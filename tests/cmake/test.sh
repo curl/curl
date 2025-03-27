@@ -114,7 +114,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} -DCURL_USE_PKGCONFIG=OFF ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"

@@ -29,31 +29,27 @@
 # - `BROTLICOMMON_LIBRARY`:  Absolute path to `brotlicommon` library.
 # - `BROTLIDEC_LIBRARY`:     Absolute path to `brotlidec` library.
 #
-# Result variables:
+# Defines:
 #
 # - `BROTLI_FOUND`:          System has brotli.
-# - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.
-# - `BROTLI_LIBRARIES`:      The brotli library names.
-# - `BROTLI_LIBRARY_DIRS`:   The brotli library directories.
-# - `BROTLI_PC_REQUIRES`:    The brotli pkg-config packages.
-# - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
+# - `CURL::brotli`:          brotli library target.
 
-set(BROTLI_PC_REQUIRES "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
+set(_brotli_pc_requires "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLI_INCLUDE_DIR AND
    NOT DEFINED BROTLICOMMON_LIBRARY AND
    NOT DEFINED BROTLIDEC_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(BROTLI ${BROTLI_PC_REQUIRES})
+  pkg_check_modules(_brotli ${_brotli_pc_requires})
 endif()
 
-if(BROTLI_FOUND)
+if(_brotli_FOUND)
   set(Brotli_FOUND TRUE)
-  set(BROTLI_VERSION ${BROTLI_libbrotlicommon_VERSION})
-  string(REPLACE ";" " " BROTLI_CFLAGS "${BROTLI_CFLAGS}")
-  message(STATUS "Found Brotli (via pkg-config): ${BROTLI_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
+  set(BROTLI_FOUND TRUE)
+  set(BROTLI_VERSION ${_brotli_libbrotlicommon_VERSION})
+  message(STATUS "Found Brotli (via pkg-config): ${_brotli_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
   find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
   find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
@@ -68,9 +64,25 @@ else()
   )
 
   if(BROTLI_FOUND)
-    set(BROTLI_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
-    set(BROTLI_LIBRARIES ${BROTLIDEC_LIBRARY} ${BROTLICOMMON_LIBRARY})
+    set(_brotli_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
+    set(_brotli_LIBRARIES ${BROTLIDEC_LIBRARY} ${BROTLICOMMON_LIBRARY})
   endif()
 
   mark_as_advanced(BROTLI_INCLUDE_DIR BROTLIDEC_LIBRARY BROTLICOMMON_LIBRARY)
+endif()
+
+if(BROTLI_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_brotli_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::brotli)
+    add_library(CURL::brotli INTERFACE IMPORTED)
+    set_target_properties(CURL::brotli PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_brotli_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_brotli_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_brotli_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_brotli_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_brotli_LIBRARIES}")
+  endif()
 endif()
