@@ -24,6 +24,8 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+
+set(_libs "")
 if("@USE_OPENSSL@")
   if("@OPENSSL_VERSION_MAJOR@")
     find_dependency(OpenSSL "@OPENSSL_VERSION_MAJOR@")
@@ -51,14 +53,16 @@ if(NOT _has_CMP0099 AND _lib)
   # CMake before CMP0099 (CMake 3.17 2020-03-20) did not endorse the concept of libdirs and lib names.
   # It expected libs to have an absolute filename. As a workaround, manually apply dependency libdirs
   # to the libcurl target, for CMake consumers without this policy set.
-  get_target_property(_libdirs "${_lib}" INTERFACE_LINK_DIRECTORIES)
-  if(_libdirs)
-    foreach(_target IN ITEMS @PROJECT_NAME@::@LIB_SHARED@ @PROJECT_NAME@::@LIB_STATIC@)
-      if(TARGET "${_target}")
-        target_link_directories("${_target}" INTERFACE ${_libdirs})
-      endif()
-    endforeach()
-  endif()
+  foreach(_lib IN ITEMS libs)
+    get_target_property(_libdirs "${_lib}" INTERFACE_LINK_DIRECTORIES)
+    if(_libdirs)
+      foreach(_target IN ITEMS @PROJECT_NAME@::libcurl)
+        if(TARGET "${_target}")
+          target_link_directories("${_target}" INTERFACE ${_libdirs})
+        endif()
+      endforeach()
+    endif()
+  endforeach()
 endif()
 
 # For compatibility with CMake's FindCURL.cmake
