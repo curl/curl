@@ -447,8 +447,9 @@ HANDLE exit_event = NULL;
 #ifndef UNDER_CE
 static void exit_signal_handler(int signum)
 {
+  static const char *err = "server/util: exit_signal_handler() called\n";
   int old_errno = errno;
-  logmsg("exit_signal_handler (%d)", signum);
+  write(STDERR_FILENO, err, sizeof(err) - 1);
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
