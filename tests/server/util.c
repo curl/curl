@@ -525,9 +525,9 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
 #ifdef SIGTERM
-      case WM_CLOSE:
-        signum = SIGTERM;
-        break;
+    case WM_CLOSE:
+      signum = SIGTERM;
+      break;
 #endif
     case WM_DESTROY:
       PostQuitMessage(0);
