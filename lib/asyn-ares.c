@@ -833,8 +833,9 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                        query_completed_cb, data);
   }
 #endif
-#ifdef USE_HTTPSRR_ARES
+#ifdef USE_HTTPSRR
   {
+    CURL_TRC_DNS(data, "asyn-ares: fire off query for HTTPSRR");
     res->num_pending++; /* one more */
     memset(&res->hinfo, 0, sizeof(struct Curl_https_rrinfo));
     res->hinfo.port = -1;
