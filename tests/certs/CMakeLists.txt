@@ -25,9 +25,8 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
 add_custom_command(OUTPUT ${GENERATEDCERTS}
-  COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" "test" ${_certconfigs}
+  COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" "test" ${CERTCONFIGS}
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" ${CERTCONFIG_CA} ${CERTCONFIGS}
   VERBATIM
 )
