@@ -28,10 +28,6 @@ use warnings;
 
 use File::Basename;
 
-sub usage {
-    print "Usage is genserv.pl <caprefix> [<prefix> ...]\n";
-}
-
 my $OPENSSL = 'openssl';
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
@@ -47,8 +43,7 @@ my $PREFIX;
 
 my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
-    print "No CA prefix\n";
-    usage();
+    print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
     exit 1;
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
