@@ -57,6 +57,13 @@
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    2
 
+/* recv_mmsg() defaults */
+#define CURL_VQUIC_MMSG_NUM  16
+#define CURL_VQUIC_MMSG_BUFSIZE  (128 * 1024)
+
+/* recv_msg() defaults */
+#define CURL_VQUIC_MSG_BUFSIZE  (8 * 128 * 1024)
+
 
 void Curl_quic_ver(char *p, size_t len)
 {
@@ -355,12 +362,10 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
 {
-#define MMSG_NUM  16
-#define MMSG_BUFSIZE  (128*1024)
-  struct iovec msg_iov[MMSG_NUM];
-  struct mmsghdr mmsg[MMSG_NUM];
-  uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
-  struct sockaddr_storage remote_addr[MMSG_NUM];
+  struct iovec msg_iov[CURL_VQUIC_MMSG_NUM];
+  struct mmsghdr mmsg[CURL_VQUIC_MMSG_NUM];
+  uint8_t msg_ctrl[CURL_VQUIC_MMSG_NUM * CMSG_SPACE(sizeof(int))];
+  struct sockaddr_storage remote_addr[CURL_VQUIC_MMSG_NUM];
   size_t total_nread = 0, pkts = 0;
   int mcount, i, n;
   char errstr[STRERROR_LEN];
@@ -369,18 +374,18 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   size_t pktlen;
   size_t offset, to;
   char *sockbuf = NULL;
-  uint8_t (*bufs)[MMSG_BUFSIZE] = NULL;
+  uint8_t (*bufs)[CURL_VQUIC_MMSG_BUFSIZE] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
-  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
-                                          &sockbuf);
+  result = Curl_multi_xfer_sockbuf_borrow(data,
+    CURL_VQUIC_MMSG_NUM * sizeof(bufs[0]), &sockbuf);
   if(result)
     goto out;
-  bufs = (uint8_t (*)[MMSG_BUFSIZE])sockbuf;
+  bufs = (uint8_t (*)[CURL_VQUIC_MMSG_BUFSIZE])sockbuf;
 
   total_nread = 0;
   while(pkts < max_pkts) {
-    n = (int)CURLMIN(CURLMIN(MMSG_NUM, IOV_MAX), max_pkts);
+    n = (int)CURLMIN(CURLMIN(CURL_VQUIC_MMSG_NUM, IOV_MAX), max_pkts);
     memset(&mmsg, 0, sizeof(mmsg));
     for(i = 0; i < n; ++i) {
       msg_iov[i].iov_base = bufs[i];
@@ -399,6 +404,11 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     if(mcount == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EAGAIN");
+        goto out;
+      }
+      if(SOCKERRNO == SOCKEMSGSIZE) {
+        /* someone probing MTU? */
+        CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EMSGSIZE, ignored");
         goto out;
       }
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
@@ -461,9 +471,8 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 {
   struct iovec msg_iov;
   struct msghdr msg;
-  uint8_t buf[64*1024];
   struct sockaddr_storage remote_addr;
-  size_t total_nread, pkts;
+  size_t total_nread = 0, pkts;
   ssize_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -471,9 +480,18 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t gso_size;
   size_t pktlen;
   size_t offset, to;
+  char *sockbuf = NULL;
+  uint8_t *buf;
+
+  DEBUGASSERT(max_pkts > 0);
+  result = Curl_multi_xfer_sockbuf_borrow(data, CURL_VQUIC_MSG_BUFSIZE,
+                                          &sockbuf);
+  if(result)
+    goto out;
+  buf = (uint8_t *)sockbuf;
 
   msg_iov.iov_base = buf;
-  msg_iov.iov_len = (int)sizeof(buf);
+  msg_iov.iov_len = CURL_VQUIC_MSG_BUFSIZE;
 
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &msg_iov;
@@ -490,6 +508,11 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       ;
     if(nread == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
+        goto out;
+      }
+      if(SOCKERRNO == SOCKEMSGSIZE) {
+        /* someone probing MTU? */
+        CURL_TRC_CF(data, cf, "ingress, recvmmsg -> EMSGSIZE, ignored");
         goto out;
       }
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
@@ -536,6 +559,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result);
+  Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
 
