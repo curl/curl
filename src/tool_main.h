@@ -34,15 +34,15 @@
 #define PARALLEL_DEFAULT 50
 
 #ifndef STDIN_FILENO
-#  define STDIN_FILENO  fileno(stdin)
+#define STDIN_FILENO  fileno(stdin)
 #endif
 
 #ifndef STDOUT_FILENO
-#  define STDOUT_FILENO  fileno(stdout)
+#define STDOUT_FILENO  fileno(stdout)
 #endif
 
 #ifndef STDERR_FILENO
-#  define STDERR_FILENO  fileno(tool_stderr)
+#define STDERR_FILENO  fileno(tool_stderr)
 #endif
 
 #endif /* HEADER_CURL_TOOL_MAIN_H */
