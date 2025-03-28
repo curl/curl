@@ -356,6 +356,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
 {
 #define MMSG_NUM  16
+#define MMSG_BUFSIZE  (128*1024)
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
@@ -368,14 +369,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   size_t pktlen;
   size_t offset, to;
   char *sockbuf = NULL;
-  uint8_t (*bufs)[128*1024] = NULL;
+  uint8_t (*bufs)[MMSG_BUFSIZE] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
   result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
                                           &sockbuf);
   if(result)
     goto out;
-  bufs = (uint8_t (*)[64*1024])sockbuf;
+  bufs = (uint8_t (*)[MMSG_BUFSIZE])sockbuf;
 
   total_nread = 0;
   while(pkts < max_pkts) {
