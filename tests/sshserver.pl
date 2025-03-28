@@ -436,8 +436,8 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     }
     display_file_top(pp($cliprvkeyf));
     # Make sure that permissions are restricted so openssh doesn't complain
-    system "chmod 600 " . pp($hstprvkeyf);
-    system "chmod 600 " . pp($cliprvkeyf);
+    chmod 0600, pp($hstprvkeyf);
+    chmod 0600, pp($cliprvkeyf);
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
         # https://cygwin.com/cygwin-ug-net/setfacl.html
         system "/bin/setfacl --remove-all " . pp($hstprvkeyf);
