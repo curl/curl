@@ -101,10 +101,14 @@ while(@ARGV) {
     system("$OPENSSL ca -config $SRCDIR/$CAPREFIX-ca.cnf -gencrl -out $PREFIX.crl 2>$dev_null");
     system("$OPENSSL x509 -in $PREFIX.crt -outform der -out $PREFIX.der");
 
-    # all together now
-    open($fh, ">", "$PREFIX.pem") and close($fh);
+    # concatenate all together now
+    open($fh, '>', "$PREFIX.pem") and close($fh);
     chmod 0600, "$PREFIX.pem";
-    system("cat $SRCDIR/$PREFIX.prm $PREFIX.key $PREFIX.crt >> $PREFIX.pem");
+    if(open($fh, '>>', "$PREFIX.pem")) {
+        my $fi;
+        print $fh do { local $/; open $fi, '<', $_ and <$fi> } for("$SRCDIR/$PREFIX.prm", "$PREFIX.key", "$PREFIX.crt");
+        close($fh);
+    }
 
     print "Certificate generated: CA=$CAPREFIX ${DURATION}days $KEYSIZE $PREFIX\n";
 }
