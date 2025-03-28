@@ -395,7 +395,6 @@ Details via CMake
 
 - `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
 - `PERL_EXECUTABLE`:                        Perl binary used throughout the build and tests.
-- `SH_EXECUTABLE`:                          POSIX shell binary used throughout the build (for generating test certificates).
 
 ## Dependency options (libraries)
 

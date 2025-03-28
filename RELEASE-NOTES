@@ -62,7 +62,6 @@ This release includes the following bugfixes:
  o cmake: allow empty `IMPORT_LIB_SUFFIX`, add suffix collision detection [41]
  o cmake: avoid `-Wnonnull` warning in `HAVE_FSETXATTR_5` detection [81]
  o cmake: disable HTTPS-proxy as a feature if proxy is disabled [77]
- o cmake: document `SH_EXECUTABLE` option [252]
  o cmake: drop `CURL_DISABLE_TESTS` option [94]
  o cmake: drop `HAVE_C_FLAG_Wno_long_double` logic for ancient Apple gcc [126]
  o cmake: drop `HAVE_IN_ADDR_T` from pre-fill too
@@ -603,7 +602,6 @@ References to bug reports and discussions on issues:
  [249] = https://curl.se/bug/?i=16673
  [250] = https://curl.se/bug/?i=16671
  [251] = https://curl.se/bug/?i=16720
- [252] = https://curl.se/bug/?i=16830
  [253] = https://curl.se/bug/?i=16723
  [254] = https://curl.se/bug/?i=16705
  [255] = https://curl.se/bug/?i=16719

@@ -25,18 +25,12 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-find_program(SH_EXECUTABLE "sh")
-mark_as_advanced(SH_EXECUTABLE)
-if(SH_EXECUTABLE)
-  string(REPLACE ";" " " _certconfigs "${CERTCONFIGS}")
-  add_custom_command(OUTPUT ${GENERATEDCERTS}
-    COMMAND ${SH_EXECUTABLE} -c "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh test ${_certconfigs}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/genserv.sh" ${CERTCONFIG_CA} ${CERTCONFIGS}
-    VERBATIM
-  )
-  add_custom_target(build-certs
-    DEPENDS ${GENERATEDCERTS})
-endif()
+add_custom_command(OUTPUT ${GENERATEDCERTS}
+  COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" "test" ${CERTCONFIGS}
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" ${CERTCONFIG_CA} ${CERTCONFIGS}
+  VERBATIM
+)
+add_custom_target(build-certs DEPENDS ${GENERATEDCERTS})
 
 add_custom_target(clean-certs
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
