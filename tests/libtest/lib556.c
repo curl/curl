@@ -26,11 +26,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-/* For MSVC (all versions as of VS2022) (may be moved in a config file?) */
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO 1
-#endif
-
 CURLcode test(char *URL)
 {
   CURLcode res;
