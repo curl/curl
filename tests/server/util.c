@@ -447,9 +447,30 @@ HANDLE exit_event = NULL;
 #ifndef UNDER_CE
 static void exit_signal_handler(int signum)
 {
-  static const char *err = "server/util: exit_signal_handler() called\n";
   int old_errno = errno;
-  write(STDERR_FILENO, err, sizeof(err) - 1);
+  if(!serverlogfile) {
+    static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
+    (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+  }
+  else {
+#ifdef _WIN32
+#define OPENMODE S_IREAD | S_IWRITE
+#else
+#define OPENMODE S_IRUSR | S_IWUSR
+#endif
+    int fn = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
+    if(fn != -1) {
+      static const char msg[] = "exit_signal_handler: called\n";
+      (void)write(fn, msg, sizeof(msg) - 1);
+      close(fn);
+    }
+    else {
+      static const char msg[] = "exit_signal_handler: failed opening ";
+      (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      (void)write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      (void)write(STDERR_FILENO, "\n", 1);
+    }
+  }
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
