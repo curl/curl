@@ -450,7 +450,7 @@ static void exit_signal_handler(int signum)
   int old_errno = errno;
   if(!serverlogfile) {
     static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
-    (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
 #ifdef _WIN32
@@ -461,14 +461,14 @@ static void exit_signal_handler(int signum)
     int fn = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
     if(fn != -1) {
       static const char msg[] = "exit_signal_handler: called\n";
-      (void)write(fn, msg, sizeof(msg) - 1);
+      (void)!write(fn, msg, sizeof(msg) - 1);
       close(fn);
     }
     else {
       static const char msg[] = "exit_signal_handler: failed opening ";
-      (void)write(STDERR_FILENO, msg, sizeof(msg) - 1);
-      (void)write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
-      (void)write(STDERR_FILENO, "\n", 1);
+      (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      (void)!write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      (void)!write(STDERR_FILENO, "\n", 1);
     }
   }
   if(got_exit_signal == 0) {
