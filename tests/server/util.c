@@ -445,10 +445,39 @@ HANDLE exit_event = NULL;
  * store in exit_signal the signal that triggered its execution.
  */
 #ifndef UNDER_CE
+/*
+ * Only call signal-safe functions from the signal handler, as required by
+ * the POSIX specification:
+ *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
+ * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
+ * log errors.
+ */
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
-  logmsg("exit_signal_handler (%d)", signum);
+  if(!serverlogfile) {
+    static const char msg[] = "exit_signal_handler: serverlogfile not set\n";
+    (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
+  }
+  else {
+#ifdef _WIN32
+#define OPENMODE S_IREAD | S_IWRITE
+#else
+#define OPENMODE S_IRUSR | S_IWUSR
+#endif
+    int fd = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
+    if(fd != -1) {
+      static const char msg[] = "exit_signal_handler: called\n";
+      (void)!write(fd, msg, sizeof(msg) - 1);
+      close(fd);
+    }
+    else {
+      static const char msg[] = "exit_signal_handler: failed opening ";
+      (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
+      (void)!write(STDERR_FILENO, serverlogfile, strlen(serverlogfile));
+      (void)!write(STDERR_FILENO, "\n", 1);
+    }
+  }
   if(got_exit_signal == 0) {
     got_exit_signal = 1;
     exit_signal = signum;
@@ -525,9 +554,9 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
 #ifdef SIGTERM
-      case WM_CLOSE:
-        signum = SIGTERM;
-        break;
+    case WM_CLOSE:
+      signum = SIGTERM;
+      break;
 #endif
     case WM_DESTROY:
       PostQuitMessage(0);
