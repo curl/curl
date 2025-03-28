@@ -61,7 +61,7 @@ typedef enum {
 
 /* one of these for each DoH request */
 struct doh_probe {
-  curl_off_t easy_mid; /* multi id of easy handle doing the lookup */
+  unsigned int easy_mid; /* multi id of easy handle doing the lookup */
   DNStype dnstype;
   unsigned char req_body[512];
   size_t req_body_len;
