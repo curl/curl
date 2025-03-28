@@ -30,8 +30,7 @@ add_custom_command(OUTPUT ${GENERATEDCERTS}
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/genserv.pl" ${CERTCONFIG_CA} ${CERTCONFIGS}
   VERBATIM
 )
-add_custom_target(build-certs
-  DEPENDS ${GENERATEDCERTS})
+add_custom_target(build-certs DEPENDS ${GENERATEDCERTS})
 
 add_custom_target(clean-certs
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
