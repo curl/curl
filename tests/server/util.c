@@ -445,6 +445,13 @@ HANDLE exit_event = NULL;
  * store in exit_signal the signal that triggered its execution.
  */
 #ifndef UNDER_CE
+/*
+ * Only call signal-safe functions from the signal handler, as required by
+ * the POSIX specification:
+ *   https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html
+ * Hence, do not call 'logmsg()', and instead use 'open/write/close' to
+ * log errors.
+ */
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
