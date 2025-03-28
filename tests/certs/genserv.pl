@@ -53,6 +53,7 @@ if(!$CAPREFIX) {
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
+    system($^O eq 'MSWin32' ? 'which' : 'command -v' ." $OPENSSL");
     system("$OPENSSL version");
 
     $PREFIX = $CAPREFIX;
