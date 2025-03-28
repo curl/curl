@@ -368,7 +368,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   size_t pktlen;
   size_t offset, to;
   char *sockbuf = NULL;
-  uint8_t (*bufs)[64*1024] = NULL;
+  uint8_t (*bufs)[128*1024] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
   result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
