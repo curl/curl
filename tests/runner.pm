@@ -1525,8 +1525,11 @@ sub ipcrecv {
 ###################################################################
 # Kill all server processes
 sub runner_stopservers {
+    print "runner_stopservers: trace-0\n";
     my $error = stopservers($verbose);
+    print "runner_stopservers: trace-1\n";
     my $logs = clearlogs();
+    print "runner_stopservers: trace-2\n";
     return ($error, $logs);
 }
 
