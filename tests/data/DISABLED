@@ -63,7 +63,7 @@
 %if bearssl
 313
 %endif
-# The CRL test doesn't work with Schannel
+# Schannel does not support CRL file
 %if Schannel
 313
 %endif
