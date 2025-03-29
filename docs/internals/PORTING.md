@@ -42,6 +42,6 @@ When you run into compiler warnings or errors, the
 and edits.
 
 A recommended approach is to define a lot of the `CURL_DISABLE_*` defines (see
-the [CURL-DISABLE](CURL-DISABLE.md) document) initially to help narrow down the
-initial work as that can save you from having to give attention to areas of the
-code that you do not care for in your port.
+the [CURL-DISABLE](../CURL-DISABLE.md) document) initially to help narrow down
+the initial work as that can save you from having to give attention to areas of
+the code that you do not care for in your port.
