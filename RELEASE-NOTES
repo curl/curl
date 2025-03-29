@@ -4,7 +4,7 @@ curl and libcurl 8.13.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3376
+ Contributors:                 3377
 
 This release includes the following changes:
 
@@ -15,6 +15,9 @@ This release includes the following changes:
  o lib: add CURLFOLLOW_OBEYCODE and CURLFOLLOW_FIRSTONLY [147]
  o OpenSSL/quictls: add support for TLSv1.3 early data [150]
  o rustls: add support for CERTINFO [106]
+ o rustls: add support for SSLKEYLOGFILE [282]
+ o rustls: support ECH w/ DoH lookup for config [280]
+ o rustls: support native platform verifier
  o var: add a '64dec' function that can base64 decode a string [78]
  o wolfssl: tls early data support [50]
 
@@ -43,6 +46,7 @@ This release includes the following bugfixes:
  o build: silence bogus `-Wconversion` warnings with gcc 5.1-5.4 [68]
  o build: silence mingw32ce C99 format warnings, simplify CI [143]
  o build: tidy-ups around `inet_pton` [180]
+ o c-ares httpsrr: fix ifdef [223]
  o c-ares: error out for unsupported versions, drop unused macros [85]
  o ca-native.md: sync with CURLSSLOPT_NATIVE_CA [72]
  o cf-socket: deduplicate Windows Vista detection [11]
@@ -50,7 +54,9 @@ This release includes the following bugfixes:
  o client writer: handle pause before decoding [61]
  o cmake: `CURL_LIBDIRS` improvements (upstreamed from vcpkg) [191]
  o cmake: `SHARE_LIB_OBJECT=ON` requires CMake 3.12 or newer [46]
+ o cmake: add custom command scripts as dependencies where missing [298]
  o cmake: add pre-fill for Unix, enable in GHA/macos, verify pre-fills [42]
+ o cmake: add shell completion support [261]
  o cmake: allow `CURL_STATIC_CRT` with shared libcurl and no curl exe [123]
  o cmake: allow `CURL_STATIC_CRT` with UCRT VS2015+ builds [134]
  o cmake: allow empty `IMPORT_LIB_SUFFIX`, add suffix collision detection [41]
@@ -83,6 +89,7 @@ This release includes the following bugfixes:
  o configure: call the blocking resolver "blocking", not "default" [220]
  o configure: fix ECH detection with MultiSSL [259]
  o configure: silence compiler warnings in feature checks, drop duplicates [86]
+ o configure: tidy up shell completion rules [292]
  o configure: use `curl_cv_apple` variable [40]
  o conn: eliminate `conn->now` [293]
  o conn: fix connection reuse when SSL is optional [54]
@@ -115,6 +122,7 @@ This release includes the following bugfixes:
  o docs: bump `rustls` to 0.14.1 [111]
  o docs: correct argument names & URL redirection [4]
  o docs: minor edits to please the new spellchecker regime
+ o docs: rework RUSTLS install instructions
  o docs: vulnerabilities in debug code are not eligible for a bounty [118]
  o doh: improve HTTPS RR svcparams parsing [198]
  o doh: remove wrong but unreachable exit path from doh_decode_rdata_name [199]
@@ -204,11 +212,15 @@ This release includes the following bugfixes:
  o runtests: drop ref to unused external function
  o runtests: fix SSH server not starting in cases, re-ignore failing vcpkg CI jobs [225]
  o runtests: fix test key format for libssh2 WinCNG (and others) [229]
+ o runtests: generate certs dynamically, bump to EC-256, tidy up [279]
  o runtests: recognize AWS-LC as OpenSSL [103]
  o runtests: support multi-target cmake, drop workarounds from CI [116]
  o runtests: support running tests under wine or qemu [210]
  o runtests: use `setfacl` on Cygwin/MSYS, if present [291]
+ o rustls: add ECH support w/ string ECH config [281]
  o rustls: cap maximum allowed CRL file size to 8MB [196]
+ o rustls: support ECH GREASE
+ o rustls: use client cert and key if available
  o schannel: deduplicate Windows Vista detection [98]
  o schannel: enable ALPN support under WINE 6.0+ [92]
  o schannel: enable ALPN with MinGW, fix ALPN for UWP builds [71]
@@ -246,6 +258,7 @@ This release includes the following bugfixes:
  o tests/server: drop unused `base64.pl` [258]
  o tests/server: fix to check against winsock2 error codes on Windows [168]
  o tests/server: give global `path` variable a more descriptive name [255]
+ o tests/server: make the signal handler signal-safe [269]
  o tests/server: replace `errno` with `SOCKERRNO` in sockfilt, socksd, sws [183]
  o tests/server: replace `strerror` with `sstrerror` in socksd
  o tests/server: support bundle binary [217]
@@ -260,6 +273,7 @@ This release includes the following bugfixes:
  o tests: reformat error messages to avoid tripping MSBuild [201]
  o tests: remove base64 encoded sections [260]
  o tests: Remove unused variables [245]
+ o tests: replace remaining non-ASCII bytes with hex markup [283]
  o tftpd: prefix TFTP protocol error `E*` constants with `TFTP_` [189]
  o tidy-up: align MSYS2/Cygwin codepaths, follow Cygwin `MAX_PID` bump [97]
  o tidy-up: delete, comment or scope C macros reported unused [16]
@@ -284,6 +298,7 @@ This release includes the following bugfixes:
  o urlapi: simplify junkscan [23]
  o urldata: remove 'hostname' from struct Curl_async [131]
  o variable.md: clarify 'trim' example [12]
+ o vquic: obey IOV_MAX [275]
  o vtls: fix compiler warnings seen with gcc 7.3.0 and mbedTLS [187]
  o winbuild: reduce command-line length by dropping whitespace [117]
  o windows: do not use winsock2 `inet_ntop()`/`inet_pton()` [202]
@@ -325,15 +340,15 @@ advice from friends like these:
   Jan Macku, Jeremy Drake, John Bampton, Joseph Chen, Justin Steventon,
   Kai Pastor, kayrus on github, kpcyrd on github, kriztalz, Lars Karlitski,
   Laurențiu Nicola, lf- on github, Marcel Raad, Marius Albrecht, Mark Phillips,
-  Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Peng-Yu Chen,
-  Peter Kokot, Philippe Antoine, qhill on github, Ray Satiro, renovate[bot],
-  Rinku Das, rmg-x on github, Roman Zharkov, Ronald Crane,
+  Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Pavel Kropachev,
+  Peng-Yu Chen, Peter Kokot, Philippe Antoine, qhill on github, Ray Satiro,
+  renovate[bot], Rinku Das, rmg-x on github, Roman Zharkov, Ronald Crane,
   RubisetCie on github, saimen, Samuel Dionne-Riel, Samuel Henrique,
   Scott Talbert, Sergey, Stefan Eissing, stevenpackardblp on github,
-  Tatsuhiro Tsujikawa, Tianyi Song, Timo Tijhof, tiymat, Viktor Szakats,
-  Vulpes Vulpes, Weng Xuetian, Yedaya Katsman, Zenju on github, Zhang Wen,
-  Zhaoming Luo
-  (66 contributors)
+  Tatsuhiro Tsujikawa, Teh Kok How, Tianyi Song, Timo Tijhof, tiymat,
+  Viktor Szakats, Vulpes Vulpes, Weng Xuetian, Yedaya Katsman, Zenju on github,
+  Zhang Wen, Zhaoming Luo
+  (68 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -559,6 +574,7 @@ References to bug reports and discussions on issues:
  [220] = https://curl.se/bug/?i=16646
  [221] = https://curl.se/bug/?i=16628
  [222] = https://curl.se/bug/?i=16634
+ [223] = https://curl.se/bug/?i=16861
  [224] = https://curl.se/bug/?i=16636
  [225] = https://curl.se/bug/?i=16636
  [226] = https://curl.se/bug/?i=16627
@@ -596,6 +612,7 @@ References to bug reports and discussions on issues:
  [258] = https://curl.se/bug/?i=16713
  [259] = https://curl.se/bug/?i=16774
  [260] = https://curl.se/bug/?i=16816
+ [261] = https://curl.se/bug/?i=16833
  [262] = https://curl.se/bug/?i=16823
  [263] = https://curl.se/bug/?i=16484
  [264] = https://curl.se/bug/?i=16759
@@ -603,10 +620,17 @@ References to bug reports and discussions on issues:
  [266] = https://curl.se/bug/?i=16072
  [267] = https://curl.se/bug/?i=16753
  [268] = https://curl.se/bug/?i=16533
+ [269] = https://curl.se/bug/?i=16852
  [271] = https://curl.se/bug/?i=16806
  [273] = https://curl.se/bug/?i=16751
+ [275] = https://curl.se/bug/?i=16846
  [276] = https://curl.se/bug/?i=16818
  [278] = https://curl.se/bug/?i=16809
+ [279] = https://curl.se/bug/?i=16824
+ [280] = https://curl.se/bug/?i=16828
+ [281] = https://curl.se/bug/?i=16828
+ [282] = https://curl.se/bug/?i=16828
+ [283] = https://curl.se/bug/?i=16837
  [284] = https://curl.se/bug/?i=16782
  [285] = https://curl.se/bug/?i=16745
  [286] = https://curl.se/bug/?i=16777
@@ -615,8 +639,10 @@ References to bug reports and discussions on issues:
  [289] = https://curl.se/bug/?i=16756
  [290] = https://curl.se/bug/?i=16791
  [291] = https://curl.se/bug/?i=16437
+ [292] = https://curl.se/bug/?i=16836
  [293] = https://curl.se/bug/?i=16793
  [294] = https://curl.se/bug/?i=16792
  [295] = https://curl.se/bug/?i=16725
  [296] = https://curl.se/bug/?i=16805
  [297] = https://curl.se/bug/?i=16801
+ [298] = https://curl.se/bug/?i=16835
