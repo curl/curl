@@ -1218,6 +1218,12 @@ static const struct redircase set_url_list[] = {
   {"http://example.org/", "../path/././../././../moo",
    "http://example.org/moo",
    0, 0, CURLUE_OK},
+  {"http://example.org/", ".%2e/path/././../%2E/./../moo",
+   "http://example.org/moo",
+   0, 0, CURLUE_OK},
+  {"http://example.org/", ".%2e/path/./%2e/.%2E/%2E/./%2e%2E/moo",
+   "http://example.org/moo",
+   0, 0, CURLUE_OK},
 
   {"http://example.org?bar/moo", "?weird",
    "http://example.org/?weird", 0, 0, CURLUE_OK},

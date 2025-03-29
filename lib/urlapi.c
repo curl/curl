@@ -762,6 +762,25 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
  * https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
  */
 
+static bool is_dot(const char **str, size_t *clen)
+{
+  const char *p = *str;
+  if(*p == '.') {
+    (*str)++;
+    (*clen)--;
+    return TRUE;
+  }
+  else if((*clen >= 3) &&
+          (p[0] == '%') && (p[1] == '2') && ((p[2] | 0x20) == 'e')) {
+    *str += 3;
+    *clen -= 3;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+#define ISSLASH(x) ((x) == '/')
+
 /*
  * dedotdotify()
  * @unittest: 1395
@@ -770,8 +789,7 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
  * passed in and strips them off according to the rules in RFC 3986 section
  * 5.2.4.
  *
- * The function handles a query part ('?' + stuff) appended but it expects
- * that fragments ('#' + stuff) have already been cut off.
+ * The function handles a path. It should not contain the query nor fragment.
  *
  * RETURNS
  *
@@ -780,112 +798,109 @@ CURLUcode Curl_url_set_authority(CURLU *u, const char *authority)
 UNITTEST int dedotdotify(const char *input, size_t clen, char **outp);
 UNITTEST int dedotdotify(const char *input, size_t clen, char **outp)
 {
-  char *outptr;
-  const char *endp = &input[clen];
-  char *out;
+  struct dynbuf out;
+  CURLcode result = CURLE_OK;
 
   *outp = NULL;
   /* the path always starts with a slash, and a slash has not dot */
-  if((clen < 2) || !memchr(input, '.', clen))
+  if(clen < 2)
     return 0;
 
-  out = malloc(clen + 1);
-  if(!out)
-    return 1; /* out of memory */
+  Curl_dyn_init(&out, clen + 1);
 
-  *out = 0; /* null-terminates, for inputs like "./" */
-  outptr = out;
+  /*  A. If the input buffer begins with a prefix of "../" or "./", then
+      remove that prefix from the input buffer; otherwise, */
+  if(is_dot(&input, &clen)) {
+    const char *p = input;
+    size_t blen = clen;
 
-  do {
-    bool dotdot = TRUE;
-    if(*input == '.') {
-      /*  A. If the input buffer begins with a prefix of "../" or "./", then
-          remove that prefix from the input buffer; otherwise, */
-
-      if(!strncmp("./", input, 2)) {
-        input += 2;
-        clen -= 2;
-      }
-      else if(!strncmp("../", input, 3)) {
-        input += 3;
-        clen -= 3;
-      }
-      /*  D. if the input buffer consists only of "." or "..", then remove
-          that from the input buffer; otherwise, */
-
-      else if(!strcmp(".", input) || !strcmp("..", input) ||
-              !strncmp(".?", input, 2) || !strncmp("..?", input, 3)) {
-        *out = 0;
-        break;
-      }
-      else
-        dotdot = FALSE;
+    if(!clen)
+      /* . [end] */
+      goto end;
+    else if(ISSLASH(*p)) {
+      /* one dot followed by a slash */
+      input = p + 1;
+      clen--;
     }
-    else if(*input == '/') {
+
+    /*  D. if the input buffer consists only of "." or "..", then remove
+        that from the input buffer; otherwise, */
+    else if(is_dot(&p, &blen)) {
+      if(!blen)
+        /* .. [end] */
+        goto end;
+      else if(ISSLASH(*p)) {
+        /* ../ */
+        input = p + 1;
+        clen = blen - 1;
+      }
+    }
+  }
+
+  while(clen && !result) { /* until end of path content */
+    if(ISSLASH(*input)) {
+      const char *p = &input[1];
+      size_t blen = clen - 1;
       /*  B. if the input buffer begins with a prefix of "/./" or "/.", where
           "."  is a complete path segment, then replace that prefix with "/" in
           the input buffer; otherwise, */
-      if(!strncmp("/./", input, 3)) {
-        input += 2;
-        clen -= 2;
-      }
-      else if(!strcmp("/.", input) || !strncmp("/.?", input, 3)) {
-        *outptr++ = '/';
-        *outptr = 0;
-        break;
-      }
-
-      /*  C. if the input buffer begins with a prefix of "/../" or "/..",
-          where ".." is a complete path segment, then replace that prefix with
-          "/" in the input buffer and remove the last segment and its
-          preceding "/" (if any) from the output buffer; otherwise, */
-
-      else if(!strncmp("/../", input, 4)) {
-        input += 3;
-        clen -= 3;
-        /* remove the last segment from the output buffer */
-        while(outptr > out) {
-          outptr--;
-          if(*outptr == '/')
-            break;
+      if(is_dot(&p, &blen)) {
+        if(!blen) { /* /. */
+          result = Curl_dyn_addn(&out, "/", 1);
+          break;
         }
-        *outptr = 0; /* null-terminate where it stops */
-      }
-      else if(!strcmp("/..", input) || !strncmp("/..?", input, 4)) {
-        /* remove the last segment from the output buffer */
-        while(outptr > out) {
-          outptr--;
-          if(*outptr == '/')
-            break;
+        else if(ISSLASH(*p)) { /* /./ */
+          input = p;
+          clen = blen;
+          continue;
         }
-        *outptr++ = '/';
-        *outptr = 0; /* null-terminate where it stops */
-        break;
+
+        /*  C. if the input buffer begins with a prefix of "/../" or "/..",
+            where ".." is a complete path segment, then replace that prefix
+            with "/" in the input buffer and remove the last segment and its
+            preceding "/" (if any) from the output buffer; otherwise, */
+        else if(is_dot(&p, &blen) && (ISSLASH(*p) || !blen)) {
+          /* remove the last segment from the output buffer */
+          size_t len = Curl_dyn_len(&out);
+          if(len) {
+            char *ptr = Curl_dyn_ptr(&out);
+            char *last = memrchr(ptr, '/', len);
+            if(last)
+              /* trim the output at the slash */
+              Curl_dyn_setlen(&out, last - ptr);
+          }
+
+          if(blen) { /* /../ */
+            input = p;
+            clen = blen;
+            continue;
+          }
+          result = Curl_dyn_addn(&out, "/", 1);
+          break;
+        }
       }
-      else
-        dotdot = FALSE;
-    }
-    else
-      dotdot = FALSE;
-
-    if(!dotdot) {
-      /*  E. move the first path segment in the input buffer to the end of
-          the output buffer, including the initial "/" character (if any) and
-          any subsequent characters up to, but not including, the next "/"
-          character or the end of the input buffer. */
-
-      do {
-        *outptr++ = *input++;
-        clen--;
-      } while(*input && (*input != '/') && (*input != '?'));
-      *outptr = 0;
     }
 
-    /* continue until end of path */
-  } while(input < endp);
+    /*  E. move the first path segment in the input buffer to the end of
+        the output buffer, including the initial "/" character (if any) and
+        any subsequent characters up to, but not including, the next "/"
+        character or the end of the input buffer. */
 
-  *outp = out;
-  return 0; /* success */
+    result = Curl_dyn_addn(&out, input, 1);
+    input++;
+    clen--;
+  }
+end:
+  if(!result) {
+    if(Curl_dyn_len(&out))
+      *outp = Curl_dyn_ptr(&out);
+    else {
+      *outp = strdup("");
+      if(!*outp)
+        return 1;
+    }
+  }
+  return result ? 1 : 0; /* success */
 }
 
 static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
