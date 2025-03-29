@@ -2951,7 +2951,9 @@ sub stopservers {
     #
     # kill sockfilter processes for all pingpong servers
     #
+    print "stopservers: trace-0\n";
     killallsockfilters("$LOGDIR/$PIDDIR", $verb);
+    print "stopservers: trace-1\n";
     #
     # kill all server pids from %run hash clearing them
     #
@@ -2974,7 +2976,9 @@ sub stopservers {
         }
         $runcert{$server} = 0 if($runcert{$server});
     }
+    print "stopservers: trace-2\n";
     killpid($verb, $pidlist);
+    print "stopservers: trace-3\n";
     #
     # cleanup all server pid files
     #
@@ -2991,10 +2995,13 @@ sub stopservers {
                 logmsg "Warning: ";
             }
             logmsg "$server server unexpectedly alive\n";
+            print "stopservers: trace-3a\n";
             killpid($verb, $pid);
+            print "stopservers: trace-3b\n";
         }
         unlink($pidfile) if(-f $pidfile);
     }
+    print "stopservers: trace-4\n";
 
     return $result;
 }
