@@ -14,6 +14,10 @@ CRL
 <features>
 SSL
 local-http
+!bearssl
+!Schannel
+!sectransp
+!wolfssl
 </features>
 <server>
 https test-localhost.pem
