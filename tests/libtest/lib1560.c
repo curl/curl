@@ -529,6 +529,12 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"http://example.com?one=a%26a&two=bb",
+   "http://example.com/?one=a%26a&two=bb",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
+  {"http://example.com/%2f/%2e/",
+   "http://example.com/%2F/./",
+   0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
   {"http://US%45R,:us%45r,@example.com:80/~smith/home.html#%2b",
    "http://USER%2C:usEr%2C@example.com/~smith/home.html#%2B",
    0, CURLU_NO_DEFAULT_PORT, CURLUE_OK},
@@ -928,6 +934,13 @@ static const struct setgetcase setget_parts_list[] = {
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
   {"https://example.com/",
+   "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
+   "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2BLX8TPHs",
+   CURLU_URLDECODE, /* decode on get */
+   CURLU_URLENCODE, /* encode on set */
+   CURLUE_OK, CURLUE_OK},
+
+  {"https://example.com/",
    "host=%43url.se,",
    "https://%43url.se/",
    0, 0, CURLUE_OK, CURLUE_OK},
@@ -1007,12 +1020,6 @@ static const struct setcase set_parts_list[] = {
    0, /* set */
    CURLUE_OK, CURLUE_OK},
 
-  {"https://example.com/",
-   "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
-   "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2BLX8TPHs",
-   CURLU_URLDECODE, /* decode on get */
-   CURLU_URLENCODE, /* encode on set */
-   CURLUE_OK, CURLUE_OK},
   {"https://example.com/",
    "query=Al2cO3tDkcDZ3EWE5Lh+LX8TPHs,", /* contains '+' */
    "https://example.com/?Al2cO3tDkcDZ3EWE5Lh%2BLX8TPHs",

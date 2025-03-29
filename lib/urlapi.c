@@ -1307,70 +1307,25 @@ fail:
   return NULL;
 }
 
-static char *normalize_path(const char *path)
-{
-  /* split the path per slash, URL decode + encode, then put together again */
-  size_t len = strlen(path);
-  char *sl;
-  struct dynbuf dupe;
-  Curl_dyn_init(&dupe, len * 3);
+/* leave as-is in query and path parts */
+#define ISPARTOK(x) (((x) == ';') || ((x) == '&'))
 
-  do {
-    char *opath;
-    char *npath;
-    int olen;
-    size_t partlen;
-    sl = memchr(path, '/', len);
-    partlen = sl ? (size_t)(sl - path) : len;
+/* leave percent-encoded in query parts */
+#define ISQUERYOK(x) (((x) == '=') || ((x) == '+') || ((x) == '&'))
 
-    if(partlen) {
-      /* First URL decode the part */
-      opath = curl_easy_unescape(NULL, path, (int)partlen, &olen);
-      if(!opath) {
-        Curl_dyn_free(&dupe);
-        return NULL;
-      }
+/* leave percent-encoded in path parts */
+#define ISPATHOK(x) ((x) == '/')
 
-      /* Then URL encode it again */
-      npath = curl_easy_escape(NULL, opath, olen);
-      curl_free(opath);
-      if(!npath) {
-        Curl_dyn_free(&dupe);
-        return NULL;
-      }
+/* leave un-encoded in query */
+#define QUERYNONENCODE(x) (((x) == ':') || ((x) == '=') ||      \
+                           ((x) == '?') || ((x) == '/') ||      \
+                           ((x) == '+'))
 
-      if(Curl_dyn_add(&dupe, npath) || (sl && Curl_dyn_addn(&dupe, "/", 1))) {
-        curl_free(npath);
-        return NULL;
-      }
-      curl_free(npath);
-    }
-    else if(sl) {
-      /* zero length part but a slash */
-      if(Curl_dyn_addn(&dupe, "/", 1))
-        return NULL;
-    }
-    else {
-      /* no part, no slash */
-      break;
-    }
+/* leave un-encoded in path */
+#define PATHNONENCODE(x) ((x) == '/') /* leave slashes as-is in paths */
 
-    if(sl) {
-      path = sl + 1;
-      len -= partlen + 1;
-    }
-
-  } while(sl);
-
-  return Curl_dyn_ptr(&dupe);
-}
-
-/* leave these as-is in query parts */
-#define ISQUERYOK(x) (((x) == ';') || ((x) == '&') || ((x) == '=') ||   \
-                      ((x) == ':') || ((x) == '/') || ((x) == '?') ||   \
-                      ((x) == '+'))
-
-static CURLUcode normalize_query(const char *str, char **updated)
+static CURLUcode normalize_querypath(const char *str, char **updated,
+                                     bool query) /* otherwise it is a path */
 {
   /* to handle ' ' to '+' escaping we cannot use libcurl's URL encode
      function */
@@ -1389,6 +1344,7 @@ static CURLUcode normalize_query(const char *str, char **updated)
     /* treat the characters unsigned */
     unsigned char in = (unsigned char)*str++;
 
+    /* already percent encoded, figure out what to do */
     if(('%' == in) && (qlen >= 2) && ISXDIGIT(str[0]) && ISXDIGIT(str[1])) {
       curl_off_t byte;
       char buf[4] = {'%'};
@@ -1397,7 +1353,25 @@ static CURLUcode normalize_query(const char *str, char **updated)
       buf[2] = Curl_raw_toupper(str[1]);
       buf[3] = 0;
       (void)Curl_str_hex(&p, &byte, 255);
-      if(!ISQUERYOK(byte) && (byte > 0x20) && (byte < 0x7f)) {
+
+      /* weird byte codes remain encoded */
+      if((byte < 0x20) || (byte > 0x7e)) {
+        byte = 0; /* leave encoded */
+      }
+      else {
+        if(query) {
+          if(ISQUERYOK(byte))
+            byte = 0; /* leave encoded */
+        }
+        else {
+          /* path */
+          if(ISPATHOK(byte))
+            byte = 0; /* leave encoded */
+        }
+        if(byte && !ISUNRESERVED(byte) && !ISPARTOK(byte))
+          byte = 0;
+      }
+      if(byte) {
         unsigned char num = (unsigned char)byte;
         result = Curl_dyn_addn(&dupe, &num, 1);
       }
@@ -1409,13 +1383,16 @@ static CURLUcode normalize_query(const char *str, char **updated)
       continue;
     }
 
-    if(in == ' ')
+    /* not percent encoded, what to do? */
+    if(query && (in == ' '))
       result = Curl_dyn_addn(&dupe, "+", 1);
-    else if(ISALNUM(in) || ISURLPUNTCS(in) || ISQUERYOK(in))
+    else if(ISUNRESERVED(in) || ISPARTOK(in) ||
+            (query && QUERYNONENCODE(in)) ||
+            (!query && PATHNONENCODE(in)))
       result = Curl_dyn_addn(&dupe, &in, 1);
     else {
       /* encode it */
-      const char hex[] = "0123456789abcdef";
+      const char hex[] = "0123456789ABCDEF";
       char out[3];
       out[0]='%';
       out[1] = hex[in >> 4];
@@ -1687,7 +1664,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
 
       if(show_nrmlzd) {
         if(u->query) {
-          uc = normalize_query(u->query, &nrm_query);
+          uc = normalize_querypath(u->query, &nrm_query, TRUE);
           if(uc)
             goto fail;
         }
@@ -1712,8 +1689,8 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
             goto fail;
         }
         if(u->path) {
-          nrm_path = normalize_path(u->path);
-          if(!nrm_path)
+          uc = normalize_querypath(u->path, &nrm_path, FALSE);
+          if(uc)
             goto fail;
         }
       }
