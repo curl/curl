@@ -159,48 +159,38 @@ static int compare_header_names(const char *a, const char *b)
 static CURLcode merge_duplicate_headers(struct curl_slist *head)
 {
   struct curl_slist *curr = head;
+  CURLcode result = CURLE_OK;
 
   while(curr) {
     struct curl_slist *next = curr->next;
-    if(!next) {
+    if(!next)
       break;
-    }
 
     if(compare_header_names(curr->data, next->data) == 0) {
+      struct dynbuf buf;
       char *colon_next;
-      char *merged;
       char *val_next;
-      size_t curr_len;
-      size_t val_next_len;
-      size_t new_len;
+
+      Curl_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
+
+      result = Curl_dyn_add(&buf, curr->data);
+      if(result)
+        return result;
 
       colon_next = strchr(next->data, ':');
-
       DEBUGASSERT(colon_next);
-
-      curr_len = strlen(curr->data);
       val_next = colon_next + 1;
 
-      val_next_len = strlen(val_next);
+      result = Curl_dyn_addn(&buf, ",", 1);
+      if(result)
+        return result;
 
-      /* add 1 for the comma we'll insert */
-      new_len = curr_len + 1 + val_next_len;
-
-      merged = malloc(new_len + 1); /* add 1 for null terminator */
-      if(!merged)
-        return CURLE_OUT_OF_MEMORY;
-
-      memcpy(merged, curr->data, curr_len);
-      merged[curr_len] = '\0';
-
-      merged[curr_len] = ',';
-      merged[curr_len + 1] = '\0';
-
-      memcpy(merged + curr_len + 1, val_next, val_next_len);
-      merged[new_len] = '\0';
+      result = Curl_dyn_add(&buf, val_next);
+      if(result)
+        return result;
 
       free(curr->data);
-      curr->data = merged;
+      curr->data = Curl_dyn_ptr(&buf);
 
       curr->next = next->next;
       free(next->data);
