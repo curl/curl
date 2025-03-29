@@ -26,7 +26,7 @@ To: another
 body
 </stdin>
 <command>
--k --ssl-reqd --mail-rcpt recipient@example.com --mail-from sender@example.com -T - smtps://%HOSTIP:%SMTPSPORT/%TESTNUMBER
+--insecure --ssl-reqd --mail-rcpt recipient@example.com --mail-from sender@example.com -T - smtps://%HOSTIP:%SMTPSPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -42,7 +42,7 @@ HTTP/2 GET using %{header_json}
 <setenv>
 </setenv>
 <command>
--k --http2 -w '%{header_json}\n' "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
+--insecure --http2 -w '%{header_json}\n' "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
 </command>
 
 </client>

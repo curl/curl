@@ -36,7 +36,7 @@ https
 simple HTTPS GET with openssl engine
 </name>
 <command>
---engine openssl -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+--engine openssl --insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
