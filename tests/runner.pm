@@ -1336,8 +1336,8 @@ sub controlleripccall {
     if(!$multiprocess) {
         # Call the remote function here in single process mode
         ipcrecv();
-     }
-     return 0;
+    }
+    return 0;
 }
 
 ###################################################################
@@ -1436,7 +1436,9 @@ sub runnerabort{
 sub ipcrecv {
     my $err;
     my $datalen;
+    print "iprecv: trace-1\n";
     while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
+        print "iprecv: trace-1a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1445,9 +1447,12 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
+    print "iprecv: trace-2\n";
     my $len=unpack("L", $datalen);
     my $buf;
+    print "iprecv: trace-3\n";
     while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
+        print "iprecv: trace-3a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1456,6 +1461,7 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
+    print "iprecv: trace-4\n";
 
     # Decode the function name and arguments
     my $argsarrayref = thaw $buf;
@@ -1466,6 +1472,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
+    print "iprecv: trace-5: $funcname\n";
     if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
@@ -1482,12 +1489,15 @@ sub ipcrecv {
     } else {
         die "Unknown IPC function $funcname\n";
     }
+    print "iprecv: trace-6\n";
     # print "ipcrecv results\n";
 
     # Marshall the results to return
     $buf = freeze \@res;
 
+    print "iprecv: trace-7\n";
     while(! defined ($err = syswrite($runnerw, (pack "L", length($buf)) . $buf)) || $err <= 0) {
+        print "iprecv: trace-7a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1496,6 +1506,7 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
+    print "iprecv: trace-8\n";
 
     return 0;
 }
@@ -1503,8 +1514,11 @@ sub ipcrecv {
 ###################################################################
 # Kill all server processes
 sub runner_stopservers {
+    print "runner_stopservers: trace-0\n";
     my $error = stopservers($verbose);
+    print "runner_stopservers: trace-1\n";
     my $logs = clearlogs();
+    print "runner_stopservers: trace-2\n";
     return ($error, $logs);
 }
 
