@@ -52,11 +52,39 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 0L);
   test_setopt(curl, CURLOPT_URL, URL);
 
+  /* We want to test a couple assumptions here.
+     1. the merging works with non-adjacent headers
+     2. the merging works across multiple duplicate headers
+     3. the merging works if a duplicate header has no colon
+     4. the merging works if the headers are cased differently
+     5. the merging works across multiple duplicate headers
+     6. the merging works across multiple duplicate headers with the
+        same value
+     7. merging works for headers all with no values
+     8. merging works for headers some with no values
+  */
+
   list = curl_slist_append(list, "x-amz-meta-test: test2");
   if(!list)
     goto test_cleanup;
   curl_slist_append(list, "some-other-header: value");
   curl_slist_append(list, "x-amz-meta-test: test1");
+  curl_slist_append(list, "duplicate-header: duplicate");
+  curl_slist_append(list, "header-no-value");
+  curl_slist_append(list, "x-amz-meta-test: test3");
+  curl_slist_append(list, "X-amz-meta-test2: test2");
+  curl_slist_append(list, "x-amz-meta-blah: blah");
+  curl_slist_append(list, "x-Amz-meta-test2: test1");
+  curl_slist_append(list, "x-amz-Meta-test2: test3");
+  curl_slist_append(list, "curr-header-no-colon");
+  curl_slist_append(list, "curr-header-no-colon: value");
+  curl_slist_append(list, "next-header-no-colon: value");
+  curl_slist_append(list, "next-header-no-colon");
+  curl_slist_append(list, "duplicate-header: duplicate");
+  curl_slist_append(list, "header-no-value;");
+  curl_slist_append(list, "header-no-value;");
+  curl_slist_append(list, "header-some-no-value;");
+  curl_slist_append(list, "header-some-no-value: value");
 
   test_setopt(curl, CURLOPT_HTTPHEADER, list);
   if(libtest_arg2) {

@@ -154,8 +154,9 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
-/* merge duplicate header definitions by comma delimiting their values
-   in the order defined the headers are defined */
+/* Merge duplicate header definitions by comma delimiting their values
+   in the order defined the headers are defined, expecting headers to
+   be alpha-sorted and use ':' at this point */
 static CURLcode merge_duplicate_headers(struct curl_slist *head)
 {
   struct curl_slist *curr = head;
