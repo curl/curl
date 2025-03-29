@@ -38,7 +38,7 @@ HTTP/3 POST
 <setenv>
 </setenv>
 <command>
--k --http3 "https://%HOSTIP:%HTTP3PORT/%TESTNUMBER" -d "moo"
+--insecure --http3 "https://%HOSTIP:%HTTP3PORT/%TESTNUMBER" -d "moo"
 </command>
 
 </client>

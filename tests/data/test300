@@ -32,7 +32,7 @@ https
 simple HTTPS GET
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
