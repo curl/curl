@@ -31,6 +31,7 @@ add_custom_command(OUTPUT ${GENERATEDCERTS}
   VERBATIM
 )
 add_custom_target(build-certs DEPENDS ${GENERATEDCERTS})
+add_dependencies(testdeps build-certs)
 
 add_custom_target(clean-certs
   COMMAND ${CMAKE_COMMAND} -E remove ${GENERATEDCERTS}
