@@ -27,6 +27,7 @@ use strict;
 use warnings;
 
 use File::Basename;
+use File::Spec;
 
 my $OPENSSL = 'openssl';
 if(-f '/usr/local/ssl/bin/openssl') {
@@ -48,7 +49,18 @@ if(!$CAPREFIX) {
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
-    system($^O eq 'MSWin32' ? 'which' : 'command -v' ." $OPENSSL");
+    if($OPENSSL eq basename($OPENSSL)) {  # has no dir component
+        # find openssl in PATH
+        foreach(File::Spec->path()) {
+            my $file = File::Spec->catfile($_, $OPENSSL);
+            if(-f $file) {
+                $OPENSSL = $file;
+                last;
+            }
+        }
+    }
+
+    print "$OPENSSL\n";
     system("$OPENSSL version");
 
     $PREFIX = $CAPREFIX;
