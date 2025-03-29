@@ -612,6 +612,11 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 
+void Curl_trc_dns(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
