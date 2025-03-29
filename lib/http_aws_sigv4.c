@@ -154,6 +154,66 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
+/* merge duplicate header definitions by comma delimiting their values
+   in the order defined the headers are defined */
+static CURLcode merge_duplicate_headers(struct curl_slist *head)
+{
+  struct curl_slist *curr = head;
+
+  while(curr) {
+    struct curl_slist *next = curr->next;
+    if(!next) {
+      break;
+    }
+
+    if(compare_header_names(curr->data, next->data) == 0) {
+      char *colon_next;
+      char *merged;
+      char *val_next;
+      size_t curr_len;
+      size_t val_next_len;
+      size_t new_len;
+
+      colon_next = strchr(next->data, ':');
+
+      DEBUGASSERT(colon_next);
+
+      curr_len = strlen(curr->data);
+      val_next = colon_next + 1;
+
+      val_next_len = strlen(val_next);
+
+      /* add 1 for the comma we'll insert */
+      new_len = curr_len + 1 + val_next_len;
+
+      merged = malloc(new_len + 1); /* add 1 for null terminator */
+      if(!merged)
+        return CURLE_OUT_OF_MEMORY;
+
+      memcpy(merged, curr->data, curr_len);
+      merged[curr_len] = '\0';
+
+      merged[curr_len] = ',';
+      merged[curr_len + 1] = '\0';
+
+      memcpy(merged + curr_len + 1, val_next, val_next_len);
+      merged[new_len] = '\0';
+
+      free(curr->data);
+      curr->data = merged;
+
+      curr->next = next->next;
+      free(next->data);
+      free(next);
+    }
+    else {
+      curr = curr->next;
+    }
+  }
+
+  return CURLE_OK;
+}
+
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
@@ -298,6 +358,10 @@ static CURLcode make_headers(struct Curl_easy *data,
       }
     }
   } while(again);
+
+  ret = merge_duplicate_headers(head);
+  if(ret)
+    goto fail;
 
   for(l = head; l; l = l->next) {
     char *tmp;
