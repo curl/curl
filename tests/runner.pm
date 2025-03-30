@@ -1239,13 +1239,13 @@ sub runner_test_preprocess {
 sub runner_test_run {
     my ($testnum)=@_;
 
-    print "runner_test_run: trace-1\n";
+    print "runner_test_run: trace-1:", $testnum,"\n";
 
     if(clearlogs()) {
         logmsg "Warning: log messages were lost\n";
     }
 
-    print "runner_test_run: trace-2\n";
+    print "runner_test_run: trace-2:", $testnum,"\n";
 
     #######################################################################
     # Prepare the test environment to run this test case
@@ -1254,7 +1254,7 @@ sub runner_test_run {
         return (-2, clearlogs());
     }
 
-    print "runner_test_run: trace-3\n";
+    print "runner_test_run: trace-3:", $testnum,"\n";
 
     #######################################################################
     # Run the test command
@@ -1269,7 +1269,7 @@ sub runner_test_run {
         return (-2, clearlogs(), \%testtimings);
     }
 
-    print "runner_test_run: trace-4\n";
+    print "runner_test_run: trace-4:", $testnum,"\n";
 
     #######################################################################
     # Clean up after test command
@@ -1278,7 +1278,7 @@ sub runner_test_run {
         return ($error, clearlogs(), \%testtimings);
     }
 
-    print "runner_test_run: trace-5\n";
+    print "runner_test_run: trace-5:", $testnum,"\n";
 
     #######################################################################
     # Verify that the postcheck succeeded
@@ -1287,15 +1287,19 @@ sub runner_test_run {
         return ($error, clearlogs(), \%testtimings);
     }
 
-    print "runner_test_run: trace-6\n";
+    print "runner_test_run: trace-6:", $testnum,"\n";
 
     #######################################################################
     # restore environment variables that were modified
     restore_test_env(0);
 
-    print "runner_test_run: trace-7\n";
+    print "runner_test_run: trace-7:", $testnum,"\n";
 
-    return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+    my $clres := clearlogs()
+
+    print "runner_test_run: trace-8:", $testnum,"\n";
+
+    return (0, $clres, \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
 # Async call runner_shutdown
