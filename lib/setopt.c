@@ -2219,6 +2219,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * String that holds file type of the SSL certificate to use for proxy
      */
     return Curl_setstropt(&data->set.str[STRING_CERT_TYPE_PROXY], ptr);
+
 #endif
   case CURLOPT_SSLKEY:
     /*
@@ -2260,6 +2261,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * String that holds the SSL private key password for proxy.
      */
     return Curl_setstropt(&data->set.str[STRING_KEY_PASSWD_PROXY], ptr);
+
 #endif
   case CURLOPT_SSLENGINE:
     /*
@@ -2282,6 +2284,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /* enable the HAProxy protocol */
     data->set.haproxyprotocol = TRUE;
     break;
+
 #endif
   case CURLOPT_INTERFACE:
     /*
@@ -2330,8 +2333,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * CA certificate
      */
     return Curl_setstropt(&data->set.str[STRING_SSL_CAFILE_PROXY], ptr);
-#endif
 
+#endif
   case CURLOPT_CAPATH:
     /*
      * Set CA path info for SSL connection. Specify directory name of the CA
@@ -2370,6 +2373,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * CRL to check certificates revocation
      */
     return Curl_setstropt(&data->set.str[STRING_SSL_CRLFILE_PROXY], ptr);
+
 #endif
   case CURLOPT_ISSUERCERT:
     /*
@@ -2387,7 +2391,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(&data->set.str[STRING_SSL_ISSUERCERT_PROXY], ptr);
 
 #endif
-
   case CURLOPT_PRIVATE:
     /*
      * Set private data pointer.
@@ -2402,6 +2405,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Specify colon-delimited list of curve algorithm names.
      */
     return Curl_setstropt(&data->set.str[STRING_SSL_EC_CURVES], ptr);
+
 #endif
 #ifdef USE_SSH
   case CURLOPT_SSH_PUBLIC_KEYFILE:
@@ -2480,7 +2484,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /* Set the SMTP auth originator */
     return Curl_setstropt(&data->set.str[STRING_MAIL_AUTH], ptr);
 #endif
-
   case CURLOPT_SASL_AUTHZID:
     /* Authorization identity (identity to act as) */
     return Curl_setstropt(&data->set.str[STRING_SASL_AUTHZID], ptr);
@@ -2806,7 +2809,6 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
     data->set.resolver_start = va_arg(param, curl_resolver_start_callback);
     break;
-
 
 #ifdef USE_SSH
 #ifdef USE_LIBSSH2
