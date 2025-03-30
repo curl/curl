@@ -2906,9 +2906,13 @@ sub stopservers {
     #
     my $result = 0;
     foreach my $server (keys %serverpidfile) {
+        print "stopservers: trace-3a:", $server, "\n";
         my $pidfile = $serverpidfile{$server};
+        print "stopservers: trace-3b: $pidfile\n";
         my $pid = processexists($pidfile);
+        print "stopservers: trace-3c:", $pid, "\n";
         if($pid > 0) {
+            print "stopservers: trace-3d:", $pid, "\n";
             if($err_unexpected) {
                 logmsg "ERROR: ";
                 $result = -1;
@@ -2917,11 +2921,13 @@ sub stopservers {
                 logmsg "Warning: ";
             }
             logmsg "$server server unexpectedly alive\n";
-            print "stopservers: trace-3a\n";
+            print "stopservers: trace-3e\n";
             killpid($verb, $pid);
-            print "stopservers: trace-3b\n";
+            print "stopservers: trace-3f\n";
         }
+        print "stopservers: trace-3g\n";
         unlink($pidfile) if(-f $pidfile);
+        print "stopservers: trace-3h\n";
     }
     print "stopservers: trace-4\n";
 
