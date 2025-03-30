@@ -160,30 +160,28 @@ perlcheck:
 build-certs:
 	(cd certs && $(MAKE) build-certs)
 
-runtests-pre: perlcheck build-certs
-
-test: runtests-pre all
+test: perlcheck all
 	$(TEST) $(TFLAGS)
 
-quiet-test: runtests-pre all
+quiet-test: perlcheck all
 	$(TEST) $(TEST_Q) $(TFLAGS)
 
-am-test: runtests-pre all
+am-test: perlcheck all
 	$(TEST) $(TEST_AM) $(TFLAGS)
 
-ci-test: runtests-pre all
+ci-test: perlcheck all
 	$(TEST) $(TEST_CI) $(TFLAGS)
 
-full-test: runtests-pre all
+full-test: perlcheck all
 	$(TEST) $(TEST_F) $(TFLAGS)
 
-nonflaky-test: runtests-pre all
+nonflaky-test: perlcheck all
 	$(TEST) $(TEST_NF) $(TFLAGS)
 
-torture-test: runtests-pre all
+torture-test: perlcheck all
 	$(TEST) $(TEST_T) $(TFLAGS)
 
-event-test: runtests-pre all
+event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
 
 default-pytest: ci-pytest

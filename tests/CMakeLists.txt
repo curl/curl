@@ -41,7 +41,7 @@ function(curl_add_runtests _targetname _test_flags)
   if(NOT BUILD_LIBCURL_DOCS)
     string(APPEND _test_flags " !documentation")
   endif()
-  set(_depends "build-certs")
+  set(_depends "")
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
