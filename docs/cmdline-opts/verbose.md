@@ -20,10 +20,11 @@ Example:
 
 # `--verbose`
 
-Makes curl verbose during the operation. Useful for debugging and seeing
-what's going on under the hood. A line starting with \> means header data sent
-by curl, \< means header data received by curl that is hidden in normal cases,
-and a line starting with * means additional info provided by curl.
+Make curl output verbose information during the operation. Useful for
+debugging and seeing what's going on under the hood. A line starting with \>
+means header data sent by curl, \< means header data received by curl that is
+hidden in normal cases, and a line starting with * means additional info
+provided by curl.
 
 If you only want HTTP headers in the output, --show-headers or --dump-header
 might be more suitable options.
