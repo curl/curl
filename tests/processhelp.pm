@@ -324,7 +324,7 @@ sub killpid {
     print "killpid: trace-3\n";
     # Allow all signalled processes five seconds to gracefully die.
     if(@signalled) {
-        print "killpid: trace-3a\n";
+        #print "killpid: trace-3a\n";
         my $twentieths = 5 * 20;
         while($twentieths--) {
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
@@ -348,7 +348,7 @@ sub killpid {
     print "killpid: trace-4\n";
     # Mercilessly SIGKILL processes still alive.
     if(@signalled) {
-        print "killpid: trace-4a\n";
+        #print "killpid: trace-4a\n";
         foreach my $pid (@signalled) {
             if($pid > 0) {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
@@ -364,7 +364,7 @@ sub killpid {
     print "killpid: trace-5\n";
     # Reap processes dead children for sure.
     if(@reapchild) {
-        print "killpid: trace-5a\n";
+        #print "killpid: trace-5a\n";
         foreach my $pid (@reapchild) {
             if($pid > 0) {
                 pidwait($pid, 0);
