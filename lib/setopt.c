@@ -1661,8 +1661,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST))
       /* set a list of cipher we want to use in the SSL connection */
       return Curl_setstropt(&data->set.str[STRING_SSL_CIPHER_LIST], ptr);
-    return CURLE_NOT_BUILT_IN;
-    break;
+    else
+      return CURLE_NOT_BUILT_IN;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
