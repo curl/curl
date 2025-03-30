@@ -477,10 +477,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       primary->version = (unsigned char)version;
       primary->version_max = (unsigned int)version_max;
     }
+    break;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
-    break;
   case CURLOPT_POSTFIELDSIZE:
     /*
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
@@ -1672,7 +1672,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       return CURLE_NOT_BUILT_IN;
-    break;
 #endif
   case CURLOPT_TLS13_CIPHERS:
     if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES)) {
@@ -1681,7 +1680,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       return CURLE_NOT_BUILT_IN;
-    break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLS13_CIPHERS:
     if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
@@ -1690,7 +1688,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             ptr);
     else
       return CURLE_NOT_BUILT_IN;
-    break;
 #endif
   case CURLOPT_RANDOM_FILE:
     break;
@@ -1943,7 +1940,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * to decide for us (if CURLOPT_SOCKS_PROXY setting it to NULL).
      */
     return Curl_setstropt(&data->set.str[STRING_PROXY], ptr);
-    break;
 
   case CURLOPT_PRE_PROXY:
     /*
@@ -1968,7 +1964,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set authentication service name for DIGEST-MD5, Kerberos 5 and SPNEGO
      */
     return Curl_setstropt(&data->set.str[STRING_SERVICE_NAME], ptr);
-    break;
 
   case CURLOPT_HEADERDATA:
     /*
@@ -2020,12 +2015,13 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
       data->set.ssl.fsslctxp = ptr;
+      break;
+    }
     else
 #endif
       return CURLE_NOT_BUILT_IN;
-    break;
   case CURLOPT_SOCKOPTDATA:
     /*
      * socket callback data pointer. Might be NULL.
@@ -2243,7 +2239,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * String that holds file type of the SSL key to use
      */
     return Curl_setstropt(&data->set.str[STRING_KEY_TYPE], ptr);
-    break;
+
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLKEYTYPE:
     /*
@@ -2503,7 +2499,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * for generic server options, the application will need to set this.
      */
     return Curl_setstropt(&data->set.str[STRING_RTSP_STREAM_URI], ptr);
-    break;
 
   case CURLOPT_RTSP_TRANSPORT:
     /*
@@ -2773,12 +2768,13 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      * Set a SSL_CTX callback
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
+    if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+      break;
+    }
     else
 #endif
       return CURLE_NOT_BUILT_IN;
-    break;
 
   case CURLOPT_SOCKOPTFUNCTION:
     /*
