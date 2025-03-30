@@ -252,17 +252,22 @@ sub processexists {
     # fetch pid from pidfile
     my $pid = pidfromfile($pidfile);
 
+    print "processexists: trace-1: ", $pid, "\n";
+
     if($pid > 0) {
         # verify if currently alive
         if(pidexists($pid)) {
+            print "processexists: trace-2 exists: ", $pid, "\n";
             return $pid;
         }
         else {
+            print "processexists: trace-3 miss: ", $pid, "\n";
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
             pidwait($pid, &WNOHANG);
             # negative return value means dead process
+            print "processexists: trace-4 returning: ", -$pid, "\n";
             return -$pid;
         }
     }
