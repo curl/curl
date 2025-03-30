@@ -188,8 +188,10 @@ int init_thread_sync_data(struct thread_data *td,
     return 0;
 
   tsd->port = port;
+#ifndef CURL_DISABLE_SOCKETPAIR
   tsd->sock_pair[0] = CURL_SOCKET_BAD;
   tsd->sock_pair[1] = CURL_SOCKET_BAD;
+#endif
   tsd->ref_count = 0;
 
 #ifdef HAVE_GETADDRINFO
