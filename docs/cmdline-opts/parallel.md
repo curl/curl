@@ -19,7 +19,7 @@ Example:
 
 # `--parallel`
 
-Makes curl perform all transfers in parallel as compared to the regular serial
+Make curl perform all transfers in parallel as compared to the regular serial
 manner. Parallel transfer means that curl runs up to N concurrent transfers
 simultaneously and if there are more than N transfers to handle, it starts new
 ones when earlier transfers finish.

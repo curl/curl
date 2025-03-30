@@ -16,7 +16,7 @@ Example:
 
 # `--version`
 
-Displays information about curl and the libcurl version it uses.
+Display information about curl and the libcurl version it uses.
 
 The first line includes the full version of curl, libcurl and other 3rd party
 libraries linked with the executable.
