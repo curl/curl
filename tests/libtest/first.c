@@ -182,8 +182,6 @@ int main(int argc, char **argv)
       fprintf(stderr, "Test '%s' not found.\n", test_name);
       return 1;
     }
-
-    fprintf(stderr, "Test: %s\n", test_name);
   }
 #else
   basearg = 1;
