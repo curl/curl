@@ -1295,7 +1295,7 @@ sub runner_test_run {
 
     print "runner_test_run: trace-7:", $testnum,"\n";
 
-    my $clres := clearlogs()
+    my $clres = clearlogs();
 
     print "runner_test_run: trace-8:", $testnum,"\n";
 
