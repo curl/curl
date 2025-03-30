@@ -2906,13 +2906,13 @@ sub stopservers {
     #
     my $result = 0;
     foreach my $server (keys %serverpidfile) {
-        print "stopservers: trace-3a:", $server, "\n";
+        print "stopservers: trace-3a: $server\n";
         my $pidfile = $serverpidfile{$server};
         print "stopservers: trace-3b: $pidfile\n";
         my $pid = processexists($pidfile);
-        print "stopservers: trace-3c:", $pid, "\n";
+        print "stopservers: trace-3c: ", $pid, "\n";
         if($pid > 0) {
-            print "stopservers: trace-3d:", $pid, "\n";
+            print "stopservers: trace-3d: ", $pid, "\n";
             if($err_unexpected) {
                 logmsg "ERROR: ";
                 $result = -1;
