@@ -219,6 +219,7 @@ sub pidwait {
         }
         my $start = time;
         my $warn_at = 5;
+        print "pidwait: trace-1: ", $pid, "\n";
         while(pidexists($pid)) {
             if(time - $start > $warn_at) {
                 print "pidwait: still waiting for PID ", $pid, "\n";
@@ -230,6 +231,7 @@ sub pidwait {
             }
             portable_sleep(0.2);
         }
+        print "pidwait: trace-2: ", $pid, "\n";
         return $pid;
     }
 
