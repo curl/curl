@@ -49,20 +49,18 @@ if(!$CAPREFIX) {
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
-    # Show which openssl we are actually using.
-    if($OPENSSL ne basename($OPENSSL)) {  # has path
-        print "$OPENSSL\n";
-    }
-    else {
+    # find OpenSSL in PATH
+    if($OPENSSL eq basename($OPENSSL)) {  # has no path
         foreach(File::Spec->path()) {
             my $file = File::Spec->catfile($_, $OPENSSL);
             if(-f $file) {
-                print "$file\n";
+                $OPENSSL = $file;
                 last;
             }
         }
     }
 
+    print "$OPENSSL\n";
     system("$OPENSSL version");
 
     $PREFIX = $CAPREFIX;
