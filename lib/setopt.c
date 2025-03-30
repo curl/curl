@@ -1533,7 +1533,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
     !defined(CURL_DISABLE_IMAP)
 # ifndef CURL_DISABLE_MIME
-    case CURLOPT_MIMEPOST:
+  case CURLOPT_MIMEPOST:
     /*
      * Set to make us do MIME POST
      */
