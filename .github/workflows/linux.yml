@@ -228,7 +228,7 @@ jobs:
 
           - name: address-sanitizer
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
-            install_steps: pytest
+            install_steps: pytest randcurl
             configure: >-
               CC=clang
               CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
@@ -247,6 +247,7 @@ jobs:
 
           - name: memory-sanitizer
             install_packages: clang
+            install_steps: randcurl
             configure: >-
               CC=clang
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
@@ -696,6 +697,13 @@ jobs:
           else
             make -C bld V=1 pytest-ci
           fi
+
+      - name: 'randcurl'
+        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
+        run: |
+          mkdir run
+          cd run
+          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
