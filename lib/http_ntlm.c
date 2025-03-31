@@ -235,7 +235,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   case NTLMSTATE_TYPE2:
     /* We already received the type-2 message, create a type-3 message */
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
-                                                 localhostname, ntlm, &ntlmmsg);
+                                                 localhostname, ntlm,
+                                                 &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
       result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);

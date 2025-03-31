@@ -598,6 +598,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size_t useroff = 0;
   size_t domoff = 0;
   size_t hostlen = 0;
+  size_t maxhostlen = 65535;
   size_t userlen = 0;
   size_t domlen = 0;
 
@@ -685,6 +686,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     domlen = domlen * 2;
     userlen = userlen * 2;
     hostlen = hostlen * 2;
+    maxhostlen = 32767;
   }
 
   lmrespoff = 64; /* size of the message header */
@@ -785,6 +787,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     ntlm_print_hex(stderr, (char *)&ntlmbuf[lmrespoff], 0x18);
   });
 
+  /* hostlen should not exceed 64k (non-unicode) or 32k (unicode) */
+  if(hostlen > maxhostlen) {
+    failf(data, "host length too big");
+    return CURLE_OUT_OF_MEMORY;
+  }
   /* ntresplen + size should not be risking an integer overflow here */
   if(ntresplen + size > sizeof(ntlmbuf)) {
     failf(data, "incoming NTLM message too big");

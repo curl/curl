@@ -11,6 +11,7 @@ Added: 7.10.6
 Multi: mutex
 See-also:
   - proxy-ntlm
+  - login-options
 Example:
   - --ntlm -u user:password $URL
 ---
