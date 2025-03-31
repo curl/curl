@@ -2299,7 +2299,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
     }
 
     case SSH_SFTP_GETINFO:
-    {
       if(data->set.get_filetime) {
         state(data, SSH_SFTP_FILETIME);
       }
@@ -2307,7 +2306,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         state(data, SSH_SFTP_TRANS_INIT);
       }
       break;
-    }
 
     case SSH_SFTP_FILETIME:
     {
