@@ -399,6 +399,7 @@ sub logslocked {
             push @locks, $1;
         }
     }
+    print "logslocked: trace-1", scalar @locks, "\n";
     return @locks;
 }
 
@@ -413,19 +414,25 @@ sub waitlockunlock {
     # of time until the server removes it, or the given time expires.
     my $serverlogslocktimeout = shift;
 
+    print "waitlockunlock: trace-1 ", $serverlogslocktimeout, "\n";
+
     if($serverlogslocktimeout) {
         my $lockretry = $serverlogslocktimeout * 20;
         my @locks;
+        print "waitlockunlock: trace-2 ", $lockretry, "\n";
         while((@locks = logslocked()) && $lockretry--) {
             portable_sleep(0.05);
         }
+        print "waitlockunlock: trace-3 ", $lockretry, "\n";
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
+            print "waitlockunlock: trace-4\n";
             logmsg "Warning: server logs lock timeout ",
                    "($serverlogslocktimeout seconds) expired (locks: " .
                    join(", ", @locks) . ")\n";
         }
     }
+    print "waitlockunlock: trace-5\n";
 }
 
 #######################################################################
