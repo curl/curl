@@ -71,7 +71,7 @@ jobs:
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: 'release-tgz'
 
@@ -94,7 +94,7 @@ jobs:
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: 'release-tgz'
 
@@ -115,7 +115,7 @@ jobs:
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: 'release-tgz'
 
@@ -136,7 +136,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
         with:
           name: 'release-tgz'
 
