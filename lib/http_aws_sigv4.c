@@ -537,8 +537,7 @@ static CURLcode canon_string(const char *q, size_t len,
           result = Curl_dyn_addn(dq, "%25", 3);
         break;
       default: {
-        const char hex[] = "0123456789ABCDEF";
-        char out[3]={'%'};
+        unsigned char out[3]={'%'};
 
         if(!found_equals) {
           /* if found_equals is NULL assuming, been in path */
@@ -557,8 +556,7 @@ static CURLcode canon_string(const char *q, size_t len,
           }
         }
         /* URL encode */
-        out[1] = hex[((unsigned char)*q) >> 4];
-        out[2] = hex[*q & 0xf];
+        Curl_hexbyte(&out[1], *q, FALSE);
         result = Curl_dyn_addn(dq, out, 3);
         break;
       }

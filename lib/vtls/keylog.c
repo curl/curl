@@ -32,6 +32,7 @@
 
 #include "keylog.h"
 #include <curl/curl.h>
+#include "escape.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -114,10 +115,9 @@ Curl_tls_keylog_write(const char *label,
                       const unsigned char client_random[CLIENT_RANDOM_SIZE],
                       const unsigned char *secret, size_t secretlen)
 {
-  const char *hex = "0123456789ABCDEF";
   size_t pos, i;
-  char line[KEYLOG_LABEL_MAXLEN + 1 + 2 * CLIENT_RANDOM_SIZE + 1 +
-            2 * SECRET_MAXLEN + 1 + 1];
+  unsigned char line[KEYLOG_LABEL_MAXLEN + 1 + 2 * CLIENT_RANDOM_SIZE + 1 +
+                     2 * SECRET_MAXLEN + 1 + 1];
 
   if(!keylog_file_fp) {
     return FALSE;
@@ -134,22 +134,22 @@ Curl_tls_keylog_write(const char *label,
 
   /* Client Random */
   for(i = 0; i < CLIENT_RANDOM_SIZE; i++) {
-    line[pos++] = hex[client_random[i] >> 4];
-    line[pos++] = hex[client_random[i] & 0xF];
+    Curl_hexbyte(&line[pos], client_random[i], FALSE);
+    pos += 2;
   }
   line[pos++] = ' ';
 
   /* Secret */
   for(i = 0; i < secretlen; i++) {
-    line[pos++] = hex[secret[i] >> 4];
-    line[pos++] = hex[secret[i] & 0xF];
+    Curl_hexbyte(&line[pos], secret[i], FALSE);
+    pos += 2;
   }
   line[pos++] = '\n';
   line[pos] = '\0';
 
   /* Using fputs here instead of fprintf since libcurl's fprintf replacement
      may not be thread-safe. */
-  fputs(line, keylog_file_fp);
+  fputs((char *)line, keylog_file_fp);
   return TRUE;
 }
 
