@@ -3108,6 +3108,34 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   CURLcode result;
   struct connectdata *conn = data->conn;
 
+#if LIBSSH2_VERSION_NUM >= 0x010b00
+  {
+    const char *crypto_str;
+    switch(libssh2_crypto_engine()) {
+      case libssh2_gcrypt:
+        crypto_str = "libgcrypt";
+        break;
+      case libssh2_mbedtls:
+        crypto_str = "mbedTLS";
+        break;
+      case libssh2_openssl:
+        crypto_str = "openssl compatible";
+        break;
+      case libssh2_os400qc3:
+        crypto_str = "OS400QC3";
+        break;
+      case libssh2_wincng:
+        crypto_str = "WinCNG";
+        break;
+      default:
+        crypto_str = NULL;
+        break;
+    }
+    if(crypto_str)
+      infof(data, "libssh2 cryptography backend: %s", crypto_str);
+  }
+#endif
+
   /* initialize per-handle data if not already */
   if(!data->req.p.ssh) {
     result = ssh_setup_connection(data, conn);
@@ -3730,30 +3758,7 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  const char *crypto_str = "";
-#if LIBSSH2_VERSION_NUM >= 0x010b00
-  switch(libssh2_crypto_engine()) {
-    case libssh2_gcrypt:
-      crypto_str = "libgcrypt";
-      break;
-    case libssh2_mbedtls:
-      crypto_str = "mbedTLS";
-      break;
-    case libssh2_openssl:
-      crypto_str = "openssl";  /* In lowercase to cover forks and wolfSSL. */
-      break;
-    case libssh2_os400qc3:
-      crypto_str = "os400qc3";
-      break;
-    case libssh2_wincng:
-      crypto_str = "WinCNG";
-      break;
-    default:
-      break;
-  }
-#endif
-  (void)msnprintf(buffer, buflen, "libssh2/%s%s%s", libssh2_version(0),
-    crypto_str ? "/" : "", crypto_str);
+  (void)msnprintf(buffer, buflen, "libssh2/%s", libssh2_version(0));
 }
 
 /* The SSH session is associated with the *CONNECTION* but the callback user
