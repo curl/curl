@@ -33,7 +33,7 @@ simple HTTPS GET
 </name>
 # Using '-k' over '--insecure' to also test the short form
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
