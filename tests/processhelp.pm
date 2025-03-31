@@ -371,8 +371,9 @@ sub killpid {
     print "killpid: trace-5\n";
     # Reap processes dead children for sure.
     if(@reapchild) {
-        #print "killpid: trace-5a\n";
+        print "killpid: trace-5a\n";
         foreach my $pid (@reapchild) {
+            print "killpid: trace-5aa: ", $pid, "\n";
             if($pid > 0) {
                 pidwait($pid, 0);
             }
