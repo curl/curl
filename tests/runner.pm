@@ -1179,9 +1179,12 @@ sub runner_test_preprocess {
     my ($testnum)=@_;
     my %testtimings;
 
+
     if(clearlogs()) {
         logmsg "Warning: log messages were lost\n";
     }
+
+    print "runner_test_preprocess: trace-2:", $testnum,"\n";
 
     # timestamp test preparation start
     # TODO: this metric now shows only a portion of the prep time; better would
@@ -1193,20 +1196,26 @@ sub runner_test_preprocess {
     # ignore any error here--if there were one, it would have been
     # caught during the selection phase and this test would not be
     # running now
+    print "runner_test_preprocess: trace-3:", $testnum,"\n";
     loadtest("${TESTDIR}/test${testnum}");
+    print "runner_test_preprocess: trace-4:", $testnum,"\n";
     readtestkeywords();
 
     ###################################################################
     # Restore environment variables that were modified in a previous run.
     # Test definition may instruct to (un)set environment vars.
+    print "runner_test_preprocess: trace-5:", $testnum,"\n";
     restore_test_env(1);
 
     ###################################################################
     # Start the servers needed to run this test case
+    print "runner_test_preprocess: trace-6:", $testnum,"\n";
     my ($why, $error) = singletest_startservers($testnum, \%testtimings);
 
+    print "runner_test_preprocess: trace-7:", $testnum,"\n";
     # make sure no locks left for responsive test
     waitlockunlock($defserverlogslocktimeout);
+    print "runner_test_preprocess: trace-8:", $testnum,"\n";
 
     if(!$why) {
 
@@ -1214,16 +1223,21 @@ sub runner_test_preprocess {
         # Generate preprocessed test file
         # This must be done after the servers are started so server
         # variables are available for substitution.
+        print "runner_test_preprocess: trace-9:", $testnum,"\n";
         singletest_preprocess($testnum);
 
         ###############################################################
         # Set up the test environment to run this test case
+        print "runner_test_preprocess: trace-10:", $testnum,"\n";
         singletest_setenv();
 
         ###############################################################
         # Check that the test environment is fine to run this test case
+        print "runner_test_preprocess: trace-11:", $testnum,"\n";
         if (!$listonly) {
+            print "runner_test_preprocess: trace-12:", $testnum,"\n";
             $why = singletest_precheck($testnum);
+            print "runner_test_preprocess: trace-13:", $testnum,"\n";
             $error = -1;
         }
     }
