@@ -254,9 +254,10 @@ sub processexists {
     # fetch pid from pidfile
     my $pid = pidfromfile($pidfile);
 
-    print "processexists: trace-1: ", $pid, "\n";
+    print "processexists: trace-1: ", $pid, " <= ", $pidfile, "\n";
 
     if($pid > 0) {
+        print "processexists: trace-1a: ", $pid, "\n";
         # verify if currently alive
         if(pidexists($pid)) {
             print "processexists: trace-2 exists: ", $pid, "\n";
