@@ -26,7 +26,6 @@ TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
-INET_PTON = ../../lib/inet_pton.c ../../lib/inet_pton.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
 # these files are used in every single test program below
@@ -657,7 +656,7 @@ lib1958_LDADD = $(TESTUTIL_LIBS)
 lib1959_SOURCES = lib1959.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1959_LDADD = $(TESTUTIL_LIBS)
 
-lib1960_SOURCES = lib1960.c $(SUPPORTFILES) $(INET_PTON)
+lib1960_SOURCES = lib1960.c $(SUPPORTFILES)
 lib1960_LDADD = $(TESTUTIL_LIBS)
 
 lib1964_SOURCES = lib1964.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
