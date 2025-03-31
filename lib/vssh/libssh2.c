@@ -2030,13 +2030,13 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         break;
       }
 
-    /* This is the last step in the SFTP connect phase. Do note that while
-       we get the homedir here, we get the "workingpath" in the DO action
-       since the homedir will remain the same between request but the
-       working path will not. */
-    DEBUGF(infof(data, "SSH CONNECT phase done"));
-    state(data, SSH_STOP);
-    break;
+      /* This is the last step in the SFTP connect phase. Do note that while
+         we get the homedir here, we get the "workingpath" in the DO action
+         since the homedir will remain the same between request but the
+         working path will not. */
+      DEBUGF(infof(data, "SSH CONNECT phase done"));
+      state(data, SSH_STOP);
+      break;
 
     case SSH_SFTP_QUOTE_INIT:
 
