@@ -332,10 +332,13 @@ sub killpid {
     print "killpid: trace-3\n";
     # Allow all signalled processes five seconds to gracefully die.
     if(@signalled) {
+        print "killpid: trace-3a\n";
         #print "killpid: trace-3a\n";
         my $twentieths = 5 * 20;
         while($twentieths--) {
+            print "killpid: trace-3a1\n";
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
+                print "killpid: trace-3a1a\n";
                 my $pid = $signalled[$i];
                 if(!pidexists($pid)) {
                     print("RUN: Process with pid $pid gracefully died\n")
