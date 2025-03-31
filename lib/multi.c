@@ -2086,8 +2086,10 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   dns = Curl_fetch_addr(data, hostname, conn->primary.remote_port);
 
   if(dns) {
-    /* Tell a possibly async resolver we no longer need the results. */
-    Curl_resolver_set_result(data, dns);
+#ifdef USE_CURL_ASYNC
+    data->state.async.dns = dns;
+    data->state.async.done = TRUE;
+#endif
     result = CURLE_OK;
     infof(data, "Hostname '%s' was found in DNS cache", hostname);
   }
