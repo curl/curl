@@ -403,7 +403,7 @@ sub killsockfilters {
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
-                ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
+                ($proto eq 'ftp')?'ctrl':'filt', $pid);
             pidkill($pid);
             pidwait($pid, 0);
         }
@@ -417,7 +417,7 @@ sub killsockfilters {
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
-                $pid) if($verbose);
+                $pid);
             pidkill($pid);
             pidwait($pid, 0);
         }
