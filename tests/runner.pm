@@ -1459,7 +1459,6 @@ sub runnerabort{
 sub ipcrecv {
     my $err;
     my $datalen;
-    print "ipcrecv: trace-1\n";
     while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
         print "ipcrecv: trace-1a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
@@ -1470,10 +1469,8 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
-    print "ipcrecv: trace-2\n";
     my $len=unpack("L", $datalen);
     my $buf;
-    print "ipcrecv: trace-3\n";
     while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
         print "ipcrecv: trace-3a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
@@ -1484,7 +1481,6 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
-    print "ipcrecv: trace-4\n";
 
     # Decode the function name and arguments
     my $argsarrayref = thaw $buf;
@@ -1512,13 +1508,11 @@ sub ipcrecv {
     } else {
         die "Unknown IPC function $funcname\n";
     }
-    print "ipcrecv: trace-6\n";
     # print "ipcrecv results\n";
 
     # Marshall the results to return
     $buf = freeze \@res;
 
-    print "ipcrecv: trace-7\n";
     while(! defined ($err = syswrite($runnerw, (pack "L", length($buf)) . $buf)) || $err <= 0) {
         print "ipcrecv: trace-7a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
@@ -1529,7 +1523,6 @@ sub ipcrecv {
         }
         # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
-    print "ipcrecv: trace-8\n";
 
     return 0;
 }
