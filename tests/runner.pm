@@ -1235,7 +1235,13 @@ sub runner_test_preprocess {
             $error = -1;
         }
     }
-    return ($why, $error, clearlogs(), \%testtimings);
+    print "runner_test_preprocess: trace-14:", $testnum,"\n";
+
+    my $clres = clearlogs();
+
+    print "runner_test_preprocess: trace-15:", $testnum,"\n";
+
+    return ($why, $error, $clres, \%testtimings);
 }
 
 
