@@ -51,6 +51,7 @@ INTERNALDOCS =                                  \
  internals/DYNBUF.md                            \
  internals/HASH.md                              \
  internals/LLIST.md                             \
+ internals/MID.md                               \
  internals/MQTT.md                              \
  internals/MULTI-EV.md                          \
  internals/NEW-PROTOCOL.md                      \
@@ -59,6 +60,7 @@ INTERNALDOCS =                                  \
  internals/SPLAY.md                             \
  internals/STRPARSE.md                          \
  internals/TLS-SESSIONS.md                      \
+ internals/UINT_SETS.md                         \
  internals/WEBSOCKET.md
 
 EXTRA_DIST =                                    \
