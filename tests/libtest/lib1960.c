@@ -23,7 +23,18 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "inet_pton.h"
+#ifdef HAVE_INET_PTON
+
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #include "memdebug.h"
 
 /* to prevent libcurl from closing our socket */
@@ -55,6 +66,13 @@ static int sockopt_cb(void *clientp,
   (void)purpose;
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
+
+#if defined(__AMIGA__)
+#define my_inet_pton(x,y,z) inet_pton(x,(unsigned char *)y,z)
+#else
+#define my_inet_pton(x,y,z) inet_pton(x,y,z)
+#endif
+
 
 /* Expected args: URL IP PORT */
 CURLcode test(char *URL)
@@ -90,7 +108,7 @@ CURLcode test(char *URL)
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port);
 
-  if(curlx_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
+  if(my_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
     fprintf(stderr, "inet_pton failed\n");
     goto test_cleanup;
   }
@@ -128,3 +146,11 @@ test_cleanup:
 
   return res;
 }
+#else
+CURLcode test(char *URL)
+{
+  (void)URL;
+  printf("lacks inet_pton\n");
+  return CURLE_OK;
+}
+#endif
