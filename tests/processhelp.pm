@@ -291,6 +291,8 @@ sub killpid {
     # The 'pidlist' argument is a string of whitespace separated pids.
     return if(not defined($pidlist));
 
+    $verbose = 1;
+
     print "killpid: trace-1\n";
 
     # Make 'requested' hold the non-duplicate pids from 'pidlist'.
