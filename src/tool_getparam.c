@@ -992,17 +992,10 @@ static ParameterError set_rate(struct GlobalConfig *global,
 
   if(div) {
     curl_off_t numunits;
-    const char *s;
     div++;
-    s = div;
 
-    if(curlx_str_number(&div, &numunits, CURL_OFF_T_MAX)) {
-      if(s == div)
-        /* if div did not move, accept it as a 1 */
-        numunits = 1;
-      else
-        return PARAM_BAD_USE;
-    }
+    if(curlx_str_number(&div, &numunits, CURL_OFF_T_MAX))
+      numunits = 1;
 
     switch(*div) {
     case 's': /* per second */
