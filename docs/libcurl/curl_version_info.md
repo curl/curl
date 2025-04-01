@@ -8,7 +8,7 @@ See-also:
   - curl_version (3)
 Protocol:
   - All
-Added-in: 7.10.0
+Added-in: 7.10
 ---
 
 # NAME

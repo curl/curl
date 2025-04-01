@@ -9,7 +9,7 @@ See-also:
   - libcurl (3)
 Protocol:
   - All
-Added-in: 8.3
+Added-in: 8.3.0
 ---
 
 # NAME

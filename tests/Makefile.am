@@ -57,6 +57,7 @@ EXTRA_DIST =        \
  CMakeLists.txt     \
  FILEFORMAT.md      \
  README.md          \
+ allversions.pm     \
  appveyor.pm        \
  azure.pm           \
  devtest.pl         \
