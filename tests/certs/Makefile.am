@@ -30,9 +30,16 @@ EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt \
 
 DISTCLEANFILES = $(GENERATEDCERTS)
 
+all-am: test-ca.cacert
+
 # Rebuild the certificates
 
-clean-certs:
+# Generate all certs in a single shot, but declare just a single target file
+# to support GNU Make <4.3 without the "grouped explicit targets" feature.
+test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.pl
+	$(PERL) $(srcdir)/genserv.pl test $(CERTCONFIGS)
+
+clean-local:
 	rm -f $(GENERATEDCERTS) \
 	  test-*.csr \
 	  test-*.der \
@@ -41,10 +48,3 @@ clean-certs:
 	  test-ca.db* \
 	  test-ca.raw* \
 	  test-ca.srl
-
-build-certs: test-ca.cacert
-
-# Generate all certs in a single shot, but declare just a single target file
-# to support GNU Make <4.3 without the "grouped explicit targets" feature.
-test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.pl
-	$(PERL) $(srcdir)/genserv.pl test $(CERTCONFIGS)
