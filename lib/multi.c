@@ -1408,7 +1408,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
     while(1) {
-#ifdef HAVE_EVENTFD
+#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
       /* eventfd has a stringent rule of requiring the 8-byte buffer when
          calling write(2) on it */
       const uint64_t buf[1] = { 1 };
