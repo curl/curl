@@ -114,7 +114,7 @@ jobs:
         run: grep -v '^#' .github/scripts/spellcheck.words >  wordlist.txt
 
       - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@ed0756273a1658136c36d26e3d0353de35b98c8b # v0
+        uses: rojopolis/spellcheck-github-actions@c18ddfa5900ac5045697c0914ca9d99eb9abe903 # v0
         with:
           config_path: .github/scripts/spellcheck.yaml
 
