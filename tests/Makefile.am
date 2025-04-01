@@ -158,7 +158,7 @@ perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
 build-certs:
-	(cd certs && $(MAKE) build-certs)
+	(cd certs && $(MAKE))
 
 test: perlcheck all
 	$(TEST) $(TFLAGS)
