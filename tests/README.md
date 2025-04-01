@@ -276,6 +276,6 @@ SPDX-License-Identifier: curl
   The executables' first argument is the name of libtest, unit test or server
   respectively.
   In these executables, the build process automatically renames the entry point
-  to a unique symbol. `test` becomes `test_<tool>`, e.g. `test_liblib1598` or
+  to a unique symbol. `test` becomes `test_<tool>`, e.g. `test_lib1598` or
   `test_unit1305`. For servers `main` becomes `main_sws` for the `sws` server,
   and so on. Other common symbols may also be suffixed the same way.
