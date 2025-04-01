@@ -170,7 +170,7 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
    * close one end of the socket pair (may be done in resolver thread);
    * the other end (for reading) is always closed in the parent thread.
    */
-#ifndef HAVE_EVENTFD
+#ifndef USE_EVENTFD
   if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
     wakeup_close(tsd->sock_pair[1]);
   }
@@ -293,7 +293,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
       const uint64_t buf[1] = { 1 };
 #else
       const char buf[1] = { 1 };
