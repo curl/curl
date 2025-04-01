@@ -449,8 +449,7 @@ mev_get_last_pollset(struct Curl_multi *multi,
     if(conn)
       return Curl_hash_offt_get(&multi->ev.conn_pollsets,
                                 conn->connection_id);
-    else if(data)
-      return Curl_hash_offt_get(&multi->ev.xfer_pollsets, data->mid);
+    return Curl_hash_offt_get(&multi->ev.xfer_pollsets, data->mid);
   }
   return NULL;
 }
