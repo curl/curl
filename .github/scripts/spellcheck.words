@@ -447,6 +447,8 @@ librtmp
 libs
 libssh
 libssh2
+libtest
+libtests
 Libtool
 libtool
 libuv
