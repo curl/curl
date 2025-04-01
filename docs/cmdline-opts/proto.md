@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: proto
 Arg: <protocols>
 Help: Enable/disable PROTOCOLS
-Added: 7.20.2
+Added: 7.21.0
 Category: connection curl
 Multi: single
 See-also:

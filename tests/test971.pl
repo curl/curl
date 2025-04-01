@@ -30,8 +30,11 @@
 #   $cmddir
 #
 
+use allversions;
+
 my $opts = $ARGV[0];
 my $cmddir = $ARGV[1];
+my $versions = $ARGV[2];
 
 sub cmdfiles {
     my ($dir)=@_;
@@ -91,6 +94,9 @@ sub versioncheck {
     close($fh);
 }
 
+# get all the past versions
+allversions($versions);
+
 # get all the files
 my @cmdopts = cmdfiles($cmddir);
 
@@ -100,6 +106,12 @@ my @veropts = mentions($opts);
 # check if all files are in the doc
 for my $c (sort @cmdopts) {
     if($oiv{$c}) {
+        if(!$pastversion{$oiv{$c}}) {
+            printf STDERR "$c: %s is not a proper release\n",
+                $oiv{$c};
+            $error++;
+        }
+
         # present, but at same version?
         versioncheck($c, $oiv{$c});
     }
