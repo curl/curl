@@ -52,6 +52,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib696 \
  lib1156 \
  lib1301 \
+ lib1308 \
  lib1485 \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
@@ -350,6 +351,9 @@ lib696_CPPFLAGS = $(AM_CPPFLAGS) -DLIB696
 
 lib1301_SOURCES = lib1301.c $(SUPPORTFILES) $(TESTUTIL)
 lib1301_LDADD = $(TESTUTIL_LIBS)
+
+lib1308_SOURCES = lib1308.c $(SUPPORTFILES)
+lib1308_LDADD = $(TESTUTIL_LIBS)
 
 lib1485_SOURCES = lib1485.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1485_LDADD = $(TESTUTIL_LIBS)
