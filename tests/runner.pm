@@ -940,7 +940,7 @@ sub singletest_run {
 
         if($bundle) {
             if($gdbthis) {
-                $cmdargs =" $tool_name $cmdargs";
+                $cmdargs =" $tool_name$cmdargs";
             }
             else {
                 $CMDLINE.=" $tool_name";
