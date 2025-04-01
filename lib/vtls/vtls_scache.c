@@ -861,10 +861,6 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
-  if(!GOOD_SCACHE(scache)) {
-    Curl_ssl_session_destroy(s);
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
 
   Curl_ssl_scache_lock(data);
   result = cf_scache_add_session(cf, data, scache, ssl_peer_key, s);
