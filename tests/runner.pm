@@ -939,7 +939,12 @@ sub singletest_run {
         $CMDLINE=exerunner() . $CMDLINE;
 
         if($bundle) {
-            $CMDLINE.=" $tool_name";
+            if($gdbthis) {
+                $cmdargs =" $tool_name$cmdargs";
+            }
+            else {
+                $CMDLINE.=" $tool_name";
+            }
         }
 
         $DBGCURL=$CMDLINE;
