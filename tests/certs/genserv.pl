@@ -72,7 +72,7 @@ if(!$CAPREFIX) {
     }
 
     print "$OPENSSL\n";
-    system("$OPENSSL version")
+    system("$OPENSSL version");
 
     $PREFIX = $CAPREFIX;
     $DURATION = 6000;
