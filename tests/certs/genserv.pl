@@ -66,7 +66,7 @@ if(!$CAPREFIX) {
             }
         }
         if(!$found) {
-            print 'genserv.pl: openssl not found. openssl is required to generate test certificates.';
+            print 'genserv.pl: openssl not found, but required to generate test certificates.';
             exit 1;
         }
     }
