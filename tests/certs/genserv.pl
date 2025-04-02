@@ -34,7 +34,7 @@ sub opensslfail {
     exit 1;
 }
 
-my $OPENSSL = './libressl-3.1.0';
+my $OPENSSL = 'openssl';
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
 }
