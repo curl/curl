@@ -30,8 +30,9 @@ use File::Basename;
 use File::Spec;
 
 sub opensslfail {
-    print 'genserv.pl: openssl 1.0.2+ is required to generate test certificates.';
-    exit 1;
+    die "Missing or broken 'openssl' tool. openssl 1.0.2+ is required. ".
+        "Without it, this script cannot generate the necessary certificates ".
+        "the curl test suite needs for all its TLS related tests.";
 }
 
 my $OPENSSL = 'openssl';
@@ -66,8 +67,7 @@ if(!$CAPREFIX) {
             }
         }
         if(!$found) {
-            print 'genserv.pl: openssl not found, but required to generate test certificates.';
-            exit 1;
+            opensslfail();
         }
     }
 
