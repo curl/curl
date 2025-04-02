@@ -135,6 +135,7 @@ struct OperationConfig {
   char *etag_compare_file;
   char *customrequest;
   char *ssl_ec_curves;
+  char *ssl_signature_algorithms;
   char *krblevel;
   char *request_target;
   char *writeout;           /* %-styled format string to output */

@@ -259,14 +259,15 @@ struct ssl_backend_data;
 struct Curl_ssl_scache_entry;
 
 struct ssl_primary_config {
-  char *CApath;          /* certificate dir (does not work on Windows) */
-  char *CAfile;          /* certificate to verify peer against */
-  char *issuercert;      /* optional issuer certificate filename */
+  char *CApath;               /* certificate dir (does not work on Windows) */
+  char *CAfile;               /* certificate to verify peer against */
+  char *issuercert;           /* optional issuer certificate filename */
   char *clientcert;
-  char *cipher_list;     /* list of ciphers to use */
-  char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
+  char *cipher_list;          /* list of ciphers to use */
+  char *cipher_list13;        /* list of TLS 1.3 cipher suites to use */
+  char *signature_algorithms; /* list of signature algorithms to use */
   char *pinned_key;
-  char *CRLfile;         /* CRL to check certificate revocation */
+  char *CRLfile;              /* CRL to check certificate revocation */
   struct curl_blob *cert_blob;
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
@@ -1474,6 +1475,7 @@ enum dupstring {
 #endif
   STRING_ECH_CONFIG,            /* CURLOPT_ECH_CONFIG */
   STRING_ECH_PUBLIC,            /* CURLOPT_ECH_PUBLIC */
+  STRING_SSL_SIGNATURE_ALGORITHMS, /* CURLOPT_SSL_SIGNATURE_ALGORITHMS */
 
   /* -- end of null-terminated strings -- */
 

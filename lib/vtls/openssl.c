@@ -3810,6 +3810,17 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 
+  {
+    const char *signature_algorithms = conn_config->signature_algorithms;
+    if (signature_algorithms)
+    {
+      if(!SSL_CTX_set1_sigalgs_list(octx->ssl_ctx, signature_algorithms)) {
+        failf(data, "failed setting signature algorithms: '%s'", signature_algorithms);
+        return CURLE_SSL_CIPHER;
+      }
+    }
+  }
+
 #ifdef USE_OPENSSL_SRP
   if(ssl_config->primary.username && Curl_auth_allowed_to_host(data)) {
     char * const ssl_username = ssl_config->primary.username;
