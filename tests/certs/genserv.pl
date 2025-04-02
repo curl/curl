@@ -72,9 +72,7 @@ if(!$CAPREFIX) {
     }
 
     print "$OPENSSL\n";
-    if(system("$OPENSSL version") != 0) {
-        opensslfail();
-    }
+    system("$OPENSSL version")
 
     $PREFIX = $CAPREFIX;
     $DURATION = 6000;
