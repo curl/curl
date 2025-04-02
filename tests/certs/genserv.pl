@@ -42,7 +42,7 @@ my $KEYSIZE = 'prime256v1';
 my $DURATION;
 my $PREFIX;
 
-if(`$OPENSSL -version` eq "") {
+if(`$OPENSSL version` eq "") {
     die "Missing or broken 'openssl' tool. Without it, this script cannot ".
         "generate the necessary certificates the curl test suite needs for ".
         "all its TLS related tests.";
