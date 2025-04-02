@@ -253,6 +253,7 @@ DPAGES = \
   show-error.md \
   show-headers.md \
   silent.md \
+  sigalgs.md \
   skip-existing.md \
   socks4.md \
   socks4a.md \

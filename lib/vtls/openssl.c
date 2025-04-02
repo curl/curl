@@ -197,6 +197,16 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
   #endif
 #endif
 
+/* Whether SSL_CTX_set1_sigalgs_list is available
+ * OpenSSL: supported since 1.0.2 (commit 0b362de5f575)
+ * BoringSSL: supported since 0.20240913.0 (commit 826ce15)
+ * LibreSSL: no
+ */
+#if (OPENSSL_VERSION_NUMBER >= 0x10002000L && \
+      !defined(LIBRESSL_VERSION_NUMBER))
+  #define HAVE_SSL_CTX_SET1_SIGALGS
+#endif
+
 #ifdef LIBRESSL_VERSION_NUMBER
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
@@ -3870,6 +3880,21 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS
+#define OSSL_SIGALG_CAST(x) OSSL_CURVE_CAST(x)
+  {
+    const char *signature_algorithms = conn_config->signature_algorithms;
+    if(signature_algorithms) {
+      if(!SSL_CTX_set1_sigalgs_list(octx->ssl_ctx,
+                                    OSSL_SIGALG_CAST(signature_algorithms))) {
+        failf(data, "failed setting signature algorithms: '%s'",
+              signature_algorithms);
+        return CURLE_SSL_CIPHER;
+      }
+    }
+  }
+#endif
+
 #ifdef USE_OPENSSL_SRP
   if(ssl_config->primary.username && Curl_auth_allowed_to_host(data)) {
     char * const ssl_username = ssl_config->primary.username;
@@ -5523,6 +5548,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
   SSLSUPP_SSL_CTX |
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   SSLSUPP_TLS13_CIPHERSUITES |
+#endif
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS
+  SSLSUPP_SIGNATURE_ALGORITHMS |
 #endif
 #ifdef USE_ECH_OPENSSL
   SSLSUPP_ECH |
