@@ -4,7 +4,7 @@ curl and libcurl 8.13.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3377
+ Contributors:                 3378
 
 This release includes the following changes:
 
@@ -31,6 +31,9 @@ This release includes the following bugfixes:
  o autotools: fix `dllmain.c` in unity builds [257]
  o autotools: fix `libtest` bundle to depend on `FIRSTFILES` [240]
  o autotools: use `CURLDEBUG` to exclude TrackMemory code from unity [253]
+ o aws_sigv4: cannot be used for proxy [171]
+ o aws_sigv4: merge repeated headers in canonical request [272]
+ o aws_sigv4: use strparse more for parsing [55]
  o base64: drop `BUILDING_CURL` macro, always include in tests/server [234]
  o build: add Windows CE / CeGCC support, with CI jobs [87]
  o build: cmake multi-pkg-config detection improvements (brotli, ldap, mbedtls) [192]
@@ -103,6 +106,7 @@ This release includes the following bugfixes:
  o curl.h: convert CURLUSESSL* names to defines [146]
  o curl.h: stop defining non-curl `__has_declspec_attribute` [142]
  o curl.h: switch `CURL_HTTP_VERSION*` enums to long constants [160]
+ o curl/system.h: drop leftover comment about 32 bit curl_off_t [305]
  o curl: add my_setopt_long() and _offt() [158]
  o curl_msh3: remove verify bypass from DEBUGBUILDs [43]
  o curl_setup: drop `ERANGE` (for WinCE), no longer used [249]
@@ -115,17 +119,19 @@ This release includes the following bugfixes:
  o CURLOPT_HTTPHEADER.md: rephrases [108]
  o curltime: use libcurl time functions in src and tests/server [247]
  o DISABLED: add 313 for sectransp (move from GHA/macos) [209]
- o docs/cmdline-opts: unify HTTP version style in --help output [139]
+ o docs/cmdline-opts: use imperative form [270]
  o docs: adapt to removed --with-random [177]
  o docs: add FD_ZERO to curl_multi_fdset example [19]
  o docs: bump `rustls` to 0.14.1 [111]
  o docs: correct argument names & URL redirection [4]
  o docs: minor edits to please the new spellchecker regime
  o docs: rework RUSTLS install instructions
+ o docs: unify HTTP version style in --help output [139]
  o docs: vulnerabilities in debug code are not eligible for a bounty [118]
  o doh: improve HTTPS RR svcparams parsing [198]
  o doh: remove wrong but unreachable exit path from doh_decode_rdata_name [199]
  o dynbuf: assert init on free [295]
+ o easy: drop `break` after `return` [300]
  o easy: fix warning about possible comma misuse [219]
  o eventfd: allow use on all CPUs [93]
  o examples: prefer `return` over `exit()` (cont.) [110]
@@ -140,6 +146,7 @@ This release includes the following bugfixes:
  o http2: add on_invalid_frame callback for error detection [174]
  o http2: detect session being closed on ingress handling [173]
  o http2: enhance error messages on Curl_dyn* upon receiving headers [149]
+ o http2: fix stream assignemnt for pushes [302]
  o http2: reset stream on response header error [175]
  o HTTP3.md: only speak about minimal versions [18]
  o http: convert parsers to strparse [48]
@@ -149,8 +156,6 @@ This release includes the following bugfixes:
  o http: negotiation and room for alt-svc/https rr to navigate [64]
  o http: remove a HTTP method size restriction [241]
  o http: version negotiation [45]
- o http_aws_sigv4: cannot be used for proxy [171]
- o http_aws_sigv4: use strparse more for parsing [55]
  o http_chunks: replace a strofft call with curl_str_hex [138]
  o https-rr: implementation improvements [44]
  o httpsrr: fix port detection [51]
@@ -159,6 +164,7 @@ This release includes the following bugfixes:
  o INSTALL-CMAKE.md: CMake usage updates [101]
  o INSTALL-CMAKE.md: mention `ZLIB_USE_STATIC_LIBS` [112]
  o lib1156: pass longs to `curl_easy_setopt()` [159]
+ o lib1560: test set path containing LR or CR [299]
  o lib2302: fix crash due to stack overflow on MSVC and clang Windows [228]
  o lib696: fix building on Windows in non-bundle mode [267]
  o lib: better optimized casecompare() and ncasecompare() [3]
@@ -174,8 +180,10 @@ This release includes the following bugfixes:
  o libssh2: fix memory leak in `SSH_SFTP_REALPATH` state [224]
  o libssh2: fix to ignore `known_hosts` if SHA256 host public key is set [296]
  o libssh2: print user with verbose flag [125]
+ o libssh2: show crypto backend in the verbose connect log [316]
  o libssh: fix freeing of resources in disconnect [206]
  o libssh: fix scp large file upload for 32-bit size_t systems [211]
+ o libtest/first.c: remove the Test: stderr output for unity builds [301]
  o libtest/libprereq.c: set CURLOPT_FOLLOWLOCATION with a long [89]
  o managen: accept more markdown-quote-markers [243]
  o managen: correct the warning for un-escaped '<' and '>' [1]
@@ -198,6 +206,7 @@ This release includes the following bugfixes:
  o openssl: fix crash on missing cert password [271]
  o openssl: fix pkcs11 URI checking for key files. [152]
  o openssl: remove bad `goto`s into other scope [63]
+ o prox/preproxy.md: document argument within <brackets> [317]
  o pytest: test negotiate with http proxy [83]
  o quiche: do not iterate over multi handles [182]
  o RELEASE-PROCEDURE.md: explain release candidates [161]
@@ -209,11 +218,14 @@ This release includes the following bugfixes:
  o runtests: drop logic calling the `handle` tool (Windows) [263]
  o runtests: drop recognizing 'winssl' as Schannel [102]
  o runtests: drop ref to unused external function
+ o runtests: fix bundled test invocation with `-g` option [308]
  o runtests: fix SSH server not starting in cases, re-ignore failing vcpkg CI jobs [225]
  o runtests: fix test key format for libssh2 WinCNG (and others) [229]
  o runtests: generate certs dynamically, bump to EC-256, tidy up [279]
  o runtests: recognize AWS-LC as OpenSSL [103]
+ o runtests: rewrite `genserv.sh` in Perl [312]
  o runtests: support multi-target cmake, drop workarounds from CI [116]
+ o runtests: support running tests under wine or qemu (cont.) [309]
  o runtests: support running tests under wine or qemu [210]
  o runtests: use `setfacl` on Cygwin/MSYS, if present [291]
  o rustls: add ECH support w/ string ECH config [281]
@@ -241,6 +253,7 @@ This release includes the following bugfixes:
  o src: replace strto[u][ld] with curlx_str_ parsers [222]
  o ssh: consider sftp quote commands case sensitive [33]
  o sshserver.pl: adjust `AuthorizedKeysFile2` cutoff version [204]
+ o sshserver.pl: use Perl `chmod` [311]
  o sshserver: fix excluding obsolete client config lines [212]
  o ssl session cache: add exportable flag [56]
  o SSLCERTS: list support for SSL_CERT_FILE and SSL_CERT_DIR [265]
@@ -249,6 +262,8 @@ This release includes the following bugfixes:
  o strparse: switch to curl_off_t as base data type [7]
  o test1022: add support for rc releases [144]
  o test1167: catch #defines with extra whitespace [140]
+ o test313: disable CRL test for Schannel due to lack of support and flakiness [310]
+ o test313: disable via `<features>` for backends without CRL support [303]
  o test489: set output dir [186]
  o test612: SCP `rm` the uploaded remote file (not the local source), unignore in CI [297]
  o test613: make it pass on Windows, fix postprocess, unignore in CI [290]
@@ -294,6 +309,7 @@ This release includes the following bugfixes:
  o tool_setopt: reduce use of "code hiding" macros [203]
  o url: call protocol handler's disconnect in Curl_conn_free [193]
  o urlapi: fix redirect from file:// with query, and simplify [136]
+ o urlapi: remove percent encoded dot sequences from the URL path [252]
  o urlapi: simplify junkscan [23]
  o urldata: remove 'hostname' from struct Curl_async [131]
  o variable.md: clarify 'trim' example [12]
@@ -332,12 +348,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Anthony Hu, Aquila Macedo, Ben Bodenmiller, Brian Inglis, Calvin Ruocco,
-  Carlos Henrique Lima Melara, Catena cyber, Christian Schmitz, Dan Fandrich,
-  Daniel McCarney, Daniel Stenberg, Dave Nicolson, dependabot[bot],
-  Derek Huang, Dexter Gerig, Ethan Wilkes, Gabriel Marin, Harry Sintonen,
-  Jan Macku, Jeremy Drake, John Bampton, Joseph Chen, Justin Steventon,
-  Kai Pastor, kayrus on github, kpcyrd on github, kriztalz, Lars Karlitski,
+  Abhinav Singhal, Anthony Hu, Aquila Macedo, Austin Moore, Ben Bodenmiller,
+  Brian Inglis, Calvin Ruocco, Carlos Henrique Lima Melara, Catena cyber,
+  Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Stenberg,
+  Dave Nicolson, Demi Marie Obenour, dependabot[bot], Derek Huang,
+  Dexter Gerig, Ethan Wilkes, Gabriel Marin, Harry Sintonen, Jan Macku,
+  Jeremy Drake, John Bampton, Joseph Chen, Justin Steventon, Kai Pastor,
+  kayrus on github, kpcyrd on github, kriztalz, Lars Karlitski,
   Laurențiu Nicola, lf- on github, Marcel Raad, Marius Albrecht, Mark Phillips,
   Martxel, Michał Antoniak, Ondřej Hlavatý, Orgad Shaneh, Pavel Kropachev,
   Peng-Yu Chen, Peter Kokot, Philippe Antoine, qhill on github, Ray Satiro,
@@ -347,7 +364,7 @@ advice from friends like these:
   Tatsuhiro Tsujikawa, Teh Kok How, Tianyi Song, Timo Tijhof, tiymat,
   Viktor Szakats, Vulpes Vulpes, Weng Xuetian, Yedaya Katsman, Zenju on github,
   Zhang Wen, Zhaoming Luo
-  (68 contributors)
+  (71 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -602,6 +619,7 @@ References to bug reports and discussions on issues:
  [249] = https://curl.se/bug/?i=16673
  [250] = https://curl.se/bug/?i=16671
  [251] = https://curl.se/bug/?i=16720
+ [252] = https://curl.se/bug/?i=16869
  [253] = https://curl.se/bug/?i=16723
  [254] = https://curl.se/bug/?i=16705
  [255] = https://curl.se/bug/?i=16719
@@ -619,7 +637,9 @@ References to bug reports and discussions on issues:
  [267] = https://curl.se/bug/?i=16753
  [268] = https://curl.se/bug/?i=16533
  [269] = https://curl.se/bug/?i=16852
+ [270] = https://curl.se/bug/?i=16879
  [271] = https://curl.se/bug/?i=16806
+ [272] = https://curl.se/bug/?i=16743
  [273] = https://curl.se/bug/?i=16751
  [275] = https://curl.se/bug/?i=16846
  [276] = https://curl.se/bug/?i=16818
@@ -644,3 +664,16 @@ References to bug reports and discussions on issues:
  [296] = https://curl.se/bug/?i=16805
  [297] = https://curl.se/bug/?i=16801
  [298] = https://curl.se/bug/?i=16835
+ [299] = https://curl.se/bug/?i=16875
+ [300] = https://curl.se/bug/?i=16873
+ [301] = https://curl.se/bug/?i=16872
+ [302] = https://curl.se/bug/?i=16881
+ [303] = https://curl.se/bug/?i=16865
+ [305] = https://curl.se/bug/?i=16867
+ [308] = https://curl.se/bug/?i=16893
+ [309] = https://curl.se/bug/?i=16863
+ [310] = https://curl.se/bug/?i=16862
+ [311] = https://curl.se/bug/?i=16859
+ [312] = https://curl.se/bug/?i=16858
+ [316] = https://curl.se/bug/?i=16790
+ [317] = https://curl.se/bug/?i=16883
