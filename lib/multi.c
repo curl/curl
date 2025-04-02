@@ -2748,7 +2748,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #else
 #ifdef ENABLE_WAKEUP
     wakeup_close(multi->wakeup_pair[0]);
-#ifndef HAVE_EVENTFD
+#ifndef USE_EVENTFD
     wakeup_close(multi->wakeup_pair[1]);
 #endif
 #endif
