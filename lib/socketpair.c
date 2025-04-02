@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "rand.h"
 
-#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
+#ifdef USE_EVENTFD
 
 #include <sys/eventfd.h>
 
@@ -74,7 +74,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
   return 0;
 }
 
-#endif /* HAVE_EVENTFD && HAVE_SYS_EVENTFD_H */
+#endif /* USE_EVENTFD */
 
 #ifndef CURL_DISABLE_SOCKETPAIR
 #ifdef HAVE_SOCKETPAIR

@@ -165,16 +165,14 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
   if(tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
-#ifndef CURL_DISABLE_SOCKETPAIR
+#if !defined(CURL_DISABLE_SOCKETPAIR) && !defined(USE_EVENTFD)
   /*
    * close one end of the socket pair (may be done in resolver thread);
    * the other end (for reading) is always closed in the parent thread.
    */
-#if !defined(HAVE_EVENTFD) || !defined(HAVE_SYS_EVENTFD_H)
   if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
     wakeup_close(tsd->sock_pair[1]);
   }
-#endif
 #endif
   memset(tsd, 0, sizeof(*tsd));
 }
@@ -293,7 +291,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   else {
 #ifndef CURL_DISABLE_SOCKETPAIR
     if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
+#ifdef USE_EVENTFD
       const uint64_t buf[1] = { 1 };
 #else
       const char buf[1] = { 1 };
