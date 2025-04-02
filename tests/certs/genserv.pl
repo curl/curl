@@ -42,6 +42,10 @@ my $KEYSIZE = 'prime256v1';
 my $DURATION;
 my $PREFIX;
 
+if(`$OPENSSL --version` eq "") {
+    die "Missing or broken 'openssl' tool";
+}
+
 my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
     print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
