@@ -28,6 +28,7 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
+#include "hostip.h"
 #include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
