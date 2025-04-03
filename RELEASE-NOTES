@@ -4,18 +4,36 @@ curl and libcurl 8.13.1
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3379
+ Contributors:                 3381
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o async-threaded resolver: use ref counter [10]
+ o configure: fix --disable-rt [20]
+ o configure: restore link checks [25]
+ o conncache: make Curl_cpool_init return void [15]
  o contrithanks.sh: drop set -e [6]
+ o curl_krb5: only use functions if FTP is still enabled [21]
+ o eventfd: fix feature guards [24]
+ o genserv.pl: fail with a message if `openssl` is missing or failing [14]
+ o hostip: fix build without threaded-resolver and without DoH [17]
+ o http: fix a build error when all auths are disabled [16]
+ o http_negotiate: fix non-SSL build with GSSAPI [23]
+ o if2ip: build the function also if FTP is present [19]
+ o INSTALL-CMAKE.md: fix typo
  o lib: unify conversions to/from hex [3]
+ o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
  o test: make unittest 1308 into a libtest [4]
+ o tests/README.md: document --test-duphandle [8]
+ o tests/README.md: list the openssl tool among the prerequisites [12]
  o tests/serverhelp: remove last remnants of http-pipe server [1]
+ o tests: mark ipfs tests to require ipfs [2]
+ o VERSIONS: list all past releases [22]
+ o vtls: fix build with ssl but without http [18]
 
 This release includes the following known bugs:
 
@@ -36,13 +54,32 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Viktor Szakats, Yedaya Katsman
-  (3 contributors)
+  Abhinav Singhal, Andrew Kirillov, Dagobert Michelsen, Daniel Engberg,
+  Daniel Stenberg, Ray Satiro, renovate[bot], Stefan Eissing, Tomas Volf,
+  Viktor Szakats, x1sc0 on github, Yedaya Katsman
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=16924
+ [2] = https://curl.se/bug/?i=16947
  [3] = https://curl.se/bug/?i=16888
  [4] = https://curl.se/bug/?i=16891
  [5] = https://curl.se/bug/?i=16908
  [6] = https://curl.se/bug/?i=16914
+ [8] = https://curl.se/bug/?i=16944
+ [10] = https://curl.se/bug/?i=16916
+ [12] = https://curl.se/bug/?i=16942
+ [13] = https://curl.se/bug/?i=16943
+ [14] = https://curl.se/bug/?i=16926
+ [15] = https://curl.se/bug/?i=16936
+ [16] = https://curl.se/bug/?i=16939
+ [17] = https://curl.se/bug/?i=16938
+ [18] = https://curl.se/bug/?i=16935
+ [19] = https://curl.se/bug/?i=16933
+ [20] = https://curl.se/bug/?i=16932
+ [21] = https://curl.se/bug/?i=16925
+ [22] = https://curl.se/bug/?i=16907
+ [23] = https://curl.se/bug/?i=16919
+ [24] = https://curl.se/mail/lib-2025-04/0000.html
+ [25] = https://curl.se/mail/lib-2025-04/0004.html
