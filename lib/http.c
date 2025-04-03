@@ -1075,12 +1075,12 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       break;
     Curl_str_passblanks(&auth);
   }
+  return result;
 #else
   (void) proxy;
   /* nothing to do when disabled */
+  return CURLE_OK;
 #endif
-
-  return result;
 }
 
 /**
