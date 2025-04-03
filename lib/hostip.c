@@ -932,7 +932,11 @@ enum resolve_t Curl_resolv_timeout(struct Curl_easy *data,
   else
     timeout = (timeoutms > LONG_MAX) ? LONG_MAX : (long)timeoutms;
 
-  if(!timeout || data->set.doh)
+  if(!timeout
+#ifndef CURL_DISABLE_DOH
+     || data->set.doh
+#endif
+    )
     /* USE_ALARM_TIMEOUT defined, but no timeout actually requested or resolve
        done using DoH */
     return Curl_resolv(data, hostname, port, TRUE, entry);
