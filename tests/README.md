@@ -74,9 +74,9 @@ SPDX-License-Identifier: curl
 ## Event-based
 
   If curl is built with `Debug` enabled (see below), then the `runtests.pl`
-  script offers a `-e` option that makes it perform *event-based*. Such tests
-  invokes the curl tool with `--test-event`, a debug-only option made for this
-  purpose.
+  script offers a `-e` option (or `--test-event`) that makes it perform
+  *event-based*. Such tests invokes the curl tool with `--test-event`, a
+  debug-only option made for this purpose.
 
   Performing event-based means that the curl tool uses the
   `curl_multi_socket_action()` API call to drive the transfer(s), instead of
@@ -87,12 +87,21 @@ SPDX-License-Identifier: curl
   To be able to use `--test-event` together with `--parallel`, curl requires
   *libuv* to be present and enabled in the build: `configure --enable-libuv`
 
+## Duplicated handles
+
+  If curl is built with `Debug` enabled (see below), then the `runtests.pl`
+  script offers a `--test-duphandle` option. When enabled, curl will always
+  duplicate the easy handle and do the transfer using the duplicated one
+  instead of the original. This is entirely for testing purpose to verify that
+  everything works exactly the same when this is done, thus confirming that
+  the duphandle function duplicates everyting that it should.
+
 ### Port numbers used by test servers
 
-  All test servers run on "random" port numbers. All tests should be written
-  to use suitable variables instead of fixed port numbers so that test cases
-  continue to work independent on what port numbers the test servers actually
-  use.
+  All test servers run on "random" port numbers. All tests must be written to
+  use the suitable variables instead of fixed port numbers so that test cases
+  continue to work independently of what port numbers the test servers
+  actually use.
 
   See [`FILEFORMAT`](FILEFORMAT.md) for the port number variables.
 
