@@ -1134,11 +1134,6 @@ static void dnscache_entry_dtor(void *entry)
   dns->refcount--;
   if(dns->refcount == 0)
     dnscache_entry_free(dns);
-  else {
-    /* Ideally, when we destroy the dnscache, we should have unlinked
-     * all handed out entries. */
-    DEBUGASSERT(0);
-  }
 }
 
 /*
