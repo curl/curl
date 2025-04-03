@@ -46,7 +46,7 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
-    Curl_init_dnscache(&share->hostcache, 23);
+    Curl_dnscache_init(&share->dnscache, 23);
     share->admin = curl_easy_init();
     if(!share->admin) {
       free(share);
@@ -247,7 +247,8 @@ curl_share_cleanup(CURLSH *sh)
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
     Curl_cpool_destroy(&share->cpool);
   }
-  Curl_hash_destroy(&share->hostcache);
+
+  Curl_dnscache_destroy(&share->dnscache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);

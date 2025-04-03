@@ -1840,15 +1840,6 @@ struct UserDefined {
 #define IS_MIME_POST(a) FALSE
 #endif
 
-struct Names {
-  struct Curl_hash *hostcache;
-  enum {
-    HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_MULTI,   /* points to a shared one in the multi handle */
-    HCACHE_SHARED   /* points to a shared one in a shared object */
-  } hostcachetype;
-};
-
 /*
  * The 'connectdata' struct MUST have all the connection oriented stuff as we
  * may have several simultaneous connections and connection structs in memory.
@@ -1884,7 +1875,6 @@ struct Curl_easy {
 
   struct Curl_message msg; /* A single posted message. */
 
-  struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" when used by
                                   the multi interface */

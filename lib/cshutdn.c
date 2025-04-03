@@ -317,8 +317,6 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
   }
   DEBUGASSERT(!Curl_llist_count(&cshutdn->list));
 
-  Curl_hostcache_clean(data, data->dns.hostcache);
-
   sigpipe_restore(&pipe_st);
 }
 

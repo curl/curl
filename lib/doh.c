@@ -1229,20 +1229,9 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         return result;
       }
 
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
       /* we got a response, store it in the cache */
       dns = Curl_cache_addr(data, ai, dohp->host, 0, dohp->port, FALSE);
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-      if(!dns) {
-        /* returned failure, bail out nicely */
-        Curl_freeaddrinfo(ai);
-      }
-      else {
+      if(dns) {
         data->state.async.dns = dns;
         *dnsp = dns;
         result = CURLE_OK;      /* address resolution OK */
