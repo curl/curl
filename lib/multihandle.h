@@ -111,7 +111,7 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
-  struct Curl_hash hostcache; /* Hostname cache */
+  struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL

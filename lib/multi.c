@@ -221,7 +221,7 @@ struct Curl_multi *Curl_multi_handle(size_t ev_hashsize,  /* event hash */
 
   multi->magic = CURL_MULTI_HANDLE;
 
-  Curl_init_dnscache(&multi->hostcache, dnssize);
+  Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_multi_ev_init(multi, ev_hashsize);
 
   Curl_hash_init(&multi->proto_hash, 23,
@@ -276,7 +276,7 @@ error:
 
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
-  Curl_hash_destroy(&multi->hostcache);
+  Curl_dnscache_destroy(&multi->dnscache);
   Curl_cpool_destroy(&multi->cpool);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
   Curl_ssl_scache_destroy(multi->ssl_scache);
@@ -383,14 +383,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   /* set the easy handle */
   multistate(data, MSTATE_INIT);
 
-  /* for multi interface connections, we share DNS cache automatically if the
-     easy handle's one is currently not set. */
-  if(!data->dns.hostcache ||
-     (data->dns.hostcachetype == HCACHE_NONE)) {
-    data->dns.hostcache = &multi->hostcache;
-    data->dns.hostcachetype = HCACHE_MULTI;
-  }
-
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
   if(data->share && (data->share->specifier & (1 << CURL_LOCK_DATA_PSL)))
@@ -469,7 +461,7 @@ static void multi_done_locked(struct connectdata *conn,
 
   if(conn->dns_entry)
     Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
-  Curl_hostcache_prune(data);
+  Curl_dnscache_prune(data);
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this connection. This is ignored for requests taking
@@ -682,13 +674,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 
   /* the handle is in a list, remove it from whichever it is */
   Curl_node_remove(&data->multi_queue);
-
-  if(data->dns.hostcachetype == HCACHE_MULTI) {
-    /* stop using the multi handle's DNS cache, *after* the possible
-       multi_done() call above */
-    data->dns.hostcache = NULL;
-    data->dns.hostcachetype = HCACHE_NONE;
-  }
 
   Curl_wildcard_dtor(&data->wildcard);
 
@@ -2712,12 +2697,6 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       if(!data->state.done && data->conn)
         /* if DONE was never called for this handle */
         (void)multi_done(data, CURLE_OK, TRUE);
-      if(data->dns.hostcachetype == HCACHE_MULTI) {
-        /* clear out the usage of the shared DNS cache */
-        Curl_hostcache_clean(data, data->dns.hostcache);
-        data->dns.hostcache = NULL;
-        data->dns.hostcachetype = HCACHE_NONE;
-      }
 
       data->multi = NULL; /* clear the association */
 
@@ -2739,7 +2718,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 
     Curl_multi_ev_cleanup(multi);
     Curl_hash_destroy(&multi->proto_hash);
-    Curl_hash_destroy(&multi->hostcache);
+    Curl_dnscache_destroy(&multi->dnscache);
     Curl_psl_destroy(&multi->psl);
     Curl_ssl_scache_destroy(multi->ssl_scache);
 
