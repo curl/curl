@@ -868,8 +868,8 @@ init_config_builder_client_auth(struct Curl_easy *data,
     return CURLE_SSL_CERTPROBLEM;
   }
 
-  Curl_dyn_init(&cert_contents, SIZE_MAX);
-  Curl_dyn_init(&key_contents, SIZE_MAX);
+  Curl_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
+  Curl_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
   if(!read_file_into(conn_config->clientcert, &cert_contents)) {
     failf(data, "rustls: failed to read client certificate file: '%s'",
