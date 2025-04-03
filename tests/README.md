@@ -94,7 +94,7 @@ SPDX-License-Identifier: curl
   duplicates the easy handle and does its transfers using the new one instead
   of the original. This is done entirely for testing purpose to verify that
   everything works exactly the same when this is done; confirming that the
-  duphandle function duplicates everyting that it should.
+  `curl_easy_duphandle()` function duplicates everything that it should.
 
 ### Port numbers used by test servers
 
