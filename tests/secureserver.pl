@@ -70,7 +70,6 @@ my $ipvnum = 4;       # default IP version of stunneled server
 my $idnum = 1;        # default stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
-my $capath;           # certificate chain PEM folder
 my $certfile;         # certificate chain PEM file
 
 #***************************************************************************
@@ -195,7 +194,6 @@ if(!$logfile) {
 
 $conffile = "$piddir/${proto}_stunnel.conf";
 
-$capath = abs_path($path);
 $certfile = $stuncert ? "certs/$stuncert" : "certs/test-localhost.pem";
 $certfile = abs_path($certfile);
 
@@ -246,7 +244,6 @@ if($stunnel =~ /tstunnel(\.exe)?$/) {
     $tstunnel_windows = 1;
 
     # convert Cygwin/MinGW paths to Windows format
-    $capath = pathhelp::sys_native_abs_path($capath);
     $certfile = pathhelp::sys_native_abs_path($certfile);
 }
 
@@ -292,7 +289,6 @@ if($stunnel_version >= 400) {
     $SIG{TERM} = \&exit_signal_handler;
     # stunnel configuration file
     if(open(my $stunconf, ">", "$conffile")) {
-        print $stunconf "CApath = $capath\n";
         print $stunconf "cert = $certfile\n";
         print $stunconf "debug = $loglevel\n";
         print $stunconf "socket = $socketopt\n";
