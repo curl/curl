@@ -70,7 +70,9 @@ my $ipvnum = 4;       # default IP version of stunneled server
 my $idnum = 1;        # default stunneled server instance number
 my $proto = 'https';  # default secure server protocol
 my $conffile;         # stunnel configuration file
+my $cafile;           # certificate CA PEM file
 my $certfile;         # certificate chain PEM file
+my $mtls = 0;         # Whether to verify client certificates
 
 #***************************************************************************
 # stunnel requires full path specification for several files.
@@ -170,6 +172,9 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
+    elsif($ARGV[0] eq '--mtls') {
+        $mtls = 1;
+    }
     else {
         print STDERR "\nWarning: secureserver.pl unknown parameter: $ARGV[0]\n";
     }
@@ -194,6 +199,7 @@ if(!$logfile) {
 
 $conffile = "$piddir/${proto}_stunnel.conf";
 
+$cafile = abs_path("$path/certs/test-ca.cacert");
 $certfile = $stuncert ? "certs/$stuncert" : "certs/test-localhost.pem";
 $certfile = abs_path($certfile);
 
@@ -244,6 +250,7 @@ if($stunnel =~ /tstunnel(\.exe)?$/) {
     $tstunnel_windows = 1;
 
     # convert Cygwin/MinGW paths to Windows format
+    $cafile = pathhelp::sys_native_abs_path($cafile);
     $certfile = pathhelp::sys_native_abs_path($certfile);
 }
 
@@ -292,6 +299,10 @@ if($stunnel_version >= 400) {
         print $stunconf "cert = $certfile\n";
         print $stunconf "debug = $loglevel\n";
         print $stunconf "socket = $socketopt\n";
+        if($mtls) {
+            print $stunconf "CAfile = $cafile\n";
+            print $stunconf "verifyChain = yes\n";
+        }
         if($fips_support) {
             # disable fips in case OpenSSL doesn't support it
             print $stunconf "fips = no\n";
