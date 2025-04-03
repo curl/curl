@@ -813,7 +813,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   if(!canonical_request)
     goto fail;
 
-  DEBUGF(infof(data, "Canonical request: %s", canonical_request));
+  infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
+    canonical_request);
 
   request_type = aprintf("%.*s4_request",
                          (int)Curl_strlen(&provider0), Curl_str(&provider0));
@@ -855,6 +856,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   /* make provider0 part done uppercase */
   Curl_strntoupper(str_to_sign, Curl_str(&provider0), Curl_strlen(&provider0));
 
+  infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
+    str_to_sign);
+
   secret = aprintf("%.*s4%s", (int)Curl_strlen(&provider0),
                    Curl_str(&provider0), data->state.aptr.passwd ?
                    data->state.aptr.passwd : "");
@@ -872,6 +876,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
 
   sha256_to_hex(sha_hex, sign0);
+
+  infof(data, "aws_sigv4: Signature - %s", sha_hex);
 
   auth_headers = aprintf("Authorization: %.*s4-HMAC-SHA256 "
                          "Credential=%s/%s, "
