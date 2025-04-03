@@ -62,12 +62,12 @@ struct cpool {
 };
 
 /* Init the pool, pass multi only if pool is owned by it.
- * returns 1 on error, 0 is fine.
+ * Cannot fail.
  */
-int Curl_cpool_init(struct cpool *cpool,
-                    struct Curl_easy *idata,
-                    struct Curl_share *share,
-                    size_t size);
+void Curl_cpool_init(struct cpool *cpool,
+                     struct Curl_easy *idata,
+                     struct Curl_share *share,
+                     size_t size);
 
 /* Destroy all connections and free all members */
 void Curl_cpool_destroy(struct cpool *connc);
