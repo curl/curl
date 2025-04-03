@@ -28,8 +28,8 @@ interpreted as a PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine
 option is set as `pkcs11` if none was provided and the --key-type option is
 set as `ENG` or `PROV` if none was provided (depending on OpenSSL version).
 OpenSSL 1.x used engines, whereas starting from OpenSSL 3.x providers should
-be used and engines are deprecated. Also the engine tpm2tss or the
-tpm2provider can be used for the private key of a client certificate. curl
+be used and engines are deprecated. The OpenSSL engine `tpm2tss` or the
+OpenSSL provider `tpm2` can be used for the private key of a client certificate. curl
 provides the option --engine to load an OpenSSL engine. Providers have to be
 loaded via the OpenSSL config file. See the --engine option for further
 details. The following examples demonstrate how a client certificate can be
