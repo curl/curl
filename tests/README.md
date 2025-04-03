@@ -90,11 +90,11 @@ SPDX-License-Identifier: curl
 ## Duplicated handles
 
   If curl is built with `Debug` enabled (see below), then the `runtests.pl`
-  script offers a `--test-duphandle` option. When enabled, curl will always
-  duplicate the easy handle and do the transfer using the duplicated one
-  instead of the original. This is entirely for testing purpose to verify that
-  everything works exactly the same when this is done, thus confirming that
-  the duphandle function duplicates everyting that it should.
+  script offers a `--test-duphandle` option. When enabled, curl always
+  duplicates the easy handle and does its transfers using the new one instead
+  of the original. This is done entirely for testing purpose to verify that
+  everything works exactly the same when this is done; confirming that the
+  duphandle function duplicates everyting that it should.
 
 ### Port numbers used by test servers
 
