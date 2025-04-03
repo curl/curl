@@ -106,7 +106,7 @@ static int parsedate(const char *date, time_t *output);
 #endif
 
 #if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
-  !defined(CURL_DISABLE_FILE)
+  !defined(CURL_DISABLE_FILE) || defined(USE_GNUTLS)
 /* These names are also used by FTP and FILE code */
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};

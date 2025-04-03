@@ -16,8 +16,8 @@ Example:
 
 # `--doh-url`
 
-Specifies which DNS-over-HTTPS (DoH) server to use to resolve hostnames,
-instead of using the default name resolver mechanism. The URL must be HTTPS.
+Specify which DNS-over-HTTPS (DoH) server to use to resolve hostnames, instead
+of using the default name resolver mechanism. The URL must be HTTPS.
 
 Some SSL options that you set for your transfer also applies to DoH since the
 name lookups take place over SSL. However, the certificate verification

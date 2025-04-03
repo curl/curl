@@ -110,9 +110,6 @@ jobs:
       - name: yamlcheck
         run: .github/scripts/yamlcheck.sh
 
-      - name: binarycheck
-        run: .github/scripts/binarycheck.pl
-
       # we allow some extra in source code
       - name: badwords
         run: |

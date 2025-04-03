@@ -35,16 +35,16 @@ add_subdirectory(http/clients)
 add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(unit)
-add_subdirectory(certs EXCLUDE_FROM_ALL)
+add_subdirectory(certs)
 
 function(curl_add_runtests _targetname _test_flags)
   if(NOT BUILD_LIBCURL_DOCS)
     string(APPEND _test_flags " !documentation")
   endif()
+  set(_depends "")
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
-  set(_depends "")
   if(NOT _targetname STREQUAL "test-ci")
     set(_depends "testdeps")
   endif()

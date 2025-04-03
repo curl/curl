@@ -2030,13 +2030,13 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         break;
       }
 
-    /* This is the last step in the SFTP connect phase. Do note that while
-       we get the homedir here, we get the "workingpath" in the DO action
-       since the homedir will remain the same between request but the
-       working path will not. */
-    DEBUGF(infof(data, "SSH CONNECT phase done"));
-    state(data, SSH_STOP);
-    break;
+      /* This is the last step in the SFTP connect phase. Do note that while
+         we get the homedir here, we get the "workingpath" in the DO action
+         since the homedir will remain the same between request but the
+         working path will not. */
+      DEBUGF(infof(data, "SSH CONNECT phase done"));
+      state(data, SSH_STOP);
+      break;
 
     case SSH_SFTP_QUOTE_INIT:
 
@@ -2299,7 +2299,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
     }
 
     case SSH_SFTP_GETINFO:
-    {
       if(data->set.get_filetime) {
         state(data, SSH_SFTP_FILETIME);
       }
@@ -2307,7 +2306,6 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         state(data, SSH_SFTP_TRANS_INIT);
       }
       break;
-    }
 
     case SSH_SFTP_FILETIME:
     {
@@ -3109,6 +3107,34 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
   struct ssh_conn *sshc;
   CURLcode result;
   struct connectdata *conn = data->conn;
+
+#if LIBSSH2_VERSION_NUM >= 0x010b00
+  {
+    const char *crypto_str;
+    switch(libssh2_crypto_engine()) {
+      case libssh2_gcrypt:
+        crypto_str = "libgcrypt";
+        break;
+      case libssh2_mbedtls:
+        crypto_str = "mbedTLS";
+        break;
+      case libssh2_openssl:
+        crypto_str = "openssl compatible";
+        break;
+      case libssh2_os400qc3:
+        crypto_str = "OS400QC3";
+        break;
+      case libssh2_wincng:
+        crypto_str = "WinCNG";
+        break;
+      default:
+        crypto_str = NULL;
+        break;
+    }
+    if(crypto_str)
+      infof(data, "libssh2 cryptography backend: %s", crypto_str);
+  }
+#endif
 
   /* initialize per-handle data if not already */
   if(!data->req.p.ssh) {

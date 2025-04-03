@@ -16,7 +16,7 @@ Example:
 
 # `--location-trusted`
 
-Instructs curl to like --location follow HTTP redirects, but permits it to
+Instruct curl to follow HTTP redirects like --location, but permit curl to
 send credentials and other secrets along to other hosts than the initial one.
 
 This may or may not introduce a security breach if the site redirects you to a

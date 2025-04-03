@@ -26,7 +26,6 @@ TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
-INET_PTON = ../../lib/inet_pton.c ../../lib/inet_pton.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
 # these files are used in every single test program below
@@ -52,6 +51,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib696 \
  lib1156 \
  lib1301 \
+ lib1308 \
  lib1485 \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
@@ -72,7 +72,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
  lib1945 lib1946 lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
  lib1960 lib1964 \
- lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 lib1977 \
+ lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 lib1977 lib1978 \
  lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 lib2309 lib2310 \
  lib2311 \
  lib2402 lib2404 lib2405 \
@@ -350,6 +350,9 @@ lib696_CPPFLAGS = $(AM_CPPFLAGS) -DLIB696
 
 lib1301_SOURCES = lib1301.c $(SUPPORTFILES) $(TESTUTIL)
 lib1301_LDADD = $(TESTUTIL_LIBS)
+
+lib1308_SOURCES = lib1308.c $(SUPPORTFILES)
+lib1308_LDADD = $(TESTUTIL_LIBS)
 
 lib1485_SOURCES = lib1485.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1485_LDADD = $(TESTUTIL_LIBS)
@@ -653,7 +656,7 @@ lib1958_LDADD = $(TESTUTIL_LIBS)
 lib1959_SOURCES = lib1959.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1959_LDADD = $(TESTUTIL_LIBS)
 
-lib1960_SOURCES = lib1960.c $(SUPPORTFILES) $(INET_PTON)
+lib1960_SOURCES = lib1960.c $(SUPPORTFILES)
 lib1960_LDADD = $(TESTUTIL_LIBS)
 
 lib1964_SOURCES = lib1964.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
@@ -679,6 +682,9 @@ lib1975_LDADD = $(TESTUTIL_LIBS)
 
 lib1977_SOURCES = lib1977.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1977_LDADD = $(TESTUTIL_LIBS)
+
+lib1978_SOURCES = lib1978.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1978_LDADD = $(TESTUTIL_LIBS)
 
 lib2301_SOURCES = lib2301.c $(SUPPORTFILES)
 lib2301_LDADD = $(TESTUTIL_LIBS)

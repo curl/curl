@@ -57,6 +57,7 @@ EXTRA_DIST =        \
  CMakeLists.txt     \
  FILEFORMAT.md      \
  README.md          \
+ allversions.pm     \
  appveyor.pm        \
  azure.pm           \
  devtest.pl         \
@@ -157,6 +158,9 @@ SUFFIXES = .1 .md
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
+build-certs:
+	(cd certs && $(MAKE))
+
 test: perlcheck all
 	$(TEST) $(TFLAGS)
 
@@ -192,7 +196,7 @@ checksrc:
 	(cd server && $(MAKE) checksrc)
 	(cd http && $(MAKE) checksrc)
 
-all-local: $(MANFILES)
+all-local: $(MANFILES) build-certs
 
 distclean:
 	rm -f $(MANFILES)

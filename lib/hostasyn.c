@@ -72,18 +72,11 @@ CURLcode Curl_addrinfo_callback(struct Curl_easy *data,
 
   if(CURL_ASYNC_SUCCESS == status) {
     if(ai) {
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
       dns = Curl_cache_addr(data, ai,
                             data->conn->host.dispname, 0,
                             data->state.async.port, FALSE);
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
       if(!dns) {
-        /* failed to store, cleanup and return error */
-        Curl_freeaddrinfo(ai);
+        /* failed to store, return error */
         result = CURLE_OUT_OF_MEMORY;
       }
     }

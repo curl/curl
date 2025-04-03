@@ -20,7 +20,7 @@ Example:
 
 # `--ftp-port`
 
-Reverses the default initiator/listener roles when connecting with FTP. This
+Reverse the default initiator/listener roles when connecting with FTP. This
 option makes curl use active mode. curl then commands the server to connect
 back to the client's specified address and port, while passive mode asks the
 server to setup an IP address and port for it to connect to. \<address\>

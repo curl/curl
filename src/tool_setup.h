@@ -98,8 +98,6 @@ extern bool tool_term_has_bold;
 #  define _get_osfhandle(fd) (fd)
 #  undef _getch
 #  define _getch() 0
-#  undef STDIN_FILENO
-#  define STDIN_FILENO 0
 #endif
 
 #ifndef HAVE_FTRUNCATE

@@ -54,6 +54,7 @@ INTERNALDOCS =                                  \
  internals/MQTT.md                              \
  internals/MULTI-EV.md                          \
  internals/NEW-PROTOCOL.md                      \
+ internals/PORTING.md                           \
  internals/README.md                            \
  internals/SPLAY.md                             \
  internals/STRPARSE.md                          \

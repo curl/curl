@@ -16,4 +16,4 @@ Example:
 
 # `--trace-time`
 
-Prepends a time stamp to each trace or verbose line that curl displays.
+Prepend a time stamp to each trace or verbose line that curl displays.

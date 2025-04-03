@@ -112,6 +112,7 @@ use testutil qw(
     logmsg
     runclient
     runclientoutput
+    exerunner
     shell_quote
     );
 
@@ -542,7 +543,7 @@ sub verifyhttp {
     $flags .= "--http3-only " if($do_http3);
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -619,7 +620,7 @@ sub verifyftp {
     }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -685,7 +686,7 @@ sub verifyrtsp {
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -818,7 +819,7 @@ sub verifyhttptls {
     }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -919,7 +920,7 @@ sub verifysmb {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -979,7 +980,8 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
+    my $cmd = "echo 'verifiedserver' | " .
+        exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -3083,6 +3085,7 @@ sub subvariables {
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
     $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
+    $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
 

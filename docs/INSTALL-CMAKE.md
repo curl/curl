@@ -229,6 +229,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
+- `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
+- `CURL_COMPLETION_FISH_DIR`:               Custom fish completion install directory.
+- `CURL_COMPLETION_ZSH`:                    Install zsh completions. Default: `OFF`
+- `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
@@ -391,7 +395,6 @@ Details via CMake
 
 - `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
 - `PERL_EXECUTABLE`:                        Perl binary used throughout the build and tests.
-- `SH_EXECUTABLE`:                          POSIX shell binary used throughout the build (for generating test certificates).
 
 ## Dependency options (libraries)
 
@@ -465,8 +468,8 @@ Details via CMake
 
 We recommend using CMake to build curl with MSVC.
 
-The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
-VS2013 respectively.
+The project build files reside in project/Windows/VC\* for VS2010, VS2012 and
+VS2013.
 
 These CMake Visual Studio generators require CMake v3.24 or older. You can
 download them from <https://cmake.org/files/v3.24/>.

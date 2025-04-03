@@ -21,9 +21,11 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-CERTCONFIGS = \
-  test-ca.prm \
+CERTCONFIG_CA = \
   test-ca.cnf \
+  test-ca.prm
+
+CERTCONFIGS = \
   test-localhost.prm \
   test-localhost.nn.prm \
   test-localhost0h.prm \

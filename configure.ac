@@ -4203,11 +4203,6 @@ if test "$ipv6" = yes -a "$curl_cv_apple" = 'yes'; then
   CURL_DARWIN_SYSTEMCONFIGURATION
 fi
 
-dnl turn off pthreads if rt is disabled
-if test "$want_threaded_resolver" = "yes" && test "$dontwant_rt" = "yes"; then
-  AC_MSG_ERROR([options --enable-pthreads and --disable-rt are mutually exclusive])
-fi
-
 dnl Windows threaded resolver check
 if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
   USE_THREADS_WIN32=1
@@ -4888,6 +4883,7 @@ if test "x$want_ech" != "xno"; then
   ECH_ENABLED=0
   ECH_ENABLED_OPENSSL=0
   ECH_ENABLED_WOLFSSL=0
+  ECH_ENABLED_RUSTLS=0
   ECH_SUPPORT=''
 
   dnl check for OpenSSL equivalent
@@ -4901,10 +4897,15 @@ if test "x$want_ech" != "xno"; then
       ECH_SUPPORT="$ECH_SUPPORT wolfSSL"
       ECH_ENABLED_WOLFSSL=1)
   fi
+  if test "x$RUSTLS_ENABLED" = "x1"; then
+      ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
+      ECH_ENABLED_RUSTLS=1
+  fi
 
   dnl now deal with whatever we found
   if test "x$ECH_ENABLED_OPENSSL" = "x1" -o \
-          "x$ECH_ENABLED_WOLFSSL" = "x1"; then
+          "x$ECH_ENABLED_WOLFSSL" = "x1" -o \
+          "x$ECH_ENABLED_RUSTLS" = "x1"; then
     AC_DEFINE(USE_ECH, 1, [if ECH support is available])
     AC_MSG_RESULT(ECH support available via:$ECH_SUPPORT)
     experimental="$experimental ECH"
@@ -5400,7 +5401,6 @@ AC_CONFIG_FILES([\
   tests/config \
   tests/configurehelp.pm \
   tests/certs/Makefile \
-  tests/certs/scripts/Makefile \
   tests/data/Makefile \
   tests/server/Makefile \
   tests/libtest/Makefile \

@@ -37,7 +37,7 @@
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
-#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
+#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL, wolfSSL or rustls-ffi
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection is skipped.  If the variable is
@@ -1065,7 +1065,7 @@ endif()
 option(USE_HTTPSRR "Enable HTTPS RR support" OFF)
 option(USE_ECH "Enable ECH support" OFF)
 if(USE_ECH)
-  if(USE_OPENSSL OR USE_WOLFSSL)
+  if(USE_OPENSSL OR USE_WOLFSSL OR USE_RUSTLS)
     # Be sure that the TLS library actually supports ECH.
     if(USE_WOLFSSL)
       curl_openssl_check_exists("wolfSSL_CTX_GenerateEchConfig" HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
@@ -1074,11 +1074,12 @@ if(USE_ECH)
       curl_openssl_check_exists("SSL_set1_ech_config_list" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     endif()
     if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
-       HAVE_SSL_SET1_ECH_CONFIG_LIST)
+       HAVE_SSL_SET1_ECH_CONFIG_LIST OR
+       USE_RUSTLS)
       set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
-      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL")
+      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL/rustls-ffi")
     else()
       message(STATUS "ECH enabled")
       # ECH wants HTTPSRR
@@ -1086,7 +1087,7 @@ if(USE_ECH)
       message(STATUS "HTTPSRR enabled")
     endif()
   else()
-    message(FATAL_ERROR "ECH requires ECH-enabled OpenSSL, BoringSSL, AWS-LC or wolfSSL")
+    message(FATAL_ERROR "ECH requires ECH-enabled OpenSSL, BoringSSL, AWS-LC, wolfSSL or rustls-ffi")
   endif()
 endif()
 
@@ -2049,6 +2050,8 @@ if(HAVE_MANUAL_TOOLS)
   set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
+
+add_subdirectory(scripts)  # for shell completions
 
 list(REMOVE_DUPLICATES CURL_LIBDIRS)
 

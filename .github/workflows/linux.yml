@@ -51,13 +51,13 @@ env:
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.47.0
+  awslc-version: 1.49.0
   # handled in renovate.json
   openssl-version: 3.4.1
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  rustls-version: 0.14.1
+  rustls-version: 0.15.0
 
 jobs:
   linux:
@@ -80,13 +80,13 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
 
           - name: libressl heimdal
-            install_packages: zlib1g-dev heimdal-dev
+            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
 
           - name: libressl heimdal valgrind
-            install_packages: zlib1g-dev heimdal-dev valgrind
-            install_steps: libressl pytest
+            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
+            install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: libressl clang
@@ -105,13 +105,13 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: mbedtls valgrind
-            install_packages: libnghttp2-dev valgrind
-            install_steps: mbedtls pytest
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: mbedtls
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls clang
-            install_packages: libnghttp2-dev clang
-            install_steps: mbedtls
+            install_packages: libnghttp2-dev libldap-dev clang
+            install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
           - name: mbedtls
@@ -127,7 +127,7 @@ jobs:
           - name: mbedtls-pkg !pc
             install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: skipall
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: msh3
             install_packages: zlib1g-dev
@@ -155,8 +155,7 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: openssl libssh2 sync-resolver valgrind
-            install_packages: zlib1g-dev libssh2-1-dev valgrind
-            install_steps: pytest
+            install_packages: zlib1g-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
           - name: openssl
@@ -229,7 +228,7 @@ jobs:
 
           - name: address-sanitizer
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
-            install_steps: pytest
+            install_steps: pytest randcurl
             configure: >-
               CC=clang
               CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
@@ -248,6 +247,7 @@ jobs:
 
           - name: memory-sanitizer
             install_packages: clang
+            install_steps: randcurl
             configure: >-
               CC=clang
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
@@ -266,14 +266,14 @@ jobs:
             tflags: -n --test-duphandle '!TLS-SRP'
 
           - name: rustls valgrind
-            install_packages: valgrind
-            install_steps: rust rustls pytest
-            configure: --with-rustls=$HOME/rustls --enable-debug
+            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_steps: rust rustls
+            configure: --with-rustls --enable-ech --enable-debug
 
           - name: rustls
-            install_steps: rust rustls skipall
-            PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
-            generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
+            install_packages: libnghttp2-dev libldap-dev
+            install_steps: rust rustls skipall pytest
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: IntelC openssl
             install_packages: zlib1g-dev libssl-dev
@@ -328,7 +328,7 @@ jobs:
             libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
             heimdal-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
-            perl-time-hires openssh stunnel sudo git
+            perl-time-hires openssh stunnel sudo git openssl
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
@@ -551,20 +551,19 @@ jobs:
           path: ~/rustls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
 
-      - name: 'install rust'
-        if: contains(matrix.build.install_steps, 'rust') && steps.cache-rustls.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup toolchain install stable --profile minimal
-
-      - name: 'build rustls'
+      - name: 'fetch rustls deb'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
-          cd rustls-ffi
-          make DESTDIR=$HOME/rustls install
+          mkdir -p ~/rustls
+          curl -L https://github.com/rustls/rustls-ffi/releases/download/v${{ env.rustls-version }}/librustls_${{ env.rustls-version }}_amd64.deb.zip -o ~/rustls/librustls.zip
+          unzip ~/rustls/librustls.zip -d ~/rustls
+          rm ~/rustls/librustls.zip
+
+      - name: 'build rustls'
+        # Note: we don't check cache-hit here. If the cache is hit, we still need to dpkg install the deb.
+        if: contains(matrix.build.install_steps, 'rustls')
+        run: |
+          sudo dpkg -i ~/rustls/librustls_${{ env.rustls-version }}_amd64.deb
 
       - name: 'install Intel compilers'
         if: contains(matrix.build.install_steps, 'intel')
@@ -698,6 +697,13 @@ jobs:
           else
             make -C bld V=1 pytest-ci
           fi
+
+      - name: 'randcurl'
+        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
+        run: |
+          mkdir run
+          cd run
+          ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}

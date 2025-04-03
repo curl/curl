@@ -25,6 +25,17 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#define KEYLOG_LABEL_MAXLEN (sizeof("CLIENT_HANDSHAKE_TRAFFIC_SECRET") - 1)
+
+#define CLIENT_RANDOM_SIZE  32
+
+/*
+ * The master secret in TLS 1.2 and before is always 48 bytes. In TLS 1.3, the
+ * secret size depends on the cipher suite's hash function which is 32 bytes
+ * for SHA-256 and 48 bytes for SHA-384.
+ */
+#define SECRET_MAXLEN       48
+
 /*
  * Opens the TLS key log file if requested by the user. The SSLKEYLOGFILE
  * environment variable specifies the output file.

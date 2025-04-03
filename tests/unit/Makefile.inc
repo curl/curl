@@ -32,7 +32,7 @@ UNITFILES = curlcheck.h $(FIRSTFILES)
 
 # These are all unit test programs
 UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
- unit1308 unit1309 unit1323 \
+          unit1309 unit1323 \
  unit1330 unit1394 unit1395 unit1396 unit1397 unit1398 \
  unit1399 \
  unit1600 unit1601 unit1602 unit1603 unit1604 unit1605 unit1606 unit1607 \
@@ -55,8 +55,6 @@ unit1304_SOURCES = unit1304.c $(UNITFILES)
 unit1305_SOURCES = unit1305.c $(UNITFILES)
 
 unit1307_SOURCES = unit1307.c $(UNITFILES)
-
-unit1308_SOURCES = unit1308.c $(UNITFILES)
 
 unit1309_SOURCES = unit1309.c $(UNITFILES)
 

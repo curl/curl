@@ -221,7 +221,7 @@ struct Curl_multi *Curl_multi_handle(size_t ev_hashsize,  /* event hash */
 
   multi->magic = CURL_MULTI_HANDLE;
 
-  Curl_init_dnscache(&multi->hostcache, dnssize);
+  Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_multi_ev_init(multi, ev_hashsize);
 
   Curl_hash_init(&multi->proto_hash, 23,
@@ -242,8 +242,7 @@ struct Curl_multi *Curl_multi_handle(size_t ev_hashsize,  /* event hash */
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
 
-  if(Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize))
-    goto error;
+  Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize);
 
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
     goto error;
@@ -276,7 +275,7 @@ error:
 
   Curl_multi_ev_cleanup(multi);
   Curl_hash_destroy(&multi->proto_hash);
-  Curl_hash_destroy(&multi->hostcache);
+  Curl_dnscache_destroy(&multi->dnscache);
   Curl_cpool_destroy(&multi->cpool);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
   Curl_ssl_scache_destroy(multi->ssl_scache);
@@ -383,14 +382,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   /* set the easy handle */
   multistate(data, MSTATE_INIT);
 
-  /* for multi interface connections, we share DNS cache automatically if the
-     easy handle's one is currently not set. */
-  if(!data->dns.hostcache ||
-     (data->dns.hostcachetype == HCACHE_NONE)) {
-    data->dns.hostcache = &multi->hostcache;
-    data->dns.hostcachetype = HCACHE_MULTI;
-  }
-
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
   if(data->share && (data->share->specifier & (1 << CURL_LOCK_DATA_PSL)))
@@ -469,7 +460,7 @@ static void multi_done_locked(struct connectdata *conn,
 
   if(conn->dns_entry)
     Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
-  Curl_hostcache_prune(data);
+  Curl_dnscache_prune(data);
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this connection. This is ignored for requests taking
@@ -682,13 +673,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 
   /* the handle is in a list, remove it from whichever it is */
   Curl_node_remove(&data->multi_queue);
-
-  if(data->dns.hostcachetype == HCACHE_MULTI) {
-    /* stop using the multi handle's DNS cache, *after* the possible
-       multi_done() call above */
-    data->dns.hostcache = NULL;
-    data->dns.hostcachetype = HCACHE_NONE;
-  }
 
   Curl_wildcard_dtor(&data->wildcard);
 
@@ -1408,7 +1392,7 @@ CURLMcode curl_multi_wakeup(CURLM *m)
      and before cleanup */
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
     while(1) {
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
       /* eventfd has a stringent rule of requiring the 8-byte buffer when
          calling write(2) on it */
       const uint64_t buf[1] = { 1 };
@@ -2086,10 +2070,8 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   dns = Curl_fetch_addr(data, hostname, conn->primary.remote_port);
 
   if(dns) {
-#ifdef USE_CURL_ASYNC
-    data->state.async.dns = dns;
-    data->state.async.done = TRUE;
-#endif
+    /* Tell a possibly async resolver we no longer need the results. */
+    Curl_resolver_set_result(data, dns);
     result = CURLE_OK;
     infof(data, "Hostname '%s' was found in DNS cache", hostname);
   }
@@ -2712,12 +2694,6 @@ CURLMcode curl_multi_cleanup(CURLM *m)
       if(!data->state.done && data->conn)
         /* if DONE was never called for this handle */
         (void)multi_done(data, CURLE_OK, TRUE);
-      if(data->dns.hostcachetype == HCACHE_MULTI) {
-        /* clear out the usage of the shared DNS cache */
-        Curl_hostcache_clean(data, data->dns.hostcache);
-        data->dns.hostcache = NULL;
-        data->dns.hostcachetype = HCACHE_NONE;
-      }
 
       data->multi = NULL; /* clear the association */
 
@@ -2739,7 +2715,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 
     Curl_multi_ev_cleanup(multi);
     Curl_hash_destroy(&multi->proto_hash);
-    Curl_hash_destroy(&multi->hostcache);
+    Curl_dnscache_destroy(&multi->dnscache);
     Curl_psl_destroy(&multi->psl);
     Curl_ssl_scache_destroy(multi->ssl_scache);
 
@@ -2748,7 +2724,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #else
 #ifdef ENABLE_WAKEUP
     wakeup_close(multi->wakeup_pair[0]);
-#ifndef HAVE_EVENTFD
+#ifndef USE_EVENTFD
     wakeup_close(multi->wakeup_pair[1]);
 #endif
 #endif

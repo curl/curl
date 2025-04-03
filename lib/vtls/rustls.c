@@ -38,6 +38,7 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
+#include "keylog.h"
 #include "strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
@@ -518,6 +519,19 @@ add_ciphers:
   *selected_size = count;
 }
 
+static void
+cr_keylog_log_cb(struct rustls_str label,
+                 const uint8_t *client_random, size_t client_random_len,
+                 const uint8_t *secret, size_t secret_len)
+{
+  char clabel[KEYLOG_LABEL_MAXLEN];
+  (void)client_random_len;
+  DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
+  /* Turning a "rustls_str" into a null delimited "c" string */
+  msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
+}
+
 static CURLcode
 init_config_builder(struct Curl_easy *data,
                     const struct ssl_primary_config *conn_config,
@@ -573,6 +587,14 @@ init_config_builder(struct Curl_easy *data,
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
+
+#if defined(USE_ECH)
+  if(ECH_ENABLED(data)) {
+    tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
+    tls_versions_len = 1;
+    infof(data, "rustls: ECH enabled, forcing TLSv1.3");
+  }
+#endif /* USE_ECH */
 
   cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
@@ -775,12 +797,234 @@ cleanup:
 }
 
 static CURLcode
+init_config_builder_platform_verifier(
+  struct Curl_easy *data,
+  struct rustls_client_config_builder *builder)
+{
+  struct rustls_server_cert_verifier *server_cert_verifier = NULL;
+  CURLcode result = CURLE_OK;
+  rustls_result rr;
+
+  rr = rustls_platform_server_cert_verifier(&server_cert_verifier);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "failed to create platform certificate verifier");
+    result = CURLE_SSL_CACERT_BADFILE;
+    goto cleanup;
+  }
+
+  rustls_client_config_builder_set_server_verifier(builder,
+                                                   server_cert_verifier);
+
+cleanup:
+  if(server_cert_verifier) {
+    rustls_server_cert_verifier_free(server_cert_verifier);
+  }
+  return result;
+}
+
+static CURLcode
+init_config_builder_keylog(struct Curl_easy *data,
+                           struct rustls_client_config_builder *builder)
+{
+  rustls_result rr;
+
+  Curl_tls_keylog_open();
+  if(!Curl_tls_keylog_enabled()) {
+    return CURLE_OK;
+  }
+
+  rr = rustls_client_config_builder_set_key_log(builder,
+                                                cr_keylog_log_cb,
+                                                NULL);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls_client_config_builder_set_key_log");
+    Curl_tls_keylog_close();
+    return map_error(rr);
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode
+init_config_builder_client_auth(struct Curl_easy *data,
+                                const struct ssl_primary_config *conn_config,
+                                const struct ssl_config_data *ssl_config,
+                                struct rustls_client_config_builder *builder)
+{
+  struct dynbuf cert_contents;
+  struct dynbuf key_contents;
+  rustls_result rr;
+  const struct rustls_certified_key *certified_key = NULL;
+  CURLcode result = CURLE_OK;
+
+  if(conn_config->clientcert && !ssl_config->key) {
+    failf(data, "rustls: must provide key with certificate '%s'",
+          conn_config->clientcert);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+  else if(!conn_config->clientcert && ssl_config->key) {
+    failf(data, "rustls: must provide certificate with key '%s'",
+          conn_config->clientcert);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
+  Curl_dyn_init(&cert_contents, SIZE_MAX);
+  Curl_dyn_init(&key_contents, SIZE_MAX);
+
+  if(!read_file_into(conn_config->clientcert, &cert_contents)) {
+    failf(data, "rustls: failed to read client certificate file: '%s'",
+          conn_config->clientcert);
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  if(!read_file_into(ssl_config->key, &key_contents)) {
+    failf(data, "rustls: failed to read key file: '%s'", ssl_config->key);
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_certified_key_build(Curl_dyn_uptr(&cert_contents),
+                                  Curl_dyn_len(&cert_contents),
+                                  Curl_dyn_uptr(&key_contents),
+                                  Curl_dyn_len(&key_contents),
+                                  &certified_key);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls: failed to build certified key");
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_certified_key_keys_match(certified_key);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data,
+                 rr,
+                 "rustls: client certificate and keypair files do not match:");
+
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_client_config_builder_set_certified_key(builder,
+                                                      &certified_key,
+                                                      1);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls: failed to set certified key");
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+cleanup:
+  Curl_dyn_free(&cert_contents);
+  Curl_dyn_free(&key_contents);
+  if(certified_key) {
+    rustls_certified_key_free(certified_key);
+  }
+  return result;
+}
+
+#if defined(USE_ECH)
+static CURLcode
+init_config_builder_ech(struct Curl_easy *data,
+                        const struct ssl_connect_data *connssl,
+                        struct rustls_client_config_builder *builder)
+{
+  const rustls_hpke *hpke = rustls_supported_hpke();
+  unsigned char *ech_config = NULL;
+  size_t ech_config_len = 0;
+  struct Curl_dns_entry *dns = NULL;
+  struct Curl_https_rrinfo *rinfo = NULL;
+  CURLcode result = CURLE_OK;
+  rustls_result rr;
+
+  if(!hpke) {
+    failf(data,
+          "rustls: ECH unavailable, rustls-ffi built without "
+          "HPKE compatible crypto provider");
+    result = CURLE_SSL_CONNECT_ERROR;
+    goto cleanup;
+  }
+
+  if(data->set.str[STRING_ECH_PUBLIC]) {
+    failf(data, "rustls: ECH outername not supported");
+    result = CURLE_SSL_CONNECT_ERROR;
+    goto cleanup;
+  }
+
+  if(data->set.tls_ech == CURLECH_GREASE) {
+    rr = rustls_client_config_builder_enable_ech_grease(builder, hpke);
+    if(rr != RUSTLS_RESULT_OK) {
+      rustls_failf(data, rr, "rustls: failed to configure ECH GREASE");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto cleanup;
+    }
+    return CURLE_OK;
+  }
+
+  if(data->set.tls_ech & CURLECH_CLA_CFG
+       && data->set.str[STRING_ECH_CONFIG]) {
+    const char *b64 = data->set.str[STRING_ECH_CONFIG];
+    size_t decode_result;
+    if(!b64) {
+      infof(data, "rustls: ECHConfig from command line empty");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto cleanup;
+    }
+    /* rustls-ffi expects the raw TLS encoded ECHConfigList bytes */
+    decode_result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
+    if(decode_result || !ech_config) {
+      infof(data, "rustls: cannot base64 decode ECHConfig from command line");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto cleanup;
+    }
+  }
+  else {
+    if(connssl->peer.hostname) {
+      dns = Curl_fetch_addr(
+        data,
+        connssl->peer.hostname,
+        connssl->peer.port);
+    }
+    if(!dns) {
+      failf(data, "rustls: ECH requested but no DNS info available");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto cleanup;
+    }
+    rinfo = dns->hinfo;
+    if(!rinfo || !rinfo->echconfiglist) {
+      failf(data, "rustls: ECH requested but no ECHConfig available");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto cleanup;
+    }
+    ech_config = rinfo->echconfiglist;
+    ech_config_len = rinfo->echconfiglist_len;
+  }
+
+  rr = rustls_client_config_builder_enable_ech(builder,
+                                               ech_config,
+                                               ech_config_len,
+                                               hpke);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls: failed to configure ECH");
+    result = CURLE_SSL_CONNECT_ERROR;
+    goto cleanup;
+  }
+cleanup:
+  if(dns) {
+    Curl_resolv_unlink(data, &dns);
+  }
+  return result;
+}
+#endif /* USE_ECH */
+
+static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   const struct ssl_primary_config *conn_config =
     Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
 
@@ -807,6 +1051,13 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     rustls_client_config_builder_dangerous_set_certificate_verifier(
       config_builder, cr_verify_none);
   }
+  else if(ssl_config->native_ca_store) {
+    result = init_config_builder_platform_verifier(data, config_builder);
+    if(result != CURLE_OK) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
+  }
   else if(ca_info_blob || ssl_cafile) {
     result = init_config_builder_verifier(data,
                                           config_builder,
@@ -817,6 +1068,33 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       rustls_client_config_builder_free(config_builder);
       return result;
     }
+  }
+
+  if(conn_config->clientcert || ssl_config->key) {
+    result = init_config_builder_client_auth(data,
+                                             conn_config,
+                                             ssl_config,
+                                             config_builder);
+    if(result != CURLE_OK) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
+  }
+
+#if defined(USE_ECH)
+  if(ECH_ENABLED(data)) {
+    result = init_config_builder_ech(data, connssl, config_builder);
+    if(result != CURLE_OK && data->set.tls_ech & CURLECH_HARD) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
+  }
+#endif /* USE_ECH */
+
+  result = init_config_builder_keylog(data, config_builder);
+  if(result != CURLE_OK) {
+    rustls_client_config_builder_free(config_builder);
+    return result;
   }
 
   rr = rustls_client_config_builder_build(
@@ -1125,17 +1403,23 @@ cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
   return map_error(rresult);
 }
 
+static void cr_cleanup(void)
+{
+  Curl_tls_keylog_close();
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST |
   SSLSUPP_TLS13_CIPHERSUITES |
-  SSLSUPP_CERTINFO,
+  SSLSUPP_CERTINFO |
+  SSLSUPP_ECH,
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */
-  NULL,                            /* cleanup */
+  cr_cleanup,                      /* cleanup */
   cr_version,                      /* version */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
