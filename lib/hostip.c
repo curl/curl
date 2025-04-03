@@ -119,7 +119,7 @@
  * CURLRES_* defines based on the config*.h and curl_setup.h defines.
  */
 
-static void dnscache_unlink_entry(void *entry);
+static void dnscache_entry_free(struct Curl_dns_entry *dns);
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void show_resolve_info(struct Curl_easy *data,
@@ -484,38 +484,28 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 }
 #endif
 
-/*
- * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
- *
- * When calling Curl_resolv() has resulted in a response with a returned
- * address, we call this function to store the information in the dns
- * cache etc
- *
- * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
- */
-struct Curl_dns_entry *
-Curl_cache_addr(struct Curl_easy *data,
-                struct Curl_addrinfo *addr,
-                const char *hostname,
-                size_t hostlen, /* length or zero */
-                int port,
-                bool permanent)
+static struct Curl_dns_entry *
+dnscache_add_addr(struct Curl_easy *data,
+                  struct Curl_dnscache *dnscache,
+                  struct Curl_addrinfo *addr,
+                  const char *hostname,
+                  size_t hostlen, /* length or zero */
+                  int port,
+                  bool permanent)
 {
-  struct Curl_dnscache *dnscache = dnscache_get(data);
   char entry_id[MAX_HOSTCACHE_LEN];
   size_t entry_len;
   struct Curl_dns_entry *dns;
   struct Curl_dns_entry *dns2;
 
-  if(!dnscache)
-    return NULL;
-
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   /* shuffle addresses if requested */
   if(data->set.dns_shuffle_addresses) {
     CURLcode result = Curl_shuffle_addr(data, &addr);
-    if(result)
+    if(result) {
+      Curl_freeaddrinfo(addr);
       return NULL;
+    }
   }
 #endif
   if(!hostlen)
@@ -524,6 +514,7 @@ Curl_cache_addr(struct Curl_easy *data,
   /* Create a new cache entry */
   dns = calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
   if(!dns) {
+    Curl_freeaddrinfo(addr);
     return NULL;
   }
 
@@ -548,12 +539,44 @@ Curl_cache_addr(struct Curl_easy *data,
   dns2 = Curl_hash_add(&dnscache->entries, entry_id, entry_len + 1,
                        (void *)dns);
   if(!dns2) {
-    free(dns);
+    dnscache_entry_free(dns);
     return NULL;
   }
 
   dns = dns2;
   dns->refcount++;         /* mark entry as in-use */
+  return dns;
+}
+
+/*
+ * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
+ *
+ * When calling Curl_resolv() has resulted in a response with a returned
+ * address, we call this function to store the information in the dns
+ * cache etc
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
+ */
+struct Curl_dns_entry *
+Curl_cache_addr(struct Curl_easy *data,
+                struct Curl_addrinfo *addr,
+                const char *hostname,
+                size_t hostlen, /* length or zero */
+                int port,
+                bool permanent)
+{
+  struct Curl_dnscache *dnscache = dnscache_get(data);
+  struct Curl_dns_entry *dns;
+
+  if(!dnscache) {
+    Curl_freeaddrinfo(addr);
+    return NULL;
+  }
+
+  dnscache_lock(data, dnscache);
+  dns = dnscache_add_addr(data, dnscache, addr,
+                          hostname, hostlen, port, permanent);
+  dnscache_unlock(data, dnscache);
   return dns;
 }
 
@@ -869,17 +892,9 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       }
     }
     else {
-      dnscache_lock(data, dnscache);
-
       /* we got a response, store it in the cache */
       dns = Curl_cache_addr(data, addr, hostname, 0, port, FALSE);
-
-      dnscache_unlock(data, dnscache);
-
-      if(!dns)
-        /* returned failure, bail out nicely */
-        Curl_freeaddrinfo(addr);
-      else {
+      if(dns) {
         rc = CURLRESOLV_RESOLVED;
         show_resolve_info(data, dns);
       }
@@ -1080,6 +1095,18 @@ clean_up:
   return rc;
 }
 
+static void dnscache_entry_free(struct Curl_dns_entry *dns)
+{
+  Curl_freeaddrinfo(dns->addr);
+#ifdef USE_HTTPSRR
+  if(dns->hinfo) {
+    Curl_httpsrr_cleanup(dns->hinfo);
+    free(dns->hinfo);
+  }
+#endif
+  free(dns);
+}
+
 /*
  * Curl_resolv_unlink() releases a reference to the given cached DNS entry.
  * When the reference count reaches 0, the entry is destroyed. It is important
@@ -1094,28 +1121,23 @@ void Curl_resolv_unlink(struct Curl_easy *data, struct Curl_dns_entry **pdns)
   *pdns = NULL;
 
   dnscache_lock(data, dnscache);
-  dnscache_unlink_entry(dns);
+  dns->refcount--;
+  if(dns->refcount == 0)
+    dnscache_entry_free(dns);
   dnscache_unlock(data, dnscache);
 }
 
-/*
- * File-internal: release cache dns entry reference, free if inuse drops to 0
- */
-static void dnscache_unlink_entry(void *entry)
+static void dnscache_entry_dtor(void *entry)
 {
   struct Curl_dns_entry *dns = (struct Curl_dns_entry *) entry;
   DEBUGASSERT(dns && (dns->refcount > 0));
-
   dns->refcount--;
-  if(dns->refcount == 0) {
-    Curl_freeaddrinfo(dns->addr);
-#ifdef USE_HTTPSRR
-    if(dns->hinfo) {
-      Curl_httpsrr_cleanup(dns->hinfo);
-      free(dns->hinfo);
-    }
-#endif
-    free(dns);
+  if(dns->refcount == 0)
+    dnscache_entry_free(dns);
+  else {
+    /* Ideally, when we destroy the dnscache, we should have unlinked
+     * all handed out entries. */
+    DEBUGASSERT(0);
   }
 }
 
@@ -1125,12 +1147,12 @@ static void dnscache_unlink_entry(void *entry)
 void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size)
 {
   Curl_hash_init(&dns->entries, size, Curl_hash_str, Curl_str_key_compare,
-                 dnscache_unlink_entry);
+                 dnscache_entry_dtor);
 }
 
 void Curl_dnscache_destroy(struct Curl_dnscache *dns)
 {
-  Curl_hash_clean(&dns->entries);
+  Curl_hash_destroy(&dns->entries);
 }
 
 CURLcode Curl_loadhostpairs(struct Curl_easy *data)
@@ -1304,8 +1326,8 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = Curl_cache_addr(data, head, Curl_str(&source),
-                            Curl_strlen(&source), (int)port, permanent);
+      dns = dnscache_add_addr(data, dnscache, head, Curl_str(&source),
+                              Curl_strlen(&source), (int)port, permanent);
       if(dns) {
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -1314,10 +1336,9 @@ err:
 
       dnscache_unlock(data, dnscache);
 
-      if(!dns) {
-        Curl_freeaddrinfo(head);
+      if(!dns)
         return CURLE_OUT_OF_MEMORY;
-      }
+
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
             (int)Curl_strlen(&source), Curl_str(&source), port, addresses,

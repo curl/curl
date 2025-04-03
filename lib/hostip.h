@@ -184,6 +184,7 @@ Curl_fetch_addr(struct Curl_easy *data,
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
+ * Call takes ownership of `addr` and free's it on failure.
  * @param permanent   iff TRUE, entry will never become stale
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
