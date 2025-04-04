@@ -44,6 +44,7 @@
 #include "connect.h"
 #include "rand.h"
 #include "strdup.h"
+#include "strparse.h"
 #include "transfer.h"
 #include "dynbuf.h"
 #include "headers.h"
@@ -141,6 +142,9 @@ struct cf_h2_ctx {
   uint32_t goaway_error;        /* goaway error code from server */
   int32_t remote_max_sid;       /* max id processed by server */
   int32_t local_max_sid;        /* max id processed by us */
+#ifdef DEBUGBUILD
+  int32_t stream_win_max;       /* max h2 stream window size */
+#endif
   BIT(initialized);
   BIT(via_h1_upgrade);
   BIT(conn_closed);
@@ -166,6 +170,18 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_H2_STREAM_WIN_MAX");
+
+    ctx->stream_win_max = H2_STREAM_WINDOW_SIZE_MAX;
+    if(p) {
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, INT_MAX))
+        ctx->stream_win_max = (int32_t)l;
+    }
+  }
+#endif
   ctx->initialized = TRUE;
 }
 
@@ -285,7 +301,15 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
      * This gets less precise the higher the latency. */
     return (int32_t)data->set.max_recv_speed;
   }
+#ifdef DEBUGBUILD
+  else {
+    struct cf_h2_ctx *ctx = cf->ctx;
+    CURL_TRC_CF(data, cf, "stream_win_max=%d", ctx->stream_win_max);
+    return ctx->stream_win_max;
+  }
+#else
   return H2_STREAM_WINDOW_SIZE_MAX;
+#endif
 }
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
@@ -302,6 +326,13 @@ static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
     int32_t wsize = nghttp2_session_get_stream_effective_local_window_size(
                       ctx->h2, stream->id);
     if(dwsize > wsize) {
+      rv = nghttp2_session_set_local_window_size(ctx->h2, NGHTTP2_FLAG_NONE,
+                                                 stream->id, dwsize);
+      if(rv) {
+        failf(data, "[%d] nghttp2 set_local_window_size(%d) failed: "
+              "%s(%d)", stream->id, dwsize, nghttp2_strerror(rv), rv);
+        return CURLE_HTTP2;
+      }
       rv = nghttp2_submit_window_update(ctx->h2, NGHTTP2_FLAG_NONE,
                                         stream->id, dwsize - wsize);
       if(rv) {
