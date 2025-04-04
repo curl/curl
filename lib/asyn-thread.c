@@ -561,7 +561,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
 #ifdef USE_HTTPSRR_ARES
   /* best effort, ignore errors */
   if(data->state.async.thdata.rr_ctx)
-    (void)Curl_ares_perform(data->state.async.thdata.rr_ctx, 0);
+    (void)Curl_ares_perform(data->state.async.thdata.rr_ctx->channel, 0);
 #endif
 
   DEBUGASSERT(addr_ctx);
@@ -584,15 +584,15 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
       return result;
     }
 #ifdef USE_HTTPSRR_ARES
-    if(td->rr_ctx) {
-      result = td->result;
+    if(data->state.async.thdata.rr_ctx) {
+      result = data->state.async.thdata.result;
       if(result) {
         async_thread_destroy(data);
         return result;
       }
       else {
         struct Curl_https_rrinfo *lhrr;
-        lhrr = Curl_httpsrr_dup_move(&td->hinfo);
+        lhrr = Curl_httpsrr_dup_move(&data->state.async.thdata.hinfo);
         if(!lhrr) {
           async_thread_destroy(data);
           return CURLE_OUT_OF_MEMORY;
