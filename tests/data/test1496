@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+chunked Transfer-Encoding
+DELAY
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: gzip, chunked
+Content-Length: 19
+
+stuff server sends
+</data>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with gzip + chunked transfer-encoding without being asked
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<errorcode>
+61
+</errorcode>
+</verify>
+
+</testcase>
