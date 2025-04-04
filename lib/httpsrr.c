@@ -38,58 +38,39 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
+#define MAX_ALPN_LENGTH 255
+
+CURLcode Curl_httpsrr_decode_alpn(const char *cp, size_t len,
                                   unsigned char *alpns)
 {
   /*
-   * spec here is as per RFC 9460, section-7.1.1
-   * encoding is a concatenated list of strings each preceded by a one
-   * octet length
-   * output is comma-sep list of the strings
-   * implementations may or may not handle quoting of comma within
-   * string values, so we might see a comma within the wire format
-   * version of a string, in which case we will precede that by a
-   * backslash - same goes for a backslash character, and of course
-   * we need to use two backslashes in strings when we mean one;-)
+   * The wire-format value for "alpn" consists of at least one alpn-id
+   * prefixed by its length as a single octet, and these length-value pairs
+   * are concatenated to form the SvcParamValue. These pairs MUST exactly fill
+   * the SvcParamValue; otherwise, the SvcParamValue is malformed.
    */
-  struct dynbuf dval;
   int idnum = 0;
 
-  Curl_dyn_init(&dval, DYN_DOH_RESPONSE);
   while(len > 0) {
     size_t tlen = (size_t) *cp++;
-    size_t i;
     enum alpnid id;
     len--;
     if(tlen > len)
-      goto err;
-    /* add escape char if needed, clunky but easier to read */
-    for(i = 0; i != tlen; i++) {
-      if('\\' == *cp || ',' == *cp) {
-        if(Curl_dyn_addn(&dval, "\\", 1))
-          goto err;
-      }
-      if(Curl_dyn_addn(&dval, cp++, 1))
-        goto err;
-    }
-    len -= tlen;
+      return CURLE_BAD_CONTENT_ENCODING;
 
     /* we only store ALPN ids we know about */
-    id = Curl_alpn2alpnid(Curl_dyn_ptr(&dval), Curl_dyn_len(&dval));
+    id = Curl_alpn2alpnid(cp, tlen);
     if(id != ALPN_none) {
       if(idnum == MAX_HTTPSRR_ALPNS)
         break;
       alpns[idnum++] = (unsigned char)id;
     }
-    Curl_dyn_reset(&dval);
+    cp += tlen;
+    len -= tlen;
   }
-  Curl_dyn_free(&dval);
   if(idnum < MAX_HTTPSRR_ALPNS)
     alpns[idnum] = ALPN_none; /* terminate the list */
   return CURLE_OK;
-err:
-  Curl_dyn_free(&dval);
-  return CURLE_BAD_CONTENT_ENCODING;
 }
 
 CURLcode Curl_httpsrr_set(struct Curl_easy *data,
@@ -97,17 +78,22 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
                           uint16_t rrkey, const uint8_t *val, size_t vlen)
 {
   switch(rrkey) {
+  case HTTPS_RR_CODE_MANDATORY:
+    CURL_TRC_DNS(data, "HTTPS RR MANDATORY left to implement");
+    break;
   case HTTPS_RR_CODE_ALPN: /* str_list */
-    Curl_httpsrr_decode_alpn(val, vlen, hi->alpns);
+    Curl_httpsrr_decode_alpn((const char *)val, vlen, hi->alpns);
     CURL_TRC_DNS(data, "HTTPS RR ALPN: %u %u %u %u",
                  hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
   case HTTPS_RR_CODE_NO_DEF_ALPN:
+    if(vlen) /* no data */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     hi->no_def_alpn = TRUE;
     CURL_TRC_DNS(data, "HTTPS RR no-def-alpn");
     break;
   case HTTPS_RR_CODE_IPV4: /* addr4 list */
-    if(!vlen)
+    if(!vlen || (vlen & 3)) /* the size must be 4-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     hi->ipv4hints = Curl_memdup(val, vlen);
     if(!hi->ipv4hints)
@@ -125,7 +111,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     CURL_TRC_DNS(data, "HTTPS RR ECH");
     break;
   case HTTPS_RR_CODE_IPV6: /* addr6 list */
-    if(!vlen)
+    if(!vlen || (vlen & 15)) /* the size must be 16-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
     hi->ipv6hints = Curl_memdup(val, vlen);
     if(!hi->ipv6hints)
