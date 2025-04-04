@@ -512,8 +512,8 @@ and therefore ignore the value of `CMAKE_BUILD_TYPE`.
 # Migrating from winbuild builds
 
 We recommend CMake to build curl with MSVC. The winbuild build system is
-deprecated and will be removed in September 2025 in favor of the CMake build
-system.
+deprecated and is going to be removed in September 2025 in favor of the CMake
+build system.
 
 In CMake you can customize the path of dependencies by passing the absolute
 header path and the full path of the library via `*_INCLUDE_DIR` and

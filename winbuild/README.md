@@ -6,8 +6,8 @@ SPDX-License-Identifier: curl
 
 # Deprecation warning
 
- This winbuild build system is deprecated and will be removed in September 2025
- in favor of the CMake build system.
+ This winbuild build system is deprecated and is going to be removed in
+ September 2025 in favor of the CMake build system.
 
  Please see docs/INSTALL-CMAKE.md : "Migrating from winbuild builds"
 
