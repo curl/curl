@@ -799,10 +799,12 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
       int st;
+      if(Curl_resolver_init_lazy(data))
+        return CURLRESOLV_ERROR;
       Curl_set_in_callback(data, TRUE);
       st = data->set.resolver_start(
-#ifdef CURLRES_ASYNCH
-        data->state.async.resolver,
+#ifdef CURLRES_ARES
+        data->state.async.thdata.channel,
 #else
         NULL,
 #endif

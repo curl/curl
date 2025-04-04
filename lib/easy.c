@@ -1038,14 +1038,6 @@ CURL *curl_easy_duphandle(CURL *d)
   }
 #endif
 
-#ifdef CURLRES_ASYNCH
-  /* Clone the resolver handle, if present, for the new handle */
-  if(Curl_resolver_duphandle(outcurl,
-                             &outcurl->state.async.resolver,
-                             data->state.async.resolver))
-    goto fail;
-#endif
-
 #ifdef USE_ARES
   {
     CURLcode rc;

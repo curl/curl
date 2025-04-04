@@ -569,8 +569,6 @@ struct Curl_async {
   struct Curl_dns_entry *dns;
 #ifdef CURLRES_ASYNCH
   struct thread_data thdata;
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel e.g. */
 #endif
   int port;
   BIT(done);  /* set TRUE when the lookup is complete */

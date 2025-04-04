@@ -292,7 +292,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   /* this destroys the channel and we cannot use it anymore after this */
   Curl_resolver_cancel(data);
-  Curl_resolver_cleanup(data->state.async.resolver);
 
   data_priority_cleanup(data);
 
@@ -515,12 +514,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
 
-  result = Curl_resolver_init(data, &data->state.async.resolver);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    goto out;
-  }
-
   result = Curl_init_userdefined(data);
   if(result)
     goto out;
@@ -540,7 +533,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
 out:
   if(result) {
-    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
