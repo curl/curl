@@ -20,7 +20,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-verify setting pipeling blocklisting options
+verify setting pipelining blocklisting options
 </name>
 <command>
 http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
