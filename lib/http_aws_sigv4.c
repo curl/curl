@@ -813,7 +813,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   if(!canonical_request)
     goto fail;
 
-  infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]", canonical_request);
+  infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
+    canonical_request);
 
   request_type = aprintf("%.*s4_request",
                          (int)Curl_strlen(&provider0), Curl_str(&provider0));
@@ -855,7 +856,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   /* make provider0 part done uppercase */
   Curl_strntoupper(str_to_sign, Curl_str(&provider0), Curl_strlen(&provider0));
 
-  infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]", str_to_sign);
+  infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
+    str_to_sign);
 
   secret = aprintf("%.*s4%s", (int)Curl_strlen(&provider0),
                    Curl_str(&provider0), data->state.aptr.passwd ?
