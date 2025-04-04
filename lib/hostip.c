@@ -1494,25 +1494,21 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 #ifdef USE_CURL_ASYNC
 CURLcode Curl_resolver_error(struct Curl_easy *data)
 {
-  const char *host_or_proxy;
-  CURLcode result;
+  struct connectdata *conn = data->conn;
+  const char *host_or_proxy = "host";
+  const char *name = conn->host.dispname;
+  CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
 
 #ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
-  if(conn->bits.httpproxy) {
+  if(conn->bits.proxy) {
     host_or_proxy = "proxy";
     result = CURLE_COULDNT_RESOLVE_PROXY;
+    name = conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
+      conn->http_proxy.host.dispname;
   }
-  else
 #endif
-  {
-    host_or_proxy = "host";
-    result = CURLE_COULDNT_RESOLVE_HOST;
-  }
 
-  failf(data, "Could not resolve %s: %s", host_or_proxy,
-        data->conn->host.dispname);
-
+  failf(data, "Could not resolve %s: %s", host_or_proxy, name);
   return result;
 }
 #endif /* USE_CURL_ASYNC */
