@@ -38,7 +38,7 @@ ftps
 FTPS dir list, PORT with specified IP
 </name>
 <command>
--k --ftp-ssl-control -P %CLIENTIP ftps://%HOSTIP:%FTPSPORT/
+--insecure --ftp-ssl-control -P %CLIENTIP ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>
 

@@ -29,6 +29,7 @@
 use Cwd;
 use Cwd 'abs_path';
 use File::Basename;
+use File::Spec;
 
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
@@ -38,7 +39,7 @@ my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "test-localhost";
 my $conf = "nghttpx.conf";
-my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+my $dev_null = File::Spec->devnull();
 
 #***************************************************************************
 # Process command line options

@@ -29,7 +29,7 @@ gophers
 Gophers index
 </name>
 <command>
--k gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
+--insecure gophers://%HOSTIP:%GOPHERSPORT/1/%TESTNUMBER
 </command>
 </client>
 

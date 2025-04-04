@@ -129,7 +129,6 @@ static const char *find_host_sep(const char *url)
 #define cc2cu(x) ((x) == CURLE_TOO_LARGE ? CURLUE_TOO_LARGE :   \
                   CURLUE_OUT_OF_MEMORY)
 
-static const char hexdigits[] = "0123456789abcdef";
 /* urlencode_str() writes data into an output dynbuf and URL-encodes the
  * spaces in the source URL accordingly.
  *
@@ -164,9 +163,8 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
         result = Curl_dyn_addn(o, "+", 1);
     }
     else if((*iptr < ' ') || (*iptr >= 0x7f)) {
-      char out[3]={'%'};
-      out[1] = hexdigits[*iptr >> 4];
-      out[2] = hexdigits[*iptr & 0xf];
+      unsigned char out[3]={'%'};
+      Curl_hexbyte(&out[1], *iptr, TRUE);
       result = Curl_dyn_addn(o, out, 3);
     }
     else {
@@ -1824,9 +1822,8 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
             return cc2cu(result);
         }
         else {
-          char out[3]={'%'};
-          out[1] = hexdigits[*i >> 4];
-          out[2] = hexdigits[*i & 0xf];
+          unsigned char out[3]={'%'};
+          Curl_hexbyte(&out[1], *i, TRUE);
           result = Curl_dyn_addn(&enc, out, 3);
           if(result)
             return cc2cu(result);

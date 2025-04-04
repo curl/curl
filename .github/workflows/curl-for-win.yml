@@ -58,13 +58,13 @@ jobs:
           export CW_CONFIG='-main-werror-linux-a64-x64-gcc'
           export CW_REVISION='${{ github.sha }}'
           DOCKER_IMAGE='debian:bookworm-slim'
-          export DOCKER_CONTENT_TRUST=1
           export CW_CCSUFFIX='-15'
           export CW_GCCSUFFIX='-12'
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${DOCKER_IMAGE}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
               '^(CW_|GITHUB_)') \
             "${DOCKER_IMAGE}" \
@@ -86,10 +86,11 @@ jobs:
           export CW_CONFIG='-main-werror-linux-musl-r64-x64'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${DOCKER_IMAGE}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
               '^(CW_|GITHUB_)') \
             "${DOCKER_IMAGE}" \
@@ -129,10 +130,11 @@ jobs:
           export CW_CONFIG='-main-werror-win-x64'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${DOCKER_IMAGE}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
               '^(CW_|GITHUB_)') \
             "${DOCKER_IMAGE}" \
@@ -153,10 +155,11 @@ jobs:
           export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-zlibng'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
-          docker trust inspect --pretty "${DOCKER_IMAGE}"
-          time docker pull "${DOCKER_IMAGE}"
-          docker images --digests
-          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+          sudo podman image trust set --type reject default
+          sudo podman image trust set --type accept docker.io/library
+          time podman pull "${DOCKER_IMAGE}"
+          podman images --digests
+          time podman run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
             --env-file <(env | grep -a -E \
               '^(CW_|GITHUB_)') \
             "${DOCKER_IMAGE}" \

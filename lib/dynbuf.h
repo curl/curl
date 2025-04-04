@@ -99,4 +99,6 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
 #define DYN_MQTT_RECV       (64*1024)
 #define DYN_MQTT_SEND       0xFFFFFFF
 #define DYN_CRLFILE_SIZE    (400*1024*1024) /* 400mb */
+#define DYN_CERTFILE_SIZE   (100*1024) /* 100KiB */
+#define DYN_KEYFILE_SIZE    (100*1024) /* 100KiB */
 #endif

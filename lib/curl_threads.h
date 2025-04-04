@@ -61,7 +61,7 @@ curl_thread_t Curl_thread_create(
                                  (CURL_STDCALL *func) (void *),
                                  void *arg);
 
-void Curl_thread_destroy(curl_thread_t hnd);
+void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 

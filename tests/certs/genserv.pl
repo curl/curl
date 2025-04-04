@@ -29,6 +29,12 @@ use warnings;
 use File::Basename;
 use File::Spec;
 
+sub opensslfail {
+    die "Missing or broken 'openssl' tool. openssl 1.0.2+ is required. ".
+        "Without it, this script cannot generate the necessary certificates ".
+        "the curl test suite needs for all its TLS related tests.";
+}
+
 my $OPENSSL = 'openssl';
 if(-f '/usr/local/ssl/bin/openssl') {
     $OPENSSL = '/usr/local/ssl/bin/openssl';
@@ -36,7 +42,7 @@ if(-f '/usr/local/ssl/bin/openssl') {
 
 my $SRCDIR = dirname(__FILE__);
 my $fh;
-my $dev_null = $^O eq 'MSWin32' ? 'NUL' : '/dev/null';
+my $dev_null = File::Spec->devnull();
 
 my $KEYSIZE = 'prime256v1';
 my $DURATION;
@@ -44,19 +50,24 @@ my $PREFIX;
 
 my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
-    print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
+    print 'Usage: genserv.pl <caprefix> [<prefix> ...]\n';
     exit 1;
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
     if($OPENSSL eq basename($OPENSSL)) {  # has no dir component
         # find openssl in PATH
+        my $found = 0;
         foreach(File::Spec->path()) {
             my $file = File::Spec->catfile($_, $OPENSSL);
             if(-f $file) {
                 $OPENSSL = $file;
+                $found = 1;
                 last;
             }
+        }
+        if(!$found) {
+            opensslfail();
         }
     }
 
@@ -66,8 +77,10 @@ if(!$CAPREFIX) {
     $PREFIX = $CAPREFIX;
     $DURATION = 6000;
 
-    system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
-        "-out $PREFIX-ca.key -pass pass:secret");
+    if(system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
+        "-out $PREFIX-ca.key -pass pass:secret") != 0) {
+        opensslfail();
+    }
     system("$OPENSSL req -config $SRCDIR/$PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret 2>$dev_null");
     system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX-ca.prm -days $DURATION " .
         "-req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-ca.raw-cacert");

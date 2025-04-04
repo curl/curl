@@ -141,7 +141,8 @@ UNITTEST_START
     if(!entry_id)
       goto error;
 
-    dns = Curl_hash_pick(easy->dns.hostcache, entry_id, strlen(entry_id) + 1);
+    dns = Curl_hash_pick(&multi->dnscache.entries,
+                         entry_id, strlen(entry_id) + 1);
     free(entry_id);
     entry_id = NULL;
 

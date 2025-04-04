@@ -161,7 +161,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
   for(i = 0; i < THREAD_SIZE; i++) {
     if(thread[i]) {
       Curl_thread_join(&thread[i]);
-      Curl_thread_destroy(thread[i]);
+      Curl_thread_destroy(&thread[i]);
     }
   }
   curl_share_setopt(share, CURLSHOPT_LOCKFUNC, NULL);

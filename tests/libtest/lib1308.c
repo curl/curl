@@ -25,16 +25,6 @@
 
 #include <curl/curl.h>
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);
@@ -42,7 +32,8 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
   return len;
 }
 
-UNITTEST_START
+CURLcode test(char *URL)
+{
   CURLFORMcode rc;
   int res;
   struct curl_httppost *post = NULL;
@@ -90,7 +81,7 @@ UNITTEST_START
   CURL_IGNORE_DEPRECATION(
     rc = curl_formadd(&post, &last,
                       CURLFORM_PTRNAME, "name of file field",
-                      CURLFORM_FILE, arg,
+                      CURLFORM_FILE, URL,
                       CURLFORM_FILENAME, "custom named file",
                       CURLFORM_END);
   )
@@ -105,5 +96,5 @@ UNITTEST_START
   CURL_IGNORE_DEPRECATION(
     curl_formfree(post);
   )
-
-UNITTEST_STOP
+  return CURLE_OK;
+}

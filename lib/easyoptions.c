@@ -28,7 +28,7 @@
 #include "easyoptions.h"
 
 /* all easy setopt options listed in alphabetical order */
-struct curl_easyoption Curl_easyopts[] = {
+const struct curl_easyoption Curl_easyopts[] = {
   {"ABSTRACT_UNIX_SOCKET", CURLOPT_ABSTRACT_UNIX_SOCKET, CURLOT_STRING, 0},
   {"ACCEPTTIMEOUT_MS", CURLOPT_ACCEPTTIMEOUT_MS, CURLOT_LONG, 0},
   {"ACCEPT_ENCODING", CURLOPT_ACCEPT_ENCODING, CURLOT_STRING, 0},

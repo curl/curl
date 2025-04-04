@@ -110,8 +110,8 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #endif
   /* Check if the connection is using SSL and get the channel binding data */
 #ifdef HAVE_GSSAPI
-  Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
 #ifdef USE_SSL
+  Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_get_channel_binding(
       data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
@@ -120,6 +120,8 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
       return result;
     }
   }
+#else
+  Curl_dyn_init(&neg_ctx->channel_binding_data, 1);
 #endif /* USE_SSL */
 #endif /* HAVE_GSSAPI */
 

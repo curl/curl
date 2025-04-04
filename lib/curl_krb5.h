@@ -39,7 +39,7 @@ struct Curl_sec_client_mech {
 #define AUTH_CONTINUE   1
 #define AUTH_ERROR      2
 
-#ifdef HAVE_GSSAPI
+#if defined(HAVE_GSSAPI) && !defined(CURL_DISABLE_FTP)
 void Curl_sec_conn_init(struct connectdata *);
 void Curl_sec_conn_destroy(struct connectdata *);
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn, char *,

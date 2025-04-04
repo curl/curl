@@ -81,6 +81,9 @@ use Cwd qw(getcwd);
 use testutil qw(
     shell_quote
 );
+use File::Spec qw(
+    devnull
+);
 
 
 #######################################################################
@@ -119,7 +122,7 @@ our $VCURL=$CURL;  # what curl binary to use to verify the servers with
 our $memanalyze="$perl " . shell_quote("$srcdir/memanalyze.pl");
 our $valgrind;     # path to valgrind, or empty if disabled
 our $bundle = 0;   # use bundled server, libtest, unit binaries
-our $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+our $dev_null = File::Spec->devnull();   # null device path, eg: /dev/null
 
 # paths in $LOGDIR
 our $LOCKDIR = "lock";          # root of the server directory with lock files

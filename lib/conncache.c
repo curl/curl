@@ -132,10 +132,10 @@ static void cpool_bundle_free_entry(void *freethis)
   cpool_bundle_destroy((struct cpool_bundle *)freethis);
 }
 
-int Curl_cpool_init(struct cpool *cpool,
-                    struct Curl_easy *idata,
-                    struct Curl_share *share,
-                    size_t size)
+void Curl_cpool_init(struct cpool *cpool,
+                     struct Curl_easy *idata,
+                     struct Curl_share *share,
+                     size_t size)
 {
   Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
                  Curl_str_key_compare, cpool_bundle_free_entry);
@@ -145,7 +145,6 @@ int Curl_cpool_init(struct cpool *cpool,
   cpool->idata = idata;
   cpool->share = share;
   cpool->initialised = TRUE;
-  return 0; /* good */
 }
 
 /* Return the "first" connection in the pool or NULL. */

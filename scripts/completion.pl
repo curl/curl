@@ -171,7 +171,7 @@ completion.pl - Generates tab-completion files for various shells
 
 completion.pl [options...]
 
-    --opts_dir path to cmdline-opts directory
+    --opts-dir path to cmdline-opts directory
     --shell    zsh/fish
     --help     prints this help
 

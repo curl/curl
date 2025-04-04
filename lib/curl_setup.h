@@ -455,6 +455,11 @@
 #  define __NO_NET_API
 #endif
 
+/* Whether to use eventfd() */
+#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
+#define USE_EVENTFD
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 

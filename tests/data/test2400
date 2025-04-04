@@ -41,7 +41,7 @@ HTTP/2 GET over HTTPS
 <setenv>
 </setenv>
 <command>
--k --http2 "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
+--insecure --http2 "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
 </command>
 
 </client>

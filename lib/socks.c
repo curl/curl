@@ -344,10 +344,8 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if(dns) {
-#ifdef USE_CURL_ASYNC
-      data->state.async.dns = dns;
-      data->state.async.done = TRUE;
-#endif
+      /* Tell a possibly async resolver we no longer need the results. */
+      Curl_resolver_set_result(data, dns);
       infof(data, "Hostname '%s' was found", sx->hostname);
       sxstate(sx, data, CONNECT_RESOLVED);
     }
@@ -814,10 +812,8 @@ CONNECT_REQ_INIT:
     dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
 
     if(dns) {
-#ifdef USE_CURL_ASYNC
-      data->state.async.dns = dns;
-      data->state.async.done = TRUE;
-#endif
+      /* Tell a possibly async resolver we no longer need the results. */
+      Curl_resolver_set_result(data, dns);
       infof(data, "SOCKS5: hostname '%s' found", sx->hostname);
     }
 

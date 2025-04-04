@@ -1569,11 +1569,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     if(data->share) {
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 
-      if(data->dns.hostcachetype == HCACHE_SHARED) {
-        data->dns.hostcache = NULL;
-        data->dns.hostcachetype = HCACHE_NONE;
-      }
-
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(data->share->cookies == data->cookies)
         data->cookies = NULL;
@@ -1603,11 +1598,6 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 
       data->share->dirty++;
 
-      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
-        /* use shared host cache */
-        data->dns.hostcache = &data->share->hostcache;
-        data->dns.hostcachetype = HCACHE_SHARED;
-      }
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(data->share->cookies) {
         /* use shared cookie list, first free own one if any */

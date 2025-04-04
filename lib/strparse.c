@@ -139,25 +139,23 @@ int Curl_str_singlespace(const char **linep)
 
 /* given an ASCII character and max ascii, return TRUE if valid */
 #define valid_digit(x,m) \
-  (((x) >= '0') && ((x) <= m) && hexasciitable[(x)-'0'])
+  (((x) >= '0') && ((x) <= m) && Curl_hexasciitable[(x)-'0'])
+
+/* We use 16 for the zero index (and the necessary bitwise AND in the loop)
+   to be able to have a non-zero value there to make valid_digit() able to
+   use the info */
+const unsigned char Curl_hexasciitable[] = {
+  16, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 0x30: 0 - 9 */
+  0, 0, 0, 0, 0, 0, 0,
+  10, 11, 12, 13, 14, 15,        /* 0x41: A - F */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  10, 11, 12, 13, 14, 15         /* 0x61: a - f */
+};
 
 /* no support for 0x prefix nor leading spaces */
 static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
                         int base) /* 8, 10 or 16, nothing else */
 {
-  /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
-     to be able to have a non-zero value there to make valid_digit() able to
-     use the info */
-  static const unsigned char hexasciitable[] = {
-    16, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 0x30: 0 - 9 */
-    0, 0, 0, 0, 0, 0, 0,
-    10, 11, 12, 13, 14, 15,       /* 0x41: A - F */
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0,
-    10, 11, 12, 13, 14, 15        /* 0x61: a - f */
-  };
-
   curl_off_t num = 0;
   const char *p;
   int m = (base == 10) ? '9' :   /* the largest digit possible */
@@ -172,7 +170,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   if(max < base) {
     /* special-case low max scenario because check needs to be different */
     do {
-      int n = hexasciitable[*p++ - '0'] & 0x0f;
+      int n = Curl_hexval(*p++);
       num = num * base + n;
       if(num > max)
         return STRE_OVERFLOW;
@@ -180,7 +178,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
   }
   else {
     do {
-      int n = hexasciitable[*p++ - '0'] & 0x0f;
+      int n = Curl_hexval(*p++);
       if(num > ((max - n) / base))
         return STRE_OVERFLOW;
       num = num * base + n;

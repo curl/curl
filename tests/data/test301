@@ -33,7 +33,7 @@ https
 HTTPS GET with user and password
 </name>
 <command>
--k -u fake:user https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+--insecure -u fake:user https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

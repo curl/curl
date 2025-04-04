@@ -45,13 +45,14 @@ SPDX-License-Identifier: curl
 
 ## Requires to run
 
-  - perl (and a Unix-style shell)
-  - python (and a Unix-style shell, for SMB and TELNET tests)
-  - python-impacket (for SMB tests)
-  - diff (when a test fails, a diff is shown)
-  - stunnel (for HTTPS and FTPS tests)
-  - OpenSSH or SunSSH (for SCP and SFTP tests)
-  - nghttpx (for HTTP/2 and HTTP/3 tests)
+  - `perl` (and a Unix-style shell)
+  - `python` (and a Unix-style shell, for SMB and TELNET tests)
+  - `python-impacket` (for SMB tests)
+  - `diff` (when a test fails, a diff is shown)
+  - `stunnel` (for HTTPS and FTPS tests)
+  - `openssl` (the command line tool, for generating test server certificates)
+  - `openssh` or `SunSSH` (for SCP and SFTP tests)
+  - `nghttpx` (for HTTP/2 and HTTP/3 tests)
   - An available `en_US.UTF-8` locale
 
 ### Installation of impacket
@@ -73,9 +74,9 @@ SPDX-License-Identifier: curl
 ## Event-based
 
   If curl is built with `Debug` enabled (see below), then the `runtests.pl`
-  script offers a `-e` option that makes it perform *event-based*. Such tests
-  invokes the curl tool with `--test-event`, a debug-only option made for this
-  purpose.
+  script offers a `-e` option (or `--test-event`) that makes it perform
+  *event-based*. Such tests invokes the curl tool with `--test-event`, a
+  debug-only option made for this purpose.
 
   Performing event-based means that the curl tool uses the
   `curl_multi_socket_action()` API call to drive the transfer(s), instead of
@@ -86,12 +87,21 @@ SPDX-License-Identifier: curl
   To be able to use `--test-event` together with `--parallel`, curl requires
   *libuv* to be present and enabled in the build: `configure --enable-libuv`
 
+## Duplicated handles
+
+  If curl is built with `Debug` enabled (see below), then the `runtests.pl`
+  script offers a `--test-duphandle` option. When enabled, curl always
+  duplicates the easy handle and does its transfers using the new one instead
+  of the original. This is done entirely for testing purpose to verify that
+  everything works exactly the same when this is done; confirming that the
+  `curl_easy_duphandle()` function duplicates everything that it should.
+
 ### Port numbers used by test servers
 
-  All test servers run on "random" port numbers. All tests should be written
-  to use suitable variables instead of fixed port numbers so that test cases
-  continue to work independent on what port numbers the test servers actually
-  use.
+  All test servers run on "random" port numbers. All tests must be written to
+  use the suitable variables instead of fixed port numbers so that test cases
+  continue to work independently of what port numbers the test servers
+  actually use.
 
   See [`FILEFORMAT`](FILEFORMAT.md) for the port number variables.
 
