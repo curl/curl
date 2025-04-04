@@ -197,16 +197,20 @@ struct timeval {
  */
 
 #ifdef HAVE_CLOSESOCKET
-#  define sclose(x)  closesocket((x))
+#  define CURL_SCLOSE(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
-#  define sclose(x)  CloseSocket((x))
+#  define CURL_SCLOSE(x)  CloseSocket((x))
 #elif defined(MSDOS)  /* Watt-32 */
-#  define sclose(x)  close_s((x))
+#  define CURL_SCLOSE(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
-#  define sclose(x)  lwip_close((x))
+#  define CURL_SCLOSE(x)  lwip_close((x))
 #else
-#  define sclose(x)  close((x))
+#  define CURL_SCLOSE(x)  close((x))
 #endif
+
+/* compatibility/convenience macros */
+#define sclose(x)  CURL_SCLOSE(x)
+#define fake_sclose(x)  Curl_nop_stmt
 
 /*
  * Stack-independent version of fcntl() on sockets:
