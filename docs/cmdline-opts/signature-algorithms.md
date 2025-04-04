@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Stormshield, <andrei.florea@stormshield.eu>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: signature-algorithms
 Arg: <list>
