@@ -673,7 +673,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
        (!conn->dns_entry->hinfo->target ||      /* for same host */
         !conn->dns_entry->hinfo->target[0] ||
         (conn->dns_entry->hinfo->target[0] == '.' &&
-         !conn->dns_entry->hinfo->target[0])) &&
+         !conn->dns_entry->hinfo->target[1])) &&
        (conn->dns_entry->hinfo->port < 0 ||    /* for same port */
         conn->dns_entry->hinfo->port == conn->remote_port)) {
       size_t i;
