@@ -38,7 +38,7 @@ getoptions();
 
 # options to select a TLS
 my @tls = ("--with-openssl",
-           "--with-wolfssl=/home/daniel/build-wolfssl",
+           "--with-wolfssl=" . $ENV{'HOME'} . "/build-wolfssl",
            "--with-gnutls",
            "--with-mbedtls");
 
