@@ -552,7 +552,6 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
 CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
                                    struct Curl_dns_entry **entry)
 {
-  struct thread_data *td = &data->state.async.thdata;
   struct async_addr_thrd_ctx *addr_ctx = data->state.async.thdata.addr_ctx;
   bool done = FALSE;
 
@@ -560,9 +559,9 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
   *entry = NULL;
 
 #ifdef USE_HTTPSRR_ARES
-   /* best effort, ignore errors */
-  if(td->rr_ctx)
-    (void)Curl_ares_perform(td->rr_ctx->channel, 0);
+  /* best effort, ignore errors */
+  if(data->state.async.thdata.rr_ctx)
+    (void)Curl_ares_perform(data->state.async.thdata.rr_ctx, 0);
 #endif
 
   DEBUGASSERT(addr_ctx);
@@ -632,7 +631,6 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
 
 int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
-  struct thread_data *td = &data->state.async.thdata;
   struct async_addr_thrd_ctx *addr_ctx = data->state.async.thdata.addr_ctx;
   int ret_val = 0;
 #if !defined(CURL_DISABLE_SOCKETPAIR) || defined(USE_HTTPSRR_ARES)
@@ -642,7 +640,8 @@ int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 #endif
 
 #ifdef USE_HTTPSRR_ARES
-  if(td->rr_ctx) {
+  if(data->state.async.thdata.rr_ctx) {
+    struct thread_data *td = &data->state.async.thdata;
     ret_val = Curl_ares_getsock(data, td->rr_ctx->channel, socks);
     for(socketi = 0; socketi < (MAX_SOCKSPEREASYHANDLE - 1); socketi++)
       if(!ARES_GETSOCK_READABLE(ret_val, socketi) &&
