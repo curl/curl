@@ -265,6 +265,8 @@ if(GSS_FOUND)
   endif()
 
   if(NOT TARGET CURL::gss)
+    define_property(TARGET PROPERTY CURL_GSS_FLAVOUR BRIEF_DOCS "GSS flavour: GNU, MIT or Heimdal")
+
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
       VERSION "${GSS_VERSION}"
