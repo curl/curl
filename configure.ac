@@ -4112,6 +4112,7 @@ case $host in
 esac
 
 AC_CHECK_FUNCS([\
+  accept4 \
   eventfd \
   fnmatch \
   geteuid \
