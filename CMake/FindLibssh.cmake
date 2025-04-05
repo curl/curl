@@ -89,6 +89,23 @@ else()
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
 
-if(LIBSSH_FOUND AND WIN32)
-  list(APPEND _libssh_LIBRARIES "iphlpapi")  # for if_nametoindex
+if(LIBSSH_FOUND)
+  if(WIN32)
+    list(APPEND _libssh_LIBRARIES "iphlpapi")  # for if_nametoindex
+  endif()
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_bearssl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::bearssl)
+    add_library(CURL::bearssl INTERFACE IMPORTED)
+    set_target_properties(CURL::bearssl PROPERTIES
+      VERSION "${BEARSSL_VERSION}"
+      CURL_PC_MODULES "${_bearssl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+  endif()
 endif()
