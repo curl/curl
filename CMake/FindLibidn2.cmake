@@ -34,13 +34,13 @@
 # - `LIBIDN2_VERSION`:       Version of libidn2.
 # - `CURL::libidn2`:         libidn2 library target.
 
-set(LIBIDN2_PC_REQUIRES "libidn2")
+set(_libidn2_pc_requires "libidn2")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
    NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBIDN2 ${LIBIDN2_PC_REQUIRES})
+  pkg_check_modules(LIBIDN2 ${_libidn2_pc_requires})
 endif()
 
 if(LIBIDN2_FOUND)

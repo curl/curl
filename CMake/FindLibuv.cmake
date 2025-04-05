@@ -34,13 +34,13 @@
 # - `LIBUV_VERSION`:       Version of libuv.
 # - `CURL::libuv`:         libuv library target.
 
-set(LIBUV_PC_REQUIRES "libuv")
+set(_libuv_pc_requires "libuv")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND
    NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBUV ${LIBUV_PC_REQUIRES})
+  pkg_check_modules(LIBUV ${_libuv_pc_requires})
 endif()
 
 if(LIBUV_FOUND)

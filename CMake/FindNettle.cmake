@@ -34,13 +34,13 @@
 # - `NETTLE_VERSION`:       Version of nettle.
 # - `CURL::nettle`:         nettle library target.
 
-set(NETTLE_PC_REQUIRES "nettle")
+set(_nettle_pc_requires "nettle")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NETTLE_INCLUDE_DIR AND
    NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NETTLE ${NETTLE_PC_REQUIRES})
+  pkg_check_modules(NETTLE ${_nettle_pc_requires})
 endif()
 
 if(NETTLE_FOUND)

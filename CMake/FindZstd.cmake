@@ -43,13 +43,13 @@ if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
   set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
 endif()
 
-set(ZSTD_PC_REQUIRES "libzstd")
+set(_zstd_pc_requires "libzstd")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(ZSTD ${ZSTD_PC_REQUIRES})
+  pkg_check_modules(ZSTD ${_zstd_pc_requires})
 endif()
 
 if(ZSTD_FOUND)
