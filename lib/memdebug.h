@@ -181,7 +181,10 @@ CURL_EXTERN ALLOC_FUNC
 
 #else
 /* when not CURLDEBUG */
+#ifndef FOPEN
+/* FOPEN might already be defined in curl_setup.h for Windows */
 #define FOPEN(a,b) fopen(a,b)
+#endif
 #define FDOPEN(a,b) fdopen(a,b)
 #define FCLOSE(a) fclose(a)
 #define SOCKET(a,b,c) socket(a,b,c)
