@@ -27,7 +27,7 @@
 #
 # - `GSS_ROOT_DIR`:      Absolute path to the root installation of GSS. (also supported as environment)
 #
-# Result variables:
+# Defines:
 #
 # - `GSS_FOUND`:         System has a GSS library.
 # - `GSS_FLAVOUR`:       "GNU" or "MIT" if anything found.

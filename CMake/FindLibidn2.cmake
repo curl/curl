@@ -28,7 +28,7 @@
 # - `LIBIDN2_INCLUDE_DIR`:   Absolute path to libidn2 include directory.
 # - `LIBIDN2_LIBRARY`:       Absolute path to `libidn2` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBIDN2_FOUND`:         System has libidn2.
 # - `LIBIDN2_INCLUDE_DIRS`:  The libidn2 include directories.
