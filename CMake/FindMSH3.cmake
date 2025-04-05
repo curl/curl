@@ -28,7 +28,7 @@
 # - `MSH3_INCLUDE_DIR`:   The msh3 include directory.
 # - `MSH3_LIBRARY`:       Path to `msh3` library.
 #
-# Result variables:
+# Defines:
 #
 # - `MSH3_FOUND`:         System has msh3.
 # - `MSH3_INCLUDE_DIRS`:  The msh3 include directories.
