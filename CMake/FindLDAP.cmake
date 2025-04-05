@@ -42,13 +42,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_LIBRARY AND
    NOT DEFINED LDAP_LBER_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LDAP ${_ldap_pc_requires})
+  pkg_check_modules(_ldap ${_ldap_pc_requires})
 endif()
 
-if(LDAP_FOUND)
-  set(LDAP_VERSION ${LDAP_ldap_VERSION})
-  string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
-  message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
+if(_ldap_FOUND)
+  set(LDAP_VERSION "${_ldap_ldap_VERSION}")
+  string(REPLACE ";" " " _ldap_CFLAGS "${_ldap_CFLAGS}")
+  message(STATUS "Found LDAP (via pkg-config): ${_ldap_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
   set(_ldap_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
@@ -95,8 +95,8 @@ else()
   )
 
   if(LDAP_FOUND)
-    set(LDAP_INCLUDE_DIRS ${LDAP_INCLUDE_DIR})
-    set(LDAP_LIBRARIES    ${LDAP_LIBRARY} ${LDAP_LBER_LIBRARY})
+    set(_ldap_INCLUDE_DIRS ${LDAP_INCLUDE_DIR})
+    set(_ldap_LIBRARIES    ${LDAP_LIBRARY} ${LDAP_LBER_LIBRARY})
   endif()
 
   mark_as_advanced(LDAP_INCLUDE_DIR LDAP_LIBRARY LDAP_LBER_LIBRARY)

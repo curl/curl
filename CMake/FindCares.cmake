@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED CARES_INCLUDE_DIR AND
    NOT DEFINED CARES_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(CARES ${_cares_pc_requires})
+  pkg_check_modules(_cares ${_cares_pc_requires})
 endif()
 
-if(CARES_FOUND)
+if(_cares_FOUND)
   set(Cares_FOUND TRUE)
-  string(REPLACE ";" " " CARES_CFLAGS "${CARES_CFLAGS}")
-  message(STATUS "Found Cares (via pkg-config): ${CARES_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
+  string(REPLACE ";" " " _cares_CFLAGS "${_cares_CFLAGS}")
+  message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
   find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
@@ -81,13 +81,13 @@ else()
   )
 
   if(CARES_FOUND)
-    set(CARES_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
-    set(CARES_LIBRARIES    ${CARES_LIBRARY})
+    set(_cares_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
+    set(_cares_LIBRARIES    ${CARES_LIBRARY})
   endif()
 
   mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)
 endif()
 
 if(CARES_FOUND AND WIN32)
-  list(APPEND CARES_LIBRARIES "iphlpapi")  # for if_indextoname and others
+  list(APPEND _cares_LIBRARIES "iphlpapi")  # for if_indextoname and others
 endif()

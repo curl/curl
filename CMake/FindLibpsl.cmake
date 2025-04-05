@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBPSL_INCLUDE_DIR AND
    NOT DEFINED LIBPSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBPSL ${_libpsl_pc_requires})
+  pkg_check_modules(_libpsl ${_libpsl_pc_requires})
 endif()
 
-if(LIBPSL_FOUND AND LIBPSL_INCLUDE_DIRS)
+if(_libpsl_FOUND AND _libpsl_INCLUDE_DIRS)
   set(Libpsl_FOUND TRUE)
-  string(REPLACE ";" " " LIBPSL_CFLAGS "${LIBPSL_CFLAGS}")
-  message(STATUS "Found Libpsl (via pkg-config): ${LIBPSL_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
+  string(REPLACE ";" " " _libpsl_CFLAGS "${_libpsl_CFLAGS}")
+  message(STATUS "Found Libpsl (via pkg-config): ${_libpsl_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
 else()
   find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h")
   find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
@@ -71,8 +71,8 @@ else()
   )
 
   if(LIBPSL_FOUND)
-    set(LIBPSL_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
-    set(LIBPSL_LIBRARIES    ${LIBPSL_LIBRARY})
+    set(_libpsl_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
+    set(_libpsl_LIBRARIES    ${LIBPSL_LIBRARY})
   endif()
 
   mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)

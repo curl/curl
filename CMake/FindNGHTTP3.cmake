@@ -40,12 +40,12 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP3_INCLUDE_DIR AND
    NOT DEFINED NGHTTP3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP3 ${_nghttp3_pc_requires})
+  pkg_check_modules(_nghttp3 ${_nghttp3_pc_requires})
 endif()
 
-if(NGHTTP3_FOUND)
-  string(REPLACE ";" " " NGHTTP3_CFLAGS "${NGHTTP3_CFLAGS}")
-  message(STATUS "Found NGHTTP3 (via pkg-config): ${NGHTTP3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
+if(_nghttp3_FOUND)
+  string(REPLACE ";" " " _nghttp3_CFLAGS "${_nghttp3_CFLAGS}")
+  message(STATUS "Found NGHTTP3 (via pkg-config): ${_nghttp3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
 else()
   find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h")
   find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
@@ -70,8 +70,8 @@ else()
   )
 
   if(NGHTTP3_FOUND)
-    set(NGHTTP3_INCLUDE_DIRS ${NGHTTP3_INCLUDE_DIR})
-    set(NGHTTP3_LIBRARIES    ${NGHTTP3_LIBRARY})
+    set(_nghttp3_INCLUDE_DIRS ${NGHTTP3_INCLUDE_DIR})
+    set(_nghttp3_LIBRARIES    ${NGHTTP3_LIBRARY})
   endif()
 
   mark_as_advanced(NGHTTP3_INCLUDE_DIR NGHTTP3_LIBRARY)

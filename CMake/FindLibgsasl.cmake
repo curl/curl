@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBGSASL_INCLUDE_DIR AND
    NOT DEFINED LIBGSASL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBGSASL ${_libgsasl_pc_requires})
+  pkg_check_modules(_libgsasl ${_libgsasl_pc_requires})
 endif()
 
-if(LIBGSASL_FOUND)
+if(_libgsasl_FOUND)
   set(Libgsasl_FOUND TRUE)
-  string(REPLACE ";" " " LIBGSASL_CFLAGS "${LIBGSASL_CFLAGS}")
-  message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
+  string(REPLACE ";" " " _libgsasl_CFLAGS "${_libgsasl_CFLAGS}")
+  message(STATUS "Found Libgsasl (via pkg-config): ${_libgsasl_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
 else()
   find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
@@ -71,8 +71,8 @@ else()
   )
 
   if(LIBGSASL_FOUND)
-    set(LIBGSASL_INCLUDE_DIRS ${LIBGSASL_INCLUDE_DIR})
-    set(LIBGSASL_LIBRARIES    ${LIBGSASL_LIBRARY})
+    set(_libgsasl_INCLUDE_DIRS ${LIBGSASL_INCLUDE_DIR})
+    set(_libgsasl_LIBRARIES    ${LIBGSASL_LIBRARY})
   endif()
 
   mark_as_advanced(LIBGSASL_INCLUDE_DIR LIBGSASL_LIBRARY)
