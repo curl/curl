@@ -28,14 +28,10 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef CURLDEBUG
-#  define MEMDEBUG_NODEFINES
-#  include "memdebug.h"
-#endif
-
 #include "timediff.h"
-
 #include "tool_binmode.h"
+
+#include "memdebug.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
