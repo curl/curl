@@ -28,7 +28,7 @@
 # - `BEARSSL_INCLUDE_DIR`:   The BearSSL include directory.
 # - `BEARSSL_LIBRARY`:       Path to `bearssl` library.
 #
-# Result variables:
+# Defines:
 #
 # - `BEARSSL_FOUND`:         System has BearSSL.
 # - `BEARSSL_INCLUDE_DIRS`:  The BearSSL include directories.
