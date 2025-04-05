@@ -15,7 +15,6 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - Schannel
-  - Secure Transport
   - wolfSSL
 Added-in: 7.52.0
 ---
@@ -38,13 +37,8 @@ This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
 Pass a pointer to a null-terminated string as parameter. The string should be
 the filename of your client certificate used to connect to the HTTPS proxy.
-The default format is "P12" on Secure Transport and "PEM" on other engines,
-and can be changed with CURLOPT_PROXY_SSLCERTTYPE(3).
-
-With Secure Transport, this can also be the nickname of the certificate you
-wish to authenticate with as it is named in the security database. If you want
-to use a file from the current directory, please precede it with "./" prefix,
-in order to avoid confusion with a nickname.
+The default format "PEM", and can be changed with
+CURLOPT_PROXY_SSLCERTTYPE(3).
 
 When using a client certificate, you most likely also need to provide a
 private key with CURLOPT_PROXY_SSLKEY(3).

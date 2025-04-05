@@ -14,9 +14,7 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
-  - BearSSL
   - Schannel
-  - Secure Transport
   - wolfSSL
   - mbedTLS
   - rustls
@@ -98,8 +96,6 @@ int main(void)
 OpenSSL support added in 7.9.
 wolfSSL support added in 7.53.0.
 Schannel support added in 7.61.0.
-Secure Transport support added in 7.77.0.
-BearSSL support added in 7.83.0.
 mbedTLS support added in 8.8.0.
 Rustls support added in 8.10.0.
 
