@@ -37,8 +37,9 @@ struct Curl_dns_entry;
 #ifdef CURLRES_THREADED
 #include "curl_threads.h"
 
-/* Data for synchronization between resolver thread and its parent */
-struct thread_sync_data {
+/* Context for threaded address resolver */
+struct async_addr_thrd_ctx {
+  curl_thread_t thread_hnd;
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
   curl_mutex_t mutx;
@@ -49,29 +50,34 @@ struct thread_sync_data {
 #ifdef HAVE_GETADDRINFO
   struct addrinfo hints;
 #endif
+  struct curltime start;
+  timediff_t interval_end;
+  unsigned int poll_interval;
   int port;
   int sock_error;
   int ref_count;
 };
 
-struct thread_data {
-  curl_thread_t thread_hnd;
-  unsigned int poll_interval;
-  timediff_t interval_end;
-  struct curltime start;
-  struct thread_sync_data *tsd;
-  CURLcode result; /* CURLE_OK or error handling response */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
-  struct Curl_https_rrinfo hinfo;
+struct async_rr_ares_ctx {
   ares_channel channel;
-  int num_pending; /* number of outstanding c-ares requests */
+};
 #endif
-  bool init;
+
+struct thread_data {
+  struct async_addr_thrd_ctx *addr_ctx;
+#if defined(USE_HTTPSRR) && defined(USE_ARES)
+  struct async_rr_ares_ctx *rr_ctx;
+  struct Curl_https_rrinfo hinfo;
+  int num_pending; /* number of outstanding c-ares requests */
+  CURLcode result;
+#endif
 };
 
 #elif defined(CURLRES_ARES) /* CURLRES_THREADED */
 
 struct thread_data {
+  ares_channel channel;
   int num_pending; /* number of outstanding c-ares requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
@@ -121,35 +127,7 @@ int Curl_resolver_global_init(void);
  */
 void Curl_resolver_global_cleanup(void);
 
-/*
- * Curl_resolver_init()
- * Called from curl_easy_init() -> Curl_open() to initialize resolver
- * URL-state specific environment ('resolver' member of the UrlState
- * structure). Should fill the passed pointer by the initialized handler.
- * Returning anything else than CURLE_OK fails curl_easy_init() with the
- * correspondent code.
- */
-CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver);
-
-/*
- * Curl_resolver_cleanup()
- * Called from curl_easy_cleanup() -> Curl_close() to cleanup resolver
- * URL-state specific environment ('resolver' member of the UrlState
- * structure). Should destroy the handler and free all resources connected to
- * it.
- */
-void Curl_resolver_cleanup(void *resolver);
-
-/*
- * Curl_resolver_duphandle()
- * Called from curl_easy_duphandle() to duplicate resolver URL-state specific
- * environment ('resolver' member of the UrlState structure). Should
- * duplicate the 'from' handle and pass the resulting handle to the 'to'
- * pointer. Returning anything else than CURLE_OK causes failed
- * curl_easy_duphandle() call.
- */
-CURLcode Curl_resolver_duphandle(struct Curl_easy *easy, void **to,
-                                 void *from);
+CURLcode Curl_resolver_init_lazy(struct Curl_easy *easy);
 
 /*
  * Curl_resolver_cancel().
@@ -236,16 +214,14 @@ void Curl_resolver_set_result(struct Curl_easy *data,
 
 #ifndef CURLRES_ASYNCH
 /* convert these functions if an asynch resolver is not used */
+#define Curl_resolver_init_lazy(x) CURLE_OK
 #define Curl_resolver_cancel(x) Curl_nop_stmt
 #define Curl_resolver_kill(x) Curl_nop_stmt
 #define Curl_resolver_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_resolver_wait_resolv(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_resolver_duphandle(x,y,z) CURLE_OK
-#define Curl_resolver_init(x,y) CURLE_OK
 #define Curl_resolver_global_init() CURLE_OK
 #define Curl_resolver_global_cleanup() Curl_nop_stmt
 #define Curl_resolver_set_result(x,y) Curl_nop_stmt
-#define Curl_resolver_cleanup(x) Curl_nop_stmt
 #endif
 
 #ifdef CURLRES_ASYNCH
