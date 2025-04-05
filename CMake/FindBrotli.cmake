@@ -42,13 +42,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLICOMMON_LIBRARY AND
    NOT DEFINED BROTLIDEC_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(BROTLI ${_brotli_pc_requires})
+  pkg_check_modules(_brotli ${_brotli_pc_requires})
 endif()
 
-if(BROTLI_FOUND)
+if(_brotli_FOUND)
   set(Brotli_FOUND TRUE)
-  string(REPLACE ";" " " BROTLI_CFLAGS "${BROTLI_CFLAGS}")
-  message(STATUS "Found Brotli (via pkg-config): ${BROTLI_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
+  string(REPLACE ";" " " _brotli_CFLAGS "${_brotli_CFLAGS}")
+  message(STATUS "Found Brotli (via pkg-config): ${_brotli_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
   find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
   find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
@@ -63,8 +63,8 @@ else()
   )
 
   if(BROTLI_FOUND)
-    set(BROTLI_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
-    set(BROTLI_LIBRARIES ${BROTLIDEC_LIBRARY} ${BROTLICOMMON_LIBRARY})
+    set(_brotli_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
+    set(_brotli_LIBRARIES ${BROTLIDEC_LIBRARY} ${BROTLICOMMON_LIBRARY})
   endif()
 
   mark_as_advanced(BROTLI_INCLUDE_DIR BROTLIDEC_LIBRARY BROTLICOMMON_LIBRARY)
