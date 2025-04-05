@@ -34,13 +34,13 @@
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
 # - `CURL::nghttp3`:         nghttp3 library target.
 
-set(NGHTTP3_PC_REQUIRES "libnghttp3")
+set(_nghttp3_pc_requires "libnghttp3")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP3_INCLUDE_DIR AND
    NOT DEFINED NGHTTP3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP3 ${NGHTTP3_PC_REQUIRES})
+  pkg_check_modules(NGHTTP3 ${_nghttp3_pc_requires})
 endif()
 
 if(NGHTTP3_FOUND)
