@@ -34,13 +34,13 @@
 # - `QUICHE_VERSION`:       Version of quiche.
 # - `CURL::quiche`:         quiche library target.
 
-set(QUICHE_PC_REQUIRES "quiche")
+set(_quiche_pc_requires "quiche")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED QUICHE_INCLUDE_DIR AND
    NOT DEFINED QUICHE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(QUICHE ${QUICHE_PC_REQUIRES})
+  pkg_check_modules(QUICHE ${_quiche_pc_requires})
 endif()
 
 if(QUICHE_FOUND)

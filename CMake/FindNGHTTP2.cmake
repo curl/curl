@@ -34,13 +34,13 @@
 # - `NGHTTP2_VERSION`:       Version of nghttp2.
 # - `CURL::nghttp2`:         nghttp2 library target.
 
-set(NGHTTP2_PC_REQUIRES "libnghttp2")
+set(_nghttp2_pc_requires "libnghttp2")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP2 ${NGHTTP2_PC_REQUIRES})
+  pkg_check_modules(NGHTTP2 ${_nghttp2_pc_requires})
 endif()
 
 if(NGHTTP2_FOUND)

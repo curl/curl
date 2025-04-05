@@ -34,13 +34,13 @@
 # - `LIBPSL_VERSION`:       Version of libpsl.
 # - `CURL::libpsl`:         libpsl library target.
 
-set(LIBPSL_PC_REQUIRES "libpsl")
+set(_libpsl_pc_requires "libpsl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBPSL_INCLUDE_DIR AND
    NOT DEFINED LIBPSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBPSL ${LIBPSL_PC_REQUIRES})
+  pkg_check_modules(LIBPSL ${_libpsl_pc_requires})
 endif()
 
 if(LIBPSL_FOUND AND LIBPSL_INCLUDE_DIRS)

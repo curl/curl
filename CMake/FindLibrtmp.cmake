@@ -34,13 +34,13 @@
 # - `LIBRTMP_VERSION`:       Version of librtmp.
 # - `CURL::librtmp`:         librtmp library target.
 
-set(LIBRTMP_PC_REQUIRES "librtmp")
+set(_librtmp_pc_requires "librtmp")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBRTMP_INCLUDE_DIR AND
    NOT DEFINED LIBRTMP_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBRTMP ${LIBRTMP_PC_REQUIRES})
+  pkg_check_modules(LIBRTMP ${_librtmp_pc_requires})
 endif()
 
 if(LIBRTMP_FOUND AND LIBRTMP_INCLUDE_DIRS)
