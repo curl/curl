@@ -28,7 +28,7 @@
 # - `RUSTLS_INCLUDE_DIR`:   The Rustls include directory.
 # - `RUSTLS_LIBRARY`:       Path to `rustls` library.
 #
-# Result variables:
+# Defines:
 #
 # - `RUSTLS_FOUND`:         System has Rustls.
 # - `RUSTLS_INCLUDE_DIRS`:  The Rustls include directories.
