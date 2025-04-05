@@ -40,12 +40,12 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MSH3_INCLUDE_DIR AND
    NOT DEFINED MSH3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(MSH3 ${_msh3_pc_requires})
+  pkg_check_modules(_msh3 ${_msh3_pc_requires})
 endif()
 
-if(MSH3_FOUND)
-  string(REPLACE ";" " " MSH3_CFLAGS "${MSH3_CFLAGS}")
-  message(STATUS "Found MSH3 (via pkg-config): ${MSH3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
+if(_msh3_FOUND)
+  string(REPLACE ";" " " _msh3_CFLAGS "${_msh3_CFLAGS}")
+  message(STATUS "Found MSH3 (via pkg-config): ${_msh3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
 else()
   set(_msh3_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
@@ -60,8 +60,8 @@ else()
   )
 
   if(MSH3_FOUND)
-    set(MSH3_INCLUDE_DIRS ${MSH3_INCLUDE_DIR})
-    set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
+    set(_msh3_INCLUDE_DIRS ${MSH3_INCLUDE_DIR})
+    set(_msh3_LIBRARIES    ${MSH3_LIBRARY})
   endif()
 
   mark_as_advanced(MSH3_INCLUDE_DIR MSH3_LIBRARY)
