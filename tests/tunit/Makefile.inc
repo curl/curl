@@ -24,11 +24,9 @@
 
 # these files are used in every single unit test program
 
-FIRSTFILES = \
- ../libtest/first.c \
- ../libtest/first.h
+FIRSTFILES = ../libtest/first.c
 
-TOOLFILES = curlcheck.h $(FIRSTFILES)
+TOOLFILES = $(FIRSTFILES)
 
 # These are all tool unit test programs
 TOOLPROGS = tool1394 tool1604
