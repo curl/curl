@@ -44,7 +44,7 @@
 # - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Absolute path to `ngtcp2_crypto_quictls` library.
 # - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Absolute path to `ngtcp2_crypto_wolfssl` library.
 #
-# Result variables:
+# Defines:
 #
 # - `NGTCP2_FOUND`:                     System has ngtcp2.
 # - `NGTCP2_INCLUDE_DIRS`:              The ngtcp2 include directories.

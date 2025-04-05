@@ -28,7 +28,7 @@
 # - `CARES_INCLUDE_DIR`:   Absolute path to c-ares include directory.
 # - `CARES_LIBRARY`:       Absolute path to `cares` library.
 #
-# Result variables:
+# Defines:
 #
 # - `CARES_FOUND`:         System has c-ares.
 # - `CARES_INCLUDE_DIRS`:  The c-ares include directories.

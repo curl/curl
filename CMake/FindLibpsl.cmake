@@ -28,7 +28,7 @@
 # - `LIBPSL_INCLUDE_DIR`:   Absolute path to libpsl include directory.
 # - `LIBPSL_LIBRARY`:       Absolute path to `libpsl` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBPSL_FOUND`:         System has libpsl.
 # - `LIBPSL_INCLUDE_DIRS`:  The libpsl include directories.

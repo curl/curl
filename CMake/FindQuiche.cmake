@@ -28,7 +28,7 @@
 # - `QUICHE_INCLUDE_DIR`:   Absolute path to quiche include directory.
 # - `QUICHE_LIBRARY`:       Absolute path to `quiche` library.
 #
-# Result variables:
+# Defines:
 #
 # - `QUICHE_FOUND`:         System has quiche.
 # - `QUICHE_INCLUDE_DIRS`:  The quiche include directories.

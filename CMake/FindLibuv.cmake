@@ -28,7 +28,7 @@
 # - `LIBUV_INCLUDE_DIR`:   Absolute path to libuv include directory.
 # - `LIBUV_LIBRARY`:       Absolute path to `libuv` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBUV_FOUND`:         System has libuv.
 # - `LIBUV_INCLUDE_DIRS`:  The libuv include directories.
