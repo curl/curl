@@ -34,20 +34,20 @@
 # - `MSH3_VERSION`:       Version of msh3.
 # - `CURL::msh3`:         msh3 library target.
 
-set(MSH3_PC_REQUIRES "libmsh3")
+set(_msh3_pc_requires "libmsh3")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MSH3_INCLUDE_DIR AND
    NOT DEFINED MSH3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(MSH3 ${MSH3_PC_REQUIRES})
+  pkg_check_modules(MSH3 ${_msh3_pc_requires})
 endif()
 
 if(MSH3_FOUND)
   string(REPLACE ";" " " MSH3_CFLAGS "${MSH3_CFLAGS}")
   message(STATUS "Found MSH3 (via pkg-config): ${MSH3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
 else()
-  set(MSH3_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_msh3_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MSH3_INCLUDE_DIR NAMES "msh3.h")
   find_library(MSH3_LIBRARY NAMES "msh3")

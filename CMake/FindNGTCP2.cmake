@@ -60,16 +60,16 @@ if(NGTCP2_FIND_COMPONENTS)
   endif()
 endif()
 
-set(NGTCP2_PC_REQUIRES "libngtcp2")
+set(_ngtcp2_pc_requires "libngtcp2")
 if(_ngtcp2_crypto_backend)
-  list(APPEND NGTCP2_PC_REQUIRES "lib${_crypto_library_lower}")
+  list(APPEND _ngtcp2_pc_requires "lib${_crypto_library_lower}")
 endif()
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGTCP2_INCLUDE_DIR AND
    NOT DEFINED NGTCP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGTCP2 ${NGTCP2_PC_REQUIRES})
+  pkg_check_modules(NGTCP2 ${_ngtcp2_pc_requires})
 endif()
 
 if(NGTCP2_FOUND)
