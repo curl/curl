@@ -45,6 +45,7 @@ endif()
 
 if(_librtmp_FOUND AND _librtmp_INCLUDE_DIRS)
   set(Librtmp_FOUND TRUE)
+  set(LIBRTMP_FOUND TRUE)
   string(REPLACE ";" " " _librtmp_CFLAGS "${_librtmp_CFLAGS}")
   message(STATUS "Found Librtmp (via pkg-config): ${_librtmp_INCLUDE_DIRS} (found version \"${LIBRTMP_VERSION}\")")
 else()
