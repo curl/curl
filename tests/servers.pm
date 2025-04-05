@@ -235,7 +235,7 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt')) {
+                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -1362,6 +1362,9 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'certs/test-localhost.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    if($proto eq "https-mtls") {
+        $flags .= "--mtls ";
+    }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
     }
@@ -2545,14 +2548,14 @@ sub startservers {
         elsif($what eq "file") {
             # we support it but have no server!
         }
-        elsif($what eq "https") {
+        elsif($what eq "https" || $what eq "https-mtls") {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return ("no stunnel", 4);
             }
-            if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
+            if($runcert{$what} && ($runcert{$what} ne $certfile)) {
                 # stop server when running and using a different cert
-                if(stopserver('https')) {
+                if(stopserver($what)) {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2560,10 +2563,10 @@ sub startservers {
                     return ("failed stopping HTTP server", 3);
                 }
             }
-            if($run{'https'} &&
-               !responsive_http_server("https", $verbose, 0,
-                                       protoport('https'))) {
-                if(stopserver('https')) {
+            if($run{$what} &&
+               !responsive_http_server($what, $verbose, 0,
+                                       protoport($what))) {
+                if(stopserver($what)) {
                     return ("failed stopping unresponsive HTTPS server", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2572,7 +2575,7 @@ sub startservers {
                 }
             }
             # check a running http server if we not already checked https
-            if($run{'http'} && !$run{'https'} &&
+            if($run{'http'} && !$run{$what} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {
@@ -2588,15 +2591,15 @@ sub startservers {
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(!$run{'https'}) {
-                ($serr, $pid, $pid2, $PORT{'https'}) =
-                    runhttpsserver($verbose, "https", "", $certfile);
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
                 if($pid <= 0) {
                     return ("failed starting HTTPS server (stunnel)", $serr);
                 }
-                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https'}="$pid $pid2";
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "http/2") {
@@ -3017,7 +3020,7 @@ sub subvariables {
     foreach my $proto ('DICT',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
-                       'HTTP', 'HTTP6', 'HTTPS',
+                       'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',
                        'HTTPSPROXY', 'HTTPTLS', 'HTTPTLS6',
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',
