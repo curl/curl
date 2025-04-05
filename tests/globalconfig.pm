@@ -43,7 +43,7 @@ BEGIN {
         $has_shared
         $LIBDIR
         $UNITDIR
-        $TOOLUNITDIR
+        $TUNITDIR
         $SRVDIR
         $listonly
         $LOCKDIR
