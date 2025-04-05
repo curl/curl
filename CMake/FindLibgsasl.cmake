@@ -28,7 +28,7 @@
 # - `LIBGSASL_INCLUDE_DIR`:   The libgsasl include directory.
 # - `LIBGSASL_LIBRARY`:       Path to `libgsasl` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBGSASL_FOUND`:         System has libgsasl.
 # - `LIBGSASL_INCLUDE_DIRS`:  The libgsasl include directories.
