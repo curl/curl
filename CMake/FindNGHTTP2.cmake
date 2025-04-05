@@ -28,7 +28,7 @@
 # - `NGHTTP2_INCLUDE_DIR`:   Absolute path to nghttp2 include directory.
 # - `NGHTTP2_LIBRARY`:       Absolute path to `nghttp2` library.
 #
-# Result variables:
+# Defines:
 #
 # - `NGHTTP2_FOUND`:         System has nghttp2.
 # - `NGHTTP2_INCLUDE_DIRS`:  The nghttp2 include directories.

@@ -30,7 +30,7 @@
 # - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
 # - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
 #
-# Result variables:
+# Defines:
 #
 # - `MBEDTLS_FOUND`:         System has mbedTLS.
 # - `MBEDTLS_INCLUDE_DIRS`:  The mbedTLS include directories.
