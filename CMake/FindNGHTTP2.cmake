@@ -45,6 +45,7 @@ endif()
 
 if(_nghttp2_FOUND)
   set(NGHTTP2_FOUND TRUE)
+  set(NGHTTP2_VERSION ${_nghttp2_VERSION})
   string(REPLACE ";" " " _nghttp2_CFLAGS "${_nghttp2_CFLAGS}")
   message(STATUS "Found NGHTTP2 (via pkg-config): ${_nghttp2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
