@@ -63,7 +63,7 @@ endif()
 
 mark_as_advanced(WOLFSSH_INCLUDE_DIR WOLFSSH_LIBRARY)
 
-if(BEARSSL_FOUND)
+if(WOLFSSH_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
     link_directories(${_bearssl_LIBRARY_DIRS})
   endif()
@@ -71,7 +71,7 @@ if(BEARSSL_FOUND)
   if(NOT TARGET CURL::bearssl)
     add_library(CURL::bearssl INTERFACE IMPORTED)
     set_target_properties(CURL::bearssl PROPERTIES
-      VERSION "${BEARSSL_VERSION}"
+      VERSION "${WOLFSSH_VERSION}"
       CURL_PC_MODULES "${_bearssl_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
