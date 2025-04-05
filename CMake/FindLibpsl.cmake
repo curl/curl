@@ -37,6 +37,7 @@
 # - `LIBPSL_PC_REQUIRES`:   The libpsl pkg-config packages.
 # - `LIBPSL_CFLAGS`:        Required compiler flags.
 # - `LIBPSL_VERSION`:       Version of libpsl.
+# - `CURL::libpsl`:         libpsl library target.
 
 set(LIBPSL_PC_REQUIRES "libpsl")
 

@@ -39,6 +39,7 @@
 # - `MBEDTLS_PC_REQUIRES`:   The mbedTLS pkg-config packages.
 # - `MBEDTLS_CFLAGS`:        Required compiler flags.
 # - `MBEDTLS_VERSION`:       Version of mbedTLS.
+# - `CURL::mbedtls`:         mbedTLS library target.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")
