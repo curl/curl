@@ -37,6 +37,7 @@
 # - `NETTLE_PC_REQUIRES`:   The nettle pkg-config packages.
 # - `NETTLE_CFLAGS`:        Required compiler flags.
 # - `NETTLE_VERSION`:       Version of nettle.
+# - `CURL::nettle`:         nettle library target.
 
 set(NETTLE_PC_REQUIRES "nettle")
 
