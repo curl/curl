@@ -770,7 +770,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         /* not requested, ignore */
         CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
                        (int)namelen, name);
-        if(is_transfer) {
+        if(is_transfer && !data->set.http_te_skip) {
           if(has_chunked)
             failf(data, "A Transfer-Encoding (%.*s) was listed after chunked",
                   (int)namelen, name);
