@@ -37,6 +37,7 @@
 # - `ZSTD_PC_REQUIRES`:   The zstd pkg-config packages.
 # - `ZSTD_CFLAGS`:        Required compiler flags.
 # - `ZSTD_VERSION`:       Version of zstd.
+# - `CURL::zstd`:         zstd library target.
 
 if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
   message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")

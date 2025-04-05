@@ -38,6 +38,7 @@
 # - `LDAP_PC_REQUIRES`:   The ldap pkg-config packages.
 # - `LDAP_CFLAGS`:        Required compiler flags.
 # - `LDAP_VERSION`:       Version of ldap.
+# - `CURL::ldap`:         ldap library target.
 
 set(LDAP_PC_REQUIRES "ldap" "lber")
 
