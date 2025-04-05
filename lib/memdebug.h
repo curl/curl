@@ -182,6 +182,7 @@ CURL_EXTERN ALLOC_FUNC
 #else
 /* when not CURLDEBUG */
 #define FOPEN(a,b) fopen(a,b)
+#define FCLOSE(a) fclose(a)
 #define SOCKET(a,b,c) socket(a,b,c)
 #define ACCEPT(a,b,c) accept(a,b,c)
 #define SOCKETPAIR(a,b,c,d,e) socketpair(a,b,c,d,e)
