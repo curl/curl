@@ -37,6 +37,7 @@
 # - `NGHTTP2_PC_REQUIRES`:   The nghttp2 pkg-config packages.
 # - `NGHTTP2_CFLAGS`:        Required compiler flags.
 # - `NGHTTP2_VERSION`:       Version of nghttp2.
+# - `CURL::nghttp2`:         nghttp2 library target.
 
 set(NGHTTP2_PC_REQUIRES "libnghttp2")
 
