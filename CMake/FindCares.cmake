@@ -34,13 +34,13 @@
 # - `CARES_VERSION`:       Version of c-ares.
 # - `CURL::cares`:         c-ares library target.
 
-set(CARES_PC_REQUIRES "libcares")
+set(_cares_pc_requires "libcares")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED CARES_INCLUDE_DIR AND
    NOT DEFINED CARES_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(CARES ${CARES_PC_REQUIRES})
+  pkg_check_modules(CARES ${_cares_pc_requires})
 endif()
 
 if(CARES_FOUND)
