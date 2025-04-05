@@ -141,15 +141,6 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #  endif
 #endif
 
-#else /* if not building libcurl */
-
-/* when included by the tool code for example */
-#define FREE(x) free(x)
-#define MALLOC(x) malloc(x)
-#define CALLOC(a,b) calloc(a,b)
-#define REALLOC(a,b) realloc(a,b)
-#define STRDUP(x) strdup(x)
-
 #endif
 
 #endif /* CURLDEBUG */

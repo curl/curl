@@ -186,6 +186,15 @@ CURL_EXTERN ALLOC_FUNC
 #define SEND(a,b,c,d) send(a,b,c,d)
 #define RECV(a,b,c,d) recv(a,b,c,d)
 
+#ifndef BUILDING_LIBCURL
+/* for outside of libcurl code */
+#define FREE(x) free(x)
+#define MALLOC(x) malloc(x)
+#define CALLOC(a,b) calloc(a,b)
+#define REALLOC(a,b) realloc(a,b)
+#define STRDUP(x) strdup(x)
+#endif
+
 #endif /* CURLDEBUG */
 
 /*
