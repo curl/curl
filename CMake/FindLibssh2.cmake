@@ -28,7 +28,7 @@
 # - `LIBSSH2_INCLUDE_DIR`:   The libssh2 include directory.
 # - `LIBSSH2_LIBRARY`:       Path to `libssh2` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBSSH2_FOUND`:         System has libssh2.
 # - `LIBSSH2_INCLUDE_DIRS`:  The libssh2 include directories.

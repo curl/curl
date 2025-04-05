@@ -28,7 +28,7 @@
 # - `LIBRTMP_INCLUDE_DIR`:   The librtmp include directory.
 # - `LIBRTMP_LIBRARY`:       Path to `librtmp` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LIBRTMP_FOUND`:         System has librtmp.
 # - `LIBRTMP_INCLUDE_DIRS`:  The librtmp include directories.
