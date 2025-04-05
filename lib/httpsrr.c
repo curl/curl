@@ -40,8 +40,8 @@
 
 #define MAX_ALPN_LENGTH 255
 
-CURLcode Curl_httpsrr_decode_alpn(const char *cp, size_t len,
-                                  unsigned char *alpns)
+static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
+                                    unsigned char *alpns)
 {
   /*
    * The wire-format value for "alpn" consists of at least one alpn-id
@@ -81,12 +81,13 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
                           struct Curl_https_rrinfo *hi,
                           uint16_t rrkey, const uint8_t *val, size_t vlen)
 {
+  CURLcode result = CURLE_OK;
   switch(rrkey) {
   case HTTPS_RR_CODE_MANDATORY:
     CURL_TRC_DNS(data, "HTTPS RR MANDATORY left to implement");
     break;
   case HTTPS_RR_CODE_ALPN: /* str_list */
-    Curl_httpsrr_decode_alpn((const char *)val, vlen, hi->alpns);
+    result = httpsrr_decode_alpn((const char *)val, vlen, hi->alpns);
     CURL_TRC_DNS(data, "HTTPS RR ALPN: %u %u %u %u",
                  hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
@@ -133,7 +134,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     CURL_TRC_DNS(data, "HTTPS RR unknown code");
     break;
   }
-  return CURLE_OK;
+  return result;
 }
 
 struct Curl_https_rrinfo *

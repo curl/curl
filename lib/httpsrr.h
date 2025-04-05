@@ -76,9 +76,6 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 #define HTTPS_RR_CODE_ECH             0x05
 #define HTTPS_RR_CODE_IPV6            0x06
 
-CURLcode Curl_httpsrr_decode_alpn(const char *cp, size_t len,
-                                  unsigned char *alpns);
-
 #if defined(USE_ARES)
 void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
                          size_t timeouts,
