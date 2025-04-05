@@ -46,6 +46,7 @@
 # - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
 # - `NGTCP2_CFLAGS`:        Required compiler flags.
 # - `NGTCP2_VERSION`:       Version of ngtcp2.
+# - `CURL::ngtcp2`:         ngtcp2 library target.
 
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")

@@ -38,6 +38,7 @@
 # - `BROTLI_PC_REQUIRES`:    The brotli pkg-config packages.
 # - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
+# - `CURL::brotli`:          brotli library target.
 
 set(BROTLI_PC_REQUIRES "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
 
