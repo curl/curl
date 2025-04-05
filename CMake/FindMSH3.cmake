@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `MSH3_FOUND`:         System has msh3.
-# - `MSH3_INCLUDE_DIRS`:  The msh3 include directories.
-# - `MSH3_LIBRARIES`:     The msh3 library names.
-# - `MSH3_LIBRARY_DIRS`:  The msh3 library directories.
-# - `MSH3_PC_REQUIRES`:   The msh3 pkg-config packages.
-# - `MSH3_CFLAGS`:        Required compiler flags.
 # - `MSH3_VERSION`:       Version of msh3.
 # - `CURL::msh3`:         msh3 library target.
 

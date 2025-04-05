@@ -31,8 +31,6 @@
 # Defines:
 #
 # - `BEARSSL_FOUND`:         System has BearSSL.
-# - `BEARSSL_INCLUDE_DIRS`:  The BearSSL include directories.
-# - `BEARSSL_LIBRARIES`:     The BearSSL library names.
 # - `CURL::bearssl`:         BearSSL library target.
 
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
