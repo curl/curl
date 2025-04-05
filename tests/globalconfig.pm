@@ -81,9 +81,7 @@ use Cwd qw(getcwd);
 use testutil qw(
     shell_quote
 );
-use File::Spec qw(
-    devnull
-);
+use File::Spec;
 
 
 #######################################################################
