@@ -521,7 +521,18 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     if((arg < -1) || (arg > 1))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     /* see the TR_MODE_* defines */
-    data->set.http_trenc = (unsigned char)(arg + 1);
+    switch(arg) {
+    case -1:
+      data->set.http_trenc = TR_MODE_IGNORE;
+      break;
+    case 1:
+      data->set.http_trenc = TR_MODE_COMPRESS;
+      break;
+    case 0:
+    default:
+      data->set.http_trenc = TR_MODE_CHUNKED;
+      break;
+    }
     break;
 
   case CURLOPT_FOLLOWLOCATION:

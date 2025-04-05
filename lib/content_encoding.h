@@ -25,9 +25,9 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#define TR_MODE_IGNORE   0
-#define TR_MODE_CHUNKED  1
-#define TR_MODE_COMPRESS 2
+#define TR_MODE_CHUNKED  0 /* default */
+#define TR_MODE_COMPRESS 1
+#define TR_MODE_IGNORE   2
 
 struct Curl_cwriter;
 
