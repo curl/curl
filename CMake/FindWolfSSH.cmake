@@ -34,6 +34,7 @@
 # - `WOLFSSH_INCLUDE_DIRS`:  The wolfSSH include directories.
 # - `WOLFSSH_LIBRARIES`:     The wolfSSH library names.
 # - `WOLFSSH_VERSION`:       Version of wolfSSH.
+# - `CURL::wolfssh`:         wolfSSH library target.
 
 find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")
