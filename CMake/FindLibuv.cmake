@@ -45,6 +45,7 @@ endif()
 
 if(_libuv_FOUND)
   set(Libuv_FOUND TRUE)
+  set(LIBUV_FOUND TRUE)
   string(REPLACE ";" " " _libuv_CFLAGS "${_libuv_CFLAGS}")
   message(STATUS "Found Libuv (via pkg-config): ${_libuv_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
