@@ -107,17 +107,17 @@ endif()
 
 if(MBEDTLS_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_mbedtls_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::mbedtls)
+    add_library(CURL::mbedtls INTERFACE IMPORTED)
+    set_target_properties(CURL::mbedtls PROPERTIES
       VERSION "${MBEDTLS_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_mbedtls_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_mbedtls_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_mbedtls_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_mbedtls_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_mbedtls_LIBRARIES}")
   endif()
 endif()
