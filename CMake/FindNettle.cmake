@@ -28,7 +28,7 @@
 # - `NETTLE_INCLUDE_DIR`:   Absolute path to nettle include directory.
 # - `NETTLE_LIBRARY`:       Absolute path to `nettle` library.
 #
-# Result variables:
+# Defines:
 #
 # - `NETTLE_FOUND`:         System has nettle.
 # - `NETTLE_INCLUDE_DIRS`:  The nettle include directories.

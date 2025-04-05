@@ -29,7 +29,7 @@
 # - `LDAP_LIBRARY`:       Absolute path to `ldap` library.
 # - `LDAP_LBER_LIBRARY`:  Absolute path to `lber` library.
 #
-# Result variables:
+# Defines:
 #
 # - `LDAP_FOUND`:         System has ldap.
 # - `LDAP_INCLUDE_DIRS`:  The ldap include directories.

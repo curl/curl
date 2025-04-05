@@ -29,7 +29,7 @@
 # - `BROTLICOMMON_LIBRARY`:  Absolute path to `brotlicommon` library.
 # - `BROTLIDEC_LIBRARY`:     Absolute path to `brotlidec` library.
 #
-# Result variables:
+# Defines:
 #
 # - `BROTLI_FOUND`:          System has brotli.
 # - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.

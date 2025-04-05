@@ -28,7 +28,7 @@
 # - `WOLFSSL_INCLUDE_DIR`:   Absolute path to wolfSSL include directory.
 # - `WOLFSSL_LIBRARY`:       Absolute path to `wolfssl` library.
 #
-# Result variables:
+# Defines:
 #
 # - `WOLFSSL_FOUND`:         System has wolfSSL.
 # - `WOLFSSL_INCLUDE_DIRS`:  The wolfSSL include directories.
