@@ -45,6 +45,7 @@ endif()
 
 if(_nghttp3_FOUND)
   set(NGHTTP3_FOUND TRUE)
+  set(NGHTTP3_VERSION ${_nghttp3_VERSION})
   string(REPLACE ";" " " _nghttp3_CFLAGS "${_nghttp3_CFLAGS}")
   message(STATUS "Found NGHTTP3 (via pkg-config): ${_nghttp3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
 else()
