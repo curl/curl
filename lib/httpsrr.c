@@ -63,7 +63,11 @@ CURLcode Curl_httpsrr_decode_alpn(const char *cp, size_t len,
     if(id != ALPN_none) {
       if(idnum == MAX_HTTPSRR_ALPNS)
         break;
-      alpns[idnum++] = (unsigned char)id;
+      if(idnum && memchr(alpns, id, idnum))
+        /* this ALPN id is already stored */
+        ;
+      else
+        alpns[idnum++] = (unsigned char)id;
     }
     cp += tlen;
     len -= tlen;

@@ -169,6 +169,25 @@ UNITTEST_START
       "r:0|p:0|name.some.|alpn:10|alpn:20|"
     },
     {
+      "five alpns (ignore dupes)", /* we only support four */
+      (const unsigned char *)"\x00\x00" /* 16-bit prio */
+      "\x04name\x04some\x00" /* RNAME */
+      "\x00\x01" /* RR (1 == ALPN) */
+      "\x00\x0f" /* data size */
+      "\x02" /* ALPN length byte */
+      "h2"
+      "\x02" /* ALPN length byte */
+      "h2"
+      "\x02" /* ALPN length byte */
+      "h2"
+      "\x02" /* ALPN length byte */
+      "h2"
+      "\x02" /* APLN length byte */
+      "h3",
+      32,
+      "r:0|p:0|name.some.|alpn:10|alpn:20|"
+    },
+    {
       "rname only",
       (const unsigned char *)"\x00\x00" /* 16-bit prio */
       "\x04name\x04some\x00", /* RNAME */
