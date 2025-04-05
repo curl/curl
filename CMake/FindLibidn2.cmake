@@ -81,17 +81,17 @@ endif()
 
 if(LIBIDN2_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_libidn2_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::libidn2)
+    add_library(CURL::libidn2 INTERFACE IMPORTED)
+    set_target_properties(CURL::libidn2 PROPERTIES
       VERSION "${LIBIDN2_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_libidn2_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libidn2_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libidn2_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libidn2_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libidn2_LIBRARIES}")
   endif()
 endif()

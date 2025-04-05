@@ -80,17 +80,17 @@ endif()
 
 if(NGHTTP2_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_nghttp2_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::nghttp2)
+    add_library(CURL::nghttp2 INTERFACE IMPORTED)
+    set_target_properties(CURL::nghttp2 PROPERTIES
       VERSION "${NGHTTP2_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_nghttp2_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_nghttp2_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_nghttp2_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_nghttp2_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}")
   endif()
 endif()
