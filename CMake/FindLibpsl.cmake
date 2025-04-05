@@ -45,6 +45,7 @@ endif()
 
 if(_libpsl_FOUND AND _libpsl_INCLUDE_DIRS)
   set(Libpsl_FOUND TRUE)
+  set(LIBPSL_FOUND TRUE)
   string(REPLACE ";" " " _libpsl_CFLAGS "${_libpsl_CFLAGS}")
   message(STATUS "Found Libpsl (via pkg-config): ${_libpsl_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
 else()
