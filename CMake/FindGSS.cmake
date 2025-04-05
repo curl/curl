@@ -209,7 +209,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
         if(_GSS_INCLUDE_DIRS)
           set(GSS_FLAVOUR "GNU")
-          set(GSS_PC_REQUIRES "gss")
+          set(_gss_pc_requires "gss")
         endif()
       endif()
     endif()
@@ -264,19 +264,19 @@ else()
   # _GSS_MODULE_NAME set since CMake 3.16
   if(_GSS_MODULE_NAME STREQUAL _gnu_modname OR _GSS_${_gnu_modname}_VERSION)
     set(GSS_FLAVOUR "GNU")
-    set(GSS_PC_REQUIRES "gss")
+    set(_gss_pc_requires "gss")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_gnu_modname}_VERSION})
     endif()
   elseif(_GSS_MODULE_NAME STREQUAL _mit_modname OR _GSS_${_mit_modname}_VERSION)
     set(GSS_FLAVOUR "MIT")
-    set(GSS_PC_REQUIRES "mit-krb5-gssapi")
+    set(_gss_pc_requires "mit-krb5-gssapi")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_mit_modname}_VERSION})
     endif()
   else()
     set(GSS_FLAVOUR "Heimdal")
-    set(GSS_PC_REQUIRES "heimdal-gssapi")
+    set(_gss_pc_requires "heimdal-gssapi")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_heimdal_modname}_VERSION})
     endif()

@@ -35,21 +35,21 @@
 # - `LDAP_VERSION`:       Version of ldap.
 # - `CURL::ldap`:         ldap library target.
 
-set(LDAP_PC_REQUIRES "ldap" "lber")
+set(_ldap_pc_requires "ldap" "lber")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_INCLUDE_DIR AND
    NOT DEFINED LDAP_LIBRARY AND
    NOT DEFINED LDAP_LBER_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LDAP ${LDAP_PC_REQUIRES})
+  pkg_check_modules(LDAP ${_ldap_pc_requires})
 endif()
 
 if(LDAP_FOUND)
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
-  set(LDAP_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_ldap_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   # On Apple the SDK LDAP gets picked up from
   # 'MacOSX.sdk/System/Library/Frameworks/LDAP.framework/Headers', which contains
