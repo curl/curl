@@ -45,6 +45,7 @@ endif()
 
 if(_quiche_FOUND)
   set(Quiche_FOUND TRUE)
+  set(QUICHE_FOUND TRUE)
   string(REPLACE ";" " " _quiche_CFLAGS "${_quiche_CFLAGS}")
   message(STATUS "Found Quiche (via pkg-config): ${_quiche_INCLUDE_DIRS} (found version \"${QUICHE_VERSION}\")")
 else()

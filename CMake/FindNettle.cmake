@@ -45,6 +45,7 @@ endif()
 
 if(_nettle_FOUND)
   set(Nettle_FOUND TRUE)
+  set(NETTLE_FOUND TRUE)
   string(REPLACE ";" " " _nettle_CFLAGS "${_nettle_CFLAGS}")
   message(STATUS "Found Nettle (via pkg-config): ${_nettle_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()

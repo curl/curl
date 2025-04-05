@@ -45,6 +45,7 @@ endif()
 
 if(_cares_FOUND)
   set(Cares_FOUND TRUE)
+  set(CARES_FOUND TRUE)
   string(REPLACE ";" " " _cares_CFLAGS "${_cares_CFLAGS}")
   message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
