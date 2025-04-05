@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `RUSTLS_FOUND`:         System has Rustls.
-# - `RUSTLS_INCLUDE_DIRS`:  The Rustls include directories.
-# - `RUSTLS_LIBRARIES`:     The Rustls library names.
-# - `RUSTLS_LIBRARY_DIRS`:  The Rustls library directories.
-# - `RUSTLS_PC_REQUIRES`:   The Rustls pkg-config packages.
-# - `RUSTLS_CFLAGS`:        Required compiler flags.
 # - `RUSTLS_VERSION`:       Version of Rustls.
 # - `CURL::rustls`:         Rustls library target.
 

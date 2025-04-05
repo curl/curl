@@ -30,12 +30,8 @@
 # Defines:
 #
 # - `GSS_FOUND`:         System has a GSS library.
+# - `GSS_FOUND`:         System has a GSS library.
 # - `GSS_FLAVOUR`:       "GNU" or "MIT" if anything found.
-# - `GSS_INCLUDE_DIRS`:  The GSS include directories.
-# - `GSS_LIBRARIES`:     The GSS library names.
-# - `GSS_LIBRARY_DIRS`:  The GSS library directories.
-# - `GSS_PC_REQUIRES`:   The GSS pkg-config packages.
-# - `GSS_CFLAGS`:        Required compiler flags.
 # - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
 #                        In case the library is found but no version info available it is set to "unknown"
 # - `CURL::gss`:         GSS library target.

@@ -32,11 +32,6 @@
 # Defines:
 #
 # - `BROTLI_FOUND`:          System has brotli.
-# - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.
-# - `BROTLI_LIBRARIES`:      The brotli library names.
-# - `BROTLI_LIBRARY_DIRS`:   The brotli library directories.
-# - `BROTLI_PC_REQUIRES`:    The brotli pkg-config packages.
-# - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
 # - `CURL::brotli`:          brotli library target.
 

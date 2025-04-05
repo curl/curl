@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `ZSTD_FOUND`:         System has zstd.
-# - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.
-# - `ZSTD_LIBRARIES`:     The zstd library names.
-# - `ZSTD_LIBRARY_DIRS`:  The zstd library directories.
-# - `ZSTD_PC_REQUIRES`:   The zstd pkg-config packages.
-# - `ZSTD_CFLAGS`:        Required compiler flags.
 # - `ZSTD_VERSION`:       Version of zstd.
 # - `CURL::zstd`:         zstd library target.
 

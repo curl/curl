@@ -32,11 +32,6 @@
 # Defines:
 #
 # - `LDAP_FOUND`:         System has ldap.
-# - `LDAP_INCLUDE_DIRS`:  The ldap include directories.
-# - `LDAP_LIBRARIES`:     The ldap library names.
-# - `LDAP_LIBRARY_DIRS`:  The ldap library directories.
-# - `LDAP_PC_REQUIRES`:   The ldap pkg-config packages.
-# - `LDAP_CFLAGS`:        Required compiler flags.
 # - `LDAP_VERSION`:       Version of ldap.
 # - `CURL::ldap`:         ldap library target.
 

@@ -47,11 +47,6 @@
 # Defines:
 #
 # - `NGTCP2_FOUND`:                     System has ngtcp2.
-# - `NGTCP2_INCLUDE_DIRS`:              The ngtcp2 include directories.
-# - `NGTCP2_LIBRARIES`:                 The ngtcp2 library names.
-# - `NGTCP2_LIBRARY_DIRS`:              The ngtcp2 library directories.
-# - `NGTCP2_PC_REQUIRES`:               The ngtcp2 pkg-config packages.
-# - `NGTCP2_CFLAGS`:                    Required compiler flags.
 # - `NGTCP2_VERSION`:                   Version of ngtcp2.
 # - `CURL::ngtcp2`:                     ngtcp2 library target.
 
