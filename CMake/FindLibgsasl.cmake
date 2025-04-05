@@ -34,13 +34,13 @@
 # - `LIBGSASL_VERSION`:       Version of libgsasl.
 # - `CURL::libgsasl`:         libgsasl library target.
 
-set(LIBGSASL_PC_REQUIRES "libgsasl")
+set(_libgsasl_pc_requires "libgsasl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBGSASL_INCLUDE_DIR AND
    NOT DEFINED LIBGSASL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBGSASL ${LIBGSASL_PC_REQUIRES})
+  pkg_check_modules(LIBGSASL ${_libgsasl_pc_requires})
 endif()
 
 if(LIBGSASL_FOUND)
