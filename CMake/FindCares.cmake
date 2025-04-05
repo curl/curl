@@ -37,6 +37,7 @@
 # - `CARES_PC_REQUIRES`:   The c-ares pkg-config packages.
 # - `CARES_CFLAGS`:        Required compiler flags.
 # - `CARES_VERSION`:       Version of c-ares.
+# - `CURL::cares`:         c-ares library target.
 
 set(CARES_PC_REQUIRES "libcares")
 

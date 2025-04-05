@@ -37,6 +37,7 @@
 # - `LIBSSH_PC_REQUIRES`:   The libssh pkg-config packages.
 # - `LIBSSH_CFLAGS`:        Required compiler flags.
 # - `LIBSSH_VERSION`:       Version of libssh.
+# - `CURL::libssh`:         libssh library target.
 
 set(LIBSSH_PC_REQUIRES "libssh")
 

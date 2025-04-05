@@ -37,6 +37,7 @@
 # - `RUSTLS_PC_REQUIRES`:   The Rustls pkg-config packages.
 # - `RUSTLS_CFLAGS`:        Required compiler flags.
 # - `RUSTLS_VERSION`:       Version of Rustls.
+# - `CURL::rustls`:         Rustls library target.
 
 set(RUSTLS_PC_REQUIRES "rustls")
 

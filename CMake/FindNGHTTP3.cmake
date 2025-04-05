@@ -37,6 +37,7 @@
 # - `NGHTTP3_PC_REQUIRES`:   The nghttp3 pkg-config packages.
 # - `NGHTTP3_CFLAGS`:        Required compiler flags.
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
+# - `CURL::nghttp3`:         nghttp3 library target.
 
 set(NGHTTP3_PC_REQUIRES "libnghttp3")
 

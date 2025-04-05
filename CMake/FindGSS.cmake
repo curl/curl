@@ -38,6 +38,7 @@
 # - `GSS_CFLAGS`:        Required compiler flags.
 # - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
 #                        In case the library is found but no version info available it is set to "unknown"
+# - `CURL::gss`:         GSS library target.
 
 set(_gnu_modname "gss")
 set(_mit_modname "mit-krb5-gssapi")

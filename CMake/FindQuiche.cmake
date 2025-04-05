@@ -37,6 +37,7 @@
 # - `QUICHE_PC_REQUIRES`:   The quiche pkg-config packages.
 # - `QUICHE_CFLAGS`:        Required compiler flags.
 # - `QUICHE_VERSION`:       Version of quiche.
+# - `CURL::quiche`:         quiche library target.
 
 set(QUICHE_PC_REQUIRES "quiche")
 

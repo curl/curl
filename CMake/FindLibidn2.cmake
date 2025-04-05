@@ -37,6 +37,7 @@
 # - `LIBIDN2_PC_REQUIRES`:   The libidn2 pkg-config packages.
 # - `LIBIDN2_CFLAGS`:        Required compiler flags.
 # - `LIBIDN2_VERSION`:       Version of libidn2.
+# - `CURL::libidn2`:         libidn2 library target.
 
 set(LIBIDN2_PC_REQUIRES "libidn2")
 
