@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `QUICHE_FOUND`:         System has quiche.
-# - `QUICHE_INCLUDE_DIRS`:  The quiche include directories.
-# - `QUICHE_LIBRARIES`:     The quiche library names.
-# - `QUICHE_LIBRARY_DIRS`:  The quiche library directories.
-# - `QUICHE_PC_REQUIRES`:   The quiche pkg-config packages.
-# - `QUICHE_CFLAGS`:        Required compiler flags.
 # - `QUICHE_VERSION`:       Version of quiche.
 # - `CURL::quiche`:         quiche library target.
 

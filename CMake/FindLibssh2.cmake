@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `LIBSSH2_FOUND`:         System has libssh2.
-# - `LIBSSH2_INCLUDE_DIRS`:  The libssh2 include directories.
-# - `LIBSSH2_LIBRARIES`:     The libssh2 library names.
-# - `LIBSSH2_LIBRARY_DIRS`:  The libssh2 library directories.
-# - `LIBSSH2_PC_REQUIRES`:   The libssh2 pkg-config packages.
-# - `LIBSSH2_CFLAGS`:        Required compiler flags.
 # - `LIBSSH2_VERSION`:       Version of libssh2.
 # - `CURL::libssh2`:         libssh2 library target.
 

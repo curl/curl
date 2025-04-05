@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `LIBRTMP_FOUND`:         System has librtmp.
-# - `LIBRTMP_INCLUDE_DIRS`:  The librtmp include directories.
-# - `LIBRTMP_LIBRARIES`:     The librtmp library names.
-# - `LIBRTMP_LIBRARY_DIRS`:  The librtmp library directories.
-# - `LIBRTMP_PC_REQUIRES`:   The librtmp pkg-config packages.
-# - `LIBRTMP_CFLAGS`:        Required compiler flags.
 # - `LIBRTMP_VERSION`:       Version of librtmp.
 # - `CURL::librtmp`:         librtmp library target.
 

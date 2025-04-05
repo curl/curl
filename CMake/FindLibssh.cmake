@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `LIBSSH_FOUND`:         System has libssh.
-# - `LIBSSH_INCLUDE_DIRS`:  The libssh include directories.
-# - `LIBSSH_LIBRARIES`:     The libssh library names.
-# - `LIBSSH_LIBRARY_DIRS`:  The libssh library directories.
-# - `LIBSSH_PC_REQUIRES`:   The libssh pkg-config packages.
-# - `LIBSSH_CFLAGS`:        Required compiler flags.
 # - `LIBSSH_VERSION`:       Version of libssh.
 # - `CURL::libssh`:         libssh library target.
 
