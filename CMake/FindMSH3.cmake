@@ -44,7 +44,8 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(_msh3_FOUND)
-  set(LIBMSH3_FOUND TRUE)
+  set(MSH3_FOUND TRUE)
+  set(MSH3_VERSION ${_msh3_VERSION})
   string(REPLACE ";" " " _msh3_CFLAGS "${_msh3_CFLAGS}")
   message(STATUS "Found MSH3 (via pkg-config): ${_msh3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
 else()
