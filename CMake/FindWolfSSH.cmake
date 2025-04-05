@@ -57,8 +57,8 @@ find_package_handle_standard_args(WolfSSH
 )
 
 if(WOLFSSH_FOUND)
-  set(WOLFSSH_INCLUDE_DIRS ${WOLFSSH_INCLUDE_DIR})
-  set(WOLFSSH_LIBRARIES    ${WOLFSSH_LIBRARY})
+  set(_wolfssh_INCLUDE_DIRS ${WOLFSSH_INCLUDE_DIR})
+  set(_wolfssh_LIBRARIES    ${WOLFSSH_LIBRARY})
 endif()
 
 mark_as_advanced(WOLFSSH_INCLUDE_DIR WOLFSSH_LIBRARY)

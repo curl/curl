@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED QUICHE_INCLUDE_DIR AND
    NOT DEFINED QUICHE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(QUICHE ${_quiche_pc_requires})
+  pkg_check_modules(_quiche ${_quiche_pc_requires})
 endif()
 
-if(QUICHE_FOUND)
+if(_quiche_FOUND)
   set(Quiche_FOUND TRUE)
-  string(REPLACE ";" " " QUICHE_CFLAGS "${QUICHE_CFLAGS}")
-  message(STATUS "Found Quiche (via pkg-config): ${QUICHE_INCLUDE_DIRS} (found version \"${QUICHE_VERSION}\")")
+  string(REPLACE ";" " " _quiche_CFLAGS "${_quiche_CFLAGS}")
+  message(STATUS "Found Quiche (via pkg-config): ${_quiche_INCLUDE_DIRS} (found version \"${QUICHE_VERSION}\")")
 else()
   find_path(QUICHE_INCLUDE_DIR NAMES "quiche.h")
   find_library(QUICHE_LIBRARY NAMES "quiche")
@@ -59,8 +59,8 @@ else()
   )
 
   if(QUICHE_FOUND)
-    set(QUICHE_INCLUDE_DIRS ${QUICHE_INCLUDE_DIR})
-    set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
+    set(_quiche_INCLUDE_DIRS ${QUICHE_INCLUDE_DIR})
+    set(_quiche_LIBRARIES    ${QUICHE_LIBRARY})
   endif()
 
   mark_as_advanced(QUICHE_INCLUDE_DIR QUICHE_LIBRARY)
