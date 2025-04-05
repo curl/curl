@@ -28,7 +28,7 @@
 # - `WOLFSSH_INCLUDE_DIR`:   The wolfSSH include directory.
 # - `WOLFSSH_LIBRARY`:       Path to `wolfssh` library.
 #
-# Result variables:
+# Defines:
 #
 # - `WOLFSSH_FOUND`:         System has wolfSSH.
 # - `WOLFSSH_INCLUDE_DIRS`:  The wolfSSH include directories.
