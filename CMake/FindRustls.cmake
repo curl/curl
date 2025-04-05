@@ -107,17 +107,17 @@ endif()
 
 if(RUSTLS_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_rustls_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::rustls)
+    add_library(CURL::rustls INTERFACE IMPORTED)
+    set_target_properties(CURL::rustls PROPERTIES
       VERSION "${RUSTLS_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_rustls_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_rustls_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_rustls_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_rustls_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_rustls_LIBRARIES}")
   endif()
 endif()
