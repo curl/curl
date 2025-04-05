@@ -35,6 +35,10 @@
 #ifdef _WIN32
 
 #include "curl_multibyte.h"
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 /*
  * MultiByte conversions using Windows kernel32 library.

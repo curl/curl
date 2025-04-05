@@ -126,7 +126,6 @@ static void memory_tracking_init(void)
     strcpy(fname, env);
     curl_free(env);
     curl_dbg_memdebug(fname);
-    fprintf(tool_stderr, "starting memdebug\n");
     /* this weird stuff here is to make curl_free() get called before
        curl_dbg_memdebug() as otherwise memory tracking will log a FREE()
        without an alloc! */
