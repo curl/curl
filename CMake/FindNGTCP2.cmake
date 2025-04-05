@@ -36,15 +36,11 @@
 # - `NGTCP2_INCLUDE_DIR`:   The ngtcp2 include directory.
 # - `NGTCP2_LIBRARY`:       Path to `ngtcp2` library.
 #
-# Result variables:
+# Defines:
 #
 # - `NGTCP2_FOUND`:         System has ngtcp2.
-# - `NGTCP2_INCLUDE_DIRS`:  The ngtcp2 include directories.
-# - `NGTCP2_LIBRARIES`:     The ngtcp2 library names.
-# - `NGTCP2_LIBRARY_DIRS`:  The ngtcp2 library directories.
-# - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
-# - `NGTCP2_CFLAGS`:        Required compiler flags.
 # - `NGTCP2_VERSION`:       Version of ngtcp2.
+# - `CURL::ngtcp2`:         ngtcp2 library target.
 
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")
@@ -63,30 +59,23 @@ if(NGTCP2_FIND_COMPONENTS)
   endif()
 endif()
 
-set(NGTCP2_PC_REQUIRES "libngtcp2")
+set(_ngtcp2_pc_requires "libngtcp2")
 if(_ngtcp2_crypto_backend)
-  set(NGTCP2_CRYPTO_PC_REQUIRES "lib${_crypto_library_lower}")
+  list(APPEND _ngtcp2_pc_requires "lib${_crypto_library_lower}")
 endif()
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGTCP2_INCLUDE_DIR AND
    NOT DEFINED NGTCP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGTCP2 ${NGTCP2_PC_REQUIRES})
-  if(_ngtcp2_crypto_backend)
-    pkg_check_modules("${_crypto_library_upper}" ${NGTCP2_CRYPTO_PC_REQUIRES})
-  else()
-    set("${_crypto_library_upper}_FOUND" TRUE)
-  endif()
+  pkg_check_modules(_ngtcp2 ${_ngtcp2_pc_requires})
 endif()
 
-list(APPEND NGTCP2_PC_REQUIRES ${NGTCP2_CRYPTO_PC_REQUIRES})
-
-if(NGTCP2_FOUND AND "${${_crypto_library_upper}_FOUND}")
-  list(APPEND NGTCP2_LIBRARIES "${${_crypto_library_upper}_LIBRARIES}")
-  list(REMOVE_DUPLICATES NGTCP2_LIBRARIES)
-  string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
-  message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
+if(_ngtcp2_FOUND)
+  set(NGTCP2_FOUND TRUE)
+  set(NGTCP2_VERSION ${_ngtcp2_VERSION})
+  string(REPLACE ";" " " _ngtcp2_CFLAGS "${_ngtcp2_CFLAGS}")
+  message(STATUS "Found NGTCP2 (via pkg-config): ${_ngtcp2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
   find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h")
   find_library(NGTCP2_LIBRARY NAMES "ngtcp2")
@@ -122,9 +111,26 @@ else()
   )
 
   if(NGTCP2_FOUND)
-    set(NGTCP2_INCLUDE_DIRS ${NGTCP2_INCLUDE_DIR})
-    set(NGTCP2_LIBRARIES    ${NGTCP2_LIBRARY} ${NGTCP2_CRYPTO_LIBRARY})
+    set(_ngtcp2_INCLUDE_DIRS ${NGTCP2_INCLUDE_DIR})
+    set(_ngtcp2_LIBRARIES    ${NGTCP2_LIBRARY} ${NGTCP2_CRYPTO_LIBRARY})
   endif()
 
   mark_as_advanced(NGTCP2_INCLUDE_DIR NGTCP2_LIBRARY NGTCP2_CRYPTO_LIBRARY)
+endif()
+
+if(NGTCP2_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_ngtcp2_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::ngtcp2)
+    add_library(CURL::ngtcp2 INTERFACE IMPORTED)
+    set_target_properties(CURL::ngtcp2 PROPERTIES
+      VERSION "${NGTCP2_VERSION}"
+      CURL_PC_MODULES "${_ngtcp2_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_ngtcp2_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_ngtcp2_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_ngtcp2_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_ngtcp2_LIBRARIES}")
+  endif()
 endif()
