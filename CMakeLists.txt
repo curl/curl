@@ -1732,6 +1732,7 @@ elseif(DOS)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${WATT_ROOT}/lib/libwatt.a")
 endif()
 
+check_function_exists("accept4"       HAVE_ACCEPT4)
 check_function_exists("fnmatch"       HAVE_FNMATCH)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)

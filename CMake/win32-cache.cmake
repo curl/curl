@@ -85,6 +85,7 @@ else()
   set(HAVE_ATOMIC 0)
 endif()
 
+set(HAVE_ACCEPT4 0)
 set(HAVE_ALARM 0)
 set(HAVE_ARC4RANDOM 0)
 set(HAVE_ARPA_INET_H 0)
