@@ -45,6 +45,7 @@ endif()
 
 if(_rustls_FOUND)
   set(Rustls_FOUND TRUE)
+  set(RUSTLS_FOUND TRUE)
   string(REPLACE ";" " " _rustls_CFLAGS "${_rustls_CFLAGS}")
   message(STATUS "Found Rustls (via pkg-config): ${_rustls_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
