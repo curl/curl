@@ -54,6 +54,7 @@ endif()
 
 if(_wolfssl_FOUND)
   set(WolfSSL_FOUND TRUE)
+  set(WOLFSSL_FOUND TRUE)
   string(REPLACE ";" " " _wolfssl_CFLAGS "${_wolfssl_CFLAGS}")
   message(STATUS "Found WolfSSL (via pkg-config): ${_wolfssl_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
 else()
