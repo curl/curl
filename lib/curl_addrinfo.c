@@ -82,7 +82,7 @@ Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
 
   for(ca = cahead; ca; ca = canext) {
     canext = ca->ai_next;
-    free(ca);
+    FREE(ca);
   }
 }
 
@@ -145,7 +145,7 @@ Curl_getaddrinfo_ex(const char *nodename,
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct Curl_addrinfo) + ss_size + namelen);
+    ca = MALLOC(sizeof(struct Curl_addrinfo) + ss_size + namelen);
     if(!ca) {
       error = EAI_MEMORY;
       break;
@@ -284,7 +284,7 @@ Curl_he2ai(const struct hostent *he, int port)
       ss_size = sizeof(struct sockaddr_in);
 
     /* allocate memory to hold the struct, the address and the name */
-    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + namelen);
+    ai = CALLOC(1, sizeof(struct Curl_addrinfo) + ss_size + namelen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
@@ -379,7 +379,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     return NULL;
 
   /* allocate memory to hold the struct, the address and the name */
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + addrsize + namelen);
+  ai = CALLOC(1, sizeof(struct Curl_addrinfo) + addrsize + namelen);
   if(!ai)
     return NULL;
   /* put the address after the struct */
@@ -459,7 +459,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
 
   *longpath = FALSE;
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_un));
+  ai = CALLOC(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_un));
   if(!ai)
     return NULL;
   ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
@@ -470,7 +470,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
   /* sun_path must be able to store the NUL-terminated path */
   path_len = strlen(path) + 1;
   if(path_len > sizeof(sa_un->sun_path)) {
-    free(ai);
+    FREE(ai);
     *longpath = TRUE;
     return NULL;
   }

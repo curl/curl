@@ -76,7 +76,7 @@ enum found_state {
 static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
-  FILE *file = fopen(filename, FOPEN_READTEXT);
+  FILE *file = FOPEN(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
   Curl_dyn_init(&linebuf, MAX_NETRC_LINE);
 
@@ -99,7 +99,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 done:
   Curl_dyn_free(&linebuf);
   if(file)
-    fclose(file);
+    FCLOSE(file);
   return ret;
 }
 
@@ -267,8 +267,8 @@ static NETRCcode parsenetrc(struct store_netrc *store,
             our_login = !Curl_timestrcmp(login, tok);
           else {
             our_login = TRUE;
-            free(login);
-            login = strdup(tok);
+            FREE(login);
+            login = STRDUP(tok);
             if(!login) {
               retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
               goto out;
@@ -278,8 +278,8 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           keyword = NONE;
         }
         else if(keyword == PASSWORD) {
-          free(password);
-          password = strdup(tok);
+          FREE(password);
+          password = STRDUP(tok);
           if(!password) {
             retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
             goto out;
@@ -336,7 +336,7 @@ out:
   if(!retcode) {
     if(!password && our_login) {
       /* success without a password, set a blank one */
-      password = strdup("");
+      password = STRDUP("");
       if(!password)
         retcode = NETRC_OUT_OF_MEMORY; /* out of memory */
     }
@@ -353,8 +353,8 @@ out:
   else {
     Curl_dyn_free(filebuf);
     if(!specific_login)
-      free(login);
-    free(password);
+      FREE(login);
+    FREE(password);
   }
 
   return retcode;
@@ -430,24 +430,24 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
 
     filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
     if(!filealloc) {
-      free(homea);
+      FREE(homea);
       return NETRC_OUT_OF_MEMORY;
     }
     retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
-    free(filealloc);
+    FREE(filealloc);
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
       filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
-        free(homea);
+        FREE(homea);
         return NETRC_OUT_OF_MEMORY;
       }
       retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
-      free(filealloc);
+      FREE(filealloc);
     }
 #endif
-    free(homea);
+    FREE(homea);
   }
   else
     retcode = parsenetrc(store, host, loginp, passwordp, netrcfile);

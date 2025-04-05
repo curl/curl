@@ -96,7 +96,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
      must be freed by curlx_unicodefree we will dupe the result so that the
      pointer this function returns can be normally free'd. */
   tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
-  free(utf8_spn);
+  FREE(utf8_spn);
   if(!tchar_spn)
     return NULL;
   dupe_tchar_spn = _tcsdup(tchar_spn);

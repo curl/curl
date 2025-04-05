@@ -1263,7 +1263,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
     if(!result)
       result = Curl_dyn_add(&out, "-----END CERTIFICATE-----\n");
   }
-  free(certptr);
+  FREE(certptr);
   if(!result)
     if(data->set.ssl.certinfo)
       result = ssl_push_certinfo_dyn(data, certnum, "Cert", &out);

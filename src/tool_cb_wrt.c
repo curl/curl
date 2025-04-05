@@ -61,7 +61,7 @@ bool tool_create_output_file(struct OutStruct *outs,
      (config->file_clobber_mode == CLOBBER_DEFAULT &&
       !outs->is_cd_filename)) {
     /* open file for writing */
-    file = fopen(fname, "wb");
+    file = FOPEN(fname, "wb");
   }
   else {
     int fd;
@@ -80,7 +80,7 @@ bool tool_create_output_file(struct OutStruct *outs,
         errorf(global, "overflow in filename generation");
         return FALSE;
       }
-      newname = malloc(newlen);
+      newname = MALLOC(newlen);
       if(!newname) {
         errorf(global, "out of memory");
         return FALSE;
@@ -109,7 +109,7 @@ bool tool_create_output_file(struct OutStruct *outs,
        is not needed because we would have failed earlier, in the while loop
        and `fd` would now be -1 */
     if(fd != -1) {
-      file = fdopen(fd, "wb");
+      file = FDOPEN(fd, "wb");
       if(!file)
         close(fd);
     }
@@ -318,14 +318,14 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       if(!wc_len)
         return CURL_WRITEFUNC_ERROR;
 
-      wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
+      wc_buf = (wchar_t*) MALLOC(wc_len * sizeof(wchar_t));
       if(!wc_buf)
         return CURL_WRITEFUNC_ERROR;
 
       wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
                                           wc_buf, (int)wc_len);
       if(!wc_len) {
-        free(wc_buf);
+        FREE(wc_buf);
         return CURL_WRITEFUNC_ERROR;
       }
 
@@ -335,10 +335,10 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
           wc_len,
           &chars_written,
           NULL)) {
-        free(wc_buf);
+        FREE(wc_buf);
         return CURL_WRITEFUNC_ERROR;
       }
-      free(wc_buf);
+      FREE(wc_buf);
     }
 
     rc = bytes;

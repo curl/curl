@@ -139,7 +139,7 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
     rtspc->initialised = TRUE;
   }
 
-  data->req.p.rtsp = rtsp = calloc(1, sizeof(struct RTSP));
+  data->req.p.rtsp = rtsp = CALLOC(1, sizeof(struct RTSP));
   if(!rtsp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -266,7 +266,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      to this origin */
 
   if(!data->state.first_host) {
-    data->state.first_host = strdup(conn->host.name);
+    data->state.first_host = STRDUP(conn->host.name);
     if(!data->state.first_host)
       return CURLE_OUT_OF_MEMORY;
 
@@ -355,7 +355,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      free(data->state.aptr.rtsp_transport);
+      FREE(data->state.aptr.rtsp_transport);
       data->state.aptr.rtsp_transport =
         aprintf("Transport: %s\r\n",
                 data->set.str[STRING_RTSP_TRANSPORT]);
@@ -381,7 +381,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING]) {
-      free(data->state.aptr.accept_encoding);
+      FREE(data->state.aptr.accept_encoding);
       data->state.aptr.accept_encoding =
         aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
 
@@ -435,7 +435,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
-      free(data->state.aptr.rangeline);
+      FREE(data->state.aptr.rangeline);
       data->state.aptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
       p_range = data->state.aptr.rangeline;
     }

@@ -61,7 +61,7 @@ static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
 {
   if(ctx) {
     Curl_dyn_free(&ctx->data_out);
-    free(ctx);
+    FREE(ctx);
   }
 }
 
@@ -216,7 +216,7 @@ static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

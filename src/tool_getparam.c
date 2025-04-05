@@ -51,14 +51,14 @@
 static ParameterError getstr(char **str, const char *val, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    FREE(*str);
     *str = NULL;
   }
   if(val) {
     if(!allowblank && !val[0])
       return PARAM_BLANK_STRING;
 
-    *str = strdup(val);
+    *str = STRDUP(val);
     if(!*str)
       return PARAM_NO_MEM;
   }
@@ -69,14 +69,14 @@ static ParameterError getstrn(char **str, const char *val,
                               size_t len, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    FREE(*str);
     *str = NULL;
   }
   if(val) {
     if(!allowblank && !val[0])
       return PARAM_BLANK_STRING;
 
-    *str = malloc(len + 1);
+    *str = MALLOC(len + 1);
     if(!*str)
       return PARAM_NO_MEM;
 
@@ -405,11 +405,11 @@ void parse_cert_parameter(const char *cert_parameter,
    * means no passphrase was given and no characters escaped */
   if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
-    *certname = strdup(cert_parameter);
+    *certname = STRDUP(cert_parameter);
     return;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
-  certname_place = malloc(param_length + 1);
+  certname_place = MALLOC(param_length + 1);
   if(!certname_place)
     return;
 
@@ -469,7 +469,7 @@ void parse_cert_parameter(const char *cert_parameter,
        * above; if we are still here, this is a separating colon */
       param_place++;
       if(*param_place) {
-        *passphrase = strdup(param_place);
+        *passphrase = STRDUP(param_place);
       }
       goto done;
     }
@@ -512,10 +512,10 @@ GetFileAndPassword(const char *nextarg, char **file, char **password)
   char *certname, *passphrase;
   if(nextarg) {
     parse_cert_parameter(nextarg, &certname, &passphrase);
-    free(*file);
+    FREE(*file);
     *file = certname;
     if(passphrase) {
-      free(*password);
+      FREE(*password);
       *password = passphrase;
     }
   }
@@ -630,7 +630,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
       CURL_SET_BINMODE(stdin);
     }
     else {
-      file = fopen(p, "rb");
+      file = FOPEN(p, "rb");
       if(!file) {
         errorf(global, "Failed to open %s", p);
         return PARAM_READ_ERROR;
@@ -640,7 +640,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     err = file2memory(&postdata, &size, file);
 
     if(file && (file != stdin))
-      fclose(file);
+      FCLOSE(file);
     if(err)
       return err;
   }
@@ -654,7 +654,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
   if(!postdata) {
     /* no data from the file, point to a zero byte string to make this
        get sent as a POST anyway */
-    postdata = strdup("");
+    postdata = STRDUP("");
     if(!postdata)
       return PARAM_NO_MEM;
     size = 0;
@@ -856,7 +856,7 @@ static ParameterError url_query(const char *nextarg,
 
   if(*nextarg == '+') {
     /* use without encoding */
-    query = strdup(&nextarg[1]);
+    query = STRDUP(&nextarg[1]);
     if(!query)
       err = PARAM_NO_MEM;
   }
@@ -866,11 +866,11 @@ static ParameterError url_query(const char *nextarg,
   if(!err) {
     if(config->query) {
       CURLcode result = curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
-      free(query);
+      FREE(query);
       if(result)
         err = PARAM_NO_MEM;
       else {
-        free(config->query);
+        FREE(config->query);
         config->query = curlx_dyn_ptr(&dyn);
       }
     }
@@ -906,7 +906,7 @@ static ParameterError set_data(cmdline_t cmd,
         CURL_SET_BINMODE(stdin);
     }
     else {
-      file = fopen(nextarg, "rb");
+      file = FOPEN(nextarg, "rb");
       if(!file) {
         errorf(global, "Failed to open %s", nextarg);
         return PARAM_READ_ERROR;
@@ -924,14 +924,14 @@ static ParameterError set_data(cmdline_t cmd,
     }
 
     if(file && (file != stdin))
-      fclose(file);
+      FCLOSE(file);
     if(err)
       return err;
 
     if(!postdata) {
       /* no data from the file, point to a zero byte string to make this
          get sent as a POST anyway */
-      postdata = strdup("");
+      postdata = STRDUP("");
       if(!postdata)
         return PARAM_NO_MEM;
     }
@@ -1100,7 +1100,7 @@ static ParameterError parse_url(struct GlobalConfig *global,
     if(fromstdin)
       f = stdin;
     else
-      f = fopen(&nextarg[1], FOPEN_READTEXT);
+      f = FOPEN(&nextarg[1], FOPEN_READTEXT);
     if(f) {
       curlx_dyn_init(&line, 8092);
       while(my_get_line(f, &line, &error)) {
@@ -1110,7 +1110,7 @@ static ParameterError parse_url(struct GlobalConfig *global,
           break;
       }
       if(!fromstdin)
-        fclose(f);
+        FCLOSE(f);
       curlx_dyn_free(&line);
       if(error || err)
         return PARAM_READ_ERROR;
@@ -1216,7 +1216,7 @@ static ParameterError parse_ech(struct GlobalConfig *global,
         file = stdin;
       }
       else {
-        file = fopen(nextarg, FOPEN_READTEXT);
+        file = FOPEN(nextarg, FOPEN_READTEXT);
       }
       if(!file) {
         warnf(global,
@@ -1227,11 +1227,11 @@ static ParameterError parse_ech(struct GlobalConfig *global,
       }
       err = file2string(&tmpcfg, file);
       if(file != stdin)
-        fclose(file);
+        FCLOSE(file);
       if(err)
         return err;
       config->ech_config = aprintf("ecl:%s",tmpcfg);
-      free(tmpcfg);
+      FREE(tmpcfg);
       if(!config->ech_config)
         return PARAM_NO_MEM;
     } /* file done */
@@ -1254,7 +1254,7 @@ static ParameterError parse_header(struct GlobalConfig *global,
   if(nextarg[0] == '@') {
     /* read many headers from a file or stdin */
     bool use_stdin = !strcmp(&nextarg[1], "-");
-    FILE *file = use_stdin ? stdin : fopen(&nextarg[1], FOPEN_READTEXT);
+    FILE *file = use_stdin ? stdin : FOPEN(&nextarg[1], FOPEN_READTEXT);
     if(!file) {
       errorf(global, "Failed to open %s", &nextarg[1]);
       err = PARAM_READ_ERROR;
@@ -1275,7 +1275,7 @@ static ParameterError parse_header(struct GlobalConfig *global,
         err = PARAM_READ_ERROR;
       curlx_dyn_free(&line);
       if(!use_stdin)
-        fclose(file);
+        FCLOSE(file);
     }
   }
   else {
@@ -1411,8 +1411,8 @@ static ParameterError parse_range(struct GlobalConfig *global,
           "Appending one for you");
     msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
               value);
-    free(config->range);
-    config->range = strdup(buffer);
+    FREE(config->range);
+    config->range = STRDUP(buffer);
     if(!config->range)
       err = PARAM_NO_MEM;
   }
@@ -1496,8 +1496,8 @@ static ParameterError parse_verbose(struct GlobalConfig *global,
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
-    free(global->trace_dump);
-    global->trace_dump = strdup("%");
+    FREE(global->trace_dump);
+    global->trace_dump = STRDUP("%");
     if(!global->trace_dump)
       err = PARAM_NO_MEM;
     else {
@@ -1549,7 +1549,7 @@ static ParameterError parse_writeout(struct GlobalConfig *global,
     }
     else {
       fname = nextarg;
-      file = fopen(fname, FOPEN_READTEXT);
+      file = FOPEN(fname, FOPEN_READTEXT);
       if(!file) {
         errorf(global, "Failed to open %s", fname);
         return PARAM_READ_ERROR;
@@ -1558,7 +1558,7 @@ static ParameterError parse_writeout(struct GlobalConfig *global,
     curlx_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if(file && (file != stdin))
-      fclose(file);
+      FCLOSE(file);
     if(err)
       return err;
     if(!config->writeout)
@@ -2748,7 +2748,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_HELP: /* --help */
       if(toggle) {
         if(*nextarg) {
-          global->help_category = strdup(nextarg);
+          global->help_category = STRDUP(nextarg);
           if(!global->help_category) {
             err = PARAM_NO_MEM;
             break;
@@ -2978,7 +2978,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
 error:
   if(nextalloc)
-    free(CURL_UNCONST(nextarg));
+    FREE(CURL_UNCONST(nextarg));
   return err;
 }
 
@@ -3025,7 +3025,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
           if(config->url_list && config->url_list->url) {
             /* Allocate the next config */
-            config->next = malloc(sizeof(struct OperationConfig));
+            config->next = MALLOC(sizeof(struct OperationConfig));
             if(config->next) {
               /* Initialise the newly created config */
               config_init(config->next);

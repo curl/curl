@@ -84,7 +84,7 @@ struct cw_out_buf {
 
 static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
 {
-  struct cw_out_buf *cwbuf = calloc(1, sizeof(*cwbuf));
+  struct cw_out_buf *cwbuf = CALLOC(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = otype;
     Curl_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
@@ -96,7 +96,7 @@ static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 {
   if(cwbuf) {
     Curl_dyn_free(&cwbuf->b);
-    free(cwbuf);
+    FREE(cwbuf);
   }
 }
 

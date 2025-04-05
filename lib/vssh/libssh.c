@@ -944,8 +944,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_ERROR_STATE(CURLE_COULDNT_CONNECT);
         break;
       }
-      free(data->state.most_recent_ftp_entrypath);
-      data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+      FREE(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = STRDUP(sshc->homedir);
       if(!data->state.most_recent_ftp_entrypath)
         return CURLE_OUT_OF_MEMORY;
 
@@ -1157,7 +1157,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
 
         result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-        free(tmp);
+        FREE(tmp);
         if(result) {
           state(data, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
@@ -1438,7 +1438,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           }
           result = Curl_client_write(data, CLIENTWRITE_BODY,
                                      tmpLine, sshc->readdir_len + 1);
-          free(tmpLine);
+          FREE(tmpLine);
 
           if(result) {
             state(data, SSH_STOP);
@@ -1976,7 +1976,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 }
 
 
-/* called by the multi interface to figure out what socket(s) to wait for and
+/* called by the multi interface to figure out what SOCKET(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int myssh_getsock(struct Curl_easy *data,
                          struct connectdata *conn,
@@ -2091,7 +2091,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
     sshc->initialised = TRUE;
   }
 
-  data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
+  data->req.p.ssh = ssh = CALLOC(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2713,7 +2713,7 @@ static void sftp_quote(struct Curl_easy *data)
        current directory can be read very similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    FREE(tmp);
     if(result) {
       state(data, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;

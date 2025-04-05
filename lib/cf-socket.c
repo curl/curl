@@ -369,7 +369,7 @@ static CURLcode socket_open(struct Curl_easy *data,
   }
   else {
     /* opensocket callback not set, so simply create the socket now */
-    *sockfd = socket(addr->family, addr->socktype, addr->protocol);
+    *sockfd = SOCKET(addr->family, addr->socktype, addr->protocol);
   }
 
   if(*sockfd == CURL_SOCKET_BAD)
@@ -548,7 +548,7 @@ CURLcode Curl_parse_interface(const char *input,
     ++host_part;
     *host = Curl_memdup0(host_part, len - (host_part - input));
     if(!*host) {
-      free(*iface);
+      FREE(*iface);
       *iface = NULL;
       return CURLE_OUT_OF_MEMORY;
     }
@@ -1041,7 +1041,7 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   cf_socket_close(cf, data);
   CURL_TRC_CF(data, cf, "destroy");
-  free(ctx);
+  FREE(ctx);
   cf->ctx = NULL;
 }
 
@@ -1116,7 +1116,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #ifdef SOCK_NONBLOCK
   /* Do not tuck SOCK_NONBLOCK into socktype when opensocket callback is set
    * because we would not know how socketype is about to be used in the
-   * callback, SOCK_NONBLOCK might get factored out before calling socket().
+   * callback, SOCK_NONBLOCK might get factored out before calling SOCKET().
    */
   if(!data->set.fopensocket)
     ctx->addr.socktype |= SOCK_NONBLOCK;
@@ -1484,7 +1484,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     unsigned char c = 0;
     Curl_rand_bytes(data, FALSE, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
-      CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
+      CURL_TRC_CF(data, cf, "SEND(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
       *err = CURLE_AGAIN;
       nwritten = -1;
       cf->conn->sock[cf->sockindex] = fdsave;
@@ -1495,7 +1495,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = len * ctx->wpartial_percent / 100;
     if(!len)
       len = 1;
-    CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE partial write of %zu bytes",
+    CURL_TRC_CF(data, cf, "SEND(len=%zu) SIMULATE partial write of %zu bytes",
                 orig_len, len);
   }
 #endif
@@ -1544,7 +1544,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     win_update_sndbuf_size(ctx);
 #endif
 
-  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
+  CURL_TRC_CF(data, cf, "SEND(len=%zu) -> %d, err=%d",
               orig_len, (int)nwritten, *err);
   cf->conn->sock[cf->sockindex] = fdsave;
   return nwritten;
@@ -1564,7 +1564,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
-      CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
+      CURL_TRC_CF(data, cf, "RECV(len=%zu) SIMULATE EWOULDBLOCK", len);
       *err = CURLE_AGAIN;
       return -1;
     }
@@ -1572,7 +1572,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
     size_t orig_len = len;
     len = ctx->recv_max;
-    CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
+    CURL_TRC_CF(data, cf, "RECV(len=%zu) SIMULATE max read of %zu bytes",
                 orig_len, len);
   }
 #endif
@@ -1608,7 +1608,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
+  CURL_TRC_CF(data, cf, "RECV(len=%zu) -> %d, err=%d", len, (int)nread,
               *err);
   if(nread > 0 && !ctx->got_first_byte) {
     ctx->first_byte_at = Curl_now();
@@ -1794,7 +1794,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_TCP);
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1949,7 +1949,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_UDP || transport == TRNSPRT_QUIC);
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -2004,7 +2004,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_UNIX);
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -2144,11 +2144,11 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   if(0 == getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
     size = sizeof(add);
-    s_accepted = accept(ctx->sock, (struct sockaddr *) &add, &size);
+    s_accepted = ACCEPT(ctx->sock, (struct sockaddr *) &add, &size);
   }
 
   if(CURL_SOCKET_BAD == s_accepted) {
-    failf(data, "Error accept()ing server connect");
+    failf(data, "Error ACCEPT()ing server connect");
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -2216,7 +2216,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   Curl_conn_cf_discard_all(data, conn, sockindex);
   DEBUGASSERT(conn->sock[sockindex] == CURL_SOCKET_BAD);
 
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

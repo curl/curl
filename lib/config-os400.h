@@ -131,7 +131,7 @@
 
 
 /* The following define is needed on OS400 to enable strcmpi(), stricmp() and
-   strdup(). */
+   STRDUP(). */
 #define __cplusplus__strings__
 
 /* Define if you have the `strcasecmp' function. */

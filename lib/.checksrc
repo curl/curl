@@ -6,3 +6,15 @@ banfunc vsnprint
 banfunc strtoul
 banfunc strtol
 banfunc strtok_r
+# the ones we use UPPERCASE:
+banfunc strdup
+banfunc malloc
+banfunc calloc
+banfunc realloc
+banfunc socket
+banfunc send
+banfunc recv
+banfunc accept
+banfunc fopen
+banfunc fdopen
+banfunc fclose

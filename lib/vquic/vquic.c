@@ -185,7 +185,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   *psent = 0;
 
-  while((sent = send(qctx->sockfd,
+  while((sent = SEND(qctx->sockfd,
                      (const char *)pkt, (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
@@ -195,7 +195,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       return CURLE_AGAIN;
     }
     else {
-      failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
+      failf(data, "SEND() returned %zd (errno %d)", sent, SOCKERRNO);
       if(SOCKERRNO != SOCKEMSGSIZE) {
         return CURLE_SEND_ERROR;
       }

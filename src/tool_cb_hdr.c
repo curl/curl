@@ -214,14 +214,14 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           if(filename) {
             if(outs->stream) {
               /* indication of problem, get out! */
-              free(filename);
+              FREE(filename);
               return CURL_WRITEFUNC_ERROR;
             }
 
             if(per->config->output_dir) {
               outs->filename = aprintf("%s/%s", per->config->output_dir,
                                        filename);
-              free(filename);
+              FREE(filename);
               if(!outs->filename)
                 return CURL_WRITEFUNC_ERROR;
             }
@@ -254,7 +254,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         if(clone) {
           struct curl_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = curl_slist_append(old, clone);
-          free(clone);
+          FREE(clone);
           if(!hdrcbdata->headlist) {
             curl_slist_free_all(old);
             return CURL_WRITEFUNC_ERROR;
@@ -327,7 +327,7 @@ static char *parse_filename(const char *ptr, size_t len)
   char  stop = '\0';
 
   /* simple implementation of strndup() */
-  copy = malloc(len + 1);
+  copy = MALLOC(len + 1);
   if(!copy)
     return NULL;
   memcpy(copy, ptr, len);
@@ -442,7 +442,7 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
     goto locout;
 
   /* Create a NUL-terminated and whitespace-stripped copy of Location: */
-  copyloc = malloc(llen + 1);
+  copyloc = MALLOC(llen + 1);
   if(!copyloc)
     goto locout;
   memcpy(copyloc, loc, llen);
@@ -486,7 +486,7 @@ locdone:
     curl_free(finalurl);
     curl_free(scheme);
     curl_url_cleanup(u);
-    free(copyloc);
+    FREE(copyloc);
   }
 }
 #endif

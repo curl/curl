@@ -149,7 +149,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         if(!newpath)
           goto fail;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
-        free(newpath);
+        FREE(newpath);
         if(uerr) {
           result = urlerr_cvt(uerr);
           goto fail;
@@ -159,7 +159,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           result = urlerr_cvt(uerr);
           goto fail;
         }
-        free(*inurlp);
+        FREE(*inurlp);
         *inurlp = newurl;
         result = CURLE_OK;
       }
@@ -212,11 +212,11 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
 
       if(pc) {
         /* duplicate the string beyond the slash */
-        *filename = strdup(pc + 1);
+        *filename = STRDUP(pc + 1);
       }
       else {
         /* no slash => empty string, use default */
-        *filename = strdup("curl_response");
+        *filename = STRDUP("curl_response");
         warnf(global, "No remote file name, uses \"%s\"", *filename);
       }
 

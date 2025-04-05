@@ -70,7 +70,7 @@ CURLcode Curl_setstropt(char **charp, const char *s)
     if(strlen(s) > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    *charp = strdup(s);
+    *charp = STRDUP(s);
     if(!*charp)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -91,7 +91,7 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
     if(blob->len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     nblob = (struct curl_blob *)
-      malloc(sizeof(struct curl_blob) +
+      MALLOC(sizeof(struct curl_blob) +
              ((blob->flags & CURL_BLOB_COPY) ? blob->len : 0));
     if(!nblob)
       return CURLE_OUT_OF_MEMORY;
@@ -130,10 +130,10 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
       return result;
   }
 
-  free(*userp);
+  FREE(*userp);
   *userp = user;
 
-  free(*passwdp);
+  FREE(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
@@ -157,13 +157,13 @@ static CURLcode setstropt_interface(char *option, char **devp,
     if(result)
       return result;
   }
-  free(*devp);
+  FREE(*devp);
   *devp = dev;
 
-  free(*ifacep);
+  FREE(*ifacep);
   *ifacep = iface;
 
-  free(*hostp);
+  FREE(*hostp);
   *hostp = host;
 
   return CURLE_OK;
@@ -1722,7 +1722,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
         if(!p)
           return CURLE_OUT_OF_MEMORY;
         else {
-          free(data->set.str[STRING_COPYPOSTFIELDS]);
+          FREE(data->set.str[STRING_COPYPOSTFIELDS]);
           data->set.str[STRING_COPYPOSTFIELDS] = p;
         }
       }
@@ -2141,8 +2141,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     }
-    free(u);
-    free(p);
+    FREE(u);
+    FREE(p);
   }
     break;
   case CURLOPT_PROXYUSERNAME:
@@ -2771,14 +2771,14 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
 
   case CURLOPT_SOCKOPTFUNCTION:
     /*
-     * socket callback function: called after socket() but before connect()
+     * socket callback function: called after SOCKET() but before connect()
      */
     data->set.fsockopt = va_arg(param, curl_sockopt_callback);
     break;
 
   case CURLOPT_OPENSOCKETFUNCTION:
     /*
-     * open/create socket callback function: called instead of socket(),
+     * open/create socket callback function: called instead of SOCKET(),
      * before connect()
      */
     data->set.fopensocket = va_arg(param, curl_opensocket_callback);

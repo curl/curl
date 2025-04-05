@@ -129,9 +129,9 @@ static char *vms_getenv(const char *envvar)
   result = vms_translate_path(vms_path);
 
   /* note that if you backport this to use VAX C RTL, that the VAX C RTL */
-  /* may do a malloc(2048) for each call to getenv(), so you will need   */
-  /* to add a free(vms_path) */
-  /* Do not do a free() for DEC C RTL builds, which should be used for */
+  /* may do a MALLOC(2048) for each call to getenv(), so you will need   */
+  /* to add a FREE(vms_path) */
+  /* Do not do a FREE() for DEC C RTL builds, which should be used for */
   /* VMS 5.5-2 and later, even if using GCC */
 
   return result;

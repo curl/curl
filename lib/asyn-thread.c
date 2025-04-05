@@ -155,7 +155,7 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
   if(tsd) {
     DEBUGASSERT(!tsd->ref_count);
     Curl_mutex_destroy(&tsd->mutx);
-    free(tsd->hostname);
+    FREE(tsd->hostname);
     if(tsd->res)
       Curl_freeaddrinfo(tsd->res);
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -164,12 +164,12 @@ void destroy_thread_sync_data(struct thread_sync_data *tsd)
    * the other end (for reading) is always closed in the parent thread.
    */
 #ifndef USE_EVENTFD
-  if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
-    wakeup_close(tsd->sock_pair[1]);
-  }
+    if(tsd->sock_pair[1] != CURL_SOCKET_BAD) {
+      wakeup_close(tsd->sock_pair[1]);
+    }
 #endif
 #endif
-    free(tsd);
+    FREE(tsd);
   }
 }
 
@@ -183,7 +183,7 @@ int init_thread_sync_data(struct thread_data *td,
   struct thread_sync_data *tsd;
 
   DEBUGASSERT(!td->tsd);
-  tsd = calloc(1, sizeof(*tsd));
+  tsd = CALLOC(1, sizeof(*tsd));
   if(!tsd)
     return 0;
 
@@ -216,7 +216,7 @@ int init_thread_sync_data(struct thread_data *td,
   /* Copying hostname string because original can be destroyed by parent
    * thread during gethostbyname execution.
    */
-  tsd->hostname = strdup(hostname);
+  tsd->hostname = STRDUP(hostname);
   if(!tsd->hostname)
     goto err_exit;
 

@@ -278,7 +278,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
     goto out;
   }
 
-  s = calloc(1, sizeof(*s));
+  s = CALLOC(1, sizeof(*s));
   if(!s) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;

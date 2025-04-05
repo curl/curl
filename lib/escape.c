@@ -69,7 +69,7 @@ char *curl_easy_escape(CURL *data, const char *string,
 
   length = (inlength ? (size_t)inlength : strlen(string));
   if(!length)
-    return strdup("");
+    return STRDUP("");
 
   Curl_dyn_init(&d, length * 3 + 1);
 
@@ -121,7 +121,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
 
   alloc = (length ? length : strlen(string));
-  ns = malloc(alloc + 1);
+  ns = MALLOC(alloc + 1);
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
@@ -197,7 +197,7 @@ char *curl_easy_unescape(CURL *data, const char *string,
    the library's memory system */
 void curl_free(void *p)
 {
-  free(p);
+  FREE(p);
 }
 
 /*

@@ -28,6 +28,7 @@
 #endif
 
 #include "tool_cb_soc.h"
+#include "memdebug.h"
 
 /*
 ** callback for CURLOPT_OPENSOCKETFUNCTION
@@ -54,5 +55,5 @@ curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
     return CURL_SOCKET_BAD;
 #endif
 
-  return socket(addr->family, addr->socktype, protocol);
+  return SOCKET(addr->family, addr->socktype, protocol);
 }

@@ -132,7 +132,7 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   if(len > max_sanitized_len)
     return SANITIZE_ERR_INVALID_PATH;
 
-  target = strdup(file_name);
+  target = STRDUP(file_name);
   if(!target)
     return SANITIZE_ERR_OUT_OF_MEMORY;
 
@@ -182,28 +182,28 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
 #ifdef MSDOS
   sc = msdosify(&p, target, flags);
-  free(target);
+  FREE(target);
   if(sc)
     return sc;
   target = p;
   len = strlen(target);
 
   if(len > max_sanitized_len) {
-    free(target);
+    FREE(target);
     return SANITIZE_ERR_INVALID_PATH;
   }
 #endif
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
     sc = rename_if_reserved_dos(&p, target, flags);
-    free(target);
+    FREE(target);
     if(sc)
       return sc;
     target = p;
     len = strlen(target);
 
     if(len > max_sanitized_len) {
-      free(target);
+      FREE(target);
       return SANITIZE_ERR_INVALID_PATH;
     }
   }
@@ -414,7 +414,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
       return SANITIZE_ERR_INVALID_PATH;
   }
 
-  *sanitized = strdup(dos_name);
+  *sanitized = STRDUP(dos_name);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 #endif /* MSDOS */
@@ -456,7 +456,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
-    *sanitized = strdup(file_name);
+    *sanitized = STRDUP(file_name);
     if(!*sanitized)
       return SANITIZE_ERR_OUT_OF_MEMORY;
     return SANITIZE_ERR_OK;
@@ -543,7 +543,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
   }
 #endif
 
-  *sanitized = strdup(fname);
+  *sanitized = STRDUP(fname);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 
@@ -596,7 +596,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
     char *mstr = curlx_convert_tchar_to_UTF8(buf);
     curlx_safefree(config->cacert);
     if(mstr)
-      config->cacert = strdup(mstr);
+      config->cacert = STRDUP(mstr);
     curlx_unicodefree(mstr);
     if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;

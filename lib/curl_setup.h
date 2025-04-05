@@ -89,10 +89,10 @@
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for STRDUP(), write(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#define _CRT_SECURE_NO_DEPRECATE  /* for FOPEN(), getenv(), etc. */
 #endif
 #endif /* _MSC_VER */
 
@@ -498,7 +498,7 @@
 #  define struct_stat                struct _stati64
 #  define LSEEK_ERROR                (__int64)-1
 #  define open                       curlx_win32_open
-#  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#  define FOPEN(fname,mode)          curlx_win32_fopen(fname, mode)
    int curlx_win32_open(const char *filename, int oflag, ...);
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
@@ -529,7 +529,7 @@
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
 #    define struct_stat                struct _stat
 #    define open                       curlx_win32_open
-#    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+#    define FOPEN(fname,mode)          curlx_win32_fopen(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);

@@ -1133,7 +1133,7 @@ static CURLcode pop3_init(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   struct POP3 *pop3;
 
-  pop3 = data->req.p.pop3 = calloc(1, sizeof(struct POP3));
+  pop3 = data->req.p.pop3 = CALLOC(1, sizeof(struct POP3));
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
 

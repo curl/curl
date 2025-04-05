@@ -194,7 +194,7 @@ void config_free(struct OperationConfig *config)
     struct OperationConfig *prev = last->prev;
 
     free_config_fields(last);
-    free(last);
+    FREE(last);
 
     last = prev;
   }

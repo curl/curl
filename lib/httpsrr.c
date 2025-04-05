@@ -205,7 +205,7 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
        is in ServiceMode */
     target = ares_dns_rr_get_str(rr, ARES_RR_HTTPS_TARGET);
     if(target && target[0]) {
-      res->hinfo.target = strdup(target);
+      res->hinfo.target = STRDUP(target);
       if(!res->hinfo.target) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;

@@ -50,12 +50,12 @@ void tool_set_stderr_file(struct GlobalConfig *global, const char *filename)
 
   /* precheck that filename is accessible to lessen the chance that the
      subsequent freopen will fail. */
-  fp = fopen(filename, FOPEN_WRITETEXT);
+  fp = FOPEN(filename, FOPEN_WRITETEXT);
   if(!fp) {
     warnf(global, "Warning: Failed to open %s", filename);
     return;
   }
-  fclose(fp);
+  FCLOSE(fp);
 
   /* freopen the actual stderr (stdio.h stderr) instead of tool_stderr since
      the latter may be set to stdout. */

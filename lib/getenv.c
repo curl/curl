@@ -45,9 +45,9 @@ static char *GetEnv(const char *variable)
   const DWORD max = 32768; /* max env var size from MSCRT source */
 
   for(;;) {
-    tmp = realloc(buf, rc);
+    tmp = REALLOC(buf, rc);
     if(!tmp) {
-      free(buf);
+      FREE(buf);
       return NULL;
     }
 
@@ -58,7 +58,7 @@ static char *GetEnv(const char *variable)
        Since getenv does not make that distinction we ignore it as well. */
     rc = GetEnvironmentVariableA(variable, buf, bufsize);
     if(!rc || rc == bufsize || rc > max) {
-      free(buf);
+      FREE(buf);
       return NULL;
     }
 
@@ -70,7 +70,7 @@ static char *GetEnv(const char *variable)
   }
 #else
   char *env = getenv(variable);
-  return (env && env[0]) ? strdup(env) : NULL;
+  return (env && env[0]) ? STRDUP(env) : NULL;
 #endif
 }
 

@@ -125,7 +125,7 @@ struct timeval {
 
 /*
  * If we have the MSG_NOSIGNAL define, make sure we use
- * it as the fourth argument of function send()
+ * it as the fourth argument of function SEND()
  */
 
 #ifdef HAVE_MSG_NOSIGNAL
@@ -144,10 +144,10 @@ struct timeval {
 #elif defined(HAVE_RECV)
 /*
  * The definitions for the return type and arguments types
- * of functions recv() and send() belong and come from the
+ * of functions RECV() and SEND() belong and come from the
  * configuration file. Do not define them in any other place.
  *
- * HAVE_RECV is defined if you have a function named recv()
+ * HAVE_RECV is defined if you have a function named RECV()
  * which is used to read incoming data from sockets. If your
  * function has another name then do not define HAVE_RECV.
  *
@@ -155,7 +155,7 @@ struct timeval {
  * RECV_TYPE_ARG3, RECV_TYPE_ARG4 and RECV_TYPE_RETV must also
  * be defined.
  *
- * HAVE_SEND is defined if you have a function named send()
+ * HAVE_SEND is defined if you have a function named SEND()
  * which is used to write outgoing data on a connected socket.
  * If yours has another name then do not define HAVE_SEND.
  *
@@ -164,7 +164,7 @@ struct timeval {
  * SEND_TYPE_RETV must also be defined.
  */
 
-#define sread(x,y,z) (ssize_t)recv((RECV_TYPE_ARG1)(x), \
+#define sread(x,y,z) (ssize_t)RECV((RECV_TYPE_ARG1)(x), \
                                    (RECV_TYPE_ARG2)(y), \
                                    (RECV_TYPE_ARG3)(z), \
                                    (RECV_TYPE_ARG4)(0))
@@ -181,7 +181,7 @@ struct timeval {
                                      (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                      (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
-#define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
+#define swrite(x,y,z) (ssize_t)SEND((SEND_TYPE_ARG1)(x), \
                               (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                     (SEND_TYPE_ARG3)(z), \
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))

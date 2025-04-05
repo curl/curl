@@ -118,12 +118,12 @@ static void cap_expires(time_t now, struct Cookie *co)
 
 static void freecookie(struct Cookie *co)
 {
-  free(co->domain);
-  free(co->path);
-  free(co->spath);
-  free(co->name);
-  free(co->value);
-  free(co);
+  FREE(co->domain);
+  FREE(co->path);
+  FREE(co->spath);
+  FREE(co->name);
+  FREE(co->value);
+  FREE(co);
 }
 
 static bool cookie_tailmatch(const char *cookie_domain,
@@ -294,7 +294,7 @@ static char *sanitize_cookie_path(const char *cookie_path)
   /* RFC6265 5.2.4 The Path Attribute */
   if(cookie_path[0] != '/')
     /* Let cookie-path be the default-path. */
-    return strdup("/");
+    return STRDUP("/");
 
   /* remove trailing slash */
   /* convert /hoge/ to /hoge */
@@ -344,7 +344,7 @@ void Curl_cookie_loadfiles(struct Curl_easy *data)
 static void strstore(char **str, const char *newstr, size_t len)
 {
   DEBUGASSERT(str);
-  free(*str);
+  FREE(*str);
   if(!len) {
     len++;
     newstr = "";
@@ -596,7 +596,7 @@ parse_cookie_header(struct Curl_easy *data,
         strstore(&co->path, Curl_str(&val), Curl_strlen(&val));
         if(!co->path)
           return CERR_OUT_OF_MEMORY;
-        free(co->spath); /* if this is set again */
+        FREE(co->spath); /* if this is set again */
         co->spath = sanitize_cookie_path(co->path);
         if(!co->spath)
           return CERR_OUT_OF_MEMORY;
@@ -725,7 +725,7 @@ parse_cookie_header(struct Curl_easy *data,
 
   if(!co->domain && domain) {
     /* no domain was given in the header line, set the default */
-    co->domain = strdup(domain);
+    co->domain = STRDUP(domain);
     if(!co->domain)
       return CERR_OUT_OF_MEMORY;
   }
@@ -831,10 +831,10 @@ parse_netscape(struct Cookie *co,
         break;
       }
       /* this does not look like a path, make one up! */
-      co->path = strdup("/");
+      co->path = STRDUP("/");
       if(!co->path)
         return CERR_OUT_OF_MEMORY;
-      co->spath = strdup("/");
+      co->spath = STRDUP("/");
       if(!co->spath)
         return CERR_OUT_OF_MEMORY;
       fields++; /* add a field and fall down to secure */
@@ -873,7 +873,7 @@ parse_netscape(struct Cookie *co,
   }
   if(6 == fields) {
     /* we got a cookie with blank contents, fix it */
-    co->value = strdup("");
+    co->value = STRDUP("");
     if(!co->value)
       return CERR_OUT_OF_MEMORY;
     else
@@ -1072,7 +1072,7 @@ Curl_cookie_add(struct Curl_easy *data,
     return NULL;
 
   /* First, alloc and init a new struct for it */
-  co = calloc(1, sizeof(struct Cookie));
+  co = CALLOC(1, sizeof(struct Cookie));
   if(!co)
     return NULL; /* bail out if we are this low on memory */
 
@@ -1176,7 +1176,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     int i;
 
     /* we did not get a struct, create one */
-    ci = calloc(1, sizeof(struct CookieInfo));
+    ci = CALLOC(1, sizeof(struct CookieInfo));
     if(!ci)
       return NULL; /* failed to get memory */
 
@@ -1198,7 +1198,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       if(!strcmp(file, "-"))
         fp = stdin;
       else {
-        fp = fopen(file, "rb");
+        fp = FOPEN(file, "rb");
         if(!fp)
           infof(data, "WARNING: failed to open cookie file \"%s\"", file);
         else
@@ -1231,7 +1231,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       remove_expired(ci);
 
       if(handle)
-        fclose(handle);
+        FCLOSE(handle);
     }
     data->state.cookie_engine = TRUE;
   }
@@ -1373,7 +1373,7 @@ int Curl_cookie_getlist(struct Curl_easy *data,
     size_t i;
 
     /* alloc an array and store all cookie pointers */
-    array = malloc(sizeof(struct Cookie *) * matches);
+    array = MALLOC(sizeof(struct Cookie *) * matches);
     if(!array)
       goto fail;
 
@@ -1391,7 +1391,7 @@ int Curl_cookie_getlist(struct Curl_easy *data,
     for(i = 0; i < matches; i++)
       Curl_llist_append(list, array[i], &array[i]->getnode);
 
-    free(array); /* remove the temporary data again */
+    FREE(array); /* remove the temporary data again */
   }
 
   return 0; /* success */
@@ -1462,7 +1462,7 @@ void Curl_cookie_cleanup(struct CookieInfo *ci)
 {
   if(ci) {
     Curl_cookie_clearall(ci);
-    free(ci); /* free the base struct as well */
+    FREE(ci); /* free the base struct as well */
   }
 }
 
@@ -1545,7 +1545,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
     struct Cookie **array;
     struct Curl_llist_node *n;
 
-    array = calloc(1, sizeof(struct Cookie *) * ci->numcookies);
+    array = CALLOC(1, sizeof(struct Cookie *) * ci->numcookies);
     if(!array) {
       error = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -1567,19 +1567,19 @@ static CURLcode cookie_output(struct Curl_easy *data,
     for(i = 0; i < nvalid; i++) {
       char *format_ptr = get_netscape_format(array[i]);
       if(!format_ptr) {
-        free(array);
+        FREE(array);
         error = CURLE_OUT_OF_MEMORY;
         goto error;
       }
       fprintf(out, "%s\n", format_ptr);
-      free(format_ptr);
+      FREE(format_ptr);
     }
 
-    free(array);
+    FREE(array);
   }
 
   if(!use_stdout) {
-    fclose(out);
+    FCLOSE(out);
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
       unlink(tempstore);
@@ -1593,13 +1593,13 @@ static CURLcode cookie_output(struct Curl_easy *data,
    * no need to inspect the error, any error case should have jumped into the
    * error block below.
    */
-  free(tempstore);
+  FREE(tempstore);
   return CURLE_OK;
 
 error:
   if(out && !use_stdout)
-    fclose(out);
-  free(tempstore);
+    FCLOSE(out);
+  FREE(tempstore);
   return error;
 }
 
@@ -1627,7 +1627,7 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
       }
       beg = Curl_slist_append_nodup(list, line);
       if(!beg) {
-        free(line);
+        FREE(line);
         curl_slist_free_all(list);
         return NULL;
       }

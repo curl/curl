@@ -154,7 +154,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    */
   int h_errnop;
 
-  buf = calloc(1, CURL_HOSTENT_SIZE);
+  buf = CALLOC(1, CURL_HOSTENT_SIZE);
   if(!buf)
     return NULL; /* major failure */
   /*
@@ -268,8 +268,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      * Since we do not know how big buffer this particular lookup required,
      * we cannot realloc down the huge alloc without doing closer analysis of
      * the returned data. Thus, we always use CURL_HOSTENT_SIZE for every
-     * name lookup. Fixing this would require an extra malloc() and then
-     * calling Curl_addrinfo_copy() that subsequent realloc()s down the new
+     * name lookup. Fixing this would require an extra MALLOC() and then
+     * calling Curl_addrinfo_copy() that subsequent REALLOC()s down the new
      * memory area to the actually used amount.
      */
   }
@@ -277,7 +277,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #endif /* HAVE_...BYNAME_R_5 || HAVE_...BYNAME_R_6 || HAVE_...BYNAME_R_3 */
   {
     h = NULL; /* set return code to NULL */
-    free(buf);
+    FREE(buf);
   }
 #else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
           HAVE_GETHOSTBYNAME_R */
@@ -295,7 +295,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     ai = Curl_he2ai(h, port);
 
     if(buf) /* used a *_r() function */
-      free(buf);
+      FREE(buf);
   }
 #endif
 

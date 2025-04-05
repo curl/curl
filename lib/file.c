@@ -132,7 +132,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
 {
   (void)conn;
   /* allocate the FILE specific struct */
-  data->req.p.file = calloc(1, sizeof(struct FILEPROTO));
+  data->req.p.file = CALLOC(1, sizeof(struct FILEPROTO));
   if(!data->req.p.file)
     return CURLE_OUT_OF_MEMORY;
 
@@ -240,7 +240,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
-  free(file->freepath);
+  FREE(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
@@ -540,7 +540,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   /* The following is a shortcut implementation of file reading
      this is both more efficient than the former call to download() and
-     it avoids problems with select() and recv() on file descriptors
+     it avoids problems with select() and RECV() on file descriptors
      in Winsock */
   if(size_known)
     Curl_pgrsSetDownloadSize(data, expected_size);
