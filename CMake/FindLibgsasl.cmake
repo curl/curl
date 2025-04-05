@@ -37,6 +37,7 @@
 # - `LIBGSASL_PC_REQUIRES`:   The libgsasl pkg-config packages.
 # - `LIBGSASL_CFLAGS`:        Required compiler flags.
 # - `LIBGSASL_VERSION`:       Version of libgsasl.
+# - `CURL::libgsasl`:         libgsasl library target.
 
 set(LIBGSASL_PC_REQUIRES "libgsasl")
 

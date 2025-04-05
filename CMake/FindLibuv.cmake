@@ -37,6 +37,7 @@
 # - `LIBUV_PC_REQUIRES`:   The libuv pkg-config packages.
 # - `LIBUV_CFLAGS`:        Required compiler flags.
 # - `LIBUV_VERSION`:       Version of libuv.
+# - `CURL::libuv`:         libuv library target.
 
 set(LIBUV_PC_REQUIRES "libuv")
 
