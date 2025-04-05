@@ -42,7 +42,7 @@ if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   unset(MBEDTLS_INCLUDE_DIRS)
 endif()
 
-set(MBEDTLS_PC_REQUIRES "mbedtls" "mbedx509" "mbedcrypto")
+set(_mbedtls_pc_requires "mbedtls" "mbedx509" "mbedcrypto")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MBEDTLS_INCLUDE_DIR AND
@@ -50,7 +50,7 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MBEDX509_LIBRARY AND
    NOT DEFINED MBEDCRYPTO_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(MBEDTLS ${MBEDTLS_PC_REQUIRES})
+  pkg_check_modules(MBEDTLS ${_mbedtls_pc_requires})
 endif()
 
 if(MBEDTLS_FOUND)
@@ -58,7 +58,7 @@ if(MBEDTLS_FOUND)
   string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
-  set(MBEDTLS_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
   find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")
