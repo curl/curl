@@ -45,6 +45,7 @@ endif()
 
 if(_libssh_FOUND)
   set(Libssh_FOUND TRUE)
+  set(LIBSSH_FOUND TRUE)
   string(REPLACE ";" " " _libssh_CFLAGS "${_libssh_CFLAGS}")
   message(STATUS "Found Libssh (via pkg-config): ${_libssh_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
