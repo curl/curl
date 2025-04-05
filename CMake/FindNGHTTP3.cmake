@@ -31,11 +31,6 @@
 # Defines:
 #
 # - `NGHTTP3_FOUND`:         System has nghttp3.
-# - `NGHTTP3_INCLUDE_DIRS`:  The nghttp3 include directories.
-# - `NGHTTP3_LIBRARIES`:     The nghttp3 library names.
-# - `NGHTTP3_LIBRARY_DIRS`:  The nghttp3 library directories.
-# - `NGHTTP3_PC_REQUIRES`:   The nghttp3 pkg-config packages.
-# - `NGHTTP3_CFLAGS`:        Required compiler flags.
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
 # - `CURL::nghttp3`:         nghttp3 library target.
 
