@@ -179,6 +179,13 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* MEMDEBUG_NODEFINES */
 
+#else
+/* when not CURLDEBUG */
+#define FOPEN(a,b) fopen(a,b)
+#define SOCKET(a,b,c) socket(a,b,c)
+#define ACCEPT(a,b,c) accept(a,b,c)
+#define SOCKETPAIR(a,b,c,d,e) socketpair(a,b,c,d,e)
+
 #endif /* CURLDEBUG */
 
 /*
