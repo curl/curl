@@ -43,13 +43,13 @@ if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
   set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
 endif()
 
-set(WOLFSSL_PC_REQUIRES "wolfssl")
+set(_wolfssl_pc_requires "wolfssl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED WOLFSSL_INCLUDE_DIR AND
    NOT DEFINED WOLFSSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(WOLFSSL ${WOLFSSL_PC_REQUIRES})
+  pkg_check_modules(WOLFSSL ${_wolfssl_pc_requires})
 endif()
 
 if(WOLFSSL_FOUND)
