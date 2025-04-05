@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH2_INCLUDE_DIR AND
    NOT DEFINED LIBSSH2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH2 ${_libssh2_pc_requires})
+  pkg_check_modules(_libssh2 ${_libssh2_pc_requires})
 endif()
 
-if(LIBSSH2_FOUND AND LIBSSH2_INCLUDE_DIRS)
+if(_libssh2_FOUND AND _libssh2_INCLUDE_DIRS)
   set(Libssh2_FOUND TRUE)
-  string(REPLACE ";" " " LIBSSH2_CFLAGS "${LIBSSH2_CFLAGS}")
-  message(STATUS "Found Libssh2 (via pkg-config): ${LIBSSH2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
+  string(REPLACE ";" " " _libssh2_CFLAGS "${_libssh2_CFLAGS}")
+  message(STATUS "Found Libssh2 (via pkg-config): ${_libssh2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
 else()
   find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
   find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
@@ -71,8 +71,8 @@ else()
   )
 
   if(LIBSSH2_FOUND)
-    set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
-    set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
+    set(_libssh2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+    set(_libssh2_LIBRARIES    ${LIBSSH2_LIBRARY})
   endif()
 
   mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)

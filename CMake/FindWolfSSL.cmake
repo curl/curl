@@ -49,13 +49,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED WOLFSSL_INCLUDE_DIR AND
    NOT DEFINED WOLFSSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(WOLFSSL ${_wolfssl_pc_requires})
+  pkg_check_modules(_wolfssl ${_wolfssl_pc_requires})
 endif()
 
-if(WOLFSSL_FOUND)
+if(_wolfssl_FOUND)
   set(WolfSSL_FOUND TRUE)
-  string(REPLACE ";" " " WOLFSSL_CFLAGS "${WOLFSSL_CFLAGS}")
-  message(STATUS "Found WolfSSL (via pkg-config): ${WOLFSSL_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
+  string(REPLACE ";" " " _wolfssl_CFLAGS "${_wolfssl_CFLAGS}")
+  message(STATUS "Found WolfSSL (via pkg-config): ${_wolfssl_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
 else()
   find_path(WOLFSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h")
   find_library(WOLFSSL_LIBRARY NAMES "wolfssl")
@@ -80,8 +80,8 @@ else()
   )
 
   if(WOLFSSL_FOUND)
-    set(WOLFSSL_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
-    set(WOLFSSL_LIBRARIES    ${WOLFSSL_LIBRARY})
+    set(_wolfssl_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
+    set(_wolfssl_LIBRARIES    ${WOLFSSL_LIBRARY})
   endif()
 
   mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
@@ -90,7 +90,7 @@ endif()
 if(WOLFSSL_FOUND AND NOT WIN32)
   find_library(MATH_LIBRARY NAMES "m")
   if(MATH_LIBRARY)
-    list(APPEND WOLFSSL_LIBRARIES ${MATH_LIBRARY})  # for log and pow
+    list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
   endif()
   mark_as_advanced(MATH_LIBRARY)
 endif()
