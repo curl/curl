@@ -28,8 +28,8 @@
 
 /* defaults:
 
-   ssize_t recv(int, void *, size_t, int);
-   ssize_t send(int, const void *, size_t, int);
+   ssize_t RECV(int, void *, size_t, int);
+   ssize_t SEND(int, const void *, size_t, int);
 
    If other argument or return types are needed:
 
@@ -39,13 +39,13 @@
 */
 
 #ifdef _WIN32
-/* int recv(SOCKET, char *, int, int) */
+/* int RECV(SOCKET, char *, int, int) */
 #define RECV_TYPE_ARG1 SOCKET
 #define RECV_TYPE_ARG2 char *
 #define RECV_TYPE_ARG3 int
 #define RECV_TYPE_RETV int
 
-/* int send(SOCKET, const char *, int, int); */
+/* int SEND(SOCKET, const char *, int, int); */
 #define SEND_TYPE_ARG1 SOCKET
 #define SEND_TYPE_ARG2 char *
 #define SEND_TYPE_ARG3 int
@@ -53,14 +53,14 @@
 
 #elif defined(__AMIGA__) /* Any AmigaOS flavour */
 
-/* long recv(long, char *, long, long); */
+/* long RECV(long, char *, long, long); */
 #define RECV_TYPE_ARG1 long
 #define RECV_TYPE_ARG2 char *
 #define RECV_TYPE_ARG3 long
 #define RECV_TYPE_ARG4 long
 #define RECV_TYPE_RETV long
 
-/* int send(int, const char *, int, int); */
+/* int SEND(int, const char *, int, int); */
 #define SEND_TYPE_ARG1 int
 #define SEND_QUAL_ARG2
 #define SEND_TYPE_ARG2 char *

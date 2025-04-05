@@ -146,7 +146,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   (void)type;
   (void)protocol;
 
-  listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  listener = SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if(listener == CURL_SOCKET_BAD)
     return -1;
 
@@ -180,7 +180,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(listen(listener, 1) == -1)
     goto error;
-  socks[0] = socket(AF_INET, SOCK_STREAM, 0);
+  socks[0] = SOCKET(AF_INET, SOCK_STREAM, 0);
   if(socks[0] == CURL_SOCKET_BAD)
     goto error;
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
@@ -193,7 +193,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   pfd[0].events = POLLIN;
   pfd[0].revents = 0;
   (void)Curl_poll(pfd, 1, 1000); /* one second */
-  socks[1] = accept(listener, NULL, NULL);
+  socks[1] = ACCEPT(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
   else {

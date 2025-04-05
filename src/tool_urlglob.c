@@ -43,12 +43,12 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   pat->content.Set.ptr_s = 0;
   pat->globindex = -1;
 
-  pat->content.Set.elements = malloc(sizeof(char *));
+  pat->content.Set.elements = MALLOC(sizeof(char *));
 
   if(!pat->content.Set.elements)
     return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
-  pat->content.Set.elements[0] = malloc(len + 1);
+  pat->content.Set.elements[0] = MALLOC(len + 1);
   if(!pat->content.Set.elements[0])
     return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
@@ -130,7 +130,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
 
       *buf = '\0';
       if(pat->content.Set.elements) {
-        char **new_arr = realloc(pat->content.Set.elements,
+        char **new_arr = REALLOC(pat->content.Set.elements,
                                  (size_t)(pat->content.Set.size + 1) *
                                  sizeof(char *));
         if(!new_arr)
@@ -139,13 +139,13 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
         pat->content.Set.elements = new_arr;
       }
       else
-        pat->content.Set.elements = malloc(sizeof(char *));
+        pat->content.Set.elements = MALLOC(sizeof(char *));
 
       if(!pat->content.Set.elements)
         return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
       pat->content.Set.elements[pat->content.Set.size] =
-        strdup(glob->glob_buffer);
+        STRDUP(glob->glob_buffer);
       if(!pat->content.Set.elements[pat->content.Set.size])
         return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
       ++pat->content.Set.size;
@@ -442,12 +442,12 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
 
   *glob = NULL;
 
-  glob_buffer = malloc(strlen(url) + 1);
+  glob_buffer = MALLOC(strlen(url) + 1);
   if(!glob_buffer)
     return CURLE_OUT_OF_MEMORY;
   glob_buffer[0] = 0;
 
-  glob_expand = calloc(1, sizeof(struct URLGlob));
+  glob_expand = CALLOC(1, sizeof(struct URLGlob));
   if(!glob_expand) {
     curlx_safefree(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
@@ -596,7 +596,7 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
     }
   }
 
-  *globbed = strdup(glob->glob_buffer);
+  *globbed = STRDUP(glob->glob_buffer);
   if(!*globbed)
     return CURLE_OUT_OF_MEMORY;
 

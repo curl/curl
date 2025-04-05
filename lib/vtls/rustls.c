@@ -114,7 +114,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   else if(nread == 0)
     connssl->peer_closed = TRUE;
   *out_n = (uintptr_t)nread;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %zd, %d",
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next RECV(len=%zu) -> %zd, %d",
               len, nread, result);
   return ret;
 }
@@ -136,7 +136,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (uintptr_t)nwritten;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next SEND(len=%zu) -> %zd, %d",
               len, nwritten, result);
   return ret;
 }
@@ -376,7 +376,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(*err) {
     if(CURLE_AGAIN == *err) {
       /* The TLS bytes may have been partially written, but we fail the
-       * complete send() and remember how much we already added to Rustls. */
+       * complete SEND() and remember how much we already added to Rustls. */
       CURL_TRC_CF(data, cf, "cf_send: EAGAIN, remember we added %zu plain"
                   " bytes already to Rustls", blen);
       backend->plain_out_buffered = plainwritten;
@@ -408,7 +408,7 @@ static int
 read_file_into(const char *filename,
                struct dynbuf *out)
 {
-  FILE *f = fopen(filename, FOPEN_READTEXT);
+  FILE *f = FOPEN(filename, FOPEN_READTEXT);
   if(!f) {
     return 0;
   }
@@ -418,12 +418,12 @@ read_file_into(const char *filename,
     const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
        CURLE_OK != Curl_dyn_addn(out, buf, rr)) {
-      fclose(f);
+      FCLOSE(f);
       return 0;
     }
   }
 
-  return fclose(f) == 0;
+  return FCLOSE(f) == 0;
 }
 
 static void
@@ -596,7 +596,7 @@ init_config_builder(struct Curl_easy *data,
   }
 #endif /* USE_ECH */
 
-  cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
+  cipher_suites = MALLOC(sizeof(cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
@@ -653,7 +653,7 @@ init_config_builder(struct Curl_easy *data,
 
 cleanup:
   if(cipher_suites) {
-    free(cipher_suites);
+    FREE(cipher_suites);
   }
   if(custom_provider_builder) {
     rustls_crypto_provider_builder_free(custom_provider_builder);

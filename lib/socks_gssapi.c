@@ -153,7 +153,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                        (gss_OID) GSS_C_NULL_OID, &server);
   }
   else {
-    service.value = malloc(serviceptr_length +
+    service.value = MALLOC(serviceptr_length +
                            strlen(conn->socks_proxy.host.name) + 2);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
@@ -278,7 +278,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     us_length = ntohs(us_length);
 
     gss_recv_token.length = us_length;
-    gss_recv_token.value = malloc(us_length);
+    gss_recv_token.value = MALLOC(us_length);
     if(!gss_recv_token.value) {
       failf(data,
             "Could not allocate memory for GSS-API authentication "
@@ -325,7 +325,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     failf(data, "Failed to determine username.");
     return CURLE_COULDNT_CONNECT;
   }
-  user = malloc(gss_send_token.length + 1);
+  user = MALLOC(gss_send_token.length + 1);
   if(!user) {
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
     gss_release_name(&gss_status, &gss_client_name);
@@ -338,7 +338,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
   infof(data, "SOCKS5 server authenticated user %s with GSS-API.",user);
-  free(user);
+  FREE(user);
   user = NULL;
 
   /* Do encryption */
@@ -475,7 +475,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   us_length = ntohs(us_length);
 
   gss_recv_token.length = us_length;
-  gss_recv_token.value = malloc(gss_recv_token.length);
+  gss_recv_token.value = MALLOC(gss_recv_token.length);
   if(!gss_recv_token.value) {
     gss_delete_sec_context(&gss_status, &gss_context, NULL);
     return CURLE_OUT_OF_MEMORY;

@@ -142,7 +142,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
     /* Allocate our output buffer */
-    nego->output_token = malloc(nego->token_max);
+    nego->output_token = MALLOC(nego->token_max);
     if(!nego->output_token)
       return CURLE_OUT_OF_MEMORY;
  }
@@ -163,7 +163,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       nego->p_identity = NULL;
 
     /* Allocate our credentials handle */
-    nego->credentials = calloc(1, sizeof(CredHandle));
+    nego->credentials = CALLOC(1, sizeof(CredHandle));
     if(!nego->credentials)
       return CURLE_OUT_OF_MEMORY;
 
@@ -178,7 +178,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       return CURLE_AUTH_ERROR;
 
     /* Allocate our new context handle */
-    nego->context = calloc(1, sizeof(CtxtHandle));
+    nego->context = CALLOC(1, sizeof(CtxtHandle));
     if(!nego->context)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -254,7 +254,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                                   &expiry);
 
   /* Free the decoded challenge as it is not required anymore */
-  free(chlg);
+  FREE(chlg);
 
   if(GSS_ERROR(nego->status)) {
     char buffer[STRERROR_LEN];
@@ -312,7 +312,7 @@ CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                        nego->output_token_length, outptr,
                                        outlen);
   if(!result && (!*outptr || !*outlen)) {
-    free(*outptr);
+    FREE(*outptr);
     result = CURLE_REMOTE_ACCESS_DENIED;
   }
 
@@ -334,14 +334,14 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   /* Free our security context */
   if(nego->context) {
     Curl_pSecFn->DeleteSecurityContext(nego->context);
-    free(nego->context);
+    FREE(nego->context);
     nego->context = NULL;
   }
 
   /* Free our credentials handle */
   if(nego->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(nego->credentials);
-    free(nego->credentials);
+    FREE(nego->credentials);
     nego->credentials = NULL;
   }
 

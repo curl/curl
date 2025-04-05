@@ -698,7 +698,7 @@ static struct Curl_addrinfo *ares2addr(struct ares_addrinfo_node *node)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct Curl_addrinfo) + ss_size);
+    ca = MALLOC(sizeof(struct Curl_addrinfo) + ss_size);
     if(!ca) {
       error = EAI_MEMORY;
       break;
@@ -770,7 +770,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   struct thread_data *res = &data->state.async.thdata;
   *waitp = 0; /* default to synchronous response */
 
-  res->hostname = strdup(hostname);
+  res->hostname = STRDUP(hostname);
   if(!res->hostname)
     return NULL;
 

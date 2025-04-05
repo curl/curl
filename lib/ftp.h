@@ -124,7 +124,7 @@ struct ftp_conn {
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
   char *file;    /* url-decoded filename (or path) */
-  char **dirs;   /* realloc()ed array for path components */
+  char **dirs;   /* REALLOC()ed array for path components */
   char *newhost; /* the (allocated) IP addr or hostname to connect the data
                     connection to */
   char *prevpath;   /* url-decoded conn->path from the previous transfer */

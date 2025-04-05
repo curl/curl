@@ -60,13 +60,13 @@
 #ifdef MEMDEBUG_NODEFINES
 #ifdef CURLDEBUG
 
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#undef send
-#undef recv
+#undef STRDUP
+#undef MALLOC
+#undef CALLOC
+#undef REALLOC
+#undef FREE
+#undef SEND
+#undef RECV
 
 #ifdef _WIN32
 #  ifdef UNICODE
@@ -137,16 +137,16 @@ extern curl_wcsdup_callback Curl_cwcsdup;
  * from memdebug.h are the ones that shall be used.
  */
 
-#undef strdup
-#define strdup(ptr) Curl_cstrdup(ptr)
-#undef malloc
-#define malloc(size) Curl_cmalloc(size)
-#undef calloc
-#define calloc(nbelem,size) Curl_ccalloc(nbelem, size)
-#undef realloc
-#define realloc(ptr,size) Curl_crealloc(ptr, size)
-#undef free
-#define free(ptr) Curl_cfree(ptr)
+#undef STRDUP
+#define STRDUP(ptr) Curl_cstrdup(ptr)
+#undef MALLOC
+#define MALLOC(size) Curl_cmalloc(size)
+#undef CALLOC
+#define CALLOC(nbelem,size) Curl_ccalloc(nbelem, size)
+#undef REALLOC
+#define REALLOC(ptr,size) Curl_crealloc(ptr, size)
+#undef FREE
+#define FREE(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
 #  ifdef UNICODE

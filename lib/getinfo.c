@@ -73,10 +73,10 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->httpauthpicked = 0;
   info->numconnects = 0;
 
-  free(info->contenttype);
+  FREE(info->contenttype);
   info->contenttype = NULL;
 
-  free(info->wouldredirect);
+  FREE(info->wouldredirect);
   info->wouldredirect = NULL;
 
   memset(&info->primary, 0, sizeof(info->primary));
@@ -139,7 +139,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_FTP_ENTRY_PATH:
     /* Return the entrypath string from the most recent connection.
        This pointer was copied from the connectdata structure by FTP.
-       The actual string may be free()ed by subsequent libcurl calls so
+       The actual string may be FREE()ed by subsequent libcurl calls so
        it must be copied to a safer area before the next libcurl call.
        Callers must never free it themselves. */
     *param_charp = data->state.most_recent_ftp_entrypath;

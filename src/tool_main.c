@@ -127,7 +127,7 @@ static void memory_tracking_init(void)
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+       curl_dbg_memdebug() as otherwise memory tracking will log a FREE()
        without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
@@ -164,7 +164,7 @@ static CURLcode main_init(struct GlobalConfig *config)
   config->parallel_max = PARALLEL_DEFAULT;
 
   /* Allocate the initial operate config */
-  config->first = config->last = malloc(sizeof(struct OperationConfig));
+  config->first = config->last = MALLOC(sizeof(struct OperationConfig));
   if(config->first) {
     /* Perform the libcurl initialization */
     result = curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -179,12 +179,12 @@ static CURLcode main_init(struct GlobalConfig *config)
       }
       else {
         errorf(config, "error retrieving curl library information");
-        free(config->first);
+        FREE(config->first);
       }
     }
     else {
       errorf(config, "error initializing curl library");
-      free(config->first);
+      FREE(config->first);
     }
   }
   else {
@@ -200,7 +200,7 @@ static void free_globalconfig(struct GlobalConfig *config)
   curlx_safefree(config->trace_dump);
 
   if(config->trace_fopened && config->trace_stream)
-    fclose(config->trace_stream);
+    FCLOSE(config->trace_stream);
   config->trace_stream = NULL;
 
   curlx_safefree(config->libcurl);

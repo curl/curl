@@ -93,7 +93,7 @@
 #define CLONE_STRING(var)                    \
   do {                                       \
     if(source->var) {                        \
-      dest->var = strdup(source->var);       \
+      dest->var = STRDUP(source->var);       \
       if(!dest->var)                         \
         return FALSE;                        \
     }                                        \
@@ -115,7 +115,7 @@ static CURLcode blobdup(struct curl_blob **dest,
   if(src) {
     /* only if there is data to dupe! */
     struct curl_blob *d;
-    d = malloc(sizeof(struct curl_blob) + src->len);
+    d = MALLOC(sizeof(struct curl_blob) + src->len);
     if(!d)
       return CURLE_OUT_OF_MEMORY;
     d->len = src->len;
@@ -460,16 +460,16 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
   struct ssl_connect_data *ctx;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx)
     return NULL;
 
   ctx->ssl_impl = Curl_ssl;
   ctx->alpn = alpn;
   Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
-  ctx->backend = calloc(1, ctx->ssl_impl->sizeof_ssl_backend_data);
+  ctx->backend = CALLOC(1, ctx->ssl_impl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
-    free(ctx);
+    FREE(ctx);
     return NULL;
   }
   return ctx;
@@ -480,8 +480,8 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
   if(ctx) {
     Curl_safefree(ctx->negotiated.alpn);
     Curl_bufq_free(&ctx->earlydata);
-    free(ctx->backend);
-    free(ctx);
+    FREE(ctx->backend);
+    FREE(ctx);
   }
 }
 
@@ -570,7 +570,7 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
       ci->certinfo[i] = NULL;
     }
 
-    free(ci->certinfo); /* free the actual array too */
+    FREE(ci->certinfo); /* free the actual array too */
     ci->certinfo = NULL;
     ci->num_of_certs = 0;
   }
@@ -585,7 +585,7 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
   Curl_ssl_free_certinfo(data);
 
   /* Allocate the required certificate information structures */
-  table = calloc((size_t) num, sizeof(struct curl_slist *));
+  table = CALLOC((size_t) num, sizeof(struct curl_slist *));
   if(!table)
     return CURLE_OUT_OF_MEMORY;
 
@@ -732,7 +732,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     /* compute sha256sum of public key */
-    sha256sumdigest = malloc(CURL_SHA256_DIGEST_LENGTH);
+    sha256sumdigest = MALLOC(CURL_SHA256_DIGEST_LENGTH);
     if(!sha256sumdigest)
       return CURLE_OUT_OF_MEMORY;
     encode = Curl_ssl->sha256sum(pubkey, pubkeylen,
@@ -750,7 +750,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     infof(data, " public key hash: sha256//%s", encoded);
 
     /* it starts with sha256//, copy so we can modify it */
-    pinkeycopy = strdup(pinnedpubkey);
+    pinkeycopy = STRDUP(pinnedpubkey);
     if(!pinkeycopy) {
       Curl_safefree(encoded);
       return CURLE_OUT_OF_MEMORY;
@@ -792,7 +792,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     struct dynbuf buf;
     char unsigned *pem_ptr = NULL;
     size_t left;
-    FILE *fp = fopen(pinnedpubkey, "rb");
+    FILE *fp = FOPEN(pinnedpubkey, "rb");
     if(!fp)
       return result;
 
@@ -854,7 +854,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 end:
     Curl_dyn_free(&buf);
     Curl_safefree(pem_ptr);
-    fclose(fp);
+    FCLOSE(fp);
   }
 
   return result;
@@ -1093,7 +1093,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
     for(i = 0; available_backends[i]; i++) {
       if(strcasecompare(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
-        free(env);
+        FREE(env);
         return 0;
       }
     }
@@ -1104,7 +1104,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
     if(strcasecompare(CURL_DEFAULT_SSL_BACKEND,
                       available_backends[i]->info.name)) {
       Curl_ssl = available_backends[i];
-      free(env);
+      FREE(env);
       return 0;
     }
   }
@@ -1112,7 +1112,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
 
   /* Fall back to first available backend */
   Curl_ssl = available_backends[0];
-  free(env);
+  FREE(env);
   return 0;
 }
 
@@ -1165,7 +1165,7 @@ void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
 {
   Curl_safefree(peer->sni);
   if(peer->dispname != peer->hostname)
-    free(peer->dispname);
+    FREE(peer->dispname);
   peer->dispname = NULL;
   Curl_safefree(peer->hostname);
   Curl_safefree(peer->scache_key);
@@ -1241,13 +1241,13 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
     goto out;
   }
 
-  peer->hostname = strdup(ehostname);
+  peer->hostname = STRDUP(ehostname);
   if(!peer->hostname)
     goto out;
   if(!edispname || !strcmp(ehostname, edispname))
     peer->dispname = peer->hostname;
   else {
-    peer->dispname = strdup(edispname);
+    peer->dispname = STRDUP(edispname);
     if(!peer->dispname)
       goto out;
   }
@@ -1259,7 +1259,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
     if(len && (peer->hostname[len-1] == '.'))
       len--;
     if(len < USHRT_MAX) {
-      peer->sni = calloc(1, len + 1);
+      peer->sni = CALLOC(1, len + 1);
       if(!peer->sni)
         goto out;
       Curl_strntolower(peer->sni, peer->hostname, len);
@@ -2023,7 +2023,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->negotiated.alpn = malloc(proto_len + 1);
+    connssl->negotiated.alpn = MALLOC(proto_len + 1);
     if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
     memcpy(connssl->negotiated.alpn, proto, proto_len);

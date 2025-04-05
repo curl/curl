@@ -376,7 +376,7 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
     ret = easysrc_addf(&easysrc_data,
                        "slist%d = curl_slist_append(slist%d, \"%s\");",
                        *slistno, *slistno, escaped);
-    free(escaped);
+    FREE(escaped);
   }
 
   return ret;
@@ -430,7 +430,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
         easysrc_addf(&easysrc_code,
                      "curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
                      mimeno, escaped);
-      free(escaped);
+      FREE(escaped);
     }
     break;
 
@@ -443,7 +443,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
       ret = easysrc_addf(&easysrc_code,
                          "curl_mime_filename(part%d, NULL);", mimeno);
     }
-    free(escaped);
+    FREE(escaped);
     break;
   }
 
@@ -468,28 +468,28 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     char *escaped = c_escape(part->encoder, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_encoder(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    FREE(escaped);
   }
 
   if(!ret && filename) {
     char *escaped = c_escape(filename, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_filename(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    FREE(escaped);
   }
 
   if(!ret && part->name) {
     char *escaped = c_escape(part->name, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_name(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    FREE(escaped);
   }
 
   if(!ret && part->type) {
     char *escaped = c_escape(part->type, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_type(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    FREE(escaped);
   }
 
   if(!ret && part->headers) {
@@ -669,7 +669,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
       if(escaped) {
         ret = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, \"%s\");",
                            name, escaped);
-        free(escaped);
+        FREE(escaped);
       }
     }
   }

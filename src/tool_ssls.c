@@ -32,6 +32,7 @@
 #include "dynbuf.h"
 #include "curl_base64.h"
 #include "tool_parsecfg.h"
+#include "memdebug.h"
 
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
@@ -71,7 +72,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
   bool error = FALSE;
 
   curlx_dyn_init(&buf, MAX_SSLS_LINE);
-  fp = fopen(filename, FOPEN_READTEXT);
+  fp = FOPEN(filename, FOPEN_READTEXT);
   if(!fp) { /* ok if it does not exist */
     notef(global, "SSL session file does not exist (yet?): %s", filename);
     goto out;
@@ -128,7 +129,7 @@ out:
   if(easy)
     curl_easy_cleanup(easy);
   if(fp)
-    fclose(fp);
+    FCLOSE(fp);
   curlx_dyn_free(&buf);
   curl_free(shmac);
   curl_free(sdata);
@@ -200,7 +201,7 @@ CURLcode tool_ssls_save(struct GlobalConfig *global,
 
   ctx.global = global;
   ctx.exported = 0;
-  ctx.fp = fopen(filename, FOPEN_WRITETEXT);
+  ctx.fp = FOPEN(filename, FOPEN_WRITETEXT);
   if(!ctx.fp) {
     warnf(global, "Warning: Failed to create SSL session file %s", filename);
     goto out;
@@ -216,6 +217,6 @@ out:
   if(easy)
     curl_easy_cleanup(easy);
   if(ctx.fp)
-    fclose(ctx.fp);
+    FCLOSE(ctx.fp);
   return r;
 }

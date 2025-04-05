@@ -157,7 +157,7 @@ static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
   if(ctx && ctx->initialized) {
     Curl_hash_offt_destroy(&ctx->streams);
   }
-  free(ctx);
+  FREE(ctx);
 }
 
 static struct cf_msh3_ctx *h3_get_msh3_ctx(struct Curl_easy *data);
@@ -194,7 +194,7 @@ struct stream_ctx {
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
   Curl_bufq_free(&stream->recvbuf);
-  free(stream);
+  FREE(stream);
 }
 
 static void h3_stream_hash_free(curl_off_t id, void *stream)
@@ -213,7 +213,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   if(stream)
     return CURLE_OK;
 
-  stream = calloc(1, sizeof(*stream));
+  stream = CALLOC(1, sizeof(*stream));
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
@@ -663,7 +663,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     nheader = Curl_dynhds_count(&h2_headers);
-    nva = malloc(sizeof(MSH3_HEADER) * nheader);
+    nva = MALLOC(sizeof(MSH3_HEADER) * nheader);
     if(!nva) {
       *err = CURLE_OUT_OF_MEMORY;
       nwritten = -1;
@@ -713,7 +713,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   set_quic_expire(cf, data);
-  free(nva);
+  FREE(nva);
   Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   CF_DATA_RESTORE(cf, save);
@@ -1088,7 +1088,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   (void)ai; /* msh3 resolves itself? */
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

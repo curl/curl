@@ -79,7 +79,7 @@ CURLcode Curl_auth_create_plain_message(const char *authzid,
     return CURLE_OUT_OF_MEMORY;
   plainlen = zlen + clen + plen + 2;
 
-  plainauth = malloc(plainlen + 1);
+  plainauth = MALLOC(plainlen + 1);
   if(!plainauth)
     return CURLE_OUT_OF_MEMORY;
 

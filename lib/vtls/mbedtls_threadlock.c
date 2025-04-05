@@ -51,7 +51,7 @@ int Curl_mbedtlsthreadlock_thread_setup(void)
 {
   int i;
 
-  mutex_buf = calloc(1, NUMT * sizeof(MBEDTLS_MUTEX_T));
+  mutex_buf = CALLOC(1, NUMT * sizeof(MBEDTLS_MUTEX_T));
   if(!mutex_buf)
     return 0;     /* error, no number of threads defined */
 
@@ -85,7 +85,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
       return 0; /* CloseHandle failed */
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-  free(mutex_buf);
+  FREE(mutex_buf);
   mutex_buf = NULL;
 
   return 1; /* OK */

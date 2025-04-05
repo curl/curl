@@ -592,7 +592,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
     return CURLE_FAILED_INIT;
   }
 
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -612,7 +612,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
 
 out:
   *pcf = result ? NULL : cf;
-  free(ctx);
+  FREE(ctx);
   return result;
 }
 

@@ -519,7 +519,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   (void)done;
 
   DEBUGASSERT(!conn->proto.ldapc);
-  li = calloc(1, sizeof(struct ldapconninfo));
+  li = CALLOC(1, sizeof(struct ldapconninfo));
   if(!li)
     return CURLE_OUT_OF_MEMORY;
   else {
@@ -548,11 +548,11 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(rc) {
     failf(data, "LDAP local: Cannot connect to %s, %s",
           hosturl, ldap_err2string(rc));
-    free(hosturl);
+    FREE(hosturl);
     return CURLE_COULDNT_CONNECT;
   }
 
-  free(hosturl);
+  FREE(hosturl);
 
 #ifdef CURL_OPENLDAP_DEBUG
   if(do_trace < 0) {
@@ -860,7 +860,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
     }
     Curl_sasl_cleanup(conn, li->sasl.authused);
     conn->proto.ldapc = NULL;
-    free(li);
+    FREE(li);
   }
   return CURLE_OK;
 }
@@ -899,7 +899,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_LDAP_SEARCH_FAILED;
     }
     else {
-      lr = calloc(1, sizeof(struct ldapreqinfo));
+      lr = CALLOC(1, sizeof(struct ldapreqinfo));
       if(!lr) {
         ldap_abandon_ext(li->ld, msgid, NULL, NULL);
         result = CURLE_OUT_OF_MEMORY;
@@ -932,7 +932,7 @@ static CURLcode oldap_done(struct Curl_easy *data, CURLcode res,
       lr->msgid = 0;
     }
     data->req.p.ldap = NULL;
-    free(lr);
+    FREE(lr);
   }
 
   return CURLE_OK;
@@ -1091,7 +1091,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           if(!result)
             result = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
                                   STRCONST("\n"));
-          free(val_b64);
+          FREE(val_b64);
         }
         else
           result = client_write(data, STRCONST(" "),

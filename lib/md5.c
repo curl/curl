@@ -632,23 +632,23 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   struct MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof(*ctxt));
+  ctxt = MALLOC(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;
 
-  ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
+  ctxt->md5_hashctx = MALLOC(md5params->md5_ctxtsize);
 
   if(!ctxt->md5_hashctx) {
-    free(ctxt);
+    FREE(ctxt);
     return NULL;
   }
 
   ctxt->md5_hash = md5params;
 
   if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
-    free(ctxt->md5_hashctx);
-    free(ctxt);
+    FREE(ctxt->md5_hashctx);
+    FREE(ctxt);
     return NULL;
   }
 
@@ -668,8 +668,8 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
-  free(context->md5_hashctx);
-  free(context);
+  FREE(context->md5_hashctx);
+  FREE(context);
 
   return CURLE_OK;
 }

@@ -132,7 +132,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
     /* Allocate our response buffer */
-    krb5->output_token = malloc(krb5->token_max);
+    krb5->output_token = MALLOC(krb5->token_max);
     if(!krb5->output_token)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -153,7 +153,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       krb5->p_identity = NULL;
 
     /* Allocate our credentials handle */
-    krb5->credentials = calloc(1, sizeof(CredHandle));
+    krb5->credentials = CALLOC(1, sizeof(CredHandle));
     if(!krb5->credentials)
       return CURLE_OUT_OF_MEMORY;
 
@@ -167,7 +167,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       return CURLE_LOGIN_DENIED;
 
     /* Allocate our new context handle */
-    krb5->context = calloc(1, sizeof(CtxtHandle));
+    krb5->context = CALLOC(1, sizeof(CtxtHandle));
     if(!krb5->context)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -340,7 +340,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Allocate the trailer */
-  trailer = malloc(sizes.cbSecurityTrailer);
+  trailer = MALLOC(sizes.cbSecurityTrailer);
   if(!trailer)
     return CURLE_OUT_OF_MEMORY;
 
@@ -348,9 +348,9 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   messagelen = 4;
   if(authzid)
     messagelen += strlen(authzid);
-  message = malloc(messagelen);
+  message = MALLOC(messagelen);
   if(!message) {
-    free(trailer);
+    FREE(trailer);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -368,10 +368,10 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     memcpy(message + 4, authzid, messagelen - 4);
 
   /* Allocate the padding */
-  padding = malloc(sizes.cbBlockSize);
+  padding = MALLOC(sizes.cbBlockSize);
   if(!padding) {
-    free(message);
-    free(trailer);
+    FREE(message);
+    FREE(trailer);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -394,9 +394,9 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   status = Curl_pSecFn->EncryptMessage(krb5->context, KERB_WRAP_NO_ENCRYPT,
                                     &wrap_desc, 0);
   if(status != SEC_E_OK) {
-    free(padding);
-    free(message);
-    free(trailer);
+    FREE(padding);
+    FREE(message);
+    FREE(trailer);
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
@@ -407,11 +407,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Allocate the encryption (wrap) buffer */
   appdatalen = wrap_buf[0].cbBuffer + wrap_buf[1].cbBuffer +
                wrap_buf[2].cbBuffer;
-  appdata = malloc(appdatalen);
+  appdata = MALLOC(appdatalen);
   if(!appdata) {
-    free(padding);
-    free(message);
-    free(trailer);
+    FREE(padding);
+    FREE(message);
+    FREE(trailer);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -424,9 +424,9 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   memcpy(appdata + offset, wrap_buf[2].pvBuffer, wrap_buf[2].cbBuffer);
 
   /* Free all of our local buffers */
-  free(padding);
-  free(message);
-  free(trailer);
+  FREE(padding);
+  FREE(message);
+  FREE(trailer);
 
   /* Return the response. */
   Curl_bufref_set(out, appdata, appdatalen, curl_free);
@@ -448,14 +448,14 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
   /* Free our security context */
   if(krb5->context) {
     Curl_pSecFn->DeleteSecurityContext(krb5->context);
-    free(krb5->context);
+    FREE(krb5->context);
     krb5->context = NULL;
   }
 
   /* Free our credentials handle */
   if(krb5->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(krb5->credentials);
-    free(krb5->credentials);
+    FREE(krb5->credentials);
     krb5->credentials = NULL;
   }
 

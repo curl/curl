@@ -155,7 +155,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(query)
     gopherpath = aprintf("%s?%s", path, query);
   else
-    gopherpath = strdup(path);
+    gopherpath = STRDUP(path);
 
   if(!gopherpath)
     return CURLE_OUT_OF_MEMORY;
@@ -164,7 +164,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(strlen(gopherpath) <= 2) {
     sel = (char *)CURL_UNCONST("");
     len = strlen(sel);
-    free(gopherpath);
+    FREE(gopherpath);
   }
   else {
     char *newp;
@@ -175,7 +175,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
     /* ... and finally unescape */
     result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
-    free(gopherpath);
+    FREE(gopherpath);
     if(result)
       return result;
     sel_org = sel;
@@ -228,7 +228,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  free(sel_org);
+  FREE(sel_org);
 
   if(!result)
     result = Curl_xfer_send(data, "\r\n", 2, FALSE, &amount);

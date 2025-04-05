@@ -130,7 +130,7 @@ static CURLcode load_cafile(struct cafile_source *source,
               || source->type == CAFILE_SOURCE_BLOB);
 
   if(source->type == CAFILE_SOURCE_PATH) {
-    fp = fopen(source->data, "rb");
+    fp = FOPEN(source->data, "rb");
     if(!fp)
       return CURLE_SSL_CACERT_BADFILE;
   }
@@ -187,7 +187,7 @@ static CURLcode load_cafile(struct cafile_source *source,
           goto fail;
         }
         new_anchors_len = ca.anchors_len + 1;
-        new_anchors = realloc(ca.anchors,
+        new_anchors = REALLOC(ca.anchors,
                               new_anchors_len * sizeof(ca.anchors[0]));
         if(!new_anchors) {
           ca.err = CURLE_OUT_OF_MEMORY;
@@ -222,7 +222,7 @@ static CURLcode load_cafile(struct cafile_source *source,
         }
 
         /* fill in trust anchor DN and public key data */
-        ta->dn.data = malloc(ta_size);
+        ta->dn.data = MALLOC(ta_size);
         if(!ta->dn.data) {
           ca.err = CURLE_OUT_OF_MEMORY;
           goto fail;
@@ -255,15 +255,15 @@ static CURLcode load_cafile(struct cafile_source *source,
 
 fail:
   if(fp)
-    fclose(fp);
+    FCLOSE(fp);
   if(ca.err == CURLE_OK) {
     *anchors = ca.anchors;
     *anchors_len = ca.anchors_len;
   }
   else {
     for(i = 0; i < ca.anchors_len; ++i)
-      free(ca.anchors[i].dn.data);
-    free(ca.anchors);
+      FREE(ca.anchors[i].dn.data);
+    FREE(ca.anchors);
   }
 
   return ca.err;
@@ -829,7 +829,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     struct Curl_ssl_session *sc_session;
     br_ssl_session_parameters *session;
 
-    session = malloc(sizeof(*session));
+    session = MALLOC(sizeof(*session));
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
@@ -1051,7 +1051,7 @@ static void bearssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->active = FALSE;
   if(backend->anchors) {
     for(i = 0; i < backend->anchors_len; ++i)
-      free(backend->anchors[i].dn.data);
+      FREE(backend->anchors[i].dn.data);
     Curl_safefree(backend->anchors);
   }
 }
