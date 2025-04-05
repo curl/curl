@@ -1129,12 +1129,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * disable libcurl transfer encoding is used
      */
-#ifndef USE_HYPER
     data->set.http_te_skip = !enabled; /* reversed */
     break;
-#else
-    return CURLE_NOT_BUILT_IN; /* hyper does not support */
-#endif
 
   case CURLOPT_HTTP_CONTENT_DECODING:
     /*
