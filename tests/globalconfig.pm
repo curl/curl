@@ -43,6 +43,7 @@ BEGIN {
         $has_shared
         $LIBDIR
         $UNITDIR
+        $TUNITDIR
         $SRVDIR
         $listonly
         $LOCKDIR
@@ -110,6 +111,7 @@ our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR=dirsepadd("./libtest/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $UNITDIR=dirsepadd("./unit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
+our $TUNITDIR=dirsepadd("./tunit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $SRVDIR=dirsepadd("./server/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $TESTDIR="$srcdir/data";
 our $CURL=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) . "curl".exe_ext('TOOL'); # what curl binary to run on the tests

@@ -101,11 +101,11 @@ EXTRA_DIST =        \
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
-BUILD_UNIT = unit
+BUILD_UNIT = unit tunit
 DIST_UNIT =
 else
 BUILD_UNIT =
-DIST_UNIT = unit
+DIST_UNIT = unit tunit
 endif
 
 SUBDIRS = certs data server libtest http $(BUILD_UNIT)
@@ -193,6 +193,7 @@ ci-pytest: all
 checksrc:
 	(cd libtest && $(MAKE) checksrc)
 	(cd unit && $(MAKE) checksrc)
+	(cd tunit && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
 	(cd http && $(MAKE) checksrc)
 
