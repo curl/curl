@@ -88,10 +88,27 @@ else()
   mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
 endif()
 
-if(WOLFSSL_FOUND AND NOT WIN32)
-  find_library(MATH_LIBRARY NAMES "m")
-  if(MATH_LIBRARY)
-    list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
+if(WOLFSSL_FOUND)
+  if(NOT WIN32)
+    find_library(MATH_LIBRARY NAMES "m")
+    if(MATH_LIBRARY)
+      list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
+    endif()
+    mark_as_advanced(MATH_LIBRARY)
   endif()
-  mark_as_advanced(MATH_LIBRARY)
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_bearssl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::bearssl)
+    add_library(CURL::bearssl INTERFACE IMPORTED)
+    set_target_properties(CURL::bearssl PROPERTIES
+      VERSION "${BEARSSL_VERSION}"
+      CURL_PC_MODULES "${_bearssl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+  endif()
 endif()
