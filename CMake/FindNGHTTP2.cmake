@@ -40,12 +40,12 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP2 ${_nghttp2_pc_requires})
+  pkg_check_modules(_nghttp2 ${_nghttp2_pc_requires})
 endif()
 
-if(NGHTTP2_FOUND)
-  string(REPLACE ";" " " NGHTTP2_CFLAGS "${NGHTTP2_CFLAGS}")
-  message(STATUS "Found NGHTTP2 (via pkg-config): ${NGHTTP2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
+if(_nghttp2_FOUND)
+  string(REPLACE ";" " " _nghttp2_CFLAGS "${_nghttp2_CFLAGS}")
+  message(STATUS "Found NGHTTP2 (via pkg-config): ${_nghttp2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
   find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
@@ -70,8 +70,8 @@ else()
   )
 
   if(NGHTTP2_FOUND)
-    set(NGHTTP2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
-    set(NGHTTP2_LIBRARIES    ${NGHTTP2_LIBRARY})
+    set(_nghttp2_INCLUDE_DIRS ${NGHTTP2_INCLUDE_DIR})
+    set(_nghttp2_LIBRARIES    ${NGHTTP2_LIBRARY})
   endif()
 
   mark_as_advanced(NGHTTP2_INCLUDE_DIR NGHTTP2_LIBRARY)

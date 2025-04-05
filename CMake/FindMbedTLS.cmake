@@ -50,14 +50,14 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MBEDX509_LIBRARY AND
    NOT DEFINED MBEDCRYPTO_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(MBEDTLS ${_mbedtls_pc_requires})
+  pkg_check_modules(_mbedtls ${_mbedtls_pc_requires})
 endif()
 
-if(MBEDTLS_FOUND)
+if(_mbedtls_FOUND)
   set(MbedTLS_FOUND TRUE)
-  set(MBEDTLS_VERSION ${MBEDTLS_mbedtls_VERSION})
-  string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
-  message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
+  set(MBEDTLS_VERSION "${_mbedtls_mbedtls_VERSION}")
+  string(REPLACE ";" " " _mbedtls_CFLAGS "${_mbedtls_CFLAGS}")
+  message(STATUS "Found MbedTLS (via pkg-config): ${_mbedtls_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
@@ -88,8 +88,8 @@ else()
   )
 
   if(MBEDTLS_FOUND)
-    set(MBEDTLS_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
-    set(MBEDTLS_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
+    set(_mbedtls_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
+    set(_mbedtls_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
   endif()
 
   mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)

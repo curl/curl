@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
    NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBIDN2 ${_libidn2_pc_requires})
+  pkg_check_modules(_libidn2 ${_libidn2_pc_requires})
 endif()
 
-if(LIBIDN2_FOUND)
+if(_libidn2_FOUND)
   set(Libidn2_FOUND TRUE)
-  string(REPLACE ";" " " LIBIDN2_CFLAGS "${LIBIDN2_CFLAGS}")
-  message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
+  string(REPLACE ";" " " _libidn2_CFLAGS "${_libidn2_CFLAGS}")
+  message(STATUS "Found Libidn2 (via pkg-config): ${_libidn2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")
@@ -71,8 +71,8 @@ else()
   )
 
   if(LIBIDN2_FOUND)
-    set(LIBIDN2_INCLUDE_DIRS ${LIBIDN2_INCLUDE_DIR})
-    set(LIBIDN2_LIBRARIES    ${LIBIDN2_LIBRARY})
+    set(_libidn2_INCLUDE_DIRS ${LIBIDN2_INCLUDE_DIR})
+    set(_libidn2_LIBRARIES    ${LIBIDN2_LIBRARY})
   endif()
 
   mark_as_advanced(LIBIDN2_INCLUDE_DIR LIBIDN2_LIBRARY)

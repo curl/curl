@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NETTLE_INCLUDE_DIR AND
    NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NETTLE ${_nettle_pc_requires})
+  pkg_check_modules(_nettle ${_nettle_pc_requires})
 endif()
 
-if(NETTLE_FOUND)
+if(_nettle_FOUND)
   set(Nettle_FOUND TRUE)
-  string(REPLACE ";" " " NETTLE_CFLAGS "${NETTLE_CFLAGS}")
-  message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
+  string(REPLACE ";" " " _nettle_CFLAGS "${_nettle_CFLAGS}")
+  message(STATUS "Found Nettle (via pkg-config): ${_nettle_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
@@ -76,8 +76,8 @@ else()
   )
 
   if(NETTLE_FOUND)
-    set(NETTLE_INCLUDE_DIRS ${NETTLE_INCLUDE_DIR})
-    set(NETTLE_LIBRARIES    ${NETTLE_LIBRARY})
+    set(_nettle_INCLUDE_DIRS ${NETTLE_INCLUDE_DIR})
+    set(_nettle_LIBRARIES    ${NETTLE_LIBRARY})
   endif()
 
   mark_as_advanced(NETTLE_INCLUDE_DIR NETTLE_LIBRARY)

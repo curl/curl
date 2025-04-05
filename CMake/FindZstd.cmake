@@ -49,13 +49,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(ZSTD ${_zstd_pc_requires})
+  pkg_check_modules(_zstd ${_zstd_pc_requires})
 endif()
 
-if(ZSTD_FOUND)
+if(_zstd_FOUND)
   set(Zstd_FOUND TRUE)
-  string(REPLACE ";" " " ZSTD_CFLAGS "${ZSTD_CFLAGS}")
-  message(STATUS "Found Zstd (via pkg-config): ${ZSTD_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
+  string(REPLACE ";" " " _zstd_CFLAGS "${_zstd_CFLAGS}")
+  message(STATUS "Found Zstd (via pkg-config): ${_zstd_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
 else()
   find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h")
   find_library(ZSTD_LIBRARY NAMES "zstd")
@@ -90,8 +90,8 @@ else()
   )
 
   if(ZSTD_FOUND)
-    set(ZSTD_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
-    set(ZSTD_LIBRARIES    ${ZSTD_LIBRARY})
+    set(_zstd_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
+    set(_zstd_LIBRARIES    ${ZSTD_LIBRARY})
   endif()
 
   mark_as_advanced(ZSTD_INCLUDE_DIR ZSTD_LIBRARY)

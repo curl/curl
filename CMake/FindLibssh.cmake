@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH ${_libssh_pc_requires})
+  pkg_check_modules(_libssh ${_libssh_pc_requires})
 endif()
 
-if(LIBSSH_FOUND)
+if(_libssh_FOUND)
   set(Libssh_FOUND TRUE)
-  string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
-  message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
+  string(REPLACE ";" " " _libssh_CFLAGS "${_libssh_CFLAGS}")
+  message(STATUS "Found Libssh (via pkg-config): ${_libssh_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
@@ -81,13 +81,13 @@ else()
   )
 
   if(LIBSSH_FOUND)
-    set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
-    set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
+    set(_libssh_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
+    set(_libssh_LIBRARIES    ${LIBSSH_LIBRARY})
   endif()
 
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
 
 if(LIBSSH_FOUND AND WIN32)
-  list(APPEND LIBSSH_LIBRARIES "iphlpapi")  # for if_nametoindex
+  list(APPEND _libssh_LIBRARIES "iphlpapi")  # for if_nametoindex
 endif()
