@@ -69,17 +69,17 @@ endif()
 
 if(QUICHE_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_quiche_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::quiche)
+    add_library(CURL::quiche INTERFACE IMPORTED)
+    set_target_properties(CURL::quiche PROPERTIES
       VERSION "${QUICHE_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_quiche_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_quiche_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_quiche_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_quiche_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_quiche_LIBRARIES}")
   endif()
 endif()
