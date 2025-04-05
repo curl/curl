@@ -74,17 +74,17 @@ endif()
 
 if(BROTLI_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_brotli_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::brotli)
+    add_library(CURL::brotli INTERFACE IMPORTED)
+    set_target_properties(CURL::brotli PROPERTIES
       VERSION "${BROTLI_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_brotli_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_brotli_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_brotli_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_brotli_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_brotli_LIBRARIES}")
   endif()
 endif()
