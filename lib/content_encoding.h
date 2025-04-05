@@ -25,6 +25,10 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#define TR_MODE_IGNORE   0
+#define TR_MODE_CHUNKED  1
+#define TR_MODE_COMPRESS 2
+
 struct Curl_cwriter;
 
 void Curl_all_content_encodings(char *buf, size_t blen);

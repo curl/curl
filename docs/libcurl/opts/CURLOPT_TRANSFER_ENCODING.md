@@ -40,6 +40,14 @@ to be for the transfer and thus MUST be decoded before the data arrives in the
 client. Traditionally, Transfer-Encoding has been much less used and supported
 by both HTTP clients and HTTP servers.
 
+Setting or leaving this option disabled means *do not ask for compressed
+transfer-encoding*. When disabled, libcurl still recognizes and handles
+chunked encoding if the server sends such in an HTTP/1.1 response.
+
+Starting in 8.14.0, this option can be set to *-1* to make libcurl completely
+ignore the `Transfer-Encoding` header and pretend it does not exist. Such
+behavior might then make it not know when the transfer ends. Beware.
+
 # DEFAULT
 
 0

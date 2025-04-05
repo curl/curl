@@ -27,8 +27,6 @@
 # per line.
 # Lines starting with '#' letters are treated as comments.
 #
-# PR #16959 makes Transfer-Encoding stricer and thus --raw broke
-319
 # Uses SRP to "a server not supporting it" but modern stunnel versions
 # will silently accept it and remain happy
 323

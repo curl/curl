@@ -17,3 +17,7 @@ Example:
 
 When used, it disables all internal HTTP decoding of content or transfer
 encodings and instead makes them passed on unaltered, raw.
+
+Beware that when ignoring HTTP/1.1 chunked transfer encoding, curl might not
+detect the end of the response body and might instead sit idly waiting for the
+connection to eventually close.

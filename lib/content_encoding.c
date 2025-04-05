@@ -739,6 +739,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   CURLcode result;
   bool has_chunked = FALSE;
 
+  if(data->set.http_trenc == TR_MODE_IGNORE)
+    return CURLE_OK;
+
   do {
     const char *name;
     size_t namelen;
@@ -764,7 +767,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                     strncasecompare(name, "chunked", 7));
       /* if we skip the decoding in this phase, do not look further.
        * Exception is "chunked" transfer-encoding which always must happen */
-      if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
+      if((is_transfer && (data->set.http_trenc == TR_MODE_CHUNKED) &&
+          !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
         bool is_identity = strncasecompare(name, "identity", 8);
         /* not requested, ignore */

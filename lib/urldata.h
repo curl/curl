@@ -1728,6 +1728,7 @@ struct UserDefined {
   unsigned char gssapi_delegation;
 #endif
   unsigned char http_follow_mode; /* follow HTTP redirects */
+  unsigned char http_trenc; /* transfer-encoding mode */
   BIT(connect_only); /* make connection/request, then let application use the
                         socket */
   BIT(connect_only_ws); /* special websocket connect-only level */
@@ -1779,7 +1780,6 @@ struct UserDefined {
   BIT(hide_progress);    /* do not use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
   BIT(http_keep_sending_on_error); /* for HTTP status codes >= 300 */
-  BIT(http_transfer_encoding); /* request compressed HTTP transfer-encoding */
   BIT(allow_auth_to_other_hosts);
   BIT(include_header); /* include received protocol headers in data output */
   BIT(http_set_referer); /* is a custom referer used */

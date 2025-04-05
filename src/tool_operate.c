@@ -1564,7 +1564,9 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   /* curl 7.16.2 */
   if(config->raw) {
     my_setopt_long(curl, CURLOPT_HTTP_CONTENT_DECODING, 0);
-    my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0);
+
+    /* new value set in 8.14.0 */
+    my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, -1);
   }
 
   /* curl 7.17.1 */

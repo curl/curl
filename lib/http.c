@@ -2611,7 +2611,7 @@ static CURLcode http_firstwrite(struct Curl_easy *data)
 static CURLcode http_transferencode(struct Curl_easy *data)
 {
   if(!Curl_checkheaders(data, STRCONST("TE")) &&
-     data->set.http_transfer_encoding) {
+     (data->set.http_trenc == TR_MODE_COMPRESS)) {
     /* When we are to insert a TE: header in the request, we must also insert
        TE in a Connection: header, so we need to merge the custom provided
        Connection: header and prevent the original to get sent. Note that if
@@ -3323,7 +3323,7 @@ static CURLcode http_header(struct Curl_easy *data,
       result = Curl_build_unencoding_stack(data, v, TRUE);
       if(result)
         return result;
-      if(!k->chunk && data->set.http_transfer_encoding) {
+      if(!k->chunk && (data->set.http_trenc == TR_MODE_COMPRESS)) {
         /* if this is not chunked, only close can signal the end of this
          * transfer as Content-Length is said not to be trusted for
          * transfer-encoding! */

@@ -518,7 +518,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_TRANSFER_ENCODING:
-    data->set.http_transfer_encoding = enabled;
+    if((arg < -1) || (arg > 1))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    /* see the TR_MODE_* defines */
+    data->set.http_trenc = (unsigned char)(arg + 1);
     break;
 
   case CURLOPT_FOLLOWLOCATION:
