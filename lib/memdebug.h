@@ -186,6 +186,8 @@ CURL_EXTERN ALLOC_FUNC
 #define SOCKET(a,b,c) socket(a,b,c)
 #define ACCEPT(a,b,c) accept(a,b,c)
 #define SOCKETPAIR(a,b,c,d,e) socketpair(a,b,c,d,e)
+#define SEND(a,b,c,d) send(a,b,c,d)
+#define RECV(a,b,c,d) recv(a,b,c,d)
 
 #endif /* CURLDEBUG */
 
