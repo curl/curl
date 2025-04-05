@@ -46,6 +46,8 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   endforeach()
 endif()
 
+define_property(TARGET PROPERTY CURL_PC_MODULES BRIEF_DOCS "pkg-config modules")
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include(Utilities)
 include(Macros)
