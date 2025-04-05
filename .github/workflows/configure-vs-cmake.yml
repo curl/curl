@@ -58,9 +58,9 @@ jobs:
 
       - name: 'dump generated files'
         run: |
-          for f in lib/curl_config.h libcurl.pc curl-config; do
-            echo "::group::${f}"; cat bld-am/"${f}" || true; echo '::endgroup::'
-            echo "::group::${f}"; cat bld-cm/"${f}" || true; echo '::endgroup::'
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'
@@ -108,9 +108,9 @@ jobs:
 
       - name: 'dump generated files'
         run: |
-          for f in lib/curl_config.h libcurl.pc curl-config; do
-            echo "::group::${f}"; cat bld-am/"${f}" || true; echo '::endgroup::'
-            echo "::group::${f}"; cat bld-cm/"${f}" || true; echo '::endgroup::'
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'
@@ -155,9 +155,9 @@ jobs:
 
       - name: 'dump generated files'
         run: |
-          for f in lib/curl_config.h libcurl.pc curl-config; do
-            echo "::group::${f}"; cat bld-am/"${f}" || true; echo '::endgroup::'
-            echo "::group::${f}"; cat bld-cm/"${f}" || true; echo '::endgroup::'
+          for f in libcurl.pc curl-config; do
+            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'
