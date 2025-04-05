@@ -815,7 +815,7 @@ if(CURL_USE_MBEDTLS)
   find_package(MbedTLS REQUIRED)
   set(_ssl_enabled ON)
   set(USE_MBEDTLS ON)
-  list(APPEND CURL_LIBS "CURL::mbedtls" "CURL::mbedcrypto" "CURL::mbedx509")
+  list(APPEND CURL_LIBS "CURL::mbedtls")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
     set(_valid_default_ssl_backend TRUE)
