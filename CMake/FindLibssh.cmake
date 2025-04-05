@@ -34,13 +34,13 @@
 # - `LIBSSH_VERSION`:       Version of libssh.
 # - `CURL::libssh`:         libssh library target.
 
-set(LIBSSH_PC_REQUIRES "libssh")
+set(_libssh_pc_requires "libssh")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH ${LIBSSH_PC_REQUIRES})
+  pkg_check_modules(LIBSSH ${_libssh_pc_requires})
 endif()
 
 if(LIBSSH_FOUND)
