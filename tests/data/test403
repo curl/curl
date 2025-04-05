@@ -40,7 +40,7 @@ ftps
 FTPS with CCC not supported by server
 </name>
 <command>
--k --ftp-ssl-control --ftp-ssl-ccc ftps://%HOSTIP:%FTPSPORT/
+--insecure --ftp-ssl-control --ftp-ssl-ccc ftps://%HOSTIP:%FTPSPORT/
 </command>
 </client>
 

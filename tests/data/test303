@@ -37,7 +37,7 @@ https
 HTTPS with 8 secs timeout
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER -m 8
+--insecure https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER -m 8
 </command>
 </client>
 

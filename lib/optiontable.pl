@@ -31,7 +31,7 @@ print <<HEAD
 #include "easyoptions.h"
 
 /* all easy setopt options listed in alphabetical order */
-struct curl_easyoption Curl_easyopts[] = {
+const struct curl_easyoption Curl_easyopts[] = {
 HEAD
     ;
 

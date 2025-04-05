@@ -30,7 +30,7 @@ proxy
 http
 </server>
 <name>
-Under condition using --proxy, override NO_PROXY by --nproxy and access target URL directly
+Under condition using --proxy, override NO_PROXY by --noproxy and access target URL directly
 </name>
 <setenv>
 NO_PROXY=example.com

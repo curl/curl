@@ -4,6 +4,8 @@
 HTTP
 HTTP GET
 HTTP Basic auth
+HTTP proxy
+http_proxy
 NO_PROXY
 </keywords>
 </info>

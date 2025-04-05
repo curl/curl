@@ -185,7 +185,7 @@ tidy:
 	$(TIDY) $$_csources $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H)
 
 optiontable:
-	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
+	@PERL@ $(srcdir)/optiontable.pl < $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
 
 if HAVE_WINDRES
 .rc.lo:

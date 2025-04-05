@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP proxy
+http_proxy
 NO_PROXY
 noproxy
 </keywords>

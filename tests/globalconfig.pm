@@ -81,6 +81,9 @@ use Cwd qw(getcwd);
 use testutil qw(
     shell_quote
 );
+use File::Spec qw(
+    devnull
+);
 
 
 #######################################################################
@@ -118,8 +121,7 @@ our $VCURL=$CURL;  # what curl binary to use to verify the servers with
 # the path to the script that analyzes the memory debug output file
 our $memanalyze="$perl " . shell_quote("$srcdir/memanalyze.pl");
 our $valgrind;     # path to valgrind, or empty if disabled
-our $bundle = 0;   # use bundled server, libtest, unit binaries
-our $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+our $dev_null = File::Spec->devnull();   # null device path, eg: /dev/null
 
 # paths in $LOGDIR
 our $LOCKDIR = "lock";          # root of the server directory with lock files
@@ -132,7 +134,8 @@ our $SERVERCMD="server.cmd";    # copy server instructions here
 # other config variables
 our @protocols;   # array of lowercase supported protocol servers
 our %feature;     # hash of enabled features
-our $has_shared;  # built as a shared library
 our %keywords;    # hash of keywords from the test spec
+our $has_shared;  # built as a shared library
+our $bundle = 0;  # use bundled server, libtest, unit binaries
 
 1;

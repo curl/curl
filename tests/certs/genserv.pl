@@ -42,7 +42,7 @@ if(-f '/usr/local/ssl/bin/openssl') {
 
 my $SRCDIR = dirname(__FILE__);
 my $fh;
-my $dev_null = $^O eq 'MSWin32' ? 'NUL' : '/dev/null';
+my $dev_null = File::Spec->devnull();
 
 my $KEYSIZE = 'prime256v1';
 my $DURATION;

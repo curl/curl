@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTPS
+--write-out
 %{certs}
 </keywords>
 </info>
@@ -31,7 +32,7 @@ http
 https
 </server>
 <name>
-%{certs}
+--write-out with %{certs}
 </name>
 <command option="no-include">
 --insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -w '%{certs}'

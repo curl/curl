@@ -567,17 +567,19 @@ configure command-line as you can to disable all the libcurl features that you
 know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application do not
 use, here are some other flags that can reduce the size of the library by
-disabling support for some feature (run `./configure --help` to see them all):
+disabling support for some features (run `./configure --help` to see them all):
 
- - `--disable-alt-svc` (HTTP Alt-Svc)
- - `--disable-ares` (the C-ARES DNS library)
- - `--disable-cookies` (HTTP cookies)
+ - `--disable-aws` (cryptographic authentication)
  - `--disable-basic-auth` (cryptographic authentication)
  - `--disable-bearer-auth` (cryptographic authentication)
  - `--disable-digest-auth` (cryptographic authentication)
+ - `--disable-http-auth` (all HTTP authentication)
  - `--disable-kerberos-auth` (cryptographic authentication)
  - `--disable-negotiate-auth` (cryptographic authentication)
- - `--disable-aws` (cryptographic authentication)
+ - `--disable-ntlm` (NTLM authentication)
+ - `--disable-alt-svc` (HTTP Alt-Svc)
+ - `--disable-ares` (the C-ARES DNS library)
+ - `--disable-cookies` (HTTP cookies)
  - `--disable-dateparse` (date parsing for time conditionals)
  - `--disable-dnsshuffle` (internal server load spreading)
  - `--disable-doh` (DNS-over-HTTP)
@@ -585,14 +587,11 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-get-easy-options` (lookup easy options at runtime)
  - `--disable-headers-api` (API to access headers)
  - `--disable-hsts` (HTTP Strict Transport Security)
- - `--disable-http-auth` (all HTTP authentication)
  - `--disable-ipv6` (IPv6)
  - `--disable-libcurl-option` (--libcurl C code generation support)
  - `--disable-manual` (--manual built-in documentation)
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
- - `--disable-ntlm` (NTLM authentication)
- - `--disable-ntlm-wb` (NTLM winbind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
  - `--disable-pthreads` (multi-threading)
@@ -611,7 +610,7 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--without-libidn2` (internationalized domain names)
  - `--without-librtmp` (RTMP)
  - `--without-ssl` (SSL/TLS)
- - `--without-zlib` (on-the-fly decompression)
+ - `--without-zlib` (gzip/deflate on-the-fly decompression)
 
 Be sure also to strip debugging symbols from your binaries after compiling
 using 'strip' or an option like `-s`. If space is really tight, you may be able
@@ -619,8 +618,8 @@ to gain a few bytes by removing some unneeded sections of the shared library
 using the -R option to objcopy (e.g. the .comment section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
-shared library for i386 Linux platforms that is only 130 KiB in size
-(as of libcurl version 8.6.0, using gcc 13.2.0).
+shared library for i386 Linux platforms that is only 137 KiB in size
+(as of libcurl version 8.13.0, using gcc 14.2.0).
 
 You may find that statically linking libcurl to your application results in a
 lower total size than dynamically linking.

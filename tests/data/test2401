@@ -38,7 +38,7 @@ HTTP/2 POST over HTTPS
 <setenv>
 </setenv>
 <command>
--k --http2 "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER" -d "moo"
+--insecure --http2 "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER" -d "moo"
 </command>
 
 </client>

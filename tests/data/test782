@@ -55,7 +55,7 @@ CURL_TIME=1728465947
 HSTS update expiry, with two includeSubDomains domains present
 </name>
 <command>
--x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -k
+-x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER --insecure
 </command>
 <disable>
 test-duphandle

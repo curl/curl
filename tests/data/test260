@@ -32,7 +32,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-HTTP GET URL without slash but with questionmark
+HTTP GET URL without slash but with question mark
 </name>
 <command>
 "http://%HOSTIP:%HTTPPORT?%TESTNUMBER"

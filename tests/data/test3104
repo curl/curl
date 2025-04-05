@@ -38,7 +38,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_COOKIELIST with netscape format
+CURLOPT_COOKIELIST with Netscape format
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
