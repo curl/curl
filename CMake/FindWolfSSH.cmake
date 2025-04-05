@@ -31,8 +31,6 @@
 # Defines:
 #
 # - `WOLFSSH_FOUND`:         System has wolfSSH.
-# - `WOLFSSH_INCLUDE_DIRS`:  The wolfSSH include directories.
-# - `WOLFSSH_LIBRARIES`:     The wolfSSH library names.
 # - `WOLFSSH_VERSION`:       Version of wolfSSH.
 # - `CURL::wolfssh`:         wolfSSH library target.
 
