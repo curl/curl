@@ -80,17 +80,17 @@ endif()
 
 if(NGHTTP3_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_bearssl_LIBRARY_DIRS})
+    link_directories(${_nghttp3_LIBRARY_DIRS})
   endif()
 
-  if(NOT TARGET CURL::bearssl)
-    add_library(CURL::bearssl INTERFACE IMPORTED)
-    set_target_properties(CURL::bearssl PROPERTIES
+  if(NOT TARGET CURL::nghttp3)
+    add_library(CURL::nghttp3 INTERFACE IMPORTED)
+    set_target_properties(CURL::nghttp3 PROPERTIES
       VERSION "${NGHTTP3_VERSION}"
-      CURL_PC_MODULES "${_bearssl_pc_requires}"
-      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+      CURL_PC_MODULES "${_nghttp3_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_nghttp3_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_nghttp3_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_nghttp3_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}")
   endif()
 endif()
