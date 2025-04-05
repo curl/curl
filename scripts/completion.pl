@@ -153,7 +153,7 @@ sub parse_main_opts {
         $b =~ /([^=]*)/; my $mb = $1;
 
         length($mb) <=> length($ma) || $ma cmp $mb
-    } @list if $shell eq 'zsh';
+    } @list;
 
     return @list;
 }
