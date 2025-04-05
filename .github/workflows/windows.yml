@@ -355,7 +355,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ${{ matrix.tflags }} SCP SFTP -j1'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             if [[ '${{ matrix.install }}' = *'libssh2-wincng'* ]]; then
@@ -780,6 +780,18 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
+          - name: 'openssl SSHW'
+            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            openssh: 'OpenSSH-Windows-Pre'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
+
           - name: 'schannel MultiSSL U'
             install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
             arch: 'x64'
@@ -834,6 +846,22 @@ jobs:
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
+              -DCURL_USE_GSASL=ON
+
+          - name: 'mbedtls libssh SSHW'
+            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            openssh: 'OpenSSH-Windows-Pre'
+            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
+            #          read its configuration from, making it vulnerable to attacks on
+            #          Windows. Do not use this component till there is a fix for these.
+            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
@@ -956,7 +984,7 @@ jobs:
         timeout-minutes: 10
         run: |
           export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 -v -d ${{ matrix.tflags }} SCP SFTP -j1'
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
@@ -965,8 +993,6 @@ jobs:
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
             if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
-            else
-              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
             fi
             PATH="/d/OpenSSH-Win64:$PATH"
           fi
