@@ -33,11 +33,6 @@
 # Defines:
 #
 # - `MBEDTLS_FOUND`:         System has mbedTLS.
-# - `MBEDTLS_INCLUDE_DIRS`:  The mbedTLS include directories.
-# - `MBEDTLS_LIBRARIES`:     The mbedTLS library names.
-# - `MBEDTLS_LIBRARY_DIRS`:  The mbedTLS library directories.
-# - `MBEDTLS_PC_REQUIRES`:   The mbedTLS pkg-config packages.
-# - `MBEDTLS_CFLAGS`:        Required compiler flags.
 # - `MBEDTLS_VERSION`:       Version of mbedTLS.
 # - `CURL::mbedtls`:         mbedTLS library target.
 
