@@ -286,10 +286,6 @@ endif()
 
 string(REPLACE ";" " " _GSS_CFLAGS "${_GSS_CFLAGS}")
 
-set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
-set(GSS_LIBRARIES ${_GSS_LIBRARIES})
-set(GSS_LIBRARY_DIRS ${_GSS_LIBRARY_DIRS})
-set(GSS_CFLAGS ${_GSS_CFLAGS})
 set(GSS_VERSION ${_GSS_VERSION})
 
 if(_gss_flavour)
@@ -300,8 +296,8 @@ if(_gss_flavour)
       set(_heimdal_manifest_file "Heimdal.Application.x86.manifest")
     endif()
 
-    if(EXISTS "${GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}")
-      file(STRINGS "${GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}" _heimdal_version_str
+    if(EXISTS "${_GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}")
+      file(STRINGS "${_GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}" _heimdal_version_str
         REGEX "^.*version=\"[0-9]\\.[^\"]+\".*$")
 
       string(REGEX MATCH "[0-9]\\.[^\"]+" GSS_VERSION "${_heimdal_version_str}")
@@ -319,9 +315,9 @@ if(_gss_flavour)
       set(GSS_VERSION "MIT Unknown")
     endif()
   elseif(NOT GSS_VERSION AND _gss_flavour STREQUAL "GNU")
-    if(GSS_INCLUDE_DIRS AND EXISTS "${GSS_INCLUDE_DIRS}/gss.h")
+    if(_GSS_INCLUDE_DIRS AND EXISTS "${_GSS_INCLUDE_DIRS}/gss.h")
       set(_version_regex "#[\t ]*define[\t ]+GSS_VERSION[\t ]+\"([^\"]*)\"")
-      file(STRINGS "${GSS_INCLUDE_DIRS}/gss.h" _version_str REGEX "${_version_regex}")
+      file(STRINGS "${_GSS_INCLUDE_DIRS}/gss.h" _version_str REGEX "${_version_regex}")
       string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
       set(GSS_VERSION "${_version_str}")
       unset(_version_regex)
@@ -334,7 +330,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
     _gss_flavour
-    GSS_LIBRARIES
+    _GSS_LIBRARIES
   VERSION_VAR
     GSS_VERSION
   FAIL_MESSAGE
@@ -354,18 +350,18 @@ mark_as_advanced(
 
 if(GSS_FOUND)
   if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_gss_LIBRARY_DIRS})
+    link_directories(${_GSS_LIBRARY_DIRS})
   endif()
 
   if(NOT TARGET CURL::gss)
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
-      VERSION "${LDAP_VERSION}"
+      VERSION "${GSS_VERSION}"
       CURL_PC_MODULES "${_gss_pc_requires}"
       CURL_GSS_FLAVOUR "${_gss_flavour}"
-      INTERFACE_COMPILE_OPTIONS "${_gss_CFLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${_gss_INCLUDE_DIRS}"
-      INTERFACE_LINK_DIRECTORIES "${_gss_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_gss_LIBRARIES}")
+      INTERFACE_COMPILE_OPTIONS "${_GSS_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_GSS_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_GSS_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_GSS_LIBRARIES}")
   endif()
 endif()
