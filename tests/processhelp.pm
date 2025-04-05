@@ -59,7 +59,6 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
-    logmsg
     );
 
 use pathhelp qw(
@@ -220,6 +219,7 @@ sub pidwait {
         }
         my $start = time;
         my $warn_at = 5;
+        print "pidwait: trace-1: ", $pid, "\n";
         while(pidexists($pid)) {
             if(time - $start > $warn_at) {
                 print "pidwait: still waiting for PID ", $pid, "\n";
@@ -231,6 +231,7 @@ sub pidwait {
             }
             portable_sleep(0.2);
         }
+        print "pidwait: trace-2: ", $pid, "\n";
         return $pid;
     }
 
@@ -253,17 +254,23 @@ sub processexists {
     # fetch pid from pidfile
     my $pid = pidfromfile($pidfile);
 
+    print "processexists: trace-1: ", $pid, " <= ", $pidfile, "\n";
+
     if($pid > 0) {
+        print "processexists: trace-1a: ", $pid, "\n";
         # verify if currently alive
         if(pidexists($pid)) {
+            print "processexists: trace-2 exists: ", $pid, "\n";
             return $pid;
         }
         else {
+            print "processexists: trace-3 miss: ", $pid, "\n";
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
             pidwait($pid, &WNOHANG);
             # negative return value means dead process
+            print "processexists: trace-4 returning: ", -$pid, "\n";
             return -$pid;
         }
     }
@@ -284,6 +291,10 @@ sub killpid {
     # The 'pidlist' argument is a string of whitespace separated pids.
     return if(not defined($pidlist));
 
+    $verbose = 1;
+
+    print "killpid: trace-1\n";
+
     # Make 'requested' hold the non-duplicate pids from 'pidlist'.
     @requested = split(' ', $pidlist);
     return if(not @requested);
@@ -297,6 +308,7 @@ sub killpid {
     }
 
     # Send a SIGTERM to processes which are alive to gracefully stop them.
+    print "killpid: trace-2\n";
     foreach my $tmp (@requested) {
         chomp $tmp;
         if($tmp =~ /^(\d+)$/) {
@@ -319,11 +331,16 @@ sub killpid {
         }
     }
 
+    print "killpid: trace-3\n";
     # Allow all signalled processes five seconds to gracefully die.
     if(@signalled) {
+        print "killpid: trace-3a\n";
+        #print "killpid: trace-3a\n";
         my $twentieths = 5 * 20;
         while($twentieths--) {
+            print "killpid: trace-3a1\n";
             for(my $i = scalar(@signalled) - 1; $i >= 0; $i--) {
+                print "killpid: trace-3a1a\n";
                 my $pid = $signalled[$i];
                 if(!pidexists($pid)) {
                     print("RUN: Process with pid $pid gracefully died\n")
@@ -341,8 +358,10 @@ sub killpid {
         }
     }
 
+    print "killpid: trace-4\n";
     # Mercilessly SIGKILL processes still alive.
     if(@signalled) {
+        #print "killpid: trace-4a\n";
         foreach my $pid (@signalled) {
             if($pid > 0) {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
@@ -355,14 +374,18 @@ sub killpid {
         }
     }
 
+    print "killpid: trace-5\n";
     # Reap processes dead children for sure.
     if(@reapchild) {
+        print "killpid: trace-5a\n";
         foreach my $pid (@reapchild) {
+            print "killpid: trace-5aa: ", $pid, "\n";
             if($pid > 0) {
                 pidwait($pid, 0);
             }
         }
     }
+    print "killpid: trace-6\n";
 }
 
 #######################################################################
@@ -386,7 +409,7 @@ sub killsockfilters {
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-%s => %d\n", $server,
-                ($proto eq 'ftp')?'ctrl':'filt', $pid) if($verbose);
+                ($proto eq 'ftp')?'ctrl':'filt', $pid);
             pidkill($pid);
             pidwait($pid, 0);
         }
@@ -400,7 +423,7 @@ sub killsockfilters {
         $pid = processexists($pidfile);
         if($pid > 0) {
             printf("* kill pid for %s-data => %d\n", $server,
-                $pid) if($verbose);
+                $pid);
             pidkill($pid);
             pidwait($pid, 0);
         }

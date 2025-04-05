@@ -399,6 +399,7 @@ sub logslocked {
             push @locks, $1;
         }
     }
+    print "logslocked: trace-1", scalar @locks, "\n";
     return @locks;
 }
 
@@ -413,19 +414,25 @@ sub waitlockunlock {
     # of time until the server removes it, or the given time expires.
     my $serverlogslocktimeout = shift;
 
+    print "waitlockunlock: trace-1 ", $serverlogslocktimeout, "\n";
+
     if($serverlogslocktimeout) {
         my $lockretry = $serverlogslocktimeout * 20;
         my @locks;
+        print "waitlockunlock: trace-2 ", $lockretry, "\n";
         while((@locks = logslocked()) && $lockretry--) {
             portable_sleep(0.05);
         }
+        print "waitlockunlock: trace-3 ", $lockretry, "\n";
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
+            print "waitlockunlock: trace-4\n";
             logmsg "Warning: server logs lock timeout ",
                    "($serverlogslocktimeout seconds) expired (locks: " .
                    join(", ", @locks) . ")\n";
         }
     }
+    print "waitlockunlock: trace-5\n";
 }
 
 #######################################################################
@@ -1173,9 +1180,12 @@ sub runner_test_preprocess {
     my ($testnum)=@_;
     my %testtimings;
 
+
     if(clearlogs()) {
         logmsg "Warning: log messages were lost\n";
     }
+
+    print "runner_test_preprocess: trace-2:", $testnum,"\n";
 
     # timestamp test preparation start
     # TODO: this metric now shows only a portion of the prep time; better would
@@ -1187,20 +1197,26 @@ sub runner_test_preprocess {
     # ignore any error here--if there were one, it would have been
     # caught during the selection phase and this test would not be
     # running now
+    print "runner_test_preprocess: trace-3:", $testnum,"\n";
     loadtest("${TESTDIR}/test${testnum}");
+    print "runner_test_preprocess: trace-4:", $testnum,"\n";
     readtestkeywords();
 
     ###################################################################
     # Restore environment variables that were modified in a previous run.
     # Test definition may instruct to (un)set environment vars.
+    print "runner_test_preprocess: trace-5:", $testnum,"\n";
     restore_test_env(1);
 
     ###################################################################
     # Start the servers needed to run this test case
+    print "runner_test_preprocess: trace-6:", $testnum,"\n";
     my ($why, $error) = singletest_startservers($testnum, \%testtimings);
 
+    print "runner_test_preprocess: trace-7:", $testnum,"\n";
     # make sure no locks left for responsive test
     waitlockunlock($defserverlogslocktimeout);
+    print "runner_test_preprocess: trace-8:", $testnum,"\n";
 
     if(!$why) {
 
@@ -1208,20 +1224,31 @@ sub runner_test_preprocess {
         # Generate preprocessed test file
         # This must be done after the servers are started so server
         # variables are available for substitution.
+        print "runner_test_preprocess: trace-9:", $testnum,"\n";
         singletest_preprocess($testnum);
 
         ###############################################################
         # Set up the test environment to run this test case
+        print "runner_test_preprocess: trace-10:", $testnum,"\n";
         singletest_setenv();
 
         ###############################################################
         # Check that the test environment is fine to run this test case
+        print "runner_test_preprocess: trace-11:", $testnum,"\n";
         if (!$listonly) {
+            print "runner_test_preprocess: trace-12:", $testnum,"\n";
             $why = singletest_precheck($testnum);
+            print "runner_test_preprocess: trace-13:", $testnum,"\n";
             $error = -1;
         }
     }
-    return ($why, $error, clearlogs(), \%testtimings);
+    print "runner_test_preprocess: trace-14:", $testnum,"\n";
+
+    my $clres = clearlogs();
+
+    print "runner_test_preprocess: trace-15:", $testnum,"\n";
+
+    return ($why, $error, $clres, \%testtimings);
 }
 
 
@@ -1233,9 +1260,13 @@ sub runner_test_preprocess {
 sub runner_test_run {
     my ($testnum)=@_;
 
+    print "runner_test_run: trace-1:", $testnum,"\n";
+
     if(clearlogs()) {
         logmsg "Warning: log messages were lost\n";
     }
+
+    print "runner_test_run: trace-2:", $testnum,"\n";
 
     #######################################################################
     # Prepare the test environment to run this test case
@@ -1243,6 +1274,8 @@ sub runner_test_run {
     if($error) {
         return (-2, clearlogs());
     }
+
+    print "runner_test_run: trace-3:", $testnum,"\n";
 
     #######################################################################
     # Run the test command
@@ -1257,12 +1290,16 @@ sub runner_test_run {
         return (-2, clearlogs(), \%testtimings);
     }
 
+    print "runner_test_run: trace-4:", $testnum,"\n";
+
     #######################################################################
     # Clean up after test command
     $error = singletest_clean($testnum, $dumped_core, \%testtimings);
     if($error) {
         return ($error, clearlogs(), \%testtimings);
     }
+
+    print "runner_test_run: trace-5:", $testnum,"\n";
 
     #######################################################################
     # Verify that the postcheck succeeded
@@ -1271,11 +1308,19 @@ sub runner_test_run {
         return ($error, clearlogs(), \%testtimings);
     }
 
+    print "runner_test_run: trace-6:", $testnum,"\n";
+
     #######################################################################
     # restore environment variables that were modified
     restore_test_env(0);
 
-    return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+    print "runner_test_run: trace-7:", $testnum,"\n";
+
+    my $clres = clearlogs();
+
+    print "runner_test_run: trace-8:", $testnum,"\n";
+
+    return (0, $clres, \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
 # Async call runner_shutdown
@@ -1341,8 +1386,8 @@ sub controlleripccall {
     if(!$multiprocess) {
         # Call the remote function here in single process mode
         ipcrecv();
-     }
-     return 0;
+    }
+    return 0;
 }
 
 ###################################################################
@@ -1442,6 +1487,7 @@ sub ipcrecv {
     my $err;
     my $datalen;
     while(! defined ($err = sysread($runnerr, $datalen, 4)) || $err <= 0) {
+        print "ipcrecv: trace-1a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1453,6 +1499,7 @@ sub ipcrecv {
     my $len=unpack("L", $datalen);
     my $buf;
     while(! defined ($err = sysread($runnerr, $buf, $len)) || $err <= 0) {
+        print "ipcrecv: trace-3a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1471,6 +1518,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
+    print "ipcrecv: trace-5: $funcname\n";
     if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
@@ -1493,6 +1541,7 @@ sub ipcrecv {
     $buf = freeze \@res;
 
     while(! defined ($err = syswrite($runnerw, (pack "L", length($buf)) . $buf)) || $err <= 0) {
+        print "ipcrecv: trace-7a\n";
         if((!defined $err && ! $!{EINTR}) || (defined $err && $err == 0)) {
             # pipe has closed; controller is gone and we must exit
             runnerabort();
@@ -1508,8 +1557,11 @@ sub ipcrecv {
 ###################################################################
 # Kill all server processes
 sub runner_stopservers {
+    print "runner_stopservers: trace-0\n";
     my $error = stopservers($verbose);
+    print "runner_stopservers: trace-1\n";
     my $logs = clearlogs();
+    print "runner_stopservers: trace-2\n";
     return ($error, $logs);
 }
 
