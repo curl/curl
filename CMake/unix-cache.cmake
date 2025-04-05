@@ -26,6 +26,15 @@ if(NOT UNIX)
   message(FATAL_ERROR "This file should be included on Unix platforms only")
 endif()
 
+if(APPLE OR
+   CYGWIN)
+  set(HAVE_ACCEPT4 0)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+       CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "NetBSD" OR
+       CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  set(HAVE_ACCEPT4 1)
+endif()
 set(HAVE_ALARM 1)
 if(ANDROID)
   set(HAVE_ARC4RANDOM 1)

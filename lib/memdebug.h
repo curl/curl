@@ -92,6 +92,11 @@ CURL_EXTERN int curl_dbg_sclose(curl_socket_t sockfd,
                                 int line, const char *source);
 CURL_EXTERN curl_socket_t curl_dbg_accept(curl_socket_t s, void *a, void *alen,
                                           int line, const char *source);
+#ifdef HAVE_ACCEPT4
+CURL_EXTERN curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr,
+                                           void *saddrlen, int flags,
+                                           int line, const char *source);
+#endif
 #ifdef HAVE_SOCKETPAIR
 CURL_EXTERN int curl_dbg_socketpair(int domain, int type, int protocol,
                                     curl_socket_t socket_vector[2],
@@ -159,6 +164,11 @@ CURL_EXTERN ALLOC_FUNC
 #undef accept /* for those with accept as a macro */
 #define accept(sock,addr,len)\
  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
+#ifdef HAVE_ACCEPT4
+#undef accept4 /* for those with accept4 as a macro */
+#define accept4(sock,addr,len,flags)\
+ curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
+#endif
 #ifdef HAVE_SOCKETPAIR
 #define socketpair(domain,type,protocol,socket_vector)\
  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \

@@ -2144,7 +2144,12 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   if(0 == getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
     size = sizeof(add);
+#ifdef HAVE_ACCEPT4
+    s_accepted = accept4(ctx->sock, (struct sockaddr *) &add, &size,
+                         SOCK_NONBLOCK | SOCK_CLOEXEC);
+#else
     s_accepted = accept(ctx->sock, (struct sockaddr *) &add, &size);
+#endif
   }
 
   if(CURL_SOCKET_BAD == s_accepted) {
@@ -2153,7 +2158,9 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   }
 
   infof(data, "Connection accepted from server");
+#ifndef HAVE_ACCEPT4
   (void)curlx_nonblock(s_accepted, TRUE); /* enable non-blocking */
+#endif
   /* Replace any filter on SECONDARY with one listening on this socket */
   ctx->listening = FALSE;
   ctx->accepted = TRUE;

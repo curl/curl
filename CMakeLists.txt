@@ -282,7 +282,7 @@ endif()
 include(PickyWarnings)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg()
+  string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg() and accept4()
 endif()
 
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
@@ -1732,6 +1732,7 @@ elseif(DOS)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${WATT_ROOT}/lib/libwatt.a")
 endif()
 
+check_function_exists("accept4"       HAVE_ACCEPT4)
 check_function_exists("fnmatch"       HAVE_FNMATCH)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)
