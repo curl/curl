@@ -28,7 +28,7 @@
 # - `ZSTD_INCLUDE_DIR`:   The zstd include directory.
 # - `ZSTD_LIBRARY`:       Path to `zstd` library.
 #
-# Result variables:
+# Defines:
 #
 # - `ZSTD_FOUND`:         System has zstd.
 # - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.

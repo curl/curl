@@ -27,7 +27,7 @@
 #
 # - `GSS_ROOT_DIR`:      Set this variable to the root installation of GSS. (also supported as environment)
 #
-# Result variables:
+# Defines:
 #
 # - `GSS_FOUND`:         System has the Heimdal library.
 # - `GSS_FLAVOUR`:       "GNU", "MIT" or "Heimdal" if anything found.
