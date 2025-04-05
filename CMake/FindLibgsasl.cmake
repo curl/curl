@@ -45,6 +45,7 @@ endif()
 
 if(_libgsasl_FOUND)
   set(Libgsasl_FOUND TRUE)
+  set(LIBGSASL_FOUND TRUE)
   string(REPLACE ";" " " _libgsasl_CFLAGS "${_libgsasl_CFLAGS}")
   message(STATUS "Found Libgsasl (via pkg-config): ${_libgsasl_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
 else()

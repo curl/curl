@@ -47,6 +47,7 @@ endif()
 
 if(_brotli_FOUND)
   set(Brotli_FOUND TRUE)
+  set(BROTLI_FOUND TRUE)
   string(REPLACE ";" " " _brotli_CFLAGS "${_brotli_CFLAGS}")
   message(STATUS "Found Brotli (via pkg-config): ${_brotli_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
