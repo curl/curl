@@ -37,6 +37,7 @@
 # - `LIBRTMP_PC_REQUIRES`:   The librtmp pkg-config packages.
 # - `LIBRTMP_CFLAGS`:        Required compiler flags.
 # - `LIBRTMP_VERSION`:       Version of librtmp.
+# - `CURL::librtmp`:         librtmp library target.
 
 set(LIBRTMP_PC_REQUIRES "librtmp")
 
