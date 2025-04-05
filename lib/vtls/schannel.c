@@ -582,7 +582,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                  &cert_store_path, &cert_thumbprint_str);
 
       if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
-        fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
+        fInCert = FOPEN(data->set.ssl.primary.clientcert, "rb");
 
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"
@@ -626,15 +626,15 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         if(continue_reading)
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
         if(continue_reading)
-          certdata = malloc(certsize + 1);
+          certdata = MALLOC(certsize + 1);
         if((!certdata) ||
            ((int) fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
-        fclose(fInCert);
+        FCLOSE(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
                 data->set.ssl.primary.clientcert);
-          free(certdata);
+          FREE(certdata);
           return CURLE_SSL_CERTPROBLEM;
         }
       }
@@ -645,7 +645,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       if(data->set.ssl.key_passwd)
         pwd_len = strlen(data->set.ssl.key_passwd);
-      pszPassword = (WCHAR*)malloc(sizeof(WCHAR)*(pwd_len + 1));
+      pszPassword = (WCHAR*)MALLOC(sizeof(WCHAR)*(pwd_len + 1));
       if(pszPassword) {
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
@@ -665,10 +665,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
 
-        free(pszPassword);
+        FREE(pszPassword);
       }
       if(!blob)
-        free(certdata);
+        FREE(certdata);
       if(!cert_store) {
         DWORD errorcode = GetLastError();
         if(errorcode == ERROR_INVALID_PASSWORD)
@@ -708,12 +708,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
               cert_store_name,
               (path_utf8 ? path_utf8 : "(unknown)"),
               GetLastError());
-        free(cert_store_path);
+        FREE(cert_store_path);
         curlx_unicodefree(path_utf8);
         curlx_unicodefree(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
-      free(cert_store_path);
+      FREE(cert_store_path);
 
       cert_thumbprint.pbData = cert_thumbprint_data;
       cert_thumbprint.cbData = CERT_THUMBPRINT_DATA_LEN;
@@ -752,7 +752,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
   /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
-    calloc(1, sizeof(struct Curl_schannel_cred));
+    CALLOC(1, sizeof(struct Curl_schannel_cred));
   if(!backend->cred) {
     failf(data, "schannel: unable to allocate memory");
 
@@ -1061,7 +1061,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* allocate memory for the security context handle */
   backend->ctxt = (struct Curl_schannel_ctxt *)
-    calloc(1, sizeof(struct Curl_schannel_ctxt));
+    CALLOC(1, sizeof(struct Curl_schannel_ctxt));
   if(!backend->ctxt) {
     failf(data, "schannel: unable to allocate memory");
     return CURLE_OUT_OF_MEMORY;
@@ -1175,7 +1175,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(!backend->decdata_buffer) {
     backend->decdata_offset = 0;
     backend->decdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
-    backend->decdata_buffer = malloc(backend->decdata_length);
+    backend->decdata_buffer = MALLOC(backend->decdata_length);
     if(!backend->decdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
@@ -1187,7 +1187,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->encdata_is_incomplete = FALSE;
     backend->encdata_offset = 0;
     backend->encdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
-    backend->encdata_buffer = malloc(backend->encdata_length);
+    backend->encdata_buffer = MALLOC(backend->encdata_length);
     if(!backend->encdata_buffer) {
       failf(data, "schannel: unable to allocate memory");
       return CURLE_OUT_OF_MEMORY;
@@ -1200,7 +1200,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* increase internal encrypted data buffer */
     size_t reallocated_length = backend->encdata_offset +
       CURL_SCHANNEL_BUFFER_FREE_SIZE;
-    reallocated_buffer = realloc(backend->encdata_buffer,
+    reallocated_buffer = REALLOC(backend->encdata_buffer,
                                  reallocated_length);
 
     if(!reallocated_buffer) {
@@ -1245,7 +1245,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                   backend->encdata_offset, backend->encdata_length));
 
     /* setup input buffers */
-    InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN, malloc(backend->encdata_offset),
+    InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN, MALLOC(backend->encdata_offset),
                   curlx_uztoul(backend->encdata_offset));
     InitSecBuffer(&inbuf[1], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 2);
@@ -1738,7 +1738,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* calculate the complete message length and allocate a buffer for it */
   data_len = backend->stream_sizes.cbHeader + len +
     backend->stream_sizes.cbTrailer;
-  ptr = (unsigned char *) malloc(data_len);
+  ptr = (unsigned char *) MALLOC(data_len);
   if(!ptr) {
     *err = CURLE_OUT_OF_MEMORY;
     return -1;
@@ -1917,7 +1917,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(reallocated_length < min_encdata_length) {
         reallocated_length = min_encdata_length;
       }
-      reallocated_buffer = realloc(backend->encdata_buffer,
+      reallocated_buffer = REALLOC(backend->encdata_buffer,
                                    reallocated_length);
       if(!reallocated_buffer) {
         *err = CURLE_OUT_OF_MEMORY;
@@ -2003,7 +2003,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           if(reallocated_length < len) {
             reallocated_length = len;
           }
-          reallocated_buffer = realloc(backend->decdata_buffer,
+          reallocated_buffer = REALLOC(backend->decdata_buffer,
                                        reallocated_length);
           if(!reallocated_buffer) {
             *err = CURLE_OUT_OF_MEMORY;
@@ -2659,8 +2659,8 @@ static void schannel_cert_share_free(void *key, size_t key_len, void *p)
   if(share->cert_store) {
     CertCloseStore(share->cert_store, 0);
   }
-  free(share->CAfile);
-  free(share);
+  FREE(share->CAfile);
+  FREE(share);
 }
 
 bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
@@ -2684,7 +2684,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share) {
-    share = calloc(1, sizeof(*share));
+    share = CALLOC(1, sizeof(*share));
     if(!share) {
       return FALSE;
     }
@@ -2692,7 +2692,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                        CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
-      free(share);
+      FREE(share);
       return FALSE;
     }
   }
@@ -2706,7 +2706,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
   else {
     if(conn_config->CAfile) {
-      CAfile = strdup(conn_config->CAfile);
+      CAfile = STRDUP(conn_config->CAfile);
       if(!CAfile) {
         return FALSE;
       }
@@ -2717,7 +2717,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   if(share->cert_store) {
     CertCloseStore(share->cert_store, 0);
   }
-  free(share->CAfile);
+  FREE(share->CAfile);
 
   share->time = Curl_now();
   share->cert_store = cert_store;

@@ -104,7 +104,7 @@ struct Curl_multi {
 
   struct Curl_easy *admin; /* internal easy handle for admin operations */
 
-  /* callback function and user data pointer for the *socket() API */
+  /* callback function and user data pointer for the *SOCKET() API */
   curl_socket_callback socket_cb;
   void *socket_userp;
 
@@ -154,7 +154,7 @@ struct Curl_multi {
   long max_total_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in total */
 
-  /* timer callback and user data pointer for the *socket() API */
+  /* timer callback and user data pointer for the *SOCKET() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
   long last_timeout_ms;        /* the last timeout value set via timer_cb */

@@ -417,7 +417,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   DEBUGASSERT(conn);
 
   /* start clean, consider allocating this struct on demand */
-  dohp = data->req.doh = calloc(1, sizeof(struct doh_probes));
+  dohp = data->req.doh = CALLOC(1, sizeof(struct doh_probes));
   if(!dohp)
     return NULL;
 
@@ -467,7 +467,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                            DNS_TYPE_HTTPS,
                            qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi, dohp->req_hds);
-    free(qname);
+    FREE(qname);
     if(result)
       goto error;
     dohp->pending++;
@@ -911,7 +911,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
+    ai = CALLOC(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
@@ -1078,7 +1078,7 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   *hrr = NULL;
   if(len <= 2)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
+  lhrr = CALLOC(1, sizeof(struct Curl_https_rrinfo));
   if(!lhrr)
     return CURLE_OUT_OF_MEMORY;
   lhrr->priority = doh_get16bit(cp, 0);

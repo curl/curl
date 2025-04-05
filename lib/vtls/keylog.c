@@ -49,7 +49,7 @@ Curl_tls_keylog_open(void)
   if(!keylog_file_fp) {
     keylog_file_name = curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
-      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      keylog_file_fp = FOPEN(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
 #ifdef _WIN32
         if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
@@ -57,7 +57,7 @@ Curl_tls_keylog_open(void)
         if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
         {
-          fclose(keylog_file_fp);
+          FCLOSE(keylog_file_fp);
           keylog_file_fp = NULL;
         }
       }
@@ -70,7 +70,7 @@ void
 Curl_tls_keylog_close(void)
 {
   if(keylog_file_fp) {
-    fclose(keylog_file_fp);
+    FCLOSE(keylog_file_fp);
     keylog_file_fp = NULL;
   }
 }

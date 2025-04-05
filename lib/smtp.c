@@ -563,7 +563,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data)
                              utf8 ? " SMTPUTF8" : "");
 
       Curl_free_idnconverted_hostname(&host);
-      free(address);
+      FREE(address);
     }
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
@@ -638,11 +638,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
          worry about that and reply with a 501 error */
       from = aprintf("<%s>", address);
 
-    free(address);
+    FREE(address);
   }
   else
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
-    from = strdup("<>");
+    from = STRDUP("<>");
 
   if(!from) {
     result = CURLE_OUT_OF_MEMORY;
@@ -678,11 +678,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
         /* An invalid mailbox was provided but we will simply let the server
            worry about it */
         auth = aprintf("<%s>", address);
-      free(address);
+      FREE(address);
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
-      auth = strdup("<>");
+      auth = STRDUP("<>");
 
     if(!auth) {
       result = CURLE_OUT_OF_MEMORY;
@@ -764,9 +764,9 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
                                : "");          /* included in our envelope  */
 
 out:
-  free(from);
-  free(auth);
-  free(size);
+  FREE(from);
+  FREE(auth);
+  FREE(size);
 
   if(!result)
     smtp_state(data, SMTP_MAIL);
@@ -807,7 +807,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data)
                            address);
 
   Curl_free_idnconverted_hostname(&host);
-  free(address);
+  FREE(address);
 
   if(!result)
     smtp_state(data, SMTP_RCPT);
@@ -1314,7 +1314,7 @@ static CURLcode smtp_init(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   struct SMTP *smtp;
 
-  smtp = data->req.p.smtp = calloc(1, sizeof(struct SMTP));
+  smtp = data->req.p.smtp = CALLOC(1, sizeof(struct SMTP));
   if(!smtp)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1744,7 +1744,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
+  char *dup = STRDUP(fqma[0] == '<' ? fqma + 1  : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 

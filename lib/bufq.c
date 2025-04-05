@@ -162,7 +162,7 @@ static void chunk_list_free(struct buf_chunk **anchor)
   while(*anchor) {
     chunk = *anchor;
     *anchor = chunk->next;
-    free(chunk);
+    FREE(chunk);
   }
 }
 
@@ -192,7 +192,7 @@ static CURLcode bufcp_take(struct bufc_pool *pool,
     return CURLE_OK;
   }
 
-  chunk = calloc(1, sizeof(*chunk) + pool->chunk_size);
+  chunk = CALLOC(1, sizeof(*chunk) + pool->chunk_size);
   if(!chunk) {
     *pchunk = NULL;
     return CURLE_OUT_OF_MEMORY;
@@ -206,7 +206,7 @@ static void bufcp_put(struct bufc_pool *pool,
                       struct buf_chunk *chunk)
 {
   if(pool->spare_count >= pool->spare_max) {
-    free(chunk);
+    FREE(chunk);
   }
   else {
     chunk_reset(chunk);
@@ -320,7 +320,7 @@ static struct buf_chunk *get_spare(struct bufq *q)
     return chunk;
   }
   else {
-    chunk = calloc(1, sizeof(*chunk) + q->chunk_size);
+    chunk = CALLOC(1, sizeof(*chunk) + q->chunk_size);
     if(!chunk)
       return NULL;
     chunk->dlen = q->chunk_size;
@@ -347,7 +347,7 @@ static void prune_head(struct bufq *q)
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */
-      free(chunk);
+      FREE(chunk);
       --q->chunk_count;
     }
     else {
@@ -390,7 +390,7 @@ static void prune_tail(struct bufq *q)
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */
-      free(chunk);
+      FREE(chunk);
       --q->chunk_count;
     }
     else {

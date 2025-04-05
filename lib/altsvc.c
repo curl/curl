@@ -73,9 +73,9 @@ const char *Curl_alpnid2str(enum alpnid id)
 
 static void altsvc_free(struct altsvc *as)
 {
-  free(as->src.host);
-  free(as->dst.host);
-  free(as);
+  FREE(as->src.host);
+  FREE(as->dst.host);
+  FREE(as);
 }
 
 static struct altsvc *altsvc_createid(const char *srchost,
@@ -87,7 +87,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t srcport,
                                       size_t dstport)
 {
-  struct altsvc *as = calloc(1, sizeof(struct altsvc));
+  struct altsvc *as = CALLOC(1, sizeof(struct altsvc));
   if(!as)
     return NULL;
   DEBUGASSERT(hlen);
@@ -223,12 +223,12 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
   /* we need a private copy of the filename so that the altsvc cache file
      name survives an easy handle reset */
-  free(asi->filename);
-  asi->filename = strdup(file);
+  FREE(asi->filename);
+  asi->filename = STRDUP(file);
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = FOPEN(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     Curl_dyn_init(&buf, MAX_ALTSVC_LINE);
@@ -239,7 +239,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
         altsvc_add(asi, lineptr);
     }
     Curl_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    FCLOSE(fp);
   }
   return result;
 }
@@ -299,7 +299,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
  */
 struct altsvcinfo *Curl_altsvc_init(void)
 {
-  struct altsvcinfo *asi = calloc(1, sizeof(struct altsvcinfo));
+  struct altsvcinfo *asi = CALLOC(1, sizeof(struct altsvcinfo));
   if(!asi)
     return NULL;
   Curl_llist_init(&asi->list, NULL);
@@ -350,8 +350,8 @@ void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
       n = Curl_node_next(e);
       altsvc_free(as);
     }
-    free(altsvc->filename);
-    free(altsvc);
+    FREE(altsvc->filename);
+    FREE(altsvc);
     *altsvcp = NULL; /* clear the pointer */
   }
 }
@@ -392,14 +392,14 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
       if(result)
         break;
     }
-    fclose(out);
+    FCLOSE(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  FREE(tempstore);
   return result;
 }
 

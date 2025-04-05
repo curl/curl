@@ -809,11 +809,11 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
   if(randlen >= sizeof(keyval)) {
-    free(randstr);
+    FREE(randstr);
     return CURLE_FAILED_INIT;
   }
   strcpy(keyval, randstr);
-  free(randstr);
+  FREE(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
       result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
@@ -840,7 +840,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   ws = data->conn->proto.ws;
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
-    ws = calloc(1, sizeof(*ws));
+    ws = CALLOC(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
     data->conn->proto.ws = ws;

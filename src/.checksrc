@@ -3,3 +3,16 @@ banfunc strncpy
 banfunc sscanf
 banfunc strtol
 banfunc strtoul
+# the ones we use UPPERCASE:
+banfunc accept
+banfunc calloc
+banfunc fclose
+banfunc fdopen
+banfunc fopen
+banfunc free
+banfunc malloc
+banfunc realloc
+banfunc recv
+banfunc send
+banfunc socket
+banfunc strdup

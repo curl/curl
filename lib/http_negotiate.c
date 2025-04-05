@@ -207,16 +207,16 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      free(data->state.aptr.proxyuserpwd);
+      FREE(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else {
-      free(data->state.aptr.userpwd);
+      FREE(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 
-    free(base64);
+    FREE(base64);
 
     if(!userp) {
       return CURLE_OUT_OF_MEMORY;

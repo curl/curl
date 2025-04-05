@@ -176,7 +176,7 @@ static char *auth_digest_string_quoted(const char *source)
     ++s;
   }
 
-  dest = malloc(n);
+  dest = MALLOC(n);
   if(dest) {
     char *d = dest;
     s = source;
@@ -415,7 +415,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   /* Calculate H(A2) */
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt) {
-    free(spn);
+    FREE(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -433,7 +433,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   /* Now calculate the response hash */
   ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt) {
-    free(spn);
+    FREE(spn);
 
     return CURLE_OUT_OF_MEMORY;
   }
@@ -466,7 +466,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                      "qop=%s",
                      userp, realm, nonce,
                      cnonce, nonceCount, spn, resp_hash_hex, qop);
-  free(spn);
+  FREE(spn);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -511,8 +511,8 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
     /* Extract a value=content pair */
     if(Curl_auth_digest_get_pair(chlg, value, content, &chlg)) {
       if(strcasecompare(value, "nonce")) {
-        free(digest->nonce);
-        digest->nonce = strdup(content);
+        FREE(digest->nonce);
+        digest->nonce = STRDUP(content);
         if(!digest->nonce)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -523,14 +523,14 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         }
       }
       else if(strcasecompare(value, "realm")) {
-        free(digest->realm);
-        digest->realm = strdup(content);
+        FREE(digest->realm);
+        digest->realm = STRDUP(content);
         if(!digest->realm)
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "opaque")) {
-        free(digest->opaque);
-        digest->opaque = strdup(content);
+        FREE(digest->opaque);
+        digest->opaque = STRDUP(content);
         if(!digest->opaque)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -556,21 +556,21 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
         /* Select only auth or auth-int. Otherwise, ignore */
         if(foundAuth) {
-          free(digest->qop);
-          digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH);
+          FREE(digest->qop);
+          digest->qop = STRDUP(DIGEST_QOP_VALUE_STRING_AUTH);
           if(!digest->qop)
             return CURLE_OUT_OF_MEMORY;
         }
         else if(foundAuthInt) {
-          free(digest->qop);
-          digest->qop = strdup(DIGEST_QOP_VALUE_STRING_AUTH_INT);
+          FREE(digest->qop);
+          digest->qop = STRDUP(DIGEST_QOP_VALUE_STRING_AUTH_INT);
           if(!digest->qop)
             return CURLE_OUT_OF_MEMORY;
         }
       }
       else if(strcasecompare(value, "algorithm")) {
-        free(digest->algorithm);
-        digest->algorithm = strdup(content);
+        FREE(digest->algorithm);
+        digest->algorithm = STRDUP(content);
         if(!digest->algorithm)
           return CURLE_OUT_OF_MEMORY;
 
@@ -713,7 +713,7 @@ static CURLcode auth_create_digest_http_message(
       return CURLE_OUT_OF_MEMORY;
 
     result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
-    free(hashthis);
+    FREE(hashthis);
     if(result)
       return result;
     convert_to_ascii(hashbuf, (unsigned char *)userh);
@@ -736,7 +736,7 @@ static CURLcode auth_create_digest_http_message(
     return CURLE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
-  free(hashthis);
+  FREE(hashthis);
   if(result)
     return result;
   convert_to_ascii(hashbuf, ha1);
@@ -748,7 +748,7 @@ static CURLcode auth_create_digest_http_message(
       return CURLE_OUT_OF_MEMORY;
 
     result = hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
-    free(tmp);
+    FREE(tmp);
     if(result)
       return result;
     convert_to_ascii(hashbuf, ha1);
@@ -778,13 +778,13 @@ static CURLcode auth_create_digest_http_message(
 
     result = hash(hashbuf, (const unsigned char *)"", 0);
     if(result) {
-      free(hashthis);
+      FREE(hashthis);
       return result;
     }
     convert_to_ascii(hashbuf, (unsigned char *)hashed);
 
     hashthis2 = aprintf("%s:%s", hashthis, hashed);
-    free(hashthis);
+    FREE(hashthis);
     hashthis = hashthis2;
   }
 
@@ -792,7 +792,7 @@ static CURLcode auth_create_digest_http_message(
     return CURLE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
-  free(hashthis);
+  FREE(hashthis);
   if(result)
     return result;
   convert_to_ascii(hashbuf, ha2);
@@ -809,7 +809,7 @@ static CURLcode auth_create_digest_http_message(
     return CURLE_OUT_OF_MEMORY;
 
   result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
-  free(hashthis);
+  FREE(hashthis);
   if(result)
     return result;
   convert_to_ascii(hashbuf, request_digest);
@@ -833,18 +833,18 @@ static CURLcode auth_create_digest_http_message(
   if(digest->realm)
     realm_quoted = auth_digest_string_quoted(digest->realm);
   else {
-    realm_quoted = malloc(1);
+    realm_quoted = MALLOC(1);
     if(realm_quoted)
       realm_quoted[0] = 0;
   }
   if(!realm_quoted) {
-    free(userp_quoted);
+    FREE(userp_quoted);
     return CURLE_OUT_OF_MEMORY;
   }
   nonce_quoted = auth_digest_string_quoted(digest->nonce);
   if(!nonce_quoted) {
-    free(realm_quoted);
-    free(userp_quoted);
+    FREE(realm_quoted);
+    FREE(userp_quoted);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -881,9 +881,9 @@ static CURLcode auth_create_digest_http_message(
                        uripath,
                        request_digest);
   }
-  free(nonce_quoted);
-  free(realm_quoted);
-  free(userp_quoted);
+  FREE(nonce_quoted);
+  FREE(realm_quoted);
+  FREE(userp_quoted);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
@@ -893,12 +893,12 @@ static CURLcode auth_create_digest_http_message(
     /* Append the opaque */
     opaque_quoted = auth_digest_string_quoted(digest->opaque);
     if(!opaque_quoted) {
-      free(response);
+      FREE(response);
       return CURLE_OUT_OF_MEMORY;
     }
     tmp = aprintf("%s, opaque=\"%s\"", response, opaque_quoted);
-    free(response);
-    free(opaque_quoted);
+    FREE(response);
+    FREE(opaque_quoted);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
@@ -908,7 +908,7 @@ static CURLcode auth_create_digest_http_message(
   if(digest->algorithm) {
     /* Append the algorithm */
     tmp = aprintf("%s, algorithm=%s", response, digest->algorithm);
-    free(response);
+    FREE(response);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
@@ -918,7 +918,7 @@ static CURLcode auth_create_digest_http_message(
   if(digest->userhash) {
     /* Append the userhash */
     tmp = aprintf("%s, userhash=true", response);
-    free(response);
+    FREE(response);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 

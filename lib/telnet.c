@@ -204,7 +204,7 @@ CURLcode init_telnet(struct Curl_easy *data)
 {
   struct TELNET *tn;
 
-  tn = calloc(1, sizeof(struct TELNET));
+  tn = CALLOC(1, sizeof(struct TELNET));
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 

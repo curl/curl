@@ -60,14 +60,6 @@
 #ifdef MEMDEBUG_NODEFINES
 #ifdef CURLDEBUG
 
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#undef send
-#undef recv
-
 #ifdef _WIN32
 #  ifdef UNICODE
 #    undef wcsdup
@@ -78,17 +70,8 @@
 #  endif
 #endif
 
-#undef socket
-#undef accept
-#ifdef HAVE_SOCKETPAIR
-#undef socketpair
-#endif
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
-#undef fopen
-#undef fdopen
-#undef fclose
 
 #endif /* MEMDEBUG_NODEFINES */
 #endif /* CURLDEBUG */
@@ -128,6 +111,7 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 
 #ifndef CURLDEBUG
 
+#ifdef BUILDING_LIBCURL
 /*
  * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
  * realloc and free, along with others, in memdebug.h in a different
@@ -137,16 +121,11 @@ extern curl_wcsdup_callback Curl_cwcsdup;
  * from memdebug.h are the ones that shall be used.
  */
 
-#undef strdup
-#define strdup(ptr) Curl_cstrdup(ptr)
-#undef malloc
-#define malloc(size) Curl_cmalloc(size)
-#undef calloc
-#define calloc(nbelem,size) Curl_ccalloc(nbelem, size)
-#undef realloc
-#define realloc(ptr,size) Curl_crealloc(ptr, size)
-#undef free
-#define free(ptr) Curl_cfree(ptr)
+#define STRDUP(ptr) Curl_cstrdup(ptr)
+#define MALLOC(size) Curl_cmalloc(size)
+#define CALLOC(nbelem,size) Curl_ccalloc(nbelem, size)
+#define REALLOC(ptr,size) Curl_crealloc(ptr, size)
+#define FREE(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
 #  ifdef UNICODE
@@ -160,6 +139,17 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #    undef _tcsdup
 #    define _tcsdup(ptr) Curl_cstrdup(ptr)
 #  endif
+#endif
+
+#else /* if not building libcurl */
+
+/* when included by the tool code for example */
+#define FREE(x) free(x)
+#define MALLOC(x) malloc(x)
+#define CALLOC(a,b) calloc(a,b)
+#define REALLOC(a,b) realloc(a,b)
+#define STRDUP(x) strdup(x)
+
 #endif
 
 #endif /* CURLDEBUG */

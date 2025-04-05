@@ -207,29 +207,29 @@ static gnutls_datum_t load_file(const char *file)
   long filelen;
   void *ptr;
 
-  f = fopen(file, "rb");
+  f = FOPEN(file, "rb");
   if(!f)
     return loaded_file;
   if(fseek(f, 0, SEEK_END) != 0
      || (filelen = ftell(f)) < 0
      || fseek(f, 0, SEEK_SET) != 0
-     || !(ptr = malloc((size_t)filelen)))
+     || !(ptr = MALLOC((size_t)filelen)))
     goto out;
   if(fread(ptr, 1, (size_t)filelen, f) < (size_t)filelen) {
-    free(ptr);
+    FREE(ptr);
     goto out;
   }
 
   loaded_file.data = ptr;
   loaded_file.size = (unsigned int)filelen;
 out:
-  fclose(f);
+  FCLOSE(f);
   return loaded_file;
 }
 
 static void unload_file(gnutls_datum_t data)
 {
-  free(data.data);
+  FREE(data.data);
 }
 
 
@@ -414,14 +414,14 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
   int rc;
 
   *pcreds = NULL;
-  shared = calloc(1, sizeof(*shared));
+  shared = CALLOC(1, sizeof(*shared));
   if(!shared)
     return CURLE_OUT_OF_MEMORY;
 
   rc = gnutls_certificate_allocate_credentials(&shared->creds);
   if(rc != GNUTLS_E_SUCCESS) {
     failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
-    free(shared);
+    FREE(shared);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -449,8 +449,8 @@ void Curl_gtls_shared_creds_free(struct gtls_shared_creds **pcreds)
     --shared->refcount;
     if(!shared->refcount) {
       gnutls_certificate_free_credentials(shared->creds);
-      free(shared->CAfile);
-      free(shared);
+      FREE(shared->CAfile);
+      FREE(shared);
     }
   }
 }
@@ -602,7 +602,7 @@ static void gtls_set_cached_creds(struct Curl_cfilter *cf,
     return;
 
   if(conn_config->CAfile) {
-    sc->CAfile = strdup(conn_config->CAfile);
+    sc->CAfile = STRDUP(conn_config->CAfile);
     if(!sc->CAfile)
       return;
   }
@@ -697,7 +697,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   if(!sdata_len) /* gnutls does this for some version combinations */
     return CURLE_OK;
 
-  sdata = malloc(sdata_len); /* get a buffer for it */
+  sdata = MALLOC(sdata_len); /* get a buffer for it */
   if(!sdata)
     return CURLE_OUT_OF_MEMORY;
 
@@ -711,7 +711,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   if(quic_tp && quic_tp_len) {
     qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
     if(!qtp_clone) {
-      free(sdata);
+      FREE(sdata);
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -1284,7 +1284,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     if(ret != GNUTLS_E_SHORT_MEMORY_BUFFER || len1 == 0)
       break; /* failed */
 
-    buff1 = malloc(len1);
+    buff1 = MALLOC(len1);
     if(!buff1)
       break; /* failed */
 

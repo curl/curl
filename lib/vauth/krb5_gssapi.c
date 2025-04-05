@@ -120,12 +120,12 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
 
-      free(spn);
+      FREE(spn);
 
       return CURLE_AUTH_ERROR;
     }
 
-    free(spn);
+    FREE(spn);
   }
 
   if(chlg) {
@@ -257,7 +257,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   messagelen = 4;
   if(authzid)
     messagelen += strlen(authzid);
-  message = malloc(messagelen);
+  message = MALLOC(messagelen);
   if(!message)
     return CURLE_OUT_OF_MEMORY;
 
@@ -284,7 +284,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_wrap() failed: ",
                        major_status, minor_status);
-    free(message);
+    FREE(message);
     return CURLE_AUTH_ERROR;
   }
 
@@ -294,7 +294,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   gss_release_buffer(&unused_status, &output_token);
 
   /* Free the message buffer */
-  free(message);
+  FREE(message);
 
   return result;
 }

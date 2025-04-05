@@ -124,20 +124,13 @@ CURL_EXTERN ALLOC_FUNC
 #ifndef MEMDEBUG_NODEFINES
 
 /* Set this symbol on the command-line, recompile all lib-sources */
-#undef strdup
-#define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#undef malloc
-#define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
-#undef calloc
-#define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#undef realloc
-#define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
-#undef free
-#define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
-#undef send
-#define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#undef recv
-#define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
+#define STRDUP(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define MALLOC(size) curl_dbg_malloc(size, __LINE__, __FILE__)
+#define CALLOC(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define REALLOC(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define FREE(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
+#define SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
+#define RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
 #  ifdef UNICODE
@@ -153,14 +146,14 @@ CURL_EXTERN ALLOC_FUNC
 #  endif
 #endif
 
-#undef socket
-#define socket(domain,type,protocol)\
+#undef SOCKET
+#define SOCKET(domain,type,protocol)\
  curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
-#undef accept /* for those with accept as a macro */
-#define accept(sock,addr,len)\
+#undef ACCEPT /* for those with accept as a macro */
+#define ACCEPT(sock,addr,len)\
  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
-#define socketpair(domain,type,protocol,socket_vector)\
+#define SOCKETPAIR(domain,type,protocol,socket_vector)\
  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
                      __LINE__, __FILE__)
 #endif
@@ -171,13 +164,27 @@ CURL_EXTERN ALLOC_FUNC
 
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
 
-#undef fopen
-#define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
-#undef fdopen
-#define fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
-#define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
+#undef FOPEN
+#define FOPEN(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
+#undef FDOPEN
+#define FDOPEN(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
+#define FCLOSE(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
 #endif /* MEMDEBUG_NODEFINES */
+
+#else
+/* when not CURLDEBUG */
+#ifndef FOPEN
+/* FOPEN might already be defined in curl_setup.h for Windows */
+#define FOPEN(a,b) fopen(a,b)
+#endif
+#define FDOPEN(a,b) fdopen(a,b)
+#define FCLOSE(a) fclose(a)
+#define SOCKET(a,b,c) socket(a,b,c)
+#define ACCEPT(a,b,c) accept(a,b,c)
+#define SOCKETPAIR(a,b,c,d,e) socketpair(a,b,c,d,e)
+#define SEND(a,b,c,d) send(a,b,c,d)
+#define RECV(a,b,c,d) recv(a,b,c,d)
 
 #endif /* CURLDEBUG */
 
@@ -191,11 +198,11 @@ CURL_EXTERN ALLOC_FUNC
 
 /*
  * Curl_safefree defined as a macro to allow MemoryTracking feature
- * to log free() calls at same location where Curl_safefree is used.
+ * to log FREE() calls at same location where Curl_safefree is used.
  * This macro also assigns NULL to given pointer when free'd.
  */
 
 #define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { FREE((ptr)); (ptr) = NULL;} while(0)
 
 #endif /* HEADER_CURL_MEMDEBUG_H */

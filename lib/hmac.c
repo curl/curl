@@ -62,7 +62,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
 
   /* Create HMAC context. */
   i = sizeof(*ctxt) + 2 * hashparams->ctxtsize + hashparams->resultlen;
-  ctxt = malloc(i);
+  ctxt = MALLOC(i);
 
   if(!ctxt)
     return ctxt;
@@ -124,7 +124,7 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
   hashparams->hfinal(output, ctxt->hashctxt1);
   hashparams->hupdate(ctxt->hashctxt2, output, hashparams->resultlen);
   hashparams->hfinal(output, ctxt->hashctxt2);
-  free(ctxt);
+  FREE(ctxt);
   return 0;
 }
 

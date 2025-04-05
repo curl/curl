@@ -209,7 +209,7 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
 {
   if(ctx) {
     cf_h2_proxy_ctx_clear(ctx);
-    free(ctx);
+    FREE(ctx);
   }
 }
 
@@ -945,7 +945,7 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
   result = CURLE_OK;
 
 out:
-  free(nva);
+  FREE(nva);
   Curl_dynhds_free(&h2_headers);
   *pstream_id = stream_id;
   return result;
@@ -1643,7 +1643,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 

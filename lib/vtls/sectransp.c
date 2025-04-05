@@ -412,7 +412,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
      use that, else convert it. */
   direct = CFStringGetCStringPtr(c, kCFStringEncodingUTF8);
   if(direct) {
-    *certp = strdup(direct);
+    *certp = STRDUP(direct);
     if(!*certp) {
       failf(data, "SSL: out of memory");
       result = CURLE_OUT_OF_MEMORY;
@@ -420,7 +420,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
   }
   else {
     size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
-    cbuf = calloc(1, cbuf_size);
+    cbuf = CALLOC(1, cbuf_size);
     if(cbuf) {
       if(!CFStringGetCString(c, cbuf, (CFIndex)cbuf_size,
                              kCFStringEncodingUTF8)) {
@@ -437,7 +437,7 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
     }
   }
   if(result)
-    free(cbuf);
+    FREE(cbuf);
   CFRelease(c);
   return result;
 }
@@ -869,7 +869,7 @@ static SSLCipherSuite * sectransp_get_supported_ciphers(SSLContextRef ssl_ctx,
   if(err != noErr)
     goto failed;
 
-  ciphers = malloc(*len * sizeof(SSLCipherSuite));
+  ciphers = MALLOC(*len * sizeof(SSLCipherSuite));
   if(!ciphers)
     goto failed;
 
@@ -965,7 +965,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     goto failed;
   }
 
-  selected = malloc(supported_len * sizeof(SSLCipherSuite));
+  selected = MALLOC(supported_len * sizeof(SSLCipherSuite));
   if(!selected) {
     failf(data, "SSL: Failed to allocate memory");
     goto failed;
@@ -1166,7 +1166,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         result = CopyCertSubject(data, cert, &certp);
         if(!result) {
           infof(data, "Client certificate: %s", certp);
-          free(certp);
+          FREE(certp);
         }
 
         CFRelease(cert);
@@ -1423,7 +1423,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   sep_end += 5;
 
   len = cert_end - cert_start;
-  b64 = malloc(len + 1);
+  b64 = MALLOC(len + 1);
   if(!b64)
     return -1;
 
@@ -1435,9 +1435,9 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   b64[j] = '\0';
 
   err = Curl_base64_decode((const char *)b64, out, outlen);
-  free(b64);
+  FREE(b64);
   if(err) {
-    free(*out);
+    FREE(*out);
     return -1;
   }
 
@@ -1516,7 +1516,7 @@ static CURLcode append_cert_to_array(struct Curl_easy *data,
         CFRelease(cacert);
         return result;
     }
-    free(certp);
+    FREE(certp);
 
     CFArrayAppendValue(array, cacert);
     CFRelease(cacert);
@@ -1588,7 +1588,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     }
 
     rc = append_cert_to_array(data, der, derlen, array);
-    free(der);
+    FREE(der);
     if(rc != CURLE_OK) {
       CURL_TRC_CF(data, cf, "append_cert for CA failed");
       result = rc;
@@ -1683,7 +1683,7 @@ static CURLcode verify_cert(struct Curl_cfilter *cf,
 
   result = verify_cert_buf(cf, data, certbuf, buflen, ctx);
   if(free_certbuf)
-    free(certbuf);
+    FREE(certbuf);
   return result;
 }
 
@@ -1782,7 +1782,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     realpubkeylen = pubkeylen + spkiHeaderLength;
-    realpubkey = malloc(realpubkeylen);
+    realpubkey = MALLOC(realpubkeylen);
     if(!realpubkey)
       break;
 
@@ -2163,7 +2163,7 @@ collect_server_cert_single(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CopyCertSubject(data, server_cert, &certp);
     if(!result) {
       infof(data, "Server certificate: %s", certp);
-      free(certp);
+      FREE(certp);
     }
   }
 #endif

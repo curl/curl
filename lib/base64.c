@@ -38,9 +38,7 @@
 #include "curl_base64.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 #include "memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
@@ -111,7 +109,7 @@ CURLcode Curl_base64_decode(const char *src,
   rawlen = (numQuantums * 3) - padding;
 
   /* Allocate our buffer including room for a null-terminator */
-  newstr = malloc(rawlen + 1);
+  newstr = MALLOC(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -181,7 +179,7 @@ CURLcode Curl_base64_decode(const char *src,
 
   return CURLE_OK;
 bad:
-  free(newstr);
+  FREE(newstr);
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
@@ -205,7 +203,7 @@ static CURLcode base64_encode(const char *table64,
     return CURLE_OUT_OF_MEMORY;
 #endif
 
-  base64data = output = malloc((insize + 2) / 3 * 4 + 1);
+  base64data = output = MALLOC((insize + 2) / 3 * 4 + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 

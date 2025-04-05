@@ -108,7 +108,7 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
   (void)conn;
   DEBUGASSERT(data->req.p.mqtt == NULL);
 
-  mq = calloc(1, sizeof(struct MQTT));
+  mq = CALLOC(1, sizeof(struct MQTT));
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
   Curl_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
@@ -141,7 +141,7 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   return result;
 }
 
-/* Generic function called by the multi interface to figure out what socket(s)
+/* Generic function called by the multi interface to figure out what SOCKET(s)
    to wait for and for what actions during the DOING and PROTOCONNECT
    states */
 static int mqtt_getsock(struct Curl_easy *data,
@@ -286,7 +286,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /* allocating packet */
   if(packetlen > 0xFFFFFFF)
     return CURLE_WEIRD_SERVER_REPLY;
-  packet = calloc(1, packetlen);
+  packet = CALLOC(1, packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
 
@@ -336,7 +336,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
 end:
   if(packet)
-    free(packet);
+    FREE(packet);
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
   return result;
@@ -451,7 +451,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   n = mqtt_encode_len((char *)encodedsize, packetlen);
   packetlen += n + 1; /* add one for the control packet type byte */
 
-  packet = malloc(packetlen);
+  packet = MALLOC(packetlen);
   if(!packet) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -469,8 +469,8 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   result = mqtt_send(data, (const char *)packet, packetlen);
 
 fail:
-  free(topic);
-  free(packet);
+  FREE(topic);
+  FREE(packet);
   return result;
 }
 
@@ -537,7 +537,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
 
   /* add the control byte and the encoded remaining length */
-  pkt = malloc(remaininglength + 1 + encodelen);
+  pkt = MALLOC(remaininglength + 1 + encodelen);
   if(!pkt) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -556,8 +556,8 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   result = mqtt_send(data, (const char *)pkt, i);
 
 fail:
-  free(pkt);
-  free(topic);
+  FREE(pkt);
+  FREE(topic);
   return result;
 }
 

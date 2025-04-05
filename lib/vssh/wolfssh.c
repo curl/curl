@@ -342,7 +342,7 @@ static CURLcode wssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *ssh;
   (void)conn;
 
-  data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
+  data->req.p.ssh = ssh = CALLOC(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
@@ -876,7 +876,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
           }
           result = Curl_client_write(data, CLIENTWRITE_BODY,
                                      line, strlen(line));
-          free(line);
+          FREE(line);
           if(result) {
             sshc->actualcode = result;
             break;

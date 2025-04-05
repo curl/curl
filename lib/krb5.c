@@ -185,7 +185,7 @@ krb5_encode(void *app_data, const void *from, int length, int level, void **to)
 
   /* malloc a new buffer, in case gss_release_buffer does not work as
      expected */
-  *to = malloc(enc.length);
+  *to = MALLOC(enc.length);
   if(!*to)
     return -1;
   memcpy(*to, enc.value, enc.length);
@@ -257,7 +257,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
     input_buffer.length = strlen(stringp);
     maj = gss_import_name(&min, &input_buffer, GSS_C_NT_HOSTBASED_SERVICE,
                           &gssname);
-    free(stringp);
+    FREE(stringp);
     if(maj != GSS_S_COMPLETE) {
       gss_release_name(&min, &gssname);
       if(service == srv_host) {
@@ -291,7 +291,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
                                       NULL);
 
       if(gssresp) {
-        free(_gssresp.value);
+        FREE(_gssresp.value);
         gssresp = NULL;
       }
 
@@ -318,8 +318,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         else
           result = CURLE_OUT_OF_MEMORY;
 
-        free(p);
-        free(cmd);
+        FREE(p);
+        FREE(cmd);
 
         if(result) {
           ret = -2;
@@ -366,7 +366,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
     gss_release_buffer(&min, &output_buffer);
 
     if(gssresp)
-      free(_gssresp.value);
+      FREE(_gssresp.value);
 
     if(ret == AUTH_OK || service == srv_host)
       break;
@@ -648,7 +648,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     error = Curl_base64_encode(buffer, curlx_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
-      free(buffer);
+      FREE(buffer);
       return; /* error */
     }
     if(cmd_size > 0) {
@@ -663,7 +663,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
       socket_write(data, sockindex, "\r\n", 2);
       infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
             cmd_buffer);
-      free(cmd_buffer);
+      FREE(cmd_buffer);
     }
   }
   else {
@@ -671,7 +671,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     socket_write(data, sockindex, &htonl_bytes, sizeof(htonl_bytes));
     socket_write(data, sockindex, buffer, curlx_sitouz(bytes));
   }
-  free(buffer);
+  FREE(buffer);
 }
 
 static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
@@ -728,7 +728,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
     return -1;
 
   if(decoded_sz > (size_t)INT_MAX) {
-    free(buf);
+    FREE(buf);
     return -1;
   }
   decoded_len = curlx_uztosi(decoded_sz);
@@ -736,7 +736,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   decoded_len = conn->mech->decode(conn->app_data, buf, decoded_len,
                                    (int)level, conn);
   if(decoded_len <= 0) {
-    free(buf);
+    FREE(buf);
     return -1;
   }
 
@@ -756,7 +756,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
   strcpy(buffer, buf);
-  free(buf);
+  FREE(buf);
   return ret_code;
 }
 
@@ -840,7 +840,7 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
   void *tmp_allocation;
   const struct Curl_sec_client_mech *mech = &Curl_krb5_client_mech;
 
-  tmp_allocation = realloc(conn->app_data, mech->size);
+  tmp_allocation = REALLOC(conn->app_data, mech->size);
   if(!tmp_allocation) {
     failf(data, "Failed realloc of size %zu", mech->size);
     mech = NULL;

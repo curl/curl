@@ -419,7 +419,7 @@ void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
   if(cpfds->allocated_pfds) {
-    free(cpfds->pfds);
+    FREE(cpfds->pfds);
   }
   memset(cpfds, 0, sizeof(*cpfds));
 }
@@ -429,13 +429,13 @@ static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
   struct pollfd *new_fds;
   unsigned int new_count = cpfds->count + inc;
 
-  new_fds = calloc(new_count, sizeof(struct pollfd));
+  new_fds = CALLOC(new_count, sizeof(struct pollfd));
   if(!new_fds)
     return CURLE_OUT_OF_MEMORY;
 
   memcpy(new_fds, cpfds->pfds, cpfds->count * sizeof(struct pollfd));
   if(cpfds->allocated_pfds)
-    free(cpfds->pfds);
+    FREE(cpfds->pfds);
   cpfds->pfds = new_fds;
   cpfds->count = new_count;
   cpfds->allocated_pfds = TRUE;

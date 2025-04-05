@@ -284,7 +284,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
-      free(ntlm->target_info); /* replace any previous data */
+      FREE(ntlm->target_info); /* replace any previous data */
       ntlm->target_info = Curl_memdup(&type2[target_info_offset],
                                       target_info_len);
       if(!ntlm->target_info)
@@ -798,7 +798,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     ntlm_print_hex(stderr, (char *)&ntlmbuf[ntrespoff], ntresplen);
   });
 
-  free(ntlmv2resp);/* Free the dynamic buffer allocated for NTLMv2 */
+  FREE(ntlmv2resp);/* Free the dynamic buffer allocated for NTLMv2 */
 
   DEBUG_OUT({
     fprintf(stderr, "\n   flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",

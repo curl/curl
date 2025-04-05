@@ -164,7 +164,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
       break;
   }
 
-  free(s); /* free the output string */
+  FREE(s); /* free the output string */
 
   return result;
 }
@@ -302,8 +302,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   }
 
 error:
-  free(eword);
-  free(path);
+  FREE(eword);
+  FREE(path);
   return result;
 }
 #endif /* CURL_DISABLE_DICT */

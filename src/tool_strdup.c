@@ -24,7 +24,7 @@
 #include "tool_strdup.h"
 
 #ifndef HAVE_STRDUP
-char *strdup(const char *str)
+char *STRDUP(const char *str)
 {
   size_t len;
   char *newstr;
@@ -34,7 +34,7 @@ char *strdup(const char *str)
 
   len = strlen(str) + 1;
 
-  newstr = malloc(len);
+  newstr = MALLOC(len);
   if(!newstr)
     return (char *)NULL;
 

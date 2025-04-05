@@ -40,7 +40,7 @@
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *) calloc(1, sizeof(*m));
+  struct tool_mime *m = (struct tool_mime *) CALLOC(1, sizeof(*m));
 
   if(m) {
     m->kind = kind;
@@ -64,11 +64,11 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   char *mime_data_copy;
   struct tool_mime *m = NULL;
 
-  mime_data_copy = strdup(mime_data);
+  mime_data_copy = STRDUP(mime_data);
   if(mime_data_copy) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free(mime_data_copy);
+      FREE(mime_data_copy);
     else
       m->data = mime_data_copy;
   }
@@ -111,11 +111,11 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   *errcode = CURLE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
-    char *filedup = strdup(filename);
+    char *filedup = STRDUP(filename);
     if(filedup) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free(filedup);
+        FREE(filedup);
       else {
         m->data = filedup;
         if(!isremotefile)
@@ -160,7 +160,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       default:
         if(!stdinsize) {
           /* Zero-length data has been freed. Re-create it. */
-          data = strdup("");
+          data = STRDUP("");
           if(!data)
             return m;
         }
@@ -198,7 +198,7 @@ void tool_mime_free(struct tool_mime *mime)
     curlx_safefree(mime->encoder);
     curlx_safefree(mime->data);
     curl_slist_free_all(mime->headers);
-    free(mime);
+    FREE(mime);
   }
 }
 
@@ -573,14 +573,14 @@ static int get_param_part(struct OperationConfig *config, char endchar,
             endpos--;
         sep = *p;
         *endpos = '\0';
-        fp = fopen(hdrfile, FOPEN_READTEXT);
+        fp = FOPEN(hdrfile, FOPEN_READTEXT);
         if(!fp)
           warnf(config->global, "Cannot read from %s: %s", hdrfile,
                 strerror(errno));
         else {
           int i = read_field_headers(config, hdrfile, fp, &headers);
 
-          fclose(fp);
+          FCLOSE(fp);
           if(i) {
             curl_slist_free_all(headers);
             return -1;
@@ -725,7 +725,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
 #define SET_TOOL_MIME_PTR(m, field)                                     \
   do {                                                                  \
     if(field) {                                                         \
-      (m)->field = strdup(field);                                       \
+      (m)->field = STRDUP(field);                                       \
       if(!(m)->field)                                                   \
         goto fail;                                                      \
     }                                                                   \
@@ -760,7 +760,7 @@ int formparse(struct OperationConfig *config,
   }
 
   /* Make a copy we can overwrite. */
-  contents = strdup(input);
+  contents = STRDUP(input);
   if(!contents)
     goto fail;
 

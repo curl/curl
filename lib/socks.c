@@ -1109,7 +1109,7 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
 {
   struct socks_state *sxstate = cf->ctx;
   if(sxstate) {
-    free(sxstate);
+    FREE(sxstate);
     cf->ctx = NULL;
   }
 }
@@ -1140,7 +1140,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return result;
 
   if(!sx) {
-    sx = calloc(1, sizeof(*sx));
+    sx = CALLOC(1, sizeof(*sx));
     if(!sx)
       return CURLE_OUT_OF_MEMORY;
     cf->ctx = sx;

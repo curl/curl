@@ -57,9 +57,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     /* NULL means load .curlrc from homedir! */
     char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
     if(curlrc) {
-      file = fopen(curlrc, FOPEN_READTEXT);
+      file = FOPEN(curlrc, FOPEN_READTEXT);
       if(!file) {
-        free(curlrc);
+        FREE(curlrc);
         return 1;
       }
       filename = pathalloc = curlrc;
@@ -79,7 +79,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   }
   else {
     if(strcmp(filename, "-"))
-      file = fopen(filename, FOPEN_READTEXT);
+      file = FOPEN(filename, FOPEN_READTEXT);
     else
       file = stdin;
   }
@@ -130,7 +130,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(*line == '\"') {
         /* quoted parameter, do the quote dance */
         line++;
-        param = malloc(strlen(line) + 1); /* parameter */
+        param = MALLOC(strlen(line) + 1); /* parameter */
         if(!param) {
           /* out of memory */
           rc = 1;
@@ -186,7 +186,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(res == PARAM_NEXT_OPERATION) {
         if(operation->url_list && operation->url_list->url) {
           /* Allocate the next config */
-          operation->next = malloc(sizeof(struct OperationConfig));
+          operation->next = MALLOC(sizeof(struct OperationConfig));
           if(operation->next) {
             /* Initialise the newly created config */
             config_init(operation->next);
@@ -228,14 +228,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     }
     curlx_dyn_free(&buf);
     if(file != stdin)
-      fclose(file);
+      FCLOSE(file);
     if(fileerror)
       rc = 1;
   }
   else
     rc = 1; /* could not open the file */
 
-  free(pathalloc);
+  FREE(pathalloc);
   return rc;
 }
 

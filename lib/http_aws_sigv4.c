@@ -190,12 +190,12 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
       if(result)
         return result;
 
-      free(curr->data);
+      FREE(curr->data);
       curr->data = Curl_dyn_ptr(&buf);
 
       curr->next = next->next;
-      free(next->data);
-      free(next);
+      FREE(next->data);
+      FREE(next);
     }
     else {
       curr = curr->next;
@@ -249,7 +249,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
     if(!head) {
-      free(fullhost);
+      FREE(fullhost);
       goto fail;
     }
   }
@@ -288,13 +288,13 @@ static CURLcode make_headers(struct Curl_easy *data,
       ;
     if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
       continue;
-    dupdata = strdup(l->data);
+    dupdata = STRDUP(l->data);
     if(!dupdata)
       goto fail;
     dupdata[sep - l->data] = ':';
     tmp_head = Curl_slist_append_nodup(head, dupdata);
     if(!tmp_head) {
-      free(dupdata);
+      FREE(dupdata);
       goto fail;
     }
     head = tmp_head;
@@ -904,7 +904,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    Curl_str(&provider0), Curl_strlen(&provider0));
 
-  free(data->state.aptr.userpwd);
+  FREE(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;
@@ -914,12 +914,12 @@ fail:
   Curl_dyn_free(&canonical_path);
   Curl_dyn_free(&canonical_headers);
   Curl_dyn_free(&signed_headers);
-  free(canonical_request);
-  free(request_type);
-  free(credential_scope);
-  free(str_to_sign);
-  free(secret);
-  free(date_header);
+  FREE(canonical_request);
+  FREE(request_type);
+  FREE(credential_scope);
+  FREE(str_to_sign);
+  FREE(secret);
+  FREE(date_header);
   return result;
 }
 

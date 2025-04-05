@@ -515,7 +515,7 @@ struct ConnectBits {
   BIT(abstract_unix_socket);
 #endif
   BIT(sock_accepted); /* TRUE if the SECONDARYSOCKET was created with
-                         accept() */
+                         ACCEPT() */
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
                             started (happy eyeballs) */
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
@@ -757,7 +757,7 @@ struct connectdata {
   struct Curl_llist_node cpool_node; /* conncache lists */
   struct Curl_llist_node cshutdn_node; /* cshutdn list */
 
-  curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
+  curl_closesocket_callback fclosesocket; /* function closing the SOCKET(s) */
   void *closesocket_client;
 
   /* This is used by the connection pool logic. If this returns TRUE, this
@@ -1189,7 +1189,7 @@ struct UrlState {
   /* hostname, port number and protocol of the first (not followed) request.
      if set, this should be the hostname that we will sent authorization to,
      no else. Used to make Location: following not keep sending user+password.
-     This is strdup()ed data. */
+     This is STRDUP()ed data. */
   char *first_host;
   int first_remote_port;
   curl_prot_t first_remote_protocol;
@@ -1338,7 +1338,7 @@ struct UrlState {
   BIT(disableexpect);    /* TRUE if Expect: is disabled due to a previous
                             417 response */
   BIT(use_range);
-  BIT(rangestringalloc); /* the range string is malloc()'ed */
+  BIT(rangestringalloc); /* the range string is MALLOC()'ed */
   BIT(done); /* set to FALSE when Curl_init_do() is called and set to TRUE
                 when multi_done() is called, to prevent multi_done() to get
                 invoked twice when the multi interface is used. */
@@ -1349,8 +1349,8 @@ struct UrlState {
 #ifdef CURL_LIST_ONLY_PROTOCOL
   BIT(list_only);      /* list directory contents */
 #endif
-  BIT(url_alloc);   /* URL string is malloc()'ed */
-  BIT(referer_alloc); /* referer string is malloc()ed */
+  BIT(url_alloc);   /* URL string is MALLOC()'ed */
+  BIT(referer_alloc); /* referer string is MALLOC()ed */
   BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
   BIT(upload);         /* upload request */
   BIT(internal); /* internal: true if this easy handle was created for

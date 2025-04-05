@@ -109,7 +109,7 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
                                      buffer, sizeof(buffer) - 1, &info, &err);
         uidna_close(idna);
         if(!U_FAILURE(err) && !info.errors) {
-          *out = strdup(buffer);
+          *out = STRDUP(buffer);
           if(*out)
             return CURLE_OK;
           else
@@ -137,7 +137,7 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
                                     sizeof(buffer) - 1, &info, &err);
       uidna_close(idna);
       if(!U_FAILURE(err)) {
-        *out = strdup(buffer);
+        *out = STRDUP(buffer);
         if(*out)
           return CURLE_OK;
         else
@@ -180,7 +180,7 @@ static CURLcode win32_idn_to_ascii(const char *in, char **out)
     if(chars) {
       char *mstr = curlx_convert_wchar_to_UTF8(punycode);
       if(mstr) {
-        *out = strdup(mstr);
+        *out = STRDUP(mstr);
         curlx_unicodefree(mstr);
         if(!*out)
           return CURLE_OUT_OF_MEMORY;
@@ -210,7 +210,7 @@ static CURLcode win32_ascii_to_idn(const char *in, char **output)
       /* 'chars' is "the number of characters retrieved" */
       char *mstr = curlx_convert_wchar_to_UTF8(idn);
       if(mstr) {
-        out = strdup(mstr);
+        out = STRDUP(mstr);
         curlx_unicodefree(mstr);
         if(!out)
           return CURLE_OUT_OF_MEMORY;
@@ -315,7 +315,7 @@ CURLcode Curl_idn_decode(const char *input, char **output)
   CURLcode result = idn_decode(input, &d);
 #ifdef USE_LIBIDN2
   if(!result) {
-    char *c = strdup(d);
+    char *c = STRDUP(d);
     idn2_free(d);
     if(c)
       d = c;
@@ -334,7 +334,7 @@ CURLcode Curl_idn_encode(const char *puny, char **output)
   CURLcode result = idn_encode(puny, &d);
 #ifdef USE_LIBIDN2
   if(!result) {
-    char *c = strdup(d);
+    char *c = STRDUP(d);
     idn2_free(d);
     if(c)
       d = c;

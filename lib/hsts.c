@@ -74,7 +74,7 @@ static time_t hsts_debugtime(void *unused)
 
 struct hsts *Curl_hsts_init(void)
 {
-  struct hsts *h = calloc(1, sizeof(struct hsts));
+  struct hsts *h = CALLOC(1, sizeof(struct hsts));
   if(h) {
     Curl_llist_init(&h->list, NULL);
   }
@@ -83,8 +83,8 @@ struct hsts *Curl_hsts_init(void)
 
 static void hsts_free(struct stsentry *e)
 {
-  free(CURL_UNCONST(e->host));
-  free(e);
+  FREE(CURL_UNCONST(e->host));
+  FREE(e);
 }
 
 void Curl_hsts_cleanup(struct hsts **hp)
@@ -98,8 +98,8 @@ void Curl_hsts_cleanup(struct hsts **hp)
       n = Curl_node_next(e);
       hsts_free(sts);
     }
-    free(h->filename);
-    free(h);
+    FREE(h->filename);
+    FREE(h);
     *hp = NULL;
   }
 }
@@ -118,13 +118,13 @@ static CURLcode hsts_create(struct hsts *h,
     --hlen;
   if(hlen) {
     char *duphost;
-    struct stsentry *sts = calloc(1, sizeof(struct stsentry));
+    struct stsentry *sts = CALLOC(1, sizeof(struct stsentry));
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
 
     duphost = Curl_memdup0(hostname, hlen);
     if(!duphost) {
-      free(sts);
+      FREE(sts);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -380,14 +380,14 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       if(result)
         break;
     }
-    fclose(out);
+    FCLOSE(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  FREE(tempstore);
 skipsave:
   if(data->set.hsts_write) {
     /* if there is a write callback */
@@ -518,12 +518,12 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   /* we need a private copy of the filename so that the hsts cache file
      name survives an easy handle reset */
-  free(h->filename);
-  h->filename = strdup(file);
+  FREE(h->filename);
+  h->filename = STRDUP(file);
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = FOPEN(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     Curl_dyn_init(&buf, MAX_HSTS_LINE);
@@ -541,7 +541,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
       hsts_add(h, lineptr);
     }
     Curl_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    FCLOSE(fp);
   }
   return result;
 }

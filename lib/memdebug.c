@@ -70,6 +70,7 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
+    /* !checksrc! disable BANNEDFUNC 1 : allow fclose() here */
     fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
@@ -80,6 +81,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
+      /* !checksrc! disable BANNEDFUNC 1 : allow fopen() here */
       curl_dbg_logfile = fopen(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
@@ -93,7 +95,7 @@ void curl_dbg_memdebug(const char *logname)
     registered_cleanup = !atexit(curl_dbg_cleanup);
 }
 
-/* This function sets the number of malloc() calls that should return
+/* This function sets the number of MALLOC() calls that should return
    successfully! */
 void curl_dbg_memlimit(long limit)
 {
@@ -235,8 +237,8 @@ wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 }
 #endif
 
-/* We provide a realloc() that accepts a NULL as pointer, which then
-   performs a malloc(). In order to work with ares. */
+/* We provide a REALLOC() that accepts a NULL as pointer, which then
+   performs a MALLOC(). In order to work with ares. */
 void *curl_dbg_realloc(void *ptr, size_t wantedsize,
                        int line, const char *source)
 {
@@ -309,6 +311,7 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
+  /* !checksrc! disable BANNEDFUNC 1 : allow socket() here */
   sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
@@ -326,9 +329,10 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
+  /* !checksrc! disable BANNEDFUNC 1 : allow send() here */
   rc = send(sockfd, buf, len, flags);
   if(source)
-    curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
+    curl_dbg_log("SEND %s:%d SEND(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
   return rc;
 }
@@ -340,6 +344,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
+  /* !checksrc! disable BANNEDFUNC 1 : allow recv() here */
   rc = recv(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
@@ -369,6 +374,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
+  /* !checksrc! disable BANNEDFUNC 1 : allow accept() here */
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
@@ -398,6 +404,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
+  /* !checksrc! disable BANNEDFUNC 1 : allow fopen() here */
   FILE *res = fopen(file, mode);
 
   if(source)
@@ -411,6 +418,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
+  /* !checksrc! disable BANNEDFUNC 1 : allow fdopen() here */
   FILE *res = fdopen(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
@@ -428,6 +436,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
+  /* !checksrc! disable BANNEDFUNC 1 : allow fclose() here */
   res = fclose(file);
 
   return res;

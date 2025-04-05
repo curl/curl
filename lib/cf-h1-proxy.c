@@ -117,7 +117,7 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  ts = calloc(1, sizeof(*ts));
+  ts = CALLOC(1, sizeof(*ts));
   if(!ts)
     return CURLE_OUT_OF_MEMORY;
 
@@ -196,7 +196,7 @@ static void tunnel_free(struct Curl_cfilter *cf,
       Curl_dyn_free(&ts->rcvbuf);
       Curl_dyn_free(&ts->request_data);
       Curl_httpchunk_free(data, &ts->ch);
-      free(ts);
+      FREE(ts);
       cf->ctx = NULL;
     }
   }
@@ -217,7 +217,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
     /* This only happens if we have looped here due to authentication
        reasons, and we do not really use the newly cloned URL here
-       then. Just free() it. */
+       then. Just FREE() it. */
   Curl_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
@@ -301,7 +301,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "CONNECT: fwd auth header '%s'", header);
     result = Curl_http_input_auth(data, proxy, auth);
 
-    free(auth);
+    FREE(auth);
 
     if(result)
       return result;

@@ -433,7 +433,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   struct eyeballer *baller;
 
   *pballer = NULL;
-  baller = calloc(1, sizeof(*baller));
+  baller = CALLOC(1, sizeof(*baller));
   if(!baller)
     return CURLE_OUT_OF_MEMORY;
 
@@ -469,7 +469,7 @@ static void baller_free(struct eyeballer *baller,
 {
   if(baller) {
     baller_close(baller, data);
-    free(baller);
+    FREE(baller);
   }
 }
 
@@ -1168,7 +1168,7 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   *pcf = NULL;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1420,7 +1420,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = CALLOC(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1437,7 +1437,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 
 out:
   *pcf = result ? NULL : cf;
-  free(ctx);
+  FREE(ctx);
   return result;
 }
 

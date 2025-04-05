@@ -238,8 +238,7 @@ static curl_off_t vms_realfilesize(const char *name,
   int ret_stat;
   FILE * file;
 
-  /* !checksrc! disable FOPENMODE 1 */
-  file = fopen(name, "r"); /* VMS */
+  file = FOPEN(name, "r"); /* VMS */
   if(!file) {
     return 0;
   }
@@ -250,7 +249,7 @@ static curl_off_t vms_realfilesize(const char *name,
     if(ret_stat)
       count += ret_stat;
   }
-  fclose(file);
+  FCLOSE(file);
 
   return count;
 }
@@ -286,7 +285,7 @@ static curl_off_t all_pers;
 static CURLcode add_per_transfer(struct per_transfer **per)
 {
   struct per_transfer *p;
-  p = calloc(1, sizeof(struct per_transfer));
+  p = CALLOC(1, sizeof(struct per_transfer));
   if(!p)
     return CURLE_OUT_OF_MEMORY;
   if(!transfers)
@@ -330,7 +329,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   else
     transfersl = p;
 
-  free(per);
+  FREE(per);
   all_pers--;
 
   return n;
@@ -705,7 +704,7 @@ noretry:
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
-    rc = fclose(outs->stream);
+    rc = FCLOSE(outs->stream);
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
@@ -740,25 +739,25 @@ skip:
 
   /* Close function-local opened file descriptors */
   if(per->heads.fopened && per->heads.stream)
-    fclose(per->heads.stream);
+    FCLOSE(per->heads.stream);
 
   if(per->heads.alloc_filename)
     curlx_safefree(per->heads.filename);
 
   if(per->etag_save.fopened && per->etag_save.stream)
-    fclose(per->etag_save.stream);
+    FCLOSE(per->etag_save.stream);
 
   if(per->etag_save.alloc_filename)
     curlx_safefree(per->etag_save.filename);
 
   curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
-    free(outs->filename);
-  free(per->url);
-  free(per->outfile);
-  free(per->uploadfile);
+    FREE(outs->filename);
+  FREE(per->url);
+  FREE(per->outfile);
+  FREE(per->uploadfile);
   if(global->parallel)
-    free(per->errorbuffer);
+    FREE(per->errorbuffer);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
@@ -833,7 +832,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
     /* Check if config->cert is a PKCS#11 URI and set the config->cert_type if
      * necessary */
     if(config->cert && !config->cert_type && is_pkcs11_uri(config->cert)) {
-      config->cert_type = strdup("ENG");
+      config->cert_type = STRDUP("ENG");
       if(!config->cert_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -841,7 +840,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
     /* Check if config->key is a PKCS#11 URI and set the config->key_type if
      * necessary */
     if(config->key && !config->key_type && is_pkcs11_uri(config->key)) {
-      config->key_type = strdup("ENG");
+      config->key_type = STRDUP("ENG");
       if(!config->key_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -850,7 +849,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
      * config->proxy_type if necessary */
     if(config->proxy_cert && !config->proxy_cert_type &&
        is_pkcs11_uri(config->proxy_cert)) {
-      config->proxy_cert_type = strdup("ENG");
+      config->proxy_cert_type = STRDUP("ENG");
       if(!config->proxy_cert_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -859,7 +858,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
      * config->proxy_key_type if necessary */
     if(config->proxy_key && !config->proxy_key_type &&
        is_pkcs11_uri(config->proxy_key)) {
-      config->proxy_key_type = strdup("ENG");
+      config->proxy_key_type = STRDUP("ENG");
       if(!config->proxy_key_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -1768,7 +1767,7 @@ static CURLcode append2query(struct GlobalConfig *global,
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
-        free(per->url); /* free previous URL */
+        FREE(per->url); /* free previous URL */
         per->url = updated; /* use our new URL instead! */
       }
     }
@@ -1843,7 +1842,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
     /* save outfile pattern before expansion */
     if(urlnode->outfile && !state->outfiles) {
-      state->outfiles = strdup(urlnode->outfile);
+      state->outfiles = STRDUP(urlnode->outfile);
       if(!state->outfiles) {
         errorf(global, "out of memory");
         result = CURLE_OUT_OF_MEMORY;
@@ -1916,7 +1915,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         ParameterError pe;
 
         /* open file for reading: */
-        FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
+        FILE *file = FOPEN(config->etag_compare_file, FOPEN_READTEXT);
         if(!file)
           warnf(global, "Failed to open %s: %s", config->etag_compare_file,
                 strerror(errno));
@@ -1931,7 +1930,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         if(!header) {
           if(file)
-            fclose(file);
+            FCLOSE(file);
           errorf(global,
                  "Failed to allocate memory for custom etag header");
           result = CURLE_OUT_OF_MEMORY;
@@ -1943,7 +1942,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         curlx_safefree(header);
 
         if(file)
-          fclose(file);
+          FCLOSE(file);
         if(pe != PARAM_OK) {
           result = CURLE_OUT_OF_MEMORY;
           break;
@@ -1959,7 +1958,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* open file for output: */
         if(strcmp(config->etag_save_file, "-")) {
-          FILE *newfile = fopen(config->etag_save_file, "ab");
+          FILE *newfile = FOPEN(config->etag_save_file, "ab");
           if(!newfile) {
             warnf(global, "Failed creating file for saving etags: \"%s\". "
                   "Skip this transfer", config->etag_save_file);
@@ -1988,12 +1987,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       if(result) {
         curl_easy_cleanup(curl);
         if(etag_save->fopened)
-          fclose(etag_save->stream);
+          FCLOSE(etag_save->stream);
         break;
       }
       per->etag_save = etag_first; /* copy the whole struct */
       if(state->uploadfile) {
-        per->uploadfile = strdup(state->uploadfile);
+        per->uploadfile = STRDUP(state->uploadfile);
         if(!per->uploadfile) {
           curl_easy_cleanup(curl);
           result = CURLE_OUT_OF_MEMORY;
@@ -2042,11 +2041,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
           }
           if(!per->prev || per->prev->config != config) {
-            newfile = fopen(config->headerfile, "wb");
+            newfile = FOPEN(config->headerfile, "wb");
             if(newfile)
-              fclose(newfile);
+              FCLOSE(newfile);
           }
-          newfile = fopen(config->headerfile, "ab");
+          newfile = FOPEN(config->headerfile, "ab");
 
           if(!newfile) {
             errorf(global, "Failed to open %s", config->headerfile);
@@ -2083,7 +2082,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           break;
       }
       else if(!state->li) {
-        per->url = strdup(urlnode->url);
+        per->url = STRDUP(urlnode->url);
         if(!per->url) {
           result = CURLE_OUT_OF_MEMORY;
           break;
@@ -2095,7 +2094,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         break;
 
       if(state->outfiles) {
-        per->outfile = strdup(state->outfiles);
+        per->outfile = STRDUP(state->outfiles);
         if(!per->outfile) {
           result = CURLE_OUT_OF_MEMORY;
           break;
@@ -2143,7 +2142,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             result = CURLE_WRITE_ERROR;
             break;
           }
-          free(per->outfile);
+          FREE(per->outfile);
           per->outfile = d;
         }
         /* Create the directory hierarchy, if not pre-existent to a multiple
@@ -2189,11 +2188,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 #ifdef __VMS
           /* open file for output, forcing VMS output format into stream
              mode which is needed for stat() call above to always work. */
-          FILE *file = fopen(outfile, "ab",
+          FILE *file = FOPEN(outfile, "ab",
                              "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
 #else
           /* open file for output: */
-          FILE *file = fopen(per->outfile, "ab");
+          FILE *file = FOPEN(per->outfile, "ab");
 #endif
           if(!file) {
             errorf(global, "cannot open '%s'", per->outfile);
@@ -2391,7 +2390,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     if(result)
       return result;
 
-    errorbuf = malloc(CURL_ERROR_SIZE);
+    errorbuf = MALLOC(CURL_ERROR_SIZE);
     if(!errorbuf)
       return CURLE_OUT_OF_MEMORY;
 
@@ -2424,7 +2423,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
       } while(skipped);
     }
     if(result) {
-      free(errorbuf);
+      FREE(errorbuf);
       return result;
     }
     errorbuf[0] = 0;
@@ -2548,7 +2547,7 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 {
   struct contextuv *c;
 
-  c = (struct contextuv *) malloc(sizeof(*c));
+  c = (struct contextuv *) MALLOC(sizeof(*c));
 
   c->sockfd = sockfd;
   c->uv = uv;
@@ -2562,7 +2561,7 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 static void close_cb(uv_handle_t *handle)
 {
   struct contextuv *c = (struct contextuv *) handle->data;
-  free(c);
+  FREE(c);
 }
 
 static void destroy_context(struct contextuv *c)
@@ -2990,7 +2989,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
   CURLcode result = CURLE_OUT_OF_MEMORY;
   char *env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
-    config->cacert = strdup(env);
+    config->cacert = STRDUP(env);
     curl_free(env);
     if(!config->cacert)
       goto fail;
@@ -2998,14 +2997,14 @@ static CURLcode cacertpaths(struct OperationConfig *config)
   else {
     env = curl_getenv("SSL_CERT_DIR");
     if(env) {
-      config->capath = strdup(env);
+      config->capath = STRDUP(env);
       curl_free(env);
       if(!config->capath)
         goto fail;
     }
     env = curl_getenv("SSL_CERT_FILE");
     if(env) {
-      config->cacert = strdup(env);
+      config->cacert = STRDUP(env);
       curl_free(env);
       if(!config->cacert)
         goto fail;
@@ -3018,8 +3017,8 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     char *cacert = NULL;
     FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
     if(cafile) {
-      fclose(cafile);
-      config->cacert = strdup(cacert);
+      FCLOSE(cafile);
+      config->cacert = STRDUP(cacert);
     }
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
   !defined(CURL_DISABLE_CA_SEARCH)
@@ -3031,7 +3030,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 #endif
   return CURLE_OK;
 fail:
-  free(config->capath);
+  FREE(config->capath);
   return result;
 }
 
@@ -3151,7 +3150,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
   CURLcode result = CURLE_OK;
   const char *first_arg;
 #ifdef UNDER_CE
-  first_arg = argc > 1 ? strdup(argv[1]) : NULL;
+  first_arg = argc > 1 ? STRDUP(argv[1]) : NULL;
 #else
   first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
 #endif

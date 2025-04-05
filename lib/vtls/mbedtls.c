@@ -396,7 +396,7 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
   for(i = 0; supported[i] != 0; i++);
   supported_len = i;
 
-  selected = malloc(sizeof(int) * (supported_len + 1));
+  selected = MALLOC(sizeof(int) * (supported_len + 1));
   if(!selected)
     return CURLE_OUT_OF_MEMORY;
 
@@ -474,7 +474,7 @@ add_ciphers:
   selected[count] = 0;
 
   if(count == 0) {
-    free(selected);
+    FREE(selected);
     failf(data, "mbedTLS: no supported cipher in list");
     return CURLE_SSL_CIPHER;
   }
@@ -494,7 +494,7 @@ mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
   (void) data, (void) crt;
 #else
   const size_t bufsize = 16384;
-  char *p, *buffer = malloc(bufsize);
+  char *p, *buffer = MALLOC(bufsize);
 
   if(buffer && mbedtls_x509_crt_info(buffer, bufsize, " ", crt) > 0) {
     infof(data, "Server certificate:");
@@ -507,7 +507,7 @@ mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
   else
     infof(data, "Unable to dump certificate information");
 
-  free(buffer);
+  FREE(buffer);
 #endif
 }
 
@@ -628,7 +628,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
     ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
                                  ca_info_blob->len + 1);
-    free(newblob);
+    FREE(newblob);
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
@@ -701,7 +701,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
     ret = mbedtls_x509_crt_parse(&backend->clicert, newblob,
                                  ssl_cert_blob->len + 1);
-    free(newblob);
+    FREE(newblob);
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -1053,12 +1053,12 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
 
-    p = calloc(1, sizeof(*p));
+    p = CALLOC(1, sizeof(*p));
 
     if(!p)
       return CURLE_OUT_OF_MEMORY;
 
-    pubkey = malloc(PUB_DER_MAX_BYTES);
+    pubkey = MALLOC(PUB_DER_MAX_BYTES);
 
     if(!pubkey) {
       result = CURLE_OUT_OF_MEMORY;
@@ -1101,8 +1101,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                   &pubkey[PUB_DER_MAX_BYTES - size], size);
 pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
-    free(p);
-    free(pubkey);
+    FREE(p);
+    FREE(pubkey);
     if(result) {
       return result;
     }
@@ -1158,7 +1158,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
     goto out;
   }
 
-  sdata = malloc(slen);
+  sdata = MALLOC(slen);
   if(!sdata) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1187,7 +1187,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 out:
   if(msession_alloced)
     mbedtls_ssl_session_free(&session);
-  free(sdata);
+  FREE(sdata);
   return result;
 }
 

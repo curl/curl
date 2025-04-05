@@ -70,7 +70,7 @@ hash_offt_mk_entry(curl_off_t id, void *value)
   struct Curl_hash_offt_entry *e;
 
   /* allocate the struct for the hash entry */
-  e = malloc(sizeof(*e));
+  e = MALLOC(sizeof(*e));
   if(e) {
     e->id = id;
     e->next = NULL;
@@ -95,7 +95,7 @@ static void hash_offt_entry_destroy(struct Curl_hash_offt *h,
                                     struct Curl_hash_offt_entry *e)
 {
   hash_offt_entry_clear(h, e);
-  free(e);
+  FREE(e);
 }
 
 static void hash_offt_entry_unlink(struct Curl_hash_offt *h,
@@ -126,7 +126,7 @@ bool Curl_hash_offt_set(struct Curl_hash_offt *h, curl_off_t id, void *value)
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
   if(!h->table) {
-    h->table = calloc(h->slots, sizeof(*he));
+    h->table = CALLOC(h->slots, sizeof(*he));
     if(!h->table)
       return FALSE; /* OOM */
   }

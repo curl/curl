@@ -42,14 +42,14 @@
 CURLSH *
 curl_share_init(void)
 {
-  struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
+  struct Curl_share *share = CALLOC(1, sizeof(struct Curl_share));
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
     Curl_dnscache_init(&share->dnscache, 23);
     share->admin = curl_easy_init();
     if(!share->admin) {
-      free(share);
+      FREE(share);
       return NULL;
     }
     share->admin->state.internal = TRUE;
@@ -271,7 +271,7 @@ curl_share_cleanup(CURLSH *sh)
   if(share->unlockfunc)
     share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
   share->magic = 0;
-  free(share);
+  FREE(share);
 
   return CURLSHE_OK;
 }

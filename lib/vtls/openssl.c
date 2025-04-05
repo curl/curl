@@ -2961,7 +2961,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       goto out;
     }
 
-    der_session_buf = der_session_ptr = malloc(der_session_size);
+    der_session_buf = der_session_ptr = MALLOC(der_session_size);
     if(!der_session_buf) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;
@@ -2998,7 +2998,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
   }
 
 out:
-  free(der_session_buf);
+  FREE(der_session_buf);
   return result;
 }
 
@@ -3148,7 +3148,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
        */
       if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size)) {
         if(req_size && req_size > enhkey_usage_size) {
-          void *tmp = realloc(enhkey_usage, req_size);
+          void *tmp = REALLOC(enhkey_usage, req_size);
 
           if(!tmp) {
             failf(data, "SSL: Out of memory allocating for OID list");
@@ -3206,7 +3206,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
       X509_free(x509);
     }
 
-    free(enhkey_usage);
+    FREE(enhkey_usage);
     CertFreeCertificateContext(pContext);
     CertCloseStore(hStore, 0);
 
@@ -3402,8 +3402,8 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
   if(share->store) {
     X509_STORE_free(share->store);
   }
-  free(share->CAfile);
-  free(share);
+  FREE(share->CAfile);
+  FREE(share);
 }
 
 static bool
@@ -3469,14 +3469,14 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
                          sizeof(MPROTO_OSSL_X509_KEY)-1);
 
   if(!share) {
-    share = calloc(1, sizeof(*share));
+    share = CALLOC(1, sizeof(*share));
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_OSSL_X509_KEY),
                        sizeof(MPROTO_OSSL_X509_KEY)-1,
                        share, oss_x509_share_free)) {
-      free(share);
+      FREE(share);
       return;
     }
   }
@@ -3485,7 +3485,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     char *CAfile = NULL;
 
     if(conn_config->CAfile) {
-      CAfile = strdup(conn_config->CAfile);
+      CAfile = STRDUP(conn_config->CAfile);
       if(!CAfile) {
         X509_STORE_free(store);
         return;
@@ -3494,7 +3494,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 
     if(share->store) {
       X509_STORE_free(share->store);
-      free(share->CAfile);
+      FREE(share->CAfile);
     }
 
     share->time = Curl_now();
@@ -3947,11 +3947,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                                   ech_config_len) != 1) {
         infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD) {
-          free(ech_config);
+          FREE(ech_config);
           return CURLE_SSL_CONNECT_ERROR;
         }
       }
-      free(ech_config);
+      FREE(ech_config);
       trying_ech_now = 1;
 # else
       ech_config = (unsigned char *) data->set.str[STRING_ECH_CONFIG];
@@ -4228,7 +4228,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
     result = Curl_base64_encode((const char *)rcs, rcl, &b64str, &blen);
     if(!result && b64str) {
       infof(data, "ECH: retry_configs %s", b64str);
-      free(b64str);
+      FREE(b64str);
 #if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
       rv = SSL_ech_get1_status(ssl, &inner, &outer);
       infof(data, "ECH: retry_configs for %s from %s, %d %d",
@@ -4538,7 +4538,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     if(len1 < 1)
       break; /* failed */
 
-    buff1 = temp = malloc(len1);
+    buff1 = temp = MALLOC(len1);
     if(!buff1)
       break; /* failed */
 
@@ -4560,7 +4560,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
   } while(0);
 
   if(buff1)
-    free(buff1);
+    FREE(buff1);
 
   return result;
 }
@@ -5054,7 +5054,7 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
                          size_t len,
                          CURLcode *curlcode)
 {
-  /* SSL_write() is said to return 'int' while write() and send() returns
+  /* SSL_write() is said to return 'int' while write() and SEND() returns
      'size_t' */
   int err;
   char error_buffer[256];

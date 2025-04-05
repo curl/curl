@@ -40,7 +40,7 @@
 
 struct getout *new_getout(struct OperationConfig *config)
 {
-  struct getout *node = calloc(1, sizeof(struct getout));
+  struct getout *node = CALLOC(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
     static int outnum = 0;
@@ -419,7 +419,7 @@ ParameterError proto2num(struct OperationConfig *config,
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  protoset = malloc((proto_count + 1) * sizeof(*protoset));
+  protoset = MALLOC((proto_count + 1) * sizeof(*protoset));
   if(!protoset)
     return PARAM_NO_MEM;
 
@@ -517,9 +517,9 @@ ParameterError proto2num(struct OperationConfig *config,
   result = curlx_dyn_addn(&obuf, "", 0);
   for(proto = 0; protoset[proto] && !result; proto++)
     result = curlx_dyn_addf(&obuf, "%s,", protoset[proto]);
-  free((char *) protoset);
+  FREE((char *) protoset);
   curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
-  free(*ostr);
+  FREE(*ostr);
   *ostr = curlx_dyn_ptr(&obuf);
 
   return *ostr ? PARAM_OK : PARAM_NO_MEM;
@@ -606,7 +606,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       return CURLE_OUT_OF_MEMORY;
 
     /* return the new string */
-    free(*userpwd);
+    FREE(*userpwd);
     *userpwd = curlx_dyn_ptr(&dyn);
   }
 
@@ -672,7 +672,7 @@ long delegation(struct OperationConfig *config, const char *str)
  */
 static char *my_useragent(void)
 {
-  return strdup(CURL_NAME "/" CURL_VERSION);
+  return STRDUP(CURL_NAME "/" CURL_VERSION);
 }
 
 #define isheadersep(x) ((((x)==':') || ((x)==';')))

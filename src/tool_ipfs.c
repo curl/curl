@@ -91,7 +91,7 @@ static char *ipfs_gateway(void)
   if(!gateway_composed_file_path)
     goto fail;
 
-  gateway_file = fopen(gateway_composed_file_path, FOPEN_READTEXT);
+  gateway_file = FOPEN(gateway_composed_file_path, FOPEN_READTEXT);
   curlx_safefree(gateway_composed_file_path);
 
   if(gateway_file) {
@@ -106,7 +106,7 @@ static char *ipfs_gateway(void)
         goto fail;
     }
 
-    fclose(gateway_file);
+    FCLOSE(gateway_file);
     gateway_file = NULL;
 
     if(curlx_dyn_len(&dyn))
@@ -124,7 +124,7 @@ static char *ipfs_gateway(void)
   }
 fail:
   if(gateway_file)
-    fclose(gateway_file);
+    FCLOSE(gateway_file);
   curlx_safefree(gateway);
   curlx_safefree(ipfs_path);
   return NULL;
@@ -172,7 +172,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
 
     if(!curl_url_set(gatewayurl, CURLUPART_URL, config->ipfs_gateway,
                     CURLU_GUESS_SCHEME)) {
-      gateway = strdup(config->ipfs_gateway);
+      gateway = STRDUP(config->ipfs_gateway);
       if(!gateway) {
         result = CURLE_URL_MALFORMAT;
         goto clean;
@@ -252,8 +252,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
     goto clean;
   }
-  /* we need to strdup the URL so that we can call free() on it later */
-  *url = strdup(cloneurl);
+  /* we need to strdup the URL so that we can call FREE() on it later */
+  *url = STRDUP(cloneurl);
   curl_free(cloneurl);
   if(!*url)
     goto clean;
@@ -261,7 +261,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   result = CURLE_OK;
 
 clean:
-  free(gateway);
+  FREE(gateway);
   curl_free(gwhost);
   curl_free(gwpath);
   curl_free(gwquery);

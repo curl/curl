@@ -83,7 +83,7 @@ static void mev_sh_entry_dtor(void *freethis)
   struct mev_sh_entry *entry = (struct mev_sh_entry *)freethis;
   Curl_hash_offt_destroy(&entry->xfers);
   Curl_hash_offt_destroy(&entry->conns);
-  free(entry);
+  FREE(entry);
 }
 
 /* look up a given socket in the socket hash, skip invalid sockets */
@@ -110,7 +110,7 @@ mev_sh_entry_add(struct Curl_hash *sh, curl_socket_t s)
   }
 
   /* not present, add it */
-  check = calloc(1, sizeof(struct mev_sh_entry));
+  check = CALLOC(1, sizeof(struct mev_sh_entry));
   if(!check)
     return NULL; /* major failure */
 
@@ -430,11 +430,11 @@ mev_add_new_pollset(struct Curl_hash_offt *h, curl_off_t id)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = CALLOC(1, sizeof(*ps));
   if(!ps)
     return NULL;
   if(!Curl_hash_offt_set(h, id, ps)) {
-    free(ps);
+    FREE(ps);
     return NULL;
   }
   return ps;
@@ -600,7 +600,7 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
 static void mev_hash_pollset_free(curl_off_t id, void *entry)
 {
   (void)id;
-  free(entry);
+  FREE(entry);
 }
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)

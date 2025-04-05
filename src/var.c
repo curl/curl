@@ -44,7 +44,7 @@
 
 static char *Memdup(const char *data, size_t len)
 {
-  char *p = malloc(len + 1);
+  char *p = MALLOC(len + 1);
   if(!p)
     return NULL;
   if(len)
@@ -60,8 +60,8 @@ void varcleanup(struct GlobalConfig *global)
   while(list) {
     struct tool_var *t = list;
     list = list->next;
-    free(CURL_UNCONST(t->content));
-    free(t);
+    FREE(CURL_UNCONST(t->content));
+    FREE(t);
   }
 }
 
@@ -210,7 +210,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
       break;
     }
     if(alloc)
-      free(c);
+      FREE(c);
 
     clen = curlx_dyn_len(out);
     c = Memdup(curlx_dyn_ptr(out), clen);
@@ -221,7 +221,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
     alloc = TRUE;
   }
   if(alloc)
-    free(c);
+    FREE(c);
   if(err)
     curlx_dyn_free(out);
   return err;
@@ -380,7 +380,7 @@ static ParameterError addvariable(struct GlobalConfig *global,
   if(check)
     notef(global, "Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct tool_var) + nlen);
+  p = CALLOC(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
 
@@ -392,7 +392,7 @@ static ParameterError addvariable(struct GlobalConfig *global,
       global->variables = p;
       return PARAM_OK;
     }
-    free(p);
+    FREE(p);
   }
   return PARAM_NO_MEM;
 }
@@ -477,7 +477,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     if(use_stdin)
       file = stdin;
     else {
-      file = fopen(line, "rb");
+      file = FOPEN(line, "rb");
       if(!file) {
         errorf(global, "Failed to open %s: %s", line,
                strerror(errno));
@@ -492,7 +492,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     }
     curlx_dyn_free(&fname);
     if(!use_stdin && file)
-      fclose(file);
+      FCLOSE(file);
     if(err)
       return err;
   }
@@ -520,7 +520,7 @@ ParameterError setvariable(struct GlobalConfig *global,
   err = addvariable(global, name, nlen, content, clen, contalloc);
   if(err) {
     if(contalloc)
-      free(content);
+      FREE(content);
   }
   return err;
 }

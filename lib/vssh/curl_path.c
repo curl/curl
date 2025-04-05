@@ -57,7 +57,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
     if(Curl_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
-      free(working_path);
+      FREE(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -65,7 +65,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
     if(Curl_dyn_add(&npath, homedir)) {
-      free(working_path);
+      FREE(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
     if(working_path_len > 2) {
@@ -80,14 +80,14 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
 
       if(Curl_dyn_addn(&npath,
                        &working_path[copyfrom], working_path_len - copyfrom)) {
-        free(working_path);
+        FREE(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
   }
 
   if(Curl_dyn_len(&npath)) {
-    free(working_path);
+    FREE(working_path);
 
     /* store the pointer for the caller to receive */
     *path = Curl_dyn_ptr(&npath);

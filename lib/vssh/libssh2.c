@@ -192,7 +192,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
 #endif  /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
-    responses[0].text = strdup(conn->passwd);
+    responses[0].text = STRDUP(conn->passwd);
     responses[0].length =
       responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
@@ -610,7 +610,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
     size_t b64_pos = 0;
 
 #ifdef LIBSSH2_HOSTKEY_HASH_SHA256
-    /* The fingerprint points to static storage (!), do not free() it. */
+    /* The fingerprint points to static storage (!), do not FREE() it. */
     fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
                                        LIBSSH2_HOSTKEY_HASH_SHA256);
 #else
@@ -671,13 +671,13 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
       failf(data,
             "Denied establishing ssh session: mismatch sha256 fingerprint. "
             "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
-      free(fingerprint_b64);
+      FREE(fingerprint_b64);
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
     }
 
-    free(fingerprint_b64);
+    FREE(fingerprint_b64);
 
     infof(data, "SHA256 checksum match");
   }
@@ -690,7 +690,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
                                        LIBSSH2_HOSTKEY_HASH_MD5);
 
     if(fingerprint) {
-      /* The fingerprint points to static storage (!), do not free() it. */
+      /* The fingerprint points to static storage (!), do not FREE() it. */
       int i;
       for(i = 0; i < 16; i++) {
         msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
@@ -940,7 +940,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
        current directory can be read very similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    FREE(tmp);
     if(!result)
       state(data, SSH_SFTP_NEXT_QUOTE);
     return result;
@@ -1251,7 +1251,7 @@ sftp_pkey_init(struct Curl_easy *data,
     sshc->rsa_pub = sshc->rsa = NULL;
 
     if(data->set.str[STRING_SSH_PRIVATE_KEY])
-      sshc->rsa = strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+      sshc->rsa = STRDUP(data->set.str[STRING_SSH_PRIVATE_KEY]);
     else {
       /* To ponder about: should really the lib be messing about with the
          HOME environment variable etc? */
@@ -1265,7 +1265,7 @@ sftp_pkey_init(struct Curl_easy *data,
         if(!sshc->rsa)
           out_of_memory = TRUE;
         else if(stat(sshc->rsa, &sbuf)) {
-          free(sshc->rsa);
+          FREE(sshc->rsa);
           sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
           if(!sshc->rsa)
             out_of_memory = TRUE;
@@ -1273,19 +1273,19 @@ sftp_pkey_init(struct Curl_easy *data,
             Curl_safefree(sshc->rsa);
           }
         }
-        free(home);
+        FREE(home);
       }
       if(!out_of_memory && !sshc->rsa) {
         /* Nothing found; try the current dir. */
-        sshc->rsa = strdup("id_rsa");
+        sshc->rsa = STRDUP("id_rsa");
         if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
-          free(sshc->rsa);
-          sshc->rsa = strdup("id_dsa");
+          FREE(sshc->rsa);
+          sshc->rsa = STRDUP("id_dsa");
           if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
-            free(sshc->rsa);
+            FREE(sshc->rsa);
             /* Out of guesses. Set to the empty string to avoid
              * surprising info messages. */
-            sshc->rsa = strdup("");
+            sshc->rsa = STRDUP("");
           }
         }
       }
@@ -1299,7 +1299,7 @@ sftp_pkey_init(struct Curl_easy *data,
     if(data->set.str[STRING_SSH_PUBLIC_KEY]
        /* treat empty string the same way as NULL */
        && data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
-      sshc->rsa_pub = strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
+      sshc->rsa_pub = STRDUP(data->set.str[STRING_SSH_PUBLIC_KEY]);
       if(!sshc->rsa_pub)
         out_of_memory = TRUE;
     }
@@ -2002,15 +2002,15 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
       if(rc > 0) {
         /* It seems that this string is not always NULL terminated */
         sshp->readdir_filename[rc] = '\0';
-        free(sshc->homedir);
-        sshc->homedir = strdup(sshp->readdir_filename);
+        FREE(sshc->homedir);
+        sshc->homedir = STRDUP(sshp->readdir_filename);
         if(!sshc->homedir) {
           state(data, SSH_SFTP_CLOSE);
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
           break;
         }
-        free(data->state.most_recent_ftp_entrypath);
-        data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+        FREE(data->state.most_recent_ftp_entrypath);
+        data->state.most_recent_ftp_entrypath = STRDUP(sshc->homedir);
         if(!data->state.most_recent_ftp_entrypath)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -2287,7 +2287,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         }
 
         result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-        free(tmp);
+        FREE(tmp);
         if(result) {
           state(data, SSH_SFTP_CLOSE);
           sshc->nextstate = SSH_NO_STATE;
@@ -2893,7 +2893,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
   return result;
 }
 
-/* called by the multi interface to figure out what socket(s) to wait for and
+/* called by the multi interface to figure out what SOCKET(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
 static int ssh_getsock(struct Curl_easy *data,
                        struct connectdata *conn,
@@ -3030,7 +3030,7 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
     sshc->initialised = TRUE;
   }
 
-  data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
+  data->req.p.ssh = ssh = CALLOC(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
