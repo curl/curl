@@ -74,6 +74,7 @@ endif()
 
 if(_ngtcp2_FOUND)
   set(NGTCP2_FOUND TRUE)
+  set(NGTCP2_VERSION ${_ngtcp2_VERSION})
   string(REPLACE ";" " " _ngtcp2_CFLAGS "${_ngtcp2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${_ngtcp2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
