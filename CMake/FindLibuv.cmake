@@ -40,13 +40,13 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND
    NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBUV ${_libuv_pc_requires})
+  pkg_check_modules(_libuv ${_libuv_pc_requires})
 endif()
 
-if(LIBUV_FOUND)
+if(_libuv_FOUND)
   set(Libuv_FOUND TRUE)
-  string(REPLACE ";" " " LIBUV_CFLAGS "${LIBUV_CFLAGS}")
-  message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
+  string(REPLACE ";" " " _libuv_CFLAGS "${_libuv_CFLAGS}")
+  message(STATUS "Found Libuv (via pkg-config): ${_libuv_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")
@@ -81,8 +81,8 @@ else()
   )
 
   if(LIBUV_FOUND)
-    set(LIBUV_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR})
-    set(LIBUV_LIBRARIES    ${LIBUV_LIBRARY})
+    set(_libuv_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR})
+    set(_libuv_LIBRARIES    ${LIBUV_LIBRARY})
   endif()
 
   mark_as_advanced(LIBUV_INCLUDE_DIR LIBUV_LIBRARY)
