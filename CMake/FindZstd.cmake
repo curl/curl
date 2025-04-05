@@ -54,6 +54,7 @@ endif()
 
 if(_zstd_FOUND)
   set(Zstd_FOUND TRUE)
+  set(ZSTD_FOUND TRUE)
   string(REPLACE ";" " " _zstd_CFLAGS "${_zstd_CFLAGS}")
   message(STATUS "Found Zstd (via pkg-config): ${_zstd_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
 else()
