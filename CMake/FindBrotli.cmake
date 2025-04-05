@@ -35,14 +35,14 @@
 # - `BROTLI_VERSION`:        Version of brotli.
 # - `CURL::brotli`:          brotli library target.
 
-set(BROTLI_PC_REQUIRES "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
+set(_brotli_pc_requires "libbrotlidec" "libbrotlicommon")  # order is significant: brotlidec then brotlicommon
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLI_INCLUDE_DIR AND
    NOT DEFINED BROTLICOMMON_LIBRARY AND
    NOT DEFINED BROTLIDEC_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(BROTLI ${BROTLI_PC_REQUIRES})
+  pkg_check_modules(BROTLI ${_brotli_pc_requires})
 endif()
 
 if(BROTLI_FOUND)
