@@ -114,7 +114,6 @@ if(MBEDTLS_FOUND)
   if(NOT TARGET CURL::mbedtls)
     add_library(CURL::mbedtls INTERFACE IMPORTED)
     set_target_properties(CURL::mbedtls PROPERTIES
-      VERSION "${MBEDTLS_VERSION}"
       CURL_PC_MODULES "${_mbedtls_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_mbedtls_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_mbedtls_INCLUDE_DIRS}"
