@@ -88,7 +88,6 @@ if(LIBSSH2_FOUND)
   if(NOT TARGET CURL::libssh2)
     add_library(CURL::libssh2 INTERFACE IMPORTED)
     set_target_properties(CURL::libssh2 PROPERTIES
-      VERSION "${LIBSSH2_VERSION}"
       CURL_PC_MODULES "${_libssh2_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_libssh2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libssh2_INCLUDE_DIRS}"
