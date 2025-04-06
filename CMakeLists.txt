@@ -2119,10 +2119,12 @@ if(NOT CURL_DISABLE_INSTALL)
         # Assume the user will not need this information in the .pc file.
         continue()
       endif()
-      if(CMAKE_VERSION VERSION_LESS 3.8)
-        set(_libname "")  # FIXME
+      if(_lib MATCHES "CURL::")
+        # This is empty for 'CURL::*' targets and safe to ignore.
+        # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
+        set(_libname "")
       else()
-        get_target_property(_libname "${_lib}" IMPORTED_LOCATION)
+        get_target_property(_libname "${_lib}" LOCATION)
       endif()
       if(_libname)
         list(APPEND _explicit_libs "${_libname}")
