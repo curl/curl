@@ -76,7 +76,6 @@ if(QUICHE_FOUND)
   if(NOT TARGET CURL::quiche)
     add_library(CURL::quiche INTERFACE IMPORTED)
     set_target_properties(CURL::quiche PROPERTIES
-      VERSION "${QUICHE_VERSION}"
       CURL_PC_MODULES "${_quiche_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_quiche_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_quiche_INCLUDE_DIRS}"
