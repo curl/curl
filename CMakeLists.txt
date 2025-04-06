@@ -2202,9 +2202,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
 
   foreach(_lib IN LISTS _implicit_libs _custom_libs _explicit_libs)
-    if(_lib MATCHES "^-")  # '-framework <name>'
-      list(APPEND _ldflags "${_lib}")
-    elseif(_lib MATCHES "/")
+    if(_lib MATCHES "/")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
       get_filename_component(_libdir ${_lib} DIRECTORY)
