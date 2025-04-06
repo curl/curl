@@ -257,16 +257,12 @@ mark_as_advanced(
   _gss_version
 )
 
-message(STATUS "GSS_TRACE1|${GSS_FOUND}|")
-
 if(GSS_FOUND)
-  message(STATUS "GSS_TRACE2|${GSS_FOUND}|")
   if(CMAKE_VERSION VERSION_LESS 3.13)
     link_directories(${_gss_LIBRARY_DIRS})
   endif()
 
   if(NOT TARGET CURL::gss)
-    message(STATUS "GSS_TRACE3|${GSS_FOUND}|")
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
       INTERFACE_CURL_GSS_FLAVOUR "${_gss_flavour}"
@@ -275,8 +271,5 @@ if(GSS_FOUND)
       INTERFACE_INCLUDE_DIRECTORIES "${_gss_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_gss_LIBRARY_DIRS}"
       INTERFACE_LINK_LIBRARIES "${_gss_LIBRARIES}")
-    message(STATUS "GSS_TRACE4|${_gss_INCLUDE_DIRS}|_gss_INCLUDE_DIRS")
-    message(STATUS "GSS_TRACE5|${_gss_LIBRARY_DIRS}|_gss_LIBRARY_DIRS")
-    message(STATUS "GSS_TRACE6|${_gss_LIBRARIES}|_gss_LIBRARIES")
   endif()
 endif()
