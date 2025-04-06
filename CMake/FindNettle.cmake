@@ -93,7 +93,6 @@ if(NETTLE_FOUND)
   if(NOT TARGET CURL::nettle)
     add_library(CURL::nettle INTERFACE IMPORTED)
     set_target_properties(CURL::nettle PROPERTIES
-      VERSION "${NETTLE_VERSION}"
       CURL_PC_MODULES "${_nettle_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_nettle_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nettle_INCLUDE_DIRS}"

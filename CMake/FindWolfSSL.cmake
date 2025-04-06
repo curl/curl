@@ -119,7 +119,6 @@ if(WOLFSSL_FOUND)
   if(NOT TARGET CURL::wolfssl)
     add_library(CURL::wolfssl INTERFACE IMPORTED)
     set_target_properties(CURL::wolfssl PROPERTIES
-      VERSION "${WOLFSSL_VERSION}"
       CURL_PC_MODULES "${_wolfssl_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_wolfssl_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_wolfssl_INCLUDE_DIRS}"

@@ -145,7 +145,6 @@ if(NGTCP2_FOUND)
   if(NOT TARGET CURL::ngtcp2)
     add_library(CURL::ngtcp2 INTERFACE IMPORTED)
     set_target_properties(CURL::ngtcp2 PROPERTIES
-      VERSION "${NGTCP2_VERSION}"
       CURL_PC_MODULES "${_ngtcp2_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_ngtcp2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_ngtcp2_INCLUDE_DIRS}"
