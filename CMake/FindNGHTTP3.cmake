@@ -87,7 +87,6 @@ if(NGHTTP3_FOUND)
   if(NOT TARGET CURL::nghttp3)
     add_library(CURL::nghttp3 INTERFACE IMPORTED)
     set_target_properties(CURL::nghttp3 PROPERTIES
-      VERSION "${NGHTTP3_VERSION}"
       CURL_PC_MODULES "${_nghttp3_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_nghttp3_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nghttp3_INCLUDE_DIRS}"

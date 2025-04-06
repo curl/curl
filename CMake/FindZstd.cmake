@@ -107,7 +107,6 @@ if(ZSTD_FOUND)
   if(NOT TARGET CURL::zstd)
     add_library(CURL::zstd INTERFACE IMPORTED)
     set_target_properties(CURL::zstd PROPERTIES
-      VERSION "${ZSTD_VERSION}"
       CURL_PC_MODULES "${_zstd_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_zstd_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_zstd_INCLUDE_DIRS}"

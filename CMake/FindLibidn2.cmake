@@ -88,7 +88,6 @@ if(LIBIDN2_FOUND)
   if(NOT TARGET CURL::libidn2)
     add_library(CURL::libidn2 INTERFACE IMPORTED)
     set_target_properties(CURL::libidn2 PROPERTIES
-      VERSION "${LIBIDN2_VERSION}"
       CURL_PC_MODULES "${_libidn2_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_libidn2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libidn2_INCLUDE_DIRS}"
