@@ -358,7 +358,6 @@ if(GSS_FOUND)
 
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
-      VERSION "${GSS_VERSION}"
       CURL_PC_MODULES "${_gss_pc_requires}"
       CURL_GSS_FLAVOUR "${_gss_flavour}"
       INTERFACE_COMPILE_OPTIONS "${_GSS_CFLAGS}"
