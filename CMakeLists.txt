@@ -1313,21 +1313,18 @@ mark_as_advanced(CURL_USE_GSSAPI)
 
 if(CURL_USE_GSSAPI)
   find_package(GSS)
-  message(STATUS "GSS_FOUND1|${GSS_FOUND}|")
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
-    message(STATUS "GSS_FOUND2|${GSS_FOUND}|")
     list(APPEND CURL_LIBS CURL::gss)
 
     get_target_property(_gss_flavour CURL::gss INTERFACE_CURL_GSS_FLAVOUR)
-    message(STATUS "GSS_FLAVOUR|${_gss_flavour}|")
 
     if(_gss_flavour STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     else()
       cmake_push_check_state()
-      list(APPEND CMAKE_REQUIRED_INCLUDES "${GSS_INCLUDE_DIRS}")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gss)
 
       set(_include_list "")
       check_include_file("gssapi/gssapi.h" HAVE_GSSAPI_GSSAPI_H)
@@ -1346,9 +1343,6 @@ if(CURL_USE_GSSAPI)
         endif()
 
         if(NOT DEFINED HAVE_GSS_C_NT_HOSTBASED_SERVICE)
-          string(APPEND CMAKE_REQUIRED_FLAGS " ${GSS_CFLAGS}")
-          list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gss)
-          curl_required_libpaths("${GSS_LIBRARY_DIRS}")
           check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" "${_include_list}" HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         endif()
         if(NOT HAVE_GSS_C_NT_HOSTBASED_SERVICE)
