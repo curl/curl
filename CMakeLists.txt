@@ -1177,9 +1177,6 @@ if(NOT CURL_DISABLE_LDAP)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
       set(CURL_LIBS CURL::ldap ${CURL_LIBS})
-      if(LDAP_PC_REQUIRES)
-        set(LIBCURL_PC_REQUIRES_PRIVATE ${LDAP_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
-      endif()
 
       # LDAP feature checks
 
