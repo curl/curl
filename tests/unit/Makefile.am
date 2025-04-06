@@ -58,12 +58,14 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
+BUNDLE=units
+
 if BUILD_UNITTESTS
 if USE_TEST_BUNDLES
 unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
 
-noinst_PROGRAMS = units
+noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = unit_bundle.c
 CLEANFILES = unit_bundle.c
 else
@@ -85,3 +87,6 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	  -W$(srcdir)/unit_bundle.c \
 	  $(srcdir)/*.[ch])
+
+clean-local:
+	rm -f $(BUNDLE)

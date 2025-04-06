@@ -96,11 +96,13 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
+BUNDLE=libtests
+
 if USE_TEST_BUNDLES
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 
-noinst_PROGRAMS = libtests
+noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c
 libtests_SOURCES = $(TESTUTIL) $(TSTTRACE)
 libtests_LDADD = $(TESTUTIL_LIBS)
@@ -133,3 +135,6 @@ if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
 all-local: checksrc
 endif
+
+clean-local:
+	rm -f $(BUNDLE)
