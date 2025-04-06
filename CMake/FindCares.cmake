@@ -102,7 +102,7 @@ if(CARES_FOUND)
   if(NOT TARGET CURL::cares)
     add_library(CURL::cares INTERFACE IMPORTED)
     set_target_properties(CURL::cares PROPERTIES
-      CURL_PC_MODULES "${_cares_pc_requires}"
+      INTERFACE_CURL_PC_MODULES "${_cares_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_cares_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_cares_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_cares_LIBRARY_DIRS}"
