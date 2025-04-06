@@ -965,7 +965,6 @@ macro(curl_openssl_check_exists)
   endif()
   if(USE_WOLFSSL)
     list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::wolfssl)
-    curl_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()
