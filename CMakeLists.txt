@@ -1182,7 +1182,6 @@ if(NOT CURL_DISABLE_LDAP)
 
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
       list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::ldap)
-      curl_required_libpaths("${LDAP_LIBRARY_DIRS}")
 
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)
       check_function_exists("ldap_init_fd" HAVE_LDAP_INIT_FD)
