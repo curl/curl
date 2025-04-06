@@ -281,7 +281,7 @@ endif()
 
 include(PickyWarnings)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CYGWIN OR MSYS OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
   string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg() and accept4()
 endif()
 
