@@ -47,7 +47,6 @@ if(_rustls_FOUND)
   set(Rustls_FOUND TRUE)
   set(RUSTLS_FOUND TRUE)
   set(RUSTLS_VERSION ${_rustls_VERSION})
-  string(REPLACE ";" " " _rustls_CFLAGS "${_rustls_CFLAGS}")
   message(STATUS "Found Rustls (via pkg-config): ${_rustls_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
   set(_rustls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
