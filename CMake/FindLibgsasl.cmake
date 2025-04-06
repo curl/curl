@@ -87,7 +87,7 @@ if(LIBGSASL_FOUND)
   if(NOT TARGET CURL::libgsasl)
     add_library(CURL::libgsasl INTERFACE IMPORTED)
     set_target_properties(CURL::libgsasl PROPERTIES
-      CURL_PC_MODULES "${_libgsasl_pc_requires}"
+      INTERFACE_CURL_PC_MODULES "${_libgsasl_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_libgsasl_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libgsasl_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_libgsasl_LIBRARY_DIRS}"
