@@ -577,7 +577,7 @@ AM_CONDITIONAL(BUILD_UNITTESTS, test x$supports_unittests = xyes)
 # In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
 # jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
 case $host_os in
-  linux*)
+  linux*|cygwin*|msys*)
     CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
     ;;
 esac
@@ -4124,6 +4124,7 @@ AC_CHECK_FUNCS([\
   gettimeofday \
   mach_absolute_time \
   pipe \
+  pipe2 \
   poll \
   sendmmsg \
   sendmsg \
