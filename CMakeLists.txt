@@ -834,23 +834,17 @@ endif()
 
 if(CURL_USE_GNUTLS)
   find_package(GnuTLS REQUIRED)
-  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${GNUTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GNUTLS_PC_REQUIRES})
-  include_directories(SYSTEM ${GNUTLS_INCLUDE_DIRS})
-  link_directories(${GNUTLS_LIBRARY_DIRS})
-  if(GNUTLS_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${GNUTLS_CFLAGS}")
-  endif()
-
+  add_library(CURL::gnutls INTERFACE IMPORTED)
+  set_target_properties(CURL::gnutls PROPERTIES
+    INTERFACE_CURL_PC_MODULES "gnutls"
+    INTERFACE_COMPILE_OPTIONS "${GNUTLS_CFLAGS}"
+    INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIRS}"
+    INTERFACE_LINK_DIRECTORIES "${GNUTLS_LIBRARY_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${GNUTLS_LIBRARIES}")
   find_package(Nettle REQUIRED)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
-  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${GNUTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls")
-  include_directories(SYSTEM ${GNUTLS_INCLUDE_DIRS})
-  list(APPEND CURL_LIBS CURL::nettle)
+  list(APPEND CURL_LIBS CURL::gnutls CURL::nettle)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
@@ -859,9 +853,7 @@ if(CURL_USE_GNUTLS)
 
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${GNUTLS_INCLUDE_DIRS}")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${GNUTLS_LIBRARIES}")
-    curl_required_libpaths("${GNUTLS_LIBRARY_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gnutls)
     # In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
     # Detecting actual TLS-SRP support needs poking the API at runtime.
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
