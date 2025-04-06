@@ -378,6 +378,24 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   return sockfd;
 }
 
+#ifdef HAVE_ACCEPT4
+curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr, void *saddrlen,
+                               int flags,
+                               int line, const char *source)
+{
+  struct sockaddr *addr = (struct sockaddr *)saddr;
+  curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
+
+  curl_socket_t sockfd = accept4(s, addr, addrlen, flags);
+
+  if(source && (sockfd != CURL_SOCKET_BAD))
+    curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
+                 source, line, sockfd);
+
+  return sockfd;
+}
+#endif
+
 /* separate function to allow libcurl to mark a "faked" close */
 void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
