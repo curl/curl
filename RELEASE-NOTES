@@ -4,7 +4,7 @@ curl and libcurl 8.13.1
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3381
+ Contributors:                 3384
 
 This release includes the following changes:
 
@@ -12,28 +12,52 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o async-threaded resolver: use ref counter [10]
+ o cmake/FindNGTCP2: simplify multi-pkg-config detection [27]
+ o cmake: use absolute paths for completion targets [40]
  o configure: fix --disable-rt [20]
  o configure: restore link checks [25]
  o conncache: make Curl_cpool_init return void [15]
+ o content_encoding: Transfer-Encoding parser improvements [31]
  o contrithanks.sh: drop set -e [6]
  o curl_krb5: only use functions if FTP is still enabled [21]
  o eventfd: fix feature guards [24]
  o genserv.pl: fail with a message if `openssl` is missing or failing [14]
  o hostip: fix build without threaded-resolver and without DoH [17]
+ o hostip: show the correct name on proxy resolve error [37]
+ o http2: fix stream window size after unpausing [34]
  o http: fix a build error when all auths are disabled [16]
+ o http_aws_sigv4: add additional verbose log statements [39]
  o http_negotiate: fix non-SSL build with GSSAPI [23]
+ o https-connect: fix httpsrr target check [36]
  o if2ip: build the function also if FTP is present [19]
  o INSTALL-CMAKE.md: fix typo
+ o INSTALL.md: update the minimal libcurl size example
+ o lib: add const to clientwriter tables
+ o lib: make Curl_easyopts const [44]
  o lib: unify conversions to/from hex [3]
+ o libtest/first: stop defining MEMDEBUG_NODEFINES [32]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
+ o rand: update comment on Curl_rand_bytes weak random [35]
+ o rustls: make max size of cert and key reasonable [41]
+ o scripts: completion.pl: sort the completion file for all shells [9]
+ o scripts: fix --opts-dir help in completion.pl
+ o socket: use accept4 when available [7]
+ o test1658: add unit test for the HTTPS RR decoder [28]
  o test: make unittest 1308 into a libtest [4]
  o tests/README.md: document --test-duphandle [8]
  o tests/README.md: list the openssl tool among the prerequisites [12]
  o tests/serverhelp: remove last remnants of http-pipe server [1]
+ o tests: fix some test tag mismatches
  o tests: mark ipfs tests to require ipfs [2]
+ o tests: move a boolean variable out of the path section
+ o tests: prefer `--insecure` over `-k` [43]
+ o tests: remove some unused test case sections
+ o tests: unify test case keywords
+ o tests: use a more portable null device path [38]
  o VERSIONS: list all past releases [22]
  o vtls: fix build with ssl but without http [18]
+ o winbuild: add the deprecation warning to the README [29]
 
 This release includes the following known bugs:
 
@@ -54,10 +78,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andrew Kirillov, Dagobert Michelsen, Daniel Engberg,
-  Daniel Stenberg, Ray Satiro, renovate[bot], Stefan Eissing, Tomas Volf,
-  Viktor Szakats, x1sc0 on github, Yedaya Katsman
-  (12 contributors)
+  Abhinav Singhal, Andrew Kirillov, Andy Pan, Carlos Henrique Lima Melara,
+  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel Stenberg,
+  Jean-Christophe Amiel, Jonathan Rosa, Nigel Brittain, Pavel Kropachev,
+  Ray Satiro, renovate[bot], Stefan Eissing, Tomas Volf, Viktor Szakats,
+  x1sc0 on github, Yedaya Katsman
+  (19 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -67,7 +93,9 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=16891
  [5] = https://curl.se/bug/?i=16908
  [6] = https://curl.se/bug/?i=16914
+ [7] = https://curl.se/bug/?i=16979
  [8] = https://curl.se/bug/?i=16944
+ [9] = https://curl.se/bug/?i=16985
  [10] = https://curl.se/bug/?i=16916
  [12] = https://curl.se/bug/?i=16942
  [13] = https://curl.se/bug/?i=16943
@@ -83,3 +111,18 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=16919
  [24] = https://curl.se/mail/lib-2025-04/0000.html
  [25] = https://curl.se/mail/lib-2025-04/0004.html
+ [27] = https://curl.se/bug/?i=16980
+ [28] = https://curl.se/bug/?i=16972
+ [29] = https://curl.se/bug/?i=16957
+ [31] = https://curl.se/bug/?i=16956
+ [32] = https://curl.se/bug/?i=16978
+ [34] = https://curl.se/bug/?i=16955
+ [35] = https://curl.se/bug/?i=16965
+ [36] = https://curl.se/bug/?i=16966
+ [37] = https://curl.se/bug/?i=16958
+ [38] = https://curl.se/bug/?i=16929
+ [39] = https://curl.se/bug/?i=16952
+ [40] = https://curl.se/bug/?i=16946
+ [41] = https://curl.se/bug/?i=16951
+ [43] = https://curl.se/bug/?i=16878
+ [44] = https://curl.se/bug/?i=16950
