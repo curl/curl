@@ -754,6 +754,7 @@ if(CURL_USE_OPENSSL)
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
   set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_CURL_PC_MODULES "openssl")
+  #curl_dumptargetprops(OpenSSL::SSL)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -2118,7 +2119,11 @@ if(NOT CURL_DISABLE_INSTALL)
         # Assume the user will not need this information in the .pc file.
         continue()
       endif()
-      get_target_property(_libname "${_lib}" LOCATION)
+      if(CMAKE_VERSION VERSION_LESS 3.8)
+        set(_libname "")  # FIXME
+      else()
+        get_target_property(_libname "${_lib}" IMPORTED_LOCATION)
+      endif()
       if(_libname)
         list(APPEND _explicit_libs "${_libname}")
       else()
