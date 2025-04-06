@@ -71,7 +71,7 @@ if(WOLFSSH_FOUND)
   if(NOT TARGET CURL::wolfssh)
     add_library(CURL::wolfssh INTERFACE IMPORTED)
     set_target_properties(CURL::wolfssh PROPERTIES
-      CURL_PC_MODULES "${_wolfssh_pc_requires}"
+      INTERFACE_CURL_PC_MODULES "${_wolfssh_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_wolfssh_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_wolfssh_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_wolfssh_LIBRARY_DIRS}"
