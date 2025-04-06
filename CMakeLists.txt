@@ -772,7 +772,6 @@ if(CURL_USE_OPENSSL)
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
   set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_CURL_PC_MODULES "openssl")
-  #curl_dumptargetprops(OpenSSL::SSL)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
