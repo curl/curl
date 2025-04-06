@@ -285,8 +285,6 @@ else()
   message(STATUS "Found GSS/${_gss_flavour} (via pkg-config): ${_GSS_INCLUDE_DIRS} (found version \"${_gss_version}\")")
 endif()
 
-string(REPLACE ";" " " _GSS_CFLAGS "${_GSS_CFLAGS}")
-
 set(GSS_VERSION ${_gss_version})
 
 if(_gss_flavour)
