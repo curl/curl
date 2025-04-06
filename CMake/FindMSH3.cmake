@@ -46,7 +46,6 @@ endif()
 if(_msh3_FOUND)
   set(MSH3_FOUND TRUE)
   set(MSH3_VERSION ${_msh3_VERSION})
-  string(REPLACE ";" " " _msh3_CFLAGS "${_msh3_CFLAGS}")
   message(STATUS "Found MSH3 (via pkg-config): ${_msh3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
 else()
   set(_msh3_pc_requires "")  # Depend on pkg-config only when found via pkg-config
