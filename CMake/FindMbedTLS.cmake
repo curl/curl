@@ -57,7 +57,6 @@ if(_mbedtls_FOUND)
   set(MbedTLS_FOUND TRUE)
   set(MBEDTLS_FOUND TRUE)
   set(MBEDTLS_VERSION "${_mbedtls_mbedtls_VERSION}")
-  string(REPLACE ";" " " _mbedtls_CFLAGS "${_mbedtls_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${_mbedtls_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
