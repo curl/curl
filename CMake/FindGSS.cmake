@@ -356,8 +356,8 @@ if(GSS_FOUND)
   if(NOT TARGET CURL::gss)
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
-      INTERFACE_CURL_PC_MODULES "${_gss_pc_requires}"
       INTERFACE_CURL_GSS_FLAVOUR "${_gss_flavour}"
+      INTERFACE_CURL_PC_MODULES "${_gss_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_GSS_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_GSS_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_GSS_LIBRARY_DIRS}"
