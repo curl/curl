@@ -77,7 +77,6 @@ if(MSH3_FOUND)
   if(NOT TARGET CURL::msh3)
     add_library(CURL::msh3 INTERFACE IMPORTED)
     set_target_properties(CURL::msh3 PROPERTIES
-      VERSION "${MSH3_VERSION}"
       CURL_PC_MODULES "${_msh3_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_msh3_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_msh3_INCLUDE_DIRS}"
