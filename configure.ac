@@ -4124,6 +4124,7 @@ AC_CHECK_FUNCS([\
   gettimeofday \
   mach_absolute_time \
   pipe \
+  pipe2 \
   poll \
   sendmmsg \
   sendmsg \

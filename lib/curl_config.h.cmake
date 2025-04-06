@@ -430,6 +430,9 @@
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
 
+/* Define to 1 if you have the `pipe2' function. */
+#cmakedefine HAVE_PIPE2 1
+
 /* Define to 1 if you have the `eventfd' function. */
 #cmakedefine HAVE_EVENTFD 1
 
