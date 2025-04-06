@@ -87,10 +87,11 @@ if(LIBPSL_FOUND)
 
   if(NOT TARGET CURL::libpsl)
     add_library(CURL::libpsl INTERFACE IMPORTED)
-    set_target_properties(CURL::libpsl PROPERTIES INTERFACE_CURL_PC_MODULES ${_libpsl_pc_requires})
-    set_target_properties(CURL::libpsl PROPERTIES INTERFACE_COMPILE_OPTIONS ${_libpsl_CFLAGS})
-    set_target_properties(CURL::libpsl PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${_libpsl_INCLUDE_DIRS})
-    set_target_properties(CURL::libpsl PROPERTIES INTERFACE_LINK_DIRECTORIES ${_libpsl_LIBRARY_DIRS})
-    set_target_properties(CURL::libpsl PROPERTIES INTERFACE_LINK_LIBRARIES ${_libpsl_LIBRARIES})
+    set_target_properties(CURL::libpsl PROPERTIES
+      INTERFACE_CURL_PC_MODULES "${_libpsl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libpsl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libpsl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libpsl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libpsl_LIBRARIES}")
   endif()
 endif()
