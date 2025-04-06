@@ -2112,9 +2112,7 @@ if(NOT CURL_DISABLE_INSTALL)
   set(_explicit_libdirs "")
   set(LIBCURL_PC_REQUIRES_PRIVATE "")
   foreach(_lib IN LISTS CURL_LIBS)
-    if(_lib MATCHES "^-")  # '-framework <name>'
-      list(APPEND _ldflags "${_lib}")
-    elseif(TARGET "${_lib}")
+    if(TARGET "${_lib}")
       get_target_property(_imported "${_lib}" IMPORTED)
       if(NOT _imported)
         # Reading the LOCATION property on non-imported target will error out.
@@ -2147,6 +2145,10 @@ if(NOT CURL_DISABLE_INSTALL)
       if(_modules)
         list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "${_modules}")
       endif()
+    elseif(_lib MATCHES "^-")  # '-framework <name>'
+      list(APPEND _ldflags "${_lib}")
+    else()
+      list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_lib}")
     endif()
   endforeach()
 
