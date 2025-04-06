@@ -36,7 +36,7 @@ endfunction()
 
 # Dump all target properties
 function(curl_dumptargetprops _target)
-  if(TARGET "${_target}")
+  if(NOT CMAKE_VERSION VERSION_LESS 3.19 AND TARGET "${_target}")
     execute_process(COMMAND "${CMAKE_COMMAND}" "--help-property-list" OUTPUT_VARIABLE _cmake_property_list)
     string(REPLACE "\n" ";" _cmake_property_list "${_cmake_property_list}")
     list(REMOVE_DUPLICATES _cmake_property_list)
