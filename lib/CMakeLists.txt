@@ -44,7 +44,7 @@ if(CURL_BUILD_TESTING)
   # special libcurlu library just for unittests
   add_library(curlu STATIC EXCLUDE_FROM_ALL ${HHEADERS} ${CSOURCES})
   target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
-  target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+  target_link_libraries(curlu PUBLIC ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
   set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0 C_CLANG_TIDY "")
