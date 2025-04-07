@@ -17,7 +17,7 @@
 #
 # or get into a shell in the build environment, for example
 #
-#   docker run --rm -it -u $(id -u):$(id -g) -v (pwd):/usr/src -w /usr/src curl/curl bash
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl bash
 #   $ autoreconf -fi
 #   $ ./configure --without-ssl --without-libpsl
 #   $ make
