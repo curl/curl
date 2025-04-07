@@ -1128,6 +1128,10 @@ Control SSL behavior. See CURLOPT_SSL_OPTIONS(3)
 
 Disable SSL session-id cache. See CURLOPT_SSL_SESSIONID_CACHE(3)
 
+## CURLOPT_SSL_SIGNATURE_ALGORITHMS
+
+TLS signature algorihms to use. See CURLOPT_SSL_SIGNATURE_ALGORITHMS(3)
+
 ## CURLOPT_SSL_VERIFYHOST
 
 Verify the hostname in the SSL certificate. See CURLOPT_SSL_VERIFYHOST(3)
