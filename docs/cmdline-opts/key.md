@@ -33,7 +33,7 @@ OpenSSL provider `tpm2` can be used for the private key of a client certificate.
 provides the option --engine to load an OpenSSL engine. Providers have to be
 loaded via the OpenSSL config file. See the --engine option for further
 details. The following examples demonstrate how a client certificate can be
-used if the private key is protected or stored in the TPM:
+used if the private key is protected or stored in the TPM 2.0:
 ```bash
 # OpenSSL 1.x and tpm2tss engine
 # mTLS download with TSS key protected by TPM
