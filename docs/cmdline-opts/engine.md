@@ -22,12 +22,13 @@ list to print a list of build-time supported engines. Note that not all (and
 possibly none) of the engines may be available at runtime.
 
 OpenSSL 1.x used engines, whereas starting from OpenSSL 3.x providers should
-be used and engines are deprecated. curl does not provide an option to load
-OpenSSL providers. However, an OpenSSL config can be used to achieve this.
-Either adjust the system-wide config, usually present under
-`/etc/ssl/openssl.cnf` or point to one via the environment variable before
-calling curl `export OPENSSL_CONF=/your/path/to/openssl.cnf`. A minimum config
-file that loads the tpm2 and the default provider would look the following:
+be used and engines are deprecated. curl does not provide an command line
+option to explicitly load a certain OpenSSL providers. However, an OpenSSL
+config can be used to achieve this. Either adjust the system-wide config,
+usually present under `/etc/ssl/openssl.cnf` or point to one via the
+environment variable before calling curl
+`export OPENSSL_CONF=/your/path/to/openssl.cnf`. A minimum config file that
+loads the `tpm2` and the default provider would look the following:
 
 ```dosini
 openssl_conf = default_conf_section
