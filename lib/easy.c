@@ -572,6 +572,32 @@ static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
   return numfds;
 }
 
+/* check_sockets()
+ *
+ * loop over the monitored sockets to see which ones had activity
+ */
+static CURLMcode check_sockets(const unsigned int numfds,
+                               struct pollfd *fds,
+                               struct Curl_multi *multi,
+                               struct events *ev)
+{
+  unsigned int i;
+  CURLMcode mcode = CURLM_OK;
+  for(i = 0; i < numfds; i++) {
+    if(fds[i].revents) {
+      /* socket activity, tell libcurl */
+      int act = poll2cselect(fds[i].revents); /* convert */
+
+      /* sending infof "randomly" to the first easy handle */
+      infof(multi->admin, "call curl_multi_socket_action(socket "
+            "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
+      mcode = curl_multi_socket_action(multi, fds[i].fd, act,
+                                       &ev->running_handles);
+    }
+  }
+  return mcode;
+}
+
 /* wait_or_timeout()
  *
  * waits for activity on any of the given sockets, or the timeout to trigger.
@@ -625,21 +651,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
     else {
       /* here pollrc is > 0 */
-      /* loop over the monitored sockets to see which ones had activity */
-      unsigned int i;
-      for(i = 0; i < numfds; i++) {
-        if(fds[i].revents) {
-          /* socket activity, tell libcurl */
-          int act = poll2cselect(fds[i].revents); /* convert */
-
-          /* sending infof "randomly" to the first easy handle */
-          infof(multi->admin, "call curl_multi_socket_action(socket "
-                "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
-          mcode = curl_multi_socket_action(multi, fds[i].fd, act,
-                                           &ev->running_handles);
-        }
-      }
-
+      mcode = check_sockets(numfds, fds, multi, ev);
 
       if(!ev->msbump && ev->ms >= 0) {
         /* If nothing updated the timeout, we decrease it by the spent time.
