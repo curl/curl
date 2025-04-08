@@ -316,7 +316,7 @@ if(!$opt_n) {
     if($curl) {
       if($curl =~ /^Protocols:.* https( |$)/m) {
         report "Get certdata with curl!";
-        my $proto = !$opt_k ? "--proto =https --proto-redir =https" : "";
+        my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
         my @out = `curl -w %{response_code} --location $proto $quiet -o "$txt" "$url"`;
         if(!$? && @out && $out[0] == 200) {
