@@ -38,10 +38,6 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_BINARY_DIR}/lib")  # for "curl_config.h"
 
-if(USE_ARES)
-  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
-endif()
-
 if(CURL_BUILD_TESTING)
   add_library(
     curlu  # special libcurlu library just for unittests
