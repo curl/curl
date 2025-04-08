@@ -1199,9 +1199,11 @@ struct UrlState {
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
-  /* this is just a flag -- we do not need to reference the provider in any
-   * way as OpenSSL takes care of that */
-  BIT(provider);
+  /* void instead of OSSL_PROVIDER */
+  void *provider;
+  void *libctx;
+
+  BIT(provider_loaded);
   BIT(provider_failed);
 #endif /* USE_OPENSSL */
   struct curltime expiretime; /* set this with Curl_expire() only */

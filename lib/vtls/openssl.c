@@ -1100,7 +1100,7 @@ static bool is_pkcs11_uri(const char *string)
 #endif
 
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
-#if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
+#if defined(OPENSSL_HAS_PROVIDERS)
 static CURLcode ossl_set_provider(struct Curl_easy *data,
                                   const char *provider);
 #endif
@@ -1353,7 +1353,8 @@ int cert_stuff(struct Curl_easy *data,
       }
     }
     break;
-#elif defined(OPENSSL_HAS_PROVIDERS)
+#endif
+#if defined(OPENSSL_HAS_PROVIDERS)
       /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
     {
@@ -1372,7 +1373,12 @@ int cert_stuff(struct Curl_easy *data,
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         X509 *cert = NULL;
+#if 0
         store = OSSL_STORE_open(cert_file, NULL, NULL, NULL, NULL);
+#else
+        store = OSSL_STORE_open_ex(cert_file, data->state.libctx,
+                                   NULL, NULL, NULL, NULL, NULL, NULL);
+#endif
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -1385,22 +1391,13 @@ int cert_stuff(struct Curl_easy *data,
                               sizeof(error_buffer)));
         }
 
-        for(info = OSSL_STORE_load(store);
-            info != NULL;
-            info = OSSL_STORE_load(store)) {
+        info = OSSL_STORE_load(store);
+        if(info) {
           int ossl_type = OSSL_STORE_INFO_get_type(info);
 
-          if(ossl_type == OSSL_STORE_INFO_CERT) {
+          if(ossl_type == OSSL_STORE_INFO_CERT)
             cert = OSSL_STORE_INFO_get1_CERT(info);
-          }
-          else {
-            failf(data, "Ignoring object not matching our type: %d",
-                  ossl_type);
-            OSSL_STORE_INFO_free(info);
-            continue;
-          }
           OSSL_STORE_INFO_free(info);
-          break;
         }
         OSSL_STORE_close(store);
         if(!cert) {
@@ -1424,9 +1421,6 @@ int cert_stuff(struct Curl_easy *data,
       }
     }
     break;
-#else
-    failf(data, "file type ENG nor PROV for certificate not implemented");
-    return 0;
 #endif
 
     case SSL_FILETYPE_PKCS12:
@@ -1616,7 +1610,8 @@ fail:
       }
     }
     break;
-#elif defined(OPENSSL_HAS_PROVIDERS)
+#endif
+#if defined(OPENSSL_HAS_PROVIDERS)
       /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
     {
@@ -1647,7 +1642,8 @@ fail:
         UI_method_set_reader(ui_method, ssl_ui_reader);
         UI_method_set_writer(ui_method, ssl_ui_writer);
 
-        store = OSSL_STORE_open(key_file, ui_method, NULL, NULL, NULL);
+        store = OSSL_STORE_open_ex(key_file, data->state.libctx, NULL,
+                                   ui_method, NULL, NULL, NULL, NULL);
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -1660,22 +1656,13 @@ fail:
                               sizeof(error_buffer)));
         }
 
-        for(info = OSSL_STORE_load(store);
-            info != NULL;
-            info = OSSL_STORE_load(store)) {
+        info = OSSL_STORE_load(store);
+        if(info) {
           int ossl_type = OSSL_STORE_INFO_get_type(info);
 
-          if(ossl_type == OSSL_STORE_INFO_PKEY) {
+          if(ossl_type == OSSL_STORE_INFO_PKEY)
             priv_key = OSSL_STORE_INFO_get1_PKEY(info);
-          }
-          else {
-            failf(data, "Ignoring object not matching our type: %d",
-                  ossl_type);
-            OSSL_STORE_INFO_free(info);
-            continue;
-          }
           OSSL_STORE_INFO_free(info);
-          break;
         }
         OSSL_STORE_close(store);
         UI_destroy_method(ui_method);
@@ -1701,9 +1688,6 @@ fail:
       }
     }
     break;
-#else
-    failf(data, "file type ENG nor PROV for private key not implemented");
-    return 0;
 #endif
 
     case SSL_FILETYPE_PKCS12:
@@ -1878,36 +1862,39 @@ static void ossl_cleanup(void)
   Curl_tls_keylog_close();
 }
 
-/* Selects an OpenSSL crypto engine
+/* Selects an OpenSSL crypto engine or provider.
  */
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 {
 #ifdef USE_OPENSSL_ENGINE
+  CURLcode result = CURLE_SSL_ENGINE_NOTFOUND;
   ENGINE *e = ENGINE_by_id(engine);
 
-  if(!e) {
-    failf(data, "SSL Engine '%s' not found", engine);
-    return CURLE_SSL_ENGINE_NOTFOUND;
-  }
+  if(e) {
 
-  if(data->state.engine) {
-    ENGINE_finish(data->state.engine);
-    ENGINE_free(data->state.engine);
-    data->state.engine = NULL;
-  }
-  if(!ENGINE_init(e)) {
-    char buf[256];
+    if(data->state.engine) {
+      ENGINE_finish(data->state.engine);
+      ENGINE_free(data->state.engine);
+      data->state.engine = NULL;
+    }
+    if(!ENGINE_init(e)) {
+      char buf[256];
 
-    ENGINE_free(e);
-    failf(data, "Failed to initialise SSL Engine '%s': %s",
-          engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
-    return CURLE_SSL_ENGINE_INITFAILED;
+      ENGINE_free(e);
+      failf(data, "Failed to initialise SSL Engine '%s': %s",
+            engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
+      result = CURLE_SSL_ENGINE_INITFAILED;
+      e = NULL;
+    }
+    data->state.engine = e;
+    return result;
   }
-  data->state.engine = e;
-  return CURLE_OK;
+#endif
+#ifdef OPENSSL_HAS_PROVIDERS
+  return ossl_set_provider(data, engine);
 #else
   (void)engine;
-  failf(data, "SSL Engine not supported");
+  failf(data, "OpenSSL engine not found");
   return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
 }
@@ -1956,25 +1943,31 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
   return list;
 }
 
-#if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
+#if defined(OPENSSL_HAS_PROVIDERS)
 /* Selects an OpenSSL crypto provider
  */
-static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
+static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
 {
-  OSSL_PROVIDER *pkcs11_provider = NULL;
   char error_buffer[256];
 
-  if(OSSL_PROVIDER_available(NULL, provider)) {
-    /* already loaded through the configuration - no action needed */
-    data->state.provider = TRUE;
-    return CURLE_OK;
-  }
-  if(data->state.provider_failed) {
-    return CURLE_SSL_ENGINE_NOTFOUND;
+  if(!data->state.libctx) {
+    OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
+    if(!libctx)
+      return CURLE_OUT_OF_MEMORY;
+    data->state.libctx = libctx;
   }
 
-  pkcs11_provider = OSSL_PROVIDER_try_load(NULL, provider, 1);
-  if(!pkcs11_provider) {
+  if(OSSL_PROVIDER_available(data->state.libctx, name)) {
+    /* already loaded through the configuration - no action needed */
+    data->state.provider_loaded = TRUE;
+    return CURLE_OK;
+  }
+  if(data->state.provider_failed)
+    return CURLE_SSL_ENGINE_NOTFOUND;
+
+  data->state.provider =
+    OSSL_PROVIDER_try_load(data->state.libctx, name, 1);
+  if(!data->state.provider) {
     failf(data, "Failed to initialize provider: %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)));
@@ -1982,7 +1975,7 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
     data->state.provider_failed = TRUE;
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
-  data->state.provider = TRUE;
+  data->state.provider_loaded = TRUE;
   return CURLE_OK;
 }
 #endif
