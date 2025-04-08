@@ -22,40 +22,40 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_QUICHE
 #include <quiche.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
-#include "bufq.h"
-#include "hash_offt.h"
-#include "urldata.h"
-#include "cfilters.h"
-#include "cf-socket.h"
-#include "sendf.h"
-#include "strdup.h"
-#include "rand.h"
-#include "strcase.h"
-#include "multiif.h"
-#include "connect.h"
-#include "progress.h"
-#include "strerror.h"
-#include "http1.h"
+#include "../bufq.h"
+#include "../hash_offt.h"
+#include "../urldata.h"
+#include "../cfilters.h"
+#include "../cf-socket.h"
+#include "../sendf.h"
+#include "../strdup.h"
+#include "../rand.h"
+#include "../strcase.h"
+#include "../multiif.h"
+#include "../connect.h"
+#include "../progress.h"
+#include "../strerror.h"
+#include "../http1.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vquic-tls.h"
 #include "curl_quiche.h"
-#include "transfer.h"
-#include "inet_pton.h"
-#include "vtls/openssl.h"
-#include "vtls/keylog.h"
-#include "vtls/vtls.h"
+#include "../transfer.h"
+#include "../inet_pton.h"
+#include "../vtls/openssl.h"
+#include "../vtls/keylog.h"
+#include "../vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  (0x0100)

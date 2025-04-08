@@ -22,29 +22,29 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_WOLFSSH
 
 #include <limits.h>
 
-#include "urldata.h"
-#include "cfilters.h"
-#include "connect.h"
-#include "sendf.h"
-#include "progress.h"
+#include "../urldata.h"
+#include "../cfilters.h"
+#include "../connect.h"
+#include "../sendf.h"
+#include "../progress.h"
 #include "curl_path.h"
-#include "transfer.h"
-#include "speedcheck.h"
-#include "select.h"
-#include "multiif.h"
-#include "warnless.h"
-#include "strdup.h"
+#include "../transfer.h"
+#include "../speedcheck.h"
+#include "../select.h"
+#include "../multiif.h"
+#include "../warnless.h"
+#include "../strdup.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 static CURLcode wssh_connect(struct Curl_easy *data, bool *done);
 static CURLcode wssh_multi_statemach(struct Curl_easy *data, bool *done);

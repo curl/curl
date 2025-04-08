@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
@@ -30,26 +30,26 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include "urldata.h"
-#include "bufq.h"
-#include "dynbuf.h"
-#include "cfilters.h"
-#include "curl_trc.h"
+#include "../urldata.h"
+#include "../bufq.h"
+#include "../dynbuf.h"
+#include "../cfilters.h"
+#include "../curl_trc.h"
 #include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_osslq.h"
 #include "curl_quiche.h"
-#include "multiif.h"
-#include "rand.h"
+#include "../multiif.h"
+#include "../rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
-#include "strerror.h"
-#include "strparse.h"
+#include "../strerror.h"
+#include "../strparse.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 
 #ifdef USE_HTTP3

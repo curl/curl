@@ -24,23 +24,23 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_SPNEGO)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
-#include "strerror.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../curl_base64.h"
+#include "../warnless.h"
+#include "../curl_multibyte.h"
+#include "../sendf.h"
+#include "../strerror.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_is_spnego_supported()

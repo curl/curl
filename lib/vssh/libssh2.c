@@ -24,7 +24,7 @@
 
 /* #define CURL_LIBSSH2_DEBUG */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_LIBSSH2
 
@@ -49,38 +49,37 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "progress.h"
-#include "transfer.h"
-#include "escape.h"
-#include "http.h" /* for HTTP proxy tunnel stuff */
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../hostip.h"
+#include "../progress.h"
+#include "../transfer.h"
+#include "../escape.h"
+#include "../http.h" /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
-#include "url.h"
-#include "speedcheck.h"
-#include "getinfo.h"
-#include "strdup.h"
-#include "strcase.h"
-#include "vtls/vtls.h"
-#include "cfilters.h"
-#include "connect.h"
-#include "inet_ntop.h"
-#include "parsedate.h" /* for the week day and month names */
-#include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
-#include "select.h"
-#include "warnless.h"
+#include "../url.h"
+#include "../speedcheck.h"
+#include "../getinfo.h"
+#include "../strdup.h"
+#include "../strcase.h"
+#include "../vtls/vtls.h"
+#include "../cfilters.h"
+#include "../connect.h"
+#include "../inet_ntop.h"
+#include "../parsedate.h" /* for the week day and month names */
+#include "../sockaddr.h" /* required for Curl_sockaddr_storage */
+#include "../multiif.h"
+#include "../select.h"
+#include "../warnless.h"
 #include "curl_path.h"
-#include "strparse.h"
-#include <curl_base64.h> /* for base64 encoding/decoding */
-#include <curl_sha256.h>
-
+#include "../strparse.h"
+#include "../curl_base64.h" /* for base64 encoding/decoding */
+#include "../curl_sha256.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* Local functions: */
 static const char *sftp_libssh2_strerror(unsigned long err);

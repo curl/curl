@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
     defined(USE_BEARSSL) || defined(USE_RUSTLS)
