@@ -36,10 +36,7 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # The rest of the build
 
-include_directories(
-  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-)
+include_directories("${PROJECT_BINARY_DIR}/lib")  # for "curl_config.h"
 if(USE_ARES)
   include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
 endif()

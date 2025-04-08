@@ -22,19 +22,19 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SSLS_EXPORT
 
-#include "urldata.h"
-#include "curl_trc.h"
+#include "../urldata.h"
+#include "../curl_trc.h"
 #include "vtls_scache.h"
 #include "vtls_spack.h"
-#include "strdup.h"
+#include "../strdup.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #ifdef _MSC_VER
 #if _MSC_VER >= 1600

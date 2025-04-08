@@ -50,11 +50,9 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 #
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "private" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
-              -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib
+              -I$(top_builddir)/lib
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -162,10 +160,8 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir)         \
-	  -W$(srcdir)/libcurl_unity.c -W$(srcdir)/curl_config.h $(srcdir)/*.[ch] \
-	  $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch] $(srcdir)/vquic/*.[ch]    \
-	  $(srcdir)/vssh/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
+	$(CSOURCES) $(HHEADERS))
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes

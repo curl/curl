@@ -28,7 +28,7 @@
  *
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_WOLFSSL
 
@@ -56,30 +56,30 @@
 
 #include <limits.h>
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "keylog.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "progress.h"
-#include "select.h"
-#include "strcase.h"
-#include "strdup.h"
+#include "../parsedate.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../progress.h"
+#include "../select.h"
+#include "../strcase.h"
+#include "../strdup.h"
 #include "x509asn1.h"
-#include "curl_printf.h"
-#include "multiif.h"
+#include "../curl_printf.h"
+#include "../multiif.h"
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
 #define USE_ECH_WOLFSSL

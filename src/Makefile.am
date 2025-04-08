@@ -121,7 +121,7 @@ endif
 # Use absolute directory to disable VPATH
 ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
-HUGE=tool_hugehelp.c
+HUGE=$(builddir)/tool_hugehelp.c
 
 HUGECMD = $(HUGEIT_$(V))
 HUGEIT_0 = @echo "  HUGE    " $@;
@@ -164,7 +164,7 @@ curl_cfiles_gen += $(HUGE)
 curl_hfiles_gen += tool_hugehelp.h
 CLEANFILES += $(HUGE)
 
-CA_EMBED_CSOURCE = tool_ca_embed.c
+CA_EMBED_CSOURCE = $(builddir)/tool_ca_embed.c
 curl_cfiles_gen += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
@@ -184,12 +184,7 @@ CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/$(HUGE) \
-	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
-	  -W$(srcdir)/curltool_unity.c \
-	  -W$(srcdir)/libcurltool_unity.c \
-	  $(srcdir)/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(CURL_CFILES) $(CURL_HFILES))
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes

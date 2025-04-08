@@ -30,7 +30,7 @@
  * since they were not present in 1.0.X.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_GNUTLS
 
@@ -40,28 +40,28 @@
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "vauth/vauth.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "progress.h"
-#include "select.h"
-#include "strcase.h"
-#include "strdup.h"
-#include "warnless.h"
+#include "../vauth/vauth.h"
+#include "../parsedate.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../progress.h"
+#include "../select.h"
+#include "../strcase.h"
+#include "../strdup.h"
+#include "../warnless.h"
 #include "x509asn1.h"
-#include "multiif.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "../multiif.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "../memdebug.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */

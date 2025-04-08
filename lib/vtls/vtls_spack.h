@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SSLS_EXPORT
 

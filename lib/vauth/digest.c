@@ -25,30 +25,30 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "vauth/digest.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "curl_hmac.h"
-#include "curl_md5.h"
-#include "curl_sha256.h"
-#include "curl_sha512_256.h"
-#include "vtls/vtls.h"
-#include "warnless.h"
-#include "strparse.h"
-#include "strcase.h"
-#include "curl_printf.h"
-#include "rand.h"
+#include "vauth.h"
+#include "digest.h"
+#include "../urldata.h"
+#include "../curl_base64.h"
+#include "../curl_hmac.h"
+#include "../curl_md5.h"
+#include "../curl_sha256.h"
+#include "../curl_sha512_256.h"
+#include "../vtls/vtls.h"
+#include "../warnless.h"
+#include "../strparse.h"
+#include "../strcase.h"
+#include "../curl_printf.h"
+#include "../rand.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */

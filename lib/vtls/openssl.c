@@ -27,7 +27,7 @@
  * but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 
@@ -45,26 +45,26 @@
 #undef OCSP_RESPONSE
 #endif
 
-#include "urldata.h"
-#include "sendf.h"
-#include "formdata.h" /* for the boundary function */
-#include "url.h" /* for the ssl config check function */
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../formdata.h" /* for the boundary function */
+#include "../url.h" /* for the ssl config check function */
+#include "../inet_pton.h"
 #include "openssl.h"
-#include "connect.h"
-#include "slist.h"
-#include "select.h"
+#include "../connect.h"
+#include "../slist.h"
+#include "../select.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "vauth/vauth.h"
+#include "../vauth/vauth.h"
 #include "keylog.h"
-#include "strcase.h"
+#include "../strcase.h"
 #include "hostcheck.h"
-#include "multiif.h"
-#include "strdup.h"
-#include "strerror.h"
-#include "curl_printf.h"
+#include "../multiif.h"
+#include "../strdup.h"
+#include "../strerror.h"
+#include "../curl_printf.h"
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -119,11 +119,11 @@
 #define OPENSSL_HAS_PROVIDERS
 #endif
 
-#include "warnless.h"
+#include "../warnless.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
    renegotiations when built with BoringSSL. Renegotiating is non-compliant

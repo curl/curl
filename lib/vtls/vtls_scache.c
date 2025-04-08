@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SSL
 
@@ -36,28 +36,28 @@
 #include <fcntl.h>
 #endif
 
-#include "urldata.h"
-#include "cfilters.h"
+#include "../urldata.h"
+#include "../cfilters.h"
 
 #include "vtls.h" /* generic SSL protos etc */
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "vtls_spack.h"
 
-#include "strcase.h"
-#include "url.h"
-#include "llist.h"
-#include "share.h"
-#include "curl_trc.h"
-#include "curl_sha256.h"
-#include "rand.h"
-#include "warnless.h"
-#include "curl_printf.h"
-#include "strdup.h"
+#include "../strcase.h"
+#include "../url.h"
+#include "../llist.h"
+#include "../share.h"
+#include "../curl_trc.h"
+#include "../curl_sha256.h"
+#include "../rand.h"
+#include "../warnless.h"
+#include "../curl_printf.h"
+#include "../strdup.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 
 static bool cf_ssl_peer_key_is_global(const char *peer_key);
