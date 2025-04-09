@@ -77,6 +77,12 @@ HTTP/2.
 
 Fake the size returned by CURLINFO_HEADER_SIZE and CURLINFO_REQUEST_SIZE.
 
+## `CURL_DNS_SERVER`
+
+When built with c-ares for name resolving, setting this environment variable
+to `[IP:port]` makes libcurl use that DNS server instead of the system
+default. This is used by the curl test suite.
+
 ## `CURL_GETHOSTNAME`
 
 Fake the local machine's unqualified hostname for NTLM and SMTP.

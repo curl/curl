@@ -235,7 +235,8 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls')) {
+                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
+                  'dns')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -295,6 +296,7 @@ sub serverfortest {
     for(my $i = scalar(@what) - 1; $i >= 0; $i--) {
         my $srvrline = $what[$i];
         chomp $srvrline if($srvrline);
+
         if($srvrline =~ /^(\S+)((\s*)(.*))/) {
             my $server = "${1}";
             my $lnrest = "${2}";
@@ -303,7 +305,12 @@ sub serverfortest {
                 $server = "${1}${4}${5}";
                 $tlsext = uc("TLS-${3}");
             }
-            if(! grep /^\Q$server\E$/, @protocols) {
+
+            my @lprotocols = @protocols;
+
+            push @lprotocols, "dns";
+
+            if(! grep /^\Q$server\E$/, @lprotocols) {
                 if(substr($server,0,5) ne "socks") {
                     if($tlsext) {
                         return ("curl lacks $tlsext support", 4);
@@ -1029,6 +1036,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
+                 'dns' => \&verifypid,
                  'socks' => \&verifypid,
                  'socks5unix' => \&verifypid,
                  'gopher' => \&verifyhttp,
@@ -1614,6 +1622,70 @@ sub runtftpserver {
     return (0, $pid2, $tftppid, $port);
 }
 
+#######################################################################
+# start the dns server
+#
+sub rundnsserver {
+    my ($id, $verb, $ipv6) = @_;
+    my $ip = $HOSTIP;
+    my $proto = 'dns';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $ip = $HOST6IP;
+    }
+
+    my $server = servername_id($proto, $ipvnum, $idnum);
+
+    my $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if ($doesntrun{$pidfile}) {
+        return (2, 0, 0, 0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    my $srvrname = servername_str($proto, $ipvnum, $idnum);
+    my $portfile = $serverportfile{$server};
+    my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    my $cmd=server_exe('dnsd');
+    $cmd .= " --port 0";
+    $cmd .= " --verbose" if($debugprotocol);
+    $cmd .= " --pidfile \"$pidfile\"";
+    $cmd .= " --portfile \"$portfile\"";
+    $cmd .= " --logfile \"$logfile\"";
+    $cmd .= " --logdir \"$LOGDIR\"";
+    $cmd .= " --id $idnum" if($idnum > 1);
+    $cmd .= " --ipv$ipvnum";
+
+    # start DNS server on a random port
+    my ($dnspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($dnspid <= 0 || !pidexists($dnspid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        return (1, 0, 0, 0);
+    }
+
+    my $port = pidfromfile($portfile);
+
+    if($verb) {
+        logmsg "RUN: $srvrname server on PID $dnspid port $port\n";
+    }
+
+    return (0, $pid2, $dnspid, $port);
+}
 
 #######################################################################
 # start the rtsp server
@@ -2218,6 +2290,28 @@ sub responsive_tftp_server {
 }
 
 #######################################################################
+# Single shot dns server responsiveness test. This should only be
+# used to verify that a server present in %run hash is still functional
+#
+sub responsive_dns_server {
+    my ($id, $verb, $ipv6) = @_;
+    my $proto = 'dns';
+    my $port = protoport($proto);
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $port = protoport('dns6');
+        $ip = $HOST6IP;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
 # Single shot non-stunnel HTTP TLS extensions capable server
 # responsiveness test. This should only be used to verify that a
 # server present in %run hash is still functional
@@ -2721,6 +2815,23 @@ sub startservers {
                 $run{'httptls-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "dns") {
+            if($run{'dns'} &&
+               !responsive_dns_server("", $verbose)) {
+                if(stopserver('dns')) {
+                    return ("failed stopping unresponsive DNS server", 3);
+                }
+            }
+            if(!$run{'dns'}) {
+                ($serr, $pid, $pid2, $PORT{'dns'}) =
+                    rundnsserver("", $verbose);
+                if($pid <= 0) {
+                    return ("failed starting DNS server", $serr);
+                }
+                logmsg sprintf("* pid dns => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'dns'}="$pid $pid2";
+            }
+        }
         elsif($what eq "tftp") {
             if($run{'tftp'} &&
                !responsive_tftp_server("", $verbose)) {
@@ -2936,7 +3047,7 @@ sub subvariables {
 
     # test server ports
     # Substitutes variables like %HTTPPORT and %SMTP6PORT with the server ports
-    foreach my $proto ('DICT',
+    foreach my $proto ('DICT', 'DNS',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
                        'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',

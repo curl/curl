@@ -179,6 +179,17 @@ static CURLcode async_ares_init(struct Curl_easy *data)
     else
       return CURLE_FAILED_INIT;
   }
+#if defined(CURLDEBUG) && defined(HAVE_CARES_PORTS_CSV)
+  else {
+    const char *env = getenv("CURL_DNS_SERVER");
+    if(env) {
+      int rc = ares_set_servers_ports_csv(ares->channel, env);
+      if(rc)
+        infof(data, "ares_set_servers_ports_csv failed: %d", rc);
+    }
+  }
+#endif
+
   return CURLE_OK;
   /* make sure that all other returns from this function should destroy the
      ares channel before returning error! */
