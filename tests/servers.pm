@@ -869,29 +869,15 @@ sub verifyhttptls {
 }
 
 #######################################################################
-# STUB for verifying mqtt
+# For verifying mqtt and socks
 #
-sub verifymqtt {
+sub verifypid {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
                                      $idnum);
     my $pid = processexists($pidfile);
     if($pid < 0) {
-        logmsg "RUN: MQTT server has died after starting up\n";
-    }
-    return $pid;
-}
-
-#######################################################################
-# STUB for verifying socks
-#
-sub verifysocks {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                     $idnum);
-    my $pid = processexists($pidfile);
-    if($pid < 0) {
-        logmsg "RUN: SOCKS server has died after starting up\n";
+        logmsg "RUN: $proto server has died\n";
     }
     return $pid;
 }
@@ -1039,40 +1025,17 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
-                 'mqtt' => \&verifymqtt,
+                 'mqtt' => \&verifypid,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks,
-                 'socks5unix' => \&verifysocks,
+                 'socks' => \&verifypid,
+                 'socks5unix' => \&verifypid,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
                  'smb' => \&verifysmb,
                  'telnet' => \&verifytelnet);
-
-sub verifyserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-
-    my $count = 30; # try for this many seconds
-    my $pid;
-
-    while($count--) {
-        my $fun = $protofunc{$proto};
-
-        $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
-
-        if($pid > 0) {
-            last;
-        }
-        elsif($pid < 0) {
-            # a real failure, stop trying and bail out
-            return 0;
-        }
-        sleep(1);
-    }
-    return $pid;
-}
 
 #######################################################################
 # Single shot server responsiveness test. This should only be used
@@ -1177,17 +1140,6 @@ sub runhttpserver {
     if(!$port_or_path) {
         $port = $port_or_path = pidfromfile($portfile);
     }
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$httppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server is on PID $httppid port $port_or_path\n";
@@ -1522,17 +1474,6 @@ sub runpingpongserver {
 
     logmsg "PINGPONG runs on port $port ($portfile)\n" if($verb);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ftppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0);
-    }
-    $pid2 = $pid3;
-
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verb);
 
     # Assign the correct port variable!
@@ -1666,17 +1607,6 @@ sub runtftpserver {
 
     my $port = pidfromfile($portfile);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$tftppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
-
     if($verb) {
         logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
     }
@@ -1741,17 +1671,6 @@ sub runrtspserver {
     }
 
     my $port = pidfromfile($portfile);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$rtsppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server PID $rtsppid port $port\n";
