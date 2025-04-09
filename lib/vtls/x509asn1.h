@@ -27,8 +27,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
-  defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || \
   defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 
 #include "../cfilters.h"
@@ -79,8 +78,8 @@ CURLcode Curl_verifyhost(struct Curl_cfilter *cf, struct Curl_easy *data,
                          const char *beg, const char *end);
 
 #ifdef UNITTESTS
-#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS) || \
+  defined(USE_RUSTLS)
 
 /* used by unit1656.c */
 CURLcode Curl_x509_GTime2str(struct dynbuf *store,
@@ -91,6 +90,6 @@ CURLcode Curl_x509_getASN1Element(struct Curl_asn1Element *elem,
 #endif
 #endif
 
-#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_SECTRANSP
-          or USE_MBEDTLS or USE_RUSTLS */
+#endif /* USE_GNUTLS or USE_WOLFSSL or USE_SCHANNEL or USE_MBEDTLS or
+          USE_RUSTLS */
 #endif /* HEADER_CURL_X509ASN1_H */
