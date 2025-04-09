@@ -24,8 +24,8 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-#include "bufq.h"
+#include "../curl_setup.h"
+#include "../bufq.h"
 
 #ifdef USE_HTTP3
 

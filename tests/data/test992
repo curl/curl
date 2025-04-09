@@ -1,7 +1,9 @@
 <testcase>
 <info>
 <keywords>
+SMTP
 SASL
+UPLOAD
 </keywords>
 </info>
 

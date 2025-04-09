@@ -30,7 +30,7 @@
  * since they were not present in 1.0.X.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_GNUTLS
 
@@ -40,28 +40,28 @@
 #include <gnutls/crypto.h>
 #include <nettle/sha2.h>
 
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "vauth/vauth.h"
-#include "parsedate.h"
-#include "connect.h" /* for the connect timeout */
-#include "progress.h"
-#include "select.h"
-#include "strcase.h"
-#include "strdup.h"
-#include "warnless.h"
+#include "../vauth/vauth.h"
+#include "../parsedate.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../progress.h"
+#include "../select.h"
+#include "../strcase.h"
+#include "../strdup.h"
+#include "../warnless.h"
 #include "x509asn1.h"
-#include "multiif.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "../multiif.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "../memdebug.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */
@@ -100,6 +100,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
               blen, nwritten, result);
   backend->gtls.io_result = result;
   if(nwritten < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nwritten = -1;
@@ -121,6 +122,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   if(!backend->gtls.shared_creds->trust_setup) {
     result = Curl_gtls_client_trust_setup(cf, data, &backend->gtls);
     if(result) {
+      /* !checksrc! disable ERRNOVAR 1 */
       gnutls_transport_set_errno(backend->gtls.session, EINVAL);
       backend->gtls.io_result = result;
       return -1;
@@ -132,6 +134,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
               blen, nread, result);
   backend->gtls.io_result = result;
   if(nread < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nread = -1;
@@ -1589,10 +1592,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unsigned char addrbuf[sizeof(struct use_addr)];
     size_t addrlen = 0;
 
-    if(Curl_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
+    if(curlx_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
       addrlen = 4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
+    else if(curlx_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
       addrlen = 16;
 #endif
 

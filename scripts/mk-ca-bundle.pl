@@ -318,7 +318,7 @@ if(!$opt_n) {
         report "Get certdata with curl!";
         my $proto = !$opt_k ? "--proto =https" : "";
         my $quiet = $opt_q ? "-s" : "";
-        my @out = `curl -w %{response_code} $proto $quiet -o "$txt" "$url"`;
+        my @out = `curl -Lw %{response_code} $proto $quiet -o "$txt" "$url"`;
         if(!$? && @out && $out[0] == 200) {
           $fetched = 1;
           report "Downloaded $txt";

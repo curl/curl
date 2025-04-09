@@ -25,25 +25,25 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "vauth/digest.h"
-#include "urldata.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
-#include "strdup.h"
-#include "strcase.h"
-#include "strerror.h"
+#include "vauth.h"
+#include "digest.h"
+#include "../urldata.h"
+#include "../warnless.h"
+#include "../curl_multibyte.h"
+#include "../sendf.h"
+#include "../strdup.h"
+#include "../strcase.h"
+#include "../strerror.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
 * Curl_auth_is_digest_supported()
@@ -582,8 +582,12 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     /* Allocate our new context handle */
     digest->http_context = calloc(1, sizeof(CtxtHandle));
-    if(!digest->http_context)
+    if(!digest->http_context) {
+      curlx_unicodefree(spn);
+      Curl_sspi_free_identity(p_identity);
+      free(output_token);
       return CURLE_OUT_OF_MEMORY;
+    }
 
     /* Generate our response message */
     status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL,

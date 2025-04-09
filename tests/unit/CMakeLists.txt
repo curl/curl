@@ -50,6 +50,7 @@ foreach(_target IN LISTS UNITPROGS)
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/tests/libtest"
   )
+  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
   if(CURL_TEST_BUNDLES)
     target_include_directories(${_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/tests/unit")
   endif()

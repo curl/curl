@@ -30,31 +30,40 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
 
 # DESCRIPTION
 
-Retrieves as much as possible of a received WebSocket frame into the
-*buffer*, but not more than *buflen* bytes. *recv* is set to the
-number of bytes actually stored.
+Retrieves as much as possible of a received WebSocket frame into the *buffer*,
+but not more than *buflen* bytes. *recv* is set to the number of bytes
+actually stored.
 
 If the function call is successful, the *meta* pointer gets set to point to a
 *const struct curl_ws_frame* that contains information about the received
 data. That struct must not be freed and its contents must not be relied upon
-anymore once another WebSocket function is called. See curl_ws_meta(3) for more
-details on that struct.
+anymore once another WebSocket function is called. See curl_ws_meta(3) for
+more details on that struct.
 
 The application must check `meta->bytesleft` to determine whether the complete
 frame has been received. If more payload is pending, the application must call
 this function again with an updated *buffer* and *buflen* to resume receiving.
-This may for example happen when the data does not fit into the provided buffer
-or when not all frame data has been delivered over the network yet.
+This may for example happen when the data does not fit into the provided
+buffer or when not all frame data has been delivered over the network yet.
 
 If the application wants to read the metadata without consuming any payload,
 it may call this function with a *buflen* of zero. Setting *buffer* to a NULL
-pointer is permitted in this case. Note that frames without payload are consumed
-by this action.
+pointer is permitted in this case. Note that frames without payload are
+consumed by this action.
 
 If the received message consists of multiple fragments, the *CURLWS_CONT* bit
-is set in all frames except the final one. The application is responsible for
-reassembling fragmented messages. See curl_ws_meta(3) for more details on
-*CURLWS_CONT*.
+is set in all frames except the final one. The appropriate *CURLWS_TEXT* or
+*CURLWS_BINARY* flag is set in every frame, regardless whether it is the first
+fragment, an intermediate fragment or the final fragment. The application is
+responsible for reassembling fragmented messages. Special care must be taken
+to correctly handle control frames (i.e. CLOSE, PING and PONG) arriving in
+between consecutive fragments of a fragmented TEXT or BINARY message. See
+curl_ws_meta(3) for more details on *CURLWS_CONT*.
+
+The WebSocket protocol consists of *messages* that can be delivered over the
+wire as one or more *frames* - but since a frame can be too large to buffer in
+memory, libcurl may need to deliver partial frames to the application.
+Fragments, or chunks, of frames.
 
 # %PROTOCOLS%
 

@@ -169,7 +169,7 @@ sub pidterm {
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
@@ -194,7 +194,7 @@ sub pidkill {
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
@@ -218,8 +218,18 @@ sub pidwait {
         if($flags == &WNOHANG) {
             return pidexists($pid)?0:$pid;
         }
+        my $start = time;
+        my $warn_at = 5;
         while(pidexists($pid)) {
-            portable_sleep(0.01);
+            if(time - $start > $warn_at) {
+                print "pidwait: still waiting for PID ", $pid, "\n";
+                $warn_at += 5;
+                if($warn_at > 20) {
+                    print "pidwait: giving up waiting for PID ", $pid, "\n";
+                    last;
+                }
+            }
+            portable_sleep(0.2);
         }
         return $pid;
     }

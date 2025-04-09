@@ -68,6 +68,8 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_PROXYUSERPWD, "me:password");
 
   res = curl_easy_perform(curl);
+  if(res)
+    goto test_cleanup;
 
   res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &usedauth);
   if(CURLAUTH_NTLM != usedauth) {

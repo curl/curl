@@ -154,6 +154,57 @@ static int compare_header_names(const char *a, const char *b)
   return cmp;
 }
 
+/* Merge duplicate header definitions by comma delimiting their values
+   in the order defined the headers are defined, expecting headers to
+   be alpha-sorted and use ':' at this point */
+static CURLcode merge_duplicate_headers(struct curl_slist *head)
+{
+  struct curl_slist *curr = head;
+  CURLcode result = CURLE_OK;
+
+  while(curr) {
+    struct curl_slist *next = curr->next;
+    if(!next)
+      break;
+
+    if(compare_header_names(curr->data, next->data) == 0) {
+      struct dynbuf buf;
+      char *colon_next;
+      char *val_next;
+
+      Curl_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
+
+      result = Curl_dyn_add(&buf, curr->data);
+      if(result)
+        return result;
+
+      colon_next = strchr(next->data, ':');
+      DEBUGASSERT(colon_next);
+      val_next = colon_next + 1;
+
+      result = Curl_dyn_addn(&buf, ",", 1);
+      if(result)
+        return result;
+
+      result = Curl_dyn_add(&buf, val_next);
+      if(result)
+        return result;
+
+      free(curr->data);
+      curr->data = Curl_dyn_ptr(&buf);
+
+      curr->next = next->next;
+      free(next->data);
+      free(next);
+    }
+    else {
+      curr = curr->next;
+    }
+  }
+
+  return CURLE_OK;
+}
+
 /* timestamp should point to a buffer of at last TIMESTAMP_SIZE bytes */
 static CURLcode make_headers(struct Curl_easy *data,
                              const char *hostname,
@@ -298,6 +349,10 @@ static CURLcode make_headers(struct Curl_easy *data,
       }
     }
   } while(again);
+
+  ret = merge_duplicate_headers(head);
+  if(ret)
+    goto fail;
 
   for(l = head; l; l = l->next) {
     char *tmp;
@@ -482,8 +537,7 @@ static CURLcode canon_string(const char *q, size_t len,
           result = Curl_dyn_addn(dq, "%25", 3);
         break;
       default: {
-        const char hex[] = "0123456789ABCDEF";
-        char out[3]={'%'};
+        unsigned char out[3]={'%'};
 
         if(!found_equals) {
           /* if found_equals is NULL assuming, been in path */
@@ -502,8 +556,7 @@ static CURLcode canon_string(const char *q, size_t len,
           }
         }
         /* URL encode */
-        out[1] = hex[((unsigned char)*q) >> 4];
-        out[2] = hex[*q & 0xf];
+        Curl_hexbyte(&out[1], *q, FALSE);
         result = Curl_dyn_addn(dq, out, 3);
         break;
       }
@@ -760,7 +813,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   if(!canonical_request)
     goto fail;
 
-  DEBUGF(infof(data, "Canonical request: %s", canonical_request));
+  infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
+    canonical_request);
 
   request_type = aprintf("%.*s4_request",
                          (int)Curl_strlen(&provider0), Curl_str(&provider0));
@@ -802,6 +856,9 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   /* make provider0 part done uppercase */
   Curl_strntoupper(str_to_sign, Curl_str(&provider0), Curl_strlen(&provider0));
 
+  infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
+    str_to_sign);
+
   secret = aprintf("%.*s4%s", (int)Curl_strlen(&provider0),
                    Curl_str(&provider0), data->state.aptr.passwd ?
                    data->state.aptr.passwd : "");
@@ -819,6 +876,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
 
   sha256_to_hex(sha_hex, sign0);
+
+  infof(data, "aws_sigv4: Signature - %s", sha_hex);
 
   auth_headers = aprintf("Authorization: %.*s4-HMAC-SHA256 "
                          "Credential=%s/%s, "

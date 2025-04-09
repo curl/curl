@@ -722,7 +722,7 @@ UNITTEST_START
 
     Curl_cipher_suite_get_str(test->id, buf, sizeof(buf), true);
 
-    if(strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect) != 0) {
       fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
                       test->id, buf, expect);
@@ -737,13 +737,13 @@ UNITTEST_START
 
     /* suites matched by EDH alias will return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
-      if(memcmp(expect, "EDH-", 4) == 0)
+      if(expect && memcmp(expect, "EDH-", 4) == 0)
         expect = (char *) memcpy(strcpy(alt, expect), "DHE-", 4);
-      if(memcmp(expect + 4, "EDH-", 4) == 0)
+      if(expect && memcmp(expect + 4, "EDH-", 4) == 0)
         expect = (char *) memcpy(strcpy(alt, expect) + 4, "DHE-", 4) - 4;
     }
 
-    if(strcmp(buf, expect) != 0) {
+    if(expect && strcmp(buf, expect) != 0) {
       fprintf(stderr, "Curl_cipher_suite_get_str FAILED for 0x%04x, "
                       "result = \"%s\", expected = \"%s\"\n",
                       test->id, buf, expect);

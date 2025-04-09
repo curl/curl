@@ -2,7 +2,8 @@
 <info>
 <keywords>
 SFTP
-server sha256 key check
+server key check
+SHA256
 </keywords>
 </info>
 

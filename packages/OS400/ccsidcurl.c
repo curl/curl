@@ -290,6 +290,7 @@ curl_easy_escape_ccsid(CURL *handle, const char *string, int length,
   char *d;
 
   if(!string) {
+    /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return (char *) NULL;
     }
@@ -320,6 +321,7 @@ curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
   char *d;
 
   if(!string) {
+    /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return (char *) NULL;
     }

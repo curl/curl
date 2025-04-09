@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
 We have added support for ECH to curl. It can use HTTPS RRs published in the
 DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
-from the command line. This works with OpenSSL, wolfSSL, BoringSSL or AWS-LC as
-the TLS provider.
+from the command line. This works with OpenSSL, wolfSSL, BoringSSL, AWS-LC
+or rustls-ffi as the TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 

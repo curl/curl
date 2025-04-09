@@ -761,6 +761,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
   do {
     dump = fopen(dumpfile, "ab");
+    /* !checksrc! disable ERRNOVAR 1 */
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
     logmsg("[2] Error opening file %s error (%d) %s",
@@ -771,13 +772,14 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
   writeleft = totalsize;
   do {
-    written = fwrite(&reqbuf[totalsize-writeleft],
-                     1, writeleft, dump);
+    written = fwrite(&reqbuf[totalsize-writeleft], 1, writeleft, dump);
     if(got_exit_signal)
       goto storerequest_cleanup;
     if(written > 0)
       writeleft -= written;
-  } while((writeleft > 0) && ((error = errno) == EINTR));
+    error = errno;
+    /* !checksrc! disable ERRNOVAR 1 */
+  } while((writeleft > 0) && (error == EINTR));
 
   if(writeleft == 0)
     logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
@@ -1300,7 +1302,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
     serveraddr.sa4.sin_family = AF_INET;
     serveraddr.sa4.sin_port = htons(port);
-    if(Curl_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
+    if(curlx_inet_pton(AF_INET, ipaddr, &serveraddr.sa4.sin_addr) < 1) {
       logmsg("Error inet_pton failed AF_INET conversion of '%s'", ipaddr);
       sclose(serverfd);
       return CURL_SOCKET_BAD;
@@ -1313,7 +1315,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     memset(&serveraddr.sa6, 0, sizeof(serveraddr.sa6));
     serveraddr.sa6.sin6_family = AF_INET6;
     serveraddr.sa6.sin6_port = htons(port);
-    if(Curl_inet_pton(AF_INET6, ipaddr, &serveraddr.sa6.sin6_addr) < 1) {
+    if(curlx_inet_pton(AF_INET6, ipaddr, &serveraddr.sa6.sin6_addr) < 1) {
       logmsg("Error inet_pton failed AF_INET6 conversion of '%s'", ipaddr);
       sclose(serverfd);
       return CURL_SOCKET_BAD;
@@ -2121,7 +2123,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--srcdir", argv[arg])) {
       arg++;
       if(argc > arg) {
-        path = argv[arg];
+        srcpath = argv[arg];
         arg++;
       }
     }
@@ -2509,7 +2511,7 @@ sws_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
-           socket_type, location_str, (long)Curl_getpid(), exit_signal);
+           socket_type, location_str, (long)curlx_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we

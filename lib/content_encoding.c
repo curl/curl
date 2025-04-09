@@ -737,6 +737,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
   Curl_cwriter_phase phase = is_transfer ?
     CURL_CW_TRANSFER_DECODE : CURL_CW_CONTENT_DECODE;
   CURLcode result;
+  bool has_chunked = FALSE;
 
   do {
     const char *name;
@@ -765,9 +766,21 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
        * Exception is "chunked" transfer-encoding which always must happen */
       if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
+        bool is_identity = strncasecompare(name, "identity", 8);
         /* not requested, ignore */
         CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
                        (int)namelen, name);
+        if(is_transfer && !data->set.http_te_skip) {
+          if(has_chunked)
+            failf(data, "A Transfer-Encoding (%.*s) was listed after chunked",
+                  (int)namelen, name);
+          else if(is_identity)
+            continue;
+          else
+            failf(data, "Unsolicited Transfer-Encoding (%.*s) found",
+                  (int)namelen, name);
+          return CURLE_BAD_CONTENT_ENCODING;
+        }
         return CURLE_OK;
       }
 
@@ -818,6 +831,8 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         Curl_cwriter_free(data, writer);
         return result;
       }
+      if(is_chunked)
+        has_chunked = TRUE;
     }
   } while(*enclist);
 

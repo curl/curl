@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_LIBSSH2)
 #include <libssh2.h>
@@ -212,6 +212,7 @@ struct ssh_conn {
   byte handle[WOLFSSH_MAX_HANDLE];
   curl_off_t offset;
 #endif /* USE_LIBSSH */
+  BIT(initialised);
 };
 
 #ifdef USE_LIBSSH

@@ -29,7 +29,7 @@
  * but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -42,25 +42,25 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "strcase.h"
-#include "sendf.h"
-#include "connect.h" /* for the connect timeout */
-#include "strerror.h"
-#include "select.h" /* for the socket readiness */
-#include "inet_pton.h" /* for IP addr SNI check */
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "../strcase.h"
+#include "../sendf.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../strerror.h"
+#include "../select.h" /* for the socket readiness */
+#include "../inet_pton.h" /* for IP addr SNI check */
+#include "../curl_multibyte.h"
+#include "../warnless.h"
 #include "x509asn1.h"
-#include "curl_printf.h"
-#include "multiif.h"
-#include "system_win32.h"
-#include "version_win32.h"
-#include "rand.h"
-#include "strparse.h"
+#include "../curl_printf.h"
+#include "../multiif.h"
+#include "../system_win32.h"
+#include "../version_win32.h"
+#include "../rand.h"
+#include "../strparse.h"
 
 /* The last #include file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
  * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
@@ -975,7 +975,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(!backend->cred) {
     char *snihost;
     result = schannel_acquire_credential_handle(cf, data);
-    if(result)
+    if(result || !backend->cred)
       return result;
     /* schannel_acquire_credential_handle() sets backend->cred accordingly or
        it returns error otherwise. */
@@ -1631,6 +1631,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
+      args.result = CURLE_OK;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
@@ -1941,7 +1942,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     backend->encdata_offset),
                               size, err);
     if(*err) {
-      nread = -1;
       if(*err == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)

@@ -36,12 +36,9 @@
  * curl_off_t
  * ----------
  *
- * For any given platform/compiler curl_off_t must be typedef'ed to a 64-bit
+ * For any given platform/compiler curl_off_t MUST be typedef'ed to a 64-bit
  * wide signed integral data type. The width of this data type must remain
  * constant and independent of any possible large file support settings.
- *
- * As an exception to the above, curl_off_t shall be typedef'ed to a 32-bit
- * wide signed integral data type if there is no 64-bit type.
  *
  * As a general rule, curl_off_t shall not be mapped to off_t. This rule shall
  * only be violated if off_t is the only 64-bit data type available and the

@@ -413,7 +413,7 @@ Run the local h3 server on port 9443, make it proxy all traffic through to
 HTTP/1 on localhost port 80. For local toying, we can just use the test cert
 that exists in curl's test dir.
 
-     % CERT=$CURLSRC/tests/stunnel.pem
+     % CERT=/path/to/stunnel.pem
      % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
       --frontend="localhost,9443;quic"
 

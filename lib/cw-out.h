@@ -33,7 +33,7 @@
  * the client callbacks. Intended to be the last installed in the
  * client writer stack of a transfer.
  */
-extern struct Curl_cwtype Curl_cwt_out;
+extern const struct Curl_cwtype Curl_cwt_out;
 
 /**
  * Return TRUE iff 'cw-out' client write has paused data.

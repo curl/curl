@@ -41,7 +41,7 @@
 #include "memdebug.h" /* LAST include file */
 
 static struct Curl_easy *testdata;
-static struct Curl_hash hp;
+static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
@@ -53,7 +53,7 @@ static CURLcode unit_setup(void)
     return CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_init_dnscache(&hp, 7);
+  Curl_dnscache_init(&hp, 7);
   return CURLE_OK;
 }
 
@@ -64,7 +64,7 @@ static void unit_stop(void)
     free(data_node);
   }
   free(data_key);
-  Curl_hash_destroy(&hp);
+  Curl_dnscache_destroy(&hp);
 
   curl_easy_cleanup(testdata);
   curl_global_cleanup();
@@ -122,7 +122,7 @@ UNITTEST_START
     key_len = strlen(data_key);
 
     data_node->refcount = 1; /* hash will hold the reference */
-    nodep = Curl_hash_add(&hp, data_key, key_len + 1, data_node);
+    nodep = Curl_hash_add(&hp.entries, data_key, key_len + 1, data_node);
     abort_unless(nodep, "insertion into hash failed");
     /* Freeing will now be done by Curl_hash_destroy */
     data_node = NULL;

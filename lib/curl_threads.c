@@ -82,11 +82,12 @@ err:
   return curl_thread_t_null;
 }
 
-void Curl_thread_destroy(curl_thread_t hnd)
+void Curl_thread_destroy(curl_thread_t *hnd)
 {
-  if(hnd != curl_thread_t_null) {
-    pthread_detach(*hnd);
-    free(hnd);
+  if(*hnd != curl_thread_t_null) {
+    pthread_detach(**hnd);
+    free(*hnd);
+    *hnd = curl_thread_t_null;
   }
 }
 
@@ -127,6 +128,7 @@ curl_thread_t Curl_thread_create(
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef UNDER_CE
     DWORD gle = GetLastError();
+    /* !checksrc! disable ERRNOVAR 1 */
     int err = (gle == ERROR_ACCESS_DENIED ||
                gle == ERROR_NOT_ENOUGH_MEMORY) ?
                EACCES : EINVAL;
@@ -137,10 +139,12 @@ curl_thread_t Curl_thread_create(
   return t;
 }
 
-void Curl_thread_destroy(curl_thread_t hnd)
+void Curl_thread_destroy(curl_thread_t *hnd)
 {
-  if(hnd != curl_thread_t_null)
-    CloseHandle(hnd);
+  if(*hnd != curl_thread_t_null) {
+    CloseHandle(*hnd);
+    *hnd = curl_thread_t_null;
+  }
 }
 
 int Curl_thread_join(curl_thread_t *hnd)
@@ -152,9 +156,7 @@ int Curl_thread_join(curl_thread_t *hnd)
   int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
 #endif
 
-  Curl_thread_destroy(*hnd);
-
-  *hnd = curl_thread_t_null;
+  Curl_thread_destroy(hnd);
 
   return ret;
 }

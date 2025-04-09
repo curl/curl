@@ -229,6 +229,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
+- `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
+- `CURL_COMPLETION_FISH_DIR`:               Custom fish completion install directory.
+- `CURL_COMPLETION_ZSH`:                    Install zsh completions. Default: `OFF`
+- `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
@@ -240,11 +244,12 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
-- `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
+- `CURL_TEST_BUNDLES`:                      Build tests into single-binary bundles. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
+- `ENABLE_SERVER_DEBUG`:                    Apply curl debug options to test servers. Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
 - `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
@@ -386,10 +391,13 @@ Details via CMake
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
 
-## Dependency options
+## Dependency options (tools)
 
 - `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
-- `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
+- `PERL_EXECUTABLE`:                        Perl binary used throughout the build and tests.
+
+## Dependency options (libraries)
+
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
@@ -460,8 +468,8 @@ Details via CMake
 
 We recommend using CMake to build curl with MSVC.
 
-The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
-VS2013 respectively.
+The project build files reside in project/Windows/VC\* for VS2010, VS2012 and
+VS2013.
 
 These CMake Visual Studio generators require CMake v3.24 or older. You can
 download them from <https://cmake.org/files/v3.24/>.
@@ -503,8 +511,9 @@ and therefore ignore the value of `CMAKE_BUILD_TYPE`.
 
 # Migrating from winbuild builds
 
-We recommend CMake to build curl with MSVC. The winbuild build method is
-deprecated and may be dropped in a future release.
+We recommend CMake to build curl with MSVC. The winbuild build system is
+deprecated and is going to be removed in September 2025 in favor of the CMake
+build system.
 
 In CMake you can customize the path of dependencies by passing the absolute
 header path and the full path of the library via `*_INCLUDE_DIR` and

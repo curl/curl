@@ -16,7 +16,7 @@ none
 </server>
 
 <name>
-Verify curl -h --badone
+Verify curl -h with bad option name
 </name>
 
 <command>

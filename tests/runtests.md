@@ -40,6 +40,11 @@ Prefix a test number with a tilde (~) to still run it, but ignore the results.
 It is also possible to specify tests based on a keyword describing the test(s)
 to run, like `FTPS`. The keywords are strings used in the individual tests.
 
+Features are included as keywords with the `feat:` prefix (e.g., `feat:debug`).
+Specify a feature to run only tests requiring it, or exclude tests using
+`!feat:<feature>`, like `!feat:proxy`, to disable tests which depend on that
+feature.
+
 You can also specify keywords with a leading exclamation point and the keyword
 or phrase, like "!HTTP NTLM auth" to run all tests **except** those using this
 keyword. Remember that the exclamation marks and spaces need to be quoted
@@ -90,11 +95,6 @@ Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
 ## `-am`
 
 Display test results in automake style output (`PASS/FAIL: [number] [name]`).
-
-## `-bundle`
-
-Run tests via bundled test binaries. Bundled test binaries contain all tests,
-and the test name passed as the first argument selects which test run.
 
 ## `-c \<curl\>`
 
@@ -218,11 +218,6 @@ Display run time statistics. (Requires the `Perl Time::HiRes` module)
 ## `-rf`
 
 Display full run time statistics. (Requires the `Perl Time::HiRes` module)
-
-## `-rm`
-
-Force removal of files by killing locking processes. (Windows only, requires
-the **Sysinternals** `handle[64].exe` to be on PATH)
 
 ## `--repeat=[num]`
 

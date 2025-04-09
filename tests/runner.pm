@@ -47,7 +47,6 @@ BEGIN {
         readtestkeywords
         restore_test_env
         runner_init
-        runnerac_clearlocks
         runnerac_shutdown
         runnerac_stopservers
         runnerac_test_preprocess
@@ -88,7 +87,6 @@ use processhelp qw(
     );
 use servers qw(
     checkcmd
-    clearlocks
     initserverconfig
     serverfortest
     stopserver
@@ -101,6 +99,7 @@ use testutil qw(
     clearlogs
     logmsg
     runclient
+    exerunner
     shell_quote
     subbase64
     subsha256base64file
@@ -916,24 +915,26 @@ sub singletest_run {
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
             $tool_name="unit$testnum";
-            $tool = $tool_name;
+            $tool = $tool_name . exe_ext('TOOL');
         }
 
         if($tool =~ /^lib/) {
             if($bundle) {
-                $CMDLINE=$LIBDIR . "libtests";
+                $tool = "libtests" . exe_ext('TOOL');
             }
-            else {
-                $CMDLINE=$LIBDIR . $tool;
-            }
+            $CMDLINE=$LIBDIR . $tool;
         }
         elsif($tool =~ /^unit/) {
             if($bundle) {
-                $CMDLINE=$UNITDIR . "units";
+                $tool = "units" . exe_ext('TOOL')
             }
-            else {
-                $CMDLINE=$UNITDIR . $tool;
+            $CMDLINE=$UNITDIR . $tool;
+        }
+        elsif($tool =~ /^tool/) {
+            if($bundle) {
+                $tool = "units" . exe_ext('TOOL')
             }
+            $CMDLINE=$TUNITDIR . $tool;
         }
 
         if(! -f $CMDLINE) {
@@ -941,8 +942,15 @@ sub singletest_run {
             return (-1, 0, 0, "", "", 0);
         }
 
+        $CMDLINE=exerunner() . $CMDLINE;
+
         if($bundle) {
-            $CMDLINE.=" $tool_name";
+            if($gdbthis) {
+                $cmdargs =" $tool_name$cmdargs";
+            }
+            else {
+                $CMDLINE.=" $tool_name";
+            }
         }
 
         $DBGCURL=$CMDLINE;
@@ -977,7 +985,7 @@ sub singletest_run {
     }
 
     if(!$tool) {
-        $CMDLINE=shell_quote($CURL);
+        $CMDLINE=exerunner() . shell_quote($CURL);
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
@@ -1276,12 +1284,6 @@ sub runner_test_run {
     return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
 }
 
-# Async call runner_clearlocks
-# Called by controller
-sub runnerac_clearlocks {
-    return controlleripccall(\&runner_clearlocks, @_);
-}
-
 # Async call runner_shutdown
 # This call does NOT generate an IPC response and must be the last IPC call
 # received.
@@ -1475,10 +1477,7 @@ sub ipcrecv {
     # print "ipcrecv $funcname\n";
     # Synchronously call the desired function
     my @res;
-    if($funcname eq "runner_clearlocks") {
-        @res = runner_clearlocks(@$argsarrayref);
-    }
-    elsif($funcname eq "runner_shutdown") {
+    if($funcname eq "runner_shutdown") {
         runner_shutdown(@$argsarrayref);
         # Special case: no response will be forthcoming
         return 1;
@@ -1511,18 +1510,6 @@ sub ipcrecv {
 
     return 0;
 }
-
-###################################################################
-# Kill the server processes that still have lock files in a directory
-sub runner_clearlocks {
-    my ($lockdir)=@_;
-    if(clearlogs()) {
-        logmsg "Warning: log messages were lost\n";
-    }
-    clearlocks($lockdir);
-    return clearlogs();
-}
-
 
 ###################################################################
 # Kill all server processes

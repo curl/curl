@@ -44,7 +44,6 @@
 #include <netdb.h>
 #endif
 
-#include "curlx.h" /* from the private lib dir */
 #include "util.h"
 
 /* include memdebug.h last */

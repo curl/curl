@@ -770,7 +770,6 @@ struct connectdata {
   curl_off_t connection_id; /* Contains a unique number to make it easier to
                                track the connections in the log output */
   char *destination; /* string carrying normalized hostname+port+scope */
-  size_t destination_len; /* strlen(destination) + 1 */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -804,7 +803,6 @@ struct connectdata {
   char *options; /* options string, allocated */
   char *sasl_authzid;     /* authorization identity string, allocated */
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
-  struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection poolas idle */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
@@ -1843,15 +1841,6 @@ struct UserDefined {
 #define IS_MIME_POST(a) FALSE
 #endif
 
-struct Names {
-  struct Curl_hash *hostcache;
-  enum {
-    HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_MULTI,   /* points to a shared one in the multi handle */
-    HCACHE_SHARED   /* points to a shared one in a shared object */
-  } hostcachetype;
-};
-
 /*
  * The 'connectdata' struct MUST have all the connection oriented stuff as we
  * may have several simultaneous connections and connection structs in memory.
@@ -1887,7 +1876,6 @@ struct Curl_easy {
 
   struct Curl_message msg; /* A single posted message. */
 
-  struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" when used by
                                   the multi interface */

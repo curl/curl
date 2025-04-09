@@ -98,8 +98,9 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb,
 }
 
 
-static int perform_and_check_connections(CURL *curl, const char *description,
-                                         long expected_connections)
+static CURLcode perform_and_check_connections(CURL *curl,
+                                              const char *description,
+                                              long expected_connections)
 {
   CURLcode res;
   long connections = 0;
@@ -132,7 +133,7 @@ CURLcode test(char *URL)
   struct cb_data data;
   CURL *curl = NULL;
   CURLcode res = TEST_ERR_FAILURE;
-  int result;
+  CURLcode result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -161,7 +162,7 @@ CURLcode test(char *URL)
   result = perform_and_check_connections(curl,
     "First request without CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = (CURLcode) result;
+    res = result;
     goto test_cleanup;
   }
 
@@ -170,7 +171,7 @@ CURLcode test(char *URL)
   result = perform_and_check_connections(curl,
     "Second request without CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = (CURLcode) result;
+    res = result;
     goto test_cleanup;
   }
 
@@ -181,7 +182,7 @@ CURLcode test(char *URL)
   result = perform_and_check_connections(curl,
     "First request with CURLOPT_KEEP_SENDING_ON_ERROR", 1);
   if(result != TEST_ERR_SUCCESS) {
-    res = (CURLcode) result;
+    res = result;
     goto test_cleanup;
   }
 
@@ -190,7 +191,7 @@ CURLcode test(char *URL)
   result = perform_and_check_connections(curl,
     "Second request with CURLOPT_KEEP_SENDING_ON_ERROR", 0);
   if(result != TEST_ERR_SUCCESS) {
-    res = (CURLcode) result;
+    res = result;
     goto test_cleanup;
   }
 

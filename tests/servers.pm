@@ -54,7 +54,6 @@ BEGIN {
         # functions
         qw(
             checkcmd
-            clearlocks
             serverfortest
             stopserver
             stopservers
@@ -113,6 +112,7 @@ use testutil qw(
     logmsg
     runclient
     runclientoutput
+    exerunner
     shell_quote
     );
 
@@ -235,7 +235,7 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt')) {
+                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -261,54 +261,6 @@ sub init_serverpidfile_hash {
   }
 }
 
-
-#######################################################################
-# Kill the processes that still have lock files in a directory
-#
-sub clearlocks {
-    my $dir = $_[0];
-    my $done = 0;
-
-    if(os_is_win()) {
-        $dir = sys_native_abs_path($dir);
-        # Must use backslashes for handle64 to find a match
-        if ($^O eq 'MSWin32') {
-            $dir =~ s/\//\\/g;
-        }
-        else {
-            $dir =~ s/\//\\\\/g;
-        }
-        my $handle = "handle";
-        if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
-            $handle = "handle64";
-        }
-        if(checkcmd($handle)) {
-            # https://learn.microsoft.com/sysinternals/downloads/handle#usage
-            my $cmd = "$handle $dir -accepteula -nobanner";
-            logmsg "clearlocks: Executing query: '$cmd'\n";
-            my @handles = `$cmd`;
-            for my $tryhandle (@handles) {
-                # Skip the "No matching handles found." warning when returned
-                if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
-                    logmsg "clearlocks: Found $3 lock of '$5' ($4) by $1 ($2)\n";
-                    # Ignore stunnel since we cannot do anything about its locks
-                    if("$3" eq "File" && "$1" ne "tstunnel.exe") {
-                        logmsg "clearlocks: Killing IMAGENAME eq $1 and PID eq $2\n";
-                        # https://ss64.com/nt/taskkill.html
-                        my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
-                        logmsg "clearlocks: Executing kill: '$cmd'\n";
-                        system($cmd);
-                        $done = 1;
-                    }
-                }
-            }
-        }
-        else {
-            logmsg "Warning: 'handle' tool not found.\n";
-        }
-    }
-    return $done;
-}
 
 #######################################################################
 # Check if a given child process has just died. Reaps it if so.
@@ -591,7 +543,7 @@ sub verifyhttp {
     $flags .= "--http3-only " if($do_http3);
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -668,7 +620,7 @@ sub verifyftp {
     }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -734,7 +686,7 @@ sub verifyrtsp {
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -867,7 +819,7 @@ sub verifyhttptls {
     }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -968,7 +920,7 @@ sub verifysmb {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1028,7 +980,8 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
+    my $cmd = "echo 'verifiedserver' | " .
+        exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1409,6 +1362,9 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'certs/test-localhost.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    if($proto eq "https-mtls") {
+        $flags .= "--mtls ";
+    }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
     }
@@ -2592,14 +2548,14 @@ sub startservers {
         elsif($what eq "file") {
             # we support it but have no server!
         }
-        elsif($what eq "https") {
+        elsif($what eq "https" || $what eq "https-mtls") {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return ("no stunnel", 4);
             }
-            if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
+            if($runcert{$what} && ($runcert{$what} ne $certfile)) {
                 # stop server when running and using a different cert
-                if(stopserver('https')) {
+                if(stopserver($what)) {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2607,10 +2563,10 @@ sub startservers {
                     return ("failed stopping HTTP server", 3);
                 }
             }
-            if($run{'https'} &&
-               !responsive_http_server("https", $verbose, 0,
-                                       protoport('https'))) {
-                if(stopserver('https')) {
+            if($run{$what} &&
+               !responsive_http_server($what, $verbose, 0,
+                                       protoport($what))) {
+                if(stopserver($what)) {
                     return ("failed stopping unresponsive HTTPS server", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2619,7 +2575,7 @@ sub startservers {
                 }
             }
             # check a running http server if we not already checked https
-            if($run{'http'} && !$run{'https'} &&
+            if($run{'http'} && !$run{$what} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {
@@ -2635,15 +2591,15 @@ sub startservers {
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(!$run{'https'}) {
-                ($serr, $pid, $pid2, $PORT{'https'}) =
-                    runhttpsserver($verbose, "https", "", $certfile);
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
                 if($pid <= 0) {
                     return ("failed starting HTTPS server (stunnel)", $serr);
                 }
-                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https'}="$pid $pid2";
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "http/2") {
@@ -3064,7 +3020,7 @@ sub subvariables {
     foreach my $proto ('DICT',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
-                       'HTTP', 'HTTP6', 'HTTPS',
+                       'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',
                        'HTTPSPROXY', 'HTTPTLS', 'HTTPTLS6',
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',
@@ -3132,6 +3088,7 @@ sub subvariables {
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
     $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
+    $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
 

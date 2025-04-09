@@ -40,7 +40,7 @@ HTTP/2 over HTTPS with -f
 <setenv>
 </setenv>
 <command>
--k --http2 -f "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
+--insecure --http2 -f "https://%HOSTIP:%HTTP2TLSPORT/%TESTNUMBER"
 </command>
 
 </client>

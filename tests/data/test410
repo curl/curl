@@ -36,7 +36,7 @@ HTTPS GET with very long request header
 Long: %repeat[3500 x header content]%
 </file>
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @%LOGDIR/file%TESTNUMBER
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER -H @%LOGDIR/file%TESTNUMBER
 </command>
 </client>
 

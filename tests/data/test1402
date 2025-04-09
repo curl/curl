@@ -22,6 +22,9 @@ Connection: close
 
 # Client-side
 <client>
+<features>
+--libcurl
+</features>
 <server>
 http
 </server>

@@ -65,7 +65,7 @@ endif()
 
 set(NGTCP2_PC_REQUIRES "libngtcp2")
 if(_ngtcp2_crypto_backend)
-  set(NGTCP2_CRYPTO_PC_REQUIRES "lib${_crypto_library_lower}")
+  list(APPEND NGTCP2_PC_REQUIRES "lib${_crypto_library_lower}")
 endif()
 
 if(CURL_USE_PKGCONFIG AND
@@ -73,18 +73,9 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGTCP2_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(NGTCP2 ${NGTCP2_PC_REQUIRES})
-  if(_ngtcp2_crypto_backend)
-    pkg_check_modules("${_crypto_library_upper}" ${NGTCP2_CRYPTO_PC_REQUIRES})
-  else()
-    set("${_crypto_library_upper}_FOUND" TRUE)
-  endif()
 endif()
 
-list(APPEND NGTCP2_PC_REQUIRES ${NGTCP2_CRYPTO_PC_REQUIRES})
-
-if(NGTCP2_FOUND AND "${${_crypto_library_upper}_FOUND}")
-  list(APPEND NGTCP2_LIBRARIES "${${_crypto_library_upper}_LIBRARIES}")
-  list(REMOVE_DUPLICATES NGTCP2_LIBRARIES)
+if(NGTCP2_FOUND)
   string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()

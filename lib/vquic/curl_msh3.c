@@ -22,31 +22,31 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_MSH3
 
-#include "urldata.h"
-#include "hash.h"
-#include "hash_offt.h"
-#include "timeval.h"
-#include "multiif.h"
-#include "sendf.h"
-#include "curl_trc.h"
-#include "cfilters.h"
-#include "cf-socket.h"
-#include "connect.h"
-#include "progress.h"
-#include "http1.h"
+#include "../urldata.h"
+#include "../hash.h"
+#include "../hash_offt.h"
+#include "../timeval.h"
+#include "../multiif.h"
+#include "../sendf.h"
+#include "../curl_trc.h"
+#include "../cfilters.h"
+#include "../cf-socket.h"
+#include "../connect.h"
+#include "../progress.h"
+#include "../http1.h"
 #include "curl_msh3.h"
-#include "socketpair.h"
-#include "vtls/vtls.h"
-#include "vquic/vquic.h"
+#include "../socketpair.h"
+#include "../vtls/vtls.h"
+#include "vquic.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #ifdef CURL_DISABLE_SOCKETPAIR
 #error "MSH3 cannot be build with CURL_DISABLE_SOCKETPAIR set"

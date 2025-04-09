@@ -102,6 +102,13 @@ int Curl_str_cspn(const char **linep, struct Curl_str *out, const char *cspn);
 void Curl_str_trimblanks(struct Curl_str *out);
 void Curl_str_passblanks(const char **linep);
 
+/* given a hexadecimal letter, return the binary value. '0' returns 0, 'a'
+   returns 10. THIS ONLY WORKS ON VALID HEXADECIMAL LETTER INPUT. Verify
+   before calling this!
+*/
+extern const unsigned char Curl_hexasciitable[];
+#define Curl_hexval(x) (unsigned char)(Curl_hexasciitable[(x) - '0'] & 0x0f)
+
 #define curlx_str_number(x,y,z) Curl_str_number(x,y,z)
 #define curlx_str_octal(x,y,z) Curl_str_octal(x,y,z)
 #define curlx_str_single(x,y) Curl_str_single(x,y)

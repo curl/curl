@@ -14,7 +14,7 @@ Example:
 
 # `--mptcp`
 
-Enables the use of Multipath TCP (MPTCP) for connections. MPTCP is an extension
+Enable the use of Multipath TCP (MPTCP) for connections. MPTCP is an extension
 to the standard TCP that allows multiple TCP streams over different network
 paths between the same source and destination. This can enhance bandwidth and
 improve reliability by using multiple paths simultaneously.

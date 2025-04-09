@@ -17,6 +17,9 @@ unittest
 <name>
 unit test for parse_cert_parameter()
 </name>
+<tool>
+tool%TESTNUMBER
+</tool>
 </client>
 
 <verify>

@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#ifdef HAVE_EVENTFD
+#ifdef USE_EVENTFD
 
 #define wakeup_write  write
 #define wakeup_read   read
@@ -46,7 +46,7 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
 #include <curl/curl.h>
 int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 
-#else /* !HAVE_EVENTFD && !HAVE_PIPE */
+#else /* !USE_EVENTFD && !HAVE_PIPE */
 
 #define wakeup_write     swrite
 #define wakeup_read      sread
@@ -69,7 +69,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 #define wakeup_create(p,nb)\
 Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
-#endif /* HAVE_EVENTFD */
+#endif /* USE_EVENTFD */
 
 #ifndef CURL_DISABLE_SOCKETPAIR
 #include <curl/curl.h>

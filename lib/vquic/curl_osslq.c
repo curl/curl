@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
 
@@ -31,36 +31,36 @@
 #include <openssl/err.h>
 #include <nghttp3/nghttp3.h>
 
-#include "urldata.h"
-#include "hash.h"
-#include "sendf.h"
-#include "strdup.h"
-#include "rand.h"
-#include "multiif.h"
-#include "strcase.h"
-#include "cfilters.h"
-#include "cf-socket.h"
-#include "connect.h"
-#include "progress.h"
-#include "strerror.h"
-#include "dynbuf.h"
-#include "http1.h"
-#include "select.h"
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../hash.h"
+#include "../sendf.h"
+#include "../strdup.h"
+#include "../rand.h"
+#include "../multiif.h"
+#include "../strcase.h"
+#include "../cfilters.h"
+#include "../cf-socket.h"
+#include "../connect.h"
+#include "../progress.h"
+#include "../strerror.h"
+#include "../dynbuf.h"
+#include "../http1.h"
+#include "../select.h"
+#include "../inet_pton.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vquic-tls.h"
-#include "vtls/keylog.h"
-#include "vtls/vtls.h"
-#include "vtls/openssl.h"
+#include "../vtls/keylog.h"
+#include "../vtls/vtls.h"
+#include "../vtls/openssl.h"
 #include "curl_osslq.h"
 
-#include "warnless.h"
+#include "../warnless.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer. We use HTTP/3 flow control and only ACK

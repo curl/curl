@@ -38,6 +38,9 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 <file name="%LOGDIR/%TESTNUMBER-upload" nonewline="yes">
 %hex[ab%81cd%00e\"?%0D%0A%09%01fghi%1Ajklm%FD]hex%
 </file>
+<features>
+--libcurl
+</features>
 </client>
 
 # Verify data after the test has been "shot"

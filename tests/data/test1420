@@ -41,6 +41,7 @@ SSL_CERT_FILE=
 # Need ftp so the FTP options are written in the --libcurl template
 <features>
 ftp
+--libcurl
 </features>
 </client>
 

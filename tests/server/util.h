@@ -25,24 +25,6 @@
  ***************************************************************************/
 #include "server_setup.h"
 
-#ifdef USE_WINSOCK
-#define SOCKEADDRINUSE   WSAEADDRINUSE
-#define SOCKECONNREFUSED WSAECONNREFUSED
-#define SOCKEINPROGRESS  WSAEINPROGRESS
-#define SOCKEINTR        WSAEINTR
-#define SOCKEINVAL       WSAEINVAL
-#define SOCKEISCONN      WSAEISCONN
-#define SOCKEWOULDBLOCK  WSAEWOULDBLOCK
-#else
-#define SOCKEADDRINUSE   EADDRINUSE
-#define SOCKECONNREFUSED ECONNREFUSED
-#define SOCKEINPROGRESS  EINPROGRESS
-#define SOCKEINTR        EINTR
-#define SOCKEINVAL       EINVAL
-#define SOCKEISCONN      EISCONN
-#define SOCKEWOULDBLOCK  EWOULDBLOCK
-#endif
-
 enum {
   DOCNUMBER_NOTHING    = -7,
   DOCNUMBER_QUIT       = -6,
@@ -61,7 +43,7 @@ unsigned char byteval(char *value);
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 /* global variables */
-extern const char *path;  /* where to find the 'data' dir */
+extern const char *srcpath;  /* where to find the 'data' dir */
 extern const char *pidname;
 extern const char *portname;
 extern const char *serverlogfile;  /* log file name */
@@ -110,8 +92,9 @@ extern HANDLE exit_event;
 void install_signal_handlers(bool keep_sigalrm);
 void restore_signal_handlers(bool keep_sigalrm);
 
-#ifdef USE_UNIX_SOCKETS
 #include <curl/curl.h> /* for curl_socket_t */
+
+#ifdef USE_UNIX_SOCKETS
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif

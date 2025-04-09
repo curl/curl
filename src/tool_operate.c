@@ -547,7 +547,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
             (CURLE_COULDNT_CONNECT == result)) {
       long oserrno = 0;
       curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &oserrno);
-      if(ECONNREFUSED == oserrno)
+      if(SOCKECONNREFUSED == oserrno)
         retry = RETRY_CONNREFUSED;
     }
     else if((CURLE_OK == result) ||
@@ -644,10 +644,12 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         }
       }
       warnf(config->global, "Problem %s. "
-            "Will retry in %ld seconds. "
-            "%ld %s left.",
-            m[retry], sleeptime/1000L, per->retry_remaining,
-            (per->retry_remaining > 1 ? "retries" : "retry"));
+            "Will retry in %ld second%s. "
+            "%ld retr%s left.",
+            m[retry], sleeptime/1000L,
+            (sleeptime/1000L == 1 ? "" : "s"),
+            per->retry_remaining,
+            (per->retry_remaining > 1 ? "ies" : "y"));
 
       per->retry_remaining--;
       if(!config->retry_delay) {
@@ -908,11 +910,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
 
   /* Note that if CURLOPT_READFUNCTION is fread (the default), then
-   * lib/telnet.c will Curl_poll() on the input file descriptor
-   * rather than calling the READFUNCTION at regular intervals.
-   * The circumstances in which it is preferable to enable this
-   * behavior, by omitting to set the READFUNCTION & READDATA options,
-   * have not been determined.
+   * lib/telnet.c will poll on the input file descriptor rather than calling
+   * the READFUNCTION at regular intervals. The circumstances in which it is
+   * preferable to enable this behavior, by omitting to set the READFUNCTION &
+   * READDATA options, have not been determined.
    */
   my_setopt(curl, CURLOPT_READDATA, per);
   /* what call to read */

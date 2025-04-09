@@ -44,7 +44,6 @@ BEGIN {
 }
 
 use Memoize;
-use MIME::Base64;
 
 my @xml;      # test data file contents
 my $xmlfile;  # test data file name
@@ -132,7 +131,6 @@ sub getpart {
 
     my @this;
     my $inside=0;
-    my $base64=0;
     my $hex=0;
     my $line;
 
@@ -144,10 +142,6 @@ sub getpart {
         elsif(($inside >= 1) && ($_ =~ /^ *\<$part[ \>]/)) {
             if($inside > 1) {
                 push @this, $_;
-            }
-            elsif($_ =~ /$part [^>]*base64=/) {
-                # attempt to detect our base64 encoded part
-                $base64=1;
             }
             elsif($_ =~ /$part [^>]*hex=/) {
                 # attempt to detect a hex-encoded part
@@ -172,14 +166,7 @@ sub getpart {
             if($warning && !@this) {
                 print STDERR "*** getpart.pm: $section/$part returned empty!\n";
             }
-            if($base64) {
-                # decode the whole array before returning it!
-                for(@this) {
-                    my $decoded = decode_base64($_);
-                    $_ = $decoded;
-                }
-            }
-            elsif($hex) {
+            if($hex) {
                 # decode the whole array before returning it!
                 for(@this) {
                     my $decoded = decode_hex($_);
@@ -308,7 +295,7 @@ sub striparray {
 sub compareparts {
  my ($firstref, $secondref)=@_;
 
- # we cannot compare arrays index per index since with the base64 chunks,
+ # we cannot compare arrays index per index since with data chunks,
  # they may not be "evenly" distributed
  my $first = join("", @$firstref);
  my $second = join("", @$secondref);

@@ -38,7 +38,7 @@
    https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
 */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -50,8 +50,8 @@
 #include <fcntl.h>
 #endif
 
-#include "urldata.h"
-#include "cfilters.h"
+#include "../urldata.h"
+#include "../cfilters.h"
 
 #include "vtls.h" /* generic SSL protos etc */
 #include "vtls_int.h"
@@ -66,28 +66,28 @@
 #include "bearssl.h"        /* BearSSL versions */
 #include "rustls.h"         /* Rustls versions */
 
-#include "slist.h"
-#include "sendf.h"
-#include "strcase.h"
-#include "url.h"
-#include "progress.h"
-#include "share.h"
-#include "multiif.h"
-#include "timeval.h"
-#include "curl_md5.h"
-#include "curl_sha256.h"
-#include "warnless.h"
-#include "curl_base64.h"
-#include "curl_printf.h"
-#include "inet_pton.h"
-#include "connect.h"
-#include "select.h"
-#include "strdup.h"
-#include "rand.h"
+#include "../slist.h"
+#include "../sendf.h"
+#include "../strcase.h"
+#include "../url.h"
+#include "../progress.h"
+#include "../share.h"
+#include "../multiif.h"
+#include "../timeval.h"
+#include "../curl_md5.h"
+#include "../curl_sha256.h"
+#include "../warnless.h"
+#include "../curl_base64.h"
+#include "../curl_printf.h"
+#include "../inet_pton.h"
+#include "../connect.h"
+#include "../select.h"
+#include "../strdup.h"
+#include "../rand.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 
 #define CLONE_STRING(var)                    \
@@ -1191,10 +1191,10 @@ static ssl_peer_type get_peer_type(const char *hostname)
 #else
     struct in_addr addr;
 #endif
-    if(Curl_inet_pton(AF_INET, hostname, &addr))
+    if(curlx_inet_pton(AF_INET, hostname, &addr))
       return CURL_SSL_PEER_IPV4;
 #ifdef USE_IPV6
-    else if(Curl_inet_pton(AF_INET6, hostname, &addr)) {
+    else if(curlx_inet_pton(AF_INET6, hostname, &addr)) {
       return CURL_SSL_PEER_IPV6;
     }
 #endif
@@ -1661,8 +1661,14 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
+#ifdef CURL_DISABLE_HTTP
+  /* We only support ALPN for HTTP so far. */
+  DEBUGASSERT(!conn->bits.tls_enable_alpn);
+  ctx = cf_ctx_new(data, NULL);
+#else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        conn->bits.tls_enable_alpn));
+#endif
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

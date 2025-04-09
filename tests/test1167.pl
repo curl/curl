@@ -67,8 +67,6 @@ my $summary=0;
 my $misses=0;
 
 my @syms;
-my %doc;
-my %rem;
 
 sub scanenums {
     my ($file)=@_;

@@ -16,6 +16,6 @@ Example:
 
 # `--remote-time`
 
-Makes curl attempt to figure out the timestamp of the remote file that is
+Make curl attempt to figure out the timestamp of the remote file that is
 getting downloaded, and if that is available make the local file get that same
 timestamp.

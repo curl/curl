@@ -35,7 +35,7 @@ if(BUILD_MISC_DOCS)
     add_custom_command(OUTPUT "${_man_target}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md" > "${_man_target}"
-      DEPENDS "${_man_misc}.md"
+      DEPENDS "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md"
       VERBATIM
     )
     add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")

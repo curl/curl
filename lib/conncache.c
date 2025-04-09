@@ -88,16 +88,17 @@ static void cpool_discard_conn(struct cpool *cpool,
                                struct connectdata *conn,
                                bool aborted);
 
-static struct cpool_bundle *cpool_bundle_create(const char *dest,
-                                                size_t dest_len)
+static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
   struct cpool_bundle *bundle;
+  size_t dest_len = strlen(dest);
+
   bundle = calloc(1, sizeof(*bundle) + dest_len);
   if(!bundle)
     return NULL;
   Curl_llist_init(&bundle->conns, NULL);
-  bundle->dest_len = dest_len;
-  memcpy(bundle->dest, dest, dest_len);
+  bundle->dest_len = dest_len + 1;
+  memcpy(bundle->dest, dest, bundle->dest_len);
   return bundle;
 }
 
@@ -131,25 +132,19 @@ static void cpool_bundle_free_entry(void *freethis)
   cpool_bundle_destroy((struct cpool_bundle *)freethis);
 }
 
-int Curl_cpool_init(struct cpool *cpool,
-                    Curl_cpool_disconnect_cb *disconnect_cb,
-                    struct Curl_easy *idata,
-                    struct Curl_share *share,
-                    size_t size)
+void Curl_cpool_init(struct cpool *cpool,
+                     struct Curl_easy *idata,
+                     struct Curl_share *share,
+                     size_t size)
 {
   Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
                  Curl_str_key_compare, cpool_bundle_free_entry);
 
   DEBUGASSERT(idata);
-  DEBUGASSERT(disconnect_cb);
-  if(!disconnect_cb)
-    return 1;
 
   cpool->idata = idata;
-  cpool->disconnect_cb = disconnect_cb;
   cpool->share = share;
   cpool->initialised = TRUE;
-  return 0; /* good */
 }
 
 /* Return the "first" connection in the pool or NULL. */
@@ -176,7 +171,7 @@ static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
                                               struct connectdata *conn)
 {
   return Curl_hash_pick(&cpool->dest2bundle,
-                        conn->destination, conn->destination_len);
+                        conn->destination, strlen(conn->destination) + 1);
 }
 
 
@@ -276,7 +271,7 @@ cpool_add_bundle(struct cpool *cpool, struct connectdata *conn)
 {
   struct cpool_bundle *bundle;
 
-  bundle = cpool_bundle_create(conn->destination, conn->destination_len);
+  bundle = cpool_bundle_create(conn->destination);
   if(!bundle)
     return NULL;
 
@@ -456,9 +451,9 @@ CURLcode Curl_cpool_add(struct Curl_easy *data,
   cpool_bundle_add(bundle, conn);
   conn->connection_id = cpool->next_connection_id++;
   cpool->num_conn++;
-  DEBUGF(infof(data, "Added connection %" FMT_OFF_T ". "
-               "The cache now contains %zu members",
-               conn->connection_id, cpool->num_conn));
+  CURL_TRC_M(data, "[CPOOL] added connection %" FMT_OFF_T ". "
+             "The cache now contains %zu members",
+             conn->connection_id, cpool->num_conn);
 out:
   CPOOL_UNLOCK(cpool, data);
 
@@ -551,7 +546,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
 }
 
 bool Curl_cpool_find(struct Curl_easy *data,
-                     const char *destination, size_t dest_len,
+                     const char *destination,
                      Curl_cpool_conn_match_cb *conn_cb,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata)
@@ -567,7 +562,8 @@ bool Curl_cpool_find(struct Curl_easy *data,
 
   CPOOL_LOCK(cpool, data);
   bundle = Curl_hash_pick(&cpool->dest2bundle,
-                          CURL_UNCONST(destination), dest_len);
+                          CURL_UNCONST(destination),
+                          strlen(destination) + 1);
   if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conns);
     while(curr) {
@@ -667,8 +663,10 @@ void Curl_conn_terminate(struct Curl_easy *data,
     DEBUGASSERT(!conn->bits.in_cpool);
   }
 
-  /* Run the callback to let it clean up anything it wants to. */
-  aborted = cpool->disconnect_cb(data, conn, aborted);
+  /* treat the connection as aborted in CONNECT_ONLY situations,
+   * so no graceful shutdown is attempted. */
+  if(conn->connect_only)
+    aborted = TRUE;
 
   if(data->multi) {
     /* Add it to the multi's cpool for shutdown handling */

@@ -25,7 +25,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_LIBSSH
 
@@ -46,29 +46,29 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "sendf.h"
-#include "hostip.h"
-#include "progress.h"
-#include "transfer.h"
-#include "escape.h"
-#include "http.h"               /* for HTTP proxy tunnel stuff */
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../hostip.h"
+#include "../progress.h"
+#include "../transfer.h"
+#include "../escape.h"
+#include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
-#include "url.h"
-#include "speedcheck.h"
-#include "getinfo.h"
-#include "strdup.h"
-#include "strcase.h"
-#include "vtls/vtls.h"
-#include "cfilters.h"
-#include "connect.h"
-#include "inet_ntop.h"
-#include "parsedate.h"          /* for the week day and month names */
-#include "sockaddr.h"           /* required for Curl_sockaddr_storage */
-#include "strparse.h"
-#include "multiif.h"
-#include "select.h"
-#include "warnless.h"
+#include "../url.h"
+#include "../speedcheck.h"
+#include "../getinfo.h"
+#include "../strdup.h"
+#include "../strcase.h"
+#include "../vtls/vtls.h"
+#include "../cfilters.h"
+#include "../connect.h"
+#include "../inet_ntop.h"
+#include "../parsedate.h"          /* for the week day and month names */
+#include "../sockaddr.h"           /* required for Curl_sockaddr_storage */
+#include "../strparse.h"
+#include "../multiif.h"
+#include "../select.h"
+#include "../warnless.h"
 #include "curl_path.h"
 
 #ifdef HAVE_SYS_STAT_H
@@ -82,9 +82,9 @@
 #endif
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
@@ -944,7 +944,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         MOVE_TO_ERROR_STATE(CURLE_COULDNT_CONNECT);
         break;
       }
-      data->state.most_recent_ftp_entrypath = sshc->homedir;
+      free(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+      if(!data->state.most_recent_ftp_entrypath)
+        return CURLE_OUT_OF_MEMORY;
 
       /* This is the last step in the SFTP connect phase. Do note that while
          we get the homedir here, we get the "workingpath" in the DO action
@@ -1763,7 +1766,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_DISCONNECT);
       break;
@@ -1939,7 +1941,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
-      data->state.most_recent_ftp_entrypath = NULL;
 
       state(data, SSH_SESSION_FREE);
       FALLTHROUGH();
@@ -2085,10 +2086,14 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
+  if(!sshc->initialised) {
+    Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
+    sshc->initialised = TRUE;
+  }
+
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
 
   return CURLE_OK;
 }
@@ -2294,47 +2299,50 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 static void sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data)
 {
   (void)data;
-  if(sshc->ssh_session) {
-    ssh_free(sshc->ssh_session);
-    sshc->ssh_session = NULL;
-  }
+  if(sshc->initialised) {
+    if(sshc->ssh_session) {
+      ssh_free(sshc->ssh_session);
+      sshc->ssh_session = NULL;
+    }
 
-  /* worst-case scenario cleanup */
-  DEBUGASSERT(sshc->ssh_session == NULL);
-  DEBUGASSERT(sshc->scp_session == NULL);
+    /* worst-case scenario cleanup */
+    DEBUGASSERT(sshc->ssh_session == NULL);
+    DEBUGASSERT(sshc->scp_session == NULL);
 
-  if(sshc->readdir_tmp) {
-    ssh_string_free_char(sshc->readdir_tmp);
-    sshc->readdir_tmp = NULL;
-  }
-  if(sshc->quote_attrs) {
-    sftp_attributes_free(sshc->quote_attrs);
-    sshc->quote_attrs = NULL;
-  }
-  if(sshc->readdir_attrs) {
-    sftp_attributes_free(sshc->readdir_attrs);
-    sshc->readdir_attrs = NULL;
-  }
-  if(sshc->readdir_link_attrs) {
-    sftp_attributes_free(sshc->readdir_link_attrs);
-    sshc->readdir_link_attrs = NULL;
-  }
-  if(sshc->privkey) {
-    ssh_key_free(sshc->privkey);
-    sshc->privkey = NULL;
-  }
-  if(sshc->pubkey) {
-    ssh_key_free(sshc->pubkey);
-    sshc->pubkey = NULL;
-  }
+    if(sshc->readdir_tmp) {
+      ssh_string_free_char(sshc->readdir_tmp);
+      sshc->readdir_tmp = NULL;
+    }
+    if(sshc->quote_attrs) {
+      sftp_attributes_free(sshc->quote_attrs);
+      sshc->quote_attrs = NULL;
+    }
+    if(sshc->readdir_attrs) {
+      sftp_attributes_free(sshc->readdir_attrs);
+      sshc->readdir_attrs = NULL;
+    }
+    if(sshc->readdir_link_attrs) {
+      sftp_attributes_free(sshc->readdir_link_attrs);
+      sshc->readdir_link_attrs = NULL;
+    }
+    if(sshc->privkey) {
+      ssh_key_free(sshc->privkey);
+      sshc->privkey = NULL;
+    }
+    if(sshc->pubkey) {
+      ssh_key_free(sshc->pubkey);
+      sshc->pubkey = NULL;
+    }
 
-  Curl_safefree(sshc->rsa_pub);
-  Curl_safefree(sshc->rsa);
-  Curl_safefree(sshc->quote_path1);
-  Curl_safefree(sshc->quote_path2);
-  Curl_dyn_free(&sshc->readdir_buf);
-  Curl_safefree(sshc->readdir_linkPath);
-  SSH_STRING_FREE_CHAR(sshc->homedir);
+    Curl_safefree(sshc->rsa_pub);
+    Curl_safefree(sshc->rsa);
+    Curl_safefree(sshc->quote_path1);
+    Curl_safefree(sshc->quote_path2);
+    Curl_dyn_free(&sshc->readdir_buf);
+    Curl_safefree(sshc->readdir_linkPath);
+    SSH_STRING_FREE_CHAR(sshc->homedir);
+    sshc->initialised = FALSE;
+  }
 }
 
 /* BLOCKING, but the function is using the state machine so the only reason

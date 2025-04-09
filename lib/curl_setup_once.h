@@ -321,32 +321,39 @@ typedef unsigned int bit;
  */
 
 #ifdef USE_WINSOCK
-#undef  EBADF            /* override definition in errno.h */
-#define EBADF            WSAEBADF
-#undef  EINTR            /* override definition in errno.h */
-#define EINTR            WSAEINTR
-#undef  EINVAL           /* override definition in errno.h */
-#define EINVAL           WSAEINVAL
-#undef  EWOULDBLOCK      /* override definition in errno.h */
-#define EWOULDBLOCK      WSAEWOULDBLOCK
-#undef  EINPROGRESS      /* override definition in errno.h */
-#define EINPROGRESS      WSAEINPROGRESS
-#undef  EMSGSIZE         /* override definition in errno.h */
-#define EMSGSIZE         WSAEMSGSIZE
-#undef  EAFNOSUPPORT     /* override definition in errno.h */
-#define EAFNOSUPPORT     WSAEAFNOSUPPORT
-#undef  EADDRINUSE       /* override definition in errno.h */
-#define EADDRINUSE       WSAEADDRINUSE
-#undef  EADDRNOTAVAIL    /* override definition in errno.h */
-#define EADDRNOTAVAIL    WSAEADDRNOTAVAIL
-#undef  ECONNRESET       /* override definition in errno.h */
-#define ECONNRESET       WSAECONNRESET
-#undef  EISCONN          /* override definition in errno.h */
-#define EISCONN          WSAEISCONN
-#undef  ETIMEDOUT        /* override definition in errno.h */
-#define ETIMEDOUT        WSAETIMEDOUT
-#undef  ECONNREFUSED     /* override definition in errno.h */
-#define ECONNREFUSED     WSAECONNREFUSED
+#define SOCKEACCES        WSAEACCES
+#define SOCKEADDRINUSE    WSAEADDRINUSE
+#define SOCKEADDRNOTAVAIL WSAEADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  WSAEAFNOSUPPORT
+#define SOCKEBADF         WSAEBADF
+#define SOCKECONNREFUSED  WSAECONNREFUSED
+#define SOCKECONNRESET    WSAECONNRESET
+#define SOCKEINPROGRESS   WSAEINPROGRESS
+#define SOCKEINTR         WSAEINTR
+#define SOCKEINVAL        WSAEINVAL
+#define SOCKEISCONN       WSAEISCONN
+#define SOCKEMSGSIZE      WSAEMSGSIZE
+#define SOCKENOMEM        WSA_NOT_ENOUGH_MEMORY
+#define SOCKETIMEDOUT     WSAETIMEDOUT
+#define SOCKEWOULDBLOCK   WSAEWOULDBLOCK
+#else
+#define SOCKEACCES        EACCES
+#define SOCKEADDRINUSE    EADDRINUSE
+#define SOCKEADDRNOTAVAIL EADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  EAFNOSUPPORT
+#define SOCKEBADF         EBADF
+#define SOCKECONNREFUSED  ECONNREFUSED
+#define SOCKECONNRESET    ECONNRESET
+#define SOCKEINPROGRESS   EINPROGRESS
+#define SOCKEINTR         EINTR
+#define SOCKEINVAL        EINVAL
+#define SOCKEISCONN       EISCONN
+#define SOCKEMSGSIZE      EMSGSIZE
+#define SOCKENOMEM        ENOMEM
+#ifdef ETIMEDOUT
+#define SOCKETIMEDOUT     ETIMEDOUT
+#endif
+#define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
 /*

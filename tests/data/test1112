@@ -91,7 +91,7 @@ ftps
 FTPS download with strict timeout and slow data transfer
 </name>
 <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 5
+--insecure --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 5
 </command>
 </client>
 

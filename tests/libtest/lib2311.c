@@ -35,20 +35,20 @@ static void websocket_close(CURL *curl)
   CURLcode result =
     curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
   fprintf(stderr,
-          "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
+          "ws: curl_ws_send returned %d, sent %zu\n", result, sent);
 }
 
-static void websocket(CURL *curl)
+static void websocket_frame(CURL *curl, FILE *save, int expected_flags)
 {
   char buffer[256];
   const struct curl_ws_frame *meta;
   size_t nread;
-  size_t i = 0;
-  FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);
-  if(!save)
-    return;
+  size_t total_read = 0;
 
-  /* Three 4097-bytes frames are expected, 12291 bytes */
+  /* silence "unused parameter" warning */
+  (void)expected_flags;
+
+  /* Frames are expected to have 4097 bytes */
   while(true) {
     CURLcode result =
       curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
@@ -56,27 +56,39 @@ static void websocket(CURL *curl)
       if(result == CURLE_AGAIN)
         /* crude busy-loop */
         continue;
-      fclose(save);
       printf("curl_ws_recv returned %d\n", result);
       return;
     }
     printf("%d: nread %zu Age %d Flags %x "
            "Offset %" CURL_FORMAT_CURL_OFF_T " "
            "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
-           (int)i,
+           (int)total_read,
            nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
-    i += meta->len;
+    assert(meta->flags == expected_flags);
+    total_read += nread;
     fwrite(buffer, 1, nread, save);
     /* exit condition */
-    if(!(meta->flags & CURLWS_CONT)) {
+    if(meta->bytesleft == 0) {
       break;
     }
   }
+
+  assert(total_read == 4097);
+}
+
+static void websocket(CURL *curl)
+{
+  FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);
+  if(!save)
+    return;
+
+  /* Three frames are expected */
+  websocket_frame(curl, save, CURLWS_TEXT | CURLWS_CONT);
+  websocket_frame(curl, save, CURLWS_TEXT | CURLWS_CONT);
+  websocket_frame(curl, save, CURLWS_TEXT);
+
   fclose(save);
-
   websocket_close(curl);
-
-  assert(i == 12291);
 }
 
 CURLcode test(char *URL)
@@ -91,7 +103,7 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_URL, URL);
 
     /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "websocket/2304");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "websocket/2311");
     libtest_debug_config.nohex = 1;
     libtest_debug_config.tracetime = 1;
     curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &libtest_debug_config);

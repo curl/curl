@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: proxy
 Short: x
-Arg: [protocol://]host[:port]
+Arg: <[protocol://]host[:port]>
 Help: Use this proxy
 Category: proxy
 Added: 4.0

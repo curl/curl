@@ -35,6 +35,8 @@ if(!@ARGV) {
     die "Usage: $0 [<c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
+my $srcdir = shift @ARGV;
+
 # Specific sources to exclude or add as an extra source file
 my @src;
 my %exclude;
@@ -58,6 +60,11 @@ HEADER
 
 foreach my $src (@src) {
     if($src =~ /\.c$/g && !exists $exclude{$src}) {
-        print "#include \"$src\"\n";
+        if(-e "$srcdir/$src") {
+            print "#include \"$srcdir/$src\"\n";
+        }
+        else {
+            print "#include \"$src\"\n";
+        }
     }
 }

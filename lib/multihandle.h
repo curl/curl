@@ -28,6 +28,7 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
+#include "hostip.h"
 #include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
@@ -111,7 +112,7 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
-  struct Curl_hash hostcache; /* Hostname cache */
+  struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL

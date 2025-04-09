@@ -27,7 +27,7 @@
 # This script updates the docs/THANKS document.
 #
 
-set -eu
+set -u
 
 start="${1:-}"
 

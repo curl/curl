@@ -26,6 +26,9 @@ REPLY FAIL 500 this might not be a failure!
 
 # Client-side
 <client>
+<features>
+--libcurl
+</features>
 <server>
 ftp
 </server>

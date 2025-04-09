@@ -44,6 +44,7 @@
 #include "connect.h"
 #include "rand.h"
 #include "strdup.h"
+#include "strparse.h"
 #include "transfer.h"
 #include "dynbuf.h"
 #include "headers.h"
@@ -141,6 +142,9 @@ struct cf_h2_ctx {
   uint32_t goaway_error;        /* goaway error code from server */
   int32_t remote_max_sid;       /* max id processed by server */
   int32_t local_max_sid;        /* max id processed by us */
+#ifdef DEBUGBUILD
+  int32_t stream_win_max;       /* max h2 stream window size */
+#endif
   BIT(initialized);
   BIT(via_h1_upgrade);
   BIT(conn_closed);
@@ -166,6 +170,18 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
+#ifdef DEBUGBUILD
+  {
+    const char *p = getenv("CURL_H2_STREAM_WIN_MAX");
+
+    ctx->stream_win_max = H2_STREAM_WINDOW_SIZE_MAX;
+    if(p) {
+      curl_off_t l;
+      if(!Curl_str_number(&p, &l, INT_MAX))
+        ctx->stream_win_max = (int32_t)l;
+    }
+  }
+#endif
   ctx->initialized = TRUE;
 }
 
@@ -285,7 +301,15 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
      * This gets less precise the higher the latency. */
     return (int32_t)data->set.max_recv_speed;
   }
+#ifdef DEBUGBUILD
+  else {
+    struct cf_h2_ctx *ctx = cf->ctx;
+    CURL_TRC_CF(data, cf, "stream_win_max=%d", ctx->stream_win_max);
+    return ctx->stream_win_max;
+  }
+#else
   return H2_STREAM_WINDOW_SIZE_MAX;
+#endif
 }
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
@@ -302,6 +326,13 @@ static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
     int32_t wsize = nghttp2_session_get_stream_effective_local_window_size(
                       ctx->h2, stream->id);
     if(dwsize > wsize) {
+      rv = nghttp2_session_set_local_window_size(ctx->h2, NGHTTP2_FLAG_NONE,
+                                                 stream->id, dwsize);
+      if(rv) {
+        failf(data, "[%d] nghttp2 set_local_window_size(%d) failed: "
+              "%s(%d)", stream->id, dwsize, nghttp2_strerror(rv), rv);
+        return CURLE_HTTP2;
+      }
       rv = nghttp2_submit_window_update(ctx->h2, NGHTTP2_FLAG_NONE,
                                         stream->id, dwsize - wsize);
       if(rv) {
@@ -648,7 +679,7 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
 
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(rv < 0) {
-      failf(data, "nghttp2 error %zd: %s", rv, nghttp2_strerror((int)rv));
+      failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
       *err = CURLE_HTTP2;
       return -1;
     }
@@ -967,9 +998,6 @@ static int push_promise(struct Curl_cfilter *cf,
       goto fail;
     }
 
-    /* ask the application */
-    CURL_TRC_CF(data, cf, "Got PUSH_PROMISE, ask application");
-
     stream = H2_STREAM_CTX(ctx, data);
     if(!stream) {
       failf(data, "Internal NULL stream");
@@ -984,19 +1012,12 @@ static int push_promise(struct Curl_cfilter *cf,
 
     rv = set_transfer_url(newhandle, &heads);
     if(rv) {
+      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set url -> %d",
+                  frame->promised_stream_id, rv);
       discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
     }
-
-    result = http2_data_setup(cf, newhandle, &newstream);
-    if(result) {
-      failf(data, "error setting up stream: %d", result);
-      discard_newhandle(cf, newhandle);
-      rv = CURL_PUSH_DENY;
-      goto fail;
-    }
-    DEBUGASSERT(stream);
 
     Curl_set_in_callback(data, TRUE);
     rv = data->multi->push_cb(data, newhandle,
@@ -1010,16 +1031,15 @@ static int push_promise(struct Curl_cfilter *cf,
     if(rv) {
       DEBUGASSERT((rv > CURL_PUSH_OK) && (rv <= CURL_PUSH_ERROROUT));
       /* denied, kill off the new handle again */
+      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, denied by application -> %d",
+                  frame->promised_stream_id, rv);
       discard_newhandle(cf, newhandle);
       goto fail;
     }
 
-    newstream->id = frame->promised_stream_id;
-    newhandle->req.maxdownload = -1;
-    newhandle->req.size = -1;
-
-    /* approved, add to the multi handle and immediately switch to PERFORM
-       state with the given connection !*/
+    /* approved, add to the multi handle for processing. This
+     * assigns newhandle->mid. For the new `mid` we assign the
+     * h2_stream instance and remember the stream_id already known. */
     rc = Curl_multi_add_perform(data->multi, newhandle, cf->conn);
     if(rc) {
       infof(data, "failed to add handle to multi");
@@ -1028,6 +1048,21 @@ static int push_promise(struct Curl_cfilter *cf,
       goto fail;
     }
 
+    result = http2_data_setup(cf, newhandle, &newstream);
+    if(result) {
+      failf(data, "error setting up stream: %d", result);
+      discard_newhandle(cf, newhandle);
+      rv = CURL_PUSH_DENY;
+      goto fail;
+    }
+
+    DEBUGASSERT(newstream);
+    newstream->id = frame->promised_stream_id;
+    newhandle->req.maxdownload = -1;
+    newhandle->req.size = -1;
+
+    CURL_TRC_CF(data, cf, "promise easy handle added to multi, mid=%"
+                FMT_OFF_T, newhandle->mid);
     rv = nghttp2_session_set_stream_user_data(ctx->h2,
                                               newstream->id,
                                               newhandle);
@@ -1581,7 +1616,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 
   /* get the stream from the hash based on Stream ID */
   data_s = nghttp2_session_get_stream_user_data(session, stream_id);
-  if(!data_s)
+  if(!GOOD_EASY_HANDLE(data_s))
     /* Receiving a Stream ID not in the hash should not happen, this is an
        internal error more than anything else! */
     return NGHTTP2_ERR_CALLBACK_FAILURE;

@@ -48,18 +48,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
                          struct connectdata *conn,
                          bool aborted);
 
-/**
- * Callback invoked when disconnecting connections.
- * @param data    transfer last handling the connection, not attached
- * @param conn    the connection to discard
- * @param aborted if the connection is being aborted
- * @return if the connection is being aborted, e.g. should NOT perform
- *         a shutdown and just close.
- **/
-typedef bool Curl_cpool_disconnect_cb(struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      bool aborted);
-
 struct cpool {
    /* the pooled connections, bundled per destination */
   struct Curl_hash dest2bundle;
@@ -68,20 +56,18 @@ struct cpool {
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
   struct Curl_easy *idata; /* internal handle for maintenance */
-  struct Curl_share *share; /* != NULL iff pool belongs to share */
-  Curl_cpool_disconnect_cb *disconnect_cb;
+  struct Curl_share *share; /* != NULL if pool belongs to share */
   BIT(locked);
   BIT(initialised);
 };
 
 /* Init the pool, pass multi only if pool is owned by it.
- * returns 1 on error, 0 is fine.
+ * Cannot fail.
  */
-int Curl_cpool_init(struct cpool *cpool,
-                    Curl_cpool_disconnect_cb *disconnect_cb,
-                    struct Curl_easy *idata,
-                    struct Curl_share *share,
-                    size_t size);
+void Curl_cpool_init(struct cpool *cpool,
+                     struct Curl_easy *idata,
+                     struct Curl_share *share,
+                     size_t size);
 
 /* Destroy all connections and free all members */
 void Curl_cpool_destroy(struct cpool *connc);
@@ -121,14 +107,13 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * All callbacks are invoked while the pool's lock is held.
  * @param data        current transfer
  * @param destination match agaonst `conn->destination` in pool
- * @param dest_len    destination length, including terminating NUL
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
  * @return combined result of last conn_db and result_cb or FALSE if no
                       connections were present.
  */
 bool Curl_cpool_find(struct Curl_easy *data,
-                     const char *destination, size_t dest_len,
+                     const char *destination,
                      Curl_cpool_conn_match_cb *conn_cb,
                      Curl_cpool_done_match_cb *done_cb,
                      void *userdata);

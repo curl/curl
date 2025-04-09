@@ -23,35 +23,28 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = scripts
-
 include Makefile.inc
 
-EXTRA_DIST = $(CERTCONFIGS) $(GENERATEDCERTS) $(SRPFILES) CMakeLists.txt
+EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt \
+  genserv.pl
+
+DISTCLEANFILES = $(GENERATEDCERTS)
+
+all-am: test-ca.cacert
 
 # Rebuild the certificates
 
-clean-certs:
-	cd $(srcdir); rm -f $(GENERATEDCERTS)
+# Generate all certs in a single shot, but declare just a single target file
+# to support GNU Make <4.3 without the "grouped explicit targets" feature.
+test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.pl
+	$(PERL) $(srcdir)/genserv.pl test $(CERTCONFIGS)
 
-build-certs: $(srcdir)/test-ca.cacert $(srcdir)/test-localhost.pem \
-	$(srcdir)/test-localhost.nn.pem $(srcdir)/test-localhost0h.pem \
-	$(srcdir)/test-localhost-san-first.pem $(srcdir)/test-localhost-san-last.pem
-
-$(srcdir)/test-ca.cacert:
-	cd $(srcdir); scripts/genroot.sh test
-
-$(srcdir)/test-localhost.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost test
-
-$(srcdir)/test-localhost.nn.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost.nn test
-
-$(srcdir)/test-localhost0h.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost0h test
-
-$(srcdir)/test-localhost-san-first.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost-san-first test
-
-$(srcdir)/test-localhost-san-last.pem: $(srcdir)/test-ca.cacert
-	cd $(srcdir); scripts/genserv.sh test-localhost-san-last test
+clean-local:
+	rm -f $(GENERATEDCERTS) \
+	  test-*.csr \
+	  test-*.der \
+	  test-*.keyenc \
+	  test-ca.cnt* \
+	  test-ca.db* \
+	  test-ca.raw* \
+	  test-ca.srl

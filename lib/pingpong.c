@@ -51,10 +51,10 @@
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
-  struct connectdata *conn = data->conn;
   timediff_t timeout_ms; /* in milliseconds */
   timediff_t response_time = (data->set.server_response_timeout) ?
     data->set.server_response_timeout : pp->response_time;
+  struct curltime now = Curl_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is
@@ -63,14 +63,11 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
-  timeout_ms = response_time -
-    Curl_timediff(Curl_now(), pp->response); /* spent time */
+  timeout_ms = response_time - Curl_timediff(now, pp->response);
 
   if(data->set.timeout && !disconnecting) {
-    /* if timeout is requested, find out how much remaining time we have */
-    timediff_t timeout2_ms = data->set.timeout - /* timeout time */
-      Curl_timediff(Curl_now(), conn->now); /* spent time */
-
+    /* if timeout is requested, find out how much overall remains */
+    timediff_t timeout2_ms = Curl_timeleft(data, &now, FALSE);
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
   }
@@ -151,11 +148,13 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp)
 {
+  DEBUGASSERT(!pp->initialised);
   pp->nread_resp = 0;
   pp->response = Curl_now(); /* start response time-out now! */
   pp->pending_resp = TRUE;
   Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
   Curl_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
+  pp->initialised = TRUE;
 }
 
 /***********************************************************************
@@ -450,8 +449,11 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  Curl_dyn_free(&pp->sendbuf);
-  Curl_dyn_free(&pp->recvbuf);
+  if(pp->initialised) {
+    Curl_dyn_free(&pp->sendbuf);
+    Curl_dyn_free(&pp->recvbuf);
+    memset(pp, 0, sizeof(*pp));
+  }
   return CURLE_OK;
 }
 

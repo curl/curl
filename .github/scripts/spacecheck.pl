@@ -28,16 +28,13 @@ use warnings;
 
 my @tabs = (
     "^m4/zz40-xc-ovr.m4",
-    "Makefile\\.[a-z]+\$",
+    "Makefile\\.(am|example)\$",
     "/mkfile",
     "\\.(bat|sln|vc)\$",
-    "^tests/certs/.+\\.der\$",
     "^tests/data/test",
 );
 
 my @mixed_eol = (
-    "^tests/certs/.+\\.(crt|der)\$",
-    "^tests/certs/Server-localhost0h-sv.pem",
     "^tests/data/test",
 );
 
@@ -47,12 +44,7 @@ my @need_crlf = (
 );
 
 my @space_at_eol = (
-    "^tests/.+\\.(cacert|crt|pem)\$",
     "^tests/data/test",
-);
-
-my @eol_at_eof = (
-    "^tests/certs/.+\\.der\$",
 );
 
 sub fn_match {
@@ -129,7 +121,6 @@ while (my $filename = <$git_ls_files>) {
     }
 
     if ($content ne "" &&
-        !fn_match($filename, @eol_at_eof) &&
         $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
@@ -137,6 +128,10 @@ while (my $filename = <$git_ls_files>) {
     if ($content =~ /\n\n\z/ ||
         $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
+    }
+
+    if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
+        push @err, "content: has binary contents";
     }
 
     if (@err) {

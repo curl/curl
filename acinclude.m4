@@ -807,29 +807,29 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" = "xno" ; then
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #ifdef HAVE_SYS_TYPES_H
-        #include <sys/types.h>
-        #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
-        #endif
-        #include <time.h>
-      ]],[[
-        struct timespec ts;
-        (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-        (void)ts;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      curl_func_clock_gettime="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_func_clock_gettime="no"
-    ])
-  fi
+
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifdef HAVE_SYS_TIME_H
+      #include <sys/time.h>
+      #endif
+      #include <time.h>
+    ]],[[
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+      (void)ts;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_func_clock_gettime="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_func_clock_gettime="no"
+  ])
+
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
   dnl until library linking and run-time checks for clock_gettime succeed.
 ])
@@ -842,29 +842,27 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
   AC_CHECK_HEADERS(sys/types.h sys/time.h)
   AC_MSG_CHECKING([for raw monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" = "xno" ; then
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #ifdef HAVE_SYS_TYPES_H
-        #include <sys/types.h>
-        #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
-        #endif
-        #include <time.h>
-      ]],[[
-        struct timespec ts;
-        (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
-        (void)ts;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC_RAW, 1,
-        [Define to 1 if you have the clock_gettime function and raw monotonic timer.])
-    ],[
-      AC_MSG_RESULT([no])
-    ])
-  fi
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifdef HAVE_SYS_TIME_H
+      #include <sys/time.h>
+      #endif
+      #include <time.h>
+    ]],[[
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+      (void)ts;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC_RAW, 1,
+      [Define to 1 if you have the clock_gettime function and raw monotonic timer.])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 ])
 
 
@@ -923,13 +921,18 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         curl_func_clock_gettime="yes"
         ;;
       *)
-        if test -z "$curl_cv_save_LIBS"; then
-          LIBS="$curl_cv_gclk_LIBS"
+        if test "x$dontwant_rt" = "xyes" ; then
+          AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+          curl_func_clock_gettime="no"
         else
-          LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+          if test -z "$curl_cv_save_LIBS"; then
+            LIBS="$curl_cv_gclk_LIBS"
+          else
+            LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+          fi
+          AC_MSG_RESULT([$curl_cv_gclk_LIBS])
+          curl_func_clock_gettime="yes"
         fi
-        AC_MSG_RESULT([$curl_cv_gclk_LIBS])
-        curl_func_clock_gettime="yes"
         ;;
     esac
     #

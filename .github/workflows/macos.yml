@@ -94,10 +94,11 @@ jobs:
             configure: >-
               --enable-debug
               --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
-              --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp
+              --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
               --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
-              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp --without-libssh2
-              --without-nghttp2 --without-ntlm-auth --without-ssl --without-zlib --without-zstd
+              --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
+              --without-libssh2 --without-libssh --without-wolfssh
+              --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'SecureTransport libssh2'
@@ -132,9 +133,9 @@ jobs:
           - name: 'OpenSSL gsasl rtmp AppleIDN'
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
-          - name: 'OpenSSL AppleIDN clang-tidy +examples'
-            install: llvm
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
+          - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
+            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
             clang-tidy: true
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
@@ -238,6 +239,7 @@ jobs:
               [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
+                -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -276,17 +278,6 @@ jobs:
       - name: 'test configs'
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
-      - name: 'build-cert'
-        if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON') || contains(matrix.build.configure, '--with-secure-transport')
-        run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target clean-certs
-            cmake --build bld --target build-certs --parallel 1
-          else
-            make -C bld/tests/certs clean-certs
-            make -C bld/tests/certs build-certs -j1
-          fi
-
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
@@ -298,10 +289,14 @@ jobs:
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
+      - name: 'cmake install'
+        if: ${{ matrix.build.generate }}
+        run: cmake --install bld --strip
+
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -324,7 +319,7 @@ jobs:
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi

@@ -9,8 +9,8 @@ HTTP Basic auth
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.1 200 OK
+<data crlf="yes">
+HTTP/1.1 200
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html

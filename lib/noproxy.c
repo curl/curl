@@ -54,9 +54,9 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     /* strange input */
     return FALSE;
 
-  if(1 != Curl_inet_pton(AF_INET, ipv4, &address))
+  if(1 != curlx_inet_pton(AF_INET, ipv4, &address))
     return FALSE;
-  if(1 != Curl_inet_pton(AF_INET, network, &check))
+  if(1 != curlx_inet_pton(AF_INET, network, &check))
     return FALSE;
 
   if(bits && (bits != 32)) {
@@ -92,9 +92,9 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
   rest = bits & 0x07;
   if((bytes > 16) || ((bytes == 16) && rest))
     return FALSE;
-  if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
+  if(1 != curlx_inet_pton(AF_INET6, ipv6, address))
     return FALSE;
-  if(1 != Curl_inet_pton(AF_INET6, network, check))
+  if(1 != curlx_inet_pton(AF_INET6, network, check))
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
@@ -163,7 +163,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     else {
       unsigned int address;
       namelen = strlen(name);
-      if(1 == Curl_inet_pton(AF_INET, name, &address))
+      if(1 == curlx_inet_pton(AF_INET, name, &address))
         type = TYPE_IPV4;
       else {
         /* ignore trailing dots in the hostname */

@@ -44,7 +44,7 @@ CURLcode test(char *URL)
   easy = curl_easy_init();
   if(!easy) {
     curl_global_cleanup();
-    return (CURLcode)1;
+    return TEST_ERR_EASY_INIT;
   }
 
   /* make it a null-terminated C string with just As */

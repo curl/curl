@@ -22,15 +22,15 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_SSH)
 
 #include "curl_path.h"
 #include <curl/curl.h>
-#include "curl_memory.h"
-#include "escape.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../escape.h"
+#include "../memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 

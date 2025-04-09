@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 struct connectdata;
 struct ssl_config_data;
@@ -44,7 +44,7 @@ struct dynbuf;
 #define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
 
 #ifdef USE_ECH
-# include "curl_base64.h"
+# include "../curl_base64.h"
 # define ECH_ENABLED(__data__) \
     (__data__->set.tls_ech && \
      !(__data__->set.tls_ech & CURLECH_DISABLE)\

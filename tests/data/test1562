@@ -44,7 +44,7 @@ https
 Expire secure cookies over HTTPS
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -H "Host: www.example.com" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0002 -b "non-existing" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -H "Host: www.example.com" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0002 -b "non-existing" https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001
 </command>
 </client>
 <verify>

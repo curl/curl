@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
 
@@ -34,7 +34,7 @@
 
 struct Curl_cfilter;
 
-#include "urldata.h"
+#include "../urldata.h"
 
 void Curl_osslq_ver(char *p, size_t len);
 

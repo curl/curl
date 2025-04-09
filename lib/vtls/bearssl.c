@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_BEARSSL
 
@@ -29,20 +29,20 @@
 
 #include "bearssl.h"
 #include "cipher_suite.h"
-#include "urldata.h"
-#include "sendf.h"
-#include "inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "connect.h"
-#include "select.h"
-#include "multiif.h"
-#include "curl_printf.h"
+#include "../connect.h"
+#include "../select.h"
+#include "../multiif.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 struct x509_context {
   const br_x509_class *vtable;

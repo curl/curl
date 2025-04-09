@@ -61,15 +61,6 @@ enum alpnid {
   ALPN_h3 = CURLALTSVC_H3
 };
 
-/*
- * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
- * Global DNS cache is general badness. Do not use. This will be removed in
- * a future version. Use the share interface instead!
- *
- * Returns a struct Curl_hash pointer on success, NULL on failure.
- */
-struct Curl_hash *Curl_global_host_cache_init(void);
-
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;
 #ifdef USE_HTTPSRR
@@ -83,6 +74,10 @@ struct Curl_dns_entry {
   int hostport;
   /* hostname that resolved to addr. may be NULL (Unix domain sockets). */
   char hostname[1];
+};
+
+struct Curl_dnscache {
+  struct Curl_hash entries;
 };
 
 bool Curl_host_is_ipnum(const char *hostname);
@@ -144,10 +139,12 @@ void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);
 
 /* init a new dns cache */
-void Curl_init_dnscache(struct Curl_hash *hash, size_t hashsize);
+void Curl_dnscache_init(struct Curl_dnscache *dns, size_t hashsize);
+
+void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 
 /* prune old entries from the DNS cache */
-void Curl_hostcache_prune(struct Curl_easy *data);
+void Curl_dnscache_prune(struct Curl_easy *data);
 
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
@@ -156,7 +153,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
 
 /*
  * Curl_addrinfo_callback() is used when we build with any asynch specialty.
- * Handles end of async request processing. Inserts ai into hostcache when
+ * Handles end of async request processing. Inserts ai into dnscache when
  * status is CURL_ASYNC_SUCCESS. Twiddles fields in conn to indicate async
  * request completed whether successful or failed.
  */
@@ -187,6 +184,7 @@ Curl_fetch_addr(struct Curl_easy *data,
 
 /*
  * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
+ * Call takes ownership of `addr` and free's it on failure.
  * @param permanent   iff TRUE, entry will never become stale
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
@@ -220,11 +218,6 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
  */
 CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6);
-
-/*
- * Clean off entries from the cache
- */
-void Curl_hostcache_clean(struct Curl_easy *data, struct Curl_hash *hash);
 
 /*
  * Populate the cache with specified entries from CURLOPT_RESOLVE.

@@ -16,7 +16,7 @@ Example:
 
 # `--ftp-ssl-ccc-mode`
 
-Sets the CCC mode. The passive mode does not initiate the shutdown, but
-instead waits for the server to do it, and does not reply to the shutdown from
-the server. The active mode initiates the shutdown and waits for a reply from
-the server.
+Set the CCC mode. The passive mode does not initiate the shutdown, but instead
+waits for the server to do it, and does not reply to the shutdown from the
+server. The active mode initiates the shutdown and waits for a reply from the
+server.

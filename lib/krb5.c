@@ -855,7 +855,6 @@ static CURLcode choose_mech(struct Curl_easy *data, struct connectdata *conn)
             mech->name);
       return CURLE_FAILED_INIT;
     }
-    Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
   }
 
   infof(data, "Trying mechanism %s...", mech->name);
@@ -914,9 +913,16 @@ Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
   return choose_mech(data, conn);
 }
 
+void
+Curl_sec_conn_init(struct connectdata *conn)
+{
+  Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
+  conn->in_buffer.index = 0;
+  conn->in_buffer.eof_flag = 0;
+}
 
 void
-Curl_sec_end(struct connectdata *conn)
+Curl_sec_conn_destroy(struct connectdata *conn)
 {
   if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);

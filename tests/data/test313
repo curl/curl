@@ -14,6 +14,10 @@ CRL
 <features>
 SSL
 local-http
+!bearssl
+!Schannel
+!sectransp
+!wolfssl
 </features>
 <server>
 https test-localhost.pem
@@ -22,7 +26,7 @@ https test-localhost.pem
 CRL test
 </name>
 <command>
--4 --cacert %SRCDIR/certs/test-ca.crt --crlfile %SRCDIR/certs/test-localhost.crl https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %CERTDIR/certs/test-ca.crt --crlfile %CERTDIR/certs/test-localhost.crl https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

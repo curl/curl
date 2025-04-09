@@ -455,6 +455,11 @@
 #  define __NO_NET_API
 #endif
 
+/* Whether to use eventfd() */
+#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
+#define USE_EVENTFD
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 
@@ -469,9 +474,9 @@
 #endif
 
 #ifdef _WIN32
-#define Curl_getpid() GetCurrentProcessId()
+#define curlx_getpid() GetCurrentProcessId()
 #else
-#define Curl_getpid() getpid()
+#define curlx_getpid() getpid()
 #endif
 
 /*
@@ -853,13 +858,17 @@
 /* Terrible workarounds to make Windows CE compile */
 #define errno 0
 #define CURL_SETERRNO(x) ((void)(x))
+#define EINTR  4
 #define EAGAIN 11
 #define ENOMEM 12
 #define EACCES 13
 #define EEXIST 17
 #define EISDIR 21
+#define EINVAL 22
 #define ENOSPC 28
 #define strerror(x) "?"
+#undef STDIN_FILENO
+#define STDIN_FILENO 0
 #else
 #define CURL_SETERRNO(x) (errno = (x))
 #endif
@@ -906,6 +915,17 @@
 /* Define S_ISDIR if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+/* For MSVC (all versions as of VS2022) */
+#ifndef STDIN_FILENO
+#define STDIN_FILENO  fileno(stdin)
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO  fileno(stdout)
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO  fileno(stderr)
 #endif
 
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in

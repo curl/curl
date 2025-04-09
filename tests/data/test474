@@ -38,7 +38,7 @@ https
 -w urle.scheme after HTTP to HTTPS redirect
 </name>
 <command option="no-include">
--k -L http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_redirects} %{url_effective} %{urle.scheme}\n"
+--insecure -L http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_redirects} %{url_effective} %{urle.scheme}\n"
 </command>
 </client>
 

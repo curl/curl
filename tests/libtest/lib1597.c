@@ -37,7 +37,6 @@ CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
-  CURLcode result = CURLE_OK;
   curl_version_info_data *curlinfo;
   const char *const *proto;
   int n;
@@ -97,9 +96,9 @@ CURLcode test(char *URL)
 
   /* Run the tests. */
   for(i = 0; prots[i].in; i++) {
-    result = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
-    if(result != *prots[i].exp) {
-      printf("unexpectedly '%s' returned %d\n", prots[i].in, result);
+    res = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
+    if(res != *prots[i].exp) {
+      printf("unexpectedly '%s' returned %d\n", prots[i].in, res);
       break;
     }
   }
@@ -109,5 +108,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

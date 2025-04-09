@@ -37,7 +37,7 @@
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
 #   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
-#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
+#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL, wolfSSL or rustls-ffi
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection is skipped.  If the variable is
@@ -91,7 +91,7 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
+elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce build
   if(NOT MINGW32CE_LIBRARY_DIR)
     message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
   endif()
@@ -118,7 +118,7 @@ elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
   set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
@@ -161,7 +161,7 @@ endif()
 if(AMIGA)
   string(APPEND _target_flags " AMIGA")
 endif()
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   string(APPEND _target_flags " GCC")
 endif()
 if(MINGW)
@@ -190,7 +190,7 @@ else()
   set(CURL_OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
-include_directories("${PROJECT_SOURCE_DIR}/include")
+set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/include")
 
 if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
@@ -281,8 +281,8 @@ endif()
 
 include(PickyWarnings)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg()
+if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg() and accept4()
 endif()
 
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
@@ -290,18 +290,24 @@ if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
+option(ENABLE_SERVER_DEBUG "Apply curl debug options to test servers" OFF)
 
+set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
+  list(APPEND CURL_DEBUG_MACROS "DEBUGBUILD")
+endif()
+if(ENABLE_CURLDEBUG)
+  list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
-if(ENABLE_CURLDEBUG)
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
-endif()
+option(CURL_TEST_BUNDLES "Build tests into single-binary bundles" OFF)
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
+  # clang-tidy is not looking into #included sources, thus not compatible with
+  # unity builds and test bundles.
   set(CMAKE_UNITY_BUILD OFF)
+  set(CURL_TEST_BUNDLES OFF)
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
@@ -937,6 +943,22 @@ if(CURL_USE_RUSTLS)
     string(APPEND CMAKE_C_FLAGS " ${RUSTLS_CFLAGS}")
   endif()
 
+  if(NOT DEFINED HAVE_RUSTLS_SUPPORTED_HPKE)
+    if(RUSTLS_VERSION AND RUSTLS_VERSION VERSION_GREATER_EQUAL "0.15")
+      set(HAVE_RUSTLS_SUPPORTED_HPKE TRUE)
+    elseif(NOT RUSTLS_VERSION)
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_INCLUDES ${RUSTLS_INCLUDE_DIRS})
+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${RUSTLS_LIBRARIES})
+      curl_required_libpaths("${RUSTLS_LIBRARY_DIRS}")
+      check_symbol_exists("rustls_supported_hpke" "rustls.h" HAVE_RUSTLS_SUPPORTED_HPKE)
+      cmake_pop_check_state()
+    endif()
+  endif()
+  if(NOT HAVE_RUSTLS_SUPPORTED_HPKE)
+    message(FATAL_ERROR "rustls-ffi library does not provide rustls_supported_hpke function. Required version is 0.15 or newer.")
+  endif()
+
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "rustls")
     set(_valid_default_ssl_backend TRUE)
   endif()
@@ -1059,7 +1081,7 @@ endif()
 option(USE_HTTPSRR "Enable HTTPS RR support" OFF)
 option(USE_ECH "Enable ECH support" OFF)
 if(USE_ECH)
-  if(USE_OPENSSL OR USE_WOLFSSL)
+  if(USE_OPENSSL OR USE_WOLFSSL OR USE_RUSTLS)
     # Be sure that the TLS library actually supports ECH.
     if(USE_WOLFSSL)
       curl_openssl_check_exists("wolfSSL_CTX_GenerateEchConfig" HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
@@ -1068,11 +1090,12 @@ if(USE_ECH)
       curl_openssl_check_exists("SSL_set1_ech_config_list" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     endif()
     if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
-       HAVE_SSL_SET1_ECH_CONFIG_LIST)
+       HAVE_SSL_SET1_ECH_CONFIG_LIST OR
+       USE_RUSTLS)
       set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
-      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL")
+      message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL/rustls-ffi")
     else()
       message(STATUS "ECH enabled")
       # ECH wants HTTPSRR
@@ -1080,7 +1103,7 @@ if(USE_ECH)
       message(STATUS "HTTPSRR enabled")
     endif()
   else()
-    message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL, AWS-LC or wolfSSL")
+    message(FATAL_ERROR "ECH requires ECH-enabled OpenSSL, BoringSSL, AWS-LC, wolfSSL or rustls-ffi")
   endif()
 endif()
 
@@ -1725,6 +1748,7 @@ elseif(DOS)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${WATT_ROOT}/lib/libwatt.a")
 endif()
 
+check_function_exists("accept4"       HAVE_ACCEPT4)
 check_function_exists("fnmatch"       HAVE_FNMATCH)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)
@@ -1764,6 +1788,7 @@ check_symbol_exists("getaddrinfo"     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_
 check_symbol_exists("getifaddrs"      "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)  # ifaddrs.h
 check_symbol_exists("freeaddrinfo"    "${CURL_INCLUDES}" HAVE_FREEADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
 check_function_exists("pipe"          HAVE_PIPE)
+check_function_exists("pipe2"         HAVE_PIPE2)
 check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
@@ -2043,6 +2068,8 @@ if(HAVE_MANUAL_TOOLS)
   set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
+
+add_subdirectory(scripts)  # for shell completions
 
 list(REMOVE_DUPLICATES CURL_LIBDIRS)
 

@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#include "bufref.h"
+#include "../bufref.h"
 
 struct Curl_easy;
 

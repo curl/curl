@@ -37,8 +37,6 @@ void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
-bool Curl_on_disconnect(struct Curl_easy *data,
-                        struct connectdata *, bool aborted);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);

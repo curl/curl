@@ -36,13 +36,6 @@ mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -K %LOGDIR/input%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-# These are hexadecimal protocol dumps from the client
-#
-# Strip out the random part of the client id from the CONNECT message
-# before comparison
-<strippart>
-s/^(.* 00044d51545404c2003c000c6375726c).*/$1/
-</strippart>
 # 8 is CURLE_WEIRD_SERVER_REPLY
 <errorcode>
 8

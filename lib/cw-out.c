@@ -114,7 +114,7 @@ static void cw_out_close(struct Curl_easy *data, struct Curl_cwriter *writer);
 static CURLcode cw_out_init(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 
-struct Curl_cwtype Curl_cwt_out = {
+const struct Curl_cwtype Curl_cwt_out = {
   "cw-out",
   NULL,
   cw_out_init,

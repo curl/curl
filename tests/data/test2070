@@ -39,7 +39,7 @@ Ignore certificate revocation "best effort" strategy
 CURL_SSL_BACKEND=schannel
  </setenv>
 <command>
--4 --cacert %SRCDIR/certs/test-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %CERTDIR/certs/test-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

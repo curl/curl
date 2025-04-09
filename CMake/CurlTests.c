@@ -278,6 +278,7 @@ int main(void)
 {
   char buffer[1024];
   /* This will not compile if strerror_r does not return a char* */
+  /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer))[0]);
   return 0;
 }
@@ -294,6 +295,7 @@ int main(void)
 {
   char buffer[1024];
   /* This will not compile if strerror_r does not return an int */
+  /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer)));
   return 0;
 }

@@ -50,11 +50,9 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 #
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "private" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
-              -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib
+              -I$(top_builddir)/lib
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -64,18 +62,37 @@ include Makefile.soname
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
 AM_CFLAGS =
+if DEBUGBUILD
+AM_CPPFLAGS += -DDEBUGBUILD
+endif
+if CURLDEBUG
+AM_CPPFLAGS += -DCURLDEBUG
+endif
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
+
+if DOING_NATIVE_WINDOWS
+CSOURCES += dllmain.c
+else
+if DOING_CYGWIN
+CSOURCES += dllmain.c
+endif
+endif
 
 if USE_UNITY
 # Keep these separate to avoid duplicate definitions when linking libtests
 # in static mode.
 curl_EXCLUDE = curl_threads.c timediff.c warnless.c
-if DEBUGBUILD
-# We must compile these sources separately to avoid memdebug.h redefinitions
-# applying to them.
-curl_EXCLUDE += memdebug.c curl_multibyte.c
+if CURLDEBUG
+# We must compile this source separately to avoid memdebug.h redefinitions
+# applying to it.
+curl_EXCLUDE += memdebug.c
+endif
+# For Cygwin always compile dllmain.c as a separate unit since it
+# includes windows.h, which should not be included in other units.
+if DOING_CYGWIN
+curl_EXCLUDE += dllmain.c
 endif
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
@@ -143,10 +160,8 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir)         \
-	  -W$(srcdir)/libcurl_unity.c -W$(srcdir)/curl_config.h $(srcdir)/*.[ch] \
-	  $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch] $(srcdir)/vquic/*.[ch]    \
-	  $(srcdir)/vssh/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
+	$(CSOURCES) $(HHEADERS))
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
@@ -162,11 +177,11 @@ endif
 TIDY := clang-tidy
 
 tidy:
-	(_csources=`echo ' $(CSOURCES)' | sed -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
+	(_csources=`echo ' $(CSOURCES)' | sed -E -e 's/ +$$//' -e 's/ +/ /g' -e 's| | $(srcdir)/|g'`; \
 	$(TIDY) $$_csources $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H)
 
 optiontable:
-	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c
+	@PERL@ $(srcdir)/optiontable.pl < $(top_srcdir)/include/curl/curl.h > $(srcdir)/easyoptions.c
 
 if HAVE_WINDRES
 .rc.lo:

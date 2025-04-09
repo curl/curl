@@ -45,7 +45,7 @@ https
 HTTPS GET, receive no headers only data!
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --http0.9
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER --http0.9
 </command>
 </client>
 

@@ -72,7 +72,7 @@ https
 Cookies set over HTTP can't override secure ones
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"  http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"
+--insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"  http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"
 </command>
 </client>
 <verify>

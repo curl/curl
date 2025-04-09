@@ -437,8 +437,13 @@ ParameterError proto2num(struct OperationConfig *config,
     size_t plen;
     enum e_action { allow, deny, set } action = allow;
 
-    if(next)
+    if(next) {
+      if(str == next) {
+        str++;
+        continue;
+      }
       plen = next - str - 1;
+    }
     else
       plen = strlen(str) - 1;
 

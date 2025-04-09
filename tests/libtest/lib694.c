@@ -54,8 +54,12 @@ CURLcode test(char *URL)
   do {
 
     res = curl_easy_perform(curl);
+    if(res)
+      goto test_cleanup;
 
     res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
+    if(res)
+      goto test_cleanup;
     if(CURLAUTH_NTLM != usedauth) {
       printf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
     }

@@ -71,6 +71,7 @@ static CURLcode iconv_to_utf8(const char *in, size_t inlen,
     *outlen -= iconv_outlen;
     iconv_close(cd);
     if(iconv_result == (size_t)-1) {
+      /* !checksrc! disable ERRNOVAR 1 */
       if(errno == ENOMEM)
         return CURLE_OUT_OF_MEMORY;
       else
@@ -80,6 +81,7 @@ static CURLcode iconv_to_utf8(const char *in, size_t inlen,
     return CURLE_OK;
   }
   else {
+    /* !checksrc! disable ERRNOVAR 1 */
     if(errno == ENOMEM)
       return CURLE_OUT_OF_MEMORY;
     else

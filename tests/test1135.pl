@@ -68,10 +68,6 @@ my $verbose=0;
 my $summary=0;
 my $misses=0;
 
-my @syms;
-my %doc;
-my %rem;
-
 my @out;
 foreach my $f (@incs) {
     open H, "<$f" || die;

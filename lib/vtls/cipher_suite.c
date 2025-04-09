@@ -21,13 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
     defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
-#include "curl_printf.h"
-#include "strcase.h"
+#include "../curl_printf.h"
+#include "../strcase.h"
 #include <string.h>
 
 /*

@@ -191,3 +191,19 @@ Collective.
 We have stickers, coffee mugs and coasters. They are managed by Daniel who
 sits on the inventory. The best way to get your hands on curl merchandise is
 to attend events where Daniel is physically.
+
+## Chat
+
+Some curl developers, maintainers, users and enthusiasts use IRC for real-time
+chat about curl and related topics. This done in the `#curl` channel on the
+`libra.chat` IRC network. **Daniel Stenberg** (`bagder`) is registered owner
+of the channel. We do not run any IRC servers or services ourselves.
+
+`curelbot` is a service in the channel that shows details about GitHub issues
+and pull requests when publicly mentioned using #[number]. The bot is run by
+user `TheAssassin`.
+
+There is a Matrix bridge to the IRC channel called `matrix.curl.se`. The
+bridge is setup and run by **Sergio Durigan Junior** and **Daniel Stenberg**.
+
+[curl online chat documentation](https://curl.se/docs/irc.html)

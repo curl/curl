@@ -357,6 +357,7 @@ Curl_gss_convert_in_place(OM_uint32 *minor_status, gss_buffer_t buf)
       gss_release_buffer(minor_status, buf);
 
       if(minor_status)
+        /* !checksrc! disable ERRNOVAR 1 */
         *minor_status = ENOMEM;
 
       return -1;
@@ -388,6 +389,7 @@ Curl_gss_import_name_a(OM_uint32 *minor_status, gss_buffer_t in_name,
   in.value = malloc(i + 1);
   if(!in.value) {
     if(minor_status)
+      /* !checksrc! disable ERRNOVAR 1 */
       *minor_status = ENOMEM;
 
     return GSS_S_FAILURE;
@@ -451,6 +453,7 @@ Curl_gss_init_sec_context_a(OM_uint32 *minor_status,
       in.value = malloc(i + 1);
       if(!in.value) {
         if(minor_status)
+          /* !checksrc! disable ERRNOVAR 1 */
           *minor_status = ENOMEM;
 
         return GSS_S_FAILURE;
@@ -801,6 +804,7 @@ sockaddr2ebcdic(struct sockaddr_storage *dstaddr,
 
   if(!srcaddr || srclen < offsetof(struct sockaddr, sa_family) +
      sizeof(srcaddr->sa_family) || srclen > sizeof(*dstaddr)) {
+    /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return -1;
   }
@@ -838,6 +842,7 @@ sockaddr2ascii(struct sockaddr *dstaddr, int dstlen,
   if(srclen > dstlen)
     srclen = dstlen;
   if(!srcaddr || srclen < 0) {
+    /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return -1;
   }

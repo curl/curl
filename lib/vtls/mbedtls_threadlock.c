@@ -22,7 +22,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_MBEDTLS) &&                                     \
   ((defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) ||   \
@@ -36,10 +36,10 @@
 #endif
 
 #include "mbedtls_threadlock.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "../memdebug.h"
 
 /* number of thread locks */
 #define NUMT                    2

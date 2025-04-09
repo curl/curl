@@ -102,7 +102,6 @@
 #endif
 
 #include "curlx.h" /* from the private lib dir */
-#include "getpart.h"
 #include "inet_pton.h"
 #include "util.h"
 #include "server_sockaddr.h"
@@ -160,8 +159,6 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
   CURL_SETERRNO((int)GetLastError());
   return -1;
 }
-#undef  read
-#define read(a,b,c) read_wincon(a,b,c)
 
 /*
  * write-wrapper to support writing to stdout and stderr on Windows.
@@ -195,8 +192,11 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
   CURL_SETERRNO((int)GetLastError());
   return -1;
 }
-#undef  write
-#define write(a,b,c) write_wincon(a,b,c)
+#define SOCKFILT_read  read_wincon
+#define SOCKFILT_write write_wincon
+#else
+#define SOCKFILT_read  read
+#define SOCKFILT_write write
 #endif
 
 #ifndef UNDER_CE
@@ -218,8 +218,9 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
   ssize_t nread = 0;
 
   do {
-    ssize_t rc = read(filedes,
-                      (unsigned char *)buffer + nread, nbytes - nread);
+    ssize_t rc = SOCKFILT_read(filedes,
+                               (unsigned char *)buffer + nread,
+                               nbytes - nread);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -228,6 +229,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
 
     if(rc < 0) {
       error = errno;
+      /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       if(error == CURL_WIN32_EPIPE) {
@@ -269,8 +271,9 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   ssize_t nwrite = 0;
 
   do {
-    ssize_t wc = write(filedes, (const unsigned char *)buffer + nwrite,
-                       nbytes - nwrite);
+    ssize_t wc = SOCKFILT_write(filedes,
+                                (const unsigned char *)buffer + nwrite,
+                                nbytes - nwrite);
 
     if(got_exit_signal) {
       logmsg("signalled to die");
@@ -279,6 +282,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
 
     if(wc < 0) {
       error = errno;
+      /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
@@ -624,7 +628,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* check if the input value is valid */
   if(nfds < 0) {
-    CURL_SETERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 
@@ -645,7 +649,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* create internal event to abort waiting threads */
   abort = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!abort) {
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
@@ -653,7 +657,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   data = calloc(nfds, sizeof(struct select_ws_data));
   if(!data) {
     CloseHandle(abort);
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
@@ -662,7 +666,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   if(!handles) {
     CloseHandle(abort);
     free(data);
-    CURL_SETERRNO(ENOMEM);
+    SET_SOCKERRNO(SOCKENOMEM);
     return -1;
   }
 
@@ -874,7 +878,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   return ret;
 }
-#define select(a,b,c,d,e) select_ws(a,b,c,d,e)
+#define SOCKFILT_select(a,b,c,d,e) select_ws(a,b,c,d,e)
+#else
+#define SOCKFILT_select(a,b,c,d,e) select(a,b,c,d,e)
 #endif  /* USE_WINSOCK */
 
 
@@ -1068,7 +1074,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
     /* select() blocking behavior call on blocking descriptors please */
 
-    rc = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+    rc = SOCKFILT_select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
 
     if(got_exit_signal) {
       logmsg("signalled to die, exiting...");
@@ -1526,7 +1532,7 @@ int main(int argc, char *argv[])
       me.sa4.sin_addr.s_addr = INADDR_ANY;
       if(!addr)
         addr = "127.0.0.1";
-      Curl_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+      curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa4));
 #ifdef USE_IPV6
@@ -1537,7 +1543,7 @@ int main(int argc, char *argv[])
       me.sa6.sin6_port = htons(server_connectport);
       if(!addr)
         addr = "::1";
-      Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+      curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
       rc = connect(sock, &me.sa, sizeof(me.sa6));
     }
