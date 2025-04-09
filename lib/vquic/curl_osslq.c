@@ -654,7 +654,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(stream) {
     CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] easy handle is done",
                 stream->s.id);
-    if(ctx->h3.conn && !stream->closed) {
+    if(ctx->h3.conn && (stream->s.id >= 0) && !stream->closed) {
       nghttp3_conn_shutdown_stream_read(ctx->h3.conn, stream->s.id);
       nghttp3_conn_close_stream(ctx->h3.conn, stream->s.id,
                                 NGHTTP3_H3_REQUEST_CANCELLED);
