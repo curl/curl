@@ -1898,8 +1898,8 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 #ifndef SET_ENGINE_HANDLED
   (void)engine;
   failf(data, "OpenSSL engine or provider not supported");
-  return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
+  return CURLE_SSL_ENGINE_NOTFOUND;
 }
 
 /* Sets engine as default for all SSL operations
