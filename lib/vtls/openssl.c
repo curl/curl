@@ -1679,6 +1679,16 @@ fail:
           EVP_PKEY_free(priv_key);
           return 0;
         }
+        {
+          OSSL_PARAM *p;
+          OSSL_PARAM *p2;
+          if(EVP_PKEY_todata(priv_key, EVP_PKEY_KEY_PARAMETERS, &p) == 1) {
+            ;
+          }
+          if(EVP_PKEY_todata(priv_key, EVP_PKEY_KEYPAIR, &p2) == 1) {
+            ;
+          }
+        }
         EVP_PKEY_free(priv_key); /* we do not need the handle any more... */
       }
       else {
