@@ -1896,6 +1896,7 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 #endif
 
 #ifndef SET_ENGINE_HANDLED
+  (void)engine;
   failf(data, "OpenSSL engine or provider not supported");
   return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
