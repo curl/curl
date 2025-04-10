@@ -558,6 +558,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *localhostname,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
 {
@@ -590,15 +591,14 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned char *ptr_ntresp = &ntresp[0];
   unsigned char *ntlmv2resp = NULL;
   bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE);
-  /* The fixed hostname we provide, in order to not leak our real local host
-     name. Copy the name used by Firefox. */
-  static const char host[] = "WORKSTATION";
+  const char *host;
   const char *user;
   const char *domain = "";
   size_t hostoff = 0;
   size_t useroff = 0;
   size_t domoff = 0;
   size_t hostlen = 0;
+  size_t maxhostlen = 65535;
   size_t userlen = 0;
   size_t domlen = 0;
 
@@ -617,7 +617,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     user = userp;
 
   userlen = strlen(user);
-  hostlen = sizeof(host) - 1;
+
+  host = localhostname;
+  hostlen = strlen(host);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
@@ -684,6 +686,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     domlen = domlen * 2;
     userlen = userlen * 2;
     hostlen = hostlen * 2;
+    maxhostlen = 32767;
   }
 
   lmrespoff = 64; /* size of the message header */
@@ -784,6 +787,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     ntlm_print_hex(stderr, (char *)&ntlmbuf[lmrespoff], 0x18);
   });
 
+  /* hostlen should not exceed 64k (non-unicode) or 32k (unicode) */
+  if(hostlen > maxhostlen) {
+    failf(data, "host length too big");
+    return CURLE_OUT_OF_MEMORY;
+  }
   /* ntresplen + size should not be risking an integer overflow here */
   if(ntresplen + size > sizeof(ntlmbuf)) {
     failf(data, "incoming NTLM message too big");
