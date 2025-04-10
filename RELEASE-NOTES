@@ -4,7 +4,7 @@ curl and libcurl 8.13.1
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3384
+ Contributors:                 3386
 
 This release includes the following changes:
 
@@ -12,7 +12,11 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o async-threaded resolver: use ref counter [10]
+ o build: check required rustls-ffi version [46]
+ o certs: drop unused `default_bits` from `.prm` files [45]
  o cmake/FindNGTCP2: simplify multi-pkg-config detection [27]
+ o cmake: quotes, whitespace, use `VERSION_GREATER_EQUAL` [33]
+ o cmake: use `INCLUDE_DIRECTORIES` prop to specify local header dirs [47]
  o cmake: use absolute paths for completion targets [40]
  o configure: fix --disable-rt [20]
  o configure: restore link checks [25]
@@ -20,11 +24,14 @@ This release includes the following bugfixes:
  o content_encoding: Transfer-Encoding parser improvements [31]
  o contrithanks.sh: drop set -e [6]
  o curl_krb5: only use functions if FTP is still enabled [21]
+ o curl_multibyte: fixup low-level calls, include in unity builds [55]
+ o docs: fix incorrect shell substitution in docker run example command [51]
  o eventfd: fix feature guards [24]
  o genserv.pl: fail with a message if `openssl` is missing or failing [14]
  o hostip: fix build without threaded-resolver and without DoH [17]
  o hostip: show the correct name on proxy resolve error [37]
  o http2: fix stream window size after unpausing [34]
+ o HTTP3.md: fix incorrect variable placeholders [30]
  o http: fix a build error when all auths are disabled [16]
  o http_aws_sigv4: add additional verbose log statements [39]
  o http_negotiate: fix non-SSL build with GSSAPI [23]
@@ -32,10 +39,15 @@ This release includes the following bugfixes:
  o if2ip: build the function also if FTP is present [19]
  o INSTALL-CMAKE.md: fix typo
  o INSTALL.md: update the minimal libcurl size example
+ o KNOWN_BUGS: fix link in sivg4 issue 16.3 [26]
  o lib: add const to clientwriter tables
+ o lib: include files using known path [48]
  o lib: make Curl_easyopts const [44]
  o lib: unify conversions to/from hex [3]
  o libtest/first: stop defining MEMDEBUG_NODEFINES [32]
+ o make: clean tests better [60]
+ o mk-ca-bundle.pl: follow redirects [53]
+ o openssl-quic: fix shutdown when stream not open [11]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
  o rand: update comment on Curl_rand_bytes weak random [35]
@@ -43,11 +55,15 @@ This release includes the following bugfixes:
  o scripts: completion.pl: sort the completion file for all shells [9]
  o scripts: fix --opts-dir help in completion.pl
  o socket: use accept4 when available [7]
+ o socketpair: support pipe2 where available [56]
  o test1658: add unit test for the HTTPS RR decoder [28]
  o test: make unittest 1308 into a libtest [4]
+ o tests/ech_tests.sh: sync shebang with rest of bash scripts [42]
  o tests/README.md: document --test-duphandle [8]
  o tests/README.md: list the openssl tool among the prerequisites [12]
  o tests/serverhelp: remove last remnants of http-pipe server [1]
+ o tests/tunit: make a separate directory for tool-based unit tests [54]
+ o tests: Add https-mtls server to force client auth [57]
  o tests: fix some test tag mismatches
  o tests: mark ipfs tests to require ipfs [2]
  o tests: move a boolean variable out of the path section
@@ -79,11 +95,12 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Abhinav Singhal, Andrew Kirillov, Andy Pan, Carlos Henrique Lima Melara,
-  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel Stenberg,
-  Jean-Christophe Amiel, Jonathan Rosa, Nigel Brittain, Pavel Kropachev,
-  Ray Satiro, renovate[bot], Stefan Eissing, Tomas Volf, Viktor Szakats,
-  x1sc0 on github, Yedaya Katsman
-  (19 contributors)
+  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
+  Daniel Stenberg, Demi Marie Obenour, dependabot[bot], Harry Sintonen,
+  Jake Yuesong Li, Jean-Christophe Amiel, Johan Eliasson, Jonathan Rosa,
+  Kai Pastor, Nigel Brittain, Pavel Kropachev, Ray Satiro, renovate[bot],
+  Stefan Eissing, Tomas Volf, Viktor Szakats, x1sc0 on github, Yedaya Katsman
+  (26 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -97,6 +114,7 @@ References to bug reports and discussions on issues:
  [8] = https://curl.se/bug/?i=16944
  [9] = https://curl.se/bug/?i=16985
  [10] = https://curl.se/bug/?i=16916
+ [11] = https://curl.se/bug/?i=16998
  [12] = https://curl.se/bug/?i=16942
  [13] = https://curl.se/bug/?i=16943
  [14] = https://curl.se/bug/?i=16926
@@ -111,11 +129,14 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=16919
  [24] = https://curl.se/mail/lib-2025-04/0000.html
  [25] = https://curl.se/mail/lib-2025-04/0004.html
+ [26] = https://curl.se/bug/?i=17007
  [27] = https://curl.se/bug/?i=16980
  [28] = https://curl.se/bug/?i=16972
  [29] = https://curl.se/bug/?i=16957
+ [30] = https://curl.se/bug/?i=17008
  [31] = https://curl.se/bug/?i=16956
  [32] = https://curl.se/bug/?i=16978
+ [33] = https://curl.se/bug/?i=17002
  [34] = https://curl.se/bug/?i=16955
  [35] = https://curl.se/bug/?i=16965
  [36] = https://curl.se/bug/?i=16966
@@ -124,5 +145,17 @@ References to bug reports and discussions on issues:
  [39] = https://curl.se/bug/?i=16952
  [40] = https://curl.se/bug/?i=16946
  [41] = https://curl.se/bug/?i=16951
+ [42] = https://curl.se/bug/?i=17001
  [43] = https://curl.se/bug/?i=16878
  [44] = https://curl.se/bug/?i=16950
+ [45] = https://curl.se/bug/?i=16999
+ [46] = https://curl.se/bug/?i=16922
+ [47] = https://curl.se/bug/?i=16993
+ [48] = https://curl.se/bug/?i=16991
+ [51] = https://curl.se/bug/?i=16990
+ [53] = https://curl.se/bug/?i=16995
+ [54] = https://curl.se/bug/?i=16983
+ [55] = https://curl.se/bug/?i=16742
+ [56] = https://curl.se/bug/?i=16987
+ [57] = https://curl.se/bug/?i=16923
+ [60] = https://curl.se/bug/?i=16986
