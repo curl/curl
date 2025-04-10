@@ -1949,6 +1949,7 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
 {
   char error_buffer[256];
+  OSSL_PROVIDER *base;
 
   if(!data->state.libctx) {
     OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
@@ -1975,7 +1976,11 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
     data->state.provider_failed = TRUE;
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
-  data->state.provider_loaded = TRUE;
+  base = OSSL_PROVIDER_try_load(data->state.libctx, "base", 1);
+  if(!base)
+    failf(data, "Failed to load base");
+  else
+    data->state.provider_loaded = TRUE;
   return CURLE_OK;
 }
 #endif
