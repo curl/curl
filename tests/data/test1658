@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+unittest
+doh
+httpsrr
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+DoH
+</features>
+<name>
+unit test for doh_resp_decode_httpsrr
+</name>
+</client>
+<verify>
+<stderr mode="text">
+URL: -
+Test ended with result 0
+</stderr>
+</verify>
+</testcase>

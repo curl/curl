@@ -930,6 +930,12 @@ sub singletest_run {
             }
             $CMDLINE=$UNITDIR . $tool;
         }
+        elsif($tool =~ /^tool/) {
+            if($bundle) {
+                $tool = "units" . exe_ext('TOOL')
+            }
+            $CMDLINE=$TUNITDIR . $tool;
+        }
 
         if(! -f $CMDLINE) {
             logmsg " $testnum: IGNORED: The tool set in the test case for this: '$tool' does not exist\n";

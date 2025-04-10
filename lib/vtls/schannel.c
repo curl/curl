@@ -29,7 +29,7 @@
  * but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -42,25 +42,25 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "strcase.h"
-#include "sendf.h"
-#include "connect.h" /* for the connect timeout */
-#include "strerror.h"
-#include "select.h" /* for the socket readiness */
-#include "inet_pton.h" /* for IP addr SNI check */
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "../strcase.h"
+#include "../sendf.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../strerror.h"
+#include "../select.h" /* for the socket readiness */
+#include "../inet_pton.h" /* for IP addr SNI check */
+#include "../curl_multibyte.h"
+#include "../warnless.h"
 #include "x509asn1.h"
-#include "curl_printf.h"
-#include "multiif.h"
-#include "system_win32.h"
-#include "version_win32.h"
-#include "rand.h"
-#include "strparse.h"
+#include "../curl_printf.h"
+#include "../multiif.h"
+#include "../system_win32.h"
+#include "../version_win32.h"
+#include "../rand.h"
+#include "../strparse.h"
 
 /* The last #include file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
  * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These

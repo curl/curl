@@ -242,3 +242,19 @@ class TestBasic:
             r.check_exit_code(16)  # CURLE_HTTP2
         else:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
+
+    # http: invalid request headers, GET, issue #16998
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_16_inv_req_get(self, env: Env, httpd, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '-H', "a: a\x0ab"
+        ])
+        # on h1, request is sent, h2/h3 reject
+        if proto == 'http/1.1':
+            r.check_exit_code(0)
+        else:
+            r.check_exit_code(43)

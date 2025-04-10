@@ -28,18 +28,18 @@
  * TLS/SSL layer. No code but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SECTRANSP
 
-#include "urldata.h" /* for the Curl_easy definition */
-#include "curl_base64.h"
-#include "strparse.h"
-#include "multiif.h"
-#include "strcase.h"
+#include "../urldata.h" /* for the Curl_easy definition */
+#include "../curl_base64.h"
+#include "../strparse.h"
+#include "../multiif.h"
+#include "../strcase.h"
 #include "x509asn1.h"
 #include "vtls_scache.h"
-#include "strerror.h"
+#include "../strerror.h"
 #include "cipher_suite.h"
 
 #ifdef __clang__
@@ -134,19 +134,19 @@
 #include <sys/sysctl.h>
 #endif /* CURL_BUILD_MAC */
 
-#include "sendf.h"
-#include "inet_pton.h"
-#include "connect.h"
-#include "select.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
+#include "../connect.h"
+#include "../select.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "sectransp.h"
-#include "curl_printf.h"
-#include "strdup.h"
+#include "../curl_printf.h"
+#include "../strdup.h"
 
-#include "curl_memory.h"
+#include "../curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "../memdebug.h"
 
 
 /* From MacTypes.h (which we cannot include because it is not present in

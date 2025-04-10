@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
@@ -35,24 +35,24 @@
 
 #define DEBUG_ME 0
 
-#include "urldata.h"
-#include "sendf.h"
-#include "curl_ntlm_core.h"
-#include "curl_gethostname.h"
-#include "curl_multibyte.h"
-#include "curl_md5.h"
-#include "warnless.h"
-#include "rand.h"
-#include "vtls/vtls.h"
-#include "strdup.h"
+#include "../urldata.h"
+#include "../sendf.h"
+#include "../curl_ntlm_core.h"
+#include "../curl_gethostname.h"
+#include "../curl_multibyte.h"
+#include "../curl_md5.h"
+#include "../warnless.h"
+#include "../rand.h"
+#include "../vtls/vtls.h"
+#include "../strdup.h"
 
-#include "vauth/vauth.h"
-#include "curl_endian.h"
-#include "curl_printf.h"
+#include "vauth.h"
+#include "../curl_endian.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */

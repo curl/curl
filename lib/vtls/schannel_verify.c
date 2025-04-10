@@ -29,7 +29,7 @@
  * only be invoked by code in schannel.c.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 #ifndef USE_WINDOWS_SSPI
@@ -39,19 +39,19 @@
 #include "schannel.h"
 #include "schannel_int.h"
 
-#include "inet_pton.h"
+#include "../inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "sendf.h"
-#include "strerror.h"
-#include "curl_multibyte.h"
-#include "curl_printf.h"
+#include "../sendf.h"
+#include "../strerror.h"
+#include "../curl_multibyte.h"
+#include "../curl_printf.h"
 #include "hostcheck.h"
-#include "version_win32.h"
+#include "../version_win32.h"
 
 /* The last #include file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 

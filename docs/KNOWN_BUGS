@@ -66,6 +66,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+ 9.6 wolfssh: all tests fail
 
  10. Connection
  10.1 --interface with link-scoped IPv6 address
@@ -92,8 +93,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  15. CMake
  15.1 cmake outputs: no version information available
- 15.2 support build with GnuTLS
- 15.3 unusable tool_hugehelp.c with MinGW
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
  15.13 CMake build with MIT Kerberos does not work
@@ -437,6 +436,12 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/11244
 
+9.6 wolfssh: all tests fail
+
+ Something fundamental stops them all from working properly.
+
+ https://github.com/curl/curl/issues/16794
+
 10. Connection
 
 10.1 --interface with link-scoped IPv6 address
@@ -602,7 +607,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 16.3 aws-sigv4 has problems with particular URLs
 
- https://github.com/curl/curl/issues/13085
+ https://github.com/curl/curl/issues/13058
 
 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 

@@ -476,6 +476,9 @@ sub parseprotocols {
     # 'http-proxy' is used in test cases to do CONNECT through
     push @protocols, 'http-proxy';
 
+    # 'https-mtls' is used for client certificate auth testing
+    push @protocols, 'https-mtls';
+
     # 'none' is used in test cases to mean no server
     push @protocols, 'none';
 }

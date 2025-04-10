@@ -313,9 +313,9 @@ class TestDownload:
         assert httpd.stop()
         assert httpd.start()
 
-    # download via lib client, 1 at a time, pause/resume at different offsets
+    # download serial via lib client, pause/resume at different offsets
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h3'])
     def test_02_21_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
@@ -323,6 +323,29 @@ class TestDownload:
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-P', f'{pause_offset}', '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+
+    # h2 download parallel via lib client, pause/resume at different offsets
+    # debug-override stream window size to reproduce #16955
+    @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
+    @pytest.mark.parametrize("swin_max", [0, 10*1024])
+    def test_02_21_h2_lib_serial(self, env: Env, httpd, pause_offset, swin_max):
+        proto = 'h2'
+        count = 2
+        docname = 'data-10m'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'multi,http/2'
+        if swin_max > 0:
+            run_env['CURL_H2_STREAM_WIN_MAX'] = f'{swin_max}'
+        client = LocalClient(name='hx-download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

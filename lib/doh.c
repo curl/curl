@@ -38,11 +38,13 @@
 #include "connect.h"
 #include "strdup.h"
 #include "dynbuf.h"
+#include "escape.h"
+#include "urlapi-int.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "escape.h"
 
 #define DNS_CLASS_IN 0x01
 
@@ -1014,10 +1016,10 @@ UNITTEST void de_cleanup(struct dohentry *d)
  * just after the end of the DNS name encoding on output. (And
  * that is why it is an "unsigned char **" :-)
  */
-static CURLcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
-                                      char **dnsname)
+static CURLcode doh_decode_rdata_name(const unsigned char **buf,
+                                      size_t *remaining, char **dnsname)
 {
-  unsigned char *cp = NULL;
+  const unsigned char *cp = NULL;
   size_t rem = 0;
   unsigned char clen = 0; /* chunk len */
   struct dynbuf thename;
@@ -1057,43 +1059,23 @@ static CURLcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
   return CURLE_OK;
 }
 
-#ifdef DEBUGBUILD
-static CURLcode doh_test_alpn_escapes(void)
-{
-  /* we will use an example from draft-ietf-dnsop-svcb, figure 10 */
-  static unsigned char example[] = {
-    0x08,                                           /* length 8 */
-    0x66, 0x5c, 0x6f, 0x6f, 0x2c, 0x62, 0x61, 0x72, /* value "f\\oo,bar" */
-    0x02,                                           /* length 2 */
-    0x68, 0x32                                      /* value "h2" */
-  };
-  size_t example_len = sizeof(example);
-  unsigned char aval[MAX_HTTPSRR_ALPNS] = { 0 };
-  static const char expected[2] = { ALPN_h2, ALPN_none };
+UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
+                                          const unsigned char *cp, size_t len,
+                                          struct Curl_https_rrinfo **hrr);
 
-  if(Curl_httpsrr_decode_alpn(example, example_len, aval) != CURLE_OK)
-    return CURLE_BAD_CONTENT_ENCODING;
-  if(memcmp(aval, expected, sizeof(expected)))
-    return CURLE_BAD_CONTENT_ENCODING;
-  return CURLE_OK;
-}
-#endif
-
-static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
-                                        unsigned char *cp, size_t len,
-                                        struct Curl_https_rrinfo **hrr)
+/* @unittest 1658 */
+UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
+                                          const unsigned char *cp, size_t len,
+                                          struct Curl_https_rrinfo **hrr)
 {
   uint16_t pcode = 0, plen = 0;
   uint32_t expected_min_pcode = 0;
   struct Curl_https_rrinfo *lhrr = NULL;
   char *dnsname = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  size_t olen;
 
-#ifdef DEBUGBUILD
-  /* a few tests of escaping, should not be here but ok for now */
-  if(doh_test_alpn_escapes() != CURLE_OK)
-    return CURLE_OUT_OF_MEMORY;
-#endif
+  *hrr = NULL;
   if(len <= 2)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
@@ -1105,6 +1087,11 @@ static CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   if(doh_decode_rdata_name(&cp, &len, &dnsname) != CURLE_OK)
     goto err;
   lhrr->target = dnsname;
+  if(Curl_junkscan(dnsname, &olen, FALSE)) {
+    /* unacceptable hostname content */
+    result = CURLE_WEIRD_SERVER_REPLY;
+    goto err;
+  }
   lhrr->port = -1; /* until set */
   while(len >= 4) {
     pcode = doh_get16bit(cp, 0);
@@ -1131,9 +1118,12 @@ err:
   return result;
 }
 
-# ifdef DEBUGBUILD
-static void doh_print_httpsrr(struct Curl_easy *data,
-                              struct Curl_https_rrinfo *hrr)
+#ifdef DEBUGBUILD
+UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
+                                struct Curl_https_rrinfo *hrr);
+
+UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
+                                struct Curl_https_rrinfo *hrr)
 {
   DEBUGASSERT(hrr);
   infof(data, "HTTPS RR: priority %d, target: %s",

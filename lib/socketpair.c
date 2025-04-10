@@ -50,6 +50,11 @@ int Curl_eventfd(curl_socket_t socks[2], bool nonblocking)
 
 int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
 {
+#ifdef HAVE_PIPE2
+  int flags = nonblocking ? O_NONBLOCK | O_CLOEXEC : O_CLOEXEC;
+  if(pipe2(socks, flags))
+    return -1;
+#else
   if(pipe(socks))
     return -1;
 #ifdef HAVE_FCNTL
@@ -70,6 +75,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
       return -1;
     }
   }
+#endif
 
   return 0;
 }

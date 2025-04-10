@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||      \
   defined(USE_SCHANNEL) || defined(USE_SECTRANSP) ||    \
@@ -39,22 +39,22 @@
 #endif
 
 #include <curl/curl.h>
-#include "urldata.h"
-#include "strcase.h"
-#include "curl_ctype.h"
+#include "../urldata.h"
+#include "../strcase.h"
+#include "../curl_ctype.h"
 #include "hostcheck.h"
-#include "vtls/vtls.h"
-#include "vtls/vtls_int.h"
-#include "sendf.h"
-#include "inet_pton.h"
-#include "curl_base64.h"
+#include "vtls.h"
+#include "vtls_int.h"
+#include "../sendf.h"
+#include "../inet_pton.h"
+#include "../curl_base64.h"
 #include "x509asn1.h"
-#include "dynbuf.h"
+#include "../dynbuf.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Constants.

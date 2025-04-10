@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_OPENSSL
 /*
@@ -35,7 +35,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
-#include "urldata.h"
+#include "../urldata.h"
 
 /*
  * Whether SSL_CTX_set_keylog_callback is available.

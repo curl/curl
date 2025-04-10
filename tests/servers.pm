@@ -235,7 +235,7 @@ sub init_serverpidfile_hash {
     }
   }
   for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt')) {
+                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls')) {
     for my $ipvnum ((4, 6)) {
       for my $idnum ((1, 2)) {
         my $serv = servername_id($proto, $ipvnum, $idnum);
@@ -869,29 +869,15 @@ sub verifyhttptls {
 }
 
 #######################################################################
-# STUB for verifying mqtt
+# For verifying mqtt and socks
 #
-sub verifymqtt {
+sub verifypid {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
                                      $idnum);
     my $pid = processexists($pidfile);
     if($pid < 0) {
-        logmsg "RUN: MQTT server has died after starting up\n";
-    }
-    return $pid;
-}
-
-#######################################################################
-# STUB for verifying socks
-#
-sub verifysocks {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                     $idnum);
-    my $pid = processexists($pidfile);
-    if($pid < 0) {
-        logmsg "RUN: SOCKS server has died after starting up\n";
+        logmsg "RUN: $proto server has died\n";
     }
     return $pid;
 }
@@ -1039,40 +1025,17 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
-                 'mqtt' => \&verifymqtt,
+                 'mqtt' => \&verifypid,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks,
-                 'socks5unix' => \&verifysocks,
+                 'socks' => \&verifypid,
+                 'socks5unix' => \&verifypid,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
                  'smb' => \&verifysmb,
                  'telnet' => \&verifytelnet);
-
-sub verifyserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-
-    my $count = 30; # try for this many seconds
-    my $pid;
-
-    while($count--) {
-        my $fun = $protofunc{$proto};
-
-        $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
-
-        if($pid > 0) {
-            last;
-        }
-        elsif($pid < 0) {
-            # a real failure, stop trying and bail out
-            return 0;
-        }
-        sleep(1);
-    }
-    return $pid;
-}
 
 #######################################################################
 # Single shot server responsiveness test. This should only be used
@@ -1177,17 +1140,6 @@ sub runhttpserver {
     if(!$port_or_path) {
         $port = $port_or_path = pidfromfile($portfile);
     }
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$httppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server is on PID $httppid port $port_or_path\n";
@@ -1362,6 +1314,9 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'certs/test-localhost.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    if($proto eq "https-mtls") {
+        $flags .= "--mtls ";
+    }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
     }
@@ -1519,17 +1474,6 @@ sub runpingpongserver {
 
     logmsg "PINGPONG runs on port $port ($portfile)\n" if($verb);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ftppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0);
-    }
-    $pid2 = $pid3;
-
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verb);
 
     # Assign the correct port variable!
@@ -1663,17 +1607,6 @@ sub runtftpserver {
 
     my $port = pidfromfile($portfile);
 
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$tftppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
-
     if($verb) {
         logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
     }
@@ -1738,17 +1671,6 @@ sub runrtspserver {
     }
 
     my $port = pidfromfile($portfile);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$rtsppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0, 0);
-    }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server PID $rtsppid port $port\n";
@@ -2545,14 +2467,14 @@ sub startservers {
         elsif($what eq "file") {
             # we support it but have no server!
         }
-        elsif($what eq "https") {
+        elsif($what eq "https" || $what eq "https-mtls") {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return ("no stunnel", 4);
             }
-            if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
+            if($runcert{$what} && ($runcert{$what} ne $certfile)) {
                 # stop server when running and using a different cert
-                if(stopserver('https')) {
+                if(stopserver($what)) {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2560,10 +2482,10 @@ sub startservers {
                     return ("failed stopping HTTP server", 3);
                 }
             }
-            if($run{'https'} &&
-               !responsive_http_server("https", $verbose, 0,
-                                       protoport('https'))) {
-                if(stopserver('https')) {
+            if($run{$what} &&
+               !responsive_http_server($what, $verbose, 0,
+                                       protoport($what))) {
+                if(stopserver($what)) {
                     return ("failed stopping unresponsive HTTPS server", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2572,7 +2494,7 @@ sub startservers {
                 }
             }
             # check a running http server if we not already checked https
-            if($run{'http'} && !$run{'https'} &&
+            if($run{'http'} && !$run{$what} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {
@@ -2588,15 +2510,15 @@ sub startservers {
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(!$run{'https'}) {
-                ($serr, $pid, $pid2, $PORT{'https'}) =
-                    runhttpsserver($verbose, "https", "", $certfile);
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
                 if($pid <= 0) {
                     return ("failed starting HTTPS server (stunnel)", $serr);
                 }
-                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https'}="$pid $pid2";
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "http/2") {
@@ -3017,7 +2939,7 @@ sub subvariables {
     foreach my $proto ('DICT',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
-                       'HTTP', 'HTTP6', 'HTTPS',
+                       'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',
                        'HTTPSPROXY', 'HTTPTLS', 'HTTPTLS6',
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',

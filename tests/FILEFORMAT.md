@@ -397,6 +397,7 @@ What server(s) this test case requires/uses. Available servers:
 - `http-proxy`
 - `https`
 - `https-proxy`
+- `https-mtls`
 - `httptls+srp`
 - `httptls+srp-ipv6`
 - `http-unix`

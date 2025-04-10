@@ -24,22 +24,22 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_RUSTLS
 
-#include "curl_printf.h"
+#include "../curl_printf.h"
 
 #include <rustls.h>
 
-#include "inet_pton.h"
-#include "urldata.h"
-#include "sendf.h"
+#include "../inet_pton.h"
+#include "../urldata.h"
+#include "../sendf.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
 #include "keylog.h"
-#include "strerror.h"
+#include "../strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
 

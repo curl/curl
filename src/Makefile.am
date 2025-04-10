@@ -70,22 +70,16 @@ curl_hfiles_gen =
 CLEANFILES =
 
 if USE_UNITY
-curl_EXCLUDE =
-if CURLDEBUG
-# We must compile this source separately to avoid memdebug.h redefinitions
-# applying to them.
-curl_EXCLUDE += ../lib/curl_multibyte.c
-endif
 if USE_CPPFLAG_CURL_STATICLIB
 curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
 else
 curl_CURLX = $(CURLX_CFILES)
 endif
 curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
-curl_SOURCES = $(curl_EXCLUDE)
+curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
 # CURL_FILES comes from Makefile.inc
@@ -114,10 +108,10 @@ libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 if USE_UNITY
 libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES) --exclude $(curl_EXCLUDE) > libcurltool_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
-libcurltool_la_SOURCES = $(curl_EXCLUDE)
+libcurltool_la_SOURCES =
 CLEANFILES += libcurltool_unity.c
 else
 libcurltool_la_SOURCES = $(CURL_FILES)
@@ -127,7 +121,7 @@ endif
 # Use absolute directory to disable VPATH
 ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
-HUGE=tool_hugehelp.c
+HUGE=$(builddir)/tool_hugehelp.c
 
 HUGECMD = $(HUGEIT_$(V))
 HUGEIT_0 = @echo "  HUGE    " $@;
@@ -170,7 +164,7 @@ curl_cfiles_gen += $(HUGE)
 curl_hfiles_gen += tool_hugehelp.h
 CLEANFILES += $(HUGE)
 
-CA_EMBED_CSOURCE = tool_ca_embed.c
+CA_EMBED_CSOURCE = $(builddir)/tool_ca_embed.c
 curl_cfiles_gen += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
@@ -190,12 +184,7 @@ CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/$(HUGE) \
-	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
-	  -W$(srcdir)/curltool_unity.c \
-	  -W$(srcdir)/libcurltool_unity.c \
-	  $(srcdir)/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(CURL_CFILES) $(CURL_HFILES))
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes

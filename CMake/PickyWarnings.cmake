@@ -28,15 +28,15 @@ set(_picky "")
 if(CURL_WERROR AND
    ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
      NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
-     NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
-     NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
+     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0 AND
+     CMAKE_VERSION VERSION_GREATER_EQUAL 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
 endif()
 
 if(APPLE AND
-   (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
-   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
+   (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
+   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.3))
   list(APPEND _picky "-Werror=partial-availability")  # clang 3.6  appleclang 6.3
 endif()
 
@@ -141,8 +141,8 @@ if(PICKY_COMPILER)
         )
       endif()
       # Enable based on compiler version
-      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.3))
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.3
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
@@ -153,29 +153,29 @@ if(PICKY_COMPILER)
           -Wunused-const-variable          # clang  3.4  gcc  6.0  appleclang  5.1
         )
       endif()
-      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.9) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 8.3))
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.3))
         list(APPEND _picky_enable
           -Wcomma                          # clang  3.9            appleclang  8.3
           -Wmissing-variable-declarations  # clang  3.2            appleclang  4.6
         )
       endif()
-      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.3))
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.3))
         list(APPEND _picky_enable
           -Wassign-enum                    # clang  7.0            appleclang 10.3
           -Wextra-semi-stmt                # clang  7.0            appleclang 10.3
         )
       endif()
-      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.4))
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12.4))
         list(APPEND _picky_enable
           -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # We do silencing for clang 10.0 and above only
         )
       endif()
     else()  # gcc
       # Enable based on compiler version
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3)
         list(APPEND _picky_enable
           ${_picky_common_old}
           -Wclobbered                      #             gcc  4.3
@@ -186,7 +186,7 @@ if(PICKY_COMPILER)
           -ftree-vrp                       #             gcc  4.3 (required for -Warray-bounds, included in -Wall)
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.5)
         list(APPEND _picky_enable
           -Wjump-misses-init               #             gcc  4.5
         )
@@ -197,19 +197,19 @@ if(PICKY_COMPILER)
           )
         endif()
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.3
           -Wformat=2                       # clang  3.0  gcc  4.8
           -Wtrampolines                    #             gcc  4.6
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  3.0  gcc  5.0 (clang default: -Warray-bounds)
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.0)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
         list(APPEND _picky_enable
           -Wduplicated-cond                #             gcc  6.0
           -Wnull-dereference               # clang  3.0  gcc  6.0 (clang default)
@@ -219,7 +219,7 @@ if(PICKY_COMPILER)
           -Wunused-const-variable          # clang  3.4  gcc  6.0  appleclang  5.1
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 7.0)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0)
         list(APPEND _picky_enable
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
@@ -228,7 +228,7 @@ if(PICKY_COMPILER)
           -Wrestrict                       #             gcc  7.0
         )
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
         list(APPEND _picky_enable
           -Warith-conversion               #             gcc 10.0
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
@@ -260,17 +260,17 @@ if(PICKY_COMPILER)
         list(APPEND _picky "-Wno-shadow")
         list(APPEND _picky "-Wno-unreachable-code")
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
         # GCC <4.6 do not support #pragma to suppress warnings locally. Disable them globally instead.
         list(APPEND _picky "-Wno-overlength-strings")
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
         list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
         list(APPEND _picky "-Wno-type-limits")  # Avoid false positives
       endif()
-      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.5)
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.1 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.5)
         list(APPEND _picky "-Wno-conversion")  # Avoid false positives
       endif()
     endif()
