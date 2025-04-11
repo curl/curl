@@ -312,6 +312,8 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
       else if(feof(input))
         return TRUE; /* all good */
     }
+    else if(curlx_dyn_len(buf))
+      return TRUE; /* all good */
     else
       break;
   }
