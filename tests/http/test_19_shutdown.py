@@ -209,4 +209,3 @@ class TestShutdown:
                      if re.match(r'.*SHUTDOWN\] shutdown, done=1', line)]
         # we see less clean shutdowns as total limit forces early closes
         assert len(shutdowns) < count, f'{shutdowns}'
-
