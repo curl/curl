@@ -256,13 +256,13 @@ static void sock_state_cb(void *data, ares_socket_t socket_fd,
  * URL-state specific environment ('resolver' member of the UrlState
  * structure). Fills the passed pointer by the initialized ares_channel.
  */
-CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
+CURLcode Curl_resolver_init(struct Curl_easy *data, void **resolver)
 {
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
   options.sock_state_cb = sock_state_cb;
-  options.sock_state_cb_data = easy;
+  options.sock_state_cb_data = data;
 
   /*
      if c ares < 1.20.0: curl set timeout to CARES_TIMEOUT_PER_ATTEMPT (2s)
@@ -279,13 +279,26 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
     optmask |= ARES_OPT_TIMEOUTMS;
   }
 
-  status = ares_init_options((ares_channel*)resolver, &options, optmask);
+  status = ares_init_options((ares_channel *)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
     if(status == ARES_ENOMEM)
       return CURLE_OUT_OF_MEMORY;
     else
       return CURLE_FAILED_INIT;
   }
+#ifdef CURLDEBUG
+#ifdef HAVE_CARES_PORTS_CSV
+  {
+    const char *env = getenv("CURL_DNS_SERVER");
+    if(env) {
+      int rc = ares_set_servers_ports_csv((ares_channel_t *)*resolver, env);
+      if(rc)
+        infof(data, "ares_set_servers_ports_csv failed: %d", rc);
+    }
+  }
+#endif
+#endif
+
   return CURLE_OK;
   /* make sure that all other returns from this function should destroy the
      ares channel before returning error! */
