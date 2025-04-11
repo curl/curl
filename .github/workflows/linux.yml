@@ -69,6 +69,24 @@ jobs:
       fail-fast: false
       matrix:
         build:
+          - name: openssl !unity !bundle
+            configure: --with-openssl --enable-debug --disable-unity --disable-test-bundles
+          - name: openssl  unity !bundle
+            configure: --with-openssl --enable-debug                 --disable-test-bundles
+          - name: openssl !unity  bundle
+            configure: --with-openssl --enable-debug --disable-unity
+          - name: openssl  unity  bundle
+            configure: --with-openssl --enable-debug
+
+          - name: openssl !unity !bundle
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_TEST_BUNDLES=OFF
+          - name: openssl  unity !bundle
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=ON  -DCURL_TEST_BUNDLES=OFF
+          - name: openssl !unity  bundle
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=OFF -DCURL_TEST_BUNDLES=ON
+          - name: openssl  unity  bundle
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=ON  -DCURL_TEST_BUNDLES=ON
+
           - name: bearssl
             install_packages: zlib1g-dev
             install_steps: bearssl pytest
