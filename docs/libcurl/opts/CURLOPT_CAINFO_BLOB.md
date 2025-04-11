@@ -63,7 +63,7 @@ NULL
 
 int main(void)
 {
-  char *strpem; /* strpem must point to a PEM string */
+  char *strpem = "PEMDATA"; /* strpem must point to a PEM string */
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode res;

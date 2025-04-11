@@ -53,7 +53,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    long size_of_file;
+    long size_of_file = 6789;
 
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
 
