@@ -218,6 +218,7 @@
 --show-error (-S)                    5.9
 --show-headers (-i)                  4.8
 --silent (-s)                        4.0
+--signature-algorithms               8.14.0
 --skip-existing                      8.10.0
 --socks4                             7.15.2
 --socks4a                            7.18.0
