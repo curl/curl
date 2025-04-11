@@ -375,24 +375,33 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
     bundle = cpool_find_bundle(cpool, conn);
     live = bundle ? Curl_llist_count(&bundle->conns) : 0;
-      shutdowns = Curl_cshutdn_dest_count(data, conn->destination);
-    while(!shutdowns && bundle && live >= dest_limit) {
-      struct connectdata *oldest_idle = NULL;
-      /* The bundle is full. Extract the oldest connection that may
-       * be removed now, if there is one. */
-      oldest_idle = cpool_bundle_get_oldest_idle(bundle);
-      if(!oldest_idle)
+    shutdowns = Curl_cshutdn_dest_count(data, conn->destination);
+    while((live  + shutdowns) >= dest_limit) {
+      if(shutdowns) {
+        /* close one connection in shutdown right away, if we can */
+        if(!Curl_cshutdn_close_oldest(data, conn->destination))
+          break;
+      }
+      else if(!bundle)
         break;
-      /* disconnect the old conn and continue */
-      CURL_TRC_M(data, "Discarding connection #%"
-                   FMT_OFF_T " from %zu to reach destination "
-                   "limit of %zu", oldest_idle->connection_id,
-                   Curl_llist_count(&bundle->conns), dest_limit);
-      Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
+      else {
+        struct connectdata *oldest_idle = NULL;
+        /* The bundle is full. Extract the oldest connection that may
+         * be removed now, if there is one. */
+        oldest_idle = cpool_bundle_get_oldest_idle(bundle);
+        if(!oldest_idle)
+          break;
+        /* disconnect the old conn and continue */
+        CURL_TRC_M(data, "Discarding connection #%"
+                     FMT_OFF_T " from %zu to reach destination "
+                     "limit of %zu", oldest_idle->connection_id,
+                     Curl_llist_count(&bundle->conns), dest_limit);
+        Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
 
-      /* in case the bundle was destroyed in disconnect, look it up again */
-      bundle = cpool_find_bundle(cpool, conn);
-      live = bundle ? Curl_llist_count(&bundle->conns) : 0;
+        /* in case the bundle was destroyed in disconnect, look it up again */
+        bundle = cpool_find_bundle(cpool, conn);
+        live = bundle ? Curl_llist_count(&bundle->conns) : 0;
+      }
       shutdowns = Curl_cshutdn_dest_count(cpool->idata, conn->destination);
     }
     if((live + shutdowns) >= dest_limit) {
@@ -404,15 +413,22 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   if(total_limit) {
     shutdowns = Curl_cshutdn_count(cpool->idata);
     while((cpool->num_conn + shutdowns) >= total_limit) {
-      struct connectdata *oldest_idle = cpool_get_oldest_idle(cpool);
-      if(!oldest_idle)
-        break;
-      /* disconnect the old conn and continue */
-      CURL_TRC_M(data, "Discarding connection #%"
-                 FMT_OFF_T " from %zu to reach total "
-                 "limit of %zu",
-                 oldest_idle->connection_id, cpool->num_conn, total_limit);
-      Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
+      if(shutdowns) {
+        /* close one connection in shutdown right away, if we can */
+        if(!Curl_cshutdn_close_oldest(data, NULL))
+          break;
+      }
+      else {
+        struct connectdata *oldest_idle = cpool_get_oldest_idle(cpool);
+        if(!oldest_idle)
+          break;
+        /* disconnect the old conn and continue */
+        CURL_TRC_M(data, "Discarding connection #%"
+                   FMT_OFF_T " from %zu to reach total "
+                   "limit of %zu",
+                   oldest_idle->connection_id, cpool->num_conn, total_limit);
+        Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
+      }
       shutdowns = Curl_cshutdn_count(cpool->idata);
     }
     if((cpool->num_conn + shutdowns) >= total_limit) {
