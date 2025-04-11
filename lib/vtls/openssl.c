@@ -119,6 +119,10 @@
 #define OPENSSL_HAS_PROVIDERS
 #endif
 
+#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
+#endif
+
 #include "../warnless.h"
 
 /* The last #include files should be: */
@@ -200,7 +204,8 @@
 #define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
-#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_MSH3)
+#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
+       !defined(OPENSSL_QUIC_API2)) || defined(USE_MSH3)
 #define OSSL_PACKAGE "quictls"
 #else
 #define OSSL_PACKAGE "OpenSSL"
@@ -1841,6 +1846,11 @@ static int ossl_init(void)
 #endif
 
   Curl_tls_keylog_open();
+
+#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
+  if(ngtcp2_crypto_ossl_init())
+    return 0;
+#endif
 
   return 1;
 }
