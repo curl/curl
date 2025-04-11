@@ -103,6 +103,7 @@ typedef enum {
                                            when extracting the URL or the
                                            components */
 #define CURLU_NO_GUESS_SCHEME (1<<15)   /* for get, do not accept a guess */
+#define CURLU_NORMALIZE (1<<16)         /* for URL get, normalize */
 
 typedef struct Curl_URL CURLU;
 
