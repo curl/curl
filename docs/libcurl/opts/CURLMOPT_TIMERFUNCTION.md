@@ -88,6 +88,7 @@ static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
   else {
     /* delete the timeout, nothing to wait for now */
   }
+  return 0;
 }
 
 int main(void)
