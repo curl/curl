@@ -3616,7 +3616,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         else
 #endif
         {
-          infof(data, "No connections available, total of %zu reached.",
+          infof(data, "No connections available, total of %ld reached.",
                 data->multi->max_total_connections);
           connections_available = FALSE;
         }
