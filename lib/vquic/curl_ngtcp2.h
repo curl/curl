@@ -33,6 +33,9 @@
 #endif
 
 #include <ngtcp2/ngtcp2_crypto.h>
+#ifdef OPENSSL_QUIC_API2
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
+#endif
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/ssl.h>

@@ -119,10 +119,6 @@
 #define OPENSSL_HAS_PROVIDERS
 #endif
 
-#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
-#include <ngtcp2/ngtcp2_crypto_ossl.h>
-#endif
-
 #include "../warnless.h"
 
 /* The last #include files should be: */
@@ -1846,11 +1842,6 @@ static int ossl_init(void)
 #endif
 
   Curl_tls_keylog_open();
-
-#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
-  if(ngtcp2_crypto_ossl_init())
-    return 0;
-#endif
 
   return 1;
 }
