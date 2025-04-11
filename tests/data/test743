@@ -35,7 +35,7 @@ http
 --config with a 127 byte line
 </name>
 <file name="%LOGDIR/config" nonewline="yes">
-url localhost
+-A pointless
 data = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 </file>
 <command>
@@ -49,7 +49,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/config
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: pointless
 Accept: */*
 Content-Length: 118
 Content-Type: application/x-www-form-urlencoded
