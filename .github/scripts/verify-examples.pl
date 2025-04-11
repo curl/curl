@@ -29,12 +29,12 @@ my $check = "./scripts/checksrc.pl";
 my $error;
 
 if($files[0] eq "-h") {
-    print "Usage: verify-synopsis [man pages]\n";
+    print "Usage: verify-examples [markdown pages]\n";
     exit;
 }
 
 sub testcompile {
-    my $rc = system("gcc -c test.c -DCURL_DISABLE_TYPECHECK -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION -Wunused -Werror -Wno-unused-but-set-variable -I include") >> 8;
+    my $rc = system("gcc -c test.c -DCURL_DISABLE_TYPECHECK -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION -Wunused -Werror -Wall -Wno-unused-but-set-variable -I include") >> 8;
     return $rc;
 }
 
@@ -54,11 +54,11 @@ sub extract {
     print O "#include <curl/curl.h>\n";
     while(<F>) {
         $iline++;
-        if(/^.SH EXAMPLE/) {
+        if(/^# EXAMPLE/) {
             $syn = 1
         }
         elsif($syn == 1) {
-            if(/^.nf/) {
+            if(/^~~~/) {
                 $syn++;
                 print O "/* !checksrc! disable UNUSEDIGNORE all */\n";
                 print O "/* !checksrc! disable COPYRIGHT all */\n";
@@ -67,16 +67,7 @@ sub extract {
             }
         }
         elsif($syn == 2) {
-            if(/^.fi/) {
-                last;
-            }
-            if(/(?<!\\)(?:\\{2})*\\(?!\\)/) {
-                print STDERR
-                  "Error while processing file $f line $iline:\n$_" .
-                  "Error: Single backslashes \\ are not properly shown in " .
-                  "manpage EXAMPLE output unless they are escaped \\\\.\n";
-                $fail = 1;
-                $error = 1;
+            if(/^~~~/) {
                 last;
             }
             # two backslashes become one
