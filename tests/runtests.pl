@@ -3086,15 +3086,21 @@ my $sofar = time() - $start;
 # Finish CI Test Run
 citest_finishtestrun();
 
+logmsg "shutdown: trace-1\n";
 # Tests done, stop the servers
 foreach my $runnerid (values %runnerids) {
+    logmsg "shutdown: trace-1a\n";
     runnerac_stopservers($runnerid);
+    logmsg "shutdown: trace-1b\n";
 }
 
 # Wait for servers to stop
 my $unexpected;
+logmsg "shutdown: trace-2\n";
 foreach my $runnerid (values %runnerids) {
+    logmsg "shutdown: trace-2a\n";
     my ($rid, $unexpect, $logs) = runnerar($runnerid);
+    logmsg "shutdown: trace-2b\n";
     $unexpected ||= $unexpect;
     logmsg $logs;
 }
@@ -3103,8 +3109,11 @@ foreach my $runnerid (values %runnerids) {
 # There is a race condition here since we don't know exactly when the runners
 # have each finished shutting themselves down, but we're about to exit so it
 # doesn't make much difference.
+logmsg "shutdown: trace-3\n";
 foreach my $runnerid (values %runnerids) {
+    logmsg "shutdown: trace-3a\n";
     runnerac_shutdown($runnerid);
+    logmsg "shutdown: trace-3b\n";
     sleep 0;  # give runner a context switch so it can shut itself down
 }
 
