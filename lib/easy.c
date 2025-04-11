@@ -49,6 +49,7 @@
 #include "transfer.h"
 #include "vtls/vtls.h"
 #include "vtls/vtls_scache.h"
+#include "vquic/vquic.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
@@ -167,6 +168,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(!Curl_ssl_init()) {
     DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
+    goto fail;
+  }
+
+  if(!Curl_vquic_init()) {
+    DEBUGF(fprintf(stderr, "Error: Curl_vquic_init failed\n"));
     goto fail;
   }
 
