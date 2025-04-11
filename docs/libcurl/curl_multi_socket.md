@@ -65,8 +65,9 @@ int main(void)
      which we translate to a call to curl_multi_socket_action() */
   int running;
   int rc;
-  int fd;
-  CURLM *multi;
+  int fd = 2;
+  CURLM *multi = curl_multi_init();
+
   rc = curl_multi_socket(multi, fd, &running);
 }
 ~~~

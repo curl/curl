@@ -140,11 +140,8 @@ jobs:
           persist-credentials: false
         name: checkout
 
-      - name: render nroff versions
-        run: autoreconf -fi && ./configure --without-ssl --without-libpsl && make -C docs
-
       - name: verify examples
-        run: .github/scripts/verify-examples.pl docs/libcurl/curl*.3 docs/libcurl/opts/*.3
+        run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
   miscchecks:
     runs-on: ubuntu-24.04-arm
