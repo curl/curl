@@ -3597,10 +3597,12 @@ static CURLcode create_conn(struct Curl_easy *data,
         conn->bits.tls_enable_alpn = TRUE;
     }
 
-    if(waitpipe)
+    if(waitpipe) {
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
+      infof(data, "Waiting on connection to negotiate possible multiplexing.");
       connections_available = FALSE;
+    }
     else {
       switch(Curl_cpool_check_limits(data, conn)) {
       case CPOOL_LIMIT_DEST:
@@ -3614,7 +3616,8 @@ static CURLcode create_conn(struct Curl_easy *data,
         else
 #endif
         {
-          infof(data, "No connections available in cache");
+          infof(data, "No connections available, total of %ld reached.",
+                data->multi->max_total_connections);
           connections_available = FALSE;
         }
         break;
@@ -3624,8 +3627,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 
     if(!connections_available) {
-      infof(data, "No connections available.");
-
       Curl_conn_free(data, conn);
       *in_connect = NULL;
 
