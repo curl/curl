@@ -222,7 +222,7 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
     DEBUGASSERT(0);
   }
   else {
-    struct doh_probes *dohp = data->req.doh;
+    struct doh_probes *dohp = data->state.async.doh;
     /* one of the DoH request done for the 'data' transfer is now complete! */
     dohp->pending--;
     infof(doh, "a DoH request is completed, %u to go", dohp->pending);
@@ -403,21 +403,28 @@ error:
 struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                const char *hostname,
                                int port,
+                               int ip_version,
                                int *waitp)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp;
   struct connectdata *conn = data->conn;
   size_t i;
-  *waitp = FALSE;
-  (void)hostname;
-  (void)port;
 
-  DEBUGASSERT(!data->req.doh);
+  *waitp = FALSE;
+
+  DEBUGASSERT(!data->state.async.doh);
   DEBUGASSERT(conn);
 
+  data->state.async.done = FALSE;
+  data->state.async.port = port;
+  data->state.async.ip_version = ip_version;
+  data->state.async.hostname = strdup(hostname);
+  if(!data->state.async.hostname)
+    return NULL;
+
   /* start clean, consider allocating this struct on demand */
-  dohp = data->req.doh = calloc(1, sizeof(struct doh_probes));
+  dohp = data->state.async.doh = calloc(1, sizeof(struct doh_probes));
   if(!dohp)
     return NULL;
 
@@ -426,8 +433,8 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   }
 
   conn->bits.doh = TRUE;
-  dohp->host = hostname;
-  dohp->port = port;
+  dohp->host = data->state.async.hostname;
+  dohp->port = data->state.async.port;
   dohp->req_hds =
     curl_slist_append(NULL,
                       "Content-Type: application/dns-message");
@@ -435,6 +442,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     goto error;
 
   /* create IPv4 DoH request */
+  (void)ip_version; /* WHY not select on this for ipv4? */
   result = doh_run_probe(data, &dohp->probe[DOH_SLOT_IPV4],
                          DNS_TYPE_A, hostname, data->set.str[STRING_DOH],
                          data->multi, dohp->req_hds);
@@ -443,7 +451,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   dohp->pending++;
 
 #ifdef USE_IPV6
-  if((conn->ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
+  if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* create IPv6 DoH request */
     result = doh_run_probe(data, &dohp->probe[DOH_SLOT_IPV6],
                            DNS_TYPE_AAAA, hostname, data->set.str[STRING_DOH],
@@ -1164,7 +1172,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
   CURLcode result;
-  struct doh_probes *dohp = data->req.doh;
+  struct doh_probes *dohp = data->state.async.doh;
   *dnsp = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
@@ -1179,6 +1187,9 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
     DOHcode rc[DOH_SLOT_COUNT];
     struct dohentry de;
     int slot;
+
+    /* Clear any result the might still be there */
+    Curl_resolv_unlink(data, &data->state.async.dns);
 
     memset(rc, 0, sizeof(rc));
     /* remove DoH handles from multi handle and close them */
@@ -1219,34 +1230,35 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         return result;
       }
 
-      /* we got a response, store it in the cache */
-      dns = Curl_cache_addr(data, ai, dohp->host, 0, dohp->port, FALSE);
+      /* we got a response, create a dns entry. */
+      dns = Curl_dnscache_mk_entry(data, ai, dohp->host, 0, dohp->port, FALSE);
       if(dns) {
+        /* Now add and HTTPSRR information if we have */
+#ifdef USE_HTTPSRR
+        if(de.numhttps_rrs > 0 && result == CURLE_OK && *dnsp) {
+          struct Curl_https_rrinfo *hrr = NULL;
+          result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
+                                           de.https_rrs->len, &hrr);
+          if(result) {
+            infof(data, "Failed to decode HTTPS RR");
+            return result;
+          }
+          infof(data, "Some HTTPS RR to process");
+# ifdef DEBUGBUILD
+          doh_print_httpsrr(data, hrr);
+# endif
+          dns->hinfo = hrr;
+       }
+#endif
+        /* and add the entry to the cache */
         data->state.async.dns = dns;
-        *dnsp = dns;
-        result = CURLE_OK;      /* address resolution OK */
+        result = Curl_dnscache_add(data, dns);
+        *dnsp = data->state.async.dns;
       }
     } /* address processing done */
 
-    /* Now process any build-specific attributes retrieved from DNS */
-#ifdef USE_HTTPSRR
-    if(de.numhttps_rrs > 0 && result == CURLE_OK && *dnsp) {
-      struct Curl_https_rrinfo *hrr = NULL;
-      result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
-                                       de.https_rrs->len, &hrr);
-      if(result) {
-        infof(data, "Failed to decode HTTPS RR");
-        return result;
-      }
-      infof(data, "Some HTTPS RR to process");
-# ifdef DEBUGBUILD
-      doh_print_httpsrr(data, hrr);
-# endif
-      (*dnsp)->hinfo = hrr;
-    }
-#endif
-
     /* All done */
+    data->state.async.done = TRUE;
     de_cleanup(&de);
     Curl_doh_cleanup(data);
     return result;
@@ -1259,7 +1271,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
 void Curl_doh_close(struct Curl_easy *data)
 {
-  struct doh_probes *doh = data->req.doh;
+  struct doh_probes *doh = data->state.async.doh;
   if(doh && data->multi) {
     struct Curl_easy *probe_data;
     curl_off_t mid;
@@ -1288,13 +1300,14 @@ void Curl_doh_close(struct Curl_easy *data)
 
 void Curl_doh_cleanup(struct Curl_easy *data)
 {
-  struct doh_probes *doh = data->req.doh;
+  struct doh_probes *doh = data->state.async.doh;
   if(doh) {
     Curl_doh_close(data);
     curl_slist_free_all(doh->req_hds);
-    data->req.doh->req_hds = NULL;
-    Curl_safefree(data->req.doh);
+    data->state.async.doh->req_hds = NULL;
+    Curl_safefree(data->state.async.doh);
   }
+  Curl_safefree(data->state.async.hostname);
 }
 
 #endif /* CURL_DISABLE_DOH */
