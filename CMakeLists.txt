@@ -2503,6 +2503,13 @@ if(NOT CURL_DISABLE_INSTALL)
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/wcurl"
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE)
+
   # The `-DEV` part is important
   string(REGEX REPLACE "([0-9]+\.[0-9]+)\.([0-9]+.*)" "\\2" CPACK_PACKAGE_VERSION_PATCH "${_curl_version}")
   set(CPACK_GENERATOR "TGZ")
