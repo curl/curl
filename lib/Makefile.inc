@@ -111,7 +111,8 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   asyn-ares.c        \
-  asyn-thread.c      \
+  asyn-base.c        \
+  asyn-thrdd.c       \
   base64.c           \
   bufq.c             \
   bufref.c           \
@@ -166,11 +167,9 @@ LIB_CFILES =         \
   hash_offt.c        \
   headers.c          \
   hmac.c             \
-  hostasyn.c         \
   hostip.c           \
   hostip4.c          \
   hostip6.c          \
-  hostsyn.c          \
   hsts.c             \
   http.c             \
   http1.c            \

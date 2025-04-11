@@ -2534,7 +2534,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #endif
-#ifdef USE_ARES
+#ifdef CURLRES_ARES
   case CURLOPT_DNS_SERVERS:
     result = Curl_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
     if(result)

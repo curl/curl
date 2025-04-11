@@ -81,9 +81,6 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
       conn->handler->disconnect(data, conn, conn->bits.aborted);
     }
 
-    /* possible left-overs from the async name resolvers */
-    Curl_resolver_cancel(data);
-
     conn->bits.shutdown_handler = TRUE;
   }
 }

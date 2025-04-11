@@ -538,8 +538,8 @@ static CURLcode multi_done(struct Curl_easy *data,
     /* Stop if multi_done() has already been called */
     return CURLE_OK;
 
-  /* Stop the resolver and free its own resources (but not dns_entry yet). */
-  Curl_resolver_kill(data);
+  /* Shut down any ongoing async resolver operation. */
+  Curl_async_shutdown(data);
 
   /* Cleanup possible redirect junk */
   Curl_safefree(data->req.newurl);
@@ -2050,35 +2050,12 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
                                  CURLcode *resultp)
 {
   struct Curl_dns_entry *dns = NULL;
-  struct connectdata *conn = data->conn;
-  const char *hostname;
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   CURLMcode rc = CURLM_OK;
 
-  DEBUGASSERT(conn);
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy)
-    hostname = conn->http_proxy.host.name;
-  else
-#endif
-    if(conn->bits.conn_to_host)
-      hostname = conn->conn_to_host.name;
-    else
-      hostname = conn->host.name;
-
-  /* check if we have the name resolved by now */
-  dns = Curl_fetch_addr(data, hostname, conn->primary.remote_port);
-
-  if(dns) {
-    /* Tell a possibly async resolver we no longer need the results. */
-    Curl_resolver_set_result(data, dns);
-    result = CURLE_OK;
-    infof(data, "Hostname '%s' was found in DNS cache", hostname);
-  }
-
-  if(!dns)
-    result = Curl_resolv_check(data, &dns);
-
+  result = Curl_resolv_check(data, &dns);
+  CURL_TRC_DNS(data, "Curl_resolv_check() -> %d, %s",
+               result, dns ? "found" : "missing");
   /* Update sockets here, because the socket(s) may have been closed and the
      application thus needs to be told, even if it is likely that the same
      socket(s) will again be used further down. If the name has not yet been

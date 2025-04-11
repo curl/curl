@@ -1379,7 +1379,8 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       struct ssl_connect_data *connssl = cf->ctx;
       struct Curl_dns_entry *dns = NULL;
 
-      dns = Curl_fetch_addr(data, connssl->peer.hostname, connssl->peer.port);
+      dns = Curl_dnscache_get(data, connssl->peer.hostname, connssl->peer.port,
+                              cf->conn->ip_version);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
         if(data->set.tls_ech & CURLECH_HARD) {
