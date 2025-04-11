@@ -105,6 +105,7 @@ struct doh_probes {
 struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                const char *hostname,
                                int port,
+                               int ip_version,
                                int *waitp);
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
@@ -168,7 +169,7 @@ UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
 #else /* if DoH is disabled */
-#define Curl_doh(a,b,c,d) NULL
+#define Curl_doh(a,b,c,d,e) NULL
 #define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #endif
 

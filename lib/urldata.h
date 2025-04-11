@@ -556,21 +556,6 @@ struct hostname {
 #define CURL_WANT_RECV(data) \
   (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
 
-#if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
-#define USE_CURL_ASYNC
-struct Curl_async {
-  struct Curl_dns_entry *dns;
-#ifdef CURLRES_ASYNCH
-  struct thread_data thdata;
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel e.g. */
-#endif
-  int port;
-  BIT(done);  /* set TRUE when the lookup is complete */
-};
-
-#endif
-
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
