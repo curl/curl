@@ -1642,7 +1642,8 @@ fail:
         UI_method_set_reader(ui_method, ssl_ui_reader);
         UI_method_set_writer(ui_method, ssl_ui_writer);
 
-        store = OSSL_STORE_open_ex(key_file, data->state.libctx, NULL,
+        store = OSSL_STORE_open_ex(key_file, data->state.libctx,
+                                   "?provider=tpm2",
                                    ui_method, NULL, NULL, NULL, NULL);
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
