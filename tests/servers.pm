@@ -3005,7 +3005,7 @@ sub subvariables {
     }
 
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
-    $$thing =~ s/${prefix}SCP_PWD/$ssh_pwd/g;
+    $$thing =~ s/${prefix}SCP_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}SFTP_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}CERTDIR/./g;
