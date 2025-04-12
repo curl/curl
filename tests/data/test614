@@ -30,7 +30,7 @@ sftp
 SFTP pre-quote chmod
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 </client>
 
