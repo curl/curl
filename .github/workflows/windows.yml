@@ -55,12 +55,11 @@ jobs:
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
-
-      - uses: cygwin/cygwin-install-action@f61179d72284ceddc397ed07ddb444d82bf9e559 # v5
+      - uses: cygwin/cygwin-install-action@e67b1f4a359a621ee71cc8f0a96d3b8be1c9a218 # v5
         with:
           platform: ${{ matrix.platform }}
           site: https://mirrors.kernel.org/sourceware/cygwin/
-          install-dir: D:\cygwin
+          work-vol: 'D:'
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
