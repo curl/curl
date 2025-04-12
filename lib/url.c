@@ -3045,10 +3045,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
     DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
                  neg->wanted, neg->allowed));
+#ifdef USE_HTTP3
     if(neg->allowed & CURL_HTTP_V3x)
       allowed_alpns |= ALPN_h3;
+#endif
+#ifdef USE_HTTP2
     if(neg->allowed & CURL_HTTP_V2x)
       allowed_alpns |= ALPN_h2;
+#endif
     if(neg->allowed & CURL_HTTP_V1x)
       allowed_alpns |= ALPN_h1;
     allowed_alpns &= (int)data->asi->flags;
