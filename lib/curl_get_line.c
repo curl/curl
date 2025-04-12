@@ -70,6 +70,8 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
         return 1; /* all good */
       }
     }
+    else if(Curl_dyn_len(buf))
+      return 1; /* all good */
     else
       break;
   }
