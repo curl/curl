@@ -817,6 +817,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
+            openssh: 'OpenSSH-Windows-built-in'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
@@ -937,7 +938,6 @@ jobs:
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client'
             pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server'
-            pwsh -Command 'Start-Service sshd'
           else  # OpenSSH-Windows
             cd /d || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
