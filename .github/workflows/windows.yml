@@ -817,7 +817,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            openssh: 'OpenSSH-Windows-built-in'
+            openssh: 'OpenSSH-Windows-builtin'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
@@ -934,7 +934,7 @@ jobs:
         run: |
           if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-built-in' ]; then
+          elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.*'  # Client and Server
           else  # OpenSSH-Windows
