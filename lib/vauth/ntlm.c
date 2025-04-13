@@ -550,6 +550,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
  * data    [in]     - The session handle.
  * userp   [in]     - The username in the format User or Domain\User.
  * passwdp [in]     - The user's password.
+ * options [in]     - Login options holding localhostname
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * out     [out]    - The result storage.
  *
@@ -558,7 +559,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
-                                             const char *localhostname,
+                                             const char *options,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
 {
@@ -618,7 +619,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   userlen = strlen(user);
 
-  host = localhostname;
+  host = options;
   hostlen = strlen(host);
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
