@@ -935,8 +935,7 @@ jobs:
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-built-in' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client'
-            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server'
+            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.*'  # Client and Server
           else  # OpenSSH-Windows
             cd /d || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
