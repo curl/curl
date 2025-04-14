@@ -282,11 +282,21 @@ if(PICKY_COMPILER)
     endif()
   elseif(MSVC)
     list(APPEND _picky "-Wall")
-    list(APPEND _picky "-wd4061" "-wd4191" "-wd4255" "-wd4464")
-    list(APPEND _picky "-wd4548" "-wd4574" "-wd4668" "-wd4710")
-    list(APPEND _picky "-wd4711" "-wd4746" "-wd4774" "-wd4820")
+    list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
+    list(APPEND _picky "-wd4191")  # 'type cast': unsafe conversion from 'FARPROC' to 'void (__cdecl *)(void)'
+    list(APPEND _picky "-wd4255")  # no function prototype given: converting '()' to '(void)' (in winuser.h)
+    list(APPEND _picky "-wd4464")  # relative include path contains '..'
+    list(APPEND _picky "-wd4548")  # expression before comma has no effect; expected expression with side-effect (in FD_SET())
+    list(APPEND _picky "-wd4574")  # 'M' is defined to be '0': did you mean to use '#if M'? (in ws2tcpip.h)
+    list(APPEND _picky "-wd4668")  # 'M' is not defined as a preprocessor macro, replacing with '0' for '#if/#elif' (in winbase.h)
+    list(APPEND _picky "-wd4710")  # 'snprintf': function not inlined
+    list(APPEND _picky "-wd4711")  # function 'A' selected for automatic inline expansion
+    list(APPEND _picky "-wd4746")  # volatile access of '<expression>' is subject to /volatile:<iso|ms> setting;
+                                   #   consider using __iso_volatile_load/store intrinsic functions (ARM64)
+    list(APPEND _picky "-wd4774")  # 'snprintf': format string expected in argument 3 is not a string literal
+    list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
     if(MSVC_VERSION GREATER_EQUAL 1900)
-      list(APPEND _picky "-wd5045")
+      list(APPEND _picky "-wd5045")  # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
     endif()
   endif()
 endif()
