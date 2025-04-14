@@ -101,7 +101,7 @@ class TestWebsockets:
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
         r = client.run(args=[url, payload])
-        r.check_exit_code(56)
+        r.check_exit_code(100)  # CURLE_TOO_LARGE
 
     def test_20_04_data_small(self, env: Env, ws_echo):
         client = LocalClient(env=env, name='ws-data')

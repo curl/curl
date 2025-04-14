@@ -385,6 +385,26 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
+      if(dec->frame_flags & CURLWS_PING && dec->head[1] > 125) {
+        /* The maximum valid size of PING frames is 125 bytes.
+           Accepting overlong pings would mean sending equivalent pongs! */
+        failf(data, "[WS] received PING frame is too big");
+        ws_dec_reset(dec);
+        return CURLE_RECV_ERROR;
+      }
+      if(dec->frame_flags & CURLWS_PONG && dec->head[1] > 125) {
+        /* The maximum valid size of PONG frames is 125 bytes. */
+        failf(data, "[WS] received PONG frame is too big");
+        ws_dec_reset(dec);
+        return CURLE_RECV_ERROR;
+      }
+      if(dec->frame_flags & CURLWS_CLOSE && dec->head[1] > 125) {
+        /* The maximum valid size of CLOSE frames is 125 bytes. */
+        failf(data, "[WS] received CLOSE frame is too big");
+        ws_dec_reset(dec);
+        return CURLE_RECV_ERROR;
+      }
+
       /* How long is the frame head? */
       if(dec->head[1] == 126) {
         dec->head_total = 4;
@@ -763,6 +783,25 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
    * control frames (close/ping/pong) do not affect the CONT status */
   if(flags & (CURLWS_TEXT | CURLWS_BINARY)) {
     enc->contfragment = (flags & CURLWS_CONT) ? (bit)TRUE : (bit)FALSE;
+  }
+
+  if(flags & CURLWS_PING && payload_len > 125) {
+    /* The maximum valid size of PING frames is 125 bytes. */
+    failf(data, "[WS] given PING frame is too big");
+    *err = CURLE_TOO_LARGE;
+    return -1;
+  }
+  if(flags & CURLWS_PONG && payload_len > 125) {
+    /* The maximum valid size of PONG frames is 125 bytes. */
+    failf(data, "[WS] given PONG frame is too big");
+    *err = CURLE_TOO_LARGE;
+    return -1;
+  }
+  if(flags & CURLWS_CLOSE && payload_len > 125) {
+    /* The maximum valid size of CLOSE frames is 125 bytes. */
+    failf(data, "[WS] given CLOSE frame is too big");
+    *err = CURLE_TOO_LARGE;
+    return -1;
   }
 
   head[0] = enc->firstbyte = firstbyte;
