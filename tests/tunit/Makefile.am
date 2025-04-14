@@ -65,7 +65,7 @@ tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > tool_bundle.c
 
 noinst_PROGRAMS = tunits
-nodist_units_SOURCES = tool_bundle.c
+nodist_tunits_SOURCES = tool_bundle.c
 CLEANFILES = tool_bundle.c
 else
 # Makefile.inc provides neat definitions
