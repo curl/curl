@@ -44,7 +44,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(MSVC)
-  #string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   list(APPEND _picky "-W4")
 elseif(BORLAND)
   list(APPEND _picky "-w-")  # Disable warnings on Borland to avoid changing 3rd party code.
