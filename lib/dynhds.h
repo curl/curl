@@ -156,14 +156,14 @@ CURLcode Curl_dynhds_cadd(struct dynhds *dynhds,
 
 /**
  * Add a single header from an HTTP/1.1 formatted line at the end. Line
- * may contain a delimiting \r\n or just \n. Any characters after
+ * may contain a delimiting CRLF or just LF. Any characters after
  * that will be ignored.
  */
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line);
 
 /**
  * Add a single header from an HTTP/1.1 formatted line at the end. Line
- * may contain a delimiting \r\n or just \n. Any characters after
+ * may contain a delimiting CRLF or just LF. Any characters after
  * that will be ignored.
  */
 CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
