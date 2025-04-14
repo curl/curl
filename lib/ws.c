@@ -187,12 +187,24 @@ static int ws_frame_firstbyte2flags(struct Curl_easy *data,
         return 0;
       }
       return CURLWS_BINARY;
+    /* 0x08 - first CLOSE fragment */
+    case WSBIT_OPCODE_CLOSE:
+      failf(data, "[WS] invalid fragmented CLOSE frame");
+      return 0;
     /* 0x88 - unfragmented CLOSE */
     case (WSBIT_OPCODE_CLOSE | WSBIT_FIN):
       return CURLWS_CLOSE;
+    /* 0x09 - first PING fragment */
+    case WSBIT_OPCODE_PING:
+      failf(data, "[WS] invalid fragmented PING frame");
+      return 0;
     /* 0x89 - unfragmented PING */
     case (WSBIT_OPCODE_PING | WSBIT_FIN):
       return CURLWS_PING;
+    /* 0x0a - first PONG fragment */
+    case WSBIT_OPCODE_PONG:
+      failf(data, "[WS] invalid fragmented PONG frame");
+      return 0;
     /* 0x8a - unfragmented PONG */
     case (WSBIT_OPCODE_PONG | WSBIT_FIN):
       return CURLWS_PONG;
