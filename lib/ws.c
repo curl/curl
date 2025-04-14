@@ -147,23 +147,45 @@ static int ws_frame_firstbyte2flags(struct Curl_easy *data,
   switch(firstbyte) {
     /* 0x00 - intermediate TEXT/BINARY fragment */
     case WSBIT_OPCODE_CONT:
-      /* continuation of a previous fragment: restore stored flags */
+      if(!(cont_flags & CURLWS_CONT)) {
+        failf(data, "[WS] no ongoing fragmented message to resume");
+        return 0;
+      }
       return cont_flags | CURLWS_CONT;
     /* 0x80 - final TEXT/BIN fragment */
     case (WSBIT_OPCODE_CONT | WSBIT_FIN):
-      /* continuation of a previous fragment: restore stored flags */
+      if(!(cont_flags & CURLWS_CONT)) {
+        failf(data, "[WS] no ongoing fragmented message to resume");
+        return 0;
+      }
       return cont_flags & ~CURLWS_CONT;
     /* 0x01 - first TEXT fragment */
     case WSBIT_OPCODE_TEXT:
+      if(cont_flags & CURLWS_CONT) {
+        failf(data, "[WS] fragmented message interrupted by new TEXT msg");
+        return 0;
+      }
       return CURLWS_TEXT | CURLWS_CONT;
     /* 0x81 - unfragmented TEXT msg */
     case (WSBIT_OPCODE_TEXT | WSBIT_FIN):
+      if(cont_flags & CURLWS_CONT) {
+        failf(data, "[WS] fragmented message interrupted by new TEXT msg");
+        return 0;
+      }
       return CURLWS_TEXT;
     /* 0x02 - first BINARY fragment */
     case WSBIT_OPCODE_BIN:
+      if(cont_flags & CURLWS_CONT) {
+        failf(data, "[WS] fragmented message interrupted by new BINARY msg");
+        return 0;
+      }
       return CURLWS_BINARY | CURLWS_CONT;
     /* 0x82 - unfragmented BINARY msg */
     case (WSBIT_OPCODE_BIN | WSBIT_FIN):
+      if(cont_flags & CURLWS_CONT) {
+        failf(data, "[WS] fragmented message interrupted by new BINARY msg");
+        return 0;
+      }
       return CURLWS_BINARY;
     /* 0x88 - unfragmented CLOSE */
     case (WSBIT_OPCODE_CLOSE | WSBIT_FIN):
