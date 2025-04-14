@@ -95,6 +95,9 @@ uint_spbset_get_chunk(struct uint_spbset *bset, unsigned int i, bool grow)
   struct uint_spbset_chunk *chunk, **panchor = NULL;
   unsigned int i_offset = (i & ~CURL_UINT_SPBSET_CH_MASK);
 
+  if(!bset)
+    return NULL;
+
   for(chunk = &bset->head; chunk;
       panchor = &chunk->next, chunk = chunk->next) {
     if(chunk->offset == i_offset) {
