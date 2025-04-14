@@ -1,0 +1,86 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Fragmented messages with empty fragments
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# Full list of frames: see <verify.stdout> below
+#   1st a message with an emtpy fragment at the beginning
+#   2nd a message with an emtpy fragment in the middle
+#   3rd a message with an emtpy fragment at the end
+#   4th a message with only empty fragments
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%01%00]hex%%hex[%00%02a1]hex%%hex[%80%02a2]hex%%hex[%01%02b1]hex%%hex[%00%00]hex%%hex[%80%02b2]hex%%hex[%01%02c1]hex%%hex[%00%02c2]hex%%hex[%80%00]hex%%hex[%01%00]hex%%hex[%00%00]hex%%hex[%80%00]hex%%hex[%88%00]hex%
+</data>
+</reply>
+
+<verify>
+
+# Exact echo of reply data with additional masking
+<protocol nonewline="yes">
+%hex[%01%80%00%00%00%00]hex%%hex[%00%82%00%00%00%00a1]hex%%hex[%80%82%00%00%00%00a2]hex%%hex[%01%82%00%00%00%00b1]hex%%hex[%00%80%00%00%00%00]hex%%hex[%80%82%00%00%00%00b2]hex%%hex[%01%82%00%00%00%00c1]hex%%hex[%00%82%00%00%00%00c2]hex%%hex[%80%80%00%00%00%00]hex%%hex[%01%80%00%00%00%00]hex%%hex[%00%80%00%00%00%00]hex%%hex[%80%80%00%00%00%00]hex%%hex[%88%80%00%00%00%00]hex%
+</protocol>
+
+<stdout>
+txt --- [0]
+txt --- [2] a1
+txt fin [2] a2
+txt --- [2] b1
+txt --- [0]
+txt fin [2] b2
+txt --- [2] c1
+txt --- [2] c2
+txt fin [0]
+txt --- [0]
+txt --- [0]
+txt fin [0]
+close [0]
+</stdout>
+
+# CURLE_OK
+<errorcode>
+0
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>

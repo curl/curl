@@ -6,7 +6,7 @@ WebSockets
 </info>
 
 #
-# Sends a PING + a 5 byte hello TEXT
+# Close connection during websocket upgrade
 <reply>
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets swsclose
@@ -16,7 +16,6 @@ Connection: Upgrade
 Something: else
 Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
 
-%hex[%89%00%81%05hello]hex%
 </data>
 # allow upgrade
 <servercmd>
@@ -53,7 +52,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol nocheck="yes" crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: websocket/2304
+User-Agent: websocket/%TESTNUMBER
 Accept: */*
 Upgrade: websocket
 Connection: Upgrade
