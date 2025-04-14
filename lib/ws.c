@@ -951,6 +951,8 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
                                  CURLcode *err)
 {
   struct ws_collect *ctx = userp;
+  struct Curl_easy *data = ctx->data;
+  bool auto_pong = !data->set.ws_no_auto_pong;
   size_t nwritten;
   curl_off_t remain = (payload_len - (payload_offset + buflen));
 
@@ -962,7 +964,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
     ctx->payload_len = payload_len;
   }
 
-  if((frame_flags & CURLWS_PING) && !remain) {
+  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
     size_t bytes;
     infof(ctx->data, "WS: auto-respond to PING with a PONG");
