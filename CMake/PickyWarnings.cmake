@@ -301,6 +301,7 @@ if(_picky)
   list(REMOVE_ITEM _picky "-pedantic-errors")  # Must not pass to feature checks
   string(REPLACE ";" " " _picky_tmp "${_picky}")
   list(APPEND CMAKE_REQUIRED_FLAGS "${_picky_tmp}")
+
   unset(_picky)
   unset(_picky_tmp)
 endif()
