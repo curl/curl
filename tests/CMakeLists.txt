@@ -34,6 +34,7 @@ add_subdirectory(http)
 add_subdirectory(http/clients)
 add_subdirectory(server)
 add_subdirectory(libtest)
+add_subdirectory(tunit)
 add_subdirectory(unit)
 add_subdirectory(certs)
 
