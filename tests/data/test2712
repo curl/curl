@@ -1,0 +1,74 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Max sized PING/PONG/CLOSE
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# Full list of frames: see <verify.stdout> below
+#   A PING/PONG/CLOSE with 125 bytes payload each
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%89%7d]hex%%repeat[125 x _]%%hex[%8a%7d]hex%%repeat[125 x _]%%hex[%88%7d%03%e8]hex%%repeat[123 x _]%
+</data>
+</reply>
+
+<verify>
+
+# Exact echo of reply data with additional masking
+<protocol nonewline="yes">
+%hex[%89%fd%00%00%00%00]hex%%repeat[125 x _]%%hex[%8a%fd%00%00%00%00]hex%%repeat[125 x _]%%hex[%88%fd%00%00%00%00%03%e8]hex%%repeat[123 x _]%
+</protocol>
+
+# PING is handled by lib and never given to application
+<stdout>
+ping [125] %repeat[125 x _]%
+pong [125] %repeat[125 x _]%
+close [125] %hex[%03%e8]hex%%repeat[123 x _]%
+</stdout>
+
+# CURLE_OK
+<errorcode>
+0
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>
