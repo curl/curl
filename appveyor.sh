@@ -68,6 +68,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     # shellcheck disable=SC2086
     time cmake -G "${PRJ_GEN}" ${TARGET} \
       -DCURL_TEST_BUNDLES=ON \
+      -DCMAKE_C_FLAGS=-W2 \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \
@@ -87,7 +88,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --verbose -- ${BUILD_OPT:-}; then
     if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
       find . -name BuildLog.htm -exec dos2unix '{}' +
       find . -name BuildLog.htm -exec cat '{}' +
