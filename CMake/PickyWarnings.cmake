@@ -53,7 +53,7 @@ endif()
 
 if(MSVC)
   # Use the highest warning level for Visual Studio.
-  list(APPEND _picky "-W4 -Wall")
+  list(APPEND _picky "-W4 -Wall -wd4061 -wd4464 -wd4820")
 elseif(BORLAND)
   list(APPEND _picky "-w-")  # Disable warnings on Borland to avoid changing 3rd party code.
 endif()
