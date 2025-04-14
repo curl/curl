@@ -145,35 +145,43 @@ static int ws_frame_firstbyte2flags(struct Curl_easy *data,
                                     unsigned char firstbyte, int cont_flags)
 {
   switch(firstbyte) {
+    /* 0x00 - intermediate TEXT/BINARY fragment */
     case WSBIT_OPCODE_CONT:
       /* continuation of a previous fragment: restore stored flags */
       return cont_flags | CURLWS_CONT;
+    /* 0x80 - final TEXT/BIN fragment */
     case (WSBIT_OPCODE_CONT | WSBIT_FIN):
       /* continuation of a previous fragment: restore stored flags */
       return cont_flags & ~CURLWS_CONT;
+    /* 0x01 - first TEXT fragment */
     case WSBIT_OPCODE_TEXT:
       return CURLWS_TEXT | CURLWS_CONT;
+    /* 0x81 - unfragmented TEXT msg */
     case (WSBIT_OPCODE_TEXT | WSBIT_FIN):
       return CURLWS_TEXT;
+    /* 0x02 - first BINARY fragment */
     case WSBIT_OPCODE_BIN:
       return CURLWS_BINARY | CURLWS_CONT;
+    /* 0x82 - unfragmented BINARY msg */
     case (WSBIT_OPCODE_BIN | WSBIT_FIN):
       return CURLWS_BINARY;
+    /* 0x88 - unfragmented CLOSE */
     case (WSBIT_OPCODE_CLOSE | WSBIT_FIN):
       return CURLWS_CLOSE;
+    /* 0x89 - unfragmented PING */
     case (WSBIT_OPCODE_PING | WSBIT_FIN):
       return CURLWS_PING;
+    /* 0x8a - unfragmented PONG */
     case (WSBIT_OPCODE_PONG | WSBIT_FIN):
       return CURLWS_PONG;
+    /* invalid first byte */
     default:
-      if(firstbyte & WSBIT_RSV_MASK) {
-        failf(data, "[WS] unknown reserved bit: %x",
-              firstbyte & WSBIT_RSV_MASK);
-      }
-      else {
-        failf(data, "[WS] unknown opcode: %x",
-              firstbyte & WSBIT_OPCODE_MASK);
-      }
+      if(firstbyte & WSBIT_RSV_MASK)
+        /* any of the reserved bits 0x40/0x20/0x10 are set */
+        failf(data, "[WS] invalid reserved bits: %02x", firstbyte);
+      else
+        /* any of the reserved opcodes 0x3-0x7 or 0xb-0xf is used */
+        failf(data, "[WS] invalid opcode: %02x", firstbyte);
       return 0;
   }
 }
@@ -232,7 +240,7 @@ static unsigned char ws_frame_flags2firstbyte(struct Curl_easy *data,
       return 0xff;
     default:
       failf(data, "[WS] unknown flags: %x", flags);
-      *err = CURLE_SEND_ERROR;
+      *err = CURLE_BAD_FUNCTION_ARGUMENT;
       return 0xff;
   }
 }
@@ -318,7 +326,6 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->frame_flags = ws_frame_firstbyte2flags(data, dec->head[0],
                                                   dec->cont_flags);
       if(!dec->frame_flags) {
-        failf(data, "[WS] invalid first byte: %x", dec->head[0]);
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
@@ -716,7 +723,6 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
 
   firstbyte = ws_frame_flags2firstbyte(data, flags, enc->contfragment, err);
   if(*err) {
-    failf(data, "[WS] provided flags not valid: %x", flags);
     return -1;
   }
 
