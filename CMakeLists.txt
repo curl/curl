@@ -282,7 +282,8 @@ endif()
 include(PickyWarnings)
 
 if(CYGWIN OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  string(APPEND CMAKE_C_FLAGS " -D_GNU_SOURCE")  # Required for sendmmsg() and accept4()
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "_GNU_SOURCE")  # Required for accept4(), pipe2(), sendmmsg()
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE")  # Apply to all feature checks
 endif()
 
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
