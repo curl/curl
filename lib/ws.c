@@ -330,11 +330,10 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         return CURLE_RECV_ERROR;
       }
 
-      if(dec->frame_flags & CURLWS_CONT) {
+      /* fragmentation only applies to data frames (text/binary);
+       * control frames (close/ping/pong) do not affect the CONT status */
+      if(dec->frame_flags & (CURLWS_TEXT | CURLWS_BINARY)) {
         dec->cont_flags = dec->frame_flags;
-      }
-      else {
-        dec->cont_flags = 0;
       }
 
       dec->head_len = 1;
