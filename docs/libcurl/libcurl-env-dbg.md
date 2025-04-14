@@ -141,6 +141,11 @@ decoding.
 Used to simulate blocking sends after this chunk size for WebSocket
 connections.
 
+## `CURL_WS_FORCE_ZERO_MASK`
+
+Used to set the bitmask of all sent WebSocket frames to zero. The value of the
+environment variable does not matter.
+
 ## `CURL_FORBID_REUSE`
 
 Used to set the CURLOPT_FORBID_REUSE flag on each transfer initiated

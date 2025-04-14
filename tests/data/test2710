@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Unsolicited PONG
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# Full list of frames: see <verify.stdout> below
+#   An unsolicited PONG with and without payload
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%8a%00]hex%%hex[%8a%04pong]hex%%hex[%88%00]hex%
+</data>
+</reply>
+
+<verify>
+
+# Exact echo of reply data with additional masking
+<protocol nonewline="yes">
+%hex[%8a%80%00%00%00%00]hex%%hex[%8a%84%00%00%00%00pong]hex%%hex[%88%80%00%00%00%00]hex%
+</protocol>
+
+<stdout>
+pong [0]
+pong [4] pong
+close [0]
+</stdout>
+
+# CURLE_OK
+<errorcode>
+0
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>
