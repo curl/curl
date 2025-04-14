@@ -54,7 +54,7 @@ endif()
 if(MSVC)
   # Use the highest warning level for Visual Studio.
   list(APPEND _picky "-W4")
-  list(APPEND _picky "-Wall -wd4061 -wd4191 -wd4255 -wd4464 -wd4548 -wd4574 -wd4668 -wd4710 -wd4711 -wd4774 -wd4820")
+  list(APPEND _picky "-Wall -wd4061 -wd4191 -wd4255 -wd4464 -wd4548 -wd4574 -wd4668 -wd4710 -wd4711 -wd4746 -wd4774 -wd4820")
   if(MSVC_VERSION GREATER_EQUAL 1900)
     list(APPEND _picky "-wd5045")
   endif()
