@@ -366,6 +366,10 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = 30;       /* sensible default */
 
+#ifndef CURL_DISABLE_DOH
+  set->dohfor_mid  = -1;
+#endif
+
   set->method = HTTPREQ_GET; /* Default HTTP request */
 #ifndef CURL_DISABLE_RTSP
   set->rtspreq = RTSPREQ_OPTIONS; /* Default RTSP request */
