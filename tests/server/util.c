@@ -502,7 +502,7 @@ static void exit_signal_handler(int signum)
  * application, such as one in UNIX, to become multithreaded and cause
  * unexpected behavior.
  * [...]
- * The SIGILL and SIGTERM signals are not generated under Windows.
+ * The SIGKILL and SIGTERM signals are not generated under Windows.
  * They are included for ANSI compatibility. Therefore, you can set
  * signal handlers for these signals by using signal, and you can also
  * explicitly generate these signals by calling raise. Source:
