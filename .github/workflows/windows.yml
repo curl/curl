@@ -814,7 +814,7 @@ jobs:
               -DUSE_ECH=ON
 
           - name: 'wolfssl +examples'
-            install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
+            install: 'brotli zlib zstd        nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
             arch: 'arm64'
             plat: 'windows'
             type: 'Debug'
@@ -824,6 +824,7 @@ jobs:
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
+              -DCURL_USE_LIBPSL=OFF
               -DUSE_ECH=ON
 
           - name: 'mbedtls'
