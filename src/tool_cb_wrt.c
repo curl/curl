@@ -367,7 +367,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     int res;
     do {
       res = fflush(outs->stream);
-    } while(res && errno == SOCKEINTR);
+      /* Keep retrying in the hope that it is not interrupted sometime */
+      /* !checksrc! disable ERRNOVAR 1 */
+    } while(res && errno == EINTR);
     if(res)
       return CURL_WRITEFUNC_ERROR;
   }
