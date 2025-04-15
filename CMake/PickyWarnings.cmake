@@ -302,7 +302,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
 endif()
 
 if(_picky_nocheck OR _picky)
-  set(_picky_tmp "${picky_nocheck}" "${_picky}")
+  set(_picky_tmp "${_picky_nocheck}" "${_picky}")
   string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
   string(STRIP "${_picky_tmp}" _picky_tmp)
   message(STATUS "Picky compiler options: ${_picky_tmp}")
