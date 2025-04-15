@@ -51,6 +51,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(MSVC)
+  # Use the highest warning level for Visual Studio.
   string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   list(APPEND _picky "-W4")
 elseif(BORLAND)
