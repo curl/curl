@@ -172,7 +172,7 @@ jobs:
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
-    runs-on: windows-latest
+    runs-on: ${{ matrix.image || 'windows-latest' }}
     timeout-minutes: 20
     defaults:
       run:
@@ -200,7 +200,7 @@ jobs:
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-libssh2', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
           # { build: 'autotools', sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '--without-debug --with-schannel --enable-shared', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug', image: 'windows-2025' }
           - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
@@ -744,7 +744,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    runs-on: windows-latest
+    runs-on: ${{ matrix.image || 'windows-latest' }}
     timeout-minutes: 55
     defaults:
       run:
@@ -936,8 +936,10 @@ jobs:
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
-            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
+            if [ '${{ matrix.image }}' != 'windows-2025' ]; then
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
+            fi
           else  # OpenSSH-Windows
             cd /d || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
