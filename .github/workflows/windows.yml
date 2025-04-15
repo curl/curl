@@ -769,18 +769,6 @@ jobs:
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'openssl'
-            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
-            arch: 'arm64'
-            plat: 'windows'
-            type: 'Debug'
-            image: 'windows-11-arm'
-            config: >-
-              -DENABLE_DEBUG=ON
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_LIBPSL=OFF
-
-          - name: 'openssl'
             install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
             arch: 'x64'
             plat: 'windows'
@@ -907,7 +895,6 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
               -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
-              -DCMAKE_C_COMPILER_TARGET='${{ matrix.arch }}-${{ matrix.plat }}' \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
