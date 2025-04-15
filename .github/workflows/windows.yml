@@ -852,12 +852,18 @@ jobs:
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        if: ${{ !contains(matrix.image, 'arm') }}
         with:
           msystem: ucrt64
           release: false
           update: false
           cache: false
           path-type: inherit
+
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        if: ${{ contains(matrix.image, 'arm') }}
+        with:
+          msystem: clangarm64
 
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
