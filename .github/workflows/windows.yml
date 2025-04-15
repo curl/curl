@@ -796,7 +796,7 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             image: 'windows-2025'
-            openssh: 'OpenSSH-Windows'
+            openssh: 'OpenSSH-Windows-builtin'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
