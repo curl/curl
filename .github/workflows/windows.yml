@@ -744,7 +744,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    runs-on: windows-latest
+    runs-on: ${{ matrix.image || 'windows-latest' }}
     timeout-minutes: 55
     defaults:
       run:
@@ -795,6 +795,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-2025'
             openssh: 'OpenSSH-Windows'
             config: >-
               -DENABLE_DEBUG=ON
