@@ -24,19 +24,20 @@
 include(CheckCCompilerFlag)
 
 set(_picky "")
+set(_picky_nocheck "")  # not to pass to feature checks
 
 if(CURL_WERROR)
   if(MSVC)
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-WX")
+    list(APPEND _picky_nocheck "-WX")
   else()  # llvm/clang and gcc style options
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Werror")
+    list(APPEND _picky_nocheck "-Werror")
   endif()
 
   if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
       NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
       CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0) OR
      CMAKE_C_COMPILER_ID MATCHES "Clang")
-    list(APPEND _picky "-pedantic-errors")
+    list(APPEND _picky_nocheck "-pedantic-errors")
   endif()
 endif()
 
@@ -298,13 +299,13 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   set(_picky ${_picky_tmp})
 endif()
 
-if(_picky)
-  string(REPLACE ";" " " _picky_tmp "${_picky}")
+if(_picky_nocheck OR _picky)
+  set(_picky_tmp "${picky_nocheck}" "${_picky}")
+  string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
   message(STATUS "Picky compiler options: ${_picky_tmp}")
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky}")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
 
   # Apply to all feature checks
-  list(REMOVE_ITEM _picky "-pedantic-errors")  # Must not pass to feature checks
   string(REPLACE ";" " " _picky_tmp "${_picky}")
   string(APPEND CMAKE_REQUIRED_FLAGS " ${_picky_tmp}")
 
