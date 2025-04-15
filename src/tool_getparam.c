@@ -1785,7 +1785,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         nextarg = &parse[1]; /* this is the actual extra parameter */
         singleopt = TRUE;   /* do not loop anymore after this */
 #ifdef HAVE_WRITABLE_ARGV
-        clearthis = &cleararg1[parse + 2 - flag];
+        if(cleararg1)
+          clearthis = &cleararg1[parse + 2 - flag];
 #endif
       }
       else if(!nextarg) {
@@ -1794,7 +1795,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       else {
 #ifdef HAVE_WRITABLE_ARGV
-        clearthis = cleararg2;
+        if(cleararg2)
+          clearthis = cleararg2;
 #endif
         *usedarg = TRUE; /* mark it as used */
       }
