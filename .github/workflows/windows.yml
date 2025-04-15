@@ -804,10 +804,9 @@ jobs:
 
           - name: 'boringssl'
             install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-            arch: 'arm64'
+            arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            image: 'windows-11-arm'
             config: >-
               -DENABLE_DEBUG=OFF
               -DCURL_USE_LIBSSH2=ON
@@ -816,9 +815,10 @@ jobs:
 
           - name: 'wolfssl +examples'
             install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
-            arch: 'x64'
+            arch: 'arm64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-11-arm'
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_LIBSSH2=ON
