@@ -422,12 +422,6 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-static unsigned int thread_main_id = 0;
-static HANDLE thread_main_window = NULL;
-static HWND hidden_main_window = NULL;
-#endif
-
 /* var which if set indicates that the program should finish execution */
 volatile int got_exit_signal = 0;
 
@@ -488,135 +482,6 @@ static void exit_signal_handler(int signum)
   }
   (void)signal(signum, exit_signal_handler);
   CURL_SETERRNO(old_errno);
-}
-#endif
-
-#if defined(_WIN32) && !defined(UNDER_CE)
-/* CTRL event handler for Windows Console applications to simulate
- * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
- *
- * Background information from MSDN:
- * SIGINT is not supported for any Win32 application. When a CTRL+C
- * interrupt occurs, Win32 operating systems generate a new thread
- * to specifically handle that interrupt. This can cause a single-thread
- * application, such as one in UNIX, to become multithreaded and cause
- * unexpected behavior.
- * [...]
- * The SIGKILL and SIGTERM signals are not generated under Windows.
- * They are included for ANSI compatibility. Therefore, you can set
- * signal handlers for these signals by using signal, and you can also
- * explicitly generate these signals by calling raise. Source:
- * https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/signal
- */
-static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
-{
-  int signum = 0;
-  logmsg("ctrl_event_handler: %lu", dwCtrlType);
-  switch(dwCtrlType) {
-#ifdef SIGINT
-  case CTRL_C_EVENT:
-    signum = SIGINT;
-    break;
-#endif
-#ifdef SIGTERM
-  case CTRL_CLOSE_EVENT:
-    signum = SIGTERM;
-    break;
-#endif
-#ifdef SIGBREAK
-  case CTRL_BREAK_EVENT:
-    signum = SIGBREAK;
-    break;
-#endif
-  default:
-    return FALSE;
-  }
-  if(signum) {
-    logmsg("ctrl_event_handler: %lu -> %d", dwCtrlType, signum);
-    raise(signum);
-  }
-  return TRUE;
-}
-#endif
-
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-/* Window message handler for Windows applications to add support
- * for graceful process termination via taskkill (without /f) which
- * sends WM_CLOSE to all Windows of a process (even hidden ones).
- *
- * Therefore we create and run a hidden Window in a separate thread
- * to receive and handle the WM_CLOSE message as SIGTERM signal.
- */
-static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
-                                         WPARAM wParam, LPARAM lParam)
-{
-  int signum = 0;
-  if(hwnd == hidden_main_window) {
-    switch(uMsg) {
-#ifdef SIGTERM
-    case WM_CLOSE:
-      signum = SIGTERM;
-      break;
-#endif
-    case WM_DESTROY:
-      PostQuitMessage(0);
-      break;
-    }
-    if(signum) {
-      logmsg("main_window_proc: %d -> %d", uMsg, signum);
-      raise(signum);
-    }
-  }
-  return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-/* Window message queue loop for hidden main window, details see above.
- */
-#include <process.h>
-static unsigned int WINAPI main_window_loop(void *lpParameter)
-{
-  WNDCLASS wc;
-  BOOL ret;
-  MSG msg;
-
-  ZeroMemory(&wc, sizeof(wc));
-  wc.lpfnWndProc = (WNDPROC)main_window_proc;
-  wc.hInstance = (HINSTANCE)lpParameter;
-  wc.lpszClassName = TEXT("MainWClass");
-  if(!RegisterClass(&wc)) {
-    win32_perror("RegisterClass failed");
-    return (DWORD)-1;
-  }
-
-  hidden_main_window = CreateWindowEx(0, TEXT("MainWClass"),
-                                      TEXT("Recv WM_CLOSE msg"),
-                                      WS_OVERLAPPEDWINDOW,
-                                      CW_USEDEFAULT, CW_USEDEFAULT,
-                                      CW_USEDEFAULT, CW_USEDEFAULT,
-                                      (HWND)NULL, (HMENU)NULL,
-                                      wc.hInstance, (LPVOID)NULL);
-  if(!hidden_main_window) {
-    win32_perror("CreateWindowEx failed");
-    return (DWORD)-1;
-  }
-
-  do {
-    ret = GetMessage(&msg, NULL, 0, 0);
-    if(ret == -1) {
-      win32_perror("GetMessage failed");
-      return (DWORD)-1;
-    }
-    else if(ret) {
-      if(msg.message == WM_APP) {
-        DestroyWindow(hidden_main_window);
-      }
-      else if(msg.hwnd && !TranslateMessage(&msg)) {
-        DispatchMessage(&msg);
-      }
-    }
-  } while(ret);
-
-  hidden_main_window = NULL;
-  return (DWORD)msg.wParam;
 }
 #endif
 
@@ -700,24 +565,6 @@ void install_signal_handlers(bool keep_sigalrm)
   if(old_sigbreak_handler == SIG_ERR)
     logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
 #endif
-#ifdef _WIN32
-#ifndef UNDER_CE
-  if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
-    logmsg("cannot install CTRL event handler");
-#endif
-
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-  {
-    typedef uintptr_t curl_win_thread_handle_t;
-    curl_win_thread_handle_t thread;
-    thread = _beginthreadex(NULL, 0, &main_window_loop,
-                            (void *)GetModuleHandle(NULL), 0, &thread_main_id);
-    thread_main_window = (HANDLE)thread;
-    if(!thread_main_window || !thread_main_id)
-      logmsg("cannot start main window loop");
-  }
-#endif
-#endif
 }
 
 void restore_signal_handlers(bool keep_sigalrm)
@@ -749,28 +596,6 @@ void restore_signal_handlers(bool keep_sigalrm)
 #if defined(SIGBREAK) && defined(_WIN32)
   if(SIG_ERR != old_sigbreak_handler)
     (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
-#endif
-#ifdef _WIN32
-#ifndef UNDER_CE
-  (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#endif
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-  if(thread_main_window && thread_main_id) {
-    if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
-      if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
-        if(CloseHandle(thread_main_window)) {
-          thread_main_window = NULL;
-          thread_main_id = 0;
-        }
-      }
-    }
-  }
-  if(exit_event) {
-    if(CloseHandle(exit_event)) {
-      exit_event = NULL;
-    }
-  }
-#endif
 #endif
 }
 
