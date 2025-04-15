@@ -198,7 +198,7 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
   * connection when it does not hear from us for that time.
   *
   * Some servers use this as a keep-alive timer at a rather low
-  * value. BUT we are doing HTTP/3 here and waiting for the response
+  * value. We are doing HTTP/3 here and waiting for the response
   * to a request may take a considerable amount of time. We need
   * to prevent the peer's QUIC stack from closing in this case.
   */
