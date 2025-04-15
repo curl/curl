@@ -770,18 +770,6 @@ jobs:
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'openssl'
-            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
-            arch: 'arm64'
-            plat: 'windows'
-            type: 'Debug'
-            image: 'windows-11-arm'
-            config: >-
-              -DENABLE_DEBUG=ON
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_LIBPSL=OFF
-
-          - name: 'openssl'
             install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
             arch: 'x64'
             plat: 'windows'
@@ -817,9 +805,10 @@ jobs:
 
           - name: 'boringssl'
             install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-            arch: 'x64'
+            arch: 'arm64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-11-arm'
             config: >-
               -DENABLE_DEBUG=OFF
               -DCURL_USE_LIBSSH2=ON
