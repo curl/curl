@@ -2009,14 +2009,6 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
 endif()
 
-if(CURL_WERROR)
-  if(MSVC)
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-WX")
-  else()
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Werror")  # This assumes clang or gcc style options
-  endif()
-endif()
-
 if(CURL_LTO)
   if(CMAKE_VERSION VERSION_LESS 3.9)
     message(FATAL_ERROR "LTO has been requested, but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
