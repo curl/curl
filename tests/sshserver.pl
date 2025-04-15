@@ -261,7 +261,7 @@ if(!$sshdid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-print "ssh server found $sshd is $sshdverstr\n";
+logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
 
 
 #***************************************************************************
@@ -345,7 +345,7 @@ if(!$sshid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-print "ssh client found $ssh is $sshverstr\n";
+logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 
 
 #***************************************************************************
