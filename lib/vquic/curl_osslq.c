@@ -1239,17 +1239,6 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
     goto out;
   }
 
-#ifdef SSL_VALUE_QUIC_IDLE_TIMEOUT
-  /* Added in OpenSSL v3.3.x */
-  if(!SSL_set_feature_request_uint(ctx->tls.ossl.ssl,
-                                   SSL_VALUE_QUIC_IDLE_TIMEOUT,
-                                   CURL_QUIC_MAX_IDLE_MS)) {
-    CURL_TRC_CF(data, cf, "error setting idle timeout, ");
-    result = CURLE_FAILED_INIT;
-    goto out;
-  }
-#endif
-
   SSL_set_bio(ctx->tls.ossl.ssl, bio, bio);
   bio = NULL;
   SSL_set_connect_state(ctx->tls.ossl.ssl);

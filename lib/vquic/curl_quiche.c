@@ -1321,7 +1321,6 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
     return CURLE_FAILED_INIT;
   }
   quiche_config_enable_pacing(ctx->cfg, FALSE);
-  quiche_config_set_max_idle_timeout(ctx->cfg, CURL_QUIC_MAX_IDLE_MS);
   quiche_config_set_initial_max_data(ctx->cfg, (1 * 1024 * 1024)
     /* (QUIC_MAX_STREAMS/2) * H3_STREAM_WINDOW_SIZE */);
   quiche_config_set_initial_max_streams_bidi(ctx->cfg, QUIC_MAX_STREAMS);

@@ -140,7 +140,6 @@ struct cf_ngtcp2_ctx {
   struct dynbuf scratch;             /* temp buffer for header construction */
   struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
-  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
@@ -169,7 +168,6 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   ctx->qlogfd = -1;
   ctx->version = NGTCP2_PROTO_VER_MAX;
   ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
-  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
@@ -189,6 +187,44 @@ static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
   }
   free(ctx);
 }
+
+static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const ngtcp2_transport_params *rp;
+  /* Peer should have sent us its transport parameters. If it
+  * announces a positive `max_idle_timeout` it will close the
+  * connection when it does not hear from us for that time.
+  *
+  * Some servers use this as a keep-alive timer at a rather low
+  * value. We are doing HTTP/3 here and waiting for the response
+  * to a request may take a considerable amount of time. We need
+  * to prevent the peer's QUIC stack from closing in this case.
+  */
+  if(!ctx->qconn)
+    return;
+
+  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+  if(!rp || !rp->max_idle_timeout) {
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
+    CURL_TRC_CF(data, cf, "no peer idle timeout, unset keep-alive");
+  }
+  else if(!Curl_uint_hash_count(&ctx->streams)) {
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
+    CURL_TRC_CF(data, cf, "no active streams, unset keep-alive");
+  }
+  else {
+    ngtcp2_duration keep_ns;
+    keep_ns = (rp->max_idle_timeout > 1) ? (rp->max_idle_timeout / 2) : 1;
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, keep_ns);
+    CURL_TRC_CF(data, cf, "peer idle timeout is %" FMT_PRIu64 "ms, "
+                "set keep-alive to %" FMT_PRIu64 " ms.",
+                (curl_uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS),
+                (curl_uint64_t)(keep_ns / NGTCP2_MILLISECONDS));
+  }
+}
+
 
 struct pkt_io_ctx;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -262,6 +298,9 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
+  if(Curl_uint_hash_count(&ctx->streams) == 1)
+    cf_ngtcp2_setup_keep_alive(cf, data);
+
   return CURLE_OK;
 }
 
@@ -297,6 +336,8 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
                 stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
     Curl_uint_hash_remove(&ctx->streams, data->mid);
+    if(!Curl_uint_hash_count(&ctx->streams))
+      cf_ngtcp2_setup_keep_alive(cf, data);
   }
 }
 
@@ -418,7 +459,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   t->initial_max_stream_data_uni = ctx->max_stream_window;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
-  t->max_idle_timeout = (ctx->max_idle_ms * NGTCP2_MILLISECONDS);
+  t->max_idle_timeout = 0; /* no idle timeout from our side */
   if(ctx->qlogfd != -1) {
     s->qlog_write = qlog_callback;
   }
@@ -2674,21 +2715,12 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->qconn || ctx->shutdown_started)
     goto out;
 
-  /* Both sides of the QUIC connection announce they max idle times in
-   * the transport parameters. Look at the minimum of both and if
-   * we exceed this, regard the connection as dead. The other side
-   * may have completely purged it and will no longer respond
-   * to any packets from us. */
+  /* We do not announce a max idle timeout, but when the peer does
+   * it will close the connection when it expires. */
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
-  if(rp) {
-    timediff_t idletime;
-    uint64_t idle_ms = ctx->max_idle_ms;
-
-    if(rp->max_idle_timeout &&
-      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
-      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
-    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
-    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+  if(rp && rp->max_idle_timeout) {
+    timediff_t idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > rp->max_idle_timeout)
       goto out;
   }
 
