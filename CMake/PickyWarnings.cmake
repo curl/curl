@@ -25,12 +25,19 @@ include(CheckCCompilerFlag)
 
 set(_picky "")
 
-if(CURL_WERROR AND
-   ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
-     NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
-     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0) OR
-   CMAKE_C_COMPILER_ID MATCHES "Clang"))
-  list(APPEND _picky "-pedantic-errors")
+if(CURL_WERROR)
+  if(MSVC)
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-WX")
+  else()  # llvm/clang and gcc style options
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-Werror")
+  endif()
+
+  if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+      NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
+      CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0) OR
+     CMAKE_C_COMPILER_ID MATCHES "Clang")
+    list(APPEND _picky "-pedantic-errors")
+  endif()
 endif()
 
 if(APPLE AND
