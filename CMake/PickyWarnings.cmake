@@ -287,21 +287,24 @@ endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   list(APPEND _picky "-Wno-language-extension-token")  # Allow __int64
 
-  set(_picky_tmp "")
-  foreach(_ccopt IN LISTS _picky)
-    # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
-    if(_ccopt MATCHES "^-W" AND NOT _ccopt STREQUAL "-Wall")
-      list(APPEND _picky_tmp ${_ccopt})
-    else()
-      list(APPEND _picky_tmp "-clang:${_ccopt}")
-    endif()
+  foreach(_wlist IN ITEMS _picky_nocheck _picky)
+    set(_picky_tmp "")
+    foreach(_ccopt IN LISTS "${_wlist}")
+      # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
+      if(_ccopt MATCHES "^-W" AND NOT _ccopt STREQUAL "-Wall")
+        list(APPEND _picky_tmp ${_ccopt})
+      else()
+        list(APPEND _picky_tmp "-clang:${_ccopt}")
+      endif()
+    endforeach()
+    set("${_wlist}" ${_picky_tmp})
   endforeach()
-  set(_picky ${_picky_tmp})
 endif()
 
 if(_picky_nocheck OR _picky)
   set(_picky_tmp "${picky_nocheck}" "${_picky}")
   string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
+  string(STRIP "${_picky_tmp}" _picky_tmp)
   message(STATUS "Picky compiler options: ${_picky_tmp}")
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
 
