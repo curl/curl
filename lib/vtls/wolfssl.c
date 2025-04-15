@@ -1467,7 +1467,7 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(result)
     return result;
 
-#ifdef HAS_ALPN
+#ifdef HAVE_ALPN
   if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
     struct alpn_proto_buf proto;
     memset(&proto, 0, sizeof(proto));
