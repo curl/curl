@@ -364,7 +364,10 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->nobuffer) {
     /* output buffering disabled */
-    int res = fflush(outs->stream);
+    int res;
+    do {
+      res = fflush(outs->stream);
+    } while(res && errno == SOCKEINTR);
     if(res)
       return CURL_WRITEFUNC_ERROR;
   }
