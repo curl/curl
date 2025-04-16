@@ -215,12 +215,13 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "no active streams, unset keep-alive");
   }
   else {
-    curl_uint64_t idle_ms, keep_ms;
-    idle_ms = (curl_uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS);
-    keep_ms = (idle_ms > 1) ? (idle_ms / 2) : 1;
-    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, keep_ms);
+    ngtcp2_duration keep_ns;
+    keep_ns = (rp->max_idle_timeout > 1) ? (rp->max_idle_timeout / 2) : 1;
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, keep_ns);
     CURL_TRC_CF(data, cf, "peer idle timeout is %" FMT_PRIu64 "ms, "
-                "set keep-alive to %" FMT_PRIu64 " ms.", idle_ms, keep_ms);
+                "set keep-alive to %" FMT_PRIu64 " ms.",
+                (curl_uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS),
+                (curl_uint64_t)(keep_ns / NGTCP2_MILLISECONDS));
   }
 }
 
