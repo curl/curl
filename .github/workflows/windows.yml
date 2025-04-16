@@ -856,6 +856,7 @@ jobs:
       - name: 'vcpkg versions'
         timeout-minutes: 1
         run: |
+          curl -L https://github.com/microsoft/vcpkg-tool/releases/download/2025-03-22/vcpkg.exe -o c:/vcpkg/vcpkg.exe
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
