@@ -407,7 +407,7 @@ void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 /* this is our own defined way to close sockets on *ALL* platforms */
 int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
 {
-  int res = sclose(sockfd);
+  int res = CURL_SCLOSE(sockfd);
   curl_dbg_mark_sclose(sockfd, line, source);
   return res;
 }
@@ -416,7 +416,12 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res = fopen(file, mode);
+  FILE *res;
+#ifdef CURL_FOPEN
+  res = CURL_FOPEN(file, mode);
+#else
+  res = fopen(file, mode);
+#endif
 
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
