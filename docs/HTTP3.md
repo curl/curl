@@ -53,7 +53,7 @@ for the version you build.
 ## Build with OpenSSL
 
 OpenSSL v3.5.0+ offers APIs for integration with *ngtcp2* v1.12.0+. Earlier
-versions will not work.
+versions do not work.
 
 Build OpenSSL (version 3.5.0 or newer):
 
