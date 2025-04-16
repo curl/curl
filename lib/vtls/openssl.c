@@ -199,7 +199,7 @@
  * BoringSSL: supported since 0.20240913.0 (commit 826ce15)
  * LibreSSL: no
  */
-#if ((OPENSSL_VERSION_NUMBER >= 0x10002000L && \
+#if (OPENSSL_VERSION_NUMBER >= 0x10002000L && \
       !defined(LIBRESSL_VERSION_NUMBER))
   #define HAVE_SSL_CTX_SET1_SIGALGS
 #endif
