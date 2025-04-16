@@ -631,8 +631,9 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                                                    &conn->ntlm);
     if(!result)
       result = Curl_auth_create_ntlm_type3_message(data, conn->user,
-                                                   conn->passwd, &conn->ntlm,
-                                                   &resp);
+                                                   conn->passwd,
+                                                   conn->options,
+                                                   &conn->ntlm, &resp);
     break;
 #endif
 
