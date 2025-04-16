@@ -868,6 +868,15 @@ if(CURL_USE_GNUTLS)
     find_package(GnuTLS REQUIRED)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
       list(APPEND CURL_LIBS GnuTLS::GnuTLS)
+    else()
+      add_library(CURL::gnutls INTERFACE IMPORTED)
+      set_target_properties(CURL::gnutls PROPERTIES
+        INTERFACE_CURL_PC_MODULES "gnutls"
+        INTERFACE_COMPILE_OPTIONS "${GNUTLS_CFLAGS}"
+        INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIRS}"
+        INTERFACE_LINK_DIRECTORIES "${GNUTLS_LIBRARY_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${GNUTLS_LIBRARIES}")
+      list(APPEND CURL_LIBS CURL::gnutls)
     endif()
   endif()
   find_package(Nettle REQUIRED)
