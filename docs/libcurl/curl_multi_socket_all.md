@@ -50,7 +50,8 @@ int main(void)
 {
   int running;
   int rc;
-  CURLM *multi;
+  CURLM *multi = curl_multi_init();
+
   rc = curl_multi_socket_all(multi, &running);
 }
 ~~~

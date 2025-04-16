@@ -58,7 +58,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     FILE *src = fopen("local-file", "r");
-    curl_off_t fsize; /* set this to the size of the input file */
+    curl_off_t fsize = 9876; /* set this to the size of the input file */
 
     /* we want to use our own read function */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);

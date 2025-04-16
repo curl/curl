@@ -924,17 +924,17 @@ sub singletest_run {
             }
             $CMDLINE=$LIBDIR . $tool;
         }
+        elsif($tool =~ /^tool/) {
+            if($bundle) {
+                $tool = "tunits" . exe_ext('TOOL')
+            }
+            $CMDLINE=$TUNITDIR . $tool;
+        }
         elsif($tool =~ /^unit/) {
             if($bundle) {
                 $tool = "units" . exe_ext('TOOL')
             }
             $CMDLINE=$UNITDIR . $tool;
-        }
-        elsif($tool =~ /^tool/) {
-            if($bundle) {
-                $tool = "units" . exe_ext('TOOL')
-            }
-            $CMDLINE=$TUNITDIR . $tool;
         }
 
         if(! -f $CMDLINE) {

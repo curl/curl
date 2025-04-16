@@ -4919,14 +4919,24 @@ if test "x$want_ech" != "xno"; then
   fi
 fi
 
+AC_MSG_CHECKING([whether to enable HTTPS-RR support])
 dnl *************************************************************
 dnl check whether HTTPSRR support if desired
 dnl
 if test "x$want_httpsrr" != "xno"; then
-  AC_MSG_RESULT([HTTPSRR support is enabled])
+  AC_MSG_RESULT([yes])
   AC_DEFINE(USE_HTTPSRR, 1, [enable HTTPS RR support])
   experimental="$experimental HTTPSRR"
   curl_httpsrr_msg="enabled (--disable-httpsrr)"
+else
+  AC_MSG_RESULT([no])
+  # no HTTPSRR wanted
+  if test "$want_threaded_resolver" = "yes"; then
+    # and using the threaded resolver
+    if test "x$USE_ARES" = "x1"; then
+      AC_MSG_ERROR([without HTTPS-RR support, asking for both threaded resolver and c-ares support is ambivalent. Please drop one of them.])
+    fi
+  fi
 fi
 
 

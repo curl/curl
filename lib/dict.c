@@ -65,6 +65,15 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+
+#define DICT_MATCH "/MATCH:"
+#define DICT_MATCH2 "/M:"
+#define DICT_MATCH3 "/FIND:"
+#define DICT_DEFINE "/DEFINE:"
+#define DICT_DEFINE2 "/D:"
+#define DICT_DEFINE3 "/LOOKUP:"
+
+
 /*
  * Forward declarations.
  */

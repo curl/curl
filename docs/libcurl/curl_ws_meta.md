@@ -143,6 +143,7 @@ static size_t writecb(unsigned char *buffer,
   const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
   printf("flags: %x\n", m->flags);
+  return 0;
 }
 
 int main(void)
@@ -158,6 +159,7 @@ int main(void)
     curl_easy_perform(curl);
 
   }
+  return 0;
 }
 ~~~
 

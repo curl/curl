@@ -24,14 +24,21 @@
 include(CheckCCompilerFlag)
 
 set(_picky "")
+set(_picky_nocheck "")  # not to pass to feature checks
 
-if(CURL_WERROR AND
-   ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
-     NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
-     CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0 AND
-     CMAKE_VERSION VERSION_GREATER_EQUAL 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
-   CMAKE_C_COMPILER_ID MATCHES "Clang"))
-  list(APPEND _picky "-pedantic-errors")
+if(CURL_WERROR)
+  if(MSVC)
+    list(APPEND _picky_nocheck "-WX")
+  else()  # llvm/clang and gcc style options
+    list(APPEND _picky_nocheck "-Werror")
+  endif()
+
+  if((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+      NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
+      CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0) OR
+     CMAKE_C_COMPILER_ID MATCHES "Clang")
+    list(APPEND _picky_nocheck "-pedantic-errors")
+  endif()
 endif()
 
 if(APPLE AND
@@ -45,9 +52,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(MSVC)
-  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
-    string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  endif()
+  # Use the highest warning level for Visual Studio.
+  string(REGEX REPLACE "[/-]W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   list(APPEND _picky "-W4")
 elseif(BORLAND)
   list(APPEND _picky "-w-")  # Disable warnings on Borland to avoid changing 3rd party code.
@@ -274,6 +280,24 @@ if(PICKY_COMPILER)
         list(APPEND _picky "-Wno-conversion")  # Avoid false positives
       endif()
     endif()
+  elseif(MSVC AND MSVC_VERSION LESS_EQUAL 1943)  # Skip for untested/unreleased newer versions
+    list(APPEND _picky "-Wall")
+    list(APPEND _picky "-wd4061")  # enumerator 'A' in switch of enum 'B' is not explicitly handled by a case label
+    list(APPEND _picky "-wd4191")  # 'type cast': unsafe conversion from 'FARPROC' to 'void (__cdecl *)(void)'
+    list(APPEND _picky "-wd4255")  # no function prototype given: converting '()' to '(void)' (in winuser.h)
+    list(APPEND _picky "-wd4464")  # relative include path contains '..'
+    list(APPEND _picky "-wd4548")  # expression before comma has no effect; expected expression with side-effect (in FD_SET())
+    list(APPEND _picky "-wd4574")  # 'M' is defined to be '0': did you mean to use '#if M'? (in ws2tcpip.h)
+    list(APPEND _picky "-wd4668")  # 'M' is not defined as a preprocessor macro, replacing with '0' for '#if/#elif' (in winbase.h)
+    list(APPEND _picky "-wd4710")  # 'snprintf': function not inlined
+    list(APPEND _picky "-wd4711")  # function 'A' selected for automatic inline expansion
+    list(APPEND _picky "-wd4746")  # volatile access of '<expression>' is subject to /volatile:<iso|ms> setting;
+                                   #   consider using __iso_volatile_load/store intrinsic functions (ARM64)
+    list(APPEND _picky "-wd4774")  # 'snprintf': format string expected in argument 3 is not a string literal
+    list(APPEND _picky "-wd4820")  # 'A': 'N' bytes padding added after data member 'B'
+    if(MSVC_VERSION GREATER_EQUAL 1900)
+      list(APPEND _picky "-wd5045")  # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+    endif()
   endif()
 endif()
 
@@ -281,20 +305,31 @@ endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   list(APPEND _picky "-Wno-language-extension-token")  # Allow __int64
 
-  set(_picky_tmp "")
-  foreach(_ccopt IN LISTS _picky)
-    # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
-    if(_ccopt MATCHES "^-W" AND NOT _ccopt STREQUAL "-Wall")
-      list(APPEND _picky_tmp ${_ccopt})
-    else()
-      list(APPEND _picky_tmp "-clang:${_ccopt}")
-    endif()
+  foreach(_wlist IN ITEMS _picky_nocheck _picky)
+    set(_picky_tmp "")
+    foreach(_ccopt IN LISTS "${_wlist}")
+      # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
+      if(_ccopt MATCHES "^-W" AND NOT _ccopt STREQUAL "-Wall")
+        list(APPEND _picky_tmp ${_ccopt})
+      else()
+        list(APPEND _picky_tmp "-clang:${_ccopt}")
+      endif()
+    endforeach()
+    set("${_wlist}" ${_picky_tmp})
   endforeach()
-  set(_picky ${_picky_tmp})
 endif()
 
-if(_picky)
-  string(REPLACE ";" " " _picky "${_picky}")
-  string(APPEND CMAKE_C_FLAGS " ${_picky}")
-  message(STATUS "Picky compiler options: ${_picky}")
+if(_picky_nocheck OR _picky)
+  set(_picky_tmp "${_picky_nocheck}" "${_picky}")
+  string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
+  string(STRIP "${_picky_tmp}" _picky_tmp)
+  message(STATUS "Picky compiler options: ${_picky_tmp}")
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
+
+  # Apply to all feature checks
+  string(REPLACE ";" " " _picky_tmp "${_picky}")
+  string(APPEND CMAKE_REQUIRED_FLAGS " ${_picky_tmp}")
+
+  unset(_picky)
+  unset(_picky_tmp)
 endif()

@@ -151,6 +151,10 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+#ifndef CERT_FIND_HAS_PRIVATE_KEY
+#define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
+#endif
+
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
@@ -611,6 +615,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       WCHAR* pszPassword;
       size_t pwd_len = 0;
       int str_w_len = 0;
+      int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
       curlx_unicodefree(cert_path);
@@ -682,9 +687,17 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         return CURLE_SSL_CERTPROBLEM;
       }
 
+      /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
+         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
+      if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                      VERSION_GREATER_THAN_EQUAL))
+        cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
+      else
+        cert_find_flags = CERT_FIND_ANY;
+
       client_certs[0] = CertFindCertificateInStore(
         cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-        CERT_FIND_ANY, NULL, NULL);
+        cert_find_flags, NULL, NULL);
 
       if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"

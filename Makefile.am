@@ -44,7 +44,6 @@ CMAKE_DIST =                                    \
  CMake/FindLibssh.cmake                         \
  CMake/FindLibssh2.cmake                        \
  CMake/FindLibuv.cmake                          \
- CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindNGHTTP2.cmake                        \

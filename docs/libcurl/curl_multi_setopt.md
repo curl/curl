@@ -114,7 +114,8 @@ Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
 
 int main(void)
 {
-  CURLM *multi;
+  CURLM *multi = curl_multi_init();
+
   /* Limit the amount of simultaneous connections curl should allow: */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)MAX_PARALLEL);
 }

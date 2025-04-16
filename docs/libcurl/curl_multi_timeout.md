@@ -61,7 +61,7 @@ int main(void)
   fd_set fdread;
   fd_set fdwrite;
   fd_set fdexcep;
-  int maxfd;
+  int maxfd = 2;
   CURLM *multi = curl_multi_init();
 
   curl_multi_timeout(multi, &timeo);

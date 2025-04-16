@@ -290,9 +290,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
-  /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cancel(data);
-  Curl_resolver_cleanup(data->state.async.resolver);
+  Curl_async_shutdown(data);
 
   data_priority_cleanup(data);
 
@@ -365,6 +363,10 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->filesize = -1;        /* we do not know the size */
   set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = 30;       /* sensible default */
+
+#ifndef CURL_DISABLE_DOH
+  set->dohfor_mid  = -1;
+#endif
 
   set->method = HTTPREQ_GET; /* Default HTTP request */
 #ifndef CURL_DISABLE_RTSP
@@ -515,12 +517,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
 
-  result = Curl_resolver_init(data, &data->state.async.resolver);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    goto out;
-  }
-
   result = Curl_init_userdefined(data);
   if(result)
     goto out;
@@ -540,7 +536,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
 out:
   if(result) {
-    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
@@ -3045,10 +3040,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
     DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
                  neg->wanted, neg->allowed));
+#ifdef USE_HTTP3
     if(neg->allowed & CURL_HTTP_V3x)
       allowed_alpns |= ALPN_h3;
+#endif
+#ifdef USE_HTTP2
     if(neg->allowed & CURL_HTTP_V2x)
       allowed_alpns |= ALPN_h2;
+#endif
     if(neg->allowed & CURL_HTTP_V1x)
       allowed_alpns |= ALPN_h1;
     allowed_alpns &= (int)data->asi->flags;
@@ -3165,7 +3164,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   struct hostname *ehost;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
   const char *peertype = "host";
-  int rc;
+  CURLcode result;
 #ifdef USE_UNIX_SOCKETS
   char *unix_path = conn->unix_domain_socket;
 
@@ -3206,22 +3205,25 @@ static CURLcode resolve_server(struct Curl_easy *data,
   if(!conn->hostname_resolve)
     return CURLE_OUT_OF_MEMORY;
 
-  rc = Curl_resolv_timeout(data, conn->hostname_resolve,
-                           conn->primary.remote_port,
-                           &conn->dns_entry, timeout_ms);
-  if(rc == CURLRESOLV_PENDING)
+  result = Curl_resolv_timeout(data, conn->hostname_resolve,
+                               conn->primary.remote_port, conn->ip_version,
+                               &conn->dns_entry, timeout_ms);
+  if(result == CURLE_AGAIN) {
+    DEBUGASSERT(!conn->dns_entry);
     *async = TRUE;
-  else if(rc == CURLRESOLV_TIMEDOUT) {
+    return CURLE_OK;
+  }
+  else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
           Curl_timediff(Curl_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
-  else if(!conn->dns_entry) {
+  else if(result) {
     failf(data, "Could not resolve %s: %s", peertype, ehost->dispname);
-    return CURLE_COULDNT_RESOLVE_HOST;
+    return result;
   }
-
+  DEBUGASSERT(conn->dns_entry);
   return CURLE_OK;
 }
 
@@ -3597,10 +3599,12 @@ static CURLcode create_conn(struct Curl_easy *data,
         conn->bits.tls_enable_alpn = TRUE;
     }
 
-    if(waitpipe)
+    if(waitpipe) {
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
+      infof(data, "Waiting on connection to negotiate possible multiplexing.");
       connections_available = FALSE;
+    }
     else {
       switch(Curl_cpool_check_limits(data, conn)) {
       case CPOOL_LIMIT_DEST:
@@ -3614,7 +3618,8 @@ static CURLcode create_conn(struct Curl_easy *data,
         else
 #endif
         {
-          infof(data, "No connections available in cache");
+          infof(data, "No connections available, total of %ld reached.",
+                data->multi->max_total_connections);
           connections_available = FALSE;
         }
         break;
@@ -3624,8 +3629,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 
     if(!connections_available) {
-      infof(data, "No connections available.");
-
       Curl_conn_free(data, conn);
       *in_connect = NULL;
 

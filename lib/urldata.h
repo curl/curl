@@ -95,13 +95,6 @@ typedef unsigned int curl_prot_t;
    in the API */
 #define CURLPROTO_MASK   (0x3ffffff)
 
-#define DICT_MATCH "/MATCH:"
-#define DICT_MATCH2 "/M:"
-#define DICT_MATCH3 "/FIND:"
-#define DICT_DEFINE "/DEFINE:"
-#define DICT_DEFINE2 "/D:"
-#define DICT_DEFINE3 "/LOOKUP:"
-
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
@@ -563,21 +556,6 @@ struct hostname {
 /* transfer receive is not on PAUSE or HOLD */
 #define CURL_WANT_RECV(data) \
   (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
-
-#if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
-#define USE_CURL_ASYNC
-struct Curl_async {
-  struct Curl_dns_entry *dns;
-#ifdef CURLRES_ASYNCH
-  struct thread_data thdata;
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel e.g. */
-#endif
-  int port;
-  BIT(done);  /* set TRUE when the lookup is complete */
-};
-
-#endif
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1

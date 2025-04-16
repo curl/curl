@@ -2982,7 +2982,6 @@ sub subvariables {
     $$thing =~ s/${prefix}CURL/$CURL/g;
     $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
-    $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
     $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
@@ -3005,7 +3004,8 @@ sub subvariables {
     }
 
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
-    $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
+    $$thing =~ s/${prefix}SCP_PWD/$posix_pwd/g;
+    $$thing =~ s/${prefix}SFTP_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;

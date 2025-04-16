@@ -980,10 +980,8 @@ init_config_builder_ech(struct Curl_easy *data,
   }
   else {
     if(connssl->peer.hostname) {
-      dns = Curl_fetch_addr(
-        data,
-        connssl->peer.hostname,
-        connssl->peer.port);
+      dns = Curl_dnscache_get(data, connssl->peer.hostname,
+                              connssl->peer.port, data->conn->ip_version);
     }
     if(!dns) {
       failf(data, "rustls: ECH requested but no DNS info available");

@@ -42,7 +42,7 @@ curl_slist_free_all(3).
 ~~~c
 int main(void)
 {
-  CURL *handle;
+  CURL *handle = curl_easy_init();
   struct curl_slist *slist = NULL;
   struct curl_slist *temp = NULL;
 

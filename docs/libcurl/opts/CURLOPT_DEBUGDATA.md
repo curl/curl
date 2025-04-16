@@ -51,6 +51,7 @@ static int my_trace(CURL *handle, curl_infotype type,
   printf("our ptr: %p\n", mine->custom);
 
   /* output debug info */
+  return 0;
 }
 
 int main(void)

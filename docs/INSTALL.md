@@ -594,7 +594,6 @@ disabling support for some features (run `./configure --help` to see them all):
  - `--disable-netrc`  (.netrc file)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
- - `--disable-pthreads` (multi-threading)
  - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)

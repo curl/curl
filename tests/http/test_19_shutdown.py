@@ -153,7 +153,7 @@ class TestShutdown:
         r.check_response(http_status=200, count=count)
         # check that we closed all connections
         closings = [line for line in r.trace_lines
-                    if re.match(r'.*SHUTDOWN\] closing', line)]
+                    if re.match(r'.*SHUTDOWN\] (force )?closing', line)]
         assert len(closings) == count, f'{closings}'
         # check that all connection sockets were removed from event
         removes = [line for line in r.trace_lines
@@ -180,3 +180,32 @@ class TestShutdown:
         shutdowns = [line for line in r.trace_lines
                      if re.match(r'.*SHUTDOWN\] shutdown, done=1', line)]
         assert len(shutdowns) == 1, f'{shutdowns}'
+
+    # run connection pressure, many small transfers, not reusing connections,
+    # limited total
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_19_07_shutdown_by_curl(self, env: Env, httpd, proto):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
+        count = 500
+        docname = 'data.json'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='hx-download', env=env, run_env={
+            'CURL_GRACEFUL_SHUTDOWN': '2000',
+            'CURL_DEBUG': 'ssl,multi'
+        })
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',  #that many transfers
+             '-f',  # forbid conn reuse
+             '-m', '10',  # max parallel
+             '-T', '5',  # max total conns at a time
+             '-V', proto,
+             url
+        ])
+        r.check_exit_code(0)
+        shutdowns = [line for line in r.trace_lines
+                     if re.match(r'.*SHUTDOWN\] shutdown, done=1', line)]
+        # we see less clean shutdowns as total limit forces early closes
+        assert len(shutdowns) < count, f'{shutdowns}'
