@@ -2398,7 +2398,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set accepted signature algorithms.
      * Specify colon-delimited list of signature scheme names.
      */
-    return Curl_setstropt(&data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS], ptr);
+    return Curl_setstropt(&data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS],
+                          ptr);
 
 #endif
 #ifdef USE_SSH
