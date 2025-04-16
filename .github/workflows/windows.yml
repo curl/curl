@@ -857,6 +857,9 @@ jobs:
         timeout-minutes: 1
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          # Downgrade to last known good version that handles the binary cache correctly.
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+            --location 'https://github.com/microsoft/vcpkg-tool/releases/download/2025-03-22/vcpkg.exe' --output C:/vcpkg/vcpkg.exe
           vcpkg version
 
       - name: 'vcpkg build'
