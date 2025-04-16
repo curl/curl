@@ -2325,10 +2325,33 @@ if(NOT CURL_DISABLE_INSTALL)
   #   LIB_NAME
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
-  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
+  #   HAVE_BROTLI
+  #   HAVE_GSSAPI
+  #   HAVE_LIBIDN2
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
+  #   HAVE_ZSTD
+  #   USE_ARES
+  #   USE_BEARSSL
+  #   USE_GNUTLS
+  #   USE_GSASL
+  #   USE_LIBPSL
+  #   USE_LIBRTMP
+  #   USE_LIBSSH
+  #   USE_LIBSSH2
+  #   USE_LIBUV
+  #   USE_MBEDTLS
+  #   USE_MSH3
+  #   USE_NGHTTP2
+  #   USE_NGHTTP3
+  #   USE_NGTCP2
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   USE_QUICHE
+  #   USE_RUSTLS
+  #   USE_WIN32_LDAP CURL_DISABLE_LDAP
+  #   USE_WOLFSSH
+  #   USE_WOLFSSL
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
@@ -2340,7 +2363,33 @@ if(NOT CURL_DISABLE_INSTALL)
       DESTINATION ${_install_cmake_dir})
   endif()
 
-  install(FILES ${_version_config} ${_project_config}
+  install(
+    FILES
+      ${_version_config}
+      ${_project_config}
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBearSSL.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBrotli.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindCares.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLDAP.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibrtmp.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibuv.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMSH3.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGTCP2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNettle.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindQuiche.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindRustls.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSH.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)
