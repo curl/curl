@@ -843,10 +843,12 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 
   /* No luck, we need to resolve hostname. Notify user callback. */
   if(data->set.resolver_start) {
-    void *resolver;
+    void *resolver = NULL;
     int st;
+#ifdef CURLRES_ASYNCH
     if(Curl_async_get_impl(data, &resolver))
       goto error;
+#endif
     Curl_set_in_callback(data, TRUE);
     st = data->set.resolver_start(resolver, NULL,
                                   data->set.resolver_start_client);
@@ -924,6 +926,7 @@ error:
   if(dns)
     Curl_resolv_unlink(data, &dns);
   *entry = NULL;
+  Curl_async_shutdown(data);
   return CURLE_COULDNT_RESOLVE_HOST;
 }
 
@@ -1487,11 +1490,11 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
                            data->state.async.ip_version);
   if(*dns) {
     /* Tell a possibly async resolver we no longer need the results. */
+    infof(data, "Hostname '%s' was found in DNS cache",
+          data->state.async.hostname);
     Curl_async_shutdown(data);
     data->state.async.dns = *dns;
     data->state.async.done = TRUE;
-    infof(data, "Hostname '%s' was found in DNS cache",
-          data->state.async.hostname);
     return CURLE_OK;
   }
 

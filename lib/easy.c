@@ -938,6 +938,15 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   return result;
 }
 
+static void dupeasy_meta_freeentry(void *p)
+{
+  (void)p;
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
+}
+
 /*
  * curl_easy_duphandle() is an external interface to allow duplication of a
  * given input easy handle. The returned handle will be a new working handle
@@ -957,6 +966,8 @@ CURL *curl_easy_duphandle(CURL *d)
    */
   outcurl->set.buffer_size = data->set.buffer_size;
 
+  Curl_hash_init(&outcurl->meta_hash, 23,
+                 Curl_hash_str, Curl_str_key_compare, dupeasy_meta_freeentry);
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_netrc_init(&outcurl->state.netrc);
 
@@ -965,6 +976,7 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
   outcurl->mid = -1;
+  outcurl->master_mid = -1;
 
 #ifndef CURL_DISABLE_HTTP
   Curl_llist_init(&outcurl->state.httphdrs, NULL);
@@ -1090,7 +1102,12 @@ void curl_easy_reset(CURL *d)
 {
   struct Curl_easy *data = d;
   Curl_req_hard_reset(&data->req, data);
+  Curl_hash_clean(&data->meta_hash);
 
+  /* clear all meta data */
+  Curl_meta_reset(data);
+  /* clear any async resolve data */
+  Curl_async_shutdown(data);
   /* zero out UserDefined data: */
   Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));
@@ -1113,6 +1130,7 @@ void curl_easy_reset(CURL *d)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
+  data->master_mid = -1;
 }
 
 /*
@@ -1389,4 +1407,29 @@ CURLcode curl_easy_ssls_export(CURL *d,
   (void)userptr;
   return CURLE_NOT_BUILT_IN;
 #endif
+}
+
+CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
+                       void *meta_data, Curl_meta_dtor *meta_dtor)
+{
+  if(!Curl_hash_add2(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
+                     meta_data, meta_dtor)) {
+    meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+  }
+  return CURLE_OK;
+}
+
+void Curl_meta_clear(struct Curl_easy *data, const char *key)
+{
+  Curl_hash_delete(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+}
+
+void *Curl_meta_get(struct Curl_easy *data, const char *key)
+{
+  return Curl_hash_pick(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+}
+
+void Curl_meta_reset(struct Curl_easy *data)
+{
+  Curl_hash_clean(&data->meta_hash);
 }

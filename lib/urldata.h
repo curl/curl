@@ -1497,10 +1497,6 @@ enum dupblob {
   BLOB_LAST
 };
 
-/* callback that gets called when this easy handle is completed within a multi
-   handle. Only used for internally created transfers, like for example
-   DoH. */
-typedef int (*multidone_func)(struct Curl_easy *easy, CURLcode result);
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
@@ -1656,10 +1652,6 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
-  multidone_func fmultidone;
-#ifndef CURL_DISABLE_DOH
-  curl_off_t dohfor_mid; /* this is a DoH request for that transfer */
-#endif
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
@@ -1818,6 +1810,12 @@ struct UserDefined {
 #define IS_MIME_POST(a) FALSE
 #endif
 
+/* callback that gets called when a sub easy (data->master_mid set) is
+   DONE. Called on the master easy. */
+typedef void multi_sub_xfer_done_cb(struct Curl_easy *master_easy,
+                                    struct Curl_easy *sub_easy,
+                                    CURLcode result);
+
 /*
  * The 'connectdata' struct MUST have all the connection oriented stuff as we
  * may have several simultaneous connections and connection structs in memory.
@@ -1843,6 +1841,8 @@ struct Curl_easy {
    * libcurl application or implicitly during `curl_easy_perform()`,
    * a unique identifier inside this one multi instance. */
   curl_off_t mid;
+  curl_off_t master_mid; /* if set, this transfer belongs to a master */
+  multi_sub_xfer_done_cb *sub_xfer_done;
 
   struct connectdata *conn;
   struct Curl_llist_node multi_queue; /* for multihandle list management */
@@ -1860,6 +1860,13 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+
+  /* `meta_hash` is a general key-value store for implementations
+   * with the lifetime of the easy handle.
+   * Elements need to be added with their own destructor to be invoked when
+   * the easy handle is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash meta_hash;
+
 #ifdef USE_LIBPSL
   struct PslCache *psl;        /* The associated PSL cache. */
 #endif

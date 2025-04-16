@@ -203,32 +203,39 @@ CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl)
   return result;
 }
 
-static void async_ares_destroy(struct Curl_easy *data);
+static void async_ares_cleanup(struct Curl_easy *data);
 
-/*
- * For asyn-ares, this is the same as abort.
- */
-void Curl_async_shutdown(struct Curl_easy *data)
+void Curl_async_ares_shutdown(struct Curl_easy *data)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
-  if(ares->channel) {
+  if(ares->channel)
     ares_cancel(ares->channel);
+  async_ares_cleanup(data);
+}
+
+void Curl_async_ares_destroy(struct Curl_easy *data)
+{
+  struct async_ares_ctx *ares = &data->state.async.ares;
+  Curl_async_ares_shutdown(data);
+  if(ares->channel) {
+    ares_destroy(ares->channel);
     ares->channel = NULL;
   }
-  async_ares_destroy(data);
 }
 
 /*
- * async_ares_destroy() cleans up async resolver data.
+ * async_ares_cleanup() cleans up async resolver data.
  */
-static void async_ares_destroy(struct Curl_easy *data)
+static void async_ares_cleanup(struct Curl_easy *data)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
   if(ares->temp_ai) {
     Curl_freeaddrinfo(ares->temp_ai);
     ares->temp_ai = NULL;
   }
-  Curl_safefree(data->state.async.hostname);
+#ifdef USE_HTTPSRR
+  Curl_httpsrr_cleanup(&ares->hinfo);
+#endif
 }
 
 /*
@@ -323,7 +330,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     *dns = data->state.async.dns;
     CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
                  result, *dns ? "" : "not ");
-    async_ares_destroy(data);
+    async_ares_cleanup(data);
   }
   return result;
 }
@@ -780,7 +787,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
    * default.
    */
   if(!servers) {
-    Curl_async_shutdown(data);
+    Curl_async_destroy(data);
     result = async_ares_init_lazy(data);
     if(!result) {
       /* this now needs to restore the other options set to c-ares */

@@ -169,3 +169,37 @@ int Curl_ares_perform(ares_channel channel,
 #endif
 
 #endif /* CURLRES_ASYNCH */
+
+#ifdef USE_CURL_ASYNC
+
+#include "doh.h"
+
+void Curl_async_shutdown(struct Curl_easy *data)
+{
+#ifdef CURLRES_ARES
+  Curl_async_ares_shutdown(data);
+#endif
+#ifdef CURLRES_THREADED
+  Curl_async_thrdd_shutdown(data);
+#endif
+#ifndef CURL_DISABLE_DOH
+  Curl_doh_cleanup(data);
+#endif
+  Curl_safefree(data->state.async.hostname);
+}
+
+void Curl_async_destroy(struct Curl_easy *data)
+{
+#ifdef CURLRES_ARES
+  Curl_async_ares_destroy(data);
+#endif
+#ifdef CURLRES_THREADED
+  Curl_async_thrdd_destroy(data);
+#endif
+#ifndef CURL_DISABLE_DOH
+  Curl_doh_cleanup(data);
+#endif
+  Curl_safefree(data->state.async.hostname);
+}
+
+#endif /* USE_CURL_ASYNC */
