@@ -294,7 +294,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
        leave us with res->num_pending == 0, which is perfect for the next
        block. */
     ares_cancel(ares->channel);
-    DEBUGASSERT(res->num_pending == 0);
+    DEBUGASSERT(ares->num_pending == 0);
   }
 #endif
 
