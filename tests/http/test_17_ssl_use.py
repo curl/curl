@@ -71,8 +71,6 @@ class TestSSLUse:
                 exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
-        if env.curl_uses_lib('bearssl') and tls_max == '1.3':
-            pytest.skip('BearSSL does not support TLSv1.3')
         if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working in 3.6.0')
@@ -140,8 +138,6 @@ class TestSSLUse:
     # use ip address for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_05_ip_addr(self, env: Env, proto):
-        if env.curl_uses_lib('bearssl'):
-            pytest.skip("BearSSL does not support cert verification with IP addresses")
         if env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedTLS does use IP addresses in SNI")
         if proto == 'h3' and not env.have_h3():
@@ -219,17 +215,9 @@ class TestSSLUse:
         elif env.curl_uses_lib('schannel'):  # not in CI, so untested
             if ciphers12 is not None:
                 pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
-        elif env.curl_uses_lib('bearssl'):
-            if tls_proto == 'TLSv1.3':
-                pytest.skip('BearSSL does not support TLSv1.3')
-            tls_proto = 'TLSv1.2'
         elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             if tls_proto == 'TLSv1.3':
                 pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
-        elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
-            if tls_proto == 'TLSv1.3':
-                pytest.skip('Secure Transport does not support TLSv1.3')
-            tls_proto = 'TLSv1.2'
         # test
         extra_args = ['--tls13-ciphers', ':'.join(ciphers13)] if ciphers13 else []
         extra_args += ['--ciphers', ':'.join(ciphers12)] if ciphers12 else []
@@ -292,11 +280,7 @@ class TestSSLUse:
         curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
-        if env.curl_uses_lib('bearssl'):
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', None]
-        elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', None]
-        elif env.curl_uses_lib('gnutls'):
+        if env.curl_uses_lib('gnutls'):
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
         elif env.curl_uses_lib('quiche'):
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
@@ -399,8 +383,6 @@ class TestSSLUse:
            pytest.skip('Libressl resumption does not work inTLSv1.3')
         if env.curl_uses_lib('rustls-ffi'):
             pytest.skip('rustsls does not expose sessions')
-        if env.curl_uses_lib('bearssl'):
-            pytest.skip('BearSSL does not support TLSv1.3')
         if env.curl_uses_lib('mbedtls') and \
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working before 3.6.0')

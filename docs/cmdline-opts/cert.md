@@ -20,8 +20,7 @@ Example:
 # `--cert`
 
 Use the specified client certificate file when getting a file with HTTPS, FTPS
-or another SSL-based protocol. The certificate must be in PKCS#12 format if
-using Secure Transport, or PEM format if using any other engine. If the
+or another SSL-based protocol. The certificate must be PEM format. If the
 optional password is not specified, it is queried for on the terminal. Note
 that this option assumes a certificate file that is the private key and the
 client certificate concatenated. See --cert and --key to specify them
@@ -43,14 +42,8 @@ If curl is built against GnuTLS library, a PKCS#11 URI can be used to specify
 a certificate located in a PKCS#11 device. A string beginning with `pkcs11:`
 is interpreted as a PKCS#11 URI.
 
-(iOS and macOS only) If curl is built against Secure Transport, then the
-certificate string can either be the name of a certificate/private key in the
-system or user keychain, or the path to a PKCS#12-encoded certificate and
-private key. If you want to use a file from the current directory, please
-precede it with `./` prefix, in order to avoid confusion with a nickname.
-
-(Schannel only) Client certificates must be specified by a path expression to
-a certificate store. (Loading *PFX* is not supported; you can import it to a
+(Schannel) Client certificates must be specified by a path expression to a
+certificate store. (Loading *PFX* is not supported; you can import it to a
 store first). You can use "\<store location\>\\<store name\>\\<thumbprint\>"
 to refer to a certificate in the system certificates store, for example,
 *"CurrentUser\MY\934a7ac6f8a5d579285a74fa61e19f23ddfe8d7a"*. Thumbprint is

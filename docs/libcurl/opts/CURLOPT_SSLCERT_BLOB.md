@@ -12,7 +12,6 @@ Protocol:
   - TLS
 TLS-backend:
   - OpenSSL
-  - Secure Transport
   - Schannel
   - mbedTLS
   - wolfSSL
@@ -35,10 +34,9 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT_BLOB,
 # DESCRIPTION
 
 Pass a pointer to a curl_blob structure, which contains (pointer and size) a
-client certificate. The format must be "P12" on Secure Transport or
-Schannel. The format must be "P12" or "PEM" on OpenSSL. The format must be
-"DER" or "PEM" on mbedTLS. The format must be specified with
-CURLOPT_SSLCERTTYPE(3).
+client certificate. The format must be "P12" on Schannel. The format must be
+"P12" or "PEM" on OpenSSL. The format must be "DER" or "PEM" on mbedTLS. The
+format must be specified with CURLOPT_SSLCERTTYPE(3).
 
 If the blob is initialized with the flags member of struct curl_blob set to
 CURL_BLOB_COPY, the application does not have to keep the buffer around after
