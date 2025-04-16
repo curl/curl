@@ -742,243 +742,243 @@ jobs:
             make -C bld examples
           fi
 
-  #msvc:
-  #  name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-  #  runs-on: ${{ matrix.image || 'windows-latest' }}
-  #  timeout-minutes: 55
-  #  defaults:
-  #    run:
-  #      shell: msys2 {0}
-  #  env:
-  #    openssh_windows-version: 'v9.8.1.0p1-Preview'
-  #    VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
-  #    VCPKG_DISABLE_METRICS: '1'
-  #  strategy:
-  #    matrix:
-  #      include:
-  #        - name: 'openssl +examples'
-  #          install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
-  #          arch: 'x64'
-  #          plat: 'uwp'
-  #          type: 'Debug'
-  #          tflags: 'skiprun'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-  #            -DCURL_USE_LIBPSL=OFF
-  #
-  #        - name: 'openssl'
-  #          install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-  #            -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
-  #
-  #        - name: 'schannel MultiSSL U'
-  #          install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-  #            -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-  #
-  #        - name: 'libressl'
-  #          install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          openssh: 'OpenSSH-Windows'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
-  #            -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
-  #
-  #        - name: 'boringssl'
-  #          install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          config: >-
-  #            -DENABLE_DEBUG=OFF
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
-  #            -DUSE_ECH=ON
-  #
-  #        - name: 'wolfssl +examples'
-  #          install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-  #            -DCURL_USE_GSASL=ON
-  #            -DUSE_ECH=ON
-  #
-  #        - name: 'mbedtls'
-  #          install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh2 pkgconf gsasl'
-  #          arch: 'x64'
-  #          plat: 'windows'
-  #          type: 'Debug'
-  #          chkprefill: '_chkprefill'
-  #          config: >-
-  #            -DENABLE_DEBUG=ON
-  #            -DCURL_USE_LIBSSH2=ON
-  #            -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
-  #            -DCURL_USE_GSASL=ON
-  #
-  #    fail-fast: false
-  #  steps:
-  #    - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
-  #      with:
-  #        msystem: ucrt64
-  #        release: ${{ contains(matrix.image, 'arm') }}
-  #        cache: ${{ contains(matrix.image, 'arm') }}
-  #        path-type: inherit
-  #
-  #    - name: 'vcpkg cache setup'
-  #      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-  #      with:
-  #        script: |
-  #          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-  #          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-  #
-  #    - name: 'vcpkg versions'
-  #      timeout-minutes: 1
-  #      run: |
-  #        git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
-  #        vcpkg version
-  #
-  #    - name: 'vcpkg build'
-  #      timeout-minutes: 45
-  #      run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
-  #
-  #    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-  #      with:
-  #        persist-credentials: false
-  #
-  #    - name: 'configure'
-  #      timeout-minutes: 5
-  #      run: |
-  #        for _chkprefill in '' ${{ matrix.chkprefill }}; do
-  #          options=''
-  #          if [ '${{ matrix.plat }}' = 'uwp' ]; then
-  #            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-  #            cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-  #            ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
-  #            vsglobals=';AppxPackage=false;WindowsAppContainer=false'
-  #          fi
-  #          [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
-  #          [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
-  #          [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
-  #          [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-  #          cmake -B "bld${_chkprefill}" ${options} \
-  #            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-  #            -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-  #            -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
-  #            -DCMAKE_C_FLAGS="${cflags}" \
-  #            -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-  #            -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-  #            -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-  #            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-  #            -DCURL_WERROR=ON \
-  #            -DBUILD_SHARED_LIBS=OFF \
-  #            ${{ matrix.config }}
-  #        done
-  #        if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
-  #          echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
-  #          false
-  #        fi
-  #
-  #    - name: 'configure log'
-  #      if: ${{ !cancelled() }}
-  #      run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-  #
-  #    - name: 'curl_config.h'
-  #      run: |
-  #        echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-  #        grep -F '#define' bld/lib/curl_config.h | sort || true
-  #
-  #    - name: 'build'
-  #      timeout-minutes: 5
-  #      run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
-  #
-  #    - name: 'curl version'
-  #      timeout-minutes: 1
-  #      run: |
-  #        PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
-  #        if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-  #          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
-  #          'bld/src/${{ matrix.type }}/curl.exe' --disable --version
-  #        fi
-  #
-  #    - name: 'build tests'
-  #      if: ${{ matrix.tflags != 'skipall' }}
-  #      timeout-minutes: 10
-  #      run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
-  #
-  #    - name: 'install test prereqs'
-  #      if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-  #      timeout-minutes: 5
-  #      run: |
-  #        if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
-  #          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-  #        elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
-  #          # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-  #          if [ '${{ matrix.image }}' != 'windows-2025' ]; then
-  #            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
-  #            pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
-  #          fi
-  #        else  # OpenSSH-Windows
-  #          cd /d || exit 1
-  #          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-  #            --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
-  #          unzip bin.zip
-  #          rm -f bin.zip
-  #        fi
-  #        /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-  #        python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-  #
-  #    - name: 'downgrade msys2-runtime'
-  #      if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-  #      timeout-minutes: 2
-  #      # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-  #      # causing runtests.pl to run at 2-3x reduced speed.
-  #      run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
-  #
-  #    - name: 'run tests'
-  #      if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-  #      timeout-minutes: 10
-  #      run: |
-  #        export CURL_DIRSUFFIX='${{ matrix.type }}'
-  #        export TFLAGS='-j8 ${{ matrix.tflags }}'
-  #        TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-  #        if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-  #          TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
-  #        fi
-  #        if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
-  #          TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-  #          if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-  #            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
-  #          else
-  #            TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
-  #          fi
-  #          PATH="/d/OpenSSH-Win64:$PATH"
-  #        fi
-  #        PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
-  #        cmake --build bld --config '${{ matrix.type }}' --target test-ci
-  #
-  #    - name: 'build examples'
-  #      timeout-minutes: 5
-  #      if: ${{ contains(matrix.name, '+examples') }}
-  #      run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+  msvc:
+    name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
+    runs-on: ${{ matrix.image || 'windows-latest' }}
+    timeout-minutes: 55
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      openssh_windows-version: 'v9.8.1.0p1-Preview'
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DISABLE_METRICS: '1'
+    strategy:
+      matrix:
+        include:
+          - name: 'openssl +examples'
+            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
+            arch: 'x64'
+            plat: 'uwp'
+            type: 'Debug'
+            tflags: 'skiprun'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_LIBPSL=OFF
+
+          - name: 'openssl'
+            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
+
+          - name: 'schannel MultiSSL U'
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
+
+          - name: 'libressl'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            openssh: 'OpenSSH-Windows'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
+              -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
+
+          - name: 'boringssl'
+            install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            config: >-
+              -DENABLE_DEBUG=OFF
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DUSE_ECH=ON
+
+          - name: 'wolfssl +examples'
+            install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
+              -DUSE_ECH=ON
+
+          - name: 'mbedtls'
+            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh2 pkgconf gsasl'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            chkprefill: '_chkprefill'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
+              -DCURL_USE_GSASL=ON
+
+      fail-fast: false
+    steps:
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        with:
+          msystem: ucrt64
+          release: ${{ contains(matrix.image, 'arm') }}
+          cache: ${{ contains(matrix.image, 'arm') }}
+          path-type: inherit
+
+      - name: 'vcpkg cache setup'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: 'vcpkg versions'
+        timeout-minutes: 1
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
+      - name: 'vcpkg build'
+        timeout-minutes: 45
+        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'configure'
+        timeout-minutes: 5
+        run: |
+          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+            options=''
+            if [ '${{ matrix.plat }}' = 'uwp' ]; then
+              options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+              ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              vsglobals=';AppxPackage=false;WindowsAppContainer=false'
+            fi
+            [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
+            [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
+            [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
+            [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            cmake -B "bld${_chkprefill}" ${options} \
+              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+              -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
+              -DCMAKE_C_FLAGS="${cflags}" \
+              -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+              -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DBUILD_SHARED_LIBS=OFF \
+              ${{ matrix.config }}
+          done
+          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+            false
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        timeout-minutes: 1
+        run: |
+          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
+          if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
+            PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
+            'bld/src/${{ matrix.type }}/curl.exe' --disable --version
+          fi
+
+      - name: 'build tests'
+        if: ${{ matrix.tflags != 'skipall' }}
+        timeout-minutes: 10
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
+            # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
+            if [ '${{ matrix.image }}' != 'windows-2025' ]; then
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
+            fi
+          else  # OpenSSH-Windows
+            cd /d || exit 1
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+              --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
+            unzip bin.zip
+            rm -f bin.zip
+          fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
+      - name: 'downgrade msys2-runtime'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 2
+        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
+        # causing runtests.pl to run at 2-3x reduced speed.
+        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+
+      - name: 'run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 10
+        run: |
+          export CURL_DIRSUFFIX='${{ matrix.type }}'
+          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
+          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+            TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
+          fi
+          if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
+            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+              TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            else
+              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
+            fi
+            PATH="/d/OpenSSH-Win64:$PATH"
+          fi
+          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+      - name: 'build examples'
+        timeout-minutes: 5
+        if: ${{ contains(matrix.name, '+examples') }}
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
