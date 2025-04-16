@@ -346,8 +346,6 @@ static void async_thrdd_destroy(struct Curl_easy *data)
     wakeup_close(sock_rd);
 #endif
   }
-
-  Curl_safefree(data->state.async.hostname);
 }
 
 #ifdef USE_HTTPSRR_ARES
@@ -496,7 +494,7 @@ static CURLcode asyn_thrdd_await(struct Curl_easy *data,
  * Until we gain a way to signal the resolver threads to stop early, we must
  * simply wait for them and ignore their results.
  */
-void Curl_async_shutdown(struct Curl_easy *data)
+void Curl_async_thrdd_shutdown(struct Curl_easy *data)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
 
@@ -508,6 +506,11 @@ void Curl_async_shutdown(struct Curl_easy *data)
     (void)asyn_thrdd_await(data, thrdd->addr, NULL);
   else
     async_thrdd_destroy(data);
+}
+
+void Curl_async_thrdd_destroy(struct Curl_easy *data)
+{
+  Curl_async_thrdd_shutdown(data);
 }
 
 /*

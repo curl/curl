@@ -69,13 +69,6 @@ void Curl_async_global_cleanup(void);
  */
 CURLcode Curl_async_get_impl(struct Curl_easy *easy, void **impl);
 
-/*
- * Curl_async_shutdown().
- *
- * This frees the resources of any async resolve operation.
- */
-void Curl_async_shutdown(struct Curl_easy *data);
-
 /* Curl_async_getsock()
  *
  * This function is called from the Curl_multi_getsock() function.  'sock' is a
@@ -157,6 +150,9 @@ struct async_ares_ctx {
 #endif
 };
 
+void Curl_async_ares_shutdown(struct Curl_easy *data);
+void Curl_async_ares_destroy(struct Curl_easy *data);
+
 /*
  * Function provided by the resolver backend to set DNS servers to use.
  */
@@ -227,6 +223,9 @@ struct async_thrdd_ctx {
 #endif
 };
 
+void Curl_async_thrdd_shutdown(struct Curl_easy *data);
+void Curl_async_thrdd_destroy(struct Curl_easy *data);
+
 #endif /* CURLRES_THREADED */
 
 #ifndef CURL_DISABLE_DOH
@@ -237,7 +236,6 @@ struct doh_probes;
 
 /* convert these functions if an asynch resolver is not used */
 #define Curl_async_get_impl(x,y)    (*(y) = NULL, CURLE_OK)
-#define Curl_async_shutdown(x) Curl_nop_stmt
 #define Curl_async_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_await(x,y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_global_init() CURLE_OK
@@ -247,7 +245,9 @@ struct doh_probes;
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
+#endif
 
+#ifdef USE_CURL_ASYNC
 struct Curl_async {
 #ifdef CURLRES_ARES /*  */
   struct async_ares_ctx ares;
@@ -264,7 +264,23 @@ struct Curl_async {
   BIT(done);
 };
 
-#endif
+/*
+ * Curl_async_shutdown().
+ *
+ * This shuts down all ongoing operations.
+ */
+void Curl_async_shutdown(struct Curl_easy *data);
+
+/*
+ * Curl_async_destroy().
+ *
+ * This frees the resources of any async resolve.
+ */
+void Curl_async_destroy(struct Curl_easy *data);
+#else /* !USE_CURL_ASYNC */
+#define Curl_async_shutdown(x) Curl_nop_stmt
+#endif /* USE_CURL_ASYNC */
+
 
 /********** end of generic resolver interface functions *****************/
 #endif /* HEADER_CURL_ASYN_H */

@@ -290,7 +290,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
-  Curl_async_shutdown(data);
+  Curl_async_destroy(data);
 
   data_priority_cleanup(data);
 
@@ -301,6 +301,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  Curl_hash_destroy(&data->meta_hash);
 #ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
 #endif
@@ -363,10 +364,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->filesize = -1;        /* we do not know the size */
   set->postfieldsize = -1;   /* unknown size */
   set->maxredirs = 30;       /* sensible default */
-
-#ifndef CURL_DISABLE_DOH
-  set->dohfor_mid  = -1;
-#endif
 
   set->method = HTTPREQ_GET; /* Default HTTP request */
 #ifndef CURL_DISABLE_RTSP
@@ -486,6 +483,17 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   return result;
 }
 
+/* easy->meta_hash destructor. Should never be called as elements
+ * MUST be added with their own destructor */
+static void easy_meta_freeentry(void *p)
+{
+  (void)p;
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
+}
+
 /**
  * Curl_open()
  *
@@ -509,6 +517,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  Curl_hash_init(&data->meta_hash, 23,
+                 Curl_hash_str, Curl_str_key_compare, easy_meta_freeentry);
   Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
@@ -527,9 +537,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   /* and not assigned an id yet */
   data->id = -1;
   data->mid = -1;
-#ifndef CURL_DISABLE_DOH
-  data->set.dohfor_mid = -1;
-#endif
+  data->master_mid = -1;
 
   data->progress.flags |= PGRS_HIDE;
   data->state.current_speed = -1; /* init to negative == impossible */
@@ -539,6 +547,7 @@ out:
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
+    Curl_hash_destroy(&data->meta_hash);
     free(data);
     data = NULL;
   }
@@ -3612,12 +3621,10 @@ static CURLcode create_conn(struct Curl_easy *data,
         connections_available = FALSE;
         break;
       case CPOOL_LIMIT_TOTAL:
-#ifndef CURL_DISABLE_DOH
-        if(data->set.dohfor_mid >= 0)
-          infof(data, "Allowing DoH to override max connection limit");
-        else
-#endif
-        {
+        if(data->master_mid >= 0)
+          CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
+                     "max connection limit");
+        else {
           infof(data, "No connections available, total of %ld reached.",
                 data->multi->max_total_connections);
           connections_available = FALSE;

@@ -727,6 +727,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 
   data->multi = NULL; /* clear the association to this multi handle */
   data->mid = -1;
+  data->master_mid = -1;
 
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
@@ -2507,9 +2508,24 @@ statemachine_end:
     }
 
     if(MSTATE_COMPLETED == data->mstate) {
-      if(data->set.fmultidone) {
-        /* signal via callback instead */
-        data->set.fmultidone(data, result);
+      if(data->master_mid >= 0) {
+        /* A sub transfer, not for msgsent to application */
+        struct Curl_easy *mdata;
+
+        CURL_TRC_M(data, "sub xfer done for master %" FMT_OFF_T,
+                   data->master_mid);
+        mdata = Curl_multi_get_handle(multi, data->master_mid);
+        if(mdata) {
+          if(mdata->sub_xfer_done)
+            mdata->sub_xfer_done(mdata, data, result);
+          else
+            CURL_TRC_M(data, "master easy %" FMT_OFF_T
+                       " without sub_xfer_done.", data->master_mid);
+        }
+        else {
+          CURL_TRC_M(data, "master easy %" FMT_OFF_T " already gone.",
+                     data->master_mid);
+        }
       }
       else {
         /* now fill in the Curl_message with this info */
