@@ -32,6 +32,8 @@
 #include <openssl/err.h>
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
+#elif defined(OPENSSL_QUIC_API2)
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
 #else
 #include <ngtcp2/ngtcp2_crypto_quictls.h>
 #endif
@@ -117,6 +119,9 @@ struct cf_ngtcp2_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
   struct curl_tls_ctx tls;
+#ifdef OPENSSL_QUIC_API2
+  ngtcp2_crypto_ossl_ctx *ossl_ctx;
+#endif
   ngtcp2_path connected_path;
   ngtcp2_conn *qconn;
   ngtcp2_cid dcid;
@@ -2014,10 +2019,20 @@ static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
   ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
-  if(ctx->h3conn)
+  if(ctx->h3conn) {
     nghttp3_conn_del(ctx->h3conn);
-  if(ctx->qconn)
+    ctx->h3conn = NULL;
+  }
+  if(ctx->qconn) {
     ngtcp2_conn_del(ctx->qconn);
+    ctx->qconn = NULL;
+  }
+#ifdef OPENSSL_QUIC_API2
+  if(ctx->ossl_ctx) {
+    ngtcp2_crypto_ossl_ctx_del(ctx->ossl_ctx);
+    ctx->ossl_ctx = NULL;
+  }
+#endif
   ctx->call_data = save;
 }
 
@@ -2133,6 +2148,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   CURL_TRC_CF(data, cf, "destroy");
   if(cf->ctx) {
+    cf_ngtcp2_close(cf, data);
     cf_ngtcp2_ctx_free(cf->ctx);
     cf->ctx = NULL;
   }
@@ -2291,6 +2307,8 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
+#elif defined(OPENSSL_QUIC_API2)
+  /* nothing to do */
 #else
   if(ngtcp2_crypto_quictls_configure_client_context(ctx->ossl.ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
@@ -2453,6 +2471,9 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
+  ctx->conn_ref.get_conn = get_conn;
+  ctx->conn_ref.user_data = cf;
+
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer, &ALPN_SPEC_H3,
                                cf_ngtcp2_tls_ctx_setup, &ctx->tls,
                                &ctx->conn_ref,
@@ -2460,7 +2481,17 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(result)
     return result;
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) && defined(OPENSSL_QUIC_API2)
+  if(ngtcp2_crypto_ossl_ctx_new(&ctx->ossl_ctx, ctx->tls.ossl.ssl) != 0) {
+    failf(data, "ngtcp2_crypto_ossl_ctx_new failed");
+    return CURLE_FAILED_INIT;
+  }
+  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->ossl_ctx);
+  if(ngtcp2_crypto_ossl_configure_client_session(ctx->tls.ossl.ssl) != 0) {
+    failf(data, "ngtcp2_crypto_ossl_configure_client_session failed");
+    return CURLE_FAILED_INIT;
+  }
+#elif defined(USE_OPENSSL)
   SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ossl.ssl);
 #elif defined(USE_GNUTLS)
@@ -2472,9 +2503,6 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
 #endif
 
   ngtcp2_ccerr_default(&ctx->last_error);
-
-  ctx->conn_ref.get_conn = get_conn;
-  ctx->conn_ref.user_data = cf;
 
   return CURLE_OK;
 }

@@ -58,6 +58,16 @@
 #define NW_SEND_CHUNKS    2
 
 
+int Curl_vquic_init(void)
+{
+#if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)
+  if(ngtcp2_crypto_ossl_init())
+    return 0;
+#endif
+
+  return 1;
+}
+
 void Curl_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
