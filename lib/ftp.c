@@ -330,8 +330,7 @@ static void freedirs(struct ftp_conn *ftpc)
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
-/***********************************************************************
- *
+/*
  * Lineend Conversions
  * On ASCII transfers, e.g. directory listings, we might get lines
  * ending in '\r\n' and we prefer just '\n'.
