@@ -453,7 +453,7 @@ jobs:
       - name: 'vcpkg build'
         if: ${{ matrix.install }}
         timeout-minutes: 20
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=arm64-android'
+        run: vcpkg x-set-installed ${{ matrix.install }} --debug '--triplet=arm64-android'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:

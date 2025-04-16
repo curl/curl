@@ -864,7 +864,7 @@ jobs:
 
       - name: 'vcpkg build'
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        run: vcpkg x-set-installed ${{ matrix.install }} --debug '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
