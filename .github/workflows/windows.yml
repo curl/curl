@@ -769,6 +769,17 @@ jobs:
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'openssl'
+            install: 'openssl'
+            arch: 'arm64'
+            plat: 'windows'
+            type: 'Debug'
+            image: 'windows-11-arm'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_USE_LIBPSL=OFF
+
+          - name: 'openssl'
             install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
             arch: 'x64'
             plat: 'windows'
@@ -840,18 +851,10 @@ jobs:
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
-        if: ${{ !contains(matrix.image, 'arm') }}
         with:
           msystem: ucrt64
-          release: false
-          update: false
-          cache: false
-          path-type: inherit
-
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
-        if: ${{ contains(matrix.image, 'arm') }}
-        with:
-          msystem: clangarm64
+          release: ${{ contains(matrix.image, 'arm') }}
+          cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
 
       - name: 'vcpkg cache setup'
