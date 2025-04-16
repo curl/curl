@@ -439,7 +439,7 @@ jobs:
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           # Downgrade to last known good version that handles the binary cache correctly.
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-            --location 'https://github.com/microsoft/vcpkg-tool/releases/download/2025-03-22/vcpkg-muslc' --output /usr/local/bin/vcpkg
+            --location 'https://github.com/microsoft/vcpkg-tool/releases/download/2025-03-13/vcpkg-muslc' --output /usr/local/bin/vcpkg
           vcpkg version
 
       - name: 'install prereqs for vcpkg'
