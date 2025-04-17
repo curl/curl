@@ -115,7 +115,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
   if(host[hostlen-1]!='.')
     expected_len++;
 
-  if(expected_len > (256 + 16)) /* RFCs 1034, 1035 */
+  if(expected_len > DOH_MAX_DNSREQ_SIZE)
     return DOH_DNS_NAME_TOO_LONG;
 
   if(len < expected_len)
