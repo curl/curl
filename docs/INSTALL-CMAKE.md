@@ -479,18 +479,20 @@ Available variables:
 - `HAVE_GSS_C_NT_HOSTBASED_SERVICE`:        `GSS_C_NT_HOSTBASED_SERVICE` present in GSS/Heimdal/Kerberos.
 - `HAVE_LDAP_INIT_FD`:                      `ldap_init_fd` present in LDAP library.
 - `HAVE_LDAP_URL_PARSE`:                    `ldap_url_parse` present in LDAP library.
-- `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL(-fork).
+- `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL (or fork).
 - `HAVE_QUICHE_CONN_SET_QLOG_FD`:           `quiche_conn_set_qlog_fd` present in quiche.
 - `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls (unused if Rustls is detected via `pkg-config`).
-- `HAVE_SSL_SET0_WBIO`:                     `SSL_set0_wbio` present in OpenSSL(-fork).
-- `HAVE_SSL_SET1_ECH_CONFIG_LIST`:          `SSL_set1_ech_config_list` present in OpenSSL(-fork).
-- `HAVE_SSL_QUICTLS_API`:                   `SSL_set_quic_use_legacy_codepoint`, `SSL_set_quic_tls_cbs` or
-                                            `wolfSSL_set_quic_use_legacy_codepoint` present in OpenSSL(-fork)/wolfSSL.
+- `HAVE_SSL_SET0_WBIO`:                     `SSL_set0_wbio` present in OpenSSL (or fork).
+- `HAVE_SSL_SET1_ECH_CONFIG_LIST`:          `SSL_set1_ech_config_list` present in OpenSSL (or fork).
+- `HAVE_SSL_SET_QUIC_TLS_CBS`:              `SSL_set_quic_tls_cbs` in OpenSSL.
+- `HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT`: `SSL_set_quic_use_legacy_codepoint` in OpenSSL fork.
 - `HAVE_WOLFSSL_BIO`:                       `wolfSSL_BIO_new` present in wolfSSL.
 - `HAVE_WOLFSSL_CTX_GENERATEECHCONFIG`:     `wolfSSL_CTX_GenerateEchConfig` present in wolfSSL.
 - `HAVE_WOLFSSL_DES_ECB_ENCRYPT`:           `wolfSSL_DES_ecb_encrypt` present in wolfSSL.
 - `HAVE_WOLFSSL_FULL_BIO`:                  `wolfSSL_BIO_set_shutdown` present in wolfSSL.
 - `HAVE_WOLFSSL_GET_PEER_CERTIFICATE`:      `wolfSSL_get_peer_certificate` present in wolfSSL.
+- `HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT`:
+                                            `wolfSSL_set_quic_use_legacy_codepoint` present in wolfSSL.
 - `HAVE_WOLFSSL_USEALPN`:                   `wolfSSL_UseALPN` present in wolfSSL.
 
 For each of the above variables, if the variable is *defined* (either to `ON`
