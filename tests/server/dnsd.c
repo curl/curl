@@ -368,10 +368,20 @@ static int send_response(curl_socket_t sock,
     }
   }
 
+#ifdef __AMIGA__
+  /* Amiga breakage */
+  (void)rc;
+  (void)sock;
+  (void)addr;
+  (void)addrlen;
+  fprintf(stderr, "Not working\n");
+  return -1;
+#else
   rc = sendto(sock, (const void *)bytes, (SENDTO3) i, 0, addr, addrlen);
   if(rc != (ssize_t)i) {
     fprintf(stderr, "failed sending %d bytes\n", (int)i);
   }
+#endif
   return 0;
 }
 
