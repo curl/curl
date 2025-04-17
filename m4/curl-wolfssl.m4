@@ -136,17 +136,14 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
-                     wolfSSL_UseALPN )
+                     wolfSSL_UseALPN \
+                     wolfSSL_DES_ecb_encrypt)
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
-      AC_CHECK_FUNC(wolfSSL_DES_ecb_encrypt,
-        [
-          AC_DEFINE(HAVE_WOLFSSL_DES_ECB_ENCRYPT, 1,
-                    [if you have wolfSSL_DES_ecb_encrypt])
-          WOLFSSL_NTLM=1
-        ]
-        )
+      if test "x$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'xyes'; then
+        WOLFSSL_NTLM=1
+      fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
       AC_CHECK_FUNC(wolfSSL_BIO_new,
