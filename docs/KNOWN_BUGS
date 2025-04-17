@@ -15,8 +15,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  2. TLS
  2.1 IMAPS connection fails with Rustls error
- 2.3 Unable to use PKCS12 certificate with Secure Transport
- 2.4 Secure Transport does not import PKCS#12 client certificates without a password
+ 2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -53,7 +52,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
- 6.12 cannot use Secure Transport with Crypto Token Kit
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
@@ -125,15 +123,13 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/10457
 
-2.3 Unable to use PKCS12 certificate with Secure Transport
+2.5 Client cert handling with Issuer DN differs between backends
 
- See https://github.com/curl/curl/issues/5403
+ When the specified client certificate does not match any of the
+ server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
+ The github discussion may contain a solution.
 
-2.4 Secure Transport does not import PKCS#12 client certificates without a password
-
- libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
- function rejects certificates that do not have a password.
- https://github.com/curl/curl/issues/1308
+ See https://github.com/curl/curl/issues/1411
 
 2.7 Client cert (MTLS) issues with Schannel
 
@@ -368,10 +364,6 @@ problems may have been fixed or changed somewhat since this was written.
  in Unix/Linux.
 
  https://github.com/curl/curl/issues/5881
-
-6.12 cannot use Secure Transport with Crypto Token Kit
-
- https://github.com/curl/curl/issues/7048
 
 6.13 Negotiate authentication against Hadoop HDFS
 
