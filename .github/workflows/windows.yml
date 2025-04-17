@@ -986,7 +986,9 @@ jobs:
             rm -f bin.zip
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+          if [ '${{ matrix.image }}' != 'windows-11-arm' ]; then  # save a minute by skipping this, and the single SMB test that needs it
+            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+          fi
 
       - name: 'downgrade msys2-runtime'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
