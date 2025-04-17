@@ -778,7 +778,7 @@ jobs:
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
-              -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
+              -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'schannel'
