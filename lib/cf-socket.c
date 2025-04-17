@@ -2182,6 +2182,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     if(error)
       return CURLE_ABORTED_BY_CALLBACK;
   }
+  *done = TRUE;
   return CURLE_OK;
 }
 
