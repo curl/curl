@@ -135,35 +135,23 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
+      dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
-                     wolfSSL_UseALPN )
+                     wolfSSL_UseALPN \
+                     wolfSSL_DES_ecb_encrypt \
+                     wolfSSL_BIO_new \
+                     wolfSSL_BIO_set_shutdown)
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
-      AC_CHECK_FUNC(wolfSSL_DES_ecb_encrypt,
-        [
-          AC_DEFINE(HAVE_WOLFSSL_DES_ECB_ENCRYPT, 1,
-                    [if you have wolfSSL_DES_ecb_encrypt])
-          WOLFSSL_NTLM=1
-        ]
-        )
+      if test "x$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'xyes'; then
+        HAVE_WOLFSSL_DES_ECB_ENCRYPT=1
+      fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
-      AC_CHECK_FUNC(wolfSSL_BIO_new,
-        [
-          AC_DEFINE(HAVE_WOLFSSL_BIO, 1,
-                    [if you have wolfSSL_BIO_new])
-          WOLFSSL_BIO=1
-        ]
-        )
-      dnl if this symbol is present, we have the full BIO feature set
-      AC_CHECK_FUNC(wolfSSL_BIO_set_shutdown,
-        [
-          AC_DEFINE(HAVE_WOLFSSL_FULL_BIO, 1,
-                    [if you have wolfSSL_BIO_set_shutdown])
-          WOLFSSL_FULL_BIO=1
-        ]
-        )
+      if test "x$ac_cv_func_wolfSSL_BIO_new" = 'xyes'; then
+        HAVE_WOLFSSL_BIO_NEW=1
+      fi
 
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
