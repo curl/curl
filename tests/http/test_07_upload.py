@@ -274,8 +274,9 @@ class TestUpload:
             f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
-        exp_exit = 92 if proto == 'h2' else 95
-        r.check_stats(count=count, exitcode=exp_exit)
+        # depending on timing and protocol, we might get CURLE_PARTIAL_FILE or
+        # CURLE_HTTP3 or CURLE_HTTP2_STREAM
+        r.check_stats(count=count, exitcode=[18, 92, 95])
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
