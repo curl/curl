@@ -668,18 +668,22 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      * We are here after having selected a connection to a host+port and
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
-    if(conn->dns_entry && conn->dns_entry->hinfo &&
-       !conn->dns_entry->hinfo->no_def_alpn &&  /* ALPNs are defaults */
-       (!conn->dns_entry->hinfo->target ||      /* for same host */
-        !conn->dns_entry->hinfo->target[0] ||
-        (conn->dns_entry->hinfo->target[0] == '.' &&
-         !conn->dns_entry->hinfo->target[1])) &&
-       (conn->dns_entry->hinfo->port < 0 ||    /* for same port */
-        conn->dns_entry->hinfo->port == conn->remote_port)) {
+    struct Curl_dns_entry *dns = conn->dns_entry;
+    struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
+
+    if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
+       (!rr->target ||      /* for same host */
+        !rr->target[0] ||
+        (rr->target[0] == '.' && !rr->target[1]))) {
       size_t i;
-      for(i = 0; i < CURL_ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
+      if(rr->port >= 0) {
+        CURL_TRC_CF(data, cf, "switch to port %d via HTTPS-RR",
+                    rr->port);
+        conn->remote_port = rr->port;
+      }
+      for(i = 0; i < CURL_ARRAYSIZE(rr->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
-        enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
+        enum alpnid alpn = rr->alpns[i];
         if(cf_https_alpns_contain(alpn, alpn_ids, alpn_count))
           continue;
         switch(alpn) {
