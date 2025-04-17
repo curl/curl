@@ -5247,7 +5247,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
         -o "x$MBEDTLS_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
       AC_MSG_RESULT([yes])
-    elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$WOLFSSL_BIO" = "x1"; then
+    elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$HAVE_WOLFSSL_BIO_NEW" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
       AC_MSG_RESULT([yes])
     else
