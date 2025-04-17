@@ -1049,6 +1049,7 @@ endmacro()
 
 if(USE_WOLFSSL)
   curl_openssl_check_exists("wolfSSL_get_peer_certificate" HAVE_WOLFSSL_GET_PEER_CERTIFICATE)
+  curl_openssl_check_exists("wolfSSL_UseALPN" HAVE_WOLFSSL_USEALPN)
   curl_openssl_check_exists("wolfSSL_DES_ecb_encrypt" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
   curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO)
   curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_FULL_BIO)
