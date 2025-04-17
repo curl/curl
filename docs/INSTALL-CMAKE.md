@@ -484,7 +484,7 @@ Available variables:
 - `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls (unused if Rustls is detected via `pkg-config`).
 - `HAVE_SSL_SET0_WBIO`:                     `SSL_set0_wbio` present in OpenSSL(-fork).
 - `HAVE_SSL_SET1_ECH_CONFIG_LIST`:          `SSL_set1_ech_config_list` present in OpenSSL(-fork).
-- `HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT`: `SSL_set_quic_use_legacy_codepoint`, `SSL_set_quic_tls_cbs` or
+- `HAVE_SSL_QUICTLS_API`:                   `SSL_set_quic_use_legacy_codepoint`, `SSL_set_quic_tls_cbs` or
                                             `wolfSSL_set_quic_use_legacy_codepoint` present in OpenSSL(-fork)/wolfSSL.
 - `HAVE_WOLFSSL_BIO`:                       `wolfSSL_BIO_new` present in wolfSSL.
 - `HAVE_WOLFSSL_CTX_GENERATEECHCONFIG`:     `wolfSSL_CTX_GenerateEchConfig` present in wolfSSL.
