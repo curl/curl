@@ -765,7 +765,7 @@ jobs:
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_ENABLE_SSL=OFF
-              -DCURL_CA_SEARCH_SAFE=ON -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DCURL_CA_SEARCH_SAFE=ON -DUSE_WIN32_IDN=ON
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'zlib libssh2 +examples'
