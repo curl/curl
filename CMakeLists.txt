@@ -23,35 +23,6 @@
 ###########################################################################
 # by Tetetest and Sukender (Benoit Neil)
 
-# Note: By default this CMake build script detects the version of some
-# dependencies using `check_symbol_exists`. Those checks do not work in
-# the case that both CURL and its dependency are included as sub-projects
-# in a larger build using `FetchContent`. To support that case, additional
-# variables may be defined by the parent project, ideally in the "extra"
-# find package redirect file:
-# https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
-#
-# The following variables are available:
-#   HAVE_GNUTLS_SRP:                        `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_GSS_C_NT_HOSTBASED_SERVICE:        `GSS_C_NT_HOSTBASED_SERVICE` present in GSS/Heimdal/Kerberos
-#   HAVE_LDAP_INIT_FD:                      `ldap_init_fd` present in LDAP library
-#   HAVE_LDAP_URL_PARSE:                    `ldap_url_parse` present in LDAP library
-#   HAVE_OPENSSL_SRP:                       `SSL_CTX_set_srp_username` present in OpenSSL(-fork)
-#   HAVE_QUICHE_CONN_SET_QLOG_FD:           `quiche_conn_set_qlog_fd` present in quiche
-#   HAVE_RUSTLS_SUPPORTED_HPKE:             `rustls_supported_hpke` present in Rustls
-#   HAVE_SSL_SET0_WBIO:                     `SSL_set0_wbio` present in OpenSSL(-fork)
-#   HAVE_SSL_SET1_ECH_CONFIG_LIST:          `SSL_set1_ech_config_list` present in OpenSSL(-fork)
-#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint`, `SSL_set_quic_tls_cbs` or
-#                                           `wolfSSL_set_quic_use_legacy_codepoint` present in OpenSSL(-fork)/wolfSSL
-#   HAVE_WOLFSSL_BIO:                       `wolfSSL_BIO_new` present in wolfSSL
-#   HAVE_WOLFSSL_CTX_GENERATEECHCONFIG:     `wolfSSL_CTX_GenerateEchConfig` present in wolfSSL
-#   HAVE_WOLFSSL_DES_ECB_ENCRYPT:           `wolfSSL_DES_ecb_encrypt` present in wolfSSL
-#   HAVE_WOLFSSL_FULL_BIO:                  `wolfSSL_BIO_set_shutdown` present in wolfSSL
-#
-# For each of the above variables, if the variable is DEFINED (either
-# to ON or OFF), the symbol detection is skipped.  If the variable is
-# NOT DEFINED, the symbol detection is performed.
-
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
