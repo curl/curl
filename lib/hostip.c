@@ -764,7 +764,6 @@ convert_ipaddr_direct(const char *hostname, int port, bool *is_ipaddr)
     }
   }
 #endif /* USE_IPV6 */
-  *is_ipaddr = FALSE;
   return NULL;
 }
 
