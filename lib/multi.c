@@ -357,6 +357,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
        Curl_uint_bset_resize(&multi->msgsent, newsize) ||
        Curl_uint_tbl_resize(&multi->xfers, newsize))
       return CURLM_OUT_OF_MEMORY;
+    CURL_TRC_M(data, "increased xfer table size to %u", newsize);
   }
   /* Insert the easy into the table now that MUST have room for it */
   if(!Curl_uint_tbl_add(&multi->xfers, data, &data->mid)) {
@@ -441,7 +442,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   if(rc) {
     data->multi = NULL; /* not anymore */
     Curl_uint_tbl_remove(&multi->xfers, data->mid);
-    data->mid = CURL_MULTI_MID_INVALID;
+    data->mid = UINT_MAX;
     return rc;
   }
 
@@ -472,8 +473,9 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
     data->set.server_response_timeout;
   multi->admin->set.no_signal = data->set.no_signal;
 
-  CURL_TRC_M(data, "added, transfers=%u",
-             Curl_uint_tbl_count(&multi->xfers) - 1);
+  CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
+             data->mid, Curl_multi_xfers_running(multi),
+             Curl_uint_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
 
@@ -673,6 +675,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   struct Curl_llist_node *e;
   CURLMcode rc;
   bool removed_timer = FALSE;
+  unsigned int mid;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -690,7 +693,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   if(data->multi != multi)
     return CURLM_BAD_EASY_HANDLE;
 
-  if(data->mid == CURL_MULTI_MID_INVALID) {
+  if(data->mid == UINT_MAX) {
     DEBUGASSERT(0);
     return CURLM_INTERNAL_ERROR;
   }
@@ -731,11 +734,6 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
   if(!Curl_uint_bset_contains(&multi->msgsent, data->mid))
     --multi->xfers_alive;
-
-  /* Remove from all our sets */
-  Curl_uint_bset_remove(&multi->process, data->mid);
-  Curl_uint_bset_remove(&multi->pending, data->mid);
-  Curl_uint_bset_remove(&multi->msgsent, data->mid);
 
   Curl_wildcard_dtor(&data->wildcard);
 
@@ -788,7 +786,14 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
     }
   }
 
-  data->multi = NULL; /* clear the association to this multi handle */
+  /* clear the association to this multi handle */
+  mid = data->mid;
+  DEBUGASSERT(Curl_uint_tbl_contains(&multi->xfers, mid));
+  Curl_uint_tbl_remove(&multi->xfers, mid);
+  Curl_uint_bset_remove(&multi->process, mid);
+  Curl_uint_bset_remove(&multi->pending, mid);
+  Curl_uint_bset_remove(&multi->msgsent, mid);
+  data->multi = NULL;
   data->mid = UINT_MAX;
   data->master_mid = UINT_MAX;
 
@@ -802,8 +807,9 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
       return rc;
   }
 
-  CURL_TRC_M(data, "removed, transfers=%u",
-             Curl_uint_tbl_count(&multi->xfers) - 1);
+  CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
+             mid, Curl_multi_xfers_running(multi),
+             Curl_uint_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
 
@@ -2733,6 +2739,14 @@ CURLMcode curl_multi_cleanup(CURLM *m)
         if(!GOOD_EASY_HANDLE(data))
           return CURLM_BAD_HANDLE;
 
+#ifdef DEBUGBUILD
+        if(mid != data->mid) {
+          CURL_TRC_M(data, "multi_cleanup: still present with mid=%u, "
+                  "but unexpected data->mid=%u\n", mid, data->mid);
+          DEBUGASSERT(0);
+        }
+#endif
+
         if(data == multi->admin)
           continue;
 
@@ -2741,8 +2755,8 @@ CURLMcode curl_multi_cleanup(CURLM *m)
           (void)multi_done(data, CURLE_OK, TRUE);
 
         data->multi = NULL; /* clear the association */
-        Curl_uint_tbl_remove(&multi->xfers, data->mid);
-        data->mid = CURL_MULTI_MID_INVALID;
+        Curl_uint_tbl_remove(&multi->xfers, mid);
+        data->mid = UINT_MAX;
 
 #ifdef USE_LIBPSL
         if(data->psl == &multi->psl)
@@ -2757,6 +2771,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_cpool_destroy(&multi->cpool);
     Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
     if(multi->admin) {
+      CURL_TRC_M(multi->admin, "multi_cleanup, closing admin handle, done");
       multi->admin->multi = NULL;
       Curl_uint_tbl_remove(&multi->xfers, multi->admin->mid);
       Curl_close(&multi->admin);

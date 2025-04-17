@@ -163,9 +163,6 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
  */
 void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
 
-/* A `data->mid` value that is never assigned by a multi */
-#define CURL_MULTI_MID_INVALID    (UINT_MAX)
-
 /**
  * Get the easy handle for the given mid.
  * Returns NULL if not found.
