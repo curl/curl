@@ -108,7 +108,6 @@ if test "x$OPT_WOLFSSL" != xno; then
         WOLFSSL_ENABLED=1
         USE_WOLFSSL="yes"
         ssl_msg="wolfSSL"
-        QUIC_ENABLED=yes
         test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       ],
       [
@@ -129,6 +128,9 @@ if test "x$OPT_WOLFSSL" != xno; then
       CURL_SIZEOF(long long)
 
       LIBS="$addlib -lm $LIBS"
+
+      dnl is this wolfSSL providing the original QUIC API?
+      AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
 
       dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility

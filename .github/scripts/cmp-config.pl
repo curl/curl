@@ -76,6 +76,7 @@ my %remove = (
     '#define HAVE_SYS_XATTR_H 1' => 1,
     '#define HAVE_UNICODE_UIDNA_H 1' => 1,
     '#define HAVE_WOLFSSH_SSH_H 1' => 1,
+    '#define HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT 1' => 1,
     '#define HAVE_ZSTD 1' => 1,
     '#define HAVE_ZSTD_H 1' => 1,
     '#define LT_OBJDIR ".libs/"' => 1,
