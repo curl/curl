@@ -781,7 +781,7 @@ jobs:
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'schannel'
+          - name: 'schannel U'
             install: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
             plat: 'windows'
