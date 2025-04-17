@@ -3821,10 +3821,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 
 #ifdef HAVE_SSL_CTX_SET1_SIGALGS
+#define OSSL_SIGALG_CAST(x) OSSL_CURVE_CAST(x)
   {
     const char *signature_algorithms = conn_config->signature_algorithms;
     if(signature_algorithms) {
-      if(!SSL_CTX_set1_sigalgs_list(octx->ssl_ctx, signature_algorithms)) {
+      if(!SSL_CTX_set1_sigalgs_list(octx->ssl_ctx,
+                                    OSSL_SIGALG_CAST(signature_algorithms))) {
         failf(data, "failed setting signature algorithms: '%s'",
               signature_algorithms);
         return CURLE_SSL_CIPHER;
