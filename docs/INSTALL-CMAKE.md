@@ -497,6 +497,8 @@ For each of the above variables, if the variable is *defined* (either to `ON`
 or `OFF`), the symbol detection is skipped. If the variable is *not defined*,
 the feature detection is performed.
 
+Note: These variables are internal and subject to change.
+
 # Migrating from Visual Studio IDE Project Files
 
 We recommend using CMake to build curl with MSVC.
