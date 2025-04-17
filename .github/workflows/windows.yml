@@ -756,7 +756,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'zlib libssh2 +examples'
+          - name: '!ssl +examples'
             install: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             plat: 'uwp'
@@ -769,7 +769,7 @@ jobs:
               -DUSE_WIN32_IDN=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'zlib libssh2 +examples'
+          - name: 'schannel +examples'
             install: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             plat: 'windows'
@@ -781,7 +781,7 @@ jobs:
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'zlib libssh2'
+          - name: 'schannel'
             install: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
             plat: 'windows'
