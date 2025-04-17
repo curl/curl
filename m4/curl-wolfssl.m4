@@ -148,7 +148,7 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       dnl if this symbol is present, we can make use of BIO filter chains
       if test "x$ac_cv_func_wolfSSL_BIO_new" = 'xyes'; then
-        WOLFSSL_BIO=1
+        HAVE_WOLFSSL_BIO_NEW=1
       fi
 
       dnl if this symbol is present, we have the full BIO feature set
