@@ -1130,7 +1130,7 @@ void curl_easy_reset(CURL *d)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
-  data->master_mid = -1;
+  data->master_mid = UINT_MAX;
 }
 
 /*
