@@ -98,9 +98,9 @@
 
 #ifdef HAVE_WOLFSSL_BIO_NEW
 #define USE_BIO_CHAIN
-#ifdef HAVE_WOLFSSL_FULL_BIO
+#ifdef HAVE_WOLFSSL_BIO_SET_SHUTDOWN
 #define USE_FULL_BIO
-#else /* HAVE_WOLFSSL_FULL_BIO */
+#else /* HAVE_WOLFSSL_BIO_SET_SHUTDOWN */
 #undef USE_FULL_BIO
 #endif
 /* wolfSSL 5.7.4 and older do not have these symbols, but only the
