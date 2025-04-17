@@ -135,6 +135,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl wolfSSL needs configure --enable-opensslextra to have *get_peer*
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
+      dnl if wolfSSL_BIO_set_shutdown is present, we have the full BIO feature set
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN \
                      wolfSSL_DES_ecb_encrypt \
@@ -150,11 +151,6 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl if this symbol is present, we can make use of BIO filter chains
       if test "x$ac_cv_func_wolfSSL_BIO_new" = 'xyes'; then
         HAVE_WOLFSSL_BIO_NEW=1
-      fi
-
-      dnl if this symbol is present, we have the full BIO feature set
-      if test "x$ac_cv_func_wolfSSL_BIO_set_shutdown" = 'xyes'; then
-        WOLFSSL_FULL_BIO=1
       fi
 
       if test -n "$wolfssllibpath"; then
