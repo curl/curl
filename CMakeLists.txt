@@ -32,12 +32,21 @@
 # https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
 #
 # The following variables are available:
-#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
-#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL
-#   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
-#   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
-#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL, wolfSSL or rustls-ffi
+#   HAVE_GNUTLS_SRP:                        `gnutls_srp_verifier` present in GnuTLS
+#   HAVE_GSS_C_NT_HOSTBASED_SERVICE:        `GSS_C_NT_HOSTBASED_SERVICE` present in GSS/Heimdal/Kerberos
+#   HAVE_LDAP_INIT_FD:                      `ldap_init_fd` present in LDAP library
+#   HAVE_LDAP_URL_PARSE:                    `ldap_url_parse` present in LDAP library
+#   HAVE_OPENSSL_SRP:                       `SSL_CTX_set_srp_username` present in OpenSSL(-fork)
+#   HAVE_QUICHE_CONN_SET_QLOG_FD:           `quiche_conn_set_qlog_fd` present in quiche
+#   HAVE_RUSTLS_SUPPORTED_HPKE:             `rustls_supported_hpke` present in Rustls
+#   HAVE_SSL_SET0_WBIO:                     `SSL_set0_wbio` present in OpenSSL(-fork)
+#   HAVE_SSL_SET1_ECH_CONFIG_LIST:          `SSL_set1_ech_config_list` present in OpenSSL(-fork)
+#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint`, `SSL_set_quic_tls_cbs` or
+#                                           `wolfSSL_set_quic_use_legacy_codepoint` present in OpenSSL(-fork)/wolfSSL
+#   HAVE_WOLFSSL_BIO:                       `wolfSSL_BIO_new` present in wolfSSL
+#   HAVE_WOLFSSL_CTX_GENERATEECHCONFIG:     `wolfSSL_CTX_GenerateEchConfig` present in wolfSSL
+#   HAVE_WOLFSSL_DES_ECB_ENCRYPT:           `wolfSSL_DES_ecb_encrypt` present in wolfSSL
+#   HAVE_WOLFSSL_FULL_BIO:                  `wolfSSL_BIO_set_shutdown` present in wolfSSL
 #
 # For each of the above variables, if the variable is DEFINED (either
 # to ON or OFF), the symbol detection is skipped.  If the variable is
@@ -1048,7 +1057,7 @@ macro(curl_openssl_check_exists)
   cmake_pop_check_state()
 endmacro()
 
-# Ensure that the OpenSSL fork actually supports QUIC.
+# Ensure that the OpenSSL(-fork)/wolfSSL actually supports QUICTLS API.
 macro(curl_openssl_check_quic)
   if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     if(USE_OPENSSL AND NOT USE_OPENSSL_QUIC)
@@ -1063,7 +1072,7 @@ macro(curl_openssl_check_quic)
     endif()
   endif()
   if(NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL fork. Try setting -DOPENSSL_ROOT_DIR")
+    message(FATAL_ERROR "QUICTLS API support is missing from OpenSSL(-fork)/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
   endif()
 endmacro()
 
