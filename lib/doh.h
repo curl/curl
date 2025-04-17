@@ -94,11 +94,11 @@ enum doh_slot_num {
 /* each DoH probe request has this
  * as easy meta for CURL_EZM_DOH_PROBE */
 struct doh_request {
-  DNStype dnstype;
-  unsigned char req_body[512];
-  size_t req_body_len;
   struct curl_slist *req_hds;
   struct dynbuf resp_body;
+  size_t req_body_len;
+  unsigned char req_body[512];
+  DNStype dnstype;
 };
 
 struct doh_response {
