@@ -491,6 +491,7 @@ Available variables:
 - `HAVE_WOLFSSL_DES_ECB_ENCRYPT`:           `wolfSSL_DES_ecb_encrypt` present in wolfSSL.
 - `HAVE_WOLFSSL_FULL_BIO`:                  `wolfSSL_BIO_set_shutdown` present in wolfSSL.
 - `HAVE_WOLFSSL_GET_PEER_CERTIFICATE`:      `wolfSSL_get_peer_certificate` present in wolfSSL.
+- `HAVE_WOLFSSL_USEALPN`:                   `wolfSSL_UseALPN` present in wolfSSL.
 
 For each of the above variables, if the variable is *defined* (either to `ON`
 or `OFF`), the symbol detection is skipped. If the variable is *not defined*,

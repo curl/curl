@@ -134,7 +134,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl DES* is needed for NTLM support and lives in the OpenSSL compatibility
       dnl layer
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
-                     wolfSSL_UseALPN )
+                     wolfSSL_UseALPN)
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
