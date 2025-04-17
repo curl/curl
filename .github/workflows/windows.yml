@@ -757,7 +757,7 @@ jobs:
       matrix:
         include:
           - name: 'zlib libssh2'
-            install: 'zlib libssh2'
+            install: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
