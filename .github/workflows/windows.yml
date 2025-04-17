@@ -977,7 +977,11 @@ jobs:
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
           else  # OpenSSH-Windows
-            cd /d || exit 1
+            if [[ '${{ matrix.image }}' = 'windows-11-arm' ]]; then
+              cd /c || exit 1  # There is no D: drive on this runner
+            else
+              cd /d || exit 1
+            fi
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
               --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
             unzip bin.zip
