@@ -780,7 +780,7 @@ jobs:
               -DCURL_CA_SEARCH_SAFE=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'zlib libssh2 +examples'
+          - name: 'zlib libssh2'
             install: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
             plat: 'windows'
