@@ -137,7 +137,8 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl layer
       AC_CHECK_FUNCS(wolfSSL_get_peer_certificate \
                      wolfSSL_UseALPN \
-                     wolfSSL_DES_ecb_encrypt)
+                     wolfSSL_DES_ecb_encrypt \
+                     wolfSSL_BIO_new)
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
@@ -146,13 +147,10 @@ if test "x$OPT_WOLFSSL" != xno; then
       fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
-      AC_CHECK_FUNC(wolfSSL_BIO_new,
-        [
-          AC_DEFINE(HAVE_WOLFSSL_BIO, 1,
-                    [if you have wolfSSL_BIO_new])
-          WOLFSSL_BIO=1
-        ]
-        )
+      if test "x$ac_cv_func_wolfSSL_BIO_new" = 'xyes'; then
+        WOLFSSL_BIO=1
+      fi
+
       dnl if this symbol is present, we have the full BIO feature set
       AC_CHECK_FUNC(wolfSSL_BIO_set_shutdown,
         [
