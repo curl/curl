@@ -23,7 +23,7 @@
 ###########################################################################
 # by Tetetest and Sukender (Benoit Neil)
 
-# NOTE: By default this CMake build script detects the version of some
+# Note: By default this CMake build script detects the version of some
 # dependencies using `check_symbol_exists`. Those checks do not work in
 # the case that both CURL and its dependency are included as sub-projects
 # in a larger build using `FetchContent`. To support that case, additional
