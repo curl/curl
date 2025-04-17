@@ -392,8 +392,10 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   if(multi->dead) {
     /* a "dead" handle cannot get added transfers while any existing easy
        handles are still alive - but if there are none alive anymore, it is
-       fine to start over and unmark the "deadness" of this handle */
-    if(Curl_uint_tbl_count(&multi->xfers) > 1) /* more than admin handle */
+       fine to start over and unmark the "deadness" of this handle.
+       This means only the admin handle MUST be present. */
+    if((Curl_uint_tbl_count(&multi->xfers) != 1) ||
+       !Curl_uint_tbl_contains(&multi->xfers, 0))
       return CURLM_ABORTED_BY_CALLBACK;
     multi->dead = FALSE;
     Curl_uint_bset_clear(&multi->process);
