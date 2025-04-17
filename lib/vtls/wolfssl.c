@@ -96,7 +96,7 @@
 #endif
 #endif
 
-#ifdef HAVE_WOLFSSL_BIO
+#ifdef HAVE_WOLFSSL_BIO_NEW
 #define USE_BIO_CHAIN
 #ifdef HAVE_WOLFSSL_FULL_BIO
 #define USE_FULL_BIO
@@ -114,7 +114,7 @@
 #define wolfSSL_BIO_set_retry_read    BIO_set_retry_read
 #endif /* !WOLFSSL_BIO_CTRL_GET_CLOSE */
 
-#else /* HAVE_WOLFSSL_BIO */
+#else /* HAVE_WOLFSSL_BIO_NEW */
 #undef USE_BIO_CHAIN
 #endif
 
