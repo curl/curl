@@ -23,26 +23,6 @@
 ###########################################################################
 # by Tetetest and Sukender (Benoit Neil)
 
-# Note: By default this CMake build script detects the version of some
-# dependencies using `check_symbol_exists`. Those checks do not work in
-# the case that both CURL and its dependency are included as sub-projects
-# in a larger build using `FetchContent`. To support that case, additional
-# variables may be defined by the parent project, ideally in the "extra"
-# find package redirect file:
-# https://cmake.org/cmake/help/latest/module/FetchContent.html#integrating-with-find-package
-#
-# The following variables are available:
-#   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL
-#   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL
-#   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
-#   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
-#   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL, wolfSSL or rustls-ffi
-#
-# For each of the above variables, if the variable is DEFINED (either
-# to ON or OFF), the symbol detection is skipped.  If the variable is
-# NOT DEFINED, the symbol detection is performed.
-
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
@@ -1048,26 +1028,32 @@ macro(curl_openssl_check_exists)
   cmake_pop_check_state()
 endmacro()
 
-# Ensure that the OpenSSL fork actually supports QUIC.
+# Ensure that OpenSSL (or fork) or wolfSSL actually supports QUICTLS API.
 macro(curl_openssl_check_quic)
-  if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
-    if(USE_OPENSSL AND NOT USE_OPENSSL_QUIC)
-      if(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0 AND NOT USE_OPENSSL_QUIC)
-        curl_openssl_check_exists("SSL_set_quic_tls_cbs" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
-      else()
+  if(USE_OPENSSL AND NOT USE_OPENSSL_QUIC)
+    if(OPENSSL_VERSION VERSION_GREATER_EQUAL 3.5.0)
+      if(NOT DEFINED HAVE_SSL_SET_QUIC_TLS_CBS)
+        curl_openssl_check_exists("SSL_set_quic_tls_cbs" HAVE_SSL_SET_QUIC_TLS_CBS)
+      endif()
+    else()
+      if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
         curl_openssl_check_exists("SSL_set_quic_use_legacy_codepoint" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
       endif()
     endif()
-    if(USE_WOLFSSL)
-      curl_openssl_check_exists("wolfSSL_set_quic_use_legacy_codepoint" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
-    endif()
   endif()
-  if(NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
-    message(FATAL_ERROR "QUIC support is missing in OpenSSL fork. Try setting -DOPENSSL_ROOT_DIR")
+  if(USE_WOLFSSL AND NOT DEFINED HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+    curl_openssl_check_exists("wolfSSL_set_quic_use_legacy_codepoint" HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+  endif()
+  if(NOT HAVE_SSL_SET_QUIC_TLS_CBS AND
+     NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT AND
+     NOT HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+    message(FATAL_ERROR "QUICTLS API support is missing from OpenSSL/fork/wolfSSL. Try setting -DOPENSSL_ROOT_DIR")
   endif()
 endmacro()
 
 if(USE_WOLFSSL)
+  curl_openssl_check_exists("wolfSSL_get_peer_certificate" HAVE_WOLFSSL_GET_PEER_CERTIFICATE)
+  curl_openssl_check_exists("wolfSSL_UseALPN" HAVE_WOLFSSL_USEALPN)
   curl_openssl_check_exists("wolfSSL_DES_ecb_encrypt" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
   curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO)
   curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_FULL_BIO)
