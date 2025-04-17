@@ -143,7 +143,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
       if test "x$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'xyes'; then
-        WOLFSSL_NTLM=1
+        HAVE_WOLFSSL_DES_ECB_ENCRYPT=1
       fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
