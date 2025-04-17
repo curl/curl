@@ -542,7 +542,7 @@ sub checksystemfeatures {
                 # system support LD_PRELOAD; may be disabled later
                 $feature{"ld_preload"} = 1;
             }
-            if($curl =~ /win32|Windows|mingw(32|64)/) {
+            if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Windows-style path.
                 $pwd = sys_native_current_path();
