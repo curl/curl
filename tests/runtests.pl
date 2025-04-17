@@ -123,6 +123,7 @@ my $TESTCASES="all";
 
 my $libtool;
 my $repeat = 0;
+my $retry = 0;
 
 my $start;          # time at which testing started
 my $args;           # command-line arguments
@@ -2353,6 +2354,10 @@ while(@ARGV) {
         # Repeat-run the given tests this many times
         $repeat = $1;
     }
+    elsif($ARGV[0] =~ /--retry=(\d+)/) {
+        # Number of attempts for the whole test run to retry failed tests
+        $retry = $1;
+    }
     elsif($ARGV[0] =~ /--seed=(\d+)/) {
         # Set a fixed random seed (used for -R and --shallow)
         $randseed = $1;
@@ -2461,6 +2466,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -r       run time statistics
   -rf      full run time statistics
   --repeat=[num] run the given tests this many times
+  --retry=[num] number of attempts for the whole test run to retry failed tests
   -s       short output
   --seed=[num] set the random seed to a fixed number
   --shallow=[num] randomly makes the torture tests "thinner"
@@ -2875,9 +2881,12 @@ sub displaylogs {
 
 my $failed;
 my $failedign;
+my $failedre;
 my $ok=0;
 my $ign=0;
 my $total=0;
+my $executed=0;
+my $retry_done=0;
 my $lasttest=0;
 my @at = split(" ", $TESTCASES);
 my $count=0;
@@ -2925,6 +2934,16 @@ createrunners($numrunners);
 
 # run through each candidate test and execute it
 my $runner_wait_cnt = 0;
+
+# number of retry attempts for the whole test run
+my $retry_left;
+if($torture) {
+    $retry_left = 0;  # No use of retrying torture tests
+}
+else {
+    $retry_left = $retry;
+}
+
 while () {
     # check the abort flag
     if($globalabort) {
@@ -3014,6 +3033,7 @@ while () {
                     }
 
                     $total++; # number of tests we've run
+                    $executed++;
 
                     if($error>0) {
                         if($error==2) {
@@ -3021,7 +3041,17 @@ while () {
                             $failedign .= "$testnum ";
                         }
                         else {
-                            $failed.= "$testnum ";
+                            # make another attempt to counteract flaky failures
+                            if($retry_left > 0) {
+                                $retry_left--;
+                                $retry_done++;
+                                $total--;
+                                push(@runtests, $testnum);
+                                $failedre .= "$testnum ";
+                            }
+                            else {
+                                $failed.= "$testnum ";
+                            }
                         }
                         if($postmortem) {
                             # display all files in $LOGDIR/ in a nice way
@@ -3176,7 +3206,15 @@ sub testnumdetails {
     }
 }
 
-if($total) {
+if($executed) {
+    if($failedre) {
+        my $sorted = numsortwords($failedre);
+        logmsg "::group::Failed Retried Test details\n";
+        testnumdetails("FAIL-RETRIED", $sorted);
+        logmsg "RETRIED: failed tests: $sorted\n";
+        logmsg "::endgroup::\n";
+    }
+
     if($passedign) {
         my $sorted = numsortwords($passedign);
         logmsg "::group::Passed Ignored Test details\n";
