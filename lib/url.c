@@ -3951,6 +3951,9 @@ void Curl_data_priority_clear_state(struct Curl_easy *data)
   memset(&data->state.priority, 0, sizeof(data->state.priority));
 }
 
+#endif /* defined(USE_HTTP2) || defined(USE_HTTP3) */
+
+
 CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
                             void *meta_data, Curl_meta_dtor *meta_dtor)
 {
@@ -3970,4 +3973,3 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
   return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
 }
 
-#endif /* defined(USE_HTTP2) || defined(USE_HTTP3) */
