@@ -3972,4 +3972,3 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
 {
   return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
 }
-
