@@ -1295,7 +1295,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       if(dns) {
         /* Now add and HTTPSRR information if we have */
 #ifdef USE_HTTPSRR
-        if(de.numhttps_rrs > 0 && result == CURLE_OK && *dnsp) {
+        if(de.numhttps_rrs > 0 && result == CURLE_OK) {
           struct Curl_https_rrinfo *hrr = NULL;
           result = doh_resp_decode_httpsrr(data, de.https_rrs->val,
                                            de.https_rrs->len, &hrr);
