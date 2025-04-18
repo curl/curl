@@ -601,6 +601,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 #endif
   Curl_safefree(conn->destination);
   Curl_uint_spbset_destroy(&conn->xfers_attached);
+  Curl_hash_destroy(&conn->meta_hash);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -3322,6 +3323,15 @@ static void reuse_conn(struct Curl_easy *data,
   Curl_conn_free(data, temp);
 }
 
+static void conn_meta_freeentry(void *p)
+{
+  (void)p;
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
+}
+
 /**
  * create_conn() sets up a new connectdata struct, or reuses an already
  * existing one, and resolves hostname.
@@ -3377,6 +3387,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   *in_connect = conn;
 
   /* Do the unfailable inits first, before checks that may early return */
+  Curl_hash_init(&conn->meta_hash, 23,
+               Curl_hash_str, Curl_str_key_compare, conn_meta_freeentry);
+
   /* GSSAPI related inits */
   Curl_sec_conn_init(conn);
 
@@ -3944,3 +3957,23 @@ void Curl_data_priority_clear_state(struct Curl_easy *data)
 }
 
 #endif /* defined(USE_HTTP2) || defined(USE_HTTP3) */
+
+
+CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
+                            void *meta_data, Curl_meta_dtor *meta_dtor)
+{
+  if(!Curl_hash_add2(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
+                     meta_data, meta_dtor)) {
+    meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+  }
+  return CURLE_OK;
+}
+void Curl_conn_meta_remove(struct connectdata *conn, const char *key)
+{
+  Curl_hash_delete(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+}
+
+void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
+{
+  return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+}

@@ -29,7 +29,7 @@
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
 #include "bufq.h"
-#include "hash_offt.h"
+#include "uint-hash.h"
 #include "http1.h"
 #include "http2.h"
 #include "http.h"
