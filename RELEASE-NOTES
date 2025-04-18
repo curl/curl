@@ -4,22 +4,28 @@ curl and libcurl 8.13.1
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3394
+ Contributors:                 3395
 
 This release includes the following changes:
 
  o mqtt: send ping at upkeep interval [49]
  o schannel: handle pkcs12 client certificates containing CA certificates [58]
+ o websocket: add option to disable auto-pong reply [52]
 
 This release includes the following bugfixes:
 
  o asyn resolver code improvements [50]
  o async-threaded resolver: use ref counter [10]
+ o async: DoH improvements [99]
  o build: check required rustls-ffi version [46]
  o certs: drop unused `default_bits` from `.prm` files [45]
+ o cf-https-connect: use the passed in dns struct pointer [64]
  o cmake/FindNGTCP2: simplify multi-pkg-config detection [27]
  o cmake: append picky warnings to `CMAKE_REQUIRED_FLAGS` as string [68]
+ o cmake: do not install `mk-ca-bundle` script and manpage [101]
+ o cmake: enable `-Wall` for MSVC when `PICKY_COMPILER=ON` [100]
  o cmake: fix nghttp3 static linking with `USE_OPENSSL_QUIC=ON` [79]
+ o cmake: fix shell completion install when just one flavor is enabled [73]
  o cmake: merge `CURL_WERROR` logic into `PickyWarnings.cmake` [66]
  o cmake: prefer `COMPILE_OPTIONS` over `CMAKE_C_FLAGS` for custom C options [72]
  o cmake: quotes, whitespace, use `VERSION_GREATER_EQUAL` [33]
@@ -42,6 +48,8 @@ This release includes the following bugfixes:
  o docs/libcurl: make examples build with picky compiler options [84]
  o docs: add missing return statement in examples [85]
  o docs: fix incorrect shell substitution in docker run example command [51]
+ o doh: httpsrr fix [71]
+ o doh: reduce the DNS request buffer size [70]
  o easy_reset: fix dohfor_mid member [63]
  o eventfd: fix feature guards [24]
  o genserv.pl: fail with a message if `openssl` is missing or failing [14]
@@ -65,15 +73,20 @@ This release includes the following bugfixes:
  o libtest/first: stop defining MEMDEBUG_NODEFINES [32]
  o make: clean tests better [60]
  o mk-ca-bundle.pl: follow redirects [53]
+ o multi: do transfer book keeping using mid [91]
  o openssl-quic: fix shutdown when stream not open [11]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
+ o pytest: make test_07_22 more lenient to exit codes [90]
+ o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
  o rand: update comment on Curl_rand_bytes weak random [35]
+ o runtests: recognize lowercase `windows` in `curl -V` [77]
  o runtests: remove server verification after start [89]
  o runtests: split `SSH_PWD` into `SCP_PWD` and `SFTP_PWD`, and more [75]
  o rustls: make max size of cert and key reasonable [41]
  o scripts: completion.pl: sort the completion file for all shells [9]
+ o scripts: drop unused import, formatting [95]
  o scripts: fix --opts-dir help in completion.pl
  o socket: use accept4 when available [7]
  o socketpair: support pipe2 where available [56]
@@ -82,6 +95,7 @@ This release includes the following bugfixes:
  o tests/ech_tests.sh: sync shebang with rest of bash scripts [42]
  o tests/README.md: document --test-duphandle [8]
  o tests/README.md: list the openssl tool among the prerequisites [12]
+ o tests/server/dnsd: basic DNS server for test suite [92]
  o tests/server: fix typo in comment
  o tests/serverhelp: remove last remnants of http-pipe server [1]
  o tests/tunit: make a separate directory for tool-based unit tests [54]
@@ -97,6 +111,7 @@ This release includes the following bugfixes:
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
  o VERSIONS: list all past releases [22]
+ o vquic: ngtcp2 + openssl support [96]
  o vtls: fix build with ssl but without http [18]
  o winbuild: add the deprecation warning to the README [29]
  o wolfssl: fix to enable ALPN when available [67]
@@ -120,17 +135,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andrew Kirillov, Andy Pan, Bo Anderson, bruce.yoon,
-  Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
-  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
-  Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
+  Abhinav Singhal, Andrew Kirillov, Andy Pan, Bo Anderson, Brian Chrzanowski,
+  bruce.yoon, Calvin Ruocco, Carlos Henrique Lima Melara, Christian Schmitz,
+  Cole Helbling, Dagobert Michelsen, Dan Fandrich, Daniel Engberg,
+  Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
   epicmkirzinger on github, Fujii Hironori, Graham Christensen, Harry Sintonen,
   Jake Yuesong Li, Jean-Christophe Amiel, Joel Depooter, Johan Eliasson,
   Jonathan Rosa, Kai Pastor, Marius Kleidl, mschroeder-fzj on github,
   Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont, Ray Satiro,
-  renovate[bot], Sören Tempel, Stefan Eissing, Tomas Volf, Viktor Szakats,
-  x1sc0 on github, Yedaya Katsman
-  (39 contributors)
+  renovate[bot], Sören Tempel, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tomas Volf, Viktor Szakats, x1sc0 on github, Yedaya Katsman
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -185,6 +200,7 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=16975
  [50] = https://curl.se/bug/?i=16963
  [51] = https://curl.se/bug/?i=16990
+ [52] = https://curl.se/bug/?i=16744
  [53] = https://curl.se/bug/?i=16995
  [54] = https://curl.se/bug/?i=16983
  [55] = https://curl.se/bug/?i=16742
@@ -193,16 +209,22 @@ References to bug reports and discussions on issues:
  [58] = https://curl.se/bug/?i=16825
  [59] = https://curl.se/bug/?i=17037
  [60] = https://curl.se/bug/?i=16986
+ [61] = https://curl.se/bug/?i=17057
  [62] = https://curl.se/bug/?i=17036
  [63] = https://curl.se/bug/?i=17052
+ [64] = https://curl.se/bug/?i=17092
  [65] = https://curl.se/bug/?i=17061
  [66] = https://curl.se/bug/?i=17062
  [67] = https://curl.se/bug/?i=17056
  [68] = https://curl.se/bug/?i=17055
  [69] = https://curl.se/bug/?i=17054
+ [70] = https://curl.se/bug/?i=17087
+ [71] = https://curl.se/bug/?i=17099
  [72] = https://curl.se/bug/?i=17047
+ [73] = https://curl.se/bug/?i=16946
  [74] = https://curl.se/bug/?i=17042
  [75] = https://curl.se/bug/?i=17041
+ [77] = https://curl.se/bug/?i=17088
  [78] = https://curl.se/bug/?i=17039
  [79] = https://curl.se/bug/?i=17010
  [80] = https://curl.se/bug/?i=17020
@@ -214,3 +236,11 @@ References to bug reports and discussions on issues:
  [87] = https://curl.se/bug/?i=17014
  [88] = https://curl.se/bug/?i=17012
  [89] = https://curl.se/bug/?i=17005
+ [90] = https://curl.se/bug/?i=17083
+ [91] = https://curl.se/bug/?i=16761
+ [92] = https://curl.se/bug/?i=17015
+ [95] = https://curl.se/bug/?i=17077
+ [96] = https://curl.se/bug/?i=17027
+ [99] = https://curl.se/bug/?i=16384
+ [100] = https://curl.se/bug/?i=17050
+ [101] = https://curl.se/bug/?i=17035
