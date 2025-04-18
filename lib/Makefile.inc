@@ -164,7 +164,6 @@ LIB_CFILES =         \
   getinfo.c          \
   gopher.c           \
   hash.c             \
-  hash_offt.c        \
   headers.c          \
   hmac.c             \
   hostip.c           \
@@ -237,6 +236,7 @@ LIB_CFILES =         \
   timeval.c          \
   transfer.c         \
   uint-bset.c        \
+  uint-hash.c        \
   uint-spbset.c      \
   uint-table.c       \
   url.c              \
@@ -314,7 +314,6 @@ LIB_HFILES =         \
   getinfo.h          \
   gopher.h           \
   hash.h             \
-  hash_offt.h        \
   headers.h          \
   hostip.h           \
   hsts.h             \
@@ -380,6 +379,7 @@ LIB_HFILES =         \
   timeval.h          \
   transfer.h         \
   uint-bset.h        \
+  uint-hash.h        \
   uint-spbset.h      \
   uint-table.h       \
   url.h              \

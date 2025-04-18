@@ -28,7 +28,7 @@
 
 #include "../urldata.h"
 #include "../hash.h"
-#include "../hash_offt.h"
+#include "../uint-hash.h"
 #include "../timeval.h"
 #include "../multiif.h"
 #include "../sendf.h"

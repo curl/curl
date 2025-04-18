@@ -29,7 +29,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "../bufq.h"
-#include "../hash_offt.h"
+#include "../uint-hash.h"
 #include "../urldata.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"
