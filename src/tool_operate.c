@@ -1263,6 +1263,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   if(config->ssl_ec_curves)
     my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
 
+  if(config->ssl_signature_algorithms)
+    my_setopt_str(curl, CURLOPT_SSL_SIGNATURE_ALGORITHMS,
+                  config->ssl_signature_algorithms);
+
   if(config->writeout)
     my_setopt_long(curl, CURLOPT_CERTINFO, 1);
 

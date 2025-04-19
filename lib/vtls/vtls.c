@@ -215,6 +215,7 @@ match_ssl_primary_config(struct Curl_easy *data,
      strcasecompare(c1->cipher_list, c2->cipher_list) &&
      strcasecompare(c1->cipher_list13, c2->cipher_list13) &&
      strcasecompare(c1->curves, c2->curves) &&
+     strcasecompare(c1->signature_algorithms, c2->signature_algorithms) &&
      strcasecompare(c1->CRLfile, c2->CRLfile) &&
      strcasecompare(c1->pinned_key, c2->pinned_key))
     return TRUE;
@@ -259,6 +260,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
   CLONE_STRING(curves);
+  CLONE_STRING(signature_algorithms);
   CLONE_STRING(CRLfile);
 #ifdef USE_TLS_SRP
   CLONE_STRING(username);
@@ -281,6 +283,7 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->ca_info_blob);
   Curl_safefree(sslc->issuercert_blob);
   Curl_safefree(sslc->curves);
+  Curl_safefree(sslc->signature_algorithms);
   Curl_safefree(sslc->CRLfile);
 #ifdef USE_TLS_SRP
   Curl_safefree(sslc->username);
@@ -299,6 +302,8 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
     data->set.str[STRING_SSL_CIPHER_LIST];
   data->set.ssl.primary.cipher_list13 =
     data->set.str[STRING_SSL_CIPHER13_LIST];
+  data->set.ssl.primary.signature_algorithms =
+    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
   data->set.ssl.primary.pinned_key =
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT];
