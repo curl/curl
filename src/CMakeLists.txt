@@ -99,7 +99,7 @@ add_library(
   ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
 )
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
-target_link_libraries(curltool PRIVATE ${CURL_LIBS})
+target_link_libraries(curltool PUBLIC ${CURL_LIBS})
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)

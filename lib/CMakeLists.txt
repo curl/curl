@@ -38,10 +38,6 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_BINARY_DIR}/lib")  # for "curl_config.h"
 
-if(USE_ARES)
-  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
-endif()
-
 if(CURL_BUILD_TESTING)
   add_library(
     curlu  # special libcurlu library just for unittests
@@ -50,7 +46,7 @@ if(CURL_BUILD_TESTING)
     ${HHEADERS} ${CSOURCES}
   )
   target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
-  target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+  target_link_libraries(curlu PUBLIC ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
   set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
@@ -151,8 +147,7 @@ if(BUILD_STATIC_LIBS)
   set_target_properties(${LIB_STATIC} PROPERTIES
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     SUFFIX "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB"
-    INTERFACE_LINK_DIRECTORIES "${CURL_LIBDIRS}")
+    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
   if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
