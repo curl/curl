@@ -1419,7 +1419,7 @@ CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
   return CURLE_OK;
 }
 
-void Curl_meta_clear(struct Curl_easy *data, const char *key)
+void Curl_meta_remove(struct Curl_easy *data, const char *key)
 {
   Curl_hash_delete(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
 }

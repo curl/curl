@@ -54,9 +54,17 @@ typedef void Curl_meta_dtor(void *key, size_t key_len, void *meta_data);
  * Takes ownership of `meta_data` and destroys it when the call fails. */
 CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
                        void *meta_data, Curl_meta_dtor *meta_dtor);
-void Curl_meta_clear(struct Curl_easy *data, const char *key);
+void Curl_meta_remove(struct Curl_easy *data, const char *key);
 void *Curl_meta_get(struct Curl_easy *data, const char *key);
 void Curl_meta_reset(struct Curl_easy *data);
+
+/* Set connection meta data for the key. Any existing entry for that
+ * key will be destroyed.
+ * Takes ownership of `meta_data` and destroys it when the call fails. */
+CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
+                            void *meta_data, Curl_meta_dtor *meta_dtor);
+void Curl_conn_meta_remove(struct connectdata *conn, const char *key);
+void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
 
 /* Get protocol handler for a URI scheme
  * @param scheme URI scheme, case-insensitive

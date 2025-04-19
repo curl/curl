@@ -152,7 +152,6 @@ typedef unsigned int curl_prot_t;
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
-#include "hash_offt.h"
 #include "splay.h"
 #include "dynbuf.h"
 #include "dynhds.h"
@@ -749,6 +748,12 @@ struct connectdata {
   curl_off_t connection_id; /* Contains a unique number to make it easier to
                                track the connections in the log output */
   char *destination; /* string carrying normalized hostname+port+scope */
+
+  /* `meta_hash` is a general key-value store for implementations
+   * with the lifetime of the connection.
+   * Elements need to be added with their own destructor to be invoked when
+   * the connection is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash meta_hash;
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in

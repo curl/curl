@@ -26,206 +26,11 @@
 
 #include <curl/curl.h>
 
-#include "hash_offt.h"
+#include "uint-hash.h"
 #include "curl_memory.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-/* random patterns for API verification */
-#ifdef DEBUGBUILD
-#define CURL_HASHOFFTINIT 0x7117e781
-#endif
-
-static size_t hash_offt_hash(curl_off_t id, size_t slots)
-{
-  return (size_t)((id >= 0) ? (id % slots) : (-id % slots));
-}
-
-struct Curl_hash_offt_entry {
-  curl_off_t id;
-  struct Curl_hash_offt_entry *next;
-  void   *value;
-};
-
-void Curl_hash_offt_init(struct Curl_hash_offt *h,
-                         size_t slots,
-                         Curl_hash_offt_dtor *dtor)
-{
-  DEBUGASSERT(h);
-  DEBUGASSERT(slots);
-
-  h->table = NULL;
-  h->dtor = dtor;
-  h->size = 0;
-  h->slots = slots;
-#ifdef DEBUGBUILD
-  h->init = CURL_HASHOFFTINIT;
-#endif
-}
-
-static struct Curl_hash_offt_entry *
-hash_offt_mk_entry(curl_off_t id, void *value)
-{
-  struct Curl_hash_offt_entry *e;
-
-  /* allocate the struct for the hash entry */
-  e = malloc(sizeof(*e));
-  if(e) {
-    e->id = id;
-    e->next = NULL;
-    e->value = value;
-  }
-  return e;
-}
-
-static void hash_offt_entry_clear(struct Curl_hash_offt *h,
-                                  struct Curl_hash_offt_entry *e)
-{
-  DEBUGASSERT(h);
-  DEBUGASSERT(e);
-  if(e->value) {
-    if(h->dtor)
-      h->dtor(e->id, e->value);
-    e->value = NULL;
-  }
-}
-
-static void hash_offt_entry_destroy(struct Curl_hash_offt *h,
-                                    struct Curl_hash_offt_entry *e)
-{
-  hash_offt_entry_clear(h, e);
-  free(e);
-}
-
-static void hash_offt_entry_unlink(struct Curl_hash_offt *h,
-                                   struct Curl_hash_offt_entry **he_anchor,
-                                   struct Curl_hash_offt_entry *he)
-{
-  *he_anchor = he->next;
-  --h->size;
-}
-
-static void hash_offtr_elem_link(struct Curl_hash_offt *h,
-                                 struct Curl_hash_offt_entry **he_anchor,
-                                 struct Curl_hash_offt_entry *he)
-{
-  he->next = *he_anchor;
-  *he_anchor = he;
-  ++h->size;
-}
-
-#define CURL_HASH_OFFT_SLOT(h,id)  h->table[hash_offt_hash(id, h->slots)]
-#define CURL_HASH_OFFT_SLOT_ADDR(h,id) &CURL_HASH_OFFT_SLOT(h,id)
-
-bool Curl_hash_offt_set(struct Curl_hash_offt *h, curl_off_t id, void *value)
-{
-  struct Curl_hash_offt_entry *he, **slot;
-
-  DEBUGASSERT(h);
-  DEBUGASSERT(h->slots);
-  DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-  if(!h->table) {
-    h->table = calloc(h->slots, sizeof(*he));
-    if(!h->table)
-      return FALSE; /* OOM */
-  }
-
-  slot = CURL_HASH_OFFT_SLOT_ADDR(h, id);
-  for(he = *slot; he; he = he->next) {
-    if(he->id == id) {
-      /* existing key entry, overwrite by clearing old pointer */
-      hash_offt_entry_clear(h, he);
-      he->value = value;
-      return TRUE;
-    }
-  }
-
-  he = hash_offt_mk_entry(id, value);
-  if(!he)
-    return FALSE; /* OOM */
-
-  hash_offtr_elem_link(h, slot, he);
-  return TRUE;
-}
-
-bool Curl_hash_offt_remove(struct Curl_hash_offt *h, curl_off_t id)
-{
-  DEBUGASSERT(h);
-  DEBUGASSERT(h->slots);
-  DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-  if(h->table) {
-    struct Curl_hash_offt_entry *he, **he_anchor;
-
-    he_anchor = CURL_HASH_OFFT_SLOT_ADDR(h, id);
-    while(*he_anchor) {
-      he = *he_anchor;
-      if(id == he->id) {
-        hash_offt_entry_unlink(h, he_anchor, he);
-        hash_offt_entry_destroy(h, he);
-        return TRUE;
-      }
-      he_anchor = &he->next;
-    }
-  }
-  return FALSE;
-}
-
-void *Curl_hash_offt_get(struct Curl_hash_offt *h, curl_off_t id)
-{
-  DEBUGASSERT(h);
-  DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-  if(h->table) {
-    struct Curl_hash_offt_entry *he;
-    DEBUGASSERT(h->slots);
-    he = CURL_HASH_OFFT_SLOT(h, id);
-    while(he) {
-      if(id == he->id) {
-        return he->value;
-      }
-      he = he->next;
-    }
-  }
-  return NULL;
-}
-
-void Curl_hash_offt_clear(struct Curl_hash_offt *h)
-{
-  if(h && h->table) {
-    struct Curl_hash_offt_entry *he, **he_anchor;
-    size_t i;
-    DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-    for(i = 0; i < h->slots; ++i) {
-      he_anchor = &h->table[i];
-      while(*he_anchor) {
-        he = *he_anchor;
-        hash_offt_entry_unlink(h, he_anchor, he);
-        hash_offt_entry_destroy(h, he);
-      }
-    }
-  }
-}
-
-void
-Curl_hash_offt_destroy(struct Curl_hash_offt *h)
-{
-  DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-  if(h->table) {
-    Curl_hash_offt_clear(h);
-    Curl_safefree(h->table);
-  }
-  DEBUGASSERT(h->size == 0);
-  h->slots = 0;
-}
-
-size_t Curl_hash_offt_count(struct Curl_hash_offt *h)
-{
-  DEBUGASSERT(h->init == CURL_HASHOFFTINIT);
-  return h->size;
-}
-
-/* FOR NOW: basically a duplicate of Curl_hash_offt, BUT we hope to
- * eliminate the offt variant in the near future. */
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -311,7 +116,7 @@ static void uint_hash_elem_link(struct uint_hash *h,
 }
 
 #define CURL_UINT_HASH_SLOT(h,id)  h->table[uint_hash_hash(id, h->slots)]
-#define CURL_UINT_HASH_SLOT_ADDR(h,id) &CURL_HASH_OFFT_SLOT(h,id)
+#define CURL_UINT_HASH_SLOT_ADDR(h,id) &CURL_UINT_HASH_SLOT(h,id)
 
 bool Curl_uint_hash_set(struct uint_hash *h, unsigned int id, void *value)
 {
@@ -401,8 +206,12 @@ static void uint_hash_clear(struct uint_hash *h)
   }
 }
 
-void
-Curl_uint_hash_destroy(struct uint_hash *h)
+void Curl_uint_hash_clear(struct uint_hash *h)
+{
+  uint_hash_clear(h);
+}
+
+void Curl_uint_hash_destroy(struct uint_hash *h)
 {
   DEBUGASSERT(h->init == CURL_UINTHASHINIT);
   if(h->table) {

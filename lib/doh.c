@@ -249,7 +249,7 @@ static void doh_probe_done(struct Curl_easy *data,
                                Curl_dyn_len(&doh_req->resp_body));
         Curl_dyn_free(&doh_req->resp_body);
       }
-      Curl_meta_clear(doh, CURL_EZM_DOH_PROBE);
+      Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
     }
 
     if(result)

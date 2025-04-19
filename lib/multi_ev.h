@@ -25,17 +25,17 @@
  ***************************************************************************/
 
 #include "hash.h"
-#include "hash_offt.h"
 
 struct Curl_easy;
 struct Curl_multi;
 struct easy_pollset;
 struct uint_bset;
 
+/* meta key for event pollset at easy handle or connection */
+#define CURL_META_MEV_POLLSET   "meta:mev:ps"
+
 struct curl_multi_ev {
   struct Curl_hash sh_entries;
-  struct uint_hash xfer_pollsets;
-  struct Curl_hash_offt conn_pollsets;
 };
 
 /* Setup/teardown of multi event book-keeping. */

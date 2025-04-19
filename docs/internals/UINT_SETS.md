@@ -126,6 +126,3 @@ Iterating a sparse bitset works the same as for bitset and table.
 At last, there are places in libcurl such as the HTTP/2 and HTTP/3 protocol implementations that need
 to store their own data related to a transfer. `uint_hash` allows then to associate an unsigned int,
 e.g. the transfer's `mid`, to their own data.
-
-This is just a variation of `hash_offt` that can associate data with a `connection_id`. Which
-is a specialization of the generic `Curl_hash`.

@@ -47,7 +47,7 @@
 #endif
 
 #include "../urldata.h"
-#include "../hash_offt.h"
+#include "../uint-hash.h"
 #include "../sendf.h"
 #include "../strdup.h"
 #include "../rand.h"
