@@ -90,12 +90,12 @@ static int recv_pong(CURL *curl, const char *expected_payload)
       printf("Error: timeout.\n");
       break;
     }
-  } while (result == CURLE_AGAIN);
+  } while(result == CURLE_AGAIN);
 
   if(result != CURLE_OK) {
-      fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
-              (unsigned int)result, (unsigned int)rlen);
-      return (int)result;
+    fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
+            (unsigned int)result, (unsigned int)rlen);
+    return (int)result;
   }
 
   if(meta->flags & CURLWS_PONG) {
