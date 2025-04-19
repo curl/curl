@@ -77,6 +77,13 @@ if(BUILD_STATIC_CURL)
   set(CURLX_CFILES ${CURLTOOL_LIBCURL_CFILES})
 endif()
 
+set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
+  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
+  # This is needed as tool_hugehelp.c is generated in the binary dir
+  "${PROJECT_SOURCE_DIR}/src"  # for "tool_hugehelp.h"
+)
+
 add_executable(
   ${EXE_NAME}
   ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen}
@@ -108,13 +115,6 @@ endif()
 source_group("curlX source files" FILES ${CURLX_CFILES})
 source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
 source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
-
-include_directories(
-  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-  # This is needed as tool_hugehelp.c is generated in the binary dir
-  "${PROJECT_SOURCE_DIR}/src"  # for "tool_hugehelp.h"
-)
 
 # Build curl executable
 target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})

@@ -612,7 +612,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
     /* get the time stamp to use to figure out how long poll takes */
     before = Curl_now();
-p
+
     if(numfds) {
       /* wait for activity or timeout */
 #if DEBUG_EV_POLL
