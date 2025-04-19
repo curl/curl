@@ -45,6 +45,10 @@ Since 7.60.0 libcurl initializes the contents of the error buffer to an empty
 string before performing the transfer. For earlier versions if an error code
 was returned but there was no error detail then the buffer was untouched.
 
+Do not attempt to set the contents of the buffer yourself, including in any
+callbacks you write that may be called by libcurl. The library may overwrite
+the buffer after your callback returns.
+
 Consider CURLOPT_VERBOSE(3) and CURLOPT_DEBUGFUNCTION(3) to better debug and
 trace why errors happen.
 
