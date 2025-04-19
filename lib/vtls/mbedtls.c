@@ -272,8 +272,13 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   int ver_max = MBEDTLS_SSL_MINOR_VERSION_3; /* TLS 1.2 */
 #else
   /* mbedTLS 3.2.0 (2022) introduced new methods for setting TLS version */
+#if MBEDTLS_VERSION_NUMBER < 0x03060000
   mbedtls_ssl_protocol_version ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
   mbedtls_ssl_protocol_version ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
+#else
+  mbedtls_ssl_protocol_version ver_min = MBEDTLS_SSL_VERSION_TLS1_3;
+  mbedtls_ssl_protocol_version ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
+#endif
 #endif
 
   switch(conn_config->version) {
