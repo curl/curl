@@ -5203,7 +5203,7 @@ if test "x$CURL_DISABLE_NTLM" != "x1"; then
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
-      -o "x$WOLFSSL_NTLM" = "x1"; then
+      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1"; then
     use_curl_ntlm_core=yes
   fi
 
@@ -5247,7 +5247,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
         -o "x$MBEDTLS_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
       AC_MSG_RESULT([yes])
-    elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$WOLFSSL_BIO" = "x1"; then
+    elif test "x$WOLFSSL_ENABLED" = "x1" -a "x$HAVE_WOLFSSL_BIO_NEW" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPS-proxy"
       AC_MSG_RESULT([yes])
     else

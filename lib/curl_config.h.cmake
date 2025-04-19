@@ -703,14 +703,20 @@ ${SIZEOF_TIME_T_CODE}
 /* if wolfSSL is enabled */
 #cmakedefine USE_WOLFSSL 1
 
+/* if wolfSSL has the wolfSSL_get_peer_certificate function. */
+#cmakedefine HAVE_WOLFSSL_GET_PEER_CERTIFICATE 1
+
+/* if wolfSSL has the wolfSSL_UseALPN function. */
+#cmakedefine HAVE_WOLFSSL_USEALPN 1
+
 /* if wolfSSL has the wolfSSL_DES_ecb_encrypt function. */
 #cmakedefine HAVE_WOLFSSL_DES_ECB_ENCRYPT 1
 
 /* if wolfSSL has the wolfSSL_BIO_new function. */
-#cmakedefine HAVE_WOLFSSL_BIO 1
+#cmakedefine HAVE_WOLFSSL_BIO_NEW 1
 
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
-#cmakedefine HAVE_WOLFSSL_FULL_BIO 1
+#cmakedefine HAVE_WOLFSSL_BIO_SET_SHUTDOWN 1
 
 /* if libssh is in use */
 #cmakedefine USE_LIBSSH 1
