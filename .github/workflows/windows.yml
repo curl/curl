@@ -227,10 +227,11 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          update: ${{ matrix.sys == 'clangarm64' }}  # delete this line on next msys2/setup-msys2 bump
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
-            ${{ matrix.sys != 'clangarm64' && format('mingw-w64-{0}-diffutils', matrix.env) || '' }}
+            mingw-w64-${{ matrix.env }}-diffutils
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
