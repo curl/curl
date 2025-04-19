@@ -19,7 +19,6 @@ caIssuers;URI.0         = http://test.curl.se/ca/EdelCurlRoot.cer
 URI.0                   = http://test.curl.se/ca/EdelCurlRoot.crl
 
 [ req ]
-default_bits            = 2048
 distinguished_name      = req_DN
 default_md              = sha256
 string_mask             = utf8only

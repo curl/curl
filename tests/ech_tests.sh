@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -66,7 +66,7 @@ declare -A ech_targets=(
     [draft-13.esni.defo.ie:11413]=""
     [draft-13.esni.defo.ie:12413]=""
     [draft-13.esni.defo.ie:12414]=""
-    [crypto.cloudflare.com]="cdn-cgi/trace"
+    [cloudflare-ech.com]="cdn-cgi/trace"
     [tls-ech.dev]=""
     # this one's gone away for now (possibly temporarily)
     # [epochbelt.com]=""
@@ -361,7 +361,7 @@ do
     then
         case $targ in
             "draft-13.esni.defo.ie:8414" | "tls-ech.dev" | \
-            "crypto.cloudflare.com" | "epochbelt.com")
+            "cloudflare-ech.com" | "epochbelt.com")
                 echo "Skipping $targ 'cause wolf"; continue;;
             *)
                 ;;
@@ -413,7 +413,7 @@ then
             echo "Skipping $targ as ports != 443 seem blocked"
             continue
         fi
-        if [[ "$host" == "crypto.cloudflare.com" ]]
+        if [[ "$host" == "cloudflare-ech.com" ]]
         then
             echo "Skipping $host as they've blocked PN override"
             continue

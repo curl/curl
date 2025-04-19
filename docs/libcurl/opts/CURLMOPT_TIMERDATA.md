@@ -47,15 +47,16 @@ struct priv {
 
 static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
 {
- struct priv *mydata = clientp;
- printf("our ptr: %p\n", mydata->custom);
+  struct priv *mydata = clientp;
+  printf("our ptr: %p\n", mydata->custom);
 
- if(timeout_ms) {
-   /* this is the new single timeout to wait for */
- }
- else {
-   /* delete the timeout, nothing to wait for now */
- }
+  if(timeout_ms) {
+    /* this is the new single timeout to wait for */
+  }
+  else {
+    /* delete the timeout, nothing to wait for now */
+  }
+  return 0;
 }
 
 int main(void)

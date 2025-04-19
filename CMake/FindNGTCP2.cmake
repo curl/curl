@@ -30,6 +30,7 @@
 # - BoringSSL:  Use `libngtcp2_crypto_boringssl`. (choose this for AWS-LC)
 # - wolfSSL:    Use `libngtcp2_crypto_wolfssl`.
 # - GnuTLS:     Use `libngtcp2_crypto_gnutls`.
+# - ossl:       Use `libngtcp2_crypto_ossl`.
 #
 # Input variables:
 #
@@ -49,7 +50,7 @@
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")
   foreach(_component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(_component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS)")
+    if(_component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS|ossl)")
       if(_ngtcp2_crypto_backend)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()

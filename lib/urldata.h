@@ -95,13 +95,6 @@ typedef unsigned int curl_prot_t;
    in the API */
 #define CURLPROTO_MASK   (0x3ffffff)
 
-#define DICT_MATCH "/MATCH:"
-#define DICT_MATCH2 "/M:"
-#define DICT_MATCH3 "/FIND:"
-#define DICT_DEFINE "/DEFINE:"
-#define DICT_DEFINE2 "/D:"
-#define DICT_DEFINE3 "/LOOKUP:"
-
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
@@ -563,21 +556,6 @@ struct hostname {
 #define CURL_WANT_RECV(data) \
   (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
 
-#if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
-#define USE_CURL_ASYNC
-struct Curl_async {
-  struct Curl_dns_entry *dns;
-#ifdef CURLRES_ASYNCH
-  struct thread_data thdata;
-  void *resolver; /* resolver state, if it is used in the URL state -
-                     ares_channel e.g. */
-#endif
-  int port;
-  BIT(done);  /* set TRUE when the lookup is complete */
-};
-
-#endif
-
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
@@ -764,7 +742,8 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) Curl_llist_count(&(c)->easyq)
+#define CONN_INUSE(c) (!Curl_uint_spbset_empty(&(c)->xfers_attached))
+#define CONN_ATTACHED(c) Curl_uint_spbset_count(&(c)->xfers_attached)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -851,7 +830,7 @@ struct connectdata {
   struct kerberos5data krb5;  /* variables into the structure definition, */
 #endif                        /* however, some of them are ftp specific. */
 
-  struct Curl_llist easyq;    /* List of easy handles using this connection */
+  struct uint_spbset xfers_attached; /* mids of attached transfers */
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
@@ -1519,10 +1498,6 @@ enum dupblob {
   BLOB_LAST
 };
 
-/* callback that gets called when this easy handle is completed within a multi
-   handle. Only used for internally created transfers, like for example
-   DoH. */
-typedef int (*multidone_func)(struct Curl_easy *easy, CURLcode result);
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
@@ -1678,10 +1653,6 @@ struct UserDefined {
                                                   before resolver start */
   void *resolver_start_client; /* pointer to pass to resolver start callback */
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
-  multidone_func fmultidone;
-#ifndef CURL_DISABLE_DOH
-  curl_off_t dohfor_mid; /* this is a DoH request for that transfer */
-#endif
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
   void *trailer_data; /* pointer to pass to trailer data callback */
@@ -1831,6 +1802,7 @@ struct UserDefined {
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
+  BIT(ws_no_auto_pong);
 #endif
 };
 
@@ -1839,6 +1811,12 @@ struct UserDefined {
 #else
 #define IS_MIME_POST(a) FALSE
 #endif
+
+/* callback that gets called when a sub easy (data->master_mid set) is
+   DONE. Called on the master easy. */
+typedef void multi_sub_xfer_done_cb(struct Curl_easy *master_easy,
+                                    struct Curl_easy *sub_easy,
+                                    CURLcode result);
 
 /*
  * The 'connectdata' struct MUST have all the connection oriented stuff as we
@@ -1864,11 +1842,11 @@ struct Curl_easy {
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,
    * a unique identifier inside this one multi instance. */
-  curl_off_t mid;
+  unsigned int mid;
+  unsigned int master_mid; /* if set, this transfer belongs to a master */
+  multi_sub_xfer_done_cb *sub_xfer_done;
 
   struct connectdata *conn;
-  struct Curl_llist_node multi_queue; /* for multihandle list management */
-  struct Curl_llist_node conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
@@ -1882,6 +1860,13 @@ struct Curl_easy {
                                     struct to which this "belongs" when used
                                     by the easy interface */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
+
+  /* `meta_hash` is a general key-value store for implementations
+   * with the lifetime of the easy handle.
+   * Elements need to be added with their own destructor to be invoked when
+   * the easy handle is cleaned up (see Curl_hash_add2()).*/
+  struct Curl_hash meta_hash;
+
 #ifdef USE_LIBPSL
   struct PslCache *psl;        /* The associated PSL cache. */
 #endif

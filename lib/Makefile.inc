@@ -111,7 +111,8 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   asyn-ares.c        \
-  asyn-thread.c      \
+  asyn-base.c        \
+  asyn-thrdd.c       \
   base64.c           \
   bufq.c             \
   bufref.c           \
@@ -166,11 +167,9 @@ LIB_CFILES =         \
   hash_offt.c        \
   headers.c          \
   hmac.c             \
-  hostasyn.c         \
   hostip.c           \
   hostip4.c          \
   hostip6.c          \
-  hostsyn.c          \
   hsts.c             \
   http.c             \
   http1.c            \
@@ -237,6 +236,9 @@ LIB_CFILES =         \
   timediff.c         \
   timeval.c          \
   transfer.c         \
+  uint-bset.c        \
+  uint-spbset.c      \
+  uint-table.c       \
   url.c              \
   urlapi.c           \
   version.c          \
@@ -377,6 +379,9 @@ LIB_HFILES =         \
   timediff.h         \
   timeval.h          \
   transfer.h         \
+  uint-bset.h        \
+  uint-spbset.h      \
+  uint-table.h       \
   url.h              \
   urlapi-int.h       \
   urldata.h          \

@@ -674,21 +674,14 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
        * of the connection. The resolve functions should really be changed
        * to take a type parameter instead.
        */
-      unsigned char ipver = conn->ip_version;
-      int rc;
-
-      if(af == AF_INET)
-        conn->ip_version = CURL_IPRESOLVE_V4;
+      int ip_version = (af == AF_INET) ?
+                       CURL_IPRESOLVE_V4 : CURL_IPRESOLVE_WHATEVER;
 #ifdef USE_IPV6
-      else if(af == AF_INET6)
-        conn->ip_version = CURL_IPRESOLVE_V6;
+      if(af == AF_INET6)
+        ip_version = CURL_IPRESOLVE_V6;
 #endif
 
-      rc = Curl_resolv(data, host, 80, FALSE, &h);
-      if(rc == CURLRESOLV_PENDING)
-        (void)Curl_resolver_wait_resolv(data, &h);
-      conn->ip_version = ipver;
-
+      (void)Curl_resolv_blocking(data, host, 80, ip_version, &h);
       if(h) {
         int h_af = h->addr->ai_family;
         /* convert the resolved address, sizeof myhost >= INET_ADDRSTRLEN */

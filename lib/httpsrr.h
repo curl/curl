@@ -77,10 +77,9 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
 #define HTTPS_RR_CODE_IPV6            0x06
 
 #if defined(USE_ARES)
-void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
-                         size_t timeouts,
-                         const ares_dns_record_t *dnsrec);
-
+CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
+                                const ares_dns_record_t *dnsrec,
+                                struct Curl_https_rrinfo *hinfo);
 #endif /* USE_ARES */
 #endif /* USE_HTTPSRR */
 

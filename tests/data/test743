@@ -1,0 +1,60 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--config
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+--config with a 127 byte line
+</name>
+<file name="%LOGDIR/config" nonewline="yes">
+-A pointless
+data = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/config
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes" nonewline="yes">
+POST /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: pointless
+Accept: */*
+Content-Length: 118
+Content-Type: application/x-www-form-urlencoded
+
+%repeat[118 x x]%
+</protocol>
+</verify>
+</testcase>

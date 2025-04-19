@@ -32,9 +32,6 @@
 
 /* forward declarations */
 struct UserDefined;
-#ifndef CURL_DISABLE_DOH
-struct doh_probes;
-#endif
 
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
@@ -117,9 +114,6 @@ struct SingleRequest {
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
   } p;
-#ifndef CURL_DISABLE_DOH
-  struct doh_probes *doh; /* DoH specific data for this request */
-#endif
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif

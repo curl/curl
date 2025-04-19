@@ -59,13 +59,15 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
+BUNDLE=tunits
+
 if BUILD_UNITTESTS
 if USE_TEST_BUNDLES
 tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > tool_bundle.c
 
-noinst_PROGRAMS = units
-nodist_units_SOURCES = tool_bundle.c
+noinst_PROGRAMS = $(BUNDLE)
+nodist_tunits_SOURCES = tool_bundle.c
 CLEANFILES = tool_bundle.c
 else
 # Makefile.inc provides neat definitions
@@ -86,3 +88,6 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	  -W$(srcdir)/tool_bundle.c \
 	  $(srcdir)/*.[ch])
+
+clean-local:
+	rm -f $(BUNDLE)

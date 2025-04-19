@@ -59,7 +59,6 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
-    logmsg
     );
 
 use pathhelp qw(
@@ -168,7 +167,7 @@ sub pidterm {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
-                my $cmd = "taskkill -t -pid $pid >nul 2>&1";
+                my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
                 print "Executing: '$cmd'\n";
                 system($cmd);
                 return;

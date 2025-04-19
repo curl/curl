@@ -186,9 +186,6 @@ static int prevchar = -1;  /* putbuf: previous char (cr check) */
 static tftphdr_storage_t trsbuf;
 static tftphdr_storage_t ackbuf;
 
-static srvr_sockaddr_union_t from;
-static curl_socklen_t fromlen;
-
 static curl_socket_t peer = CURL_SOCKET_BAD;
 
 static unsigned int timeout;
@@ -544,6 +541,8 @@ int main(int argc, char **argv)
   int error;
   struct testcase test;
   int result = 0;
+  srvr_sockaddr_union_t from;
+  curl_socklen_t fromlen;
 
   memset(&test, 0, sizeof(test));
 

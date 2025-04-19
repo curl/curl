@@ -321,16 +321,16 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
     /* DNS resolve only for SOCKS4, not SOCKS4a */
     if(!protocol4a) {
-      enum resolve_t rc =
-        Curl_resolv(data, sx->hostname, sx->remote_port, TRUE, &dns);
+      result = Curl_resolv(data, sx->hostname, sx->remote_port,
+                           cf->conn->ip_version, TRUE, &dns);
 
-      if(rc == CURLRESOLV_ERROR)
-        return CURLPX_RESOLVE_HOST;
-      else if(rc == CURLRESOLV_PENDING) {
+      if(result == CURLE_AGAIN) {
         sxstate(sx, data, CONNECT_RESOLVING);
         infof(data, "SOCKS4 non-blocking resolve of %s", sx->hostname);
         return CURLPX_OK;
       }
+      else if(result)
+        return CURLPX_RESOLVE_HOST;
       sxstate(sx, data, CONNECT_RESOLVED);
       goto CONNECT_RESOLVED;
     }
@@ -341,21 +341,11 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
-
-    if(dns) {
-      /* Tell a possibly async resolver we no longer need the results. */
-      Curl_resolver_set_result(data, dns);
-      infof(data, "Hostname '%s' was found", sx->hostname);
-      sxstate(sx, data, CONNECT_RESOLVED);
-    }
-    else {
-      result = Curl_resolv_check(data, &dns);
-      if(!dns) {
-        if(result)
-          return CURLPX_RESOLVE_HOST;
-        return CURLPX_OK;
-      }
+    result = Curl_resolv_check(data, &dns);
+    if(!dns) {
+      if(result)
+        return CURLPX_RESOLVE_HOST;
+      return CURLPX_OK;
     }
     FALLTHROUGH();
   case CONNECT_RESOLVED:
@@ -792,16 +782,15 @@ CONNECT_AUTH_INIT:
   case CONNECT_REQ_INIT:
 CONNECT_REQ_INIT:
     if(socks5_resolve_local) {
-      enum resolve_t rc = Curl_resolv(data, sx->hostname, sx->remote_port,
-                                      TRUE, &dns);
+      result = Curl_resolv(data, sx->hostname, sx->remote_port,
+                           cf->conn->ip_version, TRUE, &dns);
 
-      if(rc == CURLRESOLV_ERROR)
-        return CURLPX_RESOLVE_HOST;
-
-      if(rc == CURLRESOLV_PENDING) {
+      if(result == CURLE_AGAIN) {
         sxstate(sx, data, CONNECT_RESOLVING);
         return CURLPX_OK;
       }
+      else if(result)
+        return CURLPX_RESOLVE_HOST;
       sxstate(sx, data, CONNECT_RESOLVED);
       goto CONNECT_RESOLVED;
     }
@@ -809,21 +798,11 @@ CONNECT_REQ_INIT:
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, sx->remote_port);
-
-    if(dns) {
-      /* Tell a possibly async resolver we no longer need the results. */
-      Curl_resolver_set_result(data, dns);
-      infof(data, "SOCKS5: hostname '%s' found", sx->hostname);
-    }
-
+    result = Curl_resolv_check(data, &dns);
     if(!dns) {
-      result = Curl_resolv_check(data, &dns);
-      if(!dns) {
-        if(result)
-          return CURLPX_RESOLVE_HOST;
-        return CURLPX_OK;
-      }
+      if(result)
+        return CURLPX_RESOLVE_HOST;
+      return CURLPX_OK;
     }
     FALLTHROUGH();
   case CONNECT_RESOLVED:

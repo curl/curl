@@ -44,6 +44,12 @@ callback.
 In raw mode, libcurl does not handle pings or any other frame for the
 application.
 
+## CURLWS_NOAUTOPONG (2)
+
+Disable the automatic reply to PING messages. This means users must
+send a PONG message with curl_ws_send(3). This feature is added with
+version 8.14.0.
+
 # DEFAULT
 
 0

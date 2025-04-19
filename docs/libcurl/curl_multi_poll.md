@@ -99,7 +99,10 @@ int main(void)
   CURL *easy_handle;
   CURLM *multi_handle;
   int still_running = 0;
-  int myfd; /* this is our own file descriptor */
+  int myfd = 2; /* this is our own file descriptor */
+
+  multi_handle = curl_multi_init();
+  easy_handle = curl_easy_init();
 
   /* add the individual easy handle */
   curl_multi_add_handle(multi_handle, easy_handle);

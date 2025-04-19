@@ -75,6 +75,12 @@ size_t Curl_cshutdn_count(struct Curl_easy *data);
 size_t Curl_cshutdn_dest_count(struct Curl_easy *data,
                                const char *destination);
 
+/* Close the oldest connection in shutdown to destination or,
+ * when destination is NULL for any destination.
+ * Return TRUE if a connection has been closed. */
+bool Curl_cshutdn_close_oldest(struct Curl_easy *data,
+                               const char *destination);
+
 /* Add a connection to have it shut down. Will terminate the oldest
  * connection when total connection limit of multi is being reached. */
 void Curl_cshutdn_add(struct cshutdn *cshutdn,

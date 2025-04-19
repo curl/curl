@@ -1384,7 +1384,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif /* ! CURL_DISABLE_ALTSVC */
 #ifndef CURL_DISABLE_WEBSOCKETS
   case CURLOPT_WS_OPTIONS:
-    data->set.ws_raw_mode =  (bool)(arg & CURLWS_RAW_MODE);
+    data->set.ws_raw_mode = (bool)(arg & CURLWS_RAW_MODE);
+    data->set.ws_no_auto_pong = (bool)(arg & CURLWS_NOAUTOPONG);
     break;
 #endif
   case CURLOPT_QUICK_EXIT:
@@ -2534,7 +2535,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
 #endif
 #endif
-#ifdef USE_ARES
+#ifdef CURLRES_ARES
   case CURLOPT_DNS_SERVERS:
     result = Curl_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
     if(result)

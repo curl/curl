@@ -159,31 +159,23 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
 
 static CURLcode httpsrr_opt(struct Curl_easy *data,
                             const ares_dns_rr_t *rr,
-                            ares_dns_rr_key_t key, size_t idx)
+                            ares_dns_rr_key_t key, size_t idx,
+                            struct Curl_https_rrinfo *hinfo)
 {
-  size_t len = 0;
   const unsigned char *val = NULL;
   unsigned short code;
-  struct thread_data *res = &data->state.async.thdata;
-  struct Curl_https_rrinfo *hi = &res->hinfo;
+  size_t len = 0;
 
   code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
-  return Curl_httpsrr_set(data, hi, code, val, len);
+  return Curl_httpsrr_set(data, hinfo, code, val, len);
 }
 
-void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
-                         size_t timeouts,
-                         const ares_dns_record_t *dnsrec)
+CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
+                                const ares_dns_record_t *dnsrec,
+                                struct Curl_https_rrinfo *hinfo)
 {
-  struct Curl_easy *data = arg;
   CURLcode result = CURLE_OK;
   size_t i;
-  struct thread_data *res = &data->state.async.thdata;
-
-  res->num_pending--;
-  (void)timeouts;
-  if((ARES_SUCCESS != status) || !dnsrec)
-    return;
 
   for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
     const char *target;
@@ -196,24 +188,24 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
        is in ServiceMode */
     target = ares_dns_rr_get_str(rr, ARES_RR_HTTPS_TARGET);
     if(target && target[0]) {
-      res->hinfo.target = strdup(target);
-      if(!res->hinfo.target) {
+      hinfo->target = strdup(target);
+      if(!hinfo->target) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
-      CURL_TRC_DNS(data, "HTTPS RR target: %s", res->hinfo.target);
+      CURL_TRC_DNS(data, "HTTPS RR target: %s", hinfo->target);
     }
     CURL_TRC_DNS(data, "HTTPS RR priority: %u",
                  ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY));
     for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
         opt++) {
-      result = httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt);
+      result = httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt, hinfo);
       if(result)
         break;
     }
   }
 out:
-  res->result = result;
+  return result;
 }
 
 #endif /* USE_ARES */

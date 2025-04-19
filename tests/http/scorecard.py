@@ -113,11 +113,12 @@ class ScoreCard:
 
     def setup_resources(self, server_docs: str,
                         downloads: Optional[List[int]] = None):
-        for fsize in downloads:
-            label = self.fmt_size(fsize)
-            fname = f'score{label}.data'
-            self._make_docs_file(docs_dir=server_docs,
-                                 fname=fname, fsize=fsize)
+        if downloads is not None:
+            for fsize in downloads:
+                label = self.fmt_size(fsize)
+                fname = f'score{label}.data'
+                self._make_docs_file(docs_dir=server_docs,
+                                     fname=fname, fsize=fsize)
         self._make_docs_file(docs_dir=server_docs,
                              fname='reqs10.data', fsize=10*1024)
 

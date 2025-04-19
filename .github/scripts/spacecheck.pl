@@ -51,7 +51,7 @@ sub fn_match {
     my ($filename, @masklist) = @_;
 
     foreach my $mask (@masklist) {
-        if ($filename =~ $mask) {
+        if($filename =~ $mask) {
             return 1;
         }
     }
@@ -64,16 +64,16 @@ sub eol_detect {
     my $cr = () = $content =~ /\r/g;
     my $lf = () = $content =~ /\n/g;
 
-    if ($cr > 0 && $lf == 0) {
+    if($cr > 0 && $lf == 0) {
         return "cr"
     }
-    elsif ($cr == 0 && $lf > 0) {
+    elsif($cr == 0 && $lf > 0) {
         return "lf"
     }
-    elsif ($cr == 0 && $lf == 0) {
+    elsif($cr == 0 && $lf == 0) {
         return "bin"
     }
-    elsif ($cr == $lf) {
+    elsif($cr == $lf) {
         return "crlf"
     }
 
@@ -83,7 +83,7 @@ sub eol_detect {
 my $issues = 0;
 
 open my $git_ls_files, '-|', 'git ls-files' or die "Failed running git ls-files: $!";
-while (my $filename = <$git_ls_files>) {
+while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
     open my $fh, '<', $filename or die "Cannot open '$filename': $!";
@@ -92,40 +92,40 @@ while (my $filename = <$git_ls_files>) {
 
     my @err = ();
 
-    if (!fn_match($filename, @tabs) &&
+    if(!fn_match($filename, @tabs) &&
         $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
     my $eol = eol_detect($content);
 
-    if ($eol eq "" &&
+    if($eol eq "" &&
         !fn_match($filename, @mixed_eol)) {
         push @err, "content: has mixed EOL types";
     }
 
-    if ($eol ne "crlf" &&
+    if($eol ne "crlf" &&
         fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
-    if ($eol ne "lf" && $content ne "" &&
+    if($eol ne "lf" && $content ne "" &&
         !fn_match($filename, @need_crlf) &&
         !fn_match($filename, @mixed_eol)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if (!fn_match($filename, @space_at_eol) &&
+    if(!fn_match($filename, @space_at_eol) &&
         $content =~ /[ \t]\n/) {
         push @err, "content: has line-ending whitespace";
     }
 
-    if ($content ne "" &&
+    if($content ne "" &&
         $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
 
-    if ($content =~ /\n\n\z/ ||
+    if($content =~ /\n\n\z/ ||
         $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
@@ -134,7 +134,7 @@ while (my $filename = <$git_ls_files>) {
         push @err, "content: has binary contents";
     }
 
-    if (@err) {
+    if(@err) {
         $issues++;
         foreach my $err (@err) {
             print "$filename: $err\n";
@@ -143,6 +143,6 @@ while (my $filename = <$git_ls_files>) {
 }
 close $git_ls_files;
 
-if ($issues) {
+if($issues) {
     exit 1;
 }

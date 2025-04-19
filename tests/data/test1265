@@ -6,6 +6,7 @@ HTTP proxy
 http_proxy
 NO_PROXY
 noproxy
+IPv6
 </keywords>
 </info>
 
@@ -24,6 +25,10 @@ foo
 
 # Client-side
 <client>
+<features>
+http
+IPv6
+</features>
 <server>
 http-ipv6
 </server>

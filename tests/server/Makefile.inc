@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd dnsd
 
 MEMDEBUG = \
   ../../lib/memdebug.c \
@@ -117,5 +117,10 @@ tftpd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   tftp.h
 tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 tftpd_CFLAGS = $(AM_CFLAGS)
+
+dnsd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
+  dnsd.c
+dnsd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+dnsd_CFLAGS = $(AM_CFLAGS)
 
 disabled_SOURCES = disabled.c

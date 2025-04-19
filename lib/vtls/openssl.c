@@ -200,7 +200,8 @@
 #define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
-#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_MSH3)
+#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
+       !defined(OPENSSL_QUIC_API2)) || defined(USE_MSH3)
 #define OSSL_PACKAGE "quictls"
 #else
 #define OSSL_PACKAGE "OpenSSL"
@@ -3975,7 +3976,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       struct Curl_dns_entry *dns = NULL;
 
       if(peer->hostname)
-        dns = Curl_fetch_addr(data, peer->hostname, peer->port);
+        dns = Curl_dnscache_get(data, peer->hostname, peer->port,
+                                cf->conn->ip_version);
       if(!dns) {
         infof(data, "ECH: requested but no DNS info available");
         if(data->set.tls_ech & CURLECH_HARD)

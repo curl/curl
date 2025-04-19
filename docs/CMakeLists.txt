@@ -39,7 +39,7 @@ if(BUILD_MISC_DOCS)
       VERBATIM
     )
     add_custom_target("curl-generate-${_man_misc}.1" ALL DEPENDS "${_man_target}")
-    if(NOT CURL_DISABLE_INSTALL)
+    if(NOT CURL_DISABLE_INSTALL AND NOT _man_misc STREQUAL "mk-ca-bundle")
       install(FILES "${_man_target}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
     endif()
   endforeach()

@@ -178,10 +178,6 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);
-
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_cleanup(data);
-#endif
 }
 
 static CURLcode xfer_send(struct Curl_easy *data,

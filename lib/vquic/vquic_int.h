@@ -31,8 +31,6 @@
 
 #define MAX_PKT_BURST 10
 #define MAX_UDP_PAYLOAD_SIZE  1452
-/* Default QUIC connection timeout we announce from our side */
-#define CURL_QUIC_MAX_IDLE_MS   (120 * 1000)
 
 struct cf_quic_ctx {
   curl_socket_t sockfd; /* connected UDP socket */

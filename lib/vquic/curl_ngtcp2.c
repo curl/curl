@@ -32,6 +32,8 @@
 #include <openssl/err.h>
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 #include <ngtcp2/ngtcp2_crypto_boringssl.h>
+#elif defined(OPENSSL_QUIC_API2)
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
 #else
 #include <ngtcp2/ngtcp2_crypto_quictls.h>
 #endif
@@ -117,6 +119,9 @@ struct cf_ngtcp2_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
   struct curl_tls_ctx tls;
+#ifdef OPENSSL_QUIC_API2
+  ngtcp2_crypto_ossl_ctx *ossl_ctx;
+#endif
   ngtcp2_path connected_path;
   ngtcp2_conn *qconn;
   ngtcp2_cid dcid;
@@ -133,9 +138,8 @@ struct cf_ngtcp2_ctx {
   struct curltime handshake_at;      /* time connect handshake finished */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct dynbuf scratch;             /* temp buffer for header construction */
-  struct Curl_hash_offt streams;     /* hash `data->mid` to `h3_stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
-  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
@@ -156,7 +160,7 @@ struct cf_ngtcp2_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
 
-static void h3_stream_hash_free(curl_off_t id, void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
 {
@@ -164,11 +168,10 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   ctx->qlogfd = -1;
   ctx->version = NGTCP2_PROTO_VER_MAX;
   ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
-  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->initialized = TRUE;
 }
 
@@ -179,11 +182,49 @@ static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_dyn_free(&ctx->scratch);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
   }
   free(ctx);
 }
+
+static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  const ngtcp2_transport_params *rp;
+  /* Peer should have sent us its transport parameters. If it
+  * announces a positive `max_idle_timeout` it will close the
+  * connection when it does not hear from us for that time.
+  *
+  * Some servers use this as a keep-alive timer at a rather low
+  * value. We are doing HTTP/3 here and waiting for the response
+  * to a request may take a considerable amount of time. We need
+  * to prevent the peer's QUIC stack from closing in this case.
+  */
+  if(!ctx->qconn)
+    return;
+
+  rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+  if(!rp || !rp->max_idle_timeout) {
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
+    CURL_TRC_CF(data, cf, "no peer idle timeout, unset keep-alive");
+  }
+  else if(!Curl_uint_hash_count(&ctx->streams)) {
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
+    CURL_TRC_CF(data, cf, "no active streams, unset keep-alive");
+  }
+  else {
+    ngtcp2_duration keep_ns;
+    keep_ns = (rp->max_idle_timeout > 1) ? (rp->max_idle_timeout / 2) : 1;
+    ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, keep_ns);
+    CURL_TRC_CF(data, cf, "peer idle timeout is %" FMT_PRIu64 "ms, "
+                "set keep-alive to %" FMT_PRIu64 " ms.",
+                (curl_uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS),
+                (curl_uint64_t)(keep_ns / NGTCP2_MILLISECONDS));
+  }
+}
+
 
 struct pkt_io_ctx;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -213,9 +254,7 @@ struct h3_stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
-#define H3_STREAM_CTX_ID(ctx,id)  ((struct h3_stream_ctx *)(\
-            Curl_hash_offt_get(&(ctx)->streams, (id))))
+            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
@@ -224,7 +263,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   free(stream);
 }
 
-static void h3_stream_hash_free(curl_off_t id, void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -254,10 +293,13 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->sendbuf_len_in_flight = 0;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
+
+  if(Curl_uint_hash_count(&ctx->streams) == 1)
+    cf_ngtcp2_setup_keep_alive(cf, data);
 
   return CURLE_OK;
 }
@@ -293,7 +335,9 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] easy handle is done",
                 stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
+    if(!Curl_uint_hash_count(&ctx->streams))
+      cf_ngtcp2_setup_keep_alive(cf, data);
   }
 }
 
@@ -415,7 +459,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   t->initial_max_stream_data_uni = ctx->max_stream_window;
   t->initial_max_streams_bidi = QUIC_MAX_STREAMS;
   t->initial_max_streams_uni = QUIC_MAX_STREAMS;
-  t->max_idle_timeout = (ctx->max_idle_ms * NGTCP2_MILLISECONDS);
+  t->max_idle_timeout = 0; /* no idle timeout from our side */
   if(ctx->qlogfd != -1) {
     s->qlog_write = qlog_callback;
   }
@@ -546,7 +590,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read_stream(len=%zu) -> %zd",
                 stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX_ID(ctx, stream_id);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(data && stream) {
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] error on known stream, "
                   "reset=%d, closed=%d",
@@ -2014,10 +2058,20 @@ static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
   ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
-  if(ctx->h3conn)
+  if(ctx->h3conn) {
     nghttp3_conn_del(ctx->h3conn);
-  if(ctx->qconn)
+    ctx->h3conn = NULL;
+  }
+  if(ctx->qconn) {
     ngtcp2_conn_del(ctx->qconn);
+    ctx->qconn = NULL;
+  }
+#ifdef OPENSSL_QUIC_API2
+  if(ctx->ossl_ctx) {
+    ngtcp2_crypto_ossl_ctx_del(ctx->ossl_ctx);
+    ctx->ossl_ctx = NULL;
+  }
+#endif
   ctx->call_data = save;
 }
 
@@ -2133,6 +2187,7 @@ static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   CURL_TRC_CF(data, cf, "destroy");
   if(cf->ctx) {
+    cf_ngtcp2_close(cf, data);
     cf_ngtcp2_ctx_free(cf->ctx);
     cf->ctx = NULL;
   }
@@ -2291,6 +2346,8 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_boringssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
+#elif defined(OPENSSL_QUIC_API2)
+  /* nothing to do */
 #else
   if(ngtcp2_crypto_quictls_configure_client_context(ctx->ossl.ssl_ctx) != 0) {
     failf(data, "ngtcp2_crypto_quictls_configure_client_context failed");
@@ -2453,6 +2510,9 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
+  ctx->conn_ref.get_conn = get_conn;
+  ctx->conn_ref.user_data = cf;
+
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer, &ALPN_SPEC_H3,
                                cf_ngtcp2_tls_ctx_setup, &ctx->tls,
                                &ctx->conn_ref,
@@ -2460,7 +2520,17 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(result)
     return result;
 
-#ifdef USE_OPENSSL
+#if defined(USE_OPENSSL) && defined(OPENSSL_QUIC_API2)
+  if(ngtcp2_crypto_ossl_ctx_new(&ctx->ossl_ctx, ctx->tls.ossl.ssl) != 0) {
+    failf(data, "ngtcp2_crypto_ossl_ctx_new failed");
+    return CURLE_FAILED_INIT;
+  }
+  ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->ossl_ctx);
+  if(ngtcp2_crypto_ossl_configure_client_session(ctx->tls.ossl.ssl) != 0) {
+    failf(data, "ngtcp2_crypto_ossl_configure_client_session failed");
+    return CURLE_FAILED_INIT;
+  }
+#elif defined(USE_OPENSSL)
   SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ossl.ssl);
 #elif defined(USE_GNUTLS)
@@ -2472,9 +2542,6 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
 #endif
 
   ngtcp2_ccerr_default(&ctx->last_error);
-
-  ctx->conn_ref.get_conn = get_conn;
-  ctx->conn_ref.user_data = cf;
 
   return CURLE_OK;
 }
@@ -2589,7 +2656,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     }
     else if(ctx->max_bidi_streams) {
       uint64_t avail_bidi_streams = 0;
-      uint64_t max_streams = CONN_INUSE(cf->conn);
+      uint64_t max_streams = CONN_ATTACHED(cf->conn);
       if(ctx->max_bidi_streams > ctx->used_bidi_streams)
         avail_bidi_streams = ctx->max_bidi_streams - ctx->used_bidi_streams;
       max_streams += avail_bidi_streams;
@@ -2598,8 +2665,8 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     else  /* transport params not arrived yet? take our default. */
       *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
-                "MAX_CONCURRENT -> %d (%zu in use)",
-                cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
+                "MAX_CONCURRENT -> %d (%u in use)",
+                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
@@ -2648,21 +2715,12 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->qconn || ctx->shutdown_started)
     goto out;
 
-  /* Both sides of the QUIC connection announce they max idle times in
-   * the transport parameters. Look at the minimum of both and if
-   * we exceed this, regard the connection as dead. The other side
-   * may have completely purged it and will no longer respond
-   * to any packets from us. */
+  /* We do not announce a max idle timeout, but when the peer does
+   * it will close the connection when it expires. */
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
-  if(rp) {
-    timediff_t idletime;
-    uint64_t idle_ms = ctx->max_idle_ms;
-
-    if(rp->max_idle_timeout &&
-      (rp->max_idle_timeout / NGTCP2_MILLISECONDS) < idle_ms)
-      idle_ms = (rp->max_idle_timeout / NGTCP2_MILLISECONDS);
-    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
-    if(idletime > 0 && (uint64_t)idletime > idle_ms)
+  if(rp && rp->max_idle_timeout) {
+    timediff_t idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    if(idletime > 0 && (uint64_t)idletime > rp->max_idle_timeout)
       goto out;
   }
 

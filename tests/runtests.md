@@ -228,6 +228,10 @@ sequence at the end of the initially given one.
 If **-R** option is also used, the scrambling is done after the repeats have
 extended the test sequence.
 
+## `--retry=[num]`
+
+Number of attempts for the whole test run to retry failed tests.
+
 ## `-s`
 
 Shorter output. Speaks less than default.

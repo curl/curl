@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+uint_bset
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+<name>
+uint_bset unit tests
+</name>
+</client>
+</testcase>

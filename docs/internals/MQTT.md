@@ -26,6 +26,10 @@ Example subscribe:
 This sends an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in
 for incoming PUBLISH packets.
 
+You can set the upkeep interval ms option to make curl send MQTT ping requests to the
+server at an internal, to prevent the connection to get closed because of idleness.
+You might then need to use the progress callback to cancel the operation.
+
 ### Publishing
 
 Command usage:

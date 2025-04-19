@@ -290,9 +290,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
-  /* this destroys the channel and we cannot use it anymore after this */
-  Curl_resolver_cancel(data);
-  Curl_resolver_cleanup(data->state.async.resolver);
+  Curl_async_destroy(data);
 
   data_priority_cleanup(data);
 
@@ -303,6 +301,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+  Curl_hash_destroy(&data->meta_hash);
 #ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
 #endif
@@ -481,7 +480,23 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   memset(&set->priority, 0, sizeof(set->priority));
 #endif
   set->quick_exit = 0L;
+#ifndef CURL_DISABLE_WEBSOCKETS
+  set->ws_raw_mode = FALSE;
+  set->ws_no_auto_pong = FALSE;
+#endif
+
   return result;
+}
+
+/* easy->meta_hash destructor. Should never be called as elements
+ * MUST be added with their own destructor */
+static void easy_meta_freeentry(void *p)
+{
+  (void)p;
+  /* Will always be FALSE. Cannot use a 0 assert here since compilers
+   * are not in agreement if they then want a NORETURN attribute or
+   * not. *sigh* */
+  DEBUGASSERT(p == NULL);
 }
 
 /**
@@ -506,7 +521,18 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   data->magic = CURLEASY_MAGIC_NUMBER;
+  /* most recent connection is not yet defined */
+  data->state.lastconnect_id = -1;
+  data->state.recent_conn_id = -1;
+  /* and not assigned an id yet */
+  data->id = -1;
+  data->mid = UINT_MAX;
+  data->master_mid = UINT_MAX;
+  data->progress.flags |= PGRS_HIDE;
+  data->state.current_speed = -1; /* init to negative == impossible */
 
+  Curl_hash_init(&data->meta_hash, 23,
+                 Curl_hash_str, Curl_str_key_compare, easy_meta_freeentry);
   Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
@@ -515,35 +541,14 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
 
-  result = Curl_resolver_init(data, &data->state.async.resolver);
-  if(result) {
-    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-    goto out;
-  }
-
   result = Curl_init_userdefined(data);
-  if(result)
-    goto out;
 
-  /* most recent connection is not yet defined */
-  data->state.lastconnect_id = -1;
-  data->state.recent_conn_id = -1;
-  /* and not assigned an id yet */
-  data->id = -1;
-  data->mid = -1;
-#ifndef CURL_DISABLE_DOH
-  data->set.dohfor_mid = -1;
-#endif
-
-  data->progress.flags |= PGRS_HIDE;
-  data->state.current_speed = -1; /* init to negative == impossible */
-
-out:
   if(result) {
-    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
+    Curl_hash_destroy(&data->meta_hash);
+    data->magic = 0;
     free(data);
     data = NULL;
   }
@@ -595,6 +600,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
   Curl_safefree(conn->destination);
+  Curl_uint_spbset_destroy(&conn->xfers_attached);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -887,10 +893,19 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       return FALSE;
     else {
       /* transfer and conn multiplex. Are they on the same multi? */
-      struct Curl_llist_node *e = Curl_llist_head(&conn->easyq);
-      struct Curl_easy *entry = Curl_node_elem(e);
-      if(entry->multi != data->multi)
+      unsigned int mid;
+      if(Curl_uint_spbset_first(&conn->xfers_attached, &mid)) {
+        struct Curl_easy *entry = Curl_multi_get_easy(data->multi, mid);
+        DEBUGASSERT(entry);
+        if(!entry || (entry->multi != data->multi))
+          return FALSE;
+      }
+      else {
+        /* Since CONN_INUSE() checks the bitset, we SHOULD find a first
+         * mid in there. */
+        DEBUGASSERT(0);
         return FALSE;
+      }
     }
   }
   /* `conn` is connected and we could add the transfer to it, if
@@ -1152,16 +1167,16 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     DEBUGASSERT(match->may_multiplex);
     DEBUGASSERT(conn->bits.multiplex);
     /* If multiplexed, make sure we do not go over concurrency limit */
-    if(CONN_INUSE(conn) >=
+    if(CONN_ATTACHED(conn) >=
             Curl_multi_max_concurrent_streams(data->multi)) {
       infof(data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%zu)", CONN_INUSE(conn));
+            ", skip (%u)", CONN_ATTACHED(conn));
       return FALSE;
     }
-    if(CONN_INUSE(conn) >=
+    if(CONN_ATTACHED(conn) >=
             Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
-      infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)",
-            CONN_INUSE(conn));
+      infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
+            CONN_ATTACHED(conn));
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */
@@ -1346,8 +1361,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
 
-  /* Initialize the easy handle list */
-  Curl_llist_init(&conn->easyq, NULL);
+  /* Initialize the attached xfers bitset */
+  Curl_uint_spbset_init(&conn->xfers_attached);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CLEAR;
@@ -3045,10 +3060,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 
     DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
                  neg->wanted, neg->allowed));
+#ifdef USE_HTTP3
     if(neg->allowed & CURL_HTTP_V3x)
       allowed_alpns |= ALPN_h3;
+#endif
+#ifdef USE_HTTP2
     if(neg->allowed & CURL_HTTP_V2x)
       allowed_alpns |= ALPN_h2;
+#endif
     if(neg->allowed & CURL_HTTP_V1x)
       allowed_alpns |= ALPN_h1;
     allowed_alpns &= (int)data->asi->flags;
@@ -3165,7 +3184,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   struct hostname *ehost;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
   const char *peertype = "host";
-  int rc;
+  CURLcode result;
 #ifdef USE_UNIX_SOCKETS
   char *unix_path = conn->unix_domain_socket;
 
@@ -3206,22 +3225,25 @@ static CURLcode resolve_server(struct Curl_easy *data,
   if(!conn->hostname_resolve)
     return CURLE_OUT_OF_MEMORY;
 
-  rc = Curl_resolv_timeout(data, conn->hostname_resolve,
-                           conn->primary.remote_port,
-                           &conn->dns_entry, timeout_ms);
-  if(rc == CURLRESOLV_PENDING)
+  result = Curl_resolv_timeout(data, conn->hostname_resolve,
+                               conn->primary.remote_port, conn->ip_version,
+                               &conn->dns_entry, timeout_ms);
+  if(result == CURLE_AGAIN) {
+    DEBUGASSERT(!conn->dns_entry);
     *async = TRUE;
-  else if(rc == CURLRESOLV_TIMEDOUT) {
+    return CURLE_OK;
+  }
+  else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
           Curl_timediff(Curl_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
-  else if(!conn->dns_entry) {
+  else if(result) {
     failf(data, "Could not resolve %s: %s", peertype, ehost->dispname);
-    return CURLE_COULDNT_RESOLVE_HOST;
+    return result;
   }
-
+  DEBUGASSERT(conn->dns_entry);
   return CURLE_OK;
 }
 
@@ -3597,10 +3619,12 @@ static CURLcode create_conn(struct Curl_easy *data,
         conn->bits.tls_enable_alpn = TRUE;
     }
 
-    if(waitpipe)
+    if(waitpipe) {
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
+      infof(data, "Waiting on connection to negotiate possible multiplexing.");
       connections_available = FALSE;
+    }
     else {
       switch(Curl_cpool_check_limits(data, conn)) {
       case CPOOL_LIMIT_DEST:
@@ -3608,13 +3632,12 @@ static CURLcode create_conn(struct Curl_easy *data,
         connections_available = FALSE;
         break;
       case CPOOL_LIMIT_TOTAL:
-#ifndef CURL_DISABLE_DOH
-        if(data->set.dohfor_mid >= 0)
-          infof(data, "Allowing DoH to override max connection limit");
-        else
-#endif
-        {
-          infof(data, "No connections available in cache");
+        if(data->master_mid != UINT_MAX)
+          CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
+                     "max connection limit");
+        else {
+          infof(data, "No connections available, total of %ld reached.",
+                data->multi->max_total_connections);
           connections_available = FALSE;
         }
         break;
@@ -3624,8 +3647,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     }
 
     if(!connections_available) {
-      infof(data, "No connections available.");
-
       Curl_conn_free(data, conn);
       *in_connect = NULL;
 
@@ -3762,7 +3783,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
   result = create_conn(data, &conn, asyncp);
 
   if(!result) {
-    if(CONN_INUSE(conn) > 1)
+    if(CONN_ATTACHED(conn) > 1)
       /* multiplexed */
       *protocol_done = TRUE;
     else if(!*asyncp) {

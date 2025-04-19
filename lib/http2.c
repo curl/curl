@@ -136,7 +136,7 @@ struct cf_h2_ctx {
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
   struct dynbuf scratch;        /* scratch buffer for temp use */
 
-  struct Curl_hash_offt streams; /* hash of `data->mid` to `h2_stream_ctx` */
+  struct uint_hash streams; /* hash of `data->mid` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
   uint32_t goaway_error;        /* goaway error code from server */
@@ -159,7 +159,7 @@ struct cf_h2_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 
-static void h2_stream_hash_free(curl_off_t id, void *stream);
+static void h2_stream_hash_free(unsigned int id, void *stream);
 
 static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
 {
@@ -167,7 +167,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
 #ifdef DEBUGBUILD
@@ -192,7 +192,7 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_dyn_free(&ctx->scratch);
-    Curl_hash_offt_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
     memset(ctx, 0, sizeof(*ctx));
   }
   free(ctx);
@@ -238,7 +238,7 @@ struct h2_stream_ctx {
 };
 
 #define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
+            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {
@@ -282,7 +282,7 @@ static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
   free(stream);
 }
 
-static void h2_stream_hash_free(curl_off_t id, void *stream)
+static void h2_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
@@ -414,7 +414,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h2_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -452,7 +452,7 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       nghttp2_session_send(ctx->h2);
   }
 
-  Curl_hash_offt_remove(&ctx->streams, data->mid);
+  Curl_uint_hash_remove(&ctx->streams, data->mid);
 }
 
 static int h2_client_new(struct Curl_cfilter *cf,
@@ -1061,8 +1061,8 @@ static int push_promise(struct Curl_cfilter *cf,
     newhandle->req.maxdownload = -1;
     newhandle->req.size = -1;
 
-    CURL_TRC_CF(data, cf, "promise easy handle added to multi, mid=%"
-                FMT_OFF_T, newhandle->mid);
+    CURL_TRC_CF(data, cf, "promise easy handle added to multi, mid=%u",
+                newhandle->mid);
     rv = nghttp2_session_set_stream_user_data(ctx->h2,
                                               newstream->id,
                                               newhandle);
@@ -2154,7 +2154,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
      * a read() is called anyway. It is not clear what the calling sequence
      * is for such a case. */
     failf(data, "http/2 recv on a transfer never opened "
-          "or already cleared, mid=%" FMT_OFF_T, data->mid);
+          "or already cleared, mid=%u", data->mid);
     *err = CURLE_HTTP2;
     return -1;
   }
@@ -2806,7 +2806,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     CF_DATA_SAVE(save, cf, data);
     if(nghttp2_session_check_request_allowed(ctx->h2) == 0) {
       /* the limit is what we have in use right now */
-      effective_max = CONN_INUSE(cf->conn);
+      effective_max = CONN_ATTACHED(cf->conn);
     }
     else {
       effective_max = ctx->max_concurrent_streams;

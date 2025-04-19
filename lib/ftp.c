@@ -330,8 +330,7 @@ static void freedirs(struct ftp_conn *ftpc)
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
-/***********************************************************************
- *
+/*
  * Lineend Conversions
  * On ASCII transfers, e.g. directory listings, we might get lines
  * ending in '\r\n' and we prefer just '\n'.
@@ -867,7 +866,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   struct sockaddr_in6 * const sa6 = (void *)sa;
 #endif
   static const char mode[][5] = { "EPRT", "PORT" };
-  enum resolve_t rc;
   int error;
   char *host = NULL;
   char *string_ftpport = data->set.str[STRING_FTPPORT];
@@ -1014,14 +1012,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   }
 
   /* resolv ip/host to ip */
-  rc = Curl_resolv(data, host, 0, FALSE, &dns_entry);
-  if(rc == CURLRESOLV_PENDING)
-    (void)Curl_resolver_wait_resolv(data, &dns_entry);
-  if(dns_entry) {
+  res = NULL;
+  result = Curl_resolv_blocking(data, host, 0, conn->ip_version, &dns_entry);
+  if(!result) {
+    DEBUGASSERT(dns_entry);
     res = dns_entry->addr;
   }
-  else
-    res = NULL; /* failure! */
 
   if(!res) {
     failf(data, "failed to resolve the address provided to PORT: %s", host);
@@ -1786,8 +1782,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
   CURLcode result;
-  struct Curl_dns_entry *addr = NULL;
-  enum resolve_t rc;
+  struct Curl_dns_entry *dns = NULL;
   unsigned short connectport; /* the local port connect() should use! */
   struct pingpong *pp = &ftpc->pp;
   char *str =
@@ -1885,16 +1880,12 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      */
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    rc = Curl_resolv(data, host_name, conn->primary.remote_port, FALSE, &addr);
-    if(rc == CURLRESOLV_PENDING)
-      /* BLOCKING, ignores the return code but 'addr' will be NULL in
-         case of failure */
-      (void)Curl_resolver_wait_resolv(data, &addr);
-
+    (void)Curl_resolv_blocking(data, host_name, conn->primary.remote_port,
+                               conn->ip_version, &dns);
     /* we connect to the proxy's port */
     connectport = (unsigned short)conn->primary.remote_port;
 
-    if(!addr) {
+    if(!dns) {
       failf(data, "cannot resolve proxy host %s:%hu", host_name, connectport);
       return CURLE_COULDNT_RESOLVE_PROXY;
     }
@@ -1913,26 +1904,23 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
     }
 
-    rc = Curl_resolv(data, ftpc->newhost, ftpc->newport, FALSE, &addr);
-    if(rc == CURLRESOLV_PENDING)
-      /* BLOCKING */
-      (void)Curl_resolver_wait_resolv(data, &addr);
-
+    (void)Curl_resolv_blocking(data, ftpc->newhost, ftpc->newport,
+                               conn->ip_version, &dns);
     connectport = ftpc->newport; /* we connect to the remote port */
 
-    if(!addr) {
+    if(!dns) {
       failf(data, "cannot resolve new host %s:%hu",
             ftpc->newhost, connectport);
       return CURLE_FTP_CANT_GET_HOST;
     }
   }
 
-  result = Curl_conn_setup(data, conn, SECONDARYSOCKET, addr,
+  result = Curl_conn_setup(data, conn, SECONDARYSOCKET, dns,
                            conn->bits.ftp_use_data_ssl ?
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    Curl_resolv_unlink(data, &addr); /* we are done using this address */
+    Curl_resolv_unlink(data, &dns); /* we are done using this dns entry */
     if(ftpc->count1 == 0 && ftpcode == 229)
       return ftp_epsv_disable(data, conn);
 
@@ -1948,9 +1936,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(data, addr->addr, ftpc->newhost, connectport);
+    ftp_pasv_verbose(data, dns->addr, ftpc->newhost, connectport);
 
-  Curl_resolv_unlink(data, &addr); /* we are done using this address */
+  Curl_resolv_unlink(data, &dns); /* we are done using this address */
 
   free(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;

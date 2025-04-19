@@ -22,24 +22,24 @@
 #
 ###########################################################################
 
-# Get 'TOOLPROGS', '*_SOURCES', 'FIRSTFILES' variables
+# Get 'TOOLPROGS', '*_SOURCES', 'TOOLFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "tool_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "unit_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "tool_bundle.c"
     DEPENDS
-      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES}
+      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TOOLFILES}
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
-  set(TOOLPROGS "units")
-  set(units_SOURCES "tool_bundle.c")
+  set(TOOLPROGS "tunits")
+  set(tunits_SOURCES "tool_bundle.c")
 endif()
 
-foreach(_target IN LISTS UNITPROGS)
+foreach(_target IN LISTS TOOLPROGS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
@@ -49,6 +49,7 @@ foreach(_target IN LISTS UNITPROGS)
     "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/tests/libtest"
+    "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
   )
   set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
   if(CURL_TEST_BUNDLES)
@@ -56,5 +57,5 @@ foreach(_target IN LISTS UNITPROGS)
   endif()
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
-    PROJECT_LABEL "Test unit ${_target}")
+    PROJECT_LABEL "Test tunit ${_target}")
 endforeach()

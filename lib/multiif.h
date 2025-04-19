@@ -47,7 +47,8 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(size_t hashsize,
+struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+                                     size_t hashsize,
                                      size_t chashsize,
                                      size_t dnssize,
                                      size_t sesssize);
@@ -163,9 +164,13 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
 void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
 
 /**
- * Get the transfer handle for the given id. Returns NULL if not found.
+ * Get the easy handle for the given mid.
+ * Returns NULL if not found.
  */
-struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
-                                        curl_off_t id);
+struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
+                                      unsigned int mid);
+
+/* Get the # of transfers current in process/pending. */
+unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

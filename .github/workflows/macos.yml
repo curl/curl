@@ -439,6 +439,11 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
+          if [ '${{ matrix.compiler }}' = 'gcc-13' ] && [ '${{ matrix.image }}' = 'macos-15' ] ; then
+            # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
+            /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
+          fi
+
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
           else

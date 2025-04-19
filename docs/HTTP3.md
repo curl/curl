@@ -47,26 +47,26 @@ While any version of `ngtcp2` and `nghttp3` from v1.0.0 on are expected to
 work, using the latest versions often brings functional and performance
 improvements.
 
-The build examples use `$NGHTTP3_VERION` and `$NGTCP2_VERION` as placeholders
+The build examples use `$NGHTTP3_VERSION` and `$NGTCP2_VERSION` as placeholders
 for the version you build.
 
-## Build with quictls
+## Build with OpenSSL
 
-OpenSSL does not offer the required APIs for building a QUIC client. You need
-to use a TLS library that has such APIs and that works with *ngtcp2*.
+OpenSSL v3.5.0+ offers APIs for integration with *ngtcp2* v1.12.0+. Earlier
+versions do not work.
 
-Build quictls (any `+quic` tagged version works):
+Build OpenSSL (version 3.5.0 or newer):
 
-     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
+     % git clone --quiet --depth=1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
-     % ./config enable-tls1_3 --prefix=<somewhere1>
+     % ./config --prefix=<somewhere1> --libdir=lib
      % make
      % make install
 
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -77,7 +77,51 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
+     % cd ngtcp2
+     % autoreconf -fi
+     % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-openssl
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % make
+     % make install
+
+## Build with quictls
+
+OpenSSL does not offer the required APIs for building a QUIC client. You need
+to use a TLS library that has such APIs and that works with *ngtcp2*.
+
+Build quictls (any `+quic` tagged version works):
+
+     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere1> --libdir=lib
+     % make
+     % make install
+
+Build nghttp3:
+
+     % cd ..
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % git submodule update --init
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build ngtcp2:
+
+     % cd ..
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only
@@ -94,8 +138,6 @@ Build curl:
      % make
      % make install
 
-For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute all occurrences of "/lib" with "/lib64"
-
 ## Build with GnuTLS
 
 Build GnuTLS:
@@ -110,7 +152,7 @@ Build GnuTLS:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -121,7 +163,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-gnutls
@@ -152,7 +194,7 @@ Build wolfSSL:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
@@ -163,7 +205,7 @@ Build nghttp3:
 Build ngtcp2:
 
      % cd ..
-     % git clone -b $NGTCP2_VERION https://github.com/ngtcp2/ngtcp2
+     % git clone -b $NGTCP2_VERSION https://github.com/ngtcp2/ngtcp2
      % cd ngtcp2
      % autoreconf -fi
      % ./configure PKG_CONFIG_PATH=<somewhere1>/lib/pkgconfig:<somewhere2>/lib/pkgconfig LDFLAGS="-Wl,-rpath,<somewhere1>/lib" --prefix=<somewhere3> --enable-lib-only --with-wolfssl
@@ -228,7 +270,7 @@ Build via:
 Build nghttp3:
 
      % cd ..
-     % git clone -b $NGHTTP3_VERION https://github.com/ngtcp2/nghttp3
+     % git clone -b $NGHTTP3_VERSION https://github.com/ngtcp2/nghttp3
      % cd nghttp3
      % git submodule update --init
      % autoreconf -fi
