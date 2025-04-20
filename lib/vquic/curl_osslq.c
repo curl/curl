@@ -1564,10 +1564,13 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
           idx_count++) {
         if(ctx->poll_items[idx_count].revents & SSL_POLL_EVENT_W) {
           stream = H3_STREAM_CTX(ctx, ctx->curl_items[idx_count]);
-          nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
-          stream->s.send_blocked = FALSE;
-          h3_drain_stream(cf, ctx->curl_items[idx_count]);
-          CURL_TRC_CF(ctx->curl_items[idx_count], cf, "unblocked");
+          DEBUGASSERT(stream);  /* should still exist */
+          if(stream) {
+            nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
+            stream->s.send_blocked = FALSE;
+            h3_drain_stream(cf, ctx->curl_items[idx_count]);
+            CURL_TRC_CF(ctx->curl_items[idx_count], cf, "unblocked");
+          }
           result_count--;
         }
       }
