@@ -1804,6 +1804,33 @@ if(CURL_CODE_COVERAGE)
   list(APPEND CURL_LIBS ${CURL_COVERAGE_LIBS})
 endif()
 
+# Hack to add some libraries to the end of the library list to make binutils ld
+# for GCC happy when linking statically. Necessary for libs detected via
+# CMake's built-in find modules and which CMake adds to the beginning of
+# the lib list on linker command-line for some reason. This makes them appear
+# before the dependencies detected via curl's custom Find modules, and
+# breaking linkers sensitive to lib order. There must be a better solution
+# to this.
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  if(TARGET OpenSSL::Crypto)
+    add_library(CURL::OpenSSLCrypto INTERFACE IMPORTED)
+    get_target_property(_libname OpenSSL::Crypto LOCATION)
+    set_target_properties(CURL::OpenSSLCrypto PROPERTIES INTERFACE_LINK_LIBRARIES "${_libname}")
+    list(APPEND CURL_LIBS CURL::OpenSSLCrypto)
+  endif()
+  if(TARGET ZLIB::ZLIB)
+    add_library(CURL::ZLIB INTERFACE IMPORTED)
+    get_target_property(_libname ZLIB::ZLIB LOCATION)
+    set_target_properties(CURL::ZLIB PROPERTIES INTERFACE_LINK_LIBRARIES "${_libname}")
+    list(APPEND CURL_LIBS CURL::ZLIB)
+  endif()
+  if(WIN32)
+    add_library(CURL::WIN32 INTERFACE IMPORTED)
+    set_target_properties(CURL::WIN32 PROPERTIES INTERFACE_LINK_LIBRARIES "${_win32_winsock}")
+    list(APPEND CURL_LIBS CURL::WIN32)
+  endif()
+endif()
+
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
 endif()
