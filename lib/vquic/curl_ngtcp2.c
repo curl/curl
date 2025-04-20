@@ -246,10 +246,10 @@ struct h3_stream_ctx {
   curl_off_t upload_left; /* number of request bytes left to upload */
   int status_code; /* HTTP status code */
   CURLcode xfer_result; /* result from xfer_resp_write(_hd) */
-  bool resp_hds_complete; /* we have a complete, final response */
-  bool closed; /* TRUE on stream close */
-  bool reset;  /* TRUE on stream reset */
-  bool send_closed; /* stream is local closed */
+  BIT(resp_hds_complete); /* we have a complete, final response */
+  BIT(closed); /* TRUE on stream close */
+  BIT(reset);  /* TRUE on stream reset */
+  BIT(send_closed); /* stream is local closed */
   BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 

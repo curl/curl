@@ -45,7 +45,7 @@ struct Curl_asn1Element {
   const char *end;            /* Pointer to 1st byte after element. */
   unsigned char class;        /* ASN.1 element class. */
   unsigned char tag;          /* ASN.1 element tag. */
-  bool          constructed;  /* Element is constructed. */
+  BIT(constructed);           /* Element is constructed. */
 };
 
 /* X509 certificate: RFC 5280. */

@@ -43,10 +43,10 @@ struct FormInfo {
   char *userp;        /* pointer for the read callback */
   struct curl_slist *contentheader;
   struct FormInfo *more;
-  bool name_alloc;
-  bool value_alloc;
-  bool contenttype_alloc;
-  bool showfilename_alloc;
+  BIT(name_alloc);
+  BIT(value_alloc);
+  BIT(contenttype_alloc);
+  BIT(showfilename_alloc);
 };
 
 CURLcode Curl_getformdata(CURL *data,

@@ -71,7 +71,7 @@ struct ossl_ctx {
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */
-  bool keylog_done;
+  BIT(keylog_done);
 #endif
   BIT(x509_store_setup);            /* x509 store has been set up */
   BIT(reused_session);              /* session-ID was reused for this */

@@ -53,7 +53,7 @@ struct Curl_https_rrinfo {
   /* store parsed alpnid entries in the array, end with ALPN_none */
   int port; /* -1 means not set */
   uint16_t priority;
-  bool no_def_alpn; /* keytag = 2 */
+  BIT(no_def_alpn); /* keytag = 2 */
 };
 
 CURLcode Curl_httpsrr_set(struct Curl_easy *data,

@@ -56,8 +56,8 @@ struct MQTT {
   size_t remaining_length;
   unsigned char pkt_hd[4]; /* for decoding the arriving packet length */
   struct curltime lastTime; /* last time we sent or received data */
-  bool pingsent; /* 1 while we wait for ping response */
   unsigned char firstbyte;
+  BIT(pingsent); /* 1 while we wait for ping response */
 };
 
 #endif /* HEADER_CURL_MQTT_H */
