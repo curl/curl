@@ -96,13 +96,13 @@ jobs:
 
           - name: wolfssl-all
             install_packages: zlib1g-dev
-            install_steps: wolfssl-all wolfssh
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
+            install_steps: wolfssl-all
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-ech --enable-debug
 
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
-            install_steps: wolfssl-opensslextra
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
+            install_steps: wolfssl-opensslextra wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev libldap-dev valgrind
@@ -434,7 +434,7 @@ jobs:
           tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
           cd wolfssh-${{ env.wolfssh-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-all --enable-scp --enable-sftp --disable-term \
+          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
             --disable-examples --prefix=$HOME/wolfssh
           make install
 
