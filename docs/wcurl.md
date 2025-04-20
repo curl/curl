@@ -16,11 +16,11 @@ Added-in: n/a
 
 # SYNOPSIS
 
-**wcurl** \<URL\>**...**
+**wcurl \<URL\>...**
 
-**wcurl [--curl-options **\<CURL_OPTIONS\>**]... [--dry-run] [--no-decode-filename] [-o|-O|--output **\<PATH\>**] [--] \<URL\>...**
+**wcurl [--curl-options \<CURL_OPTIONS\>]... [--dry-run] [--no-decode-filename] [-o|-O|--output \<PATH\>] [--] \<URL\>...**
 
-**wcurl [--curl-options=**\<CURL_OPTIONS\>**]... [--dry-run] [--no-decode-filename] [--output=**\<PATH\>**] [--] \<URL\>...**
+**wcurl [--curl-options=\<CURL_OPTIONS\>]... [--dry-run] [--no-decode-filename] [--output=\<PATH\>] [--] \<URL\>...**
 
 **wcurl -V|--version**
 
