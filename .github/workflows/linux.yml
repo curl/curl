@@ -96,13 +96,13 @@ jobs:
 
           - name: wolfssl-all
             install_packages: zlib1g-dev
-            install_steps: wolfssl-all wolfssh
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
+            install_steps: wolfssl-all
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-ech --enable-debug
 
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
-            install_steps: wolfssl-opensslextra
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-ech --enable-debug
+            install_steps: wolfssl-opensslextra wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev libldap-dev valgrind
@@ -382,7 +382,7 @@ jobs:
           path: ~/wolfssl-all
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
-      - name: 'build wolfssl (all)'
+      - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
@@ -394,7 +394,7 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
           make install
 
-      - name: 'cache wolfssl (opensslextra)'
+      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssl-opensslextra
@@ -412,12 +412,12 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
           make install
 
       - name: 'cache wolfssh'
-        if: contains(matrix.build.install_steps, 'wolfssl')
+        if: contains(matrix.build.install_steps, 'wolfssh')
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssh
         env:
@@ -434,7 +434,7 @@ jobs:
           tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
           cd wolfssh-${{ env.wolfssh-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-all --enable-scp --enable-sftp --disable-term \
+          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
             --disable-examples --prefix=$HOME/wolfssh
           make install
 
