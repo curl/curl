@@ -215,8 +215,8 @@ jobs:
 
           - name: clang-tidy
             install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
-            install_steps: skipall wolfssl-opensslextra wolfssh
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
+            install_steps: skipall wolfssl-all wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --with-wolfssh=$HOME/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
 
           - name: scanbuild
