@@ -382,7 +382,7 @@ jobs:
           path: ~/wolfssl-all
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
-      - name: 'build wolfssl (all)'
+      - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
@@ -394,7 +394,7 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
           make install
 
-      - name: 'cache wolfssl (opensslextra)'
+      - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssl-opensslextra
