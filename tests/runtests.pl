@@ -3207,15 +3207,6 @@ sub testnumdetails {
 }
 
 if($executed) {
-    # If anything failed, make sure to list all 
-    if($failed && ($ok != $total) && $failedre) {
-        foreach my $testnum (split(' ', $failedre)) {
-            if($failed !~ /$testnum /) {
-                $failed .= "$testnum ";
-            }
-        }
-    }
-
     if($failedre) {
         my $sorted = numsortwords($failedre);
         logmsg "::group::Failed Retried Test details\n";
