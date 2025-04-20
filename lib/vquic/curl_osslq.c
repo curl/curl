@@ -832,7 +832,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
   stream->download_recvd += (curl_off_t)buflen;
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu, total=%zd",
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu, total=%" FMT_OFF_T,
               stream->s.id, buflen, stream->download_recvd);
   h3_drain_stream(cf, data);
   return 0;
