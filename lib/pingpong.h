@@ -48,9 +48,6 @@ typedef enum {
  */
 struct pingpong {
   size_t nread_resp;  /* number of bytes currently read of a server response */
-  bool pending_resp;  /* set TRUE when a server response is pending or in
-                         progress, and is cleared once the last response is
-                         read */
   char *sendthis; /* pointer to a buffer that is to be sent to the server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
@@ -71,6 +68,9 @@ struct pingpong {
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
                     const char *ptr, size_t len, int *code);
   BIT(initialised);
+  BIT(pending_resp);  /* set TRUE when a server response is pending or in
+                         progress, and is cleared once the last response is
+                         read */
 };
 
 #define PINGPONG_SETUP(pp,s,e)                   \

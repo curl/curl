@@ -141,9 +141,6 @@ struct ssh_conn {
   const char *passphrase;     /* pass-phrase to use */
   char *rsa_pub;              /* strdup'ed public key file */
   char *rsa;                  /* strdup'ed private key file */
-  bool authed;                /* the connection has been authenticated fine */
-  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
-                                 quote command fails) */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
   CURLcode actualcode;        /* the actual error code */
@@ -213,6 +210,9 @@ struct ssh_conn {
   curl_off_t offset;
 #endif /* USE_LIBSSH */
   BIT(initialised);
+  BIT(authed);                /* the connection has been authenticated fine */
+  BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
+                                 quote command fails) */
 };
 
 #ifdef USE_LIBSSH

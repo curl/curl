@@ -122,9 +122,9 @@ struct cf_msh3_ctx {
   struct curltime handshake_at;      /* time connect handshake finished */
   struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
-  bool handshake_complete;
-  bool handshake_succeeded;
-  bool connected;
+  BIT(handshake_complete);
+  BIT(handshake_succeeded);
+  BIT(connected);
   BIT(initialized);
   /* Flags written by curl thread */
   BIT(verbose);
@@ -181,11 +181,11 @@ struct stream_ctx {
   uint64_t error3; /* HTTP/3 stream error code */
   int status_code; /* HTTP status code */
   CURLcode recv_error;
-  bool closed;
-  bool reset;
-  bool upload_done;
-  bool firstheader;  /* FALSE until headers arrive */
-  bool recv_header_complete;
+  BIT(closed);
+  BIT(reset);
+  BIT(upload_done);
+  BIT(firstheader);  /* FALSE until headers arrive */
+  BIT(recv_header_complete);
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)((data && ctx)? \
