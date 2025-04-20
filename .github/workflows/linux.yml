@@ -417,7 +417,7 @@ jobs:
           make install
 
       - name: 'cache wolfssh'
-        if: contains(matrix.build.install_steps, 'wolfssl')
+        if: contains(matrix.build.install_steps, 'wolfssh')
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssh
         env:
