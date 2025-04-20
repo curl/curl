@@ -51,6 +51,9 @@ struct cf_quic_ctx {
   BIT(no_gso); /* do not use gso on sending */
 };
 
+#define H3_STREAM_CTX(ctx,data)                                         \
+  (data ? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL)
+
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
 

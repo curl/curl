@@ -590,9 +590,6 @@ struct h3_stream_ctx {
   BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
-#define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
-
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
   cf_osslq_stream_cleanup(&stream->s);

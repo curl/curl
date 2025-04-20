@@ -165,7 +165,7 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
 /**
  * All about the H3 internals of a stream
  */
-struct stream_ctx {
+struct h3_stream_ctx {
   curl_uint64_t id; /* HTTP/3 protocol stream identifier */
   struct bufq recvbuf; /* h3 response */
   struct h1_req_parser h1; /* h1 request parsing */
@@ -179,10 +179,7 @@ struct stream_ctx {
   BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
 };
 
-#define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)(\
-            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
-
-static void h3_stream_ctx_free(struct stream_ctx *stream)
+static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
   Curl_bufq_free(&stream->recvbuf);
   Curl_h1_req_parse_free(&stream->h1);
@@ -193,12 +190,12 @@ static void h3_stream_hash_free(unsigned int id, void *stream)
 {
   (void)id;
   DEBUGASSERT(stream);
-  h3_stream_ctx_free((struct stream_ctx *)stream);
+  h3_stream_ctx_free((struct h3_stream_ctx *)stream);
 }
 
 typedef bool cf_quiche_svisit(struct Curl_cfilter *cf,
                               struct Curl_easy *sdata,
-                              struct stream_ctx *stream,
+                              struct h3_stream_ctx *stream,
                               void *user_data);
 
 struct cf_quiche_visit_ctx {
@@ -211,7 +208,7 @@ struct cf_quiche_visit_ctx {
 static bool cf_quiche_stream_do(unsigned int mid, void *val, void *user_data)
 {
   struct cf_quiche_visit_ctx *vctx = user_data;
-  struct stream_ctx *stream = val;
+  struct h3_stream_ctx *stream = val;
   struct Curl_easy *sdata = Curl_multi_get_easy(vctx->multi, mid);
   if(sdata)
     return vctx->cb(vctx->cf, sdata, stream, vctx->user_data);
@@ -234,7 +231,7 @@ static void cf_quiche_for_all_streams(struct Curl_cfilter *cf,
 
 static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
                                 struct Curl_easy *sdata,
-                                struct stream_ctx *stream,
+                                struct h3_stream_ctx *stream,
                                 void *user_data)
 {
   (void)user_data;
@@ -248,7 +245,7 @@ static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
 
 static bool cf_quiche_do_expire(struct Curl_cfilter *cf,
                                 struct Curl_easy *sdata,
-                                struct stream_ctx *stream,
+                                struct h3_stream_ctx *stream,
                                 void *user_data)
 {
   (void)stream;
@@ -262,7 +259,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   if(stream)
     return CURLE_OK;
@@ -287,7 +284,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result;
 
   (void)cf;
@@ -314,7 +311,7 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   unsigned char bits;
 
   (void)cf;
@@ -345,7 +342,7 @@ static CURLcode write_resp_raw(struct Curl_cfilter *cf,
                                const void *mem, size_t memlen)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result = CURLE_OK;
   ssize_t nwritten;
 
@@ -376,7 +373,7 @@ static int cb_each_header(uint8_t *name, size_t name_len,
 {
   struct cb_ctx *x = argp;
   struct cf_quiche_ctx *ctx = x->cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, x->data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, x->data);
   CURLcode result;
 
   if(!stream)
@@ -416,7 +413,7 @@ static ssize_t stream_resp_read(void *reader_ctx,
 {
   struct cb_ctx *x = reader_ctx;
   struct cf_quiche_ctx *ctx = x->cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, x->data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, x->data);
   ssize_t nread;
 
   if(!stream) {
@@ -440,7 +437,7 @@ static CURLcode cf_recv_body(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nwritten;
   struct cb_ctx cb_ctx;
   CURLcode result = CURLE_OK;
@@ -498,7 +495,7 @@ static const char *cf_ev_name(quiche_h3_event *ev)
 
 static CURLcode h3_process_event(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 struct stream_ctx *stream,
+                                 struct h3_stream_ctx *stream,
                                  quiche_h3_event *ev)
 {
   struct cb_ctx cb_ctx;
@@ -561,7 +558,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
 
 static CURLcode cf_quiche_ev_process(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
-                                     struct stream_ctx *stream,
+                                     struct h3_stream_ctx *stream,
                                      quiche_h3_event *ev)
 {
   CURLcode result = h3_process_event(cf, data, stream, ev);
@@ -584,7 +581,7 @@ struct cf_quich_disp_ctx {
 static bool cf_quiche_disp_event(unsigned int mid, void *val, void *user_data)
 {
   struct cf_quich_disp_ctx *dctx = user_data;
-  struct stream_ctx *stream = val;
+  struct h3_stream_ctx *stream = val;
 
   if(stream->id == dctx->stream_id) {
     struct Curl_easy *sdata = Curl_multi_get_easy(dctx->multi, mid);
@@ -599,7 +596,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = NULL;
+  struct h3_stream_ctx *stream = NULL;
   quiche_h3_event *ev;
 
   /* Take in the events and distribute them to the transfers. */
@@ -848,7 +845,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
                                   CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nread = -1;
 
   DEBUGASSERT(stream);
@@ -880,7 +877,7 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t len, CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nread = -1;
   CURLcode result;
 
@@ -953,7 +950,7 @@ out:
 
 static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
-                                   struct stream_ctx *stream,
+                                   struct h3_stream_ctx *stream,
                                    const void *buf, size_t len, bool eos,
                                    CURLcode *err)
 {
@@ -1012,7 +1009,7 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
                               CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   size_t nheader, i;
   curl_int64_t stream3_id;
   struct dynhds h2_headers;
@@ -1132,7 +1129,7 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               CURLcode *err)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result;
   ssize_t nwritten;
 
@@ -1191,7 +1188,7 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   return stream && (quiche_conn_stream_writable(
     ctx->qconn, (curl_uint64_t)stream->id, 1) > 0);
@@ -1209,7 +1206,7 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
 
   Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
   if(want_recv || want_send) {
-    struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     bool c_exhaust, s_exhaust;
 
     c_exhaust = FALSE; /* Have not found any call in quiche that tells
@@ -1232,7 +1229,7 @@ static bool cf_quiche_data_pending(struct Curl_cfilter *cf,
                                    const struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  const struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  const struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)cf;
   return stream && !Curl_bufq_is_empty(&stream->recvbuf);
 }
@@ -1269,7 +1266,7 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     h3_data_done(cf, data);
     break;
   case CF_CTRL_DATA_DONE_SEND: {
-    struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       unsigned char body[1];
       ssize_t sent;
@@ -1283,7 +1280,7 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     break;
   }
   case CF_CTRL_DATA_IDLE: {
-    struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->closed) {
       result = cf_flush_egress(cf, data);
       if(result)
