@@ -55,7 +55,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-a64-x64-gcc'
+          export CW_CONFIG='-main-werror-linux-a64-x64-gcc-nolibgroup'
           export CW_REVISION='${{ github.sha }}'
           DOCKER_IMAGE='debian:bookworm-slim'
           export CW_CCSUFFIX='-15'
@@ -152,7 +152,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-zlibng'
+          export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-zlibng-nolibgroup'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           sudo podman image trust set --type reject default
