@@ -27,13 +27,16 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
-  rm -rf bld-curl
-  cmake ../.. -B bld-curl -DCMAKE_INSTALL_PREFIX="${PWD}/bld-curl/_pkg"
-  cmake --build bld-curl
-  cmake --install bld-curl
+  bld='bld-curl'
+  rm -rf "${bld}"
+  cmake ../.. -B "${bld}" -DCMAKE_INSTALL_PREFIX="${PWD}/${bld}/_pkg" \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_STATIC_LIBS=ON
+  cmake --build "${bld}"
+  cmake --install "${bld}"
   rm -rf bld-find_package
   cmake -B bld-find_package \
     -DTEST_INTEGRATION_MODE=find_package \
-    -DCMAKE_PREFIX_PATH="${PWD}/bld-curl/_pkg/lib/cmake/CURL"
-  cmake --build bld-find_package
+    -DCMAKE_PREFIX_PATH="${PWD}/${bld}/_pkg/lib/cmake/CURL"
+  cmake --build bld-find_package --verbose
 fi

@@ -62,6 +62,8 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package")
     endif()
   endforeach()
 elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "")
+  set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
   include(FetchContent)
@@ -71,8 +73,16 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_REPOSITORY "${FROM_GIT_REPO}"
     GIT_TAG "${FROM_GIT_TAG}"
     GIT_SHALLOW)
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "")
+  set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
 endif()
+
+add_executable(test-dependent-static-ns "test.c")
+target_link_libraries(test-dependent-static-ns PRIVATE "CURL::libcurl_static")
+
+add_executable(test-dependent-shared-ns "test.c")
+target_link_libraries(test-dependent-shared-ns PRIVATE "CURL::libcurl_shared")
 
 # Alias for either shared or static library
 add_executable(test-dependent-selected-ns "test.c")
@@ -80,6 +90,13 @@ target_link_libraries(test-dependent-selected-ns PRIVATE "CURL::libcurl")
 
 if(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
+
+  add_executable(test-dependent-static-bare "test.c")
+  target_link_libraries(test-dependent-static-bare PRIVATE "libcurl_static")
+
+  add_executable(test-dependent-shared-bare "test.c")
+  target_link_libraries(test-dependent-shared-bare PRIVATE "libcurl_shared")
+
   add_executable(test-dependent-selected-bare "test.c")
   target_link_libraries(test-dependent-selected-bare PRIVATE "libcurl")
 endif()
