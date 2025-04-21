@@ -79,10 +79,6 @@ else()
 endif()
 
 if(LIBGSASL_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_libgsasl_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::libgsasl)
     add_library(CURL::libgsasl INTERFACE IMPORTED)
     set_target_properties(CURL::libgsasl PROPERTIES

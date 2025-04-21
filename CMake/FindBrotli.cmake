@@ -72,10 +72,6 @@ else()
 endif()
 
 if(BROTLI_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_brotli_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::brotli)
     add_library(CURL::brotli INTERFACE IMPORTED)
     set_target_properties(CURL::brotli PROPERTIES
