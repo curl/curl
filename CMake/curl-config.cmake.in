@@ -111,18 +111,11 @@ if("@USE_GNUTLS@")
   if(CURL_USE_PKGCONFIG)
     find_dependency(PkgConfig)
     pkg_check_modules(GNUTLS "gnutls")
-    if(GNUTLS_FOUND)
-      add_library(CURL::gnutls INTERFACE IMPORTED)
-      set_target_properties(CURL::gnutls PROPERTIES
-        INTERFACE_COMPILE_OPTIONS "${GNUTLS_CFLAGS}"
-        INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIRS}"
-        INTERFACE_LINK_DIRECTORIES "${GNUTLS_LIBRARY_DIRS}"
-        INTERFACE_LINK_LIBRARIES "${GNUTLS_LIBRARIES}")
-      list(APPEND _libs CURL::gnutls)
-    endif()
   endif()
   if(NOT GNUTLS_FOUND)
     find_dependency(GnuTLS)
+  endif()
+  if(GNUTLS_FOUND)
     add_library(CURL::gnutls INTERFACE IMPORTED)
     set_target_properties(CURL::gnutls PROPERTIES
       INTERFACE_COMPILE_OPTIONS "${GNUTLS_CFLAGS}"
