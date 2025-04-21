@@ -15,18 +15,21 @@ shift
 cmake_provider="${CMAKE_PROVIDER:-cmake}"
 cmake_consumer="${CMAKE_CONSUMER:-${cmake_provider}}"
 
+src='../..'
+
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
+  src="${PWD}/${src}"
   bldc='bld-fetchcontent'
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" "$@" \
     -DTEST_INTEGRATION_MODE=FetchContent \
-    -DFROM_GIT_REPO="${PWD}/../.." \
+    -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
   "${cmake_consumer}" --build "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
-  rm -rf curl; ln -s ../.. curl
+  rm -rf curl; ln -s "${src}" curl
   bldc='bld-add_subdirectory'
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" "$@" \
@@ -35,9 +38,11 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
+  src="${PWD}/${src}"
   bldp='bld-curl'
+  prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
-  "${cmake_provider}" ../.. -B "${bldp}" -DCMAKE_INSTALL_PREFIX="${PWD}/${bldp}/_pkg" "$@" \
+  "${cmake_provider}" "${src}" -B "${bldp}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_STATIC_LIBS=ON
   "${cmake_provider}" --build "${bldp}"
@@ -46,6 +51,6 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" "$@" \
     -DTEST_INTEGRATION_MODE=find_package \
-    -DCMAKE_PREFIX_PATH="${PWD}/${bldp}/_pkg/lib/cmake/CURL"
+    -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
   "${cmake_consumer}" --build "${bldc}" --verbose
 fi
