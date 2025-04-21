@@ -85,10 +85,6 @@ else()
 endif()
 
 if(NETTLE_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_nettle_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::nettle)
     add_library(CURL::nettle INTERFACE IMPORTED)
     set_target_properties(CURL::nettle PROPERTIES
