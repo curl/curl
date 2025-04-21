@@ -25,7 +25,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
-  "${cmake_consumer}" --build "${bldc}"
+  "${cmake_consumer}" --build "${bldc}" --verbose
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
@@ -34,7 +34,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" "$@" \
     -DTEST_INTEGRATION_MODE=add_subdirectory
-  "${cmake_consumer}" --build "${bldc}"
+  "${cmake_consumer}" --build "${bldc}" --verbose
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
