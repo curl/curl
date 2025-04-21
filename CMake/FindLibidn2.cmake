@@ -80,6 +80,10 @@ else()
 endif()
 
 if(LIBIDN2_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libidn2_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::libidn2)
     add_library(CURL::libidn2 INTERFACE IMPORTED)
     set_target_properties(CURL::libidn2 PROPERTIES

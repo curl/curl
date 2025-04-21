@@ -94,6 +94,10 @@ if(CARES_FOUND)
     list(APPEND _cares_LIBRARIES "iphlpapi")  # for if_indextoname and others
   endif()
 
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_cares_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::cares)
     add_library(CURL::cares INTERFACE IMPORTED)
     set_target_properties(CURL::cares PROPERTIES
