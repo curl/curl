@@ -119,10 +119,6 @@ else()
 endif()
 
 if(NGTCP2_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_ngtcp2_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::ngtcp2)
     add_library(CURL::ngtcp2 INTERFACE IMPORTED)
     set_target_properties(CURL::ngtcp2 PROPERTIES

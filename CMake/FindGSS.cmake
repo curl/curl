@@ -347,10 +347,6 @@ mark_as_advanced(
 )
 
 if(GSS_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_GSS_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::gss)
     add_library(CURL::gss INTERFACE IMPORTED)
     set_target_properties(CURL::gss PROPERTIES
