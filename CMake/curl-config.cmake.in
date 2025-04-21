@@ -172,21 +172,25 @@ if(NOT TARGET @PROJECT_NAME@::@LIB_NAME@)
 endif()
 
 cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
-if(NOT _has_CMP0099 AND _lib)
+if(NOT _has_CMP0099 AND _libs)
   message(STATUS "CURL: CMP0099 not detected, resorting to workaround.")
   # CMake before CMP0099 (CMake 3.17 2020-03-20) did not endorse the concept of libdirs and lib names.
   # It expected libs to have an absolute filename. As a workaround, manually apply dependency libdirs
   # to the libcurl target, for CMake consumers without this policy set.
-  foreach(_lib IN ITEMS libs)
-    get_target_property(_libdirs "${_lib}" INTERFACE_LINK_DIRECTORIES)
-    if(_libdirs)
-      foreach(_target IN ITEMS @PROJECT_NAME@::libcurl)
-        if(TARGET "${_target}")
-          target_link_directories("${_target}" INTERFACE ${_libdirs})
-        endif()
-      endforeach()
+  set(_libdirs "")
+  foreach(_lib IN LISTS _libs)
+    get_target_property(_libdir "${_lib}" INTERFACE_LINK_DIRECTORIES)
+    if(_libdir)
+      list(APPEND _libdirs "${_libdir}")
     endif()
   endforeach()
+  if(_libdirs)
+    foreach(_target IN ITEMS @PROJECT_NAME@::@LIB_SELECTED@)
+      if(TARGET "${_target}")
+        target_link_directories("${_target}" INTERFACE ${_libdirs})
+      endif()
+    endforeach()
+  endif()
 endif()
 
 # For compatibility with CMake's FindCURL.cmake
