@@ -97,6 +97,10 @@ if(WOLFSSL_FOUND)
     mark_as_advanced(MATH_LIBRARY)
   endif()
 
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_wolfssl_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::wolfssl)
     add_library(CURL::wolfssl INTERFACE IMPORTED)
     set_target_properties(CURL::wolfssl PROPERTIES
