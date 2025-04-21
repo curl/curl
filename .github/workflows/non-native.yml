@@ -265,7 +265,6 @@ jobs:
 
           - name: 'libressl'
             install_steps: libressl
-            generator: Ninja
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
@@ -344,7 +343,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
-            cmake -B bld -D_CURL_PREFILL=ON \
+            cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
