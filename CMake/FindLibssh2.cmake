@@ -85,7 +85,6 @@ if(LIBSSH2_FOUND)
   endif()
   if(CMAKE_VERSION VERSION_LESS 3.13 OR NOT _has_CMP0099)
     link_directories(${_libssh2_LIBRARY_DIRS})
-    message(STATUS "TRACE-1|${_libssh2_LIBRARY_DIRS}|")
   endif()
 
   if(NOT TARGET CURL::libssh2)
