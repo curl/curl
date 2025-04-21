@@ -850,27 +850,12 @@ if(CURL_USE_WOLFSSL)
 endif()
 
 if(CURL_USE_GNUTLS)
-  if(CURL_USE_PKGCONFIG)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(_gnutls "gnutls")
-  endif()
-  if(NOT _gnutls_FOUND)
-    find_package(GnuTLS REQUIRED)
-    set(_gnutls_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
-    set(_gnutls_LIBRARIES    ${GNUTLS_LIBRARY})
-  endif()
-  add_library(CURL::gnutls INTERFACE IMPORTED)
-  set_target_properties(CURL::gnutls PROPERTIES
-    INTERFACE_CURL_PC_MODULES "gnutls"
-    INTERFACE_COMPILE_OPTIONS "${_gnutls_CFLAGS}"
-    INTERFACE_INCLUDE_DIRECTORIES "${_gnutls_INCLUDE_DIRS}"
-    INTERFACE_LINK_DIRECTORIES "${_gnutls_LIBRARY_DIRS}"
-    INTERFACE_LINK_LIBRARIES "${_gnutls_LIBRARIES}")
+  find_package(GnuTLS REQUIRED)
   list(APPEND CURL_LIBS CURL::gnutls)
   find_package(Nettle REQUIRED)
+  list(APPEND CURL_LIBS CURL::nettle)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
-  list(APPEND CURL_LIBS CURL::nettle)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
@@ -2397,6 +2382,7 @@ if(NOT CURL_DISABLE_INSTALL)
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBrotli.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindCares.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGnuTLS.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLDAP.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
