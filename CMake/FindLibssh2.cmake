@@ -80,7 +80,8 @@ else()
 endif()
 
 if(LIBSSH2_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
+  cmake_policy(GET CMP0099 _has_CMP0099)
+  if(CMAKE_VERSION VERSION_LESS 3.13 OR NOT _has_CMP0099)
     link_directories(${_libssh2_LIBRARY_DIRS})
   endif()
 
