@@ -187,9 +187,9 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-      - name: 'via FetchContent'
-        run: ./tests/cmake/test.sh FetchContent
-      - name: 'via add_subdirectory'
-        run: ./tests/cmake/test.sh add_subdirectory
       - name: 'via find_package'
         run: ./tests/cmake/test.sh find_package
+      - name: 'via add_subdirectory'
+        run: ./tests/cmake/test.sh add_subdirectory
+      - name: 'via FetchContent'
+        run: ./tests/cmake/test.sh FetchContent
