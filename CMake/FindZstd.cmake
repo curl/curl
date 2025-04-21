@@ -99,10 +99,6 @@ else()
 endif()
 
 if(ZSTD_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_zstd_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::zstd)
     add_library(CURL::zstd INTERFACE IMPORTED)
     set_target_properties(CURL::zstd PROPERTIES
