@@ -64,6 +64,10 @@ endif()
 mark_as_advanced(WOLFSSH_INCLUDE_DIR WOLFSSH_LIBRARY)
 
 if(WOLFSSH_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_wolfssh_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::wolfssh)
     add_library(CURL::wolfssh INTERFACE IMPORTED)
     set_target_properties(CURL::wolfssh PROPERTIES
