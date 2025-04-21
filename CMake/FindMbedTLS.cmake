@@ -96,6 +96,10 @@ else()
 endif()
 
 if(MBEDTLS_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_mbedtls_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::mbedtls)
     add_library(CURL::mbedtls INTERFACE IMPORTED)
     set_target_properties(CURL::mbedtls PROPERTIES
