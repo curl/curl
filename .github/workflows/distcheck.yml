@@ -180,7 +180,7 @@ jobs:
           if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
             sudo apt-get -o Dpkg::Use-Pty=0 install ninja-build libpsl-dev libssl-dev
           else
-            brew install ninja libpsl openssl
+            brew install libpsl openssl
           fi
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
