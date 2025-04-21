@@ -852,18 +852,20 @@ endif()
 if(CURL_USE_GNUTLS)
   if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
-    pkg_check_modules(GNUTLS "gnutls")
+    pkg_check_modules(_gnutls "gnutls")
   endif()
-  if(NOT GNUTLS_FOUND)
+  if(NOT _gnutls_FOUND)
     find_package(GnuTLS REQUIRED)
+    set(_gnutls_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
+    set(_gnutls_LIBRARIES    ${GNUTLS_LIBRARY})
   endif()
   add_library(CURL::gnutls INTERFACE IMPORTED)
   set_target_properties(CURL::gnutls PROPERTIES
     INTERFACE_CURL_PC_MODULES "gnutls"
-    INTERFACE_COMPILE_OPTIONS "${GNUTLS_CFLAGS}"
-    INTERFACE_INCLUDE_DIRECTORIES "${GNUTLS_INCLUDE_DIRS}"
-    INTERFACE_LINK_DIRECTORIES "${GNUTLS_LIBRARY_DIRS}"
-    INTERFACE_LINK_LIBRARIES "${GNUTLS_LIBRARIES}")
+    INTERFACE_COMPILE_OPTIONS "${_gnutls_CFLAGS}"
+    INTERFACE_INCLUDE_DIRECTORIES "${_gnutls_INCLUDE_DIRS}"
+    INTERFACE_LINK_DIRECTORIES "${_gnutls_LIBRARY_DIRS}"
+    INTERFACE_LINK_LIBRARIES "${_gnutls_LIBRARIES}")
   list(APPEND CURL_LIBS CURL::gnutls)
   find_package(Nettle REQUIRED)
   set(_ssl_enabled ON)
