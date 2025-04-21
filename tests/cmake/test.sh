@@ -42,7 +42,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   bldp='bld-curl'
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
-  "${cmake_provider}" "${src}" -B "${bldp}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
+  "${cmake_provider}" -B "${bldp}" -S "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
     -DBUILD_SHARED_LIBS=ON \
     -DBUILD_STATIC_LIBS=ON
   "${cmake_provider}" --build "${bldp}"
