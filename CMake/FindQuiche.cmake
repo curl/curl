@@ -68,10 +68,6 @@ else()
 endif()
 
 if(QUICHE_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_quiche_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::quiche)
     add_library(CURL::quiche INTERFACE IMPORTED)
     set_target_properties(CURL::quiche PROPERTIES
