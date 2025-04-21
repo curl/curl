@@ -100,10 +100,6 @@ if(LIBRTMP_FOUND)
     list(APPEND _librtmp_LIBRARIES "winmm")
   endif()
 
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_librtmp_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::librtmp)
     add_library(CURL::librtmp INTERFACE IMPORTED)
     set_target_properties(CURL::librtmp PROPERTIES
