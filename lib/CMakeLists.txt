@@ -169,7 +169,9 @@ if(BUILD_STATIC_LIBS)
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
-  # Hack for old CMake versions not propagating libdirs automatically.
+  # CMake before CMP0099 (CMake 3.17 2020-03-20) did not propagate libdirs to
+  # targets. It expected libs to have an absolute filename. As a workaround,
+  # manually apply dependency libdirs, for CMake consumers without this policy.
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
   endif()
