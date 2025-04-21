@@ -94,6 +94,10 @@ if(LIBSSH_FOUND)
     list(APPEND _libssh_LIBRARIES "iphlpapi")  # for if_nametoindex
   endif()
 
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libssh_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::libssh)
     add_library(CURL::libssh INTERFACE IMPORTED)
     set_target_properties(CURL::libssh PROPERTIES
