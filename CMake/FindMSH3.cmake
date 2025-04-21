@@ -69,6 +69,10 @@ else()
 endif()
 
 if(MSH3_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_msh3_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::msh3)
     add_library(CURL::msh3 INTERFACE IMPORTED)
     set_target_properties(CURL::msh3 PROPERTIES
