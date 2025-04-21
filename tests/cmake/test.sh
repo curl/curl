@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 # Copyright (C) Viktor Szakats
 #
 # SPDX-License-Identifier: curl
@@ -29,7 +29,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
-  "${cmake_consumer}" --build "${bldc}" --verbose
+  "${cmake_consumer}" --verbose --build "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
@@ -38,7 +38,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   rm -rf "${bldc}"
   "${cmake_consumer}" -B "${bldc}" "$@" \
     -DTEST_INTEGRATION_MODE=add_subdirectory
-  "${cmake_consumer}" --build "${bldc}" --verbose
+  "${cmake_consumer}" --verbose --build "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
@@ -56,5 +56,5 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   "${cmake_consumer}" -B "${bldc}" "$@" \
     -DTEST_INTEGRATION_MODE=find_package \
     -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
-  "${cmake_consumer}" --build "${bldc}" --verbose
+  "${cmake_consumer}" --verbose --build "${bldc}"
 fi
