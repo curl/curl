@@ -319,7 +319,7 @@ jobs:
             https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
           cd libressl-${{ env.libressl-version }}
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
-          cmake -B . \
+          cmake -B . -G Ninja \
             -DHAVE_ENDIAN_H=0 \
             -DCMAKE_INSTALL_PREFIX="$HOME/libressl" \
             -DCMAKE_SYSTEM_NAME=iOS \
@@ -343,7 +343,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
-            cmake -B bld -D_CURL_PREFILL=ON \
+            cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
