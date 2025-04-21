@@ -265,6 +265,7 @@ jobs:
 
           - name: 'libressl'
             install_steps: libressl
+            generator: Ninja
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
@@ -319,7 +320,7 @@ jobs:
             https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
           cd libressl-${{ env.libressl-version }}
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
-          cmake -B . \
+          cmake -B . -G Ninja \
             -DHAVE_ENDIAN_H=0 \
             -DCMAKE_INSTALL_PREFIX="$HOME/libressl" \
             -DCMAKE_SYSTEM_NAME=iOS \

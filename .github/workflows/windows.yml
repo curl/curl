@@ -677,7 +677,7 @@ jobs:
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake -B bld \
+            cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
               -DCMAKE_SYSTEM_PROCESSOR=arm \
