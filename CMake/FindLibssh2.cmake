@@ -80,7 +80,7 @@ else()
 endif()
 
 if(LIBSSH2_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.17)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     cmake_policy(GET CMP0099 _has_CMP0099)
     message(STATUS "TRACE-0|${_has_CMP0099}|")
   endif()
