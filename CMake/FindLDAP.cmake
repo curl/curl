@@ -103,6 +103,10 @@ else()
 endif()
 
 if(LDAP_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_ldap_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::ldap)
     add_library(CURL::ldap INTERFACE IMPORTED)
     set_target_properties(CURL::ldap PROPERTIES

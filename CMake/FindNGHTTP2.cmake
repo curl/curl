@@ -79,6 +79,10 @@ else()
 endif()
 
 if(NGHTTP2_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_nghttp2_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::nghttp2)
     add_library(CURL::nghttp2 INTERFACE IMPORTED)
     set_target_properties(CURL::nghttp2 PROPERTIES

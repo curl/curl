@@ -80,6 +80,10 @@ else()
 endif()
 
 if(LIBSSH2_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libssh2_LIBRARY_DIRS})
+  endif()
+
   if(NOT TARGET CURL::libssh2)
     add_library(CURL::libssh2 INTERFACE IMPORTED)
     set_target_properties(CURL::libssh2 PROPERTIES
