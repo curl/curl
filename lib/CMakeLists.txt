@@ -173,6 +173,29 @@ if(BUILD_STATIC_LIBS)
   target_include_directories(${LIB_STATIC} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+  # Hack for old CMake versions not propagating libdirs automatically.
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
+    cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
+  endif()
+  if(NOT _has_CMP0099 AND CURL_LIBS)
+    set(_libdirs "")
+    foreach(_lib IN LISTS CURL_LIBS)
+      if(TARGET "${_lib}")
+        get_target_property(_libdir "${_lib}" INTERFACE_LINK_DIRECTORIES)
+        if(_libdir)
+          list(APPEND _libdirs "${_libdir}")
+        endif()
+      endif()
+    endforeach()
+    if(_libdirs)
+      foreach(_target IN ITEMS ${LIB_STATIC})
+        if(TARGET "${_target}")
+          target_link_directories("${_target}" INTERFACE ${_libdirs})
+        endif()
+      endforeach()
+    endif()
+  endif()
 endif()
 
 if(BUILD_SHARED_LIBS)
