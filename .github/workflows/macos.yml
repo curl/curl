@@ -501,7 +501,12 @@ jobs:
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build / ${{ matrix.build }}'
-        run: make -C bld V=1 VERBOSE=1
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --verbose
+          else
+            make -C bld V=1
+          fi
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
