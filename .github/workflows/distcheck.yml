@@ -169,7 +169,6 @@ jobs:
     timeout-minutes: 10
     env:
       CC: clang
-      CMAKE_GENERATOR: Ninja
     strategy:
       fail-fast: false
       matrix:

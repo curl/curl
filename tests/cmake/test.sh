@@ -7,6 +7,8 @@ set -eu
 
 cd "$(dirname "$0")"
 
+command -v dpkg >/dev/null && export CMAKE_GENERATOR=Ninja
+
 mode="${1:-all}"
 
 cmake_provider="${CMAKE_PROVIDER:-cmake}"
