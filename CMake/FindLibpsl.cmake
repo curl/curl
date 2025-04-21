@@ -80,10 +80,6 @@ else()
 endif()
 
 if(LIBPSL_FOUND)
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_libpsl_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::libpsl)
     add_library(CURL::libpsl INTERFACE IMPORTED)
     set_target_properties(CURL::libpsl PROPERTIES
