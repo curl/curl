@@ -1567,6 +1567,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
           idx_count++) {
         if(ctx->poll_items[idx_count].revents & SSL_POLL_EVENT_W) {
           stream = H3_STREAM_CTX(ctx, ctx->curl_items[idx_count]);
+          DEBUGASSERT(stream);
           if(stream) {
             nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
             stream->s.send_blocked = FALSE;
