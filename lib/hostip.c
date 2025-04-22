@@ -1474,6 +1474,7 @@ fail:
 }
 #endif
 
+#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns)
 {
@@ -1508,6 +1509,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
     show_resolve_info(data, *dns);
   return result;
 }
+#endif
 
 int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks)
