@@ -42,6 +42,7 @@ struct dynbuf;
 #define SSLSUPP_ECH          (1<<7)
 #define SSLSUPP_CA_CACHE     (1<<8)
 #define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
+#define SSLSUPP_SIGNATURE_ALGORITHMS (1<<10) /* supports TLS sigalgs */
 
 #ifdef USE_ECH
 # include "../curl_base64.h"

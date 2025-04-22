@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Long: signature-algorithms
+Long: sigalgs
 Arg: <list>
 Help: TLS signature algorithms to use
 Protocols: TLS
@@ -11,10 +11,10 @@ Multi: single
 See-also:
   - ciphers
 Example:
-  - --signature-algorithms ecdsa_secp256r1_sha256 $URL
+  - --sigalgs ecdsa_secp256r1_sha256 $URL
 ---
 
-# `--signature-algorithms`
+# `--sigalgs`
 
 Set specific signature algorithms to use during SSL session establishment according to RFC
 5246, 7.4.1.4.1.
@@ -26,7 +26,7 @@ Multiple algorithms can be provided by separating them with `:`
 (e.g. `DSA+SHA256:rsa_pss_pss_sha256`). The parameter is available as `-sigalgs` in the
 OpenSSL `s_client` and `s_server` utilities.
 
---signature-algorithms allows a OpenSSL powered curl to make SSL-connections with exactly
+`--sigalgs` allows a OpenSSL powered curl to make SSL-connections with exactly
 the signature algorithms requested by the client, avoiding nontransparent client/server
 negotiations.
 

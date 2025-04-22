@@ -5489,6 +5489,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS
+  SSLSUPP_SIGNATURE_ALGORITHMS |
+#endif
 #ifdef USE_ECH_OPENSSL
   SSLSUPP_ECH |
 #endif

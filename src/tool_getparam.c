@@ -305,7 +305,7 @@ static const struct LongShort aliases[]= {
   {"sessionid",                  ARG_BOOL|ARG_NO, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
   {"show-headers",               ARG_BOOL, 'i', C_SHOW_HEADERS},
-  {"signature-algorithms",       ARG_STRG|ARG_TLS, ' ',
+  {"sigalgs",                    ARG_STRG|ARG_TLS, ' ',
    C_SIGNATURE_ALGORITHMS},
   {"silent",                     ARG_BOOL, 's', C_SILENT},
   {"skip-existing",              ARG_BOOL, ' ', C_SKIP_EXISTING},
@@ -2694,7 +2694,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_CURVES: /* --curves */
       err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
       break;
-    case C_SIGNATURE_ALGORITHMS: /* --signature-algorithms */
+    case C_SIGNATURE_ALGORITHMS: /* --sigalgs */
       err = getstr(&config->ssl_signature_algorithms, nextarg, DENY_BLANK);
       break;
     case C_FAIL_EARLY: /* --fail-early */

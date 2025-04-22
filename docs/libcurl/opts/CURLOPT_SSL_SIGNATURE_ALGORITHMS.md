@@ -31,9 +31,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_SIGNATURE_ALGORITHMS, char *
 # DESCRIPTION
 
 Pass a char pointer, pointing to a null-terminated string holding the list of
-signature algorithms to use for the TLS 1.2 (1.1, 1.0) connection. The list must
-be syntactically correct, it consists of one or more signature algorithm strings
-separated by colons.
+signature algorithms to use for the TLS connection. The list must be syntactically
+correct, it consists of one or more signature algorithm strings separated by colons.
 
 A valid example of a signature algorithms list with OpenSSL is:
 ~~~
@@ -45,6 +44,8 @@ option.
 
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
+
+Works with OpenSSL and its BoringSSL fork (added in 8.14.0).
 
 # DEFAULT
 
