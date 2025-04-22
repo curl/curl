@@ -36,9 +36,17 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   rm -rf curl; ln -s "${src}" curl
   bldc='bld-add_subdirectory'
   rm -rf "${bldc}"
-  "${cmake_consumer}" -B "${bldc}" "$@" \
-    -DTEST_INTEGRATION_MODE=add_subdirectory
-  "${cmake_consumer}" --verbose --build "${bldc}"
+  if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
+    "${cmake_consumer}" -B "${bldc}" "$@" \
+      -DTEST_INTEGRATION_MODE=add_subdirectory
+    "${cmake_consumer}" --verbose --build "${bldc}"
+  else
+    mkdir "${bldc}"; cd "${bldc}"
+    "${cmake_consumer}" .. "$@" \
+      -DTEST_INTEGRATION_MODE=add_subdirectory
+    "${cmake_consumer}" --verbose --build .
+    cd ..
+  fi
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
@@ -46,15 +54,34 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   bldp='bld-curl'
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
-  "${cmake_provider}" -B "${bldp}" -S "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
-    -DBUILD_SHARED_LIBS=ON \
-    -DBUILD_STATIC_LIBS=ON
-  "${cmake_provider}" --build "${bldp}"
-  "${cmake_provider}" --install "${bldp}"
+  if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
+    "${cmake_provider}" -B "${bldp}" -S "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
+      -DBUILD_SHARED_LIBS=ON \
+      -DBUILD_STATIC_LIBS=ON
+    "${cmake_provider}" --build "${bldp}"
+    "${cmake_provider}" --install "${bldp}"
+  else
+    mkdir "${bldp}"; cd "${bldp}"
+    "${cmake_provider}" "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
+      -DBUILD_SHARED_LIBS=ON \
+      -DBUILD_STATIC_LIBS=ON
+    "${cmake_provider}" --build .
+    make install
+    cd ..
+  fi
   bldc='bld-find_package'
   rm -rf "${bldc}"
-  "${cmake_consumer}" -B "${bldc}" "$@" \
-    -DTEST_INTEGRATION_MODE=find_package \
-    -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
-  "${cmake_consumer}" --verbose --build "${bldc}"
+  if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
+    "${cmake_consumer}" -B "${bldc}" "$@" \
+      -DTEST_INTEGRATION_MODE=find_package \
+      -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
+    "${cmake_consumer}" --verbose --build "${bldc}"
+  else
+    mkdir "${bldc}"; cd "${bldc}"
+    "${cmake_consumer}" .. "$@" \
+      -DTEST_INTEGRATION_MODE=find_package \
+      -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
+    "${cmake_consumer}" --verbose --build .
+    cd ..
+  fi
 fi
