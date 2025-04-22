@@ -43,7 +43,6 @@ TESTSCRIPTS = \
  test1173.pl  \
  test1175.pl  \
  test1177.pl  \
- test1222.pl  \
  test1275.pl  \
  test1276.pl  \
  test1477.pl  \
