@@ -481,19 +481,21 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t pktlen;
   size_t offset, to;
 
-  msg_iov.iov_base = buf;
-  msg_iov.iov_len = (int)sizeof(buf);
-
-  memset(&msg, 0, sizeof(msg));
-  msg.msg_iov = &msg_iov;
-  msg.msg_iovlen = 1;
-  msg.msg_control = msg_ctrl;
-
   DEBUGASSERT(max_pkts > 0);
   for(pkts = 0, total_nread = 0; pkts < max_pkts;) {
+    /* fully initialise this on each call to `recvmsg()`. There are
+     * operating systems out there that mess with `msg_iov.iov_len`
+     * in the call (*staring at NetBSD*). */
+    memset(&msg, 0, sizeof(msg));
+    msg_iov.iov_base = buf;
+    msg_iov.iov_len = (int)sizeof(buf);
+    msg.msg_iov = &msg_iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = msg_ctrl;
     msg.msg_name = &remote_addr;
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = sizeof(msg_ctrl);
+
     while((nread = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
           SOCKERRNO == SOCKEINTR)
       ;
