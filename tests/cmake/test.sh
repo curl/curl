@@ -21,7 +21,7 @@ cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 
 src='../..'
 
-if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
   src="${PWD}/${src}"
   bldc='bld-fetchcontent'
   rm -rf "${bldc}"
