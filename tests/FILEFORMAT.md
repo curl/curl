@@ -476,6 +476,7 @@ Features testable here are:
 - `NTLM`
 - `NTLM_WB`
 - `OpenSSL`
+- `override-dns` - this build can use a "fake" DNS server
 - `parsedate`
 - `proxy`
 - `PSL`

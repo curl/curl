@@ -123,10 +123,10 @@ LIB_CFILES =         \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
-  cshutdn.c          \
   connect.c          \
   content_encoding.c \
   cookie.c           \
+  cshutdn.c          \
   curl_addrinfo.c    \
   curl_des.c         \
   curl_endian.c      \
@@ -154,6 +154,7 @@ LIB_CFILES =         \
   easygetopt.c       \
   easyoptions.c      \
   escape.c           \
+  fake_addrinfo.c    \
   file.c             \
   fileinfo.c         \
   fopen.c            \
@@ -304,6 +305,7 @@ LIB_HFILES =         \
   easyif.h           \
   easyoptions.h      \
   escape.h           \
+  fake_addrinfo.h    \
   file.h             \
   fileinfo.h         \
   fopen.h            \

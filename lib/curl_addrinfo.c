@@ -50,6 +50,7 @@
 #include <stddef.h>
 
 #include "curl_addrinfo.h"
+#include "fake_addrinfo.h"
 #include "inet_pton.h"
 #include "warnless.h"
 /* The last 3 #include files should be in this order */
@@ -508,6 +509,14 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
                source, line, (void *)freethis);
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
+#elif defined(USE_FAKE_GETADDRINFO)
+  {
+    const char *env = getenv("CURL_DNS_SERVER");
+    if(env)
+      r_freeaddrinfo(freethis);
+    else
+      freeaddrinfo(freethis);
+  }
 #else
   freeaddrinfo(freethis);
 #endif
@@ -526,13 +535,20 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
 
 int
 curl_dbg_getaddrinfo(const char *hostname,
-                    const char *service,
-                    const struct addrinfo *hints,
-                    struct addrinfo **result,
-                    int line, const char *source)
+                     const char *service,
+                     const struct addrinfo *hints,
+                     struct addrinfo **result,
+                     int line, const char *source)
 {
 #ifdef USE_LWIPSOCK
   int res = lwip_getaddrinfo(hostname, service, hints, result);
+#elif defined(USE_FAKE_GETADDRINFO)
+  int res;
+  const char *env = getenv("CURL_DNS_SERVER");
+  if(env)
+    res = r_getaddrinfo(hostname, service, hints, result);
+  else
+    res = getaddrinfo(hostname, service, hints, result);
 #else
   int res = getaddrinfo(hostname, service, hints, result);
 #endif
