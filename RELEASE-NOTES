@@ -1,15 +1,16 @@
-curl and libcurl 8.13.1
+curl and libcurl 8.14.0
 
  Public curl releases:         267
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3395
+ Contributors:                 3399
 
 This release includes the following changes:
 
  o mqtt: send ping at upkeep interval [49]
  o schannel: handle pkcs12 client certificates containing CA certificates [58]
+ o wcurl: import v2025.04.20 script + docs [97]
  o websocket: add option to disable auto-pong reply [52]
 
 This release includes the following bugfixes:
@@ -26,6 +27,7 @@ This release includes the following bugfixes:
  o cmake: enable `-Wall` for MSVC when `PICKY_COMPILER=ON` [100]
  o cmake: fix nghttp3 static linking with `USE_OPENSSL_QUIC=ON` [79]
  o cmake: fix shell completion install when just one flavor is enabled [73]
+ o cmake: link `crypt32` for OpenSSL feature detection [105]
  o cmake: merge `CURL_WERROR` logic into `PickyWarnings.cmake` [66]
  o cmake: prefer `COMPILE_OPTIONS` over `CMAKE_C_FLAGS` for custom C options [72]
  o cmake: quotes, whitespace, use `VERSION_GREATER_EQUAL` [33]
@@ -43,6 +45,7 @@ This release includes the following bugfixes:
  o curl_get_line: handle lines ending on the buffer boundary [62]
  o curl_krb5: only use functions if FTP is still enabled [21]
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
+ o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
  o docs/INSTALL.md: drop reference to removed configure option [83]
  o docs/libcurl: make examples build with picky compiler options [84]
@@ -74,6 +77,7 @@ This release includes the following bugfixes:
  o make: clean tests better [60]
  o mk-ca-bundle.pl: follow redirects [53]
  o multi: do transfer book keeping using mid [91]
+ o openssl-quic: fix printf mask [102]
  o openssl-quic: fix shutdown when stream not open [11]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
@@ -81,6 +85,7 @@ This release includes the following bugfixes:
  o pytest: make test_07_22 more lenient to exit codes [90]
  o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
  o rand: update comment on Curl_rand_bytes weak random [35]
+ o runtests: add retry option to reduce flakiness [106]
  o runtests: recognize lowercase `windows` in `curl -V` [77]
  o runtests: remove server verification after start [89]
  o runtests: split `SSH_PWD` into `SCP_PWD` and `SFTP_PWD`, and more [75]
@@ -109,6 +114,7 @@ This release includes the following bugfixes:
  o tests: unify test case keywords
  o tests: use a more portable null device path [38]
  o tool_cb_write.c: handle EINTR on flush [65]
+ o tool_getparam: clear argument only when needed [98]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
  o VERSIONS: list all past releases [22]
  o vquic: ngtcp2 + openssl support [96]
@@ -135,17 +141,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andrew Kirillov, Andy Pan, Bo Anderson, Brian Chrzanowski,
-  bruce.yoon, Calvin Ruocco, Carlos Henrique Lima Melara, Christian Schmitz,
-  Cole Helbling, Dagobert Michelsen, Dan Fandrich, Daniel Engberg,
-  Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
+  Abhinav Singhal, Andrew Kirillov, Andy Pan, bo0tzz on github, Bo Anderson,
+  Brian Chrzanowski, bruce.yoon, bsr13 on hackerone, Calvin Ruocco,
+  Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
+  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
+  Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
   epicmkirzinger on github, Fujii Hironori, Graham Christensen, Harry Sintonen,
-  Jake Yuesong Li, Jean-Christophe Amiel, Joel Depooter, Johan Eliasson,
-  Jonathan Rosa, Kai Pastor, Marius Kleidl, mschroeder-fzj on github,
-  Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont, Ray Satiro,
-  renovate[bot], Sören Tempel, Stefan Eissing, Stephen Farrell, Tal Regev,
-  Tomas Volf, Viktor Szakats, x1sc0 on github, Yedaya Katsman
-  (43 contributors)
+  Jake Yuesong Li, Jean-Christophe Amiel, Jixinqi, Joel Depooter,
+  Johan Eliasson, Jonathan Rosa, Kai Pastor, Marius Kleidl, Max Eliaser,
+  mschroeder-fzj on github, Nigel Brittain, Nils Goroll, Pavel Kropachev,
+  PleaseJustDont, Ray Satiro, renovate[bot], Samuel Henrique, Sören Tempel,
+  Stefan Eissing, Stephen Farrell, Tal Regev, Tomas Volf, Viktor Szakats,
+  x1sc0 on github, Yedaya Katsman
+  (48 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -239,8 +247,14 @@ References to bug reports and discussions on issues:
  [90] = https://curl.se/bug/?i=17083
  [91] = https://curl.se/bug/?i=16761
  [92] = https://curl.se/bug/?i=17015
+ [93] = https://curl.se/bug/?i=17105
  [95] = https://curl.se/bug/?i=17077
  [96] = https://curl.se/bug/?i=17027
+ [97] = https://curl.se/bug/?i=17035
+ [98] = https://curl.se/bug/?i=17112
  [99] = https://curl.se/bug/?i=16384
  [100] = https://curl.se/bug/?i=17050
  [101] = https://curl.se/bug/?i=17035
+ [102] = https://curl.se/bug/?i=17106
+ [105] = https://curl.se/bug/?i=17101
+ [106] = https://curl.se/bug/?i=17091
