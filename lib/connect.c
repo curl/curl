@@ -171,11 +171,12 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
     nowp = &now;
   }
   data->conn->shutdown.start[sockindex] = *nowp;
-  data->conn->shutdown.timeout_ms = (timeout_ms >= 0) ?
+  data->conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (unsigned int)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
-  if(data->conn->shutdown.timeout_ms)
+  /* Set a timer, unless we operate on the admin handle */
+  if(data->mid && data->conn->shutdown.timeout_ms)
     Curl_expire_ex(data, nowp, data->conn->shutdown.timeout_ms,
                    EXPIRE_SHUTDOWN);
 }
