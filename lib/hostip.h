@@ -187,8 +187,13 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
  * Populate the cache with specified entries from CURLOPT_RESOLVE.
  */
 CURLcode Curl_loadhostpairs(struct Curl_easy *data);
+
+#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns);
+#else
+#define Curl_resolv_check(x,y) CURLE_NOT_BUILT_IN
+#endif
 int Curl_resolv_getsock(struct Curl_easy *data,
                         curl_socket_t *socks);
 
