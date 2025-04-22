@@ -12,12 +12,12 @@ command -v dpkg >/dev/null && export CMAKE_GENERATOR=Ninja  # 3.17+
 mode="${1:-all}"
 shift
 
-cmake_provider="${CMAKE_PROVIDER:-cmake}"
-cmake_consumer="${CMAKE_CONSUMER:-${cmake_provider}}"
+cmake_consumer="${CMAKE_CONSUMER:-cmake}"
+cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 
 # 'modern': supports -S/-B (3.13+), --install (3.15+)
-"${cmake_provider}" --help | grep -q -- '--install' && cmake_provider_modern=1
 "${cmake_consumer}" --help | grep -q -- '--install' && cmake_consumer_modern=1
+"${cmake_provider}" --help | grep -q -- '--install' && cmake_provider_modern=1
 
 src='../..'
 
