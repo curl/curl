@@ -28,6 +28,27 @@ cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 
 src='../..'
 
+if [ "${mode}" = 'ExternalProject' ]; then  # Broken
+  (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
+  src="${PWD}/source.tar.gz"
+  sha="$(openssl dgst -sha256 "${src}" | grep -a -i -o -E '[0-9a-f]{64}$')"
+  bldc='bld-externalproject'
+  rm -rf "${bldc}"
+  if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
+    "${cmake_consumer}" -B "${bldc}" "$@" \
+      -DTEST_INTEGRATION_MODE=ExternalProject \
+      -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
+    "${cmake_consumer}" --build "${bldc}" --verbose
+  else
+    mkdir "${bldc}"; cd "${bldc}"
+    "${cmake_consumer}" .. "$@" \
+      -DTEST_INTEGRATION_MODE=ExternalProject \
+      -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
+    "${cmake_consumer}" --verbose --build .
+    cd ..
+  fi
+fi
+
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
   src="${PWD}/${src}"
   bldc='bld-fetchcontent'

@@ -35,7 +35,16 @@ if(TEST_INTEGRATION_MODE STREQUAL "FetchContent" AND CMAKE_VERSION VERSION_LESS 
   message(FATAL_ERROR "This test requires CMake 3.14 or upper")
 endif()
 
-if(TEST_INTEGRATION_MODE STREQUAL "find_package")
+if(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")  # Broken
+  include(ExternalProject)
+  ExternalProject_Add(libssh2
+    URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
+    INSTALL_COMMAND ""
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+endif()
+
+if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
+   TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # Double-inclusion test
   foreach(result_var IN ITEMS
