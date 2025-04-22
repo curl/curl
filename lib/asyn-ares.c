@@ -816,6 +816,10 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   }
 
 #ifdef HAVE_CARES_SERVERS_CSV
+  result = async_ares_init_lazy(data);
+  if(result)
+    return result;
+
 #ifdef HAVE_CARES_PORTS_CSV
   ares_result = ares_set_servers_ports_csv(ares->channel, servers);
 #else
