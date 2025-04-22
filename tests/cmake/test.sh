@@ -28,7 +28,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
-  "${cmake_consumer}" --verbose --build "${bldc}"
+  "${cmake_consumer}" --build "${bldc}" --verbose
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
@@ -38,12 +38,12 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
     "${cmake_consumer}" -B "${bldc}" "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
-    "${cmake_consumer}" --verbose --build "${bldc}"
+    "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
     "${cmake_consumer}" .. "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
-    "${cmake_consumer}" --verbose --build .
+    "${cmake_consumer}" --build . --verbose
     cd ..
   fi
 fi
@@ -74,13 +74,13 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_consumer}" -B "${bldc}" "$@" \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
-    "${cmake_consumer}" --verbose --build "${bldc}"
+    "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
     "${cmake_consumer}" .. "$@" \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
-    "${cmake_consumer}" --verbose --build .
+    "${cmake_consumer}" --build . --verbose
     cd ..
   fi
 fi
