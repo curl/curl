@@ -4466,41 +4466,28 @@ static bool h2_permissible_field(struct dynhds_entry *e)
   return TRUE;
 }
 
-static const char *http_skip_quoted_string(const char *s)
-{
-  DEBUGASSERT(*s == '"');
-  if(!*s)
-    return s;
-  s++;
-  while(*s && *s != '"')
-    s++;
-  if(*s == '"')
-    s++;
-  return s;
-}
-
 static bool http_TE_has_token(const char *fvalue, const char *token)
 {
-  size_t tlen = strlen(token);
-
   while(*fvalue) {
-    const char *name;
-    size_t namelen;
+    struct Curl_str name;
 
     /* skip to first token */
     while(ISBLANK(*fvalue) || *fvalue == ',')
       fvalue++;
-    name = fvalue;
-    /* skip until anything that is no longer token */
-    while(*fvalue && !ISBLANK(*fvalue) && *fvalue != ',' && *fvalue != ';')
-      fvalue++;
-    namelen = fvalue - name;
-    if((namelen == tlen) && strncasecompare(name, token, tlen))
+    if(Curl_str_cspn(&fvalue, &name, " \t\r;,"))
+      return FALSE;
+    if(Curl_str_casecompare(&name, token))
       return TRUE;
+
     /* skip any remainder after token, e.g. parameters with quoted strings */
     while(*fvalue && *fvalue != ',') {
-      if(*fvalue == '"')
-        fvalue = http_skip_quoted_string(fvalue);
+      if(*fvalue == '"') {
+        struct Curl_str qw;
+        /* if we do not cleanly find a quoted word here, the header value
+         * does not follow HTTP syntax and we reject */
+        if(Curl_str_quotedword(&fvalue, &qw, CURL_MAX_HTTP_HEADER))
+          return FALSE;
+      }
       else
         fvalue++;
     }
