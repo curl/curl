@@ -3,6 +3,14 @@
 #
 # SPDX-License-Identifier: curl
 
+# Recommended options:
+#
+# -DCMAKE_UNITY_BUILD=ON -DBUILD_STATIC_CURL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
+# -D_CURL_PREFILL=ON:       for macOS
+# -DCURL_USE_PKGCONFIG=OFF: for cmake <=3.12 with 'add_subdirectory' tests.
+#                           These old versions can't propagate library
+#                           directories back to the consumer project.
+
 set -eu
 
 cd "$(dirname "$0")"
