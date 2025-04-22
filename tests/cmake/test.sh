@@ -9,8 +9,7 @@ cd "$(dirname "$0")"
 
 command -v dpkg >/dev/null && export CMAKE_GENERATOR=Ninja  # 3.17+
 
-mode="${1:-all}"
-shift
+mode="${1:-all}"; shift
 
 cmake_consumer="${CMAKE_CONSUMER:-cmake}"
 cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
