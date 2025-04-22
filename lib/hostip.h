@@ -188,7 +188,7 @@ CURLcode Curl_dnscache_add(struct Curl_easy *data,
  */
 CURLcode Curl_loadhostpairs(struct Curl_easy *data);
 
-#if USE_CURL_ASYNC
+#ifdef USE_CURL_ASYNC
 CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns);
 #else
