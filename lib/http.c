@@ -4445,7 +4445,6 @@ struct name_const {
 
 /* keep them sorted by length! */
 static struct name_const H2_NON_FIELD[] = {
-  { STRCONST("TE") },
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
   { STRCONST("Connection") },
@@ -4454,15 +4453,57 @@ static struct name_const H2_NON_FIELD[] = {
   { STRCONST("Transfer-Encoding") },
 };
 
-static bool h2_non_field(const char *name, size_t namelen)
+static bool h2_permissible_field(struct dynhds_entry *e)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(H2_NON_FIELD); ++i) {
-    if(namelen < H2_NON_FIELD[i].namelen)
-      return FALSE;
-    if(namelen == H2_NON_FIELD[i].namelen &&
-       strcasecompare(H2_NON_FIELD[i].name, name))
+    if(e->namelen < H2_NON_FIELD[i].namelen)
       return TRUE;
+    if(e->namelen == H2_NON_FIELD[i].namelen &&
+       strcasecompare(H2_NON_FIELD[i].name, e->name))
+      return FALSE;
+  }
+  return TRUE;
+}
+
+static const char *http_skip_quoted_string(const char *s)
+{
+  DEBUGASSERT(*s == '"');
+  if(!*s)
+    return s;
+  s++;
+  while(*s && *s != '"')
+    s++;
+  if(*s == '"')
+    s++;
+  return s;
+}
+
+static bool http_TE_has_token(const char *fvalue, const char *token)
+{
+  size_t tlen = strlen(token);
+
+  while(*fvalue) {
+    const char *name;
+    size_t namelen;
+
+    /* skip to first token */
+    while(ISBLANK(*fvalue) || *fvalue == ',')
+      fvalue++;
+    name = fvalue;
+    /* skip until anything that is no longer token */
+    while(*fvalue && !ISBLANK(*fvalue) && *fvalue != ',' && *fvalue != ';')
+      fvalue++;
+    namelen = fvalue - name;
+    if((namelen == tlen) && strncasecompare(name, token, tlen))
+      return TRUE;
+    /* skip any remainder after token, e.g. parameters with quoted strings */
+    while(*fvalue && *fvalue != ',') {
+      if(*fvalue == '"')
+        fvalue = http_skip_quoted_string(fvalue);
+      else
+        fvalue++;
+    }
   }
   return FALSE;
 }
@@ -4521,7 +4562,14 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   }
   for(i = 0; !result && i < Curl_dynhds_count(&req->headers); ++i) {
     e = Curl_dynhds_getn(&req->headers, i);
-    if(!h2_non_field(e->name, e->namelen)) {
+    /* "TE" is special in that it is only permissible when it
+     * has only value "trailers". RFC 9113 ch. 8.2.2 */
+    if(e->namelen == 2 && strcasecompare("TE", e->name)) {
+      if(http_TE_has_token(e->value, "trailers"))
+        result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
+                                 "trailers", sizeof("trailers") - 1);
+    }
+    else if(h2_permissible_field(e)) {
       result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
                                e->value, e->valuelen);
     }
