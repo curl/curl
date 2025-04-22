@@ -51,7 +51,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
     mkdir "${bldc}"; cd "${bldc}"
     "${cmake_consumer}" .. "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
-    "${cmake_consumer}" --build . --verbose
+    "${cmake_consumer}" --verbose --build .
     cd ..
   fi
 fi
@@ -88,7 +88,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_consumer}" .. "$@" \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
-    "${cmake_consumer}" --build . --verbose
+    "${cmake_consumer}" --verbose --build .
     cd ..
   fi
 fi
