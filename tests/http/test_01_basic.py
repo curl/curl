@@ -258,3 +258,24 @@ class TestBasic:
             r.check_exit_code(0)
         else:
             r.check_exit_code(43)
+
+    # http: special handling of TE request header
+    @pytest.mark.parametrize("te_in, te_out", [
+        ['trailers', 'trailers'],
+        ['chunked', None],
+        ['gzip, trailers', 'trailers'],
+        ['gzip ;q=0.2;x="y,x", trailers', 'trailers'],
+        ['gzip ;x="trailers", chunks', None],
+    ])
+    def test_01_17_TE(self, env: Env, httpd, te_in, te_out):
+        proto = 'h2'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               with_headers=True,
+                               extra_args=['-H', f'TE: {te_in}'])
+        r.check_response(200)
+        if te_out is not None:
+            assert r.responses[0]['header']['request-te'] == te_out, f'{r.responses[0]}'
+        else:
+            assert 'request-te' not in r.responses[0]['header'], f'{r.responses[0]}'

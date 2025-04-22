@@ -254,6 +254,10 @@ static int curltest_echo_handler(request_rec *r)
   ct = apr_table_get(r->headers_in, "content-type");
   ap_set_content_type(r, ct ? ct : "application/octet-stream");
 
+  if(apr_table_get(r->headers_in, "TE"))
+    apr_table_setn(r->headers_out, "Request-TE",
+                   apr_table_get(r->headers_in, "TE"));
+
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
   rv = ap_setup_client_block(r, REQUEST_CHUNKED_DECHUNK);
