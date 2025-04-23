@@ -3634,7 +3634,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   DEBUGASSERT(!octx->ssl_ctx);
   if(data->state.libctx) {
-    octx->ssl_ctx = SSL_CTX_new_ex(data->state.libctx, "?provider=tmp2",
+    octx->ssl_ctx = SSL_CTX_new_ex(data->state.libctx, "?provider=tpm2",
                                    req_method);
   }
   else {
