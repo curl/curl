@@ -83,7 +83,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
     curl_easy_setopt(curl, CURLOPT_URL,         url);
     curl_easy_setopt(curl, CURLOPT_USERAGENT,   "CURLOPT_CAINFO_BLOB");
     curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS,
-                     CURLSSLOPT_REVOKE_BEST_EFFORT);
+                     (long)CURLSSLOPT_REVOKE_BEST_EFFORT);
 
     blob.data = certdata;
     blob.len = certsize;

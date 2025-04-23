@@ -341,6 +341,7 @@ CURLcode test(char *URL)
   curl_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct testdata object;
+  CURLU *curlu = (CURLU *)&object;
   char *charp;
   long val;
   curl_off_t oval;
@@ -495,7 +496,7 @@ MOO
             elsif(($name eq "CURLOPT_POSTFIELDS") ||
                   ($name eq "CURLOPT_COPYPOSTFIELDS")) {
                 # set size to zero to avoid it being "illegal"
-                print $fh "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
+                print $fh "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);\n";
                 print $fh "${fpref} stringpointerextra);\n$fcheck";
             }
             elsif($name eq "CURLOPT_HTTPPOST") {
@@ -506,6 +507,9 @@ MOO
             }
             elsif($name eq "CURLOPT_STDERR") {
               print $fh "${fpref} stream);\n$fcheck";
+            }
+            elsif($name eq "CURLOPT_CURLU") {
+              print $fh "${fpref} curlu);\n$fcheck";
             }
             else {
               print $fh "${fpref} &object);\n$fcheck";
@@ -595,7 +599,7 @@ MOO
 print $fh <<FOOTER
   )
   /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
-  curl_easy_setopt(curl, (CURLoption)1, 0);
+  curl_easy_setopt(curl, (CURLoption)1, 0L);
   res = CURLE_OK;
 test_cleanup:
   curl_easy_cleanup(curl);

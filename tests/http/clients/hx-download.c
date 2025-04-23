@@ -233,7 +233,7 @@ static int my_progress_cb(void *userdata,
 }
 
 static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 int http_version, struct curl_slist *host,
+                 long http_version, struct curl_slist *host,
                  CURLSH *share, int use_earlydata, int fresh_connect)
 {
   curl_easy_setopt(hnd, CURLOPT_SHARE, share);

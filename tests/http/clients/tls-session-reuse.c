@@ -138,7 +138,7 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
 
 static int add_transfer(CURLM *multi, CURLSH *share,
                         struct curl_slist *resolve,
-                        const char *url, int http_version)
+                        const char *url, long http_version)
 {
   CURL *easy;
   CURLMcode mc;
