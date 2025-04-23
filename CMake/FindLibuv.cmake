@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBUV_INCLUDE_DIR`:   The libuv include directory.
-# - `LIBUV_LIBRARY`:       Path to `libuv` library.
+# - `LIBUV_INCLUDE_DIR`:  The libuv include directory.
+# - `LIBUV_LIBRARY`:      Path to `libuv` library.
 #
 # Defines:
 #
-# - `LIBUV_FOUND`:         System has libuv.
-# - `LIBUV_VERSION`:       Version of libuv.
-# - `CURL::libuv`:         libuv library target.
+# - `LIBUV_FOUND`:        System has libuv.
+# - `LIBUV_VERSION`:      Version of libuv.
+# - `CURL::libuv`:        libuv library target.
 
 set(_libuv_pc_requires "libuv")
 
