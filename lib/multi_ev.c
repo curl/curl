@@ -484,10 +484,8 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
   ps = calloc(1, sizeof(*ps));
   if(!ps)
     return NULL;
-  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps)) {
-    free(ps);
+  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps))
     return NULL;
-  }
   return ps;
 }
 

@@ -448,11 +448,10 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
 
-  if(Curl_meta_set(doh, CURL_META_DOH_PROBE, doh_req)) {
-    result = CURLE_OUT_OF_MEMORY;
+  result = Curl_meta_set(doh, CURL_META_DOH_PROBE, doh_req);
+  doh_req = NULL; /* call has taken ownership */
+  if(result)
     goto error;
-  }
-  doh_req = NULL;
 
   /* DoH handles must not inherit private_data. The handles may be passed to
      the user via callbacks and the user will be able to identify them as
