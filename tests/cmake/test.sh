@@ -33,7 +33,6 @@ src='../..'
 runresults() {
   set +x
   for bin in "$1"/test-consumer*; do
-    echo "---- ${bin} ----"
     file "${bin}" || true
     "${bin}" || true
   done
