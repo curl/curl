@@ -72,7 +72,6 @@ void Curl_meta_hash_init(struct meta_hash *h, unsigned int slots)
   DEBUGASSERT(slots);
 
   h->table = NULL;
-  h->size = 0;
   h->slots = slots;
 #ifdef DEBUGBUILD
   h->init = CURL_METAHASHINIT;
@@ -107,21 +106,17 @@ static void meta_hash_entry_destroy(struct meta_hash_entry *e)
   free(e);
 }
 
-static void meta_hash_entry_unlink(struct meta_hash *h,
-                                   struct meta_hash_entry **he_anchor,
+static void meta_hash_entry_unlink(struct meta_hash_entry **he_anchor,
                                    struct meta_hash_entry *he)
 {
   *he_anchor = he->next;
-  --h->size;
 }
 
-static void meta_hash_elem_link(struct meta_hash *h,
-                                struct meta_hash_entry **he_anchor,
+static void meta_hash_elem_link(struct meta_hash_entry **he_anchor,
                                 struct meta_hash_entry *he)
 {
   he->next = *he_anchor;
   *he_anchor = he;
-  ++h->size;
 }
 
 #define CURL_META_HASH_SLOT(h,key)  h->table[meta_hash_hash(key, h->slots)]
@@ -155,7 +150,7 @@ bool Curl_meta_hash_set(struct meta_hash *h,
   if(!he)
     return FALSE; /* OOM */
 
-  meta_hash_elem_link(h, slot, he);
+  meta_hash_elem_link(slot, he);
   return TRUE;
 }
 
@@ -171,7 +166,7 @@ bool Curl_meta_hash_remove(struct meta_hash *h, const struct meta_key *key)
     while(*he_anchor) {
       he = *he_anchor;
       if(meta_key_same(key, he->key)) {
-        meta_hash_entry_unlink(h, he_anchor, he);
+        meta_hash_entry_unlink(he_anchor, he);
         meta_hash_entry_destroy(he);
         return TRUE;
       }
@@ -209,7 +204,7 @@ static void meta_hash_clear(struct meta_hash *h)
       he_anchor = &h->table[i];
       while(*he_anchor) {
         he = *he_anchor;
-        meta_hash_entry_unlink(h, he_anchor, he);
+        meta_hash_entry_unlink(he_anchor, he);
         meta_hash_entry_destroy(he);
       }
     }
@@ -228,7 +223,6 @@ void Curl_meta_hash_destroy(struct meta_hash *h)
     meta_hash_clear(h);
     Curl_safefree(h->table);
   }
-  DEBUGASSERT(h->size == 0);
   h->slots = 0;
 }
 

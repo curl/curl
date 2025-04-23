@@ -41,7 +41,7 @@ typedef CURLcode Curl_meta_hash_print(struct dynbuf *buf,
 
 typedef enum {
   CURL_META_STR,    /* value is a C-string */
-  CURL_META_PTR,    /* value is an opaque pointer */
+  CURL_META_PTR     /* value is an opaque pointer */
 } meta_type;
 
 /* A meta key for lookups into the hash table.
@@ -62,7 +62,6 @@ struct meta_hash_entry;
 struct meta_hash {
   struct meta_hash_entry **table;
   unsigned int slots;
-  unsigned int size;
 #ifdef DEBUGBUILD
   int init;
 #endif
