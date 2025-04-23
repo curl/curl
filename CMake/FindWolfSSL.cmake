@@ -89,7 +89,9 @@ else()
 endif()
 
 if(WOLFSSL_FOUND)
-  if(NOT WIN32)
+  if(WIN32)
+    list(APPEND _wolfssl_LIBRARIES "crypt32")
+  else()
     find_library(MATH_LIBRARY NAMES "m")
     if(MATH_LIBRARY)
       list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
