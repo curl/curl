@@ -172,7 +172,7 @@ jobs:
         shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
-      TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }}
+      TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
     strategy:
       fail-fast: false
       matrix:
