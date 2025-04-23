@@ -36,7 +36,7 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-#define DNS_TIMEOUT 1
+#define DNS_TIMEOUT 1L
 
 static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
 {

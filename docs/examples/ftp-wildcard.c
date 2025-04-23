@@ -33,10 +33,10 @@ struct callback_data {
 };
 
 static long file_is_coming(struct curl_fileinfo *finfo,
-                           struct callback_data *data,
+                           void *data,
                            int remains);
 
-static long file_is_downloaded(struct callback_data *data);
+static long file_is_downloaded(void *data);
 
 static size_t write_it(char *buff, size_t size, size_t nmemb,
                        void *cb_data);
@@ -93,10 +93,10 @@ int main(int argc, char **argv)
   return (int)rc;
 }
 
-static long file_is_coming(struct curl_fileinfo *finfo,
-                           struct callback_data *data,
+static long file_is_coming(struct curl_fileinfo *finfo, void *input,
                            int remains)
 {
+  struct callback_data *data = input;
   printf("%3d %40s %10luB ", remains, finfo->filename,
          (unsigned long)finfo->size);
 
@@ -128,8 +128,9 @@ static long file_is_coming(struct curl_fileinfo *finfo,
   return CURL_CHUNK_BGN_FUNC_OK;
 }
 
-static long file_is_downloaded(struct callback_data *data)
+static long file_is_downloaded(void *input)
 {
+  struct callback_data *data = input;
   if(data->output) {
     printf("DOWNLOADED\n");
     fclose(data->output);

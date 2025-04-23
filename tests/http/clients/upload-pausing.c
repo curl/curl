@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
   char *url, *host = NULL, *port = NULL;
-  int http_version = CURL_HTTP_VERSION_1_1;
+  long http_version = CURL_HTTP_VERSION_1_1;
   int ch;
 
   while((ch = getopt(argc, argv, "V:")) != -1) {

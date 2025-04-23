@@ -57,9 +57,9 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_PROXYHEADER, phl);
-  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
+  test_setopt(curl, CURLOPT_HEADEROPT, (long)CURLHEADER_SEPARATE);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+  test_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_HTTP);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
   res = curl_easy_perform(curl);

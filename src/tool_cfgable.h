@@ -202,7 +202,7 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   unsigned long timecond;
   HttpReq httpreq;
-  int proxyver;             /* set to CURLPROXY_HTTP* define */
+  long proxyver;             /* set to CURLPROXY_HTTP* define */
   int ftp_ssl_ccc_mode;
   int ftp_filemethod;
   int default_node_flags;   /* default flags to search for each 'node', which

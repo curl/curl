@@ -48,7 +48,7 @@ CURLcode test(char *URL)
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   CURLMcode mres;
-  int timeout;
+  long timeout;
 
   global_init(CURL_GLOBAL_ALL);
 
