@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBGSASL_INCLUDE_DIR`:   Absolute path to libgsasl include directory.
-# - `LIBGSASL_LIBRARY`:       Absolute path to `libgsasl` library.
+# - `LIBGSASL_INCLUDE_DIR`:  Absolute path to libgsasl include directory.
+# - `LIBGSASL_LIBRARY`:      Absolute path to `libgsasl` library.
 #
 # Defines:
 #
-# - `LIBGSASL_FOUND`:         System has libgsasl.
-# - `LIBGSASL_VERSION`:       Version of libgsasl.
-# - `CURL::libgsasl`:         libgsasl library target.
+# - `LIBGSASL_FOUND`:        System has libgsasl.
+# - `LIBGSASL_VERSION`:      Version of libgsasl.
+# - `CURL::libgsasl`:        libgsasl library target.
 
 set(_libgsasl_pc_requires "libgsasl")
 
