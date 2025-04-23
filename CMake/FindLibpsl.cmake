@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBPSL_INCLUDE_DIR`:   Absolute path to libpsl include directory.
-# - `LIBPSL_LIBRARY`:       Absolute path to `libpsl` library.
+# - `LIBPSL_INCLUDE_DIR`:  Absolute path to libpsl include directory.
+# - `LIBPSL_LIBRARY`:      Absolute path to `libpsl` library.
 #
 # Defines:
 #
-# - `LIBPSL_FOUND`:         System has libpsl.
-# - `LIBPSL_VERSION`:       Version of libpsl.
-# - `CURL::libpsl`:         libpsl library target.
+# - `LIBPSL_FOUND`:        System has libpsl.
+# - `LIBPSL_VERSION`:      Version of libpsl.
+# - `CURL::libpsl`:        libpsl library target.
 
 set(_libpsl_pc_requires "libpsl")
 

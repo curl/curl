@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBIDN2_INCLUDE_DIR`:   Absolute path to libidn2 include directory.
-# - `LIBIDN2_LIBRARY`:       Absolute path to `libidn2` library.
+# - `LIBIDN2_INCLUDE_DIR`:  Absolute path to libidn2 include directory.
+# - `LIBIDN2_LIBRARY`:      Absolute path to `libidn2` library.
 #
 # Defines:
 #
-# - `LIBIDN2_FOUND`:         System has libidn2.
-# - `LIBIDN2_VERSION`:       Version of libidn2.
-# - `CURL::libidn2`:         libidn2 library target.
+# - `LIBIDN2_FOUND`:        System has libidn2.
+# - `LIBIDN2_VERSION`:      Version of libidn2.
+# - `CURL::libidn2`:        libidn2 library target.
 
 set(_libidn2_pc_requires "libidn2")
 

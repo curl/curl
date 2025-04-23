@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `CARES_INCLUDE_DIR`:   Absolute path to c-ares include directory.
-# - `CARES_LIBRARY`:       Absolute path to `cares` library.
+# - `CARES_INCLUDE_DIR`:  Absolute path to c-ares include directory.
+# - `CARES_LIBRARY`:      Absolute path to `cares` library.
 #
 # Defines:
 #
-# - `CARES_FOUND`:         System has c-ares.
-# - `CARES_VERSION`:       Version of c-ares.
-# - `CURL::cares`:         c-ares library target.
+# - `CARES_FOUND`:        System has c-ares.
+# - `CARES_VERSION`:      Version of c-ares.
+# - `CURL::cares`:        c-ares library target.
 
 set(_cares_pc_requires "libcares")
 

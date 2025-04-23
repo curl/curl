@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBSSH2_INCLUDE_DIR`:   Absolute path to libssh2 include directory.
-# - `LIBSSH2_LIBRARY`:       Absolute path to `libssh2` library.
+# - `LIBSSH2_INCLUDE_DIR`:  Absolute path to libssh2 include directory.
+# - `LIBSSH2_LIBRARY`:      Absolute path to `libssh2` library.
 #
 # Defines:
 #
-# - `LIBSSH2_FOUND`:         System has libssh2.
-# - `LIBSSH2_VERSION`:       Version of libssh2.
-# - `CURL::libssh2`:         libssh2 library target.
+# - `LIBSSH2_FOUND`:        System has libssh2.
+# - `LIBSSH2_VERSION`:      Version of libssh2.
+# - `CURL::libssh2`:        libssh2 library target.
 
 set(_libssh2_pc_requires "libssh2")
 

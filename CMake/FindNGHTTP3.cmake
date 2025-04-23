@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `NGHTTP3_INCLUDE_DIR`:   Absolute path to nghttp3 include directory.
-# - `NGHTTP3_LIBRARY`:       Absolute path to `nghttp3` library.
+# - `NGHTTP3_INCLUDE_DIR`:  Absolute path to nghttp3 include directory.
+# - `NGHTTP3_LIBRARY`:      Absolute path to `nghttp3` library.
 #
 # Defines:
 #
-# - `NGHTTP3_FOUND`:         System has nghttp3.
-# - `NGHTTP3_VERSION`:       Version of nghttp3.
-# - `CURL::nghttp3`:         nghttp3 library target.
+# - `NGHTTP3_FOUND`:        System has nghttp3.
+# - `NGHTTP3_VERSION`:      Version of nghttp3.
+# - `CURL::nghttp3`:        nghttp3 library target.
 
 set(_nghttp3_pc_requires "libnghttp3")
 
