@@ -15,7 +15,7 @@ set -eu
 
 cd "$(dirname "$0")"
 
-command -v dpkg >/dev/null && export CMAKE_GENERATOR=Ninja  # 3.17+
+command -v ninja >/dev/null && export CMAKE_GENERATOR=Ninja  # 3.17+
 
 mode="${1:-all}"; shift
 
