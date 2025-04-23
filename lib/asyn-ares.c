@@ -86,6 +86,13 @@
 #define HAVE_CARES_GETADDRINFO 1
 #endif
 
+#ifdef USE_HTTPSRR
+#if ARES_VERSION < 0x011c00
+#error "requires c-ares 1.28.0 or newer for HTTPSRR"
+#endif
+#define HTTPSRR_WORKS
+#endif
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
