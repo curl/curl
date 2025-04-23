@@ -74,7 +74,10 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
-  rm -rf curl; ln -s "${src}" curl
+  rm -rf curl
+  if ! ln -s "${src}" curl; then
+    rm -rf curl; mkdir curl; (cd "${src}"; git archive --format=tar HEAD) | tar -x --directory=curl  # for MSYS2/Cygwin
+  fi
   bldc='bld-add_subdirectory'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
