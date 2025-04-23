@@ -349,7 +349,10 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: |
+          if [[ "$(uname -a)" = *' 3.5'* ]]; then
+            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -520,7 +523,10 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: |
+          if [[ "$(uname -a)" = *' 3.5'* ]]; then
+            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -996,7 +1002,10 @@ jobs:
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
-        run: exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+        run: |
+          if [[ "$(uname -a)" = *' 3.5'* ]]; then
+            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
