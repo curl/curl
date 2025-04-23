@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `WOLFSSL_INCLUDE_DIR`:   The wolfSSL include directory.
-# - `WOLFSSL_LIBRARY`:       Path to `wolfssl` library.
+# - `WOLFSSL_INCLUDE_DIR`:  The wolfSSL include directory.
+# - `WOLFSSL_LIBRARY`:      Path to `wolfssl` library.
 #
 # Defines:
 #
-# - `WOLFSSL_FOUND`:         System has wolfSSL.
-# - `WOLFSSL_VERSION`:       Version of wolfSSL.
-# - `CURL::wolfssl`:         wolfSSL library target.
+# - `WOLFSSL_FOUND`:        System has wolfSSL.
+# - `WOLFSSL_VERSION`:      Version of wolfSSL.
+# - `CURL::wolfssl`:        wolfSSL library target.
 
 if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
   message(WARNING "WolfSSL_INCLUDE_DIR is deprecated, use WOLFSSL_INCLUDE_DIR instead.")

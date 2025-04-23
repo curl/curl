@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `NGHTTP2_INCLUDE_DIR`:   The nghttp2 include directory.
-# - `NGHTTP2_LIBRARY`:       Path to `nghttp2` library.
+# - `NGHTTP2_INCLUDE_DIR`:  The nghttp2 include directory.
+# - `NGHTTP2_LIBRARY`:      Path to `nghttp2` library.
 #
 # Defines:
 #
-# - `NGHTTP2_FOUND`:         System has nghttp2.
-# - `NGHTTP2_VERSION`:       Version of nghttp2.
-# - `CURL::nghttp2`:         nghttp2 library target.
+# - `NGHTTP2_FOUND`:        System has nghttp2.
+# - `NGHTTP2_VERSION`:      Version of nghttp2.
+# - `CURL::nghttp2`:        nghttp2 library target.
 
 set(_nghttp2_pc_requires "libnghttp2")
 
