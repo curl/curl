@@ -79,7 +79,7 @@ if(BROTLI_FOUND)
   if(NOT TARGET CURL::brotli)
     add_library(CURL::brotli INTERFACE IMPORTED)
     set_target_properties(CURL::brotli PROPERTIES
-      INTERFACE_CURL_PC_MODULES "${_brotli_pc_requires}"
+      INTERFACE_LIBCURL_PC_MODULES "${_brotli_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_brotli_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_brotli_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_brotli_LIBRARY_DIRS}"
