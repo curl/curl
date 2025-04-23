@@ -52,7 +52,7 @@ if(CURL_COMPLETION_FISH OR
 
     if(NOT CURL_DISABLE_INSTALL)
       if(CURL_COMPLETION_FISH)
-        if(NOT CURL_COMPLETION_FISH_DIR)
+        if(NOT CURL_COMPLETION_FISH_DIR AND NOT CMAKE_CROSSCOMPILING)
           find_package(PkgConfig QUIET)
           pkg_get_variable(CURL_COMPLETION_FISH_DIR "fish" "completionsdir")
         endif()
