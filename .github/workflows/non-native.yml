@@ -458,7 +458,7 @@ jobs:
         run: |
           export PKG_CONFIG_PATH="$VCPKG_INSTALLATION_ROOT/installed/arm64-android/lib/pkgconfig"
           if [ '${{ matrix.build }}' = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
-            cmake -B bld \
+            cmake -B bld -G Ninja \
               -DANDROID_ABI=arm64-v8a \
               -DANDROID_PLATFORM='android-${{ matrix.platform }}' \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
@@ -546,7 +546,7 @@ jobs:
       - name: 'configure'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake -B bld \
+            cmake -B bld -G Ninja \
               -DAMIGA=1 \
               -DCMAKE_SYSTEM_NAME=Generic \
               -DCMAKE_SYSTEM_PROCESSOR=m68k \
@@ -626,7 +626,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
