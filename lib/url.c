@@ -3348,7 +3348,8 @@ static void conn_meta_freeentry(void *p)
 
 static CURLcode create_conn(struct Curl_easy *data,
                             struct connectdata **in_connect,
-                            bool *async)
+                            bool *async,
+                            bool do_slist)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -3459,9 +3460,12 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  result = parse_connect_to_slist(data, conn, data->set.connect_to);
-  if(result)
-    goto out;
+  if(do_slist){
+    result = parse_connect_to_slist(data, conn, data->set.connect_to);
+    if(result)
+      goto out;
+  }
+  
 
   /*************************************************************
    * IDN-convert the proxy hostnames
@@ -3792,7 +3796,20 @@ CURLcode Curl_connect(struct Curl_easy *data,
   Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
-  result = create_conn(data, &conn, asyncp);
+  result = create_conn(data, &conn, asyncp,TRUE);
+  
+  /*if we failed redo logic for removing things*/
+  if(result){
+    /*note this logic was coppied from downstairs I have no idea if its right...*/
+    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE){
+        Curl_detach_connection(data);
+        Curl_conn_terminate(data, conn, TRUE);
+    }
+
+    result = create_conn(data, &conn, asyncp,FALSE);
+  }
+
+
 
   if(!result) {
     if(CONN_ATTACHED(conn) > 1)
