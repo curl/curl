@@ -3806,6 +3806,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
       Curl_conn_terminate(data, conn, TRUE);
     }
 
+    Curl_req_hard_reset(&data->req, data);
     result = create_conn(data, &conn, asyncp, FALSE);
   }
 #endif
