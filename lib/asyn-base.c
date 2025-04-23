@@ -64,18 +64,9 @@
 
 
 #ifdef USE_ARES
-/* common functions for c-ares and threaded resolver with HTTPSRR */
 
-#ifdef USE_HTTPSRR
-/* 1.28.0 and later have ares_query_dnsrec */
-#if ARES_VERSION < 0x011c00
-#error "requires c-ares 1.28.0 or newer for HTTPSRR"
-#endif
-#define HTTPSRR_WORKS
-#else
 #if ARES_VERSION < 0x010600
 #error "requires c-ares 1.6.0 or newer"
-#endif
 #endif
 
 /*
