@@ -3460,7 +3460,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  if(do_slist){
+  if(do_slist) {
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
     if(result)
       goto out;
@@ -3796,17 +3796,17 @@ CURLcode Curl_connect(struct Curl_easy *data,
   Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
-  result = create_conn(data, &conn, asyncp,TRUE);
+  result = create_conn(data, &conn, asyncp, TRUE);
   
-  /*if we failed redo logic for removing things*/
-  if(result){
-    /*note this logic was coppied from downstairs I have no idea if its right...*/
-    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE){
-        Curl_detach_connection(data);
-        Curl_conn_terminate(data, conn, TRUE);
+  /* if we failed because of the avc cache retry */
+  if(result && data->asi) {
+    /* note this logic was coppied from downstairs I have no idea if its right... */
+    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
+      Curl_detach_connection(data);
+      Curl_conn_terminate(data, conn, TRUE);
     }
 
-    result = create_conn(data, &conn, asyncp,FALSE);
+    result = create_conn(data, &conn, asyncp, FALSE);
   }
 
 
