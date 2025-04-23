@@ -536,7 +536,7 @@ jobs:
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
-          tar xzf v${{ env.awslc-version }}.tar.gz
+          tar -xzf v${{ env.awslc-version }}.tar.gz
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
