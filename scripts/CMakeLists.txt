@@ -56,7 +56,7 @@ if(CURL_COMPLETION_FISH OR
           if(NOT CURL_COMPLETION_FISH_DIR)
             find_package(PkgConfig QUIET)
             pkg_get_variable(CURL_COMPLETION_FISH_DIR "fish" "completionsdir")
-            if(NOT _pkg_fish_completionsdir)
+            if(NOT CURL_COMPLETION_FISH_DIR)
               if(CMAKE_INSTALL_DATAROOTDIR)
                 set(CURL_COMPLETION_FISH_DIR "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d")
               endif()
