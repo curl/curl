@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `MSH3_INCLUDE_DIR`:   The msh3 include directory.
-# - `MSH3_LIBRARY`:       Path to `msh3` library.
+# - `MSH3_INCLUDE_DIR`:  The msh3 include directory.
+# - `MSH3_LIBRARY`:      Path to `msh3` library.
 #
 # Defines:
 #
-# - `MSH3_FOUND`:         System has msh3.
-# - `MSH3_VERSION`:       Version of msh3.
-# - `CURL::msh3`:         msh3 library target.
+# - `MSH3_FOUND`:        System has msh3.
+# - `MSH3_VERSION`:      Version of msh3.
+# - `CURL::msh3`:        msh3 library target.
 
 set(_msh3_pc_requires "libmsh3")
 
