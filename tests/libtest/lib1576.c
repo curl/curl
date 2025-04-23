@@ -38,7 +38,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return strlen(testdata);
 }
 
-static int seek_callback(char *ptr, curl_off_t offset, int origin)
+static int seek_callback(void *ptr, curl_off_t offset, int origin)
 {
   (void)ptr;
   (void)offset;
