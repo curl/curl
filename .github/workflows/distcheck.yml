@@ -169,6 +169,7 @@ jobs:
     timeout-minutes: 10
     env:
       CC: clang
+      TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -187,8 +188,8 @@ jobs:
         with:
           persist-credentials: false
       - name: 'via FetchContent'
-        run: ./tests/cmake/test.sh FetchContent
+        run: ./tests/cmake/test.sh FetchContent ${TESTOPTS}
       - name: 'via add_subdirectory'
-        run: ./tests/cmake/test.sh add_subdirectory
+        run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS}
       - name: 'via find_package'
-        run: ./tests/cmake/test.sh find_package
+        run: ./tests/cmake/test.sh find_package ${TESTOPTS}
