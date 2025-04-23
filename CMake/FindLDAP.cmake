@@ -110,7 +110,7 @@ if(LDAP_FOUND)
   if(NOT TARGET CURL::ldap)
     add_library(CURL::ldap INTERFACE IMPORTED)
     set_target_properties(CURL::ldap PROPERTIES
-      INTERFACE_CURL_PC_MODULES "${_ldap_pc_requires}"
+      INTERFACE_LIBCURL_PC_MODULES "${_ldap_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_ldap_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_ldap_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_ldap_LIBRARY_DIRS}"
