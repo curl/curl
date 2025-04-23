@@ -308,12 +308,6 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
 
 /* groups of curl_easy_setops options that take the same type of argument */
 
-/* To add a new option to one of the groups, just add
- *   (option) == CURLOPT_SOMETHING
- * to the or-expression. If the option takes a long or curl_off_t, you do not
- * have to do anything
- */
-
 /* evaluates to true if option takes a long argument */
 #define curlcheck_long_option(option)                   \
   (0 < (option) && (option) < CURLOPTTYPE_OBJECTPOINT)

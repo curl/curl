@@ -58,7 +58,6 @@ sub getinclude {
         }
     }
     $enum{"CURLOPT_SOCKS5_GSSAPI_SERVICE"}++;
-    $enum{"CURLOPT_SOMETHING"}++;
     $enum{"CURLOPT_CONV_FROM_NETWORK_FUNCTION"}++;
     $enum{"CURLOPT_CONV_FROM_UTF8_FUNCTION"}++;
     $enum{"CURLOPT_CONV_TO_NETWORK_FUNCTION"}++;
