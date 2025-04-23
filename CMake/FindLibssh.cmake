@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBSSH_INCLUDE_DIR`:   The libssh include directory.
-# - `LIBSSH_LIBRARY`:       Path to libssh library.
+# - `LIBSSH_INCLUDE_DIR`:  The libssh include directory.
+# - `LIBSSH_LIBRARY`:      Path to libssh library.
 #
 # Defines:
 #
-# - `LIBSSH_FOUND`:         System has libssh.
-# - `LIBSSH_VERSION`:       Version of libssh.
-# - `CURL::libssh`:         libssh library target.
+# - `LIBSSH_FOUND`:        System has libssh.
+# - `LIBSSH_VERSION`:      Version of libssh.
+# - `CURL::libssh`:        libssh library target.
 
 set(_libssh_pc_requires "libssh")
 
