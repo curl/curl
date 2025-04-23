@@ -3465,7 +3465,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     if(result)
       goto out;
   }
-  
+
 
   /*************************************************************
    * IDN-convert the proxy hostnames
@@ -3797,10 +3797,10 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp, TRUE);
-  
+
+#ifndef CURL_DISABLE_ALTSVC
   /* if we failed because of the avc cache retry */
   if(result && data->asi) {
-    /* note this logic was coppied from downstairs I have no idea if its right... */
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
       Curl_detach_connection(data);
       Curl_conn_terminate(data, conn, TRUE);
@@ -3808,7 +3808,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
     result = create_conn(data, &conn, asyncp, FALSE);
   }
-
+#endif
 
 
   if(!result) {
