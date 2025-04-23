@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: curl
 
 # Recommended options:
-#
 # -D_CURL_PREFILL=ON:       for macOS
 # -DCURL_USE_PKGCONFIG=OFF: for cmake <=3.12 with 'add_subdirectory' tests.
 #                           These old versions can't propagate library
