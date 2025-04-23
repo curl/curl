@@ -87,7 +87,7 @@ if(GNUTLS_FOUND)
   if(NOT TARGET CURL::gnutls)
     add_library(CURL::gnutls INTERFACE IMPORTED)
     set_target_properties(CURL::gnutls PROPERTIES
-      INTERFACE_CURL_PC_MODULES "${_gnutls_pc_requires}"
+      INTERFACE_LIBCURL_PC_MODULES "${_gnutls_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_gnutls_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_gnutls_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_gnutls_LIBRARY_DIRS}"

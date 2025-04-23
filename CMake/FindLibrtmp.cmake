@@ -107,7 +107,7 @@ if(LIBRTMP_FOUND)
   if(NOT TARGET CURL::librtmp)
     add_library(CURL::librtmp INTERFACE IMPORTED)
     set_target_properties(CURL::librtmp PROPERTIES
-      INTERFACE_CURL_PC_MODULES "${_librtmp_pc_requires}"
+      INTERFACE_LIBCURL_PC_MODULES "${_librtmp_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_librtmp_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_librtmp_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_librtmp_LIBRARY_DIRS}"
