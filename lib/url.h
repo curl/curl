@@ -44,27 +44,26 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
 
-/* Attach/Clear/Get meta data for an easy handle. Needs to provide
- * a destructor, will be automatically called when the easy handle
- * is reset or closed. */
-typedef void Curl_meta_dtor(void *key, size_t key_len, void *meta_data);
-
 /* Set the transfer meta data for the key. Any existing entry for that
  * key will be destroyed.
  * Takes ownership of `meta_data` and destroys it when the call fails. */
-CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
-                       void *meta_data, Curl_meta_dtor *meta_dtor);
-void Curl_meta_remove(struct Curl_easy *data, const char *key);
-void *Curl_meta_get(struct Curl_easy *data, const char *key);
+CURLcode Curl_meta_set(struct Curl_easy *data,
+                       const struct meta_key *key, void *value);
+void Curl_meta_remove(struct Curl_easy *data,
+                      const struct meta_key *key);
+void *Curl_meta_get(struct Curl_easy *data,
+                    const struct meta_key *key);
 void Curl_meta_reset(struct Curl_easy *data);
 
 /* Set connection meta data for the key. Any existing entry for that
  * key will be destroyed.
  * Takes ownership of `meta_data` and destroys it when the call fails. */
-CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
-                            void *meta_data, Curl_meta_dtor *meta_dtor);
-void Curl_conn_meta_remove(struct connectdata *conn, const char *key);
-void *Curl_conn_meta_get(struct connectdata *conn, const char *key);
+CURLcode Curl_conn_meta_set(struct connectdata *conn,
+                            const struct meta_key *key, void *value);
+void Curl_conn_meta_remove(struct connectdata *conn,
+                           const struct meta_key *key);
+void *Curl_conn_meta_get(struct connectdata *conn,
+                         const struct meta_key *key);
 
 /* Get protocol handler for a URI scheme
  * @param scheme URI scheme, case-insensitive

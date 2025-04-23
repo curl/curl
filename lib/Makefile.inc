@@ -192,6 +192,7 @@ LIB_CFILES =         \
   md4.c              \
   md5.c              \
   memdebug.c         \
+  meta-hash.c        \
   mime.c             \
   mprintf.c          \
   mqtt.c             \
@@ -335,6 +336,7 @@ LIB_HFILES =         \
   llist.h            \
   macos.h            \
   memdebug.h         \
+  meta-hash.h        \
   mime.h             \
   mqtt.h             \
   multihandle.h      \

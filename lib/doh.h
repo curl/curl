@@ -80,8 +80,6 @@ enum doh_slot_num {
   DOH_SLOT_COUNT
 };
 
-#define CURL_EZM_DOH_PROBE   "ezm:doh-p"
-
 /* the largest one we can make, based on RFCs 1034, 1035 */
 #define DOH_MAX_DNSREQ_SIZE (256 + 16)
 

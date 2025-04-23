@@ -155,6 +155,7 @@ typedef unsigned int curl_prot_t;
 #include "splay.h"
 #include "dynbuf.h"
 #include "dynhds.h"
+#include "meta-hash.h"
 #include "request.h"
 #include "netrc.h"
 
@@ -753,7 +754,7 @@ struct connectdata {
    * with the lifetime of the connection.
    * Elements need to be added with their own destructor to be invoked when
    * the connection is cleaned up (see Curl_hash_add2()).*/
-  struct Curl_hash meta_hash;
+  struct meta_hash meta_hash;
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -1870,7 +1871,7 @@ struct Curl_easy {
    * with the lifetime of the easy handle.
    * Elements need to be added with their own destructor to be invoked when
    * the easy handle is cleaned up (see Curl_hash_add2()).*/
-  struct Curl_hash meta_hash;
+  struct meta_hash meta_hash;
 
 #ifdef USE_LIBPSL
   struct PslCache *psl;        /* The associated PSL cache. */

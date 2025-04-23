@@ -301,7 +301,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
-  Curl_hash_destroy(&data->meta_hash);
+  Curl_meta_hash_destroy(&data->meta_hash);
 #ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
 #endif
@@ -488,17 +488,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   return result;
 }
 
-/* easy->meta_hash destructor. Should never be called as elements
- * MUST be added with their own destructor */
-static void easy_meta_freeentry(void *p)
-{
-  (void)p;
-  /* Will always be FALSE. Cannot use a 0 assert here since compilers
-   * are not in agreement if they then want a NORETURN attribute or
-   * not. *sigh* */
-  DEBUGASSERT(p == NULL);
-}
-
 /**
  * Curl_open()
  *
@@ -531,8 +520,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->progress.flags |= PGRS_HIDE;
   data->state.current_speed = -1; /* init to negative == impossible */
 
-  Curl_hash_init(&data->meta_hash, 23,
-                 Curl_hash_str, Curl_str_key_compare, easy_meta_freeentry);
+  Curl_meta_hash_init(&data->meta_hash, 23);
   Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
@@ -547,7 +535,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
-    Curl_hash_destroy(&data->meta_hash);
+    Curl_meta_hash_destroy(&data->meta_hash);
     data->magic = 0;
     free(data);
     data = NULL;
@@ -601,7 +589,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 #endif
   Curl_safefree(conn->destination);
   Curl_uint_spbset_destroy(&conn->xfers_attached);
-  Curl_hash_destroy(&conn->meta_hash);
+  Curl_meta_hash_destroy(&conn->meta_hash);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -3323,15 +3311,6 @@ static void reuse_conn(struct Curl_easy *data,
   Curl_conn_free(data, temp);
 }
 
-static void conn_meta_freeentry(void *p)
-{
-  (void)p;
-  /* Will always be FALSE. Cannot use a 0 assert here since compilers
-   * are not in agreement if they then want a NORETURN attribute or
-   * not. *sigh* */
-  DEBUGASSERT(p == NULL);
-}
-
 /**
  * create_conn() sets up a new connectdata struct, or reuses an already
  * existing one, and resolves hostname.
@@ -3387,8 +3366,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   *in_connect = conn;
 
   /* Do the unfailable inits first, before checks that may early return */
-  Curl_hash_init(&conn->meta_hash, 23,
-               Curl_hash_str, Curl_str_key_compare, conn_meta_freeentry);
+  Curl_meta_hash_init(&conn->meta_hash, 23);
 
   /* GSSAPI related inits */
   Curl_sec_conn_init(conn);
@@ -3959,21 +3937,24 @@ void Curl_data_priority_clear_state(struct Curl_easy *data)
 #endif /* defined(USE_HTTP2) || defined(USE_HTTP3) */
 
 
-CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
-                            void *meta_data, Curl_meta_dtor *meta_dtor)
+CURLcode Curl_conn_meta_set(struct connectdata *conn,
+                            const struct meta_key *key, void *value)
 {
-  if(!Curl_hash_add2(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
-                     meta_data, meta_dtor)) {
-    meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+  if(!Curl_meta_hash_set(&conn->meta_hash, key, value)) {
+    if(key->dtor)
+      key->dtor(key, value);
+    return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }
-void Curl_conn_meta_remove(struct connectdata *conn, const char *key)
+void Curl_conn_meta_remove(struct connectdata *conn,
+                           const struct meta_key *key)
 {
-  Curl_hash_delete(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+  Curl_meta_hash_remove(&conn->meta_hash, key);
 }
 
-void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
+void *Curl_conn_meta_get(struct connectdata *conn,
+                         const struct meta_key *key)
 {
-  return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
+  return Curl_meta_hash_get(&conn->meta_hash, key);
 }
