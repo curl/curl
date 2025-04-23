@@ -3633,7 +3633,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 
   DEBUGASSERT(!octx->ssl_ctx);
-  octx->ssl_ctx = SSL_CTX_new(req_method);
+  if(data->state.libctx) {
+    octx->ssl_ctx = SSL_CTX_new_ex(data->state.libctx, "?provider=tmp2",
+                                   req_method);
+  }
+  else {
+    octx->ssl_ctx = SSL_CTX_new(req_method);
+  }
 
   if(!octx->ssl_ctx) {
     failf(data, "SSL: could not create a context: %s",
