@@ -30,7 +30,6 @@ src='../..'
 
 runresult() {
   for bin in "$1"/test-consumer*; do
-    echo "Running '${bin}'...:"
     "${bin}" || true
   done
 }
