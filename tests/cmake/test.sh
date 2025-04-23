@@ -28,7 +28,7 @@ cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 
 src='../..'
 
-runres() {
+runresult() {
   for bin in "$1"/test-consumer*; do
     echo "Running '${bin}'...:"
     "${bin}" || true
@@ -54,7 +54,7 @@ if [ "${mode}" = 'ExternalProject' ]; then  # Broken
     "${cmake_consumer}" --verbose --build .
     cd ..
   fi
-  runres "${bldc}"
+  runresult "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
@@ -66,7 +66,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
   "${cmake_consumer}" --build "${bldc}" --verbose
-  runres "${bldc}"
+  runresult "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
@@ -84,7 +84,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
     "${cmake_consumer}" --verbose --build .
     cd ..
   fi
-  runres "${bldc}"
+  runresult "${bldc}"
 fi
 
 if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
@@ -124,5 +124,5 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_consumer}" --verbose --build .
     cd ..
   fi
-  runres "${bldc}"
+  runresult "${bldc}"
 fi
