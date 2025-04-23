@@ -178,7 +178,7 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
-            sudo apt-get -o Dpkg::Use-Pty=0 install ninja-build libpsl-dev libssl-dev
+            sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
           else
             brew install libpsl openssl
           fi
