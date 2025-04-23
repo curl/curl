@@ -83,16 +83,18 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
   if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
-    "${cmake_provider}" -B "${bldp}" -S "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
+    "${cmake_provider}" -B "${bldp}" -S "${src}" "$@" \
       -DBUILD_SHARED_LIBS=ON \
-      -DBUILD_STATIC_LIBS=ON
+      -DBUILD_STATIC_LIBS=ON \
+      -DCMAKE_INSTALL_PREFIX="${prefix}"
     "${cmake_provider}" --build "${bldp}"
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" -DCMAKE_INSTALL_PREFIX="${prefix}" "$@" \
+    "${cmake_provider}" "${src}" "$@" \
       -DBUILD_SHARED_LIBS=ON \
-      -DBUILD_STATIC_LIBS=ON
+      -DBUILD_STATIC_LIBS=ON \
+      -DCMAKE_INSTALL_PREFIX="${prefix}"
     "${cmake_provider}" --build .
     make install
     cd ..
