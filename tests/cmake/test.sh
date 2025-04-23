@@ -31,9 +31,13 @@ cmake_opts='-DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=
 src='../..'
 
 runresults() {
+  set +x
   for bin in "$1"/test-consumer*; do
+    echo "---- ${bin} ----"
+    file "${bin}" || true
     "${bin}" || true
   done
+  set -x
 }
 
 if [ "${mode}" = 'ExternalProject' ]; then  # Broken
