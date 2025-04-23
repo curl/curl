@@ -25,13 +25,13 @@
 #
 # Input variables:
 #
-# - `BEARSSL_INCLUDE_DIR`:   The BearSSL include directory.
-# - `BEARSSL_LIBRARY`:       Path to `bearssl` library.
+# - `BEARSSL_INCLUDE_DIR`:  The BearSSL include directory.
+# - `BEARSSL_LIBRARY`:      Path to `bearssl` library.
 #
 # Defines:
 #
-# - `BEARSSL_FOUND`:         System has BearSSL.
-# - `CURL::bearssl`:         BearSSL library target.
+# - `BEARSSL_FOUND`:        System has BearSSL.
+# - `CURL::bearssl`:        BearSSL library target.
 
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   message(WARNING "BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.")

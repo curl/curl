@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `WOLFSSH_INCLUDE_DIR`:   The wolfSSH include directory.
-# - `WOLFSSH_LIBRARY`:       Path to `wolfssh` library.
+# - `WOLFSSH_INCLUDE_DIR`:  The wolfSSH include directory.
+# - `WOLFSSH_LIBRARY`:      Path to `wolfssh` library.
 #
 # Defines:
 #
-# - `WOLFSSH_FOUND`:         System has wolfSSH.
-# - `WOLFSSH_VERSION`:       Version of wolfSSH.
-# - `CURL::wolfssh`:         wolfSSH library target.
+# - `WOLFSSH_FOUND`:        System has wolfSSH.
+# - `WOLFSSH_VERSION`:      Version of wolfSSH.
+# - `CURL::wolfssh`:        wolfSSH library target.
 
 find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")

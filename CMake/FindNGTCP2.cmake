@@ -34,14 +34,14 @@
 #
 # Input variables:
 #
-# - `NGTCP2_INCLUDE_DIR`:   The ngtcp2 include directory.
-# - `NGTCP2_LIBRARY`:       Path to `ngtcp2` library.
+# - `NGTCP2_INCLUDE_DIR`:  The ngtcp2 include directory.
+# - `NGTCP2_LIBRARY`:      Path to `ngtcp2` library.
 #
 # Defines:
 #
-# - `NGTCP2_FOUND`:         System has ngtcp2.
-# - `NGTCP2_VERSION`:       Version of ngtcp2.
-# - `CURL::ngtcp2`:         ngtcp2 library target.
+# - `NGTCP2_FOUND`:        System has ngtcp2.
+# - `NGTCP2_VERSION`:      Version of ngtcp2.
+# - `CURL::ngtcp2`:        ngtcp2 library target.
 
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")

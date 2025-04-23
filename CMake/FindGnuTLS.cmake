@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `GNUTLS_INCLUDE_DIR`:   The GnuTLS include directory.
-# - `GNUTLS_LIBRARY`:       Path to `gnutls` library.
+# - `GNUTLS_INCLUDE_DIR`:  The GnuTLS include directory.
+# - `GNUTLS_LIBRARY`:      Path to `gnutls` library.
 #
 # Defines:
 #
-# - `GNUTLS_FOUND`:         System has GnuTLS.
-# - `GNUTLS_VERSION`:       Version of GnuTLS.
-# - `CURL::gnutls`:         GnuTLS library target.
+# - `GNUTLS_FOUND`:        System has GnuTLS.
+# - `GNUTLS_VERSION`:      Version of GnuTLS.
+# - `CURL::gnutls`:        GnuTLS library target.
 
 set(_gnutls_pc_requires "gnutls")
 
