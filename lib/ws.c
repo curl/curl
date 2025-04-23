@@ -27,6 +27,7 @@
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
 #include "urldata.h"
+#include "url.h"
 #include "bufq.h"
 #include "dynbuf.h"
 #include "rand.h"
@@ -75,6 +76,50 @@
 /* buffer dimensioning */
 #define WS_CHUNK_SIZE 65535
 #define WS_CHUNK_COUNT 2
+
+
+/* a client-side WS frame decoder, parsing frame headers and
+ * payload, keeping track of current position and stats */
+enum ws_dec_state {
+  WS_DEC_INIT,
+  WS_DEC_HEAD,
+  WS_DEC_PAYLOAD
+};
+
+struct ws_decoder {
+  int frame_age;        /* zero */
+  int frame_flags;      /* See the CURLWS_* defines */
+  curl_off_t payload_offset;   /* the offset parsing is at */
+  curl_off_t payload_len;
+  unsigned char head[10];
+  int head_len, head_total;
+  enum ws_dec_state state;
+  int cont_flags;
+};
+
+/* a client-side WS frame encoder, generating frame headers and
+ * converting payloads, tracking remaining data in current frame */
+struct ws_encoder {
+  curl_off_t payload_len;  /* payload length of current frame */
+  curl_off_t payload_remain;  /* remaining payload of current */
+  unsigned int xori; /* xor index */
+  unsigned char mask[4]; /* 32-bit mask for this connection */
+  unsigned char firstbyte; /* first byte of frame we encode */
+  BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
+};
+
+/* A websocket connection with en- and decoder that treat frames
+ * and keep track of boundaries. */
+struct websocket {
+  struct Curl_easy *data; /* used for write callback handling */
+  struct ws_decoder dec;  /* decode of we frames */
+  struct ws_encoder enc;  /* decode of we frames */
+  struct bufq recvbuf;    /* raw data from the server */
+  struct bufq sendbuf;    /* raw data to be sent to the server */
+  struct curl_ws_frame frame;  /* the current WS FRAME received */
+  size_t sendbuf_payload; /* number of payload bytes in sendbuf */
+};
+
 
 static const char *ws_frame_name_of_op(unsigned char firstbyte)
 {
@@ -541,7 +586,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY) || data->set.ws_raw_mode)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  ws = data->conn->proto.ws;
+  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "WS: not a websocket transfer");
     return CURLE_FAILED_INIT;
@@ -826,6 +871,16 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   return result;
 }
 
+static void ws_conn_dtor(void *key, size_t klen, void *entry)
+{
+  struct websocket *ws = entry;
+  (void)key;
+  (void)klen;
+  Curl_bufq_free(&ws->recvbuf);
+  Curl_bufq_free(&ws->sendbuf);
+  free(ws);
+}
+
 /*
  * 'nread' is number of bytes of websocket data already in the buffer at
  * 'mem'.
@@ -839,13 +894,12 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(data->conn);
-  ws = data->conn->proto.ws;
+  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
     ws = calloc(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
-    data->conn->proto.ws = ws;
 #ifdef DEBUGBUILD
     {
       const char *p = getenv("CURL_WS_CHUNK_SIZE");
@@ -863,6 +917,10 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
                     BUFQ_OPT_SOFT_LIMIT);
     ws_dec_init(&ws->dec);
     ws_enc_init(&ws->enc);
+    result = Curl_conn_meta_set(data->conn, CURL_META_PROTO_WS_CONN,
+                                ws, ws_conn_dtor);
+    if(result)
+      return result;
   }
   else {
     Curl_bufq_reset(&ws->recvbuf);
@@ -1031,7 +1089,7 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
-  ws = conn->proto.ws;
+  ws = Curl_conn_meta_get(conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "connection is not setup for websocket");
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1195,9 +1253,10 @@ static CURLcode ws_send_raw_blocking(CURL *d, struct websocket *ws,
 static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
                             size_t buflen, size_t *pnwritten)
 {
-  struct websocket *ws = data->conn->proto.ws;
+  struct websocket *ws;
   CURLcode result;
 
+  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "Not a websocket transfer");
     return CURLE_SEND_ERROR;
@@ -1253,12 +1312,12 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
     result = CURLE_SEND_ERROR;
     goto out;
   }
-  if(!data->conn->proto.ws) {
+  ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
+  if(!ws) {
     failf(data, "Not a websocket transfer");
     result = CURLE_SEND_ERROR;
     goto out;
   }
-  ws = data->conn->proto.ws;
 
   if(data->set.ws_raw_mode) {
     /* In raw mode, we write directly to the connection */
@@ -1366,15 +1425,6 @@ out:
   return result;
 }
 
-static void ws_free(struct connectdata *conn)
-{
-  if(conn && conn->proto.ws) {
-    Curl_bufq_free(&conn->proto.ws->recvbuf);
-    Curl_bufq_free(&conn->proto.ws->sendbuf);
-    Curl_safefree(conn->proto.ws);
-  }
-}
-
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
@@ -1387,24 +1437,19 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
 }
 
 
-static CURLcode ws_disconnect(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              bool dead_connection)
-{
-  (void)data;
-  (void)dead_connection;
-  ws_free(conn);
-  return CURLE_OK;
-}
-
 CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *d)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
   struct Curl_easy *data = d;
-  if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) && data->conn &&
-     data->conn->proto.ws && !data->set.ws_raw_mode)
-    return &data->conn->proto.ws->frame;
+  if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) &&
+     data->conn && !data->set.ws_raw_mode) {
+    struct websocket *ws;
+    ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
+    if(ws)
+      return &ws->frame;
+
+  }
   return NULL;
 }
 
@@ -1421,7 +1466,7 @@ const struct Curl_handler Curl_handler_ws = {
   Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ws_disconnect,                        /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
@@ -1448,7 +1493,7 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
-  ws_disconnect,                        /* disconnect */
+  ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */

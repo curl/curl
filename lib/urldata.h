@@ -898,9 +898,6 @@ struct connectdata {
 #ifndef CURL_DISABLE_MQTT
     struct mqtt_conn mqtt;
 #endif
-#ifndef CURL_DISABLE_WEBSOCKETS
-    struct websocket *ws;
-#endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
