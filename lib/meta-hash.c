@@ -45,8 +45,7 @@ static bool meta_key_same(const struct meta_key *k1,
          ((k1->id_len == k2->id_len) && !strcmp(k1->id, k2->id));
 }
 
-static unsigned int meta_hash_hash(const struct meta_key *key,
-                                   unsigned int slots)
+static size_t meta_hash_hash(const struct meta_key *key, unsigned int slots)
 {
   const char *key_str = key->id;
   const char *end = key_str + key->id_len;
