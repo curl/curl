@@ -38,6 +38,15 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return strlen(testdata);
 }
 
+static int seek_callback(void *ptr, curl_off_t offset, int origin)
+{
+  (void)ptr;
+  (void)offset;
+  if(origin != SEEK_SET)
+    return CURL_SEEKFUNC_FAIL;
+  return CURL_SEEKFUNC_OK;
+}
+
 CURLcode test(char *URL)
 {
   CURLcode res;
@@ -62,6 +71,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_SEEKFUNCTION, seek_callback);
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testdata));
 
   test_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");

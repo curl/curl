@@ -1560,10 +1560,15 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
   rc = curl_multi_add_handle(multi, data);
   if(!rc) {
     struct SingleRequest *k = &data->req;
+    CURLcode result;
 
     /* pass in NULL for 'conn' here since we do not want to init the
        connection, only this transfer */
-    Curl_init_do(data, NULL);
+    result = Curl_init_do(data, NULL);
+    if(result) {
+      curl_multi_remove_handle(multi, data);
+      return CURLM_INTERNAL_ERROR;
+    }
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);

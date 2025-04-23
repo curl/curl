@@ -78,6 +78,7 @@ my @reused_symbols = (
     "removeFd",
     "rlim2str",
     "run_thread",
+    "seek_callback",
     "send_ping",
     "showem",
     "store_errmsg",
