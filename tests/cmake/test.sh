@@ -5,11 +5,12 @@
 
 # Recommended options:
 #
-# -DBUILD_STATIC_CURL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
 # -D_CURL_PREFILL=ON:       for macOS
 # -DCURL_USE_PKGCONFIG=OFF: for cmake <=3.12 with 'add_subdirectory' tests.
 #                           These old versions can't propagate library
-#                           directories back to the consumer project.
+#                           directories to the consumer project.
+
+# shellcheck disable=SC2086
 
 set -eu
 
@@ -26,6 +27,8 @@ cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 "${cmake_consumer}" --help | grep -q -- '--install' && cmake_consumer_modern=1
 "${cmake_provider}" --help | grep -q -- '--install' && cmake_provider_modern=1
 
+cmake_opts='-DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF'
+
 src='../..'
 
 runresults() {
@@ -41,13 +44,13 @@ if [ "${mode}" = 'ExternalProject' ]; then  # Broken
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. "$@" \
+    "${cmake_consumer}" .. ${cmake_opts} "$@" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     "${cmake_consumer}" --verbose --build .
@@ -60,7 +63,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
   src="${PWD}/${src}"
   bldc='bld-fetchcontent'
   rm -rf "${bldc}"
-  "${cmake_consumer}" -B "${bldc}" -DCMAKE_UNITY_BUILD=ON "$@" \
+  "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
@@ -73,12 +76,12 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   bldc='bld-add_subdirectory'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. "$@" \
+    "${cmake_consumer}" .. ${cmake_opts} "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
     "${cmake_consumer}" --verbose --build .
     cd ..
@@ -92,7 +95,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
   if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
-    "${cmake_provider}" -B "${bldp}" -S "${src}" -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_provider}" -B "${bldp}" -S "${src}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
@@ -100,7 +103,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" "$@" \
+    "${cmake_provider}" "${src}" ${cmake_opts} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
