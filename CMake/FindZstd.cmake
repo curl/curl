@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `ZSTD_INCLUDE_DIR`:   Absolute path to zstd include directory.
-# - `ZSTD_LIBRARY`:       Absolute path to `zstd` library.
+# - `ZSTD_INCLUDE_DIR`:  Absolute path to zstd include directory.
+# - `ZSTD_LIBRARY`:      Absolute path to `zstd` library.
 #
 # Defines:
 #
-# - `ZSTD_FOUND`:         System has zstd.
-# - `ZSTD_VERSION`:       Version of zstd.
-# - `CURL::zstd`:         zstd library target.
+# - `ZSTD_FOUND`:        System has zstd.
+# - `ZSTD_VERSION`:      Version of zstd.
+# - `CURL::zstd`:        zstd library target.
 
 if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
   message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")

@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `RUSTLS_INCLUDE_DIR`:   Absolute path to Rustls include directory.
-# - `RUSTLS_LIBRARY`:       Absolute path to `rustls` library.
+# - `RUSTLS_INCLUDE_DIR`:  Absolute path to Rustls include directory.
+# - `RUSTLS_LIBRARY`:      Absolute path to `rustls` library.
 #
 # Defines:
 #
-# - `RUSTLS_FOUND`:         System has Rustls.
-# - `RUSTLS_VERSION`:       Version of Rustls.
-# - `CURL::rustls`:         Rustls library target.
+# - `RUSTLS_FOUND`:        System has Rustls.
+# - `RUSTLS_VERSION`:      Version of Rustls.
+# - `CURL::rustls`:        Rustls library target.
 
 set(_rustls_pc_requires "rustls")
 

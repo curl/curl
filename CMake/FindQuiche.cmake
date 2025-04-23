@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `QUICHE_INCLUDE_DIR`:   Absolute path to quiche include directory.
-# - `QUICHE_LIBRARY`:       Absolute path to `quiche` library.
+# - `QUICHE_INCLUDE_DIR`:  Absolute path to quiche include directory.
+# - `QUICHE_LIBRARY`:      Absolute path to `quiche` library.
 #
 # Defines:
 #
-# - `QUICHE_FOUND`:         System has quiche.
-# - `QUICHE_VERSION`:       Version of quiche.
-# - `CURL::quiche`:         quiche library target.
+# - `QUICHE_FOUND`:        System has quiche.
+# - `QUICHE_VERSION`:      Version of quiche.
+# - `CURL::quiche`:        quiche library target.
 
 set(_quiche_pc_requires "quiche")
 

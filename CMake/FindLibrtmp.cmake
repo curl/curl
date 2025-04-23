@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `LIBRTMP_INCLUDE_DIR`:   Absolute path to librtmp include directory.
-# - `LIBRTMP_LIBRARY`:       Absolute path to `librtmp` library.
+# - `LIBRTMP_INCLUDE_DIR`:  Absolute path to librtmp include directory.
+# - `LIBRTMP_LIBRARY`:      Absolute path to `librtmp` library.
 #
 # Defines:
 #
-# - `LIBRTMP_FOUND`:         System has librtmp.
-# - `LIBRTMP_VERSION`:       Version of librtmp.
-# - `CURL::librtmp`:         librtmp library target.
+# - `LIBRTMP_FOUND`:        System has librtmp.
+# - `LIBRTMP_VERSION`:      Version of librtmp.
+# - `CURL::librtmp`:        librtmp library target.
 
 set(_librtmp_pc_requires "librtmp")
 
