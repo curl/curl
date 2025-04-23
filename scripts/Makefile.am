@@ -57,9 +57,6 @@ $(FISH_COMPLETION_FUNCTION_FILENAME): completion.pl
 endif
 
 install-data-local:
-if CROSSCOMPILING
-	@echo 'NOTICE: we cannot install completion scripts when cross-compiling'
-else # if not cross-compiling:
 if USE_ZSH_COMPLETION
 	if test -n "$(PERL)"; then \
 	  $(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR); \
@@ -71,7 +68,6 @@ if USE_FISH_COMPLETION
 	  $(MKDIR_P) $(DESTDIR)$(FISH_FUNCTIONS_DIR); \
 	  $(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(FISH_FUNCTIONS_DIR)/$(FISH_COMPLETION_FUNCTION_FILENAME); \
 	fi
-endif
 endif
 
 distclean:
