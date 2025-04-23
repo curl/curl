@@ -3533,28 +3533,26 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* conn_protocol can only provide "old" protocols */
     data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
     result = conn->handler->connect_it(data, &done);
+    if(result)
+      goto out;
 
     /* Setup a "faked" transfer that will do nothing */
+    Curl_attach_connection(data, conn);
+    result = Curl_cpool_add(data, conn);
     if(!result) {
-      Curl_attach_connection(data, conn);
-      result = Curl_cpool_add(data, conn);
+      /* Setup whatever necessary for a resumed transfer */
+      result = setup_range(data);
       if(!result) {
-        /* Setup whatever necessary for a resumed transfer */
-        result = setup_range(data);
+        Curl_xfer_setup_nop(data);
+        result = Curl_init_do(data, conn);
       }
-
-      if(result) {
-        DEBUGASSERT(conn->handler->done);
-        /* we ignore the return code for the protocol-specific DONE */
-        (void)conn->handler->done(data, result, FALSE);
-        goto out;
-      }
-      Curl_xfer_setup_nop(data);
     }
 
-    /* since we skip do_init() */
-    Curl_init_do(data, conn);
-
+    if(result) {
+      DEBUGASSERT(conn->handler->done);
+      /* we ignore the return code for the protocol-specific DONE */
+      (void)conn->handler->done(data, result, FALSE);
+    }
     goto out;
   }
 #endif
@@ -3704,7 +3702,9 @@ static CURLcode create_conn(struct Curl_easy *data,
   }
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
-  Curl_init_do(data, conn);
+  result = Curl_init_do(data, conn);
+  if(result)
+    goto out;
 
   /*
    * Setup whatever necessary for a resumed transfer
