@@ -3426,7 +3426,9 @@ static void conn_meta_freeentry(void *p)
 
 static CURLcode create_conn(struct Curl_easy *data,
                             struct connectdata **in_connect,
-                            bool *reusedp)
+                            bool *reusedp,
+                            bool *async,
+                            bool *use_slist)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -3537,9 +3539,12 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  result = parse_connect_to_slist(data, conn, data->set.connect_to);
-  if(result)
-    goto out;
+  if(*use_slist) {
+    *use_slist = FALSE; /* next retry without slist */
+    result = parse_connect_to_slist(data, conn, data->set.connect_to);
+    if(result)
+      goto out;
+  }
 
   /*************************************************************
    * IDN-convert the proxy hostnames
@@ -3851,7 +3856,11 @@ CURLcode Curl_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn;
+<<<<<<< HEAD
   bool reused = FALSE;
+=======
+  bool use_slist = TRUE; /* start by attempting to use the slist */
+>>>>>>> 3edfc1476 (first draft)
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
   *protocol_done = FALSE;
@@ -3860,12 +3869,32 @@ CURLcode Curl_connect(struct Curl_easy *data,
   Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
+<<<<<<< HEAD
   result = create_conn(data, &conn, &reused);
 
   if(result == CURLE_NO_CONNECTION_AVAILABLE) {
     DEBUGASSERT(!conn);
     return result;
   }
+=======
+  result = create_conn(data, &conn, asyncp, &use_slist);
+
+#ifndef CURL_DISABLE_ALTSVC
+  /* if we failed because of the avc cache retry */
+  if(result && data-> asi
+    && !use_slist
+    && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
+    ) {
+    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
+      Curl_detach_connection(data);
+      Curl_conn_terminate(data, conn, TRUE);
+    }
+
+    Curl_req_hard_reset(&data->req, data);
+    result = create_conn(data, &conn, asyncp, &use_slist);
+  }
+#endif
+>>>>>>> 3edfc1476 (first draft)
 
   if(!result) {
     DEBUGASSERT(conn);
