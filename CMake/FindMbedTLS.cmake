@@ -25,16 +25,16 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:   Absolute path to mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:       Absolute path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:  Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:      Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:     Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:   Absolute path to `mbedcrypto` library.
 #
 # Defines:
 #
-# - `MBEDTLS_FOUND`:         System has mbedTLS.
-# - `MBEDTLS_VERSION`:       Version of mbedTLS.
-# - `CURL::mbedtls`:         mbedTLS library target.
+# - `MBEDTLS_FOUND`:        System has mbedTLS.
+# - `MBEDTLS_VERSION`:      Version of mbedTLS.
+# - `CURL::mbedtls`:        mbedTLS library target.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")

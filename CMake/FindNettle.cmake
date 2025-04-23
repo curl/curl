@@ -25,14 +25,14 @@
 #
 # Input variables:
 #
-# - `NETTLE_INCLUDE_DIR`:   Absolute path to nettle include directory.
-# - `NETTLE_LIBRARY`:       Absolute path to `nettle` library.
+# - `NETTLE_INCLUDE_DIR`:  Absolute path to nettle include directory.
+# - `NETTLE_LIBRARY`:      Absolute path to `nettle` library.
 #
 # Defines:
 #
-# - `NETTLE_FOUND`:         System has nettle.
-# - `NETTLE_VERSION`:       Version of nettle.
-# - `CURL::nettle`:         nettle library target.
+# - `NETTLE_FOUND`:        System has nettle.
+# - `NETTLE_VERSION`:      Version of nettle.
+# - `CURL::nettle`:        nettle library target.
 
 set(_nettle_pc_requires "nettle")
 
