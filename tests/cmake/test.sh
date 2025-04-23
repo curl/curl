@@ -102,13 +102,13 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   bldc='bld-find_package'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" "$@" \
+    "${cmake_consumer}" -B "${bldc}" \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. "$@" \
+    "${cmake_consumer}" .. \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     "${cmake_consumer}" --verbose --build .
