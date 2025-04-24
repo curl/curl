@@ -3349,7 +3349,7 @@ static void conn_meta_freeentry(void *p)
 static CURLcode create_conn(struct Curl_easy *data,
                             struct connectdata **in_connect,
                             bool *async,
-                            bool do_slist)
+                            bool *use_slist)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -3460,7 +3460,8 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  if(do_slist) {
+  if(*use_slist) {
+    *use_slist=FALSE /* if we fail a retry should happen without the slist */
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
     if(result)
       goto out;
@@ -3788,6 +3789,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn;
+  bool use_slist = TRUE; /* start by attempting to use the slist */
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
@@ -3795,18 +3797,18 @@ CURLcode Curl_connect(struct Curl_easy *data,
   Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
-  result = create_conn(data, &conn, asyncp, TRUE);
+  result = create_conn(data, &conn, asyncp, &use_slist);
 
 #ifndef CURL_DISABLE_ALTSVC
   /* if we failed because of the avc cache retry */
-  if(result && data->asi) {
+  if(result && use_slist==FALSE) {
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
       Curl_detach_connection(data);
       Curl_conn_terminate(data, conn, TRUE);
     }
 
     Curl_req_hard_reset(&data->req, data);
-    result = create_conn(data, &conn, asyncp, FALSE);
+    result = create_conn(data, &conn, asyncp, use_slist);
   }
 #endif
 
