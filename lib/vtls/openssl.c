@@ -1954,14 +1954,15 @@ static void ossl_provider_cleanup(struct Curl_easy *data)
   OSSL_LIB_CTX_free(data->state.libctx);
   data->state.libctx = NULL;
   Curl_safefree(data->state.propq);
-  if(data->state.provider) {
-    OSSL_PROVIDER_unload(data->state.provider);
-    data->state.provider = NULL;
-  }
   if(data->state.baseprov) {
     OSSL_PROVIDER_unload(data->state.baseprov);
     data->state.baseprov = NULL;
   }
+  if(data->state.provider) {
+    OSSL_PROVIDER_unload(data->state.provider);
+    data->state.provider = NULL;
+  }
+  data->state.provider_loaded = FALSE;
 }
 
 #define MAX_PROVIDER_LEN 128 /* reasonable */
