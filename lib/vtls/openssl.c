@@ -1968,17 +1968,17 @@ static void ossl_provider_cleanup(struct Curl_easy *data)
 
 /* Selects an OpenSSL crypto provider.
  *
- * A provider might need an associated "propq", a string passed on to OpenSSL.
- * Specify this as [PROVIDER][:PROPQ]: separate the name and the propq with a
- * colon. No colon means no propq.
+ * A provider might need an associated property, a string passed on to
+ * OpenSSL. Specify this as [PROVIDER][:PROPERTY]: separate the name and the
+ * property with a colon. No colon means no property is set.
  *
- * An example propq looks like "?provider=tpm2".
+ * An example provider + property looks like "tpm2:?provider=tpm2".
  */
 static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
 {
   char name[MAX_PROVIDER_LEN + 1];
   struct Curl_str prov;
-  struct Curl_str propq = { 0 };
+  const char *propq = NULL;
 
   if(!iname) {
     /* clear and cleanup provider use */
@@ -1990,7 +1990,7 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
 
   if(!Curl_str_single(&iname, ':'))
     /* there was a colon, get the propq until the end of string */
-    (void)Curl_str_until(&iname, &propq, MAX_PROVIDER_LEN, '\0');
+    propq = iname;
 
   /* we need the name in a buffer, null-terminated */
   memcpy(name, Curl_str(&prov), Curl_strlen(&prov));
@@ -2000,8 +2000,8 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
     OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
     if(!libctx)
       return CURLE_OUT_OF_MEMORY;
-    if(Curl_strlen(&propq)) {
-      data->state.propq = strdup(Curl_str(&propq));
+    if(propq) {
+      data->state.propq = strdup(propq);
       if(!data->state.propq) {
         OSSL_LIB_CTX_free(libctx);
         return CURLE_OUT_OF_MEMORY;
