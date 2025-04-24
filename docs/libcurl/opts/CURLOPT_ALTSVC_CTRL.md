@@ -52,9 +52,10 @@ versions.
 
 Setting any bit enables the alt-svc engine.
 
-If at any point the connection crashes because of Alt-Svc,
-CURLALTSVC_NO_RETRY is not set then,
-the default path is attempted instead.
+If the connection fails when trying to connect to an alternative host,
+the hostname from the URL is attempted instead.
+
+Failed connection problems that trigger this fallback include: ...
 
 ## CURLALTSVC_READONLYFILE
 
