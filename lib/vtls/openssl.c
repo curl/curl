@@ -2016,8 +2016,6 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
     data->state.provider_loaded = TRUE;
     return CURLE_OK;
   }
-  if(data->state.provider_failed)
-    return CURLE_SSL_ENGINE_NOTFOUND;
 
   data->state.provider =
     OSSL_PROVIDER_try_load(data->state.libctx, name, 1);
@@ -2026,16 +2024,18 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
     failf(data, "Failed to initialize provider: %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)));
-    /* Do not attempt to load it again */
-    data->state.provider_failed = TRUE;
+    ossl_provider_cleanup(data);
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
 
   /* load the base provider as well */
   data->state.baseprov =
     OSSL_PROVIDER_try_load(data->state.libctx, "base", 1);
-  if(!data->state.baseprov)
+  if(!data->state.baseprov) {
+    ossl_provider_cleanup(data);
     failf(data, "Failed to load base");
+    return CURLE_SSL_ENGINE_NOTFOUND;
+  }
   else
     data->state.provider_loaded = TRUE;
   return CURLE_OK;

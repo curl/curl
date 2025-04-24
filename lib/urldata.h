@@ -1206,7 +1206,6 @@ struct UrlState {
   char *propq; /* for a provider */
 
   BIT(provider_loaded);
-  BIT(provider_failed);
 #endif /* USE_OPENSSL */
   struct curltime expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
