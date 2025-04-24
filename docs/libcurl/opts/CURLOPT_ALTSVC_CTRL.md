@@ -50,6 +50,7 @@ and HTTP/3 bits are only set if libcurl was built with support for those
 versions.
 
 Setting any bit enables the alt-svc engine.
+If at any point the connection crashes because of alt-svc curl will attempt another request without it.
 
 ## CURLALTSVC_READONLYFILE
 
