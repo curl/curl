@@ -3801,7 +3801,10 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_ALTSVC
   /* if we failed because of the avc cache retry */
-  if(result && data-> asi && (use_slist == FALSE)) {
+  if(result && data-> asi
+    && !use_slist
+    && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
+    ) {
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
       Curl_detach_connection(data);
       Curl_conn_terminate(data, conn, TRUE);

@@ -26,6 +26,7 @@ CURLOPT_ALTSVC_CTRL - control alt-svc behavior
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
+#define CURLALTSVC_NO_RETRY     (1<<6)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 ~~~
@@ -52,6 +53,7 @@ versions.
 Setting any bit enables the alt-svc engine.
 
 If at any point the connection crashes because of Alt-Svc,
+CURLALTSVC_NO_RETRY is not set then,
 the default path is attempted instead.
 
 ## CURLALTSVC_READONLYFILE
