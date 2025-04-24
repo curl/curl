@@ -33,11 +33,6 @@ struct meta_key;
 
 typedef void Curl_meta_hash_dtor(const struct meta_key *key,
                                  void *value);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-typedef CURLcode Curl_meta_hash_print(struct dynbuf *buf,
-                                      const struct meta_key *key,
-                                      void *value);
-#endif
 
 typedef enum {
   CURL_META_STR,    /* value is a C-string */
@@ -50,9 +45,6 @@ struct meta_key {
   const char *id;
   size_t id_len;
   Curl_meta_hash_dtor *dtor;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  Curl_meta_hash_print *print;
-#endif
   meta_type type;
 };
 
@@ -86,24 +78,7 @@ void *Curl_meta_hash_get(struct meta_hash *h, const struct meta_key *key);
 
 
 /* Declaring meta keys */
-
-void Curl_meta_str_dtor(const struct meta_key *key, void *value);
-
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-CURLcode Curl_meta_str_print(struct dynbuf *buf,
-                             const struct meta_key *key, void *value);
-
-#define CURL_META_KEY_PTR(id, dtor, print) \
-    { STRCONST(id), (dtor), (print), CURL_META_PTR }
-
-#define CURL_META_KEY_STR(id) \
-    { STRCONST(id), Curl_meta_str_dtor, Curl_meta_str_print, CURL_META_STR }
-#else
-#define CURL_META_KEY(id, dtor, print) \
+#define CURL_META_KEY_PTR(id, dtor) \
     { STRCONST(id), (dtor), CURL_META_PTR }
-#define CURL_META_KEY_STR(id) \
-    { STRCONST(id), Curl_meta_str_dtor, CURL_META_STR }
-#endif
 
 #endif /* HEADER_CURL_META_HASH_H */

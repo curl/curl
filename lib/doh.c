@@ -86,21 +86,9 @@ static void doh_meta_probe_dtor(const struct meta_key *key, void *value)
   }
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static CURLcode doh_meta_probe_print(struct dynbuf *buf,
-                                     const struct meta_key *key,
-                                     void *value)
-{
-  struct doh_request *doh_req = value;
-  (void)key;
-  return Curl_dyn_addf(buf, "DoH request, DNStype=%d", doh_req->dnstype);
-}
-#endif
-
 #define CURL_EZM_DOH_PROBE   "ezm:doh-p"
 static const struct meta_key doh_meta_key_probe =
-  CURL_META_KEY_PTR("meta:doh:probe", doh_meta_probe_dtor,
-                    doh_meta_probe_print);
+  CURL_META_KEY_PTR("meta:doh:probe", doh_meta_probe_dtor);
 #define CURL_META_DOH_PROBE  (&doh_meta_key_probe)
 
 

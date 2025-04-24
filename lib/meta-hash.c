@@ -225,19 +225,3 @@ void Curl_meta_hash_destroy(struct meta_hash *h)
   }
   h->slots = 0;
 }
-
-void Curl_meta_str_dtor(const struct meta_key *key, void *value)
-{
-  (void)key;
-  DEBUGASSERT(key->type == CURL_META_STR);
-  free(value);
-}
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-CURLcode Curl_meta_str_print(struct dynbuf *buf,
-                             const struct meta_key *key, void *value)
-{
-  (void)key;
-  return Curl_dyn_add(buf, (const char *)value);
-}
-#endif

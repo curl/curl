@@ -53,28 +53,14 @@ static void mev_meta_pollset_dtor(const struct meta_key *key, void *value)
   free(value);
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-static CURLcode mev_meta_pollset_print(struct dynbuf *buf,
-                                       const struct meta_key *key,
-                                       void *value)
-{
-  struct easy_pollset *ps = value;
-  (void)key;
-  return Curl_dyn_addf(buf, "pollset, %d sockets", ps->num);
-}
-#endif
-
 static const struct meta_key mev_meta_key_pollset =
-  CURL_META_KEY_PTR("meta:mev:ps", mev_meta_pollset_dtor,
-                    mev_meta_pollset_print);
+  CURL_META_KEY_PTR("meta:mev:ps", mev_meta_pollset_dtor);
 #define CURL_META_MEV_POLLSET  (&mev_meta_key_pollset)
 
 static void mev_in_callback(struct Curl_multi *multi, bool value)
 {
   multi->in_callback = value;
 }
-
-#define CURL_MEV_CONN_HASH_SIZE 3
 
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
