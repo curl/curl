@@ -1201,7 +1201,9 @@ struct UrlState {
   void *engine;
   /* void instead of OSSL_PROVIDER */
   void *provider;
+  void *baseprov;
   void *libctx;
+  char *propq; /* for a provider */
 
   BIT(provider_loaded);
   BIT(provider_failed);

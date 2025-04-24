@@ -62,6 +62,7 @@
 #include "../strcase.h"
 #include "hostcheck.h"
 #include "../multiif.h"
+#include "../strparse.h"
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../curl_printf.h"
@@ -1643,8 +1644,8 @@ fail:
         UI_method_set_writer(ui_method, ssl_ui_writer);
 
         store = OSSL_STORE_open_ex(key_file, data->state.libctx,
-                                   "?provider=tpm2",
-                                   ui_method, NULL, NULL, NULL, NULL);
+                                   data->state.propq, ui_method, NULL, NULL,
+                                   NULL, NULL);
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -1865,11 +1866,11 @@ static void ossl_cleanup(void)
 
 /* Selects an OpenSSL crypto engine or provider.
  */
-static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
+static CURLcode ossl_set_engine(struct Curl_easy *data, const char *name)
 {
 #ifdef USE_OPENSSL_ENGINE
   CURLcode result = CURLE_SSL_ENGINE_NOTFOUND;
-  ENGINE *e = ENGINE_by_id(engine);
+  ENGINE *e = ENGINE_by_id(name);
 
   if(e) {
 
@@ -1883,7 +1884,7 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 
       ENGINE_free(e);
       failf(data, "Failed to initialise SSL Engine '%s': %s",
-            engine, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
+            name, ossl_strerror(ERR_get_error(), buf, sizeof(buf)));
       result = CURLE_SSL_ENGINE_INITFAILED;
       e = NULL;
     }
@@ -1892,9 +1893,9 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
   }
 #endif
 #ifdef OPENSSL_HAS_PROVIDERS
-  return ossl_set_provider(data, engine);
+  return ossl_set_provider(data, name);
 #else
-  (void)engine;
+  (void)name;
   failf(data, "OpenSSL engine not found");
   return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
@@ -1945,17 +1946,45 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 }
 
 #if defined(OPENSSL_HAS_PROVIDERS)
-/* Selects an OpenSSL crypto provider
+
+#define MAX_PROVIDER_LEN 128 /* reasonable */
+
+/* Selects an OpenSSL crypto provider.
+ *
+ * A provider might need an associated "propq", a string passed on to OpenSSL.
+ * Specify this as [PROVIDER][:PROPQ]: separate the name and the propq with a
+ * colon. No colon means no propq.
+ *
+ * An example propq looks like "?provider=tpm2".
  */
-static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
+static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
 {
-  char error_buffer[256];
-  OSSL_PROVIDER *base;
+  char name[MAX_PROVIDER_LEN + 1];
+  struct Curl_str prov;
+  struct Curl_str propq = { 0 };
+
+  if(Curl_str_until(&iname, &prov, MAX_PROVIDER_LEN, ':'))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(!Curl_str_single(&iname, ':'))
+    /* there was a colon, get the propq until the end of string */
+    (void)Curl_str_until(&iname, &propq, MAX_PROVIDER_LEN, '\0');
+
+  /* we need the name in a buffer, null-terminated */
+  memcpy(name, Curl_str(&prov), Curl_strlen(&prov));
+  name[Curl_strlen(&prov)] = 0;
 
   if(!data->state.libctx) {
     OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
     if(!libctx)
       return CURLE_OUT_OF_MEMORY;
+    if(Curl_strlen(&propq)) {
+      data->state.propq = strdup(Curl_str(&propq));
+      if(!data->state.propq) {
+        OSSL_LIB_CTX_free(libctx);
+        return CURLE_OUT_OF_MEMORY;
+      }
+    }
     data->state.libctx = libctx;
   }
 
@@ -1970,6 +1999,7 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
   data->state.provider =
     OSSL_PROVIDER_try_load(data->state.libctx, name, 1);
   if(!data->state.provider) {
+    char error_buffer[256];
     failf(data, "Failed to initialize provider: %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)));
@@ -1977,8 +2007,11 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *name)
     data->state.provider_failed = TRUE;
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
-  base = OSSL_PROVIDER_try_load(data->state.libctx, "base", 1);
-  if(!base)
+
+  /* load the base provider as well */
+  data->state.baseprov =
+    OSSL_PROVIDER_try_load(data->state.libctx, "base", 1);
+  if(!data->state.baseprov)
     failf(data, "Failed to load base");
   else
     data->state.provider_loaded = TRUE;
@@ -2140,6 +2173,19 @@ static void ossl_close_all(struct Curl_easy *data)
   }
 #else
   (void)data;
+#endif
+#ifdef OPENSSL_HAS_PROVIDERS
+  OSSL_LIB_CTX_free(data->state.libctx);
+  data->state.libctx = NULL;
+  Curl_safefree(data->state.propq);
+  if(data->state.provider) {
+    OSSL_PROVIDER_unload(data->state.provider);
+    data->state.provider = NULL;
+  }
+  if(data->state.baseprov) {
+    OSSL_PROVIDER_unload(data->state.baseprov);
+    data->state.baseprov = NULL;
+  }
 #endif
 #ifndef HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED
   /* OpenSSL 1.0.1 and 1.0.2 build an error queue that is stored per-thread
@@ -3633,13 +3679,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
 
   DEBUGASSERT(!octx->ssl_ctx);
-  if(data->state.libctx) {
-    octx->ssl_ctx = SSL_CTX_new_ex(data->state.libctx, "?provider=tpm2",
-                                   req_method);
-  }
-  else {
-    octx->ssl_ctx = SSL_CTX_new(req_method);
-  }
+  octx->ssl_ctx =
+    data->state.libctx ?
+    SSL_CTX_new_ex(data->state.libctx, data->state.propq,
+                   req_method):
+    SSL_CTX_new(req_method);
 
   if(!octx->ssl_ctx) {
     failf(data, "SSL: could not create a context: %s",
@@ -5490,7 +5534,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_get_internals,       /* get_internals */
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */
-  ossl_set_engine,          /* set_engine */
+  ossl_set_engine,          /* set_engine  or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
   NULL,                     /* false_start */
