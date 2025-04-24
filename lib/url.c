@@ -3461,7 +3461,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
   if(*use_slist) {
-    *use_slist = FALSE; /* if we fail a retry should happen without the slist */
+    *use_slist = FALSE; /* next retry without slist */
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
     if(result)
       goto out;
