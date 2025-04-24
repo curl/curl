@@ -101,17 +101,20 @@ We ship release candidate tarballs on three occasions in preparation for the
 pending release:
 
 - Release candidate one (**rc1**) ships the same Saturday the feature freeze
-  starts. Twenty-five days before the release.
+  starts. Twenty-five days before the release. Tagged like `rc-7_34_0-1`.
 
 - Release candidate two (**rc2**) ships nine days later, sixteen days before
-  the release. On a Monday.
+  the release. On a Monday. Tagged like `rc-7_34_0-2`.
 
 - Release candidate tree (**rc3**) ships nine days later, seven days before
-  the release. On a Wednesday.
+  the release. On a Wednesday. Tagged like `rc-7_34_0-3`.
 
 Release candidate tarballs are ephemeral and each such tarball is only kept
 around for a few weeks. They are provided on their dedicated webpage at:
 https://curl.se/rc/
+
+The git tags for release candidate are temporary and remain set only for a
+limited period of time.
 
 **Do not use release candidates in production**. They are work in progress.
 Use them for testing and verification only. Use actual releases in production.
