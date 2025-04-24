@@ -51,8 +51,8 @@ versions.
 
 Setting any bit enables the alt-svc engine.
 
-If at any point the connection crashes because of the alt-svc
-the defualt path is attempted instead.
+If at any point the connection crashes because of Alt-Svc,
+the default path is attempted instead.
 
 ## CURLALTSVC_READONLYFILE
 
