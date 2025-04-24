@@ -957,7 +957,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --verbose
 
       - name: 'curl version'
         timeout-minutes: 1
