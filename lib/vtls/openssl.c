@@ -118,6 +118,8 @@
 #include <openssl/store.h>
 /* this is used in the following conditions to make them easier to read */
 #define OPENSSL_HAS_PROVIDERS
+
+static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
 #include "../warnless.h"
@@ -1947,6 +1949,21 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
 
 #if defined(OPENSSL_HAS_PROVIDERS)
 
+static void ossl_provider_cleanup(struct Curl_easy *data)
+{
+  OSSL_LIB_CTX_free(data->state.libctx);
+  data->state.libctx = NULL;
+  Curl_safefree(data->state.propq);
+  if(data->state.provider) {
+    OSSL_PROVIDER_unload(data->state.provider);
+    data->state.provider = NULL;
+  }
+  if(data->state.baseprov) {
+    OSSL_PROVIDER_unload(data->state.baseprov);
+    data->state.baseprov = NULL;
+  }
+}
+
 #define MAX_PROVIDER_LEN 128 /* reasonable */
 
 /* Selects an OpenSSL crypto provider.
@@ -1963,6 +1980,11 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
   struct Curl_str prov;
   struct Curl_str propq = { 0 };
 
+  if(!iname) {
+    /* clear and cleanup provider use */
+    ossl_provider_cleanup(data);
+    return CURLE_OK;
+  }
   if(Curl_str_until(&iname, &prov, MAX_PROVIDER_LEN, ':'))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -2175,17 +2197,7 @@ static void ossl_close_all(struct Curl_easy *data)
   (void)data;
 #endif
 #ifdef OPENSSL_HAS_PROVIDERS
-  OSSL_LIB_CTX_free(data->state.libctx);
-  data->state.libctx = NULL;
-  Curl_safefree(data->state.propq);
-  if(data->state.provider) {
-    OSSL_PROVIDER_unload(data->state.provider);
-    data->state.provider = NULL;
-  }
-  if(data->state.baseprov) {
-    OSSL_PROVIDER_unload(data->state.baseprov);
-    data->state.baseprov = NULL;
-  }
+  ossl_provider_cleanup(data);
 #endif
 #ifndef HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED
   /* OpenSSL 1.0.1 and 1.0.2 build an error queue that is stored per-thread
