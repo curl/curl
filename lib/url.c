@@ -3461,7 +3461,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
   if(*use_slist) {
-    *use_slist=FALSE; /* if we fail a retry should happen without the slist */
+    *use_slist= FALSE; /* if we fail a retry should happen without the slist */
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
     if(result)
       goto out;
@@ -3801,7 +3801,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_ALTSVC
   /* if we failed because of the avc cache retry */
-  if(result && use_slist==FALSE) {
+  if(result && (use_slist == FALSE)) {
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
       Curl_detach_connection(data);
       Curl_conn_terminate(data, conn, TRUE);
