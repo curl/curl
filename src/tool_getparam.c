@@ -2005,7 +2005,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_AWS_SIGV4: /* --aws-sigv4 */
       config->authtype |= CURLAUTH_AWS_SIGV4;
-      err = getstr(&config->aws_sigv4, nextarg, DENY_BLANK);
+      err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
       break;
     case C_STDERR: /* --stderr */
       tool_set_stderr_file(global, nextarg);
