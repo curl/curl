@@ -320,7 +320,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
     break;
 #endif
   case CURL_SSLVERSION_MAX_TLSv1_2:
-    /* ver_max = MBEDTLS_SSL_VERSION_TLS1_2; */
+    ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
     break;
 #if MBEDTLS_VERSION_NUMBER < 0x03000000
   case CURL_SSLVERSION_MAX_TLSv1_1:
