@@ -26,7 +26,7 @@ cmake_provider="${CMAKE_PROVIDER:-${cmake_consumer}}"
 "${cmake_consumer}" --help | grep -q -- '--install' && cmake_consumer_modern=1
 "${cmake_provider}" --help | grep -q -- '--install' && cmake_provider_modern=1
 
-cmake_opts='-DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF'
+cmake_opts='-DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF'
 
 src='../..'
 
