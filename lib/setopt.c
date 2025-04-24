@@ -2540,25 +2540,25 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     result = Curl_setstropt(&data->set.str[STRING_DNS_SERVERS], ptr);
     if(result)
       return result;
-    return Curl_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
+    return Curl_async_ares_set_dns_servers(data);
 
   case CURLOPT_DNS_INTERFACE:
     result = Curl_setstropt(&data->set.str[STRING_DNS_INTERFACE], ptr);
     if(result)
       return result;
-    return Curl_set_dns_interface(data, data->set.str[STRING_DNS_INTERFACE]);
+    return Curl_async_ares_set_dns_interface(data);
 
   case CURLOPT_DNS_LOCAL_IP4:
     result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP4], ptr);
     if(result)
       return result;
-    return Curl_set_dns_local_ip4(data, data->set.str[STRING_DNS_LOCAL_IP4]);
+    return Curl_async_ares_set_dns_local_ip4(data);
 
   case CURLOPT_DNS_LOCAL_IP6:
     result = Curl_setstropt(&data->set.str[STRING_DNS_LOCAL_IP6], ptr);
     if(result)
       return result;
-    return Curl_set_dns_local_ip6(data, data->set.str[STRING_DNS_LOCAL_IP6]);
+    return Curl_async_ares_set_dns_local_ip6(data);
 
 #endif
 #ifdef USE_UNIX_SOCKETS

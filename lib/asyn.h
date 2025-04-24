@@ -154,31 +154,17 @@ struct async_ares_ctx {
 void Curl_async_ares_shutdown(struct Curl_easy *data);
 void Curl_async_ares_destroy(struct Curl_easy *data);
 
-/*
- * Function provided by the resolver backend to set DNS servers to use.
- */
-CURLcode Curl_set_dns_servers(struct Curl_easy *data, char *servers);
+/* Set the DNS server to use by ares, from `data` settings. */
+CURLcode Curl_async_ares_set_dns_servers(struct Curl_easy *data);
 
-/*
- * Function provided by the resolver backend to set
- * outgoing interface to use for DNS requests
- */
-CURLcode Curl_set_dns_interface(struct Curl_easy *data,
-                                const char *interf);
+/* Set the DNS interfacer to use by ares, from `data` settings. */
+CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data);
 
-/*
- * Function provided by the resolver backend to set
- * local IPv4 address to use as source address for DNS requests
- */
-CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
-                                const char *local_ip4);
+/* Set the local ipv4 address to use by ares, from `data` settings. */
+CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data);
 
-/*
- * Function provided by the resolver backend to set
- * local IPv6 address to use as source address for DNS requests
- */
-CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
-                                const char *local_ip6);
+/* Set the local ipv6 address to use by ares, from `data` settings. */
+CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data);
 
 #endif /* CURLRES_ARES */
 
