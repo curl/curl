@@ -3680,9 +3680,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   DEBUGASSERT(!octx->ssl_ctx);
   octx->ssl_ctx =
+#ifdef OPENSSL_HAS_PROVIDERS
     data->state.libctx ?
     SSL_CTX_new_ex(data->state.libctx, data->state.propq,
                    req_method):
+#endif
     SSL_CTX_new(req_method);
 
   if(!octx->ssl_ctx) {
