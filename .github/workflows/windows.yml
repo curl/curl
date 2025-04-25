@@ -565,6 +565,7 @@ jobs:
       - name: 'install packages'
         timeout-minutes: 5
         run: |
+          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 \
             ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
 
