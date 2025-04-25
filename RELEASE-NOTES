@@ -4,7 +4,7 @@ curl and libcurl 8.14.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3399
+ Contributors:                 3404
 
 This release includes the following changes:
 
@@ -18,20 +18,28 @@ This release includes the following bugfixes:
  o asyn resolver code improvements [50]
  o async-threaded resolver: use ref counter [10]
  o async: DoH improvements [99]
+ o autotools: detect `wolfSSL_set_quic_use_legacy_code` like cmake does [104]
+ o autotools: install shell completion files on cross build [119]
+ o aws-sigv4: allow a blank string [86]
  o build: check required rustls-ffi version [46]
  o certs: drop unused `default_bits` from `.prm` files [45]
  o cf-https-connect: use the passed in dns struct pointer [64]
  o cmake/FindNGTCP2: simplify multi-pkg-config detection [27]
  o cmake: append picky warnings to `CMAKE_REQUIRED_FLAGS` as string [68]
+ o cmake: avoid 'target is imported but not globally visible' when consuming libcurl with old cmake [125]
  o cmake: do not install `mk-ca-bundle` script and manpage [101]
  o cmake: enable `-Wall` for MSVC when `PICKY_COMPILER=ON` [100]
+ o cmake: fix `fish` install directory detection via `pkg-config` [123]
  o cmake: fix nghttp3 static linking with `USE_OPENSSL_QUIC=ON` [79]
+ o cmake: fix option() and mark_as_advanced() mixed order [111]
  o cmake: fix shell completion install when just one flavor is enabled [73]
+ o cmake: install shell completions for cross-builds [112]
  o cmake: link `crypt32` for OpenSSL feature detection [105]
  o cmake: merge `CURL_WERROR` logic into `PickyWarnings.cmake` [66]
  o cmake: prefer `COMPILE_OPTIONS` over `CMAKE_C_FLAGS` for custom C options [72]
  o cmake: quotes, whitespace, use `VERSION_GREATER_EQUAL` [33]
  o cmake: revert `CURL_LTO` behavior for multi-config generators [74]
+ o cmake: tidy up and document feature detections in dependencies [107]
  o cmake: use `INCLUDE_DIRECTORIES` prop to specify local header dirs [47]
  o cmake: use absolute paths for completion targets [40]
  o cmake: use the `LINK_OPTIONS` property with CMake 3.13+ [78]
@@ -39,6 +47,7 @@ This release includes the following bugfixes:
  o configure: fix --disable-rt [20]
  o configure: restore link checks [25]
  o conncache: make Curl_cpool_init return void [15]
+ o connect: shutdown timer fix [132]
  o content_encoding: Transfer-Encoding parser improvements [31]
  o contrithanks.sh: drop set -e [6]
  o cpool/cshutdown: force close connections under pressure [80]
@@ -52,6 +61,7 @@ This release includes the following bugfixes:
  o docs: add missing return statement in examples [85]
  o docs: fix incorrect shell substitution in docker run example command [51]
  o doh: httpsrr fix [71]
+ o doh: make sure CURLOPT_PROTOCOLS is set a with a "long" arg [124]
  o doh: reduce the DNS request buffer size [70]
  o easy_reset: fix dohfor_mid member [63]
  o eventfd: fix feature guards [24]
@@ -61,6 +71,7 @@ This release includes the following bugfixes:
  o http2: fix stream window size after unpausing [34]
  o HTTP3.md: fix incorrect variable placeholders [30]
  o http: fix a build error when all auths are disabled [16]
+ o http: fix HTTP/2 handling of TE request header using "trailers" [130]
  o http: in alt-svc negotiation only allow supported HTTP versions [59]
  o http_aws_sigv4: add additional verbose log statements [39]
  o http_negotiate: fix non-SSL build with GSSAPI [23]
@@ -69,14 +80,19 @@ This release includes the following bugfixes:
  o INSTALL-CMAKE.md: fix typo
  o INSTALL.md: update the minimal libcurl size example
  o KNOWN_BUGS: fix link in sivg4 issue 16.3 [26]
+ o lib/src/docs/test: improve curl_easy_setopt() calls [116]
  o lib: add const to clientwriter tables
  o lib: include files using known path [48]
  o lib: make Curl_easyopts const [44]
  o lib: unify conversions to/from hex [3]
+ o libcurl-tutorial.md: fix read callback explanation [118]
  o libtest/first: stop defining MEMDEBUG_NODEFINES [32]
  o make: clean tests better [60]
+ o mbedtls: TLS 1.3 is max when mbedtls has 1.3 support [109]
  o mk-ca-bundle.pl: follow redirects [53]
  o multi: do transfer book keeping using mid [91]
+ o multi: init_do(): check result [114]
+ o openssl-quic: avoid potential `-Wnull-dereference`, add assert [126]
  o openssl-quic: fix printf mask [102]
  o openssl-quic: fix shutdown when stream not open [11]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
@@ -86,6 +102,7 @@ This release includes the following bugfixes:
  o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
  o rand: update comment on Curl_rand_bytes weak random [35]
  o runtests: add retry option to reduce flakiness [106]
+ o runtests: fix indentation
  o runtests: recognize lowercase `windows` in `curl -V` [77]
  o runtests: remove server verification after start [89]
  o runtests: split `SSH_PWD` into `SCP_PWD` and `SFTP_PWD`, and more [75]
@@ -116,7 +133,10 @@ This release includes the following bugfixes:
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_getparam: clear argument only when needed [98]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
+ o typecheck-gcc.h: fix the typechecks [110]
  o VERSIONS: list all past releases [22]
+ o vquic: consistent name for the stream struct across backends [135]
+ o vquic: init for every call to recvmsg [134]
  o vquic: ngtcp2 + openssl support [96]
  o vtls: fix build with ssl but without http [18]
  o winbuild: add the deprecation warning to the README [29]
@@ -141,19 +161,21 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andrew Kirillov, Andy Pan, bo0tzz on github, Bo Anderson,
-  Brian Chrzanowski, bruce.yoon, bsr13 on hackerone, Calvin Ruocco,
+  Abhinav Singhal, Andrew Kirillov, Andy Pan, Arian van Putten,
+  bo0tzz on github, Bo Anderson, Brian Chrzanowski, bruce.yoon,
+  bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
   Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
   Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
   Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
   epicmkirzinger on github, Fujii Hironori, Graham Christensen, Harry Sintonen,
-  Jake Yuesong Li, Jean-Christophe Amiel, Jixinqi, Joel Depooter,
-  Johan Eliasson, Jonathan Rosa, Kai Pastor, Marius Kleidl, Max Eliaser,
-  mschroeder-fzj on github, Nigel Brittain, Nils Goroll, Pavel Kropachev,
-  PleaseJustDont, Ray Satiro, renovate[bot], Samuel Henrique, Sören Tempel,
-  Stefan Eissing, Stephen Farrell, Tal Regev, Tomas Volf, Viktor Szakats,
-  x1sc0 on github, Yedaya Katsman
-  (48 contributors)
+  Helmut Grohne, Jake Yuesong Li, Jean-Christophe Amiel, Jixinqi,
+  Jochen Sprickerhof, Joel Depooter, Johan Eliasson, Jonathan Rosa, Kai Pastor,
+  kkalganov on github, Marius Kleidl, Max Eliaser, mschroeder-fzj on github,
+  Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
+  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique, Sergey,
+  Sören Tempel, Stefan Eissing, Stephen Farrell, Tal Regev, Thomas Klausner,
+  Tomas Volf, Travis Lane, Viktor Szakats, x1sc0 on github, Yedaya Katsman
+  (58 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -241,6 +263,7 @@ References to bug reports and discussions on issues:
  [83] = https://curl.se/bug/?i=17023
  [84] = https://curl.se/bug/?i=17028
  [85] = https://curl.se/bug/?i=17024
+ [86] = https://curl.se/bug/?i=17176
  [87] = https://curl.se/bug/?i=17014
  [88] = https://curl.se/bug/?i=17012
  [89] = https://curl.se/bug/?i=17005
@@ -256,5 +279,23 @@ References to bug reports and discussions on issues:
  [100] = https://curl.se/bug/?i=17050
  [101] = https://curl.se/bug/?i=17035
  [102] = https://curl.se/bug/?i=17106
+ [104] = https://curl.se/bug/?i=17172
  [105] = https://curl.se/bug/?i=17101
  [106] = https://curl.se/bug/?i=17091
+ [107] = https://curl.se/bug/?i=17082
+ [109] = https://curl.se/bug/?i=17048
+ [110] = https://curl.se/bug/?i=17143
+ [111] = https://curl.se/bug/?i=17163
+ [112] = https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1103938
+ [114] = https://curl.se/bug/?i=17139
+ [116] = https://curl.se/bug/?i=17160
+ [118] = https://curl.se/bug/?i=17138
+ [119] = https://curl.se/bug/?i=17159
+ [123] = https://curl.se/bug/?i=17147
+ [124] = https://curl.se/bug/?i=17142
+ [125] = https://curl.se/bug/?i=17140
+ [126] = https://curl.se/bug/?i=17107
+ [130] = https://curl.se/bug/?i=17122
+ [132] = https://curl.se/bug/?i=17130
+ [134] = https://curl.se/bug/?i=17120
+ [135] = https://curl.se/bug/?i=17113
