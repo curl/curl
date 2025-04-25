@@ -4,8 +4,7 @@
 
 server_bundle.c
 servers
-
-disabled
+buildinfo
 mqttd
 resolve
 rtspd
