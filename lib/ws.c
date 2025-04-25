@@ -817,7 +817,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   strcpy(keyval, randstr);
   free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
-    if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
+    if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name) - 1)) {
       result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
                              heads[i].val);
     }
