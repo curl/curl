@@ -778,18 +778,18 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     {
       /* The request MUST contain an |Upgrade| header field whose value
          MUST include the "websocket" keyword. */
-      "Upgrade:", "websocket"
+      "Upgrade", "websocket"
     },
     {
       /* The request MUST contain a |Connection| header field whose value
          MUST include the "Upgrade" token. */
-      "Connection:", "Upgrade",
+      "Connection", "Upgrade",
     },
     {
       /* The request MUST include a header field with the name
          |Sec-WebSocket-Version|. The value of this header field MUST be
          13. */
-      "Sec-WebSocket-Version:", "13",
+      "Sec-WebSocket-Version", "13",
     },
     {
       /* The request MUST include a header field with the name
@@ -797,7 +797,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
          consisting of a randomly selected 16-byte value that has been
          base64-encoded (see Section 4 of [RFC4648]). The nonce MUST be
          selected randomly for each connection. */
-      "Sec-WebSocket-Key:", NULL,
+      "Sec-WebSocket-Key", NULL,
     }
   };
   heads[3].val = &keyval[0];
@@ -817,8 +817,8 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   strcpy(keyval, randstr);
   free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
-    if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
-      result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
+    if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
+      result = Curl_dyn_addf(req, "%s: %s\r\n", heads[i].name,
                              heads[i].val);
     }
   }
