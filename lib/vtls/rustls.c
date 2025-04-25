@@ -961,8 +961,7 @@ init_config_builder_ech(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  if(data->set.tls_ech & CURLECH_CLA_CFG
-       && data->set.str[STRING_ECH_CONFIG]) {
+  if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
     const char *b64 = data->set.str[STRING_ECH_CONFIG];
     size_t decode_result;
     if(!b64) {
@@ -1008,6 +1007,10 @@ init_config_builder_ech(struct Curl_easy *data,
     goto cleanup;
   }
 cleanup:
+  /* if we base64 decoded, we can free now */
+  if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
+    free(ech_config);
+  }
   if(dns) {
     Curl_resolv_unlink(data, &dns);
   }

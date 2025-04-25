@@ -1352,9 +1352,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
       goto out;
     }
     if(data->set.tls_ech == CURLECH_GREASE) {
-      infof(data, "ECH: GREASE'd ECH not yet supported for wolfSSL");
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto out;
+      infof(data, "ECH: GREASE is done by default by wolfSSL: no need to ask");
     }
     if(data->set.tls_ech & CURLECH_CLA_CFG
        && data->set.str[STRING_ECH_CONFIG]) {
