@@ -25,7 +25,11 @@ http://neverused.example/ -m 22222242222222222
 </errorcode>
 <stderr mode="text">
 curl: option -m: expected a proper numerical parameter
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 </verify>
 </testcase>
