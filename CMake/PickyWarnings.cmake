@@ -249,6 +249,13 @@ if(PICKY_COMPILER)
           -Wxor-used-as-pow                # clang 10.0  gcc 13.0
         )
       endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+        list(APPEND _picky_enable
+          -Wleading-whitespace=spaces      #             gcc 15.0
+          -Wtrailing-whitespace=any        #             gcc 15.0
+          -Wunterminated-string-initialization  #        gcc 15.0
+        )
+      endif()
     endif()
 
     #
