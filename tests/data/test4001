@@ -33,7 +33,11 @@ Make real ECH attempt and fail with "ech required" error (101)
 <verify>
 <errorcode>
 %if !wolfssl
+%if !rustls
 101
+$else
+35
+%endif
 %else
 35
 %endif
