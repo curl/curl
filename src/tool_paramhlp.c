@@ -328,7 +328,7 @@ ParameterError secs2ms(long *valp, const char *str)
   const unsigned int digs[] = { 1, 10, 100, 1000, 10000, 1000000,
     1000000, 10000000, 100000000 };
   if(!str ||
-     curlx_str_number(&str, &secs, CURL_OFF_T_MAX/100))
+     curlx_str_number(&str, &secs, LONG_MAX/1000 - 1))
     return PARAM_BAD_NUMERIC;
   if(!curlx_str_single(&str, '.')) {
     curl_off_t fracs;
