@@ -32,7 +32,11 @@ Make real ECH attempt and fail with "ech required" error (101)
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
+%if !wolfssl
 101
+%else
+35
+%endif
 </errorcode>
 </verify>
 </testcase>
