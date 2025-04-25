@@ -518,8 +518,14 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", server_exe('disabled', 'TOOL'));
-    @disabled = <$disabledh>;
+    open(my $disabledh, "-|", server_exe('buildinfo', 'TOOL'));
+    while(<$disabledh>) {
+        if($_ =~ /([^:]*): ([ONF]*)/) {
+            my ($val, $toggle) = ($1, $2);
+            push @disabled, $val if($toggle eq "OFF");
+            $feature{$val} = 1 if($toggle eq "ON");
+        }
+    }
     close($disabledh);
 
     if($disabled[0]) {
@@ -812,29 +818,8 @@ sub checksystemfeatures {
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
     $feature{"nghttpx-h3"} = !!$nghttpx_h3;
 
-    #
-    # strings that must exactly match the names used in server/disabled.c
-    #
-    $feature{"cookies"} = 1;
     # Use this as a proxy for any cryptographic authentication
     $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
-    $feature{"DoH"} = 1;
-    $feature{"HTTP-auth"} = 1;
-    $feature{"Mime"} = 1;
-    $feature{"form-api"} = 1;
-    $feature{"netrc"} = 1;
-    $feature{"parsedate"} = 1;
-    $feature{"proxy"} = 1;
-    $feature{"shuffle-dns"} = 1;
-    $feature{"typecheck"} = 1;
-    $feature{"verbose-strings"} = 1;
-    $feature{"wakeup"} = 1;
-    $feature{"headers-api"} = 1;
-    $feature{"xattr"} = 1;
-    $feature{"large-time"} = 1;
-    $feature{"large-size"} = 1;
-    $feature{"sha512-256"} = 1;
-    $feature{"--libcurl"} = 1;
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
 
@@ -902,10 +887,6 @@ sub checksystemfeatures {
     # Disable memory tracking when using threaded resolver
     $feature{"TrackMemory"} = $feature{"TrackMemory"} && !$feature{"threaded-resolver"};
 
-    # toggle off the features that were disabled in the build
-    for my $d(@disabled) {
-        $feature{$d} = 0;
-    }
 }
 
 #######################################################################
