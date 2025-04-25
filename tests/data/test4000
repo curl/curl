@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+ECH GREASE
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 7
+
+MooMoo
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ECH
+</features>
+<server>
+https
+</server>
+<name>
+HTTPS GET with ECH GREASE
+</name>
+# Using '-k' over '--insecure' to also test the short form
+# Add ECH grease
+<command>
+--ech grease -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPSPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

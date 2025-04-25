@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+ECH try real and fail
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ECH
+</features>
+<server>
+https
+</server>
+<name>
+Make real ECH attempt and fail with "ech required" error (101)
+</name>
+# Using '-k' over '--insecure' to also test the short form
+<command>
+--ech ecl:AEv+DQBHdAAgACCCU49qdxKOUXJPs3wlsM06v/t42sMH5xQOL37MAd3HaAAEAAEAAQAYb3RoZXJwdWJsaWMudGVzdC5kZWZvLmllAAA= -k https://%HOSTIP:%HTTPSPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+101
+</errorcode>
+</verify>
+</testcase>
