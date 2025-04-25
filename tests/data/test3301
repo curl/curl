@@ -27,6 +27,16 @@ connection-monitor
 #
 # Client-side
 <client>
+<features>
+proxy
+alt-svc
+Debug
+</features>
+<setenv>
+# make debug-curl accept Alt-Svc over plain HTTP
+CURL_ALTSVC_HTTP="yeah"
+</setenv>
+
 <server>
 http
 </server>
@@ -41,15 +51,6 @@ alt-svc fail via proxy
 h1 http://test.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
 </file>
 
-<features>
-proxy
-alt-svc
-Debug
-</features>
-<setenv>
-# make debug-curl accept Alt-Svc over plain HTTP
-CURL_ALTSVC_HTTP="yeah"
-</setenv>
 </client>
 
 #
