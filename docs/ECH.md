@@ -479,12 +479,12 @@ and accessing and logging ``retry_configs``, it seems wolfSSL has neither.
 
 ### Testing ECH
 
-We don't yet have a robust test setup for ECH as that requires an ECH-enabled
+We have yet to add a robust test setup for ECH as that requires an ECH-enabled
 test server.
 
 We have added two basic tests though, aiming to ensure that the client sends a
-GREASE'd or real ECH extension when requested, and reacts correctly to the
-failure of ECH in the latter case. (Given that `stunnel` doesn't support ECH.)
+GREASE or real ECH extension when requested, and reacts correctly to the
+failure of ECH in the latter case. (Given that `stunnel` has no ECH support.)
 
 As with other similar tests, those tests require the `stunnel` tool be
 installed. On Ubuntu `sudo apt install stunnel4` achieves that.
@@ -492,5 +492,4 @@ installed. On Ubuntu `sudo apt install stunnel4` achieves that.
 The test cases are:
 
 - data/test4000: GREASE ECH, expected result: connection succeeds
-- data/test4001: real ECH, connection fails with error 101 (ech required)
-
+- data/test4001: real ECH, connection fails with error 101 (ECH required)
