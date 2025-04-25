@@ -931,7 +931,7 @@ jobs:
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
               -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
               -DCMAKE_C_COMPILER_TARGET='${{ matrix.arch }}-${{ matrix.plat }}' \
-              -DCMAKE_C_FLAGS="${cflags} -W2" \
+              -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
@@ -956,7 +956,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --verbose
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
