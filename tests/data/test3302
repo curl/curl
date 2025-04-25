@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Alt-Svc
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Unknown-header: blrub
+Content-Length: 6
+
+-foo-
+</data>
+
+<servercmd>
+connection-monitor
+</servercmd>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+alt-svc
+Debug
+</features>
+<setenv>
+# make debug-curl accept Alt-Svc over plain HTTP
+CURL_ALTSVC_HTTP="yeah"
+</setenv>
+
+<server>
+http
+</server>
+<name>
+alt-svc fail connection
+</name>
+
+<command>
+--alt-svc "%LOGDIR/altsvc-%TESTNUMBER"  http://%HOSTIP:%HTTPPORT/%TESTNUMBER 
+</command>
+<file name="%LOGDIR/altsvc-%TESTNUMBER">
+h1 %HOSTIP %HTTPPORT  h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
+</file>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+HTTP/1.1 200 OK
+Unknown-header: blrub
+Content-Length: 6
+
+-foo-
+</stdout>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+[DISCONNECT]
+</protocol>
+</verify>
+</testcase>
