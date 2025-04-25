@@ -875,6 +875,14 @@ static const struct setgetcase setget_parts_list[] = {
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
+  {NULL, /* start fresh! */
+   "scheme=https,path=/,url=\"\",", /* incomplete url, redirect to "" */
+   "https://example.com/",
+   0, 0, CURLUE_OK, CURLUE_MALFORMED_INPUT},
+  {NULL, /* start fresh! */
+   "scheme=https,host=example.com,path=/,url=\"\",", /* redirect to "" */
+   "https://example.com/",
+   0, 0, CURLUE_OK, CURLUE_OK},
   {"https://example.com/",
    "path=one\ntwo,",
    "https://example.com/one\ntwo",
@@ -1193,6 +1201,10 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
 }
 
 static const struct redircase set_url_list[] = {
+  {"https://example.com",
+   "", /* blank redirect */
+   "https://example.com/",
+   0, 0, CURLUE_OK },
   {"http://firstplace.example.com/want/1314",
    "//somewhere.example.com/reply/1314",
    "http://somewhere.example.com/reply/1314",
