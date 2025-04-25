@@ -40,7 +40,7 @@ permissions: {}
 #
 # - 10.7  Lion (2011)          - GSS
 # - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl Secure Transport code)
-# - 10.9  Maverick (2013)      - LDAP
+# - 10.9  Mavericks (2013)     - LDAP
 # - 10.14 Mojave (2018)        - Secure Transport
 #
 # For Secure Transport, curl implements features that require a target
