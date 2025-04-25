@@ -62,13 +62,13 @@ my %alias = (
     'CURLINFO_SSL_DATA_IN' => 'none',
     'CURLINFO_SSL_DATA_OUT' => 'none',
     'CURLINFO_TEXT' => 'none'
-    );
+  );
 
 sub scanmdpage {
     my ($file, @words) = @_;
 
     open(my $mh, "<", "$file") ||
-        die "could not open $file";
+      die "could not open $file";
     my @m;
     while(<$mh>) {
         if($_ =~ /^## (.*)/) {
@@ -102,7 +102,7 @@ my $r;
 
 # check for define aliases
 open($r, "<", "$curlh") ||
-    die "no curl.h";
+  die "no curl.h";
 while(<$r>) {
     if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
         $alias{$1}=$3;
@@ -114,7 +114,7 @@ my @curlopt;
 my @curlinfo;
 my @curlmopt;
 open($r, "<", "$syms") ||
-    die "no input file";
+  die "no input file";
 while(<$r>) {
     chomp;
     my $l= $_;
@@ -183,13 +183,12 @@ my %opts = (
     '--test-duphandle' => 6,
     '--test-event' => 6,
     '--wdebug' => 6,
-    );
-
+  );
 
 #########################################################################
 # parse the curl code that parses the command line arguments!
 open($r, "<", "$root/src/tool_getparam.c") ||
-    die "no input file";
+  die "no input file";
 my $list;
 my @getparam; # store all parsed parameters
 
@@ -232,7 +231,7 @@ close($r);
 # parse the curl.1 manpage, extract all documented command line options
 # The manpage may or may not be rebuilt, so check both possible locations
 open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") || open($r, "<", "$root/docs/cmdline-opts/curl.1") ||
-    die "failed getting curl.1";
+  die "failed getting curl.1";
 my @manpage; # store all parsed parameters
 while(<$r>) {
     chomp;
@@ -257,11 +256,10 @@ while(<$r>) {
 }
 close($r);
 
-
 #########################################################################
 # parse the curl code that outputs the curl -h list
 open($r, "<", "$root/src/tool_listhelp.c") ||
-    die "no input file";
+  die "no input file";
 my @toolhelp; # store all parsed parameters
 while(<$r>) {
     chomp;

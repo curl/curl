@@ -74,10 +74,10 @@ my $file = $ARGV[0];
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
-    "Options:\n",
-    " -l  memlimit failure displayed\n",
-    " -v  Verbose\n",
-    " -t  Trace\n";
+      "Options:\n",
+      " -l  memlimit failure displayed\n",
+      " -v  Verbose\n",
+      " -t  Trace\n";
     exit;
 }
 
@@ -93,7 +93,6 @@ if($showlimit) {
     close($fileh);
     exit;
 }
-
 
 my $lnum=0;
 while(<$fileh>) {
@@ -157,7 +156,7 @@ while(<$fileh>) {
 
             if($trace) {
                 print "MALLOC: malloc($size) at $source:$linenum",
-                " makes totally $totalmem bytes\n";
+                  " makes totally $totalmem bytes\n";
             }
 
             newtotal($totalmem);
@@ -183,7 +182,7 @@ while(<$fileh>) {
 
             if($trace) {
                 print "CALLOC: calloc($arg1,$arg2) at $source:$linenum",
-                " makes totally $totalmem bytes\n";
+                  " makes totally $totalmem bytes\n";
             }
 
             newtotal($totalmem);
@@ -228,7 +227,7 @@ while(<$fileh>) {
 
             if($trace) {
                 printf("STRDUP: $size bytes at %s, makes totally: %d bytes\n",
-                       $getmem{$addr}, $totalmem);
+                    $getmem{$addr}, $totalmem);
             }
 
             newtotal($totalmem);
@@ -248,7 +247,7 @@ while(<$fileh>) {
 
             if($trace) {
                 printf("WCSDUP: $size bytes at %s, makes totally: %d bytes\n",
-                       $getmem{$addr}, $totalmem);
+                    $getmem{$addr}, $totalmem);
             }
 
             newtotal($totalmem);
@@ -418,16 +417,16 @@ if($addrinfos) {
 
 if($verbose) {
     print "Mallocs: $mallocs\n",
-        "Reallocs: $reallocs\n",
-        "Callocs: $callocs\n",
-        "Strdups:  $strdups\n",
-        "Wcsdups:  $wcsdups\n",
-        "Frees: $frees\n",
-        "Sends: $sends\n",
-        "Recvs: $recvs\n",
-        "Sockets: $sockets\n",
-        "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
-        "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
+      "Reallocs: $reallocs\n",
+      "Callocs: $callocs\n",
+      "Strdups:  $strdups\n",
+      "Wcsdups:  $wcsdups\n",
+      "Frees: $frees\n",
+      "Sends: $sends\n",
+      "Recvs: $recvs\n",
+      "Sockets: $sockets\n",
+      "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
+      "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
 
     print "Maximum allocated: $maxmem\n";
     print "Total allocated: $memsum\n";

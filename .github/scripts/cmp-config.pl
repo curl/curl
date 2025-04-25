@@ -91,7 +91,7 @@ my %remove = (
     '#define SIZEOF_LONG_LONG 8' => 1,
     '#define VERSION "-"' => 1,
     '#define _FILE_OFFSET_BITS 64' => 1,
-    );
+  );
 
 sub filter {
     my ($line) = @_;
@@ -132,7 +132,6 @@ foreach my $v (keys %remove) {
         print "Ignored, never matched line: $v\n";
     }
 }
-
 
 # return the exit code from diff
 exit system("diff -u /tmp/autotools /tmp/cmake") >> 8;

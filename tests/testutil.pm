@@ -34,35 +34,34 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        runclient
-        runclientoutput
-        setlogfunc
-        exerunner
-        shell_quote
-        subbase64
-        subnewlines
-        subsha256base64file
-        substrippemfile
-    );
+      runclient
+      runclientoutput
+      setlogfunc
+      exerunner
+      shell_quote
+      subbase64
+      subnewlines
+      subsha256base64file
+      substrippemfile
+      );
 
     our @EXPORT_OK = qw(
-        clearlogs
-        logmsg
-    );
+      clearlogs
+      logmsg
+      );
 }
 
 use Digest::SHA qw(sha256);
 use MIME::Base64;
 
 use globalconfig qw(
-    $torture
-    $verbose
-    $dev_null
-);
+  $torture
+  $verbose
+  $dev_null
+  );
 
 my $logfunc;      # optional reference to function for logging
 my @logmessages;  # array holding logged messages
-
 
 #######################################################################
 # Log an informational message
@@ -96,7 +95,6 @@ sub clearlogs {
     undef @logmessages;
     return $loglines;
 }
-
 
 #######################################################################
 
@@ -163,10 +161,10 @@ sub subnewlines {
     }
 
     if(($$thing =~ /^HTTP\/(1.1|1.0|2|3) [1-5][^\x0d]*\z/) ||
-       ($$thing =~ /^(GET|POST|PUT|DELETE) \S+ HTTP\/\d+(\.\d+)?/) ||
-       (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
-        # skip curl error messages
-        ($$thing !~ /^curl: \(\d+\) /))) {
+        ($$thing =~ /^(GET|POST|PUT|DELETE) \S+ HTTP\/\d+(\.\d+)?/) ||
+        (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
+            # skip curl error messages
+            ($$thing !~ /^curl: \(\d+\) /))) {
         # enforce CRLF newline
         $$thing =~ s/\x0d*\x0a/\x0d\x0a/;
         $prevupdate = 1;
@@ -190,10 +188,10 @@ sub runclient {
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
 
-# This is one way to test curl on a remote machine
-#    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
-#    sleep 2;    # time to allow the NFS server to be updated
-#    return $out;
+    # This is one way to test curl on a remote machine
+    #    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
+    #    sleep 2;    # time to allow the NFS server to be updated
+    #    return $out;
 }
 
 #######################################################################
@@ -203,10 +201,10 @@ sub runclientoutput {
     my ($cmd)=@_;
     return `$cmd 2>$dev_null`;
 
-# This is one way to test curl on a remote machine
-#    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
-#    sleep 2;    # time to allow the NFS server to be updated
-#    return @out;
+    # This is one way to test curl on a remote machine
+    #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
+    #    sleep 2;    # time to allow the NFS server to be updated
+    #    return @out;
 }
 
 #######################################################################

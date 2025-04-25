@@ -57,15 +57,14 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT_OK = qw(
-        os_is_win
-        exe_ext
-        dirsepadd
-        sys_native_abs_path
-        sys_native_current_path
-        build_sys_abs_path
-    );
+      os_is_win
+      exe_ext
+      dirsepadd
+      sys_native_abs_path
+      sys_native_current_path
+      build_sys_abs_path
+      );
 }
-
 
 #######################################################################
 # Block for cached static variables
@@ -73,8 +72,8 @@ BEGIN {
 {
     # Cached static variable, Perl 5.0-compatible.
     my $is_win = $^O eq 'MSWin32'
-              || $^O eq 'cygwin'
-              || $^O eq 'msys';
+      || $^O eq 'cygwin'
+      || $^O eq 'msys';
 
     # Returns boolean true if OS is any form of Windows.
     sub os_is_win {

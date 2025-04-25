@@ -31,23 +31,23 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        portable_sleep
-        pidfromfile
-        pidexists
-        pidwait
-        processexists
-        killpid
-        killsockfilters
-        killallsockfilters
-        set_advisor_read_lock
-        clear_advisor_read_lock
-    );
+      portable_sleep
+      pidfromfile
+      pidexists
+      pidwait
+      processexists
+      killpid
+      killsockfilters
+      killallsockfilters
+      set_advisor_read_lock
+      clear_advisor_read_lock
+      );
 
     # portable sleeping needs Time::HiRes
     eval {
         no warnings "all";
         require Time::HiRes;
-    };
+      };
     # portable sleeping falls back to native Sleep on Windows
     eval {
         no warnings "all";
@@ -56,14 +56,14 @@ BEGIN {
 }
 
 use serverhelp qw(
-    servername_id
-    mainsockf_pidfilename
-    datasockf_pidfilename
-    );
+  servername_id
+  mainsockf_pidfilename
+  datasockf_pidfilename
+  );
 
 use pathhelp qw(
-    os_is_win
-    );
+  os_is_win
+  );
 
 #######################################################################
 # portable_sleep uses Time::HiRes::sleep if available and falls back
@@ -303,13 +303,13 @@ sub killpid {
             if($pid > 0) {
                 if(pidexists($pid)) {
                     print("RUN: Process with pid $pid signalled to die\n")
-                        if($verbose);
+                      if($verbose);
                     pidterm($pid);
                     push @signalled, $pid;
                 }
                 else {
                     print("RUN: Process with pid $pid already dead\n")
-                        if($verbose);
+                      if($verbose);
                     # if possible reap its dead children
                     pidwait($pid, &WNOHANG);
                     push @reapchild, $pid;
@@ -326,7 +326,7 @@ sub killpid {
                 my $pid = $signalled[$i];
                 if(!pidexists($pid)) {
                     print("RUN: Process with pid $pid gracefully died\n")
-                        if($verbose);
+                      if($verbose);
                     splice @signalled, $i, 1;
                     # if possible reap its dead children
                     pidwait($pid, &WNOHANG);
@@ -345,7 +345,7 @@ sub killpid {
         foreach my $pid (@signalled) {
             if($pid > 0) {
                 print("RUN: Process with pid $pid forced to die with SIGKILL\n")
-                    if($verbose);
+                  if($verbose);
                 pidkill($pid);
                 # if possible reap its dead children
                 pidwait($pid, &WNOHANG);
@@ -376,7 +376,7 @@ sub killsockfilters {
     return if($proto !~ /^(ftp|imap|pop3|smtp)$/);
 
     die "unsupported sockfilter: $which"
-        if($which && ($which !~ /^(main|data)$/));
+      if($which && ($which !~ /^(main|data)$/));
 
     $server = servername_id($proto, $ipvnum, $idnum) if($verbose);
 
@@ -422,7 +422,6 @@ sub killallsockfilters {
     }
 }
 
-
 sub set_advisor_read_lock {
     my ($filename) = @_;
 
@@ -433,7 +432,6 @@ sub set_advisor_read_lock {
     printf "Error creating lock file $filename error: $!\n";
 }
 
-
 sub clear_advisor_read_lock {
     my ($filename) = @_;
 
@@ -441,6 +439,5 @@ sub clear_advisor_read_lock {
         unlink($filename);
     }
 }
-
 
 1;

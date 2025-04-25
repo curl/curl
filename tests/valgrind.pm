@@ -31,10 +31,9 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        valgrindparse
-    );
+      valgrindparse
+      );
 }
-
 
 use File::Basename;
 
@@ -42,7 +41,7 @@ sub valgrindparse {
     my ($file) = @_;
     my @o;
     open(my $val, "<", "$file") ||
-        return;
+      return;
     @o = <$val>;
     close($val);
     return @o;

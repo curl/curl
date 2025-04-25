@@ -33,25 +33,25 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT_OK = qw(
-        logmsg
-        $logfile
-        serverfactors
-        servername_id
-        servername_str
-        servername_canon
-        server_pidfilename
-        server_portfilename
-        server_logfilename
-        server_cmdfilename
-        server_inputfilename
-        server_outputfilename
-        server_exe
-        server_exe_args
-        mainsockf_pidfilename
-        mainsockf_logfilename
-        datasockf_pidfilename
-        datasockf_logfilename
-    );
+      logmsg
+      $logfile
+      serverfactors
+      servername_id
+      servername_str
+      servername_canon
+      server_pidfilename
+      server_portfilename
+      server_logfilename
+      server_cmdfilename
+      server_inputfilename
+      server_outputfilename
+      server_exe
+      server_exe_args
+      mainsockf_pidfilename
+      mainsockf_logfilename
+      datasockf_pidfilename
+      datasockf_logfilename
+      );
 
     # sub second timestamping needs Time::HiRes
     eval {
@@ -63,11 +63,11 @@ BEGIN {
 
 use globalconfig;
 use pathhelp qw(
-    exe_ext
-    );
+  exe_ext
+  );
 use testutil qw(
-    exerunner
-    );
+  exerunner
+  );
 
 our $logfile;  # server log file name, for logmsg
 
@@ -86,13 +86,13 @@ sub logmsg {
     if($Time::HiRes::VERSION) {
         my ($seconds, $usec) = gettimeofday();
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-            localtime($seconds);
+          localtime($seconds);
         $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
     }
     else {
         my $seconds = time();
         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-            localtime($seconds);
+          localtime($seconds);
         $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
     }
     # we see warnings on Windows run that $logfile is used uninitialized
@@ -104,7 +104,6 @@ sub logmsg {
         close($logfilefh);
     }
 }
-
 
 #***************************************************************************
 # Return server characterization factors given a server id string.
@@ -133,7 +132,6 @@ sub serverfactors {
     return($proto, $ipvnum, $idnum);
 }
 
-
 #***************************************************************************
 # Return server name string formatted for presentation purposes
 #
@@ -157,7 +155,6 @@ sub servername_str {
     return "${proto}${idnum}${ipver}";
 }
 
-
 #***************************************************************************
 # Return server name string formatted for identification purposes
 #
@@ -165,7 +162,6 @@ sub servername_id {
     my ($proto, $ipver, $idnum) = @_;
     return lc(servername_str($proto, $ipver, $idnum));
 }
-
 
 #***************************************************************************
 # Return server name string formatted for file name purposes
@@ -177,7 +173,6 @@ sub servername_canon {
     $string =~ s/\//_v/;
     return $string;
 }
-
 
 #***************************************************************************
 # Return file name for server pid file.
@@ -197,7 +192,6 @@ sub server_portfilename {
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for server log file.
 #
@@ -208,7 +202,6 @@ sub server_logfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for server commands file.
 #
@@ -217,7 +210,6 @@ sub server_cmdfilename {
     my $trailer = '_server.cmd';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return file name for server input file.
@@ -228,7 +220,6 @@ sub server_inputfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for server output file.
 #
@@ -237,7 +228,6 @@ sub server_outputfilename {
     my $trailer = '_server.output';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return filename for a server executable
@@ -256,7 +246,6 @@ sub server_exe {
     }
     return exerunner() . "$cmd";
 }
-
 
 #***************************************************************************
 # Return filename for a server executable as an argument list
@@ -279,7 +268,6 @@ sub server_exe_args {
     return @cmd;
 }
 
-
 #***************************************************************************
 # Return file name for main or primary sockfilter pid file.
 #
@@ -290,7 +278,6 @@ sub mainsockf_pidfilename {
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return file name for main or primary sockfilter log file.
@@ -303,7 +290,6 @@ sub mainsockf_logfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for data or secondary sockfilter pid file.
 #
@@ -315,7 +301,6 @@ sub datasockf_pidfilename {
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return file name for data or secondary sockfilter log file.
 #
@@ -326,7 +311,6 @@ sub datasockf_logfilename {
     my $trailer = '_sockdata.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # End of library

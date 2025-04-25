@@ -65,7 +65,7 @@ code makes it no longer compile error-free after that specified version.
 
 This man page is automatically generated from the symbols-in-versions file.
 HEADER
-    ;
+  ;
 
 sub nameref {
     my ($n)=@_;
@@ -95,7 +95,7 @@ sub nameref {
             'CURLINFO_DATA_OUT' => 1,
             'CURLINFO_SSL_DATA_IN' => 1,
             'CURLINFO_SSL_DATA_OUT' => 1,
-            );
+          );
         if($infotypes{$n}) {
             return "CURLOPT_DEBUGFUNCTION(3)";
         }
@@ -290,13 +290,13 @@ while(<STDIN>) {
         my ($symbol, $rest)=($1,$2);
         my ($intro, $dep, $rem);
         if($rest =~ s/^([0-9.]*) *//) {
-           $intro = $1;
+            $intro = $1;
         }
         if($rest =~ s/^([0-9.]*) *//) {
-           $dep = $1;
+            $dep = $1;
         }
         if($rest =~ s/^- *([0-9.]*)//) {
-           $rem = $1;
+            $rem = $1;
         }
         print "\n## $symbol\nIntroduced in $intro.";
         if($dep) {

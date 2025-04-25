@@ -36,7 +36,6 @@ sub testcompile {
     return $rc;
 }
 
-
 sub extract {
     my($f) = @_;
     my $syn = 0;

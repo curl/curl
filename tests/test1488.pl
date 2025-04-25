@@ -37,10 +37,10 @@ use allversions;
 my $rc = eval {
     require configurehelp;
     configurehelp->import(qw(
-        $Cpreprocessor
-    ));
+          $Cpreprocessor
+          ));
     1;
-};
+  };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
 if (!$rc) {
@@ -95,7 +95,7 @@ sub checkmanpage {
 sub scanman_md_dir {
     my ($d) = @_;
     opendir(my $dh, $d) ||
-        die "Can't opendir: $!";
+      die "Can't opendir: $!";
     my @mans = grep { /.md\z/ } readdir($dh);
     closedir $dh;
     for my $m (@mans) {
@@ -131,7 +131,7 @@ for my $e (sort @syms) {
 
         if( $manpage{$e} ne $symadded{$e} ) {
             printf "%s.md says version %s, but SIV says %s\n",
-                $e, $manpage{$e}, $symadded{$e};
+              $e, $manpage{$e}, $symadded{$e};
             $error++;
         }
 

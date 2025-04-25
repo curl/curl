@@ -48,16 +48,16 @@ print <<HEAD
 #include "tool_help.h"
 
 HEAD
-    ;
+  ;
 if($c) {
     # If compression requested, check that the Gzip module is available
     # or else disable compression
     $c = eval
     {
-      require IO::Compress::Gzip;
-      IO::Compress::Gzip->import();
-      1;
-    };
+        require IO::Compress::Gzip;
+        IO::Compress::Gzip->import();
+        1;
+      };
     print STDERR "Warning: compression requested but Gzip is not available\n" if (!$c)
 }
 
@@ -79,7 +79,7 @@ static const unsigned char hugehelpgz[] = {
      to $gzipped bytes. You can disable the use of compressed help
      texts by NOT passing -c to the mkhelp.pl tool. */
 HEAD
-;
+      ;
 
     my $c=0;
     print " ";
@@ -189,15 +189,15 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
   inflateEnd(&z);
 }
 EOF
-    ;
-foot();
-exit;
+      ;
+    foot();
+    exit;
 }
 else {
     print <<HEAD
 static const char * const curlman[] = {
 HEAD
-        ;
+      ;
 }
 
 my $blank;
@@ -242,7 +242,7 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
   }
 }
 ENDLINE
-    ;
+  ;
 
 foot();
 
@@ -250,5 +250,5 @@ sub foot {
     print <<FOOT
 #endif /* USE_MANUAL */
 FOOT
-  ;
+      ;
 }

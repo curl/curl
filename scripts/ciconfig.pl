@@ -98,8 +98,7 @@ my %defaulton = (
     'lber-lib' => 1,
     'ldap-lib' => 1,
 
-    );
-
+  );
 
 sub configureopts {
     my ($opts)=@_;
@@ -163,14 +162,14 @@ scanjobs();
 print "Used configure options (with / without)\n";
 for my $w (sort keys %used) {
     printf "  %s: %d %d%s\n", $w, $with{$w}, $without{$w},
-        $defaulton{$w} ? " (auto)":"";
+      $defaulton{$w} ? " (auto)":"";
 }
 
 print "Never used configure options\n";
 for my $w (sort keys %avail) {
     if(!$used{$w}) {
         printf "  %s%s\n", $w,
-            $defaulton{$w} ? " (auto)":"";
+          $defaulton{$w} ? " (auto)":"";
     }
 }
 
@@ -180,7 +179,6 @@ for my $w (sort keys %avail) {
         printf "  %s\n", $w;
     }
 }
-
 
 print "ENABLED configure options that aren't available\n";
 for my $w (sort keys %with) {

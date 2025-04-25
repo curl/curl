@@ -108,7 +108,7 @@ for my $c (sort @cmdopts) {
     if($oiv{$c}) {
         if(!$pastversion{$oiv{$c}}) {
             printf STDERR "$c: %s is not a proper release\n",
-                $oiv{$c};
+              $oiv{$c};
             $error++;
         }
 

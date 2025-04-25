@@ -11,7 +11,7 @@
 #
 
 open(S, "<./docs/libcurl/symbols-in-versions")
-    || die "can't find symbols-in-versions";
+  || die "can't find symbols-in-versions";
 while(<S>) {
     if(/^([^ ]*) /) {
         push @asyms, $1;
@@ -22,10 +22,10 @@ close(S);
 # init the opts table with "special" options not easy to figure out
 my @aopts = (
     '--ftp-ssl-reqd', # old alias
-    );
+  );
 
 open(O, "<./docs/options-in-versions")
-    || die "can't find options-in-versions";
+  || die "can't find options-in-versions";
 while(<O>) {
     chomp;
     if(/^([^ ]+)/) {
@@ -45,7 +45,7 @@ while(<O>) {
 close(O);
 
 open(C, "<./.github/scripts/spellcheck.curl")
-    || die "can't find spellcheck.curl";
+  || die "can't find spellcheck.curl";
 while(<C>) {
     if(/^\#/) {
         next;

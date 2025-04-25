@@ -50,20 +50,19 @@ BEGIN {
 
 use globalconfig;
 use servers qw(
-    initserverconfig
-    protoport
-    serverfortest
-    stopservers
-);
+  initserverconfig
+  protoport
+  serverfortest
+  stopservers
+  );
 use runner qw(
-    readtestkeywords
-    singletest_preprocess
-);
+  readtestkeywords
+  singletest_preprocess
+  );
 use testutil qw(
-    setlogfunc
-);
+  setlogfunc
+  );
 use getpart;
-
 
 #######################################################################
 # logmsg is our general message logging subroutine.
@@ -105,7 +104,6 @@ sub parseprotocols {
     push @protocols, 'none';
 }
 
-
 #######################################################################
 # Initialize @protocols from the curl binary under test
 #
@@ -116,7 +114,6 @@ sub init_protocols {
         }
     }
 }
-
 
 #######################################################################
 # Initialize the test harness to run tests

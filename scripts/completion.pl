@@ -35,7 +35,7 @@ Getopt::Long::GetOptions(
     'opts-dir=s' => \$opts_dir,
     'shell=s' => \$shell,
     'help' => \$help,
-) or Pod::Usage::pod2usage();
+  ) or Pod::Usage::pod2usage();
 Pod::Usage::pod2usage() if $help;
 
 my @opts = parse_main_opts($opts_dir);
@@ -52,7 +52,7 @@ if ($shell eq 'fish') {
     $opts_str .= qq{  $_ \\\n} foreach (@opts);
     chomp $opts_str;
 
-my $tmpl = <<"EOS";
+    my $tmpl = <<"EOS";
 #compdef curl
 
 # curl zsh completion
@@ -84,8 +84,8 @@ sub parse_main_opts {
     @files = readdir($dir_handle);
     closedir($dir_handle) || die "Unable to close handle on dir: $opts_dir due to error: $!";
 
-    # We want regular files that end with .md and don't start with an underscore
-    # Edge case: MANPAGE.md doesn't start with an underscore but also isn't documentation for an option
+   # We want regular files that end with .md and don't start with an underscore
+# Edge case: MANPAGE.md doesn't start with an underscore but also isn't documentation for an option
     @files = grep { $_ =~ /\.md$/i && !/^_/ && -f "$opts_dir/$_" && $_ ne "MANPAGE.md" } @files;
 
     for my $file (@files) {
@@ -115,11 +115,11 @@ sub parse_main_opts {
         if ($shell eq 'fish') {
             $option .= "complete --command curl";
             $option .= " --short-option '" . strip_dash(trim($short)) . "'"
-                if defined $short;
+              if defined $short;
             $option .= " --long-option '" . strip_dash(trim($long)) . "'"
-                if defined $long;
+              if defined $long;
             $option .= " --description '" . strip_dash(trim($desc)) . "'"
-                if defined $desc;
+              if defined $desc;
         } elsif ($shell eq 'zsh') {
             $option .= '{' . trim($short) . ',' if defined $short;
             $option .= trim($long)  if defined $long;
@@ -153,7 +153,7 @@ sub parse_main_opts {
         $b =~ /([^=]*)/; my $mb = $1;
 
         length($mb) <=> length($ma) || $ma cmp $mb
-    } @list;
+      } @list;
 
     return @list;
 }

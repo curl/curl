@@ -32,21 +32,21 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        azure_check_environment
-        azure_create_test_run
-        azure_create_test_result
-        azure_update_test_result
-        azure_update_test_run
-    );
+      azure_check_environment
+      azure_create_test_run
+      azure_create_test_result
+      azure_update_test_result
+      azure_update_test_run
+      );
 }
 
 use POSIX qw(strftime);
 
 sub azure_check_environment {
     if(defined $ENV{'AZURE_ACCESS_TOKEN'} && $ENV{'AZURE_ACCESS_TOKEN'} &&
-       defined $ENV{'AGENT_JOBNAME'} && $ENV{'BUILD_BUILDID'} &&
-       defined $ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'} &&
-       defined $ENV{'SYSTEM_TEAMPROJECTID'}) {
+        defined $ENV{'AGENT_JOBNAME'} && $ENV{'BUILD_BUILDID'} &&
+        defined $ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'} &&
+        defined $ENV{'SYSTEM_TEAMPROJECTID'}) {
         return 1;
     }
     return 0;

@@ -43,26 +43,26 @@ my @bad_function_argument = (
     'CURLOPT_PROXY_TLSAUTH_TYPE',
     'CURLOPT_SSLENGINE',
     'CURLOPT_TLSAUTH_TYPE',
-);
+  );
 
 # Options allowed to return CURLE_UNSUPPORTED_PROTOCOL if given a string they
 # do not recognize as valid
 my @unsupported_protocol = (
     'CURLOPT_PROTOCOLS_STR',
     'CURLOPT_REDIR_PROTOCOLS_STR',
-    );
+  );
 
 # Options allowed to return CURLE_SSL_ENGINE_NOTFOUND if given a string they
 # do not recognize as valid
 my @ssl_engine_notfound = (
     'CURLOPT_SSLENGINE',
-    );
+  );
 
 # Options allowed to return CURLE_UNSUPPORTED_PROTOCOL if given a bad
 # numerical input they do not recognize as valid
 my @unsupported_protocol_num = (
     'CURLOPT_HTTP_VERSION',
-    );
+  );
 
 # Options allowed to return CURLE_NOT_BUILT_IN if given a bad
 # numerical input they do not recognize as valid
@@ -70,8 +70,7 @@ my @not_built_in_num = (
     'CURLOPT_HTTPAUTH',
     'CURLOPT_PROXYAUTH',
     'CURLOPT_SOCKS5_AUTH',
-    );
-
+  );
 
 #
 # Generate a set of string checks
@@ -81,47 +80,47 @@ my $allowedstringerrors = <<MOO
   switch(code) {
   case CURLE_BAD_FUNCTION_ARGUMENT:
 MOO
-    ;
+  ;
 
 for my $o (@bad_function_argument) {
     $allowedstringerrors .= <<MOO
     if(!strcmp("$o", name))
       return;
 MOO
-        ;
+      ;
 }
 
 $allowedstringerrors .= <<MOO
      break;
 MOO
-    ;
+  ;
 
 $allowedstringerrors .= <<MOO
   case CURLE_UNSUPPORTED_PROTOCOL:
 MOO
-    ;
+  ;
 for my $o (@unsupported_protocol) {
     $allowedstringerrors .= <<MOO
     if(!strcmp("$o", name))
       return;
 MOO
-        ;
+      ;
 }
 $allowedstringerrors .= <<MOO
     break;
 MOO
-    ;
+  ;
 
 $allowedstringerrors .= <<MOO
   case CURLE_SSL_ENGINE_NOTFOUND:
 MOO
-    ;
+  ;
 for my $o (@ssl_engine_notfound) {
     $allowedstringerrors .= <<MOO
     if(!strcmp("$o", name))
       return;
 MOO
-        ;
+      ;
 }
 $allowedstringerrors .= <<MOO
     break;
@@ -129,7 +128,7 @@ $allowedstringerrors .= <<MOO
     break;
   }
 MOO
-    ;
+  ;
 
 #
 # Generate a set of string checks
@@ -139,28 +138,28 @@ my $allowednumerrors = <<MOO
   switch(code) {
   case CURLE_UNSUPPORTED_PROTOCOL:
 MOO
-    ;
+  ;
 
 for my $o (@unsupported_protocol_num) {
     $allowednumerrors .= <<MOO
     if(!strcmp("$o", name))
       return;
 MOO
-        ;
+      ;
 }
 
 $allowednumerrors .= <<MOO
     break;
   case CURLE_NOT_BUILT_IN:
 MOO
-    ;
+  ;
 
 for my $o (@not_built_in_num) {
     $allowednumerrors .= <<MOO
     if(!strcmp("$o", name))
       return;
 MOO
-        ;
+      ;
 }
 
 $allowednumerrors .= <<MOO
@@ -169,7 +168,7 @@ $allowednumerrors .= <<MOO
     break;
   }
 MOO
-    ;
+  ;
 
 if(!$ARGV[0]) {
     die "missing target file name";
@@ -363,11 +362,11 @@ CURLcode test(char *URL)
 
   CURL_IGNORE_DEPRECATION(
 HEADER
-    ;
+  ;
 
 while(<STDIN>) {
     s/^\s*(.*?)\s*$/$1/;      # Trim.
-    # Remove multi-line comment trail.
+     # Remove multi-line comment trail.
     if($incomment) {
         if($_ !~ /.*?\*\/\s*(.*)$/) {
             next;
@@ -430,35 +429,35 @@ while(<STDIN>) {
     if(first && present(first)) /* first setopt check only */
       err("$name", first, __LINE__);
 MOO
-            ;
+          ;
         my $fstringcheck = <<MOO
     if(first && present(first)) /* first setopt check only */
       errstring("$name", first, __LINE__);
 MOO
-            ;
+          ;
         my $check = <<MOO
       if(res)
         err("$name", res, __LINE__);
 MOO
-            ;
+          ;
         my $flongcheckzero = <<MOO
     if(first && present(first) && !bad_long(first,
        $name))
       errlongzero("$name", first, __LINE__);
 MOO
-            ;
+          ;
 
         my $longcheck = <<MOO
       if(res && !bad_long(res, $name))
         errlong("$name", res, __LINE__);
 MOO
-            ;
+          ;
 
         my $nullcheck = <<MOO
       if(res)
         errnull(\"$name\", res, __LINE__);
 MOO
-            ;
+          ;
 
         print $fh "\n  /****** Verify $name ******/\n";
         if($type eq "CURLOPTTYPE_STRINGPOINT") {
@@ -467,7 +466,7 @@ MOO
             print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif(($type eq "CURLOPTTYPE_LONG") ||
-              ($type eq "CURLOPTTYPE_VALUES")) {
+            ($type eq "CURLOPTTYPE_VALUES")) {
             print $fh "${fpref} 0L);\n$flongcheckzero";
             print $fh "$ifpresent";
             print $fh "${pref} 22L);\n$longcheck";
@@ -483,36 +482,36 @@ MOO
             print $fh "${pref} OFF_LO);\n$longcheck";
         }
         elsif(($type eq "CURLOPTTYPE_OBJECTPOINT") ||
-              ($type eq "CURLOPTTYPE_CBPOINT")) {
+            ($type eq "CURLOPTTYPE_CBPOINT")) {
             if($name =~ /DEPENDS/) {
-              print $fh "${fpref} dep);\n$fcheck";
+                print $fh "${fpref} dep);\n$fcheck";
             }
             elsif($name =~ "SHARE") {
-              print $fh "${fpref} share);\n$fcheck";
+                print $fh "${fpref} share);\n$fcheck";
             }
             elsif($name eq "CURLOPT_ERRORBUFFER") {
-              print $fh "${fpref} errorbuffer);\n$fcheck";
+                print $fh "${fpref} errorbuffer);\n$fcheck";
             }
             elsif(($name eq "CURLOPT_POSTFIELDS") ||
-                  ($name eq "CURLOPT_COPYPOSTFIELDS")) {
+                ($name eq "CURLOPT_COPYPOSTFIELDS")) {
                 # set size to zero to avoid it being "illegal"
                 print $fh "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);\n";
                 print $fh "${fpref} stringpointerextra);\n$fcheck";
             }
             elsif($name eq "CURLOPT_HTTPPOST") {
-              print $fh "${fpref} httppost);\n$fcheck";
+                print $fh "${fpref} httppost);\n$fcheck";
             }
             elsif($name eq "CURLOPT_MIMEPOST") {
-              print $fh "${fpref} mimepost);\n$fcheck";
+                print $fh "${fpref} mimepost);\n$fcheck";
             }
             elsif($name eq "CURLOPT_STDERR") {
-              print $fh "${fpref} stream);\n$fcheck";
+                print $fh "${fpref} stream);\n$fcheck";
             }
             elsif($name eq "CURLOPT_CURLU") {
-              print $fh "${fpref} curlu);\n$fcheck";
+                print $fh "${fpref} curlu);\n$fcheck";
             }
             else {
-              print $fh "${fpref} &object);\n$fcheck";
+                print $fh "${fpref} &object);\n$fcheck";
             }
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
@@ -548,53 +547,52 @@ MOO
     } /* end of secondary checks */
   } /* end of single setopt */
 MOO
-            ;
+          ;
     }
     elsif($_ =~ /^CURLINFO_NONE/) {
-       $infomode = 1;
+        $infomode = 1;
     }
     elsif($infomode &&
-          ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
-       my ($info, $type)=($1, $2);
-       my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
-       my $check = "  if(res)\n    geterr(\"$info\", res, __LINE__);\n";
-       if($type eq "STRING") {
-         print $fh "$c &charp);\n$check";
-       }
-       elsif($type eq "LONG") {
-         print $fh "$c &val);\n$check";
-       }
-       elsif($type eq "OFF_T") {
-         print $fh "$c &oval);\n$check";
-       }
-       elsif($type eq "DOUBLE") {
-         print $fh "$c &dval);\n$check";
-       }
-       elsif($type eq "SLIST") {
-         print $fh "$c &slist);\n$check";
-         print $fh "  if(slist)\n    curl_slist_free_all(slist);\n";
-       }
-       elsif($type eq "SOCKET") {
-         print $fh "$c &sockfd);\n$check";
-       }
-       elsif($type eq "PTR") {
-         if($info eq "CERTINFO") {
-            print $fh "$c &certinfo);\n$check";
-         }
-         elsif(($info eq "TLS_SESSION") ||
-               ($info eq "TLS_SSL_PTR")) {
-            print $fh "$c &tlssession);\n$check";
-         }
-         else {
-            print STDERR "$info/$type is unsupported\n";
-         }
-       }
-       else {
-         print STDERR "$type is unsupported\n";
-       }
+        ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
+        my ($info, $type)=($1, $2);
+        my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
+        my $check = "  if(res)\n    geterr(\"$info\", res, __LINE__);\n";
+        if($type eq "STRING") {
+            print $fh "$c &charp);\n$check";
+        }
+        elsif($type eq "LONG") {
+            print $fh "$c &val);\n$check";
+        }
+        elsif($type eq "OFF_T") {
+            print $fh "$c &oval);\n$check";
+        }
+        elsif($type eq "DOUBLE") {
+            print $fh "$c &dval);\n$check";
+        }
+        elsif($type eq "SLIST") {
+            print $fh "$c &slist);\n$check";
+            print $fh "  if(slist)\n    curl_slist_free_all(slist);\n";
+        }
+        elsif($type eq "SOCKET") {
+            print $fh "$c &sockfd);\n$check";
+        }
+        elsif($type eq "PTR") {
+            if($info eq "CERTINFO") {
+                print $fh "$c &certinfo);\n$check";
+            }
+            elsif(($info eq "TLS_SESSION") ||
+                ($info eq "TLS_SSL_PTR")) {
+                print $fh "$c &tlssession);\n$check";
+            }
+            else {
+                print STDERR "$info/$type is unsupported\n";
+            }
+        }
+        else {
+            print STDERR "$type is unsupported\n";
+        }
     }
 }
-
 
 print $fh <<FOOTER
   )
@@ -612,7 +610,7 @@ test_cleanup:
   return res;
 }
 FOOTER
-    ;
+  ;
 
 close($fh);
 rename($tempfile, $ARGV[0]);

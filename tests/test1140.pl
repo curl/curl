@@ -33,7 +33,6 @@ if(!$docsroot || ($docsroot eq "-g")) {
     exit;
 }
 
-
 shift @ARGV;
 
 my @f = @ARGV;
@@ -46,8 +45,8 @@ sub manpresent {
         return 1;
     }
     elsif(-r "$docsroot/$man" ||
-          -r "$docsroot/libcurl/$man" ||
-          -r "$docsroot/libcurl/opts/$man") {
+        -r "$docsroot/libcurl/$man" ||
+        -r "$docsroot/libcurl/opts/$man") {
         $manp{$man}=1;
         return 1;
     }
@@ -57,7 +56,7 @@ sub manpresent {
 sub file {
     my ($f) = @_;
     open(my $fh, "<", "$f") ||
-        die "test1140.pl could not open $f";
+      die "test1140.pl could not open $f";
     my $line = 1;
     while(<$fh>) {
         chomp;

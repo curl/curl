@@ -65,8 +65,8 @@ sub getoptions {
 # this adds a fake randomly generated command line option
 sub addarg {
     my $nice = "abcdefhijklmnopqrstuvwqxyz".
-        "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
-        "0123456789-";
+      "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
+      "0123456789-";
     my $len = getnum(20) + 2;
     my $o;
     for (1 .. $len) {
@@ -77,9 +77,9 @@ sub addarg {
 
 sub randarg {
     my $nice = "abcdefhijklmnopqrstuvwqxyz".
-        "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
-        "0123456789".
-        ",-?#$%!@ ";
+      "ABCDEFHIJKLMNOPQRSTUVWQXYZ".
+      "0123456789".
+      ",-?#$%!@ ";
     my $len = getnum(20);
     my $o;
     for (1 .. $len) {
@@ -103,8 +103,7 @@ my %commonrc = (
     '1' => 1,
     '2' => 1,
     '26' => 1,
-    );
-
+  );
 
 sub runone {
     my $a;
@@ -135,7 +134,7 @@ sub runone {
     my $cmd="$curl$a $url";
 
     my $rc = system("$cmd >curl-output 2>&1 </dev/null -M 0.1") >> 8;
-    #my $rc = system("valgrind -q $cmd >/dev/null 2>&1 </dev/null -M 0.1") >> 8;
+   #my $rc = system("valgrind -q $cmd >/dev/null 2>&1 </dev/null -M 0.1") >> 8;
 
     $allrc{$rc}++;
 
@@ -213,7 +212,7 @@ print "Running command lines\n";
 do {
     runconfig();
     $c++;
-} while(time() <= $end);
+  } while(time() <= $end);
 print "$c command lines\n";
 
 # run curl command lines
@@ -223,7 +222,7 @@ print "Running config lines\n";
 do {
     runone();
     $c++;
-} while(time() <= $end);
+  } while(time() <= $end);
 
 print "$c config line uses\n";
 
@@ -232,9 +231,9 @@ for my $rc (keys %allrc) {
     printf " %2d: %d times\n", $rc, $allrc{$rc};
 }
 printf "Number or command lines tested:\n".
-    " $totalcmds (%.1f/second)\n", $totalcmds/$seconds;
+  " $totalcmds (%.1f/second)\n", $totalcmds/$seconds;
 printf "Number or command line options tested:\n".
-    " $totalargs (average %.1f per command line)\n",
-    $totalargs/$totalcmds;
+  " $totalargs (average %.1f per command line)\n",
+  $totalargs/$totalcmds;
 printf "Number or different options tested:\n".
-    " %u out of %u\n", scalar(keys %uniq), $nopts;
+  " %u out of %u\n", scalar(keys %uniq), $nopts;

@@ -38,9 +38,9 @@ getoptions();
 
 # options to select a TLS
 my @tls = ("--with-openssl",
-           "--with-wolfssl=/home/daniel/build-wolfssl",
-           "--with-gnutls",
-           "--with-mbedtls");
+    "--with-wolfssl=/home/daniel/build-wolfssl",
+    "--with-gnutls",
+    "--with-mbedtls");
 
 do {
 
@@ -75,4 +75,4 @@ do {
         print STDERR "./configure $arg\n";
         exit 1;
     }
-} while(1);
+  } while(1);

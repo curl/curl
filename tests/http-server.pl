@@ -34,10 +34,10 @@ BEGIN {
 use File::Basename;
 
 use serverhelp qw(
-    server_pidfilename
-    server_logfilename
-    server_exe
-    );
+  server_pidfilename
+  server_logfilename
+  server_exe
+  );
 
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8990;     # just a default
@@ -169,10 +169,10 @@ if(!$logfile) {
 }
 
 $flags .= "--pidfile \"$pidfile\" ".
-    "--cmdfile \"$cmdfile\" ".
-    "--logfile \"$logfile\" ".
-    "--logdir \"$logdir\" ".
-    "--portfile \"$portfile\" ";
+  "--cmdfile \"$cmdfile\" ".
+  "--logfile \"$logfile\" ".
+  "--logdir \"$logdir\" ".
+  "--portfile \"$portfile\" ";
 $flags .= "--gopher " if($gopher);
 $flags .= "--connect $connect " if($connect);
 $flags .= "--keepalive $keepalive_secs " if($keepalive_secs);

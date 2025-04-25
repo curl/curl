@@ -61,7 +61,7 @@ close($h);
 open(my $s, "<", "$source");
 while(<$s>) {
     if($_ =~ /FEATURE\("([^"]*)"/) {
-      $sourcename{$1}++;
+        $sourcename{$1}++;
     }
 }
 close($s);

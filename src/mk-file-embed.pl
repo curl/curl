@@ -41,7 +41,7 @@ extern const unsigned char ${varname}[];
 #endif
 const unsigned char ${varname}[] = {
 HEAD
-    ;
+  ;
 
 while (<STDIN>) {
     my $line = $_;
@@ -49,7 +49,7 @@ while (<STDIN>) {
         my $ord = ord($n);
         printf("%s,", $ord);
         if($ord == 10) {
-             printf("\n");
+            printf("\n");
         }
     }
 }
@@ -58,4 +58,4 @@ print <<ENDLINE
 0
 };
 ENDLINE
-    ;
+  ;

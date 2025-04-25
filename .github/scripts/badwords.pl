@@ -56,13 +56,13 @@ sub file {
         foreach my $w (@w) {
             my $case = $exactcase{$w};
             if(($in =~ /^(.*)$w/i && !$case) ||
-               ($in =~ /^(.*)$w/ && $case) ) {
+                ($in =~ /^(.*)$w/ && $case) ) {
                 my $p = $1;
                 my $c = length($p)+1;
                 print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
                 printf STDERR " %4d | $in\n", $l;
                 printf STDERR "      | %*s^%s\n", length($p), " ",
-                    "~" x (length($w)-1);
+                  "~" x (length($w)-1);
                 printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
                 $errors++;
             }

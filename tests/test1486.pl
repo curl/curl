@@ -40,7 +40,7 @@ sub getsrcvars {
     my $mode = 0;
     while(<$f>) {
         if(!$mode &&
-           ($_ =~ /^static const struct writeoutvar/)) {
+            ($_ =~ /^static const struct writeoutvar/)) {
             $mode = 1;
         }
         if($mode) {

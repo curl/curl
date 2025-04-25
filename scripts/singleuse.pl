@@ -49,7 +49,7 @@ my %wl = (
     'Curl_creader_def_total_length' => 'internal api',
     'Curl_meta_reset' => 'internal api',
     'Curl_trc_dns' => 'internal api',
-);
+  );
 
 my %api = (
     'curl_easy_cleanup' => 'API',
@@ -151,7 +151,7 @@ my %api = (
 
     # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',
-    );
+  );
 
 sub doublecheck {
     my ($f, $used) = @_;
@@ -171,7 +171,7 @@ sub doublecheck {
 }
 
 open(N, "nm $file|") ||
-    die;
+  die;
 
 my %exist;
 my %uses;

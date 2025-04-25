@@ -56,7 +56,7 @@ foreach my $src (@ARGV) {
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
 HEADER
-    ;
+  ;
 
 foreach my $src (@src) {
     if($src =~ /\.c$/g && !exists $exclude{$src}) {

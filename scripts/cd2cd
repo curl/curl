@@ -51,7 +51,6 @@ while(1) {
     }
 }
 
-
 use POSIX qw(strftime);
 my @ts;
 if (defined($ENV{SOURCE_DATE_EPOCH})) {
@@ -85,7 +84,7 @@ sub single {
     my $d;
     my $line = 0;
     open(F, "<:crlf", "$f") ||
-        return 1;
+      return 1;
     while(<F>) {
         $line++;
         $d = $_;
@@ -176,7 +175,7 @@ Title: $title
 Section: $section
 Source: $source
 HEAD
-        ;
+      ;
     push @desc, "See-also:\n";
     for my $s (sort @seealso) {
         push @desc, "  - $s\n" if($s);

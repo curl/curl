@@ -68,7 +68,7 @@ my %whitelist = (
     'https://github.com/curl/curl/labels/help%20wanted' => 1,
     'https://github.com/curl/curl/pulls' => 1,
 
-    );
+  );
 
 # list all .md files in the repo
 my @files=`git ls-files '**.md'`;
@@ -104,7 +104,7 @@ sub findlinks {
     my ($f) = @_;
     my $line = 1;
     open(F, "<:crlf", "$f") ||
-        return;
+      return;
 
     while(<F>) {
         if(/\]\(([^)]*)/) {

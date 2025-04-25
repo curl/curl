@@ -42,72 +42,71 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        checktestcmd
-        prepro
-        readtestkeywords
-        restore_test_env
-        runner_init
-        runnerac_shutdown
-        runnerac_stopservers
-        runnerac_test_preprocess
-        runnerac_test_run
-        runnerar
-        runnerar_ready
-        stderrfilename
-        stdoutfilename
-        $DBGCURL
-        $gdb
-        $gdbthis
-        $gdbxwin
-        $shallow
-        $tortalloc
-        $valgrind_logfile
-        $valgrind_tool
-    );
+      checktestcmd
+      prepro
+      readtestkeywords
+      restore_test_env
+      runner_init
+      runnerac_shutdown
+      runnerac_stopservers
+      runnerac_test_preprocess
+      runnerac_test_run
+      runnerar
+      runnerar_ready
+      stderrfilename
+      stdoutfilename
+      $DBGCURL
+      $gdb
+      $gdbthis
+      $gdbxwin
+      $shallow
+      $tortalloc
+      $valgrind_logfile
+      $valgrind_tool
+      );
 
     # these are for debugging only
     our @EXPORT_OK = qw(
-        singletest_preprocess
-    );
+      singletest_preprocess
+      );
 }
 
 use B qw(
-    svref_2object
-    );
+  svref_2object
+  );
 use Storable qw(
-    freeze
-    thaw
-    );
+  freeze
+  thaw
+  );
 
 use pathhelp qw(
-    exe_ext
-    );
+  exe_ext
+  );
 use processhelp qw(
-    portable_sleep
-    );
+  portable_sleep
+  );
 use servers qw(
-    checkcmd
-    initserverconfig
-    serverfortest
-    stopserver
-    stopservers
-    subvariables
-    );
+  checkcmd
+  initserverconfig
+  serverfortest
+  stopserver
+  stopservers
+  subvariables
+  );
 use getpart;
 use globalconfig;
 use testutil qw(
-    clearlogs
-    logmsg
-    runclient
-    exerunner
-    shell_quote
-    subbase64
-    subsha256base64file
-    substrippemfile
-    subnewlines
-    );
+  clearlogs
+  logmsg
+  runclient
+  exerunner
+  shell_quote
+  subbase64
+  subsha256base64file
+  substrippemfile
+  subnewlines
+  );
 use valgrind;
-
 
 #######################################################################
 # Global variables set elsewhere but used only by this package
@@ -190,9 +189,9 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
             eval {
-                # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
+  # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
                 $SIG{USR1} = 'IGNORE';
-            };
+              };
 
             $thisrunnerid = $$;
             print "Runner $thisrunnerid starting\n" if($verbose);
@@ -372,7 +371,6 @@ sub prepro {
     return @out;
 }
 
-
 #######################################################################
 # Load test keywords into %keywords hash
 #
@@ -386,7 +384,6 @@ sub readtestkeywords {
         $keywords{$k} = 1;
     }
 }
-
 
 #######################################################################
 # Return a list of log locks that still exist
@@ -420,10 +417,10 @@ sub waitlockunlock {
             portable_sleep(0.05);
         }
         if(($lockretry < 0) &&
-           ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
+            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
             logmsg "Warning: server logs lock timeout ",
-                   "($serverlogslocktimeout seconds) expired (locks: " .
-                   join(", ", @locks) . ")\n";
+              "($serverlogslocktimeout seconds) expired (locks: " .
+              join(", ", @locks) . ")\n";
         }
     }
 }
@@ -466,7 +463,7 @@ sub torture {
             do {
                 # find a test to discard
                 $rm = rand(scalar(@ttests));
-            } while(!$ttests[$rm]);
+              } while(!$ttests[$rm]);
             $ttests[$rm] = undef;
             $discard--;
         }
@@ -490,7 +487,7 @@ sub torture {
 
         if($verbose) {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-                localtime(time());
+              localtime(time());
             my $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
             logmsg "Fail function no: $limit at $now\r";
         }
@@ -575,7 +572,7 @@ sub torture {
         }
         if($fail) {
             logmsg " $testnum: torture FAILED: function number $limit in test.\n",
-            " invoke with \"-t$limit\" to repeat this single case.\n";
+              " invoke with \"-t$limit\" to repeat this single case.\n";
             stopservers($verbose);
             return 1;
         }
@@ -585,7 +582,6 @@ sub torture {
     logmsg "torture OK\n";
     return 0;
 }
-
 
 #######################################################################
 # restore environment variables that were modified in test
@@ -603,7 +599,6 @@ sub restore_test_env {
         }
     }
 }
-
 
 #######################################################################
 # Start the servers needed to run this test case
@@ -644,7 +639,6 @@ sub singletest_startservers {
     return ($why, $error);
 }
 
-
 #######################################################################
 # Generate preprocessed test file
 sub singletest_preprocess {
@@ -667,7 +661,6 @@ sub singletest_preprocess {
     # in case the process changed the file, reload it
     loadtest("$LOGDIR/test${testnum}");
 }
-
 
 #######################################################################
 # Set up the test environment to run this test case
@@ -710,7 +703,6 @@ sub singletest_setenv {
     }
 }
 
-
 #######################################################################
 # Check that test environment is fine to run this test case
 sub singletest_precheck {
@@ -747,7 +739,6 @@ sub singletest_precheck {
     }
     return $why;
 }
-
 
 #######################################################################
 # Prepare the test environment to run this test case
@@ -812,7 +803,6 @@ sub singletest_prepare {
     return 0;
 }
 
-
 #######################################################################
 # Run the test command
 sub singletest_run {
@@ -823,7 +813,7 @@ sub singletest_run {
     if($cmd) {
         # make some nice replace operations
         $cmd =~ s/\n//g; # no newlines please
-        # substitute variables in the command line
+         # substitute variables in the command line
     }
     else {
         # there was no command given, use something silly
@@ -838,7 +828,7 @@ sub singletest_run {
     if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
         if (!partexists("verify", "stdout") ||
-                ($cmdhash{'option'} && $cmdhash{'option'} =~ /force-output/)) {
+            ($cmdhash{'option'} && $cmdhash{'option'} =~ /force-output/)) {
             $out=" --output $CURLOUT ";
         }
     }
@@ -1003,14 +993,14 @@ sub singletest_run {
     }
 
     $CMDLINE .= "$cmdargs > " . stdoutfilename($LOGDIR, $testnum) .
-                " 2> " . stderrfilename($LOGDIR, $testnum);
+      " 2> " . stderrfilename($LOGDIR, $testnum);
 
     if($verbose) {
         logmsg "$CMDLINE\n";
     }
 
     open(my $cmdlog, ">", "$LOGDIR/$CURLLOG") ||
-        die "Failure writing log file";
+      die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
     close($cmdlog) || die "Failure writing log file";
 
@@ -1042,8 +1032,8 @@ sub singletest_run {
     # run the command line we built
     if ($torture) {
         $cmdres = torture($CMDLINE,
-                          $testnum,
-                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
+            $testnum,
+            "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis == 1) {
         # gdb
@@ -1068,7 +1058,6 @@ sub singletest_run {
     return (0, $cmdres, $dumped_core, $CURLOUT, $tool, use_valgrind() && !$disablevalgrind);
 }
 
-
 #######################################################################
 # Clean up after test command
 sub singletest_clean {
@@ -1089,7 +1078,7 @@ sub singletest_clean {
             print $gdbcmd "bt\n";
             close($gdbcmd) || die "Failure writing gdb file";
             runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch " . shell_quote($DBGCURL) . " core ");
-     #       unlink("$LOGDIR/gdbcmd2");
+            #       unlink("$LOGDIR/gdbcmd2");
         }
     }
 
@@ -1171,8 +1160,6 @@ sub singletest_postcheck {
     return 0;
 }
 
-
-
 ###################################################################
 # Get ready to run a single test case
 sub runner_test_preprocess {
@@ -1229,7 +1216,6 @@ sub runner_test_preprocess {
     }
     return ($why, $error, clearlogs(), \%testtimings);
 }
-
 
 ###################################################################
 # Run a single test case with an environment that already been prepared
@@ -1329,7 +1315,7 @@ sub controlleripccall {
     # Get the name of the function from the reference
     my $cv = svref_2object($funcref);
     my $gv = $cv->GV;
-    # Prepend the name to the function arguments so it's marshalled along with them
+# Prepend the name to the function arguments so it's marshalled along with them
     unshift @_, $gv->NAME;
     # Marshall the arguments into a flat string
     my $margs = freeze \@_;
@@ -1341,7 +1327,7 @@ sub controlleripccall {
             # Runner has likely died
             return -1;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     if(!$multiprocess) {
@@ -1364,7 +1350,7 @@ sub runnerar {
             # Runner is likely dead and closed the pipe
             return undef;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
@@ -1373,7 +1359,7 @@ sub runnerar {
             # Runner is likely dead and closed the pipe
             return undef;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     # Decode response values
@@ -1428,7 +1414,6 @@ sub runnerar_ready {
     return (undef, undef);
 }
 
-
 ###################################################################
 # Cleanly abort and exit the runner
 # This uses print since there is no longer any controller to write logs.
@@ -1454,7 +1439,7 @@ sub ipcrecv {
             # Special case: no response will be forthcoming
             return 1;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
     my $len=unpack("L", $datalen);
     my $buf;
@@ -1465,7 +1450,7 @@ sub ipcrecv {
             # Special case: no response will be forthcoming
             return 1;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     # Decode the function name and arguments
@@ -1505,7 +1490,7 @@ sub ipcrecv {
             # Special case: no response will be forthcoming
             return 1;
         }
-        # system call was interrupted, probably by ^C; restart it so we stay in sync
+   # system call was interrupted, probably by ^C; restart it so we stay in sync
     }
 
     return 0;
@@ -1527,6 +1512,5 @@ sub runner_shutdown {
     close($runnerw);
     undef $runnerw;
 }
-
 
 1;

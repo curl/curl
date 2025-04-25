@@ -31,16 +31,16 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        compareparts
-        fulltest
-        getpart
-        getpartattr
-        loadarray
-        loadtest
-        partexists
-        striparray
-        writearray
-    );
+      compareparts
+      fulltest
+      getpart
+      getpartattr
+      loadarray
+      loadtest
+      partexists
+      striparray
+      writearray
+      );
 }
 
 use Memoize;
@@ -94,16 +94,16 @@ sub getpartattr {
     my %hash;
     my $inside=0;
 
- #   print "Section: $section, part: $part\n";
+    #   print "Section: $section, part: $part\n";
 
     for(@xml) {
- #       print "$inside: $_";
+        #       print "$inside: $_";
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
         if((1 ==$inside) && ( ($_ =~ /^ *\<$part ([^>]*)/) ||
-                              !(defined($part)) )
-             ) {
+                !(defined($part)) )
+          ) {
             $inside++;
             my $attr=$1;
 
@@ -244,7 +244,6 @@ sub loadtest {
     return 0;
 }
 
-
 # Return entire document as list of lines
 sub fulltest {
     return @xml;
@@ -293,56 +292,56 @@ sub striparray {
 # pass array *REFERENCES* !
 #
 sub compareparts {
- my ($firstref, $secondref)=@_;
+    my ($firstref, $secondref)=@_;
 
- # we cannot compare arrays index per index since with data chunks,
- # they may not be "evenly" distributed
- my $first = join("", @$firstref);
- my $second = join("", @$secondref);
+    # we cannot compare arrays index per index since with data chunks,
+    # they may not be "evenly" distributed
+    my $first = join("", @$firstref);
+    my $second = join("", @$secondref);
 
- if($first =~ /%alternatives\[/) {
-     die "bad use of compareparts\n";
- }
+    if($first =~ /%alternatives\[/) {
+        die "bad use of compareparts\n";
+    }
 
- if($second =~ /%alternatives\[([^,]*),([^\]]*)\]/) {
-     # there can be many %alternatives in this chunk, so we call
-     # this function recursively
-     my $alt = $second;
-     $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$1/;
+    if($second =~ /%alternatives\[([^,]*),([^\]]*)\]/) {
+        # there can be many %alternatives in this chunk, so we call
+        # this function recursively
+        my $alt = $second;
+        $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$1/;
 
-     # check first alternative
-     {
-         my @f;
-         my @s;
-         push @f, $first;
-         push @s, $alt;
-         if(!compareparts(\@f, \@s)) {
-             return 0;
-         }
-     }
+        # check first alternative
+        {
+            my @f;
+            my @s;
+            push @f, $first;
+            push @s, $alt;
+            if(!compareparts(\@f, \@s)) {
+                return 0;
+            }
+        }
 
-     $alt = $second;
-     $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$2/;
-     # check second alternative
-     {
-         my @f;
-         my @s;
-         push @f, $first;
-         push @s, $alt;
-         if(!compareparts(\@f, \@s)) {
-             return 0;
-         }
-     }
+        $alt = $second;
+        $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$2/;
+        # check second alternative
+        {
+            my @f;
+            my @s;
+            push @f, $first;
+            push @s, $alt;
+            if(!compareparts(\@f, \@s)) {
+                return 0;
+            }
+        }
 
-     # neither matched
-     return 1;
- }
+        # neither matched
+        return 1;
+    }
 
- if($first ne $second) {
-     return 1;
- }
+    if($first ne $second) {
+        return 1;
+    }
 
- return 0;
+    return 0;
 }
 
 #
@@ -374,6 +373,5 @@ sub loadarray {
     }
     return @array;
 }
-
 
 1;

@@ -37,10 +37,10 @@ use vars qw($Cpreprocessor);
 my $rc = eval {
     require configurehelp;
     configurehelp->import(qw(
-        $Cpreprocessor
-    ));
+          $Cpreprocessor
+          ));
     1;
-};
+  };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
 if (!$rc) {
@@ -93,7 +93,7 @@ sub scanheader {
 sub scanallheaders {
     my $d = "$root/include/curl";
     opendir(my $dh, $d) ||
-        die "Can't opendir: $!";
+      die "Can't opendir: $!";
     my @headers = grep { /.h\z/ } readdir($dh);
     closedir $dh;
     foreach my $h (@headers) {
@@ -126,14 +126,13 @@ sub checkmanpage {
 sub scanman_md_dir {
     my ($d) = @_;
     opendir(my $dh, $d) ||
-        die "Can't opendir: $!";
+      die "Can't opendir: $!";
     my @mans = grep { /.md\z/ } readdir($dh);
     closedir $dh;
     for my $m (@mans) {
         checkmanpage("$d/$m");
     }
 }
-
 
 scanallheaders();
 scanman_md_dir("$root/docs/libcurl");
@@ -230,9 +229,9 @@ for my $r (@manrefs) {
 if($summary) {
     print "Summary:\n";
     printf "%d symbols in headers (out of which %d are ignored)\n", scalar(@syms),
-    $ignored;
+      $ignored;
     printf "%d symbols in headers are interesting\n",
-    scalar(@syms)- $ignored;
+      scalar(@syms)- $ignored;
     printf "%d symbols are listed in symbols-in-versions\n (out of which %d are listed as removed)\n", scalar(keys %doc), scalar(keys %rem);
     printf "%d symbols in symbols-in-versions should match the ones in headers\n", scalar(keys %doc) - scalar(keys %rem);
 }

@@ -85,15 +85,15 @@ use List::Util 'sum';
 use I18N::Langinfo qw(langinfo CODESET);
 
 use serverhelp qw(
-    server_exe
-    );
+  server_exe
+  );
 use pathhelp qw(
-    exe_ext
-    sys_native_current_path
-    );
+  exe_ext
+  sys_native_current_path
+  );
 use processhelp qw(
-    portable_sleep
-    );
+  portable_sleep
+  );
 
 use appveyor;
 use azure;
@@ -107,7 +107,7 @@ use testutil;
 my %custom_skip_reasons;
 
 my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
-                   # ACURL is handy to set to the system one for reliability
+ # ACURL is handy to set to the system one for reliability
 my $CURLCONFIG="../curl-config"; # curl-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
@@ -165,7 +165,7 @@ use constant {
     ST_INITED => 2,
     ST_PREPROCESS => 3,
     ST_RUN => 4,
-};
+  };
 my %singletest_state;  # current state of singletest() by runner ID
 my %singletest_logs;   # log messages while in singletest array ref by runner
 my $singletest_bufferedrunner; # runner ID which is buffering logs
@@ -279,7 +279,7 @@ sub catch_usr1 {
 eval {
     # some msys2 perl versions don't define SIGUSR1
     $SIG{USR1} = \&catch_usr1;
-};
+  };
 $SIG{PIPE} = 'IGNORE';  # these errors are captured in the read/write calls
 
 ##########################################################################
@@ -325,7 +325,6 @@ if ($ENV{"NGHTTPX"}) {
     chomp $nghttpx_h3;
 }
 
-
 #######################################################################
 # Get the list of tests that the tests/data/Makefile.am knows about!
 #
@@ -344,7 +343,6 @@ sub get_disttests {
     close($dh);
 }
 
-
 #######################################################################
 # Remove all files in the specified directory
 #
@@ -355,7 +353,7 @@ sub cleardir {
 
     # Get all files
     opendir(my $dh, $dir) ||
-        return 0; # can't open dir
+      return 0; # can't open dir
     while($file = readdir($dh)) {
         # Don't clear the $PIDDIR or $LOCKDIR since those need to live beyond
         # one test
@@ -380,7 +378,6 @@ sub cleardir {
     closedir $dh;
     return $done;
 }
-
 
 #######################################################################
 # Given two array references, this function will store them in two temporary
@@ -423,7 +420,6 @@ sub showdiff {
 
     return @out;
 }
-
 
 #######################################################################
 # compare test results with the expected output, we might filter off
@@ -483,7 +479,6 @@ sub parseprotocols {
     # 'none' is used in test cases to mean no server
     push @protocols, 'none';
 }
-
 
 #######################################################################
 # Check & display information about curl and the host the test suite runs on.
@@ -636,7 +631,7 @@ sub checksystemfeatures {
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
 
-            # built with memory tracking support (--enable-curldebug); may be disabled later
+# built with memory tracking support (--enable-curldebug); may be disabled later
             $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
             # curl was built with --enable-debug
             $feature{"Debug"} = $feat =~ /Debug/i;
@@ -744,7 +739,7 @@ sub checksystemfeatures {
         }
         elsif ($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
-                           ($versretval & 127), ($versretval & 128)?"a":"no");
+                ($versretval & 127), ($versretval & 128)?"a":"no");
         }
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
@@ -850,7 +845,7 @@ sub checksystemfeatures {
 
     if(!$feature{"TrackMemory"} && $torture) {
         die "can't run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
+          "TrackMemory feature (--enable-curldebug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -861,25 +856,25 @@ sub checksystemfeatures {
 
     my $havediff;
     if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") == 0) {
-      $havediff = 'available';
+        $havediff = 'available';
     }
     else {
-      $havediff = 'missing';
+        $havediff = 'missing';
     }
 
     # display summary information about curl and the test host
     logmsg ("********* System characteristics ******** \n",
-            "* $curl\n",
-            "* $libcurl\n",
-            "* Protocols: $proto\n",
-            "* Features: $feat\n",
-            "* Disabled: $dis\n",
-            "* Host: $hostname\n",
-            "* System: $hosttype\n",
-            "* OS: $hostos\n",
-            "* Perl: $^V ($^X)\n",
-            "* diff: $havediff\n",
-            "* Args: $args\n");
+        "* $curl\n",
+        "* $libcurl\n",
+        "* Protocols: $proto\n",
+        "* Features: $feat\n",
+        "* Disabled: $dis\n",
+        "* Host: $hostname\n",
+        "* System: $hosttype\n",
+        "* OS: $hostos\n",
+        "* Perl: $^V ($^X)\n",
+        "* diff: $havediff\n",
+        "* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -887,15 +882,15 @@ sub checksystemfeatures {
     }
     if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
         logmsg("*\n",
-               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
-               "*\n");
+            "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
+            "*\n");
     }
 
     logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
-                   $run_duphandle?"test-duphandle ":"",
-                   $run_event_based?"event-based ":"",
-                   $bundle?"bundle ":"",
-                   $nghttpx_h3);
+        $run_duphandle?"test-duphandle ":"",
+        $run_event_based?"event-based ":"",
+        $bundle?"bundle ":"",
+        $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
 
@@ -969,7 +964,6 @@ sub timestampskippedevents {
     }
 }
 
-
 # Setup CI Test Run
 sub citest_starttestrun {
     if(azure_check_environment()) {
@@ -978,7 +972,6 @@ sub citest_starttestrun {
     }
     # Appveyor doesn't require anything here
 }
-
 
 # Register the test case with the CI runner
 sub citest_starttest {
@@ -997,14 +990,13 @@ sub citest_starttest {
     }
 }
 
-
 # Submit the test case result with the CI runner
 sub citest_finishtest {
     my ($testnum, $error) = @_;
     # update test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
         $AZURE_RESULT_ID = azure_update_test_result($ACURL, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
-                                                    $timeprepini{$testnum}, $timevrfyend{$testnum});
+            $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
     elsif(appveyor_check_environment()) {
         appveyor_update_test_result($ACURL, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
@@ -1018,7 +1010,6 @@ sub citest_finishtestrun {
     }
     # Appveyor doesn't require anything here
 }
-
 
 # add one set of test timings from the runner to global set
 sub updatetesttimings {
@@ -1044,7 +1035,6 @@ sub updatetesttimings {
     }
 }
 
-
 #######################################################################
 # Return the log directory for the given test runner
 sub getrunnernumlogdir {
@@ -1067,7 +1057,6 @@ sub getrunnerlogdir {
     }
     die "Internal error: runner ID $runnerid not found";
 }
-
 
 #######################################################################
 # Verify that this test case should be run
@@ -1208,7 +1197,6 @@ sub singletest_shouldrun {
 
     return ($why, $errorreturncode);
 }
-
 
 #######################################################################
 # Print the test name and count tests
@@ -1424,8 +1412,8 @@ sub singletest_check {
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
             logmsg "\n $testnum: protocol FAILED!\n".
-                " There was no content at all in the file $logdir/$SERVERIN.\n".
-                " Server glitch? Total curl failure? Returned: $cmdres\n";
+              " There was no content at all in the file $logdir/$SERVERIN.\n".
+              " Server glitch? Total curl failure? Returned: $cmdres\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time();
             return -1;
@@ -1456,7 +1444,7 @@ sub singletest_check {
                     normalize_text(\@replycheckpart);
                 }
                 if($replycheckpartattr{'nonewline'}) {
-                    # Yes, we must cut off the final newline from the final line
+                   # Yes, we must cut off the final newline from the final line
                     # of the datacheck
                     chomp($replycheckpart[-1]);
                 }
@@ -1600,16 +1588,16 @@ sub singletest_check {
             my $filename=$hash{'name'};
             if(!$filename) {
                 logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
-                       "has no name attribute\n";
+                  "has no name attribute\n";
                 if (runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
                 } else {
 
-                    # TODO: this is a blocking call that will stall the controller,
+                # TODO: this is a blocking call that will stall the controller,
                     if($verbose) {
                         logmsg "WARNING: blocking call in async function\n";
                     }
-                    # but this error condition should never happen except during
+                   # but this error condition should never happen except during
                     # development.
                     my ($rid, $unexpected, $logs) = runnerar($runnerid);
                     if(!$rid) {
@@ -1657,7 +1645,7 @@ sub singletest_check {
             }
 
             $res = compare($runnerid, $testnum, $testname, "output ($filename)",
-                           \@generated, \@outfile);
+                \@generated, \@outfile);
             if($res) {
                 return -1;
             }
@@ -1695,7 +1683,7 @@ sub singletest_check {
     else {
         if(!$short) {
             logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
-                           (!$tool)?"curl":$tool, $errorcode);
+                (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " $testnum: exit FAILED\n";
         # timestamp test result verification end
@@ -1708,7 +1696,7 @@ sub singletest_check {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
             logmsg "\n** ALERT! memory tracking with no output file?\n"
-                if($cmdtype ne "perl");
+              if($cmdtype ne "perl");
             $ok .= "-"; # problem with memory checking
         }
         else {
@@ -1815,7 +1803,6 @@ sub singletest_check {
     return 0;
 }
 
-
 #######################################################################
 # Report a successful test
 sub singletest_success {
@@ -1825,14 +1812,14 @@ sub singletest_success {
     my $esttotal = $sofar/$count * $total;
     my $estleft = $esttotal - $sofar;
     my $timeleft=sprintf("remaining: %02d:%02d",
-                     $estleft/60,
-                     $estleft%60);
+        $estleft/60,
+        $estleft%60);
     my $took = $timevrfyend{$testnum} - $timeprepini{$testnum};
     my $duration = sprintf("duration: %02d:%02d",
-                           $sofar/60, $sofar%60);
+        $sofar/60, $sofar%60);
     if(!$automakestyle) {
         logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
-                       $count, $total, $timeleft, $took, $duration);
+            $count, $total, $timeleft, $took, $duration);
     }
     else {
         my $testname= (getpart("client", "name"))[0];
@@ -2008,7 +1995,7 @@ sub singletest {
             return ($err, 0);
         }
         elsif($error == -2) {
-            # torture test; there is no verification, so the run result holds the
+          # torture test; there is no verification, so the run result holds the
             # test success code
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $cmdres);
@@ -2016,7 +2003,6 @@ sub singletest {
             logmsg singletest_dumplogs();
             return ($cmdres, 0);
         }
-
 
         #######################################################################
         # Report a successful test
@@ -2063,8 +2049,8 @@ sub runtimestats {
         if($timesrvrini{$testnum}) {
             $timesrvrtot += $timesrvrend{$testnum} - $timesrvrini{$testnum};
             $timepreptot +=
-                (($timetoolini{$testnum} - $timeprepini{$testnum}) -
-                 ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
+              (($timetoolini{$testnum} - $timeprepini{$testnum}) -
+                  ($timesrvrend{$testnum} - $timesrvrini{$testnum}));
             $timetooltot += $timetoolend{$testnum} - $timetoolini{$testnum};
             $timelocktot += $timesrvrlog{$testnum} - $timetoolend{$testnum};
             $timevrfytot += $timevrfyend{$testnum} - $timesrvrlog{$testnum};
@@ -2073,7 +2059,7 @@ sub runtimestats {
                 $timesrvrend{$testnum} - $timesrvrini{$testnum}, $testnum);
             push @timeprep, sprintf("%06.3f  %04d",
                 ($timetoolini{$testnum} - $timeprepini{$testnum}) -
-                ($timesrvrend{$testnum} - $timesrvrini{$testnum}), $testnum);
+                  ($timesrvrend{$testnum} - $timesrvrini{$testnum}), $testnum);
             push @timetool, sprintf("%06.3f  %04d",
                 $timetoolend{$testnum} - $timetoolini{$testnum}, $testnum);
             push @timelock, sprintf("%06.3f  %04d",
@@ -2096,21 +2082,21 @@ sub runtimestats {
     }
 
     logmsg "Spent ". sprintf("%08.3f ", $timesrvrtot) .
-           "seconds starting and verifying test harness servers.\n";
+      "seconds starting and verifying test harness servers.\n";
     logmsg "Spent ". sprintf("%08.3f ", $timepreptot) .
-           "seconds reading definitions and doing test preparations.\n";
+      "seconds reading definitions and doing test preparations.\n";
     logmsg "Spent ". sprintf("%08.3f ", $timetooltot) .
-           "seconds actually running test tools.\n";
+      "seconds actually running test tools.\n";
     logmsg "Spent ". sprintf("%08.3f ", $timelocktot) .
-           "seconds awaiting server logs lock removal.\n";
+      "seconds awaiting server logs lock removal.\n";
     logmsg "Spent ". sprintf("%08.3f ", $timevrfytot) .
-           "seconds verifying test results.\n";
+      "seconds verifying test results.\n";
     logmsg "Spent ". sprintf("%08.3f ", $timetesttot) .
-           "seconds doing all of the above.\n";
+      "seconds doing all of the above.\n";
 
     $counter = 25;
     logmsg "\nTest server starting and verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timesrvr) {
@@ -2120,7 +2106,7 @@ sub runtimestats {
 
     $counter = 10;
     logmsg "\nTest definition reading and preparation time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timeprep) {
@@ -2130,7 +2116,7 @@ sub runtimestats {
 
     $counter = 25;
     logmsg "\nTest tool execution time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetool) {
@@ -2140,7 +2126,7 @@ sub runtimestats {
 
     $counter = 15;
     logmsg "\nTest server logs lock removal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timelock) {
@@ -2150,7 +2136,7 @@ sub runtimestats {
 
     $counter = 10;
     logmsg "\nTest results verification time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timevrfy) {
@@ -2160,7 +2146,7 @@ sub runtimestats {
 
     $counter = 50;
     logmsg "\nTotal time per test ".
-        sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
+      sprintf("(%s)...\n\n", (not $fullstats)?"top $counter":"full");
     logmsg "-time-  test\n";
     logmsg "------  ----\n";
     foreach my $txt (@timetest) {
@@ -2481,7 +2467,7 @@ Usage: runtests.pl [options] [test selection(s)]
   [!keyword] like "!cookies" to disable any tests containing the key word
   [~keyword] like "~cookies" to ignore results of tests containing key word
 EOHELP
-    ;
+          ;
         exit;
     }
     elsif($ARGV[0] =~ /^(\d+)/) {
@@ -2526,7 +2512,7 @@ EOHELP
 # Detect a test bundle build.
 # Do not look for 'tunits' and 'units' because not all configurations build them.
 if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
-   -e $SRVDIR . "servers" . exe_ext('SRV')) {
+    -e $SRVDIR . "servers" . exe_ext('SRV')) {
     # use test bundles
     $bundle=1;
     $ENV{'CURL_TEST_BUNDLES'} = 1;
@@ -2536,12 +2522,12 @@ delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);
 
 if(!$randseed) {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-        localtime(time);
+      localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
     print "Using curl: $CURL\n";
     open(my $curlvh, "-|", exerunner() . shell_quote($CURL) . " --version 2>$dev_null") ||
-        die "could not get curl version!";
+      die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) || die "could not get curl version!";
     # use the first line of output and get the md5 out of it
@@ -2821,7 +2807,7 @@ sub displaylogs {
     my ($runnerid, $testnum)=@_;
     my $logdir = getrunnerlogdir($runnerid);
     opendir(DIR, "$logdir") ||
-        die "can't open dir: $!";
+      die "can't open dir: $!";
     my @logs = readdir(DIR);
     closedir(DIR);
 
@@ -3006,8 +2992,8 @@ while () {
     if(@ridsready) {
         for my $ridready (@ridsready) {
             if($ridready && ! defined $runnersrunning{$ridready}) {
-                # On Linux, a closed pipe still shows up as ready instead of error.
-                # Detect this here by seeing if we are expecting it to be ready and
+            # On Linux, a closed pipe still shows up as ready instead of error.
+            # Detect this here by seeing if we are expecting it to be ready and
                 # treat it as an error if not.
                 logmsg "ERROR: Runner $ridready is unexpectedly ready; is probably actually dead\n";
                 $riderror = $ridready;
@@ -3145,7 +3131,7 @@ runtimestats($lasttest);
 
 if($all) {
     logmsg "TESTDONE: $all tests were considered during ".
-        sprintf("%.0f", $sofar) ." seconds.\n";
+      sprintf("%.0f", $sofar) ." seconds.\n";
 }
 
 if(%skipped && !$short) {
@@ -3159,7 +3145,7 @@ if(%skipped && !$short) {
         my $r = $_;
         my $skip_count = $skipped{$r};
         my $log_line = sprintf("TESTINFO: \"%s\" %d time%s (", $r, $skip_count,
-                           ($skip_count == 1) ? "" : "s");
+            ($skip_count == 1) ? "" : "s");
 
         # now gather all test case numbers that had this reason for being
         # skipped
@@ -3229,7 +3215,7 @@ if($executed) {
         logmsg "IGNORED: failed tests: $sorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
-                   $ok/$total*100);
+        $ok/$total*100);
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);

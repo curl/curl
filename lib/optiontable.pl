@@ -33,7 +33,7 @@ print <<HEAD
 /* all easy setopt options listed in alphabetical order */
 const struct curl_easyoption Curl_easyopts[] = {
 HEAD
-    ;
+  ;
 
 my $lastnum=0;
 
@@ -68,7 +68,6 @@ sub add {
         $lastnum = $num;
     }
 }
-
 
 my $fl;
 while(<STDIN>) {
@@ -114,7 +113,6 @@ while(<STDIN>) {
     }
 }
 
-
 for my $name (sort @names) {
     my $oname = $name;
     my $a = $alias{$name};
@@ -124,13 +122,13 @@ for my $name (sort @names) {
         $flag = "CURLOT_FLAG_ALIAS";
     }
     $o = sprintf("  {\"%s\", %s, %s, %s},\n",
-                 $oname, $opt{$name}, $type{$name}, $flag);
+        $oname, $opt{$name}, $type{$name}, $flag);
     if(length($o) < 80) {
         print $o;
     }
     else {
         printf("  {\"%s\", %s,\n   %s, %s},\n",
-                 $oname, $opt{$name}, $type{$name}, $flag);
+            $oname, $opt{$name}, $type{$name}, $flag);
     }
 }
 
@@ -149,4 +147,4 @@ int Curl_easyopts_check(void)
 }
 #endif
 FOOT
-    ;
+  ;

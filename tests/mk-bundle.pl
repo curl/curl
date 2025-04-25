@@ -44,7 +44,7 @@ print <<HEADER
 #define CURLTESTS_BUNDLED_TEST_H
 #include "first.h"
 HEADER
-    ;
+  ;
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
@@ -110,7 +110,7 @@ my @reused_symbols = (
     "write_cb",
     "writecb",
     "xferinfo",
-    );
+  );
 
 # TODO: Some of these may be #undef-ed manually at the end of each source
 my @reused_macros = (
@@ -118,7 +118,7 @@ my @reused_macros = (
     "NUM_HANDLES",
     "SAFETY_MARGIN",
     "TEST_HANG_TIMEOUT",
-    );
+  );
 
 my $tlist = "";
 
@@ -160,4 +160,4 @@ $tlist};
 
 #include "first.c"
 FOOTER
-    ;
+  ;

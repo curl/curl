@@ -101,7 +101,7 @@ close(R);
 my $error;
 if(scalar(@curlout) != scalar(@txtout)) {
     printf "curl -h $opt is %d lines, $txt says %d lines\n",
-        scalar(@curlout), scalar(@txtout);
+      scalar(@curlout), scalar(@txtout);
     $error++;
 }
 else {
@@ -113,9 +113,9 @@ else {
         if($curlout[$i] ne $txtout[$i]) {
             printf "Line %d\n", $i;
             printf "-h   : %s (%d bytes)\n", $curlout[$i],
-                length($curlout[$i]);
+              length($curlout[$i]);
             printf "file : %s (%d bytes)\n", $txtout[$i],
-                length($txtout[$i]);
+              length($txtout[$i]);
 
             if(length($curlout[$i]) == length($txtout[$i])) {
                 my $l = length($curlout[$i]);

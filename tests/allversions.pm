@@ -28,7 +28,7 @@
 sub allversions {
     my ($file) = @_;
     open(A, "<$file") ||
-        die "can't open the versions file $file\n";
+      die "can't open the versions file $file\n";
     my $before = 1;
     my $relcount;
     while(<A>) {
@@ -36,7 +36,7 @@ sub allversions {
             $before = 0;
         }
         elsif(!$before &&
-              /^- ([0-9.]+): (.*)/) {
+            /^- ([0-9.]+): (.*)/) {
             $pastversion{$1}=$2;
             $relcount++;
         }

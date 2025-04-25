@@ -41,7 +41,7 @@ my $nroff2cd = "0.1"; # to keep check
 sub single {
     my ($f)=@_;
     open(F, "<:crlf", "$f") ||
-        return 1;
+      return 1;
     my $line;
     my $title;
     my $section;
@@ -67,7 +67,7 @@ sub single {
                 open(F, "<:crlf", "$f") || return 1;
             }
             if($d =~ /^\.TH ([^ ]*) (\d) \"(.*?)\" ([^ \n]*)/) {
-                # header, this needs to be the first thing after leading comments
+              # header, this needs to be the first thing after leading comments
                 $title = $1;
                 $section = $2;
                 # date is $3
@@ -76,7 +76,7 @@ sub single {
                 $source =~ s/[\"\'](.*)[\"\']\z/$1/;
                 $header = 1;
 
-            print <<HEAD
+                print <<HEAD
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
@@ -84,7 +84,7 @@ Title: $title
 Section: $section
 Source: $source
 HEAD
-                ;
+                  ;
             }
             next;
         }

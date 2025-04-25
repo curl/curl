@@ -67,7 +67,7 @@ if ($ARGV[0] eq "prepare")
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
-      system "chattr +r rofile.txt";
+        system "chattr +r rofile.txt";
     }
 
     exit 0;
@@ -79,7 +79,7 @@ elsif ($ARGV[0] eq "postprocess")
 
     # Clean up the test directory
     if($^O eq 'cygwin') {
-      system "chattr -r $dirname/rofile.txt";
+        system "chattr -r $dirname/rofile.txt";
     }
     chmod 0666, "$dirname/rofile.txt";
     unlink "$dirname/rofile.txt";
@@ -113,7 +113,7 @@ elsif ($ARGV[0] eq "postprocess")
                 if ($8 eq "." || $8 eq "..") {
                     next;
                 }
-                # Erase all directory metadata except for the name, as it is not
+               # Erase all directory metadata except for the name, as it is not
                 # consistent for across all test systems and filesystems
                 push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
             } elsif ($1 eq "-") {

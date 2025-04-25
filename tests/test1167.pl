@@ -37,10 +37,10 @@ use vars qw($Cpreprocessor);
 my $rc = eval {
     require configurehelp;
     configurehelp->import(qw(
-        $Cpreprocessor
-    ));
+          $Cpreprocessor
+          ));
     1;
-};
+  };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
 if (!$rc) {
@@ -73,11 +73,11 @@ sub scanenums {
     my $skipit = 0;
 
     open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
-        die "Cannot preprocess $file";
+      die "Cannot preprocess $file";
     while ( <H_IN> ) {
         my ($line, $linenum) = ($_, $.);
         if( /^#(line|) (\d+) \"(.*)\"/) {
-            # if the included file isn't in our incdir, then we skip this section
+          # if the included file isn't in our incdir, then we skip this section
             # until next #line
             #
             if($3 !~ /^$incdir/) {
@@ -99,11 +99,11 @@ sub scanenums {
             chomp;
             s/[,\s].*//;
             if(($_ !~ /\}(;|)/) &&
-               ($_ ne "typedef") &&
-               ($_ ne "enum") &&
-               ($_ ne "=") &&
-               ($_ !~ /^\d+$/) &&
-               ($_ !~ /^[ \t]*$/)) {
+                ($_ ne "typedef") &&
+                ($_ ne "enum") &&
+                ($_ ne "=") &&
+                ($_ !~ /^\d+$/) &&
+                ($_ !~ /^[ \t]*$/)) {
                 if($verbose) {
                     print "Source: $Cpreprocessor $i$file\n";
                     print "Symbol: $_\n";
@@ -133,7 +133,6 @@ sub scanheader {
     }
     close H;
 }
-
 
 opendir(my $dh, $incdir) || die "Can't opendir $incdir: $!";
 my @hfiles = grep { /\.h$/ } readdir($dh);

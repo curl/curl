@@ -32,20 +32,20 @@ my @tabs = (
     "/mkfile",
     "\\.(bat|sln|vc)\$",
     "^tests/data/test",
-);
+  );
 
 my @mixed_eol = (
     "^tests/data/test",
-);
+  );
 
 my @need_crlf = (
     "\\.(bat|sln)\$",
     "^winbuild/.+\\.md\$",
-);
+  );
 
 my @space_at_eol = (
     "^tests/data/test",
-);
+  );
 
 sub fn_match {
     my ($filename, @masklist) = @_;

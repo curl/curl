@@ -32,10 +32,10 @@ BEGIN {
 }
 
 use serverhelp qw(
-    server_pidfilename
-    server_logfilename
-    server_exe
-    );
+  server_pidfilename
+  server_logfilename
+  server_exe
+  );
 
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8990;     # just a default
@@ -124,9 +124,9 @@ if(!$logfile) {
 }
 
 $flags .= "--pidfile \"$pidfile\" ".
-    "--portfile \"$portfile\" ".
-    "--logfile \"$logfile\" ".
-    "--logdir \"$logdir\" ";
+  "--portfile \"$portfile\" ".
+  "--logfile \"$logfile\" ".
+  "--logdir \"$logdir\" ";
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;

@@ -62,7 +62,7 @@ Usage: cd2nroff [options] [file.md]
 -h       This help text,
 -v       Show version then exit
 HELP
-            ;
+          ;
         exit 0;
     }
     elsif($ARGV[0] eq "-v") {
@@ -110,8 +110,8 @@ sub outprotocols {
         push @o, "This functionality affects ";
         for my $e (sort @s) {
             push @o, sprintf "%s%s",
-                $comma ? (($e eq $s[-1]) ? " and " : ", "): "",
-                lc($e);
+              $comma ? (($e eq $s[-1]) ? " and " : ", "): "",
+              lc($e);
             $comma = 1;
         }
         if($#s == 0) {
@@ -142,7 +142,7 @@ sub outtls {
         my @s = sort @t;
         for my $e (@s) {
             push @o, sprintf "%s$e",
-                $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
+              $comma ? (($e eq $s[-1]) ? " and " : ", "): "";
             $comma = 1;
         }
     }
@@ -183,7 +183,7 @@ my %knownprotos = (
     'TCP' => 1,
     'QUIC' => 1,
     'All' => 1
-    );
+  );
 
 my %knowntls = (
     'BearSSL' => 1,
@@ -196,7 +196,7 @@ my %knowntls = (
     'wolfSSL' => 1,
     'All' => 1,
     'none' => 1,
-    );
+  );
 
 sub single {
     my @seealso;
@@ -266,7 +266,7 @@ sub single {
         elsif(/^Added-in: *(.*)/i) {
             $addedin=$1;
             if(($addedin !~ /^[0-9.]+[0-9]\z/) &&
-               ($addedin ne "n/a")) {
+                ($addedin ne "n/a")) {
                 print STDERR "$f:$line:1:ERROR: invalid version number in Added-in line: $addedin\n";
                 return 2;
             }
@@ -533,7 +533,7 @@ sub single {
 
             if($d =~ /^(.*)  /) {
                 printf STDERR "$f:$line:%d:ERROR: 2 spaces detected\n",
-                    length($1);
+                  length($1);
                 $errors++;
             }
             if($d =~ /^[ \t]*\n/) {

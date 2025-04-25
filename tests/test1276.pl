@@ -53,8 +53,8 @@ if(join("", @gen) ne join("", @file)) {
         $file[$i] =~ s/[\r\n]//g;
         if($gen[$i] ne $file[$i]) {
             printf "File: %u:%s\nGen:  %u:%s\n",
-                $i+1, showline($file[$i]),
-                $i+1, showline($gen[$i]);
+              $i+1, showline($file[$i]),
+              $i+1, showline($gen[$i]);
             $e++;
             if($e > 10) {
                 # only show 10 lines diff

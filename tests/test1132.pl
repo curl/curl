@@ -65,7 +65,6 @@ sub scanfile {
     }
     close($f);
 
-
     if($memfunc) {
         if($memdebug && $curlmem) {
             return 0;

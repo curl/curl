@@ -30,12 +30,12 @@ my @m = `git ls-files -- $root`;
 my $errors;
 
 my %accepted=('curl' => 1,
-              'libcurl' => 1,
-              'macOS' => 1,
-              'wolfSSL' => 1,
-              'mbedTLS' => 1,
-              'rustls' => 1,
-              'c-ares' => 1);
+    'libcurl' => 1,
+    'macOS' => 1,
+    'wolfSSL' => 1,
+    'mbedTLS' => 1,
+    'rustls' => 1,
+    'c-ares' => 1);
 
 sub checkfile {
     my ($f) = @_;
@@ -74,7 +74,7 @@ sub checkfile {
                 if($word =~ /^[a-z]/ && !$accepted{$word}) {
                     my $c = length($prefix);
                     print STDERR
-                        "$f:$l:$c:error: lowercase $word after period\n";
+                      "$f:$l:$c:error: lowercase $word after period\n";
                     print STDERR "$line\n";
                     print STDERR ' ' x $c;
                     print STDERR "^\n";
@@ -85,18 +85,18 @@ sub checkfile {
                 my ($prefix, $word) = ($1, $2);
 
                 if(($prefix =~ /\.\.\z/) ||
-                   ($prefix =~ /[0-9]\z/) ||
-                   ($prefix =~ /e.g\z/) ||
-                   ($prefix =~ /i.e\z/) ||
-                   ($prefix =~ /E.g\z/) ||
-                   ($prefix =~ /etc\z/) ||
-                   ($word !~ /^[a-z]/) ||
-                   $accepted{$word}) {
+                    ($prefix =~ /[0-9]\z/) ||
+                    ($prefix =~ /e.g\z/) ||
+                    ($prefix =~ /i.e\z/) ||
+                    ($prefix =~ /E.g\z/) ||
+                    ($prefix =~ /etc\z/) ||
+                    ($word !~ /^[a-z]/) ||
+                    $accepted{$word}) {
                 }
                 else {
                     my $c = length($prefix) + 2;
                     print STDERR
-                        "$f:$l:$c:error: lowercase $word after period\n";
+                      "$f:$l:$c:error: lowercase $word after period\n";
                     print STDERR "$line\n";
                     print STDERR ' ' x $c;
                     print STDERR "^\n";
@@ -108,7 +108,6 @@ sub checkfile {
     }
     close($fh);
 }
-
 
 for my $f (@m) {
     checkfile($f);

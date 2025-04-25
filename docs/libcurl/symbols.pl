@@ -62,7 +62,7 @@ print <<EOS
    (!defined(x ## _LAST) || ( x ## _LAST >= LIBCURL_VERSION_NUM)))
 
 EOS
-    ;
+  ;
 
 while(<F>) {
     if(/^(CURL[^ ]*)[ \t]*(.*)/) {
@@ -89,13 +89,13 @@ while(<F>) {
         print <<EOS
 #define ${sym}_FIRST $inum /* Added in $intr */
 EOS
-;
+          ;
         my $irm = str2num($rm);
         if($rm) {
-        print <<EOS
+            print <<EOS
 #define ${sym}_LAST $irm /* Last featured in $rm */
 EOS
-;
+              ;
         }
 
     }

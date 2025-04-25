@@ -45,13 +45,13 @@ my @optorder = (
     'NAME',
     'SYNOPSIS',
     'DESCRIPTION',
-     #'DEFAULT', # CURLINFO_ has no default
+    #'DEFAULT', # CURLINFO_ has no default
     'PROTOCOLS',
     'EXAMPLE',
     'AVAILABILITY',
     'RETURN VALUE',
     'SEE ALSO'
-    );
+  );
 my @funcorder = (
     'NAME',
     'SYNOPSIS',
@@ -60,7 +60,7 @@ my @funcorder = (
     'AVAILABILITY',
     'RETURN VALUE',
     'SEE ALSO'
-    );
+  );
 my %shline; # section => line number
 
 my %symbol;
@@ -77,10 +77,10 @@ my %deprecated = (
     CURLINFO_SSL_DATA_OUT => 1,
     CURLOPT_EGDSOCKET => 1,
     CURLOPT_RANDOM_FILE => 1,
-    );
+  );
 sub allsymbols {
     open(my $f, "<", "$symbolsinversions") ||
-        die "$symbolsinversions: $|";
+      die "$symbolsinversions: $|";
     while(<$f>) {
         if($_ =~ /^([^ ]*) +(.*)/) {
             my ($name, $info) = ($1, $2);
@@ -94,10 +94,9 @@ sub allsymbols {
     close($f);
 }
 
-
 my %ref = (
     'curl.1' => 1
-    );
+  );
 sub checkref {
     my ($f, $sec, $file, $line)=@_;
     my $present = 0;
@@ -135,7 +134,7 @@ sub scanmanpage {
     my @sepline;
 
     open(my $m, "<", "$file") ||
-        die "test1173.pl could not open $file";
+      die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
         # This is a manpage for libcurl. It requires an example unless it's
         # considered deprecated.
@@ -232,7 +231,7 @@ sub scanmanpage {
             checkref($2, $4, $file, $line);
         }
         if(($_ =~ /\\f([BI])((libcurl|CURLOPT_|CURLSHOPT_|CURLINFO_|CURLMOPT_|curl_easy_|curl_multi_|curl_url|curl_mime|curl_global|curl_share)[a-zA-Z_0-9-]+)(.)/) &&
-           ($4 ne "(")) {
+            ($4 ne "(")) {
             print STDERR "$file:$line curl ref to $2 without section\n";
             $errors++;
         }
@@ -245,15 +244,14 @@ sub scanmanpage {
             }
         }
         if(($SH =~ /^(DESCRIPTION|RETURN VALUE|AVAILABILITY)/i) &&
-           ($_ =~ /(.*)((curl_multi|curl_easy|curl_url|curl_global|curl_url|curl_share)[a-zA-Z_0-9-]+)/) &&
-           ($1 !~ /\\fI$/)) {
+            ($_ =~ /(.*)((curl_multi|curl_easy|curl_url|curl_global|curl_url|curl_share)[a-zA-Z_0-9-]+)/) &&
+            ($1 !~ /\\fI$/)) {
             print STDERR "$file:$line unrefed curl call: $2\n";
             $errors++;
         }
 
-
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
-           ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {
+            ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {
             # an option with its own manpage, check that it is tagged
             # for linking
             my ($pref, $symbol) = ($1, $2);
@@ -280,7 +278,7 @@ sub scanmanpage {
             my $sep = $separators[$l];
             if($sep ne ",") {
                 printf STDERR "$file:%d: bad not-last SEE ALSO separator: '%s'\n",
-                    $sepline[$l], $sep;
+                  $sepline[$l], $sep;
                 $errors++;
             }
         }
@@ -288,7 +286,7 @@ sub scanmanpage {
         my $sep = $separators[$#separators];
         if($sep eq ",") {
             printf STDERR "$file:%d: superfluous comma separator\n",
-                $sepline[$#separators];
+              $sepline[$#separators];
             $errors++;
         }
     }
@@ -329,9 +327,9 @@ sub scanmanpage {
 
                 if($i != $shused) {
                     printf STDERR "$file:%u Got %s, when %s was expected\n",
-                        $shline{$finesh},
-                        $finesh,
-                        $order[$shused-1];
+                      $shline{$finesh},
+                      $finesh,
+                      $order[$shused-1];
                     $errors++;
                     return;
                 }
@@ -345,9 +343,9 @@ sub scanmanpage {
 
         if($i != scalar(@order)) {
             printf STDERR "$file:$line missing mandatory section: %s\n",
-                $order[$i];
+              $order[$i];
             printf STDERR "$file:$line section found at index %u: '%s'\n",
-                $i, $shorig[$i];
+              $i, $shorig[$i];
             printf STDERR " Found %u used sections\n", $shcount;
             $errors++;
         }

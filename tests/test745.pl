@@ -36,7 +36,7 @@ my %enum; # from libcurl-errors.3
 
 sub gettypecheck {
     open(my $f, "<", "$root/include/curl/typecheck-gcc.h")
-        || die "no typecheck file";
+      || die "no typecheck file";
     while(<$f>) {
         chomp;
         if($_ =~ /\(option\) == (CURL[^ \)]*)/) {
@@ -48,7 +48,7 @@ sub gettypecheck {
 
 sub getinclude {
     open(my $f, "<", "$root/include/curl/curl.h")
-        || die "no curl.h";
+      || die "no curl.h";
     while(<$f>) {
         if($_ =~ /\((CURLOPT[^,]*), (CURLOPTTYPE_[^,]*)/) {
             my ($opt, $type) = ($1, $2);

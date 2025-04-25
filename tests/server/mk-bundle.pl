@@ -57,7 +57,7 @@ print <<HEADER
 #include "first.h"
 
 HEADER
-    ;
+  ;
 
 my $tlist = "";
 
@@ -87,4 +87,4 @@ ${tlist}  {NULL, NULL}
 
 #include "first.c"
 FOOTER
-    ;
+  ;

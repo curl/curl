@@ -31,8 +31,8 @@ use File::Spec;
 
 sub opensslfail {
     die "Missing or broken 'openssl' tool. openssl 1.0.2+ is required. ".
-        "Without it, this script cannot generate the necessary certificates ".
-        "the curl test suite needs for all its TLS related tests.";
+      "Without it, this script cannot generate the necessary certificates ".
+      "the curl test suite needs for all its TLS related tests.";
 }
 
 my $OPENSSL = 'openssl';
@@ -53,10 +53,10 @@ if(!$CAPREFIX) {
     print 'Usage: genserv.pl <caprefix> [<prefix> ...]\n';
     exit 1;
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
-        ! -f "$CAPREFIX-ca.key") {
+    ! -f "$CAPREFIX-ca.key") {
 
     if($OPENSSL eq basename($OPENSSL)) {  # has no dir component
-        # find openssl in PATH
+         # find openssl in PATH
         my $found = 0;
         foreach(File::Spec->path()) {
             my $file = File::Spec->catfile($_, $OPENSSL);
@@ -78,12 +78,12 @@ if(!$CAPREFIX) {
     $DURATION = 6000;
 
     if(system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
-        "-out $PREFIX-ca.key -pass pass:secret") != 0) {
+              "-out $PREFIX-ca.key -pass pass:secret") != 0) {
         opensslfail();
     }
     system("$OPENSSL req -config $SRCDIR/$PREFIX-ca.prm -new -key $PREFIX-ca.key -out $PREFIX-ca.csr -passin pass:secret 2>$dev_null");
     system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX-ca.prm -days $DURATION " .
-        "-req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-ca.raw-cacert");
+          "-req -signkey $PREFIX-ca.key -in $PREFIX-ca.csr -out $PREFIX-ca.raw-cacert");
     system("$OPENSSL x509 -in $PREFIX-ca.raw-cacert -text -nameopt multiline > $PREFIX-ca.cacert");
     system("$OPENSSL x509 -in $PREFIX-ca.cacert -outform der -out $PREFIX-ca.der");
     system("$OPENSSL x509 -in $PREFIX-ca.cacert -text -nameopt multiline > $PREFIX-ca.crt");
@@ -101,14 +101,14 @@ while(@ARGV) {
 
     # pseudo-secrets
     system("$OPENSSL genpkey -algorithm EC -pkeyopt ec_paramgen_curve:$KEYSIZE -pkeyopt ec_param_enc:named_curve " .
-        "-out $PREFIX.keyenc -pass pass:secret");
+          "-out $PREFIX.keyenc -pass pass:secret");
     system("$OPENSSL req -config $SRCDIR/$PREFIX.prm -new -key $PREFIX.keyenc -out $PREFIX.csr -passin pass:secret 2>$dev_null");
     system("$OPENSSL pkey -in $PREFIX.keyenc -out $PREFIX.key -passin pass:secret");
 
     system("$OPENSSL pkey -in $PREFIX.key -pubout -outform DER -out $PREFIX.pub.der");
     system("$OPENSSL pkey -in $PREFIX.key -pubout -outform PEM -out $PREFIX.pub.pem");
     system("$OPENSSL x509 -sha256 -extfile $SRCDIR/$PREFIX.prm -days $DURATION " .
-        "-req -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -CAcreateserial -in $PREFIX.csr > $PREFIX.crt 2>$dev_null");
+          "-req -CA $CAPREFIX-ca.cacert -CAkey $CAPREFIX-ca.key -CAcreateserial -in $PREFIX.csr > $PREFIX.crt 2>$dev_null");
 
     # revoke server cert
     if(open($fh, '>', "$CAPREFIX-ca.cnt")) {

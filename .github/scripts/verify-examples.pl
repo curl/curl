@@ -87,8 +87,8 @@ for my $m (@files) {
     #print "Verify $m\n";
     my $out = extract($m);
     if($out) {
-      $error |= testcompile($m);
-      $error |= checksrc($m);
+        $error |= testcompile($m);
+        $error |= checksrc($m);
     }
     $count++;
 }

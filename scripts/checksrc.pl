@@ -71,12 +71,12 @@ my %banfunc = (
     "_waccess" => 1,
     "_access" => 1,
     "access" => 1,
-    );
+  );
 
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
     'STDERR',          => 'stderr detected',
-    );
+  );
 
 my %warnings = (
     'ASSIGNWITHINCONDITION' => 'assignment within conditional expression',
@@ -127,7 +127,7 @@ my %warnings = (
     'TRAILINGSPACE'         => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'         => 'typedefed struct',
     'UNUSEDIGNORE'          => 'a warning ignore was not used',
-    );
+  );
 
 sub readskiplist {
     open(my $W, '<', "$dir/checksrc.skip") or return;
@@ -338,7 +338,7 @@ do {
     }
     $file = shift @ARGV;
 
-} while($file);
+  } while($file);
 
 sub accept_violations {
     for my $r (@alist) {
@@ -362,9 +362,9 @@ sub checksrc_endoffile {
     for(keys %ignore_set) {
         if($ignore_set{$_} && !$ignore_used{$_}) {
             checkwarn("UNUSEDIGNORE", $ignore_set{$_},
-                      length($_)+11, $file,
-                      $ignore_line[$ignore_set{$_}],
-                      "Unused ignore: $_");
+                length($_)+11, $file,
+                $ignore_line[$ignore_set{$_}],
+                "Unused ignore: $_");
         }
     }
 }
@@ -375,8 +375,8 @@ sub enable_warn {
     # switch it back on, but warn if not triggered!
     if(!$ignore_used{$what}) {
         checkwarn("UNUSEDIGNORE",
-                  $line, length($what) + 11, $file, $l,
-                  "No warning was inhibited!");
+            $line, length($what) + 11, $file, $l,
+            "No warning was inhibited!");
     }
     $ignore_set{$what}=0;
     $ignore_used{$what}=0;
@@ -387,7 +387,7 @@ sub checksrc {
     if($cmd =~ / *([^ ]*) *(.*)/) {
         my ($enable, $what) = ($1, $2);
         $what =~ s: *\*/$::; # cut off end of C comment
-        # print "ENABLE $enable WHAT $what\n";
+         # print "ENABLE $enable WHAT $what\n";
         if($enable eq "disable") {
             my ($warn, $scope)=($1, $2);
             if($what =~ /([^ ]*) +(.*)/) {
@@ -408,13 +408,13 @@ sub checksrc {
             # on non-scalar contents.
             if($scope eq "0") {
                 checkwarn("BADCOMMAND",
-                          $line, 0, $file, $l,
-                          "Disable zero not supported, did you mean to enable?");
+                    $line, 0, $file, $l,
+                    "Disable zero not supported, did you mean to enable?");
             }
             elsif($ignore_set{$warn}) {
                 checkwarn("BADCOMMAND",
-                          $line, 0, $file, $l,
-                          "$warn already disabled from line $ignore_set{$warn}");
+                    $line, 0, $file, $l,
+                    "$warn already disabled from line $ignore_set{$warn}");
             }
             else {
                 $ignore{$warn}=$scope;
@@ -427,8 +427,8 @@ sub checksrc {
         }
         else {
             checkwarn("BADCOMMAND",
-                      $line, 0, $file, $l,
-                      "Illegal !checksrc! command");
+                $line, 0, $file, $l,
+                "Illegal !checksrc! command");
         }
     }
 }
@@ -480,11 +480,11 @@ sub scanfile {
             my $count = 0;
             while($l =~ /([\d]{4})/g) {
                 push @copyright, {
-                  year => $1,
-                  line => $line,
-                  col => index($l, $1),
-                  code => $l
-                };
+                    year => $1,
+                    line => $line,
+                    col => index($l, $1),
+                    code => $l
+                  };
                 $count++;
             }
             if(!$count) {
@@ -494,43 +494,43 @@ sub scanfile {
                     line => $line,
                     col => index($l, $1),
                     code => $l
-                };
+                  };
             }
         }
 
         # detect long lines
         if(length($l) > $max_column) {
             checkwarn("LONGLINE", $line, length($l), $file, $l,
-                      "Longer than $max_column columns");
+                "Longer than $max_column columns");
         }
         # detect TAB characters
         if($l =~ /^(.*)\t/) {
             checkwarn("TABS",
-                      $line, length($1), $file, $l, "Contains TAB character", 1);
+                $line, length($1), $file, $l, "Contains TAB character", 1);
         }
         # detect trailing whitespace
         if($l =~ /^(.*)[ \t]+\z/) {
             checkwarn("TRAILINGSPACE",
-                      $line, length($1), $file, $l, "Trailing whitespace");
+                $line, length($1), $file, $l, "Trailing whitespace");
         }
 
         # no space after comment start
         if($l =~ /^(.*)\/\*\w/) {
             checkwarn("COMMENTNOSPACESTART",
-                      $line, length($1) + 2, $file, $l,
-                      "Missing space after comment start");
+                $line, length($1) + 2, $file, $l,
+                "Missing space after comment start");
         }
         # no space at comment end
         if($l =~ /^(.*)\w\*\//) {
             checkwarn("COMMENTNOSPACEEND",
-                      $line, length($1) + 1, $file, $l,
-                      "Missing space end comment end");
+                $line, length($1) + 1, $file, $l,
+                "Missing space end comment end");
         }
 
         if($l =~ /(.*)(FIXME|TODO)/) {
             checkwarn("FIXME",
-                      $line, length($1), $file, $l,
-                      "Avoid $2 comments. Add to documentation instead");
+                $line, length($1), $file, $l,
+                "Avoid $2 comments. Add to documentation instead");
         }
         # ------------------------------------------------------------
         # Above this marker, the checks were done on lines *including*
@@ -539,7 +539,7 @@ sub scanfile {
 
         # strip off C89 comments
 
-      comment:
+        comment:
         if(!$incomment) {
             if($l =~ s/\/\*.*\*\// /g) {
                 # full /* comments */ were removed!
@@ -578,14 +578,14 @@ sub scanfile {
         # positives
         if($l =~ /^(([^"\*]*)[^:"]|)\/\//) {
             checkwarn("CPPCOMMENTS",
-                      $line, length($1), $file, $l, "\/\/ comment");
+                $line, length($1), $file, $l, "\/\/ comment");
         }
 
         if($l =~ /^(\#\s*include\s+)([\">].*[>}"])/) {
             my ($pre, $path) = ($1, $2);
             if($includes{$path}) {
                 checkwarn("INCLUDEDUP",
-                          $line, length($1), $file, $l, "duplicated include");
+                    $line, length($1), $file, $l, "duplicated include");
             }
             $includes{$path} = $l;
         }
@@ -619,23 +619,23 @@ sub scanfile {
             }
             else {
                 checkwarn("SPACEBEFOREPAREN", $line, length($leading)+length($word), $file, $l,
-                          "$word with space");
+                    "$word with space");
             }
         }
         # check for '== NULL' in if/while conditions but not if the thing on
         # the left of it is a function call
         if($nostr =~ /^(.*)(if|while)(\(.*?)([!=]= NULL|NULL [!=]=)/) {
             checkwarn("EQUALSNULL", $line,
-                      length($1) + length($2) + length($3),
-                      $file, $l, "we prefer !variable instead of \"== NULL\" comparisons");
+                length($1) + length($2) + length($3),
+                $file, $l, "we prefer !variable instead of \"== NULL\" comparisons");
         }
 
         # check for '!= 0' in if/while conditions but not if the thing on
         # the left of it is a function call
         if($nostr =~ /^(.*)(if|while)(\(.*[^)]) != 0[^x]/) {
             checkwarn("NOTEQUALSZERO", $line,
-                      length($1) + length($2) + length($3),
-                      $file, $l, "we prefer if(rc) instead of \"rc != 0\" comparisons");
+                length($1) + length($2) + length($3),
+                $file, $l, "we prefer if(rc) instead of \"rc != 0\" comparisons");
         }
 
         # check spaces in 'do {'
@@ -652,8 +652,8 @@ sub scanfile {
             my $cond = $4;
             if($cond =~ / = /) {
                 checkwarn("ASSIGNWITHINCONDITION",
-                          $line, $pos+1, $file, $l,
-                          "assignment within conditional expression");
+                    $line, $pos+1, $file, $l,
+                    "assignment within conditional expression");
             }
             my $temp = $cond;
             $temp =~ s/\(//g; # remove open parens
@@ -668,31 +668,31 @@ sub scanfile {
                 # this is a #if, treat it differently
             }
             elsif($even && $postparen &&
-               ($postparen !~ /^ *$/) && ($postparen !~ /^ *[,{&|\\]+/)) {
+                ($postparen !~ /^ *$/) && ($postparen !~ /^ *[,{&|\\]+/)) {
                 checkwarn("ONELINECONDITION",
-                          $line, length($l)-length($postparen), $file, $l,
-                          "conditional block on the same line");
+                    $line, length($l)-length($postparen), $file, $l,
+                    "conditional block on the same line");
             }
         }
         # check spaces after open parentheses
         if($l =~ /^(.*[a-z])\( /i) {
             checkwarn("SPACEAFTERPAREN",
-                      $line, length($1)+1, $file, $l,
-                      "space after open parenthesis");
+                $line, length($1)+1, $file, $l,
+                "space after open parenthesis");
         }
 
         # check spaces before Logical AND operator
         if($nostr =~ /^(.*)\w&&/i) {
             checkwarn("NOSPACEAND",
-                      $line, length($1)+1, $file, $l,
-                      "missing space before Logical AND");
+                $line, length($1)+1, $file, $l,
+                "missing space before Logical AND");
         }
 
         # check spaces after Logical AND operator
         if($nostr =~ /^(.*&&)\w/i) {
             checkwarn("NOSPACEAND",
-                      $line, length($1), $file, $l,
-                      "missing space after Logical AND");
+                $line, length($1), $file, $l,
+                "missing space after Logical AND");
         }
 
         # check spaces before colon
@@ -703,8 +703,8 @@ sub scanfile {
             $e =~ s/':'//g;              # ignore these
             if($e =~ /^(.*[^']\?[^'].*)(\w|\)|\]|')\:/i) {
                 checkwarn("NOSPACEC",
-                          $line, length($m)+1, $file, $l,
-                          "missing space before colon");
+                    $line, length($m)+1, $file, $l,
+                    "missing space before colon");
             }
         }
         # check spaces after colon
@@ -715,8 +715,8 @@ sub scanfile {
             $e =~ s/':'//g;              # ignore these
             if($e =~ /^(.*[^'"]\?[^'"].*)\:(\w|\)|\]|')/i) {
                 checkwarn("NOSPACEC",
-                          $line, length($m)+1, $file, $l,
-                          "missing space after colon");
+                    $line, length($m)+1, $file, $l,
+                    "missing space after colon");
             }
         }
 
@@ -727,43 +727,43 @@ sub scanfile {
             $e =~ s/'?'//g; # ignore these
             if($e =~ /^(.*)(\w|\)|\]|')\?/i) {
                 checkwarn("NOSPACEQ",
-                          $line, length($m)+1, $file, $l,
-                          "missing space before question mark");
+                    $line, length($m)+1, $file, $l,
+                    "missing space before question mark");
             }
         }
         # check spaces after question mark
         if($nostr =~ /^(.*)\?\w/i) {
             checkwarn("NOSPACEQ",
-                      $line, length($1)+1, $file, $l,
-                      "missing space after question mark");
+                $line, length($1)+1, $file, $l,
+                "missing space after question mark");
         }
 
         # check spaces before less or greater than
         if($nostr =~ /^(.*)(\w|\)|\])[<>]/) {
             checkwarn("NOSPACETHAN",
-                      $line, length($1)+1, $file, $l,
-                      "missing space before less or greater than");
+                $line, length($1)+1, $file, $l,
+                "missing space before less or greater than");
         }
         # check spaces after less or greater than
         if($nostr =~ /^(.*)[^-][<>](\w|\(|\[)/) {
             checkwarn("NOSPACETHAN",
-                      $line, length($1)+1, $file, $l,
-                      "missing space after less or greater than");
+                $line, length($1)+1, $file, $l,
+                "missing space after less or greater than");
         }
 
         # check spaces before close parentheses, unless it was a space or a
         # close parenthesis!
         if($l =~ /(.*[^\) ]) \)/) {
             checkwarn("SPACEBEFORECLOSE",
-                      $line, length($1)+1, $file, $l,
-                      "space before close parenthesis");
+                $line, length($1)+1, $file, $l,
+                "space before close parenthesis");
         }
 
         # check spaces before comma!
         if($l =~ /(.*[^ ]) ,/) {
             checkwarn("SPACEBEFORECOMMA",
-                      $line, length($1)+1, $file, $l,
-                      "space before comma");
+                $line, length($1)+1, $file, $l,
+                "space before comma");
         }
 
         # check for "return(" without space
@@ -773,14 +773,14 @@ sub scanfile {
             }
             else {
                 checkwarn("RETURNNOSPACE", $line, length($1)+6, $file, $l,
-                          "return without space before paren");
+                    "return without space before paren");
             }
         }
 
         # check for "return" with parentheses around just a value/name
         if($l =~ /^(.*\W)return \(\w*\);/) {
             checkwarn("RETURNPAREN", $line, length($1)+7, $file, $l,
-                      "return with paren");
+                "return with paren");
         }
 
         # check for "sizeof" without parenthesis
@@ -790,7 +790,7 @@ sub scanfile {
             }
             else {
                 checkwarn("SIZEOFNOPAREN", $line, length($1)+6, $file, $l,
-                          "sizeof without parenthesis");
+                    "sizeof without parenthesis");
             }
         }
 
@@ -822,59 +822,59 @@ sub scanfile {
             }
             if(!$ign) {
                 checkwarn("COMMANOSPACE", $line, length($pref)+1, $file, $l,
-                          "comma without following space");
+                    "comma without following space");
             }
         }
 
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {
             checkwarn("BRACEELSE",
-                      $line, length($1), $file, $l, "else after closing brace on same line");
+                $line, length($1), $file, $l, "else after closing brace on same line");
         }
         # check for "){"
         if($l =~ /^(.*)\)\{/) {
             checkwarn("PARENBRACE",
-                      $line, length($1)+1, $file, $l, "missing space after close paren");
+                $line, length($1)+1, $file, $l, "missing space after close paren");
         }
         # check for "^{" with an empty line before it
         if(($l =~ /^\{/) && ($prevl =~ /^[ \t]*\z/)) {
             checkwarn("EMPTYLINEBRACE",
-                      $line, 0, $file, $l, "empty line before open brace");
+                $line, 0, $file, $l, "empty line before open brace");
         }
 
         # check for space before the semicolon last in a line
         if($l =~ /^(.*[^ ].*) ;$/) {
             checkwarn("SPACESEMICOLON",
-                      $line, length($1), $file, $ol, "no space before semicolon");
+                $line, length($1), $file, $ol, "no space before semicolon");
         }
 
         # check for space before the colon in a switch label
         if($l =~ /^( *(case .+|default)) :/) {
             checkwarn("SPACESWITCHCOLON",
-                      $line, length($1), $file, $ol, "no space before colon of switch label");
+                $line, length($1), $file, $ol, "no space before colon of switch label");
         }
 
         if($prevl !~ /\?\z/ && $l =~ /^ +([A-Za-z_][A-Za-z0-9_]*):$/ && $1 ne 'default') {
             checkwarn("SPACEBEFORELABEL",
-                      $line, length($1), $file, $ol, "no space before label");
+                $line, length($1), $file, $ol, "no space before label");
         }
 
         # scan for use of banned functions
         my $bl = $l;
-      again:
+        again:
         if(($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) {
             my $bad = $2;
             my $prefix = $1;
             my $suff = $3;
             checkwarn("BANNEDFUNC",
-                      $line, length($prefix), $file, $ol,
-                      "use of $bad is banned");
+                $line, length($prefix), $file, $ol,
+                "use of $bad is banned");
             my $replace = 'x' x (length($bad) + 1);
             $prefix =~ s/\*/\\*/;
             $suff =~ s/\(/\\(/;
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
-      }
+        }
         $l = $bl; # restore to pre-bannedfunc content
 
         if($warnings{"STDERR"}) {
@@ -884,8 +884,8 @@ sub scanfile {
                 if($1 !~ /^ *\#/) {
                     # skip preprocessor lines
                     checkwarn("STDERR",
-                              $line, length($1), $file, $ol,
-                              "use of $2 is banned (use tool_stderr instead)");
+                        $line, length($1), $file, $ol,
+                        "use of $2 is banned (use tool_stderr instead)");
                 }
             }
         }
@@ -895,8 +895,8 @@ sub scanfile {
             my $mode = $2;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
-                          $line, length($1), $file, $ol,
-                          "use of non-binary fopen without FOPEN_* macro: $mode");
+                    $line, length($1), $file, $ol,
+                    "use of non-binary fopen without FOPEN_* macro: $mode");
             }
         }
 
@@ -904,7 +904,7 @@ sub scanfile {
         # if previous line ended with a close paren and it wasn't a cpp line
         if(($prevl =~ /\)\z/) && ($l =~ /^( +)\{/) && !$prevp) {
             checkwarn("BRACEPOS",
-                      $line, length($1), $file, $ol, "badly placed open brace");
+                $line, length($1), $file, $ol, "badly placed open brace");
         }
 
         # if the previous line starts with if/while/for AND ends with an open
@@ -919,7 +919,7 @@ sub scanfile {
                 if($expect != $second) {
                     my $diff = $second - $first;
                     checkwarn("INDENTATION", $line, length($1), $file, $ol,
-                              "not indented $indent steps (uses $diff)");
+                        "not indented $indent steps (uses $diff)");
 
                 }
             }
@@ -945,7 +945,7 @@ sub scanfile {
                     if($expect != $second) {
                         my $diff = $second - $first;
                         checkwarn("INDENTATION", $line, length($1), $file, $ol,
-                                  "not indented $indent steps (uses $diff)");
+                            "not indented $indent steps (uses $diff)");
                     }
                 }
             }
@@ -954,14 +954,14 @@ sub scanfile {
         # check for 'char * name'
         if(($l =~ /(^.*(char|int|long|void|CURL|CURLM|CURLMsg|[cC]url_[A-Za-z_]+|struct [a-zA-Z_]+) *(\*+)) (\w+)/) && ($4 !~ /^(const|volatile)$/)) {
             checkwarn("ASTERISKSPACE",
-                      $line, length($1), $file, $ol,
-                      "space after declarative asterisk");
+                $line, length($1), $file, $ol,
+                "space after declarative asterisk");
         }
         # check for 'char*'
         if(($l =~ /(^.*(char|int|long|void|curl_slist|CURL|CURLM|CURLMsg|curl_httppost|sockaddr_in|FILE)\*)/)) {
             checkwarn("ASTERISKNOSPACE",
-                      $line, length($1)-1, $file, $ol,
-                      "no space before asterisk");
+                $line, length($1)-1, $file, $ol,
+                "no space before asterisk");
         }
 
         # check for 'void func() {', but avoid false positives by requiring
@@ -972,84 +972,84 @@ sub scanfile {
             $k =~ s/static *//;
             if($k =~ /\(.*\)/) {
                 checkwarn("BRACEPOS",
-                          $line, length($l)-1, $file, $ol,
-                          "wrongly placed open brace");
+                    $line, length($l)-1, $file, $ol,
+                    "wrongly placed open brace");
             }
         }
 
         # check for equals sign without spaces next to it
         if($nostr =~ /(.*)\=[a-z0-9]/i) {
             checkwarn("EQUALSNOSPACE",
-                      $line, length($1)+1, $file, $ol,
-                      "no space after equals sign");
+                $line, length($1)+1, $file, $ol,
+                "no space after equals sign");
         }
         # check for equals sign without spaces before it
         elsif($nostr =~ /(.*)[a-z0-9]\=/i) {
             checkwarn("NOSPACEEQUALS",
-                      $line, length($1)+1, $file, $ol,
-                      "no space before equals sign");
+                $line, length($1)+1, $file, $ol,
+                "no space before equals sign");
         }
 
         # check for plus signs without spaces next to it
         if($nostr =~ /(.*)[^+]\+[a-z0-9]/i) {
             checkwarn("PLUSNOSPACE",
-                      $line, length($1)+1, $file, $ol,
-                      "no space after plus sign");
+                $line, length($1)+1, $file, $ol,
+                "no space after plus sign");
         }
         # check for plus sign without spaces before it
         elsif($nostr =~ /(.*)[a-z0-9]\+[^+]/i) {
             checkwarn("NOSPACEPLUS",
-                      $line, length($1)+1, $file, $ol,
-                      "no space before plus sign");
+                $line, length($1)+1, $file, $ol,
+                "no space before plus sign");
         }
 
         # check for semicolons without space next to it
         if($nostr =~ /(.*)\;[a-z0-9]/i) {
             checkwarn("SEMINOSPACE",
-                      $line, length($1)+1, $file, $ol,
-                      "no space after semicolon");
+                $line, length($1)+1, $file, $ol,
+                "no space after semicolon");
         }
 
         # typedef struct ... {
         if($nostr =~ /^(.*)typedef struct.*{/) {
             checkwarn("TYPEDEFSTRUCT",
-                      $line, length($1)+1, $file, $ol,
-                      "typedef'ed struct");
+                $line, length($1)+1, $file, $ol,
+                "typedef'ed struct");
         }
 
         if($nostr =~ /(.*)! +(\w|\()/) {
             checkwarn("EXCLAMATIONSPACE",
-                      $line, length($1)+1, $file, $ol,
-                      "space after exclamation mark");
+                $line, length($1)+1, $file, $ol,
+                "space after exclamation mark");
         }
 
         if($nostr =~ /(.*)\b(EACCES|EADDRINUSE|EADDRNOTAVAIL|EAFNOSUPPORT|EBADF|ECONNREFUSED|ECONNRESET|EINPROGRESS|EINTR|EINVAL|EISCONN|EMSGSIZE|ENOMEM|ETIMEDOUT|EWOULDBLOCK)\b/) {
             checkwarn("ERRNOVAR",
-                      $line, length($1), $file, $ol,
-                      "use of bare errno define $2, use SOCK$2");
+                $line, length($1), $file, $ol,
+                "use of bare errno define $2, use SOCK$2");
         }
 
         # check for more than one consecutive space before open brace or
         # question mark. Skip lines containing strings since they make it hard
         # due to artificially getting multiple spaces
         if(($l eq $nostr) &&
-           $nostr =~ /^(.*(\S)) + [{?]/i) {
+            $nostr =~ /^(.*(\S)) + [{?]/i) {
             checkwarn("MULTISPACE",
-                      $line, length($1)+1, $file, $ol,
-                      "multiple spaces");
+                $line, length($1)+1, $file, $ol,
+                "multiple spaces");
         }
-      preproc:
+        preproc:
         if($prep) {
-          # scan for use of banned symbols on a preprocessor line
-          if($l =~ /^(^|.*\W)
+            # scan for use of banned symbols on a preprocessor line
+            if($l =~ /^(^|.*\W)
                      (WIN32)
                      (\W|$)
                    /x) {
-              checkwarn("BANNEDPREPROC",
-                        $line, length($1), $file, $ol,
-                        "use of $2 is banned from preprocessor lines" .
-                        (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
-          }
+                checkwarn("BANNEDPREPROC",
+                    $line, length($1), $file, $ol,
+                    "use of $2 is banned from preprocessor lines" .
+                      (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
+            }
         }
         $line++;
         $prevp = $prep;
@@ -1097,11 +1097,11 @@ sub scanfile {
         }
 
         if(defined($commityear) && scalar(@copyright) &&
-           $copyright[0]{year} != $commityear) {
+            $copyright[0]{year} != $commityear) {
             checkwarn("COPYRIGHTYEAR", $copyright[0]{line}, $copyright[0]{col},
-                      $file, $copyright[0]{code},
-                      "Copyright year out of date, should be $commityear, " .
-                      "is $copyright[0]{year}", 1);
+                $file, $copyright[0]{code},
+                "Copyright year out of date, should be $commityear, " .
+                  "is $copyright[0]{year}", 1);
         }
     }
 
@@ -1115,13 +1115,12 @@ sub scanfile {
 
 }
 
-
 if($errors || $warnings || $verbose) {
     printf "checksrc: %d errors and %d warnings\n", $errors, $warnings;
     if($suppressed) {
         printf "checksrc: %d errors and %d warnings suppressed\n",
-        $serrors,
-        $swarnings;
+          $serrors,
+          $swarnings;
     }
     exit 5; # return failure
 }

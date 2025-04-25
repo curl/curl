@@ -186,7 +186,7 @@ for my $l (@releasenotes) {
         push @o, "\n";
         for my $f (@line) {
             push @o, sprintf " o %s%s\n", $f,
-                $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
+              $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
             $refused[$moreinfo{$f}]=3;
         }
         push @o, " --- new entries are listed above this ---";
