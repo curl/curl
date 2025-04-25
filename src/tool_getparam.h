@@ -90,6 +90,7 @@ typedef enum {
   C_FAIL_EARLY,
   C_FAIL_WITH_BODY,
   C_FALSE_START,
+  C_FOLLOW,
   C_FORM,
   C_FORM_ESCAPE,
   C_FORM_STRING,

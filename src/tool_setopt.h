@@ -54,6 +54,7 @@ extern const struct NameValue setopt_nv_CURLFTPSSL_CCC[];
 extern const struct NameValue setopt_nv_CURLUSESSL[];
 extern const struct NameValueUnsigned setopt_nv_CURLSSLOPT[];
 extern const struct NameValue setopt_nv_CURL_NETRC[];
+extern const struct NameValue setopt_nv_CURLOPT_FOLLOWLOCATION[];
 extern const struct NameValueUnsigned setopt_nv_CURLAUTH[];
 extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
