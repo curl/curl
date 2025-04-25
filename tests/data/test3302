@@ -11,7 +11,7 @@ HTTP proxy
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 OK
+HTTP/1.1 500 Internal Server Error
 Unknown-header: blrub
 Content-Length: 6
 
@@ -37,7 +37,7 @@ alt-svc fail via proxy
 --proxy http://%HOSTIP:%HTTPPORT --alt-svc "%LOGDIR/altsvc-%TESTNUMBER" http://test.remote.haxx.se.%TESTNUMBER:8990
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">
-h1 http://test.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
+h1 http://different.remote.haxx.se.%TESTNUMBER 8990 h1 http://test.remote.haxx.se.%TESTNUMBER 8990 "20290222 22:19:28" 0 0
 </file>
 
 <features>
@@ -49,7 +49,12 @@ proxy
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-HTTP/1.1 200 OK
+HTTP/1.1 500 Internal Server Error
+Unknown-header: blrub
+Content-Length: 6
+
+-foo-
+HTTP/1.1 500 Internal Server Error
 Unknown-header: blrub
 Content-Length: 6
 
@@ -58,6 +63,12 @@ Content-Length: 6
 <protocol>
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://different.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
+Host: different.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
