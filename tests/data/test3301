@@ -42,7 +42,13 @@ h1 http://test.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "2029022
 
 <features>
 proxy
+alt-svc
+Debug
 </features>
+<setenv>
+# make debug-curl accept Alt-Svc over plain HTTP
+CURL_ALTSVC_HTTP="yeah"
+</setenv>
 </client>
 
 #
