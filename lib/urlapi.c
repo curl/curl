@@ -1770,9 +1770,17 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     CURLUcode uc;
     char *oldurl;
 
-    if(!nalloc)
-      /* a blank URL is not a valid URL */
+    if(!nalloc) {
+      /* a blank URL is not a valid URL unless we already have a complete one
+         and this is a redirect */
+      if(!curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+        /* success, meaning the "" is a fine relative URL, but nothing
+           changes */
+        free(oldurl);
+        return CURLUE_OK;
+      }
       return CURLUE_MALFORMED_INPUT;
+    }
 
     /* if the new thing is absolute or the old one is not (we could not get an
      * absolute URL in 'oldurl'), then replace the existing with the new. */
