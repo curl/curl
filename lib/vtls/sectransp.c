@@ -1092,8 +1092,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     return result;
 
   if(connssl->alpn) {
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-    defined(HAVE_BUILTIN_AVAILABLE)
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#ifdef HAVE_BUILTIN_AVAILABLE
     if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
 #else
     if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
@@ -1119,6 +1119,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       Curl_alpn_to_proto_str(&proto, connssl->alpn);
       infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
     }
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
   }
 
   if(ssl_config->key) {
@@ -2092,8 +2093,8 @@ check_handshake:
     }
 
     if(connssl->alpn) {
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-    defined(HAVE_BUILTIN_AVAILABLE)
+#if CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11
+#ifdef HAVE_BUILTIN_AVAILABLE
       if(__builtin_available(macOS 10.13.4, iOS 11, tvOS 11, *)) {
 #else
       if(&SSLSetALPNProtocols && &SSLCopyALPNProtocols) {
@@ -2124,6 +2125,7 @@ check_handshake:
         if(alpnArr)
           CFRelease(alpnArr);
       }
+#endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
     }
 
     return CURLE_OK;
