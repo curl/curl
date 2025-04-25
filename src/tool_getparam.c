@@ -144,6 +144,7 @@ static const struct LongShort aliases[]= {
   {"fail-early",                 ARG_BOOL, ' ', C_FAIL_EARLY},
   {"fail-with-body",             ARG_BOOL, ' ', C_FAIL_WITH_BODY},
   {"false-start",                ARG_BOOL, ' ', C_FALSE_START},
+  {"follow",                     ARG_BOOL, ' ', C_FOLLOW},
   {"form",                       ARG_STRG, 'F', C_FORM},
   {"form-escape",                ARG_BOOL, ' ', C_FORM_ESCAPE},
   {"form-string",                ARG_STRG, ' ', C_FORM_STRING},
@@ -2098,12 +2099,6 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_LIST_ONLY: /* --list-only */
     config->dirlistonly = toggle; /* only list the names of the FTP dir */
     break;
-  case C_LOCATION_TRUSTED: /* --location-trusted */
-    config->unrestricted_auth = toggle;
-    FALLTHROUGH();
-  case C_LOCATION: /* --location */
-    config->followlocation = toggle; /* Follow Location: HTTP headers */
-    break;
   case C_MANUAL: /* --manual */
     if(toggle)   /* --no-manual shows no manual... */
       return PARAM_MANUAL_REQUESTED;
@@ -2165,6 +2160,19 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_MPTCP: /* --mptcp */
     config->mptcp = toggle;
+    break;
+  case C_LOCATION_TRUSTED: /* --location-trusted */
+    config->unrestricted_auth = toggle;
+    FALLTHROUGH();
+  case C_LOCATION: /* --location */
+    if(config->followlocation == CURLFOLLOW_OBEYCODE)
+      warnf(global, "--location overrides --follow");
+    config->followlocation = toggle ? CURLFOLLOW_ALL : 0;
+    break;
+  case C_FOLLOW: /* --follow */
+    if(config->followlocation == CURLFOLLOW_ALL)
+      warnf(global, "--follow overrides --location");
+    config->followlocation = toggle ? CURLFOLLOW_OBEYCODE : 0;
     break;
   default:
     return PARAM_OPTION_UNKNOWN;

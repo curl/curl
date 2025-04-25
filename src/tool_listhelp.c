@@ -201,6 +201,9 @@ const struct helptxt helptext[] = {
   {"    --false-start",
    "Enable TLS False Start",
    CURLHELP_DEPRECATED},
+  {"    --follow",
+   "Follow redirects per spec",
+   CURLHELP_HTTP},
   {"-F, --form <name=content>",
    "Specify multipart MIME data",
    CURLHELP_HTTP | CURLHELP_UPLOAD | CURLHELP_POST | CURLHELP_IMAP |
