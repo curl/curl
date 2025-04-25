@@ -61,6 +61,7 @@ jobs:
         run: |
           sed -E -i -e s@[a-z]+\.debian\.org/@archive.debian.org/debian-archive/@ -e '/ stretch-updates /d' /etc/apt/sources.list
           apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
           # See comment above if this fails after 2025-05-20
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb

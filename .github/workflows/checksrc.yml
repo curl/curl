@@ -57,6 +57,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             codespell python3-pip python3-networkx python3-pydot python3-yaml \
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \

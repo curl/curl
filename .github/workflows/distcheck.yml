@@ -178,6 +178,7 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
+            sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
           else
             brew install libpsl openssl
