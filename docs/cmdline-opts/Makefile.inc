@@ -151,6 +151,7 @@ DPAGES = \
   limit-rate.md \
   list-only.md \
   local-port.md \
+  location-mode.md \
   location-trusted.md \
   location.md \
   login-options.md \
