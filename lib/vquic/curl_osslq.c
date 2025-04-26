@@ -1493,8 +1493,6 @@ static bool cf_osslq_collect_block_send(unsigned int mid, void *val,
 
   if(stream && stream->s.ssl && stream->s.send_blocked) {
     struct Curl_easy *sdata = Curl_multi_get_easy(fctx->multi, mid);
-    fprintf(stderr, "[OSSLQ] stream %" FMT_PRId64 " sdata=%p\n",
-            stream->s.id, (void *)sdata);
     if(sdata) {
       ctx->poll_items[fctx->n].desc = SSL_as_poll_descriptor(stream->s.ssl);
       ctx->poll_items[fctx->n].events = SSL_POLL_EVENT_W;
