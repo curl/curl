@@ -179,6 +179,7 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12.4))
         list(APPEND _picky_enable
           -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # We do silencing for clang 10.0 and above only
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
         )
       endif()
     else()  # gcc
@@ -240,6 +241,13 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warith-conversion               #             gcc 10.0
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
+        )
+      endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+        list(APPEND _picky_enable
+          -Warray-compare                  # clang 20.0  gcc 12.0
+          -Wenum-int-mismatch              #             gcc 13.0
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
         )
       endif()
     endif()
