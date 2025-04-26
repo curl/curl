@@ -399,7 +399,6 @@ jobs:
     timeout-minutes: 25
     env:
       MAKEFLAGS: -j 5
-      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
@@ -418,14 +417,6 @@ jobs:
 
       fail-fast: false
     steps:
-      - name: 'vcpkg cache setup'
-        if: ${{ matrix.install }}
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-
       - name: 'vcpkg versions'
         if: ${{ matrix.install }}
         timeout-minutes: 1
