@@ -766,7 +766,6 @@ jobs:
         shell: msys2 {0}
     env:
       openssh_windows-version: 'v9.8.1.0p1-Preview'
-      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
@@ -809,87 +808,6 @@ jobs:
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
               -DCURL_USE_LIBPSL=OFF
 
-          #- name: 'openssl +examples'
-          #  install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
-          #  arch: 'x64'
-          #  plat: 'uwp'
-          #  type: 'Debug'
-          #  tflags: 'skiprun'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-          #    -DCURL_USE_LIBPSL=OFF
-          #
-          #- name: 'openssl'
-          #  install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-          #    -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
-          #
-          #- name: 'schannel MultiSSL U'
-          #  install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls wolfssl'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-          #    -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-          #
-          #- name: 'libressl'
-          #  install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  openssh: 'OpenSSH-Windows'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
-          #    -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
-          #
-          #- name: 'boringssl'
-          #  install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  config: >-
-          #    -DENABLE_DEBUG=OFF
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
-          #    -DUSE_ECH=ON
-          #
-          #- name: 'wolfssl +examples'
-          #  install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-          #    -DCURL_USE_GSASL=ON
-          #    -DUSE_ECH=ON
-          #
-          #- name: 'mbedtls'
-          #  install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh2 pkgconf gsasl'
-          #  arch: 'x64'
-          #  plat: 'windows'
-          #  type: 'Debug'
-          #  chkprefill: '_chkprefill'
-          #  config: >-
-          #    -DENABLE_DEBUG=ON
-          #    -DCURL_USE_LIBSSH2=ON
-          #    -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
-          #    -DCURL_USE_GSASL=ON
-
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
@@ -898,13 +816,6 @@ jobs:
           release: ${{ contains(matrix.image, 'arm') }}
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
-
-      - name: 'vcpkg cache setup'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: 'vcpkg versions'
         timeout-minutes: 1
