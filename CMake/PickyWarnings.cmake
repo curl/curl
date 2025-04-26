@@ -199,7 +199,6 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wjump-misses-init               #             gcc  4.5
         )
-
         if(MINGW)
           list(APPEND _picky_enable
             -Wno-pedantic-ms-format        #             gcc  4.5 (MinGW-only)
@@ -254,9 +253,18 @@ if(PICKY_COMPILER)
 
     #
 
+    set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
-      list(APPEND _picky "${_ccopt}")
+      string(REGEX MATCH "-W([a-z0-9-]+)" _ccmatch "${_ccopt}")
+      if(_ccmatch AND CMAKE_C_FLAGS MATCHES "-Wno-${CMAKE_MATCH_1}" AND NOT _ccopt STREQUAL "-Wall" AND NOT _ccopt MATCHES "^-Wno-")
+        string(APPEND _picky_skipped " ${_ccopt}")
+      else()
+        list(APPEND _picky "${_ccopt}")
+      endif()
     endforeach()
+    if(_picky_skipped)
+      message(STATUS "Picky compiler options skipped due to CMAKE_C_FLAGS override:${_picky_skipped}")
+    endif()
 
     foreach(_ccopt IN LISTS _picky_detect)
       # Use a unique variable name 1. for meaningful log output 2. to have a fresh, undefined variable for each detection
