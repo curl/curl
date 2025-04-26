@@ -198,7 +198,6 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wjump-misses-init               #             gcc  4.5
         )
-
         if(MINGW)
           list(APPEND _picky_enable
             -Wno-pedantic-ms-format        #             gcc  4.5 (MinGW-only)
