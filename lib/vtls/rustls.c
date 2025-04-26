@@ -1009,7 +1009,7 @@ init_config_builder_ech(struct Curl_easy *data,
 cleanup:
   /* if we base64 decoded, we can free now */
   if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
-      free(ech_config);
+    free(ech_config);
   }
   if(dns) {
     Curl_resolv_unlink(data, &dns);
