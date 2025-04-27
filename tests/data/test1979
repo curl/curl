@@ -1,0 +1,22 @@
+<testcase>
+<info>
+<keywords>
+unittest
+canon_string
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+<name>
+sigv4 canon_string unit tests
+</name>
+</client>
+</testcase>
