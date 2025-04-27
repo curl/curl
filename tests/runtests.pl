@@ -518,7 +518,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", server_exe('buildinfo', 'TOOL'));
+    open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
     while(<$disabledh>) {
         if($_ =~ /([^:]*): ([ONF]*)/) {
             my ($val, $toggle) = ($1, $2);

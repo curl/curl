@@ -48,6 +48,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 
 bin_PROGRAMS = curl
 
+curlinfo_SOURCES = curlinfo.c
+noinst_PROGRAMS = curlinfo
+
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif

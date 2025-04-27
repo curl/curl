@@ -24,7 +24,7 @@
 
 /*
  * The purpose of this tool is to figure out which, if any, features that are
- * disabled which should otherwise exist and work. These aren't visible in
+ * disabled which should otherwise exist and work. These are not visible in
  * regular curl -V output.
  *
  * Disabled protocols are visible in curl_version_info() and are not included
