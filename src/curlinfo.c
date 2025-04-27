@@ -230,7 +230,20 @@ static const char *disabled[]={
   NULL
 };
 
+/*
+** curlinfo main function.
+*/
+#if defined(_UNICODE) && !defined(UNDER_CE)
+#if defined(__GNUC__) || defined(__clang__)
+/* GCC does not know about wmain() */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+#endif
+int wmain(int argc, wchar_t *argv[])
+#else
 int main(int argc, char **argv)
+#endif
 {
   int i;
 
@@ -242,3 +255,9 @@ int main(int argc, char **argv)
 
   return 0;
 }
+
+#if defined(_UNICODE) && !defined(UNDER_CE)
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
+#endif
