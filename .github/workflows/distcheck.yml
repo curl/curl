@@ -167,15 +167,30 @@ jobs:
     name: 'cmake-integration-on-${{ matrix.image }}'
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
     env:
-      CC: clang
-      CMAKE_GENERATOR: Ninja
+      CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
+      TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
     strategy:
       fail-fast: false
       matrix:
-        image: [ubuntu-latest, macos-latest]
+        image: [ubuntu-latest, macos-latest, windows-latest]
     steps:
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+        if: ${{ contains(matrix.image, 'windows') }}
+        with:
+          msystem: mingw64
+          release: false
+          update: false
+          cache: false
+          path-type: inherit
+          install: >-
+            mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
+
       - name: 'install prereqs'
+        if: ${{ !contains(matrix.image, 'windows') }}
         run: |
           if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
             sudo rm -f /var/lib/man-db/auto-update
@@ -188,8 +203,8 @@ jobs:
         with:
           persist-credentials: false
       - name: 'via FetchContent'
-        run: ./tests/cmake/test.sh FetchContent
+        run: ./tests/cmake/test.sh FetchContent ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via add_subdirectory'
-        run: ./tests/cmake/test.sh add_subdirectory
+        run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via find_package'
-        run: ./tests/cmake/test.sh find_package
+        run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON

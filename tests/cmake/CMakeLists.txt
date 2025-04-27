@@ -25,7 +25,7 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
-project(test-dependent C)
+project(test-consumer C)
 
 option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 
@@ -35,7 +35,16 @@ if(TEST_INTEGRATION_MODE STREQUAL "FetchContent" AND CMAKE_VERSION VERSION_LESS 
   message(FATAL_ERROR "This test requires CMake 3.14 or upper")
 endif()
 
-if(TEST_INTEGRATION_MODE STREQUAL "find_package")
+if(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")  # Broken
+  include(ExternalProject)
+  ExternalProject_Add(libssh2
+    URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
+    INSTALL_COMMAND ""
+    DOWNLOAD_EXTRACT_TIMESTAMP ON)
+endif()
+
+if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
+   TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # Double-inclusion test
   foreach(result_var IN ITEMS
@@ -62,6 +71,8 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package")
     endif()
   endforeach()
 elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "")
+  set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
   include(FetchContent)
@@ -71,15 +82,30 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_REPOSITORY "${FROM_GIT_REPO}"
     GIT_TAG "${FROM_GIT_TAG}"
     GIT_SHALLOW)
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "")
+  set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
 endif()
 
+add_executable(test-consumer-static-ns "test.c")
+target_link_libraries(test-consumer-static-ns PRIVATE "CURL::libcurl_static")
+
+add_executable(test-consumer-shared-ns "test.c")
+target_link_libraries(test-consumer-shared-ns PRIVATE "CURL::libcurl_shared")
+
 # Alias for either shared or static library
-add_executable(test-dependent-selected-ns "test.c")
-target_link_libraries(test-dependent-selected-ns PRIVATE "CURL::libcurl")
+add_executable(test-consumer-selected-ns "test.c")
+target_link_libraries(test-consumer-selected-ns PRIVATE "CURL::libcurl")
 
 if(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")
-  add_executable(test-dependent-selected-bare "test.c")
-  target_link_libraries(test-dependent-selected-bare PRIVATE "libcurl")
+
+  add_executable(test-consumer-static-bare "test.c")
+  target_link_libraries(test-consumer-static-bare PRIVATE "libcurl_static")
+
+  add_executable(test-consumer-shared-bare "test.c")
+  target_link_libraries(test-consumer-shared-bare PRIVATE "libcurl_shared")
+
+  add_executable(test-consumer-selected-bare "test.c")
+  target_link_libraries(test-consumer-selected-bare PRIVATE "libcurl")
 endif()
