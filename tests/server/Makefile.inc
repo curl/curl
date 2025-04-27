@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd buildinfo mqttd dnsd
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd mqttd dnsd
 
 MEMDEBUG = \
   ../../lib/memdebug.c \
@@ -122,5 +122,3 @@ dnsd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   dnsd.c
 dnsd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 dnsd_CFLAGS = $(AM_CFLAGS)
-
-buildinfo_SOURCES = buildinfo.c

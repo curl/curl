@@ -92,6 +92,12 @@ target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
+add_executable(
+  curlinfo
+  EXCLUDE_FROM_ALL
+  curlinfo.c
+)
+
 add_library(
   curltool  # special libcurltool library just for unittests
   STATIC
