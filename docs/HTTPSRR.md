@@ -15,7 +15,7 @@ curl features **experimental** support for HTTPS RR.
 - The ECH field is stored - and used if ECH is enabled in the build
 - The port number is not used (Firefox supports it, Chrome does not)
 - The target name is not used
-- The IP addresses (Ipv6hints, Ipv4hints) from the HTTPS RR are not used
+- The IP addresses (`Ipv6hints`, `Ipv4hints`) from the HTTPS RR are not used
 - It only supports a single HTTPS RR per hostname
 - Hostnames without A/AAAA records but *with* HTTPS RR fails
 - consider service profiles where the RR provides different addresses for TCP
