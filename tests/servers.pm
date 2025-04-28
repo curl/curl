@@ -219,47 +219,47 @@ sub initserverconfig {
 # possible servers.
 #
 sub init_serverpidfile_hash {
-  for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
-    for my $ssl (('', 's')) {
-      for my $ipvnum ((4, 6)) {
-        for my $idnum ((1, 2, 3)) {
-          my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
-          my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                        $ipvnum, $idnum);
-          $serverpidfile{$serv} = $pidf;
-          my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                          $ipvnum, $idnum);
-          $serverportfile{$serv} = $portf;
+    for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
+        for my $ssl (('', 's')) {
+            for my $ipvnum ((4, 6)) {
+                for my $idnum ((1, 2, 3)) {
+                    my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
+                    my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                                  $ipvnum, $idnum);
+                    $serverpidfile{$serv} = $pidf;
+                    my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                                    $ipvnum, $idnum);
+                    $serverportfile{$serv} = $portf;
+                }
+            }
         }
-      }
     }
-  }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
-                  'dns')) {
-    for my $ipvnum ((4, 6)) {
-      for my $idnum ((1, 2)) {
-        my $serv = servername_id($proto, $ipvnum, $idnum);
-        my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                      $idnum);
-        $serverpidfile{$serv} = $pidf;
-        my $portf = server_portfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                        $idnum);
-        $serverportfile{$serv} = $portf;
-      }
+    for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
+                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
+                    'dns')) {
+        for my $ipvnum ((4, 6)) {
+            for my $idnum ((1, 2)) {
+                my $serv = servername_id($proto, $ipvnum, $idnum);
+                my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
+                                              $idnum);
+                $serverpidfile{$serv} = $pidf;
+                my $portf = server_portfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
+                                                $idnum);
+                $serverportfile{$serv} = $portf;
+            }
+        }
     }
-  }
-  for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
-    for my $ssl (('', 's')) {
-      my $serv = servername_id("$proto$ssl", "unix", 1);
-      my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                    "unix", 1);
-      $serverpidfile{$serv} = $pidf;
-      my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                      "unix", 1);
-      $serverportfile{$serv} = $portf;
+    for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
+        for my $ssl (('', 's')) {
+            my $serv = servername_id("$proto$ssl", "unix", 1);
+            my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                          "unix", 1);
+            $serverpidfile{$serv} = $pidf;
+            my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                            "unix", 1);
+            $serverportfile{$serv} = $portf;
+        }
     }
-  }
 }
 
 
