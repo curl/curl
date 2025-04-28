@@ -1,3 +1,8 @@
+<!--
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+
+SPDX-License-Identifier: curl
+-->
 Welcome to curl, thanks for contributing!
 
 1. Please submit your PR in *draft mode* and mark it *ready* once the CI jobs
