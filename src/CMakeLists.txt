@@ -94,6 +94,7 @@ add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
 add_executable(
   curlinfo
+  EXCLUDE_FROM_ALL
   curlinfo.c
 )
 
