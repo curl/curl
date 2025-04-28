@@ -926,16 +926,20 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
  */
 static void get_posix_time(time_t *out, curl_off_t timestamp)
 {
-  timestamp -= CURL_OFF_T_C(116444736000000000);
-  timestamp /= 10000000;
+  if(timestamp >= CURL_OFF_T_C(116444736000000000)) {
+    timestamp -= CURL_OFF_T_C(116444736000000000);
+    timestamp /= 10000000;
 #if SIZEOF_TIME_T < SIZEOF_CURL_OFF_T
-  if(timestamp > TIME_T_MAX)
-    *out = TIME_T_MAX;
-  else if(timestamp < TIME_T_MIN)
-    *out = TIME_T_MIN;
-  else
+    if(timestamp > TIME_T_MAX)
+      *out = TIME_T_MAX;
+    else if(timestamp < TIME_T_MIN)
+      *out = TIME_T_MIN;
+    else
 #endif
-    *out = (time_t) timestamp;
+      *out = (time_t) timestamp;
+  }
+  else
+    *out = 0;
 }
 
 static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
