@@ -548,7 +548,7 @@ static void progress_meter(struct Curl_easy *data)
     ((p->flags & PGRS_DL_SIZE_KNOWN) ? p->dl.total_size : p->dl.cur_size);
 
   /* integer overflow check */
-  if((CURL_OFF_T_MAX - total_expected_size) > dl_size)
+  if((CURL_OFF_T_MAX - total_expected_size) < dl_size)
     total_expected_size = CURL_OFF_T_MAX; /* capped */
   else
     total_expected_size += dl_size;
