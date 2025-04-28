@@ -3359,7 +3359,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   bool force_reuse = FALSE;
   bool waitpipe = FALSE;
 
-  bool would_slist_error = FALSE;/*errors are not YET related to slis*/
+  bool would_slist_error = FALSE; /* errors are not YET related to slis */
 
   *async = FALSE;
   *in_connect = NULL;
@@ -3752,8 +3752,8 @@ static CURLcode create_conn(struct Curl_easy *data,
   result = Curl_conn_ev_data_setup(data);
 
 out:
-  if(would_slist_error&&result){
-    *slist_error=TRUE;
+  if(would_slist_error && result) {
+    *slist_error = TRUE;
   }
   return result;
 }
