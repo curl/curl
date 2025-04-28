@@ -509,6 +509,7 @@ static void progress_meter(struct Curl_easy *data)
   struct pgrs_estimate total_estm;
   curl_off_t total_cur_size;
   curl_off_t total_expected_size;
+  curl_off_t dl_size;
   char time_left[10];
   char time_total[10];
   char time_spent[10];
@@ -541,8 +542,16 @@ static void progress_meter(struct Curl_easy *data)
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size =
-    ((p->flags & PGRS_UL_SIZE_KNOWN) ? p->ul.total_size : p->ul.cur_size) +
+    ((p->flags & PGRS_UL_SIZE_KNOWN) ? p->ul.total_size : p->ul.cur_size);
+
+  dl_size =
     ((p->flags & PGRS_DL_SIZE_KNOWN) ? p->dl.total_size : p->dl.cur_size);
+
+  /* integer overflow check */
+  if((CURL_OFF_T_MAX - total_expected_size) > dl_size)
+    total_expected_size = CURL_OFF_T_MAX; /* capped */
+  else
+    total_expected_size += dl_size;
 
   /* We have transferred this much so far */
   total_cur_size = p->dl.cur_size + p->ul.cur_size;
