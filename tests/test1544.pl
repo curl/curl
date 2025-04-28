@@ -44,47 +44,47 @@ sub scan_header {
 
     open(my $h, "<", "$f");
     while(<$h>) {
-      s/^\s*(.*?)\s*$/$1/;      # Trim.
-      # Remove multi-line comment trail.
-      if($incomment) {
-        if($_ !~ /.*?\*\/\s*(.*)$/) {
-          next;
+        s/^\s*(.*?)\s*$/$1/;      # Trim.
+        # Remove multi-line comment trail.
+        if($incomment) {
+            if($_ !~ /.*?\*\/\s*(.*)$/) {
+                next;
+            }
+            $_ = $1;
+            $incomment = 0;
         }
-        $_ = $1;
-        $incomment = 0;
-      }
-      if($line ne "") {
-        # Unfold line.
-        $_ = "$line $1";
-        $line = "";
-      }
-      if($_ =~ /^(.*)\\$/) {
-        $line = "$1 ";
-        next;
-      }
-      # Remove comments.
-      while($_ =~ /^(.*?)\/\*.*?\*\/(.*)$/) {
-        $_ = "$1 $2";
-      }
-      if($_ =~ /^(.*)\/\*/) {
-        $_ = "$1 ";
-        $incomment = 1;
-      }
-      s/^\s*(.*?)\s*$/$1/;      # Trim again.
-      # Ignore preprocessor directives and blank lines.
-      if($_ =~ /^(?:#|$)/) {
-        next;
-      }
-      # Handle lines that may be continued as if they were folded.
-      if($_ !~ /[;,{}]$/ || $_ =~ /[^)],$/) {
-        # Folded line.
-        $line = $_;
-        next;
-      }
-      # Keep string options only.
-      if($_ =~ /CURLOPT(?:DEPRECATED)?\s*\(\s*([^, \t]+)\s*,\s*CURLOPTTYPE_STRINGPOINT/) {
-        push(@stringopts, $1);
-      }
+        if($line ne "") {
+            # Unfold line.
+            $_ = "$line $1";
+            $line = "";
+        }
+        if($_ =~ /^(.*)\\$/) {
+            $line = "$1 ";
+            next;
+        }
+        # Remove comments.
+        while($_ =~ /^(.*?)\/\*.*?\*\/(.*)$/) {
+            $_ = "$1 $2";
+        }
+        if($_ =~ /^(.*)\/\*/) {
+            $_ = "$1 ";
+            $incomment = 1;
+        }
+        s/^\s*(.*?)\s*$/$1/;      # Trim again.
+        # Ignore preprocessor directives and blank lines.
+        if($_ =~ /^(?:#|$)/) {
+            next;
+        }
+        # Handle lines that may be continued as if they were folded.
+        if($_ !~ /[;,{}]$/ || $_ =~ /[^)],$/) {
+            # Folded line.
+            $line = $_;
+            next;
+        }
+        # Keep string options only.
+        if($_ =~ /CURLOPT(?:DEPRECATED)?\s*\(\s*([^, \t]+)\s*,\s*CURLOPTTYPE_STRINGPOINT/) {
+            push(@stringopts, $1);
+        }
     }
     close $h;
     return @stringopts;
@@ -98,12 +98,12 @@ sub scan_wrapper_for_strings {
 
     open(my $h, "<", "$f");
     while(<$h>) {
-      if($_ =~ /(BEGIN|END) TRANSLATABLE STRING OPTIONS/) {
-        $inarmor = $1 eq "BEGIN";
-      }
-      elsif($inarmor && $_ =~ /case\s+([^:]+):/) {
-        push(@stringopts, $1);
-      }
+        if($_ =~ /(BEGIN|END) TRANSLATABLE STRING OPTIONS/) {
+            $inarmor = $1 eq "BEGIN";
+        }
+        elsif($inarmor && $_ =~ /case\s+([^:]+):/) {
+            push(@stringopts, $1);
+        }
     }
     close $h;
     return @stringopts;
@@ -121,27 +121,27 @@ my %diff;
 delete @diff{@stringrefs};
 
 foreach(keys %diff) {
-  print "$_ is not translated\n";
-  delete $diff{$_};
-  $errcount++;
+    print "$_ is not translated\n";
+    delete $diff{$_};
+    $errcount++;
 }
 
 @diff{@stringrefs} = 0..$#stringrefs;
 delete @diff{@stringdefs};
 
 foreach(keys %diff) {
-  print "translated option $_ does not exist\n";
-  $errcount++;
+    print "translated option $_ does not exist\n";
+    $errcount++;
 }
 
 # Check translated string option cases are sorted alphanumerically.
 foreach(my $i = 1; $i < $#stringrefs; $i++) {
-  if($stringrefs[$i] lt $stringrefs[$i - 1]) {
-    print("Translated string options are not sorted (" . $stringrefs[$i - 1] .
-          "/" . $stringrefs[$i] . ")\n");
-    $errcount++;
-    last;
-  }
+    if($stringrefs[$i] lt $stringrefs[$i - 1]) {
+        print("Translated string options are not sorted (" . $stringrefs[$i - 1] .
+              "/" . $stringrefs[$i] . ")\n");
+        $errcount++;
+        last;
+    }
 }
 
 exit !!$errcount;

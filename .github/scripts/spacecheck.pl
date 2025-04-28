@@ -65,19 +65,19 @@ sub eol_detect {
     my $lf = () = $content =~ /\n/g;
 
     if($cr > 0 && $lf == 0) {
-        return "cr"
+        return "cr";
     }
     elsif($cr == 0 && $lf > 0) {
-        return "lf"
+        return "lf";
     }
     elsif($cr == 0 && $lf == 0) {
-        return "bin"
+        return "bin";
     }
     elsif($cr == $lf) {
-        return "crlf"
+        return "crlf";
     }
 
-    return ""
+    return "";
 }
 
 my $issues = 0;

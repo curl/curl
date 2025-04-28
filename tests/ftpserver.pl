@@ -2024,26 +2024,26 @@ sub REST_ftp {
 }
 
 sub switch_directory_goto {
-  my $target_dir = $_;
+    my $target_dir = $_;
 
-  if(!$ftptargetdir) {
-    $ftptargetdir = "/";
-  }
+    if(!$ftptargetdir) {
+        $ftptargetdir = "/";
+    }
 
-  if($target_dir eq "") {
-    $ftptargetdir = "/";
-  }
-  elsif($target_dir eq "..") {
-    if($ftptargetdir eq "/") {
-      $ftptargetdir = "/";
+    if($target_dir eq "") {
+        $ftptargetdir = "/";
+    }
+    elsif($target_dir eq "..") {
+        if($ftptargetdir eq "/") {
+            $ftptargetdir = "/";
+        }
+        else {
+            $ftptargetdir =~ s/[[:alnum:]]+\/$//;
+        }
     }
     else {
-      $ftptargetdir =~ s/[[:alnum:]]+\/$//;
+        $ftptargetdir .= $target_dir . "/";
     }
-  }
-  else {
-    $ftptargetdir .= $target_dir . "/";
-  }
 }
 
 sub switch_directory {
@@ -2740,47 +2740,47 @@ sub PORT_ftp {
 sub datasockf_state {
     my $state = $_[0];
 
-  if($state eq 'STOPPED') {
-    # Data sockfilter initial state, not running,
-    # not connected and not used.
-    $datasockf_state = $state;
-    $datasockf_mode = 'none';
-    $datasockf_runs = 'no';
-    $datasockf_conn = 'no';
-  }
-  elsif($state eq 'PASSIVE') {
-    # Data sockfilter accepted connection from client.
-    $datasockf_state = $state;
-    $datasockf_mode = 'passive';
-    $datasockf_runs = 'yes';
-    $datasockf_conn = 'yes';
-  }
-  elsif($state eq 'ACTIVE') {
-    # Data sockfilter has connected to client.
-    $datasockf_state = $state;
-    $datasockf_mode = 'active';
-    $datasockf_runs = 'yes';
-    $datasockf_conn = 'yes';
-  }
-  elsif($state eq 'PASSIVE_NODATACONN') {
-    # Data sockfilter bound port without listening,
-    # client won't be able to establish data connection.
-    $datasockf_state = $state;
-    $datasockf_mode = 'passive';
-    $datasockf_runs = 'yes';
-    $datasockf_conn = 'no';
-  }
-  elsif($state eq 'ACTIVE_NODATACONN') {
-    # Data sockfilter does not even run,
-    # client awaits data connection from server in vain.
-    $datasockf_state = $state;
-    $datasockf_mode = 'active';
-    $datasockf_runs = 'no';
-    $datasockf_conn = 'no';
-  }
-  else {
-      die "Internal error. Unknown datasockf state: $state!";
-  }
+    if($state eq 'STOPPED') {
+        # Data sockfilter initial state, not running,
+        # not connected and not used.
+        $datasockf_state = $state;
+        $datasockf_mode = 'none';
+        $datasockf_runs = 'no';
+        $datasockf_conn = 'no';
+    }
+    elsif($state eq 'PASSIVE') {
+        # Data sockfilter accepted connection from client.
+        $datasockf_state = $state;
+        $datasockf_mode = 'passive';
+        $datasockf_runs = 'yes';
+        $datasockf_conn = 'yes';
+    }
+    elsif($state eq 'ACTIVE') {
+        # Data sockfilter has connected to client.
+        $datasockf_state = $state;
+        $datasockf_mode = 'active';
+        $datasockf_runs = 'yes';
+        $datasockf_conn = 'yes';
+    }
+    elsif($state eq 'PASSIVE_NODATACONN') {
+        # Data sockfilter bound port without listening,
+        # client won't be able to establish data connection.
+        $datasockf_state = $state;
+        $datasockf_mode = 'passive';
+        $datasockf_runs = 'yes';
+        $datasockf_conn = 'no';
+    }
+    elsif($state eq 'ACTIVE_NODATACONN') {
+        # Data sockfilter does not even run,
+        # client awaits data connection from server in vain.
+        $datasockf_state = $state;
+        $datasockf_mode = 'active';
+        $datasockf_runs = 'no';
+        $datasockf_conn = 'no';
+    }
+    else {
+        die "Internal error. Unknown datasockf state: $state!";
+    }
 }
 
 #**********************************************************************
