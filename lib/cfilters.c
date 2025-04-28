@@ -415,7 +415,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
 
   cf = data->conn->cfilter[sockindex];
-  DEBUGASSERT(cf);
   if(!cf) {
     *done = FALSE;
     return CURLE_FAILED_INIT;
