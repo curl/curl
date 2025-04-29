@@ -216,28 +216,28 @@ static void oldap_state(struct Curl_easy *data, ldapstate newstate)
   struct ldapconninfo *li =
     Curl_conn_meta_get(data->conn, CURL_META_LDAP_CONN);
   DEBUGASSERT(li);
-  if(!li)
-    return;
+  if(li) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  /* for debug purposes */
-  static const char * const names[] = {
-    "STOP",
-    "SSL",
-    "STARTTLS",
-    "TLS",
-    "MECHS",
-    "SASL",
-    "BIND",
-    "BINDV2",
-    /* LAST */
-  };
+    /* for debug purposes */
+    static const char * const names[] = {
+      "STOP",
+      "SSL",
+      "STARTTLS",
+      "TLS",
+      "MECHS",
+      "SASL",
+      "BIND",
+      "BINDV2",
+      /* LAST */
+    };
 
-  if(ldapc->state != newstate)
-    infof(data, "LDAP %p state change from %s to %s",
-          (void *)ldapc, names[ldapc->state], names[newstate]);
+    if(li->state != newstate)
+      infof(data, "LDAP %p state change from %s to %s",
+            (void *)li, names[li->state], names[newstate]);
 #endif
 
-  ldapc->state = newstate;
+    li->state = newstate;
+  }
 }
 
 /* Map some particular LDAP error codes to CURLcode values. */
@@ -345,7 +345,8 @@ static CURLcode oldap_setup_connection(struct Curl_easy *data,
  */
 static CURLcode oldap_get_message(struct Curl_easy *data, struct bufref *out)
 {
-  struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+  struct ldapconninfo *li =
+    Curl_conn_meta_get(data->conn, CURL_META_LDAP_CONN);
   struct berval *servercred = li ? li->servercred : NULL;
   DEBUGASSERT(li);
   if(!li)
@@ -365,11 +366,11 @@ static CURLcode oldap_perform_auth(struct Curl_easy *data, const char *mech,
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  DEBUGASSERT(li);
   struct berval cred;
   struct berval *pcred = &cred;
   int rc;
 
+  DEBUGASSERT(li);
   if(!li)
     return CURLE_FAILED_INIT;
   cred.bv_val = (char *)CURL_UNCONST(Curl_bufref_ptr(initresp));
@@ -458,7 +459,8 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
 /* Query the supported SASL authentication mechanisms. */
 static CURLcode oldap_perform_mechs(struct Curl_easy *data)
 {
-  struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
+  struct ldapconninfo *li =
+    Curl_conn_meta_get(data->conn, CURL_META_LDAP_CONN);
   int rc;
   static const char * const supportedSASLMechanisms[] = {
     "supportedSASLMechanisms",
@@ -508,10 +510,11 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
   bool ssldone = FALSE;
+  CURLcode result;
 
   if(!li)
     return CURLE_FAILED_INIT;
-  CURLcode result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
     oldap_state(data, newstate);
 
@@ -634,8 +637,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   }
 
   if(data->set.use_ssl) {
-    CURLcode result = oldap_perform_starttls(data);
-
+    result = oldap_perform_starttls(data);
     if(!result || data->set.use_ssl != CURLUSESSL_TRY)
       goto out;
   }
