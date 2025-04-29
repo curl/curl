@@ -895,9 +895,6 @@ struct connectdata {
 #ifdef USE_OPENLDAP
     struct ldapconninfo *ldapc;
 #endif
-#ifndef CURL_DISABLE_MQTT
-    struct mqtt_conn mqtt;
-#endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
 

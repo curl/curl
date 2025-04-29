@@ -106,7 +106,6 @@ struct SingleRequest {
     struct FTP *ftp;
     struct IMAP *imap;
     struct ldapreqinfo *ldap;
-    struct MQTT *mqtt;
     struct POP3 *pop3;
     struct RTSP *rtsp;
     struct smb_request *smb;
