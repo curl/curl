@@ -453,10 +453,8 @@ mev_add_new_conn_pollset(struct connectdata *conn)
   ps = calloc(1, sizeof(*ps));
   if(!ps)
     return NULL;
-  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
-    free(ps);
+  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
-  }
   return ps;
 }
 
@@ -468,10 +466,8 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
   ps = calloc(1, sizeof(*ps));
   if(!ps)
     return NULL;
-  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
-    free(ps);
+  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
-  }
   return ps;
 }
 

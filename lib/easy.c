@@ -1393,6 +1393,7 @@ CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
   if(!Curl_hash_add2(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
                      meta_data, meta_dtor)) {
     meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+    return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }
