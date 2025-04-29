@@ -161,13 +161,9 @@ static void mqtt_conn_dtor(void *key, size_t klen, void *entry)
 static CURLcode mqtt_setup_conn(struct Curl_easy *data,
                                 struct connectdata *conn)
 {
-  /* allocate the HTTP-specific struct for the Curl_easy, only to survive
-     during this request */
-  struct mqtt_conn *mqtt = Curl_conn_meta_get(conn, CURL_META_MQTT_CONN);
-  struct MQTT *mq = Curl_meta_get(data, CURL_META_MQTT_EASY);
-
-  DEBUGASSERT(!mqtt);
-  DEBUGASSERT(!mq);
+  /* setup MQTT specific meta data at easy handle and connection */
+  struct mqtt_conn *mqtt;
+  struct MQTT *mq;
 
   mqtt = calloc(1, sizeof(*mqtt));
   if(!mqtt ||
