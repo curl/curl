@@ -3462,9 +3462,10 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  would_slist_error = TRUE;
   if(!*slist_error) {
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
+
+    would_slist_error = TRUE;
     if(result)
       goto out;
   }
