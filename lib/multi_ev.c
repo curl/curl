@@ -478,8 +478,7 @@ mev_get_last_pollset(struct Curl_easy *data,
   if(data) {
     if(conn)
       return Curl_conn_meta_get(conn, CURL_META_MEV_POLLSET);
-    else if(data)
-      return Curl_meta_get(data, CURL_META_MEV_POLLSET);
+    return Curl_meta_get(data, CURL_META_MEV_POLLSET);
   }
   return NULL;
 }
