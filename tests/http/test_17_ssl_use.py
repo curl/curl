@@ -318,6 +318,7 @@ class TestSSLUse:
         if not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('quictls') and \
+           not (env.curl_uses_lib('openssl') and env.curl_uses_lib('ngtcp2')) and \
            not env.curl_uses_lib('gnutls') and \
            not env.curl_uses_lib('wolfssl'):
             pytest.skip("QUIC session reuse not implemented")
@@ -337,8 +338,7 @@ class TestSSLUse:
         # check that TLS session was reused as expected
         reused_session = False
         for line in r.trace_lines:
-            m = re.match(r'\[1-1] \* SSL reusing session.*', line)
-            if m:
+            if re.match(r'.*\[1-1] (\* )?SSL reusing session.*', line):
                 reused_session = True
         assert reused_session, f'{r}\n{r.dump_logs()}'
 
