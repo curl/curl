@@ -3812,18 +3812,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 #endif
 
-  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
-    if(!result &&
-       !cert_stuff(data, octx->ssl_ctx,
-                   ssl_cert, ssl_cert_blob, ssl_cert_type,
-                   ssl_config->key, ssl_config->key_blob,
-                   ssl_config->key_type, ssl_config->key_passwd))
-      result = CURLE_SSL_CERTPROBLEM;
-    if(result)
-      /* failf() is already done in cert_stuff() */
-      return result;
-  }
-
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
     ciphers = DEFAULT_CIPHER_SELECTION;
@@ -3849,6 +3837,18 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 #endif
+
+  if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
+    if(!result &&
+       !cert_stuff(data, octx->ssl_ctx,
+                   ssl_cert, ssl_cert_blob, ssl_cert_type,
+                   ssl_config->key, ssl_config->key_blob,
+                   ssl_config->key_type, ssl_config->key_passwd))
+      result = CURLE_SSL_CERTPROBLEM;
+    if(result)
+      /* failf() is already done in cert_stuff() */
+      return result;
+  }
 
 #ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
   /* OpenSSL 1.1.1 requires clients to opt-in for PHA */
