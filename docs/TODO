@@ -178,12 +178,11 @@
 
  20. Test suite
  20.1 SSL tunnel
- 20.2 nicer lacking perl message
- 20.3 more protocols supported
- 20.4 more platforms supported
- 20.5 write an SMB test server to replace impacket
- 20.6 Use the RFC 6265 test suite
- 20.8 Run web-platform-tests URL tests
+ 20.2 more protocols supported
+ 20.3 more platforms supported
+ 20.4 write an SMB test server to replace impacket
+ 20.5 Use the RFC 6265 test suite
+ 20.6 Run web-platform-tests URL tests
 
  21. MQTT
  21.1 Support rate-limiting
@@ -1297,29 +1296,24 @@
  and FTP-SSL tests without the stunnel dependency, and it could allow us to
  provide test tools built with either OpenSSL or GnuTLS
 
-20.2 nicer lacking perl message
-
- If perl was not found by the configure script, do not attempt to run the tests
- but explain something nice why it does not.
-
-20.3 more protocols supported
+20.2 more protocols supported
 
  Extend the test suite to include more protocols. The telnet could just do FTP
  or http operations (for which we have test servers).
 
-20.4 more platforms supported
+20.3 more platforms supported
 
  Make the test suite work on more platforms. OpenBSD and macOS. Remove
  fork()s and it should become even more portable.
 
-20.5 write an SMB test server to replace impacket
+20.4 write an SMB test server to replace impacket
 
  This would allow us to run SMB tests on more platforms and do better and more
  covering tests.
 
  See https://github.com/curl/curl/issues/15697
 
-20.6 Use the RFC 6265 test suite
+20.5 Use the RFC 6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
@@ -1328,7 +1322,7 @@
  with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
-20.8 Run web-platform-tests URL tests
+20.6 Run web-platform-tests URL tests
 
  Run web-platform-tests URL tests and compare results with browsers on wpt.fyi
 
