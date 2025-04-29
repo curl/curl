@@ -46,11 +46,11 @@ struct progress {
   size_t size;
 };
 
-static size_t progress_cb(void *clientp,
-                          curl_off_t dltotal,
-                          curl_off_t dlnow,
-                          curl_off_t ultotal,
-                          curl_off_t ulnow)
+static int progress_cb(void *clientp,
+                       curl_off_t dltotal,
+                       curl_off_t dlnow,
+                       curl_off_t ultotal,
+                       curl_off_t ulnow)
 {
   struct progress *memory = clientp;
   printf("private ptr: %p\n", memory->private);
