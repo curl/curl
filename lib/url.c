@@ -3965,9 +3965,11 @@ CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,
   if(!Curl_hash_add2(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
                      meta_data, meta_dtor)) {
     meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
+    return CURLE_OUT_OF_MEMORY;
   }
   return CURLE_OK;
 }
+
 void Curl_conn_meta_remove(struct connectdata *conn, const char *key)
 {
   Curl_hash_delete(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
