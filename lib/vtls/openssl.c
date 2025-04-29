@@ -5549,7 +5549,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_get_internals,       /* get_internals */
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */
-  ossl_set_engine,          /* set_engine  or provider */
+  ossl_set_engine,          /* set_engine or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
   NULL,                     /* false_start */
