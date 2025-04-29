@@ -720,8 +720,6 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
-struct ldapconninfo;
-
 #define TRNSPRT_TCP 3
 #define TRNSPRT_UDP 4
 #define TRNSPRT_QUIC 5
@@ -892,9 +890,6 @@ struct connectdata {
 #endif
 #ifdef USE_LIBRTMP
     void *rtmp;
-#endif
-#ifdef USE_OPENLDAP
-    struct ldapconninfo *ldapc;
 #endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
