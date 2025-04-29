@@ -24,7 +24,7 @@ If no ETag is sent by the server, an empty file is created.
 In many situations you want to use an existing etag in the request to avoid
 downloading the same resource again but also save the new etag if it has
 indeed changed, by using both etag options --etag-save and --etag-compare with
-the same file name, in the same command line.
+the same filename, in the same command line.
 
 Starting in curl 8.12.0, using the --create-dirs option can also create
 missing directory components for the path provided in --etag-save.
