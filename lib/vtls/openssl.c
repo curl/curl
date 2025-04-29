@@ -1373,11 +1373,11 @@ int cert_stuff(struct Curl_easy *data,
 
       if(data->state.provider) {
         /* Load the certificate from the provider */
-        OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         X509 *cert = NULL;
-        store = OSSL_STORE_open_ex(cert_file, data->state.libctx,
-                                   NULL, NULL, NULL, NULL, NULL, NULL);
+        OSSL_STORE_CTX *store =
+          OSSL_STORE_open_ex(cert_file, data->state.libctx,
+                             NULL, NULL, NULL, NULL, NULL, NULL);
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
