@@ -1376,12 +1376,8 @@ int cert_stuff(struct Curl_easy *data,
         OSSL_STORE_CTX *store = NULL;
         OSSL_STORE_INFO *info = NULL;
         X509 *cert = NULL;
-#if 0
-        store = OSSL_STORE_open(cert_file, NULL, NULL, NULL, NULL);
-#else
         store = OSSL_STORE_open_ex(cert_file, data->state.libctx,
                                    NULL, NULL, NULL, NULL, NULL, NULL);
-#endif
         if(!store) {
           failf(data, "Failed to open OpenSSL store: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
