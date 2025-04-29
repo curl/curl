@@ -4,12 +4,13 @@ curl and libcurl 8.14.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3404
+ Contributors:                 3409
 
 This release includes the following changes:
 
  o mqtt: send ping at upkeep interval [49]
  o schannel: handle pkcs12 client certificates containing CA certificates [58]
+ o vquic: ngtcp2 + openssl support [96]
  o wcurl: import v2025.04.20 script + docs [97]
  o websocket: add option to disable auto-pong reply [52]
 
@@ -22,25 +23,33 @@ This release includes the following bugfixes:
  o autotools: install shell completion files on cross build [119]
  o aws-sigv4: allow a blank string [86]
  o build: check required rustls-ffi version [46]
+ o build: enable gcc-12/13+, clang-10+ picky warnings [147]
  o certs: drop unused `default_bits` from `.prm` files [45]
  o cf-https-connect: use the passed in dns struct pointer [64]
+ o cf-socket: fix FTP accept connect [153]
+ o cfilters: remove assert [120]
  o cmake/FindNGTCP2: simplify multi-pkg-config detection [27]
  o cmake: append picky warnings to `CMAKE_REQUIRED_FLAGS` as string [68]
  o cmake: avoid 'target is imported but not globally visible' when consuming libcurl with old cmake [125]
  o cmake: do not install `mk-ca-bundle` script and manpage [101]
  o cmake: enable `-Wall` for MSVC when `PICKY_COMPILER=ON` [100]
+ o cmake: extend integration tests [139]
  o cmake: fix `fish` install directory detection via `pkg-config` [123]
  o cmake: fix nghttp3 static linking with `USE_OPENSSL_QUIC=ON` [79]
  o cmake: fix option() and mark_as_advanced() mixed order [111]
  o cmake: fix shell completion install when just one flavor is enabled [73]
+ o cmake: honor individual picky option overrides found in `CMAKE_C_FLAGS` [146]
  o cmake: install shell completions for cross-builds [112]
  o cmake: link `crypt32` for OpenSSL feature detection [105]
  o cmake: merge `CURL_WERROR` logic into `PickyWarnings.cmake` [66]
  o cmake: prefer `COMPILE_OPTIONS` over `CMAKE_C_FLAGS` for custom C options [72]
  o cmake: quotes, whitespace, use `VERSION_GREATER_EQUAL` [33]
  o cmake: revert `CURL_LTO` behavior for multi-config generators [74]
+ o cmake: stop deleting `-W<n>` from `CMAKE_C_FLAGS` (MSVC) [155]
  o cmake: tidy up and document feature detections in dependencies [107]
+ o cmake: use `CMAKE_COMPILE_WARNING_AS_ERROR` if available [154]
  o cmake: use `INCLUDE_DIRECTORIES` prop to specify local header dirs [47]
+ o cmake: use `LIB_NAME` in `curl-config.cmake.in` [148]
  o cmake: use absolute paths for completion targets [40]
  o cmake: use the `LINK_OPTIONS` property with CMake 3.13+ [78]
  o configure: catch asking for double resolver without https-rr [82]
@@ -54,6 +63,7 @@ This release includes the following bugfixes:
  o curl_get_line: handle lines ending on the buffer boundary [62]
  o curl_krb5: only use functions if FTP is still enabled [21]
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
+ o curl_osslq: remove a leftover debug fprintf() call [140]
  o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
  o docs/INSTALL.md: drop reference to removed configure option [83]
@@ -64,6 +74,7 @@ This release includes the following bugfixes:
  o doh: make sure CURLOPT_PROTOCOLS is set a with a "long" arg [124]
  o doh: reduce the DNS request buffer size [70]
  o easy_reset: fix dohfor_mid member [63]
+ o etag-save.md: mention how using both options is a good idea [108]
  o eventfd: fix feature guards [24]
  o genserv.pl: fail with a message if `openssl` is missing or failing [14]
  o hostip: fix build without threaded-resolver and without DoH [17]
@@ -76,6 +87,7 @@ This release includes the following bugfixes:
  o http_aws_sigv4: add additional verbose log statements [39]
  o http_negotiate: fix non-SSL build with GSSAPI [23]
  o https-connect: fix httpsrr target check [36]
+ o HTTPSRR.md: clarify somewhat [137]
  o if2ip: build the function also if FTP is present [19]
  o INSTALL-CMAKE.md: fix typo
  o INSTALL.md: update the minimal libcurl size example
@@ -95,12 +107,15 @@ This release includes the following bugfixes:
  o openssl-quic: avoid potential `-Wnull-dereference`, add assert [126]
  o openssl-quic: fix printf mask [102]
  o openssl-quic: fix shutdown when stream not open [11]
+ o openssl: enable builds for *both* engines and providers [115]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
+ o progress: avoid integer overflow when gathering total transfer size [128]
  o pytest: make test_07_22 more lenient to exit codes [90]
  o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
  o rand: update comment on Curl_rand_bytes weak random [35]
+ o RELEASE-PROCEDURE.md: release candidate git tagging explained [143]
  o runtests: add retry option to reduce flakiness [106]
  o runtests: fix indentation
  o runtests: recognize lowercase `windows` in `curl -V` [77]
@@ -110,6 +125,8 @@ This release includes the following bugfixes:
  o scripts: completion.pl: sort the completion file for all shells [9]
  o scripts: drop unused import, formatting [95]
  o scripts: fix --opts-dir help in completion.pl
+ o sectransp: fix building for macOS Sierra and older [151]
+ o smb: avoid integer overflow on weird input date [129]
  o socket: use accept4 when available [7]
  o socketpair: support pipe2 where available [56]
  o test1658: add unit test for the HTTPS RR decoder [28]
@@ -132,15 +149,19 @@ This release includes the following bugfixes:
  o tests: use a more portable null device path [38]
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_getparam: clear argument only when needed [98]
+ o tool_paramhlp: avoid integer overflow in secs2ms() [152]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
  o typecheck-gcc.h: fix the typechecks [110]
+ o urlapi: redirecting to "" is considered fine [149]
  o VERSIONS: list all past releases [22]
  o vquic: consistent name for the stream struct across backends [135]
  o vquic: init for every call to recvmsg [134]
- o vquic: ngtcp2 + openssl support [96]
  o vtls: fix build with ssl but without http [18]
+ o VULN-DISCLOSURE-POLICY: use of weak algos [94]
  o winbuild: add the deprecation warning to the README [29]
  o wolfssl: fix to enable ALPN when available [67]
+ o ws: fix the header replace check [144]
+ o ws: store protocol context as connection meta data [136]
 
 This release includes the following known bugs:
 
@@ -161,21 +182,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andrew Kirillov, Andy Pan, Arian van Putten,
+  Abhinav Singhal, Andreas Westin, Andrew Kirillov, Andy Pan, Arian van Putten,
   bo0tzz on github, Bo Anderson, Brian Chrzanowski, bruce.yoon,
   bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
   Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
   Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
   Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
-  epicmkirzinger on github, Fujii Hironori, Graham Christensen, Harry Sintonen,
-  Helmut Grohne, Jake Yuesong Li, Jean-Christophe Amiel, Jixinqi,
-  Jochen Sprickerhof, Joel Depooter, Johan Eliasson, Jonathan Rosa, Kai Pastor,
-  kkalganov on github, Marius Kleidl, Max Eliaser, mschroeder-fzj on github,
-  Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
-  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique, Sergey,
-  Sören Tempel, Stefan Eissing, Stephen Farrell, Tal Regev, Thomas Klausner,
-  Tomas Volf, Travis Lane, Viktor Szakats, x1sc0 on github, Yedaya Katsman
-  (58 contributors)
+  epicmkirzinger on github, Eric Knibbe, Fujii Hironori, Graham Christensen,
+  Harry Sintonen, Helmut Grohne, Jake Yuesong Li, Jean-Christophe Amiel,
+  Jixinqi, Jochen Sprickerhof, Joel Depooter, Johan Eliasson, Jonathan Rosa,
+  Kai Pastor, kkalganov on github, Marius Kleidl, Max Eliaser,
+  mschroeder-fzj on github, Niall O'Reilly, Nigel Brittain, Nils Goroll,
+  Pavel Kropachev, PleaseJustDont, Rasmus Melchior Jacobsen, Ray Satiro,
+  renovate[bot], Samuel Henrique, sbernatsky on github, Sergey, Sören Tempel,
+  Stefan Eissing, Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf,
+  Travis Lane, Viktor Szakats, x1sc0 on github, xiadnoring on github,
+  Yedaya Katsman, zopsicle on github
 
 References to bug reports and discussions on issues:
 
@@ -271,6 +293,7 @@ References to bug reports and discussions on issues:
  [91] = https://curl.se/bug/?i=16761
  [92] = https://curl.se/bug/?i=17015
  [93] = https://curl.se/bug/?i=17105
+ [94] = https://curl.se/bug/?i=17220
  [95] = https://curl.se/bug/?i=17077
  [96] = https://curl.se/bug/?i=17027
  [97] = https://curl.se/bug/?i=17035
@@ -283,19 +306,39 @@ References to bug reports and discussions on issues:
  [105] = https://curl.se/bug/?i=17101
  [106] = https://curl.se/bug/?i=17091
  [107] = https://curl.se/bug/?i=17082
+ [108] = https://curl.se/bug/?i=17217
  [109] = https://curl.se/bug/?i=17048
  [110] = https://curl.se/bug/?i=17143
  [111] = https://curl.se/bug/?i=17163
  [112] = https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1103938
  [114] = https://curl.se/bug/?i=17139
+ [115] = https://curl.se/bug/?i=17165
  [116] = https://curl.se/bug/?i=17160
  [118] = https://curl.se/bug/?i=17138
  [119] = https://curl.se/bug/?i=17159
+ [120] = https://curl.se/bug/?i=17211
  [123] = https://curl.se/bug/?i=17147
  [124] = https://curl.se/bug/?i=17142
  [125] = https://curl.se/bug/?i=17140
  [126] = https://curl.se/bug/?i=17107
+ [128] = https://curl.se/bug/?i=17207
+ [129] = https://curl.se/bug/?i=17206
  [130] = https://curl.se/bug/?i=17122
  [132] = https://curl.se/bug/?i=17130
  [134] = https://curl.se/bug/?i=17120
  [135] = https://curl.se/bug/?i=17113
+ [136] = https://curl.se/bug/?i=17146
+ [137] = https://curl.se/bug/?i=17204
+ [139] = https://curl.se/bug/?i=17203
+ [140] = https://curl.se/bug/?i=17198
+ [143] = https://curl.se/bug/?i=17177
+ [144] = https://curl.se/bug/?i=17170
+ [146] = https://curl.se/bug/?i=17197
+ [147] = https://curl.se/bug/?i=17196
+ [148] = https://curl.se/bug/?i=17195
+ [149] = https://curl.se/bug/?i=17188
+ [151] = https://curl.se/bug/?i=16581
+ [152] = https://curl.se/bug/?i=17184
+ [153] = https://curl.se/bug/?i=17186
+ [154] = https://curl.se/bug/?i=17183
+ [155] = https://curl.se/bug/?i=17179
