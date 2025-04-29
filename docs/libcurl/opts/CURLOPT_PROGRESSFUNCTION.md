@@ -89,11 +89,11 @@ struct progress {
   size_t size;
 };
 
-static size_t progress_callback(void *clientp,
-                                double dltotal,
-                                double dlnow,
-                                double ultotal,
-                                double ulnow)
+static int progress_callback(void *clientp,
+                             double dltotal,
+                             double dlnow,
+                             double ultotal,
+                             double ulnow)
 {
   struct progress *memory = clientp;
   printf("private: %p\n", memory->private);
