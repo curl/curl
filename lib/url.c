@@ -85,6 +85,7 @@
 #include "speedcheck.h"
 #include "warnless.h"
 #include "getinfo.h"
+#include "pop3.h"
 #include "urlapi-int.h"
 #include "system_win32.h"
 #include "hsts.h"

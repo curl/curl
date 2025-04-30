@@ -175,7 +175,6 @@ typedef ssize_t (Curl_recv)(struct Curl_easy *data,   /* transfer */
 
 #include "mime.h"
 #include "imap.h"
-#include "pop3.h"
 #include "smtp.h"
 #include "ftp.h"
 #include "file.h"
@@ -876,9 +875,6 @@ struct connectdata {
 #endif
 #ifndef CURL_DISABLE_IMAP
     struct imap_conn imapc;
-#endif
-#ifndef CURL_DISABLE_POP3
-    struct pop3_conn pop3c;
 #endif
 #ifndef CURL_DISABLE_SMTP
     struct smtp_conn smtpc;
