@@ -254,7 +254,7 @@ jobs:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
-      libressl-version: 4.0.0
+      libressl-version: 4.1.0
     strategy:
       fail-fast: false
       matrix:
