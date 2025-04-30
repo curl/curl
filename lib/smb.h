@@ -25,30 +25,6 @@
  *
  ***************************************************************************/
 
-enum smb_conn_state {
-  SMB_NOT_CONNECTED = 0,
-  SMB_CONNECTING,
-  SMB_NEGOTIATE,
-  SMB_SETUP,
-  SMB_CONNECTED
-};
-
-struct smb_conn {
-  enum smb_conn_state state;
-  char *user;
-  char *domain;
-  char *share;
-  unsigned char challenge[8];
-  unsigned int session_key;
-  unsigned short uid;
-  char *recv_buf;
-  char *send_buf;
-  size_t upload_size;
-  size_t send_size;
-  size_t sent;
-  size_t got;
-};
-
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \
     (SIZEOF_CURL_OFF_T > 4)
 
