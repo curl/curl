@@ -594,12 +594,11 @@ static void smb_pop_message(struct smb_conn *smbc)
   smbc->got = 0;
 }
 
-static void smb_format_message(struct Curl_easy *data,
-                               struct smb_conn *smbc,
+static void smb_format_message(struct smb_conn *smbc,
+                               struct smb_request *req,
                                struct smb_header *h,
                                unsigned char cmd, size_t len)
 {
-  struct smb_request *req = Curl_meta_get(data, CURL_META_SMB_EASY);
   unsigned int pid;
 
   memset(h, 0, sizeof(*h));
@@ -660,10 +659,11 @@ static CURLcode smb_flush(struct Curl_easy *data, struct smb_conn *smbc)
 
 static CURLcode smb_send_message(struct Curl_easy *data,
                                  struct smb_conn *smbc,
+                                 struct smb_request *req,
                                  unsigned char cmd,
                                  const void *msg, size_t msg_len)
 {
-  smb_format_message(data, smbc, (struct smb_header *)smbc->send_buf,
+  smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
                      cmd, msg_len);
   DEBUGASSERT((sizeof(struct smb_header) + msg_len) <= MAX_MESSAGE_SIZE);
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
@@ -672,17 +672,19 @@ static CURLcode smb_send_message(struct Curl_easy *data,
 }
 
 static CURLcode smb_send_negotiate(struct Curl_easy *data,
-                                   struct smb_conn *smbc)
+                                   struct smb_conn *smbc,
+                                   struct smb_request *req)
 {
   const char *msg = "\x00\x0c\x00\x02NT LM 0.12";
 
-  return smb_send_message(data, smbc, SMB_COM_NEGOTIATE, msg, 15);
+  return smb_send_message(data, smbc, req, SMB_COM_NEGOTIATE, msg, 15);
 }
 
 static CURLcode smb_send_setup(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = Curl_conn_meta_get(conn, CURL_META_SMB_CONN);
+  struct smb_request *req = Curl_meta_get(data, CURL_META_SMB_EASY);
   struct smb_setup msg;
   char *p = msg.bytes;
   unsigned char lm_hash[21];
@@ -691,7 +693,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   unsigned char nt[24];
   size_t byte_count;
 
-  if(!smbc)
+  if(!smbc || !req)
     return CURLE_FAILED_INIT;
 
   byte_count = sizeof(lm) + sizeof(nt) +
@@ -729,12 +731,13 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
-  return smb_send_message(data, smbc, SMB_COM_SETUP_ANDX, &msg,
+  return smb_send_message(data, smbc, req, SMB_COM_SETUP_ANDX, &msg,
                           sizeof(msg) - sizeof(msg.bytes) + byte_count);
 }
 
 static CURLcode smb_send_tree_connect(struct Curl_easy *data,
-                                      struct smb_conn *smbc)
+                                      struct smb_conn *smbc,
+                                      struct smb_request *req)
 {
   struct smb_tree_connect msg;
   struct connectdata *conn = data->conn;
@@ -759,7 +762,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
-  return smb_send_message(data, smbc, SMB_COM_TREE_CONNECT_ANDX, &msg,
+  return smb_send_message(data, smbc, req, SMB_COM_TREE_CONNECT_ANDX, &msg,
                           sizeof(msg) - sizeof(msg.bytes) + byte_count);
 }
 
@@ -789,7 +792,7 @@ static CURLcode smb_send_open(struct Curl_easy *data,
   msg.byte_count = smb_swap16((unsigned short) byte_count);
   strcpy(msg.bytes, req->path);
 
-  return smb_send_message(data, smbc, SMB_COM_NT_CREATE_ANDX, &msg,
+  return smb_send_message(data, smbc, req, SMB_COM_NT_CREATE_ANDX, &msg,
                           sizeof(msg) - sizeof(msg.bytes) + byte_count);
 }
 
@@ -803,15 +806,16 @@ static CURLcode smb_send_close(struct Curl_easy *data,
   msg.word_count = SMB_WC_CLOSE;
   msg.fid = smb_swap16(req->fid);
 
-  return smb_send_message(data, smbc, SMB_COM_CLOSE, &msg, sizeof(msg));
+  return smb_send_message(data, smbc, req, SMB_COM_CLOSE, &msg, sizeof(msg));
 }
 
 static CURLcode smb_send_tree_disconnect(struct Curl_easy *data,
-                                         struct smb_conn *smbc)
+                                         struct smb_conn *smbc,
+                                         struct smb_request *req)
 {
   struct smb_tree_disconnect msg;
   memset(&msg, 0, sizeof(msg));
-  return smb_send_message(data, smbc, SMB_COM_TREE_DISCONNECT,
+  return smb_send_message(data, smbc, req, SMB_COM_TREE_DISCONNECT,
                           &msg, sizeof(msg));
 }
 
@@ -831,7 +835,8 @@ static CURLcode smb_send_read(struct Curl_easy *data,
   msg.min_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
   msg.max_bytes = smb_swap16(MAX_PAYLOAD_SIZE);
 
-  return smb_send_message(data, smbc, SMB_COM_READ_ANDX, &msg, sizeof(msg));
+  return smb_send_message(data, smbc, req, SMB_COM_READ_ANDX,
+                          &msg, sizeof(msg));
 }
 
 static CURLcode smb_send_write(struct Curl_easy *data,
@@ -856,7 +861,7 @@ static CURLcode smb_send_write(struct Curl_easy *data,
   msg->data_offset = smb_swap16(sizeof(*msg) - sizeof(unsigned int));
   msg->byte_count = smb_swap16((unsigned short) (upload_size + 1));
 
-  smb_format_message(data, smbc, &msg->h, SMB_COM_WRITE_ANDX,
+  smb_format_message(smbc, req, &msg->h, SMB_COM_WRITE_ANDX,
                      sizeof(*msg) - sizeof(msg->h) + (size_t) upload_size);
 
   return smb_send(data, smbc, sizeof(*msg), (size_t) upload_size);
@@ -903,12 +908,13 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
   struct smb_conn *smbc = Curl_conn_meta_get(conn, CURL_META_SMB_CONN);
+  struct smb_request *req = Curl_meta_get(data, CURL_META_SMB_EASY);
   struct smb_negotiate_response *nrsp;
   struct smb_header *h;
   CURLcode result;
   void *msg = NULL;
 
-  if(!smbc)
+  if(!smbc || !req)
     return CURLE_FAILED_INIT;
 
   if(smbc->state == SMB_CONNECTING) {
@@ -923,7 +929,7 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
     }
 #endif
 
-    result = smb_send_negotiate(data, smbc);
+    result = smb_send_negotiate(data, smbc, req);
     if(result) {
       connclose(conn, "SMB: failed to send negotiate message");
       return result;
@@ -1036,7 +1042,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
 
   /* Start the request */
   if(req->state == SMB_REQUESTING) {
-    result = smb_send_tree_connect(data, smbc);
+    result = smb_send_tree_connect(data, smbc, req);
     if(result) {
       connclose(conn, "SMB: failed to send tree connect message");
       return result;
@@ -1180,7 +1186,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     break;
 
   case SMB_TREE_DISCONNECT:
-    result = smb_send_tree_disconnect(data, smbc);
+    result = smb_send_tree_disconnect(data, smbc, req);
     break;
 
   case SMB_DONE:
