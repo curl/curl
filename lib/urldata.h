@@ -870,9 +870,6 @@ struct connectdata {
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif
-#ifndef CURL_DISABLE_TFTP
-    struct tftp_state_data *tftpc;
-#endif
 #ifndef CURL_DISABLE_IMAP
     struct imap_conn imapc;
 #endif
