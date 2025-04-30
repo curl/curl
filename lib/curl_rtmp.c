@@ -29,6 +29,7 @@
 
 #include "curl_rtmp.h"
 #include "urldata.h"
+#include "url.h"
 #include "nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
@@ -51,6 +52,10 @@
 #endif
 
 #define DEF_BUFTIME    (2*60*60*1000)    /* 2 hours */
+
+/* meta key for storing RTMP* at connection */
+#define CURL_META_RTMP_CONN   "meta:proto:rtmp:conn"
+
 
 static CURLcode rtmp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -217,11 +222,21 @@ const struct Curl_handler Curl_handler_rtmpts = {
   PROTOPT_NONE                          /* flags */
 };
 
+static void rtmp_conn_dtor(void *key, size_t klen, void *entry)
+{
+  RTMP *r = entry;
+  (void)key;
+  (void)klen;
+  RTMP_Close(r);
+  RTMP_Free(r);
+}
+
 static CURLcode rtmp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   RTMP *r = RTMP_Alloc();
-  if(!r)
+  if(!r ||
+    Curl_conn_meta_set(conn, CURL_META_RTMP_CONN, r, rtmp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   RTMP_Init(r);
@@ -230,15 +245,17 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
     RTMP_Free(r);
     return CURLE_URL_MALFORMAT;
   }
-  conn->proto.rtmp = r;
   return CURLE_OK;
 }
 
 static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  RTMP *r = conn->proto.rtmp;
+  RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   SET_RCVTIMEO(tv, 10);
+
+  if(!r)
+    return CURLE_FAILED_INIT;
 
   r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
@@ -272,9 +289,9 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
 {
   struct connectdata *conn = data->conn;
-  RTMP *r = conn->proto.rtmp;
+  RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
 
-  if(!RTMP_ConnectStream(r, 0))
+  if(!r || !RTMP_ConnectStream(r, 0))
     return CURLE_FAILED_INIT;
 
   if(data->state.upload) {
@@ -301,14 +318,11 @@ static CURLcode rtmp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead_connection)
 {
-  RTMP *r = conn->proto.rtmp;
+  RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   (void)data;
   (void)dead_connection;
-  if(r) {
-    conn->proto.rtmp = NULL;
-    RTMP_Close(r);
-    RTMP_Free(r);
-  }
+  if(r)
+    Curl_conn_meta_remove(conn, CURL_META_RTMP_CONN);
   return CURLE_OK;
 }
 
@@ -316,10 +330,14 @@ static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
                          size_t len, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
-  RTMP *r = conn->proto.rtmp;
+  RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   ssize_t nread;
 
   (void)sockindex; /* unused */
+  if(!r) {
+    *err = CURLE_FAILED_INIT;
+    return -1;
+  }
 
   nread = RTMP_Read(r, buf, curlx_uztosi(len));
   if(nread < 0) {
@@ -338,11 +356,15 @@ static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
                          const void *buf, size_t len, bool eos, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
-  RTMP *r = conn->proto.rtmp;
+  RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   ssize_t num;
 
   (void)sockindex; /* unused */
   (void)eos; /* unused */
+  if(!r) {
+    *err = CURLE_FAILED_INIT;
+    return -1;
+  }
 
   num = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
   if(num < 0)
