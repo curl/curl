@@ -1335,11 +1335,11 @@ static CURLcode tftp_do(struct Curl_easy *data, bool *done)
     result = tftp_connect(data, done);
     if(result)
       return result;
-  }
 
-  state = Curl_conn_meta_get(conn, CURL_META_TFTP_CONN);
-  if(!state)
-    return CURLE_TFTP_ILLEGAL;
+    state = Curl_conn_meta_get(conn, CURL_META_TFTP_CONN);
+    if(!state)
+      return CURLE_TFTP_ILLEGAL;
+  }
 
   result = tftp_perform(data, done);
 
