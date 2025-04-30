@@ -82,12 +82,14 @@ HEAD
 ;
 
     my $c=0;
-    print " ";
     for(split(//, $gzippedContent)) {
         my $num=ord($_);
+        if(!($c % 12)) {
+            print " ";
+        }
         printf(" 0x%02x,", 0+$num);
         if(!(++$c % 12)) {
-            print "\n ";
+            print "\n";
         }
     }
     print "\n};\n";
