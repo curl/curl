@@ -396,6 +396,7 @@ static curl_off_t smb_swap64(curl_off_t x)
 static void conn_state(struct Curl_easy *data, struct smb_conn *smbc,
                        enum smb_conn_state newstate)
 {
+  (void)data;
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* For debug purposes */
   static const char * const names[] = {
