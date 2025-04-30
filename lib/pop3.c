@@ -1557,7 +1557,7 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   pop3c = calloc(1, sizeof(*pop3c));
-  if(!pop3 ||
+  if(!pop3c ||
     Curl_conn_meta_set(conn, CURL_META_POP3_CONN, pop3c, pop3_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
