@@ -105,7 +105,6 @@ struct SingleRequest {
     struct FILEPROTO *file;
     struct IMAP *imap;
     struct ldapreqinfo *ldap;
-    struct POP3 *pop3;
     struct RTSP *rtsp;
     struct smb_request *smb;
     struct SMTP *smtp;
