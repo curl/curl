@@ -68,6 +68,12 @@ Content-Length: 6
 -foo-
 </stdout>
 <protocol>
+CONNECT %HOSTIP:%NOLISTENPORT HTTP/1.1
+Host: %HOSTIP:%NOLISTENPORT
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+[DISCONNECT]
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION

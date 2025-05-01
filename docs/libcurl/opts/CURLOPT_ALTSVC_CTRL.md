@@ -55,7 +55,12 @@ Setting any bit enables the alt-svc engine.
 If the connection fails when trying to connect to an alternative host,
 the hostname from the URL is attempted instead.
 
-Failed connection problems that trigger this fallback include: ...
+Failed connection problems that trigger this fallback:
+1. bad addresses such as .onion
+2. non-responsive servers
+3. bad SSL
+4. unsupported protocols
+5. response appears to be the wrong protocol
 
 ## CURLALTSVC_READONLYFILE
 
