@@ -4,12 +4,13 @@ curl and libcurl 8.14.0
  Command line options:         268
  curl_easy_setopt() options:   307
  Public functions in libcurl:  96
- Contributors:                 3409
+ Contributors:                 3413
 
 This release includes the following changes:
 
  o mqtt: send ping at upkeep interval [49]
  o schannel: handle pkcs12 client certificates containing CA certificates [58]
+ o TLS: add CURLOPT_SSL_SIGNATURE_ALGORITHMS and --sigalgs [113]
  o vquic: ngtcp2 + openssl support [96]
  o wcurl: import v2025.04.20 script + docs [97]
  o websocket: add option to disable auto-pong reply [52]
@@ -24,6 +25,7 @@ This release includes the following bugfixes:
  o aws-sigv4: allow a blank string [86]
  o build: check required rustls-ffi version [46]
  o build: enable gcc-12/13+, clang-10+ picky warnings [147]
+ o build: enable gcc-15 picky warnings [133]
  o certs: drop unused `default_bits` from `.prm` files [45]
  o cf-https-connect: use the passed in dns struct pointer [64]
  o cf-socket: fix FTP accept connect [153]
@@ -65,8 +67,10 @@ This release includes the following bugfixes:
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
  o curl_osslq: remove a leftover debug fprintf() call [140]
  o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
+ o CURLOPT_XFERINFOFUNCTION.md: fix the callback return type in example [122]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
  o docs/INSTALL.md: drop reference to removed configure option [83]
+ o docs/libcurl: fix type and prototype problems in examples [121]
  o docs/libcurl: make examples build with picky compiler options [84]
  o docs: add missing return statement in examples [85]
  o docs: fix incorrect shell substitution in docker run example command [51]
@@ -102,12 +106,15 @@ This release includes the following bugfixes:
  o make: clean tests better [60]
  o mbedtls: TLS 1.3 is max when mbedtls has 1.3 support [109]
  o mk-ca-bundle.pl: follow redirects [53]
+ o mkhelp: fix to not generate a line-ending space in some cases [103]
+ o mqtt: use conn/easy meta hash [141]
  o multi: do transfer book keeping using mid [91]
  o multi: init_do(): check result [114]
  o openssl-quic: avoid potential `-Wnull-dereference`, add assert [126]
  o openssl-quic: fix printf mask [102]
  o openssl-quic: fix shutdown when stream not open [11]
  o openssl: enable builds for *both* engines and providers [115]
+ o openssl: set the cipher string before doing private cert [138]
  o parsedate: provide Curl_wkday also for GnuTLS builds [13]
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
@@ -125,6 +132,7 @@ This release includes the following bugfixes:
  o scripts: completion.pl: sort the completion file for all shells [9]
  o scripts: drop unused import, formatting [95]
  o scripts: fix --opts-dir help in completion.pl
+ o scripts: fix perl indentation, whitespace, semicolons [127]
  o sectransp: fix building for macOS Sierra and older [151]
  o smb: avoid integer overflow on weird input date [129]
  o socket: use accept4 when available [7]
@@ -147,6 +155,7 @@ This release includes the following bugfixes:
  o tests: require IPv6 for 1265, 1324, 2086 [87]
  o tests: unify test case keywords
  o tests: use a more portable null device path [38]
+ o TODO: remove "nicer lacking perl message" [117]
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_getparam: clear argument only when needed [98]
  o tool_paramhlp: avoid integer overflow in secs2ms() [152]
@@ -182,22 +191,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andreas Westin, Andrew Kirillov, Andy Pan, Arian van Putten,
-  bo0tzz on github, Bo Anderson, Brian Chrzanowski, bruce.yoon,
-  bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
+  Abhinav Singhal, Andreas Westin, Andrei Florea, Andrew Kirillov, Andy Pan,
+  Arian van Putten, bo0tzz on github, Bo Anderson, Brian Chrzanowski,
+  bruce.yoon, bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
   Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
-  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel McCarney,
-  Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
-  epicmkirzinger on github, Eric Knibbe, Fujii Hironori, Graham Christensen,
-  Harry Sintonen, Helmut Grohne, Jake Yuesong Li, Jean-Christophe Amiel,
-  Jixinqi, Jochen Sprickerhof, Joel Depooter, Johan Eliasson, Jonathan Rosa,
-  Kai Pastor, kkalganov on github, Marius Kleidl, Max Eliaser,
-  mschroeder-fzj on github, Niall O'Reilly, Nigel Brittain, Nils Goroll,
-  Pavel Kropachev, PleaseJustDont, Rasmus Melchior Jacobsen, Ray Satiro,
-  renovate[bot], Samuel Henrique, sbernatsky on github, Sergey, Sören Tempel,
-  Stefan Eissing, Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf,
-  Travis Lane, Viktor Szakats, x1sc0 on github, xiadnoring on github,
-  Yedaya Katsman, zopsicle on github
+  Corinna Brandt, Dagobert Michelsen, Dan Fandrich, Daniel Engberg,
+  Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
+  epicmkirzinger on github, Eric Knibbe, Fujii Hironori, gkarracer on github,
+  Graham Christensen, Harry Sintonen, Helmut Grohne, Jake Yuesong Li,
+  Jean-Christophe Amiel, Jixinqi, Jochen Sprickerhof, Joel Depooter,
+  Johan Eliasson, Jonathan Rosa, Kai Pastor, kkalganov on github,
+  Marius Kleidl, Max Eliaser, mschroeder-fzj on github, NeimadTL,
+  Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
+  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique,
+  sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing, Stephen Farrell,
+  Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane, Viktor Szakats,
+  x1sc0 on github, xiadnoring on github, Yedaya Katsman, zopsicle on github
+  (67 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -302,6 +312,7 @@ References to bug reports and discussions on issues:
  [100] = https://curl.se/bug/?i=17050
  [101] = https://curl.se/bug/?i=17035
  [102] = https://curl.se/bug/?i=17106
+ [103] = https://curl.se/bug/?i=17240
  [104] = https://curl.se/bug/?i=17172
  [105] = https://curl.se/bug/?i=17101
  [106] = https://curl.se/bug/?i=17091
@@ -311,26 +322,34 @@ References to bug reports and discussions on issues:
  [110] = https://curl.se/bug/?i=17143
  [111] = https://curl.se/bug/?i=17163
  [112] = https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1103938
+ [113] = https://curl.se/bug/?i=12982
  [114] = https://curl.se/bug/?i=17139
  [115] = https://curl.se/bug/?i=17165
  [116] = https://curl.se/bug/?i=17160
+ [117] = https://curl.se/bug/?i=17233
  [118] = https://curl.se/bug/?i=17138
  [119] = https://curl.se/bug/?i=17159
  [120] = https://curl.se/bug/?i=17211
+ [121] = https://curl.se/bug/?i=17231
+ [122] = https://curl.se/bug/?i=17228
  [123] = https://curl.se/bug/?i=17147
  [124] = https://curl.se/bug/?i=17142
  [125] = https://curl.se/bug/?i=17140
  [126] = https://curl.se/bug/?i=17107
+ [127] = https://curl.se/bug/?i=17209
  [128] = https://curl.se/bug/?i=17207
  [129] = https://curl.se/bug/?i=17206
  [130] = https://curl.se/bug/?i=17122
  [132] = https://curl.se/bug/?i=17130
+ [133] = https://curl.se/bug/?i=17199
  [134] = https://curl.se/bug/?i=17120
  [135] = https://curl.se/bug/?i=17113
  [136] = https://curl.se/bug/?i=17146
  [137] = https://curl.se/bug/?i=17204
+ [138] = https://curl.se/bug/?i=17227
  [139] = https://curl.se/bug/?i=17203
  [140] = https://curl.se/bug/?i=17198
+ [141] = https://curl.se/bug/?i=17221
  [143] = https://curl.se/bug/?i=17177
  [144] = https://curl.se/bug/?i=17170
  [146] = https://curl.se/bug/?i=17197
