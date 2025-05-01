@@ -57,6 +57,7 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "altsvc.h"
 
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
@@ -2600,6 +2601,18 @@ statemachine_end:
         rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
+
+    /* maybe retry if altsvc is breaking */
+#ifndef CURL_DISABLE_ALTSVC
+    if(data->asi && data->asi->used && !data->asi->result) {
+      data->asi->result = result;
+
+      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)) {
+        data->mstate = MSTATE_CONNECT;
+        return CURLM_OK;
+      }
+    }
+#endif
 
     if(MSTATE_COMPLETED == data->mstate) {
       if(data->master_mid != UINT_MAX) {

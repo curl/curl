@@ -50,6 +50,7 @@ struct altsvcinfo {
   long flags; /* the publicly set bitmask */
 
   BIT(used);
+  CURLcode result;
 };
 
 const char *Curl_alpnid2str(enum alpnid id);

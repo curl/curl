@@ -304,8 +304,6 @@ struct altsvcinfo *Curl_altsvc_init(void)
     return NULL;
   Curl_llist_init(&asi->list, NULL);
 
-  asi->used = FALSE;
-
   /* set default behavior */
   asi->flags = CURLALTSVC_H1
 #ifdef USE_HTTP2

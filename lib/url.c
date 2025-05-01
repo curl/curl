@@ -3813,28 +3813,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     return result;
   }
 
-#ifndef CURL_DISABLE_ALTSVC
-  /* if we failed because of the avc cache retry */
-  if(result && data-> asi
-    && data->asi->used
-    && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
-    ) {
 
-    infof(data,
-      "Alt-Svc connection failed(%d), retrying with original target",
-      result)
-    ;
-
-
-    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
-      Curl_detach_connection(data);
-      Curl_conn_terminate(data, conn, TRUE);
-    }
-
-    Curl_req_hard_reset(&data->req, data);
-    result = create_conn(data, &conn, asyncp);
-  }
-#endif
 
   if(!result) {
     if(CONN_ATTACHED(conn) > 1)
