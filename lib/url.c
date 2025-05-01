@@ -3808,8 +3808,9 @@ CURLcode Curl_connect(struct Curl_easy *data,
     /* we want to retry wit asi */
     if(data->asi)
       data->asi->used = FALSE;
-    return result;
 #endif
+
+    return result;
   }
 
 #ifndef CURL_DISABLE_ALTSVC
@@ -3819,7 +3820,10 @@ CURLcode Curl_connect(struct Curl_easy *data,
     && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
     ) {
 
-    infof(data, "Alt-Svc connection failed(%d), retrying with original target",result);
+    infof(data,
+      "Alt-Svc connection failed(%d), retrying with original target",
+      result)
+    ;
 
 
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
