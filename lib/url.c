@@ -3460,7 +3460,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
 #ifndef CURL_DISABLE_ALTSVC
-  if(!data->asi || !data->asi->used) {
+  if(!data->asi || !data->asi->result) {
     if(data->asi)
       data->asi->used = TRUE;
 #else
