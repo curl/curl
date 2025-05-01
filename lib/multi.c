@@ -2608,13 +2608,13 @@ statemachine_end:
       data->asi->result = result;
 
       if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)) {
-        infof(data,
+        /* infof(data,
         "Alt-Svc connection failed(%d)",
         result)
-        ;
+        ; */
         /* this check is here to speed up tests */
         if(data->mstate <= MSTATE_PROTOCONNECTING) {
-          infof(data, "Retrying with original target");
+          /* infof(data, "Retrying with original target"); */
           data->mstate = MSTATE_CONNECT;
           return CURLM_OK;
         }
