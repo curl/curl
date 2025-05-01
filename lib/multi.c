@@ -2573,10 +2573,12 @@ statemachine_end:
 
         if(data->conn) {
           struct connectdata *conn = data->conn;
-          bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
+
+          /* seems like this is needed? */
+          process_pending_handles(multi); /* connection */
 
           Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, dead_connection);
+          Curl_conn_terminate(data, conn, TRUE);
         }
 
         stream_error = FALSE;
