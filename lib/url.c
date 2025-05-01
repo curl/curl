@@ -3803,6 +3803,15 @@ CURLcode Curl_connect(struct Curl_easy *data,
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
 
+  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
+#ifndef CURL_DISABLE_ALTSVC
+    /* we want to retry wit asi */
+    if(data->asi)
+      data->asi->used = FALSE;
+    return result;
+#endif
+  }
+
 #ifndef CURL_DISABLE_ALTSVC
   /* if we failed because of the avc cache retry */
   if(result && data-> asi
@@ -3810,7 +3819,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
     ) {
 
-    infof(data, "Alt-Svc connection failed, retrying with original target");
+    infof(data, "Alt-Svc connection failed(%d), retrying with original target",result);
 
 
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
@@ -3835,10 +3844,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     }
   }
 
-  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
-    return result;
-  }
-  else if(result && conn) {
+  if(result && conn) {
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
