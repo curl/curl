@@ -2608,8 +2608,11 @@ statemachine_end:
       data->asi->result = result;
 
       if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)) {
-        data->mstate = MSTATE_CONNECT;
-        return CURLM_OK;
+        /* this check is here to speed up tests */
+        if(data->mstate <= MSTATE_PROTOCONNECTING) {
+          data->mstate = MSTATE_CONNECT;
+          return CURLM_OK;
+        }
       }
     }
 #endif
