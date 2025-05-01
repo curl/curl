@@ -2577,7 +2577,6 @@ statemachine_end:
           Curl_conn_terminate(data, conn, TRUE);
         }
 
-        rc = CURLM_OK;
         stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
         goto do_connect;
