@@ -2633,30 +2633,6 @@ statemachine_end:
       }
     }
 
-<<<<<<< HEAD
-    /* maybe retry if altsvc is breaking */
-#ifndef CURL_DISABLE_ALTSVC
-    if(data->asi && data->asi->used && !data->asi->result) {
-      data->asi->result = result;
-
-      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
-        && data->mstate >= MSTATE_CONNECT
-        && data->mstate <= MSTATE_PROTOCONNECTING 
-      ) {
-        infof(data,
-        "Alt-Svc connection failed(%d)"
-        "Retrying with original target",
-        result)
-        ;
-
-        multistate(data, MSTATE_CONNECT);
-        continue;
-      }
-    }
-#endif
-
-=======
->>>>>>> 1d364621b (retry before error handling)
     if(MSTATE_COMPLETED == data->mstate) {
       if(data->master_mid != UINT_MAX) {
         /* A sub transfer, not for msgsent to application */
