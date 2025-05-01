@@ -3459,10 +3459,16 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
+#ifndef CURL_DISABLE_ALTSVC
+  if(data->asi)
+    data->asi->used = TRUE;
+
   if(!data->asi || !data->asi->used) {
+#else
+  if(1) {
+#endif
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
-    if(data->asi)
-      data->asi->used = TRUE;
+
     if(result)
       goto out;
   }
@@ -3805,14 +3811,13 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   if(result == CURLE_NO_CONNECTION_AVAILABLE) {
 #ifndef CURL_DISABLE_ALTSVC
-    /* we want to retry wit asi */
+    /* we want to retry with asi */
     if(data->asi)
       data->asi->used = FALSE;
 #endif
 
     return result;
   }
-
 
 
   if(!result) {
