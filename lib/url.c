@@ -3811,6 +3811,10 @@ CURLcode Curl_connect(struct Curl_easy *data,
     && slist_error
     && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
     ) {
+
+    infof(data, "Alt-Svc connection failed, retrying with original target");
+
+
     if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
       Curl_detach_connection(data);
       Curl_conn_terminate(data, conn, TRUE);

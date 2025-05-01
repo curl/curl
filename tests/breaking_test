@@ -4,15 +4,12 @@
 HTTP
 HTTP GET
 HTTP proxy
-<<<<<<< HEAD
-Alt-Svc
-=======
->>>>>>> aa61f758c (test avc-fail via connection lost added)
 </keywords>
 </info>
 
 #
 # Server-side
+
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 OK
@@ -30,7 +27,6 @@ connection-monitor
 #
 # Client-side
 <client>
-<<<<<<< HEAD
 <features>
 proxy
 alt-svc
@@ -41,11 +37,10 @@ Debug
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
 
-=======
->>>>>>> aa61f758c (test avc-fail via connection lost added)
 <server>
 http
 </server>
+
 <name>
 alt-svc fail via proxy
 </name>
@@ -54,18 +49,12 @@ alt-svc fail via proxy
 --proxy http://%HOSTIP:%HTTPPORT --alt-svc "%LOGDIR/altsvc-%TESTNUMBER" http://test.remote.haxx.se.%TESTNUMBER:8990
 </command>
 <file name="%LOGDIR/altsvc-%TESTNUMBER">
-<<<<<<< HEAD
-h1 http://test.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
-</file>
-
-=======
-h1 http://different.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
+h1 test.remote.haxx.se.%TESTNUMBER 8990 h1 %HOSTIP %NOLISTENPORT "20290222 22:19:28" 0 0
 </file>
 
 <features>
 proxy
 </features>
->>>>>>> aa61f758c (test avc-fail via connection lost added)
 </client>
 
 #
