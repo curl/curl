@@ -2324,6 +2324,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       FALLTHROUGH();
 
     case MSTATE_CONNECT:
+
+#ifndef CURL_DISABLE_ALTSVC
+do_connect:
+#endif
       rc = state_connect(multi, data, nowp, &result);
       break;
 
@@ -2574,8 +2578,9 @@ statemachine_end:
         }
 
         rc = CURLM_OK;
+        stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
-        continue;
+        goto do_connect;
       }
     }
 #endif
