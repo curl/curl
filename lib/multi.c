@@ -2552,6 +2552,33 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
 statemachine_end:
+    /* maybe retry if altsvc is breaking */
+#ifndef CURL_DISABLE_ALTSVC
+    if(data->asi && data->asi->used && !data->asi->result) {
+      data->asi->result = result;
+
+      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
+        && data->mstate >= MSTATE_CONNECT
+        && data->mstate <= MSTATE_PROTOCONNECTING
+      ) {
+        infof(data,
+        "Alt-Svc connection failed(%d)"
+        "Retrying with original target",
+        result)
+        ;
+
+        if(data->conn) {
+          struct connectdata *conn = data->conn;
+          Curl_detach_connection(data);
+          Curl_conn_terminate(data, conn, TRUE);
+        }
+
+        rc = CURLM_OK;
+        multistate(data, MSTATE_CONNECT);
+        continue;
+      }
+    }
+#endif
 
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {
@@ -2602,6 +2629,7 @@ statemachine_end:
       }
     }
 
+<<<<<<< HEAD
     /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
     if(data->asi && data->asi->used && !data->asi->result) {
@@ -2623,6 +2651,8 @@ statemachine_end:
     }
 #endif
 
+=======
+>>>>>>> 1d364621b (retry before error handling)
     if(MSTATE_COMPLETED == data->mstate) {
       if(data->master_mid != UINT_MAX) {
         /* A sub transfer, not for msgsent to application */
