@@ -3460,12 +3460,11 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi)
-    data->asi->used = TRUE;
-
   if(!data->asi || !data->asi->used) {
+    if(data->asi)
+      data->asi->used = TRUE;
 #else
-  if(1) {
+  {
 #endif
     result = parse_connect_to_slist(data, conn, data->set.connect_to);
 
@@ -3795,12 +3794,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn;
-
-#ifndef CURL_DISABLE_ALTSVC
-  if(data->asi)
-    data->asi->used = FALSE;
-#endif
-
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* Set the request to virgin state based on transfer settings */
@@ -3809,15 +3802,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
 
-  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
-#ifndef CURL_DISABLE_ALTSVC
-    /* we want to retry with asi */
-    if(data->asi)
-      data->asi->used = FALSE;
-#endif
-
-    return result;
-  }
 
 
   if(!result) {
@@ -3832,7 +3816,11 @@ CURLcode Curl_connect(struct Curl_easy *data,
     }
   }
 
-  if(result && conn) {
+  if(result == CURLE_NO_CONNECTION_AVAILABLE) {
+
+    return result;
+  }
+  else if(result && conn) {
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
