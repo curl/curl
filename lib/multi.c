@@ -2609,7 +2609,7 @@ statemachine_end:
 
       if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
         && data->mstate >= MSTATE_CONNECT
-        && data->mstate <= MSTATE_PROTOCONNECTING
+        && data->mstate <= MSTATE_PROTOCONNECTING 
       ) {
         infof(data,
         "Alt-Svc connection failed(%d)"
