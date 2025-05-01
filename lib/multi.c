@@ -2616,8 +2616,9 @@ statemachine_end:
         "Retrying with original target",
         result)
         ;
-        data->mstate = MSTATE_CONNECT;
-        return CURLM_OK;
+
+        multistate(data, MSTATE_CONNECT);
+        continue;
       }
     }
 #endif

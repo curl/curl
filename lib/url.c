@@ -3802,8 +3802,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
 
-
-
   if(!result) {
     if(CONN_ATTACHED(conn) > 1)
       /* multiplexed */
