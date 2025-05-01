@@ -49,6 +49,7 @@ struct altsvcinfo {
   struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
 
+  BIT(errored);
   BIT(used);
 };
 

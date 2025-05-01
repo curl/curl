@@ -3113,7 +3113,8 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi && !host && (port == -1) &&
+  /* only use altsvc if its the first time we tried it */
+  if(data->asi && !host && (port == -1) && !data->asi->errored &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef DEBUGBUILD
       /* allow debug builds to circumvent the HTTPS restriction */
@@ -3177,6 +3178,9 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;
+
+      data->asi->used = TRUE;
+
       conn->conn_to_host.rawalloc = hostd;
       conn->conn_to_host.name = hostd;
       conn->bits.conn_to_host = TRUE;
@@ -3426,8 +3430,7 @@ static void conn_meta_freeentry(void *p)
 
 static CURLcode create_conn(struct Curl_easy *data,
                             struct connectdata **in_connect,
-                            bool *reusedp,
-                            bool *use_slist)
+                            bool *reusedp)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -3538,13 +3541,9 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
-  if(!data->asi || !data->asi->used) {
-    result = parse_connect_to_slist(data, conn, data->set.connect_to);
-    if(data->asi)
-      data->asi->used = TRUE;
-    if(result)
-      goto out;
-  }
+  result = parse_connect_to_slist(data, conn, data->set.connect_to);
+  if(result)
+    goto out;
 
   /*************************************************************
    * IDN-convert the proxy hostnames
@@ -3839,6 +3838,12 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
   DEBUGASSERT(dns);
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
+  if(conn->handler->flags & PROTOPT_NONETWORK) {
+    /* nothing to setup when not using a network */
+    *protocol_done = TRUE;
+    return result;
+  }
+
   if(!conn->bits.reuse)
     result = Curl_conn_setup(data, conn, FIRSTSOCKET, dns,
                              CURL_CF_SSL_DEFAULT);
@@ -3857,7 +3862,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
   CURLcode result;
   struct connectdata *conn;
   bool reused = FALSE;
-  bool use_slist = TRUE; /* start by attempting to use the slist */
 
 #ifndef CURL_DISABLE_ALTSVC
   if(data->asi)
@@ -3877,27 +3881,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
     DEBUGASSERT(!conn);
     return result;
   }
-  result = create_conn(data, &conn, asyncp, &use_slist);
-
-#ifndef CURL_DISABLE_ALTSVC
-  /* if we failed because of the avc cache retry */
-  if(result && data-> asi
-    && data->asi->used
-    && !(data-> asi-> flags & CURLALTSVC_NO_RETRY)
-    ) {
-
-    infof(data, "Alt-Svc connection failed, retrying with original target");
-
-
-    if(conn && result != CURLE_NO_CONNECTION_AVAILABLE) {
-      Curl_detach_connection(data);
-      Curl_conn_terminate(data, conn, TRUE);
-    }
-
-    Curl_req_hard_reset(&data->req, data);
-    result = create_conn(data, &conn, asyncp);
-  }
-#endif
 
   if(!result) {
     DEBUGASSERT(conn);
