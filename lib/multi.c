@@ -2578,6 +2578,9 @@ statemachine_end:
           Curl_conn_terminate(data, conn, TRUE);
         }
 
+        /* seems like it might be needed? */
+        Curl_async_destroy(data);
+
         stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
         goto do_connect;
