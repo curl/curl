@@ -3801,6 +3801,34 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
+#ifndef CURL_DISABLE_ALTSVC
+    if(
+      result && data->asi
+      && data->asi->used
+      && !data->asi->result
+      &&!(data->asi->flags & CURLALTSVC_NO_RETRY)
+      ) {
+      if(result == CURLE_NO_CONNECTION_AVAILABLE) {
+        return result;
+      }
+
+      data->asi->result = result;
+
+      infof(data,
+      "Alt-Svc connection failed(%d)"
+      "Retrying with original target",
+      result)
+      ;
+
+      if(conn) {
+        Curl_detach_connection(data);
+        Curl_conn_terminate(data, conn, TRUE);
+      }
+
+      Curl_req_hard_reset(&data->req, data);
+      result = create_conn(data, &conn, asyncp);
+    }
+#endif
 
   if(!result) {
     if(CONN_ATTACHED(conn) > 1)

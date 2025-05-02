@@ -2579,8 +2579,6 @@ statemachine_end:
           Curl_detach_connection(data);
           Curl_conn_terminate(data, conn, TRUE);
         }
-        if(data->state)
-          Curl_async_thrdd_destroy(data);
 
         stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
