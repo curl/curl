@@ -2561,15 +2561,11 @@ statemachine_end:
     if(data->asi && data->asi->used && !data->asi->result) {
       data->asi->result = result;
 
-      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
-        && data->mstate <= MSTATE_PROTOCONNECTING
-        && data->mstate >= MSTATE_CONNECT
-        ) {
-        infof(data,
-        "Alt-Svc connection failed(%d)"
-        "Retrying with original target",
-        result)
-        ;
+      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+        data->mstate <= MSTATE_PROTOCONNECTING &&
+        data->mstate >= MSTATE_CONNECT) {
+        infof(data, "Alt-Svc connection failed(%d). "
+                    "Retrying with original target", result);
 
         if(data->conn) {
           struct connectdata *conn = data->conn;
@@ -2578,7 +2574,7 @@ statemachine_end:
           Curl_conn_terminate(data, conn, TRUE);
         }
 
-        /* some code paths in !FTP dont call this */
+        /* some code paths in !FTP do not call this */
         Curl_async_destroy(data);
 
         stream_error = FALSE;
