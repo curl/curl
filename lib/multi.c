@@ -2561,7 +2561,9 @@ statemachine_end:
     if(data->asi && data->asi->used && !data->asi->result) {
       data->asi->result = result;
 
-      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)) {
+      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
+        && data->mstate < MSTATE_COMPLETED
+        ) {
         infof(data,
         "Alt-Svc connection failed(%d)"
         "Retrying with original target",
