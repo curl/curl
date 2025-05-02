@@ -278,8 +278,7 @@ test3100 test3101 test3102 test3103 test3104 test3105 \
 test3200 test3201 test3202 test3203 test3204 test3205 test3207 test3208 \
 test3209 test3210 test3211 test3212 test3213 \
 \
-test3300 test3301 test3302 test3303\
-\
+test3300 test3301 test3302 test3303 \
 test4000 test4001
 
 EXTRA_DIST = $(TESTCASES) DISABLED
