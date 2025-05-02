@@ -2563,6 +2563,7 @@ statemachine_end:
 
       if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
         && data->mstate < MSTATE_COMPLETED
+        && data->mstate >= MSTATE_CONNECT
         ) {
         infof(data,
         "Alt-Svc connection failed(%d)"
@@ -2572,9 +2573,6 @@ statemachine_end:
 
         if(data->conn) {
           struct connectdata *conn = data->conn;
-
-          /* seems like this is needed? */
-          process_pending_handles(multi); /* connection */
 
           Curl_detach_connection(data);
           Curl_conn_terminate(data, conn, TRUE);
