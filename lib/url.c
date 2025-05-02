@@ -3042,7 +3042,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi && !host && (port == -1) &&
+  if(data->asi && !host && (port == -1) && !data->asi->result &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef DEBUGBUILD
       /* allow debug builds to circumvent the HTTPS restriction */
@@ -3460,17 +3460,13 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
 #ifndef CURL_DISABLE_ALTSVC
-  if(!data->asi || !data->asi->result) {
-    if(data->asi)
-      data->asi->used = TRUE;
-#else
-  {
+  if(data->asi)
+    data->asi->used = TRUE;
 #endif
-    result = parse_connect_to_slist(data, conn, data->set.connect_to);
+  result = parse_connect_to_slist(data, conn, data->set.connect_to);
 
-    if(result)
-      goto out;
-  }
+  if(result)
+    goto out;
 
   /*************************************************************
    * IDN-convert the proxy hostnames
