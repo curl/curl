@@ -2578,7 +2578,7 @@ statemachine_end:
           Curl_conn_terminate(data, conn, TRUE);
         }
 
-        /* seems like it might be needed? */
+        /* some code paths in !FTP dont call this */
         Curl_async_destroy(data);
 
         stream_error = FALSE;
