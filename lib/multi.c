@@ -2562,7 +2562,7 @@ statemachine_end:
       data->asi->result = result;
 
       if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY)
-        && data->mstate < MSTATE_COMPLETED
+        && data->mstate <= MSTATE_PROTOCONNECTING
         && data->mstate >= MSTATE_CONNECT
         ) {
         infof(data,
