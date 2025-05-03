@@ -45,7 +45,7 @@ my @need_crlf = (
 
 my @non_ascii = (
     ".github/scripts/spellcheck.words",
-    ".mailmap"
+    ".mailmap",
     "README",
     "README.md",
     "RELEASE-NOTES",
