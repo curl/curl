@@ -43,6 +43,29 @@ my @need_crlf = (
     "^winbuild/.+\\.md\$",
 );
 
+my @non_ascii = (
+    ".github/scripts/spellcheck.words",
+    ".mailmap"
+    "README",
+    "README.md",
+    "RELEASE-NOTES",
+    "docs/BINDINGS.md",
+    "docs/CIPHERS.md",
+    "docs/GOVERNANCE.md",
+    "docs/KNOWN_BUGS",
+    "docs/THANKS",
+    "docs/THANKS-filter",
+    "docs/TODO",
+    "docs/URL-SYNTAX.md",
+    "docs/libcurl/curl_mprintf.md",
+    "lib/krb5.c",
+    "lib/mqtt.c",
+    "lib/mqtt.h",
+    "tests/libtest/lib1560.c",
+    "tests/unit/unit1307.c",
+    "^tests/data/test",
+);
+
 my @space_at_eol = (
     "^tests/data/test",
 );
