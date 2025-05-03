@@ -130,6 +130,11 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
+    if(!fn_match($filename, @non_ascii) &&
+       $content =~ /([\x80-\xff]+)/) {
+        push @err, "content: has non-ASCII: '$1'";
+    }
+
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
         push @err, "content: has binary contents";
     }
