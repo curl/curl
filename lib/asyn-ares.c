@@ -810,7 +810,7 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 }
 
 /* Set what DNS server are is to use. This is called in 2 situations:
- * 1. when the application does `CURLOPT_DNS_SERVERS´ and passing NULL
+ * 1. when the application does 'CURLOPT_DNS_SERVERS' and passing NULL
  *    means any previous set value should be unset. Which means
  *    we need to destroy and create the are channel anew, if there is one.
  * 2. When we lazy init the ares channel and NULL means that there
