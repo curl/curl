@@ -43,30 +43,32 @@ my @need_crlf = (
     "^winbuild/.+\\.md\$",
 );
 
-my @non_ascii = (
-    ".github/scripts/spellcheck.words",
-    ".mailmap",
-    "README",
-    "README.md",
-    "RELEASE-NOTES",
-    "docs/BINDINGS.md",
-    "docs/CIPHERS.md",
-    "docs/GOVERNANCE.md",
-    "docs/KNOWN_BUGS",
-    "docs/THANKS",
-    "docs/THANKS-filter",
-    "docs/TODO",
-    "docs/URL-SYNTAX.md",
-    "docs/libcurl/curl_mprintf.md",
-    "lib/krb5.c",
-    "lib/mqtt.c",
-    "lib/mqtt.h",
-    "tests/libtest/lib1560.c",
-    "tests/unit/unit1307.c",
+my @space_at_eol = (
     "^tests/data/test",
 );
 
-my @space_at_eol = (
+my @non_ascii_allowed = (
+    'á',
+    'å',
+    'ä',
+    'ö',
+    'ü',
+    '±',
+    '§',
+    'ß',
+    '🙏',
+);
+
+my @non_ascii = (
+    ".github/scripts/spacecheck.pl",
+    ".github/scripts/spellcheck.words",
+    ".mailmap",
+    "RELEASE-NOTES",
+    "docs/BINDINGS.md",
+    "docs/CIPHERS.md",
+    "docs/THANKS",
+    "docs/THANKS-filter",
+    "tests/libtest/lib1560.c",
     "^tests/data/test",
 );
 
@@ -153,13 +155,17 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
+    if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
+        push @err, "content: has binary contents";
+    }
+
+    foreach my $seq (@non_ascii_allowed) {
+        $content =~ s/$seq//g;
+    }
+
     if(!fn_match($filename, @non_ascii) &&
        $content =~ /([\x80-\xff]+)/) {
         push @err, "content: has non-ASCII: '$1'";
-    }
-
-    if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
-        push @err, "content: has binary contents";
     }
 
     if(@err) {
