@@ -47,6 +47,19 @@ my @space_at_eol = (
     "^tests/data/test",
 );
 
+my @non_ascii_allowed = (
+    '\xC3\xA1',          # á
+    '\xC3\xA5',          # å
+    '\xC3\xA4',          # ä
+    '\xC3\xB6',          # ö
+    '\xC2\xB1',          # ±
+    '\xC2\xA7',          # §
+    '\xC3\x9F',          # ß
+    '\xF0\x9F\x99\x8F',  # 🙏
+);
+
+my $non_ascii_allowed = join(', ', @non_ascii_allowed);
+
 my @non_ascii = (
     ".github/scripts/spellcheck.words",
     ".mailmap",
@@ -146,7 +159,7 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has binary contents";
     }
 
-    $content =~ s/[\xC3\xA1, \xC3\xA5, \xC3\xA4, \xC3\xB6, \xC2\xB1, \xC2\xA7, \xC3\x9F, \xF0\x9F\x99\x8F]//g;
+    $content =~ s/[$non_ascii_allowed]//g;
 
     if(!fn_match($filename, @non_ascii) &&
        $content =~ /([\x80-\xff]+)/) {
