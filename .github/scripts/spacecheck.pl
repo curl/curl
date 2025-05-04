@@ -48,14 +48,14 @@ my @space_at_eol = (
 );
 
 my @non_ascii_allowed = (
-    '\xC3\xA1',          # https://codepoints.net/U+00E1 Latin Small Letter A with Acute
-    '\xC3\xA5',          # https://codepoints.net/U+00E5 Latin Small Letter A with Ring Above
-    '\xC3\xA4',          # https://codepoints.net/U+00E4 Latin Small Letter A with Diaeresis
-    '\xC3\xB6',          # https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis
-    '\xC2\xB1',          # https://codepoints.net/U+00B1 Plus-Minus Sign
-    '\xC2\xA7',          # https://codepoints.net/U+00A7 Section Sign
-    '\xC3\x9F',          # https://codepoints.net/U+00DF Latin Small Letter Sharp S
-    '\xF0\x9F\x99\x8F',  # https://codepoints.net/U+1f64f Person with Folded Hands
+    '\xC3\xA1',          # https://codepoints.net/U+00E1 LATIN SMALL LETTER A WITH ACUTE
+    '\xC3\xA5',          # https://codepoints.net/U+00E5 LATIN SMALL LETTER A WITH RING ABOVE
+    '\xC3\xA4',          # https://codepoints.net/U+00E4 LATIN SMALL LETTER A WITH DIAERESIS
+    '\xC3\xB6',          # https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
+    '\xC2\xB1',          # https://codepoints.net/U+00B1 PLUS-MINUS SIGN
+    '\xC2\xA7',          # https://codepoints.net/U+00A7 SECTION SIGN
+    '\xC3\x9F',          # https://codepoints.net/U+00DF LATIN SMALL LETTER SHARP S
+    '\xF0\x9F\x99\x8F',  # https://codepoints.net/U+1f64f PERSON WITH FOLDED HANDS
 );
 
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
