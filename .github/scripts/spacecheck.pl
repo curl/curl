@@ -47,19 +47,7 @@ my @space_at_eol = (
     "^tests/data/test",
 );
 
-my @non_ascii_allowed = (
-    'á',
-    'å',
-    'ä',
-    'ö',
-    '±',
-    '§',
-    'ß',
-    '🙏',
-);
-
 my @non_ascii = (
-    ".github/scripts/spacecheck.pl",
     ".github/scripts/spellcheck.words",
     ".mailmap",
     "RELEASE-NOTES",
@@ -158,9 +146,7 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has binary contents";
     }
 
-    foreach my $seq (@non_ascii_allowed) {
-        $content =~ s/$seq//g;
-    }
+    $content =~ s/[\xC3\xA1, \xC3\xA5, \xC3\xA4, \xC3\xB6, \xC2\xB1, \xC2\xA7, \xC3\x9F, \xF0\x9F\x99\x8F]//g;
 
     if(!fn_match($filename, @non_ascii) &&
        $content =~ /([\x80-\xff]+)/) {
