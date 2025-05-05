@@ -18,16 +18,17 @@ discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
-To build our ECH-enabled OpenSSL fork:
+To build the OpenSSL project's ECH feature branch:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/defo-project/openssl
+    git clone https://github.com/openssl/openssl
     cd openssl
+    git checkout feature/ech
     ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
     ...stuff...
     make -j8
-    ...stuff (maybe go for coffee)...
+    ...more stuff...
     make install_sw
     ...a little bit of stuff...
 ```
