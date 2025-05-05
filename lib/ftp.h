@@ -37,6 +37,9 @@ extern const struct Curl_handler Curl_handler_ftps;
 
 CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
                              int *ftpcode);
+
+bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn);
+
 #endif /* CURL_DISABLE_FTP */
 
 /****************************************************************************
@@ -162,6 +165,11 @@ struct ftp_conn {
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
   BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
 };
+
+/* meta key for storing `struct FTP` as easy meta data */
+#define CURL_META_FTP_EASY   "meta:proto:ftp:easy"
+/* meta key for storing `struct ftp_conn` as connection meta data */
+#define CURL_META_FTP_CONN   "meta:proto:ftp:conn"
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
 

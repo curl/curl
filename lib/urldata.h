@@ -866,9 +866,6 @@ struct connectdata {
 #endif
 
   union {
-#ifndef CURL_DISABLE_FTP
-    struct ftp_conn ftpc;
-#endif
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif

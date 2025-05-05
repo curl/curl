@@ -1046,13 +1046,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 #endif
 #ifndef CURL_DISABLE_FTP
   else if(get_protocol_family(needle->handler) & PROTO_FAMILY_FTP) {
-    /* Also match ACCOUNT, ALTERNATIVE-TO-USER, USE_SSL and CCC options */
-    if(Curl_timestrcmp(needle->proto.ftpc.account,
-                       conn->proto.ftpc.account) ||
-       Curl_timestrcmp(needle->proto.ftpc.alternative_to_user,
-                       conn->proto.ftpc.alternative_to_user) ||
-       (needle->proto.ftpc.use_ssl != conn->proto.ftpc.use_ssl) ||
-       (needle->proto.ftpc.ccc != conn->proto.ftpc.ccc))
+    if(!ftp_conns_match(needle, conn))
       return FALSE;
   }
 #endif

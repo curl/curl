@@ -46,6 +46,7 @@
 #endif
 
 #include "urldata.h"
+#include "url.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "curl_base64.h"
@@ -217,6 +218,10 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct sockaddr_in *remote_addr =
     (struct sockaddr_in *)CURL_UNCONST(&conn->remote_addr->curl_sa_addr);
   char *stringp;
+  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
+
+  if(!ftpc)
+    return -2;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)&conn->local_addr, &l) < 0)
@@ -242,8 +247,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(Curl_GetFTPResponse(data, &nread, NULL))
         return -1;
       else {
-        struct pingpong *pp = &conn->proto.ftpc.pp;
-        char *line = Curl_dyn_ptr(&pp->recvbuf);
+        char *line = Curl_dyn_ptr(&ftpc->pp.recvbuf);
         if(line[0] != '3')
           return -1;
       }
@@ -331,9 +335,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
           break;
         }
         else {
-          struct pingpong *pp = &conn->proto.ftpc.pp;
-          size_t len = Curl_dyn_len(&pp->recvbuf);
-          p = Curl_dyn_ptr(&pp->recvbuf);
+          size_t len = Curl_dyn_len(&ftpc->pp.recvbuf);
+          p = Curl_dyn_ptr(&ftpc->pp.recvbuf);
           if((len < 4) || (p[0] != '2' && p[0] != '3')) {
             infof(data, "Server did not accept auth data");
             ret = AUTH_ERROR;
@@ -781,8 +784,11 @@ static int sec_set_protection_level(struct Curl_easy *data)
   if(level) {
     char *pbsz;
     unsigned int buffer_size = 1 << 20; /* 1048576 */
-    struct pingpong *pp = &conn->proto.ftpc.pp;
+    struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
     char *line;
+
+    if(!ftpc)
+      return -2;
 
     code = ftp_send_command(data, "PBSZ %u", buffer_size);
     if(code < 0)
@@ -794,7 +800,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
     conn->buffer_size = buffer_size;
 
-    line = Curl_dyn_ptr(&pp->recvbuf);
+    line = Curl_dyn_ptr(&ftpc->pp.recvbuf);
     pbsz = strstr(line, "PBSZ=");
     if(pbsz) {
       /* stick to default value if the check fails */

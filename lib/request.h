@@ -103,7 +103,6 @@ struct SingleRequest {
      points to data it needs. */
   union {
     struct FILEPROTO *file;
-    struct FTP *ftp;
     struct IMAP *imap;
     struct ldapreqinfo *ldap;
     struct POP3 *pop3;
