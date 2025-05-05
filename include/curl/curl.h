@@ -1036,6 +1036,7 @@ typedef enum {
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
+#define CURLALTSVC_NO_RETRY     (1<<6)
 
 /* bitmask values for CURLOPT_UPLOAD_FLAGS */
 #define CURLULFLAG_ANSWERED (1L<<0)
