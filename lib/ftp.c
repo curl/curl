@@ -539,7 +539,7 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* set the SO_SNDBUF for the secondary socket for those who need it */
-    Curl_sndbuf_init(conn->sock[SECONDARYSOCKET]);
+    Curl_sndbuf_init(data->conn->sock[SECONDARYSOCKET]);
 
     /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
