@@ -3568,6 +3568,18 @@ CURL **curl_multi_get_handles(CURLM *m)
       }
       while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
+    for(e = Curl_llist_head(&multi->pending); e; e = Curl_node_next(e)) {
+      struct Curl_easy *data = Curl_node_elem(e);
+      DEBUGASSERT(i < multi->num_easy);
+      if(!data->state.internal)
+        a[i++] = data;
+    }
+    for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+      struct Curl_easy *data = Curl_node_elem(e);
+      DEBUGASSERT(i < multi->num_easy);
+      if(!data->state.internal)
+        a[i++] = data;
+    }
     a[i] = NULL; /* last entry is a NULL */
   }
   return a;
