@@ -657,16 +657,15 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   int value_to_be_ignored = 0;
 
   CURL_TRC_FTP(data, "getFTPResponse start");
-  if(!ftpc)
-    return CURLE_FAILED_INIT;
-
+  *nreadp = 0;
   if(ftpcode)
     *ftpcode = 0; /* 0 for errors */
   else
     /* make the pointer point to something for the rest of this function */
     ftpcode = &value_to_be_ignored;
 
-  *nreadp = 0;
+  if(!ftpc)
+    return CURLE_FAILED_INIT;
 
   while(!*ftpcode && !result) {
     /* check and reset timeout value every lap */
