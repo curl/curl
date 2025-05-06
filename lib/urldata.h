@@ -866,9 +866,6 @@ struct connectdata {
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif
-#ifndef CURL_DISABLE_IMAP
-    struct imap_conn imapc;
-#endif
 #ifndef CURL_DISABLE_SMTP
     struct smtp_conn smtpc;
 #endif
