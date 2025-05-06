@@ -311,6 +311,9 @@ static bool pop3_endofresp(struct Curl_easy *data, struct connectdata *conn,
 {
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
   (void)data;
+  DEBUGASSERT(pop3c);
+  if(!pop3c) /* internal error */
+    return TRUE;
 
   /* Do we have an error response? */
   if(len >= 4 && !memcmp("-ERR", line, 4)) {
