@@ -4424,7 +4424,6 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   if(data->set.str[STRING_FTP_ACCOUNT]) {
     ftpc->account = strdup(data->set.str[STRING_FTP_ACCOUNT]);
     if(!ftpc->account) {
-      free(ftp);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -4434,7 +4433,6 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
       strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
     if(!ftpc->alternative_to_user) {
       Curl_safefree(ftpc->account);
-      free(ftp);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
     }
