@@ -22,8 +22,6 @@
  *
  ***************************************************************************/
 #include "curlcheck.h"
-/* disable the curlx_get_line redefinitions for this unit test */
-#define BUILDING_LIBCURL
 #include "curl_get_line.h"
 #include "memdebug.h"
 
