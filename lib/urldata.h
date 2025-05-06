@@ -872,9 +872,6 @@ struct connectdata {
 #ifndef CURL_DISABLE_SMTP
     struct smtp_conn smtpc;
 #endif
-#ifndef CURL_DISABLE_RTSP
-    struct rtsp_conn rtspc;
-#endif
 #ifdef USE_LIBRTMP
     void *rtmp;
 #endif
