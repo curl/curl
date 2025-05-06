@@ -104,7 +104,6 @@ struct SingleRequest {
   union {
     struct FILEPROTO *file;
     struct ldapreqinfo *ldap;
-    struct SMTP *smtp;
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
   } p;
