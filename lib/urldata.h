@@ -866,9 +866,6 @@ struct connectdata {
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif
-#ifdef USE_LIBRTMP
-    void *rtmp;
-#endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
