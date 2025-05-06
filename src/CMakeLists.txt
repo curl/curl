@@ -65,7 +65,7 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES', 'CURLTOOL_LIBCURL_CFILES' variables
+# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -74,7 +74,7 @@ if(WIN32)
 endif()
 
 if(BUILD_STATIC_CURL)
-  set(CURLX_CFILES ${CURLTOOL_LIBCURL_CFILES})
+  set(CURLX_CFILES ${CURLX_CFILES})
 endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
@@ -102,7 +102,7 @@ add_library(
   curltool  # special libcurltool library just for unittests
   STATIC
   EXCLUDE_FROM_ALL
-  ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
+  ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES}
 )
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
