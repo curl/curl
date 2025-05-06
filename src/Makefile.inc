@@ -33,11 +33,7 @@
 CURLTOOL_LIBCURL_CFILES = \
   ../lib/base64.c \
   ../lib/dynbuf.c \
-  ../lib/nonblock.c \
-  ../lib/strparse.c \
-  ../lib/timediff.c \
-  ../lib/timeval.c \
-  ../lib/warnless.c
+  ../lib/timeval.c
 
 # libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
