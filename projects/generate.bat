@@ -145,7 +145,9 @@ rem
     set "var=!var:*:=!"
 
     if "!var!" == "CURL_SRC_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\src\*.c') do call :element %1 src "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\src\*.c') do (
+        if /i "%%c" NEQ "curlinfo.c" call :element %1 src "%%c" %3
+      )
     ) else if "!var!" == "CURL_SRC_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element %1 src "%%h" %3
     ) else if "!var!" == "CURL_SRC_RC_FILES" (
