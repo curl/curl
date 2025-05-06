@@ -48,7 +48,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
-        $(top_builddir)/lib/libcurl.la      \
+        $(top_builddir)/lib/libcurlu.la      \
         @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
