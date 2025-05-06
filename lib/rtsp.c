@@ -179,11 +179,11 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   struct RTSP *rtsp;
 
   rtspc = calloc(1, sizeof(*rtspc));
-  if(!rtspc ||
-     Curl_conn_meta_set(conn, CURL_META_RTSP_CONN, rtspc, rtsp_conn_dtor))
+  if(!rtspc)
     return CURLE_OUT_OF_MEMORY;
-
   Curl_dyn_init(&rtspc->buf, MAX_RTP_BUFFERSIZE);
+  if(Curl_conn_meta_set(conn, CURL_META_RTSP_CONN, rtspc, rtsp_conn_dtor))
+    return CURLE_OUT_OF_MEMORY;
 
   rtsp = calloc(1, sizeof(struct RTSP));
   if(!rtsp ||
