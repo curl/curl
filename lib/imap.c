@@ -496,7 +496,7 @@ static void imap_state(struct Curl_easy *data,
     infof(data, "IMAP %p state change from %s to %s",
           (void *)imapc, names[imapc->state], names[newstate]);
 #endif
-
+  (void)data;
   imapc->state = newstate;
 }
 
