@@ -39,10 +39,10 @@ void clean_getout(struct OperationConfig *config)
 
     while(node) {
       next = node->next;
-      curlx_safefree(node->url);
-      curlx_safefree(node->outfile);
-      curlx_safefree(node->infile);
-      curlx_safefree(node);
+      tool_safefree(node->url);
+      tool_safefree(node->outfile);
+      tool_safefree(node->infile);
+      tool_safefree(node);
       node = next;
     }
     config->url_list = NULL;
@@ -224,7 +224,7 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
       {
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-        curlx_safefree(*filename);
+        tool_safefree(*filename);
         if(sc) {
           if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
             return CURLE_OUT_OF_MEMORY;

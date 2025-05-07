@@ -221,7 +221,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       }
 
       if(alloced_param)
-        curlx_safefree(param);
+        tool_safefree(param);
     }
     curlx_dyn_free(&buf);
     if(file != stdin)

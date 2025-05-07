@@ -41,11 +41,11 @@ static CURLcode ensure_trailing_slash(char **input)
       curlx_dyn_init(&dyn, len + 2);
 
       if(curlx_dyn_addn(&dyn, *input, len)) {
-        curlx_safefree(*input);
+        tool_safefree(*input);
         return CURLE_OUT_OF_MEMORY;
       }
 
-      curlx_safefree(*input);
+      tool_safefree(*input);
 
       if(curlx_dyn_addn(&dyn, "/", 1))
         return CURLE_OUT_OF_MEMORY;
@@ -90,7 +90,7 @@ static char *ipfs_gateway(void)
     goto fail;
 
   gateway_file = fopen(gateway_composed_file_path, FOPEN_READTEXT);
-  curlx_safefree(gateway_composed_file_path);
+  tool_safefree(gateway_composed_file_path);
 
   if(gateway_file) {
     int c;
@@ -116,15 +116,15 @@ static char *ipfs_gateway(void)
     if(!gateway)
       goto fail;
 
-    curlx_safefree(ipfs_path);
+    tool_safefree(ipfs_path);
 
     return gateway;
   }
 fail:
   if(gateway_file)
     fclose(gateway_file);
-  curlx_safefree(gateway);
-  curlx_safefree(ipfs_path);
+  tool_safefree(gateway);
+  tool_safefree(ipfs_path);
   return NULL;
 }
 
@@ -245,7 +245,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   /* Free whatever it has now, rewriting is next */
-  curlx_safefree(*url);
+  tool_safefree(*url);
 
   if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
     goto clean;
