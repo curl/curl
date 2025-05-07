@@ -54,7 +54,7 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
     res = curl_easy_perform(curl);
-    printf("Returned %d, should be %d.\n", res, CURLE_RECV_ERROR);
+    curl_mprintf("Returned %d, should be %d.\n", res, CURLE_RECV_ERROR);
 
     /* always cleanup */
     curl_easy_cleanup(curl);

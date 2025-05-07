@@ -51,7 +51,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   if(data) {
     size_t len = strlen(data);
     if(size*nmemb < len) {
-      fprintf(stderr, "read buffer is too small to run test\n");
+      curl_mfprintf(stderr, "read buffer is too small to run test\n");
       return 0;
     }
     memcpy(ptr, data, len);
@@ -70,20 +70,20 @@ CURLcode test(char *URL)
   pooh.counter = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
   if(!slist) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;

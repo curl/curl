@@ -79,18 +79,18 @@ CURLcode test(char *URL)
     curl_off_t uploadSize;
     curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &uploadSize);
 
-    printf("uploadSize = %ld\n", (long)uploadSize);
+    curl_mprintf("uploadSize = %ld\n", (long)uploadSize);
 
     if((size_t) uploadSize == sizeof(g_Data)) {
-      printf("!!!!!!!!!! PASS\n");
+      curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {
-      printf("sent %d, libcurl says %d\n",
-             (int)sizeof(g_Data), (int)uploadSize);
+      curl_mprintf("sent %d, libcurl says %d\n",
+                   (int)sizeof(g_Data), (int)uploadSize);
     }
   }
   else {
-    printf("curl_easy_perform() failed. e = %d\n", code);
+    curl_mprintf("curl_easy_perform() failed. e = %d\n", code);
   }
 test_cleanup:
   curl_slist_free_all(pHeaderList);

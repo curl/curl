@@ -78,16 +78,17 @@ static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
   CURLcode result;
   const char *in = spec->input;
 
-  Curl_dyn_reset(dbuf);
+  curlx_dyn_reset(dbuf);
   result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
   if(result != spec->exp_result) {
-    fprintf(stderr, "test %zu: expect result %d, got %d\n",
-            i, spec->exp_result, result);
+    curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
+                  i, spec->exp_result, result);
     return FALSE;
   }
-  else if(!result && strcmp(spec->exp_output, Curl_dyn_ptr(dbuf))) {
-    fprintf(stderr, "test %zu: input '%s', expected output '%s', got '%s'\n",
-            i, in, spec->exp_output, Curl_dyn_ptr(dbuf));
+  else if(!result && strcmp(spec->exp_output, curlx_dyn_ptr(dbuf))) {
+    curl_mfprintf(stderr,
+                  "test %zu: input '%s', expected output '%s', got '%s'\n",
+                  i, in, spec->exp_output, curlx_dyn_ptr(dbuf));
     return FALSE;
   }
 
@@ -100,10 +101,10 @@ UNITTEST_START
   struct dynbuf dbuf;
   bool all_ok = TRUE;
 
-  Curl_dyn_init(&dbuf, 32*1024);
+  curlx_dyn_init(&dbuf, 32*1024);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -113,7 +114,7 @@ UNITTEST_START
   }
   fail_unless(all_ok, "some tests of Curl_x509_GTime2str() fails");
 
-  Curl_dyn_free(&dbuf);
+  curlx_dyn_free(&dbuf);
   curl_global_cleanup();
 }
 UNITTEST_STOP

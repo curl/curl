@@ -45,7 +45,7 @@ struct dynbuf;
 #define SSLSUPP_SIGNATURE_ALGORITHMS (1<<10) /* supports TLS sigalgs */
 
 #ifdef USE_ECH
-# include "../curl_base64.h"
+# include "../curlx/base64.h"
 # define ECH_ENABLED(__data__) \
     (__data__->set.tls_ech && \
      !(__data__->set.tls_ech & CURLECH_DISABLE)\

@@ -23,10 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "strcase.h"
-
-#include "curlx.h"
-
+#include <curlx.h>
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
@@ -39,11 +36,10 @@
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_main.h"
-#include "dynbuf.h"
 #include "tool_stderr.h"
 #include "var.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK FALSE
@@ -668,7 +664,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
       char *n;
       replace_url_encoded_space_by_plus(enc);
       if(nlen > 0) { /* only append '=' if we have a name */
-        struct curlx_dynbuf dyn;
+        struct dynbuf dyn;
         curlx_dyn_init(&dyn, MAX_DATAURLENCODE);
         if(curlx_dyn_addn(&dyn, nextarg, nlen) ||
            curlx_dyn_addn(&dyn, "=", 1) ||
@@ -740,17 +736,17 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
         break;
     }
 
-    if((len == 3) && strncasecompare(name, "all", 3)) {
+    if((len == 3) && curl_strnequal(name, "all", 3)) {
       global->traceids = toggle;
       global->tracetime = toggle;
       result = curl_global_trace(token);
       if(result)
         goto out;
     }
-    else if((len == 3) && strncasecompare(name, "ids", 3)) {
+    else if((len == 3) && curl_strnequal(name, "ids", 3)) {
       global->traceids = toggle;
     }
-    else if((len == 4) && strncasecompare(name, "time", 4)) {
+    else if((len == 4) && curl_strnequal(name, "time", 4)) {
       global->tracetime = toggle;
     }
     else {
@@ -853,7 +849,7 @@ static ParameterError url_query(const char *nextarg,
   size_t size = 0;
   ParameterError err = PARAM_OK;
   char *query;
-  struct curlx_dynbuf dyn;
+  struct dynbuf dyn;
   curlx_dyn_init(&dyn, MAX_QUERY_LEN);
 
   if(*nextarg == '+') {
@@ -1093,7 +1089,7 @@ static ParameterError parse_url(struct GlobalConfig *global,
 {
   if(nextarg && (nextarg[0] == '@')) {
     /* read URLs from a file, treat all as -O */
-    struct curlx_dynbuf line;
+    struct dynbuf line;
     ParameterError err = PARAM_OK;
     bool error = FALSE;
     bool fromstdin = !strcmp("-", &nextarg[1]);
@@ -1199,11 +1195,11 @@ static ParameterError parse_ech(struct GlobalConfig *global,
   ParameterError err = PARAM_OK;
   if(!feature_ech)
     err = PARAM_LIBCURL_DOESNT_SUPPORT;
-  else if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
+  else if(strlen(nextarg) > 4 && curl_strnequal("pn:", nextarg, 3)) {
     /* a public_name */
     err = getstr(&config->ech_public, nextarg, DENY_BLANK);
   }
-  else if(strlen(nextarg) > 5 && strncasecompare("ecl:", nextarg, 4)) {
+  else if(strlen(nextarg) > 5 && curl_strnequal("ecl:", nextarg, 4)) {
     /* an ECHConfigList */
     if('@' != *(nextarg + 4)) {
       err = getstr(&config->ech_config, nextarg, DENY_BLANK);
@@ -1744,7 +1740,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       goto error;
     }
     else if(expand && nextarg) {
-      struct curlx_dynbuf nbuf;
+      struct dynbuf nbuf;
       bool replaced;
 
       if((ARGTYPE(a->desc) != ARG_STRG) &&

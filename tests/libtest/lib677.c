@@ -65,7 +65,7 @@ CURLcode test(char *URL)
         curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sock);
         if(sock == CURL_SOCKET_BAD)
           goto test_cleanup;
-        printf("Connected fine, extracted socket. Moving on\n");
+        curl_mprintf("Connected fine, extracted socket. Moving on\n");
       }
     }
 
@@ -88,7 +88,7 @@ CURLcode test(char *URL)
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
+          curl_mfprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
                   (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
@@ -109,7 +109,7 @@ CURLcode test(char *URL)
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
+          curl_mfprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
                   (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;

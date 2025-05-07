@@ -38,13 +38,13 @@ CURLcode test(char *URL)
   (void)URL; /* we don't use this */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   asize = (int)sizeof(a);
   ptr = curl_easy_escape(NULL, (const char *)a, asize);
-  printf("%s\n", ptr);
+  curl_mprintf("%s\n", ptr);
   curl_free(ptr);
 
   /* deprecated API */
@@ -53,12 +53,12 @@ CURLcode test(char *URL)
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  printf("%s\n", ptr);
+  curl_mprintf("%s\n", ptr);
 
   raw = curl_easy_unescape(NULL, ptr, (int)strlen(ptr), &outlen);
-  printf("outlen == %d\n", outlen);
-  printf("unescape == original? %s\n",
-         memcmp(raw, a, outlen) ? "no" : "YES");
+  curl_mprintf("outlen == %d\n", outlen);
+  curl_mprintf("unescape == original? %s\n",
+               memcmp(raw, a, outlen) ? "no" : "YES");
   curl_free(raw);
 
   /* deprecated API */
@@ -68,20 +68,20 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
   outlen = (int)strlen(raw);
-  printf("[old] outlen == %d\n", outlen);
-  printf("[old] unescape == original? %s\n",
-         memcmp(raw, a, outlen) ? "no" : "YES");
+  curl_mprintf("[old] outlen == %d\n", outlen);
+  curl_mprintf("[old] unescape == original? %s\n",
+               memcmp(raw, a, outlen) ? "no" : "YES");
   curl_free(raw);
   curl_free(ptr);
 
   /* weird input length */
   ptr = curl_easy_escape(NULL, (const char *)a, -1);
-  printf("escape -1 length: %s\n", ptr);
+  curl_mprintf("escape -1 length: %s\n", ptr);
 
   /* weird input length */
   outlen = 2017; /* just a value */
   ptr = curl_easy_unescape(NULL, "moahahaha", -1, &outlen);
-  printf("unescape -1 length: %s %d\n", ptr, outlen);
+  curl_mprintf("unescape -1 length: %s %d\n", ptr, outlen);
 
 test_cleanup:
   curl_free(ptr);

@@ -33,8 +33,8 @@ static void showem(CURL *easy, unsigned int type)
 
   /* !checksrc! disable EQUALSNULL 1 */
   while((header = curl_easy_nextheader(easy, type, 0, prev)) != NULL) {
-    printf(" %s == %s (%u/%u)\n", header->name, header->value,
-           (int)header->index, (int)header->amount);
+    curl_mprintf(" %s == %s (%u/%u)\n", header->name, header->value,
+                 (int)header->index, (int)header->amount);
     prev = header;
   }
 }
@@ -67,7 +67,7 @@ CURLcode test(char *URL)
   }
   res = curl_easy_perform(easy);
   if(res) {
-    printf("badness: %d\n", res);
+    curl_mprintf("badness: %d\n", res);
   }
   showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
 

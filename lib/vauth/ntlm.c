@@ -41,7 +41,7 @@
 #include "../curl_gethostname.h"
 #include "../curl_multibyte.h"
 #include "../curl_md5.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../rand.h"
 #include "../vtls/vtls.h"
 #include "../strdup.h"

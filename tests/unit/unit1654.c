@@ -58,7 +58,7 @@ UNITTEST_START
     goto fail;
   }
   fail_unless(Curl_llist_count(&asi->list) == 4, "wrong number of entries");
-  msnprintf(outname, sizeof(outname), "%s-out", arg);
+  curl_msnprintf(outname, sizeof(outname), "%s-out", arg);
 
   result = Curl_altsvc_parse(curl, asi, "h2=\"example.com:8080\"\r\n",
                              ALPN_h1, "example.org", 8080);

@@ -43,7 +43,7 @@ static void test_lock(CURL *handle, curl_lock_data data,
   (void)data;
   (void)laccess;
   (void)useptr;
-  printf("-> Mutex lock %s\n", ldata_names[data]);
+  curl_mprintf("-> Mutex lock %s\n", ldata_names[data]);
 }
 
 static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
@@ -51,7 +51,7 @@ static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
   (void)handle;
   (void)data;
   (void)useptr;
-  printf("<- Mutex unlock %s\n", ldata_names[data]);
+  curl_mprintf("<- Mutex unlock %s\n", ldata_names[data]);
 }
 
 /* test function */
@@ -65,7 +65,7 @@ CURLcode test(char *URL)
 
   share = curl_share_init();
   if(!share) {
-    fprintf(stderr, "curl_share_init() failed\n");
+    curl_mfprintf(stderr, "curl_share_init() failed\n");
     goto test_cleanup;
   }
 
@@ -92,8 +92,8 @@ CURLcode test(char *URL)
 
       /* Check for errors */
       if(res != CURLE_OK) {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
+        curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
         goto test_cleanup;
       }
     }

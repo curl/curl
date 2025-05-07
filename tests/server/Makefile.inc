@@ -31,12 +31,12 @@ MEMDEBUG = \
 CURLX_SRCS = \
   ../../lib/mprintf.c \
   ../../lib/nonblock.c \
-  ../../lib/strparse.c \
+  ../../lib/curlx/strparse.c \
   ../../lib/strequal.c \
-  ../../lib/warnless.c \
-  ../../lib/timediff.c \
-  ../../lib/timeval.c \
-  ../../lib/dynbuf.c \
+  ../../lib/curlx/warnless.c \
+  ../../lib/curlx/timediff.c \
+  ../../lib/curlx/timeval.c \
+  ../../lib/curlx/dynbuf.c \
   ../../lib/strcase.c \
   ../../lib/strdup.c \
   ../../lib/curl_get_line.c \
@@ -44,14 +44,14 @@ CURLX_SRCS = \
   ../../lib/version_win32.c
 
 CURLX_HDRS = \
-  ../../lib/curlx.h \
+  ../../lib/curlx/curlx.h \
   ../../lib/curl_ctype.h \
   ../../lib/nonblock.h \
   ../../lib/strcase.h \
-  ../../lib/warnless.h \
-  ../../lib/timediff.h \
-  ../../lib/timeval.h \
-  ../../lib/dynbuf.h \
+  ../../lib/curlx/warnless.h \
+  ../../lib/curlx/timediff.h \
+  ../../lib/curlx/timeval.h \
+  ../../lib/curlx/dynbuf.h \
   ../../lib/strcase.h \
   ../../lib/strdup.h \
   ../../lib/curl_get_line.h \
@@ -64,8 +64,8 @@ UTIL = \
   util.c \
   util.h \
   server_setup.h \
-  ../../lib/base64.c \
-  ../../lib/curl_base64.h \
+  ../../lib/curlx/base64.c \
+  ../../lib/curlx/base64.h \
   ../../lib/strerror.c \
   ../../lib/strerror.h
 

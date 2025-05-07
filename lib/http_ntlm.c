@@ -38,10 +38,10 @@
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "url.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* SSL backend-specific #if branches in this file must be kept in the order
    documented in curl_ntlm_core. */
@@ -71,12 +71,12 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    Curl_str_passblanks(&header);
+    curlx_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;
       size_t hdrlen;
 
-      result = Curl_base64_decode(header, &hdr, &hdrlen);
+      result = curlx_base64_decode(header, &hdr, &hdrlen);
       if(!result) {
         struct bufref hdrbuf;
 
@@ -205,7 +205,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                                  ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
-      result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
+      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
@@ -224,8 +224,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
                                                  ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
-      result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
-                                  Curl_bufref_len(&ntlmmsg), &base64, &len);
+      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
+                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
         *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",

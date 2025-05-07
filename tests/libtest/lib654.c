@@ -78,7 +78,7 @@ CURLcode test(char *URL)
    */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -119,7 +119,7 @@ CURLcode test(char *URL)
   /* Duplicate the handle. */
   easy2 = curl_easy_duphandle(easy);
   if(!easy2) {
-    fprintf(stderr, "curl_easy_duphandle() failed\n");
+    curl_mfprintf(stderr, "curl_easy_duphandle() failed\n");
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
@@ -132,7 +132,7 @@ CURLcode test(char *URL)
   /* Perform on the first handle: should not send any data. */
   res = curl_easy_perform(easy);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform(original) failed\n");
+    curl_mfprintf(stderr, "curl_easy_perform(original) failed\n");
     goto test_cleanup;
   }
 
@@ -140,7 +140,7 @@ CURLcode test(char *URL)
      duplicated properly, it should cause a valgrind error. */
   res = curl_easy_perform(easy2);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform(duplicated) failed\n");
+    curl_mfprintf(stderr, "curl_easy_perform(duplicated) failed\n");
     goto test_cleanup;
   }
 
@@ -151,7 +151,7 @@ CURLcode test(char *URL)
   easy2 = NULL;  /* Already cleaned up. */
 
   if(pooh.freecount != 2) {
-    fprintf(stderr, "free_callback() called %d times instead of 2\n",
+    curl_mfprintf(stderr, "free_callback() called %d times instead of 2\n",
             pooh.freecount);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;

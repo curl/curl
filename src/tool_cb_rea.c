@@ -27,7 +27,7 @@
 #include <sys/select.h>
 #endif
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
@@ -36,7 +36,7 @@
 #include "tool_msgs.h"
 #include "tool_sleep.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /*
 ** callback for CURLOPT_READFUNCTION

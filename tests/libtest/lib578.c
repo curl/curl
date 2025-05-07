@@ -41,9 +41,9 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 
   if(moo) {
     if((size_t)ultotal == data_size && (size_t)ulnow == data_size)
-      fprintf(moo, "PASSED, UL data matched data size\n");
+      curl_mfprintf(moo, "PASSED, UL data matched data size\n");
     else
-      fprintf(moo, "Progress callback called with UL %f out of %f\n",
+      curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
               ulnow, ultotal);
     fclose(moo);
   }
@@ -56,13 +56,13 @@ CURLcode test(char *URL)
   CURLcode res = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

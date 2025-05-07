@@ -29,7 +29,7 @@
 #include "../urldata.h"
 #include "../hash.h"
 #include "../uint-hash.h"
-#include "../timeval.h"
+#include "../curlx/timeval.h"
 #include "../multiif.h"
 #include "../sendf.h"
 #include "../curl_trc.h"
@@ -901,14 +901,14 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!ctx->qconn) {
-    ctx->connect_started = Curl_now();
+    ctx->connect_started = curlx_now();
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
   }
 
   if(ctx->handshake_complete) {
-    ctx->handshake_at = Curl_now();
+    ctx->handshake_at = curlx_now();
     if(ctx->handshake_succeeded) {
       CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */

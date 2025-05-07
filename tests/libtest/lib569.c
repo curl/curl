@@ -44,19 +44,19 @@ CURLcode test(char *URL)
 
   FILE *idfile = fopen(libtest_arg2, "wb");
   if(!idfile) {
-    fprintf(stderr, "couldn't open the Session ID File\n");
+    curl_mfprintf(stderr, "couldn't open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
@@ -71,7 +71,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
   res = curl_easy_perform(curl);
   if(res != (int)CURLE_BAD_FUNCTION_ARGUMENT) {
-    fprintf(stderr, "This should have failed. "
+    curl_mfprintf(stderr, "This should have failed. "
             "Cannot setup without a Transport: header");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -96,7 +96,7 @@ CURLcode test(char *URL)
       goto test_cleanup;
 
     curl_easy_getinfo(curl, CURLINFO_RTSP_SESSION_ID, &rtsp_session_id);
-    fprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
+    curl_mfprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
     rtsp_session_id = NULL;
 
     stream_uri = suburl(URL, request++);

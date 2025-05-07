@@ -417,7 +417,7 @@ read_file_into(const char *filename,
     uint8_t buf[256];
     const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
-       CURLE_OK != Curl_dyn_addn(out, buf, rr)) {
+       CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
       fclose(f);
       return 0;
     }
@@ -692,7 +692,7 @@ init_config_builder_verifier_crl(
   struct dynbuf crl_contents;
   rustls_result rr;
 
-  Curl_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
+  curlx_dyn_init(&crl_contents, DYN_CRLFILE_SIZE);
   if(!read_file_into(conn_config->CRLfile, &crl_contents)) {
     failf(data, "rustls: failed to read revocation list file");
     result = CURLE_SSL_CRL_BADFILE;
@@ -701,8 +701,8 @@ init_config_builder_verifier_crl(
 
   rr = rustls_web_pki_server_cert_verifier_builder_add_crl(
     builder,
-    Curl_dyn_uptr(&crl_contents),
-    Curl_dyn_len(&crl_contents));
+    curlx_dyn_uptr(&crl_contents),
+    curlx_dyn_len(&crl_contents));
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to parse revocation list");
     result = CURLE_SSL_CRL_BADFILE;
@@ -710,7 +710,7 @@ init_config_builder_verifier_crl(
   }
 
 cleanup:
-  Curl_dyn_free(&crl_contents);
+  curlx_dyn_free(&crl_contents);
   return result;
 }
 
@@ -868,8 +868,8 @@ init_config_builder_client_auth(struct Curl_easy *data,
     return CURLE_SSL_CERTPROBLEM;
   }
 
-  Curl_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
-  Curl_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
+  curlx_dyn_init(&cert_contents, DYN_CERTFILE_SIZE);
+  curlx_dyn_init(&key_contents, DYN_KEYFILE_SIZE);
 
   if(!read_file_into(conn_config->clientcert, &cert_contents)) {
     failf(data, "rustls: failed to read client certificate file: '%s'",
@@ -884,10 +884,10 @@ init_config_builder_client_auth(struct Curl_easy *data,
     goto cleanup;
   }
 
-  rr = rustls_certified_key_build(Curl_dyn_uptr(&cert_contents),
-                                  Curl_dyn_len(&cert_contents),
-                                  Curl_dyn_uptr(&key_contents),
-                                  Curl_dyn_len(&key_contents),
+  rr = rustls_certified_key_build(curlx_dyn_uptr(&cert_contents),
+                                  curlx_dyn_len(&cert_contents),
+                                  curlx_dyn_uptr(&key_contents),
+                                  curlx_dyn_len(&key_contents),
                                   &certified_key);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "rustls: failed to build certified key");
@@ -915,8 +915,8 @@ init_config_builder_client_auth(struct Curl_easy *data,
   }
 
 cleanup:
-  Curl_dyn_free(&cert_contents);
-  Curl_dyn_free(&key_contents);
+  curlx_dyn_free(&cert_contents);
+  curlx_dyn_free(&key_contents);
   if(certified_key) {
     rustls_certified_key_free(certified_key);
   }
@@ -970,7 +970,7 @@ init_config_builder_ech(struct Curl_easy *data,
       goto cleanup;
     }
     /* rustls-ffi expects the raw TLS encoded ECHConfigList bytes */
-    decode_result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
+    decode_result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
     if(decode_result || !ech_config) {
       infof(data, "rustls: cannot base64 decode ECHConfig from command line");
       result = CURLE_SSL_CONNECT_ERROR;

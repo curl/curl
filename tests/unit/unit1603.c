@@ -23,11 +23,9 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curlx.h"
-
+#include <curlx.h>
 #include "hash.h"
-
-#include "memdebug.h" /* LAST include file */
+#include <memdebug.h> /* LAST include file */
 
 static struct Curl_hash hash_static;
 static const size_t slots = 3;
@@ -51,7 +49,7 @@ static void my_elem_dtor(void *key, size_t key_len, void *p)
 static CURLcode unit_setup(void)
 {
   Curl_hash_init(&hash_static, slots, Curl_hash_str,
-                 Curl_str_key_compare, mydtor);
+                 curlx_str_key_compare, mydtor);
   return CURLE_OK;
 }
 
@@ -76,8 +74,9 @@ UNITTEST_START
      Curl_hash_str(key2, strlen(key2), slots) != 0 ||
      Curl_hash_str(key3, strlen(key3), slots) != 2 ||
      Curl_hash_str(key4, strlen(key4), slots) != 1)
-    fprintf(stderr, "Warning: hashes are not computed as expected on this "
-            "architecture; test coverage will be less comprehensive\n");
+    curl_mfprintf(stderr,
+                  "Warning: hashes are not computed as expected on this "
+                  "architecture; test coverage will be less comprehensive\n");
 
   nodep = Curl_hash_add(&hash_static, &key1, strlen(key1), &key1);
   fail_unless(nodep, "insertion into hash failed");

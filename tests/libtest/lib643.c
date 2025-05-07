@@ -77,14 +77,14 @@ static CURLcode test_once(char *URL, bool oldstyle)
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   mime = curl_mime_init(curl);
   if(!mime) {
-    fprintf(stderr, "curl_mime_init() failed\n");
+    curl_mfprintf(stderr, "curl_mime_init() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -92,7 +92,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
 
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(1) failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart(1) failed\n");
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -119,7 +119,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
   }
 
   if(res)
-    printf("curl_mime_xxx(1) = %s\n", curl_easy_strerror(res));
+    curl_mprintf("curl_mime_xxx(1) = %s\n", curl_easy_strerror(res));
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
@@ -132,7 +132,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
 
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(2) failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart(2) failed\n");
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -145,11 +145,11 @@ static CURLcode test_once(char *URL, bool oldstyle)
                             NULL, NULL, &pooh2);
 
   if(res)
-    printf("curl_mime_xxx(2) = %s\n", curl_easy_strerror(res));
+    curl_mprintf("curl_mime_xxx(2) = %s\n", curl_easy_strerror(res));
 
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(3) failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart(3) failed\n");
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -163,12 +163,12 @@ static CURLcode test_once(char *URL, bool oldstyle)
                          CURL_ZERO_TERMINATED);
 
   if(res)
-    printf("curl_mime_xxx(3) = %s\n", curl_easy_strerror(res));
+    curl_mprintf("curl_mime_xxx(3) = %s\n", curl_easy_strerror(res));
 
   /* Fill in a submit field too */
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(4) failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart(4) failed\n");
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -180,11 +180,11 @@ static CURLcode test_once(char *URL, bool oldstyle)
                          CURL_ZERO_TERMINATED);
 
   if(res)
-    printf("curl_mime_xxx(4) = %s\n", curl_easy_strerror(res));
+    curl_mprintf("curl_mime_xxx(4) = %s\n", curl_easy_strerror(res));
 
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(5) failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart(5) failed\n");
     curl_mime_free(mime);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
@@ -197,7 +197,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
     res = curl_mime_data(part, "blah blah", 9);
 
   if(res)
-    printf("curl_mime_xxx(5) = %s\n", curl_easy_strerror(res));
+    curl_mprintf("curl_mime_xxx(5) = %s\n", curl_easy_strerror(res));
 
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
@@ -254,7 +254,7 @@ CURLcode test(char *URL)
   CURLcode res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 

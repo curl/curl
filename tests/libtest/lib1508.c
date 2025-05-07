@@ -45,7 +45,7 @@ test_cleanup:
   curl_multi_cleanup(m);
   curl_global_cleanup();
 
-  printf("We are done\n");
+  curl_mprintf("We are done\n");
 
   return res;
 }

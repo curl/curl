@@ -64,10 +64,11 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
 
   message_size = curlx_uztosi(size * nmemb) - 4;
 
-  printf("RTP: message size %d, channel %d\n", message_size, channel);
+  curl_mprintf("RTP: message size %d, channel %d\n", message_size, channel);
   if(message_size != coded_size) {
-    printf("RTP embedded size (%d) does not match the write size (%d).\n",
-           coded_size, message_size);
+    curl_mprintf("RTP embedded size (%d) does not match "
+                 "the write size (%d).\n",
+                 coded_size, message_size);
     return failure;
   }
 
@@ -75,13 +76,13 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   for(i = 0; i < message_size; i += RTP_DATA_SIZE) {
     if(message_size - i > RTP_DATA_SIZE) {
       if(memcmp(RTP_DATA, data + i, RTP_DATA_SIZE) != 0) {
-        printf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
+        curl_mprintf("RTP PAYLOAD CORRUPTED [%s]\n", data + i);
         /* return failure; */
       }
     }
     else {
       if(memcmp(RTP_DATA, data + i, message_size - i) != 0) {
-        printf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
+        curl_mprintf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
                message_size - i, data + i);
         /* return failure; */
       }
@@ -89,7 +90,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   }
 
   rtp_packet_count++;
-  fprintf(stderr, "packet count is %d\n", rtp_packet_count);
+  curl_mfprintf(stderr, "packet count is %d\n", rtp_packet_count);
 
   return size * nmemb;
 }
@@ -109,19 +110,19 @@ CURLcode test(char *URL)
 
   FILE *protofile = fopen(libtest_arg2, "wb");
   if(!protofile) {
-    fprintf(stderr, "Couldn't open the protocol dump file\n");
+    curl_mfprintf(stderr, "Couldn't open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     fclose(protofile);
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     fclose(protofile);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -193,11 +194,11 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  fprintf(stderr, "PLAY COMPLETE\n");
+  curl_mfprintf(stderr, "PLAY COMPLETE\n");
 
   /* Use Receive to get the rest of the data */
   while(!res && rtp_packet_count < 19) {
-    fprintf(stderr, "LOOPY LOOP!\n");
+    curl_mfprintf(stderr, "LOOPY LOOP!\n");
     test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_RECEIVE);
     res = curl_easy_perform(curl);
   }

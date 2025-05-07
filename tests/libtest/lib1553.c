@@ -39,7 +39,7 @@ static int xferinfo(void *p,
   (void)dltotal;
   (void)ulnow;
   (void)ultotal;
-  fprintf(stderr, "xferinfo fail!\n");
+  curl_mfprintf(stderr, "xferinfo fail!\n");
   return 1; /* fail as fast as we can */
 }
 
@@ -92,7 +92,7 @@ CURLcode test(char *URL)
     int num;
     mres = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
     if(mres != CURLM_OK) {
-      printf("curl_multi_wait() returned %d\n", mres);
+      curl_mprintf("curl_multi_wait() returned %d\n", mres);
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }

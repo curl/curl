@@ -62,7 +62,7 @@
 #include "speedcheck.h"
 #include "select.h"
 #include "escape.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -332,7 +332,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
 
     if(checkprefix(TFTP_OPTION_BLKSIZE, option)) {
       curl_off_t blksize;
-      if(Curl_str_number(&value, &blksize, TFTP_BLKSIZE_MAX)) {
+      if(curlx_str_number(&value, &blksize, TFTP_BLKSIZE_MAX)) {
         failf(data, "%s (%d)", "blksize is larger than max supported",
               TFTP_BLKSIZE_MAX);
         return CURLE_TFTP_ILLEGAL;
@@ -364,7 +364,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
       /* tsize should be ignored on upload: Who cares about the size of the
          remote file? */
       if(!data->state.upload &&
-         !Curl_str_number(&value, &tsize, CURL_OFF_T_MAX)) {
+         !curlx_str_number(&value, &tsize, CURL_OFF_T_MAX)) {
         if(!tsize) {
           failf(data, "invalid tsize -:%s:- value in OACK packet", value);
           return CURLE_TFTP_ILLEGAL;
@@ -1277,7 +1277,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Curl_speedcheck(data, curlx_now());
   }
   return result;
 }

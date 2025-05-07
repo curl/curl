@@ -24,72 +24,71 @@
 #include "test.h"
 
 /* The fail macros mark the current test step as failed, and continue */
-#define fail_if(expr, msg)                                       \
-  do {                                                           \
-    if(expr) {                                                   \
-      fprintf(stderr, "%s:%d FAILED Assertion '%s' met: %s\n",   \
-              __FILE__, __LINE__, #expr, msg);                   \
-      unitfail++;                                                \
-    }                                                            \
+#define fail_if(expr, msg)                                             \
+  do {                                                                 \
+    if(expr) {                                                         \
+      curl_mfprintf(stderr, "%s:%d FAILED Assertion '%s' met: %s\n",   \
+                    __FILE__, __LINE__, #expr, msg);                   \
+      unitfail++;                                                      \
+    }                                                                  \
   } while(0)
 
-#define fail_unless(expr, msg)                             \
-  do {                                                     \
-    if(!(expr)) {                                          \
-      fprintf(stderr, "%s:%d Assertion '%s' FAILED: %s\n", \
-              __FILE__, __LINE__, #expr, msg);             \
-      unitfail++;                                          \
-    }                                                      \
+#define fail_unless(expr, msg)                                   \
+  do {                                                           \
+    if(!(expr)) {                                                \
+      curl_mfprintf(stderr, "%s:%d Assertion '%s' FAILED: %s\n", \
+                    __FILE__, __LINE__, #expr, msg);             \
+      unitfail++;                                                \
+    }                                                            \
   } while(0)
 
 #define verify_memory(dynamic, check, len)                              \
   do {                                                                  \
     if(dynamic && memcmp(dynamic, check, len)) {                        \
-      fprintf(stderr, "%s:%d Memory buffer FAILED match size %d. "      \
-              "'%s' is not\n", __FILE__, __LINE__, len,                 \
-              hexdump((const unsigned char *)check, len));              \
-      fprintf(stderr, "%s:%d the same as '%s'\n", __FILE__, __LINE__,   \
-              hexdump((const unsigned char *)dynamic, len));            \
+      curl_mfprintf(stderr, "%s:%d Memory buffer FAILED match size %d. " \
+                    "'%s' is not\n", __FILE__, __LINE__, len,           \
+                    hexdump((const unsigned char *)check, len));        \
+      curl_mfprintf(stderr, "%s:%d the same as '%s'\n", __FILE__, __LINE__, \
+                    hexdump((const unsigned char *)dynamic, len));      \
       unitfail++;                                                       \
     }                                                                   \
   } while(0)
 
 /* fail() is for when the test case figured out by itself that a check
    proved a failure */
-#define fail(msg) do {                                                 \
-    fprintf(stderr, "%s:%d test FAILED: '%s'\n",                       \
-            __FILE__, __LINE__, msg);                                  \
-    unitfail++;                                                        \
+#define fail(msg) do {                                                  \
+    curl_mfprintf(stderr, "%s:%d test FAILED: '%s'\n",                  \
+                  __FILE__, __LINE__, msg);                             \
+    unitfail++;                                                         \
   } while(0)
 
-
 /* The abort macros mark the current test step as failed, and exit the test */
-#define abort_if(expr, msg)                                     \
-  do {                                                          \
-    if(expr) {                                                  \
-      fprintf(stderr, "%s:%d ABORT assertion '%s' met: %s\n",   \
-              __FILE__, __LINE__, #expr, msg);                  \
-      unitfail++;                                               \
-      goto unit_test_abort;                                     \
-    }                                                           \
+#define abort_if(expr, msg)                                           \
+  do {                                                                \
+    if(expr) {                                                        \
+      curl_mfprintf(stderr, "%s:%d ABORT assertion '%s' met: %s\n",   \
+                    __FILE__, __LINE__, #expr, msg);                  \
+      unitfail++;                                                     \
+      goto unit_test_abort;                                           \
+    }                                                                 \
   } while(0)
 
 #define abort_unless(expr, msg)                                         \
   do {                                                                  \
     if(!(expr)) {                                                       \
-      fprintf(stderr, "%s:%d ABORT assertion '%s' failed: %s\n",        \
-              __FILE__, __LINE__, #expr, msg);                          \
+      curl_mfprintf(stderr, "%s:%d ABORT assertion '%s' failed: %s\n",  \
+                    __FILE__, __LINE__, #expr, msg);                    \
       unitfail++;                                                       \
       goto unit_test_abort;                                             \
     }                                                                   \
   } while(0)
 
-#define unittest_abort(msg)                                   \
-  do {                                                        \
-    fprintf(stderr, "%s:%d test ABORTED: '%s'\n",             \
-            __FILE__, __LINE__, msg);                         \
-    unitfail++;                                               \
-    goto unit_test_abort;                                     \
+#define unittest_abort(msg)                                         \
+  do {                                                              \
+    curl_mfprintf(stderr, "%s:%d test ABORTED: '%s'\n",             \
+                  __FILE__, __LINE__, msg);                         \
+    unitfail++;                                                     \
+    goto unit_test_abort;                                           \
   } while(0)
 
 

@@ -98,7 +98,7 @@ CURLcode test(char *URL)
     mc = curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      curl_mfprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
       break;
     }
 
@@ -142,7 +142,8 @@ CURLcode test(char *URL)
   do {
     msg = curl_multi_info_read(multi_handle, &msgs_left);
     if(msg && msg->msg == CURLMSG_DONE) {
-      printf("HTTP transfer completed with status %d\n", msg->data.result);
+      curl_mprintf("HTTP transfer completed with status %d\n",
+                   msg->data.result);
       break;
     }
 

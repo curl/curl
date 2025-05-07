@@ -29,7 +29,7 @@
 struct Curl_easy;
 
 #include "mime.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
@@ -45,7 +45,7 @@ struct Curl_easy;
 #include "rand.h"
 #include "slist.h"
 #include "strcase.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -318,19 +318,19 @@ static char *escape_string(struct Curl_easy *data,
   if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
     table = mimetable;
 
-  Curl_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
+  curlx_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
 
-  for(result = Curl_dyn_addn(&db, STRCONST("")); !result && *src; src++) {
+  for(result = curlx_dyn_addn(&db, STRCONST("")); !result && *src; src++) {
     for(p = table; *p && **p != *src; p++)
       ;
 
     if(*p)
-      result = Curl_dyn_add(&db, *p + 1);
+      result = curlx_dyn_add(&db, *p + 1);
     else
-      result = Curl_dyn_addn(&db, src, 1);
+      result = curlx_dyn_addn(&db, src, 1);
   }
 
-  return Curl_dyn_ptr(&db);
+  return curlx_dyn_ptr(&db);
 }
 
 /* Check if header matches. */

@@ -23,8 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "strcase.h"
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
@@ -34,9 +33,8 @@
 #include "tool_libinfo.h"
 #include "tool_util.h"
 #include "tool_version.h"
-#include "dynbuf.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 struct getout *new_getout(struct OperationConfig *config)
 {
@@ -91,7 +89,7 @@ static size_t memcrlf(char *orig,
 
 ParameterError file2string(char **bufp, FILE *file)
 {
-  struct curlx_dynbuf dyn;
+  struct dynbuf dyn;
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
@@ -141,7 +139,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 {
   if(file) {
     size_t nread;
-    struct curlx_dynbuf dyn;
+    struct dynbuf dyn;
     curl_off_t offset = 0;
     curl_off_t throwaway = 0;
 
@@ -413,7 +411,7 @@ ParameterError proto2num(struct OperationConfig *config,
                          const char * const *val, char **ostr, const char *str)
 {
   const char **protoset;
-  struct curlx_dynbuf obuf;
+  struct dynbuf obuf;
   size_t proto;
   CURLcode result;
 
@@ -581,7 +579,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
     /* no password present, prompt for one */
     char passwd[2048] = "";
     char prompt[256];
-    struct curlx_dynbuf dyn;
+    struct dynbuf dyn;
 
     curlx_dyn_init(&dyn, MAX_USERPWDLENGTH);
     if(osep)

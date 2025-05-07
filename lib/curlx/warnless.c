@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "warnless.h"
 
 #if defined(__INTEL_COMPILER) && defined(__unix__)
 
@@ -34,8 +34,6 @@
 #endif
 
 #endif /* __INTEL_COMPILER && __unix__ */
-
-#include "warnless.h"
 
 #ifdef _WIN32
 #undef read

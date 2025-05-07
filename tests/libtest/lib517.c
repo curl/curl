@@ -172,7 +172,7 @@ CURLcode test(char *URL)
   for(i = 0; dates[i].input; i++) {
     time_t out = curl_getdate(dates[i].input, NULL);
     if(out != dates[i].output) {
-      printf("WRONGLY %s => %ld (instead of %ld)\n",
+      curl_mprintf("WRONGLY %s => %ld (instead of %ld)\n",
              dates[i].input, (long)out, (long)dates[i].output);
       error++;
     }

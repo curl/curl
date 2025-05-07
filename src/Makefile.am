@@ -44,6 +44,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_builddir)/src          \
               -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/lib/curlx      \
               -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl
@@ -74,7 +75,7 @@ CLEANFILES =
 
 if USE_UNITY
 if USE_CPPFLAG_CURL_STATICLIB
-curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
+curl_CURLX =
 else
 curl_CURLX = $(CURLX_CFILES)
 endif
@@ -110,8 +111,8 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES) > libcurltool_unity.c
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_CURLX) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =

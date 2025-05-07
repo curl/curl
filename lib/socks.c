@@ -38,7 +38,7 @@
 #include "select.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "socks.h"
 #include "multiif.h" /* for getsock macros */
 #include "inet_pton.h"

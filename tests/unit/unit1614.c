@@ -134,9 +134,9 @@ UNITTEST_START
   for(i = 0; list4[i].a; i++) {
     bool match = Curl_cidr4_match(list4[i].a, list4[i].n, list4[i].bits);
     if(match != list4[i].match) {
-      fprintf(stderr, "%s in %s/%u should %smatch\n",
-              list4[i].a, list4[i].n, list4[i].bits,
-              list4[i].match ? "": "not ");
+      curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
+                    list4[i].a, list4[i].n, list4[i].bits,
+                    list4[i].match ? "": "not ");
       err++;
     }
   }
@@ -144,9 +144,9 @@ UNITTEST_START
   for(i = 0; list6[i].a; i++) {
     bool match = Curl_cidr6_match(list6[i].a, list6[i].n, list6[i].bits);
     if(match != list6[i].match) {
-      fprintf(stderr, "%s in %s/%u should %smatch\n",
-              list6[i].a, list6[i].n, list6[i].bits,
-              list6[i].match ? "": "not ");
+      curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
+                    list6[i].a, list6[i].n, list6[i].bits,
+                    list6[i].match ? "": "not ");
       err++;
     }
   }
@@ -154,9 +154,9 @@ UNITTEST_START
   for(i = 0; list[i].a; i++) {
     bool match = Curl_check_noproxy(list[i].a, list[i].n);
     if(match != list[i].match) {
-      fprintf(stderr, "%s in %s should %smatch\n",
-              list[i].a, list[i].n,
-              list[i].match ? "": "not ");
+      curl_mfprintf(stderr, "%s in %s should %smatch\n",
+                    list[i].a, list[i].n,
+                    list[i].match ? "": "not ");
       err++;
     }
   }

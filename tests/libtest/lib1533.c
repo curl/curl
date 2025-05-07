@@ -107,18 +107,19 @@ static CURLcode perform_and_check_connections(CURL *curl,
 
   res = curl_easy_perform(curl);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform() failed with %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", res);
     return TEST_ERR_MAJOR_BAD;
   }
 
   res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connections);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_getinfo() failed\n");
+    curl_mfprintf(stderr, "curl_easy_getinfo() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  fprintf(stderr, "%s: expected: %ld connections; actual: %ld connections\n",
-          description, expected_connections, connections);
+  curl_mfprintf(stderr,
+                "%s: expected: %ld connections; actual: %ld connections\n",
+                description, expected_connections, connections);
 
   if(connections != expected_connections) {
     return TEST_ERR_FAILURE;
@@ -136,13 +137,13 @@ CURLcode test(char *URL)
   CURLcode result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

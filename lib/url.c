@@ -83,7 +83,7 @@
 #include "multiif.h"
 #include "easyif.h"
 #include "speedcheck.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
 #include "urlapi-int.h"
@@ -118,9 +118,9 @@
 #include "strdup.h"
 #include "setopt.h"
 #include "altsvc.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "headers.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -272,7 +272,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data->state.referer = NULL;
 
   up_free(data);
-  Curl_dyn_free(&data->state.headerb);
+  curlx_dyn_free(&data->state.headerb);
   Curl_flush_cookies(data, TRUE);
 #ifndef CURL_DISABLE_ALTSVC
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
@@ -533,8 +533,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->state.current_speed = -1; /* init to negative == impossible */
 
   Curl_hash_init(&data->meta_hash, 23,
-                 Curl_hash_str, Curl_str_key_compare, easy_meta_freeentry);
-  Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
+                 Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
+  curlx_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
 #ifndef CURL_DISABLE_HTTP
@@ -545,7 +545,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   result = Curl_init_userdefined(data);
 
   if(result) {
-    Curl_dyn_free(&data->state.headerb);
+    curlx_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     Curl_req_free(&data->req, data);
     Curl_hash_destroy(&data->meta_hash);
@@ -680,7 +680,7 @@ static bool conn_maxage(struct Curl_easy *data,
 {
   timediff_t idletime, lifetime;
 
-  idletime = Curl_timediff(now, conn->lastused);
+  idletime = curlx_timediff(now, conn->lastused);
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
@@ -689,7 +689,7 @@ static bool conn_maxage(struct Curl_easy *data,
     return TRUE;
   }
 
-  lifetime = Curl_timediff(now, conn->created);
+  lifetime = curlx_timediff(now, conn->created);
   lifetime /= 1000; /* integer seconds is fine */
 
   if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
@@ -717,7 +717,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
     bool dead;
     struct curltime now;
     if(!pnow) {
-      now = Curl_now();
+      now = curlx_now();
       pnow = &now;
     }
 
@@ -775,7 +775,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct curltime *now)
 {
   CURLcode result = CURLE_OK;
-  if(Curl_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+  if(curlx_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
     return result;
 
   /* briefly attach for action */
@@ -1321,7 +1321,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
-  conn->created = Curl_now();
+  conn->created = curlx_now();
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = conn->created;
@@ -1677,7 +1677,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
   if(!uc && zoneid) {
     const char *p = zoneid;
     curl_off_t scope;
-    if(!Curl_str_number(&p, &scope, UINT_MAX))
+    if(!curlx_str_number(&p, &scope, UINT_MAX))
       /* A plain number, use it directly as a scope id. */
       conn->scope_id = (unsigned int)scope;
 #ifdef HAVE_IF_NAMETOINDEX
@@ -1920,7 +1920,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       port = data->set.use_port;
     else {
       const char *p = data->state.up.port;
-      if(Curl_str_number(&p, &port, 0xffff))
+      if(curlx_str_number(&p, &port, 0xffff))
         valid = FALSE;
     }
     if(valid)
@@ -2254,7 +2254,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   if(portptr) {
     curl_off_t num;
     const char *p = portptr;
-    if(!Curl_str_number(&p, &num, 0xffff))
+    if(!curlx_str_number(&p, &num, 0xffff))
       port = (int)num;
     free(portptr);
   }
@@ -2898,7 +2898,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
     if(*host_portno) {
       curl_off_t portparse;
       const char *p = host_portno;
-      if(Curl_str_number(&p, &portparse, 0xffff)) {
+      if(curlx_str_number(&p, &portparse, 0xffff)) {
         failf(data, "No valid port number in connect to host string (%s)",
               host_portno);
         result = CURLE_SETOPT_OPTION_SYNTAX;
@@ -2976,7 +2976,7 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
       char *ptr_next = strchr(ptr, ':');
       if(ptr_next) {
         curl_off_t port_to_match;
-        if(!Curl_str_number(&ptr, &port_to_match, 0xffff) &&
+        if(!curlx_str_number(&ptr, &port_to_match, 0xffff) &&
            (port_to_match == (curl_off_t)conn->remote_port))
           port_match = TRUE;
         ptr = ptr_next + 1;
@@ -3232,7 +3232,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          Curl_timediff(Curl_now(), data->progress.t_startsingle));
+          curlx_timediff(curlx_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else if(result) {
@@ -3383,7 +3383,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* Do the unfailable inits first, before checks that may early return */
   Curl_hash_init(&conn->meta_hash, 23,
-               Curl_hash_str, Curl_str_key_compare, conn_meta_freeentry);
+               Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
 
   /* GSSAPI related inits */
   Curl_sec_conn_init(conn);

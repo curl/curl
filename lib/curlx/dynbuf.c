@@ -22,13 +22,13 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 #include "dynbuf.h"
-#include "curl_printf.h"
+#include "../curl_printf.h"
 #ifdef BUILDING_LIBCURL
-#include "curl_memory.h"
+#include "../curl_memory.h"
 #endif
-#include "memdebug.h"
+#include "../memdebug.h"
 
 #define MIN_FIRST_ALLOC 32
 
@@ -39,7 +39,7 @@
 /*
  * Init a dynbuf struct.
  */
-void Curl_dyn_init(struct dynbuf *s, size_t toobig)
+void curlx_dyn_init(struct dynbuf *s, size_t toobig)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(toobig);
@@ -57,7 +57,7 @@ void Curl_dyn_init(struct dynbuf *s, size_t toobig)
  * free the buffer and re-init the necessary fields. It does not touch the
  * 'init' field and thus this buffer can be reused to add data to again.
  */
-void Curl_dyn_free(struct dynbuf *s)
+void curlx_dyn_free(struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -84,7 +84,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   DEBUGASSERT(!len || mem);
 
   if(fit > s->toobig) {
-    Curl_dyn_free(s);
+    curlx_dyn_free(s);
     return CURLE_TOO_LARGE;
   }
   else if(!a) {
@@ -110,7 +110,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
        include that as well when it uses this code */
     void *p = realloc(s->bufr, a);
     if(!p) {
-      Curl_dyn_free(s);
+      curlx_dyn_free(s);
       return CURLE_OUT_OF_MEMORY;
     }
     s->bufr = p;
@@ -128,7 +128,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
  * Clears the string, keeps the allocation. This can also be called on a
  * buffer that already was freed.
  */
-void Curl_dyn_reset(struct dynbuf *s)
+void curlx_dyn_reset(struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -142,7 +142,7 @@ void Curl_dyn_reset(struct dynbuf *s)
  * Specify the size of the tail to keep (number of bytes from the end of the
  * buffer). The rest will be dropped.
  */
-CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
+CURLcode curlx_dyn_tail(struct dynbuf *s, size_t trail)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -152,7 +152,7 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
   else if(trail == s->leng)
     return CURLE_OK;
   else if(!trail) {
-    Curl_dyn_reset(s);
+    curlx_dyn_reset(s);
   }
   else {
     memmove(&s->bufr[0], &s->bufr[s->leng - trail], trail);
@@ -166,7 +166,7 @@ CURLcode Curl_dyn_tail(struct dynbuf *s, size_t trail)
 /*
  * Appends a buffer with length.
  */
-CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
+CURLcode curlx_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -177,7 +177,7 @@ CURLcode Curl_dyn_addn(struct dynbuf *s, const void *mem, size_t len)
 /*
  * Append a null-terminated string at the end.
  */
-CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
+CURLcode curlx_dyn_add(struct dynbuf *s, const char *str)
 {
   size_t n;
   DEBUGASSERT(str);
@@ -191,7 +191,7 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
 /*
  * Append a string vprintf()-style
  */
-CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
+CURLcode curlx_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 {
 #ifdef BUILDING_LIBCURL
   int rc;
@@ -199,7 +199,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   DEBUGASSERT(fmt);
-  rc = Curl_dyn_vprintf(s, fmt, ap);
+  rc = curlx_dyn_vprintf(s, fmt, ap);
 
   if(!rc)
     return CURLE_OK;
@@ -208,7 +208,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   return CURLE_OUT_OF_MEMORY;
 #else
   char *str;
-  str = vaprintf(fmt, ap); /* this allocs a new string to append */
+  str = curl_mvaprintf(fmt, ap); /* this allocs a new string to append */
 
   if(str) {
     CURLcode result = dyn_nappend(s, (const unsigned char *)str, strlen(str));
@@ -216,7 +216,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */
-  Curl_dyn_free(s);
+  curlx_dyn_free(s);
   return CURLE_OUT_OF_MEMORY;
 #endif
 }
@@ -224,7 +224,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 /*
  * Append a string printf()-style
  */
-CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
+CURLcode curlx_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 {
   CURLcode result;
   va_list ap;
@@ -232,7 +232,7 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   va_start(ap, fmt);
-  result = Curl_dyn_vaddf(s, fmt, ap);
+  result = curlx_dyn_vaddf(s, fmt, ap);
   va_end(ap);
   return result;
 }
@@ -240,7 +240,7 @@ CURLcode Curl_dyn_addf(struct dynbuf *s, const char *fmt, ...)
 /*
  * Returns a pointer to the buffer.
  */
-char *Curl_dyn_ptr(const struct dynbuf *s)
+char *curlx_dyn_ptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -248,7 +248,7 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
-char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
+char *curlx_dyn_take(struct dynbuf *s, size_t *plen)
 {
   char *ptr = s->bufr;
   DEBUGASSERT(s);
@@ -263,7 +263,7 @@ char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
 /*
  * Returns an unsigned pointer to the buffer.
  */
-unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
+unsigned char *curlx_dyn_uptr(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -274,7 +274,7 @@ unsigned char *Curl_dyn_uptr(const struct dynbuf *s)
 /*
  * Returns the length of the buffer.
  */
-size_t Curl_dyn_len(const struct dynbuf *s)
+size_t curlx_dyn_len(const struct dynbuf *s)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
@@ -285,7 +285,7 @@ size_t Curl_dyn_len(const struct dynbuf *s)
 /*
  * Set a new (smaller) length.
  */
-CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t set)
+CURLcode curlx_dyn_setlen(struct dynbuf *s, size_t set)
 {
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);

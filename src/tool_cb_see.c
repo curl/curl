@@ -23,13 +23,13 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_operate.h"
 #include "tool_cb_see.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /*
 ** callback for CURLOPT_SEEKFUNCTION

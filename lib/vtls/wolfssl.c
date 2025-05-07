@@ -714,8 +714,8 @@ wssl_cached_x509_store_expired(const struct Curl_easy *data,
                                const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct curltime now = Curl_now();
-  timediff_t elapsed_ms = Curl_timediff(now, mb->time);
+  struct curltime now = curlx_now();
+  timediff_t elapsed_ms = curlx_timediff(now, mb->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
@@ -799,7 +799,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
       free(share->CAfile);
     }
 
-    share->time = Curl_now();
+    share->time = curlx_now();
     share->store = store;
     share->CAfile = CAfile;
   }
@@ -871,14 +871,14 @@ wssl_add_default_ciphers(bool tls13, struct dynbuf *buf)
       continue;
 
     /* if there already is data in the string, add colon separator */
-    if(Curl_dyn_len(buf)) {
-      CURLcode result = Curl_dyn_addn(buf, ":", 1);
+    if(curlx_dyn_len(buf)) {
+      CURLcode result = curlx_dyn_addn(buf, ":", 1);
       if(result)
         return result;
     }
 
     n = strlen(str);
-    if(Curl_dyn_addn(buf, str, n))
+    if(curlx_dyn_addn(buf, str, n))
       return CURLE_OUT_OF_MEMORY;
   }
 
@@ -1067,19 +1067,19 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     const char *ciphers12 = conn_config->cipher_list;
     const char *ciphers13 = conn_config->cipher_list13;
     struct dynbuf c;
-    Curl_dyn_init(&c, MAX_CIPHER_LEN);
+    curlx_dyn_init(&c, MAX_CIPHER_LEN);
 
     if(ciphers13)
-      result = Curl_dyn_add(&c, ciphers13);
+      result = curlx_dyn_add(&c, ciphers13);
     else
       result = wssl_add_default_ciphers(TRUE, &c);
 
     if(!result) {
       if(ciphers12) {
-        if(Curl_dyn_len(&c))
-          result = Curl_dyn_addn(&c, ":", 1);
+        if(curlx_dyn_len(&c))
+          result = curlx_dyn_addn(&c, ":", 1);
         if(!result)
-          result = Curl_dyn_add(&c, ciphers12);
+          result = curlx_dyn_add(&c, ciphers12);
       }
       else
         result = wssl_add_default_ciphers(FALSE, &c);
@@ -1087,14 +1087,14 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     if(result)
       goto out;
 
-    if(!wolfSSL_CTX_set_cipher_list(wctx->ssl_ctx, Curl_dyn_ptr(&c))) {
-      failf(data, "failed setting cipher list: %s", Curl_dyn_ptr(&c));
-      Curl_dyn_free(&c);
+    if(!wolfSSL_CTX_set_cipher_list(wctx->ssl_ctx, curlx_dyn_ptr(&c))) {
+      failf(data, "failed setting cipher list: %s", curlx_dyn_ptr(&c));
+      curlx_dyn_free(&c);
       result = CURLE_SSL_CIPHER;
       goto out;
     }
-    infof(data, "Cipher selection: %s", Curl_dyn_ptr(&c));
-    Curl_dyn_free(&c);
+    infof(data, "Cipher selection: %s", curlx_dyn_ptr(&c));
+    curlx_dyn_free(&c);
   }
 #endif
 
@@ -1769,8 +1769,8 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
         char *b64str = NULL;
         size_t blen = 0;
 
-        result = Curl_base64_encode((const char *)echConfigs, echConfigsLen,
-                                    &b64str, &blen);
+        result = curlx_base64_encode((const char *)echConfigs, echConfigsLen,
+                                     &b64str, &blen);
         if(!result && b64str)
           infof(data, "ECH: (not yet) retry_configs %s", b64str);
         free(b64str);

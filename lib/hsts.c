@@ -40,7 +40,7 @@
 #include "rename.h"
 #include "share.h"
 #include "strdup.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -62,7 +62,7 @@ static time_t hsts_debugtime(void *unused)
   (void)unused;
   if(timestr) {
     curl_off_t val;
-    if(!Curl_str_number(&timestr, &val, TIME_T_MAX))
+    if(!curlx_str_number(&timestr, &val, TIME_T_MAX))
       val += (curl_off_t)deltatime;
     return (time_t)val;
   }
@@ -154,7 +154,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     return CURLE_OK;
 
   do {
-    Curl_str_passblanks(&p);
+    curlx_str_passblanks(&p);
     if(strncasecompare("max-age", p, 7)) {
       bool quoted = FALSE;
       int rc;
@@ -163,15 +163,15 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         return CURLE_BAD_FUNCTION_ARGUMENT;
 
       p += 7;
-      Curl_str_passblanks(&p);
-      if(Curl_str_single(&p, '='))
+      curlx_str_passblanks(&p);
+      if(curlx_str_single(&p, '='))
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      Curl_str_passblanks(&p);
+      curlx_str_passblanks(&p);
 
-      if(!Curl_str_single(&p, '\"'))
+      if(!curlx_str_single(&p, '\"'))
         quoted = TRUE;
 
-      rc = Curl_str_number(&p, &expires, TIME_T_MAX);
+      rc = curlx_str_number(&p, &expires, TIME_T_MAX);
       if(rc == STRE_OVERFLOW)
         expires = CURL_OFF_T_MAX;
       else if(rc)
@@ -198,7 +198,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
         p++;
     }
 
-    Curl_str_passblanks(&p);
+    curlx_str_passblanks(&p);
     if(*p == ';')
       p++;
   } while(*p);
@@ -417,10 +417,10 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
   struct Curl_str host;
   struct Curl_str date;
 
-  if(Curl_str_word(&line, &host, MAX_HSTS_HOSTLEN) ||
-     Curl_str_singlespace(&line) ||
-     Curl_str_quotedword(&line, &date, MAX_HSTS_DATELEN) ||
-     Curl_str_newline(&line))
+  if(curlx_str_word(&line, &host, MAX_HSTS_HOSTLEN) ||
+     curlx_str_singlespace(&line) ||
+     curlx_str_quotedword(&line, &date, MAX_HSTS_DATELEN) ||
+     curlx_str_newline(&line))
     ;
   else {
     CURLcode result = CURLE_OK;
@@ -428,26 +428,26 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     struct stsentry *e;
     char dbuf[MAX_HSTS_DATELEN + 1];
     time_t expires;
-    const char *hp = Curl_str(&host);
+    const char *hp = curlx_str(&host);
 
     /* The date parser works on a null terminated string. The maximum length
-       is upheld by Curl_str_quotedword(). */
-    memcpy(dbuf, Curl_str(&date), Curl_strlen(&date));
-    dbuf[Curl_strlen(&date)] = 0;
+       is upheld by curlx_str_quotedword(). */
+    memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
+    dbuf[curlx_strlen(&date)] = 0;
 
     expires = strcmp(dbuf, UNLIMITED) ? Curl_getdate_capped(dbuf) :
       TIME_T_MAX;
 
     if(hp[0] == '.') {
-      Curl_str_nudge(&host, 1);
+      curlx_str_nudge(&host, 1);
       subdomain = TRUE;
     }
     /* only add it if not already present */
-    e = Curl_hsts(h, Curl_str(&host), Curl_strlen(&host), subdomain);
+    e = Curl_hsts(h, curlx_str(&host), curlx_strlen(&host), subdomain);
     if(!e)
-      result = hsts_create(h, Curl_str(&host), Curl_strlen(&host),
+      result = hsts_create(h, curlx_str(&host), curlx_strlen(&host),
                            subdomain, expires);
-    else if(Curl_str_casecompare(&host, e->host)) {
+    else if(curlx_str_casecompare(&host, e->host)) {
       /* the same hostname, use the largest expire time */
       if(expires > e->expires)
         e->expires = expires;
@@ -526,10 +526,10 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   fp = fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
-    Curl_dyn_init(&buf, MAX_HSTS_LINE);
+    curlx_dyn_init(&buf, MAX_HSTS_LINE);
     while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = Curl_dyn_ptr(&buf);
-      Curl_str_passblanks(&lineptr);
+      const char *lineptr = curlx_dyn_ptr(&buf);
+      curlx_str_passblanks(&lineptr);
 
       /*
        * Skip empty or commented lines, since we know the line will have a
@@ -540,7 +540,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
       hsts_add(h, lineptr);
     }
-    Curl_dyn_free(&buf); /* free the line buffer */
+    curlx_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
   }
   return result;

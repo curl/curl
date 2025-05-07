@@ -137,7 +137,7 @@ UNITTEST_START
     if(Curl_loadhostpairs(easy))
       goto error;
 
-    entry_id = (void *)aprintf("%s:%d", tests[i].host, tests[i].port);
+    entry_id = (void *)curl_maprintf("%s:%d", tests[i].host, tests[i].port);
     if(!entry_id)
       goto error;
 
@@ -157,40 +157,43 @@ UNITTEST_START
 
       if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
                                    ipaddress, &port)) {
-        fprintf(stderr, "%s:%d tests[%d] failed. Curl_addr2string failed.\n",
-                __FILE__, __LINE__, i);
+        curl_mfprintf(stderr,
+                      "%s:%d tests[%d] failed. Curl_addr2string failed.\n",
+                      __FILE__, __LINE__, i);
         problem = true;
         break;
       }
 
       if(addr && !tests[i].address[j]) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is %s but tests[%d].address[%d] is NULL.\n",
-                __FILE__, __LINE__, i, ipaddress, i, j);
+        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
+                      "is %s but tests[%d].address[%d] is NULL.\n",
+                      __FILE__, __LINE__, i, ipaddress, i, j);
         problem = true;
         break;
       }
 
       if(!addr && tests[i].address[j]) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "is NULL but tests[%d].address[%d] is %s.\n",
-                __FILE__, __LINE__, i, i, j, tests[i].address[j]);
+        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
+                      "is NULL but tests[%d].address[%d] is %s.\n",
+                      __FILE__, __LINE__, i, i, j, tests[i].address[j]);
         problem = true;
         break;
       }
 
       if(!curl_strequal(ipaddress, tests[i].address[j])) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                "%s is not equal to tests[%d].address[%d] %s.\n",
-                __FILE__, __LINE__, i, ipaddress, i, j, tests[i].address[j]);
+        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
+                      "%s is not equal to tests[%d].address[%d] %s.\n",
+                      __FILE__, __LINE__, i, ipaddress, i, j,
+                      tests[i].address[j]);
         problem = true;
         break;
       }
 
       if(port != tests[i].port) {
-        fprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
-                "for tests[%d].address[%d] is %d but tests[%d].port is %d.\n",
-                __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
+        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
+                      "for tests[%d].address[%d] is %d "
+                      "but tests[%d].port is %d.\n",
+                      __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
         problem = true;
         break;
       }

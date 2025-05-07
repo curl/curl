@@ -52,7 +52,7 @@
 #include "strdup.h"
 #include "http2.h"
 #include "progress.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "ws.h"
 
 /* The last 3 #include files should be in this order */

@@ -61,10 +61,10 @@ static void test_lock(CURL *handle, curl_lock_data data,
       what = "ssl_session";
       break;
     default:
-      fprintf(stderr, "lock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
       return;
   }
-  printf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
+  curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
 
@@ -88,10 +88,10 @@ static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
       what = "ssl_session";
       break;
     default:
-      fprintf(stderr, "unlock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
       return;
   }
-  printf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
+  curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
 }
 
@@ -104,25 +104,25 @@ static void *test_fire(void *ptr)
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     return NULL;
   }
 
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
   curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
-  printf("CURLOPT_SHARE\n");
+  curl_mprintf("CURLOPT_SHARE\n");
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
-  printf("PERFORM\n");
+  curl_mprintf("PERFORM\n");
   code = curl_easy_perform(curl);
   if(code != CURLE_OK) {
     int i = 0;
-    fprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
+    curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
             tdata->url, i, (int)code);
   }
 
-  printf("CLEANUP\n");
+  curl_mprintf("CLEANUP\n");
   curl_easy_cleanup(curl);
 
   return NULL;
@@ -143,41 +143,41 @@ CURLcode test(char *URL)
   user.text = "Pigs in space";
   user.counter = 0;
 
-  printf("GLOBAL_INIT\n");
+  curl_mprintf("GLOBAL_INIT\n");
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* prepare share */
-  printf("SHARE_INIT\n");
+  curl_mprintf("SHARE_INIT\n");
   share = curl_share_init();
   if(!share) {
-    fprintf(stderr, "curl_share_init() failed\n");
+    curl_mfprintf(stderr, "curl_share_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_LOCKFUNC\n");
+    curl_mprintf("CURLSHOPT_LOCKFUNC\n");
     scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
   }
   if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_UNLOCKFUNC\n");
+    curl_mprintf("CURLSHOPT_UNLOCKFUNC\n");
     scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
   }
   if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_USERDATA\n");
+    curl_mprintf("CURLSHOPT_USERDATA\n");
     scode = curl_share_setopt(share, CURLSHOPT_USERDATA, &user);
   }
   if(CURLSHE_OK == scode) {
-    printf("CURL_LOCK_DATA_SSL_SESSION\n");
+    curl_mprintf("CURL_LOCK_DATA_SSL_SESSION\n");
     scode = curl_share_setopt(share, CURLSHOPT_SHARE,
                               CURL_LOCK_DATA_SSL_SESSION);
   }
 
   if(CURLSHE_OK != scode) {
-    fprintf(stderr, "curl_share_setopt() failed\n");
+    curl_mfprintf(stderr, "curl_share_setopt() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -192,16 +192,16 @@ CURLcode test(char *URL)
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
-    printf("*** run %d\n",i);
+    curl_mprintf("*** run %d\n",i);
     test_fire(&tdata);
   }
 
 
   /* fetch another one */
-  printf("*** run %d\n", i);
+  curl_mprintf("*** run %d\n", i);
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_share_cleanup(share);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
@@ -209,37 +209,37 @@ CURLcode test(char *URL)
 
   url = URL;
   test_setopt(curl, CURLOPT_URL, url);
-  printf("CURLOPT_SHARE\n");
+  curl_mprintf("CURLOPT_SHARE\n");
   test_setopt(curl, CURLOPT_SHARE, share);
 
-  printf("PERFORM\n");
+  curl_mprintf("PERFORM\n");
   res = curl_easy_perform(curl);
 
   /* try to free share, expect to fail because share is in use */
-  printf("try SHARE_CLEANUP...\n");
+  curl_mprintf("try SHARE_CLEANUP...\n");
   scode = curl_share_cleanup(share);
   if(scode == CURLSHE_OK) {
-    fprintf(stderr, "curl_share_cleanup succeed but error expected\n");
+    curl_mfprintf(stderr, "curl_share_cleanup succeed but error expected\n");
     share = NULL;
   }
   else {
-    printf("SHARE_CLEANUP failed, correct\n");
+    curl_mprintf("SHARE_CLEANUP failed, correct\n");
   }
 
 test_cleanup:
 
   /* clean up last handle */
-  printf("CLEANUP\n");
+  curl_mprintf("CLEANUP\n");
   curl_easy_cleanup(curl);
 
   /* free share */
-  printf("SHARE_CLEANUP\n");
+  curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
             (int)scode);
 
-  printf("GLOBAL_CLEANUP\n");
+  curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();
 
   return res;

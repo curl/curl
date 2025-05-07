@@ -60,7 +60,7 @@ CURLcode test(char *URL)
   long contentlength = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -87,7 +87,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(1) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -110,7 +110,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(2) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(2) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -131,7 +131,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(3) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(3) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -144,7 +144,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(4) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(4) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -166,7 +166,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(5) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(5) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -179,13 +179,13 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(6) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(6) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     goto test_cleanup;
   }
 

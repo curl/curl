@@ -39,6 +39,7 @@
 #include <curlx.h>
 
 #include "tool_findfile.h"
+#include "tool_cfgable.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

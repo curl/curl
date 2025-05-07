@@ -52,7 +52,7 @@ CURLcode Curl_speedcheck(struct Curl_easy *data,
         data->state.keeps_speed = now;
       else {
         /* how long has it been under the limit */
-        timediff_t howlong = Curl_timediff(now, data->state.keeps_speed);
+        timediff_t howlong = curlx_timediff(now, data->state.keeps_speed);
 
         if(howlong >= data->set.low_speed_time * 1000) {
           /* too long */

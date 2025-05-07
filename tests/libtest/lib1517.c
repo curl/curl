@@ -62,8 +62,8 @@ CURLcode test(char *URL)
 
   if(!strcmp(URL, "check")) {
 #if (defined(_WIN32) || defined(__CYGWIN__))
-    printf("Windows TCP does not deliver response data but reports "
-           "CONNABORTED\n");
+    curl_mprintf("Windows TCP does not deliver response data but reports "
+                 "CONNABORTED\n");
     return TEST_ERR_FAILURE; /* skip since it fails on Windows without
                                 workaround */
 #else
@@ -75,13 +75,13 @@ CURLcode test(char *URL)
   pooh.sizeleft = strlen(testdata);
 
   if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

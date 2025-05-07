@@ -49,9 +49,9 @@ CURLcode test(char *URL)
 
   upload = fopen(libtest_arg3, "rb");
   if(!upload) {
-    fprintf(stderr, "fopen() failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg3);
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg3);
     return TEST_ERR_FOPEN;
   }
 

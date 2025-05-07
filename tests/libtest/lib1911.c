@@ -51,7 +51,7 @@ CURLcode test(char *URL)
   memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
   testbuf[MAX_INPUT_LENGTH + 1] = 0;
 
-  printf("string length: %d\n", (int)strlen(testbuf));
+  curl_mprintf("string length: %d\n", (int)strlen(testbuf));
 
   for(o = curl_easy_option_next(NULL);
       o;
@@ -85,8 +85,8 @@ CURLcode test(char *URL)
         break;
       default:
         /* all other return codes are unexpected */
-        fprintf(stderr, "curl_easy_setopt(%s...) returned %d\n",
-                o->name, result);
+        curl_mfprintf(stderr, "curl_easy_setopt(%s...) returned %d\n",
+                      o->name, result);
         error++;
         break;
       }

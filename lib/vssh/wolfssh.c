@@ -38,7 +38,7 @@
 #include "../speedcheck.h"
 #include "../select.h"
 #include "../multiif.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../strdup.h"
 
 /* The last 3 #include files should be in this order */
@@ -998,7 +998,7 @@ static CURLcode wssh_block_statemach(struct Curl_easy *data,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
-    struct curltime now = Curl_now();
+    struct curltime now = curlx_now();
 
     result = wssh_statemach_act(data, &block);
     if(result)

@@ -47,6 +47,7 @@ foreach(_target IN LISTS UNITPROGS)
   target_include_directories(${_target_name} PRIVATE
     "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
     "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_SOURCE_DIR}/tests/libtest"
   )

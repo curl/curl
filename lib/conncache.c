@@ -43,7 +43,7 @@
 #include "connect.h"
 #include "select.h"
 #include "strcase.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "uint-table.h"
 
 /* The last 3 #include files should be in this order */
@@ -139,7 +139,7 @@ void Curl_cpool_init(struct cpool *cpool,
                      size_t size)
 {
   Curl_hash_init(&cpool->dest2bundle, size, Curl_hash_str,
-                 Curl_str_key_compare, cpool_bundle_free_entry);
+                 curlx_str_key_compare, cpool_bundle_free_entry);
 
   DEBUGASSERT(idata);
 
@@ -294,14 +294,14 @@ cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle)
   struct connectdata *oldest_idle = NULL;
   struct connectdata *conn;
 
-  now = Curl_now();
+  now = curlx_now();
   curr = Curl_llist_head(&bundle->conns);
   while(curr) {
     conn = Curl_node_elem(curr);
 
     if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
-      score = Curl_timediff(now, conn->lastused);
+      score = curlx_timediff(now, conn->lastused);
 
       if(score > highscore) {
         highscore = score;
@@ -324,7 +324,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
   timediff_t highscore =- 1;
   timediff_t score;
 
-  now = Curl_now();
+  now = curlx_now();
   Curl_hash_start_iterate(&cpool->dest2bundle, &iter);
 
   for(he = Curl_hash_next_element(&iter); he;
@@ -338,7 +338,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
       if(CONN_INUSE(conn) || conn->bits.close || conn->connect_only)
         continue;
       /* Set higher score for the age passed since the connection was used */
-      score = Curl_timediff(now, conn->lastused);
+      score = curlx_timediff(now, conn->lastused);
       if(score > highscore) {
         highscore = score;
         oldest_idle = conn;
@@ -539,7 +539,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
 
-  conn->lastused = Curl_now(); /* it was used up until now */
+  conn->lastused = curlx_now(); /* it was used up until now */
   if(cpool && maxconnects) {
     /* may be called form a callback already under lock */
     bool do_lock = !CPOOL_IS_LOCKED(cpool);
@@ -734,9 +734,9 @@ void Curl_cpool_prune_dead(struct Curl_easy *data)
   if(!cpool)
     return;
 
-  rctx.now = Curl_now();
+  rctx.now = curlx_now();
   CPOOL_LOCK(cpool, data);
-  elapsed = Curl_timediff(rctx.now, cpool->last_cleanup);
+  elapsed = curlx_timediff(rctx.now, cpool->last_cleanup);
 
   if(elapsed >= 1000L) {
     while(cpool_foreach(data, cpool, &rctx, cpool_reap_dead_cb))
@@ -758,7 +758,7 @@ static int conn_upkeep(struct Curl_easy *data,
 CURLcode Curl_cpool_upkeep(void *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct curltime now = Curl_now();
+  struct curltime now = curlx_now();
 
   if(!cpool)
     return CURLE_OK;

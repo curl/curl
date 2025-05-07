@@ -29,10 +29,9 @@
 #include "curl/curl.h"
 #include "warnless.h"
 #else
-#include "curlx.h" /* from the private lib dir */
+#include <curlx.h> /* from the private lib dir */
 #endif
 
-#include "curl_base64.h"
 #include "curl_memory.h"
 
 #ifndef TEST

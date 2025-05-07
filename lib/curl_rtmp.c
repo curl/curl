@@ -33,7 +33,7 @@
 #include "nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 

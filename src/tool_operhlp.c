@@ -24,16 +24,12 @@
 #include "tool_setup.h"
 #include "tool_operate.h"
 
-#include "strcase.h"
-
-#include "curlx.h"
-
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_msgs.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 void clean_getout(struct OperationConfig *config)
 {

@@ -49,17 +49,17 @@ static size_t readcallback(char  *ptr,
 
   if(*counter) {
     /* only do this once and then require a clearing of this */
-    fprintf(stderr, "READ ALREADY DONE!\n");
+    curl_mfprintf(stderr, "READ ALREADY DONE!\n");
     return 0;
   }
   (*counter)++; /* bump */
 
   if(size * nmemb >= strlen(uploadthis)) {
-    fprintf(stderr, "READ!\n");
+    curl_mfprintf(stderr, "READ!\n");
     strcpy(ptr, uploadthis);
     return strlen(uploadthis);
   }
-  fprintf(stderr, "READ NOT FINE!\n");
+  curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
 static curlioerr ioctlcallback(CURL *handle,
@@ -69,7 +69,7 @@ static curlioerr ioctlcallback(CURL *handle,
   int *counter = (int *)clientp;
   (void)handle; /* unused */
   if(cmd == CURLIOCMD_RESTARTREAD) {
-    fprintf(stderr, "REWIND!\n");
+    curl_mfprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
   return CURLIOE_OK;

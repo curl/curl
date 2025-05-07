@@ -129,7 +129,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 #endif /* !_WIN32 */
 
 #include "nonblock.h" /* for curlx_nonblock */
-#include "timeval.h"  /* needed before select.h */
+#include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
 
 /* The last 3 #include files should be in this order */
@@ -203,7 +203,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
   else {
-    struct curltime start = Curl_now();
+    struct curltime start = curlx_now();
     char rnd[9];
     char check[sizeof(rnd)];
     char *p = &check[0];
@@ -227,7 +227,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       if(nread == -1) {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if(Curl_timediff(Curl_now(), start) > (60 * 1000))
+        if(curlx_timediff(curlx_now(), start) > (60 * 1000))
           goto error;
         if(
 #ifdef USE_WINSOCK

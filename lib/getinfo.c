@@ -31,7 +31,7 @@
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -207,7 +207,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   const char *timestr = getenv("CURL_TIME");
   if(timestr) {
     curl_off_t val;
-    Curl_str_number(&timestr, &val, TIME_T_MAX);
+    curlx_str_number(&timestr, &val, TIME_T_MAX);
     switch(info) {
     case CURLINFO_LOCAL_PORT:
       *param_longp = (long)val;
@@ -220,7 +220,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   timestr = getenv("CURL_DEBUG_SIZE");
   if(timestr) {
     curl_off_t val;
-    Curl_str_number(&timestr, &val, LONG_MAX);
+    curlx_str_number(&timestr, &val, LONG_MAX);
     switch(info) {
     case CURLINFO_HEADER_SIZE:
     case CURLINFO_REQUEST_SIZE:
@@ -384,7 +384,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   const char *timestr = getenv("CURL_TIME");
   if(timestr) {
     curl_off_t val;
-    Curl_str_number(&timestr, &val, CURL_OFF_T_MAX);
+    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
 
     switch(info) {
     case CURLINFO_TOTAL_TIME_T:
@@ -483,7 +483,7 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
   const char *timestr = getenv("CURL_TIME");
   if(timestr) {
     curl_off_t val;
-    Curl_str_number(&timestr, &val, CURL_OFF_T_MAX);
+    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
 
     switch(info) {
     case CURLINFO_TOTAL_TIME:

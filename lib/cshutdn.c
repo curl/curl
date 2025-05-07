@@ -41,7 +41,7 @@
 #include "connect.h"
 #include "select.h"
 #include "strcase.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -270,7 +270,7 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
       /* idata has one timer list, but maybe more than one connection.
        * Set EXPIRE_SHUTDOWN to the smallest time left for all. */
       if(!nowp) {
-        now = Curl_now();
+        now = curlx_now();
         nowp = &now;
       }
       ms = Curl_conn_shutdown_timeleft(conn, nowp);
@@ -289,7 +289,7 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
                                   struct Curl_easy *data,
                                   int timeout_ms)
 {
-  struct curltime started = Curl_now();
+  struct curltime started = curlx_now();
   struct Curl_llist_node *e;
   SIGPIPE_VARIABLE(pipe_st);
 
@@ -312,7 +312,7 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
     }
 
     /* wait for activity, timeout or "nothing" */
-    timespent = Curl_timediff(Curl_now(), started);
+    timespent = curlx_timediff(curlx_now(), started);
     if(timespent >= (timediff_t)timeout_ms) {
       CURL_TRC_M(data, "[SHUTDOWN] shutdown finished, %s",
                 (timeout_ms > 0) ? "timeout" : "best effort done");
@@ -362,7 +362,7 @@ void Curl_cshutdn_destroy(struct cshutdn *cshutdn,
       const char *p = getenv("CURL_GRACEFUL_SHUTDOWN");
       if(p) {
         curl_off_t l;
-        if(!Curl_str_number(&p, &l, INT_MAX))
+        if(!curlx_str_number(&p, &l, INT_MAX))
           timeout_ms = (int)l;
       }
     }

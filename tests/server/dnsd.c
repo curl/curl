@@ -51,7 +51,7 @@
 
 #include <ctype.h>
 
-#include "curlx.h" /* from the private lib dir */
+#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
 #include "server_sockaddr.h"

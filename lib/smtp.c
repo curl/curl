@@ -78,9 +78,9 @@
 #include "curl_gethostname.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "idn.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -220,7 +220,7 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
     result = TRUE;
     memcpy(tmpline, line, (len == 5 ? 5 : 3));
     tmpline[len == 5 ? 5 : 3 ] = 0;
-    if(Curl_str_number(&p, &code, len == 5 ? 99999 : 999))
+    if(curlx_str_number(&p, &code, len == 5 ? 99999 : 999))
       return FALSE;
     *resp = (int) code;
 
@@ -246,7 +246,7 @@ static bool smtp_endofresp(struct Curl_easy *data, struct connectdata *conn,
  */
 static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
 {
-  char *message = Curl_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
+  char *message = curlx_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
   size_t len = data->conn->proto.smtpc.pp.nfinal;
 
   if(len > 4) {
@@ -884,7 +884,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
-  const char *line = Curl_dyn_ptr(&smtpc->pp.recvbuf);
+  const char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
   (void)instate; /* no use for this yet */
@@ -1034,7 +1034,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data, int smtpcode,
 {
   CURLcode result = CURLE_OK;
   struct SMTP *smtp = data->req.p.smtp;
-  char *line = Curl_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
+  char *line = curlx_dyn_ptr(&data->conn->proto.smtpc.pp.recvbuf);
   size_t len = data->conn->proto.smtpc.pp.nfinal;
 
   (void)instate; /* no use for this yet */

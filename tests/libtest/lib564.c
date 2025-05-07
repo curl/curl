@@ -53,7 +53,7 @@ CURLcode test(char *URL)
 
   multi_add_handle(m, curl);
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
   for(;;) {
     struct timeval interval;

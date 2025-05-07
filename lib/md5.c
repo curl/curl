@@ -32,7 +32,7 @@
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>

@@ -23,13 +23,11 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
-#include "dynbuf.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 static int writeTime(FILE *stream, const struct writeoutvar *wovar,
                      struct per_transfer *per, CURLcode per_result,

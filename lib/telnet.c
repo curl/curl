@@ -57,8 +57,8 @@
 #include "arpa_telnet.h"
 #include "select.h"
 #include "strcase.h"
-#include "warnless.h"
-#include "strparse.h"
+#include "curlx/warnless.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -208,7 +208,7 @@ CURLcode init_telnet(struct Curl_easy *data)
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_dyn_init(&tn->out, 0xffff);
+  curlx_dyn_init(&tn->out, 0xffff);
   data->req.p.telnet = tn; /* make us known */
 
   tn->telrcv_state = CURL_TS_DATA;
@@ -866,9 +866,9 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
           const char *p = arg;
           curl_off_t x = 0;
           curl_off_t y = 0;
-          if(Curl_str_number(&p, &x, 0xffff) ||
-             Curl_str_single(&p, 'x') ||
-             Curl_str_number(&p, &y, 0xffff)) {
+          if(curlx_str_number(&p, &x, 0xffff) ||
+             curlx_str_single(&p, 'x') ||
+             curlx_str_number(&p, &y, 0xffff)) {
             failf(data, "Syntax error in telnet option: %s", head->data);
             result = CURLE_SETOPT_OPTION_SYNTAX;
           }
@@ -1236,17 +1236,17 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
 
   if(memchr(buffer, CURL_IAC, nread)) {
     /* only use the escape buffer when necessary */
-    Curl_dyn_reset(&tn->out);
+    curlx_dyn_reset(&tn->out);
 
     for(i = 0; i < (size_t)nread && !result; i++) {
-      result = Curl_dyn_addn(&tn->out, &buffer[i], 1);
+      result = curlx_dyn_addn(&tn->out, &buffer[i], 1);
       if(!result && ((unsigned char)buffer[i] == CURL_IAC))
         /* IAC is FF in hex */
-        result = Curl_dyn_addn(&tn->out, "\xff", 1);
+        result = curlx_dyn_addn(&tn->out, "\xff", 1);
     }
 
-    outlen = Curl_dyn_len(&tn->out);
-    outbuf = Curl_dyn_uptr(&tn->out);
+    outlen = curlx_dyn_len(&tn->out);
+    outbuf = curlx_dyn_uptr(&tn->out);
   }
   else {
     outlen = (size_t)nread;
@@ -1286,7 +1286,7 @@ static CURLcode telnet_done(struct Curl_easy *data,
 
   curl_slist_free_all(tn->telnet_vars);
   tn->telnet_vars = NULL;
-  Curl_dyn_free(&tn->out);
+  curlx_dyn_free(&tn->out);
   return CURLE_OK;
 }
 
@@ -1497,8 +1497,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     }
 
     if(data->set.timeout) {
-      now = Curl_now();
-      if(Curl_timediff(now, conn->created) >= data->set.timeout) {
+      now = curlx_now();
+      if(curlx_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;
@@ -1618,8 +1618,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     } /* poll switch statement */
 
     if(data->set.timeout) {
-      now = Curl_now();
-      if(Curl_timediff(now, conn->created) >= data->set.timeout) {
+      now = curlx_now();
+      if(curlx_timediff(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;

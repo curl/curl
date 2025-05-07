@@ -89,10 +89,10 @@
 #include "progress.h"
 #include "transfer.h"
 #include "strcase.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "curl_ldap.h"
 #include "curl_multibyte.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -629,8 +629,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           if((attr_len > 7) &&
              (strcmp(";binary", attr + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            result = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
-                                        &val_b64, &val_b64_sz);
+            result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+                                         &val_b64, &val_b64_sz);
             if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
@@ -729,7 +729,7 @@ static void _ldap_trace(const char *fmt, ...)
   if(do_trace == -1) {
     const char *env = getenv("CURL_TRACE");
     curl_off_t e = 0;
-    if(!Curl_str_number(&env, &e, INT_MAX))
+    if(!curlx_str_number(&env, &e, INT_MAX))
       do_trace = e > 0;
   }
   if(!do_trace)
@@ -884,7 +884,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       CURLcode result;
       struct Curl_str out;
 
-      if(Curl_str_until(&atp, &out, 1024, ','))
+      if(curlx_str_until(&atp, &out, 1024, ','))
         break;
 
       LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
@@ -913,7 +913,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
 #endif
 
       ludp->lud_attrs_dups++;
-      if(Curl_str_single(&atp, ','))
+      if(curlx_str_single(&atp, ','))
         break;
     }
   }

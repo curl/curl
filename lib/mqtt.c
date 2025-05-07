@@ -37,7 +37,7 @@
 #include "strdup.h"
 #include "url.h"
 #include "escape.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "multiif.h"
@@ -146,8 +146,8 @@ static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
   struct MQTT *mq = entry;
   (void)key;
   (void)klen;
-  Curl_dyn_free(&mq->sendbuf);
-  Curl_dyn_free(&mq->recvbuf);
+  curlx_dyn_free(&mq->sendbuf);
+  curlx_dyn_free(&mq->recvbuf);
   free(mq);
 }
 
@@ -173,8 +173,8 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
   mq = calloc(1, sizeof(struct MQTT));
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
-  Curl_dyn_init(&mq->sendbuf, DYN_MQTT_SEND);
+  curlx_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
+  curlx_dyn_init(&mq->sendbuf, DYN_MQTT_SEND);
   if(Curl_meta_set(data, CURL_META_MQTT_EASY, mq, mqtt_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
@@ -193,20 +193,20 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   result = Curl_xfer_send(data, buf, len, FALSE, &n);
   if(result)
     return result;
-  mq->lastTime = Curl_now();
+  mq->lastTime = curlx_now();
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
   if(len != n) {
     size_t nsend = len - n;
-    if(Curl_dyn_len(&mq->sendbuf)) {
-      DEBUGASSERT(Curl_dyn_len(&mq->sendbuf) >= nsend);
-      result = Curl_dyn_tail(&mq->sendbuf, nsend); /* keep this much */
+    if(curlx_dyn_len(&mq->sendbuf)) {
+      DEBUGASSERT(curlx_dyn_len(&mq->sendbuf) >= nsend);
+      result = curlx_dyn_tail(&mq->sendbuf, nsend); /* keep this much */
     }
     else {
-      result = Curl_dyn_addn(&mq->sendbuf, &buf[n], nsend);
+      result = curlx_dyn_addn(&mq->sendbuf, &buf[n], nsend);
     }
   }
   else
-    Curl_dyn_reset(&mq->sendbuf);
+    curlx_dyn_reset(&mq->sendbuf);
   return result;
 }
 
@@ -424,7 +424,7 @@ static CURLcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
 
   if(!mq)
     return CURLE_FAILED_INIT;
-  rlen = Curl_dyn_len(&mq->recvbuf);
+  rlen = curlx_dyn_len(&mq->recvbuf);
 
   if(rlen < nbytes) {
     unsigned char readbuf[1024];
@@ -435,9 +435,9 @@ static CURLcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
     if(result)
       return result;
     DEBUGASSERT(nread >= 0);
-    if(Curl_dyn_addn(&mq->recvbuf, readbuf, (size_t)nread))
+    if(curlx_dyn_addn(&mq->recvbuf, readbuf, (size_t)nread))
       return CURLE_OUT_OF_MEMORY;
-    rlen = Curl_dyn_len(&mq->recvbuf);
+    rlen = curlx_dyn_len(&mq->recvbuf);
   }
   return (rlen >= nbytes) ? CURLE_OK : CURLE_AGAIN;
 }
@@ -447,11 +447,11 @@ static void mqtt_recv_consume(struct Curl_easy *data, size_t nbytes)
   struct MQTT *mq = Curl_meta_get(data, CURL_META_MQTT_EASY);
   DEBUGASSERT(mq);
   if(mq) {
-    size_t rlen = Curl_dyn_len(&mq->recvbuf);
+    size_t rlen = curlx_dyn_len(&mq->recvbuf);
     if(rlen <= nbytes)
-      Curl_dyn_reset(&mq->recvbuf);
+      curlx_dyn_reset(&mq->recvbuf);
     else
-      Curl_dyn_tail(&mq->recvbuf, rlen - nbytes);
+      curlx_dyn_tail(&mq->recvbuf, rlen - nbytes);
   }
 }
 
@@ -470,14 +470,14 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
     goto fail;
 
   /* verify CONNACK */
-  DEBUGASSERT(Curl_dyn_len(&mq->recvbuf) >= MQTT_CONNACK_LEN);
-  ptr = Curl_dyn_ptr(&mq->recvbuf);
+  DEBUGASSERT(curlx_dyn_len(&mq->recvbuf) >= MQTT_CONNACK_LEN);
+  ptr = curlx_dyn_ptr(&mq->recvbuf);
   Curl_debug(data, CURLINFO_HEADER_IN, ptr, MQTT_CONNACK_LEN);
 
   if(ptr[0] != 0x00 || ptr[1] != 0x00) {
     failf(data, "Expected %02x%02x but got %02x%02x",
           0x00, 0x00, ptr[0], ptr[1]);
-    Curl_dyn_reset(&mq->recvbuf);
+    curlx_dyn_reset(&mq->recvbuf);
     result = CURLE_WEIRD_SERVER_REPLY;
     goto fail;
   }
@@ -572,14 +572,14 @@ static CURLcode mqtt_verify_suback(struct Curl_easy *data)
     goto fail;
 
   /* verify SUBACK */
-  DEBUGASSERT(Curl_dyn_len(&mq->recvbuf) >= MQTT_SUBACK_LEN);
-  ptr = Curl_dyn_ptr(&mq->recvbuf);
+  DEBUGASSERT(curlx_dyn_len(&mq->recvbuf) >= MQTT_SUBACK_LEN);
+  ptr = curlx_dyn_ptr(&mq->recvbuf);
   Curl_debug(data, CURLINFO_HEADER_IN, ptr, MQTT_SUBACK_LEN);
 
   if(((unsigned char)ptr[0]) != ((mqtt->packetid >> 8) & 0xff) ||
      ((unsigned char)ptr[1]) != (mqtt->packetid & 0xff) ||
      ptr[2] != 0x00) {
-    Curl_dyn_reset(&mq->recvbuf);
+    curlx_dyn_reset(&mq->recvbuf);
     result = CURLE_WEIRD_SERVER_REPLY;
     goto fail;
   }
@@ -777,7 +777,7 @@ MQTT_SUBACK_COMING:
     }
 
     /* we received something */
-    mq->lastTime = Curl_now();
+    mq->lastTime = curlx_now();
 
     /* if QoS is set, message contains packet id */
     result = Curl_client_write(data, CLIENTWRITE_BODY, buffer, nread);
@@ -807,7 +807,7 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 
   if(!mq)
     return CURLE_FAILED_INIT;
-  mq->lastTime = Curl_now();
+  mq->lastTime = curlx_now();
   mq->pingsent = FALSE;
 
   result = mqtt_connect(data);
@@ -826,8 +826,8 @@ static CURLcode mqtt_done(struct Curl_easy *data,
   (void)status;
   (void)premature;
   if(mq) {
-    Curl_dyn_free(&mq->sendbuf);
-    Curl_dyn_free(&mq->recvbuf);
+    curlx_dyn_free(&mq->sendbuf);
+    curlx_dyn_free(&mq->recvbuf);
   }
   return CURLE_OK;
 }
@@ -846,8 +846,8 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
   if(mqtt->state == MQTT_FIRST &&
      !mq->pingsent &&
      data->set.upkeep_interval_ms > 0) {
-    struct curltime t = Curl_now();
-    timediff_t diff = Curl_timediff(t, mq->lastTime);
+    struct curltime t = curlx_now();
+    timediff_t diff = curlx_timediff(t, mq->lastTime);
 
     if(diff > data->set.upkeep_interval_ms) {
       /* 0xC0 is PINGREQ, and 0x00 is remaining length */
@@ -877,10 +877,10 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
 
   *done = FALSE;
 
-  if(Curl_dyn_len(&mq->sendbuf)) {
+  if(curlx_dyn_len(&mq->sendbuf)) {
     /* send the remainder of an outgoing packet */
-    result = mqtt_send(data, Curl_dyn_ptr(&mq->sendbuf),
-                       Curl_dyn_len(&mq->sendbuf));
+    result = mqtt_send(data, curlx_dyn_ptr(&mq->sendbuf),
+                       curlx_dyn_len(&mq->sendbuf));
     if(result)
       return result;
   }
@@ -905,7 +905,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
     Curl_debug(data, CURLINFO_HEADER_IN, (const char *)&mq->firstbyte, 1);
 
     /* we received something */
-    mq->lastTime = Curl_now();
+    mq->lastTime = curlx_now();
 
     /* remember the first byte */
     mq->npacket = 0;

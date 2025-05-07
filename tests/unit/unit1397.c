@@ -103,13 +103,13 @@ UNITTEST_START
                                              strlen(tests[i].pattern),
                                              tests[i].host,
                                              strlen(tests[i].host))) {
-      fprintf(stderr,
-              "HOST: %s\n"
-              "PTRN: %s\n"
-              "did %sMATCH\n",
-              tests[i].host,
-              tests[i].pattern,
-              tests[i].match ? "NOT ": "");
+      curl_mfprintf(stderr,
+                    "HOST: %s\n"
+                    "PTRN: %s\n"
+                    "did %sMATCH\n",
+                    tests[i].host,
+                    tests[i].pattern,
+                    tests[i].match ? "NOT ": "");
       unitfail++;
     }
   }

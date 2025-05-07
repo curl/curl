@@ -39,7 +39,7 @@
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -78,18 +78,18 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
   FILE *file = fopen(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
-  Curl_dyn_init(&linebuf, MAX_NETRC_LINE);
+  curlx_dyn_init(&linebuf, MAX_NETRC_LINE);
 
   if(file) {
     ret = NETRC_OK;
     while(Curl_get_line(&linebuf, file)) {
       CURLcode result;
-      const char *line = Curl_dyn_ptr(&linebuf);
+      const char *line = curlx_dyn_ptr(&linebuf);
       /* skip comments on load */
-      Curl_str_passblanks(&line);
+      curlx_str_passblanks(&line);
       if(*line == '#')
         continue;
-      result = Curl_dyn_add(filebuf, line);
+      result = curlx_dyn_add(filebuf, line);
       if(result) {
         ret = curl2netrc(result);
         goto done;
@@ -97,7 +97,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
     }
   }
 done:
-  Curl_dyn_free(&linebuf);
+  curlx_dyn_free(&linebuf);
   if(file)
     fclose(file);
   return ret;
@@ -126,7 +126,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
   struct dynbuf token;
   struct dynbuf *filebuf = &store->filebuf;
   DEBUGASSERT(!*passwordp);
-  Curl_dyn_init(&token, MAX_NETRC_TOKEN);
+  curlx_dyn_init(&token, MAX_NETRC_TOKEN);
 
   if(!store->loaded) {
     NETRCcode ret = file2memory(netrcfile, filebuf);
@@ -135,15 +135,15 @@ static NETRCcode parsenetrc(struct store_netrc *store,
     store->loaded = TRUE;
   }
 
-  netrcbuffer = Curl_dyn_ptr(filebuf);
+  netrcbuffer = curlx_dyn_ptr(filebuf);
 
   while(!done) {
     const char *tok = netrcbuffer;
     while(tok && !done) {
       const char *tok_end;
       bool quoted;
-      Curl_dyn_reset(&token);
-      Curl_str_passblanks(&tok);
+      curlx_dyn_reset(&token);
+      curlx_str_passblanks(&tok);
       /* tok is first non-space letter */
       if(state == MACDEF) {
         if((*tok == '\n') || (*tok == '\r'))
@@ -169,7 +169,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           retcode = NETRC_SYNTAX_ERROR;
           goto out;
         }
-        result = Curl_dyn_addn(&token, tok, len);
+        result = curlx_dyn_addn(&token, tok, len);
         if(result) {
           retcode = curl2netrc(result);
           goto out;
@@ -206,7 +206,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
             endquote = TRUE;
             break;
           }
-          result = Curl_dyn_addn(&token, &s, 1);
+          result = curlx_dyn_addn(&token, &s, 1);
           if(result) {
             retcode = curl2netrc(result);
             goto out;
@@ -220,7 +220,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
         }
       }
 
-      tok = Curl_dyn_ptr(&token);
+      tok = curlx_dyn_ptr(&token);
 
       switch(state) {
       case NOTHING:
@@ -332,7 +332,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
   } /* while !done */
 
 out:
-  Curl_dyn_free(&token);
+  curlx_dyn_free(&token);
   if(!retcode) {
     if(!password && our_login) {
       /* success without a password, set a blank one */
@@ -351,7 +351,7 @@ out:
     *passwordp = password;
   }
   else {
-    Curl_dyn_free(filebuf);
+    curlx_dyn_free(filebuf);
     if(!specific_login)
       free(login);
     free(password);
@@ -456,12 +456,12 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
 
 void Curl_netrc_init(struct store_netrc *s)
 {
-  Curl_dyn_init(&s->filebuf, MAX_NETRC_FILE);
+  curlx_dyn_init(&s->filebuf, MAX_NETRC_FILE);
   s->loaded = FALSE;
 }
 void Curl_netrc_cleanup(struct store_netrc *s)
 {
-  Curl_dyn_free(&s->filebuf);
+  curlx_dyn_free(&s->filebuf);
   s->loaded = FALSE;
 }
 #endif

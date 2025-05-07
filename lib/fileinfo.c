@@ -40,7 +40,7 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
   if(!finfo)
     return;
 
-  Curl_dyn_free(&finfo->buf);
+  curlx_dyn_free(&finfo->buf);
   free(finfo);
 }
 #endif

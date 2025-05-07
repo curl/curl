@@ -38,13 +38,13 @@ CURLcode test(char *URL)
   char *stream_uri = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -68,7 +68,7 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res != (int)CURLE_RTSP_CSEQ_ERROR) {
-    fprintf(stderr, "Failed to detect CSeq mismatch");
+    curl_mfprintf(stderr, "Failed to detect CSeq mismatch");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -107,7 +107,7 @@ CURLcode test(char *URL)
     res = CURLE_OK;
   }
   else {
-    fprintf(stderr, "Failed to detect a Session ID mismatch");
+    curl_mfprintf(stderr, "Failed to detect a Session ID mismatch");
     res = TEST_ERR_FAILURE;
   }
 

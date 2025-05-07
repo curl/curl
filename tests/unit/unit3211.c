@@ -54,8 +54,8 @@ static void check_set(const char *name, unsigned int capacity,
   size_t i, j;
   unsigned int n, c;
 
-  fprintf(stderr, "test %s, capacity=%u, %zu numbers\n",
-          name, capacity, slen);
+  curl_mfprintf(stderr, "test %s, capacity=%u, %zu numbers\n",
+                name, capacity, slen);
   Curl_uint_bset_init(&bset);
   fail_unless(!Curl_uint_bset_resize(&bset, capacity), "bset resize failed");
   c = Curl_uint_bset_capacity(&bset);
@@ -81,7 +81,7 @@ static void check_set(const char *name, unsigned int capacity,
   for(i = 1; i < slen; ++i) {
     fail_unless(Curl_uint_bset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
-      fprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
+      curl_mfprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
     }
   }

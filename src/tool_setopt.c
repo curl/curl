@@ -25,15 +25,12 @@
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
-#include "curlx.h"
-
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_setopt.h"
 #include "tool_msgs.h"
-#include "dynbuf.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /* Lookup tables for converting setopt values back to symbols */
 /* For enums, values may be in any order. */
@@ -177,7 +174,7 @@ static char *c_escape(const char *str, curl_off_t len)
   const char *s;
   unsigned int cutoff = 0;
   CURLcode result;
-  struct curlx_dynbuf escaped;
+  struct dynbuf escaped;
 
   curlx_dyn_init(&escaped, 4 * MAX_STRING_LENGTH_OUTPUT + 3);
 

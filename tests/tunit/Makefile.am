@@ -35,6 +35,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/lib/curlx      \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit     \
@@ -48,7 +49,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
-        $(top_builddir)/lib/libcurlu.la      \
+        $(top_builddir)/lib/libcurl.la      \
         @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS

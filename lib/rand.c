@@ -37,7 +37,7 @@
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
 
@@ -130,7 +130,7 @@ static CURLcode weak_random(struct Curl_easy *data,
     static bool seeded = FALSE;
     unsigned int rnd;
     if(!seeded) {
-      struct curltime now = Curl_now();
+      struct curltime now = curlx_now();
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;

@@ -48,17 +48,17 @@ void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
+  curl_mfprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04zx: ", i);
+    curl_mfprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          curl_mfprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
@@ -70,7 +70,7 @@ void dump(const char *text,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c",
+      curl_mfprintf(stream, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
@@ -95,7 +95,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", (char *)data);
+    curl_mfprintf(stderr, "== Info: %s", (char *)data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
@@ -145,7 +145,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb,
                              void *stream)
 {
   int amount = curlx_uztosi(size * nmemb);
-  printf("%.*s", amount, (char *)ptr);
+  curl_mprintf("%.*s", amount, (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
@@ -155,8 +155,8 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
   (void)clientp;
   if(cmd == CURLIOCMD_RESTARTREAD) {
-    printf("APPLICATION received a CURLIOCMD_RESTARTREAD request\n");
-    printf("APPLICATION ** REWINDING! **\n");
+    curl_mprintf("APPLICATION received a CURLIOCMD_RESTARTREAD request\n");
+    curl_mprintf("APPLICATION ** REWINDING! **\n");
     current_offset = 0;
     return CURLIOE_OK;
   }

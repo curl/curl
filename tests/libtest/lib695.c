@@ -47,7 +47,7 @@ CURLcode test(char *URL)
    */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -77,7 +77,7 @@ CURLcode test(char *URL)
 
   /* Check for errors */
   if(res != CURLE_OK)
-    fprintf(stderr, "curl_easy_perform() 1 failed: %s\n",
+    curl_mfprintf(stderr, "curl_easy_perform() 1 failed: %s\n",
             curl_easy_strerror(res));
   else {
     /* phase two, create a mime struct using the mime1 handle */
@@ -91,7 +91,7 @@ CURLcode test(char *URL)
     res = curl_mime_subparts(part, mime1);
 
     if(res != CURLE_OK)
-      fprintf(stderr, "curl_mime_subparts() failed: %sn",
+      curl_mfprintf(stderr, "curl_mime_subparts() failed: %sn",
               curl_easy_strerror(res));
     else {
       mime1 = NULL;
@@ -101,7 +101,7 @@ CURLcode test(char *URL)
 
       /* Check for errors */
       if(res != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() 2 failed: %s\n",
+        curl_mfprintf(stderr, "curl_easy_perform() 2 failed: %s\n",
                 curl_easy_strerror(res));
     }
   }

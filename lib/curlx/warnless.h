@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_WINSOCK
 #include <curl/curl.h> /* for curl_socket_t */

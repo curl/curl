@@ -46,7 +46,7 @@ CURLcode test(char *URL)
       if(res)
         goto test_cleanup;
 
-      fprintf(stderr, "****************************** Do it again\n");
+      curl_mfprintf(stderr, "****************************** Do it again\n");
       res = curl_easy_perform(curl);
     }
   }

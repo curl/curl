@@ -51,7 +51,7 @@
 #include "../curl_trc.h"
 #include "../curl_sha256.h"
 #include "../rand.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../curl_printf.h"
 #include "../strdup.h"
 
@@ -387,24 +387,24 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
      * the path as is. */
 #ifdef UNDER_CE
     (void)is_local;
-    return Curl_dyn_addf(buf, ":%s-%s", name, path);
+    return curlx_dyn_addf(buf, ":%s-%s", name, path);
 #elif defined(_WIN32)
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
-      return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+      return curlx_dyn_addf(buf, ":%s-%s", name, abspath);
     *is_local = TRUE;
 #elif defined(HAVE_REALPATH)
     if(path[0] != '/') {
       char *abspath = realpath(path, NULL);
       if(abspath) {
-        CURLcode r = Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+        CURLcode r = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
         (free)(abspath); /* allocated by libc, free without memdebug */
         return r;
       }
       *is_local = TRUE;
     }
 #endif
-    return Curl_dyn_addf(buf, ":%s-%s", name, path);
+    return curlx_dyn_addf(buf, ":%s-%s", name, path);
   }
   return CURLE_OK;
 }
@@ -418,14 +418,14 @@ static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
     unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
     size_t i;
 
-    r = Curl_dyn_addf(buf, ":%s-", name);
+    r = curlx_dyn_addf(buf, ":%s-", name);
     if(r)
       goto out;
     r = Curl_sha256it(hash, blob->data, blob->len);
     if(r)
       goto out;
     for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
-      r = Curl_dyn_addf(buf, "%02x", hash[i]);
+      r = curlx_dyn_addf(buf, "%02x", hash[i]);
       if(r)
         goto out;
     }
@@ -457,9 +457,9 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   CURLcode r;
 
   *ppeer_key = NULL;
-  Curl_dyn_init(&buf, 10 * 1024);
+  curlx_dyn_init(&buf, 10 * 1024);
 
-  r = Curl_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
+  r = curlx_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
   if(r)
     goto out;
 
@@ -467,72 +467,72 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   case TRNSPRT_TCP:
     break;
   case TRNSPRT_UDP:
-    r = Curl_dyn_add(&buf, ":UDP");
+    r = curlx_dyn_add(&buf, ":UDP");
     break;
   case TRNSPRT_QUIC:
-    r = Curl_dyn_add(&buf, ":QUIC");
+    r = curlx_dyn_add(&buf, ":QUIC");
     break;
   case TRNSPRT_UNIX:
-    r = Curl_dyn_add(&buf, ":UNIX");
+    r = curlx_dyn_add(&buf, ":UNIX");
     break;
   default:
-    r = Curl_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
+    r = curlx_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
     break;
   }
   if(r)
     goto out;
 
   if(!ssl->verifypeer) {
-    r = Curl_dyn_add(&buf, ":NO-VRFY-PEER");
+    r = curlx_dyn_add(&buf, ":NO-VRFY-PEER");
     if(r)
       goto out;
   }
   if(!ssl->verifyhost) {
-    r = Curl_dyn_add(&buf, ":NO-VRFY-HOST");
+    r = curlx_dyn_add(&buf, ":NO-VRFY-HOST");
     if(r)
       goto out;
   }
   if(ssl->verifystatus) {
-    r = Curl_dyn_add(&buf, ":VRFY-STATUS");
+    r = curlx_dyn_add(&buf, ":VRFY-STATUS");
     if(r)
       goto out;
   }
   if(!ssl->verifypeer || !ssl->verifyhost) {
     if(cf->conn->bits.conn_to_host) {
-      r = Curl_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
+      r = curlx_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
       if(r)
         goto out;
     }
     if(cf->conn->bits.conn_to_port) {
-      r = Curl_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
+      r = curlx_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
       if(r)
         goto out;
     }
   }
 
   if(ssl->version || ssl->version_max) {
-    r = Curl_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
+    r = curlx_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
                       (ssl->version_max >> 16));
     if(r)
       goto out;
   }
   if(ssl->ssl_options) {
-    r = Curl_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
+    r = curlx_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
     if(r)
       goto out;
   }
   if(ssl->cipher_list) {
-    r = Curl_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
+    r = curlx_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
     if(r)
       goto out;
   }
   if(ssl->cipher_list13) {
-    r = Curl_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
+    r = curlx_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
     if(r)
       goto out;
   }
   if(ssl->curves) {
-    r = Curl_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
+    r = curlx_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
     if(r)
       goto out;
   }
@@ -566,19 +566,19 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     }
   }
   if(ssl->pinned_key && ssl->pinned_key[0]) {
-    r = Curl_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
+    r = curlx_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
     if(r)
       goto out;
   }
 
   if(ssl->clientcert && ssl->clientcert[0]) {
-    r = Curl_dyn_add(&buf, ":CCERT");
+    r = curlx_dyn_add(&buf, ":CCERT");
     if(r)
       goto out;
   }
 #ifdef USE_TLS_SRP
   if(ssl->username || ssl->password) {
-    r = Curl_dyn_add(&buf, ":SRP-AUTH");
+    r = curlx_dyn_add(&buf, ":SRP-AUTH");
     if(r)
       goto out;
   }
@@ -588,22 +588,22 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     r = CURLE_FAILED_INIT;
     goto out;
   }
-  r = Curl_dyn_addf(&buf, ":IMPL-%s", tls_id);
+  r = curlx_dyn_addf(&buf, ":IMPL-%s", tls_id);
   if(r)
     goto out;
 
-  r = Curl_dyn_addf(&buf, is_local ?
-                    CURL_SSLS_LOCAL_SUFFIX : CURL_SSLS_GLOBAL_SUFFIX);
+  r = curlx_dyn_addf(&buf, is_local ?
+                     CURL_SSLS_LOCAL_SUFFIX : CURL_SSLS_GLOBAL_SUFFIX);
   if(r)
     goto out;
 
-  *ppeer_key = Curl_dyn_take(&buf, &key_len);
+  *ppeer_key = curlx_dyn_take(&buf, &key_len);
   /* we just added printable char, and dynbuf always 0 terminates,
    * no need to track length */
 
 
 out:
-  Curl_dyn_free(&buf);
+  curlx_dyn_free(&buf);
   return r;
 }
 
@@ -1173,8 +1173,8 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
   Curl_ssl_scache_lock(data);
 
-  Curl_dyn_init(&hbuf, (CURL_SHA256_DIGEST_LENGTH * 2) + 1);
-  Curl_dyn_init(&sbuf, CURL_SSL_TICKET_MAX);
+  curlx_dyn_init(&hbuf, (CURL_SHA256_DIGEST_LENGTH * 2) + 1);
+  curlx_dyn_init(&sbuf, CURL_SSL_TICKET_MAX);
 
   for(i = 0; scache && i < scache->peer_count; i++) {
     peer = &scache->peers[i];
@@ -1183,7 +1183,7 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
     if(!peer->exportable)
       continue;
 
-    Curl_dyn_reset(&hbuf);
+    curlx_dyn_reset(&hbuf);
     cf_scache_peer_remove_expired(peer, now);
     n = Curl_llist_head(&peer->sessions);
     if(n)
@@ -1195,22 +1195,22 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
         if(r)
           goto out;
       }
-      if(!Curl_dyn_len(&hbuf)) {
-        r = Curl_dyn_addn(&hbuf, peer->key_salt, sizeof(peer->key_salt));
+      if(!curlx_dyn_len(&hbuf)) {
+        r = curlx_dyn_addn(&hbuf, peer->key_salt, sizeof(peer->key_salt));
         if(r)
           goto out;
-        r = Curl_dyn_addn(&hbuf, peer->key_hmac, sizeof(peer->key_hmac));
+        r = curlx_dyn_addn(&hbuf, peer->key_hmac, sizeof(peer->key_hmac));
         if(r)
           goto out;
       }
-      Curl_dyn_reset(&sbuf);
+      curlx_dyn_reset(&sbuf);
       r = Curl_ssl_session_pack(data, s, &sbuf);
       if(r)
         goto out;
 
       r = export_fn(data, userptr, peer->ssl_peer_key,
-                    Curl_dyn_uptr(&hbuf), Curl_dyn_len(&hbuf),
-                    Curl_dyn_uptr(&sbuf), Curl_dyn_len(&sbuf),
+                    curlx_dyn_uptr(&hbuf), curlx_dyn_len(&hbuf),
+                    curlx_dyn_uptr(&sbuf), curlx_dyn_len(&sbuf),
                     s->valid_until, s->ietf_tls_id,
                     s->alpn, s->earlydata_max);
       if(r)
@@ -1226,8 +1226,8 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
 out:
   Curl_ssl_scache_unlock(data);
-  Curl_dyn_free(&hbuf);
-  Curl_dyn_free(&sbuf);
+  curlx_dyn_free(&hbuf);
+  curlx_dyn_free(&sbuf);
   return r;
 }
 

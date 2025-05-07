@@ -33,7 +33,7 @@
 #  include <arpa/inet.h>
 #endif
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "hash.h"
 #include "hostip.h"
@@ -94,7 +94,7 @@ static struct Curl_addrinfo *fake_ai(void)
 
 static CURLcode create_node(void)
 {
-  data_key = aprintf("%s:%d", "dummy", 0);
+  data_key = curl_maprintf("%s:%d", "dummy", 0);
   if(!data_key)
     return CURLE_OUT_OF_MEMORY;
 

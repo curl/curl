@@ -43,7 +43,7 @@
 #include "strcase.h"
 #include "share.h"
 #include "vtls/vtls.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "sendf.h"
 #include "http2.h"
 #include "setopt.h"

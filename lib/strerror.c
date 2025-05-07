@@ -866,7 +866,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
 #ifndef UNDER_CE
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
-    msnprintf(buf, buflen, "%s", sys_errlist[err]);
+    curl_msnprintf(buf, buflen, "%s", sys_errlist[err]);
   else
 #endif
   {
@@ -875,7 +875,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
        !get_winsock_error(err, buf, buflen) &&
 #endif
        !get_winapi_error(err, buf, buflen))
-      msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
+      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* not Windows coming up */
 
@@ -887,7 +887,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   */
   if(0 != strerror_r(err, buf, buflen)) {
     if('\0' == buf[0])
-      msnprintf(buf, buflen, "Unknown error %d", err);
+      curl_msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
  /*
@@ -899,18 +899,18 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
-      msnprintf(buf, buflen, "%s", msg);
+      curl_msnprintf(buf, buflen, "%s", msg);
     else
-      msnprintf(buf, buflen, "Unknown error %d", err);
+      curl_msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #else
   {
     /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
     if(msg)
-      msnprintf(buf, buflen, "%s", msg);
+      curl_msnprintf(buf, buflen, "%s", msg);
     else
-      msnprintf(buf, buflen, "Unknown error %d", err);
+      curl_msnprintf(buf, buflen, "Unknown error %d", err);
   }
 #endif
 
@@ -954,7 +954,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(!get_winapi_error((int)err, buf, buflen)) {
-    msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
+    curl_msnprintf(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
   }
 #else
   {
@@ -1090,18 +1090,18 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
   }
 
   if(err == SEC_E_ILLEGAL_MESSAGE) {
-    msnprintf(buf, buflen,
-              "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually occurs "
-              "when a fatal SSL/TLS alert is received (e.g. handshake failed)."
-              " More detail may be available in the Windows System event log.",
-              err);
+    curl_msnprintf(buf, buflen,
+                   "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually "
+                   "occurs when a fatal SSL/TLS alert is received (e.g. "
+                   "handshake failed). More detail may be available in "
+                   "the Windows System event log.", err);
   }
   else {
     char msgbuf[256];
     if(get_winapi_error(err, msgbuf, sizeof(msgbuf)))
-      msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
+      curl_msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
     else
-      msnprintf(buf, buflen, "%s (0x%08X)", txt, err);
+      curl_msnprintf(buf, buflen, "%s (0x%08X)", txt, err);
   }
 
 #else

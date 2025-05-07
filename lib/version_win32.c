@@ -28,12 +28,10 @@
 
 #include <curl/curl.h>
 #include "version_win32.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 #include "memdebug.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)

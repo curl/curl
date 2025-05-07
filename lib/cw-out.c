@@ -87,7 +87,7 @@ static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
   struct cw_out_buf *cwbuf = calloc(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = otype;
-    Curl_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
+    curlx_dyn_init(&cwbuf->b, DYN_PAUSE_BUFFER);
   }
   return cwbuf;
 }
@@ -95,7 +95,7 @@ static struct cw_out_buf *cw_out_buf_create(cw_out_type otype)
 static void cw_out_buf_free(struct cw_out_buf *cwbuf)
 {
   if(cwbuf) {
-    Curl_dyn_free(&cwbuf->b);
+    curlx_dyn_free(&cwbuf->b);
     free(cwbuf);
   }
 }
@@ -146,7 +146,7 @@ static size_t cw_out_bufs_len(struct cw_out_ctx *ctx)
   struct cw_out_buf *cwbuf = ctx->buf;
   size_t len = 0;
   while(cwbuf) {
-    len += Curl_dyn_len(&cwbuf->b);
+    len += curlx_dyn_len(&cwbuf->b);
     cwbuf = cwbuf->next;
   }
   return len;
@@ -263,23 +263,24 @@ static CURLcode cw_out_buf_flush(struct cw_out_ctx *ctx,
 {
   CURLcode result = CURLE_OK;
 
-  if(Curl_dyn_len(&cwbuf->b)) {
+  if(curlx_dyn_len(&cwbuf->b)) {
     size_t consumed;
 
     result = cw_out_ptr_flush(ctx, data, cwbuf->type, flush_all,
-                              Curl_dyn_ptr(&cwbuf->b),
-                              Curl_dyn_len(&cwbuf->b),
+                              curlx_dyn_ptr(&cwbuf->b),
+                              curlx_dyn_len(&cwbuf->b),
                               &consumed);
     if(result)
       return result;
 
     if(consumed) {
-      if(consumed == Curl_dyn_len(&cwbuf->b)) {
-        Curl_dyn_free(&cwbuf->b);
+      if(consumed == curlx_dyn_len(&cwbuf->b)) {
+        curlx_dyn_free(&cwbuf->b);
       }
       else {
-        DEBUGASSERT(consumed < Curl_dyn_len(&cwbuf->b));
-        result = Curl_dyn_tail(&cwbuf->b, Curl_dyn_len(&cwbuf->b) - consumed);
+        DEBUGASSERT(consumed < curlx_dyn_len(&cwbuf->b));
+        result = curlx_dyn_tail(&cwbuf->b,
+                                curlx_dyn_len(&cwbuf->b) - consumed);
         if(result)
           return result;
       }
@@ -319,7 +320,7 @@ static CURLcode cw_out_flush_chain(struct cw_out_ctx *ctx,
   result = cw_out_buf_flush(ctx, data, cwbuf, flush_all);
   if(result)
     return result;
-  if(!Curl_dyn_len(&cwbuf->b)) {
+  if(!curlx_dyn_len(&cwbuf->b)) {
     cw_out_buf_free(cwbuf);
     *pcwbuf = NULL;
   }
@@ -349,7 +350,7 @@ static CURLcode cw_out_append(struct cw_out_ctx *ctx,
     ctx->buf = cwbuf;
   }
   DEBUGASSERT(ctx->buf && (ctx->buf->type == otype));
-  return Curl_dyn_addn(&ctx->buf->b, buf, blen);
+  return curlx_dyn_addn(&ctx->buf->b, buf, blen);
 }
 
 static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,

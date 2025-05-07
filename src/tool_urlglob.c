@@ -23,14 +23,12 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
-#include "dynbuf.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code
@@ -611,7 +609,7 @@ CURLcode glob_match_url(char **result, const char *filename,
   char numbuf[18];
   const char *appendthis = "";
   size_t appendlen = 0;
-  struct curlx_dynbuf dyn;
+  struct dynbuf dyn;
 
   *result = NULL;
 

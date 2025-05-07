@@ -29,9 +29,9 @@
 #include "urldata.h"
 #include "url.h"
 #include "bufq.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "rand.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "connect.h"
 #include "sendf.h"
 #include "multiif.h"
@@ -40,7 +40,7 @@
 #include "transfer.h"
 #include "select.h"
 #include "nonblock.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -851,7 +851,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   result = Curl_rand(data, (unsigned char *)rand, sizeof(rand));
   if(result)
     return result;
-  result = Curl_base64_encode((char *)rand, sizeof(rand), &randstr, &randlen);
+  result = curlx_base64_encode((char *)rand, sizeof(rand), &randstr, &randlen);
   if(result)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
@@ -863,8 +863,8 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
-      result = Curl_dyn_addf(req, "%s: %s\r\n", heads[i].name,
-                             heads[i].val);
+      result = curlx_dyn_addf(req, "%s: %s\r\n", heads[i].name,
+                              heads[i].val);
     }
   }
   k->upgr101 = UPGR101_WS;
@@ -905,7 +905,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       const char *p = getenv("CURL_WS_CHUNK_SIZE");
       if(p) {
         curl_off_t l;
-        if(!Curl_str_number(&p, &l, 1*1024*1024))
+        if(!curlx_str_number(&p, &l, 1*1024*1024))
           chunk_size = (size_t)l;
       }
     }
@@ -1164,7 +1164,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     const char *p = getenv("CURL_WS_CHUNK_EAGAIN");
     if(p) {
       curl_off_t l;
-      if(!Curl_str_number(&p, &l, 1*1024*1024))
+      if(!curlx_str_number(&p, &l, 1*1024*1024))
         chunk_egain = (size_t)l;
     }
 #endif

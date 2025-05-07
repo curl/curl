@@ -58,11 +58,11 @@
 #include "inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "select.h"
 #include "strcase.h"
 #include "easy_lock.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1126,7 +1126,7 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = Curl_timediff(Curl_now(),
+    timediff_t elapsed_secs = curlx_timediff(curlx_now(),
                                             data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
@@ -1197,7 +1197,7 @@ static void dnscache_entry_dtor(void *entry)
  */
 void Curl_dnscache_init(struct Curl_dnscache *dns, size_t size)
 {
-  Curl_hash_init(&dns->entries, size, Curl_hash_str, Curl_str_key_compare,
+  Curl_hash_init(&dns->entries, size, Curl_hash_str, curlx_str_key_compare,
                  dnscache_entry_dtor);
 }
 
@@ -1227,23 +1227,23 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       curl_off_t num = 0;
       size_t entry_len;
       host++;
-      if(!Curl_str_single(&host, '[')) {
-        if(Curl_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
-           Curl_str_single(&host, ']') ||
-           Curl_str_single(&host, ':'))
+      if(!curlx_str_single(&host, '[')) {
+        if(curlx_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
+           curlx_str_single(&host, ']') ||
+           curlx_str_single(&host, ':'))
           continue;
       }
       else {
-        if(Curl_str_until(&host, &source, 4096, ':') ||
-           Curl_str_single(&host, ':')) {
+        if(curlx_str_until(&host, &source, 4096, ':') ||
+           curlx_str_single(&host, ':')) {
           continue;
         }
       }
 
-      if(!Curl_str_number(&host, &num, 0xffff)) {
+      if(!curlx_str_number(&host, &num, 0xffff)) {
         /* Create an entry id, based upon the hostname and port */
-        entry_len = create_dnscache_id(Curl_str(&source),
-                                       Curl_strlen(&source), (int)num,
+        entry_len = create_dnscache_id(curlx_str(&source),
+                                       curlx_strlen(&source), (int)num,
                                        entry_id, sizeof(entry_id));
         dnscache_lock(data, dnscache);
         /* delete entry, ignore if it did not exist */
@@ -1267,18 +1267,18 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         host++;
         permanent = FALSE;
       }
-      if(!Curl_str_single(&host, '[')) {
-        if(Curl_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
-           Curl_str_single(&host, ']'))
+      if(!curlx_str_single(&host, '[')) {
+        if(curlx_str_until(&host, &source, MAX_IPADR_LEN, ']') ||
+           curlx_str_single(&host, ']'))
           continue;
       }
       else {
-        if(Curl_str_until(&host, &source, 4096, ':'))
+        if(curlx_str_until(&host, &source, 4096, ':'))
           continue;
       }
-      if(Curl_str_single(&host, ':') ||
-         Curl_str_number(&host, &port, 0xffff) ||
-         Curl_str_single(&host, ':'))
+      if(curlx_str_single(&host, ':') ||
+         curlx_str_number(&host, &port, 0xffff) ||
+         curlx_str_single(&host, ':'))
         goto err;
 
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -1290,14 +1290,14 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         struct Curl_str target;
         struct Curl_addrinfo *ai;
 
-        if(!Curl_str_single(&host, '[')) {
-          if(Curl_str_until(&host, &target, MAX_IPADR_LEN, ']') ||
-             Curl_str_single(&host, ']'))
+        if(!curlx_str_single(&host, '[')) {
+          if(curlx_str_until(&host, &target, MAX_IPADR_LEN, ']') ||
+             curlx_str_single(&host, ']'))
             goto err;
         }
         else {
-          if(Curl_str_until(&host, &target, 4096, ',')) {
-            if(Curl_str_single(&host, ','))
+          if(curlx_str_until(&host, &target, 4096, ',')) {
+            if(curlx_str_single(&host, ','))
               goto err;
             /* survive nothing but just a comma */
             continue;
@@ -1307,17 +1307,17 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         if(memchr(target.str, ':', target.len)) {
           infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
                 address);
-          if(Curl_str_single(&host, ','))
+          if(curlx_str_single(&host, ','))
             goto err;
           continue;
         }
 #endif
 
-        if(Curl_strlen(&target) >= sizeof(address))
+        if(curlx_strlen(&target) >= sizeof(address))
           goto err;
 
-        memcpy(address, Curl_str(&target), Curl_strlen(&target));
-        address[Curl_strlen(&target)] = '\0';
+        memcpy(address, curlx_str(&target), curlx_strlen(&target));
+        address[curlx_strlen(&target)] = '\0';
 
         ai = Curl_str2addr(address, (int)port);
         if(!ai) {
@@ -1332,7 +1332,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         else {
           head = tail = ai;
         }
-        if(Curl_str_single(&host, ','))
+        if(curlx_str_single(&host, ','))
           break;
       }
 
@@ -1349,7 +1349,7 @@ err:
       }
 
       /* Create an entry id, based upon the hostname and port */
-      entry_len = create_dnscache_id(Curl_str(&source), Curl_strlen(&source),
+      entry_len = create_dnscache_id(curlx_str(&source), curlx_strlen(&source),
                                      (int)port,
                                      entry_id, sizeof(entry_id));
 
@@ -1360,8 +1360,8 @@ err:
 
       if(dns) {
         infof(data, "RESOLVE %.*s:%" CURL_FORMAT_CURL_OFF_T
-              " - old addresses discarded", (int)Curl_strlen(&source),
-              Curl_str(&source), port);
+              " - old addresses discarded", (int)curlx_strlen(&source),
+              curlx_str(&source), port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.
          2. even if entry with correct addresses is already in the cache,
@@ -1377,8 +1377,8 @@ err:
       }
 
       /* put this new host in the cache */
-      dns = dnscache_add_addr(data, dnscache, head, Curl_str(&source),
-                              Curl_strlen(&source), (int)port, permanent);
+      dns = dnscache_add_addr(data, dnscache, head, curlx_str(&source),
+                              curlx_strlen(&source), (int)port, permanent);
       if(dns) {
         /* release the returned reference; the cache itself will keep the
          * entry alive: */
@@ -1392,12 +1392,12 @@ err:
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       infof(data, "Added %.*s:%" CURL_FORMAT_CURL_OFF_T ":%s to DNS cache%s",
-            (int)Curl_strlen(&source), Curl_str(&source), port, addresses,
+            (int)curlx_strlen(&source), curlx_str(&source), port, addresses,
             permanent ? "" : " (non-permanent)");
 #endif
 
       /* Wildcard hostname */
-      if(Curl_str_casecompare(&source, "*")) {
+      if(curlx_str_casecompare(&source, "*")) {
         infof(data, "RESOLVE *:%" CURL_FORMAT_CURL_OFF_T " using wildcard",
               port);
         data->state.wildcard_resolve = TRUE;
@@ -1433,9 +1433,9 @@ static void show_resolve_info(struct Curl_easy *data,
   infof(data, "Host %s:%d was resolved.",
         (dns->hostname[0] ? dns->hostname : "(none)"), dns->hostport);
 
-  Curl_dyn_init(&out[0], 1024);
+  curlx_dyn_init(&out[0], 1024);
 #ifdef CURLRES_IPV6
-  Curl_dyn_init(&out[1], 1024);
+  curlx_dyn_init(&out[1], 1024);
 #endif
 
   while(a) {
@@ -1447,10 +1447,10 @@ static void show_resolve_info(struct Curl_easy *data,
       char buf[MAX_IPADR_LEN];
       struct dynbuf *d = &out[(a->ai_family != PF_INET)];
       Curl_printable_address(a, buf, sizeof(buf));
-      if(Curl_dyn_len(d))
-        result = Curl_dyn_addn(d, ", ", 2);
+      if(curlx_dyn_len(d))
+        result = curlx_dyn_addn(d, ", ", 2);
       if(!result)
-        result = Curl_dyn_add(d, buf);
+        result = curlx_dyn_add(d, buf);
       if(result) {
         infof(data, "too many IP, cannot show");
         goto fail;
@@ -1461,15 +1461,15 @@ static void show_resolve_info(struct Curl_easy *data,
 
 #ifdef CURLRES_IPV6
   infof(data, "IPv6: %s",
-        (Curl_dyn_len(&out[1]) ? Curl_dyn_ptr(&out[1]) : "(none)"));
+        (curlx_dyn_len(&out[1]) ? curlx_dyn_ptr(&out[1]) : "(none)"));
 #endif
   infof(data, "IPv4: %s",
-        (Curl_dyn_len(&out[0]) ? Curl_dyn_ptr(&out[0]) : "(none)"));
+        (curlx_dyn_len(&out[0]) ? curlx_dyn_ptr(&out[0]) : "(none)"));
 
 fail:
-  Curl_dyn_free(&out[0]);
+  curlx_dyn_free(&out[0]);
 #ifdef CURLRES_IPV6
-  Curl_dyn_free(&out[1]);
+  curlx_dyn_free(&out[1]);
 #endif
 }
 #endif

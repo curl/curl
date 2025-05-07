@@ -47,7 +47,7 @@
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "curl_ldap.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "curl_sasl.h"
@@ -614,7 +614,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(do_trace < 0) {
     const char *env = getenv("CURL_OPENLDAP_TRACE");
     curl_off_t e = 0;
-    if(!Curl_str_number(&env, &e, INT_MAX))
+    if(!curlx_str_number(&env, &e, INT_MAX))
       do_trace = e > 0;
   }
   if(do_trace)
@@ -1165,8 +1165,8 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
           /* Binary value, encode to base64. */
           if(bvals[i].bv_len)
-            result = Curl_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
-                                        &val_b64, &val_b64_sz);
+            result = curlx_base64_encode(bvals[i].bv_val, bvals[i].bv_len,
+                                         &val_b64, &val_b64_sz);
           if(!result)
             result = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
                                   STRCONST("\n"));

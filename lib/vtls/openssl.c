@@ -62,7 +62,7 @@
 #include "../strcase.h"
 #include "hostcheck.h"
 #include "../multiif.h"
-#include "../strparse.h"
+#include "../curlx/strparse.h"
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../curl_printf.h"
@@ -122,7 +122,7 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -992,13 +992,13 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     size_t len = sizeof(randb);
     size_t i, i_max;
     for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
-      struct curltime tv = Curl_now();
+      struct curltime tv = curlx_now();
       Curl_wait_ms(1);
       tv.tv_sec *= (time_t)i + 1;
       tv.tv_usec *= (int)i + 2;
-      tv.tv_sec ^= ((Curl_now().tv_sec + (time_t)Curl_now().tv_usec) *
+      tv.tv_sec ^= ((curlx_now().tv_sec + (time_t)curlx_now().tv_usec) *
                     (time_t)(i + 3)) << 8;
-      tv.tv_usec ^= (int) ((Curl_now().tv_sec + (time_t)Curl_now().tv_usec) *
+      tv.tv_usec ^= (int) ((curlx_now().tv_sec + (time_t)curlx_now().tv_usec) *
                            (time_t)(i + 4)) << 16;
       memcpy(&randb[i * sizeof(struct curltime)], &tv,
              sizeof(struct curltime));
@@ -1774,11 +1774,11 @@ static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(bio_out) {
-    Curl_dyn_reset(d);
+    curlx_dyn_reset(d);
     rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_SPLUS_SPC);
     if(rc != -1) {
       BIO_get_mem_ptr(bio_out, &biomem);
-      result = Curl_dyn_addn(d, biomem->data, biomem->length);
+      result = curlx_dyn_addn(d, biomem->data, biomem->length);
       BIO_free(bio_out);
     }
   }
@@ -1992,16 +1992,16 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
     ossl_provider_cleanup(data);
     return CURLE_OK;
   }
-  if(Curl_str_until(&iname, &prov, MAX_PROVIDER_LEN, ':'))
+  if(curlx_str_until(&iname, &prov, MAX_PROVIDER_LEN, ':'))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(!Curl_str_single(&iname, ':'))
+  if(!curlx_str_single(&iname, ':'))
     /* there was a colon, get the propq until the end of string */
     propq = iname;
 
   /* we need the name in a buffer, null-terminated */
-  memcpy(name, Curl_str(&prov), Curl_strlen(&prov));
-  name[Curl_strlen(&prov)] = 0;
+  memcpy(name, curlx_str(&prov), curlx_strlen(&prov));
+  name[curlx_strlen(&prov)] = 0;
 
   if(!data->state.libctx) {
     OSSL_LIB_CTX *libctx = OSSL_LIB_CTX_new();
@@ -3479,8 +3479,8 @@ ossl_cached_x509_store_expired(const struct Curl_easy *data,
   if(cfg->ca_cache_timeout < 0)
     return FALSE;
   else {
-    struct curltime now = Curl_now();
-    timediff_t elapsed_ms = Curl_timediff(now, mb->time);
+    struct curltime now = curlx_now();
+    timediff_t elapsed_ms = curlx_timediff(now, mb->time);
     timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
     return elapsed_ms >= timeout_ms;
@@ -3562,7 +3562,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       free(share->CAfile);
     }
 
-    share->time = Curl_now();
+    share->time = curlx_now();
     share->store = store;
     share->CAfile = CAfile;
   }
@@ -4023,7 +4023,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return CURLE_SSL_CONNECT_ERROR;
       }
       ech_config_len = 2 * strlen(b64);
-      result = Curl_base64_decode(b64, &ech_config, &ech_config_len);
+      result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
       if(result || !ech_config) {
         infof(data, "ECH: cannot base64 decode ECHConfig from command line");
         if(data->set.tls_ech & CURLECH_HARD)
@@ -4312,7 +4312,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
     char *b64str = NULL;
     size_t blen = 0;
 
-    result = Curl_base64_encode((const char *)rcs, rcl, &b64str, &blen);
+    result = curlx_base64_encode((const char *)rcs, rcl, &b64str, &blen);
     if(!result && b64str) {
       infof(data, "ECH: retry_configs %s", b64str);
       free(b64str);
@@ -4743,7 +4743,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
   DEBUGASSERT(octx);
 
-  Curl_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
+  curlx_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
 
   if(!mem) {
     failf(data,
@@ -4773,7 +4773,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
   result = x509_name_oneline(X509_get_subject_name(octx->server_cert),
                              &dname);
-  infof(data, " subject: %s", result ? "[NONE]" : Curl_dyn_ptr(&dname));
+  infof(data, " subject: %s", result ? "[NONE]" : curlx_dyn_ptr(&dname));
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
@@ -4798,7 +4798,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     if(result) {
       X509_free(octx->server_cert);
       octx->server_cert = NULL;
-      Curl_dyn_free(&dname);
+      curlx_dyn_free(&dname);
       return result;
     }
   }
@@ -4811,8 +4811,8 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
-    infof(data, " issuer: %s", Curl_dyn_ptr(&dname));
-    Curl_dyn_free(&dname);
+    infof(data, " issuer: %s", curlx_dyn_ptr(&dname));
+    curlx_dyn_free(&dname);
 
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
@@ -5395,10 +5395,10 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   }
 
   /* Append "tls-server-end-point:" */
-  if(Curl_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
+  if(curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
     return CURLE_OUT_OF_MEMORY;
   /* Append digest */
-  if(Curl_dyn_addn(binding, buf, length))
+  if(curlx_dyn_addn(binding, buf, length))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;

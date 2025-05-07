@@ -27,7 +27,7 @@
 #if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
 #include "curl_sha512_256.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The recommended order of the TLS backends:
  * * OpenSSL

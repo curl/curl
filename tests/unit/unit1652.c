@@ -102,7 +102,7 @@ UNITTEST_START
 #endif
 
 /* Injecting a simple short string via a format */
-msnprintf(input, sizeof(input), "Simple Test");
+curl_msnprintf(input, sizeof(input), "Simple Test");
 Curl_infof(testdata, "%s", input);
 fail_unless(verify(output, input) == 0, "Simple string test");
 

@@ -53,7 +53,7 @@ static int please_continue(void *userp,
       curl_easy_pause(st->easy, CURLPAUSE_CONT);
     }
   }
-  fprintf(stderr, "xferinfo: paused %d\n", st->halted);
+  curl_mfprintf(stderr, "xferinfo: paused %d\n", st->halted);
   return 0; /* go on */
 }
 
@@ -78,7 +78,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     return len;
   }
   if(len)
-    printf("Got bytes but pausing!\n");
+    curl_mprintf("Got bytes but pausing!\n");
   st->halted = 1;
   return CURL_WRITEFUNC_PAUSE;
 }

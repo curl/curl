@@ -43,7 +43,7 @@
 #include "../connect.h"
 #include "../progress.h"
 #include "../strerror.h"
-#include "../dynbuf.h"
+#include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
 #include "../inet_pton.h"
@@ -55,8 +55,7 @@
 #include "../vtls/vtls.h"
 #include "../vtls/openssl.h"
 #include "curl_osslq.h"
-
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 
 /* The last 3 #include files should be in this order */
 #include "../curl_printf.h"
@@ -1665,7 +1664,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     if(acked_len > 0 || (eos && !s->send_blocked)) {
       /* Since QUIC buffers the data written internally, we can tell
        * nghttp3 that it can move forward on it */
-      ctx->q.last_io = Curl_now();
+      ctx->q.last_io = curlx_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
         failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
@@ -1779,7 +1778,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  now = Curl_now();
+  now = curlx_now();
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->tls.ossl.ssl) {
@@ -1793,7 +1792,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     int readable = SOCKET_READABLE(ctx->q.sockfd, 0);
     if(readable > 0 && (readable & CURL_CSELECT_IN)) {
       ctx->got_first_byte = TRUE;
-      ctx->first_byte_at = Curl_now();
+      ctx->first_byte_at = curlx_now();
     }
   }
 
@@ -1813,7 +1812,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     ctx->handshake_at = now;
     ctx->q.last_io = now;
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
-               (int)Curl_timediff(now, ctx->started_at));
+               (int)curlx_timediff(now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -2289,7 +2288,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
       goto out;
     }
     CURL_TRC_CF(data, cf, "negotiated idle timeout: %zums", (size_t)idle_ms);
-    idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
+    idletime = curlx_timediff(curlx_now(), ctx->q.last_io);
     if(idletime > 0 && (uint64_t)idletime > idle_ms)
       goto out;
   }
@@ -2376,7 +2375,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
-      timediff_t ms = Curl_timediff(ctx->first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_timediff(ctx->first_byte_at, ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else

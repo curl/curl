@@ -73,11 +73,11 @@
 #include "../progress.h"
 #include "../share.h"
 #include "../multiif.h"
-#include "../timeval.h"
+#include "../curlx/timeval.h"
 #include "../curl_md5.h"
 #include "../curl_sha256.h"
-#include "../warnless.h"
-#include "../curl_base64.h"
+#include "../curlx/warnless.h"
+#include "../curlx/base64.h"
 #include "../curl_printf.h"
 #include "../inet_pton.h"
 #include "../connect.h"
@@ -616,17 +616,17 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 
   DEBUGASSERT(certnum < ci->num_of_certs);
 
-  Curl_dyn_init(&build, CURL_X509_STR_MAX);
+  curlx_dyn_init(&build, CURL_X509_STR_MAX);
 
-  if(Curl_dyn_add(&build, label) ||
-     Curl_dyn_addn(&build, ":", 1) ||
-     Curl_dyn_addn(&build, value, valuelen))
+  if(curlx_dyn_add(&build, label) ||
+     curlx_dyn_addn(&build, ":", 1) ||
+     curlx_dyn_addn(&build, value, valuelen))
     return CURLE_OUT_OF_MEMORY;
 
   nl = Curl_slist_append_nodup(ci->certinfo[certnum],
-                               Curl_dyn_ptr(&build));
+                               curlx_dyn_ptr(&build));
   if(!nl) {
-    Curl_dyn_free(&build);
+    curlx_dyn_free(&build);
     curl_slist_free_all(ci->certinfo[certnum]);
     result = CURLE_OUT_OF_MEMORY;
   }
@@ -663,7 +663,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
   if(!pem)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  Curl_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
+  curlx_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
 
   begin_pos = strstr(pem, "-----BEGIN PUBLIC KEY-----");
   if(!begin_pos)
@@ -691,16 +691,16 @@ static CURLcode pubkey_pem_to_der(const char *pem,
    */
   while(pem_count < pem_len) {
     if('\n' != pem[pem_count] && '\r' != pem[pem_count]) {
-      result = Curl_dyn_addn(&pbuf, &pem[pem_count], 1);
+      result = curlx_dyn_addn(&pbuf, &pem[pem_count], 1);
       if(result)
         return result;
     }
     ++pem_count;
   }
 
-  result = Curl_base64_decode(Curl_dyn_ptr(&pbuf), der, der_len);
+  result = curlx_base64_decode(curlx_dyn_ptr(&pbuf), der, der_len);
 
-  Curl_dyn_free(&pbuf);
+  curlx_dyn_free(&pbuf);
 
   return result;
 }
@@ -744,9 +744,9 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                                  sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
 
     if(!encode)
-      encode = Curl_base64_encode((char *)sha256sumdigest,
-                                  CURL_SHA256_DIGEST_LENGTH, &encoded,
-                                  &encodedlen);
+      encode = curlx_base64_encode((char *)sha256sumdigest,
+                                   CURL_SHA256_DIGEST_LENGTH, &encoded,
+                                   &encodedlen);
     Curl_safefree(sha256sumdigest);
 
     if(encode)
@@ -801,7 +801,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(!fp)
       return result;
 
-    Curl_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
+    curlx_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
 
     /* Determine the file's size */
     if(fseek(fp, 0, SEEK_END))
@@ -829,14 +829,14 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       size_t want = left > sizeof(buffer) ? sizeof(buffer) : left;
       if(want != fread(buffer, 1, want, fp))
         goto end;
-      if(Curl_dyn_addn(&buf, buffer, want))
+      if(curlx_dyn_addn(&buf, buffer, want))
         goto end;
       left -= want;
     } while(left);
 
     /* If the sizes are the same, it cannot be base64 encoded, must be der */
     if(pubkeylen == size) {
-      if(!memcmp(pubkey, Curl_dyn_ptr(&buf), pubkeylen))
+      if(!memcmp(pubkey, curlx_dyn_ptr(&buf), pubkeylen))
         result = CURLE_OK;
       goto end;
     }
@@ -845,7 +845,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      * Otherwise we will assume it is PEM and try to decode it
      * after placing null terminator
      */
-    pem_read = pubkey_pem_to_der(Curl_dyn_ptr(&buf), &pem_ptr, &pem_len);
+    pem_read = pubkey_pem_to_der(curlx_dyn_ptr(&buf), &pem_ptr, &pem_len);
     /* if it was not read successfully, exit */
     if(pem_read)
       goto end;
@@ -857,7 +857,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = CURLE_OK;
 end:
-    Curl_dyn_free(&buf);
+    curlx_dyn_free(&buf);
     Curl_safefree(pem_ptr);
     fclose(fp);
   }
@@ -1351,7 +1351,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     if(connssl->state == ssl_connection_complete)
-      connssl->handshake_done = Curl_now();
+      connssl->handshake_done = curlx_now();
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);

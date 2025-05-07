@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TIMEDIFF_H
-#define HEADER_CURL_TIMEDIFF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,30 +21,30 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "test.h"
+#include "curl_memory.h"
 
-#include "curl_setup.h"
+#ifndef CURL_STATICLIB
 
-/* Use a larger type even for 32-bit time_t systems so that we can keep
-   microsecond accuracy in it */
-typedef curl_off_t timediff_t;
-#define FMT_TIMEDIFF_T FMT_OFF_T
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(push)
+#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#endif
 
-#define TIMEDIFF_T_MAX CURL_OFF_T_MAX
-#define TIMEDIFF_T_MIN CURL_OFF_T_MIN
+/* when libcurl is *not* static and we build libtests, the global pointers in
+   curl_memory.c is not available unless we provide them like this */
 
-/*
- * Converts number of milliseconds into a timeval structure.
- *
- * Return values:
- *    NULL IF tv is NULL or ms < 0 (eg. no timeout -> blocking select)
- *    tv with 0 in both fields IF ms == 0 (eg. 0ms timeout -> polling select)
- *    tv with converted fields IF ms > 0 (eg. >0ms timeout -> waiting select)
- */
-struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms);
+curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
+curl_free_callback Curl_cfree = (curl_free_callback)free;
+curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
+curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+#if defined(_WIN32) && defined(UNICODE)
+curl_wcsdup_callback Curl_cwcsdup = wcsdup;
+#endif
 
-/*
- * Converts a timeval structure into number of milliseconds.
- */
-timediff_t curlx_tvtoms(struct timeval *tv);
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(pop)
+#endif
 
-#endif /* HEADER_CURL_TIMEDIFF_H */
+#endif /* !CURL_STATICLIB */

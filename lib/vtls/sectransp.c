@@ -33,8 +33,8 @@
 #ifdef USE_SECTRANSP
 
 #include "../urldata.h" /* for the Curl_easy definition */
-#include "../curl_base64.h"
-#include "../strparse.h"
+#include "../curlx/base64.h"
+#include "../curlx/strparse.h"
 #include "../multiif.h"
 #include "../strcase.h"
 #include "x509asn1.h"
@@ -352,9 +352,9 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
       curl_off_t fnum;
       curl_off_t snum;
       /* Parse the version: */
-      if(!Curl_str_number(&os, &fnum, INT_MAX) &&
-         !Curl_str_single(&os, '.') &&
-         !Curl_str_number(&os, &snum, INT_MAX)) {
+      if(!curlx_str_number(&os, &fnum, INT_MAX) &&
+         !curlx_str_single(&os, '.') &&
+         !curlx_str_number(&os, &snum, INT_MAX)) {
         *major = (int)fnum;
         *minor = (int)snum;
       }
@@ -1435,7 +1435,7 @@ static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
   }
   b64[j] = '\0';
 
-  err = Curl_base64_decode((const char *)b64, out, outlen);
+  err = curlx_base64_decode((const char *)b64, out, outlen);
   free(b64);
   if(err) {
     free(*out);
@@ -1454,7 +1454,7 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
   unsigned char buf[512];
   struct dynbuf certs;
 
-  Curl_dyn_init(&certs, MAX_CERTS_SIZE);
+  curlx_dyn_init(&certs, MAX_CERTS_SIZE);
 
   fd = open(file, 0);
   if(fd < 0)
@@ -1466,18 +1466,18 @@ static int read_cert(const char *file, unsigned char **out, size_t *outlen)
       break;
     if(n < 0) {
       close(fd);
-      Curl_dyn_free(&certs);
+      curlx_dyn_free(&certs);
       return -1;
     }
-    if(Curl_dyn_addn(&certs, buf, n)) {
+    if(curlx_dyn_addn(&certs, buf, n)) {
       close(fd);
       return -1;
     }
   }
   close(fd);
 
-  *out = Curl_dyn_uptr(&certs);
-  *outlen = Curl_dyn_len(&certs);
+  *out = curlx_dyn_uptr(&certs);
+  *outlen = curlx_dyn_len(&certs);
 
   return 0;
 }

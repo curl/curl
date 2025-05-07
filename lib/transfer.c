@@ -470,13 +470,13 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              Curl_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              Curl_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;

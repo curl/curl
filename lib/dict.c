@@ -115,7 +115,7 @@ static char *unescape_word(const char *input)
   struct dynbuf out;
   const char *ptr;
   CURLcode result = CURLE_OK;
-  Curl_dyn_init(&out, DYN_DICT_WORD);
+  curlx_dyn_init(&out, DYN_DICT_WORD);
 
   /* According to RFC2229 section 2.2, these letters need to be escaped with
      \[letter] */
@@ -123,13 +123,13 @@ static char *unescape_word(const char *input)
     char ch = *ptr;
     if((ch <= 32) || (ch == 127) ||
        (ch == '\'') || (ch == '\"') || (ch == '\\'))
-      result = Curl_dyn_addn(&out, "\\", 1);
+      result = curlx_dyn_addn(&out, "\\", 1);
     if(!result)
-      result = Curl_dyn_addn(&out, ptr, 1);
+      result = curlx_dyn_addn(&out, ptr, 1);
     if(result)
       return NULL;
   }
-  return Curl_dyn_ptr(&out);
+  return curlx_dyn_ptr(&out);
 }
 
 /* sendf() sends formatted data to the server */

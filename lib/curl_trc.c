@@ -43,7 +43,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "socks.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
@@ -497,13 +497,13 @@ static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
   size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
-    if(Curl_str_casecompare(token, trc_cfts[i].cft->name)) {
+    if(curlx_str_casecompare(token, trc_cfts[i].cft->name)) {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
   for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
-    if(Curl_str_casecompare(token, trc_feats[i].feat->name)) {
+    if(curlx_str_casecompare(token, trc_feats[i].feat->name)) {
       trc_feats[i].feat->log_level = lvl;
       break;
     }
@@ -527,33 +527,33 @@ static void trc_apply_level_by_category(int category, int lvl)
 static CURLcode trc_opt(const char *config)
 {
   struct Curl_str out;
-  while(!Curl_str_until(&config, &out, 32, ',')) {
+  while(!curlx_str_until(&config, &out, 32, ',')) {
     int lvl = CURL_LOG_LVL_INFO;
-    const char *token = Curl_str(&out);
+    const char *token = curlx_str(&out);
 
     if(*token == '-') {
       lvl = CURL_LOG_LVL_NONE;
-      Curl_str_nudge(&out, 1);
+      curlx_str_nudge(&out, 1);
     }
     else if(*token == '+')
-      Curl_str_nudge(&out, 1);
+      curlx_str_nudge(&out, 1);
 
-    if(Curl_str_casecompare(&out, "all"))
+    if(curlx_str_casecompare(&out, "all"))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(Curl_str_casecompare(&out, "protocol"))
+    else if(curlx_str_casecompare(&out, "protocol"))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(Curl_str_casecompare(&out, "network"))
+    else if(curlx_str_casecompare(&out, "network"))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(Curl_str_casecompare(&out, "proxy"))
+    else if(curlx_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else if(Curl_str_casecompare(&out, "doh")) {
+    else if(curlx_str_casecompare(&out, "doh")) {
       struct Curl_str dns = { "dns", 3 };
       trc_apply_level_by_name(&dns, lvl);
     }
     else
       trc_apply_level_by_name(&out, lvl);
 
-    if(Curl_str_single(&config, ','))
+    if(curlx_str_single(&config, ','))
       break;
   }
   return CURLE_OK;

@@ -65,10 +65,10 @@
 #include "../inet_ntop.h"
 #include "../parsedate.h"          /* for the week day and month names */
 #include "../sockaddr.h"           /* required for Curl_sockaddr_storage */
-#include "../strparse.h"
+#include "../curlx/strparse.h"
 #include "../multiif.h"
 #include "../select.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "curl_path.h"
 
 #ifdef HAVE_SYS_STAT_H
@@ -1417,7 +1417,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SFTP_READDIR:
-      Curl_dyn_reset(&sshc->readdir_buf);
+      curlx_dyn_reset(&sshc->readdir_buf);
       if(sshc->readdir_attrs)
         sftp_attributes_free(sshc->readdir_attrs);
 
@@ -1447,7 +1447,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
         }
         else {
-          if(Curl_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
+          if(curlx_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
             sshc->actualcode = CURLE_OUT_OF_MEMORY;
             state(data, SSH_STOP);
             break;
@@ -1515,8 +1515,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       Curl_safefree(sshc->readdir_linkPath);
 
-      if(Curl_dyn_addf(&sshc->readdir_buf, " -> %s",
-                       sshc->readdir_filename)) {
+      if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
+                        sshc->readdir_filename)) {
         sshc->actualcode = CURLE_OUT_OF_MEMORY;
         break;
       }
@@ -1529,12 +1529,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       state(data, SSH_SFTP_READDIR_BOTTOM);
       FALLTHROUGH();
     case SSH_SFTP_READDIR_BOTTOM:
-      if(Curl_dyn_addn(&sshc->readdir_buf, "\n", 1))
+      if(curlx_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
       else
         result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   Curl_dyn_ptr(&sshc->readdir_buf),
-                                   Curl_dyn_len(&sshc->readdir_buf));
+                                   curlx_dyn_ptr(&sshc->readdir_buf),
+                                   curlx_dyn_len(&sshc->readdir_buf));
 
       ssh_string_free_char(sshc->readdir_tmp);
       sshc->readdir_tmp = NULL;
@@ -1609,13 +1609,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           const char *p = data->state.range;
           int from_t, to_t;
 
-          from_t = Curl_str_number(&p, &from, CURL_OFF_T_MAX);
+          from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
           if(from_t == STRE_OVERFLOW)
             return CURLE_RANGE_ERROR;
-          Curl_str_passblanks(&p);
-          (void)Curl_str_single(&p, '-');
+          curlx_str_passblanks(&p);
+          (void)curlx_str_single(&p, '-');
 
-          to_t = Curl_str_numblanks(&p, &to);
+          to_t = curlx_str_numblanks(&p, &to);
           if(to_t == STRE_OVERFLOW)
             return CURLE_RANGE_ERROR;
 
@@ -2044,7 +2044,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
-    struct curltime now = Curl_now();
+    struct curltime now = curlx_now();
 
     result = myssh_statemach_act(data, &block);
     if(result)
@@ -2087,7 +2087,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   struct ssh_conn *sshc = &conn->proto.sshc;
 
   if(!sshc->initialised) {
-    Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
+    curlx_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
     sshc->initialised = TRUE;
   }
 
@@ -2338,7 +2338,7 @@ static void sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data)
     Curl_safefree(sshc->rsa);
     Curl_safefree(sshc->quote_path1);
     Curl_safefree(sshc->quote_path2);
-    Curl_dyn_free(&sshc->readdir_buf);
+    curlx_dyn_free(&sshc->readdir_buf);
     Curl_safefree(sshc->readdir_linkPath);
     SSH_STRING_FREE_CHAR(sshc->homedir);
     sshc->initialised = FALSE;
@@ -2893,7 +2893,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
-    (void)Curl_str_number(&p, &gid, UINT_MAX);
+    (void)curlx_str_number(&p, &gid, UINT_MAX);
     sshc->quote_attrs->gid = (uint32_t)gid;
     if(sshc->quote_attrs->gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
        !sshc->acceptfail) {
@@ -2910,7 +2910,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   else if(!strncmp(cmd, "chmod", 5)) {
     curl_off_t perms;
     const char *p = sshc->quote_path1;
-    if(Curl_str_octal(&p, &perms, 07777)) {
+    if(curlx_str_octal(&p, &perms, 07777)) {
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
       failf(data, "Syntax error: chmod permissions not a number");
@@ -2925,7 +2925,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   else if(!strncmp(cmd, "chown", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t uid;
-    (void)Curl_str_number(&p, &uid, UINT_MAX);
+    (void)curlx_str_number(&p, &uid, UINT_MAX);
     if(sshc->quote_attrs->uid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
        !sshc->acceptfail) {
       Curl_safefree(sshc->quote_path1);

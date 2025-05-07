@@ -61,7 +61,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   case 3:
     return 0;
   }
-  fprintf(stderr, "Read callback called after EOF\n");
+  curl_mfprintf(stderr, "Read callback called after EOF\n");
   exit(1);
 }
 
@@ -80,7 +80,7 @@ static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
     time_t delta = time(NULL) - pooh->origin;
 
     if(delta >= 4 * PAUSE_TIME) {
-      fprintf(stderr, "unpausing failed: drain problem?\n");
+      curl_mfprintf(stderr, "unpausing failed: drain problem?\n");
       return CURLE_ABORTED_BY_CALLBACK;
     }
 
@@ -118,7 +118,7 @@ CURLcode test(char *URL)
    */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -141,7 +141,7 @@ CURLcode test(char *URL)
   part = curl_mime_addpart(mime);
   res = curl_mime_name(part, testname);
   if(res != CURLE_OK) {
-    fprintf(stderr,
+    curl_mfprintf(stderr,
             "Something went wrong when building the mime structure: %d\n",
             res);
     goto test_cleanup;
@@ -163,7 +163,7 @@ CURLcode test(char *URL)
                           CURLFORM_END);
   )
   if(formrc) {
-    fprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
+    curl_mfprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
@@ -196,7 +196,7 @@ CURLcode test(char *URL)
       time_t delta = time(NULL) - pooh.origin;
 
       if(delta >= 4 * PAUSE_TIME) {
-        fprintf(stderr, "unpausing failed: drain problem?\n");
+        curl_mfprintf(stderr, "unpausing failed: drain problem?\n");
         res = CURLE_OPERATION_TIMEDOUT;
         break;
       }
@@ -220,7 +220,7 @@ CURLcode test(char *URL)
 #endif
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcept, &timeout);
     if(rc == -1) {
-      fprintf(stderr, "Select error\n");
+      curl_mfprintf(stderr, "Select error\n");
       break;
     }
   }

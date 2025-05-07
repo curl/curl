@@ -59,7 +59,7 @@ CURLcode test(char *URL)
           m = curl_multi_perform(multi, &running_handles);
 
         if(m)
-          fprintf(stderr, "curl_multi_perform failed\n");
+          curl_mfprintf(stderr, "curl_multi_perform failed\n");
       }
       /* Close the easy handle *before* the multi handle. Doing it the other
          way around avoids the issue. */

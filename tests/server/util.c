@@ -45,7 +45,7 @@
 #include "strerror.h"
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include <curlx.h> /* from the private lib dir */
 #include "util.h"
 
 /* need init from main() */

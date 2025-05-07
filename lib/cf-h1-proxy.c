@@ -28,7 +28,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "sendf.h"
 #include "http.h"
 #include "http1.h"
@@ -40,11 +40,11 @@
 #include "cf-h1-proxy.h"
 #include "connect.h"
 #include "curl_trc.h"
-#include "curlx.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -97,8 +97,8 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   (void)data;
   (void)cf;
   DEBUGASSERT(ts);
-  Curl_dyn_reset(&ts->rcvbuf);
-  Curl_dyn_reset(&ts->request_data);
+  curlx_dyn_reset(&ts->rcvbuf);
+  curlx_dyn_reset(&ts->request_data);
   ts->tunnel_state = H1_TUNNEL_INIT;
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
@@ -123,8 +123,8 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   infof(data, "allocate connect buffer");
 
-  Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
-  Curl_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
+  curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
+  curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
   Curl_httpchunk_init(data, &ts->ch, TRUE);
 
   *pts =  ts;
@@ -150,7 +150,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "new tunnel state 'connect'");
     ts->tunnel_state = H1_TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
-    Curl_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->rcvbuf);
     break;
 
   case H1_TUNNEL_RECEIVE:
@@ -173,8 +173,8 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     if(new_state == H1_TUNNEL_FAILED)
       CURL_TRC_CF(data, cf, "new tunnel state 'failed'");
     ts->tunnel_state = new_state;
-    Curl_dyn_reset(&ts->rcvbuf);
-    Curl_dyn_reset(&ts->request_data);
+    curlx_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->request_data);
     /* restore the protocol pointer */
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
@@ -193,8 +193,8 @@ static void tunnel_free(struct Curl_cfilter *cf,
     struct h1_tunnel_state *ts = cf->ctx;
     if(ts) {
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-      Curl_dyn_free(&ts->rcvbuf);
-      Curl_dyn_free(&ts->request_data);
+      curlx_dyn_free(&ts->rcvbuf);
+      curlx_dyn_free(&ts->request_data);
       Curl_httpchunk_free(data, &ts->ch);
       free(ts);
       cf->ctx = NULL;
@@ -226,7 +226,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   infof(data, "Establish HTTP proxy tunnel to %s", req->authority);
 
-  Curl_dyn_reset(&ts->request_data);
+  curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
   http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
@@ -248,8 +248,8 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
                              struct h1_tunnel_state *ts,
                              bool *done)
 {
-  char *buf = Curl_dyn_ptr(&ts->request_data);
-  size_t request_len = Curl_dyn_len(&ts->request_data);
+  char *buf = curlx_dyn_ptr(&ts->request_data);
+  size_t request_len = curlx_dyn_len(&ts->request_data);
   size_t blen = request_len;
   CURLcode result = CURLE_OK;
   ssize_t nwritten;
@@ -316,7 +316,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
     }
     else {
       const char *p = header + strlen("Content-Length:");
-      if(Curl_str_numblanks(&p, &ts->cl)) {
+      if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
@@ -444,7 +444,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       continue;
     }
 
-    if(Curl_dyn_addn(&ts->rcvbuf, &byte, 1)) {
+    if(curlx_dyn_addn(&ts->rcvbuf, &byte, 1)) {
       failf(data, "CONNECT response too large");
       return CURLE_RECV_ERROR;
     }
@@ -454,8 +454,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       continue;
 
     ts->headerlines++;
-    linep = Curl_dyn_ptr(&ts->rcvbuf);
-    line_len = Curl_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
+    linep = curlx_dyn_ptr(&ts->rcvbuf);
+    line_len = curlx_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
 
     /* output debug if that is requested */
     Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
@@ -512,7 +512,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     if(result)
       return result;
 
-    Curl_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->rcvbuf);
   } /* while there is buffer left and loop is requested */
 
   if(error)

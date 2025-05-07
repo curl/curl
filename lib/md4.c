@@ -30,7 +30,7 @@
 
 #include "strdup.h"
 #include "curl_md4.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslv.h>

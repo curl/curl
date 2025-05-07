@@ -68,11 +68,11 @@
 #include "multiif.h"
 #include "url.h"
 #include "speedcheck.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "http_proxy.h"
 #include "socks.h"
 #include "strdup.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -452,7 +452,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
   bool response = FALSE;
 
   /* First check whether there is a cached response from server */
-  if(Curl_dyn_len(&pp->recvbuf) && (*Curl_dyn_ptr(&pp->recvbuf) > '3')) {
+  if(curlx_dyn_len(&pp->recvbuf) && (*curlx_dyn_ptr(&pp->recvbuf) > '3')) {
     /* Data connection could not be established, let's return */
     infof(data, "There is negative response in cache while serv connect");
     (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
@@ -481,16 +481,16 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
   if(response) {
     infof(data, "Ctrl conn has data while waiting for data conn");
     if(pp->overflow > 3) {
-      const char *r = Curl_dyn_ptr(&pp->recvbuf);
+      const char *r = curlx_dyn_ptr(&pp->recvbuf);
 
       DEBUGASSERT((pp->overflow + pp->nfinal) <=
-                  Curl_dyn_len(&pp->recvbuf));
+                  curlx_dyn_len(&pp->recvbuf));
       /* move over the most recently handled response line */
       r += pp->nfinal;
 
       if(LASTLINE(r)) {
         curl_off_t status;
-        if(!Curl_str_number(&r, &status, 999) && (status == 226)) {
+        if(!curlx_str_number(&r, &status, 999) && (status == 226)) {
           /* funny timing situation where we get the final message on the
              control connection before traffic on the data connection has been
              noticed. Leave the 226 in there and use this as a trigger to read
@@ -564,7 +564,7 @@ static bool ftp_endofresp(struct Curl_easy *data, struct connectdata *conn,
   (void)data;
   (void)conn;
 
-  if((len > 3) && LASTLINE(line) && !Curl_str_number(&line, &status, 999)) {
+  if((len > 3) && LASTLINE(line) && !curlx_str_number(&line, &status, 999)) {
     *code = (int)status;
     return TRUE;
   }
@@ -585,7 +585,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   {
     struct connectdata *conn = data->conn;
-    char * const buf = Curl_dyn_ptr(&ftpc->pp.recvbuf);
+    char * const buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
 
     /* handle the security-oriented responses 6xx ***/
     switch(code) {
@@ -695,7 +695,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
      *
      */
 
-    if(Curl_dyn_len(&pp->recvbuf) && (cache_skip < 2)) {
+    if(curlx_dyn_len(&pp->recvbuf) && (cache_skip < 2)) {
       /*
        * There is a cache left since before. We then skipping the wait for
        * socket action, unless this is the same cache like the previous round
@@ -729,7 +729,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
     if(result)
       break;
 
-    if(!nread && Curl_dyn_len(&pp->recvbuf))
+    if(!nread && curlx_dyn_len(&pp->recvbuf))
       /* bump cache skip counter as on repeated skips we must wait for more
          data */
       cache_skip++;
@@ -953,12 +953,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         curl_off_t start;
         curl_off_t end;
         portp++;
-        if(!Curl_str_number(&portp, &start, 0xffff)) {
+        if(!curlx_str_number(&portp, &start, 0xffff)) {
           /* got the first number */
           port_min = (unsigned short)start;
-          if(!Curl_str_single(&portp, '-')) {
+          if(!curlx_str_single(&portp, '-')) {
             /* got the dash */
-            if(!Curl_str_number(&portp, &end, 0xffff))
+            if(!curlx_str_number(&portp, &end, 0xffff))
               /* got the second number */
               port_max = (unsigned short)end;
           }
@@ -1790,7 +1790,7 @@ static bool match_pasv_6nums(const char *p,
         return FALSE;
       p++;
     }
-    if(Curl_str_number(&p, &num, 0xff))
+    if(curlx_str_number(&p, &num, 0xff))
       return FALSE;
     array[i] = (unsigned int)num;
   }
@@ -1807,7 +1807,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   unsigned short connectport; /* the local port connect() should use! */
   struct pingpong *pp = &ftpc->pp;
   char *str =
-    Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
+    curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
 
   /* if we come here again, make sure the former name is cleared */
   Curl_safefree(ftpc->newhost);
@@ -1824,7 +1824,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       if((ptr[1] == sep) && (ptr[2] == sep) && ISDIGIT(ptr[3])) {
         const char *p = &ptr[3];
         curl_off_t num;
-        if(Curl_str_number(&p, &num, 0xffff) || (*p != sep)) {
+        if(curlx_str_number(&p, &num, 0xffff) || (*p != sep)) {
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
@@ -2073,7 +2073,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
          last .sss part is optional and means fractions of a second */
       int year, month, day, hour, minute, second;
       struct pingpong *pp = &ftpc->pp;
-      char *resp = Curl_dyn_ptr(&pp->recvbuf) + 4;
+      char *resp = curlx_dyn_ptr(&pp->recvbuf) + 4;
       if(ftp_213_date(resp, &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
@@ -2297,7 +2297,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   curl_off_t filesize = -1;
-  char *buf = Curl_dyn_ptr(&ftpc->pp.recvbuf);
+  char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
   size_t len = ftpc->pp.nfinal;
 
   /* get the size from the ascii string: */
@@ -2316,7 +2316,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     }
     else
       fdigit = start;
-    if(Curl_str_number(&fdigit, &filesize, CURL_OFF_T_MAX))
+    if(curlx_str_number(&fdigit, &filesize, CURL_OFF_T_MAX))
       filesize = -1; /* size remain unknown */
   }
   else if(ftpcode == 550) { /* "No such file or directory" */
@@ -2479,7 +2479,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        *
        * Example D above makes this parsing a little tricky */
       const char *bytes;
-      char *buf = Curl_dyn_ptr(&ftpc->pp.recvbuf);
+      char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
       bytes = strstr(buf, " bytes");
       if(bytes) {
         long in = (long)(--bytes-buf);
@@ -2500,7 +2500,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
         if(bytes) {
           ++bytes;
           /* get the number! */
-          if(Curl_str_number(&bytes, &size, CURL_OFF_T_MAX))
+          if(curlx_str_number(&bytes, &size, CURL_OFF_T_MAX))
             size = 1;
         }
       }
@@ -2854,11 +2854,11 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
     case FTP_PWD:
       if(ftpcode == 257) {
-        char *ptr = Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                       letter */
+        char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                        letter */
         bool entry_extracted = FALSE;
         struct dynbuf out;
-        Curl_dyn_init(&out, 1000);
+        curlx_dyn_init(&out, 1000);
 
         /* Reply format is like
            257<space>[rubbish]"<directory-name>"<space><commentary> and the
@@ -2879,18 +2879,18 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
             if('\"' == *ptr) {
               if('\"' == ptr[1]) {
                 /* "quote-doubling" */
-                result = Curl_dyn_addn(&out, &ptr[1], 1);
+                result = curlx_dyn_addn(&out, &ptr[1], 1);
                 ptr++;
               }
               else {
                 /* end of path */
-                if(Curl_dyn_len(&out))
+                if(curlx_dyn_len(&out))
                   entry_extracted = TRUE;
                 break; /* get out of this loop */
               }
             }
             else
-              result = Curl_dyn_addn(&out, ptr, 1);
+              result = curlx_dyn_addn(&out, ptr, 1);
             if(result)
               return result;
           }
@@ -2907,7 +2907,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                The method used here is to check the server OS: we do it only
              if the path name looks strange to minimize overhead on other
              systems. */
-          char *dir = Curl_dyn_ptr(&out);
+          char *dir = curlx_dyn_ptr(&out);
 
           if(!ftpc->server_os && dir[0] != '/') {
             result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
@@ -2938,7 +2938,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
         }
         else {
           /* could not get the path */
-          Curl_dyn_free(&out);
+          curlx_dyn_free(&out);
           infof(data, "Failed to figure out path");
         }
       }
@@ -2948,7 +2948,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
     case FTP_SYST:
       if(ftpcode == 215) {
-        char *ptr = Curl_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+        char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
                                                        letter */
         char *os;
         char *start;
@@ -3351,7 +3351,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     timediff_t old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
-    pp->response = Curl_now(); /* timeout relative now */
+    pp->response = curlx_now(); /* timeout relative now */
 
     result = Curl_GetFTPResponse(data, &nread, &ftpcode);
 
@@ -3476,7 +3476,7 @@ CURLcode ftp_sendquote(struct Curl_easy *data,
 
       result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
       if(!result) {
-        pp->response = Curl_now(); /* timeout relative now */
+        pp->response = curlx_now(); /* timeout relative now */
         result = Curl_GetFTPResponse(data, &nread, &ftpcode);
       }
       if(result)

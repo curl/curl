@@ -24,14 +24,12 @@
 #include "tool_setup.h"
 
 #ifndef CURL_DISABLE_IPFS
-#include "curlx.h"
-#include "dynbuf.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_ipfs.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /* ensure input ends in slash */
 static CURLcode ensure_trailing_slash(char **input)
@@ -39,7 +37,7 @@ static CURLcode ensure_trailing_slash(char **input)
   if(*input && **input) {
     size_t len = strlen(*input);
     if(((*input)[len - 1] != '/')) {
-      struct curlx_dynbuf dyn;
+      struct dynbuf dyn;
       curlx_dyn_init(&dyn, len + 2);
 
       if(curlx_dyn_addn(&dyn, *input, len)) {
@@ -96,7 +94,7 @@ static char *ipfs_gateway(void)
 
   if(gateway_file) {
     int c;
-    struct curlx_dynbuf dyn;
+    struct dynbuf dyn;
     curlx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
 
     /* get the first line of the gateway file, ignore the rest */

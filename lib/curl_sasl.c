@@ -42,14 +42,14 @@
 #include <curl/curl.h>
 #include "urldata.h"
 
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "curl_md5.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"
 #include "curl_hmac.h"
 #include "curl_sasl.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "sendf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -283,7 +283,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
     if(!*serverdata || *serverdata == '=')
       Curl_bufref_set(out, NULL, 0, NULL);
     else {
-      result = Curl_base64_decode(serverdata, &msg, &msglen);
+      result = curlx_base64_decode(serverdata, &msg, &msglen);
       if(!result)
         Curl_bufref_set(out, msg, msglen, curl_free);
     }
@@ -306,8 +306,8 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
       char *base64;
       size_t base64len;
 
-      result = Curl_base64_encode((const char *) Curl_bufref_ptr(msg),
-                                  Curl_bufref_len(msg), &base64, &base64len);
+      result = curlx_base64_encode((const char *) Curl_bufref_ptr(msg),
+                                   Curl_bufref_len(msg), &base64, &base64len);
       if(!result)
         Curl_bufref_set(msg, base64, base64len, curl_free);
     }

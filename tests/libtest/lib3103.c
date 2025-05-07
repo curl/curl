@@ -51,8 +51,8 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
+                  curl_easy_strerror(res));
   }
 
 test_cleanup:

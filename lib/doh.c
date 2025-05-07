@@ -34,10 +34,10 @@
 #include "multiif.h"
 #include "url.h"
 #include "share.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "connect.h"
 #include "strdup.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "escape.h"
 #include "urlapi-int.h"
 
@@ -183,7 +183,7 @@ doh_probe_write_cb(char *contents, size_t size, size_t nmemb, void *userp)
   if(!doh_req)
     return CURL_WRITEFUNC_ERROR;
 
-  if(Curl_dyn_addn(&doh_req->resp_body, contents, realsize))
+  if(curlx_dyn_addn(&doh_req->resp_body, contents, realsize))
     return 0;
 
   return realsize;
@@ -244,10 +244,10 @@ static void doh_probe_done(struct Curl_easy *data,
     if(doh_req) {
       if(!result) {
         dohp->probe_resp[i].dnstype = doh_req->dnstype;
-        result = Curl_dyn_addn(&dohp->probe_resp[i].body,
-                               Curl_dyn_ptr(&doh_req->resp_body),
-                               Curl_dyn_len(&doh_req->resp_body));
-        Curl_dyn_free(&doh_req->resp_body);
+        result = curlx_dyn_addn(&dohp->probe_resp[i].body,
+                                curlx_dyn_ptr(&doh_req->resp_body),
+                                curlx_dyn_len(&doh_req->resp_body));
+        curlx_dyn_free(&doh_req->resp_body);
       }
       Curl_meta_remove(doh, CURL_EZM_DOH_PROBE);
     }
@@ -269,7 +269,7 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
   if(e) {
     struct doh_request *doh_req = e;
     curl_slist_free_all(doh_req->req_hds);
-    Curl_dyn_free(&doh_req->resp_body);
+    curlx_dyn_free(&doh_req->resp_body);
     free(e);
   }
 }
@@ -301,7 +301,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   if(!doh_req)
     return CURLE_OUT_OF_MEMORY;
   doh_req->dnstype = dnstype;
-  Curl_dyn_init(&doh_req->resp_body, DYN_DOH_RESPONSE);
+  curlx_dyn_init(&doh_req->resp_body, DYN_DOH_RESPONSE);
 
   d = doh_req_encode(host, dnstype, doh_req->req_body,
                      sizeof(doh_req->req_body),
@@ -490,7 +490,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
     dohp->probe_resp[i].probe_mid = UINT_MAX;
-    Curl_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
+    curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
   conn->bits.doh = TRUE;
@@ -665,14 +665,14 @@ static DOHcode doh_store_cname(const unsigned char *doh, size_t dohlen,
       index++;
 
     if(length) {
-      if(Curl_dyn_len(c)) {
-        if(Curl_dyn_addn(c, STRCONST(".")))
+      if(curlx_dyn_len(c)) {
+        if(curlx_dyn_addn(c, STRCONST(".")))
           return DOH_OUT_OF_MEM;
       }
       if((index + length) > dohlen)
         return DOH_DNS_BAD_LABEL;
 
-      if(Curl_dyn_addn(c, &doh[index], length))
+      if(curlx_dyn_addn(c, &doh[index], length))
         return DOH_OUT_OF_MEM;
       index += length;
     }
@@ -736,7 +736,7 @@ UNITTEST void de_init(struct dohentry *de)
   memset(de, 0, sizeof(*de));
   de->ttl = INT_MAX;
   for(i = 0; i < DOH_MAX_CNAME; i++)
-    Curl_dyn_init(&de->cname[i], DYN_DOH_CNAME);
+    curlx_dyn_init(&de->cname[i], DYN_DOH_CNAME);
 }
 
 
@@ -923,7 +923,7 @@ static void doh_show(struct Curl_easy *data,
   }
 #endif
   for(i = 0; i < d->numcname; i++) {
-    infof(data, "CNAME: %s", Curl_dyn_ptr(&d->cname[i]));
+    infof(data, "CNAME: %s", curlx_dyn_ptr(&d->cname[i]));
   }
 }
 #else
@@ -1060,7 +1060,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
 {
   int i = 0;
   for(i = 0; i < d->numcname; i++) {
-    Curl_dyn_free(&d->cname[i]);
+    curlx_dyn_free(&d->cname[i]);
   }
 #ifdef USE_HTTPSRR
   for(i = 0; i < d->numhttps_rrs; i++)
@@ -1095,35 +1095,35 @@ static CURLcode doh_decode_rdata_name(const unsigned char **buf,
   DEBUGASSERT(buf && remaining && dnsname);
   if(!buf || !remaining || !dnsname || !*remaining)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&thename, CURL_MAXLEN_host_name);
+  curlx_dyn_init(&thename, CURL_MAXLEN_host_name);
   rem = *remaining;
   cp = *buf;
   clen = *cp++;
   if(clen == 0) {
     /* special case - return "." as name */
-    if(Curl_dyn_addn(&thename, ".", 1))
+    if(curlx_dyn_addn(&thename, ".", 1))
       return CURLE_OUT_OF_MEMORY;
   }
   while(clen) {
     if(clen >= rem) {
-      Curl_dyn_free(&thename);
+      curlx_dyn_free(&thename);
       return CURLE_OUT_OF_MEMORY;
     }
-    if(Curl_dyn_addn(&thename, cp, clen) ||
-       Curl_dyn_addn(&thename, ".", 1))
+    if(curlx_dyn_addn(&thename, cp, clen) ||
+       curlx_dyn_addn(&thename, ".", 1))
       return CURLE_TOO_LARGE;
 
     cp += clen;
     rem -= (clen + 1);
     if(rem <= 0) {
-      Curl_dyn_free(&thename);
+      curlx_dyn_free(&thename);
       return CURLE_OUT_OF_MEMORY;
     }
     clen = *cp++;
   }
   *buf = cp;
   *remaining = rem - 1;
-  *dnsname = Curl_dyn_ptr(&thename);
+  *dnsname = curlx_dyn_ptr(&thename);
   return CURLE_OK;
 }
 
@@ -1260,8 +1260,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct doh_response *p = &dohp->probe_resp[slot];
       if(!p->dnstype)
         continue;
-      rc[slot] = doh_resp_decode(Curl_dyn_uptr(&p->body),
-                                 Curl_dyn_len(&p->body),
+      rc[slot] = doh_resp_decode(curlx_dyn_uptr(&p->body),
+                                 curlx_dyn_len(&p->body),
                                  p->dnstype, &de);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
@@ -1364,7 +1364,7 @@ void Curl_doh_cleanup(struct Curl_easy *data)
     int i;
     Curl_doh_close(data);
     for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-      Curl_dyn_free(&dohp->probe_resp[i].body);
+      curlx_dyn_free(&dohp->probe_resp[i].body);
     }
     Curl_safefree(data->state.async.doh);
   }

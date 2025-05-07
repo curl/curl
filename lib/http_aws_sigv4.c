@@ -35,7 +35,7 @@
 #include "parsedate.h"
 #include "sendf.h"
 #include "escape.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 #include <time.h>
 
@@ -95,7 +95,7 @@ static void trim_headers(struct curl_slist *head)
     store = (char *)CURL_UNCONST(value);
 
     /* skip leading whitespace */
-    Curl_str_passblanks(&value);
+    curlx_str_passblanks(&value);
 
     while(*value) {
       int space = 0;
@@ -172,9 +172,9 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
       char *colon_next;
       char *val_next;
 
-      Curl_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
+      curlx_dyn_init(&buf, CURL_MAX_HTTP_HEADER);
 
-      result = Curl_dyn_add(&buf, curr->data);
+      result = curlx_dyn_add(&buf, curr->data);
       if(result)
         return result;
 
@@ -182,16 +182,16 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
       DEBUGASSERT(colon_next);
       val_next = colon_next + 1;
 
-      result = Curl_dyn_addn(&buf, ",", 1);
+      result = curlx_dyn_addn(&buf, ",", 1);
       if(result)
         return result;
 
-      result = Curl_dyn_add(&buf, val_next);
+      result = curlx_dyn_add(&buf, val_next);
       if(result)
         return result;
 
       free(curr->data);
-      curr->data = Curl_dyn_ptr(&buf);
+      curr->data = curlx_dyn_ptr(&buf);
 
       curr->next = next->next;
       free(next->data);
@@ -319,7 +319,7 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
     }
     ++value;
-    Curl_str_passblanks(&value);
+    curlx_str_passblanks(&value);
     endp = value;
     while(*endp && ISALNUM(*endp))
       ++endp;
@@ -357,9 +357,9 @@ static CURLcode make_headers(struct Curl_easy *data,
   for(l = head; l; l = l->next) {
     char *tmp;
 
-    if(Curl_dyn_add(canonical_headers, l->data))
+    if(curlx_dyn_add(canonical_headers, l->data))
       goto fail;
-    if(Curl_dyn_add(canonical_headers, "\n"))
+    if(curlx_dyn_add(canonical_headers, "\n"))
       goto fail;
 
     tmp = strchr(l->data, ':');
@@ -367,10 +367,10 @@ static CURLcode make_headers(struct Curl_easy *data,
       *tmp = 0;
 
     if(l != head) {
-      if(Curl_dyn_add(signed_headers, ";"))
+      if(curlx_dyn_add(signed_headers, ";"))
         goto fail;
     }
-    if(Curl_dyn_add(signed_headers, l->data))
+    if(curlx_dyn_add(signed_headers, l->data))
       goto fail;
   }
 
@@ -409,7 +409,7 @@ static const char *parse_content_sha_hdr(struct Curl_easy *data,
     return NULL;
   ++value;
 
-  Curl_str_passblanks(&value);
+  curlx_str_passblanks(&value);
 
   len = strlen(value);
   while(len > 0 && ISBLANK(value[len-1]))
@@ -512,7 +512,7 @@ static CURLcode canon_string(const char *q, size_t len,
 
   for(; len && !result; q++, len--) {
     if(ISALNUM(*q))
-      result = Curl_dyn_addn(dq, q, 1);
+      result = curlx_dyn_addn(dq, q, 1);
     else {
       switch(*q) {
       case '-':
@@ -520,7 +520,7 @@ static CURLcode canon_string(const char *q, size_t len,
       case '_':
       case '~':
         /* allowed as-is */
-        result = Curl_dyn_addn(dq, q, 1);
+        result = curlx_dyn_addn(dq, q, 1);
         break;
       case '%':
         /* uppercase the following if hexadecimal */
@@ -528,13 +528,13 @@ static CURLcode canon_string(const char *q, size_t len,
           char tmp[3]="%";
           tmp[1] = Curl_raw_toupper(q[1]);
           tmp[2] = Curl_raw_toupper(q[2]);
-          result = Curl_dyn_addn(dq, tmp, 3);
+          result = curlx_dyn_addn(dq, tmp, 3);
           q += 2;
           len -= 2;
         }
         else
           /* '%' without a following two-digit hex, encode it */
-          result = Curl_dyn_addn(dq, "%25", 3);
+          result = curlx_dyn_addn(dq, "%25", 3);
         break;
       default: {
         unsigned char out[3]={'%'};
@@ -543,21 +543,21 @@ static CURLcode canon_string(const char *q, size_t len,
           /* if found_equals is NULL assuming, been in path */
           if(*q == '/') {
             /* allowed as if */
-            result = Curl_dyn_addn(dq, q, 1);
+            result = curlx_dyn_addn(dq, q, 1);
             break;
           }
         }
         else {
           /* allowed as-is */
           if(*q == '=') {
-            result = Curl_dyn_addn(dq, q, 1);
+            result = curlx_dyn_addn(dq, q, 1);
             *found_equals = TRUE;
             break;
           }
         }
         /* URL encode */
         Curl_hexbyte(&out[1], *q, FALSE);
-        result = Curl_dyn_addn(dq, out, 3);
+        result = curlx_dyn_addn(dq, out, 3);
         break;
       }
       }
@@ -611,11 +611,11 @@ static CURLcode canon_query(struct Curl_easy *data,
     result = canon_string(q, ap->len, dq, &found_equals);
     if(!result && !found_equals) {
       /* queries without value still need an equals */
-      result = Curl_dyn_addn(dq, "=", 1);
+      result = curlx_dyn_addn(dq, "=", 1);
     }
     if(!result && i < entry - 1) {
       /* insert ampersands between query pairs */
-      result = Curl_dyn_addn(dq, "&", 1);
+      result = curlx_dyn_addn(dq, "&", 1);
     }
   }
   return result;
@@ -664,10 +664,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   }
 
   /* we init those buffers here, so goto fail will free initialized dynbuf */
-  Curl_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
-  Curl_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&signed_headers, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
 
   /*
    * Parameters parsing
@@ -684,62 +684,62 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 
      No string can be longer than N bytes of non-whitespace
   */
-  if(Curl_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
+  if(curlx_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
-  if(Curl_str_single(&line, ':') ||
-     Curl_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
+  if(curlx_str_single(&line, ':') ||
+     curlx_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
     provider1 = provider0;
   }
-  else if(Curl_str_single(&line, ':') ||
-          Curl_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
-          Curl_str_single(&line, ':') ||
-          Curl_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
+  else if(curlx_str_single(&line, ':') ||
+          curlx_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
+          curlx_str_single(&line, ':') ||
+          curlx_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
     /* nothing to do */
   }
 
-  if(!Curl_strlen(&service)) {
+  if(!curlx_strlen(&service)) {
     const char *p = hostname;
-    if(Curl_str_until(&p, &service, MAX_SIGV4_LEN, '.') ||
-       Curl_str_single(&p, '.')) {
+    if(curlx_str_until(&p, &service, MAX_SIGV4_LEN, '.') ||
+       curlx_str_single(&p, '.')) {
       failf(data, "aws-sigv4: service missing in parameters and hostname");
       result = CURLE_URL_MALFORMAT;
       goto fail;
     }
 
     infof(data, "aws_sigv4: picked service %.*s from host",
-          (int)Curl_strlen(&service), Curl_str(&service));
+          (int)curlx_strlen(&service), curlx_str(&service));
 
-    if(!Curl_strlen(&region)) {
-      if(Curl_str_until(&p, &region, MAX_SIGV4_LEN, '.') ||
-         Curl_str_single(&p, '.')) {
+    if(!curlx_strlen(&region)) {
+      if(curlx_str_until(&p, &region, MAX_SIGV4_LEN, '.') ||
+         curlx_str_single(&p, '.')) {
         failf(data, "aws-sigv4: region missing in parameters and hostname");
         result = CURLE_URL_MALFORMAT;
         goto fail;
       }
       infof(data, "aws_sigv4: picked region %.*s from host",
-            (int)Curl_strlen(&region), Curl_str(&region));
+            (int)curlx_strlen(&region), curlx_str(&region));
     }
   }
 
   Curl_http_method(data, conn, &method, &httpreq);
 
   payload_hash =
-    parse_content_sha_hdr(data, Curl_str(&provider1), Curl_strlen(&provider1),
-                          &payload_hash_len);
+    parse_content_sha_hdr(data, curlx_str(&provider1),
+                          curlx_strlen(&provider1), &payload_hash_len);
 
   if(!payload_hash) {
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
-    bool sign_as_s3 = Curl_str_casecompare(&provider0, "aws") &&
-      Curl_str_casecompare(&service, "s3");
+    bool sign_as_s3 = curlx_str_casecompare(&provider0, "aws") &&
+      curlx_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
-      result = calc_s3_payload_hash(data, httpreq, Curl_str(&provider1),
-                                    Curl_strlen(&provider1), sha_hash, sha_hex,
-                                    content_sha256_hdr);
+      result = calc_s3_payload_hash(data, httpreq, curlx_str(&provider1),
+                                    curlx_strlen(&provider1), sha_hash,
+                                    sha_hex, content_sha256_hdr);
     else
       result = calc_payload_hash(data, sha_hash, sha_hex);
     if(result)
@@ -771,7 +771,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   }
 
   result = make_headers(data, hostname, timestamp,
-                        Curl_str(&provider1), Curl_strlen(&provider1),
+                        curlx_str(&provider1), curlx_strlen(&provider1),
                         &date_header, content_sha256_hdr,
                         &canonical_headers, &signed_headers);
   if(result)
@@ -805,11 +805,11 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
             "%s\n" /* SignedHeaders */
             "%.*s",  /* HashedRequestPayload in hex */
             method,
-            Curl_dyn_ptr(&canonical_path),
-            Curl_dyn_ptr(&canonical_query) ?
-            Curl_dyn_ptr(&canonical_query) : "",
-            Curl_dyn_ptr(&canonical_headers),
-            Curl_dyn_ptr(&signed_headers),
+            curlx_dyn_ptr(&canonical_path),
+            curlx_dyn_ptr(&canonical_query) ?
+            curlx_dyn_ptr(&canonical_query) : "",
+            curlx_dyn_ptr(&canonical_headers),
+            curlx_dyn_ptr(&signed_headers),
             (int)payload_hash_len, payload_hash);
   if(!canonical_request)
     goto fail;
@@ -818,17 +818,17 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     canonical_request);
 
   request_type = aprintf("%.*s4_request",
-                         (int)Curl_strlen(&provider0), Curl_str(&provider0));
+                         (int)curlx_strlen(&provider0), curlx_str(&provider0));
   if(!request_type)
     goto fail;
 
   /* provider0 is lowercased *after* aprintf() so that the buffer can be
      written to */
-  Curl_strntolower(request_type, request_type, Curl_strlen(&provider0));
+  Curl_strntolower(request_type, request_type, curlx_strlen(&provider0));
 
   credential_scope = aprintf("%s/%.*s/%.*s/%s", date,
-                             (int)Curl_strlen(&region), Curl_str(&region),
-                             (int)Curl_strlen(&service), Curl_str(&service),
+                             (int)curlx_strlen(&region), curlx_str(&region),
+                             (int)curlx_strlen(&service), curlx_str(&service),
                              request_type);
   if(!credential_scope)
     goto fail;
@@ -847,7 +847,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                         "%s\n" /* RequestDateTime */
                         "%s\n" /* CredentialScope */
                         "%s",  /* HashedCanonicalRequest in hex */
-                        (int)Curl_strlen(&provider0), Curl_str(&provider0),
+                        (int)curlx_strlen(&provider0), curlx_str(&provider0),
                         timestamp,
                         credential_scope,
                         sha_hex);
@@ -855,24 +855,25 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     goto fail;
 
   /* make provider0 part done uppercase */
-  Curl_strntoupper(str_to_sign, Curl_str(&provider0), Curl_strlen(&provider0));
+  Curl_strntoupper(str_to_sign, curlx_str(&provider0),
+                   curlx_strlen(&provider0));
 
   infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
     str_to_sign);
 
-  secret = aprintf("%.*s4%s", (int)Curl_strlen(&provider0),
-                   Curl_str(&provider0), data->state.aptr.passwd ?
+  secret = aprintf("%.*s4%s", (int)curlx_strlen(&provider0),
+                   curlx_str(&provider0), data->state.aptr.passwd ?
                    data->state.aptr.passwd : "");
   if(!secret)
     goto fail;
   /* make provider0 part done uppercase */
-  Curl_strntoupper(secret, Curl_str(&provider0), Curl_strlen(&provider0));
+  Curl_strntoupper(secret, curlx_str(&provider0), curlx_strlen(&provider0));
 
   HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
   HMAC_SHA256(sign0, sizeof(sign0),
-              Curl_str(&region), Curl_strlen(&region), sign1);
+              curlx_str(&region), curlx_strlen(&region), sign1);
   HMAC_SHA256(sign1, sizeof(sign1),
-              Curl_str(&service), Curl_strlen(&service), sign0);
+              curlx_str(&service), curlx_strlen(&service), sign0);
   HMAC_SHA256(sign0, sizeof(sign0), request_type, strlen(request_type), sign1);
   HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
 
@@ -891,10 +892,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                           */
                          "%s"
                          "%s", /* optional sha256 header includes \r\n */
-                         (int)Curl_strlen(&provider0), Curl_str(&provider0),
+                         (int)curlx_strlen(&provider0), curlx_str(&provider0),
                          user,
                          credential_scope,
-                         Curl_dyn_ptr(&signed_headers),
+                         curlx_dyn_ptr(&signed_headers),
                          sha_hex,
                          date_header ? date_header : "",
                          content_sha256_hdr);
@@ -903,7 +904,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   }
   /* provider 0 uppercase */
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
-                   Curl_str(&provider0), Curl_strlen(&provider0));
+                   curlx_str(&provider0), curlx_strlen(&provider0));
 
   free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
@@ -911,10 +912,10 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   result = CURLE_OK;
 
 fail:
-  Curl_dyn_free(&canonical_query);
-  Curl_dyn_free(&canonical_path);
-  Curl_dyn_free(&canonical_headers);
-  Curl_dyn_free(&signed_headers);
+  curlx_dyn_free(&canonical_query);
+  curlx_dyn_free(&canonical_path);
+  curlx_dyn_free(&canonical_headers);
+  curlx_dyn_free(&signed_headers);
   free(canonical_request);
   free(request_type);
   free(credential_scope);

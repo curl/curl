@@ -36,7 +36,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 
 #ifndef CURL_DISABLE_IMAP
 
@@ -65,7 +65,7 @@
 #include "socks.h"
 #include "imap.h"
 #include "mime.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -75,7 +75,7 @@
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_ctype.h"
 
 /* The last 3 #include files should be in this order */
@@ -436,7 +436,7 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out)
   if(!imapc)
     return CURLE_FAILED_INIT;
 
-  message = Curl_dyn_ptr(&imapc->pp.recvbuf);
+  message = curlx_dyn_ptr(&imapc->pp.recvbuf);
   len = imapc->pp.nfinal;
   if(len > 2) {
     /* Find the start of the message */
@@ -912,7 +912,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Generate flags string and send the APPEND command */
-  Curl_dyn_init(&flags, 100);
+  curlx_dyn_init(&flags, 100);
   if(data->set.upload_flags) {
     int i;
     struct ulbits ulflag[] = {
@@ -925,29 +925,30 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
     };
 
     result = CURLE_OUT_OF_MEMORY;
-    if(Curl_dyn_add(&flags, " (")) {
+    if(curlx_dyn_add(&flags, " (")) {
       goto cleanup;
     }
 
     for(i = 0; ulflag[i].bit; i++) {
       if(data->set.upload_flags & ulflag[i].bit) {
-        if((Curl_dyn_len(&flags) > 2 && Curl_dyn_add(&flags, " ")) ||
-           Curl_dyn_add(&flags, "\\") || Curl_dyn_add(&flags, ulflag[i].flag))
-            goto cleanup;
+        if((curlx_dyn_len(&flags) > 2 && curlx_dyn_add(&flags, " ")) ||
+           curlx_dyn_add(&flags, "\\") ||
+           curlx_dyn_add(&flags, ulflag[i].flag))
+          goto cleanup;
       }
     }
 
-    if(Curl_dyn_add(&flags, ")"))
+    if(curlx_dyn_add(&flags, ")"))
       goto cleanup;
   }
-  else if(Curl_dyn_add(&flags, ""))
+  else if(curlx_dyn_add(&flags, ""))
     goto cleanup;
 
   result = imap_sendf(data, imapc, "APPEND %s%s {%" FMT_OFF_T "}",
-                      mailbox, Curl_dyn_ptr(&flags), data->state.infilesize);
+                      mailbox, curlx_dyn_ptr(&flags), data->state.infilesize);
 
 cleanup:
-  Curl_dyn_free(&flags);
+  curlx_dyn_free(&flags);
   free(mailbox);
 
   if(!result)
@@ -1030,7 +1031,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
-  const char *line = Curl_dyn_ptr(&imapc->pp.recvbuf);
+  const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
   (void)instate; /* no use for this yet */
 
@@ -1193,7 +1194,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
                                            imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  char *line = Curl_dyn_ptr(&imapc->pp.recvbuf);
+  char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
   size_t len = imapc->pp.nfinal;
 
   (void)instate; /* No use for this yet */
@@ -1217,7 +1218,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  const char *line = Curl_dyn_ptr(&imapc->pp.recvbuf);
+  const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
   (void)instate; /* no use for this yet */
 
@@ -1230,11 +1231,11 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
         len++;
       if(len && (p[len] == ']')) {
         struct dynbuf uid;
-        Curl_dyn_init(&uid, 20);
-        if(Curl_dyn_addn(&uid, p, len))
+        curlx_dyn_init(&uid, 20);
+        if(curlx_dyn_addn(&uid, p, len))
           return CURLE_OUT_OF_MEMORY;
         free(imapc->mailbox_uidvalidity);
-        imapc->mailbox_uidvalidity = Curl_dyn_ptr(&uid);
+        imapc->mailbox_uidvalidity = curlx_dyn_ptr(&uid);
       }
     }
   }
@@ -1276,7 +1277,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   struct pingpong *pp = &imapc->pp;
-  const char *ptr = Curl_dyn_ptr(&imapc->pp.recvbuf);
+  const char *ptr = curlx_dyn_ptr(&imapc->pp.recvbuf);
   size_t len = imapc->pp.nfinal;
   bool parsed = FALSE;
   curl_off_t size = 0;
@@ -1294,8 +1295,8 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
   ptr = memchr(ptr, '{', len);
   if(ptr) {
     ptr++;
-    if(!Curl_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
-       !Curl_str_single(&ptr, '}'))
+    if(!curlx_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
+       !curlx_str_single(&ptr, '}'))
       parsed = TRUE;
   }
 
@@ -1310,7 +1311,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       size_t chunk = pp->overflow;
 
       /* keep only the overflow */
-      Curl_dyn_tail(&pp->recvbuf, chunk);
+      curlx_dyn_tail(&pp->recvbuf, chunk);
       pp->nfinal = 0; /* done */
 
       if(chunk > (size_t)size)
@@ -1323,7 +1324,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
         return CURLE_OK;
       }
       result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                 Curl_dyn_ptr(&pp->recvbuf), chunk);
+                                 curlx_dyn_ptr(&pp->recvbuf), chunk);
       if(result)
         return result;
 
@@ -1334,12 +1335,12 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       if(pp->overflow > chunk) {
         /* remember the remaining trailing overflow data */
         pp->overflow -= chunk;
-        Curl_dyn_tail(&pp->recvbuf, pp->overflow);
+        curlx_dyn_tail(&pp->recvbuf, pp->overflow);
       }
       else {
         pp->overflow = 0; /* handled */
         /* Free the cache */
-        Curl_dyn_reset(&pp->recvbuf);
+        curlx_dyn_reset(&pp->recvbuf);
       }
     }
 
@@ -1898,7 +1899,7 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_pp_disconnect(&imapc->pp);
-  Curl_dyn_free(&imapc->dyn);
+  curlx_dyn_free(&imapc->dyn);
   Curl_safefree(imapc->mailbox);
   Curl_safefree(imapc->mailbox_uidvalidity);
   free(imapc);
@@ -1922,7 +1923,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   imapc->preftype = IMAP_TYPE_ANY;
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
-  Curl_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
+  curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
   Curl_pp_init(pp);
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
@@ -1958,10 +1959,10 @@ static CURLcode imap_sendf(struct Curl_easy *data,
             ++imapc->cmdid);
 
   /* start with a blank buffer */
-  Curl_dyn_reset(&imapc->dyn);
+  curlx_dyn_reset(&imapc->dyn);
 
   /* append tag + space + fmt */
-  result = Curl_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
+  result = curlx_dyn_addf(&imapc->dyn, "%s %s", imapc->resptag, fmt);
   if(!result) {
     va_list ap;
     va_start(ap, fmt);
@@ -1969,7 +1970,7 @@ static CURLcode imap_sendf(struct Curl_easy *data,
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-    result = Curl_pp_vsendf(data, &imapc->pp, Curl_dyn_ptr(&imapc->dyn), ap);
+    result = Curl_pp_vsendf(data, &imapc->pp, curlx_dyn_ptr(&imapc->dyn), ap);
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -2003,24 +2004,24 @@ static char *imap_atom(const char *str, bool escape_only)
     /* nothing to escape, return a strdup */
     return strdup(str);
 
-  Curl_dyn_init(&line, 2000);
+  curlx_dyn_init(&line, 2000);
 
-  if(!escape_only && Curl_dyn_addn(&line, "\"", 1))
+  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
     return NULL;
 
   while(*str) {
     if((*str == '\\' || *str == '"') &&
-       Curl_dyn_addn(&line, "\\", 1))
+       curlx_dyn_addn(&line, "\\", 1))
       return NULL;
-    if(Curl_dyn_addn(&line, str, 1))
+    if(curlx_dyn_addn(&line, str, 1))
       return NULL;
     str++;
   }
 
-  if(!escape_only && Curl_dyn_addn(&line, "\"", 1))
+  if(!escape_only && curlx_dyn_addn(&line, "\"", 1))
     return NULL;
 
-  return Curl_dyn_ptr(&line);
+  return curlx_dyn_ptr(&line);
 }
 
 /***********************************************************************

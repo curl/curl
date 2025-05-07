@@ -76,7 +76,7 @@
 #include "bufref.h"
 #include "curl_sasl.h"
 #include "curl_md5.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -367,7 +367,7 @@ static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out)
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
-  message = Curl_dyn_ptr(&pop3c->pp.recvbuf);
+  message = curlx_dyn_ptr(&pop3c->pp.recvbuf);
   len = pop3c->pp.nfinal;
   if(len > 2) {
     /* Find the start of the message */
@@ -819,7 +819,7 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  line = Curl_dyn_ptr(&pop3c->pp.recvbuf);
+  line = curlx_dyn_ptr(&pop3c->pp.recvbuf);
   len = pop3c->pp.nfinal;
 
   if(pop3code != '+') {
@@ -874,7 +874,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  line = Curl_dyn_ptr(&pop3c->pp.recvbuf);
+  line = curlx_dyn_ptr(&pop3c->pp.recvbuf);
   len = pop3c->pp.nfinal;
 
   /* Do we have a untagged continuation response? */
@@ -1128,18 +1128,18 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
          the body */
 
       /* keep only the overflow */
-      Curl_dyn_tail(&pp->recvbuf, pp->overflow);
+      curlx_dyn_tail(&pp->recvbuf, pp->overflow);
       pp->nfinal = 0; /* done */
 
       if(!data->req.no_body) {
-        result = pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
-                            Curl_dyn_len(&pp->recvbuf), FALSE);
+        result = pop3_write(data, curlx_dyn_ptr(&pp->recvbuf),
+                            curlx_dyn_len(&pp->recvbuf), FALSE);
         if(result)
           return result;
       }
 
       /* reset the buffer */
-      Curl_dyn_reset(&pp->recvbuf);
+      curlx_dyn_reset(&pp->recvbuf);
       pp->overflow = 0;
     }
   }

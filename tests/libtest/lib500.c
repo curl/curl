@@ -36,14 +36,14 @@ static curl_socket_t tst_opensocket(void *clientp,
 {
   (void)clientp;
   (void)purpose;
-  printf("[OPEN] counter: %d\n", ++testcounter);
+  curl_mprintf("[OPEN] counter: %d\n", ++testcounter);
   return socket(addr->family, addr->socktype, addr->protocol);
 }
 
 static int tst_closesocket(void *clientp, curl_socket_t sock)
 {
   (void)clientp;
-  printf("[CLOSE] counter: %d\n", testcounter--);
+  curl_mprintf("[CLOSE] counter: %d\n", testcounter--);
   return sclose(sock);
 }
 
@@ -66,13 +66,13 @@ CURLcode test(char *URL)
   char *ipstr = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -104,7 +104,7 @@ CURLcode test(char *URL)
         curl_off_t time_posttransfer;
         curl_off_t time_starttransfer;
         curl_off_t time_total;
-        fprintf(moo, "IP %s\n", ipstr);
+        curl_mfprintf(moo, "IP %s\n", ipstr);
         curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T, &time_namelookup);
         curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &time_connect);
         curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME_T,
@@ -118,48 +118,55 @@ CURLcode test(char *URL)
         /* since the timing will always vary we only compare relative
            differences between these 5 times */
         if(time_namelookup > time_connect) {
-          fprintf(moo, "namelookup vs connect: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_namelookup / 1000000),
-                  (long)(time_namelookup % 1000000),
-                  (time_connect / 1000000), (long)(time_connect % 1000000));
+          curl_mfprintf(moo, "namelookup vs connect: %" CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_namelookup / 1000000),
+                        (long)(time_namelookup % 1000000),
+                        (time_connect / 1000000),
+                        (long)(time_connect % 1000000));
         }
         if(time_connect > time_pretransfer) {
-          fprintf(moo, "connect vs pretransfer: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_connect / 1000000), (long)(time_connect % 1000000),
-                  (time_pretransfer / 1000000),
-                  (long)(time_pretransfer % 1000000));
+          curl_mfprintf(moo, "connect vs pretransfer: %"
+                        CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_connect / 1000000),
+                        (long)(time_connect % 1000000),
+                        (time_pretransfer / 1000000),
+                        (long)(time_pretransfer % 1000000));
         }
         if(time_pretransfer > time_posttransfer) {
-          fprintf(moo, "pretransfer vs posttransfer: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_pretransfer / 1000000),
-                  (long)(time_pretransfer % 1000000),
-                  (time_posttransfer / 1000000),
-                  (long)(time_posttransfer % 1000000));
+          curl_mfprintf(moo, "pretransfer vs posttransfer: %"
+                        CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_pretransfer / 1000000),
+                        (long)(time_pretransfer % 1000000),
+                        (time_posttransfer / 1000000),
+                        (long)(time_posttransfer % 1000000));
         }
         if(time_pretransfer > time_starttransfer) {
-          fprintf(moo, "pretransfer vs starttransfer: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_pretransfer / 1000000),
-                  (long)(time_pretransfer % 1000000),
-                  (time_starttransfer / 1000000),
-                  (long)(time_starttransfer % 1000000));
+          curl_mfprintf(moo, "pretransfer vs starttransfer: %"
+                        CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_pretransfer / 1000000),
+                        (long)(time_pretransfer % 1000000),
+                        (time_starttransfer / 1000000),
+                        (long)(time_starttransfer % 1000000));
         }
         if(time_starttransfer > time_total) {
-          fprintf(moo, "starttransfer vs total: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_starttransfer / 1000000),
-                  (long)(time_starttransfer % 1000000),
-                  (time_total / 1000000), (long)(time_total % 1000000));
+          curl_mfprintf(moo, "starttransfer vs total: %" CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_starttransfer / 1000000),
+                        (long)(time_starttransfer % 1000000),
+                        (time_total / 1000000),
+                        (long)(time_total % 1000000));
         }
         if(time_posttransfer > time_total) {
-          fprintf(moo, "posttransfer vs total: %" CURL_FORMAT_CURL_OFF_T
-                  ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
-                  (time_posttransfer / 1000000),
-                  (long)(time_posttransfer % 1000000),
-                  (time_total / 1000000), (long)(time_total % 1000000));
+          curl_mfprintf(moo, "posttransfer vs total: %" CURL_FORMAT_CURL_OFF_T
+                        ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",
+                        (time_posttransfer / 1000000),
+                        (long)(time_posttransfer % 1000000),
+                        (time_total / 1000000),
+                        (long)(time_total % 1000000));
         }
 
         fclose(moo);

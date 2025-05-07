@@ -22,6 +22,23 @@
 #
 ###########################################################################
 
+LIB_CURLX_CFILES = \
+  curlx/base64.c   \
+  curlx/dynbuf.c   \
+  curlx/strparse.c \
+  curlx/timediff.c \
+  curlx/timeval.c  \
+  curlx/warnless.c
+
+LIB_CURLX_HFILES = \
+  curlx/base64.h   \
+  curlx/curlx.h    \
+  curlx/dynbuf.h   \
+  curlx/strparse.h \
+  curlx/timediff.h \
+  curlx/timeval.h  \
+  curlx/warnless.h
+
 LIB_VAUTH_CFILES =      \
   vauth/cleartext.c     \
   vauth/cram.c          \
@@ -113,7 +130,6 @@ LIB_CFILES =         \
   asyn-ares.c        \
   asyn-base.c        \
   asyn-thrdd.c       \
-  base64.c           \
   bufq.c             \
   bufref.c           \
   cf-h1-proxy.c      \
@@ -148,7 +164,6 @@ LIB_CFILES =         \
   cw-pause.c         \
   dict.c             \
   doh.c              \
-  dynbuf.c           \
   dynhds.c           \
   easy.c             \
   easygetopt.c       \
@@ -229,12 +244,9 @@ LIB_CFILES =         \
   strdup.c           \
   strequal.c         \
   strerror.c         \
-  strparse.c         \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
-  timediff.c         \
-  timeval.c          \
   transfer.c         \
   uint-bset.c        \
   uint-hash.c        \
@@ -244,7 +256,6 @@ LIB_CFILES =         \
   urlapi.c           \
   version.c          \
   version_win32.c    \
-  warnless.c         \
   ws.c
 
 LIB_HFILES =         \
@@ -266,7 +277,6 @@ LIB_HFILES =         \
   content_encoding.h \
   cookie.h           \
   curl_addrinfo.h    \
-  curl_base64.h      \
   curl_ctype.h       \
   curl_des.h         \
   curl_endian.h      \
@@ -294,12 +304,10 @@ LIB_HFILES =         \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
-  curlx.h            \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
   doh.h              \
-  dynbuf.h           \
   dynhds.h           \
   easy_lock.h        \
   easyif.h           \
@@ -373,12 +381,9 @@ LIB_HFILES =         \
   strcase.h          \
   strdup.h           \
   strerror.h         \
-  strparse.h         \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
-  timediff.h         \
-  timeval.h          \
   transfer.h         \
   uint-bset.h        \
   uint-hash.h        \
@@ -388,12 +393,11 @@ LIB_HFILES =         \
   urlapi-int.h       \
   urldata.h          \
   version_win32.h    \
-  warnless.h         \
   ws.h
 
 LIB_RCFILES = libcurl.rc
 
 CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
-  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES)
+  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES) $(LIB_CURLX_CFILES)
 HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
-  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES)
+  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES) $(LIB_CURLX_HFILES)

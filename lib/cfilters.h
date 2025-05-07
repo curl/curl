@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "timediff.h"
+#include "curlx/timediff.h"
 
 struct Curl_cfilter;
 struct Curl_easy;

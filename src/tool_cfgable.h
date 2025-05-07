@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
+#include <curl/mprintf.h>
 #include "tool_setup.h"
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
@@ -36,6 +38,26 @@
 #define BIT(x) unsigned int x:1
 #endif
 #endif
+
+/* make the tool use the libcurl *printf family */
+# undef printf
+# undef fprintf
+# undef msnprintf
+# undef vprintf
+# undef vfprintf
+# undef mvsnprintf
+# undef aprintf
+# undef vaprintf
+# define printf curl_mprintf
+# define fprintf curl_mfprintf
+# define msnprintf curl_msnprintf
+# define vprintf curl_mvprintf
+# define vfprintf curl_mvfprintf
+# define mvsnprintf curl_mvsnprintf
+# define aprintf curl_maprintf
+# define vaprintf curl_mvaprintf
+
+#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 struct GlobalConfig;
 
@@ -55,7 +77,7 @@ struct State {
 
 struct OperationConfig {
   struct State state;             /* for create_transfer() */
-  struct curlx_dynbuf postdata;
+  struct dynbuf postdata;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */

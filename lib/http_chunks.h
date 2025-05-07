@@ -26,7 +26,7 @@
 
 #ifndef CURL_DISABLE_HTTP
 
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 
 struct connectdata;
 

@@ -49,11 +49,11 @@ static CURLUcode parse_port(CURLU *url,
 {
   struct dynbuf host;
   CURLUcode ret;
-  Curl_dyn_init(&host, 10000);
-  if(Curl_dyn_add(&host, h))
+  curlx_dyn_init(&host, 10000);
+  if(curlx_dyn_add(&host, h))
     return CURLUE_OUT_OF_MEMORY;
   ret = Curl_parse_port(url, &host, has_scheme);
-  Curl_dyn_free(&host);
+  curlx_dyn_free(&host);
   return ret;
 }
 

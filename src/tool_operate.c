@@ -54,7 +54,7 @@
 #include <uv.h>
 #endif
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
@@ -91,7 +91,7 @@
 #include "tool_hugehelp.h"
 #include "tool_progress.h"
 #include "tool_ipfs.h"
-#include "dynbuf.h"
+
 #ifdef DEBUGBUILD
 /* libcurl's debug-only curl_easy_perform_ev() */
 CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
@@ -1352,7 +1352,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
   if(config->cookies) {
-    struct curlx_dynbuf cookies;
+    struct dynbuf cookies;
     struct curl_slist *cl;
 
     /* The maximum size needs to match MAX_NAME in cookie.h */

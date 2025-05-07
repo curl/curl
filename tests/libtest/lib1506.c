@@ -48,12 +48,12 @@ CURLcode test(char *URL)
 
   /* Create fake DNS entries for serverX.example.com for all handles */
   for(i = 0; i < NUM_HANDLES; i++) {
-    msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
-              i + 1, port, address);
-    printf("%s\n", dnsentry);
+    curl_msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
+                   i + 1, port, address);
+    curl_mprintf("%s\n", dnsentry);
     slist2 = curl_slist_append(slist, dnsentry);
     if(!slist2) {
-      fprintf(stderr, "curl_slist_append() failed\n");
+      curl_mfprintf(stderr, "curl_slist_append() failed\n");
       goto test_cleanup;
     }
     slist = slist2;
@@ -72,9 +72,9 @@ CURLcode test(char *URL)
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    msnprintf(target_url, sizeof(target_url),
-              "http://server%d.example.com:%s/path/1506%04i",
-              i + 1, port, i + 1);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://server%d.example.com:%s/path/1506%04i",
+                   i + 1, port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -85,7 +85,7 @@ CURLcode test(char *URL)
     easy_setopt(curl[i], CURLOPT_RESOLVE, slist);
   }
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
   for(i = 0; i < NUM_HANDLES; i++) {
     /* add handle to multi */
