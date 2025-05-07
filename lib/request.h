@@ -104,7 +104,6 @@ struct SingleRequest {
   union {
     struct FILEPROTO *file;
     struct SSHPROTO *ssh;
-    struct TELNET *telnet;
   } p;
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
