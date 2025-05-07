@@ -118,7 +118,8 @@ jobs:
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
-  zizmor:
+  ghacheck:
+    name: GHA analysis with zizmor
     runs-on: macos-latest
     timeout-minutes: 1
     steps:
@@ -127,7 +128,7 @@ jobs:
           persist-credentials: false
         name: checkout
 
-      - name: GHA security check
+      - name: zizmor
         run: |
           brew install zizmor
           zizmor .github/workflows/*.yml
