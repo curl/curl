@@ -698,9 +698,12 @@ static CURLcode pubkey_pem_to_der(const char *pem,
     ++pem_count;
   }
 
-  result = curlx_base64_decode(curlx_dyn_ptr(&pbuf), der, der_len);
-
-  curlx_dyn_free(&pbuf);
+  if(curlx_dyn_len(&pbuf)) {
+    result = curlx_base64_decode(curlx_dyn_ptr(&pbuf), der, der_len);
+    curlx_dyn_free(&pbuf);
+  }
+  else
+    *der = NULL;
 
   return result;
 }
