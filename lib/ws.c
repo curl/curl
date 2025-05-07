@@ -1395,13 +1395,11 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
       ws->sendbuf_payload = 0;
     }
     else if(result == CURLE_AGAIN) {
-      if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
-        /* blocked, part of payload bytes remain, report length
-         * that we managed to send. */
-        size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
-        *sent += flushed;
-        ws->sendbuf_payload -= flushed;
-        result = CURLE_OK;
+      if(ws->sendbuf_payload > 0) {
+        /* E_AGAIN in the middle of a flush:
+         * For safety, tell client to submit the entire frame again. */
+        infof(data, "WS: partial send detected, reporting AGAIN to caller");
+        result = CURLE_AGAIN;
         goto out;
       }
       else {
