@@ -103,7 +103,6 @@ struct SingleRequest {
      points to data it needs. */
   union {
     struct FILEPROTO *file;
-    struct SSHPROTO *ssh;
   } p;
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;

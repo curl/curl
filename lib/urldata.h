@@ -862,13 +862,6 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
-  union {
-#ifdef USE_SSH
-    struct ssh_conn sshc;
-#endif
-    unsigned int unused:1; /* avoids empty union */
-  } proto;
-
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
