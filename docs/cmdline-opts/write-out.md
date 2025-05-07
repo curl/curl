@@ -164,6 +164,9 @@ Returns 1 if the previous transfer used a proxy, otherwise 0. Useful to for
 example determine if a `NOPROXY` pattern matched the hostname or not. (Added
 in 8.7.0)
 
+## `pid`
+The process ID (PID) of the running curl process. (Added in 8.14)
+
 ## `redirect_url`
 When an HTTP request was made without --location to follow redirects (or when
 --max-redirs is met), this variable shows the actual URL a redirect

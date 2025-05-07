@@ -23,6 +23,13 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+#ifdef _WIN32
+#include <process.h>  /* for _getpid() */
+#define getpid _getpid
+#else
+#include <unistd.h>  /* for getpid() */
+#endif
+
 #include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
@@ -91,6 +98,7 @@ static const struct writeoutvar variables[] = {
   {"num_redirects", VAR_REDIRECT_COUNT, CURLINFO_REDIRECT_COUNT, writeLong},
   {"num_retries", VAR_NUM_RETRY, CURLINFO_NONE, writeLong},
   {"onerror", VAR_ONERROR, CURLINFO_NONE, NULL},
+  {"pid", VAR_PID, CURLINFO_NONE, writeLong},
   {"proxy_ssl_verify_result", VAR_PROXY_SSL_VERIFY_RESULT,
    CURLINFO_PROXY_SSL_VERIFYRESULT, writeLong},
   {"proxy_used", VAR_PROXY_USED, CURLINFO_USED_PROXY, writeLong},
@@ -468,6 +476,10 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
         longinfo = (long)per->urlnum;
         valid = true;
       }
+      break;
+    case VAR_PID:
+      longinfo = (long)getpid();
+      valid = true;
       break;
     default:
       DEBUGASSERT(0);
