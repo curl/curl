@@ -106,7 +106,6 @@ struct SingleRequest {
     struct ldapreqinfo *ldap;
     struct SMTP *smtp;
     struct SSHPROTO *ssh;
-    struct TELNET *telnet;
   } p;
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
