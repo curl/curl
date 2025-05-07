@@ -12,6 +12,8 @@
 name: Labeler
 'on': [pull_request_target]  # zizmor: ignore[dangerous-triggers]
 
+permissions: {}
+
 jobs:
   label:
     runs-on: ubuntu-latest
