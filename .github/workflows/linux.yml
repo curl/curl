@@ -298,6 +298,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
+        # zizmor: ignore[template-injection]
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -661,6 +662,7 @@ jobs:
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
+        # zizmor: ignore[template-injection]
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
