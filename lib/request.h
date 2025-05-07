@@ -103,7 +103,6 @@ struct SingleRequest {
      points to data it needs. */
   union {
     struct FILEPROTO *file;
-    struct ldapreqinfo *ldap;
     struct SSHPROTO *ssh;
     struct TELNET *telnet;
   } p;
