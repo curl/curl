@@ -67,6 +67,4 @@
 
 #include "../curl_get_line.h"
 
-#define curlx_safefree(x) Curl_safefree(x)
-
 #endif /* HEADER_CURL_CURLX_H */
