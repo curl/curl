@@ -703,7 +703,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
     curlx_dyn_free(&pbuf);
   }
   else
-    *der = NULL;
+    result = CURLE_BAD_CONTENT_ENCODING;
 
   return result;
 }
