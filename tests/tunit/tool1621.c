@@ -37,9 +37,9 @@ static void unit_stop(void)
 {
 }
 
-#if defined(__MINGW32__)  || \
-  (!defined(HAVE_FSETXATTR) && \
-  (!defined(__FreeBSD_version) || (__FreeBSD_version < 500000)))
+#ifndef USE_XATTR
+/* stripcredentials isn't available in this case */
+
 UNITTEST_START
 UNITTEST_STOP
 #else
@@ -52,13 +52,24 @@ struct checkthis {
 };
 
 static const struct checkthis tests[] = {
-  { "ninja://foo@example.com", "ninja://foo@example.com" },
+  { "ninja://foo@example.com", "(null)" },  /* unsupported scheme */
+  { "pop3s://foo@example.com", "pop3s://example.com/" },
+  { "ldap://foo@example.com", "ldap://example.com/" },
   { "https://foo@example.com", "https://example.com/" },
   { "https://localhost:45", "https://localhost:45/" },
   { "https://foo@localhost:45", "https://localhost:45/" },
   { "http://daniel:password@localhost", "http://localhost/" },
   { "http://daniel@localhost", "http://localhost/" },
+  { "https://user:pass@localhost:45", "https://localhost:45/" },
   { "http://localhost/", "http://localhost/" },
+  { "http://odd%40host/", "(null)" },  /* bad host */
+  { "http://user@odd%40host/", "(null)" },  /* bad host */
+  { "http://host/@path/", "http://host/@path/" },
+  { "http://emptypw:@host/", "http://host/" },
+  { "http://:emptyuser@host/", "http://host/" },
+  { "http://odd%40user@host/", "http://host/" },
+  { "http://only%40one%40host/", "(null)" },  /* bad host */
+  { "http://odder%3auser@host/", "http://host/" },
   { NULL, NULL } /* end marker */
 };
 
@@ -69,11 +80,11 @@ UNITTEST_START
   for(i = 0; tests[i].input; i++) {
     const char *url = tests[i].input;
     char *stripped = stripcredentials(url);
+    char *strippedstr = stripped ? stripped : "(null)";
     printf("Test %u got input \"%s\", output: \"%s\"\n",
-           i, tests[i].input, stripped);
+           i, tests[i].input, strippedstr);
 
-    fail_if(stripped && strcmp(tests[i].output, stripped),
-            tests[i].output);
+    fail_if(strcmp(tests[i].output, strippedstr), tests[i].output);
     curl_free(stripped);
   }
 }
