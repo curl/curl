@@ -317,7 +317,7 @@ static void myssh_set_state(struct Curl_easy *data,
           lineno);
   }
 #endif
-
+  (void)data;
   sshc->state = nowstate;
 }
 
