@@ -174,6 +174,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    version. This count includes CONNECT response headers. */
 #define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
+/* MAX_HTTP_RESP_HEADER_COUNT is the maximum number of response headers that
+   libcurl allows for a single HTTP response, including CONNECT and
+   redirects. */
+#define MAX_HTTP_RESP_HEADER_COUNT 5000
 
 #endif /* CURL_DISABLE_HTTP */
 
