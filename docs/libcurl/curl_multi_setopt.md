@@ -43,6 +43,10 @@ option in each function call.
 
 **deprecated** See CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE(3)
 
+## CURLMOPT_CONNCACHE_STALE
+Mark connections in the cache as stale in order to not reuse them.
+See CURLMOPT_CONNCACHE_STALE(3)
+
 ## CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE
 
 **deprecated** See CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)
@@ -103,10 +107,6 @@ Custom pointer to pass to timer callback. See CURLMOPT_TIMERDATA(3)
 ## CURLMOPT_TIMERFUNCTION
 
 Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
-
-## CURLMOPT_CONNCACHE_STALE
-Mark connections in the cache as stale in order to not reuse them.
-See CURLMOPT_CONNCACHE_STALE(3)
 
 # %PROTOCOLS%
 
