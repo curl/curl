@@ -123,21 +123,21 @@ static const struct testcase testcases[] = {
   int msnprintf_result;
 
   for(i = 0; i < CURL_ARRAYSIZE(testcases); i++) {
-    Curl_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
+    curlx_dyn_init(&canonical_path, CURL_MAX_HTTP_HEADER);
 
     result = canon_path(testcases[i].url_part, strlen(testcases[i].url_part),
       &canonical_path,
       testcases[i].normalize);
-    canonical_path_string = Curl_dyn_ptr(&canonical_path);
+    canonical_path_string = curlx_dyn_ptr(&canonical_path);
     msnprintf_result = curl_msnprintf(buffer, sizeof(buffer),
     "%s: Received \"%s\" and should be \"%s\", normalize (%d)",
-      testcases[i].testname, Curl_dyn_ptr(&canonical_path),
+      testcases[i].testname, curlx_dyn_ptr(&canonical_path),
       testcases[i].canonical_url, testcases[i].normalize);
     fail_unless(msnprintf_result >= 0, "curl_msnprintf fails");
     fail_unless(!result && canonical_path_string &&
       !strcmp(canonical_path_string,
       testcases[i].canonical_url), buffer);
-    Curl_dyn_free(&canonical_path);
+    curlx_dyn_free(&canonical_path);
   }
 
 #endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */

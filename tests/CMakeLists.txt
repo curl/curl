@@ -30,6 +30,10 @@ mark_as_advanced(TEST_NGHTTPX)
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
+if(BUILD_CURL_EXE)
+  add_dependencies(testdeps curlinfo)
+endif()
+
 add_subdirectory(http)
 add_subdirectory(http/clients)
 add_subdirectory(server)

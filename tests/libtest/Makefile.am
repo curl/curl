@@ -35,6 +35,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/lib/curlx      \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
@@ -111,7 +112,7 @@ CLEANFILES += libtest_bundle.c
 if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS)
+libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS) $(MEMPTR)
 endif
 else
 noinst_PROGRAMS = $(LIBTESTPROGS)

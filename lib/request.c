@@ -26,7 +26,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "doh.h"
 #include "multiif.h"
 #include "progress.h"
@@ -34,7 +34,7 @@
 #include "sendf.h"
 #include "transfer.h"
 #include "url.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -95,7 +95,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
-  req->start = Curl_now();
+  req->start = curlx_now();
   return Curl_req_soft_reset(req, data);
 }
 
@@ -120,7 +120,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
   /* This is a bit ugly. `req->p` is a union and we assume we can
    * free this safely without leaks. */
-  Curl_safefree(req->p.ftp);
+  Curl_safefree(req->p.file);
   Curl_safefree(req->newurl);
   Curl_client_reset(data);
   if(req->sendbuf_init)
@@ -173,7 +173,7 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
   /* This is a bit ugly. `req->p` is a union and we assume we can
    * free this safely without leaks. */
-  Curl_safefree(req->p.ftp);
+  Curl_safefree(req->p.file);
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
@@ -198,7 +198,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
       const char *p = getenv("CURL_SMALLREQSEND");
       if(p) {
         curl_off_t body_small;
-        if(!Curl_str_number(&p, &body_small, body_len))
+        if(!curlx_str_number(&p, &body_small, body_len))
           blen = hds_len + (size_t)body_small;
       }
     }
@@ -387,8 +387,8 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
     return CURLE_FAILED_INIT;
 
   data->req.httpversion_sent = httpversion;
-  buf = Curl_dyn_ptr(req);
-  blen = Curl_dyn_len(req);
+  buf = curlx_dyn_ptr(req);
+  blen = curlx_dyn_len(req);
   if(!Curl_creader_total_length(data)) {
     /* Request without body. Try to send directly from the buf given. */
     data->req.eos_read = TRUE;

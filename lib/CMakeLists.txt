@@ -21,8 +21,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(LIB_NAME "libcurl")
-set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
+
+set(LIBCURL_OUTPUT_NAME "${LIB_NAME}" CACHE STRING "Basename of the curl library")
+
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 
@@ -36,7 +37,9 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # The rest of the build
 
-set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_BINARY_DIR}/lib")  # for "curl_config.h"
+set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
+  "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
+)
 
 if(USE_ARES)
   include_directories(SYSTEM ${CARES_INCLUDE_DIRS})

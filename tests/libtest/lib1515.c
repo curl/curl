@@ -114,8 +114,8 @@ CURLcode test(char *URL)
   int i;
   int count = 2;
 
-  msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
-            port, address);
+  curl_msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
+                 port, address);
 
   start_test_timing();
 
@@ -125,13 +125,13 @@ CURLcode test(char *URL)
 
   for(i = 1; i <= count; i++) {
     char target_url[256];
-    msnprintf(target_url, sizeof(target_url),
-              "http://testserver.example.com:%s/%s%04d", port, path, i);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
     if(res != CURLE_OK) {
-      fprintf(stderr, "request %s failed with %d\n", target_url, res);
+      curl_mfprintf(stderr, "request %s failed with %d\n", target_url, res);
       goto test_cleanup;
     }
 

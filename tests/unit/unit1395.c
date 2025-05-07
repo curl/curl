@@ -128,21 +128,21 @@ UNITTEST_START
     abort_if(err && out, "returned error with output");
 
     if(out && pairs[i].output && strcmp(out, pairs[i].output)) {
-      fprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
-              i, pairs[i].input, out, pairs[i].output);
+      curl_mfprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
+                    i, pairs[i].input, out, pairs[i].output);
       fail("Test case output mismatched");
       fails++;
     }
     else if((!out && pairs[i].output) ||
             (out && !pairs[i].output)) {
-      fprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
-              i, pairs[i].input, out ? out : "(null)",
-              pairs[i].output ? pairs[i].output : "(null)");
+      curl_mfprintf(stderr, "Test %u: '%s' gave '%s' instead of '%s'\n",
+                    i, pairs[i].input, out ? out : "(null)",
+                    pairs[i].output ? pairs[i].output : "(null)");
       fail("Test case output mismatched");
       fails++;
     }
     else
-      fprintf(stderr, "Test %u: OK\n", i);
+      curl_mfprintf(stderr, "Test %u: OK\n", i);
     free(out);
   }
 

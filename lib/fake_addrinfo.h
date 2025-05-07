@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TIMEDIFF_H
-#define HEADER_CURL_TIMEDIFF_H
+#ifndef HEADER_FAKE_ADDRINFO_H
+#define HEADER_FAKE_ADDRINFO_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -26,27 +26,29 @@
 
 #include "curl_setup.h"
 
-/* Use a larger type even for 32-bit time_t systems so that we can keep
-   microsecond accuracy in it */
-typedef curl_off_t timediff_t;
-#define FMT_TIMEDIFF_T FMT_OFF_T
+#ifdef USE_ARES
+#include <ares.h>
+#endif
 
-#define TIMEDIFF_T_MAX CURL_OFF_T_MAX
-#define TIMEDIFF_T_MIN CURL_OFF_T_MIN
+#if defined(CURLDEBUG) && defined(USE_ARES) && defined(HAVE_GETADDRINFO) && \
+  (ARES_VERSION >= 0x011a00) /* >= 1.26. 0 */
+#define USE_FAKE_GETADDRINFO 1
+#endif
 
-/*
- * Converts number of milliseconds into a timeval structure.
- *
- * Return values:
- *    NULL IF tv is NULL or ms < 0 (eg. no timeout -> blocking select)
- *    tv with 0 in both fields IF ms == 0 (eg. 0ms timeout -> polling select)
- *    tv with converted fields IF ms > 0 (eg. >0ms timeout -> waiting select)
- */
-struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms);
+#ifdef USE_FAKE_GETADDRINFO
 
-/*
- * Converts a timeval structure into number of milliseconds.
- */
-timediff_t curlx_tvtoms(struct timeval *tv);
+#ifdef HAVE_NETDB_H
+#  include <netdb.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#  include <arpa/inet.h>
+#endif
 
-#endif /* HEADER_CURL_TIMEDIFF_H */
+void r_freeaddrinfo(struct addrinfo *res);
+int r_getaddrinfo(const char *node,
+                  const char *service,
+                  const struct addrinfo *hints,
+                  struct addrinfo **res);
+#endif /* USE_FAKE_GETADDRINFO */
+
+#endif /* HEADER_FAKE_ADDRINFO_H */

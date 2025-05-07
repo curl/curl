@@ -34,8 +34,8 @@ static void websocket_close(CURL *curl)
   size_t sent;
   CURLcode result =
     curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  fprintf(stderr,
-          "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
+  curl_mfprintf(stderr,
+                "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
 }
 
 static void websocket(CURL *curl)
@@ -57,14 +57,14 @@ static void websocket(CURL *curl)
         /* crude busy-loop */
         continue;
       fclose(save);
-      printf("curl_ws_recv returned %d\n", result);
+      curl_mprintf("curl_ws_recv returned %d\n", result);
       return;
     }
-    printf("%d: nread %zu Age %d Flags %x "
-           "Offset %" CURL_FORMAT_CURL_OFF_T " "
-           "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
-           (int)i,
-           nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
+    curl_mprintf("%d: nread %zu Age %d Flags %x "
+                 "Offset %" CURL_FORMAT_CURL_OFF_T " "
+                 "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
+                 (int)i,
+                 nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
     i += meta->len;
     fwrite(buffer, 1, nread, save);
   }
@@ -93,7 +93,7 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
     res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
     if(res == CURLE_OK)
       websocket(curl);
 

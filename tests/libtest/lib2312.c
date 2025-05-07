@@ -41,23 +41,23 @@ static size_t write_cb(char *b, size_t size, size_t nitems, void *p)
 
   /* upon ping, respond with input data, disconnect, mark a success */
   if(frame->flags & CURLWS_PING) {
-    fprintf(stderr, "write_cb received ping with %zd bytes\n",
-      size * nitems);
-    fprintf(stderr, "\n");
+    curl_mfprintf(stderr, "write_cb received ping with %zd bytes\n",
+                  size * nitems);
+    curl_mfprintf(stderr, "\n");
     for(i = 0; i < size * nitems; i++) {
-      fprintf(stderr, "%02X%s", (int)b[i],
-          (i % 10 == 0 && i != 0) ? "\n" : " ");
+      curl_mfprintf(stderr, "%02X%s", (int)b[i],
+                    (i % 10 == 0 && i != 0) ? "\n" : " ");
     }
-    fprintf(stderr, "\n");
-    fprintf(stderr, "write_cb sending pong response\n");
+    curl_mfprintf(stderr, "\n");
+    curl_mfprintf(stderr, "write_cb sending pong response\n");
     curl_ws_send(curl, b, size * nitems, &sent, 0, CURLWS_PONG);
-    fprintf(stderr, "write_cb closing websocket\n");
+    curl_mfprintf(stderr, "write_cb closing websocket\n");
     curl_ws_send(curl, NULL, 0, &sent, 0, CURLWS_CLOSE);
     ping_check->pinged = 1;
   }
   else {
-    fprintf(stderr, "ping_check_cb: non-ping message, frame->flags %x\n",
-      frame->flags);
+    curl_mfprintf(stderr, "ping_check_cb: non-ping message, frame->flags %x\n",
+                  frame->flags);
   }
 
   return size * nitems;
@@ -86,7 +86,7 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &state);
 
     res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
+    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
 
     res = state.pinged ? 0 : 1;
 

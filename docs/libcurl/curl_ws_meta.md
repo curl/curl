@@ -137,7 +137,7 @@ struct customdata {
   void *ptr;
 };
 
-static size_t writecb(unsigned char *buffer,
+static size_t writecb(char *buffer,
                       size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;

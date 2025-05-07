@@ -10,11 +10,12 @@
 # https://github.com/actions/labeler
 
 name: Labeler
-'on': [pull_request_target]
+'on': [pull_request_target]  # zizmor: ignore[dangerous-triggers]
+
+permissions: {}
 
 jobs:
   label:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read

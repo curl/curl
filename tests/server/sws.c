@@ -49,7 +49,7 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
 #include "util.h"
@@ -583,7 +583,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     if(got_exit_signal)
       return 1; /* done */
 
-    if((req->cl == 0) && strncasecompare("Content-Length:", line, 15)) {
+    if((req->cl == 0) && curl_strnequal("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -605,13 +605,13 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       if(req->skip)
         logmsg("... but will abort after %zu bytes", req->cl);
     }
-    else if(strncasecompare("Transfer-Encoding: chunked", line,
+    else if(curl_strnequal("Transfer-Encoding: chunked", line,
                             strlen("Transfer-Encoding: chunked"))) {
       /* chunked data coming in */
       chunked = TRUE;
     }
     else if(req->noexpect &&
-            strncasecompare("Expect: 100-continue", line,
+            curl_strnequal("Expect: 100-continue", line,
                             strlen("Expect: 100-continue"))) {
       if(req->cl)
         req->cl = 0;

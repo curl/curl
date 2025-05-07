@@ -46,15 +46,16 @@
 #endif
 
 #include "urldata.h"
+#include "url.h"
 #include "cfilters.h"
 #include "cf-socket.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "ftp.h"
 #include "curl_gssapi.h"
 #include "sendf.h"
 #include "transfer.h"
 #include "curl_krb5.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "strcase.h"
 #include "strdup.h"
 
@@ -217,6 +218,10 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct sockaddr_in *remote_addr =
     (struct sockaddr_in *)CURL_UNCONST(&conn->remote_addr->curl_sa_addr);
   char *stringp;
+  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
+
+  if(!ftpc)
+    return -2;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)&conn->local_addr, &l) < 0)
@@ -242,8 +247,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(Curl_GetFTPResponse(data, &nread, NULL))
         return -1;
       else {
-        struct pingpong *pp = &conn->proto.ftpc.pp;
-        char *line = Curl_dyn_ptr(&pp->recvbuf);
+        char *line = curlx_dyn_ptr(&ftpc->pp.recvbuf);
         if(line[0] != '3')
           return -1;
       }
@@ -304,7 +308,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       if(output_buffer.length) {
         char *cmd;
 
-        result = Curl_base64_encode((char *)output_buffer.value,
+        result = curlx_base64_encode((char *)output_buffer.value,
                                     output_buffer.length, &p, &base64_sz);
         if(result) {
           infof(data, "base64-encoding: %s", curl_easy_strerror(result));
@@ -331,9 +335,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
           break;
         }
         else {
-          struct pingpong *pp = &conn->proto.ftpc.pp;
-          size_t len = Curl_dyn_len(&pp->recvbuf);
-          p = Curl_dyn_ptr(&pp->recvbuf);
+          size_t len = curlx_dyn_len(&ftpc->pp.recvbuf);
+          p = curlx_dyn_ptr(&ftpc->pp.recvbuf);
           if((len < 4) || (p[0] != '2' && p[0] != '3')) {
             infof(data, "Server did not accept auth data");
             ret = AUTH_ERROR;
@@ -348,7 +351,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         if(p) {
           unsigned char *outptr;
           size_t outlen;
-          result = Curl_base64_decode(p + 5, &outptr, &outlen);
+          result = curlx_base64_decode(p + 5, &outptr, &outlen);
           if(result) {
             failf(data, "base64-decoding: %s", curl_easy_strerror(result));
             ret = AUTH_CONTINUE;
@@ -537,7 +540,7 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
     if(len > CURL_MAX_INPUT_LENGTH)
       return CURLE_TOO_LARGE;
 
-    Curl_dyn_reset(&buf->buf);
+    curlx_dyn_reset(&buf->buf);
   }
   else
     return CURLE_RECV_ERROR;
@@ -548,18 +551,18 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
     result = socket_read(data, sockindex, buffer, (size_t)nread);
     if(result)
       return result;
-    result = Curl_dyn_addn(&buf->buf, buffer, nread);
+    result = curlx_dyn_addn(&buf->buf, buffer, nread);
     if(result)
       return result;
     len -= nread;
   } while(len);
   /* this decodes the dynbuf *in place* */
   nread = conn->mech->decode(conn->app_data,
-                             Curl_dyn_ptr(&buf->buf),
+                             curlx_dyn_ptr(&buf->buf),
                              len, conn->data_prot, conn);
   if(nread < 0)
     return CURLE_RECV_ERROR;
-  Curl_dyn_setlen(&buf->buf, nread);
+  curlx_dyn_setlen(&buf->buf, nread);
   buf->index = 0;
   return CURLE_OK;
 }
@@ -567,10 +570,10 @@ static CURLcode read_data(struct Curl_easy *data, int sockindex,
 static size_t
 buffer_read(struct krb5buffer *buf, void *data, size_t len)
 {
-  size_t size = Curl_dyn_len(&buf->buf);
+  size_t size = curlx_dyn_len(&buf->buf);
   if(size - buf->index < len)
     len = size - buf->index;
-  memcpy(data, Curl_dyn_ptr(&buf->buf) + buf->index, len);
+  memcpy(data, curlx_dyn_ptr(&buf->buf) + buf->index, len);
   buf->index += len;
   return len;
 }
@@ -605,7 +608,7 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   while(len > 0) {
     if(read_data(data, sockindex, &conn->in_buffer))
       return -1;
-    if(Curl_dyn_len(&conn->in_buffer.buf) == 0) {
+    if(curlx_dyn_len(&conn->in_buffer.buf) == 0) {
       if(bytes_read > 0)
         conn->in_buffer.eof_flag = 1;
       return bytes_read;
@@ -645,7 +648,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
     return; /* error */
 
   if(iscmd) {
-    error = Curl_base64_encode(buffer, curlx_sitouz(bytes),
+    error = curlx_base64_encode(buffer, curlx_sitouz(bytes),
                                &cmd_buffer, &cmd_size);
     if(error) {
       free(buffer);
@@ -723,7 +726,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
 
   DEBUGASSERT(level > PROT_NONE && level < PROT_LAST);
 
-  error = Curl_base64_decode(buffer + 4, (unsigned char **)&buf, &decoded_sz);
+  error = curlx_base64_decode(buffer + 4, (unsigned char **)&buf, &decoded_sz);
   if(error || decoded_sz == 0)
     return -1;
 
@@ -781,8 +784,11 @@ static int sec_set_protection_level(struct Curl_easy *data)
   if(level) {
     char *pbsz;
     unsigned int buffer_size = 1 << 20; /* 1048576 */
-    struct pingpong *pp = &conn->proto.ftpc.pp;
+    struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
     char *line;
+
+    if(!ftpc)
+      return -2;
 
     code = ftp_send_command(data, "PBSZ %u", buffer_size);
     if(code < 0)
@@ -794,7 +800,7 @@ static int sec_set_protection_level(struct Curl_easy *data)
     }
     conn->buffer_size = buffer_size;
 
-    line = Curl_dyn_ptr(&pp->recvbuf);
+    line = curlx_dyn_ptr(&ftpc->pp.recvbuf);
     pbsz = strstr(line, "PBSZ=");
     if(pbsz) {
       /* stick to default value if the check fails */
@@ -916,7 +922,7 @@ Curl_sec_login(struct Curl_easy *data, struct connectdata *conn)
 void
 Curl_sec_conn_init(struct connectdata *conn)
 {
-  Curl_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
+  curlx_dyn_init(&conn->in_buffer.buf, CURL_MAX_INPUT_LENGTH);
   conn->in_buffer.index = 0;
   conn->in_buffer.eof_flag = 0;
 }
@@ -927,7 +933,7 @@ Curl_sec_conn_destroy(struct connectdata *conn)
   if(conn->mech && conn->mech->end)
     conn->mech->end(conn->app_data);
   Curl_safefree(conn->app_data);
-  Curl_dyn_free(&conn->in_buffer.buf);
+  curlx_dyn_free(&conn->in_buffer.buf);
   conn->in_buffer.index = 0;
   conn->in_buffer.eof_flag = 0;
   conn->sec_complete = 0;

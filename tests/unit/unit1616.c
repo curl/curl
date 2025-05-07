@@ -23,11 +23,9 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curlx.h"
-
-#include "uint-hash.h"
-
-#include "memdebug.h" /* LAST include file */
+#include <curlx.h>
+#include <uint-hash.h>
+#include <memdebug.h> /* LAST include file */
 
 static struct uint_hash hash_static;
 

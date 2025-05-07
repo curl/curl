@@ -84,7 +84,7 @@ CURLcode test(char *URL)
 
     abort_on_test_timeout();
 
-    fprintf(stderr, "ping\n");
+    curl_mfprintf(stderr, "ping\n");
     before = tutil_tvnow();
 
     multi_perform(mhandle, &still_running);
@@ -93,7 +93,7 @@ CURLcode test(char *URL)
 
     after = tutil_tvnow();
     e = tutil_tvdiff(after, before);
-    fprintf(stderr, "pong = %ld\n", e);
+    curl_mfprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
       res = CURLE_TOO_LARGE;

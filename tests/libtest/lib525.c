@@ -46,19 +46,19 @@ CURLcode test(char *URL)
   if(!libtest_arg2) {
 #ifdef LIB529
     /* test 529 */
-    fprintf(stderr, "Usage: lib529 [url] [uploadfile]\n");
+    curl_mfprintf(stderr, "Usage: lib529 [url] [uploadfile]\n");
 #else
     /* test 525 */
-    fprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
+    curl_mfprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
 #endif
     return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    fprintf(stderr, "fopen failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
 
@@ -70,9 +70,9 @@ CURLcode test(char *URL)
 #endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error (%d) %s\n",
+    curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
             errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;
   }

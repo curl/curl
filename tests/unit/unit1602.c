@@ -23,11 +23,11 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "hash.h"
 
-#include "memdebug.h" /* LAST include file */
+#include <memdebug.h> /* LAST include file */
 
 static struct Curl_hash hash_static;
 
@@ -40,7 +40,7 @@ static void mydtor(void *p)
 static CURLcode unit_setup(void)
 {
   Curl_hash_init(&hash_static, 7, Curl_hash_str,
-                 Curl_str_key_compare, mydtor);
+                 curlx_str_key_compare, mydtor);
   return CURLE_OK;
 }
 

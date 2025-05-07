@@ -18,16 +18,17 @@ discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
-To build our ECH-enabled OpenSSL fork:
+To build the OpenSSL project's ECH feature branch:
 
 ```bash
     cd $HOME/code
-    git clone https://github.com/defo-project/openssl
+    git clone https://github.com/openssl/openssl
     cd openssl
+    git checkout feature/ech
     ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
     ...stuff...
     make -j8
-    ...stuff (maybe go for coffee)...
+    ...more stuff...
     make install_sw
     ...a little bit of stuff...
 ```
@@ -476,3 +477,20 @@ and then reuse that in another invocation.
 
 Both our OpenSSL fork and BoringSSL/AWS-LC have APIs for both controlling GREASE
 and accessing and logging ``retry_configs``, it seems wolfSSL has neither.
+
+### Testing ECH
+
+We have yet to add a robust test setup for ECH as that requires an ECH-enabled
+test server.
+
+We have added two basic tests though, aiming to ensure that the client sends a
+GREASE or real ECH extension when requested, and reacts correctly to the
+failure of ECH in the latter case. (Given that `stunnel` has no ECH support.)
+
+As with other similar tests, those tests require the `stunnel` tool be
+installed. On Ubuntu `sudo apt install stunnel4` achieves that.
+
+The test cases are:
+
+- data/test4000: GREASE ECH, expected result: connection succeeds
+- data/test4001: real ECH, connection fails with error 101 (ECH required)

@@ -57,14 +57,14 @@ CURLcode test(char *URL)
     return res;
   }
 
-  msnprintf(redirect, sizeof(redirect), "google.com:%s:%s", libtest_arg2,
-            libtest_arg3);
+  curl_msnprintf(redirect, sizeof(redirect), "google.com:%s:%s", libtest_arg2,
+                 libtest_arg3);
 
   start_test_timing();
 
   dns_cache_list = curl_slist_append(NULL, redirect);
   if(!dns_cache_list) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

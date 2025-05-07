@@ -53,8 +53,9 @@ struct callback_data {
    FILE *output;
 };
 
-static long file_is_downloaded(struct callback_data *data)
+static long file_is_downloaded(void *ptr)
 {
+  struct callback_data *data = ptr;
   if(data->output) {
     fclose(data->output);
     data->output = 0x0;

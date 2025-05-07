@@ -115,8 +115,8 @@ CURLcode test(char *URL)
   if(!result)
     tid_valid = true;
   else {
-    fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
-            __FILE__, __LINE__, result);
+    curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
+                  __FILE__, __LINE__, result);
     goto test_cleanup;
   }
 
@@ -134,8 +134,9 @@ CURLcode test(char *URL)
         finished_num++;
       }
       else {
-        fprintf(stderr, "%s:%d Got an unexpected message from curl: %i\n",
-              __FILE__, __LINE__, (int)message->msg);
+        curl_mfprintf(stderr,
+                      "%s:%d Got an unexpected message from curl: %i\n",
+                      __FILE__, __LINE__, (int)message->msg);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -170,14 +171,14 @@ CURLcode test(char *URL)
   }
 
   if(CONN_NUM != started_num) {
-    fprintf(stderr, "%s:%d Not all connections started: %d of %d\n",
-            __FILE__, __LINE__, started_num, CONN_NUM);
+    curl_mfprintf(stderr, "%s:%d Not all connections started: %d of %d\n",
+                  __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
   }
 
   if(CONN_NUM != finished_num) {
-    fprintf(stderr, "%s:%d Not all connections finished: %d of %d\n",
-            __FILE__, __LINE__, started_num, CONN_NUM);
+    curl_mfprintf(stderr, "%s:%d Not all connections finished: %d of %d\n",
+                  __FILE__, __LINE__, started_num, CONN_NUM);
     goto test_cleanup;
   }
 

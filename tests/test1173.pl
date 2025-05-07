@@ -195,13 +195,13 @@ sub scanmanpage {
                 }
             }
         }
-        elsif($inex)  {
+        elsif($inex) {
             $exsize++;
             if($_ =~ /[^\\]\\n/) {
                 print STDERR "$file:$line '\\n' need to be '\\\\n'!\n";
             }
         }
-        elsif($insynop)  {
+        elsif($insynop) {
             $synopsize++;
             if(($synopsize == 1) && ($_ !~ /\.nf/)) {
                 print STDERR "$file:$line:1:ERROR: be .nf for proper formatting\n";

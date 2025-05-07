@@ -49,14 +49,14 @@
 #include "../select.h" /* for the socket readiness */
 #include "../inet_pton.h" /* for IP addr SNI check */
 #include "../curl_multibyte.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../curl_printf.h"
 #include "../multiif.h"
 #include "../system_win32.h"
 #include "../version_win32.h"
 #include "../rand.h"
-#include "../strparse.h"
+#include "../curlx/strparse.h"
 
 /* The last #include file should be: */
 #include "../curl_memory.h"
@@ -381,7 +381,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
   int algCount = 0;
   while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
     curl_off_t alg;
-    if(Curl_str_number(&startCur, &alg, INT_MAX) || !alg)
+    if(curlx_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
 
     if(alg)
@@ -2632,8 +2632,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
      negative timeout means retain forever. */
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
-    now = Curl_now();
-    elapsed_ms = Curl_timediff(now, share->time);
+    now = curlx_now();
+    elapsed_ms = curlx_timediff(now, share->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
@@ -2732,7 +2732,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
   free(share->CAfile);
 
-  share->time = Curl_now();
+  share->time = curlx_now();
   share->cert_store = cert_store;
   share->CAinfo_blob_size = CAinfo_blob_size;
   share->CAfile = CAfile;

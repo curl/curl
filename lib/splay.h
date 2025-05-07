@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 #include "curl_setup.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 /* only use function calls to access this struct */
 struct Curl_tree {

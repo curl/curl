@@ -29,38 +29,32 @@
 # CSRC2 = file4.c file5.c file6.c
 # CSOURCES = $(CSRC1) $(CSRC2)
 
-# libcurl sources to include in curltool lib we use for test binaries
-CURLTOOL_LIBCURL_CFILES = \
-  ../lib/base64.c \
-  ../lib/dynbuf.c \
-  ../lib/timeval.c
-
 # libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
-  ../lib/base64.c \
+  ../lib/curlx/base64.c \
   ../lib/curl_multibyte.c \
-  ../lib/dynbuf.c \
+  ../lib/curlx/dynbuf.c \
   ../lib/nonblock.c \
-  ../lib/strparse.c \
+  ../lib/curlx/strparse.c \
   ../lib/strcase.c \
-  ../lib/timediff.c \
-  ../lib/timeval.c \
+  ../lib/curlx/timediff.c \
+  ../lib/curlx/timeval.c \
   ../lib/version_win32.c \
-  ../lib/warnless.c
+  ../lib/curlx/warnless.c
 
 CURLX_HFILES = \
   ../lib/curl_ctype.h \
   ../lib/curl_multibyte.h \
   ../lib/curl_setup.h \
-  ../lib/dynbuf.h \
+  ../lib/curlx/dynbuf.h \
   ../lib/nonblock.h \
-  ../lib/strparse.h \
+  ../lib/curlx/strparse.h \
   ../lib/strcase.h \
-  ../lib/timediff.h \
-  ../lib/timeval.h \
+  ../lib/curlx/timediff.h \
+  ../lib/curlx/timeval.h \
   ../lib/version_win32.h \
-  ../lib/warnless.h
+  ../lib/curlx/warnless.h
 
 CURL_CFILES = \
   slist_wc.c \

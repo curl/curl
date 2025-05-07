@@ -431,7 +431,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
   Curl_mutex_acquire(&addr_ctx->mutx);
   DEBUGASSERT(addr_ctx->ref_count == 1);
   /* passing addr_ctx to the thread adds a reference */
-  addr_ctx->start = Curl_now();
+  addr_ctx->start = curlx_now();
   ++addr_ctx->ref_count;
 #ifdef HAVE_GETADDRINFO
   addr_ctx->thread_hnd = Curl_thread_create(getaddrinfo_thread, addr_ctx);
@@ -616,7 +616,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32-bit */
-    timediff_t elapsed = Curl_timediff(Curl_now(),
+    timediff_t elapsed = curlx_timediff(curlx_now(),
                                        data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
@@ -669,7 +669,7 @@ int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
 #endif
   {
     timediff_t milli;
-    timediff_t ms = Curl_timediff(Curl_now(), thrdd->addr->start);
+    timediff_t ms = curlx_timediff(curlx_now(), thrdd->addr->start);
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)

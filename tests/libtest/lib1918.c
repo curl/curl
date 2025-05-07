@@ -43,12 +43,12 @@ CURLcode test(char *URL)
       curl_easy_option_by_id(o->id);
 
     if(ename->id != o->id) {
-      printf("name lookup id %d doesn't match %d\n",
-             ename->id, o->id);
+      curl_mprintf("name lookup id %d doesn't match %d\n",
+                   ename->id, o->id);
     }
     else if(eid->id != o->id) {
-      printf("ID lookup %d doesn't match %d\n",
-             ename->id, o->id);
+      curl_mprintf("ID lookup %d doesn't match %d\n",
+                   ename->id, o->id);
     }
   }
   curl_global_cleanup();

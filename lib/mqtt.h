@@ -28,36 +28,4 @@
 extern const struct Curl_handler Curl_handler_mqtt;
 #endif
 
-enum mqttstate {
-  MQTT_FIRST,             /* 0 */
-  MQTT_REMAINING_LENGTH,  /* 1 */
-  MQTT_CONNACK,           /* 2 */
-  MQTT_SUBACK,            /* 3 */
-  MQTT_SUBACK_COMING,     /* 4 - the SUBACK remainder */
-  MQTT_PUBWAIT,    /* 5 - wait for publish */
-  MQTT_PUB_REMAIN,  /* 6 - wait for the remainder of the publish */
-
-  MQTT_NOSTATE /* 7 - never used an actual state */
-};
-
-struct mqtt_conn {
-  enum mqttstate state;
-  enum mqttstate nextstate; /* switch to this after remaining length is
-                               done */
-  unsigned int packetid;
-};
-
-/* protocol-specific transfer-related data */
-struct MQTT {
-  struct dynbuf sendbuf;
-  /* when receiving */
-  struct dynbuf recvbuf;
-  size_t npacket; /* byte counter */
-  size_t remaining_length;
-  unsigned char pkt_hd[4]; /* for decoding the arriving packet length */
-  struct curltime lastTime; /* last time we sent or received data */
-  unsigned char firstbyte;
-  BIT(pingsent); /* 1 while we wait for ping response */
-};
-
 #endif /* HEADER_CURL_MQTT_H */

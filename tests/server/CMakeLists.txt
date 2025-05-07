@@ -50,6 +50,7 @@ foreach(_target IN LISTS SERVERPROGS)
   target_include_directories(${_target_name} PRIVATE
     "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
     "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/lib/curlx"     # for curlx
     "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
     "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
   )

@@ -69,7 +69,7 @@ int main(void)
     res = curl_easy_perform(curl);
 
     if(res == CURLE_OK) {
-      long sockfd;
+      curl_socket_t sockfd;
       size_t sent;
       /* Extract the socket from the curl handle - we need it for waiting. */
       res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);

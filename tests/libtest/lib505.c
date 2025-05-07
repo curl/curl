@@ -50,15 +50,15 @@ CURLcode test(char *URL)
   const char *buf_2 = "RNTO 505-forreal";
 
   if(!libtest_arg2) {
-    fprintf(stderr, "Usage: <url> <file-to-upload>\n");
+    curl_mfprintf(stderr, "Usage: <url> <file-to-upload>\n");
     return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    fprintf(stderr, "fopen failed with error (%d) %s\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+                  errno, strerror(errno));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
@@ -70,21 +70,21 @@ CURLcode test(char *URL)
 #endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error (%d) %s\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
+                  errno, strerror(errno));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(!file_info.st_size) {
-    fprintf(stderr, "File %s has zero size!\n", libtest_arg2);
+    curl_mfprintf(stderr, "File %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
@@ -92,7 +92,7 @@ CURLcode test(char *URL)
   /* get a curl handle */
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
@@ -102,7 +102,7 @@ CURLcode test(char *URL)
 
   hl = curl_slist_append(headerlist, buf_1);
   if(!hl) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     fclose(hd_src);
@@ -110,7 +110,7 @@ CURLcode test(char *URL)
   }
   headerlist = curl_slist_append(hl, buf_2);
   if(!headerlist) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    curl_mfprintf(stderr, "curl_slist_append() failed\n");
     curl_slist_free_all(hl);
     curl_easy_cleanup(curl);
     curl_global_cleanup();

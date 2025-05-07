@@ -31,13 +31,13 @@
 #include "cfilters.h"
 #include "curl_trc.h"
 #include "multiif.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "multi_ev.h"
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"
 #include "uint-table.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "multihandle.h"
 #include "socks.h"
 /* The last 3 #include files should be in this order */
@@ -453,10 +453,8 @@ mev_add_new_conn_pollset(struct connectdata *conn)
   ps = calloc(1, sizeof(*ps));
   if(!ps)
     return NULL;
-  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
-    free(ps);
+  if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
-  }
   return ps;
 }
 
@@ -468,10 +466,8 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
   ps = calloc(1, sizeof(*ps));
   if(!ps)
     return NULL;
-  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor)) {
-    free(ps);
+  if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
-  }
   return ps;
 }
 
@@ -482,8 +478,7 @@ mev_get_last_pollset(struct Curl_easy *data,
   if(data) {
     if(conn)
       return Curl_conn_meta_get(conn, CURL_META_MEV_POLLSET);
-    else if(data)
-      return Curl_meta_get(data, CURL_META_MEV_POLLSET);
+    return Curl_meta_get(data, CURL_META_MEV_POLLSET);
   }
   return NULL;
 }

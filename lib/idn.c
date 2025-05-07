@@ -31,7 +31,7 @@
 #include "idn.h"
 #include "sendf.h"
 #include "curl_multibyte.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>

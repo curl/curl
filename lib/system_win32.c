@@ -30,14 +30,11 @@
 #include "system_win32.h"
 #include "version_win32.h"
 #include "curl_sspi.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
-
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;

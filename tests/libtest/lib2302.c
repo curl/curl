@@ -45,13 +45,13 @@ static void flush_data(struct ws_data *wd)
     return;
 
   for(i = 0; i < wd->blen; ++i)
-    printf("%02x ", (unsigned char)wd->buf[i]);
+    curl_mprintf("%02x ", (unsigned char)wd->buf[i]);
 
-  printf("\n");
+  curl_mprintf("\n");
   if(wd->has_meta)
-    printf("RECFLAGS: %x\n", wd->meta_flags);
+    curl_mprintf("RECFLAGS: %x\n", wd->meta_flags);
   else
-    fprintf(stderr, "RECFLAGS: NULL\n");
+    curl_mfprintf(stderr, "RECFLAGS: NULL\n");
   wd->blen = 0;
   wd->nwrites = 0;
 }
@@ -89,7 +89,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   incoming = add_data(ws_data, buffer, incoming, meta);
 
   if(nitems != incoming)
-    fprintf(stderr, "returns error from callback\n");
+    curl_mfprintf(stderr, "returns error from callback\n");
   return nitems;
 }
 
@@ -115,7 +115,7 @@ CURLcode test(char *URL)
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
       res = curl_easy_perform(curl);
-      fprintf(stderr, "curl_easy_perform() returned %d\n", res);
+      curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
       /* always cleanup */
       curl_easy_cleanup(curl);
       flush_data(&ws_data);

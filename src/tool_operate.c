@@ -54,7 +54,7 @@
 #include <uv.h>
 #endif
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_binmode.h"
 #include "tool_cfgable.h"
@@ -91,7 +91,7 @@
 #include "tool_hugehelp.h"
 #include "tool_progress.h"
 #include "tool_ipfs.h"
-#include "dynbuf.h"
+
 #ifdef DEBUGBUILD
 /* libcurl's debug-only curl_easy_perform_ev() */
 CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
@@ -1263,6 +1263,10 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   if(config->ssl_ec_curves)
     my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
 
+  if(config->ssl_signature_algorithms)
+    my_setopt_str(curl, CURLOPT_SSL_SIGNATURE_ALGORITHMS,
+                  config->ssl_signature_algorithms);
+
   if(config->writeout)
     my_setopt_long(curl, CURLOPT_CERTINFO, 1);
 
@@ -1348,7 +1352,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
   if(config->cookies) {
-    struct curlx_dynbuf cookies;
+    struct dynbuf cookies;
     struct curl_slist *cl;
 
     /* The maximum size needs to match MAX_NAME in cookie.h */

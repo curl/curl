@@ -179,6 +179,7 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12.4))
         list(APPEND _picky_enable
           -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # We do silencing for clang 10.0 and above only
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
         )
       endif()
     else()  # gcc
@@ -198,7 +199,6 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wjump-misses-init               #             gcc  4.5
         )
-
         if(MINGW)
           list(APPEND _picky_enable
             -Wno-pedantic-ms-format        #             gcc  4.5 (MinGW-only)
@@ -242,13 +242,36 @@ if(PICKY_COMPILER)
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
         )
       endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+        list(APPEND _picky_enable
+          -Warray-compare                  # clang 20.0  gcc 12.0
+          -Wenum-int-mismatch              #             gcc 13.0
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
+        )
+      endif()
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
+        list(APPEND _picky_enable
+          -Wleading-whitespace=spaces      #             gcc 15.0
+          -Wtrailing-whitespace=any        #             gcc 15.0
+          -Wunterminated-string-initialization  #        gcc 15.0
+        )
+      endif()
     endif()
 
     #
 
+    set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
-      list(APPEND _picky "${_ccopt}")
+      string(REGEX MATCH "-W([a-z0-9-]+)" _ccmatch "${_ccopt}")
+      if(_ccmatch AND CMAKE_C_FLAGS MATCHES "-Wno-${CMAKE_MATCH_1}" AND NOT _ccopt STREQUAL "-Wall" AND NOT _ccopt MATCHES "^-Wno-")
+        string(APPEND _picky_skipped " ${_ccopt}")
+      else()
+        list(APPEND _picky "${_ccopt}")
+      endif()
     endforeach()
+    if(_picky_skipped)
+      message(STATUS "Picky compiler options skipped due to CMAKE_C_FLAGS override:${_picky_skipped}")
+    endif()
 
     foreach(_ccopt IN LISTS _picky_detect)
       # Use a unique variable name 1. for meaningful log output 2. to have a fresh, undefined variable for each detection

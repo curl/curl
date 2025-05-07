@@ -73,11 +73,11 @@
 #include "../progress.h"
 #include "../share.h"
 #include "../multiif.h"
-#include "../timeval.h"
+#include "../curlx/timeval.h"
 #include "../curl_md5.h"
 #include "../curl_sha256.h"
-#include "../warnless.h"
-#include "../curl_base64.h"
+#include "../curlx/warnless.h"
+#include "../curlx/base64.h"
 #include "../curl_printf.h"
 #include "../inet_pton.h"
 #include "../connect.h"
@@ -215,6 +215,7 @@ match_ssl_primary_config(struct Curl_easy *data,
      strcasecompare(c1->cipher_list, c2->cipher_list) &&
      strcasecompare(c1->cipher_list13, c2->cipher_list13) &&
      strcasecompare(c1->curves, c2->curves) &&
+     strcasecompare(c1->signature_algorithms, c2->signature_algorithms) &&
      strcasecompare(c1->CRLfile, c2->CRLfile) &&
      strcasecompare(c1->pinned_key, c2->pinned_key))
     return TRUE;
@@ -259,6 +260,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   CLONE_STRING(cipher_list13);
   CLONE_STRING(pinned_key);
   CLONE_STRING(curves);
+  CLONE_STRING(signature_algorithms);
   CLONE_STRING(CRLfile);
 #ifdef USE_TLS_SRP
   CLONE_STRING(username);
@@ -281,6 +283,7 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
   Curl_safefree(sslc->ca_info_blob);
   Curl_safefree(sslc->issuercert_blob);
   Curl_safefree(sslc->curves);
+  Curl_safefree(sslc->signature_algorithms);
   Curl_safefree(sslc->CRLfile);
 #ifdef USE_TLS_SRP
   Curl_safefree(sslc->username);
@@ -299,6 +302,8 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
     data->set.str[STRING_SSL_CIPHER_LIST];
   data->set.ssl.primary.cipher_list13 =
     data->set.str[STRING_SSL_CIPHER13_LIST];
+  data->set.ssl.primary.signature_algorithms =
+    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
   data->set.ssl.primary.pinned_key =
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT];
@@ -611,17 +616,17 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 
   DEBUGASSERT(certnum < ci->num_of_certs);
 
-  Curl_dyn_init(&build, CURL_X509_STR_MAX);
+  curlx_dyn_init(&build, CURL_X509_STR_MAX);
 
-  if(Curl_dyn_add(&build, label) ||
-     Curl_dyn_addn(&build, ":", 1) ||
-     Curl_dyn_addn(&build, value, valuelen))
+  if(curlx_dyn_add(&build, label) ||
+     curlx_dyn_addn(&build, ":", 1) ||
+     curlx_dyn_addn(&build, value, valuelen))
     return CURLE_OUT_OF_MEMORY;
 
   nl = Curl_slist_append_nodup(ci->certinfo[certnum],
-                               Curl_dyn_ptr(&build));
+                               curlx_dyn_ptr(&build));
   if(!nl) {
-    Curl_dyn_free(&build);
+    curlx_dyn_free(&build);
     curl_slist_free_all(ci->certinfo[certnum]);
     result = CURLE_OUT_OF_MEMORY;
   }
@@ -658,7 +663,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
   if(!pem)
     return CURLE_BAD_CONTENT_ENCODING;
 
-  Curl_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
+  curlx_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
 
   begin_pos = strstr(pem, "-----BEGIN PUBLIC KEY-----");
   if(!begin_pos)
@@ -686,16 +691,19 @@ static CURLcode pubkey_pem_to_der(const char *pem,
    */
   while(pem_count < pem_len) {
     if('\n' != pem[pem_count] && '\r' != pem[pem_count]) {
-      result = Curl_dyn_addn(&pbuf, &pem[pem_count], 1);
+      result = curlx_dyn_addn(&pbuf, &pem[pem_count], 1);
       if(result)
         return result;
     }
     ++pem_count;
   }
 
-  result = Curl_base64_decode(Curl_dyn_ptr(&pbuf), der, der_len);
-
-  Curl_dyn_free(&pbuf);
+  if(curlx_dyn_len(&pbuf)) {
+    result = curlx_base64_decode(curlx_dyn_ptr(&pbuf), der, der_len);
+    curlx_dyn_free(&pbuf);
+  }
+  else
+    result = CURLE_BAD_CONTENT_ENCODING;
 
   return result;
 }
@@ -739,9 +747,9 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                                  sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
 
     if(!encode)
-      encode = Curl_base64_encode((char *)sha256sumdigest,
-                                  CURL_SHA256_DIGEST_LENGTH, &encoded,
-                                  &encodedlen);
+      encode = curlx_base64_encode((char *)sha256sumdigest,
+                                   CURL_SHA256_DIGEST_LENGTH, &encoded,
+                                   &encodedlen);
     Curl_safefree(sha256sumdigest);
 
     if(encode)
@@ -796,7 +804,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(!fp)
       return result;
 
-    Curl_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
+    curlx_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
 
     /* Determine the file's size */
     if(fseek(fp, 0, SEEK_END))
@@ -824,14 +832,14 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
       size_t want = left > sizeof(buffer) ? sizeof(buffer) : left;
       if(want != fread(buffer, 1, want, fp))
         goto end;
-      if(Curl_dyn_addn(&buf, buffer, want))
+      if(curlx_dyn_addn(&buf, buffer, want))
         goto end;
       left -= want;
     } while(left);
 
     /* If the sizes are the same, it cannot be base64 encoded, must be der */
     if(pubkeylen == size) {
-      if(!memcmp(pubkey, Curl_dyn_ptr(&buf), pubkeylen))
+      if(!memcmp(pubkey, curlx_dyn_ptr(&buf), pubkeylen))
         result = CURLE_OK;
       goto end;
     }
@@ -840,7 +848,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      * Otherwise we will assume it is PEM and try to decode it
      * after placing null terminator
      */
-    pem_read = pubkey_pem_to_der(Curl_dyn_ptr(&buf), &pem_ptr, &pem_len);
+    pem_read = pubkey_pem_to_der(curlx_dyn_ptr(&buf), &pem_ptr, &pem_len);
     /* if it was not read successfully, exit */
     if(pem_read)
       goto end;
@@ -852,7 +860,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     if(pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = CURLE_OK;
 end:
-    Curl_dyn_free(&buf);
+    curlx_dyn_free(&buf);
     Curl_safefree(pem_ptr);
     fclose(fp);
   }
@@ -1346,7 +1354,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     if(connssl->state == ssl_connection_complete)
-      connssl->handshake_done = Curl_now();
+      connssl->handshake_done = curlx_now();
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
                 connssl->state == ssl_connection_deferred);

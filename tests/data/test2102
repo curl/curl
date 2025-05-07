@@ -33,8 +33,7 @@ http
 dns
 </server>
 <features>
-Debug
-c-ares
+override-dns
 </features>
 <name>
 HTTP GET with host name

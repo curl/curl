@@ -68,7 +68,7 @@ CURLcode test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    fprintf(stderr, "curl_multi_perform()\n");
+    curl_mfprintf(stderr, "curl_multi_perform()\n");
 
     multi_perform(m, &running);
 
@@ -77,7 +77,7 @@ CURLcode test(char *URL)
       int num;
       mres = curl_multi_wait(m, NULL, 0, TEST_HANG_TIMEOUT, &num);
       if(mres != CURLM_OK) {
-        printf("curl_multi_wait() returned %d\n", mres);
+        curl_mprintf("curl_multi_wait() returned %d\n", mres);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -93,20 +93,20 @@ CURLcode test(char *URL)
       /* This is where this code is expected to reach */
       int numleft;
       CURLMsg *msg = curl_multi_info_read(m, &numleft);
-      fprintf(stderr, "Expected: not running\n");
+      curl_mfprintf(stderr, "Expected: not running\n");
       if(msg && !numleft)
         res = TEST_ERR_SUCCESS; /* this is where we should be */
       else
         res = TEST_ERR_FAILURE; /* not correct */
       break; /* done */
     }
-    fprintf(stderr, "running == %d\n", running);
+    curl_mfprintf(stderr, "running == %d\n", running);
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    fprintf(stderr, "curl_multi_fdset()\n");
+    curl_mfprintf(stderr, "curl_multi_fdset()\n");
 
     multi_fdset(m, &rd, &wr, &exc, &maxfd);
 

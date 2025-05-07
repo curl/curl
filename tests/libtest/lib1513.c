@@ -43,7 +43,7 @@ static int progressKiller(void *arg,
   (void)dlnow;
   (void)ultotal;
   (void)ulnow;
-  printf("PROGRESSFUNCTION called\n");
+  curl_mprintf("PROGRESSFUNCTION called\n");
   return 1;
 }
 

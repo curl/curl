@@ -34,7 +34,7 @@
 #include "../urldata.h"
 
 #include "vauth.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../curl_printf.h"
 
 /* The last #include files should be: */

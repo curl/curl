@@ -23,9 +23,9 @@
  */
 
 #include "curl_setup.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "curl_printf.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
@@ -173,8 +173,8 @@ struct asprintf {
 static int dollarstring(const char *p, const char **end)
 {
   curl_off_t num;
-  if(Curl_str_number(&p, &num, MAX_PARAMETERS) ||
-     Curl_str_single(&p, '$') || !num)
+  if(curlx_str_number(&p, &num, MAX_PARAMETERS) ||
+     curlx_str_single(&p, '$') || !num)
     return -1;
   *end = p;
   return (int)num - 1;
@@ -306,7 +306,7 @@ static int parsefmt(const char *format,
             is_neg = ('-' == *fmt);
             if(is_neg)
               fmt++;
-            if(Curl_str_number(&fmt, &num, INT_MAX))
+            if(curlx_str_number(&fmt, &num, INT_MAX))
               return PFMT_PREC;
             precision = (int)num;
             if(is_neg)
@@ -378,7 +378,7 @@ static int parsefmt(const char *format,
           curl_off_t num;
           flags |= FLAGS_WIDTH;
           fmt--;
-          if(Curl_str_number(&fmt, &num, INT_MAX))
+          if(curlx_str_number(&fmt, &num, INT_MAX))
             return PFMT_WIDTH;
           width = (int)num;
           break;
@@ -1087,7 +1087,7 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 static int alloc_addbyter(unsigned char outc, void *f)
 {
   struct asprintf *infop = f;
-  CURLcode result = Curl_dyn_addn(infop->b, &outc, 1);
+  CURLcode result = curlx_dyn_addn(infop->b, &outc, 1);
   if(result) {
     infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
     return 1 ; /* fail */
@@ -1096,7 +1096,7 @@ static int alloc_addbyter(unsigned char outc, void *f)
 }
 
 /* appends the formatted string, returns MERR error code */
-int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
+int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 {
   struct asprintf info;
   info.b = dyn;
@@ -1104,7 +1104,7 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save)
 
   (void)formatf(&info, alloc_addbyter, format, ap_save);
   if(info.merr) {
-    Curl_dyn_free(info.b);
+    curlx_dyn_free(info.b);
     return info.merr;
   }
   return 0;
@@ -1115,16 +1115,16 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   struct asprintf info;
   struct dynbuf dyn;
   info.b = &dyn;
-  Curl_dyn_init(info.b, DYN_APRINTF);
+  curlx_dyn_init(info.b, DYN_APRINTF);
   info.merr = MERR_OK;
 
   (void)formatf(&info, alloc_addbyter, format, ap_save);
   if(info.merr) {
-    Curl_dyn_free(info.b);
+    curlx_dyn_free(info.b);
     return NULL;
   }
-  if(Curl_dyn_len(info.b))
-    return Curl_dyn_ptr(info.b);
+  if(curlx_dyn_len(info.b))
+    return curlx_dyn_ptr(info.b);
   return strdup("");
 }
 

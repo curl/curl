@@ -11,13 +11,13 @@ DNS Resource Record.
 
 curl features **experimental** support for HTTPS RR.
 
-- The ALPN list from the retrieved HTTPS record is parsed
-- The ECH field is stored (when DoH is used)
-- The port number from the HTTPS RR is not used
+- The ALPN list from the record is parsed and used
+- The ECH field is stored - and used if ECH is enabled in the build
+- The port number is not used (Firefox supports it, Chrome does not)
 - The target name is not used
-- The IP addresses from the HTTPS RR are not used
+- The IP addresses (`Ipv6hints`, `Ipv4hints`) from the HTTPS RR are not used
 - It only supports a single HTTPS RR per hostname
-- consider cases without A/AAAA records but *with* HTTPS RR
+- Hostnames without A/AAAA records but *with* HTTPS RR fails
 - consider service profiles where the RR provides different addresses for TCP
   vs QUIC etc
 

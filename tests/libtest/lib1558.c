@@ -39,8 +39,8 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
-            res, curl_easy_strerror(res));
+    curl_mfprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
+                  res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
@@ -48,12 +48,12 @@ CURLcode test(char *URL)
     res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
   )
   if(res) {
-    fprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
-            res, curl_easy_strerror(res));
+    curl_mfprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
+                  res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
-  printf("Protocol: %lx\n", protocol);
+  curl_mprintf("Protocol: %lx\n", protocol);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

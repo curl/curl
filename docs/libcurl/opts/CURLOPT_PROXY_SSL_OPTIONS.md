@@ -105,8 +105,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
     /* weaken TLS only for use with silly proxies */
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS, CURLSSLOPT_ALLOW_BEAST |
-                     CURLSSLOPT_NO_REVOKE);
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS, (long)
+                     CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }

@@ -37,17 +37,17 @@ static int prereq_callback(void *clientp,
   PRCS *prereq_cb = (PRCS *)clientp;
 
   if(prereq_cb->ipv6) {
-    printf("Connected to [%s]\n", conn_primary_ip);
-    printf("Connected from [%s]\n", conn_local_ip);
+    curl_mprintf("Connected to [%s]\n", conn_primary_ip);
+    curl_mprintf("Connected from [%s]\n", conn_local_ip);
   }
   else {
-    printf("Connected to %s\n", conn_primary_ip);
-    printf("Connected from %s\n", conn_local_ip);
+    curl_mprintf("Connected to %s\n", conn_primary_ip);
+    curl_mprintf("Connected from %s\n", conn_local_ip);
   }
 
-  printf("Remote port = %d\n", conn_primary_port);
-  printf("Local port = %d\n", conn_local_port);
-  printf("Returning = %d\n", prereq_cb->prereq_retcode);
+  curl_mprintf("Remote port = %d\n", conn_primary_port);
+  curl_mprintf("Local port = %d\n", conn_local_port);
+  curl_mprintf("Returning = %d\n", prereq_cb->prereq_retcode);
   return prereq_cb->prereq_retcode;
 }
 
@@ -85,8 +85,9 @@ CURLcode test(char *URL)
 
     ret = curl_easy_perform(curl);
     if(ret) {
-      fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+      curl_mfprintf(stderr,
+                    "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                    __FILE__, __LINE__, ret, curl_easy_strerror(ret));
       goto test_cleanup;
     }
   }

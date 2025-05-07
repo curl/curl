@@ -32,9 +32,9 @@
 
 #include "vauth.h"
 #include "../urldata.h"
-#include "../curl_base64.h"
+#include "../curlx/base64.h"
 #include "../curl_gssapi.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../curl_multibyte.h"
 #include "../sendf.h"
 
@@ -139,7 +139,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      result = curlx_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
         return result;
     }
@@ -156,10 +156,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Set channel binding data if available */
-  if(Curl_dyn_len(&nego->channel_binding_data)) {
+  if(curlx_dyn_len(&nego->channel_binding_data)) {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
-    chan.application_data.length = Curl_dyn_len(&nego->channel_binding_data);
-    chan.application_data.value = Curl_dyn_ptr(&nego->channel_binding_data);
+    chan.application_data.length = curlx_dyn_len(&nego->channel_binding_data);
+    chan.application_data.value = curlx_dyn_ptr(&nego->channel_binding_data);
     chan_bindings = &chan;
   }
 
@@ -228,9 +228,9 @@ CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
   OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(nego->output_token.value,
-                              nego->output_token.length,
-                              outptr, outlen);
+  result = curlx_base64_encode(nego->output_token.value,
+                               nego->output_token.length,
+                               outptr, outlen);
 
   if(result) {
     gss_release_buffer(&minor_status, &nego->output_token);

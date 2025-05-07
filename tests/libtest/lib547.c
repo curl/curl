@@ -42,17 +42,17 @@ static size_t readcallback(char  *ptr,
 
   if(*counter) {
     /* only do this once and then require a clearing of this */
-    fprintf(stderr, "READ ALREADY DONE!\n");
+    curl_mfprintf(stderr, "READ ALREADY DONE!\n");
     return 0;
   }
   (*counter)++; /* bump */
 
   if(size * nmemb >= strlen(UPLOADTHIS)) {
-    fprintf(stderr, "READ!\n");
+    curl_mfprintf(stderr, "READ!\n");
     strcpy(ptr, UPLOADTHIS);
     return strlen(UPLOADTHIS);
   }
-  fprintf(stderr, "READ NOT FINE!\n");
+  curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
 static curlioerr ioctlcallback(CURL *handle,
@@ -62,7 +62,7 @@ static curlioerr ioctlcallback(CURL *handle,
   int *counter = (int *)clientp;
   (void)handle; /* unused */
   if(cmd == CURLIOCMD_RESTARTREAD) {
-    fprintf(stderr, "REWIND!\n");
+    curl_mfprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
   return CURLIOE_OK;
@@ -81,13 +81,13 @@ CURLcode test(char *URL)
 #endif
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

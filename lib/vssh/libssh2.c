@@ -70,10 +70,10 @@
 #include "../sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "../multiif.h"
 #include "../select.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "curl_path.h"
-#include "../strparse.h"
-#include "../curl_base64.h" /* for base64 encoding/decoding */
+#include "../curlx/strparse.h"
+#include "../curlx/base64.h" /* for base64 encoding/decoding */
 #include "../curl_sha256.h"
 
 /* The last 3 #include files should be in this order */
@@ -635,8 +635,8 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
 
     /* The length of fingerprint is 32 bytes for SHA256.
      * See libssh2_hostkey_hash documentation. */
-    if(Curl_base64_encode(fingerprint, 32, &fingerprint_b64,
-                          &fingerprint_b64_len) != CURLE_OK) {
+    if(curlx_base64_encode(fingerprint, 32, &fingerprint_b64,
+                           &fingerprint_b64_len) != CURLE_OK) {
       state(data, SSH_SESSION_FREE);
       sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
       return sshc->actualcode;
@@ -1371,7 +1371,7 @@ sftp_quote_stat(struct Curl_easy *data,
   if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
-    (void)Curl_str_number(&p, &gid, ULONG_MAX);
+    (void)curlx_str_number(&p, &gid, ULONG_MAX);
     sshp->quote_attrs.gid = (unsigned long)gid;
     sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
     if(sshp->quote_attrs.gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
@@ -1384,7 +1384,7 @@ sftp_quote_stat(struct Curl_easy *data,
     curl_off_t perms;
     const char *p = sshc->quote_path1;
     /* permissions are octal */
-    if(Curl_str_octal(&p, &perms, 07777)) {
+    if(curlx_str_octal(&p, &perms, 07777)) {
       failf(data, "Syntax error: chmod permissions not a number");
       goto fail;
     }
@@ -1395,7 +1395,7 @@ sftp_quote_stat(struct Curl_easy *data,
   else if(!strncmp(cmd, "chown", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t uid;
-    (void)Curl_str_number(&p, &uid, ULONG_MAX);
+    (void)curlx_str_number(&p, &uid, ULONG_MAX);
     sshp->quote_attrs.uid = (unsigned long)uid;
     sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
     if(sshp->quote_attrs.uid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
@@ -1478,13 +1478,13 @@ sftp_download_stat(struct Curl_easy *data,
       const char *p = data->state.range;
       int to_t, from_t;
 
-      from_t = Curl_str_number(&p, &from, CURL_OFF_T_MAX);
+      from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
       if(from_t == STRE_OVERFLOW)
         return CURLE_RANGE_ERROR;
-      Curl_str_passblanks(&p);
-      (void)Curl_str_single(&p, '-');
+      curlx_str_passblanks(&p);
+      (void)curlx_str_single(&p, '-');
 
-      to_t = Curl_str_numblanks(&p, &to);
+      to_t = curlx_str_numblanks(&p, &to);
       if(to_t == STRE_OVERFLOW)
         return CURLE_RANGE_ERROR;
       if((to_t == STRE_NO_NUM) /* no "to" value given */
@@ -1598,14 +1598,14 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
         return result;
     }
     else {
-      result = Curl_dyn_add(&sshp->readdir, sshp->readdir_longentry);
+      result = curlx_dyn_add(&sshp->readdir, sshp->readdir_longentry);
 
       if(!result) {
         if((sshp->readdir_attrs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS) &&
            ((sshp->readdir_attrs.permissions & LIBSSH2_SFTP_S_IFMT) ==
             LIBSSH2_SFTP_S_IFLNK)) {
-          result = Curl_dyn_addf(&sshp->readdir_link, "%s%s", sshp->path,
-                                 sshp->readdir_filename);
+          result = curlx_dyn_addf(&sshp->readdir_link, "%s%s", sshp->path,
+                                  sshp->readdir_filename);
           state(data, SSH_SFTP_READDIR_LINK);
         }
         else {
@@ -2440,18 +2440,19 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
     case SSH_SFTP_READDIR_LINK:
       rc =
         libssh2_sftp_symlink_ex(sshc->sftp_session,
-                                Curl_dyn_ptr(&sshp->readdir_link),
+                                curlx_dyn_ptr(&sshp->readdir_link),
                                 (unsigned int)
-                                  Curl_dyn_len(&sshp->readdir_link),
+                                curlx_dyn_len(&sshp->readdir_link),
                                 sshp->readdir_filename,
                                 CURL_PATH_MAX, LIBSSH2_SFTP_READLINK);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
-      Curl_dyn_free(&sshp->readdir_link);
+      curlx_dyn_free(&sshp->readdir_link);
 
       /* append filename and extra output */
-      result = Curl_dyn_addf(&sshp->readdir, " -> %s", sshp->readdir_filename);
+      result = curlx_dyn_addf(&sshp->readdir, " -> %s",
+                              sshp->readdir_filename);
 
       if(result) {
         state(data, SSH_SFTP_CLOSE);
@@ -2463,18 +2464,18 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SFTP_READDIR_BOTTOM:
-      result = Curl_dyn_addn(&sshp->readdir, "\n", 1);
+      result = curlx_dyn_addn(&sshp->readdir, "\n", 1);
       if(!result)
         result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   Curl_dyn_ptr(&sshp->readdir),
-                                   Curl_dyn_len(&sshp->readdir));
+                                   curlx_dyn_ptr(&sshp->readdir),
+                                   curlx_dyn_len(&sshp->readdir));
 
       if(result) {
-        Curl_dyn_free(&sshp->readdir);
+        curlx_dyn_free(&sshp->readdir);
         state(data, SSH_STOP);
       }
       else {
-        Curl_dyn_reset(&sshp->readdir);
+        curlx_dyn_reset(&sshp->readdir);
         state(data, SSH_SFTP_READDIR);
       }
       break;
@@ -2963,12 +2964,12 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
   CURLcode result = CURLE_OK;
-  struct curltime dis = Curl_now();
+  struct curltime dis = curlx_now();
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left = 1000;
-    struct curltime now = Curl_now();
+    struct curltime now = curlx_now();
 
     result = ssh_statemachine(data, &block);
     if(result)
@@ -2988,7 +2989,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
-    else if(Curl_timediff(now, dis) > 1000) {
+    else if(curlx_timediff(now, dis) > 1000) {
       /* disconnect timeout */
       failf(data, "Disconnect timed out");
       result = CURLE_OK;
@@ -3033,8 +3034,8 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_dyn_init(&ssh->readdir, CURL_PATH_MAX * 2);
-  Curl_dyn_init(&ssh->readdir_link, CURL_PATH_MAX);
+  curlx_dyn_init(&ssh->readdir, CURL_PATH_MAX * 2);
+  curlx_dyn_init(&ssh->readdir_link, CURL_PATH_MAX);
 
   return CURLE_OK;
 }
@@ -3460,8 +3461,8 @@ static CURLcode ssh_done(struct Curl_easy *data, CURLcode status)
     result = status;
 
   Curl_safefree(sshp->path);
-  Curl_dyn_free(&sshp->readdir);
-  Curl_dyn_free(&sshp->readdir_link);
+  curlx_dyn_free(&sshp->readdir);
+  curlx_dyn_free(&sshp->readdir_link);
 
   if(Curl_pgrsDone(data))
     return CURLE_ABORTED_BY_CALLBACK;

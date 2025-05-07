@@ -32,7 +32,7 @@ CURLcode test(char *URL)
   CURLcode res = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -47,7 +47,7 @@ CURLcode test(char *URL)
 #endif
     res = curl_easy_perform(curl);
     if(res) {
-      printf("res: %d\n", res);
+      curl_mprintf("res: %d\n", res);
     }
     curl_easy_cleanup(curl);
   }

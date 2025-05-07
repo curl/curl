@@ -50,7 +50,7 @@
 #include "ftplistparser.h"
 #include "curl_fnmatch.h"
 #include "multiif.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -318,7 +318,7 @@ static CURLcode ftp_pl_insert_finfo(struct Curl_easy *data,
   struct curl_fileinfo *finfo = &infop->info;
 
   /* set the finfo pointers */
-  char *str = Curl_dyn_ptr(&infop->buf);
+  char *str = curlx_dyn_ptr(&infop->buf);
   finfo->filename       = str + parser->offsets.filename;
   finfo->strings.group  = parser->offsets.group ?
                           str + parser->offsets.group : NULL;
@@ -403,18 +403,18 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
       }
       parser->item_offset = 0;
       parser->item_length = 0;
-      Curl_dyn_init(&parser->file_data->buf, MAX_FTPLIST_BUFFER);
+      curlx_dyn_init(&parser->file_data->buf, MAX_FTPLIST_BUFFER);
     }
 
     infop = parser->file_data;
     finfo = &infop->info;
 
-    if(Curl_dyn_addn(&infop->buf, &c, 1)) {
+    if(curlx_dyn_addn(&infop->buf, &c, 1)) {
       parser->error = CURLE_OUT_OF_MEMORY;
       goto fail;
     }
-    len = Curl_dyn_len(&infop->buf);
-    mem = Curl_dyn_ptr(&infop->buf);
+    len = curlx_dyn_len(&infop->buf);
+    mem = curlx_dyn_ptr(&infop->buf);
 
     switch(parser->os_type) {
     case OS_TYPE_UNIX:
@@ -429,7 +429,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           else {
             parser->state.UNIX.main = PL_UNIX_FILETYPE;
             /* start FSM again not considering size of directory */
-            Curl_dyn_reset(&infop->buf);
+            curlx_dyn_reset(&infop->buf);
             continue;
           }
           break;
@@ -437,7 +437,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
           parser->item_length++;
           if(c == '\r') {
             parser->item_length--;
-            Curl_dyn_setlen(&infop->buf, --len);
+            curlx_dyn_setlen(&infop->buf, --len);
           }
           else if(c == '\n') {
             mem[parser->item_length - 1] = 0;
@@ -445,7 +445,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
               const char *endptr = mem + 6;
               /* here we can deal with directory size, pass the leading
                  whitespace and then the digits */
-              Curl_str_passblanks(&endptr);
+              curlx_str_passblanks(&endptr);
               while(ISDIGIT(*endptr))
                 endptr++;
               if(*endptr) {
@@ -453,7 +453,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                 goto fail;
               }
               parser->state.UNIX.main = PL_UNIX_FILETYPE;
-              Curl_dyn_reset(&infop->buf);
+              curlx_dyn_reset(&infop->buf);
             }
             else {
               parser->error = CURLE_FTP_BAD_FILE_LIST;
@@ -548,7 +548,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             curl_off_t hlinks;
             mem[parser->item_offset + parser->item_length - 1] = 0;
 
-            if(!Curl_str_number(&p, &hlinks, LONG_MAX)) {
+            if(!curlx_str_number(&p, &hlinks, LONG_MAX)) {
               parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_HLINKCOUNT;
               parser->file_data->info.hardlinks = (long)hlinks;
             }
@@ -629,7 +629,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             const char *p = mem + parser->item_offset;
             curl_off_t fsize;
             mem[parser->item_offset + parser->item_length - 1] = 0;
-            if(!Curl_str_numblanks(&p, &fsize)) {
+            if(!curlx_str_numblanks(&p, &fsize)) {
               if(p[0] == '\0' && fsize != CURL_OFF_T_MAX) {
                 parser->file_data->info.flags |= CURLFINFOFLAG_KNOWN_SIZE;
                 parser->file_data->info.size = fsize;
@@ -952,7 +952,7 @@ size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
             }
             else {
               const char *p = mem + parser->item_offset;
-              if(Curl_str_numblanks(&p, &finfo->size)) {
+              if(curlx_str_numblanks(&p, &finfo->size)) {
                 parser->error = CURLE_FTP_BAD_FILE_LIST;
                 goto fail;
               }

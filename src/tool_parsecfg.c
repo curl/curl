@@ -23,8 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
-
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
@@ -32,9 +31,7 @@
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 #include "tool_util.h"
-#include "dynbuf.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */
@@ -90,7 +87,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *param;
     int lineno = 0;
     bool dashed_option;
-    struct curlx_dynbuf buf;
+    struct dynbuf buf;
     bool fileerror = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);

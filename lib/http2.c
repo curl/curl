@@ -35,7 +35,7 @@
 #include "http.h"
 #include "sendf.h"
 #include "select.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "strcase.h"
 #include "multiif.h"
 #include "url.h"
@@ -44,9 +44,9 @@
 #include "connect.h"
 #include "rand.h"
 #include "strdup.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "transfer.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "headers.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -166,7 +166,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_bufcp_init(&ctx->stream_bufcp, H2_CHUNK_SIZE, H2_STREAM_POOL_SPARES);
   Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
-  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
   Curl_uint_hash_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
@@ -177,7 +177,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
     ctx->stream_win_max = H2_STREAM_WINDOW_SIZE_MAX;
     if(p) {
       curl_off_t l;
-      if(!Curl_str_number(&p, &l, INT_MAX))
+      if(!curlx_str_number(&p, &l, INT_MAX))
         ctx->stream_win_max = (int32_t)l;
     }
   }
@@ -191,7 +191,7 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
     Curl_bufq_free(&ctx->inbufq);
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_dyn_free(&ctx->scratch);
+    curlx_dyn_free(&ctx->scratch);
     Curl_uint_hash_destroy(&ctx->streams);
     memset(ctx, 0, sizeof(*ctx));
   }
@@ -206,7 +206,7 @@ static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
 }
 
 static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data);
+                                   struct Curl_easy *data);
 
 /**
  * All about the H2 internals of a stream
@@ -237,8 +237,9 @@ struct h2_stream_ctx {
   BIT(write_paused);  /* stream write is paused */
 };
 
-#define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
-            data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
+#define H2_STREAM_CTX(ctx,data)                                         \
+  ((struct h2_stream_ctx *)(                                            \
+    data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {
@@ -461,7 +462,7 @@ static int h2_client_new(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   nghttp2_option *o;
   nghttp2_mem mem = {NULL, Curl_nghttp2_malloc, Curl_nghttp2_free,
-                     Curl_nghttp2_calloc, Curl_nghttp2_realloc};
+    Curl_nghttp2_calloc, Curl_nghttp2_realloc};
 
   int rc = nghttp2_option_new(&o);
   if(rc)
@@ -1721,15 +1722,15 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
-    Curl_dyn_reset(&ctx->scratch);
-    result = Curl_dyn_addn(&ctx->scratch, STRCONST("HTTP/2 "));
+    curlx_dyn_reset(&ctx->scratch);
+    result = curlx_dyn_addn(&ctx->scratch, STRCONST("HTTP/2 "));
     if(!result)
-      result = Curl_dyn_addn(&ctx->scratch, value, valuelen);
+      result = curlx_dyn_addn(&ctx->scratch, value, valuelen);
     if(!result)
-      result = Curl_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
+      result = curlx_dyn_addn(&ctx->scratch, STRCONST(" \r\n"));
     if(!result)
-      h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
-                            Curl_dyn_len(&ctx->scratch), FALSE);
+      h2_xfer_write_resp_hd(cf, data_s, stream, curlx_dyn_ptr(&ctx->scratch),
+                            curlx_dyn_len(&ctx->scratch), FALSE);
     if(result) {
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1746,17 +1747,17 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   /* nghttp2 guarantees that namelen > 0, and :status was already
      received, and this is not pseudo-header field . */
   /* convert to an HTTP1-style header */
-  Curl_dyn_reset(&ctx->scratch);
-  result = Curl_dyn_addn(&ctx->scratch, (const char *)name, namelen);
+  curlx_dyn_reset(&ctx->scratch);
+  result = curlx_dyn_addn(&ctx->scratch, (const char *)name, namelen);
   if(!result)
-    result = Curl_dyn_addn(&ctx->scratch, STRCONST(": "));
+    result = curlx_dyn_addn(&ctx->scratch, STRCONST(": "));
   if(!result)
-    result = Curl_dyn_addn(&ctx->scratch, (const char *)value, valuelen);
+    result = curlx_dyn_addn(&ctx->scratch, (const char *)value, valuelen);
   if(!result)
-    result = Curl_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
+    result = curlx_dyn_addn(&ctx->scratch, STRCONST("\r\n"));
   if(!result)
-    h2_xfer_write_resp_hd(cf, data_s, stream, Curl_dyn_ptr(&ctx->scratch),
-                          Curl_dyn_len(&ctx->scratch), FALSE);
+    h2_xfer_write_resp_hd(cf, data_s, stream, curlx_dyn_ptr(&ctx->scratch),
+                          curlx_dyn_len(&ctx->scratch), FALSE);
   if(result) {
     cf_h2_header_error(cf, data_s, stream, result);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1849,22 +1850,22 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   binlen = populate_binsettings(binsettings, data);
   if(binlen <= 0) {
     failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
-    Curl_dyn_free(req);
+    curlx_dyn_free(req);
     return CURLE_FAILED_INIT;
   }
 
-  result = Curl_base64url_encode((const char *)binsettings, (size_t)binlen,
-                                 &base64, &blen);
+  result = curlx_base64url_encode((const char *)binsettings, (size_t)binlen,
+                                  &base64, &blen);
   if(result) {
-    Curl_dyn_free(req);
+    curlx_dyn_free(req);
     return result;
   }
 
-  result = Curl_dyn_addf(req,
-                         "Connection: Upgrade, HTTP2-Settings\r\n"
-                         "Upgrade: %s\r\n"
-                         "HTTP2-Settings: %s\r\n",
-                         NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
+  result = curlx_dyn_addf(req,
+                          "Connection: Upgrade, HTTP2-Settings\r\n"
+                          "Upgrade: %s\r\n"
+                          "HTTP2-Settings: %s\r\n",
+                          NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
   free(base64);
 
   k->upgr101 = UPGR101_H2;
@@ -1924,25 +1925,25 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
     size_t i;
 
     *err = CURLE_OK;
-    Curl_dyn_init(&dbuf, DYN_TRAILERS);
+    curlx_dyn_init(&dbuf, DYN_TRAILERS);
     for(i = 0; i < Curl_dynhds_count(&stream->resp_trailers); ++i) {
       e = Curl_dynhds_getn(&stream->resp_trailers, i);
       if(!e)
         break;
-      Curl_dyn_reset(&dbuf);
-      *err = Curl_dyn_addf(&dbuf, "%.*s: %.*s\x0d\x0a",
-                          (int)e->namelen, e->name,
-                          (int)e->valuelen, e->value);
+      curlx_dyn_reset(&dbuf);
+      *err = curlx_dyn_addf(&dbuf, "%.*s: %.*s\x0d\x0a",
+                            (int)e->namelen, e->name,
+                            (int)e->valuelen, e->value);
       if(*err)
         break;
-      Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&dbuf),
-                 Curl_dyn_len(&dbuf));
+      Curl_debug(data, CURLINFO_HEADER_IN, curlx_dyn_ptr(&dbuf),
+                 curlx_dyn_len(&dbuf));
       *err = Curl_client_write(data, CLIENTWRITE_HEADER|CLIENTWRITE_TRAILER,
-                               Curl_dyn_ptr(&dbuf), Curl_dyn_len(&dbuf));
+                               curlx_dyn_ptr(&dbuf), curlx_dyn_len(&dbuf));
       if(*err)
         break;
     }
-    Curl_dyn_free(&dbuf);
+    curlx_dyn_free(&dbuf);
     if(*err)
       goto out;
   }

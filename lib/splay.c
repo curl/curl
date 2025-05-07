@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "splay.h"
 
 /*
@@ -34,7 +34,7 @@
  *  zero          : when i is equal   to   j
  *  positive when : when i is larger  than j
  */
-#define compare(i,j) Curl_timediff_us(i,j)
+#define compare(i,j) curlx_timediff_us(i,j)
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting

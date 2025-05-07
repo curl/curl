@@ -90,7 +90,7 @@ CURLcode test(char *URL)
   port = (unsigned short)atoi(libtest_arg3);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -101,7 +101,7 @@ CURLcode test(char *URL)
    */
   client_fd = socket(AF_INET, SOCK_STREAM, 0);
   if(client_fd == CURL_SOCKET_BAD) {
-    fprintf(stderr, "socket creation error\n");
+    curl_mfprintf(stderr, "socket creation error\n");
     goto test_cleanup;
   }
 
@@ -109,19 +109,19 @@ CURLcode test(char *URL)
   serv_addr.sin_port = htons(port);
 
   if(my_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
-    fprintf(stderr, "inet_pton failed\n");
+    curl_mfprintf(stderr, "inet_pton failed\n");
     goto test_cleanup;
   }
 
   status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
   if(status < 0) {
-    fprintf(stderr, "connection failed\n");
+    curl_mfprintf(stderr, "connection failed\n");
     goto test_cleanup;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     goto test_cleanup;
   }
 
@@ -150,7 +150,7 @@ test_cleanup:
 CURLcode test(char *URL)
 {
   (void)URL;
-  printf("lacks inet_pton\n");
+  curl_mprintf("lacks inet_pton\n");
   return CURLE_OK;
 }
 #endif

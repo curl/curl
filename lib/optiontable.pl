@@ -109,7 +109,7 @@ while(<STDIN>) {
             $o =~ s/^CURLOPT_//;
             $n =~ s/^CURLOPT_//;
             $alias{$o} = $n;
-            push @names, $o,
+            push @names, $o;
         }
     }
 }

@@ -124,8 +124,8 @@ CURLcode test(char *URL)
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
     if(tutil_tvdiff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
-      fprintf(stderr, "ABORTING TEST, since it seems "
-              "that it would have run forever.\n");
+      curl_mfprintf(stderr, "ABORTING TEST, since it seems "
+                    "that it would have run forever.\n");
       break;
     }
 

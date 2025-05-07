@@ -109,14 +109,14 @@ UNITTEST_START
     fail_unless(Curl_dynhds_ccount_name(&hds, "bLABlaBlA") == 0, "should");
     fail_if(Curl_dynhds_cadd(&hds, "Bla-Bla", "thingies"), "add failed");
 
-    Curl_dyn_init(&dbuf, 32*1024);
+    curlx_dyn_init(&dbuf, 32*1024);
     fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
-    if(Curl_dyn_ptr(&dbuf)) {
-      fail_if(strcmp(Curl_dyn_ptr(&dbuf),
+    if(curlx_dyn_ptr(&dbuf)) {
+      fail_if(strcmp(curlx_dyn_ptr(&dbuf),
                      "test1: 123\r\ntest1: 123\r\nBla-Bla: thingies\r\n"),
                      "h1 format differs");
     }
-    Curl_dyn_free(&dbuf);
+    curlx_dyn_free(&dbuf);
   }
 
   Curl_dynhds_free(&hds);
@@ -133,15 +133,15 @@ UNITTEST_START
   fail_if(Curl_dynhds_h1_cadd_line(&hds, "ti3: val1"), "add");
   fail_if(Curl_dynhds_h1_cadd_line(&hds, "     val2"), "add indent");
 
-  Curl_dyn_init(&dbuf, 32*1024);
+  curlx_dyn_init(&dbuf, 32*1024);
   fail_if(Curl_dynhds_h1_dprint(&hds, &dbuf), "h1 print failed");
-  if(Curl_dyn_ptr(&dbuf)) {
-    fprintf(stderr, "indent concat: %s\n", Curl_dyn_ptr(&dbuf));
-    fail_if(strcmp(Curl_dyn_ptr(&dbuf),
+  if(curlx_dyn_ptr(&dbuf)) {
+    curl_mfprintf(stderr, "indent concat: %s\n", curlx_dyn_ptr(&dbuf));
+    fail_if(strcmp(curlx_dyn_ptr(&dbuf),
                    "ti1: val1 val2\r\nti2: val1 val2\r\nti3: val1 val2\r\n"),
                    "wrong format");
   }
-  Curl_dyn_free(&dbuf);
+  curlx_dyn_free(&dbuf);
 
   Curl_dynhds_free(&hds);
 

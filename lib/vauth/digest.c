@@ -34,14 +34,14 @@
 #include "vauth.h"
 #include "digest.h"
 #include "../urldata.h"
-#include "../curl_base64.h"
+#include "../curlx/base64.h"
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
 #include "../curl_sha256.h"
 #include "../curl_sha512_256.h"
 #include "../vtls/vtls.h"
-#include "../warnless.h"
-#include "../strparse.h"
+#include "../curlx/warnless.h"
+#include "../curlx/strparse.h"
 #include "../strcase.h"
 #include "../curl_printf.h"
 #include "../rand.h"
@@ -223,14 +223,14 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
   /* Initialise the output */
   *value = 0;
 
-  while(!Curl_str_until(&options, &out, 32, ',')) {
-    if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
+  while(!curlx_str_until(&options, &out, 32, ',')) {
+    if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
       *value |= DIGEST_QOP_VALUE_AUTH;
-    else if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_INT))
+    else if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_INT))
       *value |= DIGEST_QOP_VALUE_AUTH_INT;
-    else if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
+    else if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
       *value |= DIGEST_QOP_VALUE_AUTH_CONF;
-    if(Curl_str_single(&options, ','))
+    if(curlx_str_single(&options, ','))
       break;
   }
 
@@ -542,13 +542,13 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         /* Pass leading spaces */
         while(*token && ISBLANK(*token))
           token++;
-        while(!Curl_str_until(&token, &out, 32, ',')) {
-          if(Curl_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
+        while(!curlx_str_until(&token, &out, 32, ',')) {
+          if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
             foundAuth = TRUE;
-          else if(Curl_str_casecompare(&out,
+          else if(curlx_str_casecompare(&out,
                                        DIGEST_QOP_VALUE_STRING_AUTH_INT))
             foundAuthInt = TRUE;
-          if(Curl_str_single(&token, ','))
+          if(curlx_str_single(&token, ','))
             break;
           while(*token && ISBLANK(*token))
             token++;
@@ -699,8 +699,8 @@ static CURLcode auth_create_digest_http_message(
     if(result)
       return result;
 
-    result = Curl_base64_encode(cnoncebuf, sizeof(cnoncebuf),
-                                &cnonce, &cnonce_sz);
+    result = curlx_base64_encode(cnoncebuf, sizeof(cnoncebuf),
+                                 &cnonce, &cnonce_sz);
     if(result)
       return result;
 

@@ -49,7 +49,7 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
+  curl_mprintf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
 
 test_cleanup:
 

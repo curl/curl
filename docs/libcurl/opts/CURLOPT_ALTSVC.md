@@ -60,7 +60,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, CURLALTSVC_H1);
+    curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, (long)CURLALTSVC_H1);
     curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc-cache.txt");
     curl_easy_perform(curl);
   }

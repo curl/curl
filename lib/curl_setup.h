@@ -28,9 +28,6 @@
 #define CURL_NO_OLDIES
 #endif
 
-/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
-#define CURL_SKIP_INCLUDE_MPRINTF
-
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>

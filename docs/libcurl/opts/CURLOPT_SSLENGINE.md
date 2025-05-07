@@ -17,7 +17,7 @@ Added-in: 7.9.3
 
 # NAME
 
-CURLOPT_SSLENGINE - SSL engine identifier
+CURLOPT_SSLENGINE - Set SSL engine or provider
 
 # SYNOPSIS
 
@@ -30,10 +30,15 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLENGINE, char *id);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. It is used as the
-identifier for the crypto engine you want to use for your private key.
+identifier for the *engine* or *provider* you want to use for your private
+key. OpenSSL 1 had engines, OpenSSL 3 has providers.
 
 The application does not have to keep the string around after setting this
 option.
+
+When asking libcurl to use a provider, the application can also optionally
+provide a *property*, a set of name value pairs. Such a property can be
+specified separated from the name with a colon (`:`).
 
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.

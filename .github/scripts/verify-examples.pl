@@ -34,7 +34,7 @@ if($files[0] eq "-h") {
 }
 
 sub testcompile {
-    my $rc = system("gcc -c test.c -DCURL_DISABLE_TYPECHECK -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION -Wunused -Werror -Wall -Wno-unused-but-set-variable -I include") >> 8;
+    my $rc = system("gcc -c test.c -DCURL_ALLOW_OLD_MULTI_SOCKET -DCURL_DISABLE_DEPRECATION -Wunused -Werror -Wall -Wno-unused-but-set-variable -I include") >> 8;
     return $rc;
 }
 

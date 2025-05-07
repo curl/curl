@@ -86,13 +86,13 @@ CURLcode test(char *URL)
                              custom_strdup,
                              custom_calloc);
   if(res != CURLE_OK) {
-    fprintf(stderr, "curl_global_init_mem() failed\n");
+    curl_mfprintf(stderr, "curl_global_init_mem() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -103,7 +103,7 @@ CURLcode test(char *URL)
   str = curl_easy_escape(curl, (char *)a, asize); /* uses realloc() */
 
   if(seen)
-    printf("Callbacks were invoked!\n");
+    curl_mprintf("Callbacks were invoked!\n");
 
 test_cleanup:
 

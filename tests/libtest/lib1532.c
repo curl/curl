@@ -41,20 +41,22 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(httpcode != 200) {
-    fprintf(stderr, "%s:%d unexpected response code %ld\n",
-            __FILE__, __LINE__, httpcode);
+    curl_mfprintf(stderr, "%s:%d unexpected response code %ld\n",
+                  __FILE__, __LINE__, httpcode);
     res = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
@@ -64,13 +66,16 @@ CURLcode test(char *URL)
 
   res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(httpcode) {
-    fprintf(stderr, "%s:%d curl_easy_reset failed to zero the response code\n"
-            "possible regression of github bug 1017\n", __FILE__, __LINE__);
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_reset failed to zero the response code\n"
+                  "possible regression of github bug 1017\n",
+                  __FILE__, __LINE__);
     res = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }

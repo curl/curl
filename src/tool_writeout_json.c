@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_writeout_json.h"
 #include "tool_writeout.h"
@@ -36,7 +36,7 @@
    Return 0 on success, non-zero on error.
 */
 int jsonquoted(const char *in, size_t len,
-               struct curlx_dynbuf *out, bool lowercase)
+               struct dynbuf *out, bool lowercase)
 {
   const unsigned char *i = (const unsigned char *)in;
   const unsigned char *in_end = &i[len];
@@ -85,7 +85,7 @@ int jsonquoted(const char *in, size_t len,
 
 void jsonWriteString(FILE *stream, const char *in, bool lowercase)
 {
-  struct curlx_dynbuf out;
+  struct dynbuf out;
   curlx_dyn_init(&out, MAX_JSON_STRING);
 
   if(!jsonquoted(in, strlen(in), &out, lowercase)) {

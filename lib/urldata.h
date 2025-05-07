@@ -145,7 +145,7 @@ typedef unsigned int curl_prot_t;
 #include <netinet/in6.h>
 #endif
 
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 #include <curl/curl.h>
 
@@ -153,7 +153,7 @@ typedef unsigned int curl_prot_t;
 #include "hostip.h"
 #include "hash.h"
 #include "splay.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "dynhds.h"
 #include "request.h"
 #include "netrc.h"
@@ -175,7 +175,6 @@ typedef ssize_t (Curl_recv)(struct Curl_easy *data,   /* transfer */
 
 #include "mime.h"
 #include "imap.h"
-#include "pop3.h"
 #include "smtp.h"
 #include "ftp.h"
 #include "file.h"
@@ -265,6 +264,7 @@ struct ssl_primary_config {
   char *clientcert;
   char *cipher_list;     /* list of ciphers to use */
   char *cipher_list13;   /* list of TLS 1.3 cipher suites to use */
+  char *signature_algorithms; /* list of signature algorithms to use */
   char *pinned_key;
   char *CRLfile;         /* CRL to check certificate revocation */
   struct curl_blob *cert_blob;
@@ -719,8 +719,6 @@ struct proxy_info {
   char *passwd;  /* proxy password string, allocated */
 };
 
-struct ldapconninfo;
-
 #define TRNSPRT_TCP 3
 #define TRNSPRT_UDP 4
 #define TRNSPRT_QUIC 5
@@ -865,41 +863,11 @@ struct connectdata {
 #endif
 
   union {
-#ifndef CURL_DISABLE_FTP
-    struct ftp_conn ftpc;
-#endif
 #ifdef USE_SSH
     struct ssh_conn sshc;
 #endif
-#ifndef CURL_DISABLE_TFTP
-    struct tftp_state_data *tftpc;
-#endif
-#ifndef CURL_DISABLE_IMAP
-    struct imap_conn imapc;
-#endif
-#ifndef CURL_DISABLE_POP3
-    struct pop3_conn pop3c;
-#endif
-#ifndef CURL_DISABLE_SMTP
-    struct smtp_conn smtpc;
-#endif
-#ifndef CURL_DISABLE_RTSP
-    struct rtsp_conn rtspc;
-#endif
-#ifndef CURL_DISABLE_SMB
-    struct smb_conn smbc;
-#endif
 #ifdef USE_LIBRTMP
     void *rtmp;
-#endif
-#ifdef USE_OPENLDAP
-    struct ldapconninfo *ldapc;
-#endif
-#ifndef CURL_DISABLE_MQTT
-    struct mqtt_conn mqtt;
-#endif
-#ifndef CURL_DISABLE_WEBSOCKETS
-    struct websocket *ws;
 #endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
@@ -1199,10 +1167,13 @@ struct UrlState {
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
-  /* this is just a flag -- we do not need to reference the provider in any
-   * way as OpenSSL takes care of that */
-  BIT(provider);
-  BIT(provider_failed);
+  /* void instead of OSSL_PROVIDER */
+  void *provider;
+  void *baseprov;
+  void *libctx;
+  char *propq; /* for a provider */
+
+  BIT(provider_loaded);
 #endif /* USE_OPENSSL */
   struct curltime expiretime; /* set this with Curl_expire() only */
   struct Curl_tree timenode; /* for the splay stuff */
@@ -1477,6 +1448,7 @@ enum dupstring {
 #endif
   STRING_ECH_CONFIG,            /* CURLOPT_ECH_CONFIG */
   STRING_ECH_PUBLIC,            /* CURLOPT_ECH_PUBLIC */
+  STRING_SSL_SIGNATURE_ALGORITHMS, /* CURLOPT_SSL_SIGNATURE_ALGORITHMS */
 
   /* -- end of null-terminated strings -- */
 

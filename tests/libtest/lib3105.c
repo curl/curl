@@ -51,7 +51,7 @@ CURLcode test(char *URL)
   mc += curl_multi_remove_handle(multi, curls);
 
   if(mc) {
-    fprintf(stderr, "%d was unexpected\n", (int)mc);
+    curl_mfprintf(stderr, "%d was unexpected\n", (int)mc);
     i = CURLE_FAILED_INIT;
   }
 

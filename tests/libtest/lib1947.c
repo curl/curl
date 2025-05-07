@@ -51,8 +51,8 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
+                  curl_easy_strerror(res));
     goto test_cleanup;
   }
 
@@ -65,14 +65,14 @@ CURLcode test(char *URL)
     if(h)
       count++;
   } while(h);
-  printf("count = %u\n", count);
+  curl_mprintf("count = %u\n", count);
 
   /* perform another request - without redirect */
   easy_setopt(curl, CURLOPT_URL, libtest_arg2);
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
+                  curl_easy_strerror(res));
     goto test_cleanup;
   }
 
@@ -83,7 +83,7 @@ CURLcode test(char *URL)
     if(h)
       count++;
   } while(h);
-  printf("count = %u\n", count);
+  curl_mprintf("count = %u\n", count);
 
 test_cleanup:
   curl_easy_cleanup(curl);

@@ -518,7 +518,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", server_exe('buildinfo', 'TOOL'));
+    open(my $disabledh, "-|", exerunner() . shell_quote($CURLINFO));
     while(<$disabledh>) {
         if($_ =~ /([^:]*): ([ONF]*)/) {
             my ($val, $toggle) = ($1, $2);
@@ -716,6 +716,7 @@ sub checksystemfeatures {
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
+            $feature{"ECH"} = $feat =~ /ECH/;
         }
         #
         # Test harness currently uses a non-stunnel server in order to

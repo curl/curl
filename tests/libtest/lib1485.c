@@ -50,26 +50,27 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
     long httpcode = 0;
     /* end of a response */
     result = curl_easy_getinfo(st->easy, CURLINFO_RESPONSE_CODE, &httpcode);
-    fprintf(stderr, "header_callback, get status: %ld, %d\n",
-            httpcode, result);
+    curl_mfprintf(stderr, "header_callback, get status: %ld, %d\n",
+                  httpcode, result);
     if(httpcode < 100 || httpcode >= 1000) {
-      fprintf(stderr, "header_callback, invalid status: %ld, %d\n",
-              httpcode, result);
+      curl_mfprintf(stderr, "header_callback, invalid status: %ld, %d\n",
+                    httpcode, result);
       return CURLE_WRITE_ERROR;
     }
     st->http_status = (int)httpcode;
     if(st->http_status >= 200 && st->http_status < 300) {
       result = curl_easy_getinfo(st->easy, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                                  &clen);
-      fprintf(stderr, "header_callback, info Content-Length: %ld, %d\n",
-              (long)clen, result);
+      curl_mfprintf(stderr, "header_callback, info Content-Length: %ld, %d\n",
+                    (long)clen, result);
       if(result) {
         st->result = result;
         return CURLE_WRITE_ERROR;
       }
       if(clen < 0) {
-        fprintf(stderr, "header_callback, expected known Content-Length, "
-                "got: %ld\n", (long)clen);
+        curl_mfprintf(stderr,
+                      "header_callback, expected known Content-Length, "
+                      "got: %ld\n", (long)clen);
         return CURLE_WRITE_ERROR;
       }
     }

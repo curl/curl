@@ -34,7 +34,7 @@ static int progress_callback(void *clientp, double dltotal,
 
   if((dltotal > 0.0) && (dlnow > dltotal)) {
     /* this should not happen with test case 599 */
-    printf("%.0f > %.0f !!\n", dltotal, dlnow);
+    curl_mprintf("%.0f > %.0f !!\n", dltotal, dlnow);
     return -1;
   }
 
@@ -48,13 +48,13 @@ CURLcode test(char *URL)
   double content_length = 0.0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -88,7 +88,7 @@ CURLcode test(char *URL)
     )
     moo = fopen(libtest_arg2, "wb");
     if(moo) {
-      fprintf(moo, "CL %.0f\n", content_length);
+      curl_mfprintf(moo, "CL %.0f\n", content_length);
       fclose(moo);
     }
   }

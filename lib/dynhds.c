@@ -359,9 +359,10 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
     return result;
 
   for(i = 0; i < dynhds->hds_len; ++i) {
-    result = Curl_dyn_addf(dbuf, "%.*s: %.*s\r\n",
-               (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
-               (int)dynhds->hds[i]->valuelen, dynhds->hds[i]->value);
+    result = curlx_dyn_addf(dbuf, "%.*s: %.*s\r\n",
+                            (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
+                            (int)dynhds->hds[i]->valuelen,
+                            dynhds->hds[i]->value);
     if(result)
       break;
   }

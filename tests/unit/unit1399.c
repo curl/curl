@@ -56,16 +56,17 @@ static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
 {
   int time_sec = (int)(time_usec / usec_magnitude);
   bool same = (time_sec == expected_seconds);
-  fprintf(stderr, "is %d us same as %d seconds? %s\n",
-          (int)time_usec, expected_seconds,
-          same ? "Yes" : "No");
+  curl_mfprintf(stderr, "is %d us same as %d seconds? %s\n",
+                (int)time_usec, expected_seconds,
+                same ? "Yes" : "No");
   return same;
 }
 
 static void expect_timer_seconds(struct Curl_easy *data, int seconds)
 {
   char msg[64];
-  msnprintf(msg, sizeof(msg), "about %d seconds should have passed", seconds);
+  curl_msnprintf(msg, sizeof(msg), "about %d seconds should have passed",
+                 seconds);
   fail_unless(usec_matches_seconds(data->progress.t_nslookup, seconds), msg);
   fail_unless(usec_matches_seconds(data->progress.t_connect, seconds), msg);
   fail_unless(usec_matches_seconds(data->progress.t_appconnect, seconds), msg);
@@ -82,7 +83,7 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
  * be 3 seconds. */
 UNITTEST_START
   struct Curl_easy data;
-  struct curltime now = Curl_now();
+  struct curltime now = curlx_now();
 
   data.progress.t_nslookup = 0;
   data.progress.t_connect = 0;

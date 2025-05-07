@@ -170,6 +170,8 @@ else()
   set(CURL_OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
+set(LIB_NAME "libcurl")
+
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/include")
 
 if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
@@ -2028,9 +2030,9 @@ function(curl_transform_makefile_inc _input_file _output_file)
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
-  string(REGEX REPLACE "\\\\\n" "!π!α!" _makefile_inc_text ${_makefile_inc_text})
+  string(REGEX REPLACE "\\\\\n" "!^!^!" _makefile_inc_text ${_makefile_inc_text})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "set(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
-  string(REPLACE "!π!α!" "\n" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "!^!^!" "\n" _makefile_inc_text ${_makefile_inc_text})
 
   # Replace $() with ${}
   string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})
@@ -2459,6 +2461,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Consumed custom variables:
   #   CURLVERSION
+  #   LIB_NAME
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL OPENSSL_VERSION_MAJOR

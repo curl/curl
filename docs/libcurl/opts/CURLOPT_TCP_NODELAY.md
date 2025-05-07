@@ -57,7 +57,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* leave Nagle enabled */
-    curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0);
+    curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 0L);
     curl_easy_perform(curl);
   }
 }

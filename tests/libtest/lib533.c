@@ -55,7 +55,7 @@ CURLcode test(char *URL)
 
   multi_add_handle(m, curl);
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
   for(;;) {
     struct timeval interval;
@@ -71,7 +71,7 @@ CURLcode test(char *URL)
 
     if(!running) {
       if(!current++) {
-        fprintf(stderr, "Advancing to URL 1\n");
+        curl_mfprintf(stderr, "Advancing to URL 1\n");
         /* remove the handle we use */
         curl_multi_remove_handle(m, curl);
 

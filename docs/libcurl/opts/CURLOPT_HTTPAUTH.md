@@ -80,8 +80,7 @@ HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest, to
 prevent the password from being eavesdropped.
 
-You need to build libcurl with either OpenSSL or GnuTLS support for this
-option to work, or build libcurl on Windows with SSPI support.
+NTLM uses weak cryptographic algorithms and is not considered secure.
 
 ## CURLAUTH_NTLM_WB
 

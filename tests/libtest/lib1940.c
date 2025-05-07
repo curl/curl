@@ -58,8 +58,8 @@ static void showem(CURL *easy, unsigned int type)
         size_t index = 0;
         size_t amount = header->amount;
         do {
-          printf("- %s == %s (%u/%u)\n", header->name, header->value,
-                 (int)index, (int)amount);
+          curl_mprintf("- %s == %s (%u/%u)\n", header->name, header->value,
+                       (int)index, (int)amount);
 
           if(++index == amount)
             break;
@@ -70,7 +70,7 @@ static void showem(CURL *easy, unsigned int type)
       }
       else {
         /* only one of this */
-        printf(" %s == %s\n", header->name, header->value);
+        curl_mprintf(" %s == %s\n", header->name, header->value);
       }
     }
   }

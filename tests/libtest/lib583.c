@@ -63,21 +63,21 @@ CURLcode test(char *URL)
   /* this tests if removing an easy handle immediately after multi
      perform has been called succeeds or not. */
 
-  fprintf(stderr, "curl_multi_perform()...\n");
+  curl_mfprintf(stderr, "curl_multi_perform()...\n");
 
   multi_perform(multiHandle, &stillRunning);
 
-  fprintf(stderr, "curl_multi_perform() succeeded\n");
+  curl_mfprintf(stderr, "curl_multi_perform() succeeded\n");
 
-  fprintf(stderr, "curl_multi_remove_handle()...\n");
+  curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
   mres = curl_multi_remove_handle(multiHandle, curl);
   if(mres) {
-    fprintf(stderr, "curl_multi_remove_handle() failed, "
+    curl_mfprintf(stderr, "curl_multi_remove_handle() failed, "
             "with code %d\n", (int)mres);
     res = TEST_ERR_MULTI;
   }
   else
-    fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
+    curl_mfprintf(stderr, "curl_multi_remove_handle() succeeded\n");
 
 test_cleanup:
 

@@ -30,7 +30,7 @@
   !defined(CURL_DISABLE_ALTSVC)
 
 #include "curl_multibyte.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -45,7 +45,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
      MoveFileEx() will overwrite and is usually atomic, however it fails
      when there are open handles to the file. */
   const int max_wait_ms = 1000;
-  struct curltime start = Curl_now();
+  struct curltime start = curlx_now();
   TCHAR *tchar_oldpath = curlx_convert_UTF8_to_tchar(oldpath);
   TCHAR *tchar_newpath = curlx_convert_UTF8_to_tchar(newpath);
   for(;;) {
@@ -55,7 +55,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
       curlx_unicodefree(tchar_newpath);
       break;
     }
-    diff = Curl_timediff(Curl_now(), start);
+    diff = curlx_timediff(curlx_now(), start);
     if(diff < 0 || diff > max_wait_ms) {
       curlx_unicodefree(tchar_oldpath);
       curlx_unicodefree(tchar_newpath);

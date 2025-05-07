@@ -118,10 +118,42 @@ SPDX-License-Identifier: curl
   The HTTP server supports listening on a Unix domain socket, the default
   location is 'http.sock'.
 
-  For HTTP/2 and HTTP/3 testing an installed `nghttpx` is used. HTTP/3
-  tests check if nghttpx supports the protocol. To override the nghttpx
-  used, set the environment variable `NGHTTPX`. The default can also be
-  changed by specifying `--with-test-nghttpx=<path>` as argument to `configure`.
+  For HTTP/2 and HTTP/3 testing an installed `nghttpx` is used. HTTP/3 tests
+  check if nghttpx supports the protocol. To override the nghttpx used, set
+  the environment variable `NGHTTPX`. The default can also be changed by
+  specifying `--with-test-nghttpx=<path>` as argument to `configure`.
+
+### DNS server
+
+  There is a test DNS server to allow tests to resolve hostnames to verify
+  those code paths. This server is started like all the other servers within
+  the `<servers>` section.
+
+  To make a curl build actually use the test DNS server requires a debug
+  build. When such a test runs, the environment variable `CURL_DNS_SERVER` is
+  set to identify the IP address and port number of the DNS server to use.
+
+  - curl built to use c-ares for resolving automatically asks that server for
+    host information
+
+  - curl built to use `getaddrinfo()` for resolving *and* is built with c-ares
+    1.26.0 or later, gets a special work-around. In such builds, when the
+    environment variable is set, curl instead invokes a getaddrinfo wrapper
+    that emulates the function and acknowledges the DNS server environment
+    variable. This way, the getaddrinfo-using code paths in curl are verified,
+    and yet the custom responses from the test DNS server are used.
+
+  curl that is built to support a custom DNS server in a test gets the
+  `override-dns` feature set.
+
+  When curl ask for HTTPS-RR, c-ares is always used and in debug builds such
+  asks respects the dns server environment variable as well.
+
+  The test DNS server only has a few limited responses. When asked for
+
+  - type `A` response, it returns the address `127.0.0.1` three times
+  - type `AAAA` response, it returns the address `::1` three times
+  - other types, it returns a blank response without answers
 
 ### Shell startup scripts
 

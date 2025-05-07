@@ -50,7 +50,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
   /* second transfer: set URL + query in the second CURLU handle */
@@ -66,7 +66,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
   /* third transfer: append extra query in the second CURLU handle, but do not
@@ -83,7 +83,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
 test_cleanup:

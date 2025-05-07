@@ -37,6 +37,7 @@ BEGIN {
         $anyway
         $automakestyle
         $CURL
+        $CURLINFO
         $CURLVERSION
         $CURLVERNUM
         $DATE
@@ -114,7 +115,11 @@ our $UNITDIR=dirsepadd("./unit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $TUNITDIR=dirsepadd("./tunit/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $SRVDIR=dirsepadd("./server/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
 our $TESTDIR="$srcdir/data";
-our $CURL=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) . "curl".exe_ext('TOOL'); # what curl binary to run on the tests
+our $CURL=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
+    "curl".exe_ext('TOOL'); # what curl binary to run on the tests
+our $CURLINFO=dirsepadd("../src/" . ($ENV{'CURL_DIRSUFFIX'} || '')) .
+    "curlinfo".exe_ext('TOOL'); # what curlinfo binary to run on the tests
+
 our $VCURL=$CURL;  # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification

@@ -164,20 +164,20 @@ UNITTEST_START
     DOHcode rc = doh_req_encode(req[i].name, req[i].type,
                                 buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
-      fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
-              req[i].rc, rc);
+      curl_mfprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
+                    req[i].rc, rc);
       abort_if(rc != req[i].rc, "return code");
     }
     if(size != req[i].size) {
-      fprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
-              req[i].size, size);
-      fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
+      curl_mfprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
+                    req[i].size, size);
+      curl_mfprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       abort_if(size != req[i].size, "size");
     }
     if(req[i].packet && memcmp(req[i].packet, buffer, size)) {
-      fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
-      fprintf(stderr, "... instead of: %s\n",
-             hexdump((const unsigned char *)req[i].packet, size));
+      curl_mfprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
+      curl_mfprintf(stderr, "... instead of: %s\n",
+                    hexdump((const unsigned char *)req[i].packet, size));
       abort_if(req[i].packet && memcmp(req[i].packet, buffer, size),
                "contents");
     }
@@ -193,8 +193,8 @@ UNITTEST_START
     rc = doh_resp_decode((const unsigned char *)resp[i].packet, resp[i].size,
                          resp[i].type, &d);
     if(rc != resp[i].rc) {
-      fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
-              resp[i].rc, rc);
+      curl_mfprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
+                    resp[i].rc, rc);
       abort_if(rc != resp[i].rc, "return code");
     }
     len = sizeof(buffer);
@@ -205,7 +205,7 @@ UNITTEST_START
       a = &d.addr[u];
       if(resp[i].type == DNS_TYPE_A) {
         p = &a->ip.v4[0];
-        msnprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
+        curl_msnprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
         o = strlen(ptr);
         len -= o;
         ptr += o;
@@ -214,28 +214,28 @@ UNITTEST_START
         int j;
         for(j = 0; j < 16; j += 2) {
           size_t l;
-          msnprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
-                   a->ip.v6[j + 1]);
+          curl_msnprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
+                         a->ip.v6[j + 1]);
           l = strlen(ptr);
           len -= l;
           ptr += l;
         }
-        msnprintf(ptr, len, " ");
+        curl_msnprintf(ptr, len, " ");
         len--;
         ptr++;
       }
     }
     for(u = 0; u < d.numcname; u++) {
       size_t o;
-      msnprintf(ptr, len, "%s ", Curl_dyn_ptr(&d.cname[u]));
+      curl_msnprintf(ptr, len, "%s ", curlx_dyn_ptr(&d.cname[u]));
       o = strlen(ptr);
       len -= o;
       ptr += o;
     }
     de_cleanup(&d);
     if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
-      fprintf(stderr, "resp %zu: Expected %s got %s\n", i,
-              resp[i].out, buffer);
+      curl_mfprintf(stderr, "resp %zu: Expected %s got %s\n", i,
+                    resp[i].out, buffer);
       abort_if(resp[i].out && strcmp((char *)buffer, resp[i].out), "content");
     }
   }
@@ -248,7 +248,7 @@ UNITTEST_START
     rc = doh_resp_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      fprintf(stderr, "%zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "%zu: %d\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -262,7 +262,7 @@ UNITTEST_START
                          DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      fprintf(stderr, "2 %zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "2 %zu: %d\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -277,10 +277,10 @@ UNITTEST_START
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];
-    msnprintf((char *)buffer, sizeof(buffer),
-              "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
+    curl_msnprintf((char *)buffer, sizeof(buffer),
+                   "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
     if(rc || strcmp((char *)buffer, "127.0.0.1")) {
-      fprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
+      curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
       abort_if(rc || strcmp((char *)buffer, "127.0.0.1"), "bad address");
     }
     fail_if(d.numcname, "bad cname counter");

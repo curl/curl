@@ -90,7 +90,7 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME  = curl.exe
-CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /FD /c
+CURL_CFLAGS   = /I../lib /I../lib/curlx /I../include /nologo /W4 /EHsc /FD /c
 CURL_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
 CURL_RESFLAGS = /i../include
 
@@ -641,6 +641,7 @@ $(LIB_DIROBJ):
 	@if not exist "$(LIB_DIROBJ)\vtls" mkdir $(LIB_DIROBJ)\vtls
 	@if not exist "$(LIB_DIROBJ)\vssh" mkdir $(LIB_DIROBJ)\vssh
 	@if not exist "$(LIB_DIROBJ)\vquic" mkdir $(LIB_DIROBJ)\vquic
+	@if not exist "$(LIB_DIROBJ)\curlx" mkdir $(LIB_DIROBJ)\curlx
 
 $(CURL_DIROBJ):
 	@if not exist "$(CURL_DIROBJ)" mkdir $(CURL_DIROBJ)
@@ -664,6 +665,9 @@ $(CURL_DIROBJ):
 
 {$(LIBCURL_SRC_DIR)\vquic\}.c{$(LIB_DIROBJ)\vquic\}.obj::
 	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\vquic\\"  $<
+
+{$(LIBCURL_SRC_DIR)\curlx\}.c{$(LIB_DIROBJ)\curlx\}.obj::
+	$(CURL_CC) $(CFLAGS) /Fo"$(LIB_DIROBJ)\curlx\\"  $<
 
 $(LIB_DIROBJ)\libcurl.res: $(LIBCURL_SRC_DIR)\libcurl.rc
 	$(RC) $(RC_FLAGS)
@@ -716,24 +720,24 @@ $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 !ENDIF
 $(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
-$(CURL_DIROBJ)\strparse.obj: ../lib/strparse.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strparse.c
+$(CURL_DIROBJ)\strparse.obj: ../lib/curlx/strparse.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/strparse.c
 $(CURL_DIROBJ)\strcase.obj: ../lib/strcase.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strcase.c
-$(CURL_DIROBJ)\timeval.obj: ../lib/timeval.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/timeval.c
-$(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
+$(CURL_DIROBJ)\timeval.obj: ../lib/curlx/timeval.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/timeval.c
 $(CURL_DIROBJ)\curl_get_line.obj: ../lib/curl_get_line.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_get_line.c
 $(CURL_DIROBJ)\curl_multibyte.obj: ../lib/curl_multibyte.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_multibyte.c
 $(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/version_win32.c
-$(CURL_DIROBJ)\dynbuf.obj: ../lib/dynbuf.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/dynbuf.c
-$(CURL_DIROBJ)\base64.obj: ../lib/base64.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/base64.c
+$(CURL_DIROBJ)\warnless.obj: ../lib/curlx/warnless.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/warnless.c
+$(CURL_DIROBJ)\dynbuf.obj: ../lib/curlx/dynbuf.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/dynbuf.c
+$(CURL_DIROBJ)\base64.obj: ../lib/curlx/base64.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/base64.c
 $(CURL_DIROBJ)\curl.res: $(CURL_SRC_DIR)\curl.rc
 	$(RC) $(CURL_RC_FLAGS)
 

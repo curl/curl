@@ -31,7 +31,7 @@
 #include "curl_multibyte.h"
 #include "system_win32.h"
 #include "version_win32.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"

@@ -32,7 +32,7 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "bufq.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "dynhds.h"
 #include "http1.h"
 #include "http2.h"

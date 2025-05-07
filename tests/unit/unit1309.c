@@ -99,8 +99,8 @@ UNITTEST_START
     int rem = (i + 7)%NUM_NODES;
     printf("Tree look:\n");
     splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %zu\n", rem,
-           *(size_t *)Curl_splayget(&nodes[rem]));
+    curl_mprintf("remove pointer %d, payload %zu\n", rem,
+                 *(size_t *)Curl_splayget(&nodes[rem]));
     rc = Curl_splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
@@ -132,9 +132,9 @@ UNITTEST_START
     tv_now.tv_usec = i;
     root = Curl_splaygetbest(tv_now, root, &removed);
     while(removed) {
-      printf("removed payload %zu[%zu]\n",
-             *(size_t *)Curl_splayget(removed) / 10,
-             *(size_t *)Curl_splayget(removed) % 10);
+      curl_mprintf("removed payload %zu[%zu]\n",
+                   *(size_t *)Curl_splayget(removed) / 10,
+                   *(size_t *)Curl_splayget(removed) % 10);
       root = Curl_splaygetbest(tv_now, root, &removed);
     }
   }

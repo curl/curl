@@ -29,7 +29,7 @@
 #include "strcase.h"
 #include "sendf.h"
 #include "headers.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

@@ -53,10 +53,9 @@
 #include <netdb.h>
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 #include "server_sockaddr.h"
-#include "warnless.h"
 
 #include "tool_binmode.h"
 

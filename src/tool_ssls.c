@@ -23,14 +23,12 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
+#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_cb_dbg.h"
 #include "tool_msgs.h"
 #include "tool_setopt.h"
 #include "tool_ssls.h"
-#include "dynbuf.h"
-#include "curl_base64.h"
 #include "tool_parsecfg.h"
 
 /* The maximum line length for an ecoded session ticket */

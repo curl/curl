@@ -45,8 +45,8 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
-#include "timediff.h"
-#include "warnless.h"
+#include "curlx/timediff.h"
+#include "curlx/warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -197,7 +197,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     return Curl_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -292,7 +292,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     return Curl_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */

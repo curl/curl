@@ -66,7 +66,7 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
     strcpy(e->name, host);
     e->includeSubDomains = FALSE;
     strcpy(e->expire, expire);
-    fprintf(stderr, "add '%s'\n", host);
+    curl_mfprintf(stderr, "add '%s'\n", host);
   }
   else
     return CURLSTS_DONE;
@@ -89,7 +89,7 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
 {
   (void)easy;
   (void)userp;
-  printf("[%zu/%zu] %s %s\n", i->index, i->total, e->name, e->expire);
+  curl_mprintf("[%zu/%zu] %s %s\n", i->index, i->total, e->name, e->expire);
   return CURLSTS_OK;
 }
 
@@ -124,7 +124,7 @@ CURLcode test(char *URL)
   hnd = NULL;
   if(res == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
     res = CURLE_COULDNT_CONNECT;
-  printf("First request returned %d\n", res);
+  curl_mprintf("First request returned %d\n", res);
   res = CURLE_OK;
 
   easy_init(hnd);
@@ -141,7 +141,7 @@ CURLcode test(char *URL)
   res = curl_easy_perform(hnd);
   curl_easy_cleanup(hnd);
   hnd = NULL;
-  printf("Second request returned %d\n", res);
+  curl_mprintf("Second request returned %d\n", res);
 
 test_cleanup:
   curl_easy_cleanup(hnd);

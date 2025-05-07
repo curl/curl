@@ -64,7 +64,7 @@ sub setopts {
     open(H, "$f");
     my $opts;
     while(<H>) {
-        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/))  {
+        if(/^  CURLOPT(|DEPRECATED)\(/ && ($_ !~ /OBSOLETE/)) {
             $opts++;
         }
     }

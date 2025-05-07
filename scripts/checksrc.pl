@@ -480,10 +480,10 @@ sub scanfile {
             my $count = 0;
             while($l =~ /([\d]{4})/g) {
                 push @copyright, {
-                  year => $1,
-                  line => $line,
-                  col => index($l, $1),
-                  code => $l
+                    year => $1,
+                    line => $line,
+                    col => index($l, $1),
+                    code => $l
                 };
                 $count++;
             }
@@ -874,7 +874,7 @@ sub scanfile {
             $suff =~ s/\(/\\(/;
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
-      }
+        }
         $l = $bl; # restore to pre-bannedfunc content
 
         if($warnings{"STDERR"}) {
@@ -1040,16 +1040,16 @@ sub scanfile {
         }
       preproc:
         if($prep) {
-          # scan for use of banned symbols on a preprocessor line
-          if($l =~ /^(^|.*\W)
-                     (WIN32)
-                     (\W|$)
-                   /x) {
-              checkwarn("BANNEDPREPROC",
-                        $line, length($1), $file, $ol,
-                        "use of $2 is banned from preprocessor lines" .
-                        (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
-          }
+            # scan for use of banned symbols on a preprocessor line
+            if($l =~ /^(^|.*\W)
+                       (WIN32)
+                       (\W|$)
+                     /x) {
+                checkwarn("BANNEDPREPROC",
+                          $line, length($1), $file, $ol,
+                          "use of $2 is banned from preprocessor lines" .
+                          (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
+            }
         }
         $line++;
         $prevp = $prep;

@@ -57,7 +57,7 @@ static void check_spbset(const char *name, unsigned int *s, size_t slen)
   size_t i, j;
   unsigned int n, c;
 
-  fprintf(stderr, "test %s, %zu numbers\n", name, slen);
+  curl_mfprintf(stderr, "test %s, %zu numbers\n", name, slen);
 
   Curl_uint_spbset_init(&bset);
 
@@ -83,7 +83,7 @@ static void check_spbset(const char *name, unsigned int *s, size_t slen)
   for(i = 1; i < slen; ++i) {
     fail_unless(Curl_uint_spbset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
-      fprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
+      curl_mfprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
     }
   }

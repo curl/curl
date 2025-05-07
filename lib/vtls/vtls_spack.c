@@ -64,7 +64,7 @@ typedef unsigned __int64 uint64_t;
 
 static CURLcode spack_enc8(struct dynbuf *buf, uint8_t b)
 {
-  return Curl_dyn_addn(buf, &b, 1);
+  return curlx_dyn_addn(buf, &b, 1);
 }
 
 static CURLcode
@@ -82,7 +82,7 @@ static CURLcode spack_enc16(struct dynbuf *buf, uint16_t val)
   uint8_t nval[2];
   nval[0] = (uint8_t)(val >> 8);
   nval[1] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static CURLcode
@@ -102,7 +102,7 @@ static CURLcode spack_enc32(struct dynbuf *buf, uint32_t val)
   nval[1] = (uint8_t)(val >> 16);
   nval[2] = (uint8_t)(val >> 8);
   nval[3] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static CURLcode
@@ -127,7 +127,7 @@ static CURLcode spack_enc64(struct dynbuf *buf, uint64_t val)
   nval[5] = (uint8_t)(val >> 16);
   nval[6] = (uint8_t)(val >> 8);
   nval[7] = (uint8_t)val;
-  return Curl_dyn_addn(buf, nval, sizeof(nval));
+  return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
 static CURLcode
@@ -151,7 +151,7 @@ static CURLcode spack_encstr16(struct dynbuf *buf, const char *s)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   r = spack_enc16(buf, (uint16_t)slen);
   if(!r) {
-    r = Curl_dyn_addn(buf, s, slen);
+    r = curlx_dyn_addn(buf, s, slen);
   }
   return r;
 }
@@ -181,7 +181,7 @@ static CURLcode spack_encdata16(struct dynbuf *buf,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   r = spack_enc16(buf, (uint16_t)data_len);
   if(!r) {
-    r = Curl_dyn_addn(buf, data, data_len);
+    r = curlx_dyn_addn(buf, data, data_len);
   }
   return r;
 }

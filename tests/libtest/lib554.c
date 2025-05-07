@@ -99,7 +99,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
   }
 
   if(formrc)
-    printf("curl_formadd(1) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", (int)formrc);
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
@@ -117,7 +117,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
                           CURLFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(2) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(2) = %d\n", (int)formrc);
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the filename field */
@@ -128,7 +128,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
                           CURLFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(3) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(3) = %d\n", (int)formrc);
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in a submit field too */
@@ -140,7 +140,7 @@ static CURLcode test_once(char *URL, bool oldstyle)
                           CURLFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(4) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(4) = %d\n", (int)formrc);
 
   CURL_IGNORE_DEPRECATION(
     formrc = curl_formadd(&formpost, &lastptr,
@@ -151,11 +151,11 @@ static CURLcode test_once(char *URL, bool oldstyle)
                           CURLFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(5) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(5) = %d\n", (int)formrc);
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     CURL_IGNORE_DEPRECATION(
       curl_formfree(formpost);
     )
@@ -209,7 +209,7 @@ CURLcode test(char *URL)
   CURLcode res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 

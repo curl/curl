@@ -41,7 +41,7 @@ env:
   # unhandled
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
-  libressl-version: 4.0.0
+  libressl-version: 4.1.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.8.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
@@ -51,7 +51,7 @@ env:
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.49.0
+  awslc-version: 1.50.0
   # handled in renovate.json
   openssl-version: 3.5.0
   # handled in renovate.json
@@ -298,6 +298,7 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
+        # zizmor: ignore[template-injection]
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -536,7 +537,7 @@ jobs:
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
-          tar xzf v${{ env.awslc-version }}.tar.gz
+          tar -xzf v${{ env.awslc-version }}.tar.gz
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
@@ -661,6 +662,7 @@ jobs:
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
+        # zizmor: ignore[template-injection]
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then

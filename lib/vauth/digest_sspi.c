@@ -34,7 +34,7 @@
 #include "vauth.h"
 #include "digest.h"
 #include "../urldata.h"
-#include "../warnless.h"
+#include "../curlx/warnless.h"
 #include "../curl_multibyte.h"
 #include "../sendf.h"
 #include "../strdup.h"

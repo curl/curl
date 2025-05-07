@@ -34,8 +34,8 @@
 #include "multiif.h"
 #include "progress.h"
 #include "select.h"
-#include "warnless.h"
-#include "strparse.h"
+#include "curlx/warnless.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -198,7 +198,7 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   }
 
   *done = FALSE;
-  now = Curl_now();
+  now = curlx_now();
   if(!Curl_shutdown_started(data, sockindex)) {
     CURL_TRC_M(data, "shutdown start on%s connection",
                sockindex ? " secondary" : "");
@@ -415,7 +415,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
 
   cf = data->conn->cfilter[sockindex];
-  DEBUGASSERT(cf);
   if(!cf) {
     *done = FALSE;
     return CURLE_FAILED_INIT;
@@ -443,7 +442,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);
-      data->conn->keepalive = Curl_now();
+      data->conn->keepalive = curlx_now();
       Curl_verboseconnect(data, data->conn, sockindex);
       goto out;
     }
@@ -942,7 +941,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
       curl_off_t altsize;
-      if(!Curl_str_number(&p, &altsize, write_len))
+      if(!curlx_str_number(&p, &altsize, write_len))
         write_len = (size_t)altsize;
     }
   }

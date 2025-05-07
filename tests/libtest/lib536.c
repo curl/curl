@@ -32,7 +32,7 @@ static void proxystat(CURL *curl)
 {
   long wasproxy;
   if(!curl_easy_getinfo(curl, CURLINFO_USED_PROXY, &wasproxy)) {
-    printf("This %sthe proxy\n", wasproxy ? "used ":
+    curl_mprintf("This %sthe proxy\n", wasproxy ? "used ":
            "DID NOT use ");
   }
 }
@@ -44,13 +44,13 @@ CURLcode test(char *URL)
   struct curl_slist *host = NULL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }

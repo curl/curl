@@ -32,7 +32,7 @@
 #endif
 #include "../urldata.h"
 #include "../bufq.h"
-#include "../dynbuf.h"
+#include "../curlx/dynbuf.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_msh3.h"
@@ -44,7 +44,7 @@
 #include "vquic.h"
 #include "vquic_int.h"
 #include "../strerror.h"
-#include "../strparse.h"
+#include "../curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "../curl_printf.h"
@@ -95,7 +95,7 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
     const char *p = getenv("CURL_DBG_QUIC_WBLOCK");
     if(p) {
       curl_off_t l;
-      if(!Curl_str_number(&p, &l, 100))
+      if(!curlx_str_number(&p, &l, 100))
         qctx->wblock_percent = (int)l;
     }
   }
@@ -112,7 +112,7 @@ void vquic_ctx_free(struct cf_quic_ctx *qctx)
 
 void vquic_ctx_update_time(struct cf_quic_ctx *qctx)
 {
-  qctx->last_op = Curl_now();
+  qctx->last_op = curlx_now();
 }
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
@@ -651,25 +651,25 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
     struct dynbuf fname;
     CURLcode result;
     unsigned int i;
-    Curl_dyn_init(&fname, DYN_QLOG_NAME);
-    result = Curl_dyn_add(&fname, qlog_dir);
+    curlx_dyn_init(&fname, DYN_QLOG_NAME);
+    result = curlx_dyn_add(&fname, qlog_dir);
     if(!result)
-      result = Curl_dyn_add(&fname, "/");
+      result = curlx_dyn_add(&fname, "/");
     for(i = 0; (i < scidlen) && !result; i++) {
       char hex[3];
       msnprintf(hex, 3, "%02x", scid[i]);
-      result = Curl_dyn_add(&fname, hex);
+      result = curlx_dyn_add(&fname, hex);
     }
     if(!result)
-      result = Curl_dyn_add(&fname, ".sqlog");
+      result = curlx_dyn_add(&fname, ".sqlog");
 
     if(!result) {
-      int qlogfd = open(Curl_dyn_ptr(&fname), O_WRONLY|O_CREAT|CURL_O_BINARY,
+      int qlogfd = open(curlx_dyn_ptr(&fname), O_WRONLY|O_CREAT|CURL_O_BINARY,
                         data->set.new_file_perms);
       if(qlogfd != -1)
         *qlogfdp = qlogfd;
     }
-    Curl_dyn_free(&fname);
+    curlx_dyn_free(&fname);
     if(result)
       return result;
   }

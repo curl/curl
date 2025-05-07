@@ -2258,6 +2258,9 @@ typedef enum {
 
   CURLOPT(CURLOPT_UPLOAD_FLAGS, CURLOPTTYPE_LONG, 327),
 
+  /* set TLS supported signature algorithms */
+  CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -3323,9 +3326,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
 #include "options.h"
 #include "header.h"
 #include "websockets.h"
-#ifndef CURL_SKIP_INCLUDE_MPRINTF
 #include "mprintf.h"
-#endif
 
 /* the typechecker does not work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

@@ -111,9 +111,9 @@ static void showsts(struct stsentry *e, const char *chost)
   if(!e)
     printf("'%s' is not HSTS\n", chost);
   else {
-    printf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
-           chost, e->host, e->expires,
-           e->includeSubDomains ? " includeSubDomains" : "");
+    curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
+                 chost, e->host, e->expires,
+                 e->includeSubDomains ? " includeSubDomains" : "");
   }
 }
 
@@ -144,8 +144,8 @@ UNITTEST_START
       result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 
       if(result != headers[i].result) {
-        fprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
-                headers[i].hdr, result);
+        curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
+                      headers[i].hdr, result);
         unitfail++;
         continue;
       }
@@ -160,7 +160,7 @@ UNITTEST_START
     showsts(e, chost);
   }
 
-  printf("Number of entries: %zu\n", Curl_llist_count(&h->list));
+  curl_mprintf("Number of entries: %zu\n", Curl_llist_count(&h->list));
 
   /* verify that it is exists for 7 seconds */
   chost = "expire.example";
@@ -170,7 +170,7 @@ UNITTEST_START
     deltatime++; /* another second passed */
   }
 
-  msnprintf(savename, sizeof(savename), "%s.save", arg);
+  curl_msnprintf(savename, sizeof(savename), "%s.save", arg);
   (void)Curl_hsts_save(easy, h, savename);
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);

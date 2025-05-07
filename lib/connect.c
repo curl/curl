@@ -70,7 +70,7 @@
 #include "inet_pton.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "share.h"
@@ -112,7 +112,7 @@ enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
- * @param nowp timestamp to use for calculation, NULL to use Curl_now()
+ * @param nowp timestamp to use for calculation, NULL to use curlx_now()
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
@@ -133,13 +133,13 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
     return 0; /* no timeout in place or checked, return "no limit" */
 
   if(!nowp) {
-    now = Curl_now();
+    now = curlx_now();
     nowp = &now;
   }
 
   if(data->set.timeout > 0) {
     timeleft_ms = data->set.timeout -
-                  Curl_timediff(*nowp, data->progress.t_startop);
+                  curlx_timediff(*nowp, data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if(!duringconnect)
@@ -150,7 +150,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
     ctimeleft_ms = ctimeout_ms -
-                   Curl_timediff(*nowp, data->progress.t_startsingle);
+                   curlx_timediff(*nowp, data->progress.t_startsingle);
     if(!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if(!timeleft_ms)
@@ -167,7 +167,7 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
 
   DEBUGASSERT(data->conn);
   if(!nowp) {
-    now = Curl_now();
+    now = curlx_now();
     nowp = &now;
   }
   data->conn->shutdown.start[sockindex] = *nowp;
@@ -191,11 +191,11 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
     return 0; /* not started or no limits */
 
   if(!nowp) {
-    now = Curl_now();
+    now = curlx_now();
     nowp = &now;
   }
   left_ms = conn->shutdown.timeout_ms -
-            Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
+            curlx_timediff(*nowp, conn->shutdown.start[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
@@ -210,7 +210,7 @@ timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
     if(!conn->shutdown.start[i].tv_sec)
       continue;
     if(!nowp) {
-      now = Curl_now();
+      now = curlx_now();
       nowp = &now;
     }
     ms = Curl_shutdown_timeleft(conn, i, nowp);
@@ -547,7 +547,7 @@ static CURLcode baller_start(struct Curl_cfilter *cf,
   baller->has_started = TRUE;
 
   while(baller->addr) {
-    baller->started = Curl_now();
+    baller->started = curlx_now();
     baller->timeoutms = addr_next_match(baller->addr, baller->ai_family) ?
       USETIME(timeoutms) : timeoutms;
     baller_initiate(cf, data, baller);
@@ -606,7 +606,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->connected = TRUE;
         baller->is_done = TRUE;
       }
-      else if(Curl_timediff(*now, baller->started) >= baller->timeoutms) {
+      else if(curlx_timediff(*now, baller->started) >= baller->timeoutms) {
         infof(data, "%s connect timeout after %" FMT_TIMEDIFF_T
               "ms, move on!", baller->name, baller->timeoutms);
 #ifdef SOCKETIMEDOUT
@@ -644,7 +644,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
    * cot ballers in a QUIC appropriate way. */
 evaluate:
   *connected = FALSE; /* a negative world view is best */
-  now = Curl_now();
+  now = curlx_now();
   ongoing = not_started = 0;
   for(i = 0; i < CURL_ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
@@ -699,7 +699,7 @@ evaluate:
    * start new ballers or return ok. */
   if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
     failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-          Curl_timediff(now, data->progress.t_startsingle));
+          curlx_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
 
@@ -715,7 +715,7 @@ evaluate:
       /* We start its primary baller has failed to connect or if
        * its start delay_ms have expired */
       if((baller->primary && baller->primary->is_done) ||
-          Curl_timediff(now, ctx->started) >= baller->delay_ms) {
+          curlx_timediff(now, ctx->started) >= baller->delay_ms) {
         baller_start(cf, data, baller, Curl_timeleft(data, &now, TRUE));
         if(baller->is_done) {
           CURL_TRC_CF(data, cf, "%s done", baller->name);
@@ -768,7 +768,7 @@ evaluate:
   failf(data, "Failed to connect to %s port %u after "
         "%" FMT_TIMEDIFF_T " ms: %s",
         hostname, conn->primary.remote_port,
-        Curl_timediff(now, data->progress.t_startsingle),
+        curlx_timediff(now, data->progress.t_startsingle),
         curl_easy_strerror(result));
 
 #ifdef SOCKETIMEDOUT
@@ -800,7 +800,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  ctx->started = Curl_now();
+  ctx->started = curlx_now();
 
   /* remotehost->addr is the list of addresses from the resolver, each
    * with an address family. The list has at least one entry, possibly
@@ -1060,7 +1060,7 @@ static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
     memset(&t, 0, sizeof(t));
     if(baller && baller->cf &&
        !baller->cf->cft->query(baller->cf, data, query, NULL, &t)) {
-      if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
+      if((t.tv_sec || t.tv_usec) && curlx_timediff_us(t, tmax) > 0)
         tmax = t;
     }
   }

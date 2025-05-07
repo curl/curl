@@ -29,8 +29,10 @@ FIRSTFILES = ../libtest/first.c
 TOOLFILES = $(FIRSTFILES)
 
 # These are all tool unit test programs
-TOOLPROGS = tool1394 tool1604
+TOOLPROGS = tool1394 tool1604 tool1621
 
 tool1394_SOURCES = tool1394.c $(TOOLFILES)
 
 tool1604_SOURCES = tool1604.c $(TOOLFILES)
+
+tool1621_SOURCES = tool1621.c $(TOOLFILES)

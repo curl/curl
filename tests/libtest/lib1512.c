@@ -47,13 +47,13 @@ CURLcode test(char *URL)
   (void)URL; /* URL is setup in the code */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
-            port, address);
-  printf("%s\n", dnsentry);
+  curl_msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
+                 port, address);
+  curl_mprintf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
   /* get NUM_HANDLES easy handles */
@@ -61,9 +61,9 @@ CURLcode test(char *URL)
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    msnprintf(target_url, sizeof(target_url),
-              "http://server.example.curl:%s/path/1512%04i",
-              port, i + 1);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://server.example.curl:%s/path/1512%04i",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */

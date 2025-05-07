@@ -43,7 +43,7 @@ CURLcode test(char *URL)
   urlp = curl_url();
 
   if(!urlp) {
-    fprintf(stderr, "problem init URL api.");
+    curl_mfprintf(stderr, "problem init URL api.");
     goto test_cleanup;
   }
 
@@ -51,7 +51,7 @@ CURLcode test(char *URL)
   if(curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0) ||
      curl_url_set(urlp, CURLUPART_SCHEME, "http", 0) ||
      curl_url_set(urlp, CURLUPART_PORT, "80", 0)) {
-    fprintf(stderr, "problem setting CURLUPART");
+    curl_mfprintf(stderr, "problem setting CURLUPART");
     goto test_cleanup;
   }
 
@@ -62,8 +62,9 @@ CURLcode test(char *URL)
   res = curl_easy_perform(handle);
 
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 

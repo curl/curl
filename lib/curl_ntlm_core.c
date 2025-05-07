@@ -126,7 +126,7 @@
 #include "curl_ntlm_core.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_endian.h"
 #include "curl_des.h"
 #include "curl_md4.h"

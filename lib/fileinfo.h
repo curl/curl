@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 #include "llist.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 
 struct fileinfo {
   struct curl_fileinfo info;

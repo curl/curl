@@ -70,7 +70,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_range.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -391,7 +391,7 @@ static CURLcode file_upload(struct Curl_easy *data)
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Curl_speedcheck(data, curlx_now());
   }
   if(!result && Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
@@ -596,7 +596,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       if(Curl_pgrsUpdate(data))
         result = CURLE_ABORTED_BY_CALLBACK;
       else
-        result = Curl_speedcheck(data, Curl_now());
+        result = Curl_speedcheck(data, curlx_now());
       if(result)
         goto out;
     }

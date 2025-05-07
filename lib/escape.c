@@ -32,10 +32,10 @@
 struct Curl_easy;
 
 #include "urldata.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "escape.h"
 #include "strdup.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -71,7 +71,7 @@ char *curl_easy_escape(CURL *data, const char *string,
   if(!length)
     return strdup("");
 
-  Curl_dyn_init(&d, length * 3 + 1);
+  curlx_dyn_init(&d, length * 3 + 1);
 
   while(length--) {
     /* treat the characters unsigned */
@@ -79,19 +79,19 @@ char *curl_easy_escape(CURL *data, const char *string,
 
     if(ISUNRESERVED(in)) {
       /* append this */
-      if(Curl_dyn_addn(&d, &in, 1))
+      if(curlx_dyn_addn(&d, &in, 1))
         return NULL;
     }
     else {
       /* encode it */
       unsigned char out[3]={'%'};
       Curl_hexbyte(&out[1], in, FALSE);
-      if(Curl_dyn_addn(&d, out, 3))
+      if(curlx_dyn_addn(&d, out, 3))
         return NULL;
     }
   }
 
-  return Curl_dyn_ptr(&d);
+  return curlx_dyn_ptr(&d);
 }
 
 /*

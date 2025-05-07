@@ -26,7 +26,7 @@
 #include <curl/curl.h>
 #include "curl_range.h"
 #include "sendf.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* Only include this function if one or more of FTP, FILE are enabled. */
 #if !defined(CURL_DISABLE_FTP) || !defined(CURL_DISABLE_FILE)
@@ -41,14 +41,14 @@ CURLcode Curl_range(struct Curl_easy *data)
     curl_off_t from, to;
     bool first_num = TRUE;
     const char *p = data->state.range;
-    if(Curl_str_number(&p, &from, CURL_OFF_T_MAX))
+    if(curlx_str_number(&p, &from, CURL_OFF_T_MAX))
       first_num = FALSE;
 
-    if(Curl_str_single(&p, '-'))
+    if(curlx_str_single(&p, '-'))
       /* no leading dash or after the first number is an error */
       return CURLE_RANGE_ERROR;
 
-    if(Curl_str_number(&p, &to, CURL_OFF_T_MAX)) {
+    if(curlx_str_number(&p, &to, CURL_OFF_T_MAX)) {
       /* no second number */
       /* X - */
       data->state.resume_from = from;

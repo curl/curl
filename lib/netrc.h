@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 #ifndef CURL_DISABLE_NETRC
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 
 struct store_netrc {
   struct dynbuf filebuf;

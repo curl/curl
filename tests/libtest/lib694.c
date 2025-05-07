@@ -33,13 +33,13 @@ CURLcode test(char *URL)
   int count = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -61,7 +61,7 @@ CURLcode test(char *URL)
     if(res)
       goto test_cleanup;
     if(CURLAUTH_NTLM != usedauth) {
-      printf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
+      curl_mprintf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
     }
 
     /* set a new URL for the second, so that we don't restart NTLM */

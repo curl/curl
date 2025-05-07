@@ -27,13 +27,13 @@
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 /* global variable definitions, for easy-interface source code generation */
 

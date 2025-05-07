@@ -37,7 +37,7 @@
 #include <fcntl.h>
 #endif
 
-#include "curlx.h"
+#include <curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
@@ -53,7 +53,7 @@
  * the library level code from this client-side is ugly, but we do this
  * anyway for convenience.
  */
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 #ifdef __VMS
 /*

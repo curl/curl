@@ -98,7 +98,7 @@ void Curl_hash_clean(struct Curl_hash *h);
 void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
 size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num);
-size_t Curl_str_key_compare(void *k1, size_t key1_len, void *k2,
+size_t curlx_str_key_compare(void *k1, size_t key1_len, void *k2,
                             size_t key2_len);
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);

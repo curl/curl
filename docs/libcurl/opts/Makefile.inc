@@ -367,6 +367,7 @@ man_MANS =                                      \
   CURLOPT_SSL_FALSESTART.3                      \
   CURLOPT_SSL_OPTIONS.3                         \
   CURLOPT_SSL_SESSIONID_CACHE.3                 \
+  CURLOPT_SSL_SIGNATURE_ALGORITHMS.3            \
   CURLOPT_SSL_VERIFYHOST.3                      \
   CURLOPT_SSL_VERIFYPEER.3                      \
   CURLOPT_SSL_VERIFYSTATUS.3                    \

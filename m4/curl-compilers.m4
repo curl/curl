@@ -905,6 +905,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl clang 10 or later
           if test "$compiler_num" -ge "1000"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [xor-used-as-pow])
           fi
         fi
         ;;
@@ -1094,6 +1095,24 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "1000"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [arith-conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
+          fi
+          #
+          dnl Only gcc 12 or later
+          if test "$compiler_num" -ge "1200"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [array-compare])
+          fi
+          #
+          dnl Only gcc 13 or later
+          if test "$compiler_num" -ge "1300"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-int-mismatch])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [xor-used-as-pow])
+          fi
+          #
+          dnl Only gcc 15 or later
+          if test "$compiler_num" -ge "1500"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [leading-whitespace=spaces])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [trailing-whitespace=any])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unterminated-string-initialization])
           fi
           #
         fi

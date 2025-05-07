@@ -27,45 +27,35 @@
 #ifdef _WIN32
 
 #include <curl/curl.h>
-#ifdef BUILDING_LIBCURL
-#include "system_win32.h"
-#else
-#include "version_win32.h"
+#include "../version_win32.h"
+#include "../system_win32.h"
 
-static LARGE_INTEGER s_freq;
-static bool s_isVistaOrGreater;
+LARGE_INTEGER Curl_freq;
+bool Curl_isVistaOrGreater;
 
-/* For tool or tests, we must initialize before calling Curl_now() */
+/* For tool or tests, we must initialize before calling curlx_now().
+   Providing this function here is wrong. */
 void curlx_now_init(void)
 {
   if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL))
-    s_isVistaOrGreater = true;
+    Curl_isVistaOrGreater = true;
   else
-    s_isVistaOrGreater = false;
+    Curl_isVistaOrGreater = false;
 
-  QueryPerformanceFrequency(&s_freq);
+  QueryPerformanceFrequency(&Curl_freq);
 }
-#endif
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
-struct curltime Curl_now(void)
+struct curltime curlx_now(void)
 {
   struct curltime now;
   bool isVistaOrGreater;
-#ifdef BUILDING_LIBCURL
   isVistaOrGreater = Curl_isVistaOrGreater;
-#else
-  isVistaOrGreater = s_isVistaOrGreater;
-#endif
   if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
     LARGE_INTEGER count;
     LARGE_INTEGER freq;
-#ifdef BUILDING_LIBCURL
     freq = Curl_freq;
-#else
-    freq = s_freq;
-#endif
     DEBUGASSERT(freq.QuadPart);
     QueryPerformanceCounter(&count);
     now.tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
@@ -92,7 +82,7 @@ struct curltime Curl_now(void)
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
   defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
-struct curltime Curl_now(void)
+struct curltime curlx_now(void)
 {
   /*
   ** clock_gettime() is granted to be increased monotonically when the
@@ -166,7 +156,7 @@ struct curltime Curl_now(void)
 #include <stdint.h>
 #include <mach/mach_time.h>
 
-struct curltime Curl_now(void)
+struct curltime curlx_now(void)
 {
   /*
   ** Monotonic timer on macOS is provided by mach_absolute_time(), which
@@ -194,7 +184,7 @@ struct curltime Curl_now(void)
 
 #elif defined(HAVE_GETTIMEOFDAY)
 
-struct curltime Curl_now(void)
+struct curltime curlx_now(void)
 {
   /*
   ** gettimeofday() is not granted to be increased monotonically, due to
@@ -211,7 +201,7 @@ struct curltime Curl_now(void)
 
 #else
 
-struct curltime Curl_now(void)
+struct curltime curlx_now(void)
 {
   /*
   ** time() returns the value of time in seconds since the Epoch.
@@ -230,7 +220,7 @@ struct curltime Curl_now(void)
  *
  * @unittest: 1323
  */
-timediff_t Curl_timediff(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff(struct curltime newer, struct curltime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))
@@ -244,7 +234,7 @@ timediff_t Curl_timediff(struct curltime newer, struct curltime older)
  * Returns: time difference in number of milliseconds, rounded up.
  * For too large diffs it returns max value.
  */
-timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff_ceil(struct curltime newer, struct curltime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))
@@ -258,7 +248,7 @@ timediff_t Curl_timediff_ceil(struct curltime newer, struct curltime older)
  * Returns: time difference in number of microseconds. For too large diffs it
  * returns max value.
  */
-timediff_t Curl_timediff_us(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000000))

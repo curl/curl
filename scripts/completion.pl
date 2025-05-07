@@ -52,7 +52,7 @@ if ($shell eq 'fish') {
     $opts_str .= qq{  $_ \\\n} foreach (@opts);
     chomp $opts_str;
 
-my $tmpl = <<"EOS";
+    my $tmpl = <<"EOS";
 #compdef curl
 
 # curl zsh completion

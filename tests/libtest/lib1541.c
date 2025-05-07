@@ -38,8 +38,8 @@ struct transfer_status {
 
 static int geterr(const char *name, CURLcode val, int lineno)
 {
-  printf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
-         name, val, curl_easy_strerror(val), lineno);
+  curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
+               name, val, curl_easy_strerror(val), lineno);
   return (int)val;
 }
 
@@ -47,10 +47,10 @@ static void report_time(const char *key, const char *where, curl_off_t time,
                         bool ok)
 {
   if(ok)
-    printf("%s on %s is OK\n", key, where);
+    curl_mprintf("%s on %s is OK\n", key, where);
   else
-    printf("%s on %s is WRONG: %" CURL_FORMAT_CURL_OFF_T "\n",
-           key, where, time);
+    curl_mprintf("%s on %s is WRONG: %" CURL_FORMAT_CURL_OFF_T "\n",
+                 key, where, time);
 }
 
 static void check_time(CURL *easy, int key, const char *name,

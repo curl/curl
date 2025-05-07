@@ -75,9 +75,9 @@ struct pingpong {
 
 #define PINGPONG_SETUP(pp,s,e)                   \
   do {                                           \
-    pp->response_time = RESP_TIMEOUT;            \
-    pp->statemachine = s;                        \
-    pp->endofresp = e;                           \
+    (pp)->response_time = RESP_TIMEOUT;          \
+    (pp)->statemachine = s;                      \
+    (pp)->endofresp = e;                         \
   } while(0)
 
 /*
