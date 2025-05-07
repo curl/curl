@@ -4412,7 +4412,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
 
   ftp = calloc(1, sizeof(*ftp));
   if(!ftp ||
-    Curl_meta_set(data, CURL_META_FTP_EASY, ftp, ftp_easy_dtor))
+     Curl_meta_set(data, CURL_META_FTP_EASY, ftp, ftp_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   ftpc = calloc(1, sizeof(*ftpc));

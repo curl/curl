@@ -1534,6 +1534,7 @@ static void pop3_easy_dtor(void *key, size_t klen, void *entry)
   struct POP3 *pop3 = entry;
   (void)key;
   (void)klen;
+  DEBUGASSERT(pop3);
   /* Cleanup our per-request based variables */
   Curl_safefree(pop3->id);
   Curl_safefree(pop3->custom);
@@ -1545,6 +1546,7 @@ static void pop3_conn_dtor(void *key, size_t klen, void *entry)
   struct pop3_conn *pop3c = entry;
   (void)key;
   (void)klen;
+  DEBUGASSERT(pop3c);
   Curl_pp_disconnect(&pop3c->pp);
   Curl_safefree(pop3c->apoptimestamp);
   free(pop3c);
@@ -1556,12 +1558,12 @@ static CURLcode pop3_setup_connection(struct Curl_easy *data,
   struct pop3_conn *pop3c;
   struct POP3 *pop3 = calloc(1, sizeof(*pop3));
   if(!pop3 ||
-    Curl_meta_set(data, CURL_META_POP3_EASY, pop3, pop3_easy_dtor))
+     Curl_meta_set(data, CURL_META_POP3_EASY, pop3, pop3_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   pop3c = calloc(1, sizeof(*pop3c));
   if(!pop3c ||
-    Curl_conn_meta_set(conn, CURL_META_POP3_CONN, pop3c, pop3_conn_dtor))
+     Curl_conn_meta_set(conn, CURL_META_POP3_CONN, pop3c, pop3_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;

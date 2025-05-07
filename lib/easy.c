@@ -1390,6 +1390,7 @@ CURLcode curl_easy_ssls_export(CURL *d,
 CURLcode Curl_meta_set(struct Curl_easy *data, const char *key,
                        void *meta_data, Curl_meta_dtor *meta_dtor)
 {
+  DEBUGASSERT(meta_data); /* never set to NULL */
   if(!Curl_hash_add2(&data->meta_hash, CURL_UNCONST(key), strlen(key) + 1,
                      meta_data, meta_dtor)) {
     meta_dtor(CURL_UNCONST(key), strlen(key) + 1, meta_data);
