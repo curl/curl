@@ -1040,9 +1040,6 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
    * length in array */
   num_splits = 0;
   for(pos = 0; pos < len; pos++) {
-    if(num_splits == MAX_QUERY_COMPONENTS) {
-      goto fail;
-    }
     if(source[pos] == split_by) {
       if(segment_length) {
         Curl_dyn_init(&db[index], segment_length + 1);
@@ -1053,7 +1050,9 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
         }
         segment_length = 0;
         index++;
-        num_splits++;
+        if(++num_splits == MAX_QUERY_COMPONENTS) {
+          goto fail;
+        }
       }
       start = pos + 1;
     }
@@ -1063,17 +1062,16 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
   }
 
   if(segment_length) {
-    if(num_splits == MAX_QUERY_COMPONENTS) {
-      goto fail;
-    }
     Curl_dyn_init(&db[index], segment_length + 1);
     result = Curl_dyn_addn(&db[index], &source[start],
-      segment_length);
+                           segment_length);
     if(result) {
       goto fail;
     }
-    num_splits++;
-  }
+    if(++num_splits == MAX_QUERY_COMPONENTS) {
+      goto fail;
+    }
+}
 fail:
   *num_splits_out = num_splits;
   return result;
@@ -1086,7 +1084,8 @@ static bool is_reserved_char(const char c)
 }
 
 static CURLcode uri_encode_path(struct Curl_str *original_path,
-struct dynbuf *new_path) {
+struct dynbuf *new_path)
+{
 
   const char *p = Curl_str(original_path);
   CURLcode result = CURLE_OK;
@@ -1114,7 +1113,8 @@ fail:
 
 
 static CURLcode encode_query_component(char *component, size_t len,
-  struct dynbuf *db) {
+  struct dynbuf *db)
+{
 
   size_t index;
   CURLcode result = CURLE_OK;
@@ -1127,23 +1127,18 @@ static CURLcode encode_query_component(char *component, size_t len,
     if(is_reserved_char(this_char)) {
       /* Escape unreserved chars from RFC 3986 */
       result = Curl_dyn_addn(db, &this_char, 1);
-      if(result) {
-        goto fail;
-      }
     }
     else if(this_char == '+') {
       /* Encode '+' as space */
       result = Curl_dyn_add(db, "%20");
-      if(result) {
-        goto fail;
-      }
     }
     else {
       result = Curl_dyn_addf(db, "%%%02X", this_char);
-      if(result) {
-        goto fail;
-      }
     }
+    if(result) {
+      goto fail;
+    }
+
   }
 fail:
   return result;
@@ -1154,14 +1149,14 @@ fail:
 */
 
 static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-struct dynbuf *out) {
+struct dynbuf *out)
+{
   CURLcode result = CURLE_OK;
   char *out_s;
   size_t out_s_len;
 
-  result = Curl_urldecode(in, in_len,
-    &out_s, &out_s_len,
-    REJECT_NADA);
+  result = Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
+
   if(result) {
     goto fail;
   }
@@ -1180,9 +1175,9 @@ static bool should_urlencode(struct Curl_str *service_name)
    * from the AWS SDK. Urls are already normalized by the curl url parser
    */
 
-  if(!strcmp(Curl_str(service_name), "s3") ||
-    !strcmp(Curl_str(service_name), "s3-express") ||
-    !strcmp(Curl_str(service_name), "s3-outposts")) {
+  if(Curl_str_cmp(service_name, "s3") ||
+     Curl_str_cmp(service_name, "s3-express") ||
+     Curl_str_cmp(service_name, "s3-outposts")) {
     return false;
   }
   return true;
