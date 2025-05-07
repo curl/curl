@@ -1474,7 +1474,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
 
     /* flush, blocking when in callback */
     result = ws_flush(data, ws, Curl_is_in_callback(data));
-    if(!result) {
+    if(!result && ws->sendbuf_payload > 0) {
       *sent += ws->sendbuf_payload;
       buffer += ws->sendbuf_payload;
       buflen -= ws->sendbuf_payload;
