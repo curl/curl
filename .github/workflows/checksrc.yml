@@ -117,3 +117,17 @@ jobs:
         run: |
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
+
+  zizmor:
+    runs-on: macos-latest
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+        name: checkout
+
+      - name: GHA security check
+        run: |
+          brew install zizmor
+          zizmor .github/workflows/*.yml
