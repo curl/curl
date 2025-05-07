@@ -119,7 +119,7 @@ jobs:
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
   ghacheck:
-    name: GHA analysis with zizmor
+    name: GHA analysis
     runs-on: macos-latest
     timeout-minutes: 1
     steps:
