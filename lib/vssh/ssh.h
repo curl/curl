@@ -41,6 +41,11 @@
 
 #include "curl_path.h"
 
+/* meta key for storing protocol meta at easy handle */
+#define CURL_META_SSH_EASY   "meta:proto:ssh:easy"
+/* meta key for storing protocol meta at connection */
+#define CURL_META_SSH_CONN   "meta:proto:ssh:conn"
+
 /****************************************************************************
  * SSH unique setup
  ***************************************************************************/
