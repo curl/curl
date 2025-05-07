@@ -247,7 +247,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
         }
         break;
       case MACDEF:
-        if(!*tok)
+        if(!tok || !*tok)
           state = NOTHING;
         break;
       case HOSTFOUND:
