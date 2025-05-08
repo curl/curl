@@ -41,7 +41,7 @@
 
 #include "tool_sleep.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 void tool_go_sleep(long ms)
 {
