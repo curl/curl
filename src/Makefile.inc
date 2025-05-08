@@ -37,20 +37,17 @@ CURLX_CFILES = \
   ../lib/curlx/dynbuf.c \
   ../lib/nonblock.c \
   ../lib/curlx/strparse.c \
-  ../lib/strcase.c \
   ../lib/curlx/timediff.c \
   ../lib/curlx/timeval.c \
   ../lib/version_win32.c \
   ../lib/curlx/warnless.c
 
 CURLX_HFILES = \
-  ../lib/curl_ctype.h \
   ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
   ../lib/curlx/dynbuf.h \
   ../lib/nonblock.h \
   ../lib/curlx/strparse.h \
-  ../lib/strcase.h \
   ../lib/curlx/timediff.h \
   ../lib/curlx/timeval.h \
   ../lib/version_win32.h \
