@@ -101,6 +101,7 @@ add_executable(
   EXCLUDE_FROM_ALL
   curlinfo.c
 )
+target_link_libraries(curlinfo PUBLIC ${CURL_LIBS})
 
 add_library(
   curltool  # special libcurltool library just for unittests
