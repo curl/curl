@@ -30,7 +30,7 @@ MEMDEBUG = \
 
 CURLX_SRCS = \
   ../../lib/mprintf.c \
-  ../../lib/nonblock.c \
+  ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
   ../../lib/strequal.c \
   ../../lib/curlx/warnless.c \
@@ -45,7 +45,7 @@ CURLX_SRCS = \
 CURLX_HDRS = \
   ../../lib/curlx/curlx.h \
   ../../lib/curl_ctype.h \
-  ../../lib/nonblock.h \
+  ../../lib/curlx/nonblock.h \
   ../../lib/strcase.h \
   ../../lib/curlx/warnless.h \
   ../../lib/curlx/timediff.h \

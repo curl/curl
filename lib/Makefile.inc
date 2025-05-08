@@ -26,6 +26,7 @@ LIB_CURLX_CFILES = \
   curlx/base64.c   \
   curlx/dynbuf.c   \
   curlx/multibyte.c \
+  curlx/nonblock.c \
   curlx/strparse.c \
   curlx/timediff.c \
   curlx/timeval.c  \
@@ -36,6 +37,7 @@ LIB_CURLX_HFILES = \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
   curlx/multibyte.h \
+  curlx/nonblock.h \
   curlx/strparse.h \
   curlx/timediff.h \
   curlx/timeval.h  \
@@ -215,7 +217,6 @@ LIB_CFILES =         \
   multi.c            \
   multi_ev.c         \
   netrc.c            \
-  nonblock.c         \
   noproxy.c          \
   openldap.c         \
   parsedate.c        \
@@ -351,7 +352,6 @@ LIB_HFILES =         \
   multi_ev.h         \
   multiif.h          \
   netrc.h            \
-  nonblock.h         \
   noproxy.h          \
   parsedate.h        \
   pingpong.h         \

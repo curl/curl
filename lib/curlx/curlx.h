@@ -31,7 +31,7 @@
  * be.
  */
 
-#include "../nonblock.h"
+#include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
 #include "warnless.h"

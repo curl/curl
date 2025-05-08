@@ -128,7 +128,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 #endif /* !INADDR_LOOPBACK */
 #endif /* !_WIN32 */
 
-#include "nonblock.h" /* for curlx_nonblock */
+#include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
 
