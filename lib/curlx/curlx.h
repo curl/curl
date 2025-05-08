@@ -52,8 +52,8 @@
   curlx_unicodefree()
 */
 
-#include "../version_win32.h"
-/* "version_win32.h" provides curlx_verify_windows_version() */
+#include "version_win32.h"
+/* provides curlx_verify_windows_version() */
 
 #include "strparse.h"
 /* The curlx_str_* parsing functions */

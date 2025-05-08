@@ -727,8 +727,8 @@ $(CURL_DIROBJ)\timeval.obj: ../lib/curlx/timeval.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/timeval.c
 $(CURL_DIROBJ)\multibyte.obj: ../lib/curlx/multibyte.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/multibyte.c
-$(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/version_win32.c
+$(CURL_DIROBJ)\version_win32.obj: ../lib/curlx/version_win32.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/version_win32.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/curlx/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/warnless.c
 $(CURL_DIROBJ)\dynbuf.obj: ../lib/curlx/dynbuf.c

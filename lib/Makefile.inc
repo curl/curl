@@ -30,6 +30,7 @@ LIB_CURLX_CFILES = \
   curlx/strparse.c \
   curlx/timediff.c \
   curlx/timeval.c  \
+  curlx/version_win32.c \
   curlx/warnless.c
 
 LIB_CURLX_HFILES = \
@@ -41,6 +42,7 @@ LIB_CURLX_HFILES = \
   curlx/strparse.h \
   curlx/timediff.h \
   curlx/timeval.h  \
+  curlx/version_win32.h \
   curlx/warnless.h
 
 LIB_VAUTH_CFILES =      \
@@ -257,7 +259,6 @@ LIB_CFILES =         \
   url.c              \
   urlapi.c           \
   version.c          \
-  version_win32.c    \
   ws.c
 
 LIB_HFILES =         \
@@ -392,7 +393,6 @@ LIB_HFILES =         \
   url.h              \
   urlapi-int.h       \
   urldata.h          \
-  version_win32.h    \
   ws.h
 
 LIB_RCFILES = libcurl.rc
