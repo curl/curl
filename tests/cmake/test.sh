@@ -9,8 +9,6 @@ set -eu
 
 cd "$(dirname "$0")"
 
-command -v ninja >/dev/null && export CMAKE_GENERATOR=Ninja  # 3.17+
-
 mode="${1:-all}"; shift
 
 cmake_consumer="${TEST_CMAKE_CONSUMER:-cmake}"
@@ -19,6 +17,16 @@ cmake_provider="${TEST_CMAKE_PROVIDER:-${cmake_consumer}}"
 # 'modern': supports -S/-B (3.13+), --install (3.15+)
 "${cmake_consumer}" --help | grep -q -- '--install' && cmake_consumer_modern=1
 "${cmake_provider}" --help | grep -q -- '--install' && cmake_provider_modern=1
+
+if [ -n "${TEST_CMAKE_GENERATOR:-}" ]; then
+  gen="${TEST_CMAKE_GENERATOR}"
+elif [ -n "${cmake_consumer_modern:-}" ] && \
+     [ -n "${cmake_provider_modern:-}" ] && \
+     command -v ninja >/dev/null; then
+  gen='Ninja'  # 3.17+
+else
+  gen='Unix Makefiles'
+fi
 
 cmake_opts='-DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF'
 
