@@ -35,7 +35,7 @@
 #include "digest.h"
 #include "../urldata.h"
 #include "../curlx/warnless.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../sendf.h"
 #include "../strdup.h"
 #include "../strcase.h"

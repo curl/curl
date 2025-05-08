@@ -29,7 +29,7 @@
 #if (!defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_COOKIES)) || \
   !defined(CURL_DISABLE_ALTSVC)
 
-#include "curl_multibyte.h"
+#include "curlx/multibyte.h"
 #include "curlx/timeval.h"
 
 /* The last 3 #include files should be in this order */

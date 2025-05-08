@@ -32,7 +32,7 @@
 #include "../urldata.h"
 #include "../curl_ntlm_core.h"
 #include "../curlx/warnless.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../sendf.h"
 #include "../strdup.h"
 

@@ -25,7 +25,7 @@
 TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h
-MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
+MULTIBYTE = ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 MEMPTR = memptr.c
 

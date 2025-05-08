@@ -29,7 +29,7 @@
 #include "vauth.h"
 #include "../urldata.h"
 #include "../strcase.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../curl_printf.h"
 
 /* The last #include files should be: */

@@ -30,11 +30,11 @@
  * versions: `ptr = (malloc)(123)`, `(free)(ptr)`, etc.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef _WIN32
 
-#include "curl_multibyte.h"
+#include "multibyte.h"
 
 /*
  * MultiByte conversions using Windows kernel32 library.
