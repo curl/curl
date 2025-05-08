@@ -228,7 +228,10 @@ jobs:
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |
           export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
-          [[ '${{ matrix.image }}' = *'macos'* ]] && export CFLAGS='-arch arm64'
+          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
           if [[ '${{ matrix.image }}' = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
@@ -238,7 +241,10 @@ jobs:
       - name: 'via find_package OpenSSL (old cmake)'
         run: |
           export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
-          [[ '${{ matrix.image }}' = *'macos'* ]] && export CFLAGS='-arch arm64'
+          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
           if [[ '${{ matrix.image }}' = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
