@@ -38,7 +38,6 @@ CURLX_SRCS = \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/dynbuf.c \
   ../../lib/strcase.c \
-  ../../lib/strdup.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/version_win32.c
 
@@ -52,7 +51,6 @@ CURLX_HDRS = \
   ../../lib/curlx/timeval.h \
   ../../lib/curlx/dynbuf.h \
   ../../lib/strcase.h \
-  ../../lib/strdup.h \
   ../../lib/curlx/multibyte.h \
   ../../lib/curlx/version_win32.h
 
