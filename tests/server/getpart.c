@@ -51,8 +51,6 @@
 
 #if defined(UNDER_CE)
 #define system_strdup _strdup
-#elif !defined(HAVE_STRDUP)
-#define system_strdup Curl_strdup
 #else
 #define system_strdup strdup
 #endif
