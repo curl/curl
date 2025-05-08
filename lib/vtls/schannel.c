@@ -54,7 +54,7 @@
 #include "../curl_printf.h"
 #include "../multiif.h"
 #include "../system_win32.h"
-#include "../version_win32.h"
+#include "../curlx/version_win32.h"
 #include "../rand.h"
 #include "../curlx/strparse.h"
 

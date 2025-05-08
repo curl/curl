@@ -40,7 +40,7 @@ CURLX_SRCS = \
   ../../lib/strcase.c \
   ../../lib/strdup.c \
   ../../lib/curlx/multibyte.c \
-  ../../lib/version_win32.c
+  ../../lib/curlx/version_win32.c
 
 CURLX_HDRS = \
   ../../lib/curlx/curlx.h \
@@ -54,7 +54,7 @@ CURLX_HDRS = \
   ../../lib/strcase.h \
   ../../lib/strdup.h \
   ../../lib/curlx/multibyte.h \
-  ../../lib/version_win32.h
+  ../../lib/curlx/version_win32.h
 
 UTIL = \
   getpart.c \

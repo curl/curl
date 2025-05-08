@@ -152,12 +152,9 @@ rem
       for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element %1 src "%%h" %3
     ) else if "!var!" == "CURL_SRC_RC_FILES" (
       for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
-    ) else if "!var!" == "CURL_SRC_X_C_FILES" (
-      call :element %1 lib "version_win32.c" %3
     ) else if "!var!" == "CURL_SRC_X_H_FILES" (
       call :element %1 lib "config-win32.h" %3
       call :element %1 lib "curl_setup.h" %3
-      call :element %1 lib "version_win32.h" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (

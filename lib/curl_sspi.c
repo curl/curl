@@ -30,7 +30,7 @@
 #include "curl_sspi.h"
 #include "curlx/multibyte.h"
 #include "system_win32.h"
-#include "version_win32.h"
+#include "curlx/version_win32.h"
 #include "curlx/warnless.h"
 
 /* The last #include files should be: */
