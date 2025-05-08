@@ -3063,8 +3063,10 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                             &used, global, config);
     }
 
-    if(!result)
+    if(!result) {
       unicodefree(orig_opt);
+      orig_opt = NULL;
+    }
   }
 
   if(!result && config->content_disposition) {
