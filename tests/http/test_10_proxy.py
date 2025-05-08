@@ -352,7 +352,6 @@ class TestProxy:
     # download via https: proxy (no tunnel) using IP address
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
-    @pytest.mark.skipif(condition=Env.curl_uses_lib('bearssl'), reason="ip address cert verification not supported")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_10_14_proxys_ip_addr(self, env: Env, httpd, proto):
         if proto == 'h2' and not env.curl_uses_lib('nghttp2'):

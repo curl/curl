@@ -34,13 +34,7 @@ Current Working Directory, or in any folder along your PATH.
 curl 8.11.0 added a build-time option to disable this search behavior, and
 another option to restrict search to the application's directory.
 
-(iOS and macOS only) If curl is built against Secure Transport, then this
-option is supported for backward compatibility with other SSL engines, but it
-should not be set. If the option is not set, then curl uses the certificates
-in the system and user Keychain to verify the peer, which is the preferred
-method of verifying the peer's certificate chain.
-
-(Schannel only) This option is supported for Schannel in Windows 7 or later
-(added in 7.60.0). This option is supported for backward compatibility with
-other SSL engines; instead it is recommended to use Windows' store of root
-certificates (the default for Schannel).
+(Schannel) This option is supported for Schannel in Windows 7 or later (added
+in 7.60.0). This option is supported for backward compatibility with other SSL
+engines; instead it is recommended to use Windows' store of root certificates
+(the default for Schannel).

@@ -47,12 +47,6 @@ accessible file.
 This option is by default set to the system path where libcurl's CA
 certificate bundle is assumed to be stored, as established at build time.
 
-(iOS and macOS only) If curl is built against Secure Transport, then this
-option is supported for backward compatibility with other SSL engines, but it
-should not be set. If the option is not set, then curl uses the certificates
-in the system and user Keychain to verify the peer, which is the preferred
-method of verifying the peer's certificate chain.
-
 The application does not have to keep the string around after setting this
 option.
 

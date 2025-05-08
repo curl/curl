@@ -15,7 +15,6 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - Schannel
-  - Secure Transport
   - wolfSSL
 Added-in: 7.52.0
 ---
@@ -37,10 +36,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLCERTTYPE, char *type);
 Pass a pointer to a null-terminated string as parameter. The string should be
 the format of your client certificate used when connecting to an HTTPS proxy.
 
-Supported formats are "PEM" and "DER", except with Secure Transport or
-Schannel. OpenSSL (versions 0.9.3 and later), Secure Transport (on iOS 5 or
-later, or macOS 10.7 or later) and Schannel support "P12" for PKCS#12-encoded
-files.
+Supported formats are "PEM" and "DER", except with Schannel. OpenSSL and
+Schannel support "P12" for PKCS#12-encoded files.
 
 The application does not have to keep the string around after setting this
 option.
