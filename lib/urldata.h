@@ -863,9 +863,6 @@ struct connectdata {
 #endif
 
   union {
-#ifdef USE_SSH
-    struct ssh_conn sshc;
-#endif
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
