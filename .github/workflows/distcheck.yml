@@ -173,7 +173,7 @@ jobs:
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
-      old-cmake-version: 3.11.4
+      old-cmake-version: 3.7.2
     strategy:
       fail-fast: false
       matrix:
