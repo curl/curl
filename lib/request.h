@@ -99,11 +99,6 @@ struct SingleRequest {
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
                        wanted */
 
-  /* Allocated protocol-specific data. Each protocol handler makes sure this
-     points to data it needs. */
-  union {
-    struct FILEPROTO *file;
-  } p;
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
