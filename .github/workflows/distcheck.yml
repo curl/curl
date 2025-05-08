@@ -173,6 +173,7 @@ jobs:
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
+      old-cmake-version: 3.11.4
     strategy:
       fail-fast: false
       matrix:
@@ -190,21 +191,62 @@ jobs:
             mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
 
       - name: 'install prereqs'
-        if: ${{ !contains(matrix.image, 'windows') }}
         run: |
-          if [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
+          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
+            cd "${HOME}" || exit 1
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location 'https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-win64-x64.zip' --output bin.zip
+            unzip -q bin.zip
+            rm -f bin.zip
+            printf '%s' "${HOME}/cmake-${{ env.old-cmake-version }}-win64-x64/bin/cmake.exe" > "${HOME}/old-cmake-path.txt"
+          elif [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
             sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
+            cd "${HOME}" || exit 1
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Linux-x86_64.tar.gz | tar -xzf -
+            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Linux-x86_64/bin/cmake" > "${HOME}/old-cmake-path.txt"
           else
             brew install libpsl openssl
+            cd "${HOME}" || exit 1
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Darwin-x86_64.tar.gz | tar -xzf -
+            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > "${HOME}/old-cmake-path.txt"
           fi
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
+
       - name: 'via FetchContent'
         run: ./tests/cmake/test.sh FetchContent ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via add_subdirectory'
         run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via find_package'
         run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+      - name: 'via add_subdirectory OpenSSL (old cmake)'
+        run: |
+          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
+          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
+          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+          fi
+          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
+
+      - name: 'via find_package OpenSSL (old cmake)'
+        run: |
+          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
+          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
+          fi
+          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
+          fi
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
