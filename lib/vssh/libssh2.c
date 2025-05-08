@@ -3441,6 +3441,21 @@ static int sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
       sshc->sftp_handle = NULL;
     }
 
+    if(sshc->ssh_channel) {
+      rc = libssh2_channel_free(sshc->ssh_channel);
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
+        return rc;
+      }
+      if((rc < 0) && data) {
+        char *err_msg = NULL;
+        (void)libssh2_session_last_error(sshc->ssh_session,
+                                         &err_msg, NULL, 0);
+        infof(data, "Failed to free libssh2 scp subsystem: %d %s",
+              rc, err_msg);
+      }
+      sshc->ssh_channel = NULL;
+    }
+
     if(sshc->sftp_session) {
       rc = libssh2_sftp_shutdown(sshc->sftp_session);
       if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
