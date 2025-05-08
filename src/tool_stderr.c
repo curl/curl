@@ -26,7 +26,7 @@
 #include "tool_stderr.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 FILE *tool_stderr;
 

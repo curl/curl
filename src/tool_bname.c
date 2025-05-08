@@ -25,7 +25,7 @@
 
 #include "tool_bname.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#include <memdebug.h> /* keep this as LAST include */
 
 #ifndef HAVE_BASENAME
 

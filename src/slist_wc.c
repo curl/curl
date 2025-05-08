@@ -29,7 +29,7 @@
 #include "slist_wc.h"
 
 /* The last #include files should be: */
-#include "memdebug.h"
+#include <memdebug.h>
 
 /*
  * slist_wc_append() appends a string to the linked list. This function can be
