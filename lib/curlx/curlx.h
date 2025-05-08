@@ -65,6 +65,4 @@
 #include "timeval.h"
 #include "timediff.h"
 
-#include "../curl_get_line.h"
-
 #endif /* HEADER_CURL_CURLX_H */

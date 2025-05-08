@@ -697,7 +697,6 @@ CURL_FROM_LIBCURL=\
  $(CURL_DIROBJ)\strcase.obj \
  $(CURL_DIROBJ)\timeval.obj \
  $(CURL_DIROBJ)\warnless.obj \
- $(CURL_DIROBJ)\curl_get_line.obj \
  $(CURL_DIROBJ)\multibyte.obj \
  $(CURL_DIROBJ)\version_win32.obj \
  $(CURL_DIROBJ)\dynbuf.obj \
@@ -726,8 +725,6 @@ $(CURL_DIROBJ)\strcase.obj: ../lib/strcase.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strcase.c
 $(CURL_DIROBJ)\timeval.obj: ../lib/curlx/timeval.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/timeval.c
-$(CURL_DIROBJ)\curl_get_line.obj: ../lib/curl_get_line.c
-	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_get_line.c
 $(CURL_DIROBJ)\multibyte.obj: ../lib/curlx/multibyte.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curlx/multibyte.c
 $(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c
