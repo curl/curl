@@ -83,6 +83,16 @@
 #define AMIGA_FILESYSTEM 1
 #endif
 
+/* meta key for storing protocol meta at easy handle */
+#define CURL_META_FILE_EASY   "meta:proto:file:easy"
+
+struct FILEPROTO {
+  char *path; /* the path we operate on */
+  char *freepath; /* pointer to the allocated block we must free, this might
+                     differ from the 'path' pointer */
+  int fd;     /* open file descriptor to read from! */
+};
+
 /*
  * Forward declarations.
  */
@@ -127,13 +137,34 @@ const struct Curl_handler Curl_handler_file = {
 };
 
 
+static void file_cleanup(struct FILEPROTO *file)
+{
+  Curl_safefree(file->freepath);
+  file->path = NULL;
+  if(file->fd != -1) {
+    close(file->fd);
+    file->fd = -1;
+  }
+}
+
+static void file_easy_dtor(void *key, size_t klen, void *entry)
+{
+  struct FILEPROTO *file = entry;
+  (void)key;
+  (void)klen;
+  file_cleanup(file);
+  free(file);
+}
+
 static CURLcode file_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
+  struct FILEPROTO *filep;
   (void)conn;
   /* allocate the FILE specific struct */
-  data->req.p.file = calloc(1, sizeof(struct FILEPROTO));
-  if(!data->req.p.file)
+  filep = calloc(1, sizeof(*filep));
+  if(!filep ||
+     Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
@@ -147,7 +178,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
 static CURLcode file_connect(struct Curl_easy *data, bool *done)
 {
   char *real_path;
-  struct FILEPROTO *file = data->req.p.file;
+  struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   int fd;
 #ifdef DOS_FILESYSTEM
   size_t i;
@@ -155,6 +186,9 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 #endif
   size_t real_path_len;
   CURLcode result;
+
+  if(!file)
+    return CURLE_FAILED_INIT;
 
   if(file->path) {
     /* already connected.
@@ -257,17 +291,12 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 static CURLcode file_done(struct Curl_easy *data,
                           CURLcode status, bool premature)
 {
-  struct FILEPROTO *file = data->req.p.file;
+  struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   (void)status; /* not used */
   (void)premature; /* not used */
 
-  if(file) {
-    Curl_safefree(file->freepath);
-    file->path = NULL;
-    if(file->fd != -1)
-      close(file->fd);
-    file->fd = -1;
-  }
+  if(file)
+    file_cleanup(file);
 
   return CURLE_OK;
 }
@@ -287,9 +316,9 @@ static CURLcode file_disconnect(struct Curl_easy *data,
 #define DIRSEP '/'
 #endif
 
-static CURLcode file_upload(struct Curl_easy *data)
+static CURLcode file_upload(struct Curl_easy *data,
+                            struct FILEPROTO *file)
 {
-  struct FILEPROTO *file = data->req.p.file;
   const char *dir = strchr(file->path, DIRSEP);
   int fd;
   int mode;
@@ -418,6 +447,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
      are supported. This means that files on remotely mounted directories
      (via NFS, Samba, NT sharing) can be accessed through a file:// URL
   */
+  struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
   CURLcode result = CURLE_OK;
   struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
                           Windows version to have a different struct without
@@ -426,16 +456,15 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   bool size_known;
   bool fstated = FALSE;
   int fd;
-  struct FILEPROTO *file;
   char *xfer_buf;
   size_t xfer_blen;
 
   *done = TRUE; /* unconditionally */
+  if(!file)
+    return CURLE_FAILED_INIT;
 
   if(data->state.upload)
-    return file_upload(data);
-
-  file = data->req.p.file;
+    return file_upload(data, file);
 
   /* get the fd from the connection phase */
   fd = file->fd;
