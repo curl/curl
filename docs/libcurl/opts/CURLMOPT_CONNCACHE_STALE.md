@@ -32,16 +32,16 @@ A parameter set to 1 tells libcurl not to reuse existing connections in pool.
 This option is intended to adjust to network changes, and prevent the reuse of
 invalid connections that were created in the old network.
 
-When setting CURLMOPT_CONNCACHE_STALE(3) to 1, libcurl will ignore all
-connections in pool that were created earlier than the 'current time', in order
-to prevent their reuse. After CURLMOPT_CONNCACHE_STALE(3) to 1, libcurl will
-create new connections for future requests, and also try reusing them until the
-next setting of CURLMOPT_CONNCACHE_STALE(3) to 1.
+When setting CURLMOPT_CONNCACHE_STALE(3) to 1, libcurl ignore all connections
+in pool that were created earlier than the 'current time', in order to prevent
+their reuse. After CURLMOPT_CONNCACHE_STALE(3) to 1, libcurl create new
+connections for future requests, and also try reusing them until the next
+setting of CURLMOPT_CONNCACHE_STALE(3) to 1.
 
-If CURLMOPT_CONNCACHE_STALE(3) is set to 1 multiple times, libcurl will update
-the 'current time' value for checking stale.
+If CURLMOPT_CONNCACHE_STALE(3) is set to 1 multiple times, libcurl update the
+'current time' value for checking stale.
 
-When setting CURLMOPT_CONNCACHE_STALE(3) to 0, libcurl will always attempt to
+When setting CURLMOPT_CONNCACHE_STALE(3) to 0, libcurl always attempt to
 reuse the connections in the pool by default.
 
 # DEFAULT
