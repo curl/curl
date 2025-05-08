@@ -118,9 +118,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = {0, 0};
 
-  /* This is a bit ugly. `req->p` is a union and we assume we can
-   * free this safely without leaks. */
-  Curl_safefree(req->p.ssh);
   Curl_safefree(req->newurl);
   Curl_client_reset(data);
   if(req->sendbuf_init)
@@ -171,9 +168,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
-  /* This is a bit ugly. `req->p` is a union and we assume we can
-   * free this safely without leaks. */
-  Curl_safefree(req->p.ssh);
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
