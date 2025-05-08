@@ -48,13 +48,13 @@ if [ "${mode}" = 'ExternalProject' ]; then  # Broken
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. ${cmake_opts} "$@" \
+    "${cmake_consumer}" .. -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     VERBOSE=1 "${cmake_consumer}" --build .
@@ -67,7 +67,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then  # 3.14+
   src="${PWD}/${src}"
   bldc='bld-fetchcontent'
   rm -rf "${bldc}"
-  "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
+  "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
     -DTEST_INTEGRATION_MODE=FetchContent \
     -DFROM_GIT_REPO="${src}" \
     -DFROM_GIT_TAG="$(git rev-parse HEAD)"
@@ -84,14 +84,14 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
   bldc='bld-add_subdirectory'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
     # Disable `pkg-config` for CMake <= 3.12. These versions cannot propagate
     # library directories to the consumer project.
-    "${cmake_consumer}" .. ${cmake_opts} -DCURL_USE_PKGCONFIG=OFF "$@" \
+    "${cmake_consumer}" .. -G "${gen}" ${cmake_opts} -DCURL_USE_PKGCONFIG=OFF ${TEST_CMAKE_FLAGS:-} "$@" \
       -DTEST_INTEGRATION_MODE=add_subdirectory
     VERBOSE=1 "${cmake_consumer}" --build .
     cd ..
@@ -106,32 +106,32 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   prefix="${PWD}/${bldp}/_pkg"
   rm -rf "${bldp}"
   if [ -n "${cmake_provider_modern:-}" ]; then  # 3.15+
-    "${cmake_provider}" -B "${bldp}" -S "${src}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON "$@" \
+    "${cmake_provider}" -B "${bldp}" -S "${src}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
-    "${cmake_provider}" --build "${bldp}"
+    "${cmake_provider}" --build "${bldp}" --verbose
     "${cmake_provider}" --install "${bldp}"
   else
     mkdir "${bldp}"; cd "${bldp}"
-    "${cmake_provider}" "${src}" ${cmake_opts} "$@" \
+    "${cmake_provider}" "${src}" -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_STATIC_LIBS=ON \
       -DCMAKE_INSTALL_PREFIX="${prefix}"
-    "${cmake_provider}" --build .
+    VERBOSE=1 "${cmake_provider}" --build .
     make install
     cd ..
   fi
   bldc='bld-find_package'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. \
+    "${cmake_consumer}" .. -G "${gen}" ${TEST_CMAKE_FLAGS:-} \
       -DTEST_INTEGRATION_MODE=find_package \
       -DCMAKE_PREFIX_PATH="${prefix}/lib/cmake/CURL"
     VERBOSE=1 "${cmake_consumer}" --build .
