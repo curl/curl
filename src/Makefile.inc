@@ -33,7 +33,7 @@
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/curlx/base64.c \
-  ../lib/curl_multibyte.c \
+  ../lib/curlx/multibyte.c \
   ../lib/curlx/dynbuf.c \
   ../lib/nonblock.c \
   ../lib/curlx/strparse.c \
@@ -45,7 +45,7 @@ CURLX_CFILES = \
 
 CURLX_HFILES = \
   ../lib/curl_ctype.h \
-  ../lib/curl_multibyte.h \
+  ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
   ../lib/curlx/dynbuf.h \
   ../lib/nonblock.h \

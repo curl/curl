@@ -91,7 +91,7 @@
 #include "strcase.h"
 #include "curlx/strparse.h"
 #include "curl_ldap.h"
-#include "curl_multibyte.h"
+#include "curlx/multibyte.h"
 #include "curlx/base64.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */

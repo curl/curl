@@ -25,6 +25,7 @@
 LIB_CURLX_CFILES = \
   curlx/base64.c   \
   curlx/dynbuf.c   \
+  curlx/multibyte.c \
   curlx/strparse.c \
   curlx/timediff.c \
   curlx/timeval.c  \
@@ -34,6 +35,7 @@ LIB_CURLX_HFILES = \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
+  curlx/multibyte.h \
   curlx/strparse.h \
   curlx/timediff.h \
   curlx/timeval.h  \
@@ -151,7 +153,6 @@ LIB_CFILES =         \
   curl_gethostname.c \
   curl_gssapi.c      \
   curl_memrchr.c     \
-  curl_multibyte.c   \
   curl_ntlm_core.c   \
   curl_range.c       \
   curl_rtmp.c        \
@@ -291,7 +292,6 @@ LIB_HFILES =         \
   curl_md5.h         \
   curl_memory.h      \
   curl_memrchr.h     \
-  curl_multibyte.h   \
   curl_ntlm_core.h   \
   curl_printf.h      \
   curl_range.h       \

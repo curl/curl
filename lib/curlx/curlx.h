@@ -42,8 +42,8 @@
   curlx_uztosi()
 */
 
-#include "../curl_multibyte.h"
-/* "curl_multibyte.h" provides these functions and macros:
+#include "multibyte.h"
+/* "multibyte.h" provides these functions and macros:
 
   curlx_convert_UTF8_to_wchar()
   curlx_convert_wchar_to_UTF8()

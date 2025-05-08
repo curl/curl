@@ -520,7 +520,7 @@ Windows:
               .github/workflows/windows.yml,\
               CMake/win32-cache.cmake,\
               lib/*win32*,\
-              lib/curl_multibyte.*,\
+              lib/curlx/multibyte.*,\
               lib/rename.*,\
               lib/vtls/schannel*,\
               m4/curl-schannel.m4,\

@@ -44,7 +44,7 @@
 #include "vtls_int.h"
 #include "../sendf.h"
 #include "../strerror.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../curl_printf.h"
 #include "hostcheck.h"
 #include "../version_win32.h"

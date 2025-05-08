@@ -30,7 +30,7 @@
 #include "urldata.h"
 #include "idn.h"
 #include "sendf.h"
-#include "curl_multibyte.h"
+#include "curlx/multibyte.h"
 #include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2

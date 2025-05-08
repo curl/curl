@@ -28,7 +28,7 @@
 
 #include <curl/curl.h>
 #include "curl_sspi.h"
-#include "curl_multibyte.h"
+#include "curlx/multibyte.h"
 #include "system_win32.h"
 #include "version_win32.h"
 #include "curlx/warnless.h"

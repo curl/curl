@@ -34,7 +34,7 @@
 
 #ifdef _WIN32
 
-#include "curl_multibyte.h"
+#include "multibyte.h"
 
 /*
  * MultiByte conversions using Windows kernel32 library.

@@ -34,7 +34,7 @@
 #include "../urldata.h"
 #include "../curlx/base64.h"
 #include "../curlx/warnless.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../sendf.h"
 #include "../strerror.h"
 

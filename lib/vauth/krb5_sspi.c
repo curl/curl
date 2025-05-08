@@ -33,7 +33,7 @@
 #include "vauth.h"
 #include "../urldata.h"
 #include "../curlx/warnless.h"
-#include "../curl_multibyte.h"
+#include "../curlx/multibyte.h"
 #include "../sendf.h"
 
 /* The last #include files should be: */
