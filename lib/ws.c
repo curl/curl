@@ -39,7 +39,7 @@
 #include "easyif.h"
 #include "transfer.h"
 #include "select.h"
-#include "nonblock.h"
+#include "curlx/nonblock.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

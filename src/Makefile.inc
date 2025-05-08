@@ -35,7 +35,7 @@ CURLX_CFILES = \
   ../lib/curlx/base64.c \
   ../lib/curlx/multibyte.c \
   ../lib/curlx/dynbuf.c \
-  ../lib/nonblock.c \
+  ../lib/curlx/nonblock.c \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
   ../lib/curlx/timeval.c \
@@ -46,7 +46,7 @@ CURLX_HFILES = \
   ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
   ../lib/curlx/dynbuf.h \
-  ../lib/nonblock.h \
+  ../lib/curlx/nonblock.h \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
   ../lib/curlx/timeval.h \
