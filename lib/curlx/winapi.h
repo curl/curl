@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRERROR_H
-#define HEADER_CURL_STRERROR_H
+#ifndef HEADER_CURLX_WINAPI_H
+#define HEADER_CURLX_WINAPI_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,13 +24,10 @@
  *
  ***************************************************************************/
 
-#include "urldata.h"
-
-#define STRERROR_LEN 256 /* a suitable length */
-
-const char *Curl_strerror(int err, char *buf, size_t buflen);
-#ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
+#ifdef _WIN32
+#define WINAPI_ERROR_LEN 100
+const char *curlx_get_winapi_error(int err, char *buf, size_t buflen);
+const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen);
 #endif
 
-#endif /* HEADER_CURL_STRERROR_H */
+#endif /* HEADER_CURLX_WINAPI_H */

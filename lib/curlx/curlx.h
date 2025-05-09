@@ -65,4 +65,7 @@
 #include "timeval.h"
 #include "timediff.h"
 
+#include "winapi.h"
+/* for curlx_winapi_strerror */
+
 #endif /* HEADER_CURL_CURLX_H */
