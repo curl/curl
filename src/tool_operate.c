@@ -3189,7 +3189,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 
       /* Check if we were asked for the help */
       if(res == PARAM_HELP_REQUESTED)
-        tool_help(global->help_category);
+        ; /* already done */
       /* Check if we were asked for the manual */
       else if(res == PARAM_MANUAL_REQUESTED) {
 #ifdef USE_MANUAL

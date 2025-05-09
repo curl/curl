@@ -223,7 +223,7 @@ bool helpscan(const unsigned char *buf, size_t len, struct scan_ctx *ctx)
 
 #endif
 
-void tool_help(char *category)
+void tool_help(const char *category)
 {
   unsigned int cols = get_terminal_columns();
   /* If no category was provided */
@@ -255,7 +255,7 @@ void tool_help(char *category)
     /* command line option help */
     const struct LongShort *a = NULL;
     if(category[1] == '-') {
-      char *lookup = &category[2];
+      const char *lookup = &category[2];
       bool noflagged = FALSE;
       if(!strncmp(lookup, "no-", 3)) {
         lookup += 3;
@@ -299,7 +299,6 @@ void tool_help(char *category)
     puts("Unknown category provided, here is a list of all categories:\n");
     get_categories();
   }
-  free(category);
 }
 
 static bool is_debug(void)

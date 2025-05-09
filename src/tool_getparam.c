@@ -37,6 +37,7 @@
 #include "tool_parsecfg.h"
 #include "tool_main.h"
 #include "tool_stderr.h"
+#include "tool_help.h"
 #include "var.h"
 
 #include <memdebug.h> /* keep this as LAST include */
@@ -2750,13 +2751,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_HELP: /* --help */
       if(toggle) {
-        if(*nextarg) {
-          global->help_category = strdup(nextarg);
-          if(!global->help_category) {
-            err = PARAM_NO_MEM;
-            break;
-          }
-        }
+        tool_help((nextarg && *nextarg) ? nextarg : NULL);
         err = PARAM_HELP_REQUESTED;
       }
       /* we now actually support --no-help too! */
