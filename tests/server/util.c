@@ -295,11 +295,15 @@ int wait_ms(timediff_t timeout_ms)
   return r;
 }
 
+#ifdef _WIN32
+#define t_getpid() GetCurrentProcessId()
+#else
+#define t_getpid() getpid()
+#endif
+
 curl_off_t our_getpid(void)
 {
-  curl_off_t pid;
-
-  pid = (curl_off_t)curlx_getpid();
+  curl_off_t pid = (curl_off_t)t_getpid();
 #ifdef _WIN32
   /* store pid + MAX_PID to avoid conflict with Cygwin/msys PIDs, see also:
    * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;
