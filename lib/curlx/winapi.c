@@ -90,7 +90,7 @@ const char *curlx_get_winapi_error(int err, char *buf, size_t buflen)
 
 const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
-#ifdef PRESERVE_WINDOWS_ERROR_CODE
+#ifdef _WIN32
   DWORD old_win_err = GetLastError();
 #endif
   int old_errno = errno;
@@ -125,7 +125,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
   if(errno != old_errno)
     CURL_SETERRNO(old_errno);
 
-#ifdef PRESERVE_WINDOWS_ERROR_CODE
+#ifdef _WIN32
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);
 #endif
