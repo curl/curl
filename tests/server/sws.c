@@ -330,7 +330,6 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   char *line = &req->reqbuf[req->checkindex];
   bool chunked = FALSE;
   static char request[REQUEST_KEYWORD_SIZE];
-  char logbuf[456];
   int prot_major = 0;
   int prot_minor = 0;
   char *end = strstr(line, end_of_headers);
@@ -398,12 +397,10 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       /* get the number after it */
       if(*ptr == '/') {
         if((npath + strlen(request)) < 400)
-          msnprintf(logbuf, sizeof(logbuf), "Got request: %s %.*s HTTP/%d.%d",
-                    request, (int)npath, httppath, prot_major, prot_minor);
+          logmsg("Got request: %s %.*s HTTP/%d.%d",
+                 request, (int)npath, httppath, prot_major, prot_minor);
         else
-          msnprintf(logbuf, sizeof(logbuf), "Got a *HUGE* request HTTP/%d.%d",
-                    prot_major, prot_minor);
-        logmsg("%s", logbuf);
+          logmsg("Got a *HUGE* request HTTP/%d.%d", prot_major, prot_minor);
 
         if(!strncmp("/verifiedserver", ptr, 15)) {
           logmsg("Are-we-friendly question received");
@@ -429,10 +426,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
           req->partno = 0;
 
         if(req->testno) {
-
-          msnprintf(logbuf, sizeof(logbuf), "Serve test number %ld part %ld",
-                    req->testno, req->partno);
-          logmsg("%s", logbuf);
+          logmsg("Serve test number %ld part %ld", req->testno, req->partno);
         }
         else {
           logmsg("No test number in path");
@@ -449,10 +443,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
                   doc, &prot_major, &prot_minor) == 3) {
           char *portp = NULL;
 
-          msnprintf(logbuf, sizeof(logbuf),
-                    "Received a CONNECT %s HTTP/%d.%d request",
-                    doc, prot_major, prot_minor);
-          logmsg("%s", logbuf);
+          logmsg("Received a CONNECT %s HTTP/%d.%d request",
+                 doc, prot_major, prot_minor);
 
           req->connect_request = TRUE;
 
@@ -561,10 +553,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       else
         req->partno = 0;
 
-      msnprintf(logbuf, sizeof(logbuf),
-                "Requested GOPHER test number %ld part %ld",
-                req->testno, req->partno);
-      logmsg("%s", logbuf);
+      logmsg("Requested GOPHER test number %ld part %ld",
+             req->testno, req->partno);
     }
   }
 
@@ -751,8 +741,8 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
   FILE *dump;
   char dumpfile[256];
 
-  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s",
-            logdir, is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP);
+  snprintf(dumpfile, sizeof(dumpfile), "%s/%s",
+           logdir, is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP);
 
   if(!reqbuf)
     return;
@@ -989,8 +979,8 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   static char weare[256];
   char responsedump[256];
 
-  msnprintf(responsedump, sizeof(responsedump), "%s/%s",
-            logdir, is_proxy ? RESPONSE_PROXY_DUMP : RESPONSE_DUMP);
+  snprintf(responsedump, sizeof(responsedump), "%s/%s",
+           logdir, is_proxy ? RESPONSE_PROXY_DUMP : RESPONSE_DUMP);
 
   switch(req->rcmd) {
   default:
@@ -1028,15 +1018,15 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
-      msnprintf(msgbuf, sizeof(msgbuf), "WE ROOLZ: %"
-                CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
+      snprintf(msgbuf, sizeof(msgbuf), "WE ROOLZ: %ld\r\n",
+               (long)our_getpid());
       msglen = strlen(msgbuf);
       if(use_gopher)
-        msnprintf(weare, sizeof(weare), "%s", msgbuf);
+        snprintf(weare, sizeof(weare), "%s", msgbuf);
       else
-        msnprintf(weare, sizeof(weare),
-                  "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-                  msglen, msgbuf);
+        snprintf(weare, sizeof(weare),
+                 "HTTP/1.1 200 OK\r\nContent-Length: %u\r\n\r\n%s",
+                 (unsigned int)msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_404:
@@ -1056,9 +1046,9 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     const char *section = req->connect_request ? "connect" : "data";
 
     if(req->partno)
-      msnprintf(partbuf, sizeof(partbuf), "%s%ld", section, req->partno);
+      snprintf(partbuf, sizeof(partbuf), "%s%ld", section, req->partno);
     else
-      msnprintf(partbuf, sizeof(partbuf), "%s", section);
+      snprintf(partbuf, sizeof(partbuf), "%s", section);
 
     logmsg("Send response test%ld section <%s>", req->testno, partbuf);
 
@@ -2094,8 +2084,8 @@ int main(int argc, char *argv[])
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
           fprintf(stderr,
-                  "sws: socket path must be shorter than %zu chars: %s\n",
-                  sizeof(me.sau.sun_path), unix_socket);
+                  "sws: socket path must be shorter than %u chars: %s\n",
+                  (unsigned int)sizeof(me.sau.sun_path), unix_socket);
           return 0;
         }
         socket_type = "unix";
@@ -2172,9 +2162,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/sws-%s%s-%s.lock",
-            logdir, SERVERLOGS_LOCKDIR, protocol_type,
-            is_proxy ? "-proxy" : "", socket_type);
+  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/sws-%s%s-%s.lock",
+           logdir, SERVERLOGS_LOCKDIR, protocol_type,
+           is_proxy ? "-proxy" : "", socket_type);
 
 #ifdef _WIN32
   if(win32_init())
@@ -2294,7 +2284,7 @@ int main(int argc, char *argv[])
 #ifdef USE_UNIX_SOCKETS
   if(socket_domain != AF_UNIX)
 #endif
-    msnprintf(port_str, sizeof(port_str), "port %hu", port);
+    snprintf(port_str, sizeof(port_str), "port %hu", port);
 
   logmsg("Running %s %s version on %s",
          protocol_type, socket_type, location_str);
@@ -2399,8 +2389,8 @@ int main(int argc, char *argv[])
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
-        logmsg("accept_connection %" FMT_SOCKET_T
-               " returned %" FMT_SOCKET_T, sock, msgsock);
+        logmsg("accept_connection %ld returned %ld",
+               (long)sock, (long)msgsock);
         if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
         if(req->delay)
