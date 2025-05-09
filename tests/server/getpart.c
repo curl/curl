@@ -24,19 +24,12 @@
 #include "server_setup.h"
 
 #include "getpart.h"
-
-#ifdef TEST
-#include "curl/curl.h"
-#include "warnless.h"
-#else
 #include <curlx.h> /* from the private lib dir */
-#endif
-
 #include "curl_memory.h"
 
 #ifndef TEST
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 #endif
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
@@ -493,8 +486,6 @@ int getpart(char **outbuf, size_t *outlen,
 }
 
 #ifdef TEST
-#include "../../lib/base64.c"
-#include "../../lib/warnless.c"
 /* Build with:
  * $ gcc getpart.c -DTEST -I../../include -I../../lib -DHAVE_CONFIG_H
  */

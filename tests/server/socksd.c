@@ -80,7 +80,7 @@
 #include "tool_binmode.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
@@ -1004,8 +1004,8 @@ int main(int argc, char *argv[])
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(sau.sun_path)) {
           fprintf(stderr,
-                  "socksd: socket path must be shorter than %zu chars: %s\n",
-              sizeof(sau.sun_path), unix_socket);
+                  "socksd: socket path must be shorter than %u chars: %s\n",
+                  (unsigned int)sizeof(sau.sun_path), unix_socket);
           return 0;
         }
         socket_domain = AF_UNIX;
