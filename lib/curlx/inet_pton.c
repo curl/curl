@@ -18,9 +18,9 @@
  * SPDX-License-Identifier: ISC
  */
 
-#include "curl_setup.h"
-#include "curl_ctype.h"
-#include "curlx/strparse.h"
+#include "../curl_setup.h"
+#include "../curl_ctype.h"
+#include "strparse.h"
 
 #ifndef HAVE_INET_PTON
 

@@ -70,7 +70,7 @@ FIRSTFILES = \
   first.h
 
 INET_PTON = \
-  ../../lib/inet_pton.c
+  ../../lib/curlx/inet_pton.c
 
 resolve_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   resolve.c

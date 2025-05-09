@@ -55,7 +55,7 @@
 #include "share.h"
 #include "url.h"
 #include "inet_ntop.h"
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
 #include "curlx/warnless.h"

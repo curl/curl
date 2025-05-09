@@ -39,7 +39,7 @@
 #include "fopen.h"
 #include "rename.h"
 #include "strdup.h"
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"
 
