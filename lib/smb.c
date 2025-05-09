@@ -596,7 +596,7 @@ static void smb_format_message(struct smb_conn *smbc,
                                struct smb_header *h,
                                unsigned char cmd, size_t len)
 {
-  unsigned int pid;
+  const unsigned int pid = 0xbad71d; /* made up */
 
   memset(h, 0, sizeof(*h));
   h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +
@@ -607,7 +607,6 @@ static void smb_format_message(struct smb_conn *smbc,
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
   h->uid = smb_swap16(smbc->uid);
   h->tid = smb_swap16(req->tid);
-  pid = (unsigned int)curlx_getpid();
   h->pid_high = smb_swap16((unsigned short)(pid >> 16));
   h->pid = smb_swap16((unsigned short) pid);
 }

@@ -2511,7 +2511,7 @@ sws_cleanup:
 
   if(got_exit_signal) {
     logmsg("========> %s sws (%s pid: %ld) exits with signal (%d)",
-           socket_type, location_str, (long)curlx_getpid(), exit_signal);
+           socket_type, location_str, (long)our_getpid(), exit_signal);
     /*
      * To properly set the return status of the process we
      * must raise the same signal SIGINT or SIGTERM that we
