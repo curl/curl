@@ -186,11 +186,10 @@ torture-test: perlcheck all
 event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
 
-default-pytest: all
-	srcdir=$(srcdir) $(PYTEST) -n auto -v $(srcdir)/http
+default-pytest: ci-pytest
 
 ci-pytest: all
-	srcdir=$(srcdir) $(PYTEST) -n 8 -v $(srcdir)/http
+	srcdir=$(srcdir) $(PYTEST) -n auto -v $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

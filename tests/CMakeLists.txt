@@ -112,4 +112,4 @@ curl_add_runtests(test-torture   "-a -t -j20")
 curl_add_runtests(test-event     "-a -e")
 
 curl_add_pytests(curl-pytest      "-n auto")
-curl_add_pytests(curl-pytest-ci   "-n 8 -v")
+curl_add_pytests(curl-pytest-ci   "-n auto -v")
