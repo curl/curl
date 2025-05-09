@@ -49,7 +49,7 @@
 #include "../sendf.h"
 #include "../formdata.h" /* for the boundary function */
 #include "../url.h" /* for the ssl config check function */
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "openssl.h"
 #include "../connect.h"
 #include "../slist.h"

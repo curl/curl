@@ -60,7 +60,7 @@
 #include "../strcase.h"
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"

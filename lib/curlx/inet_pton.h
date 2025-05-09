@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 int curlx_inet_pton(int, const char *, void *);
 

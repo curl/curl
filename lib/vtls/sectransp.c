@@ -135,7 +135,7 @@
 #endif /* CURL_BUILD_MAC */
 
 #include "../sendf.h"
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
 #include "vtls.h"

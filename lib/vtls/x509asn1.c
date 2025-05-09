@@ -46,7 +46,7 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "../sendf.h"
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "../curlx/base64.h"
 #include "x509asn1.h"
 #include "../curlx/dynbuf.h"

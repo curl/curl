@@ -79,7 +79,7 @@
 #include "../curlx/warnless.h"
 #include "../curlx/base64.h"
 #include "../curl_printf.h"
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
 #include "../strdup.h"

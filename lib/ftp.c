@@ -61,7 +61,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "inet_ntop.h"
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */

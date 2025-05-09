@@ -61,7 +61,7 @@
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "../transfer.h"
 #include "vquic.h"
 #include "vquic_int.h"

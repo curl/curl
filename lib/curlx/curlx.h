@@ -68,4 +68,7 @@
 #include "winapi.h"
 /* for curlx_winapi_strerror */
 
+#include "inet_pton.h"
+/* for curlx_inet_pton */
+
 #endif /* HEADER_CURL_CURLX_H */

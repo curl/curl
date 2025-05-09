@@ -30,7 +30,7 @@
 #include "url.h"
 #include "escape.h"
 #include "curl_ctype.h"
-#include "inet_pton.h"
+#include "curlx/inet_pton.h"
 #include "inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"

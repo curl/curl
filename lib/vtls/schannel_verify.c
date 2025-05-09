@@ -39,7 +39,7 @@
 #include "schannel.h"
 #include "schannel_int.h"
 
-#include "../inet_pton.h"
+#include "../curlx/inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "../sendf.h"
