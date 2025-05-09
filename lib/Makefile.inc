@@ -31,7 +31,8 @@ LIB_CURLX_CFILES = \
   curlx/timediff.c \
   curlx/timeval.c  \
   curlx/version_win32.c \
-  curlx/warnless.c
+  curlx/warnless.c \
+  curlx/winapi.c
 
 LIB_CURLX_HFILES = \
   curlx/base64.h   \
@@ -43,7 +44,8 @@ LIB_CURLX_HFILES = \
   curlx/timediff.h \
   curlx/timeval.h  \
   curlx/version_win32.h \
-  curlx/warnless.h
+  curlx/warnless.h \
+  curlx/winapi.h
 
 LIB_VAUTH_CFILES =      \
   vauth/cleartext.c     \

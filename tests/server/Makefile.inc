@@ -62,8 +62,8 @@ UTIL = \
   server_setup.h \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/base64.h \
-  ../../lib/strerror.c \
-  ../../lib/strerror.h
+  ../../lib/curlx/winapi.c \
+  ../../lib/curlx/winapi.h
 
 FIRSTFILES = \
   first.c \

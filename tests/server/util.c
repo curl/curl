@@ -41,10 +41,6 @@
 #include <dos.h>  /* delay() */
 #endif
 
-#ifdef _WIN32
-#include "strerror.h"
-#endif
-
 #include <curlx.h> /* from the private lib dir */
 #include "util.h"
 
