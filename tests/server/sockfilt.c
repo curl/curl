@@ -359,20 +359,20 @@ static void lograw(unsigned char *buffer, ssize_t len)
   for(i = 0; i < len; i++) {
     switch(ptr[i]) {
     case '\n':
-      msnprintf(optr, left, "\\n");
+      snprintf(optr, left, "\\n");
       width += 2;
       optr += 2;
       left -= 2;
       break;
     case '\r':
-      msnprintf(optr, left, "\\r");
+      snprintf(optr, left, "\\r");
       width += 2;
       optr += 2;
       left -= 2;
       break;
     default:
-      msnprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
-                                   ptr[i] == 0x20) ? ptr[i] : '.');
+      snprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
+                                  ptr[i] == 0x20) ? ptr[i] : '.');
       width++;
       optr++;
       left--;
@@ -1125,10 +1125,10 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
-                ipv_inuse, server_port);
+      snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
+               ipv_inuse, server_port);
       buffer_len = (ssize_t)strlen((char *)buffer);
-      msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
+      snprintf(data, sizeof(data), "PORT\n%04x\n", (int)buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, buffer_len))
@@ -1203,7 +1203,7 @@ static bool juggle(curl_socket_t *sockfdp,
     nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
     if(nread_socket > 0) {
-      msnprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
+      snprintf(data, sizeof(data), "DATA\n%04x\n", (int)nread_socket);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, nread_socket))

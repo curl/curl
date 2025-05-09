@@ -157,13 +157,13 @@ static void logprotocol(mqttdir dir,
   int left = sizeof(data);
 
   for(i = 0; i < len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    snprintf(optr, left, "%02x", ptr[i]);
     optr += 2;
     left -= 2;
   }
-  fprintf(output, "%s %s %zx %s\n",
+  fprintf(output, "%s %s %x %s\n",
           dir == FROM_CLIENT ? "client" : "server",
-          prefix, remlen, data);
+          prefix, (int)remlen, data);
 }
 
 
@@ -446,7 +446,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     'M','Q','T','T',  /* protocol name */
     0x04              /* protocol level */
   };
-  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
+  snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
   dump = fopen(dumpfile, "ab");
   if(!dump)
     goto end;
@@ -980,8 +980,8 @@ int main(int argc, char *argv[])
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
-            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
+           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef _WIN32
   if(win32_init())

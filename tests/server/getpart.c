@@ -24,7 +24,6 @@
 #include "server_setup.h"
 
 #include "getpart.h"
-
 #include <curlx.h> /* from the private lib dir */
 #include "curl_memory.h"
 

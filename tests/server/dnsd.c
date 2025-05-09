@@ -121,7 +121,7 @@ static int store_incoming(const unsigned char *data, size_t size,
   *qtype = 0;
   *idp = 0;
 
-  msnprintf(dumpfile, sizeof(dumpfile), "%s/dnsd.input", logdir);
+  snprintf(dumpfile, sizeof(dumpfile), "%s/dnsd.input", logdir);
 
   /* Open request dump file. */
   server = fopen(dumpfile, "ab");
@@ -475,7 +475,7 @@ int main(int argc, char **argv)
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/dnsd-%s.lock",
+  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/dnsd-%s.lock",
             logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef _WIN32

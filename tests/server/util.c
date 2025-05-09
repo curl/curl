@@ -78,7 +78,7 @@ char *data_to_hex(char *data, size_t len)
     if((data[i] >= 0x20) && (data[i] < 0x7f))
       *optr++ = *iptr++;
     else {
-      msnprintf(optr, 4, "%%%02x", *iptr++);
+      snprintf(optr, 4, "%%%02x", (unsigned char)*iptr++);
       optr += 3;
     }
   }
@@ -95,7 +95,7 @@ void logmsg(const char *msg, ...)
   struct curltime tv;
   time_t sec;
   struct tm *now;
-  char timebuf[20];
+  char timebuf[50];
   static time_t epoch_offset;
   static int    known_offset;
 
@@ -113,12 +113,19 @@ void logmsg(const char *msg, ...)
   /* !checksrc! disable BANNEDFUNC 1 */
   now = localtime(&sec); /* not thread safe but we don't care */
 
-  msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
-            (long)tv.tv_usec);
+  snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
+           (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
+           (long)tv.tv_usec);
 
   va_start(ap, msg);
-  mvsnprintf(buffer, sizeof(buffer), msg, ap);
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+  vsnprintf(buffer, sizeof(buffer), msg, ap);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   va_end(ap);
 
   do {
@@ -148,7 +155,7 @@ void loghex(unsigned char *buffer, ssize_t len)
   int left = sizeof(data);
 
   for(i = 0; i < len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    snprintf(optr, left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
     left -= 2;
@@ -232,13 +239,13 @@ FILE *test2fopen(long testno, const char *logdir2)
   FILE *stream;
   char filename[256];
   /* first try the alternative, preprocessed, file */
-  msnprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
+  snprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
   stream = fopen(filename, "rb");
   if(stream)
     return stream;
 
   /* then try the source version */
-  msnprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
+  snprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
   stream = fopen(filename, "rb");
 
   return stream;
@@ -325,9 +332,9 @@ int write_pidfile(const char *filename)
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
-  fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
+  fprintf(pidfile, "%ld\n", (long)pid);
   fclose(pidfile);
-  logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
+  logmsg("Wrote pid %ld to %s", (long)pid, filename);
   return 1; /* success */
 }
 
