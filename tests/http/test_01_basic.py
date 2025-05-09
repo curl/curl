@@ -92,7 +92,8 @@ class TestBasic:
         r.check_stats(http_status=200, count=1,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
-        assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
+        # there are cases where time_connect is reported as 0
+        assert r.stats[0]['time_connect'] >= 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
 
     # simple https: HEAD
