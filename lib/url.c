@@ -3042,7 +3042,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi && !host && (port == -1) &&
+  if(data->asi && !host && (port == -1) && !data->asi->result &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef DEBUGBUILD
       /* allow debug builds to circumvent the HTTPS restriction */
@@ -3459,6 +3459,10 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Process the "connect to" linked list of hostname/port mappings.
    * Do this after the remote port number has been fixed in the URL.
    *************************************************************/
+#ifndef CURL_DISABLE_ALTSVC
+  if(data->asi)
+    data->asi->used = TRUE;
+#endif
   result = parse_connect_to_slist(data, conn, data->set.connect_to);
   if(result)
     goto out;
@@ -3762,6 +3766,7 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
+
   if(conn->handler->flags & PROTOPT_NONETWORK) {
     /* nothing to setup when not using a network */
     *protocol_done = TRUE;
@@ -3785,7 +3790,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 {
   CURLcode result;
   struct connectdata *conn;
-
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
   /* Set the request to virgin state based on transfer settings */

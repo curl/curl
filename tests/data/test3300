@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Alt-Svc
+onion
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+alt-svc
+Debug
+</features>
+<server>
+http
+</server>
+<name>
+alt-svc using to an onion server
+</name>
+<setenv>
+# make debug-curl accept Alt-Svc over plain HTTP
+CURL_ALTSVC_HTTP="yeah"
+</setenv>
+<command>
+--alt-svc "%LOGDIR/altsvc-%TESTNUMBER" "http://%HOSTIP:%HTTPPORT/%TESTNUMBER"
+</command>
+<file name="%LOGDIR/altsvc-%TESTNUMBER">
+h1 %HOSTIP %HTTPPORT h1 bad.onion %HTTPPORT "20290222 22:19:28" 0 0
+</file>
+
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
