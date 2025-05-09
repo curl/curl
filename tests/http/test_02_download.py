@@ -42,13 +42,6 @@ log = logging.getLogger(__name__)
 class TestDownload:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
-    @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
@@ -592,9 +585,10 @@ class TestDownload:
             '--parallel', '--http2'
         ])
         r.check_response(http_status=200, count=count)
-        # we see 3 connections, because Apache only every serves a single
-        # request via Upgrade: and then closed the connection.
-        assert r.total_connects == 3, r.dump_logs()
+        # we see up to 3 connections, because Apache wants to serve only a single
+        # request via Upgrade: and then closes the connection. But if a new
+        # request comes in time, it might still get served.
+        assert r.total_connects <= 3, r.dump_logs()
 
     # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")

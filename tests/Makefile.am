@@ -189,7 +189,7 @@ event-test: perlcheck all
 default-pytest: ci-pytest
 
 ci-pytest: all
-	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
+	srcdir=$(srcdir) $(PYTEST) -n auto -v $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

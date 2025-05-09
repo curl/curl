@@ -36,13 +36,6 @@ log = logging.getLogger(__name__)
 
 class TestBasic:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # simple http: GET
     def test_01_01_http_get(self, env: Env, httpd):
         curl = CurlClient(env=env)

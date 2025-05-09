@@ -27,6 +27,7 @@
 import inspect
 import logging
 import os
+import shutil
 import subprocess
 from datetime import timedelta, datetime
 from json import JSONEncoder
@@ -79,6 +80,7 @@ class Httpd:
         self._proxy_auth_basic = proxy_auth
         self._extra_configs = {}
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -151,11 +153,13 @@ class Httpd:
             log.error(f'failed to start httpd: {r}')
             return False
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
+        self._loaded_proxy_auth = self._proxy_auth_basic
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
         r = self._cmd_httpd('stop')
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         if r.exit_code == 0:
             return self.wait_dead(timeout=timedelta(seconds=5))
         log.fatal(f'stopping httpd failed: {r}')
@@ -169,13 +173,16 @@ class Httpd:
         self._write_config()
         r = self._cmd_httpd("graceful")
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
+        self._loaded_proxy_auth = self._proxy_auth_basic
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def reload_if_config_changed(self):
-        if self._loaded_extra_configs == self._extra_configs:
+        if self._loaded_extra_configs == self._extra_configs and \
+                self._loaded_proxy_auth == self._proxy_auth_basic:
             return True
         return self.reload()
 
@@ -486,12 +493,17 @@ class Httpd:
         if Httpd.MOD_CURLTEST is not None:
             return
         local_dir = os.path.dirname(inspect.getfile(Httpd))
-        p = subprocess.run([self.env.apxs, '-c', 'mod_curltest.c'],
-                           capture_output=True,
-                           cwd=os.path.join(local_dir, 'mod_curltest'))
+        out_dir = os.path.join(self.env.gen_dir, 'mod_curltest')
+        out_source = os.path.join(out_dir, 'mod_curltest.c')
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        if not os.path.exists(out_source):
+            shutil.copy(os.path.join(local_dir, 'mod_curltest/mod_curltest.c'), out_source)
+        p = subprocess.run([
+            self.env.apxs, '-c', out_source
+        ], capture_output=True, cwd=out_dir)
         rv = p.returncode
         if rv != 0:
             log.error(f"compiling mod_curltest failed: {p.stderr}")
             raise Exception(f"compiling mod_curltest failed: {p.stderr}")
-        Httpd.MOD_CURLTEST = os.path.join(
-            local_dir, 'mod_curltest/.libs/mod_curltest.so')
+        Httpd.MOD_CURLTEST = os.path.join(out_dir, '.libs/mod_curltest.so')
