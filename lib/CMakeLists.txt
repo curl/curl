@@ -41,10 +41,6 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
 )
 
-if(USE_ARES)
-  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
-endif()
-
 if(CURL_BUILD_TESTING)
   add_library(
     curlu  # special libcurlu library just for unittests
@@ -53,7 +49,7 @@ if(CURL_BUILD_TESTING)
     ${HHEADERS} ${CSOURCES}
   )
   target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
-  target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+  target_link_libraries(curlu PUBLIC ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
   set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
@@ -154,8 +150,7 @@ if(BUILD_STATIC_LIBS)
   set_target_properties(${LIB_STATIC} PROPERTIES
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     SUFFIX "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB"
-    INTERFACE_LINK_DIRECTORIES "${CURL_LIBDIRS}")
+    INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
   if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
@@ -173,6 +168,27 @@ if(BUILD_STATIC_LIBS)
   target_include_directories(${LIB_STATIC} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+  # CMake before CMP0099 (CMake 3.17 2020-03-20) did not propagate libdirs to
+  # targets. It expected libs to have an absolute filename. As a workaround,
+  # manually apply dependency libdirs, for CMake consumers without this policy.
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
+    cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
+  endif()
+  if(NOT _has_CMP0099 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND CURL_LIBS)
+    set(_libdirs "")
+    foreach(_lib IN LISTS CURL_LIBS)
+      if(TARGET "${_lib}")
+        get_target_property(_libdir "${_lib}" INTERFACE_LINK_DIRECTORIES)
+        if(_libdir)
+          list(APPEND _libdirs "${_libdir}")
+        endif()
+      endif()
+    endforeach()
+    if(_libdirs)
+      target_link_directories(${LIB_STATIC} INTERFACE ${_libdirs})
+    endif()
+  endif()
 endif()
 
 if(BUILD_SHARED_LIBS)
