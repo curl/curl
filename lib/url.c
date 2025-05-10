@@ -1188,6 +1188,20 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
   }
 
+  if(data->multi && data->multi->check_conncache_stale) {
+    /* skip if the connection was created before conncache_stale_ts, because
+       there is maybe a network change in conncache_stale_ts, and this old
+       connection in conncache is invalid for new network now */
+    timediff_t stale_time = curlx_timediff_us(data->multi->conncache_stale_ts,
+                                              conn->created);
+    if(stale_time > 0) {
+      infof(data, "Connection #%" FMT_OFF_T " is stale for "
+            "%" FMT_TIMEDIFF_T " us, cannot reuse",
+            conn->connection_id, stale_time);
+      return FALSE;
+    }
+  }
+
   /* We have found a connection. Let's stop searching. */
   match->found = conn;
   return TRUE;
