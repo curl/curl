@@ -33,6 +33,7 @@ struct Curl_easy;
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
+#include "curlx/base64.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \
@@ -86,10 +87,6 @@ static const struct mime_encoder encoders[] = {
   {"quoted-printable", encoder_qp_read, encoder_qp_size},
   {ZERO_NULL, ZERO_NULL, ZERO_NULL}
 };
-
-/* Base64 encoding table */
-static const char base64enc[] =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* Quoted-printable character class table.
  *
@@ -472,10 +469,10 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
     i = st->buf[st->bufbeg++] & 0xFF;
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
-    *ptr++ = base64enc[(i >> 18) & 0x3F];
-    *ptr++ = base64enc[(i >> 12) & 0x3F];
-    *ptr++ = base64enc[(i >> 6) & 0x3F];
-    *ptr++ = base64enc[i & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 18) & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 12) & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 6) & 0x3F];
+    *ptr++ = Curl_base64encdec[i & 0x3F];
     cursize += 4;
     st->pos += 4;
     size -= 4;
@@ -499,10 +496,10 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
           i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
 
         i |= (st->buf[st->bufbeg] & 0xFF) << 16;
-        ptr[0] = base64enc[(i >> 18) & 0x3F];
-        ptr[1] = base64enc[(i >> 12) & 0x3F];
+        ptr[0] = Curl_base64encdec[(i >> 18) & 0x3F];
+        ptr[1] = Curl_base64encdec[(i >> 12) & 0x3F];
         if(++st->bufbeg != st->bufend) {
-          ptr[2] = base64enc[(i >> 6) & 0x3F];
+          ptr[2] = Curl_base64encdec[(i >> 6) & 0x3F];
           st->bufbeg++;
         }
         cursize += 4;
