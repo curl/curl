@@ -1068,8 +1068,8 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   if(proto_http) {
     long postRedir = 0;
 
-    my_setopt_long(curl, CURLOPT_FOLLOWLOCATION,
-                   config->followlocation);
+    if(config->followlocation)
+      my_setopt_enum(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
     my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH,
                    config->unrestricted_auth);
     my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
