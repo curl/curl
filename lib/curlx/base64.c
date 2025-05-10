@@ -44,7 +44,7 @@
 #include "../memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
-static const char base64encdec[]=
+const char Curl_base64encdec[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
@@ -257,7 +257,8 @@ static CURLcode base64_encode(const char *table64,
 CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
-  return base64_encode(base64encdec, '=', inputbuff, insize, outptr, outlen);
+  return base64_encode(Curl_base64encdec, '=',
+                       inputbuff, insize, outptr, outlen);
 }
 
 /*
