@@ -47,7 +47,7 @@
 #include "util.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 int main(int argc, char *argv[])
 {
