@@ -237,6 +237,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
  * data    [in]     - The session handle.
  * userp   [in]     - The username in the format User or Domain\User.
  * passwdp [in]     - The user's password.
+ * options [in]     - Login options - unused
  * ntlm    [in/out] - The NTLM data struct being used and modified.
  * out     [out]    - The result storage.
  *
@@ -245,6 +246,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              const char *userp,
                                              const char *passwdp,
+                                             const char *options,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out)
 {
@@ -262,6 +264,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 #endif
   (void) passwdp;
   (void) userp;
+  (void) options;
 
   /* Setup the type-2 "input" security buffer */
   type_2_desc.ulVersion     = SECBUFFER_VERSION;
