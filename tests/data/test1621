@@ -15,6 +15,7 @@ none
 <features>
 unittest
 https
+pop3s
 </features>
 <name>
 unit tests for stripcredentials from URL
