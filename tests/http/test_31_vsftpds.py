@@ -148,6 +148,8 @@ class TestVsFTPD:
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     def test_31_06_shutdownh_download(self, env: Env, vsftpds: VsFTPD):
+        if env.parallel_testing:
+            pytest.skip('does not work in parallel testing')
         docname = 'data-1k'
         curl = CurlClient(env=env)
         count = 1
@@ -161,6 +163,8 @@ class TestVsFTPD:
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     def test_31_07_shutdownh_upload(self, env: Env, vsftpds: VsFTPD):
+        if env.parallel_testing:
+            pytest.skip('does not work in parallel testing')
         docname = 'upload-1k'
         curl = CurlClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)

@@ -38,13 +38,6 @@ log = logging.getLogger(__name__)
 class TestShutdown:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
-    @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
@@ -74,6 +67,8 @@ class TestShutdown:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_19_02_check_shutdown(self, env: Env, httpd, proto):
+        if env.parallel_testing:
+            pytest.skip('does not work in parallel testing')
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         run_env = os.environ.copy()
