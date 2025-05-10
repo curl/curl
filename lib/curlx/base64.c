@@ -44,9 +44,8 @@
 #include "../memdebug.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
-/* Padding character string starts at offset 64. */
 static const char base64encdec[]=
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
@@ -119,14 +118,6 @@ CURLcode curlx_base64_decode(const char *src,
 
   memset(lookup, 0xff, sizeof(lookup));
   memcpy(&lookup['+'], decodetable, sizeof(decodetable));
-  /* replaces
-  {
-    unsigned char c;
-    const unsigned char *p = (const unsigned char *)base64encdec;
-    for(c = 0; *p; c++, p++)
-      lookup[*p] = c;
-  }
-  */
 
   /* Decode the complete quantums first */
   for(i = 0; i < fullQuantums; i++) {
@@ -186,13 +177,13 @@ bad:
 }
 
 static CURLcode base64_encode(const char *table64,
+                              unsigned char padbyte,
                               const char *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
   char *output;
   char *base64data;
   const unsigned char *in = (const unsigned char *)inputbuff;
-  const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
   *outlen = 0;
@@ -222,17 +213,17 @@ static CURLcode base64_encode(const char *table64,
     *output++ = table64[ in[0] >> 2 ];
     if(insize == 1) {
       *output++ = table64[ ((in[0] & 0x03) << 4) ];
-      if(*padstr) {
-        *output++ = *padstr;
-        *output++ = *padstr;
+      if(padbyte) {
+        *output++ = padbyte;
+        *output++ = padbyte;
       }
     }
     else {
       /* insize == 2 */
       *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
       *output++ = table64[ ((in[1] & 0x0F) << 2) ];
-      if(*padstr)
-        *output++ = *padstr;
+      if(padbyte)
+        *output++ = padbyte;
     }
   }
 
@@ -266,7 +257,7 @@ static CURLcode base64_encode(const char *table64,
 CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
-  return base64_encode(base64encdec, inputbuff, insize, outptr, outlen);
+  return base64_encode(base64encdec, '=', inputbuff, insize, outptr, outlen);
 }
 
 /*
@@ -287,7 +278,7 @@ CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
 CURLcode curlx_base64url_encode(const char *inputbuff, size_t insize,
                                 char **outptr, size_t *outlen)
 {
-  return base64_encode(base64url, inputbuff, insize, outptr, outlen);
+  return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
 }
 
 #endif /* no users so disabled */
