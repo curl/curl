@@ -813,15 +813,34 @@ static CURLcode url_proto_and_rewrite(char **url,
   return result;
 }
 
-/* return current SSL backend name, chop off multissl */
+/* return current SSL backend name */
 static char *ssl_backend(void)
 {
   static char ssl_ver[80] = "no ssl";
   static bool already = FALSE;
   if(!already) { /* if there is no existing version */
     const char *v = curl_version_info(CURLVERSION_NOW)->ssl_version;
-    if(v)
-      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int) strcspn(v, " "), v);
+    if(v) {
+      size_t paren = 0;
+      const char *start, *end;
+      /* extract the current SSL backend by ignoring anything in parentheses.
+         eg multissl build has ssl_version "(OpenSSL/3.0.8) Secure Transport"
+         then the current SSL backend name is Secure Transport. */
+      for(start = v; *start; ++start) {
+        if(*start == '(')
+          ++paren;
+        else if(paren) {
+          if(*start == ')')
+            --paren;
+        }
+        else if(*start != ' ')
+          break;
+      }
+      end = start + strcspn(start, "(");
+      while(end != start && *(end - 1) == ' ')
+        --end;
+      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int)(end - start), start);
+    }
     already = TRUE;
   }
   return ssl_ver;
