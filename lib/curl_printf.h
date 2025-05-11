@@ -30,6 +30,12 @@
 #define MERR_MEM       1
 #define MERR_TOO_LARGE 2
 
+/* Lower-case digits.  */
+extern const unsigned char Curl_ldigits[];
+
+/* Upper-case digits.  */
+extern const unsigned char Curl_udigits[];
+
 #ifdef BUILDING_LIBCURL
 
 /*
