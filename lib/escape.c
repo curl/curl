@@ -232,9 +232,7 @@ void Curl_hexbyte(unsigned char *dest, /* must fit two bytes */
                   unsigned char val,
                   bool lowercase)
 {
-  const unsigned char uhex[] = "0123456789ABCDEF";
-  const unsigned char lhex[] = "0123456789abcdef";
-  const unsigned char *t = lowercase ? lhex : uhex;
+  const unsigned char *t = lowercase ? Curl_ldigits : Curl_udigits;
   dest[0] = t[val >> 4];
   dest[1] = t[val & 0x0F];
 }
