@@ -196,7 +196,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
  * code. This is to avoid losing the actual last Winsock error. When this
  * function returns NULL, check errno not SOCKERRNO.
  */
-char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
+char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
   switch(af) {
   case AF_INET:
