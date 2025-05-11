@@ -31,10 +31,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-/*
- * If SIZEOF_SIZE_T has not been defined, default to the size of long.
- */
-
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
