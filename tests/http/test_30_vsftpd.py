@@ -43,7 +43,7 @@ class TestVsFTPD:
     @pytest.fixture(autouse=True, scope='class')
     def vsftpd(self, env):
         vsftpd = VsFTPD(env=env)
-        assert vsftpd.start()
+        assert vsftpd.initial_start()
         yield vsftpd
         vsftpd.stop()
 
@@ -148,7 +148,11 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
+        # vsftp closes control connection without niceties,
+        # look only at ports from DATA connection.
+        data_ports = vsftpd.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
@@ -163,7 +167,11 @@ class TestVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
+        # vsftp closes control connection without niceties,
+        # look only at ports from DATA connection.
+        data_ports = vsftpd.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     def test_30_08_active_download(self, env: Env, vsftpd: VsFTPD):
         docname = 'data-10k'

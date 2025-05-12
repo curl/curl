@@ -47,7 +47,7 @@ class TestFtpsVsFTPD:
         if not TestFtpsVsFTPD.SUPPORTS_SSL:
             pytest.skip('vsftpd does not seem to support SSL')
         vsftpds = VsFTPD(env=env, with_ssl=True, ssl_implicit=True)
-        if not vsftpds.start():
+        if not vsftpds.initial_start():
             vsftpds.stop()
             TestFtpsVsFTPD.SUPPORTS_SSL = False
             pytest.skip('vsftpd does not seem to support SSL')
@@ -167,8 +167,10 @@ class TestFtpsVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
-        # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
+        # look only at ports from DATA connection.
+        data_ports = vsftpds.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
@@ -183,8 +185,10 @@ class TestFtpsVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
-        # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
+        # look only at ports from DATA connection.
+        data_ports = vsftpds.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     def test_32_08_upload_ascii(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-ascii'

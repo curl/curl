@@ -37,18 +37,12 @@ log = logging.getLogger(__name__)
 class TestInfo:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
-    @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
         env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
         env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
 
     # download plain file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -131,6 +125,10 @@ class TestInfo:
         assert key in s, f'stat #{idx} "{key}" missing: {s}'
         assert s[key] > 0, f'stat #{idx} "{key}" not positive: {s}'
 
+    def check_stat_positive_or_0(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] >= 0, f'stat #{idx} "{key}" not positive: {s}'
+
     def check_stat_zero(self, s, key):
         assert key in s, f'stat "{key}" missing: {s}'
         assert s[key] == 0, f'stat "{key}" not zero: {s}'
@@ -138,15 +136,16 @@ class TestInfo:
     def check_stat_times(self, s, idx):
         # check timings reported on a transfer for consistency
         url = s['url_effective']
+        # connect time is sometimes reported as 0 by openssl-quic (sigh)
+        self.check_stat_positive_or_0(s, idx, 'time_connect')
         # all stat keys which reporting timings
         all_keys = {
-            'time_appconnect', 'time_connect', 'time_redirect',
+            'time_appconnect', 'time_redirect',
             'time_pretransfer', 'time_starttransfer', 'time_total'
         }
         # stat keys where we expect a positive value
         pos_keys = {'time_pretransfer', 'time_starttransfer', 'time_total', 'time_queue'}
         if s['num_connects'] > 0:
-            pos_keys.add('time_connect')
             if url.startswith('https:'):
                 pos_keys.add('time_appconnect')
         if s['num_redirects'] > 0:

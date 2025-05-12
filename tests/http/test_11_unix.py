@@ -37,12 +37,14 @@ from testenv import Env, CurlClient
 
 log = logging.getLogger(__name__)
 
+
 class UDSFaker:
 
     def __init__(self, path):
         self._uds_path = path
         self._done = False
         self._socket = None
+        self._thread = None
 
     @property
     def path(self):

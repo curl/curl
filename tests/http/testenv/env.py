@@ -29,15 +29,16 @@ import logging
 import os
 import re
 import shutil
-import socket
 import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, Dict
+
+import pytest
+from filelock import FileLock
 
 from .certs import CertificateSpec, Credentials, TestCA
-from .ports import alloc_ports
 
 
 log = logging.getLogger(__name__)
@@ -59,9 +60,16 @@ CURL = os.path.join(TOP_PATH, 'src', 'curl')
 
 class EnvConfig:
 
-    def __init__(self):
+    def __init__(self, pytestconfig: Optional[pytest.Config] = None,
+                 testrun_uid=None,
+                 worker_id=None):
+        self.pytestconfig = pytestconfig
+        self.testrun_uid = testrun_uid
+        self.worker_id = worker_id if worker_id is not None else 'master'
         self.tests_dir = TESTS_HTTPD_PATH
-        self.gen_dir = os.path.join(self.tests_dir, 'gen')
+        self.gen_root = self.gen_dir = os.path.join(self.tests_dir, 'gen')
+        if self.worker_id != 'master':
+            self.gen_dir = os.path.join(self.gen_dir, self.worker_id)
         self.project_dir = os.path.dirname(os.path.dirname(self.tests_dir))
         self.build_dir = TOP_PATH
         self.config = DEF_CONFIG
@@ -114,19 +122,8 @@ class EnvConfig:
                     prot.lower() for prot in line[11:].split(' ')
                 }
 
-        self.ports = alloc_ports(port_specs={
-            'ftp': socket.SOCK_STREAM,
-            'ftps': socket.SOCK_STREAM,
-            'http': socket.SOCK_STREAM,
-            'https': socket.SOCK_STREAM,
-            'nghttpx_https': socket.SOCK_STREAM,
-            'proxy': socket.SOCK_STREAM,
-            'proxys': socket.SOCK_STREAM,
-            'h2proxys': socket.SOCK_STREAM,
-            'caddy': socket.SOCK_STREAM,
-            'caddys': socket.SOCK_STREAM,
-            'ws': socket.SOCK_STREAM,
-        })
+        self.ports = {}
+
         self.httpd = self.config['httpd']['httpd']
         self.apxs = self.config['httpd']['apxs']
         if len(self.apxs) == 0:
@@ -287,8 +284,15 @@ class EnvConfig:
     def tcpdmp(self) -> Optional[str]:
         return self._tcpdump
 
+    def clear_locks(self):
+        ca_lock = os.path.join(self.gen_root, 'ca/ca.lock')
+        if os.path.exists(ca_lock):
+            os.remove(ca_lock)
+
 
 class Env:
+
+    SERVER_TIMEOUT = 30  # seconds to wait for server to come up/reload
 
     CONFIG = EnvConfig()
 
@@ -434,7 +438,9 @@ class Env:
     def tcpdump() -> Optional[str]:
         return Env.CONFIG.tcpdmp
 
-    def __init__(self, pytestconfig=None):
+    def __init__(self, pytestconfig=None, env_config=None):
+        if env_config:
+            Env.CONFIG = env_config
         self._verbose = pytestconfig.option.verbose \
             if pytestconfig is not None else 0
         self._ca = None
@@ -442,11 +448,14 @@ class Env:
 
     def issue_certs(self):
         if self._ca is None:
-            ca_dir = os.path.join(self.CONFIG.gen_dir, 'ca')
-            self._ca = TestCA.create_root(name=self.CONFIG.tld,
-                                          store_dir=ca_dir,
-                                          key_type="rsa2048")
-        self._ca.issue_certs(self.CONFIG.cert_specs)
+            ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            os.makedirs(ca_dir, exist_ok=True)
+            lock_file = os.path.join(ca_dir, 'ca.lock')
+            with FileLock(lock_file):
+                self._ca = TestCA.create_root(name=self.CONFIG.tld,
+                                              store_dir=ca_dir,
+                                              key_type="rsa2048")
+                self._ca.issue_certs(self.CONFIG.cert_specs)
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -474,6 +483,10 @@ class Env:
     @property
     def gen_dir(self) -> str:
         return self.CONFIG.gen_dir
+
+    @property
+    def gen_root(self) -> str:
+        return self.CONFIG.gen_root
 
     @property
     def project_dir(self) -> str:
@@ -520,12 +533,23 @@ class Env:
         return self.CONFIG.expired_domain
 
     @property
+    def ports(self) -> Dict[str, int]:
+        return self.CONFIG.ports
+
+    def update_ports(self, ports: Dict[str, int]):
+        self.CONFIG.ports.update(ports)
+
+    @property
     def http_port(self) -> int:
-        return self.CONFIG.ports['http']
+        return self.CONFIG.ports.get('http', 0)
 
     @property
     def https_port(self) -> int:
         return self.CONFIG.ports['https']
+
+    @property
+    def https_only_tcp_port(self) -> int:
+        return self.CONFIG.ports['https-tcp-only']
 
     @property
     def nghttpx_https_port(self) -> int:

@@ -37,10 +37,6 @@ class TestMethods:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload_if_config_changed()
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
         env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
@@ -66,6 +62,6 @@ class TestMethods:
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?id=[0-{count-1}]'\
-                '&chunks=1&chunk_size=0&chunk_delay=10ms'
+            '&chunks=1&chunk_size=0&chunk_delay=10ms'
         r = curl.http_delete(urls=[url], alpn_proto=proto)
         r.check_stats(count=count, http_status=204, exitcode=0)

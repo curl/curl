@@ -337,6 +337,7 @@ jobs:
         env:
           CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
+          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then

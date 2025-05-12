@@ -38,24 +38,18 @@ log = logging.getLogger(__name__)
 
 class TestGoAway:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
@@ -86,12 +80,13 @@ class TestGoAway:
             pytest.skip('OpenSSL QUIC fails here')
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
@@ -99,7 +94,7 @@ class TestGoAway:
         # each request will take a second, reload the server in the middle
         # of the first one.
         time.sleep(1.5)
-        assert nghttpx.reload(timeout=timedelta(seconds=2))
+        assert nghttpx.reload(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         t.join()
         r: ExecResult = self.r
         # this should take `count` seconds to retrieve, maybe a little less
@@ -116,13 +111,14 @@ class TestGoAway:
         proto = 'http/1.1'
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             # pause 2 seconds between requests
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
                 '--rate', '30/m',
             ])
