@@ -268,7 +268,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           else {
             our_login = TRUE;
             free(login);
-            login = strdup(tok);
+            login = strdup(tok ? tok : "");
             if(!login) {
               retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
               goto out;
