@@ -357,17 +357,17 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
       case IMAP_LIST:
         if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
-          (imap->custom && !imap_matchresp(line, len, imap->custom) &&
-           (!strcasecompare(imap->custom, "STORE") ||
-            !imap_matchresp(line, len, "FETCH")) &&
-           !strcasecompare(imap->custom, "SELECT") &&
-           !strcasecompare(imap->custom, "EXAMINE") &&
-           !strcasecompare(imap->custom, "SEARCH") &&
-           !strcasecompare(imap->custom, "EXPUNGE") &&
-           !strcasecompare(imap->custom, "LSUB") &&
-           !strcasecompare(imap->custom, "UID") &&
-           !strcasecompare(imap->custom, "GETQUOTAROOT") &&
-           !strcasecompare(imap->custom, "NOOP")))
+           (imap->custom && !imap_matchresp(line, len, imap->custom) &&
+            (!strcasecompare(imap->custom, "STORE") ||
+             !imap_matchresp(line, len, "FETCH")) &&
+            !strcasecompare(imap->custom, "SELECT") &&
+            !strcasecompare(imap->custom, "EXAMINE") &&
+            !strcasecompare(imap->custom, "SEARCH") &&
+            !strcasecompare(imap->custom, "EXPUNGE") &&
+            !strcasecompare(imap->custom, "LSUB") &&
+            !strcasecompare(imap->custom, "UID") &&
+            !strcasecompare(imap->custom, "GETQUOTAROOT") &&
+            !strcasecompare(imap->custom, "NOOP")))
           return FALSE;
         break;
 
@@ -399,8 +399,8 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
      a space and optionally some text as per RFC-3501 for the AUTHENTICATE and
      APPEND commands and as outlined in Section 4. Examples of RFC-4959 but
      some email servers ignore this and only send a single + instead. */
-  if(imap && !imap->custom && ((len == 3 && line[0] == '+') ||
-     (len >= 2 && !memcmp("+ ", line, 2)))) {
+  if(!imap->custom && ((len == 3 && line[0] == '+') ||
+                       (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {
       /* States which are interested in continuation responses */
       case IMAP_AUTHENTICATE:
