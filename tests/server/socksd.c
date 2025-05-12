@@ -80,7 +80,7 @@
 #include "tool_binmode.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */

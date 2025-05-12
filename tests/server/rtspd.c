@@ -54,7 +54,7 @@
 #include "server_sockaddr.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 #undef REQBUFSIZ
 #define REQBUFSIZ 150000

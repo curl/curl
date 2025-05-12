@@ -57,7 +57,7 @@
 #include "server_sockaddr.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;

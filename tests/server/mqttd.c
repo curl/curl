@@ -60,7 +60,7 @@
 #include "tool_binmode.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
