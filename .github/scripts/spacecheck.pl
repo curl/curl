@@ -161,7 +161,7 @@ while(my $filename = <$git_ls_files>) {
     $content =~ s/[$non_ascii_allowed]//g;
 
     if(!fn_match($filename, @non_ascii) &&
-       ($content =~ /([\x80-\xff]+)/ && $content !~ /codeset-utf8|codeset-non-ascii|^Unicode/m)) {
+       ($content =~ /([\x80-\xff]+)/ && $content !~ /^(codeset-utf8|codeset-non-ascii|Unicode)/m)) {
         push @err, "content: has non-ASCII: '$1'";
     }
 
