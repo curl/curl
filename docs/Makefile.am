@@ -66,6 +66,7 @@ INTERNALDOCS =                                  \
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
  $(INTERNALDOCS)                                \
+ AI.md                                          \
  ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
