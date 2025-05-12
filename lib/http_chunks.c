@@ -256,7 +256,6 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
            there was no trailer and we move on */
 
         if(tr) {
-          size_t trlen;
           result = curlx_dyn_addn(&ch->trailer, STRCONST("\x0d\x0a"));
           if(result) {
             ch->state = CHUNK_FAILED;
@@ -264,8 +263,8 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
             return result;
           }
           tr = curlx_dyn_ptr(&ch->trailer);
-          trlen = curlx_dyn_len(&ch->trailer);
           if(!data->set.http_te_skip) {
+            size_t trlen = curlx_dyn_len(&ch->trailer);
             if(cw_next)
               result = Curl_cwriter_write(data, cw_next,
                                           CLIENTWRITE_HEADER|
