@@ -16,7 +16,7 @@ to do this accurately.
 
 You must also double-check the findings carefully before reporting them to us
 to validate that the issues are indeed existing and working exactly as the AI
-says. AI-based tools frequently lie and makes things up.
+says. AI-based tools frequently lie and make things up.
 
 Further: it is *rarely* a good idea to just copy and paste an AI generated
 report to the project. Those generated reports typically are too wordy and
