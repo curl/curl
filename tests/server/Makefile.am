@@ -57,6 +57,8 @@ AM_CPPFLAGS += -DCURLDEBUG
 endif
 endif
 
+AM_CPPFLAGS += -DWITHOUT_LIBCURL
+
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
