@@ -425,7 +425,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     if(got_exit_signal)
       return 1; /* done */
 
-    if((req->cl == 0) && curl_strnequal("Content-Length:", line, 15)) {
+    if((req->cl == 0) && !CURL_STRNICMP("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -445,8 +445,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         logmsg("... but will abort after %zu bytes", req->cl);
       break;
     }
-    else if(curl_strnequal("Transfer-Encoding: chunked", line,
-                            strlen("Transfer-Encoding: chunked"))) {
+    else if(!CURL_STRNICMP("Transfer-Encoding: chunked", line,
+                           strlen("Transfer-Encoding: chunked"))) {
       /* chunked data coming in */
       chunked = TRUE;
     }
