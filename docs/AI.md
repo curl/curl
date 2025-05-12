@@ -40,7 +40,7 @@ it as-is and you must make sure you are allowed to distribute it to us. By
 submitting a change to us, you agree that the changes can and should be
 adopted by curl and get redistributed under the curl license. Authors should
 be explicitly aware that the burden is on them to ensure no unlicensed code is
-submitted to the proejct.
+submitted to the project.
 
 This is independent if AI is used or not.
 
