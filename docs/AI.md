@@ -38,7 +38,9 @@ We ban users immediately who submit made up fake reports to the project.
 When contributing content to the curl project, you give us permission to use
 it as-is and you must make sure you are allowed to distribute it to us. By
 submitting a change to us, you agree that the changes can and should be
-adopted by curl and get redistributed under the curl license.
+adopted by curl and get redistributed under the curl license. Authors should
+be explicitly aware that the burden is on them to ensure no unlicensed code is
+submitted to the proejct.
 
 This is independent if AI is used or not.
 
