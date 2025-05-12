@@ -42,16 +42,12 @@ class TestUpload:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
         env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-1m+", fsize=(1024*1024)+1)
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
-        httpd.clear_extra_configs()
-        httpd.reload()
 
     # upload small data, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -190,7 +186,7 @@ class TestUpload:
              '-n', f'{count}', '-S', f'{upload_size}', '-V', proto, url
         ])
         r.check_exit_code(0)
-        self.check_downloads(client, [f"{upload_size}"], count)
+        self.check_downloads(client, r, [f"{upload_size}"], count)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_16_hx_put_reuse(self, env: Env, httpd, nghttpx, proto):
@@ -206,7 +202,7 @@ class TestUpload:
              '-n', f'{count}', '-S', f'{upload_size}', '-R', '-V', proto, url
         ])
         r.check_exit_code(0)
-        self.check_downloads(client, [f"{upload_size}"], count)
+        self.check_downloads(client, r, [f"{upload_size}"], count)
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_17_hx_post_reuse(self, env: Env, httpd, nghttpx, proto):
@@ -222,7 +218,7 @@ class TestUpload:
              '-n', f'{count}', '-M', 'POST', '-S', f'{upload_size}', '-R', '-V', proto, url
         ])
         r.check_exit_code(0)
-        self.check_downloads(client, ["x" * upload_size], count)
+        self.check_downloads(client, r, ["x" * upload_size], count)
 
     # upload data parallel, check that they were echoed
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -258,7 +254,7 @@ class TestUpload:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
         r.check_response(count=count, http_status=200)
-        self.check_download(count, fdata, curl)
+        self.check_download(r, count, fdata, curl)
 
     # upload large data parallel to a URL that denies uploads
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
@@ -522,17 +518,17 @@ class TestUpload:
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
 
-    def check_download(self, count, srcfile, curl):
+    def check_download(self, r, count, srcfile, curl):
         for i in range(count):
             dfile = curl.download_file(i)
-            assert os.path.exists(dfile)
+            assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if not filecmp.cmp(srcfile, dfile, shallow=False):
                 diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
                                                     b=open(dfile).readlines(),
                                                     fromfile=srcfile,
                                                     tofile=dfile,
                                                     n=1))
-                assert False, f'download {dfile} differs:\n{diff}'
+                assert False, f'download {dfile} differs:\n{diff}\n{r.dump_logs()}'
 
     # upload data, pause, let connection die with an incomplete response
     # issues #11769 #13260
@@ -730,24 +726,26 @@ class TestUpload:
              '-V', proto, url
         ])
         r.check_exit_code(0)
-        self.check_downloads(client, [f"{upload_size}"], count)
+        self.check_downloads(client, r, [f"{upload_size}"], count)
         earlydata = {}
         for line in r.trace_lines:
             m = re.match(r'^\[t-(\d+)] EarlyData: (-?\d+)', line)
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
-        assert earlydata[0] == 0, f'{earlydata}'
-        assert earlydata[1] == exp_early, f'{earlydata}'
+        assert earlydata[0] == 0, f'{earlydata}\n{r.dump_logs()}'
+        # depending on cpu load, curl might not upload as much before
+        # the handshake starts and early data stops.
+        assert 102 <= earlydata[1] <= exp_early, f'{earlydata}\n{r.dump_logs()}'
 
-    def check_downloads(self, client, source: List[str], count: int,
+    def check_downloads(self, client, r, source: List[str], count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)
-            assert os.path.exists(dfile)
+            assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'
             if complete:
                 diff = "".join(difflib.unified_diff(a=source,
                                                     b=open(dfile).readlines(),
                                                     fromfile='-',
                                                     tofile=dfile,
                                                     n=1))
-                assert not diff, f'download {dfile} differs:\n{diff}'
+                assert not diff, f'download {dfile} differs:\n{diff}\n{r.dump_logs()}'

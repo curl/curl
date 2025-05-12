@@ -40,12 +40,12 @@ class TestReuse:
 
     # check if HTTP/1.1 handles 'Connection: close' correctly
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_12_01_h1_conn_close(self, env: Env, httpd, nghttpx, proto):
+    def test_12_01_h1_conn_close(self, env: Env, httpd, configures_httpd, nghttpx, proto):
         httpd.clear_extra_configs()
         httpd.set_extra_config('base', [
             'MaxKeepAliveRequests 1',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         count = 100
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -59,12 +59,12 @@ class TestReuse:
     @pytest.mark.skipif(condition=Env.httpd_is_at_least('2.5.0'),
                         reason="httpd 2.5+ handles KeepAlives different")
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_12_02_h1_conn_timeout(self, env: Env, httpd, nghttpx, proto):
+    def test_12_02_h1_conn_timeout(self, env: Env, httpd, configures_httpd, nghttpx, proto):
         httpd.clear_extra_configs()
         httpd.set_extra_config('base', [
             'KeepAliveTimeout 1',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         count = 5
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -76,10 +76,7 @@ class TestReuse:
         assert r.total_connects == count
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_03_as_follow_h2h3(self, env: Env, httpd, nghttpx):
-        # Without '--http*` an Alt-Svc redirection from h2 to h3 is allowed
-        httpd.clear_extra_configs()
-        httpd.reload()
+    def test_12_03_as_follow_h2h3(self, env: Env, httpd, configures_httpd, nghttpx):
         # write a alt-svc file that advises h3 instead of h2
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
         self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')
@@ -92,10 +89,7 @@ class TestReuse:
         assert r.stats[0]['http_version'] == '3', f'{r.stats}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_04_as_follow_h3h2(self, env: Env, httpd, nghttpx):
-        # With '--http3` an Alt-Svc redirection from h3 to h2 is allowed
-        httpd.clear_extra_configs()
-        httpd.reload()
+    def test_12_04_as_follow_h3h2(self, env: Env, httpd, configures_httpd, nghttpx):
         count = 2
         # write a alt-svc file the advises h2 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_04.txt')
@@ -116,10 +110,8 @@ class TestReuse:
             assert s['http_version'] == '2', f'{s}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_05_as_follow_h3h1(self, env: Env, httpd, nghttpx):
+    def test_12_05_as_follow_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3` an Alt-Svc redirection from h3 to h1 is allowed
-        httpd.clear_extra_configs()
-        httpd.reload()
         count = 2
         # write a alt-svc file the advises h1 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
@@ -140,10 +132,8 @@ class TestReuse:
             assert s['http_version'] == '1.1', f'{s}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_06_as_ignore_h3h1(self, env: Env, httpd, nghttpx):
+    def test_12_06_as_ignore_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3-only` an Alt-Svc redirection from h3 to h1 is ignored
-        httpd.clear_extra_configs()
-        httpd.reload()
         count = 2
         # write a alt-svc file the advises h1 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
@@ -164,10 +154,8 @@ class TestReuse:
             assert s['http_version'] == '3', f'{s}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
-    def test_12_07_as_ignore_h2h3(self, env: Env, httpd, nghttpx):
+    def test_12_07_as_ignore_h2h3(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http2` an Alt-Svc redirection from h2 to h3 is ignored
-        httpd.clear_extra_configs()
-        httpd.reload()
         # write a alt-svc file that advises h3 instead of h2
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
         self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')

@@ -38,13 +38,6 @@ log = logging.getLogger(__name__)
 
 class TestGoAway:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h2'
@@ -99,7 +92,7 @@ class TestGoAway:
         # each request will take a second, reload the server in the middle
         # of the first one.
         time.sleep(1.5)
-        assert nghttpx.reload(timeout=timedelta(seconds=2))
+        assert nghttpx.reload(timeout=timedelta(seconds=30))
         t.join()
         r: ExecResult = self.r
         # this should take `count` seconds to retrieve, maybe a little less

@@ -44,6 +44,8 @@ class TestPush:
         env.make_data_file(indir=push_dir, fname="data1", fsize=1*1024)
         env.make_data_file(indir=push_dir, fname="data2", fsize=1*1024)
         env.make_data_file(indir=push_dir, fname="data3", fsize=1*1024)
+
+    def httpd_configure(self, env, httpd):
         httpd.set_extra_config(env.domain1, [
             'H2EarlyHints on',
             '<Location /push/data1>',
@@ -55,13 +57,11 @@ class TestPush:
             '</Location>',
         ])
         # activate the new config
-        httpd.reload()
-        yield
-        httpd.clear_extra_configs()
-        httpd.reload()
+        httpd.reload_if_config_changed()
 
     # download a file that triggers a "103 Early Hints" response
-    def test_09_01_h2_early_hints(self, env: Env, httpd):
+    def test_09_01_h2_early_hints(self, env: Env, httpd, configures_httpd):
+        self.httpd_configure(env, httpd)
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/push/data1'
         r = curl.http_download(urls=[url], alpn_proto='h2', with_stats=False,
@@ -72,7 +72,8 @@ class TestPush:
         assert 'link' in r.responses[0]['header'], f'{r.responses[0]}'
         assert r.responses[0]['header']['link'] == '</push/data2>; rel=preload', f'{r.responses[0]}'
 
-    def test_09_02_h2_push(self, env: Env, httpd):
+    def test_09_02_h2_push(self, env: Env, httpd, configures_httpd):
+        self.httpd_configure(env, httpd)
         # use localhost as we do not have resolve support in local client
         url = f'https://localhost:{env.https_port}/push/data1'
         client = LocalClient(name='h2-serverpush', env=env)

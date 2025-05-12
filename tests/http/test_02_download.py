@@ -42,13 +42,6 @@ log = logging.getLogger(__name__)
 class TestDownload:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
-    @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
@@ -281,7 +274,7 @@ class TestDownload:
                       remote_ip='127.0.0.1')
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
-    def test_02_20_h2_small_frames(self, env: Env, httpd):
+    def test_02_20_h2_small_frames(self, env: Env, httpd, configures_httpd):
         # Test case to reproduce content corruption as observed in
         # https://github.com/curl/curl/issues/10525
         # To reliably reproduce, we need an Apache httpd that supports
@@ -290,11 +283,7 @@ class TestDownload:
         httpd.set_extra_config(env.domain1, lines=[
             'H2MaxDataFrameLen 1024',
         ])
-        assert httpd.stop()
-        if not httpd.start():
-            # no, not supported, bail out
-            httpd.set_extra_config(env.domain1, lines=None)
-            assert httpd.start()
+        if not httpd.reload_if_config_changed():
             pytest.skip('H2MaxDataFrameLen not supported')
         # ok, make 100 downloads with 2 parallel running and they
         # are expected to stumble into the issue when using `lib/http2.c`
@@ -308,10 +297,6 @@ class TestDownload:
         r.check_response(count=count, http_status=200)
         srcfile = os.path.join(httpd.docs_dir, 'data-1m')
         self.check_downloads(curl, srcfile, count)
-        # restore httpd defaults
-        httpd.set_extra_config(env.domain1, lines=None)
-        assert httpd.stop()
-        assert httpd.start()
 
     # download serial via lib client, pause/resume at different offsets
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
@@ -592,9 +577,10 @@ class TestDownload:
             '--parallel', '--http2'
         ])
         r.check_response(http_status=200, count=count)
-        # we see 3 connections, because Apache only every serves a single
-        # request via Upgrade: and then closed the connection.
-        assert r.total_connects == 3, r.dump_logs()
+        # we see up to 3 connections, because Apache wants to serve only a single
+        # request via Upgrade: and then closes the connection. But if a new
+        # request comes in time, it might still get served.
+        assert r.total_connects <= 3, r.dump_logs()
 
     # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")

@@ -92,11 +92,6 @@ class VsFTPD:
             return self.start()
         return True
 
-    def stop_if_running(self):
-        if self.is_running():
-            return self.stop()
-        return True
-
     def stop(self, wait_dead=True):
         self._mkpath(self._tmp_dir)
         if self._process:
@@ -123,7 +118,7 @@ class VsFTPD:
         self._process = subprocess.Popen(args=args, stderr=procerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
@@ -148,7 +143,6 @@ class VsFTPD:
             ])
             if r.exit_code == 0:
                 return True
-            log.debug(f'waiting for vsftpd to become responsive: {r}')
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False

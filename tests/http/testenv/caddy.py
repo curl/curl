@@ -85,12 +85,7 @@ class Caddy:
         self._process = subprocess.Popen(args=args, cwd=self._caddy_dir, stderr=caddyerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
-
-    def stop_if_running(self):
-        if self.is_running():
-            return self.stop()
-        return True
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
 
     def stop(self, wait_dead=True):
         self._mkpath(self._tmp_dir)

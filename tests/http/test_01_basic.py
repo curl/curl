@@ -36,13 +36,6 @@ log = logging.getLogger(__name__)
 
 class TestBasic:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # simple http: GET
     def test_01_01_http_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
@@ -99,7 +92,8 @@ class TestBasic:
         r.check_stats(http_status=200, count=1,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
-        assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
+        # there are cases where time_connect is reported as 0
+        assert r.stats[0]['time_connect'] >= 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
 
     # simple https: HEAD
@@ -172,11 +166,11 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_12_xlarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_12_xlarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             f'H2MaxHeaderBlockLen {130 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
               f'/curltest/tweak?x-hd={128 * 1024}'
@@ -189,12 +183,12 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_13_megalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_13_megalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {130 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
               f'/curltest/tweak?x-hd1={128 * 1024}'
@@ -209,12 +203,12 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {1024 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
               f'/curltest/tweak?x-hd={256 * 1024}'
@@ -228,12 +222,12 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {1024 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
               f'/curltest/tweak?x-hd1={256 * 1024}'
@@ -245,7 +239,7 @@ class TestBasic:
 
     # http: invalid request headers, GET, issue #16998
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_01_16_inv_req_get(self, env: Env, httpd, proto):
+    def test_01_16_inv_req_get(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)

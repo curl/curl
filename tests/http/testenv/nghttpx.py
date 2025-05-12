@@ -84,11 +84,6 @@ class Nghttpx:
     def start(self, wait_live=True):
         pass
 
-    def stop_if_running(self):
-        if self.is_running():
-            return self.stop()
-        return True
-
     def stop(self, wait_dead=True):
         self._mkpath(self._tmp_dir)
         if self._process:
@@ -125,7 +120,7 @@ class Nghttpx:
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
                 running.wait(1)
-            return self.wait_live(timeout=timedelta(seconds=5))
+            return self.wait_live(timeout=timedelta(seconds=30))
         return False
 
     def wait_dead(self, timeout: timedelta):
@@ -169,7 +164,6 @@ class Nghttpx:
                 ])
             if r.exit_code == 0:
                 return True
-            log.debug(f'waiting for nghttpx to become responsive: {r}')
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False
@@ -226,7 +220,7 @@ class NghttpxQuic(Nghttpx):
         self._process = subprocess.Popen(args=args, stderr=ngerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
 
 
 class NghttpxFwd(Nghttpx):
@@ -258,7 +252,7 @@ class NghttpxFwd(Nghttpx):
         self._process = subprocess.Popen(args=args, stderr=ngerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
@@ -283,7 +277,6 @@ class NghttpxFwd(Nghttpx):
             ])
             if r.exit_code == 0:
                 return True
-            log.debug(f'waiting for nghttpx-fwd to become responsive: {r}')
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False

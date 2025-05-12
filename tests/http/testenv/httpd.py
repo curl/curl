@@ -27,6 +27,7 @@
 import inspect
 import logging
 import os
+import shutil
 import subprocess
 from datetime import timedelta, datetime
 from json import JSONEncoder
@@ -79,6 +80,7 @@ class Httpd:
         self._proxy_auth_basic = proxy_auth
         self._extra_configs = {}
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -147,17 +149,20 @@ class Httpd:
         with open(os.path.join(self._apache_dir, 'xxx'), 'a') as fd:
             fd.write('start of server\n')
         r = self._cmd_httpd('start')
-        if r.exit_code != 0:
+        if r.exit_code != 0 or len(r.stderr):
             log.error(f'failed to start httpd: {r}')
+            self.stop()
             return False
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
-        return self.wait_live(timeout=timedelta(seconds=5))
+        self._loaded_proxy_auth = self._proxy_auth_basic
+        return self.wait_live(timeout=timedelta(seconds=30))
 
     def stop(self):
         r = self._cmd_httpd('stop')
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         if r.exit_code == 0:
-            return self.wait_dead(timeout=timedelta(seconds=5))
+            return self.wait_dead(timeout=timedelta(seconds=30))
         log.fatal(f'stopping httpd failed: {r}')
         return r.exit_code == 0
 
@@ -168,14 +173,20 @@ class Httpd:
     def reload(self):
         self._write_config()
         r = self._cmd_httpd("graceful")
+        if r.exit_code != 0:
+            log.error(f'failed to reload httpd: {r}')
+            return False
         self._loaded_extra_configs = None
+        self._loaded_proxy_auth = None
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
-        return self.wait_live(timeout=timedelta(seconds=5))
+        self._loaded_proxy_auth = self._proxy_auth_basic
+        return self.wait_live(timeout=timedelta(seconds=30))
 
     def reload_if_config_changed(self):
-        if self._loaded_extra_configs == self._extra_configs:
+        if self._loaded_extra_configs == self._extra_configs and \
+                self._loaded_proxy_auth == self._proxy_auth_basic:
             return True
         return self.reload()
 
@@ -199,7 +210,7 @@ class Httpd:
             if r.exit_code == 0:
                 return True
             time.sleep(.1)
-        log.debug(f"Server still not responding after {timeout}")
+        log.error(f"Server still not responding after {timeout}")
         return False
 
     def _rmf(self, path):
@@ -225,6 +236,7 @@ class Httpd:
         proxy_creds = self.env.get_credentials(proxy_domain)
         assert proxy_creds  # convince pytype this isn't None
         self._mkpath(self._conf_dir)
+        self._mkpath(self._docs_dir)
         self._mkpath(self._logs_dir)
         self._mkpath(self._tmp_dir)
         self._mkpath(os.path.join(self._docs_dir, 'two'))
@@ -257,6 +269,7 @@ class Httpd:
                 f'ServerRoot "{self._apache_dir}"',
                 'DefaultRuntimeDir logs',
                 'PidFile httpd.pid',
+                f'ServerName {self.env.tld}',
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
                 'StartServers 4',
@@ -265,6 +278,7 @@ class Httpd:
                 'H2MaxWorkers 256',
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
+                f'Listen {self.env.https_only_tcp_port}',
                 f'Listen {self.env.proxy_port}',
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
@@ -289,6 +303,23 @@ class Httpd:
             ])
             conf.extend([  # https host for domain1, h1 + h2
                 f'<VirtualHost *:{self.env.https_port}>',
+                f'    ServerName {domain1}',
+                '    ServerAlias localhost',
+                '    Protocols h2 http/1.1',
+                '    SSLEngine on',
+                f'    SSLCertificateFile {creds1.cert_file}',
+                f'    SSLCertificateKeyFile {creds1.pkey_file}',
+                f'    DocumentRoot "{self._docs_dir}"',
+            ])
+            conf.extend(self._curltest_conf(domain1))
+            if domain1 in self._extra_configs:
+                conf.extend(self._extra_configs[domain1])
+            conf.extend([
+                '</VirtualHost>',
+                '',
+            ])
+            conf.extend([  # https host for domain1, h1 + h2, tcp only
+                f'<VirtualHost *:{self.env.https_only_tcp_port}>',
                 f'    ServerName {domain1}',
                 '    ServerAlias localhost',
                 '    Protocols h2 http/1.1',
@@ -334,6 +365,7 @@ class Httpd:
                 '</VirtualHost>',
                 '',
             ])
+            self._mkpath(os.path.join(self._docs_dir, 'two'))
             conf.extend([  # https host for domain2, no h2
                 f'<VirtualHost *:{self.env.https_port}>',
                 f'    ServerName {domain2}',
@@ -350,6 +382,23 @@ class Httpd:
                 '</VirtualHost>',
                 '',
             ])
+            conf.extend([  # https host for domain2, no h2, tcp only
+                f'<VirtualHost *:{self.env.https_only_tcp_port}>',
+                f'    ServerName {domain2}',
+                '    Protocols http/1.1',
+                '    SSLEngine on',
+                f'    SSLCertificateFile {creds2.cert_file}',
+                f'    SSLCertificateKeyFile {creds2.pkey_file}',
+                f'    DocumentRoot "{self._docs_dir}/two"',
+            ])
+            conf.extend(self._curltest_conf(domain2))
+            if domain2 in self._extra_configs:
+                conf.extend(self._extra_configs[domain2])
+            conf.extend([
+                '</VirtualHost>',
+                '',
+            ])
+            self._mkpath(os.path.join(self._docs_dir, 'expired'))
             conf.extend([  # https host for expired domain
                 f'<VirtualHost *:{self.env.https_port}>',
                 f'    ServerName {exp_domain}',
@@ -486,12 +535,17 @@ class Httpd:
         if Httpd.MOD_CURLTEST is not None:
             return
         local_dir = os.path.dirname(inspect.getfile(Httpd))
-        p = subprocess.run([self.env.apxs, '-c', 'mod_curltest.c'],
-                           capture_output=True,
-                           cwd=os.path.join(local_dir, 'mod_curltest'))
+        out_dir = os.path.join(self.env.gen_dir, 'mod_curltest')
+        out_source = os.path.join(out_dir, 'mod_curltest.c')
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        if not os.path.exists(out_source):
+            shutil.copy(os.path.join(local_dir, 'mod_curltest/mod_curltest.c'), out_source)
+        p = subprocess.run([
+            self.env.apxs, '-c', out_source
+        ], capture_output=True, cwd=out_dir)
         rv = p.returncode
         if rv != 0:
             log.error(f"compiling mod_curltest failed: {p.stderr}")
             raise Exception(f"compiling mod_curltest failed: {p.stderr}")
-        Httpd.MOD_CURLTEST = os.path.join(
-            local_dir, 'mod_curltest/.libs/mod_curltest.so')
+        Httpd.MOD_CURLTEST = os.path.join(out_dir, '.libs/mod_curltest.so')

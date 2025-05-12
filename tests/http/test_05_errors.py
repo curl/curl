@@ -37,13 +37,6 @@ log = logging.getLogger(__name__)
                     reason=f"httpd version too old for this: {Env.httpd_version()}")
 class TestErrors:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # download 1 file, check that we get CURLE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
