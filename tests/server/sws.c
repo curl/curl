@@ -2389,8 +2389,7 @@ int main(int argc, char *argv[])
       curl_socket_t msgsock;
       do {
         msgsock = accept_connection(sock);
-        logmsg("accept_connection %" FMT_SOCKET_T
-               " returned %" FMT_SOCKET_T, sock, msgsock);
+        logmsg("accept_connection %ld returned %ld", (long)sock, (long)msgsock);
         if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
         if(req->delay)

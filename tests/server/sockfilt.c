@@ -1186,8 +1186,7 @@ static bool juggle(curl_socket_t *sockfdp,
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
-               "failed with error (%d) %s", sockfd, error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
       }
       else {
         logmsg("====> Client connect");
@@ -1364,8 +1363,8 @@ static curl_socket_t sockfilt_sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(0 != rc) {
     error = SOCKERRNO;
-    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error (%d) %s",
-           sock, error, sstrerror(error));
+    logmsg("listen() failed with error (%d) %s",
+           error, sstrerror(error));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
