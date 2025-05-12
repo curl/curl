@@ -323,14 +323,14 @@ static void async_thrdd_destroy(struct Curl_easy *data)
     CURL_TRC_DNS(data, "resolve, destroy async data, shared ref=%d",
                  addr->ref_count);
     done = !addr->ref_count;
-    Curl_mutex_release(&addr->mutx);
-
     if(!done) {
-      /* thread is still running. Detach the thread, it will
+      /* thread is still running. Detach the thread while mutexed, it will
        * trigger the cleanup when it releases its reference. */
       Curl_thread_destroy(&addr->thread_hnd);
     }
-    else {
+    Curl_mutex_release(&addr->mutx);
+
+    if(done) {
       /* thread has released its reference, join it and
        * release the memory we shared with it. */
       if(addr->thread_hnd != curl_thread_t_null)
