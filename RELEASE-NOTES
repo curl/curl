@@ -4,7 +4,7 @@ curl and libcurl 8.14.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3415
+ Contributors:                 3416
 
 This release includes the following changes:
 
@@ -63,10 +63,13 @@ This release includes the following bugfixes:
  o content_encoding: Transfer-Encoding parser improvements [31]
  o contrithanks.sh: drop set -e [6]
  o cpool/cshutdown: force close connections under pressure [80]
+ o curl: fix memory leak when -h is used in config file [161]
  o curl_get_line: handle lines ending on the buffer boundary [62]
  o curl_krb5: only use functions if FTP is still enabled [21]
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
  o curl_osslq: remove a leftover debug fprintf() call [140]
+ o curl_version_info.md: clarify ssl_version for MultiSSL [145]
+ o CURLMOPT_TIMERFUNCTION.md: correct the example [162]
  o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
  o CURLOPT_XFERINFOFUNCTION.md: fix the callback return type in example [122]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
@@ -103,6 +106,7 @@ This release includes the following bugfixes:
  o KNOWN_BUGS: fix link in sivg4 issue 16.3 [26]
  o lib/src/docs/test: improve curl_easy_setopt() calls [116]
  o lib: add const to clientwriter tables
+ o lib: drop curlx_getpid, use fake pid in SMB [172]
  o lib: include files using known path [48]
  o lib: make Curl_easyopts const [44]
  o lib: unify conversions to/from hex [3]
@@ -165,6 +169,7 @@ This release includes the following bugfixes:
  o tests: remove some unused test case sections
  o tests: require IPv6 for 1265, 1324, 2086 [87]
  o tests: separate tunit tests from unit tests more [176]
+ o tests: stop using libcurl's strdup [170]
  o tests: unify test case keywords
  o tests: use a more portable null device path [38]
  o TODO: remove "nicer lacking perl message" [117]
@@ -206,23 +211,24 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Abhinav Singhal, Andreas Westin, Andrei Florea, Andrew Kirillov, Andy Pan,
-  Arian van Putten, bo0tzz on github, Bo Anderson, Brian Chrzanowski,
-  bruce.yoon, bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
-  Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
+  antypanty on hackerone, Arian van Putten, bo0tzz on github, Bo Anderson,
+  Brian Chrzanowski, bruce.yoon, bsr13 on hackerone, calvin2021y on github,
+  Calvin Ruocco, Carlos Henrique Lima Melara, Christian Schmitz, Cole Helbling,
   Corinna Brandt, Dagobert Michelsen, Dan Fandrich, Daniel Engberg,
   Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
-  epicmkirzinger on github, Eric Knibbe, Fujii Hironori, gkarracer on github,
-  Graham Christensen, Harry Sintonen, Helmut Grohne, Jake Yuesong Li,
-  James Fuller, Jean-Christophe Amiel, Jixinqi, Jochen Sprickerhof, Joe Cise,
-  Joel Depooter, Johan Eliasson, Jonathan Rosa, Kai Pastor,
-  kkalganov on github, Marius Kleidl, Max Eliaser, mschroeder-fzj on github,
-  NeimadTL, Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev,
-  PleaseJustDont, Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot],
-  Samuel Henrique, sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing,
-  Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane,
-  Viktor Szakats, wolfsage on hackerone, x1sc0 on github, xiadnoring on github,
-  Yedaya Katsman, zopsicle on github
-  (70 contributors)
+  Dirk Feytons, epicmkirzinger on github, Eric Knibbe, Fujii Hironori,
+  gkarracer on github, Graham Christensen, Harry Sintonen, Helmut Grohne,
+  Jake Yuesong Li, James Fuller, Jean-Christophe Amiel, Jixinqi,
+  Jochen Sprickerhof, Joe Cise, Joel Depooter, Johan Eliasson, John Bampton,
+  John Haugabook, Jonathan Rosa, Kai Pastor, kkalganov on github,
+  Marius Kleidl, Max Eliaser, mschroeder-fzj on github, NeimadTL,
+  Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
+  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique,
+  sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing, Stephen Farrell,
+  Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane, Viktor Szakats,
+  wolfsage on hackerone, x1sc0 on github, xiadnoring on github, Yedaya Katsman,
+  zopsicle on github
+  (74 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -367,6 +373,7 @@ References to bug reports and discussions on issues:
  [141] = https://curl.se/bug/?i=17221
  [143] = https://curl.se/bug/?i=17177
  [144] = https://curl.se/bug/?i=17170
+ [145] = https://curl.se/bug/?i=17308
  [146] = https://curl.se/bug/?i=17197
  [147] = https://curl.se/bug/?i=17196
  [148] = https://curl.se/bug/?i=17195
@@ -379,11 +386,15 @@ References to bug reports and discussions on issues:
  [157] = https://curl.se/bug/?i=17289
  [158] = https://curl.se/bug/?i=17286
  [160] = https://curl.se/bug/?i=17284
+ [161] = https://curl.se/bug/?i=17306
+ [162] = https://curl.se/bug/?i=17301
  [163] = https://curl.se/bug/?i=17281
  [164] = https://curl.se/bug/?i=17270
  [167] = https://curl.se/bug/?i=17275
  [169] = https://curl.se/bug/?i=17274
+ [170] = https://curl.se/bug/?i=17297
  [171] = https://curl.se/bug/?i=17268
+ [172] = https://curl.se/bug/?i=17298
  [174] = https://curl.se/bug/?i=17264
  [175] = https://curl.se/bug/?i=17263
  [176] = https://curl.se/bug/?i=17259
