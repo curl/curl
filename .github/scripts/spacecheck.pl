@@ -69,7 +69,6 @@ my @non_ascii = (
     "docs/THANKS",
     "docs/THANKS-filter",
     "tests/libtest/lib1560.c",
-    "^tests/data/test",
 );
 
 sub fn_match {
@@ -162,7 +161,7 @@ while(my $filename = <$git_ls_files>) {
     $content =~ s/[$non_ascii_allowed]//g;
 
     if(!fn_match($filename, @non_ascii) &&
-       $content =~ /([\x80-\xff]+)/) {
+       ($content =~ /([\x80-\xff]+)/ && $content !~ /^(codeset-utf8|Unicode|non-ascii)/m)) {
         push @err, "content: has non-ASCII: '$1'";
     }
 

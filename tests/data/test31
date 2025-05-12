@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 cookies
 cookiejar
+non-ascii
 </keywords>
 </info>
 # Server-side
