@@ -440,6 +440,7 @@ Features testable here are:
 - `c-ares` - c-ares is used for (all) name resolves
 - `CharConv`
 - `codeset-utf8`. If the running codeset is UTF-8 capable.
+- `codeset-non-ascii`. Quasi-feature: indicates the test uses non-ascii, non-UTF8 characters
 - `cookies`
 - `crypto`
 - `Debug`
