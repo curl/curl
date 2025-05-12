@@ -32,7 +32,7 @@ archives](https://curl.se/mail/list.cgi?list=curl-distros)).
 
 ## Alt Linux
 
-- curl: http://www.sisyphus.ru/srpm/Sisyphus/curl
+- curl: https://packages.altlinux.org/en/search/?q=curl
 - curl issues: https://packages.altlinux.org/en/sisyphus/srpms/curl/issues/
 - curl patches: https://git.altlinux.org/gears/c/curl.git?p=curl.git;a=tree;f=.gear
 
@@ -189,6 +189,7 @@ unless it is specific to Homebrew's way of packaging software.
 ## NixOS
 
 - curl: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/networking/curl/default.nix
+  (TODO: page has moved)
 - curl issues: https://github.com/NixOS/nixpkgs
 
 nixpkgs is the package repository used by the NixOS Linux distribution, but
