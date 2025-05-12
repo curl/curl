@@ -125,6 +125,9 @@
  13.16 Share the CA cache
  13.17 Add missing features to TLS backends
 
+ 14. Proxy
+ 14.1 Retry SOCKS handshake on address type not supported
+
  15. Schannel
  15.1 Extend support for client certificate authentication
  15.2 Extend support for the --ciphers option
@@ -911,6 +914,21 @@
  The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
  features are supported by which TLS backends, and thus also where there are
  feature gaps.
+
+14. Proxy
+
+14.1 Retry SOCKS handshake on address type not supported
+
+ When curl resolves a hostname, it might get a mix of IPv6 and IPv4 returned.
+ curl might then use an IPv6 address with a SOCKS5 proxy, which - if it does
+ not support IPv6 - returns "Address type not supported" and curl exits with
+ that error.
+
+ Perhaps it is preferred if curl would in this situation instead first retry
+ the SOCKS handshake again for this case and then use one of the IPv4
+ addresses for the target host.
+
+ See https://github.com/curl/curl/issues/17222
 
 15. Schannel
 
