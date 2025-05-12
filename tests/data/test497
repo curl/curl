@@ -27,6 +27,9 @@ Content-Type: text/html
 #
 # Client-side
 <client>
+<features>
+codeset-non-ascii
+</features>
 <server>
 http
 </server>

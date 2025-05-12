@@ -58,6 +58,7 @@ FTP through HTTPS-proxy, with connection reuse
 <features>
 http
 proxy
+codeset-non-ascii
 </features>
 </client>
 

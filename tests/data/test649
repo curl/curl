@@ -16,6 +16,7 @@ MULTIPART
 <client>
 <features>
 Mime
+codeset-non-ascii
 </features>
 <server>
 smtp

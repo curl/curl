@@ -29,6 +29,7 @@ Funny-head: yesyes
 <client>
 <features>
 !win32
+codeset-non-ascii
 </features>
 <server>
 http
