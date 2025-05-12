@@ -22,7 +22,7 @@ Further: it is *rarely* a good idea to just copy and paste an AI generated
 report to the project. Those generated reports typically are too wordy and
 rarely to the point (in addition to the common lies). If you actually find a
 problem with an AI and you have verified it yourself to be true: write the
-report yourself and explain the problem as you have learnt it. This makes sure
+report yourself and explain the problem as you have learned it. This makes sure
 the AI lies are filtered out early before they waste more people's time.
 
 We ban users immediately who submit made up fake reports to the project.
@@ -42,13 +42,13 @@ basic rule of thumb is that if someone can spot that the contribution was made
 with the help of AI, you have more work to do.
 
 We can accept code written with the help of AI into the project, but the code
-must still follow the code standards, be written clearely, be documented,
+must still follow the code standards, be written clearly, be documented,
 feature test cases and adhere to all the normal requirements we have.
 
 ## For translation
 
 Translation services help users write reports, texts and documentation in
-non-native languages and we encourge and welcome such contributors and
+non-native languages and we encourage and welcome such contributors and
 contributions.
 
 As AI-based translation tools sometimes have a way to make the output sound a
