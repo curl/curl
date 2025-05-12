@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 MULTIPART
+non-ascii
 </keywords>
 </info>
 
@@ -16,7 +17,6 @@ MULTIPART
 <client>
 <features>
 Mime
-codeset-non-ascii
 </features>
 <server>
 smtp

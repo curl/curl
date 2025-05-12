@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 followlocation
+non-ascii
 </keywords>
 </info>
 #
@@ -42,9 +43,6 @@ body
 #
 # Client-side
 <client>
-<features>
-codeset-non-ascii
-</features>
 <server>
 http
 </server>

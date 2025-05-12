@@ -5,6 +5,7 @@
 HTTP
 HTTP GET
 cookies
+non-ascii
 </keywords>
 </info>
 
@@ -33,7 +34,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/cookies%TESTNUMBER.txt
 </command>
 <features>
 cookies
-codeset-non-ascii
 </features>
 </client>
 

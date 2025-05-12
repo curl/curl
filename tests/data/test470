@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTP
+non-ascii
 </keywords>
 </info>
 
@@ -27,9 +28,6 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
-<features>
-codeset-non-ascii
-</features>
 <server>
 http
 </server>

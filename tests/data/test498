@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+non-ascii
 </keywords>
 </info>
 
@@ -28,9 +29,6 @@ Content-Type: text/html
 #
 # Client-side
 <client>
-<features>
-codeset-non-ascii
-</features>
 <server>
 http
 </server>

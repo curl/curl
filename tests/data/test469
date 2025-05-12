@@ -2,6 +2,7 @@
 <info>
 <keywords>
 HTTP
+non-ascii
 </keywords>
 </info>
 
@@ -29,7 +30,6 @@ Funny-head: yesyes
 <client>
 <features>
 !win32
-codeset-non-ascii
 </features>
 <server>
 http

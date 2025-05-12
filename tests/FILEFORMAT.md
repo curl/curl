@@ -226,6 +226,10 @@ Tests that have strict timing dependencies have the `timing-dependent` keyword.
 These are intended to eventually be treated specially on CI builds which are
 often run on overloaded machines with unpredictable timing.
 
+Tests using non-7-bit-ASCII characters, and not using features `Unicode` or
+`codeset-utf8`, need to add the `non-ascii` keyword to tell the code checker
+to allow these characters.
+
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes"]>`
@@ -440,7 +444,6 @@ Features testable here are:
 - `c-ares` - c-ares is used for (all) name resolves
 - `CharConv`
 - `codeset-utf8`. If the running codeset is UTF-8 capable.
-- `codeset-non-ascii`. Quasi-feature: indicates the test uses non-ascii, non-UTF8 characters
 - `cookies`
 - `crypto`
 - `Debug`

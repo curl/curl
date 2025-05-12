@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 cookies
 cookiejar
+non-ascii
 </keywords>
 </info>
 # Server-side
@@ -94,7 +95,6 @@ http://test31.curl:%HTTPPORT/we/want/%TESTNUMBER -b none -c %LOGDIR/jar%TESTNUMB
 <features>
 cookies
 local-http
-codeset-non-ascii
 </features>
 </client>
 

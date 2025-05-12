@@ -823,7 +823,6 @@ sub checksystemfeatures {
     $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
-    $feature{"codeset-non-ascii"} = 1;
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
