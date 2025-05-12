@@ -50,10 +50,9 @@ if($@) {
 eval "require LWP::UserAgent";
 
 my %urls = (
-    'nss'     => 'https://hg.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
-    'central' => 'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
-    'beta'    => 'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
-    'release' => 'https://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'autoland' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/autoland/security/nss/lib/ckfw/builtins/certdata.txt',
+    'beta'    => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/beta/security/nss/lib/ckfw/builtins/certdata.txt',
+    'release' => 'https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
