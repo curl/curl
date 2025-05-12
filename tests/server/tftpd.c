@@ -90,7 +90,7 @@
 #include "tftp.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 /*****************************************************************************
 *                      STRUCT DECLARATIONS AND DEFINES                       *

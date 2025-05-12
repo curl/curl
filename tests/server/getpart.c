@@ -25,19 +25,11 @@
 
 #include "getpart.h"
 
-#ifdef TEST
-#include "curl/curl.h"
-#include "warnless.h"
-#else
 #include <curlx.h> /* from the private lib dir */
-#endif
-
 #include "curl_memory.h"
 
-#ifndef TEST
 /* include memdebug.h last */
-#include "memdebug.h"
-#endif
+#include <memdebug.h>
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 
@@ -491,29 +483,3 @@ int getpart(char **outbuf, size_t *outlen,
 
   return error;
 }
-
-#ifdef TEST
-#include "../../lib/base64.c"
-#include "../../lib/warnless.c"
-/* Build with:
- * $ gcc getpart.c -DTEST -I../../include -I../../lib -DHAVE_CONFIG_H
- */
-int main(int argc, char **argv)
-{
-  if(argc < 3) {
-    printf("./getpart main sub\n");
-  }
-  else {
-    char  *part;
-    size_t partlen;
-    int rc = getpart(&part, &partlen, argv[1], argv[2], stdin);
-    size_t i;
-    if(rc)
-      return rc;
-    for(i = 0; i < partlen; i++)
-      printf("%c", part[i]);
-    free(part);
-  }
-  return 0;
-}
-#endif

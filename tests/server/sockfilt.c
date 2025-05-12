@@ -110,7 +110,7 @@
 #include "tool_binmode.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 /* buffer is this excessively large only to be able to support things like
   test 1003 which tests exceedingly large server response lines */

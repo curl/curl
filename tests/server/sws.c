@@ -56,7 +56,7 @@
 #include "server_sockaddr.h"
 
 /* include memdebug.h last */
-#include "memdebug.h"
+#include <memdebug.h>
 
 static bool use_gopher = FALSE;
 static bool is_proxy = FALSE;
