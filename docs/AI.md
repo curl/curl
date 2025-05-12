@@ -27,6 +27,12 @@ the AI lies are filtered out early before they waste more people's time.
 
 We ban users immediately who submit made up fake reports to the project.
 
+## Use of AI Tools for Issue Reporting
+
+Contributors are permitted to use AI tools to assist in drafting issue reports.
+If AI is used to help articulate the problem or complete an issue report template,
+it is not required to disclose this unless explicitly requested.
+
 ## For pull requests
 
 When contributing content to the curl project, you give us permission to use
