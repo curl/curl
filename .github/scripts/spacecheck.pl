@@ -54,7 +54,6 @@ my @non_ascii_allowed = (
     '\xC3\xB6',          # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
     '\xC2\xB1',          # UTF-8 for https://codepoints.net/U+00B1 PLUS-MINUS SIGN
     '\xC2\xA7',          # UTF-8 for https://codepoints.net/U+00A7 SECTION SIGN
-    '\xC3\x9F',          # UTF-8 for https://codepoints.net/U+00DF LATIN SMALL LETTER SHARP S
     '\xF0\x9F\x99\x8F',  # UTF-8 for https://codepoints.net/U+1f64f PERSON WITH FOLDED HANDS
 );
 
