@@ -48,6 +48,7 @@ INTERNALDOCS =                                  \
  internals/CLIENT-WRITERS.md                    \
  internals/CODE_STYLE.md                        \
  internals/CONNECTION-FILTERS.md                \
+ internals/CURLX.md                             \
  internals/DYNBUF.md                            \
  internals/HASH.md                              \
  internals/LLIST.md                             \
