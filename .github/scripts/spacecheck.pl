@@ -158,7 +158,10 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has binary contents";
     }
 
-    $content =~ s/[$non_ascii_allowed]//g;
+    if($filename !~ /tests\/data/) {
+        # the tests have no allowed UTF bytes
+        $content =~ s/[$non_ascii_allowed]//g;
+    }
 
     if(!fn_match($filename, @non_ascii) &&
        ($content =~ /([\x80-\xff]+)/)) {
