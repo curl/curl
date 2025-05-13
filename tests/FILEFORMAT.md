@@ -55,9 +55,11 @@ To insert a sequence of bytes from a hex encoded string, use this syntax:
 
     %hex[ %XX-encoded data to decode ]hex%
 
+Other bytes within the brackets that not percent encoded are inserted as-is.
+
 For example, to insert the binary octets 0, 1 and 255 into the test file:
 
-    %hex[ %00%01%FF ]hex%
+    %hex[%00%01%FF]hex%
 
 ## Repeat content
 
