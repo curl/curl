@@ -194,8 +194,9 @@ handle hostnames using non-ASCII characters.
 When built with libidn2, curl uses the IDNA 2008 standard. This is equivalent
 to the WHATWG URL spec, but differs from certain browsers that use IDNA 2003
 Transitional Processing. The two standards have a huge overlap but differ
-slightly, perhaps most famously in how they deal with the German "double s"
-(`ß`).
+slightly, perhaps most famously in how they deal with the
+[German "double s"](https://en.wikipedia.org/wiki/%c3%9f)
+([LATIN SMALL LETTER SHARP S](https://codepoints.net/U+00DF)).
 
 When WinIDN is used, curl uses IDNA 2003 Transitional Processing, like the rest
 of Windows.
