@@ -19,10 +19,11 @@ says. AI-based tools frequently generate inaccurate or fabricated results.
 
 Further: it is *rarely* a good idea to just copy and paste an AI generated
 report to the project. Those generated reports typically are too wordy and
-rarely to the point (in addition to the common fabricated details). If you actually find a
-problem with an AI and you have verified it yourself to be true: write the
-report yourself and explain the problem as you have learned it. This makes sure
-the AI-generated inaccuracies and invented issues are filtered out early before they waste more people's time.
+rarely to the point (in addition to the common fabricated details). If you
+actually find a problem with an AI and you have verified it yourself to be
+true: write the report yourself and explain the problem as you have learned
+it. This makes sure the AI-generated inaccuracies and invented issues are
+filtered out early before they waste more people's time.
 
 As we take security reports seriously, we investigate each report with
 priority. This work is both time and energy consuming and pulls us away from
