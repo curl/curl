@@ -28,8 +28,8 @@ the AI lies are filtered out early before they waste more people's time.
 As we take security reports seriously, we investigate each report with
 priority. This work is both time and energy consuming and pulls us away from
 doing other meaningful work. Fake and otherwise made up security problems
-effectively prevents us from doing real project work and makes us waste time
-and resources.
+effectively prevent us from doing real project work and make us waste time and
+resources.
 
 We ban users immediately who submit made up fake reports to the project.
 
