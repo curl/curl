@@ -2,7 +2,6 @@
 <info>
 <keywords>
 HTTP
-non-ascii
 </keywords>
 </info>
 
@@ -38,7 +37,7 @@ http
 warn about Unicode quote character
 </name>
 <command>
--H “host: %HOSTIP:%HTTPPORT/” -s
+-H %hex[%e2%80%9c]hex%host: %HOSTIP:%HTTPPORT/%hex[%e2%80%9c]hex% -s
 </command>
 </client>
 
