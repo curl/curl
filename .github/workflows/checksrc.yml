@@ -63,7 +63,7 @@ jobs:
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
             python3-typing-extensions python3-libcst python3-impacket \
             python3-websockets python3-pytest
-          python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.9.13 ruff==0.6.8
+          python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.10.11 ruff==0.11.9
 
       - name: spellcheck
         run: |
@@ -81,7 +81,7 @@ jobs:
         run: find . -name '*.py' -exec pytype -j auto -k {} +
 
       - name: ruff
-        run: ruff check --extend-select=B007,B016,C405,C416,COM818,D200,D213,D204,D401,D415,FURB129,N818,PERF401,PERF403,PIE790,PIE808,PLW0127,Q004,RUF010,SIM101,SIM117,SIM118,TRY400,TRY401
+        run: scripts/pythonlint.sh
 
   reuse:
     runs-on: ubuntu-latest
