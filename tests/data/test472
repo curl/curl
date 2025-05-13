@@ -39,7 +39,7 @@ Unicode
 aws-sigv4 with query
 </name>
 <command>
-"http://fake.fake.fake:8000/%TESTNUMBER/a=あ" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
+"http://fake.fake.fake:8000/%TESTNUMBER/a=%hex[%e3%81%82]hex%" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 

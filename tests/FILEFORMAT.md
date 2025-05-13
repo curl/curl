@@ -228,9 +228,8 @@ Tests that have strict timing dependencies have the `timing-dependent` keyword.
 These are intended to eventually be treated specially on CI builds which are
 often run on overloaded machines with unpredictable timing.
 
-Tests using non-7-bit-ASCII characters, and not using features `Unicode` or
-`codeset-utf8`, need to add the `non-ascii` keyword to tell the code checker
-to allow these characters.
+Tests using non-7-bit-ASCII characters must provide them with `%hex[]` or
+similar.
 
 ## `<reply>`
 

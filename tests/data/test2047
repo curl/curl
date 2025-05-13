@@ -52,7 +52,7 @@ Connection reuse with IDN host name over HTTP proxy
 </name>
 
 <command>
-http://åäö.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
+http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_redirects}\n%{size_download}\n%{url_effective}\n%{content_type}\n%{response_code}\n" -L
 </command>
 </client>
 
@@ -90,7 +90,7 @@ OK
 1
 1
 3
-http://åäö.se/%TESTNUMBER0001
+http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se/%TESTNUMBER0001
 text/plain; charset=us-ascii
 200
 </stdout>

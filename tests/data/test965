@@ -39,7 +39,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from Avsändaren@åäö.se -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from Avs%hex[%c3%a4]hex%ndaren@%hex[%c3%a5%c3%a4%c3%b6]hex%.se -T -
 </command>
 </client>
 
@@ -48,7 +48,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <verify>
 <protocol>
 EHLO %TESTNUMBER
-MAIL FROM:<Avsändaren@xn--4cab6c.se> SMTPUTF8
+MAIL FROM:<Avs%hex[%c3%a4]hex%ndaren@xn--4cab6c.se> SMTPUTF8
 RCPT TO:<recipient@example.com>
 DATA
 QUIT

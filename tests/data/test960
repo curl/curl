@@ -35,7 +35,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@åäö.se --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se --mail-from sender@example.com -T -
 </command>
 </client>
 
@@ -49,7 +49,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@åäö.se --mail-from
 <protocol>
 EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@åäö.se>
+RCPT TO:<recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se>
 QUIT
 </protocol>
 </verify>
