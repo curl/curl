@@ -243,7 +243,8 @@ static const struct testcase tests[] = {
   { "?*?*?.?",                  "abcdef.c",               MATCH },
   { "?*?*?.?",                  "abcdef.cd",              NOMATCH },
 
-  { "Lindmätarv",               "Lindmätarv",             MATCH },
+  /* https://codepoints.net/U+00F6 Latin Small Letter O with Diaeresis */
+  { "Lindm\xc3\xa4tarv",        "Lindm\xc3\xa4tarv",      MATCH },
 
   { "",                         "",                       MATCH},
   {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"

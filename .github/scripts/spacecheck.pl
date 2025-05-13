@@ -48,7 +48,6 @@ my @space_at_eol = (
 );
 
 my @non_ascii_allowed = (
-    '\xC3\xA4',  # UTF-8 for https://codepoints.net/U+00E4 LATIN SMALL LETTER A WITH DIAERESIS
     '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
 );
 
