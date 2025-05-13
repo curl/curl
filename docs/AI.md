@@ -11,8 +11,7 @@ These are guidelines for AI use when contributing to curl.
 ## For security reports and other issues
 
 If you asked an AI tool to find problems in curl, you **must** make sure to
-reveal this fact in your report because we have little faith in AI's ability
-to do this accurately.
+reveal this fact in your report.
 
 You must also double-check the findings carefully before reporting them to us
 to validate that the issues are indeed existing and working exactly as the AI
