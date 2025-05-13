@@ -68,7 +68,6 @@ my @non_ascii = (
     "docs/CIPHERS.md",
     "docs/THANKS",
     "docs/THANKS-filter",
-    "tests/libtest/lib1560.c",
 );
 
 sub fn_match {
