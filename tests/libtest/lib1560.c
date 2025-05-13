@@ -215,8 +215,10 @@ static const struct testcase get_parts_list[] ={
 #endif
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
-   "https | [11] | [12] | [13] | \xe2\x84\x82\xe1\xb5\xa4\xe2\x93\x87\xe2\x84\x92\xe3\x80\x82\xf0\x9d\x90\x92\xf0\x9f\x84\xb4 | [15] |"
-   " / | [16] | [17]",
+   "https | [11] | [12] | [13] | "
+   "\xe2\x84\x82\xe1\xb5\xa4\xe2\x93\x87\xe2\x84\x92"
+   "\xe3\x80\x82\xf0\x9d\x90\x92\xf0\x9f\x84\xb4"
+   " | [15] | / | [16] | [17]",
    0, 0, CURLUE_OK},
   {"https://"
    "%e2%84%82%e1%b5%a4%e2%93%87%e2%84%92%e3%80%82%f0%9d%90%92%f0%9f%84%b4",
