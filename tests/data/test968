@@ -34,7 +34,7 @@ LC_CTYPE=en_US.UTF-8
 SMTP VRFY with SMTPUTF8 support
 </name>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Användaren
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren
 </command>
 </client>
 
@@ -43,7 +43,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Användaren
 <verify>
 <protocol>
 EHLO %TESTNUMBER
-VRFY Användaren SMTPUTF8
+VRFY Anv%hex[%c3%a4]hex%ndaren SMTPUTF8
 QUIT
 </protocol>
 </verify>

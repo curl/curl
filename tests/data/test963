@@ -36,7 +36,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@åäö.se --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se --mail-from sender@example.com -T -
 </command>
 </client>
 

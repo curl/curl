@@ -40,7 +40,7 @@ LC_CTYPE=en_US.UTF-8
 HTTP over proxy with IDN host name
 </name>
 <command>
-http://www.åäö.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT http://www.große.de/page/%TESTNUMBER
+http://www.%hex[%c3%a5%c3%a4%c3%b6]hex%.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT http://www.gro%hex[%c3%9f]hex%e.de/page/%TESTNUMBER
 </command>
 </client>
 
