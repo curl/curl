@@ -50,8 +50,8 @@ basic rule of thumb is that if someone can spot that the contribution was made
 with the help of AI, you have more work to do.
 
 We can accept code written with the help of AI into the project, but the code
-must still follow the code standards, be written clearly, be documented,
-feature test cases and adhere to all the normal requirements we have.
+must still follow coding standards, be written clearly, be documented, feature
+test cases and adhere to all the normal requirements we have.
 
 ## For translation
 
