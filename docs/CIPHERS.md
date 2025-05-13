@@ -18,9 +18,9 @@ are names for specific combinations of
 and with TLSv1.3 the
 [authenticated encryption](https://en.wikipedia.org/wiki/Authenticated_encryption).
 In addition, there are other parameters that influence the TLS handshake, like
-[DHE](https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange) "groups" and
-[ECDHE](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman) with its
-"curves".
+[DHE](https://en.wikipedia.org/wiki/Diffie%e2%80%93Hellman_key_exchange) "groups"
+and [ECDHE](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%e2%80%93Hellman)
+with its "curves".
 
 ### History
 
