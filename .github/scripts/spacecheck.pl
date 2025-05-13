@@ -62,7 +62,6 @@ my @non_ascii = (
     ".mailmap",
     "RELEASE-NOTES",
     "docs/BINDINGS.md",
-    "docs/CIPHERS.md",
     "docs/THANKS",
     "docs/THANKS-filter",
 );
