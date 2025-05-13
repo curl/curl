@@ -336,8 +336,10 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     Curl_llist_append(&data->state.httphdrs, hs, &hs->node);
     data->state.prevhead = hs;
   }
-  else
+  else {
+    failf(data, "Invalid response header");
     free(hs);
+  }
   return result;
 }
 
