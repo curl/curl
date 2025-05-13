@@ -694,15 +694,15 @@ class TestUpload:
     # has a limit of 16k it announces
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
     @pytest.mark.parametrize("proto,upload_size,exp_early", [
-        ['http/1.1', 100, 203],        # headers+body
-        ['http/1.1', 10*1024, 10345],  # headers+body
-        ['http/1.1', 32*1024, 16384],  # headers+body, limited by server max
-        ['h2', 10*1024, 10378],        # headers+body
-        ['h2', 32*1024, 16384],        # headers+body, limited by server max
-        ['h3', 1024, 1126],            # headers+body (app data)
-        ['h3', 1024 * 1024, 131177],   # headers+body (long app data). The 0RTT
-                                       # size is limited by our sendbuf size
-                                       # of 128K.
+        pytest.param('http/1.1', 100, 203, id='h1-small-body'),
+        pytest.param('http/1.1', 10*1024, 10345, id='h1-medium-body'),
+        pytest.param('http/1.1', 32*1024, 16384, id='h1-limited-body'),
+        pytest.param('h2', 10*1024, 10378, id='h2-medium-body'),
+        pytest.param('h2', 32*1024, 16384, id='h2-limited-body'),
+        pytest.param('h3', 1024, 1126, id='h3-small-body'),
+        pytest.param('h3', 1024 * 1024, 131177, id='h3-limited-body'),
+        # h3: limited+body (long app data). The 0RTT size is limited by
+        # our sendbuf size of 128K.
     ])
     def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
         if not env.curl_can_early_data():

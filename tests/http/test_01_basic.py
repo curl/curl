@@ -261,11 +261,11 @@ class TestBasic:
 
     # http: special handling of TE request header
     @pytest.mark.parametrize("te_in, te_out", [
-        ['trailers', 'trailers'],
-        ['chunked', None],
-        ['gzip, trailers', 'trailers'],
-        ['gzip ;q=0.2;x="y,x", trailers', 'trailers'],
-        ['gzip ;x="trailers", chunks', None],
+        pytest.param('trailers', 'trailers', id='trailers'),
+        pytest.param('chunked', None, id='chunked'),
+        pytest.param('gzip, trailers', 'trailers', id='gzip+trailers'),
+        pytest.param('gzip ;q=0.2;x="y,x", trailers', 'trailers', id='gzip+q+x+trailers'),
+        pytest.param('gzip ;x="trailers", chunks', None, id='gzip+x+chunks'),
     ])
     def test_01_17_TE(self, env: Env, httpd, te_in, te_out):
         proto = 'h2'
