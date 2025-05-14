@@ -235,7 +235,8 @@ class TestFtpsVsFTPD:
         self.check_upload(env, vsftpds, docname=docname)
 
     @pytest.mark.parametrize("indata", [
-        '1234567890', ''
+        pytest.param('1234567890', id='10-bytes'),
+        pytest.param('', id='0-bytes'),
     ])
     def test_32_10_upload_stdin(self, env: Env, vsftpds: VsFTPD, indata):
         curl = CurlClient(env=env)

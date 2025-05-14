@@ -259,20 +259,13 @@ class TestBasic:
         else:
             r.check_exit_code(43)
 
-    TE_IN_17 = [
-        'trailers',
-        'chunked',
-        'gzip, trailers',
-        'gzip ;q=0.2;x="y,x", trailers',
-        'gzip ;x="trailers", chunks',
-    ]
     # http: special handling of TE request header
     @pytest.mark.parametrize("te_in, te_out", [
-        [0, 'trailers'],
-        [1, None],
-        [2, 'trailers'],
-        [3, 'trailers'],
-        [4, None],
+        pytest.param('trailers', 'trailers', id='trailers'),
+        pytest.param('chunked', None, id='chunked'),
+        pytest.param('gzip, trailers', 'trailers', id='gzip+trailers'),
+        pytest.param('gzip ;q=0.2;x="y,x", trailers', 'trailers', id='gzip+q+x+trailers'),
+        pytest.param('gzip ;x="trailers", chunks', None, id='gzip+x+chunks'),
     ])
     def test_01_17_TE(self, env: Env, httpd, te_in, te_out):
         proto = 'h2'
@@ -280,7 +273,7 @@ class TestBasic:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
                                with_headers=True,
-                               extra_args=['-H', f'TE: {self.TE_IN_17[te_in]}'])
+                               extra_args=['-H', f'TE: {te_in}'])
         r.check_response(200)
         if te_out is not None:
             assert r.responses[0]['header']['request-te'] == te_out, f'{r.responses[0]}'

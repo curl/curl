@@ -173,26 +173,29 @@ class TestSSLUse:
     @staticmethod
     def gen_test_17_07_list():
         tls13_tests = [
-            [None, True],
-            [['TLS_AES_128_GCM_SHA256'], True],
-            [['TLS_AES_256_GCM_SHA384'], False],
-            [['TLS_CHACHA20_POLY1305_SHA256'], True],
-            [['TLS_AES_256_GCM_SHA384',
-              'TLS_CHACHA20_POLY1305_SHA256'], True],
+            ['def', None, True],
+            ['AES128SHA256', ['TLS_AES_128_GCM_SHA256'], True],
+            ['AES128SHA384', ['TLS_AES_256_GCM_SHA384'], False],
+            ['CHACHA20SHA256', ['TLS_CHACHA20_POLY1305_SHA256'], True],
+            ['AES128SHA384+CHACHA20SHA256', ['TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256'], True],
         ]
         tls12_tests = [
-            [None, True],
-            [['ECDHE-ECDSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES128-GCM-SHA256'], True],
-            [['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384'], False],
-            [['ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
-            [['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384',
+            ['def', None, True],
+            ['AES128ish', ['ECDHE-ECDSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES128-GCM-SHA256'], True],
+            ['AES256ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384'], False],
+            ['CHACHA20ish', ['ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
+            ['AES256ish+CHACHA20ish', ['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384',
               'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
         ]
         ret = []
-        for tls_proto in ['TLSv1.3 +TLSv1.2', 'TLSv1.3', 'TLSv1.2']:
-            for [ciphers13, succeed13] in tls13_tests:
-                for [ciphers12, succeed12] in tls12_tests:
-                    ret.append([tls_proto, ciphers13, ciphers12, succeed13, succeed12])
+        for tls_id, tls_proto in {
+                'TLSv1.2+3': 'TLSv1.3 +TLSv1.2',
+                'TLSv1.2': 'TLSv1.3',
+                'TLSv1.3': 'TLSv1.2'}.items():
+            for [cid13, ciphers13, succeed13] in tls13_tests:
+                for [cid12, ciphers12, succeed12] in tls12_tests:
+                    id = f'{tls_id}-{cid13}-{cid12}'
+                    ret.append(pytest.param(tls_proto, ciphers13, ciphers12, succeed13, succeed12, id=id))
         return ret
 
     @pytest.mark.parametrize("tls_proto, ciphers13, ciphers12, succeed13, succeed12", gen_test_17_07_list())
@@ -450,23 +453,23 @@ class TestSSLUse:
         assert r.exit_code == 0, f'{r}'
 
     @pytest.mark.parametrize("priority, tls_proto, ciphers, success", [
-        ("", "", [], False),
-        ("NONSENSE", "", [], False),
-        ("+NONSENSE", "", [], False),
-        ("NORMAL:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True),
-        ("-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True),
-        ("NORMAL", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("NORMAL:-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("!CHACHA20-POLY1305", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True),
-        ("-CIPHER-ALL:+CHACHA20-POLY1305", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("-CIPHER-ALL:+AES-256-GCM", "", [], False),
-        ("-CIPHER-ALL:+AES-128-GCM", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True),
-        ("SECURE:-CIPHER-ALL:+AES-128-GCM:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-AES128-GCM-SHA256'], True),
-        ("-MAC-ALL:+SHA256", "", [], False),
-        ("-MAC-ALL:+AEAD", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("-GROUP-ALL:+GROUP-X25519", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True),
-        ("-GROUP-ALL:+GROUP-SECP192R1", "", [], False),
+        pytest.param("", "", [], False, id='prio-empty'),
+        pytest.param("NONSENSE", "", [], False, id='nonsense'),
+        pytest.param("+NONSENSE", "", [], False, id='+nonsense'),
+        pytest.param("NORMAL:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True, id='TLSv1.2-normal-only'),
+        pytest.param("-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-CHACHA20-POLY1305'], True, id='TLSv1.2-only'),
+        pytest.param("NORMAL", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-normal'),
+        pytest.param("NORMAL:-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-normal-only'),
+        pytest.param("-VERS-ALL:+VERS-TLS1.3", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-only'),
+        pytest.param("!CHACHA20-POLY1305", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True, id='TLSv1.3-no-chacha'),
+        pytest.param("-CIPHER-ALL:+CHACHA20-POLY1305", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-only-chacha'),
+        pytest.param("-CIPHER-ALL:+AES-256-GCM", "", [], False, id='only-AES256'),
+        pytest.param("-CIPHER-ALL:+AES-128-GCM", "TLSv1.3", ['TLS_AES_128_GCM_SHA256'], True, id='TLSv1.3-only-AES128'),
+        pytest.param("SECURE:-CIPHER-ALL:+AES-128-GCM:-VERS-ALL:+VERS-TLS1.2", "TLSv1.2", ['ECDHE-RSA-AES128-GCM-SHA256'], True, id='TLSv1.2-secure'),
+        pytest.param("-MAC-ALL:+SHA256", "", [], False, id='MAC-only-SHA256'),
+        pytest.param("-MAC-ALL:+AEAD", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-MAC-only-AEAD'),
+        pytest.param("-GROUP-ALL:+GROUP-X25519", "TLSv1.3", ['TLS_CHACHA20_POLY1305_SHA256'], True, id='TLSv1.3-group-only-X25519'),
+        pytest.param("-GROUP-ALL:+GROUP-SECP192R1", "", [], False, id='group-only-SECP192R1'),
         ])
     def test_17_18_gnutls_priority(self, env: Env, httpd, priority, tls_proto, ciphers, success):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
