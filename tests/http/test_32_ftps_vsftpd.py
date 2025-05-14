@@ -28,7 +28,6 @@ import difflib
 import filecmp
 import logging
 import os
-import re
 import shutil
 import pytest
 
