@@ -34,6 +34,7 @@ http
 <features>
 Debug
 Unicode
+aws
 </features>
 <name>
 aws-sigv4 with query

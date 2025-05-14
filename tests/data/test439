@@ -33,6 +33,7 @@ http
 </server>
 <features>
 Debug
+aws
 </features>
 <name>
 aws-sigv4 with query
