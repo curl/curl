@@ -163,9 +163,9 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl -O3 valgrind
-            install_packages: zlib1g-dev valgrind
-            configure: CFLAGS=-O3 --with-openssl --enable-debug
+          - name: openssl -O3 libssh valgrind
+            install_packages: zlib1g-dev libssh-dev valgrind
+            configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
