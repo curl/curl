@@ -36,6 +36,7 @@ http
 <features>
 SSL
 crypto
+aws
 </features>
 
 <name>

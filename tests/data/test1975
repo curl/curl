@@ -30,6 +30,7 @@ http
 SSL
 Debug
 crypto
+aws
 </features>
 <setenv>
 CURL_FORCEHOST=1

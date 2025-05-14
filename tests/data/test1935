@@ -37,6 +37,7 @@ http
 SSL
 Debug
 crypto
+aws
 </features>
 
 <name>
