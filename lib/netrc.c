@@ -220,7 +220,12 @@ static NETRCcode parsenetrc(struct store_netrc *store,
         }
       }
 
-      tok = curlx_dyn_ptr(&token);
+      if(curlx_dyn_len(&token))
+        tok = curlx_dyn_ptr(&token);
+      else
+        /* since tok might actually be NULL for no content, set it to blank
+           to avoid having to deal with it being NULL */
+        tok = "";
 
       switch(state) {
       case NOTHING:
@@ -247,7 +252,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
         }
         break;
       case MACDEF:
-        if(!tok || !*tok)
+        if(!*tok)
           state = NOTHING;
         break;
       case HOSTFOUND:
@@ -268,7 +273,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           else {
             our_login = TRUE;
             free(login);
-            login = strdup(tok ? tok : "");
+            login = strdup(tok);
             if(!login) {
               retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
               goto out;
