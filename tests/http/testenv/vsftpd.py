@@ -26,12 +26,14 @@
 #
 import logging
 import os
+import re
 import subprocess
 import time
 
 from datetime import datetime, timedelta
+from typing import List
 
-from .curl import CurlClient
+from .curl import CurlClient, ExecResult
 from .env import Env
 
 
@@ -118,7 +120,7 @@ class VsFTPD:
         self._process = subprocess.Popen(args=args, stderr=procerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
@@ -193,3 +195,11 @@ class VsFTPD:
                 ])
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))
+
+    def get_data_ports(self, r: ExecResult) -> List[int]:
+        data_ports = []
+        for line in r.trace_lines:
+            m = re.match(r'.*Connected 2nd connection to .* port (\d+)', line)
+            if m:
+                data_ports.append(int(m.group(1)))
+        return data_ports

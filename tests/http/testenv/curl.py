@@ -117,20 +117,22 @@ class RunTcpDump:
         self._stdoutfile = os.path.join(self._run_dir, 'tcpdump.out')
         self._stderrfile = os.path.join(self._run_dir, 'tcpdump.err')
 
+    def get_rsts(self, ports: List[int]|None = None) -> Optional[List[str]]:
+        if self._proc:
+            raise Exception('tcpdump still running')
+        lines = []
+        for line in open(self._stdoutfile):
+            m = re.match(r'.* IP 127\.0\.0\.1\.(\d+) [<>] 127\.0\.0\.1\.(\d+):.*', line)
+            if m:
+                sport = int(m.group(1))
+                dport = int(m.group(2))
+                if ports is None or sport in ports or dport in ports:
+                    lines.append(line)
+        return lines
+
     @property
     def stats(self) -> Optional[List[str]]:
-        if self._proc:
-            raise Exception('tcpdump still running')
-        return [line
-                for line in open(self._stdoutfile)
-                if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', line)]
-
-    def stats_excluding(self, src_port) -> Optional[List[str]]:
-        if self._proc:
-            raise Exception('tcpdump still running')
-        return [line
-                for line in self.stats
-                if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', line)]
+        return self.get_rsts()
 
     @property
     def stderr(self) -> List[str]:

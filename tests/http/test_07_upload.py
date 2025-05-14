@@ -32,7 +32,7 @@ import re
 import pytest
 from typing import List
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, CurlClient, LocalClient, ExecResult
 
 
 log = logging.getLogger(__name__)
@@ -518,7 +518,7 @@ class TestUpload:
         respdata = open(curl.response_file(0)).readlines()
         assert respdata == indata
 
-    def check_download(self, r, count, srcfile, curl):
+    def check_download(self, r: ExecResult, count: int, srcfile: str | os.PathLike, curl: CurlClient):
         for i in range(count):
             dfile = curl.download_file(i)
             assert os.path.exists(dfile), f'download {dfile} missing\n{r.dump_logs()}'

@@ -155,14 +155,14 @@ class Httpd:
             return False
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         self._loaded_proxy_auth = self._proxy_auth_basic
-        return self.wait_live(timeout=timedelta(seconds=30))
+        return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
     def stop(self):
         r = self._cmd_httpd('stop')
         self._loaded_extra_configs = None
         self._loaded_proxy_auth = None
         if r.exit_code == 0:
-            return self.wait_dead(timeout=timedelta(seconds=30))
+            return self.wait_dead(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         log.fatal(f'stopping httpd failed: {r}')
         return r.exit_code == 0
 
@@ -182,7 +182,7 @@ class Httpd:
             log.error(f'failed to reload httpd: {r}')
         self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         self._loaded_proxy_auth = self._proxy_auth_basic
-        return self.wait_live(timeout=timedelta(seconds=30))
+        return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
     def reload_if_config_changed(self):
         if self._loaded_extra_configs == self._extra_configs and \

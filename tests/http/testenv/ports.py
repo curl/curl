@@ -57,15 +57,25 @@ def alloc_port_sets(n: int, port_specs: Dict[str, int]) -> List[Dict[str, int]]:
     return port_sets
 
 
+def load_port_file(port_file, testrun_uid):
+    if os.path.exists(port_file):
+        with open(port_file) as f:
+            pjson = json.load(f)
+            try:
+                if 'testrun_uid' in pjson and \
+                        pjson['testrun_uid'] == str(testrun_uid):
+                    return pjson
+            except TypeError:
+                pass
+    return None
+
+
 def alloc_ports(config: pytest.Config,
                 gen_dir,
                 testrun_uid,
                 worker_id : str,
                 port_specs: Dict[str, int]) -> Dict[str, int]:
-    if "PYTEST_XDIST_WORKER_COUNT" in os.environ:
-        nworkers = int(os.environ["PYTEST_XDIST_WORKER_COUNT"])
-    else:
-        nworkers = 1
+    nworkers = int(os.environ.get("PYTEST_XDIST_WORKER_COUNT", 1))
     m = re.match(r'\D+(\d+)', worker_id)
     idx = int(m.group(1)) if m else 0
     assert idx < nworkers
@@ -73,17 +83,10 @@ def alloc_ports(config: pytest.Config,
     # a global locked allocation for all of them, store in a file
     #
     # `testrun_uid` is the pytest-xdist generated id of this run.
-    lock_file = os.path.join(gen_dir, 'allocated.ports.lock')
     port_file = os.path.join(gen_dir, 'allocated.ports')
+    lock_file = f'{port_file}.lock'
     with FileLock(lock_file):
-        port_json = None
-        if os.path.exists(port_file):
-            with open(port_file) as fd:
-                port_json = json.load(fd)
-            if 'testrun_uid' not in port_json or \
-                    port_json['testrun_uid'] != str(testrun_uid):
-                # file from other run or garbage file
-                port_json = None
+        port_json = load_port_file(port_file, testrun_uid)
         if port_json is None:
             # generate a complete port set for all workers
             port_json = {
@@ -92,7 +95,6 @@ def alloc_ports(config: pytest.Config,
             }
             with open(port_file, 'w') as fd:
                 fd.write(JSONEncoder().encode(port_json))
-
         assert port_json
         assert len(port_json['sets']) == nworkers
         return port_json['sets'][idx]

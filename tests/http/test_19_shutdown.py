@@ -55,20 +55,19 @@ class TestShutdown:
         if 'CURL_DEBUG' in run_env:
             del run_env['CURL_DEBUG']
         curl = CurlClient(env=env, run_env=run_env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
+        port = env.port_for(alpn_proto=proto)
+        url = f'https://{env.domain1}:{port}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
             '--parallel'
         ])
         r.check_response(http_status=200, count=2)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) != 0, f'Expected TCP RSTs packets: {r.tcpdump.stderr}'
+        assert len(r.tcpdump.get_rsts(ports=[port])) != 0, f'Expected TCP RSTs packets: {r.tcpdump.stderr}'
 
     # check with `tcpdump` that we do NOT see TCP RST when CURL_GRACEFUL_SHUTDOWN set
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_19_02_check_shutdown(self, env: Env, httpd, proto):
-        if env.parallel_testing:
-            pytest.skip('does not work in parallel testing')
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         run_env = os.environ.copy()
@@ -77,13 +76,14 @@ class TestShutdown:
             'CURL_DEBUG': 'ssl,tcp,lib-ids,multi'
         })
         curl = CurlClient(env=env, run_env=run_env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
+        port = env.port_for(alpn_proto=proto)
+        url = f'https://{env.domain1}:{port}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
             '--parallel'
         ])
         r.check_response(http_status=200, count=2)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.get_rsts(ports=[port])) == 0, 'Unexpected TCP RSTs packets'
 
     # run downloads where the server closes the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])

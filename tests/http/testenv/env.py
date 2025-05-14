@@ -315,6 +315,8 @@ class EnvConfig:
 
 class Env:
 
+    SERVER_TIMEOUT = 30  # seconds to wait for server to come up/reload
+
     CONFIG = EnvConfig()
 
     @staticmethod
@@ -492,10 +494,6 @@ class Env:
     @property
     def verbose(self) -> int:
         return self._verbose
-
-    @property
-    def parallel_testing(self) -> bool:
-        return Env.CONFIG.worker_id is not None and Env.CONFIG.worker_id != 'master'
 
     @property
     def test_timeout(self) -> Optional[float]:

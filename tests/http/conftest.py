@@ -102,7 +102,8 @@ def httpd(env) -> Generator[Httpd, None, None]:
         pytest.skip(f'httpd not found: {env.httpd}')
     httpd.clear_logs()
     if not httpd.start():
-        pytest.fail(f'failed to start httpd: {env.httpd}')
+        httpd.stop()
+        assert httpd.start(), f'failed to start httpd: {env.httpd}'
     yield httpd
     httpd.stop()
 

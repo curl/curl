@@ -92,7 +92,7 @@ class TestGoAway:
         # each request will take a second, reload the server in the middle
         # of the first one.
         time.sleep(1.5)
-        assert nghttpx.reload(timeout=timedelta(seconds=30))
+        assert nghttpx.reload(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         t.join()
         r: ExecResult = self.r
         # this should take `count` seconds to retrieve, maybe a little less

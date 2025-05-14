@@ -120,7 +120,7 @@ class Nghttpx:
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
                 running.wait(1)
-            return self.wait_live(timeout=timedelta(seconds=30))
+            return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
         return False
 
     def wait_dead(self, timeout: timedelta):
@@ -220,7 +220,7 @@ class NghttpxQuic(Nghttpx):
         self._process = subprocess.Popen(args=args, stderr=ngerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
 
 class NghttpxFwd(Nghttpx):
@@ -252,7 +252,7 @@ class NghttpxFwd(Nghttpx):
         self._process = subprocess.Popen(args=args, stderr=ngerr)
         if self._process.returncode is not None:
             return False
-        return not wait_live or self.wait_live(timeout=timedelta(seconds=30))
+        return not wait_live or self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
