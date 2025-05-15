@@ -54,6 +54,7 @@ CURLX_HFILES = \
   ../lib/curlx/warnless.h
 
 CURL_CFILES = \
+  config2setopts.c \
   slist_wc.c \
   terminal.c \
   tool_bname.c \
@@ -99,6 +100,7 @@ CURL_CFILES = \
   var.c
 
 CURL_HFILES = \
+  config2setopts.h \
   slist_wc.h \
   terminal.h \
   tool_binmode.h \
