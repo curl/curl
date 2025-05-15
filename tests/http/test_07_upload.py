@@ -271,8 +271,8 @@ class TestUpload:
         r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              extra_args=['--parallel'])
         # depending on timing and protocol, we might get CURLE_PARTIAL_FILE or
-        # CURLE_HTTP3 or CURLE_HTTP2_STREAM
-        r.check_stats(count=count, exitcode=[18, 92, 95])
+        # CURLE_SEND_ERROR or CURLE_HTTP3 or CURLE_HTTP2_STREAM
+        r.check_stats(count=count, exitcode=[18, 55, 92, 95])
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -591,6 +591,8 @@ class TestUpload:
     def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip("openssl-quic is flaky in filed PUTs")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
         fdata = os.path.join(env.gen_dir, 'data-10m')

@@ -67,8 +67,7 @@ class TestAuth:
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and not env.curl_uses_lib('ngtcp2') and \
-           env.curl_uses_lib('openssl'):
+        if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip("openssl-quic is flaky in retrying POST")
         data='0123456789'
         curl = CurlClient(env=env)
