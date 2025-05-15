@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
   CURL *hnd;
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "http://moo/");
   curl_easy_setopt(hnd, CURLOPT_PROXY, "http://%HOSTIP:%HTTPPORT");
@@ -81,10 +82,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_SSLVERSION, (long)(CURL_SSLVERSION_DEFAULT | CURL_SSLVERSION_MAX_TLSv1_3));
   curl_easy_setopt(hnd, CURLOPT_PROXY_SSLVERSION, (long)(CURL_SSLVERSION_TLSv1 | CURL_SSLVERSION_MAX_NONE));
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-%if ftp
-  curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-%endif
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
@@ -97,12 +94,12 @@ int main(int argc, char *argv[])
   CURLOPT_READFUNCTION was set to a function pointer
   CURLOPT_SEEKDATA was set to an object pointer
   CURLOPT_SEEKFUNCTION was set to a function pointer
-  CURLOPT_ERRORBUFFER was set to an object pointer
-  CURLOPT_STDERR was set to an object pointer
   CURLOPT_DEBUGFUNCTION was set to a function pointer
   CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_HEADERFUNCTION was set to a function pointer
   CURLOPT_HEADERDATA was set to an object pointer
+  CURLOPT_ERRORBUFFER was set to an object pointer
+  CURLOPT_STDERR was set to an object pointer
 
   */
 
