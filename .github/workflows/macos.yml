@@ -111,6 +111,7 @@ jobs:
             macos-version-min: '10.12'  # for monotonic timers
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
+            install_steps: pytest
             configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
           - name: 'LibreSSL +examples'
