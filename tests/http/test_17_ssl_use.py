@@ -190,8 +190,8 @@ class TestSSLUse:
         ret = []
         for tls_id, tls_proto in {
                 'TLSv1.2+3': 'TLSv1.3 +TLSv1.2',
-                'TLSv1.2': 'TLSv1.3',
-                'TLSv1.3': 'TLSv1.2'}.items():
+                'TLSv1.3': 'TLSv1.3',
+                'TLSv1.2': 'TLSv1.2'}.items():
             for [cid13, ciphers13, succeed13] in tls13_tests:
                 for [cid12, ciphers12, succeed12] in tls12_tests:
                     id = f'{tls_id}-{cid13}-{cid12}'
