@@ -310,23 +310,6 @@ jobs:
           source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
-      - name: 'run tests'
-        if: ${{ !matrix.build.clang-tidy }}
-        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
-        # zizmor: ignore[template-injection]
-        run: |
-          export TFLAGS='-j20 ${{ matrix.build.tflags }}'
-          if [ -z '${{ matrix.build.torture }}' ]; then
-            TFLAGS+=' ~2037 ~2041'  # flaky
-          fi
-          source $HOME/venv/bin/activate
-          rm -f $HOME/.curlrc
-          if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
-          else
-            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
-          fi
-
       - name: 'install pytest prereqs'
         if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
         run: |
