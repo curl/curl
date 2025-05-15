@@ -119,6 +119,17 @@ sub checkref {
     }
 }
 
+# option-looking words that aren't options
+my %allownonref = (
+    'CURLINFO_TEXT' => 1,
+    'CURLINFO_HEADER_IN' => 1,
+    'CURLINFO_HEADER_OUT' => 1,
+    'CURLINFO_DATA_IN' => 1,
+    'CURLINFO_DATA_OUT' => 1,
+    'CURLINFO_SSL_DATA_IN' => 1,
+    'CURLINFO_SSL_DATA_OUT' => 1,
+    );
+
 sub scanmanpage {
     my ($file) = @_;
     my $reqex = 0;
@@ -233,8 +244,12 @@ sub scanmanpage {
         }
         if(($_ =~ /\\f([BI])((libcurl|CURLOPT_|CURLSHOPT_|CURLINFO_|CURLMOPT_|curl_easy_|curl_multi_|curl_url|curl_mime|curl_global|curl_share)[a-zA-Z_0-9-]+)(.)/) &&
            ($4 ne "(")) {
-            print STDERR "$file:$line curl ref to $2 without section\n";
-            $errors++;
+            my $word = $2;
+
+            if(!$allownonref{$word}) {
+                print STDERR "$file:$line curl ref to $word without section\n";
+                $errors++;
+            }
         }
         if($_ =~ /(.*)\\f([^BIP])/) {
             my ($pre, $format) = ($1, $2);
