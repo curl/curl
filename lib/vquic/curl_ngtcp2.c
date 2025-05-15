@@ -89,6 +89,10 @@
  * Chunk size is large enough to take a full DATA frame */
 #define H3_STREAM_WINDOW_SIZE (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
+#if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
+#error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
+#endif
+
 /* The pool keeps spares around and half of a full stream windows
  * seems good. More does not seem to improve performance.
  * The benefit of the pool is that stream buffer to not keep
@@ -2108,6 +2112,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       }
     }
 
+    DEBUGASSERT(Curl_bufq_is_empty(&ctx->q.sendbuf));
     ctx->shutdown_started = TRUE;
     nwritten = ngtcp2_conn_write_connection_close(
       ctx->qconn, NULL, /* path */
@@ -2117,14 +2122,21 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
                 FMT_PRIu64 ") -> %d", ctx->last_error.type,
                 (curl_uint64_t)ctx->last_error.error_code, (int)nwritten);
+    /* there are cases listed in ngtcp2 documentation where this call
+     * may fail. Since we are doing a connection shutdown as graceful
+     * as we can, such an error is ignored here. */
     if(nwritten > 0) {
-      Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
-                      (size_t)nwritten, &result);
+      /* Ignore amount written. sendbuf was empty and has always room for
+       * NGTCP2_MAX_UDP_PAYLOAD_SIZE. It can only completely fail, in which
+       * case `result` is set non zero. */
+      (void)Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
+                            (size_t)nwritten, &result);
       if(result) {
         CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
                     "aborting shutdown", result);
         goto out;
       }
+
       ctx->q.no_gso = TRUE;
       ctx->q.gsolen = (size_t)nwritten;
       ctx->q.split_len = 0;
