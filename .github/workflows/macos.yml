@@ -111,7 +111,6 @@ jobs:
             macos-version-min: '10.12'  # for monotonic timers
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
-            install_steps: pytest
             configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
           - name: 'LibreSSL +examples'
@@ -120,7 +119,6 @@ jobs:
             configure: --enable-debug --with-openssl=$(brew --prefix libressl)
           - name: 'OpenSSL'
             compiler: clang
-            install_steps: pytest
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -142,6 +140,7 @@ jobs:
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
+            install_steps: pytest
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
