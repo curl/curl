@@ -1493,7 +1493,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
         }
       }
       else if(depunyfy) {
-        if(Curl_is_ASCII_name(u->host) && !strncmp("xn--", u->host, 4)) {
+        if(Curl_is_ASCII_name(u->host)) {
 #ifndef USE_IDN
           return CURLUE_LACKS_IDN;
 #else
@@ -1592,7 +1592,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
       }
     }
     else if(depunyfy) {
-      if(Curl_is_ASCII_name(u->host)  && !strncmp("xn--", u->host, 4)) {
+      if(Curl_is_ASCII_name(u->host)) {
 #ifndef USE_IDN
         return CURLUE_LACKS_IDN;
 #else
