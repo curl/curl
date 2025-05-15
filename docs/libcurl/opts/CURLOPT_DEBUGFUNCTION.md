@@ -51,11 +51,13 @@ Pass a pointer to your callback function, which should match the prototype
 shown above.
 
 CURLOPT_DEBUGFUNCTION(3) replaces the standard debug function used when
-CURLOPT_VERBOSE(3) is in effect. This callback receives debug
-information, as specified in the *type* argument. This function must
-return 0. The *data* pointed to by the char * passed to this function is
-not null-terminated, but is exactly of the *size* as told by the
-*size* argument.
+CURLOPT_VERBOSE(3) is in effect. This callback receives debug information, as
+specified in the *type* argument. This function must return 0. The *data*
+pointed to by the char * passed to this function is not null-terminated, but
+is exactly of the *size* as told by the *size* argument.
+
+**WARNING** this callback may receive sensitive contents from headers and
+data, including information sent as **CURLINFO_TEXT**.
 
 The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
 
