@@ -57,7 +57,7 @@ pointed to by the char * passed to this function is not null-terminated, but
 is exactly of the *size* as told by the *size* argument.
 
 **WARNING** this callback may receive sensitive contents from headers and
-data.
+data, including information sent as **CURLINFO_TEXT**.
 
 The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
 
