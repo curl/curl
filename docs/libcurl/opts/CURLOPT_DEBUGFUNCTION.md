@@ -56,7 +56,7 @@ specified in the *type* argument. This function must return 0. The *data*
 pointed to by the char * passed to this function is not null-terminated, but
 is exactly of the *size* as told by the *size* argument.
 
-**WARNING** this callback maye receive sensitive contents from headers and
+**WARNING** this callback may receive sensitive contents from headers and
 data.
 
 The *clientp* argument is the pointer set with CURLOPT_DEBUGDATA(3).
