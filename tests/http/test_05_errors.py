@@ -47,8 +47,8 @@ class TestErrors:
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=3&chunk_size=16000&body_error=reset'
+            f'/curltest/tweak?id=[0-{count - 1}]'\
+            '&chunks=3&chunk_size=16000&body_error=reset'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0'
         ])
@@ -69,8 +69,8 @@ class TestErrors:
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=5&chunk_size=16000&body_error=reset'
+            f'/curltest/tweak?id=[0-{count - 1}]'\
+            '&chunks=5&chunk_size=16000&body_error=reset'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0', '--parallel',
         ])
@@ -114,7 +114,7 @@ class TestErrors:
         count = 10 if proto == 'h2' else 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
-                f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
+            f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--parallel',
         ])

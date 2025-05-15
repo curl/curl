@@ -43,12 +43,13 @@ class TestGoAway:
         proto = 'h2'
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
@@ -79,12 +80,13 @@ class TestGoAway:
             pytest.skip('OpenSSL QUIC fails here')
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
@@ -109,13 +111,14 @@ class TestGoAway:
         proto = 'http/1.1'
         count = 3
         self.r = None
+
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             # pause 2 seconds between requests
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
-                   '&chunks=10&chunk_size=1024&chunk_delay=100ms'
+                f'/curltest/tweak?id=[0-{count - 1}]'\
+                '&chunks=10&chunk_size=1024&chunk_delay=100ms'
             self.r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
                 '--rate', '30/m',
             ])

@@ -259,7 +259,7 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=proxy_args)
+                                extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
         assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
@@ -268,7 +268,7 @@ class TestProxy:
         x2_args.append('--next')
         x2_args.extend(proxy_args)
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=x2_args)
+                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
         assert r2.total_connects == 1
 
@@ -284,7 +284,7 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=proxy_args)
+                                extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
         assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
@@ -294,7 +294,7 @@ class TestProxy:
         x2_args.extend(proxy_args)
         x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=x2_args)
+                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
         assert r2.total_connects == 2
 
@@ -310,7 +310,7 @@ class TestProxy:
         url = f'http://localhost:{env.http_port}/data.json'
         proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=proxy_args)
+                                extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
         assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
@@ -320,7 +320,7 @@ class TestProxy:
         x2_args.extend(proxy_args)
         x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=x2_args)
+                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
         assert r2.total_connects == 2
 
@@ -336,7 +336,7 @@ class TestProxy:
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=proxy_args)
+                                extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
         assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
             if tunnel == 'h2' else 'HTTP/1.1'
@@ -346,7 +346,7 @@ class TestProxy:
         x2_args.extend(proxy_args)
         x2_args.extend(['--tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
-                               extra_args=x2_args)
+                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
         assert r2.total_connects == 2
 
@@ -365,7 +365,7 @@ class TestProxy:
                                extra_args=xargs)
         if env.curl_uses_lib('mbedtls') and \
                 not env.curl_lib_version_at_least('mbedtls', '3.5.0'):
-            r.check_exit_code(60) # CURLE_PEER_FAILED_VERIFICATION
+            r.check_exit_code(60)  # CURLE_PEER_FAILED_VERIFICATION
         else:
             r.check_response(count=1, http_status=200,
                              protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')

@@ -74,7 +74,7 @@ class TestSSLUse:
         curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?'\
-               f'id=[0-{count-1}]&close'
+            f'id=[0-{count-1}]&close'
         r = curl.http_download(urls=[urln], alpn_proto=proto, with_stats=True,
                                extra_args=xargs)
         r.check_response(count=count, http_status=200)
@@ -190,15 +190,19 @@ class TestSSLUse:
                     ret.append(pytest.param(tls_proto, ciphers13, ciphers12, succeed13, succeed12, id=id))
         return ret
 
-    @pytest.mark.parametrize("tls_proto, ciphers13, ciphers12, succeed13, succeed12", gen_test_17_07_list())
-    def test_17_07_ssl_ciphers(self, env: Env, httpd, configures_httpd, tls_proto, ciphers13, ciphers12, succeed13, succeed12):
+    @pytest.mark.parametrize(
+        "tls_proto, ciphers13, ciphers12, succeed13, succeed12",
+        gen_test_17_07_list())
+    def test_17_07_ssl_ciphers(self, env: Env, httpd, configures_httpd,
+                               tls_proto, ciphers13, ciphers12,
+                               succeed13, succeed12):
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [
             'SSLCipherSuite SSL'
-                ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
-                ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
+            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+            ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
             'SSLCipherSuite TLSv1.3'
-                ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
+            ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
             f'SSLProtocol {tls_proto}'
         ])
         httpd.reload_if_config_changed()
@@ -391,7 +395,7 @@ class TestSSLUse:
     def test_17_15_session_export(self, env: Env, httpd):
         proto = 'http/1.1'
         if env.curl_uses_lib('libressl'):
-           pytest.skip('Libressl resumption does not work inTLSv1.3')
+            pytest.skip('Libressl resumption does not work inTLSv1.3')
         if env.curl_uses_lib('rustls-ffi'):
             pytest.skip('rustsls does not expose sessions')
         if env.curl_uses_lib('bearssl'):
@@ -467,10 +471,10 @@ class TestSSLUse:
         # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
         httpd.set_extra_config('base', [
             'SSLCipherSuite SSL'
-                ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
-                ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
+            ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+            ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
             'SSLCipherSuite TLSv1.3'
-                ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
+            ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'

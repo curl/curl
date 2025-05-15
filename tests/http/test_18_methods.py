@@ -62,6 +62,6 @@ class TestMethods:
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?id=[0-{count-1}]'\
-                '&chunks=1&chunk_size=0&chunk_delay=10ms'
+            '&chunks=1&chunk_size=0&chunk_delay=10ms'
         r = curl.http_delete(urls=[url], alpn_proto=proto)
         r.check_stats(count=count, http_status=204, exitcode=0)

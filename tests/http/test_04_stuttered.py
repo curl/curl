@@ -46,8 +46,8 @@ class TestStuttered:
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=100&chunk_size=100&chunk_delay=10ms'
+            f'/curltest/tweak?id=[0-{count - 1}]'\
+            '&chunks=100&chunk_size=100&chunk_delay=10ms'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=1, http_status=200)
 
@@ -63,8 +63,8 @@ class TestStuttered:
         curl = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count-1}]'\
-               '&chunks=100&chunk_size=100&chunk_delay=10ms'
+            f'/curltest/tweak?id=[0-{count-1}]'\
+            '&chunks=100&chunk_size=100&chunk_delay=10ms'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)
@@ -85,8 +85,8 @@ class TestStuttered:
         curl = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=1000&chunk_size=10&chunk_delay=100us'
+            f'/curltest/tweak?id=[0-{count - 1}]'\
+            '&chunks=1000&chunk_size=10&chunk_delay=100us'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)
@@ -107,8 +107,8 @@ class TestStuttered:
         curl = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
-               '&chunks=10000&chunk_size=1&chunk_delay=50us'
+            f'/curltest/tweak?id=[0-{count - 1}]'\
+            '&chunks=10000&chunk_size=1&chunk_delay=50us'
         r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)

@@ -147,7 +147,6 @@ class TestWebsockets:
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
         count = 10
-        large = 512 * 1024
         large = 20000
         r = client.run(args=['-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)

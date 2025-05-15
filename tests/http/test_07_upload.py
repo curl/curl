@@ -286,7 +286,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
-                             extra_args=['--parallel'])
+                          extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
@@ -306,7 +306,7 @@ class TestUpload:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=2ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
-                             extra_args=['--parallel'])
+                          extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
@@ -543,7 +543,7 @@ class TestUpload:
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after=0'
         r = client.run(['-V', proto, url])
-        if r.exit_code == 18: # PARTIAL_FILE is always ok
+        if r.exit_code == 18:  # PARTIAL_FILE is always ok
             pass
         elif proto == 'h2':
             # CURLE_HTTP2, CURLE_HTTP2_STREAM
@@ -600,7 +600,7 @@ class TestUpload:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?'\
             f'id=[0-{count-1}]&max_upload={max_upload}'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
-                             extra_args=['--trace-config', 'all'])
+                          extra_args=['--trace-config', 'all'])
         r.check_stats(count=count, http_status=413, exitcode=0)
 
     # speed limited on put handler
@@ -648,7 +648,7 @@ class TestUpload:
         read_delay = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
-              f'&read_delay={read_delay}s'
+            f'&read_delay={read_delay}s'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
             '--expect100-timeout', f'{read_delay+1}'
         ])
@@ -661,7 +661,7 @@ class TestUpload:
         read_delay = 2
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
-              f'&read_delay={read_delay}s'
+            f'&read_delay={read_delay}s'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
             '--expect100-timeout', f'{read_delay-1}'
         ])

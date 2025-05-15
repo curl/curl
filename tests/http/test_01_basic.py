@@ -156,7 +156,7 @@ class TestBasic:
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={48 * 1024}'
+            f'/curltest/tweak?x-hd={48 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
@@ -173,7 +173,7 @@ class TestBasic:
         httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={128 * 1024}'
+            f'/curltest/tweak?x-hd={128 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
@@ -191,7 +191,7 @@ class TestBasic:
         httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd1={128 * 1024}'
+            f'/curltest/tweak?x-hd1={128 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2
@@ -211,7 +211,7 @@ class TestBasic:
         httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={256 * 1024}'
+            f'/curltest/tweak?x-hd={256 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2
@@ -230,7 +230,7 @@ class TestBasic:
         httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd1={256 * 1024}'
+            f'/curltest/tweak?x-hd1={256 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2

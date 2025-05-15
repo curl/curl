@@ -89,8 +89,7 @@ class TestTracing:
             m = re.match(r'^([0-9:.]+) \[0-[0x]] .+ \[TCP].+', line)
             if m is not None:
                 found_tcp = True
-        if not found_tcp:
-            assert False, f'TCP filter does not appear in trace "all": {r.stderr}'
+        assert found_tcp, f'TCP filter does not appear in trace "all": {r.stderr}'
 
     # trace all, no TCP, no time
     def test_15_05_trace_all(self, env: Env, httpd):
