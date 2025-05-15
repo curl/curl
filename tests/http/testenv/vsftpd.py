@@ -197,9 +197,5 @@ class VsFTPD:
             fd.write("\n".join(conf))
 
     def get_data_ports(self, r: ExecResult) -> List[int]:
-        data_ports = []
-        for line in r.trace_lines:
-            m = re.match(r'.*Connected 2nd connection to .* port (\d+)', line)
-            if m:
-                data_ports.append(int(m.group(1)))
-        return data_ports
+        return [int(m.group(1)) for line in r.trace_lines if
+                (m := re.match(r'.*Connected 2nd connection to .* port (\d+)', line))]

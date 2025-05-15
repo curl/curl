@@ -83,7 +83,7 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=2)
         assert r.tcpdump
-        assert len(r.tcpdump.get_rsts(ports=[port])) == 0, 'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.get_rsts(ports=[port])) == 0, 'Unexpected TCP RST packets'
 
     # run downloads where the server closes the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])

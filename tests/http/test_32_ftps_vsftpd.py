@@ -170,7 +170,7 @@ class TestFtpsVsFTPD:
         # look only at ports from DATA connection.
         data_ports = vsftpds.get_data_ports(r)
         assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
-        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
@@ -188,7 +188,7 @@ class TestFtpsVsFTPD:
         # look only at ports from DATA connection.
         data_ports = vsftpds.get_data_ports(r)
         assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
-        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     def test_32_08_upload_ascii(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-ascii'
