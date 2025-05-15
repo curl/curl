@@ -140,7 +140,7 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-  win-gcc-libssh-zlibng-x86:
+  win-gcc-libssh-zlibold-x86:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
