@@ -24,16 +24,12 @@
 #
 ###########################################################################
 #
-import json
 import logging
 import os
-import re
 import socket
 from collections.abc import Callable
-from json import JSONEncoder
 from typing import Dict, List
 
-import pytest
 from filelock import FileLock
 
 log = logging.getLogger(__name__)

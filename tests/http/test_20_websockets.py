@@ -94,7 +94,7 @@ class TestWebsockets:
             self.wsproc = None
             return False
 
-        with open(err_file, 'w') as cerr:
+        with open(err_file, 'w') as self.cerr:
             assert alloc_ports_and_do(TestWebsockets.PORT_SPECS, startup,
                                       env.gen_root, max_tries=3)
             assert self.wsproc
