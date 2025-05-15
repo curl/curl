@@ -877,8 +877,6 @@ static int myssh_state_upload_init(struct Curl_easy *data,
           return rc;
         }
       } while(passed < data->state.resume_from);
-      if(rc)
-        return rc;
     }
 
     /* now, decrease the size of the read */
