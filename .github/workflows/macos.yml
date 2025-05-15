@@ -119,6 +119,7 @@ jobs:
             configure: --enable-debug --with-openssl=$(brew --prefix libressl)
           - name: 'OpenSSL'
             compiler: clang
+            install_steps: pytest
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
           - name: 'OpenSSL event-based'
             compiler: clang
