@@ -235,7 +235,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
-                                            `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
+                                            `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external). Default: `ON`
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
@@ -354,7 +354,6 @@ Details via CMake
 ## Dependencies
 
 - `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
-- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
@@ -367,7 +366,6 @@ Details via CMake
 - `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
-- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
 - `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
@@ -401,8 +399,6 @@ Details via CMake
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
-- `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory.
-- `BEARSSL_LIBRARY`:                        Path to `bearssl` library.
 - `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library.

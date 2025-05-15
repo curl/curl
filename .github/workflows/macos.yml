@@ -43,8 +43,6 @@ permissions: {}
 # - 10.9  Mavericks (2013)     - LDAP
 # - 10.14 Mojave (2018)        - Secure Transport
 #
-# For Secure Transport, curl implements features that require a target
-# newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
 
 env:
   MAKEFLAGS: -j 4
@@ -101,18 +99,6 @@ jobs:
               --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
-          - name: 'SecureTransport libssh2'
-            compiler: clang
-            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
-            macos-version-min: '10.8'
-          - name: 'SecureTransport libssh2 10.12'
-            compiler: clang
-            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
-            macos-version-min: '10.12'  # for monotonic timers
-          - name: 'SecureTransport libssh2'
-            compiler: gcc-12
-            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
-            macos-version-min: '10.8'
           - name: 'LibreSSL +examples'
             compiler: clang
             install: libressl
@@ -141,9 +127,6 @@ jobs:
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-          - name: 'SecureTransport debug'
-            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
-            macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
@@ -354,7 +337,7 @@ jobs:
             make -C bld examples V=1
           fi
 
-  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
+  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
@@ -365,7 +348,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [SecureTransport]  # also: OpenSSL
+        config:  # implied: OpenSSL
         compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
@@ -409,7 +392,6 @@ jobs:
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-15, compiler: 'llvm@15' }
           # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
           - { compiler: gcc-14, build: autotools }
     steps:
@@ -460,7 +442,6 @@ jobs:
 
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
-            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
@@ -482,7 +463,6 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
-            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \

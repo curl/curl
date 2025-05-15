@@ -574,13 +574,6 @@ sub checksystemfeatures {
                 $feature{"wolfssl"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sbearssl\b/i) {
-                $feature{"bearssl"} = 1;
-            }
-            elsif ($libcurl =~ /\ssecuretransport\b/i) {
-                $feature{"sectransp"} = 1;
-                $feature{"SSLpinning"} = 1;
-            }
             elsif ($libcurl =~ /\s(BoringSSL|AWS-LC)\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
