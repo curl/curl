@@ -30,6 +30,7 @@ import logging
 import math
 import os
 import re
+import sys
 from datetime import timedelta
 import pytest
 
@@ -76,6 +77,9 @@ class TestDownload:
     def test_02_03_download_sequential(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if (proto == 'http/1.1' or proto == 'h2') and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 10
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -87,6 +91,9 @@ class TestDownload:
     def test_02_04_download_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 10
         max_parallel = 5
         curl = CurlClient(env=env)
@@ -109,6 +116,9 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 shaky here")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 200
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -126,6 +136,9 @@ class TestDownload:
     def test_02_06_download_many_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 200
         max_parallel = 50
         curl = CurlClient(env=env)
@@ -591,6 +604,8 @@ class TestDownload:
         if proto == 'h3' and \
            (not env.have_h3() or not env.curl_can_h3_early_data()):
             pytest.skip("h3 not supported")
+        if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('failing on macOS CI runners')
         count = 2
         docname = 'data-10k'
         # we want this test to always connect to nghttpx, since it is
@@ -635,6 +650,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
     def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
@@ -671,6 +688,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
     def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50

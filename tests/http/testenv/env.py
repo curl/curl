@@ -33,7 +33,7 @@ import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import timedelta
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 import pytest
 from filelock import FileLock
@@ -330,6 +330,13 @@ class Env:
         return libname.lower() in Env.CONFIG.curl_props['libs']
 
     @staticmethod
+    def curl_uses_any_libs(libs: List[str]) -> bool:
+        for libname in libs:
+            if libname.lower() in Env.CONFIG.curl_props['libs']:
+                return True
+        return False
+
+    @staticmethod
     def curl_uses_ossl_quic() -> bool:
         if Env.have_h3_curl():
             return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
@@ -389,10 +396,7 @@ class Env:
 
     @staticmethod
     def curl_can_early_data() -> bool:
-        return Env.curl_uses_lib('gnutls') or \
-            Env.curl_uses_lib('wolfssl') or \
-            Env.curl_uses_lib('quictls') or \
-            Env.curl_uses_lib('openssl')
+        return Env.curl_uses_any_libs(['gnutls', 'wolfssl', 'quictls', 'openssl'])
 
     @staticmethod
     def curl_can_h3_early_data() -> bool:
