@@ -119,6 +119,7 @@ jobs:
             configure: --enable-debug --with-openssl=$(brew --prefix libressl)
           - name: 'OpenSSL'
             compiler: clang
+            install_steps: pytest
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
           - name: 'OpenSSL event-based'
             compiler: clang
@@ -127,6 +128,7 @@ jobs:
           - name: 'quictls libssh2 !ldap 10.15'
             compiler: clang
             install: quictls
+            install_steps: pytest
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix quictls) LDFLAGS="${LDFLAGS} -L$(brew --prefix quictls)/lib"
             macos-version-min: '10.15'
           # cmake
@@ -140,13 +142,13 @@ jobs:
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
-            install_steps: pytest
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
+            install_steps: pytest
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
