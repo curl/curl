@@ -44,7 +44,7 @@ class TestCaddy:
     @pytest.fixture(autouse=True, scope='class')
     def caddy(self, env):
         caddy = Caddy(env=env)
-        assert caddy.start()
+        assert caddy.initial_start()
         yield caddy
         caddy.stop()
 

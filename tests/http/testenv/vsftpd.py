@@ -27,15 +27,16 @@
 import logging
 import os
 import re
+import socket
 import subprocess
 import time
 
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Dict
 
 from .curl import CurlClient, ExecResult
 from .env import Env
-
+from .ports import alloc_ports_and_do
 
 log = logging.getLogger(__name__)
 
@@ -45,16 +46,23 @@ class VsFTPD:
     def __init__(self, env: Env, with_ssl=False, ssl_implicit=False):
         self.env = env
         self._cmd = env.vsftpd
+        self._port = 0
         self._with_ssl = with_ssl
         self._ssl_implicit = ssl_implicit and with_ssl
         self._scheme = 'ftps' if self._ssl_implicit else 'ftp'
         if self._with_ssl:
-            self._port = self.env.ftps_port
-            name = 'vsftpds'
+            self.name = 'vsftpds'
+            self._port_skey = 'ftps'
+            self._port_specs = {
+                'ftps': socket.SOCK_STREAM,
+            }
         else:
-            self._port = self.env.ftp_port
-            name = 'vsftpd'
-        self._vsftpd_dir = os.path.join(env.gen_dir, name)
+            self.name = 'vsftpd'
+            self._port_skey = 'ftp'
+            self._port_specs = {
+                'ftp': socket.SOCK_STREAM,
+            }
+        self._vsftpd_dir = os.path.join(env.gen_dir, self.name)
         self._run_dir = os.path.join(self._vsftpd_dir, 'run')
         self._docs_dir = os.path.join(self._vsftpd_dir, 'docs')
         self._tmp_dir = os.path.join(self._vsftpd_dir, 'tmp')
@@ -107,7 +115,22 @@ class VsFTPD:
         self.stop()
         return self.start()
 
+    def initial_start(self):
+
+        def startup(ports: Dict[str, int]) -> bool:
+            self._port = ports[self._port_skey]
+            if self.start():
+                self.env.update_ports(ports)
+                return True
+            self.stop()
+            self._port = 0
+            return False
+
+        return alloc_ports_and_do(self._port_specs, startup,
+                                  self.env.gen_root, max_tries=3)
+
     def start(self, wait_live=True):
+        assert self._port > 0
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()

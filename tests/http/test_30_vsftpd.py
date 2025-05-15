@@ -43,7 +43,7 @@ class TestVsFTPD:
     @pytest.fixture(autouse=True, scope='class')
     def vsftpd(self, env):
         vsftpd = VsFTPD(env=env)
-        assert vsftpd.start()
+        assert vsftpd.initial_start()
         yield vsftpd
         vsftpd.stop()
 

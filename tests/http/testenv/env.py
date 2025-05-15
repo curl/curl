@@ -34,13 +34,12 @@ import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, Dict
 
 import pytest
 from filelock import FileLock
 
 from .certs import CertificateSpec, Credentials, TestCA
-from .ports import alloc_ports
 
 
 log = logging.getLogger(__name__)
@@ -61,21 +60,6 @@ CURL = os.path.join(TOP_PATH, 'src', 'curl')
 
 
 class EnvConfig:
-
-    PORT_SPECS = {
-        'ftp': socket.SOCK_STREAM,
-        'ftps': socket.SOCK_STREAM,
-        'http': socket.SOCK_STREAM,
-        'https': socket.SOCK_STREAM,
-        'https-tcp-only': socket.SOCK_STREAM,
-        'nghttpx_https': socket.SOCK_STREAM,
-        'proxy': socket.SOCK_STREAM,
-        'proxys': socket.SOCK_STREAM,
-        'h2proxys': socket.SOCK_STREAM,
-        'caddy': socket.SOCK_STREAM,
-        'caddys': socket.SOCK_STREAM,
-        'ws': socket.SOCK_STREAM,
-    }
 
     def __init__(self, pytestconfig: Optional[pytest.Config] = None,
                  testrun_uid=None,
@@ -140,12 +124,6 @@ class EnvConfig:
                 }
 
         self.ports = {}
-        if self.pytestconfig:
-            self.ports = alloc_ports(self.pytestconfig,
-                                     os.path.join(self.tests_dir, 'gen'),
-                                     self.testrun_uid,
-                                     self.worker_id,
-                                     port_specs=EnvConfig.PORT_SPECS)
 
         self.httpd = self.config['httpd']['httpd']
         self.apxs = self.config['httpd']['apxs']
@@ -508,6 +486,10 @@ class Env:
         return self.CONFIG.gen_dir
 
     @property
+    def gen_root(self) -> str:
+        return self.CONFIG.gen_root
+
+    @property
     def project_dir(self) -> str:
         return self.CONFIG.project_dir
 
@@ -552,8 +534,15 @@ class Env:
         return self.CONFIG.expired_domain
 
     @property
+    def ports(self) -> Dict[str, int]:
+        return self.CONFIG.ports
+
+    def update_ports(self, ports: Dict[str, int]):
+        self.CONFIG.ports.update(ports)
+
+    @property
     def http_port(self) -> int:
-        return self.CONFIG.ports['http']
+        return self.CONFIG.ports.get('http', 0)
 
     @property
     def https_port(self) -> int:

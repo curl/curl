@@ -101,9 +101,7 @@ def httpd(env) -> Generator[Httpd, None, None]:
     if not httpd.exists():
         pytest.skip(f'httpd not found: {env.httpd}')
     httpd.clear_logs()
-    if not httpd.start():
-        httpd.stop()
-        assert httpd.start(), f'failed to start httpd: {env.httpd}'
+    assert httpd.initial_start()
     yield httpd
     httpd.stop()
 
@@ -113,7 +111,7 @@ def nghttpx(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
     if nghttpx.exists() and env.have_h3():
         nghttpx.clear_logs()
-        assert nghttpx.start()
+        assert nghttpx.initial_start()
         yield nghttpx
         nghttpx.stop()
     else:
@@ -125,7 +123,7 @@ def nghttpx_fwd(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
     nghttpx = NghttpxFwd(env=env)
     if nghttpx.exists():
         nghttpx.clear_logs()
-        assert nghttpx.start()
+        assert nghttpx.initial_start()
         yield nghttpx
         nghttpx.stop()
     else:
