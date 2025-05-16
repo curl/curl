@@ -1184,7 +1184,10 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
 out:
   if(result) {
     Curl_safefree(*pcf);
-    Curl_safefree(ctx);
+    if(ctx) {
+      Curl_resolv_unlink(data, &ctx->remotehost);
+      free(ctx);
+    }
   }
   return result;
 }
@@ -1441,7 +1444,10 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 
 out:
   *pcf = result ? NULL : cf;
-  free(ctx);
+  if(ctx) {
+    Curl_resolv_unlink(data, &ctx->remotehost);
+    free(ctx);
+  }
   return result;
 }
 
