@@ -587,37 +587,49 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(per->retry_sleep > RETRY_SLEEP_MAX)
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
+
       if(outs->bytes && outs->filename && outs->stream) {
-        /* We have written data to an output file, we truncate file
-         */
-        notef(config->global,
-              "Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
-              outs->bytes);
-        fflush(outs->stream);
-        /* truncate file at the position where we started appending */
+#ifndef __MINGW32CE__
+        struct_stat fileinfo;
+
+        /* The output can be a named pipe or a character device etc that
+           cannot be truncated. Only truncate regular files. */
+        if(!fstat(fileno(outs->stream), &fileinfo) &&
+           S_ISREG(fileinfo.st_mode))
+#else
+          /* Windows CE's fileno() is bad so just skip the check */
+#endif
+        {
+          /* We have written data to an output file, we truncate file */
+          fflush(outs->stream);
+          notef(config->global,
+                "Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
+                outs->bytes);
+          /* truncate file at the position where we started appending */
 #if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__) && \
   !defined(__MINGW32CE__)
-        if(ftruncate(fileno(outs->stream), outs->init)) {
-          /* when truncate fails, we cannot just append as then we will
-             create something strange, bail out */
-          errorf(config->global, "Failed to truncate file");
-          return CURLE_WRITE_ERROR;
-        }
-        /* now seek to the end of the file, the position where we
-           just truncated the file in a large file-safe way */
-        rc = fseek(outs->stream, 0, SEEK_END);
+          if(ftruncate(fileno(outs->stream), outs->init)) {
+            /* when truncate fails, we cannot just append as then we will
+               create something strange, bail out */
+            errorf(config->global, "Failed to truncate file");
+            return CURLE_WRITE_ERROR;
+          }
+          /* now seek to the end of the file, the position where we
+             just truncated the file in a large file-safe way */
+          rc = fseek(outs->stream, 0, SEEK_END);
 #else
-        /* ftruncate is not available, so just reposition the file
-           to the location we would have truncated it. This will not
-           work properly with large files on 32-bit systems, but
-           most of those will have ftruncate. */
-        rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
+          /* ftruncate is not available, so just reposition the file
+             to the location we would have truncated it. This will not
+             work properly with large files on 32-bit systems, but
+             most of those will have ftruncate. */
+          rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
 #endif
-        if(rc) {
-          errorf(config->global, "Failed seeking to end of file");
-          return CURLE_WRITE_ERROR;
+          if(rc) {
+            errorf(config->global, "Failed seeking to end of file");
+            return CURLE_WRITE_ERROR;
+          }
+          outs->bytes = 0; /* clear for next round */
         }
-        outs->bytes = 0; /* clear for next round */
       }
       *retryp = TRUE;
       per->num_retries++;
