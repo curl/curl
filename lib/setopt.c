@@ -255,6 +255,7 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_HTTP
 static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
 {
   /*
@@ -291,6 +292,7 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
   data->set.httpwant = (unsigned char)arg;
   return CURLE_OK;
 }
+#endif /* ! CURL_DISABLE_HTTP */
 
 #ifdef USE_SSL
 static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
