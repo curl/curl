@@ -49,7 +49,7 @@ class TestWebsockets:
         'ws': socket.SOCK_STREAM,
     }
 
-    def check_alive(self, env, port, timeout=5):
+    def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
         curl = CurlClient(env=env)
         url = f'http://localhost:{port}/'
         end = datetime.now() + timedelta(seconds=timeout)
