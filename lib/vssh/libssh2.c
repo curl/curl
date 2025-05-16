@@ -3654,9 +3654,9 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
 
     if(sshc->ssh_channel) {
       rc = libssh2_channel_free(sshc->ssh_channel);
-      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
-        return rc;
-      }
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
+        return CURLE_AGAIN;
+
       if((rc < 0) && data) {
         char *err_msg = NULL;
         (void)libssh2_session_last_error(sshc->ssh_session,
@@ -3669,9 +3669,9 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
 
     if(sshc->sftp_session) {
       rc = libssh2_sftp_shutdown(sshc->sftp_session);
-      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
-        return rc;
-      }
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
+        return CURLE_AGAIN;
+
       if((rc < 0) && data)
         infof(data, "Failed to stop libssh2 sftp subsystem");
       sshc->sftp_session = NULL;
@@ -3679,9 +3679,9 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
 
     if(sshc->ssh_session) {
       rc = libssh2_session_free(sshc->ssh_session);
-      if(!block && (rc == LIBSSH2_ERROR_EAGAIN)) {
-        return rc;
-      }
+      if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
+        return CURLE_AGAIN;
+
       if((rc < 0) && data) {
         char *err_msg = NULL;
         (void)libssh2_session_last_error(sshc->ssh_session,
@@ -3706,7 +3706,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     Curl_safefree(sshc->homedir);
     sshc->initialised = FALSE;
   }
-  return 0;
+  return CURLE_OK;
 }
 
 
@@ -3729,7 +3729,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   }
 
   if(sshc)
-    sshc_cleanup(sshc, data, TRUE);
+    return sshc_cleanup(sshc, data, TRUE);
   return result;
 }
 
