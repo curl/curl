@@ -649,7 +649,6 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   size_t alpn_count = 0;
   CURLcode result = CURLE_OK;
   struct Curl_cfilter cf_fake, *cf = NULL;
-  struct Curl_dns_entry *dns = conn->dns_entry[sockindex];
 
   (void)sockindex;
   /* we want to log for the filter before we create it, fake it. */
@@ -663,6 +662,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      * We are here after having selected a connection to a host+port and
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
+    struct Curl_dns_entry *dns = conn->dns_entry[sockindex];
     struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
     if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
        (!rr->target ||      /* for same host */
