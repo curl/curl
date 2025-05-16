@@ -240,15 +240,19 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
+          echo '--------------------'
+          cat "$(brew --prefix)/etc/vsftpd.conf"
+          echo '--------------------'
+
           if [ -n '${{ matrix.build.generate }}' ]; then
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
-              if [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]]; then
-                #options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
-                # Skip ~20 tests that stretch run time by 7x on macOS
-                options+=' -DVSFTPD=NO'
-              fi
+              #if [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]]; then
+              #  #options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
+              #  # Skip ~20 tests that stretch run time by 7x on macOS
+              #  options+=' -DVSFTPD=NO'
+              #fi
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
@@ -271,11 +275,11 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
-            if [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]]; then
-              #options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
-              # Skip ~20 tests that stretch run time by 7x on macOS
-              options+=' --with-test-vsftpd=no'
-            fi
+            #if [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]]; then
+            #  #options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
+            #  # Skip ~20 tests that stretch run time by 7x on macOS
+            #  options+=' --with-test-vsftpd=no'
+            #fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
