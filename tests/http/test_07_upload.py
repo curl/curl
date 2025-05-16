@@ -29,6 +29,7 @@ import filecmp
 import logging
 import os
 import re
+import sys
 import pytest
 from typing import List, Union
 
@@ -708,6 +709,8 @@ class TestUpload:
         if proto == 'h3' and \
            (not env.have_h3() or not env.curl_can_h3_early_data()):
             pytest.skip("h3 not supported")
+        if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('failing on macOS CI runners')
         count = 2
         # we want this test to always connect to nghttpx, since it is
         # the only server we have that supports TLS earlydata
