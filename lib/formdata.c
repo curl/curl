@@ -201,6 +201,144 @@ static struct FormInfo *AddFormInfo(char *value,
  *
  ***************************************************************************/
 
+static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
+                                 struct curl_httppost **httppost,
+                                 struct curl_httppost **last_post)
+{
+  const char *prevtype = NULL;
+  CURLFORMcode return_value = CURL_FORMADD_OK;
+  struct FormInfo *form = NULL;
+  struct curl_httppost *post = NULL;
+
+  /* go through the list, check for completeness and if everything is
+   * alright add the HttpPost item otherwise set return_value accordingly */
+
+  for(form = first_form;
+      form != NULL;
+      form = form->more) {
+    if(((!form->name || !form->value) && !post) ||
+       ( (form->contentslength) &&
+         (form->flags & HTTPPOST_FILENAME) ) ||
+       ( (form->flags & HTTPPOST_FILENAME) &&
+         (form->flags & HTTPPOST_PTRCONTENTS) ) ||
+
+       ( (!form->buffer) &&
+         (form->flags & HTTPPOST_BUFFER) &&
+         (form->flags & HTTPPOST_PTRBUFFER) ) ||
+
+       ( (form->flags & HTTPPOST_READFILE) &&
+         (form->flags & HTTPPOST_PTRCONTENTS) )
+      ) {
+      return_value = CURL_FORMADD_INCOMPLETE;
+      break;
+    }
+    if(((form->flags & HTTPPOST_FILENAME) ||
+        (form->flags & HTTPPOST_BUFFER)) &&
+       !form->contenttype) {
+      char *f = (form->flags & HTTPPOST_BUFFER) ?
+        form->showfilename : form->value;
+      char const *type;
+      type = Curl_mime_contenttype(f);
+      if(!type)
+        type = prevtype;
+      if(!type)
+        type = FILE_CONTENTTYPE_DEFAULT;
+
+      /* our contenttype is missing */
+      form->contenttype = strdup(type);
+      if(!form->contenttype) {
+        return_value = CURL_FORMADD_MEMORY;
+        break;
+      }
+      form->contenttype_alloc = TRUE;
+    }
+    if(form->name && form->namelength) {
+      /* Name should not contain nul bytes. */
+      size_t i;
+      for(i = 0; i < form->namelength; i++)
+        if(!form->name[i]) {
+          return_value = CURL_FORMADD_NULL;
+          break;
+        }
+      if(return_value != CURL_FORMADD_OK)
+        break;
+    }
+    if(!(form->flags & HTTPPOST_PTRNAME) &&
+       (form == first_form) ) {
+      /* Note that there is small risk that form->name is NULL here if the
+         app passed in a bad combo, so we better check for that first. */
+      if(form->name) {
+        /* copy name (without strdup; possibly not null-terminated) */
+        form->name = Curl_memdup0(form->name, form->namelength ?
+                                  form->namelength :
+                                  strlen(form->name));
+      }
+      if(!form->name) {
+        return_value = CURL_FORMADD_MEMORY;
+        break;
+      }
+      form->name_alloc = TRUE;
+    }
+    if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
+                        HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
+                        HTTPPOST_CALLBACK)) && form->value) {
+      /* copy value (without strdup; possibly contains null characters) */
+      size_t clen  = (size_t) form->contentslength;
+      if(!clen)
+        clen = strlen(form->value) + 1;
+
+      form->value = Curl_memdup(form->value, clen);
+
+      if(!form->value) {
+        return_value = CURL_FORMADD_MEMORY;
+        break;
+      }
+      form->value_alloc = TRUE;
+    }
+    post = AddHttpPost(form->name, form->namelength,
+                       form->value, form->contentslength,
+                       form->buffer, form->bufferlength,
+                       form->contenttype, form->flags,
+                       form->contentheader, form->showfilename,
+                       form->userp,
+                       post, httppost,
+                       last_post);
+
+    if(!post) {
+      return_value = CURL_FORMADD_MEMORY;
+      break;
+    }
+
+    if(form->contenttype)
+      prevtype = form->contenttype;
+  }
+  if(CURL_FORMADD_OK != return_value) {
+    /* On error, free allocated fields for nodes of the FormInfo linked
+       list which are not already owned by the httppost linked list
+       without deallocating nodes. List nodes are deallocated later on */
+    struct FormInfo *ptr;
+    for(ptr = form; ptr != NULL; ptr = ptr->more) {
+      if(ptr->name_alloc) {
+        Curl_safefree(ptr->name);
+        ptr->name_alloc = FALSE;
+      }
+      if(ptr->value_alloc) {
+        Curl_safefree(ptr->value);
+        ptr->value_alloc = FALSE;
+      }
+      if(ptr->contenttype_alloc) {
+        Curl_safefree(ptr->contenttype);
+        ptr->contenttype_alloc = FALSE;
+      }
+      if(ptr->showfilename_alloc) {
+        Curl_safefree(ptr->showfilename);
+        ptr->showfilename_alloc = FALSE;
+      }
+    }
+  }
+  return return_value;
+}
+
 static
 CURLFORMcode FormAdd(struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
@@ -208,8 +346,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 {
   struct FormInfo *first_form, *current_form, *form = NULL;
   CURLFORMcode return_value = CURL_FORMADD_OK;
-  const char *prevtype = NULL;
-  struct curl_httppost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
   char *array_value = NULL; /* value read from an array */
@@ -542,133 +678,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   }
 
   if(CURL_FORMADD_OK == return_value) {
-    /* go through the list, check for completeness and if everything is
-     * alright add the HttpPost item otherwise set return_value accordingly */
-
-    post = NULL;
-    for(form = first_form;
-        form != NULL;
-        form = form->more) {
-      if(((!form->name || !form->value) && !post) ||
-         ( (form->contentslength) &&
-           (form->flags & HTTPPOST_FILENAME) ) ||
-         ( (form->flags & HTTPPOST_FILENAME) &&
-           (form->flags & HTTPPOST_PTRCONTENTS) ) ||
-
-         ( (!form->buffer) &&
-           (form->flags & HTTPPOST_BUFFER) &&
-           (form->flags & HTTPPOST_PTRBUFFER) ) ||
-
-         ( (form->flags & HTTPPOST_READFILE) &&
-           (form->flags & HTTPPOST_PTRCONTENTS) )
-        ) {
-        return_value = CURL_FORMADD_INCOMPLETE;
-        break;
-      }
-      if(((form->flags & HTTPPOST_FILENAME) ||
-          (form->flags & HTTPPOST_BUFFER)) &&
-         !form->contenttype) {
-        char *f = (form->flags & HTTPPOST_BUFFER) ?
-          form->showfilename : form->value;
-        char const *type;
-        type = Curl_mime_contenttype(f);
-        if(!type)
-          type = prevtype;
-        if(!type)
-          type = FILE_CONTENTTYPE_DEFAULT;
-
-        /* our contenttype is missing */
-        form->contenttype = strdup(type);
-        if(!form->contenttype) {
-          return_value = CURL_FORMADD_MEMORY;
-          break;
-        }
-        form->contenttype_alloc = TRUE;
-      }
-      if(form->name && form->namelength) {
-        /* Name should not contain nul bytes. */
-        size_t i;
-        for(i = 0; i < form->namelength; i++)
-          if(!form->name[i]) {
-            return_value = CURL_FORMADD_NULL;
-            break;
-          }
-        if(return_value != CURL_FORMADD_OK)
-          break;
-      }
-      if(!(form->flags & HTTPPOST_PTRNAME) &&
-         (form == first_form) ) {
-        /* Note that there is small risk that form->name is NULL here if the
-           app passed in a bad combo, so we better check for that first. */
-        if(form->name) {
-          /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_memdup0(form->name, form->namelength ?
-                                    form->namelength :
-                                    strlen(form->name));
-        }
-        if(!form->name) {
-          return_value = CURL_FORMADD_MEMORY;
-          break;
-        }
-        form->name_alloc = TRUE;
-      }
-      if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
-                          HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
-                          HTTPPOST_CALLBACK)) && form->value) {
-        /* copy value (without strdup; possibly contains null characters) */
-        size_t clen  = (size_t) form->contentslength;
-        if(!clen)
-          clen = strlen(form->value) + 1;
-
-        form->value = Curl_memdup(form->value, clen);
-
-        if(!form->value) {
-          return_value = CURL_FORMADD_MEMORY;
-          break;
-        }
-        form->value_alloc = TRUE;
-      }
-      post = AddHttpPost(form->name, form->namelength,
-                         form->value, form->contentslength,
-                         form->buffer, form->bufferlength,
-                         form->contenttype, form->flags,
-                         form->contentheader, form->showfilename,
-                         form->userp,
-                         post, httppost,
-                         last_post);
-
-      if(!post) {
-        return_value = CURL_FORMADD_MEMORY;
-        break;
-      }
-
-      if(form->contenttype)
-        prevtype = form->contenttype;
-    }
-    if(CURL_FORMADD_OK != return_value) {
-      /* On error, free allocated fields for nodes of the FormInfo linked
-         list which are not already owned by the httppost linked list
-         without deallocating nodes. List nodes are deallocated later on */
-      struct FormInfo *ptr;
-      for(ptr = form; ptr != NULL; ptr = ptr->more) {
-        if(ptr->name_alloc) {
-          Curl_safefree(ptr->name);
-          ptr->name_alloc = FALSE;
-        }
-        if(ptr->value_alloc) {
-          Curl_safefree(ptr->value);
-          ptr->value_alloc = FALSE;
-        }
-        if(ptr->contenttype_alloc) {
-          Curl_safefree(ptr->contenttype);
-          ptr->contenttype_alloc = FALSE;
-        }
-        if(ptr->showfilename_alloc) {
-          Curl_safefree(ptr->showfilename);
-          ptr->showfilename_alloc = FALSE;
-        }
-      }
-    }
+    return_value = FormAddCheck(first_form, httppost, last_post);
   }
 
   /* Always deallocate FormInfo linked list nodes without touching node
