@@ -635,6 +635,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
     def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
@@ -671,6 +673,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
     def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns):
+        if not env.curl_is_debug():
+            pytest.skip('only works for curl debug builds')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
