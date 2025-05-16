@@ -64,36 +64,31 @@ struct Curl_easy;
  *
  ***************************************************************************/
 static struct curl_httppost *
-AddHttpPost(char *name, size_t namelength,
-            char *value, curl_off_t contentslength,
-            char *buffer, size_t bufferlength,
-            char *contenttype,
-            long flags,
-            struct curl_slist *contentHeader,
-            char *showfilename, char *userp,
+AddHttpPost(struct FormInfo *src,
             struct curl_httppost *parent_post,
             struct curl_httppost **httppost,
             struct curl_httppost **last_post)
 {
   struct curl_httppost *post;
-  if(!namelength && name)
-    namelength = strlen(name);
-  if((bufferlength > LONG_MAX) || (namelength > LONG_MAX))
+  size_t namelength = src->namelength;
+  if(!namelength && src->name)
+    namelength = strlen(src->name);
+  if((src->bufferlength > LONG_MAX) || (namelength > LONG_MAX))
     /* avoid overflow in typecasts below */
     return NULL;
   post = calloc(1, sizeof(struct curl_httppost));
   if(post) {
-    post->name = name;
+    post->name = src->name;
     post->namelength = (long)namelength;
-    post->contents = value;
-    post->contentlen = contentslength;
-    post->buffer = buffer;
-    post->bufferlength = (long)bufferlength;
-    post->contenttype = contenttype;
-    post->contentheader = contentHeader;
-    post->showfilename = showfilename;
-    post->userp = userp;
-    post->flags = flags | CURL_HTTPPOST_LARGE;
+    post->contents = src->value;
+    post->contentlen = src->contentslength;
+    post->buffer = src->buffer;
+    post->bufferlength = (long)src->bufferlength;
+    post->contenttype = src->contenttype;
+    post->flags = src->flags | CURL_HTTPPOST_LARGE;
+    post->contentheader = src->contentheader;
+    post->showfilename = src->showfilename;
+    post->userp = src->userp;
   }
   else
     return NULL;
@@ -311,14 +306,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
       }
       form->value_alloc = TRUE;
     }
-    post = AddHttpPost(form->name, form->namelength,
-                       form->value, form->contentslength,
-                       form->buffer, form->bufferlength,
-                       form->contenttype, form->flags,
-                       form->contentheader, form->showfilename,
-                       form->userp,
-                       post, httppost,
-                       last_post);
+    post = AddHttpPost(form, post, httppost, last_post);
 
     if(!post) {
       retval = CURL_FORMADD_MEMORY;
