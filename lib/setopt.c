@@ -327,7 +327,7 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
 #else
   data;
   option;
-  arg;  
+  arg;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
