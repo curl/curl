@@ -1162,16 +1162,6 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
   free(dns);
 }
 
-void Curl_resolv_link(struct Curl_easy *data, struct Curl_dns_entry *dns)
-{
-  if(dns) {
-    struct Curl_dnscache *dnscache = dnscache_get(data);
-    dnscache_lock(data, dnscache);
-    dns->refcount++;
-    dnscache_unlock(data, dnscache);
-  }
-}
-
 /*
  * Curl_resolv_unlink() releases a reference to the given cached DNS entry.
  * When the reference count reaches 0, the entry is destroyed. It is important
