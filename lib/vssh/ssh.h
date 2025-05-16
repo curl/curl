@@ -208,6 +208,7 @@ struct ssh_conn {
   struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
 #elif defined(USE_WOLFSSH)
+  CURLcode actualcode;        /* the actual error code */
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
   word32 handleSz;
