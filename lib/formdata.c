@@ -270,9 +270,10 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
       form->contenttype_alloc = TRUE;
     }
     if(form->name && form->namelength) {
-      if(memchr(form->name, 0, form->namelength))
+      if(memchr(form->name, 0, form->namelength)) {
         retval = CURL_FORMADD_NULL;
-      break;
+        break;
+      }
     }
     if(!(form->flags & HTTPPOST_PTRNAME) &&
        (form == first_form) ) {
