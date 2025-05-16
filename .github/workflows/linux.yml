@@ -163,6 +163,12 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
+          - name: openssl arm
+            install_packages: zlib1g-dev
+            install_steps: pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            image: 'ubuntu-24.04-arm'
+
           - name: openssl -O3 libssh valgrind
             install_packages: zlib1g-dev libssh-dev valgrind
             configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
