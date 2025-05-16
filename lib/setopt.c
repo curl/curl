@@ -292,7 +292,7 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
   return CURLE_OK;
 }
 
-static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
+CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
                                   long arg)
 {
   /*
@@ -332,6 +332,7 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
 #endif
 }
 
+#ifndef CURL_DISABLE_RTSP
 static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
 {
   /*
@@ -390,8 +391,9 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
   data->set.rtspreq = rtspreq;
   return CURLE_OK;
 }
+#endif /* ! CURL_DISABLE_RTSP */
 
-static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
+CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
   bool enabled = (0 != arg);
