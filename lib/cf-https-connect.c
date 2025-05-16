@@ -113,7 +113,7 @@ static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
 
 struct cf_hc_ctx {
   cf_hc_state state;
-  const struct Curl_dns_entry *remotehost;
+  struct Curl_dns_entry *remotehost;
   struct curltime started;  /* when connect started */
   CURLcode result;          /* overall result */
   struct cf_hc_baller ballers[2];
@@ -576,7 +576,7 @@ struct Curl_cftype Curl_cft_http_connect = {
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
-                             const struct Curl_dns_entry *remotehost,
+                             struct Curl_dns_entry *remotehost,
                              enum alpnid *alpnids, size_t alpn_count)
 {
   struct Curl_cfilter *cf = NULL;
@@ -620,7 +620,7 @@ out:
 static CURLcode cf_http_connect_add(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
-                                    const struct Curl_dns_entry *remotehost,
+                                    struct Curl_dns_entry *remotehost,
                                     enum alpnid *alpn_ids, size_t alpn_count)
 {
   struct Curl_cfilter *cf;
@@ -649,7 +649,7 @@ static bool cf_https_alpns_contain(enum alpnid id,
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex,
-                             const struct Curl_dns_entry *remotehost)
+                             struct Curl_dns_entry *remotehost)
 {
   enum alpnid alpn_ids[2];
   size_t alpn_count = 0;

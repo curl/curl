@@ -118,6 +118,10 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #endif
 
 
+/* link a dns entry for someone holding an additional reference */
+void Curl_resolv_link(struct Curl_easy *data,
+                      struct Curl_dns_entry *dns);
+
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);

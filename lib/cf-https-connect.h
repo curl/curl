@@ -38,20 +38,20 @@ extern struct Curl_cftype Curl_cft_http_connect;
 CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   int sockindex,
-                                  const struct Curl_dns_entry *remotehost,
+                                  struct Curl_dns_entry *remotehost,
                                   bool try_h3, bool try_h21);
 
 CURLcode
 Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data,
-                                  const struct Curl_dns_entry *remotehost,
+                                  struct Curl_dns_entry *remotehost,
                                   bool try_h3, bool try_h21);
 
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex,
-                             const struct Curl_dns_entry *remotehost);
+                             struct Curl_dns_entry *remotehost);
 
 
 #endif /* !defined(CURL_DISABLE_HTTP) */
