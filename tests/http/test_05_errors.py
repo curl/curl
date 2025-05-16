@@ -118,10 +118,11 @@ class TestErrors:
         url = f'https://{env.authority_for(env.domain1, proto)}'\
             f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
-            '--parallel',
+            '--parallel', '--trace-config', 'ssl'
         ])
         if proto == 'http/1.0' and not env.curl_uses_lib('wolfssl') and \
-                (env.curl_is_debug() or not env.curl_uses_lib('openssl')):
+                (env.curl_is_debug() or
+                not env.curl_uses_any_libs(['openssl', 'libressl'])):
             # we are inconsistent if we fail or not in missing TLS shutdown
             # openssl code ignore such errors intentionally in non-debug builds
             r.check_exit_code(56)
