@@ -155,9 +155,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-  )
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

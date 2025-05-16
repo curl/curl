@@ -50,9 +50,8 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   ntlm_counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
-  CURL_IGNORE_DEPRECATION(
-    code = curl_easy_getinfo(ntlm_easy[idx], CURLINFO_LASTSOCKET, &longdata);
-  )
+  code = curl_easy_getinfo(ntlm_easy[idx], CURLINFO_LASTSOCKET, &longdata);
+
   if(CURLE_OK != code) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
             "with code %d (%s)\n",

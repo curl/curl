@@ -199,9 +199,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
   /* Ioctl function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
-  )
+  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
 
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 

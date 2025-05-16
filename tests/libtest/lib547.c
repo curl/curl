@@ -100,10 +100,9 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
-    test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
-  )
+  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
+
   test_setopt(curl, CURLOPT_READFUNCTION, readcallback);
   test_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose

@@ -71,9 +71,7 @@ CURLcode test(char *URL)
     /* include headers */
     easy_setopt(curl[i], CURLOPT_HEADER, 1L);
 
-    CURL_IGNORE_DEPRECATION(
-      easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
-    )
+    easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
   }
 
   /* make the first one populate the GLOBAL cache */

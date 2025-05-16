@@ -51,10 +51,9 @@ CURLcode test(char *URL)
 
   if(!res) {
     FILE *moo;
-    CURL_IGNORE_DEPRECATION(
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
-                              &content_length);
-    )
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+                            &content_length);
+
     moo = fopen(libtest_arg2, "wb");
     if(moo) {
       curl_mfprintf(moo, "CL %.0f\n", content_length);

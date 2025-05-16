@@ -154,14 +154,12 @@ CURLcode test(char *URL)
   if(res == CURLE_OK)
     test_setopt(pooh.easy, CURLOPT_MIMEPOST, mime);
 #else
-  CURL_IGNORE_DEPRECATION(
-    /* Build the form. */
-    formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, testname,
-                          CURLFORM_STREAM, &pooh,
-                          CURLFORM_CONTENTLEN, (curl_off_t) 2,
-                          CURLFORM_END);
-  )
+  /* Build the form. */
+  formrc = curl_formadd(&formpost, &lastptr,
+                        CURLFORM_COPYNAME, testname,
+                        CURLFORM_STREAM, &pooh,
+                        CURLFORM_CONTENTLEN, (curl_off_t) 2,
+                        CURLFORM_END);
   if(formrc) {
     curl_mfprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
     goto test_cleanup;
@@ -170,10 +168,8 @@ CURLcode test(char *URL)
   /* We want to use our own read function. */
   test_setopt(pooh.easy, CURLOPT_READFUNCTION, read_callback);
 
-  CURL_IGNORE_DEPRECATION(
-    /* Send a multi-part formpost. */
-    test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
-  )
+  /* Send a multi-part formpost. */
+  test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
 #endif
 
 #if defined(LIB670) || defined(LIB672)
@@ -252,9 +248,7 @@ test_cleanup:
 #if defined(LIB670) || defined(LIB671)
   curl_mime_free(mime);
 #else
-  CURL_IGNORE_DEPRECATION(
-    curl_formfree(formpost);
-  )
+  curl_formfree(formpost);
 #endif
 
   curl_global_cleanup();

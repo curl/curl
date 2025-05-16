@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION 1
 #include "test.h"
 
 #include "memdebug.h"

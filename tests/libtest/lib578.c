@@ -78,10 +78,8 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, testdata);
 
   /* we want to use our own progress function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-  )
+  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

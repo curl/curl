@@ -361,7 +361,6 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
 HEADER
     ;
 
@@ -597,7 +596,7 @@ MOO
 
 
 print $fh <<FOOTER
-  )
+
   /* NOLINTNEXTLINE(clang-analyzer-optin.core.EnumCastOutOfRange) */
   curl_easy_setopt(curl, (CURLoption)1, 0L);
   res = CURLE_OK;
