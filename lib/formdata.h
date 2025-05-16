@@ -35,7 +35,6 @@ struct FormInfo {
   char *value;
   curl_off_t contentslength;
   char *contenttype;
-  long flags;
   char *buffer;      /* pointer to existing buffer used for file upload */
   size_t bufferlength;
   char *showfilename; /* The filename to show. If not set, the actual
@@ -43,6 +42,7 @@ struct FormInfo {
   char *userp;        /* pointer for the read callback */
   struct curl_slist *contentheader;
   struct FormInfo *more;
+  unsigned char flags;
   BIT(name_alloc);
   BIT(value_alloc);
   BIT(contenttype_alloc);
