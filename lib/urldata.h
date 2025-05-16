@@ -753,12 +753,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  /* 'dns_entry' is the particular host we use. This points to an entry in the
-     DNS cache and it will not get pruned while locked. It gets unlocked in
-     multi_done(). This entry will be NULL if the connection is reused as then
-     there is no name resolve done. */
-  struct Curl_dns_entry *dns_entry;
-
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
   const struct Curl_sockaddr_ex *remote_addr;
@@ -791,6 +785,7 @@ struct connectdata {
                             transfer when doing FTP */
   Curl_recv *recv[2];
   Curl_send *send[2];
+  struct Curl_dns_entry *dns_entry[2];
   struct Curl_cfilter *cfilter[2]; /* connection filters */
   struct {
     struct curltime start[2]; /* when filter shutdown started */

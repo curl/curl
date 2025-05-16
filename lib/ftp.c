@@ -1941,7 +1941,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    Curl_resolv_unlink(data, &dns); /* we are done using this dns entry */
     if(ftpc->count1 == 0 && ftpcode == 229)
       return ftp_epsv_disable(data, ftpc, conn);
 
@@ -1958,8 +1957,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   if(data->set.verbose)
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(data, dns->addr, ftpc->newhost, connectport);
-
-  Curl_resolv_unlink(data, &dns); /* we are done using this address */
 
   free(conn->secondaryhostname);
   conn->secondary_port = ftpc->newport;

@@ -1534,19 +1534,21 @@ int Curl_resolv_getsock(struct Curl_easy *data,
 
    Note: this function disconnects and frees the conn data in case of
    resolve failure */
-CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
+CURLcode Curl_once_resolved(struct Curl_easy *data,
+                            struct Curl_dns_entry *dns,
+                            bool *protocol_done)
 {
   CURLcode result;
   struct connectdata *conn = data->conn;
 
 #ifdef USE_CURL_ASYNC
   if(data->state.async.dns) {
-    conn->dns_entry = data->state.async.dns;
+    DEBUGASSERT(data->state.async.dns == dns);
     data->state.async.dns = NULL;
   }
 #endif
 
-  result = Curl_setup_conn(data, protocol_done);
+  result = Curl_setup_conn(data, dns, protocol_done);
 
   if(result) {
     Curl_detach_connection(data);

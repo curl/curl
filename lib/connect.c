@@ -408,7 +408,6 @@ typedef enum {
 struct cf_he_ctx {
   int transport;
   cf_ip_connect_create *cf_create;
-  const struct Curl_dns_entry *remotehost;
   cf_connect_state state;
   struct eyeballer *baller[2];
   struct eyeballer *winner;
@@ -782,8 +781,7 @@ evaluate:
  * There might be more than one IP address to try out.
  */
 static CURLcode start_connect(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const struct Curl_dns_entry *remotehost)
+                              struct Curl_easy *data)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
@@ -791,16 +789,19 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   int ai_family0 = 0, ai_family1 = 0;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
   const struct Curl_addrinfo *addr0 = NULL, *addr1 = NULL;
+  struct Curl_dns_entry *dns = cf->conn->dns_entry[cf->sockindex];
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
+  if(!dns)
+    return CURLE_FAILED_INIT;
 
   ctx->started = curlx_now();
 
-  /* remotehost->addr is the list of addresses from the resolver, each
+  /* dns->addr is the list of addresses from the resolver, each
    * with an address family. The list has at least one entry, possibly
    * many more.
    * We try at most 2 at a time, until we either get a connection or
@@ -812,27 +813,27 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   if(conn->ip_version == CURL_IPRESOLVE_V6) {
 #ifdef USE_IPV6
     ai_family0 = AF_INET6;
-    addr0 = addr_first_match(remotehost->addr, ai_family0);
+    addr0 = addr_first_match(dns->addr, ai_family0);
 #endif
   }
   else if(conn->ip_version == CURL_IPRESOLVE_V4) {
     ai_family0 = AF_INET;
-    addr0 = addr_first_match(remotehost->addr, ai_family0);
+    addr0 = addr_first_match(dns->addr, ai_family0);
   }
   else {
     /* no user preference, we try ipv6 always first when available */
 #ifdef USE_IPV6
     ai_family0 = AF_INET6;
-    addr0 = addr_first_match(remotehost->addr, ai_family0);
+    addr0 = addr_first_match(dns->addr, ai_family0);
 #endif
     /* next candidate is ipv4 */
     ai_family1 = AF_INET;
-    addr1 = addr_first_match(remotehost->addr, ai_family1);
+    addr1 = addr_first_match(dns->addr, ai_family1);
     /* no ip address families, probably AF_UNIX or something, use the
      * address family given to us */
-    if(!addr1  && !addr0 && remotehost->addr) {
-      ai_family0 = remotehost->addr->ai_family;
-      addr0 = addr_first_match(remotehost->addr, ai_family0);
+    if(!addr1  && !addr0 && dns->addr) {
+      ai_family0 = dns->addr->ai_family;
+      addr0 = addr_first_match(dns->addr, ai_family0);
     }
   }
 
@@ -966,7 +967,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
     case SCFST_INIT:
       DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
       DEBUGASSERT(!cf->connected);
-      result = start_connect(cf, data, ctx->remotehost);
+      result = start_connect(cf, data);
       if(result)
         return result;
       ctx->state = SCFST_WAITING;
@@ -1158,7 +1159,6 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
                          struct Curl_easy *data,
                          struct connectdata *conn,
                          cf_ip_connect_create *cf_create,
-                         const struct Curl_dns_entry *remotehost,
                          int transport)
 {
   struct cf_he_ctx *ctx = NULL;
@@ -1174,14 +1174,13 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
   }
   ctx->transport = transport;
   ctx->cf_create = cf_create;
-  ctx->remotehost = remotehost;
 
   result = Curl_cf_create(pcf, &Curl_cft_happy_eyeballs, ctx);
 
 out:
   if(result) {
     Curl_safefree(*pcf);
-    Curl_safefree(ctx);
+    free(ctx);
   }
   return result;
 }
@@ -1220,7 +1219,6 @@ static cf_ip_connect_create *get_cf_create(int transport)
 
 static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
                                    struct Curl_easy *data,
-                                   const struct Curl_dns_entry *remotehost,
                                    int transport)
 {
   cf_ip_connect_create *cf_create;
@@ -1235,8 +1233,7 @@ static CURLcode cf_he_insert_after(struct Curl_cfilter *cf_at,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
   result = cf_happy_eyeballs_create(&cf, data, cf_at->conn,
-                                    cf_create, remotehost,
-                                    transport);
+                                    cf_create, transport);
   if(result)
     return result;
 
@@ -1256,7 +1253,6 @@ typedef enum {
 
 struct cf_setup_ctx {
   cf_setup_state state;
-  const struct Curl_dns_entry *remotehost;
   int ssl_mode;
   int transport;
 };
@@ -1267,6 +1263,7 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 {
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
+  struct Curl_dns_entry *dns = cf->conn->dns_entry[cf->sockindex];
 
   if(cf->connected) {
     *done = TRUE;
@@ -1275,6 +1272,9 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
 
   /* connect current sub-chain */
 connect_sub_chain:
+  if(!dns)
+    return CURLE_FAILED_INIT;
+
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
@@ -1282,7 +1282,7 @@ connect_sub_chain:
   }
 
   if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
-    result = cf_he_insert_after(cf, data, ctx->remotehost, ctx->transport);
+    result = cf_he_insert_after(cf, data, ctx->transport);
     if(result)
       return result;
     ctx->state = CF_SETUP_CNNCT_EYEBALLS;
@@ -1410,7 +1410,6 @@ struct Curl_cftype Curl_cft_setup = {
 
 static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
                                 struct Curl_easy *data,
-                                const struct Curl_dns_entry *remotehost,
                                 int transport,
                                 int ssl_mode)
 {
@@ -1425,7 +1424,6 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
     goto out;
   }
   ctx->state = CF_SETUP_INIT;
-  ctx->remotehost = remotehost;
   ctx->ssl_mode = ssl_mode;
   ctx->transport = transport;
 
@@ -1436,14 +1434,15 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 
 out:
   *pcf = result ? NULL : cf;
-  free(ctx);
+  if(ctx) {
+    free(ctx);
+  }
   return result;
 }
 
 static CURLcode cf_setup_add(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex,
-                             const struct Curl_dns_entry *remotehost,
                              int transport,
                              int ssl_mode)
 {
@@ -1451,7 +1450,7 @@ static CURLcode cf_setup_add(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  result = cf_setup_create(&cf, data, transport, ssl_mode);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -1476,7 +1475,6 @@ void Curl_debug_set_transport_provider(int transport,
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
-                                    const struct Curl_dns_entry *remotehost,
                                     int transport,
                                     int ssl_mode)
 {
@@ -1484,7 +1482,7 @@ CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   DEBUGASSERT(data);
-  result = cf_setup_create(&cf, data, remotehost, transport, ssl_mode);
+  result = cf_setup_create(&cf, data, transport, ssl_mode);
   if(result)
     goto out;
   Curl_conn_cf_insert_after(cf_at, cf);
@@ -1495,19 +1493,23 @@ out:
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         const struct Curl_dns_entry *remotehost,
+                         struct Curl_dns_entry *dns,
                          int ssl_mode)
 {
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn->handler);
+  DEBUGASSERT(dns);
+
+  Curl_resolv_unlink(data, &conn->dns_entry[sockindex]);
+  conn->dns_entry[sockindex] = dns;
 
 #if !defined(CURL_DISABLE_HTTP)
   if(!conn->cfilter[sockindex] &&
      conn->handler->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
-    result = Curl_cf_https_setup(data, conn, sockindex, remotehost);
+    result = Curl_cf_https_setup(data, conn, sockindex);
     if(result)
       goto out;
   }
@@ -1515,13 +1517,14 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
-    result = cf_setup_add(data, conn, sockindex, remotehost,
-                          conn->transport, ssl_mode);
+    result = cf_setup_add(data, conn, sockindex, conn->transport, ssl_mode);
     if(result)
       goto out;
   }
 
   DEBUGASSERT(conn->cfilter[sockindex]);
 out:
+  if(result)
+    Curl_resolv_unlink(data, &conn->dns_entry[sockindex]);
   return result;
 }
