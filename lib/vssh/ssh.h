@@ -148,7 +148,6 @@ struct ssh_conn {
   char *rsa;                  /* strdup'ed private key file */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
-  CURLcode actualcode;        /* the actual error code */
   struct curl_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
@@ -164,6 +163,7 @@ struct ssh_conn {
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #if defined(USE_LIBSSH)
+  CURLcode actualcode;        /* the actual error code */
   char *readdir_linkPath;
   size_t readdir_len;
   struct dynbuf readdir_buf;
@@ -208,6 +208,7 @@ struct ssh_conn {
   struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
 #elif defined(USE_WOLFSSH)
+  CURLcode actualcode;        /* the actual error code */
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
   word32 handleSz;
