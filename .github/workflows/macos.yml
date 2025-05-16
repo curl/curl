@@ -244,7 +244,7 @@ jobs:
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
-              [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX= -DCADDY=/usr/bin/caddy -DVSFTPD=/usr/sbin/vsftpd'
+              [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
                 -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
@@ -267,7 +267,11 @@ jobs:
               CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
-            [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
+            if [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]]; then
+              options+=' --with-test-nghttpx= ac_cv_path_HTTPD_NGHTTPX='
+              options+=" --with-test-caddy=$(brew --prefix)/bin/caddy"
+              options+=" --with-test-vsftpd=$(brew --prefix)/sbin/vsftpd"
+            fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
@@ -329,6 +333,8 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
+          brew services start caddy
+          brew services start vsftpd
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
