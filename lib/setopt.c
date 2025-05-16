@@ -306,6 +306,8 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_PROXY
     if(option != CURLOPT_SSLVERSION)
       primary = &data->set.proxy_ssl.primary;
+#else
+    option;
 #endif
     version = C_SSLVERSION_VALUE(arg);
     version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
