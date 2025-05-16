@@ -23,7 +23,7 @@
 ###########################################################################
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
-  set(TEST_NGHTTPX "nghttpx")
+  set(TEST_NGHTTPX "")
 endif()
 mark_as_advanced(TEST_NGHTTPX)
 # Consumed variables: TEST_NGHTTPX
