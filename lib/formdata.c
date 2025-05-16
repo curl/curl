@@ -152,6 +152,28 @@ static struct FormInfo *AddFormInfo(char *value,
   return form_info;
 }
 
+static void free_formlist(struct FormInfo *ptr)
+{
+  for(; ptr != NULL; ptr = ptr->more) {
+    if(ptr->name_alloc) {
+      Curl_safefree(ptr->name);
+      ptr->name_alloc = FALSE;
+    }
+    if(ptr->value_alloc) {
+      Curl_safefree(ptr->value);
+      ptr->value_alloc = FALSE;
+    }
+    if(ptr->contenttype_alloc) {
+      Curl_safefree(ptr->contenttype);
+      ptr->contenttype_alloc = FALSE;
+    }
+    if(ptr->showfilename_alloc) {
+      Curl_safefree(ptr->showfilename);
+      ptr->showfilename_alloc = FALSE;
+    }
+  }
+}
+
 /***************************************************************************
  *
  * FormAdd()
@@ -306,30 +328,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
     if(form->contenttype)
       prevtype = form->contenttype;
   }
-  if(CURL_FORMADD_OK != retval) {
-    /* On error, free allocated fields for nodes of the FormInfo linked
-       list which are not already owned by the httppost linked list
-       without deallocating nodes. List nodes are deallocated later on */
-    struct FormInfo *ptr;
-    for(ptr = form; ptr != NULL; ptr = ptr->more) {
-      if(ptr->name_alloc) {
-        Curl_safefree(ptr->name);
-        ptr->name_alloc = FALSE;
-      }
-      if(ptr->value_alloc) {
-        Curl_safefree(ptr->value);
-        ptr->value_alloc = FALSE;
-      }
-      if(ptr->contenttype_alloc) {
-        Curl_safefree(ptr->contenttype);
-        ptr->contenttype_alloc = FALSE;
-      }
-      if(ptr->showfilename_alloc) {
-        Curl_safefree(ptr->showfilename);
-        ptr->showfilename_alloc = FALSE;
-      }
-    }
-  }
+
   return retval;
 }
 
@@ -647,33 +646,13 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     }
   }
 
-  if(CURL_FORMADD_OK != retval) {
+  if(CURL_FORMADD_OK == retval)
+    retval = FormAddCheck(first_form, httppost, last_post);
+
+  if(CURL_FORMADD_OK != retval)
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
-    struct FormInfo *ptr;
-    for(ptr = first_form; ptr != NULL; ptr = ptr->more) {
-      if(ptr->name_alloc) {
-        Curl_safefree(ptr->name);
-        ptr->name_alloc = FALSE;
-      }
-      if(ptr->value_alloc) {
-        Curl_safefree(ptr->value);
-        ptr->value_alloc = FALSE;
-      }
-      if(ptr->contenttype_alloc) {
-        Curl_safefree(ptr->contenttype);
-        ptr->contenttype_alloc = FALSE;
-      }
-      if(ptr->showfilename_alloc) {
-        Curl_safefree(ptr->showfilename);
-        ptr->showfilename_alloc = FALSE;
-      }
-    }
-  }
-
-  if(CURL_FORMADD_OK == retval) {
-    retval = FormAddCheck(first_form, httppost, last_post);
-  }
+    free_formlist(form);
 
   /* Always deallocate FormInfo linked list nodes without touching node
      fields given that these have either been deallocated or are owned
