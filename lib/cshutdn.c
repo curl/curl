@@ -53,8 +53,8 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
   if(!conn->bits.shutdown_handler) {
-    if(conn->dns_entry)
-      Curl_resolv_unlink(data, &conn->dns_entry);
+    Curl_resolv_unlink(data, &conn->dns_entry[0]);
+    Curl_resolv_unlink(data, &conn->dns_entry[1]);
 
     /* Cleanup NTLM connection-related data */
     Curl_http_auth_cleanup_ntlm(conn);

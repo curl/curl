@@ -113,7 +113,6 @@ static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
 
 struct cf_hc_ctx {
   cf_hc_state state;
-  struct Curl_dns_entry *remotehost;
   struct curltime started;  /* when connect started */
   CURLcode result;          /* overall result */
   struct cf_hc_baller ballers[2];
@@ -147,7 +146,6 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_easy *data,
                               int transport)
 {
-  struct cf_hc_ctx *ctx = cf->ctx;
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
@@ -161,8 +159,8 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   }
 
   if(!b->result)
-    b->result = Curl_cf_setup_insert_after(cf, data, ctx->remotehost,
-                                           transport, CURL_CF_SSL_ENABLE);
+    b->result = Curl_cf_setup_insert_after(cf, data, transport,
+                                           CURL_CF_SSL_ENABLE);
   b->cf = cf->next;
   cf->next = save;
 }
@@ -576,7 +574,6 @@ struct Curl_cftype Curl_cft_http_connect = {
 
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
-                             struct Curl_dns_entry *remotehost,
                              enum alpnid *alpnids, size_t alpn_count)
 {
   struct Curl_cfilter *cf = NULL;
@@ -598,7 +595,6 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->remotehost = remotehost;
   for(i = 0; i < alpn_count; ++i)
     cf_hc_baller_assign(&ctx->ballers[i], alpnids[i]);
   for(; i < CURL_ARRAYSIZE(ctx->ballers); ++i)
@@ -620,14 +616,13 @@ out:
 static CURLcode cf_http_connect_add(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
-                                    struct Curl_dns_entry *remotehost,
                                     enum alpnid *alpn_ids, size_t alpn_count)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  result = cf_hc_create(&cf, data, remotehost, alpn_ids, alpn_count);
+  result = cf_hc_create(&cf, data, alpn_ids, alpn_count);
   if(result)
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
@@ -648,16 +643,15 @@ static bool cf_https_alpns_contain(enum alpnid id,
 
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
-                             int sockindex,
-                             struct Curl_dns_entry *remotehost)
+                             int sockindex)
 {
   enum alpnid alpn_ids[2];
   size_t alpn_count = 0;
   CURLcode result = CURLE_OK;
   struct Curl_cfilter cf_fake, *cf = NULL;
+  struct Curl_dns_entry *dns = conn->dns_entry[sockindex];
 
   (void)sockindex;
-  (void)remotehost;
   /* we want to log for the filter before we create it, fake it. */
   memset(&cf_fake, 0, sizeof(cf_fake));
   cf_fake.cft = &Curl_cft_http_connect;
@@ -669,7 +663,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
      * We are here after having selected a connection to a host+port and
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */
-    struct Curl_https_rrinfo *rr = remotehost ? remotehost->hinfo : NULL;
+    struct Curl_https_rrinfo *rr = dns ? dns->hinfo : NULL;
     if(rr && !rr->no_def_alpn &&  /* ALPNs are defaults */
        (!rr->target ||      /* for same host */
         !rr->target[0] ||
@@ -739,8 +733,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   /* If we identified ALPNs to use, install our filter. Otherwise,
    * install nothing, so our call will use a default connect setup. */
   if(alpn_count) {
-    result = cf_http_connect_add(data, conn, sockindex, remotehost,
-                                 alpn_ids, alpn_count);
+    result = cf_http_connect_add(data, conn, sockindex, alpn_ids, alpn_count);
   }
 
 out:
