@@ -255,6 +255,141 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_HTTP
+static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
+{
+  /*
+   * This sets a requested HTTP version to be used. The value is one of
+   * the listed enums in curl/curl.h.
+   */
+  switch(arg) {
+  case CURL_HTTP_VERSION_NONE:
+    /* accepted */
+    break;
+  case CURL_HTTP_VERSION_1_0:
+  case CURL_HTTP_VERSION_1_1:
+    /* accepted */
+    break;
+#ifdef USE_HTTP2
+  case CURL_HTTP_VERSION_2_0:
+  case CURL_HTTP_VERSION_2TLS:
+  case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+    /* accepted */
+    break;
+#endif
+#ifdef USE_HTTP3
+  case CURL_HTTP_VERSION_3:
+  case CURL_HTTP_VERSION_3ONLY:
+    /* accepted */
+    break;
+#endif
+  default:
+    /* not accepted */
+    if(arg < CURL_HTTP_VERSION_NONE)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    return CURLE_UNSUPPORTED_PROTOCOL;
+  }
+  data->set.httpwant = (unsigned char)arg;
+  return CURLE_OK;
+}
+#endif /* ! CURL_DISABLE_HTTP */
+
+#ifdef USE_SSL
+static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
+                                  long arg)
+{
+  /*
+   * Set explicit SSL version to try to connect with, as some SSL
+   * implementations are lame.
+   */
+  {
+    long version, version_max;
+    struct ssl_primary_config *primary = &data->set.ssl.primary;
+#ifndef CURL_DISABLE_PROXY
+    if(option != CURLOPT_SSLVERSION)
+      primary = &data->set.proxy_ssl.primary;
+#else
+    if(option) {}
+#endif
+    version = C_SSLVERSION_VALUE(arg);
+    version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
+
+    if(version < CURL_SSLVERSION_DEFAULT ||
+       version == CURL_SSLVERSION_SSLv2 ||
+       version == CURL_SSLVERSION_SSLv3 ||
+       version >= CURL_SSLVERSION_LAST ||
+       version_max < CURL_SSLVERSION_MAX_NONE ||
+       version_max >= CURL_SSLVERSION_MAX_LAST)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    primary->version = (unsigned char)version;
+    primary->version_max = (unsigned int)version_max;
+  }
+  return CURLE_OK;
+}
+#endif /* ! USE_SSL */
+
+#ifndef CURL_DISABLE_RTSP
+static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
+{
+  /*
+   * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
+   * Would this be better if the RTSPREQ_* were just moved into here?
+   */
+  Curl_RtspReq rtspreq = RTSPREQ_NONE;
+  switch(arg) {
+  case CURL_RTSPREQ_OPTIONS:
+    rtspreq = RTSPREQ_OPTIONS;
+    break;
+
+  case CURL_RTSPREQ_DESCRIBE:
+    rtspreq = RTSPREQ_DESCRIBE;
+    break;
+
+  case CURL_RTSPREQ_ANNOUNCE:
+    rtspreq = RTSPREQ_ANNOUNCE;
+    break;
+
+  case CURL_RTSPREQ_SETUP:
+    rtspreq = RTSPREQ_SETUP;
+    break;
+
+  case CURL_RTSPREQ_PLAY:
+    rtspreq = RTSPREQ_PLAY;
+    break;
+
+  case CURL_RTSPREQ_PAUSE:
+    rtspreq = RTSPREQ_PAUSE;
+    break;
+
+  case CURL_RTSPREQ_TEARDOWN:
+    rtspreq = RTSPREQ_TEARDOWN;
+    break;
+
+  case CURL_RTSPREQ_GET_PARAMETER:
+    rtspreq = RTSPREQ_GET_PARAMETER;
+    break;
+
+  case CURL_RTSPREQ_SET_PARAMETER:
+    rtspreq = RTSPREQ_SET_PARAMETER;
+    break;
+
+  case CURL_RTSPREQ_RECORD:
+    rtspreq = RTSPREQ_RECORD;
+    break;
+
+  case CURL_RTSPREQ_RECEIVE:
+    rtspreq = RTSPREQ_RECEIVE;
+    break;
+  default:
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  data->set.rtspreq = rtspreq;
+  return CURLE_OK;
+}
+#endif /* ! CURL_DISABLE_RTSP */
+
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
@@ -290,7 +425,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.maxconnects = (unsigned int)uarg;
     break;
-   case CURLOPT_FORBID_REUSE:
+  case CURLOPT_FORBID_REUSE:
     /*
      * When this transfer is done, it must not be left to be reused by a
      * subsequent transfer but shall be closed immediately.
@@ -451,36 +586,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLVERSION:
 #endif
-    /*
-     * Set explicit SSL version to try to connect with, as some SSL
-     * implementations are lame.
-     */
 #ifdef USE_SSL
-    {
-      long version, version_max;
-      struct ssl_primary_config *primary = &data->set.ssl.primary;
-#ifndef CURL_DISABLE_PROXY
-      if(option != CURLOPT_SSLVERSION)
-        primary = &data->set.proxy_ssl.primary;
-#endif
-      version = C_SSLVERSION_VALUE(arg);
-      version_max = (long)C_SSLVERSION_MAX_VALUE(arg);
-
-      if(version < CURL_SSLVERSION_DEFAULT ||
-         version == CURL_SSLVERSION_SSLv2 ||
-         version == CURL_SSLVERSION_SSLv3 ||
-         version >= CURL_SSLVERSION_LAST ||
-         version_max < CURL_SSLVERSION_MAX_NONE ||
-         version_max >= CURL_SSLVERSION_MAX_LAST)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-
-      primary->version = (unsigned char)version;
-      primary->version_max = (unsigned int)version_max;
-    }
-    break;
+    return setopt_SSLVERSION(data, option, arg);
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
+
   case CURLOPT_POSTFIELDSIZE:
     /*
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
@@ -596,39 +707,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_HTTP_VERSION:
-    /*
-     * This sets a requested HTTP version to be used. The value is one of
-     * the listed enums in curl/curl.h.
-     */
-    switch(arg) {
-    case CURL_HTTP_VERSION_NONE:
-      /* accepted */
-      break;
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      /* accepted */
-      break;
-#ifdef USE_HTTP2
-    case CURL_HTTP_VERSION_2_0:
-    case CURL_HTTP_VERSION_2TLS:
-    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
-      /* accepted */
-      break;
-#endif
-#ifdef USE_HTTP3
-    case CURL_HTTP_VERSION_3:
-    case CURL_HTTP_VERSION_3ONLY:
-      /* accepted */
-      break;
-#endif
-    default:
-      /* not accepted */
-      if(arg < CURL_HTTP_VERSION_NONE)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      return CURLE_UNSUPPORTED_PROTOCOL;
-    }
-    data->set.httpwant = (unsigned char)arg;
-    break;
+    return setopt_HTTP_VERSION(data, arg);
 
   case CURLOPT_EXPECT_100_TIMEOUT_MS:
     /*
@@ -1200,63 +1279,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 #ifndef CURL_DISABLE_RTSP
   case CURLOPT_RTSP_REQUEST:
-  {
-    /*
-     * Set the RTSP request method (OPTIONS, SETUP, PLAY, etc...)
-     * Would this be better if the RTSPREQ_* were just moved into here?
-     */
-    Curl_RtspReq rtspreq = RTSPREQ_NONE;
-    switch(arg) {
-    case CURL_RTSPREQ_OPTIONS:
-      rtspreq = RTSPREQ_OPTIONS;
-      break;
-
-    case CURL_RTSPREQ_DESCRIBE:
-      rtspreq = RTSPREQ_DESCRIBE;
-      break;
-
-    case CURL_RTSPREQ_ANNOUNCE:
-      rtspreq = RTSPREQ_ANNOUNCE;
-      break;
-
-    case CURL_RTSPREQ_SETUP:
-      rtspreq = RTSPREQ_SETUP;
-      break;
-
-    case CURL_RTSPREQ_PLAY:
-      rtspreq = RTSPREQ_PLAY;
-      break;
-
-    case CURL_RTSPREQ_PAUSE:
-      rtspreq = RTSPREQ_PAUSE;
-      break;
-
-    case CURL_RTSPREQ_TEARDOWN:
-      rtspreq = RTSPREQ_TEARDOWN;
-      break;
-
-    case CURL_RTSPREQ_GET_PARAMETER:
-      rtspreq = RTSPREQ_GET_PARAMETER;
-      break;
-
-    case CURL_RTSPREQ_SET_PARAMETER:
-      rtspreq = RTSPREQ_SET_PARAMETER;
-      break;
-
-    case CURL_RTSPREQ_RECORD:
-      rtspreq = RTSPREQ_RECORD;
-      break;
-
-    case CURL_RTSPREQ_RECEIVE:
-      rtspreq = RTSPREQ_RECEIVE;
-      break;
-    default:
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    }
-
-    data->set.rtspreq = rtspreq;
-    break;
-  }
+    return setopt_RTSP_REQUEST(data, arg);
   case CURLOPT_RTSP_CLIENT_CSEQ:
     /*
      * Set the CSEQ number to issue for the next RTSP request. Useful if the
