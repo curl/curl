@@ -28,6 +28,7 @@ import filecmp
 import logging
 import os
 import re
+import sys
 import pytest
 
 from testenv import Env, CurlClient, ExecResult
@@ -179,6 +180,9 @@ class TestProxy:
                                   tunnel, fname, fcount):
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
+        if env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = fcount
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/{fname}?[0-{count-1}]'
@@ -209,6 +213,9 @@ class TestProxy:
                                     tunnel, fname, fcount):
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
+        if env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = fcount
         srcfile = os.path.join(httpd.docs_dir, fname)
         curl = CurlClient(env=env)
@@ -255,6 +262,9 @@ class TestProxy:
         # url twice via https: proxy separated with '--next', will reuse
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
+        if env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         curl = CurlClient(env=env)
         url = f'https://localhost:{env.https_port}/data.json'
         proxy_args = curl.get_proxy_args(tunnel=True, proto=tunnel)
