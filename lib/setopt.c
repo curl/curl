@@ -292,6 +292,7 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
   return CURLE_OK;
 }
 
+#ifdef USE_SSL
 static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
                                   long arg)
 {
@@ -299,7 +300,6 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
    * Set explicit SSL version to try to connect with, as some SSL
    * implementations are lame.
    */
-#ifdef USE_SSL
   {
     long version, version_max;
     struct ssl_primary_config *primary = &data->set.ssl.primary;
@@ -324,13 +324,8 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
     primary->version_max = (unsigned int)version_max;
   }
   return CURLE_OK;
-#else
-  data;
-  option;
-  arg;
-  return CURLE_NOT_BUILT_IN;
-#endif
 }
+#endif /* ! USE_SSL */
 
 #ifndef CURL_DISABLE_RTSP
 static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
@@ -589,7 +584,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLVERSION:
 #endif
+#ifdef USE_SSL
     return setopt_SSLVERSION(data, option, arg);
+#else
+    return CURLE_NOT_BUILT_IN;
+#endif
+
   case CURLOPT_POSTFIELDSIZE:
     /*
      * The size of the POSTFIELD data to prevent libcurl to do strlen() to
