@@ -276,19 +276,19 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
       }
     }
     if(!(form->flags & HTTPPOST_PTRNAME) &&
-       (form == first_form) ) {
-      /* Note that there is small risk that form->name is NULL here if the
-         app passed in a bad combo, so we better check for that first. */
-      if(form->name) {
-        /* copy name (without strdup; possibly not null-terminated) */
-        form->name = Curl_memdup0(form->name, form->namelength ?
-                                  form->namelength :
-                                  strlen(form->name));
-      }
-      if(!form->name) {
+       (form == first_form) &&
+       form->name) {
+      /* Note that there is small risk that form->name is NULL here if the app
+         passed in a bad combo, so we check for that. */
+
+      /* copy name (without strdup; possibly not null-terminated) */
+      char *dupname = Curl_memdup0(form->name, form->namelength ?
+                                   form->namelength : strlen(form->name));
+      if(!dupname) {
         retval = CURL_FORMADD_MEMORY;
         break;
       }
+      form->name = dupname;
       form->name_alloc = TRUE;
     }
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
@@ -637,7 +637,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   if(CURL_FORMADD_OK != retval)
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
-    free_formlist(form);
+    free_formlist(first_form);
 
   /* Always deallocate FormInfo linked list nodes without touching node
      fields given that these have either been deallocated or are owned
