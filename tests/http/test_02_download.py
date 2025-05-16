@@ -30,6 +30,7 @@ import logging
 import math
 import os
 import re
+import sys
 from datetime import timedelta
 import pytest
 
@@ -76,6 +77,9 @@ class TestDownload:
     def test_02_03_download_sequential(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if (proto == 'http/1.1' or proto == 'h2') and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 10
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -87,6 +91,9 @@ class TestDownload:
     def test_02_04_download_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 10
         max_parallel = 5
         curl = CurlClient(env=env)
@@ -109,6 +116,9 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 shaky here")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 200
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -126,6 +136,9 @@ class TestDownload:
     def test_02_06_download_many_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
+           sys.platform.startswith('darwin') and env.ci_run:
+            pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
         count = 200
         max_parallel = 50
         curl = CurlClient(env=env)
