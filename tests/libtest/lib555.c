@@ -95,10 +95,9 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* read the POST data from a callback */
-  CURL_IGNORE_DEPRECATION(
-    easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
-    easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
-  )
+  easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
+
   easy_setopt(curl, CURLOPT_READFUNCTION, readcallback);
   easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose

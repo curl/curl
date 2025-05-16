@@ -40,9 +40,8 @@ CURLcode test(char *URL)
   /* Test that protocol is properly initialized on curl_easy_init.
   */
 
-  CURL_IGNORE_DEPRECATION(
-    res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
-  )
+  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
@@ -70,9 +69,8 @@ CURLcode test(char *URL)
   /* Test that a protocol is properly set after receiving an HTTP resource.
   */
 
-  CURL_IGNORE_DEPRECATION(
-    res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
-  )
+  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
@@ -99,9 +97,8 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
-    res = curl_easy_getinfo(dupe, CURLINFO_PROTOCOL, &protocol);
-  )
+  res = curl_easy_getinfo(dupe, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
@@ -122,9 +119,8 @@ CURLcode test(char *URL)
 
   curl_easy_reset(curl);
 
-  CURL_IGNORE_DEPRECATION(
-    res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
-  )
+  res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+
   if(res) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",

@@ -64,9 +64,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-  )
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -82,10 +80,8 @@ CURLcode test(char *URL)
 
   if(!res) {
     FILE *moo;
-    CURL_IGNORE_DEPRECATION(
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
                             &content_length);
-    )
     moo = fopen(libtest_arg2, "wb");
     if(moo) {
       curl_mfprintf(moo, "CL %.0f\n", content_length);

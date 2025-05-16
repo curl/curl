@@ -61,18 +61,16 @@ CURLcode test(char *URL)
       /*
        * Whitelist string options that are safe for abuse
        */
-      CURL_IGNORE_DEPRECATION(
-        switch(o->id) {
-        case CURLOPT_PROXY_TLSAUTH_TYPE:
-        case CURLOPT_TLSAUTH_TYPE:
-        case CURLOPT_RANDOM_FILE:
-        case CURLOPT_EGDSOCKET:
-          continue;
-        default:
-          /* check this */
-          break;
-        }
-      )
+      switch(o->id) {
+      case CURLOPT_PROXY_TLSAUTH_TYPE:
+      case CURLOPT_TLSAUTH_TYPE:
+      case CURLOPT_RANDOM_FILE:
+      case CURLOPT_EGDSOCKET:
+        continue;
+      default:
+        /* check this */
+        break;
+      }
 
       /* This is a string. Make sure that passing in a string longer
          CURL_MAX_INPUT_LENGTH returns an error */
