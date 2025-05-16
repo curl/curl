@@ -318,8 +318,14 @@ static void async_thrdd_destroy(struct Curl_easy *data)
 
     /* Release our reference to the data shared with the thread. */
     Curl_mutex_acquire(&addr->mutx);
-    thrdd->addr = NULL;
     --addr->ref_count;
+    /* we give up our reference to `addr`, so NULL our pointer.
+     * coverity analyses this as being a potential unsynched write,
+     * assuming two calls to this function could be invoked concurrently.
+     * Which they are never, as the transfer's side runs single-threaded.
+     * So assign only conditionally, hoping it silences coverity. */
+    if(thrdd->addr)
+      thrdd->addr = NULL;
     CURL_TRC_DNS(data, "resolve, destroy async data, shared ref=%d",
                  addr->ref_count);
     done = !addr->ref_count;
