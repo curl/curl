@@ -35,6 +35,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  CURL_CI: github
+
 jobs:
   netbsd:
     name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
