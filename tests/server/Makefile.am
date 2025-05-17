@@ -95,7 +95,6 @@ checksrc:
 	  -W$(srcdir)/server_bundle.c \
 	  $(srcdir)/*.[ch])
 
-if DEBUGBUILD
-# for debug builds, we scan the sources on all regular make invokes
+if NOT_CURL_CI
 all-local: checksrc
 endif

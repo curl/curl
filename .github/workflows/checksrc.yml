@@ -41,7 +41,7 @@ jobs:
         name: checkout
 
       - name: check
-        run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
+        run: scripts/checksrc-all.sh
 
   codespell-cmakelint-pytype-ruff:
     runs-on: ubuntu-latest

@@ -33,6 +33,9 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   add_custom_command(
     OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable INCLUDEDUP all */" >> "tool_hugehelp.c"
+    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable LONGLINE all */" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> "tool_hugehelp.c"
     COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"    < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#else" >> "tool_hugehelp.c"

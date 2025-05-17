@@ -90,5 +90,9 @@ checksrc:
 	  -W$(srcdir)/tool_bundle.c \
 	  $(srcdir)/*.[ch])
 
+if NOT_CURL_CI
+all-local: checksrc
+endif
+
 clean-local:
 	rm -f $(BUNDLE)

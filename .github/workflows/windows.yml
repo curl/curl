@@ -35,6 +35,9 @@ concurrency:
 
 permissions: {}
 
+env:
+  CURL_CI: github
+
 jobs:
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"

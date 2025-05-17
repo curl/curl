@@ -39,7 +39,7 @@ my $dir=".";
 my $wlist="";
 my @alist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
-my $verbose;
+my $verbose = 0;
 my %skiplist;
 
 my %ignore;
@@ -288,6 +288,11 @@ while(defined $file) {
         $file = shift @ARGV;
         next;
     }
+    elsif($file =~ /^-v/) {
+        $verbose = 1;
+        $file = shift @ARGV;
+        next;
+    }
     elsif($file =~ /^(-h|--help)/) {
         undef $file;
         last;
@@ -307,6 +312,7 @@ if(!$file) {
     print "  -W[file]  Skip the given file - ignore all its flaws\n";
     print "  -i<n>     Indent spaces. Default: 2\n";
     print "  -m<n>     Maximum line length. Default: 79\n";
+    print "  -v        Verbose\n";
     print "\nDetects and warns for these problems:\n";
     my @allw = keys %warnings;
     push @allw, keys %warnings_extended;
@@ -448,6 +454,11 @@ sub scanfile {
     my $l = "";
     my $prep = 0;
     my $prevp = 0;
+
+    if($verbose) {
+        printf "Checking file: $file\n";
+    }
+
     open(my $R, '<', $file) || die "failed to open $file";
 
     my $incomment=0;
@@ -1123,5 +1134,7 @@ if($errors || $warnings || $verbose) {
         $serrors,
         $swarnings;
     }
-    exit 5; # return failure
+    if($errors || $warnings) {
+        exit 5; # return failure
+    }
 }

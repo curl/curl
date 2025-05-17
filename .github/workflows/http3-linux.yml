@@ -38,6 +38,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_CI: github
   # handled in renovate.json
   openssl-version: 3.5.0
   # handled in renovate.json
@@ -527,7 +528,6 @@ jobs:
       - name: 'run pytest event based'
         env:
           CURL_TEST_EVENT: 1
-          CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
