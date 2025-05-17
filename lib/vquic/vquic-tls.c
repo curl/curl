@@ -179,15 +179,13 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {
-    if(peer->sni) {
-      WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
-      if(wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
-            == WOLFSSL_FAILURE) {
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      wolfSSL_X509_free(cert);
+    char *snihost = peer->sni ? peer->sni : peer->hostname;
+    WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
+    if(wolfSSL_X509_check_host(cert, snihost, strlen(snihost), 0, NULL)
+          == WOLFSSL_FAILURE) {
+      result = CURLE_PEER_FAILED_VERIFICATION;
     }
-
+    wolfSSL_X509_free(cert);
   }
 #endif
   /* on error, remove any session we might have in the pool */
