@@ -95,7 +95,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
   if(!hlen || !dlen)
     /* bad input */
     goto error;
-  if((hlen > 2) && srchost[0] == '[') {
+  if ( (hlen > 2) && srchost[0] == '[') {
     /* IPv6 address, strip off brackets */
     srchost++;
     hlen -= 2;
