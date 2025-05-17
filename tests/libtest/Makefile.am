@@ -132,11 +132,9 @@ checksrc:
 	  -W$(srcdir)/libtest_bundle.c \
 	  $(srcdir)/*.[ch])
 
-if NOT_CURL_CI
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
 all-local: checksrc
-endif
 endif
 
 clean-local:
