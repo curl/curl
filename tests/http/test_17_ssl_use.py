@@ -131,7 +131,7 @@ class TestSSLUse:
 
     # use ip address for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_05_ip_addr(self, env: Env, proto, httpd, nghttpx):
+    def test_17_05_good_ip_addr(self, env: Env, proto, httpd, nghttpx):
         if env.curl_uses_lib('bearssl'):
             pytest.skip("BearSSL does not support cert verification with IP addresses")
         if env.curl_uses_lib('mbedtls'):
@@ -147,6 +147,23 @@ class TestSSLUse:
         if proto != 'h3':  # we proxy h3
             # the SNI should not have been used
             assert 'SSL_TLS_SNI' not in r.json, f'{r.json}'
+
+    # use IP address that is not in cert
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_05_bad_ip_addr(self, env: Env, proto,
+                               httpd, configures_httpd,
+                               nghttpx, configures_nghttpx):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        httpd.set_domain1_cred_name('domain1-no-ip')
+        httpd.reload_if_config_changed()
+        if proto == 'h3':
+            nghttpx.set_cred_name('domain1-no-ip')
+            nghttpx.reload_if_config_changed()
+        curl = CurlClient(env=env)
+        url = f'https://127.0.0.1:{env.port_for(proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 60, f'{r}'
 
     # use localhost for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])

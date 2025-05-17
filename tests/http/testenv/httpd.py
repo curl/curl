@@ -71,7 +71,7 @@ class Httpd:
         'proxys': socket.SOCK_STREAM,
     }
 
-    def __init__(self, env: Env, proxy_auth: bool = False):
+    def __init__(self, env: Env):
         self.env = env
         self._apache_dir = os.path.join(env.gen_dir, 'apache')
         self._run_dir = os.path.join(self._apache_dir, 'run')
@@ -86,10 +86,13 @@ class Httpd:
         self._digest_passwords = os.path.join(self._conf_dir, 'digest.passwords')
         self._mods_dir = None
         self._auth_digest = True
-        self._proxy_auth_basic = proxy_auth
+        self._proxy_auth_basic = False
+        # name used to lookup credentials for env.domain1
+        self._domain1_cred_name = env.domain1
         self._extra_configs = {}
         self._loaded_extra_configs = None
         self._loaded_proxy_auth = None
+        self._loaded_domain1_cred_name = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -121,11 +124,16 @@ class Httpd:
         else:
             self._extra_configs[domain] = lines
 
-    def clear_extra_configs(self):
+    def reset_config(self):
         self._extra_configs = {}
+        self.set_proxy_auth(False)
+        self._domain1_cred_name = self.env.domain1
 
     def set_proxy_auth(self, active: bool):
         self._proxy_auth_basic = active
+
+    def set_domain1_cred_name(self, name):
+        self._domain1_cred_name = name
 
     def _run(self, args, intext=''):
         env = os.environ.copy()
@@ -210,7 +218,8 @@ class Httpd:
     def reload_if_config_changed(self):
         if self._maybe_running and \
                 self._loaded_extra_configs == self._extra_configs and \
-                self._loaded_proxy_auth == self._proxy_auth_basic:
+                self._loaded_proxy_auth == self._proxy_auth_basic and \
+                self._loaded_domain1_cred_name == self._domain1_cred_name:
             return True
         return self.reload()
 
@@ -250,8 +259,9 @@ class Httpd:
     def _write_config(self):
         domain1 = self.env.domain1
         domain1brotli = self.env.domain1brotli
-        creds1 = self.env.get_credentials(domain1)
+        creds1 = self.env.get_credentials(self._domain1_cred_name)
         assert creds1  # convince pytype this isn't None
+        self._loaded_domain1_cred_name = self._domain1_cred_name
         domain2 = self.env.domain2
         creds2 = self.env.get_credentials(domain2)
         assert creds2  # convince pytype this isn't None

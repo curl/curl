@@ -42,9 +42,10 @@ log = logging.getLogger(__name__)
 
 class Nghttpx:
 
-    def __init__(self, env: Env, name: str):
+    def __init__(self, env: Env, name: str, domain: str, cred_name: str):
         self.env = env
         self._name = name
+        self._domain = domain
         self._port = 0
         self._https_port = 0
         self._cmd = env.nghttpx
@@ -55,10 +56,24 @@ class Nghttpx:
         self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
         self._tmp_dir = os.path.join(self._run_dir, 'tmp')
         self._process: Optional[subprocess.Popen] = None
+        self._cred_name = self._def_cred_name = cred_name
+        self._loaded_cred_name = ''
         self._rmf(self._pid_file)
         self._rmf(self._error_log)
         self._mkpath(self._run_dir)
         self._write_config()
+
+    def set_cred_name(self, name: str):
+        self._cred_name = name
+
+    def reset_config(self):
+        self._cred_name = self._def_cred_name
+
+    def reload_if_config_changed(self):
+        if self._process and self._port > 0 and \
+                self._loaded_cred_name == self._cred_name:
+            return True
+        return self.reload()
 
     @property
     def https_port(self):
@@ -101,7 +116,7 @@ class Nghttpx:
         self.stop()
         return self.start()
 
-    def reload(self, timeout: timedelta):
+    def reload(self, timeout: timedelta = timedelta(seconds=Env.SERVER_TIMEOUT)):
         if self._process:
             running = self._process
             self._process = None
@@ -132,13 +147,13 @@ class Nghttpx:
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             if self._https_port > 0:
-                check_url = f'https://{self.env.domain1}:{self._https_port}/'
+                check_url = f'https://{self._domain}:{self._port}/'
                 r = curl.http_get(url=check_url, extra_args=[
                     '--trace', 'curl.trace', '--trace-time',
                     '--connect-timeout', '1'
                 ])
             else:
-                check_url = f'https://{self.env.domain1}:{self._port}/'
+                check_url = f'https://{self._domain}:{self._port}/'
                 r = curl.http_get(url=check_url, extra_args=[
                     '--trace', 'curl.trace', '--trace-time',
                     '--http3-only', '--connect-timeout', '1'
@@ -155,13 +170,13 @@ class Nghttpx:
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             if self._https_port > 0:
-                check_url = f'https://{self.env.domain1}:{self._https_port}/'
+                check_url = f'https://{self._domain}:{self._port}/'
                 r = curl.http_get(url=check_url, extra_args=[
                     '--trace', 'curl.trace', '--trace-time',
                     '--connect-timeout', '1'
                 ])
             else:
-                check_url = f'https://{self.env.domain1}:{self._port}/'
+                check_url = f'https://{self._domain}:{self._port}/'
                 r = curl.http_get(url=check_url, extra_args=[
                     '--http3-only', '--trace', 'curl.trace', '--trace-time',
                     '--connect-timeout', '1'
@@ -195,7 +210,8 @@ class NghttpxQuic(Nghttpx):
     }
 
     def __init__(self, env: Env):
-        super().__init__(env=env, name='nghttpx-quic')
+        super().__init__(env=env, name='nghttpx-quic',
+                         domain=env.domain1, cred_name=env.domain1)
         self._https_port = env.https_port
 
     def initial_start(self):
@@ -216,14 +232,15 @@ class NghttpxQuic(Nghttpx):
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
-        creds = self.env.get_credentials(self.env.domain1)
+        creds = self.env.get_credentials(self._cred_name)
         assert creds  # convince pytype this isn't None
+        self._loaded_cred_name = self._cred_name
         args = [
             self._cmd,
+            f'--frontend=*,{self._port};tls',
             f'--frontend=*,{self.env.h3_port};quic',
             '--frontend-quic-early-data',
-            f'--frontend=*,{self._port};tls',
-            f'--backend=127.0.0.1,{self.env.https_port};{self.env.domain1};sni={self.env.domain1};proto=h2;tls',
+            f'--backend=127.0.0.1,{self.env.https_port};{self._domain};sni={self._domain};proto=h2;tls',
             f'--backend=127.0.0.1,{self.env.http_port}',
             '--log-level=INFO',
             f'--pid-file={self._pid_file}',
@@ -247,12 +264,10 @@ class NghttpxQuic(Nghttpx):
 
 class NghttpxFwd(Nghttpx):
 
-    PORT_SPECS = {
-        'h2proxys': socket.SOCK_STREAM,
-    }
-
     def __init__(self, env: Env):
-        super().__init__(env=env, name='nghttpx-fwd')
+        super().__init__(env=env, name='nghttpx-fwd',
+                         domain=env.proxy_domain,
+                         cred_name=env.proxy_domain)
 
     def initial_start(self):
 
@@ -265,16 +280,17 @@ class NghttpxFwd(Nghttpx):
             self._port = 0
             return False
 
-        return alloc_ports_and_do(NghttpxFwd.PORT_SPECS, startup,
-                                  self.env.gen_root, max_tries=3)
+        return alloc_ports_and_do({'h2proxys': socket.SOCK_STREAM},
+                                  startup, self.env.gen_root, max_tries=3)
 
     def start(self, wait_live=True):
         assert self._port > 0
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
-        creds = self.env.get_credentials(self.env.proxy_domain)
+        creds = self.env.get_credentials(self._cred_name)
         assert creds  # convince pytype this isn't None
+        self._loaded_cred_name = self._cred_name
         args = [
             self._cmd,
             '--http2-proxy',

@@ -135,11 +135,19 @@ def configures_httpd(env, httpd) -> Generator[bool, None, None]:
     # include this fixture as test parameter if the test configures httpd itself
     yield True
 
+@pytest.fixture(scope='session')
+def configures_nghttpx(env, httpd) -> Generator[bool, None, None]:
+    # include this fixture as test parameter if the test configures nghttpx itself
+    yield True
 
 @pytest.fixture(autouse=True, scope='function')
-def server_reset(request, env, httpd):
+def server_reset(request, env, httpd, nghttpx):
     # make sure httpd is in default configuration when a test starts
     if 'configures_httpd' not in request.node._fixtureinfo.argnames:
-        httpd.clear_extra_configs()
-        httpd.set_proxy_auth(False)
+        httpd.reset_config()
         httpd.reload_if_config_changed()
+    if env.have_h3() and \
+            'nghttpx' in request.node._fixtureinfo.argnames and \
+            'configures_nghttpx' not in request.node._fixtureinfo.argnames:
+        nghttpx.reset_config()
+        nghttpx.reload_if_config_changed()
