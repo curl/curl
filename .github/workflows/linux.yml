@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_CI: github
   CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
   # unhandled
   bearssl-version: 0.6
@@ -692,7 +693,6 @@ jobs:
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         env:
-          CURL_CI: github
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |

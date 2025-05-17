@@ -163,9 +163,11 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	$(CSOURCES) $(HHEADERS))
 
+if NOT_CURL_CI
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
 all-local: checksrc
+endif
 endif
 
 # disable the tests that are mostly causing false positives

@@ -441,6 +441,8 @@ XC_LIBTOOL
 
 LT_LANG([Windows Resource])
 
+AM_CONDITIONAL(NOT_CURL_CI, test -z "$CURL_CI")
+
 #
 # Automake conditionals based on libtool related checks
 #

@@ -47,6 +47,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_CI: github
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
