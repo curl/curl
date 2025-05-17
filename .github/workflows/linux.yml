@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_CI: github
   CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
   # unhandled
   bearssl-version: 0.6
@@ -65,8 +66,6 @@ jobs:
     runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 45
-    env:
-      CURL_CI: ${{ !contains(matrix.build.install_steps, 'checksrc') && 'github' || '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -153,7 +152,7 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=$HOME/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: openssl default
-            install_steps: pytest checksrc
+            install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: openssl libssh2 sync-resolver valgrind
