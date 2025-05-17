@@ -250,7 +250,7 @@ static void errlongzero(const char *name, CURLcode code, int lineno)
 static void errlong(const char *name, CURLcode code, int lineno)
 {
 $allowednumerrors
-  printf("%s set to non-zero returned %d, \\"%s\\" on line %d\\n",
+  printf ("%s set to non-zero returned %d, \\"%s\\" on line %d\\n",
          name, code, curl_easy_strerror(code), lineno);
 }
 
