@@ -587,6 +587,10 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
         if(per->retry_sleep > RETRY_SLEEP_MAX)
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
+#ifdef __MINGW32CE__
+#define fileno(x) _fileno(x)
+#endif
+
       if(outs->bytes && outs->filename && outs->stream) {
         /* We have written data to an output file, we truncate file */
         struct_stat fileinfo;
