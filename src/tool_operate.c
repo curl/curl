@@ -589,19 +589,19 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
       }
 
       if(outs->bytes && outs->filename && outs->stream) {
-        /* We have written data to an output file, we truncate file */
+#ifndef __MINGW32CE__
         struct_stat fileinfo;
-        fflush(outs->stream);
 
         /* The output can be a named pipe or a character device etc that
            cannot be truncated. Only truncate regular files. */
-#ifndef __MINGW32CE__
         if(!fstat(fileno(outs->stream), &fileinfo) &&
            S_ISREG(fileinfo.st_mode))
 #else
           /* Windows CE's fileno() is bad so just skip the check */
 #endif
         {
+          /* We have written data to an output file, we truncate file */
+          fflush(outs->stream);
           notef(config->global,
                 "Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
                 outs->bytes);
