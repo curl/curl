@@ -150,9 +150,9 @@ $(HUGE): $(ASCIIPAGE) $(MKHELP)
 	echo '/* !checksrc! disable INCLUDEDUP all */';         \
 	echo '/* !checksrc! disable LONGLINE all */';           \
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
-	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE);     \
+	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE);            \
 	echo '#else' >> $(HUGE);                                \
-	$(PERL) $(MKHELP) -c < $(ASCIIPAGE) >> $(HUGE);  \
+	$(PERL) $(MKHELP) -c < $(ASCIIPAGE) >> $(HUGE);         \
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE) )
 else # HAVE_LIBZ
 # This generates the tool_hugehelp.c file uncompressed only
