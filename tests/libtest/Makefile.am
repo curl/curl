@@ -127,7 +127,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
-checksrc:
+checksrc: lib1521.c
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	  -W$(srcdir)/libtest_bundle.c \
 	  $(srcdir)/*.[ch])
