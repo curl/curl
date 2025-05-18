@@ -41,7 +41,7 @@ jobs:
         name: checkout
 
       - name: check
-        run: scripts/checksrc.sh
+        run: scripts/checksrc-all.sh
 
   codespell-cmakelint-pytype-ruff:
     runs-on: ubuntu-latest
