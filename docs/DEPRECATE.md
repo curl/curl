@@ -44,6 +44,13 @@ curl drops support for the winbuild build method after September 2025.
 We recommend migrating to CMake. See the migration guide in
 `docs/INSTALL-CMAKE.md`.
 
+## Windows CE
+
+Windows CE "mainstream support" ended on October 9, 2018, and "Extended
+Support ended on October 10, 2023.
+
+curl drops all support in November 2025.
+
 ## Past removals
 
  - Pipelining
