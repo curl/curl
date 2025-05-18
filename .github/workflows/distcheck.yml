@@ -27,12 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: 'remove preinstalled curl libcurl4{-doc}'
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-
-      - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -65,6 +65,26 @@ jobs:
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
           rm -rf curl-99.98.97
+
+  maketgz-and-verify-in-tree-debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        run: autoreconf -fi
+
+      - name: 'configure'
+        run: ./configure --without-ssl --without-libpsl --enable-debug --enable-unity --enable-test-bundles
+
+      - name: 'make'
+        run: make V=1
+
+      - name: 'make tests'
+        run: make V=1 -C tests
 
   verify-out-of-tree-docs:
     runs-on: ubuntu-latest
