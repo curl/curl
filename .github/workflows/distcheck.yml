@@ -109,6 +109,7 @@ jobs:
           make
           make test-ci
           make install
+          popd
           scripts/checksrc.sh build
 
   verify-out-of-tree-cmake:
