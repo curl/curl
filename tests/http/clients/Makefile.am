@@ -72,8 +72,5 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/*.c)
 
 if NOT_CURL_CI
-if DEBUGBUILD
-# for debug builds, we scan the sources on all regular make invokes
 all-local: checksrc
-endif
 endif
