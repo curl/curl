@@ -588,7 +588,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
           per->retry_sleep = RETRY_SLEEP_MAX;
       }
 #ifdef __MINGW32CE__
-#define fileno(x) _fileno(x)
+#define fileno(x) (int)_fileno(x)
 #endif
 
       if(outs->bytes && outs->filename && outs->stream) {
