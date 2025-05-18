@@ -146,6 +146,9 @@ if HAVE_LIBZ
 # compressed formats.
 $(HUGE): $(ASCIIPAGE) $(MKHELP)
 	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE);    \
+	echo '/* !checksrc! disable COPYRIGHT all */';          \
+	echo '/* !checksrc! disable INCLUDEDUP all */';         \
+	echo '/* !checksrc! disable LONGLINE all */';           \
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
 	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE);     \
 	echo '#else' >> $(HUGE);                                \
