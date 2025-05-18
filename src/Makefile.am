@@ -187,7 +187,7 @@ CS_1 =
 CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
-checksrc:
+checksrc: $(HUGE) $(CA_EMBED_CSOURCE)
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(CURL_CFILES) $(CURL_HFILES))
 
 if NOT_CURL_CI
