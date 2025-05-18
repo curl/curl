@@ -145,7 +145,7 @@ if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
 $(HUGE): $(ASCIIPAGE) $(MKHELP)
-	$(HUGECMD) (echo '#include "tool_setup.h"' > $(HUGE);   \
+	$(HUGECMD)(echo '#include "tool_setup.h"' > $(HUGE);    \
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE);                    \
 	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE);     \
 	echo '#else' >> $(HUGE);                                \
