@@ -47,7 +47,7 @@ We recommend migrating to CMake. See the migration guide in
 ## Windows CE
 
 Windows CE "mainstream support" ended on October 9, 2018, and "Extended
-Support ended on October 10, 2023.
+Support" ended on October 10, 2023.
 
 curl drops all support in November 2025.
 
