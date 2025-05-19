@@ -35,6 +35,7 @@ print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mk-file-embed.pl script instead!
  */
+/* !checksrc! disable COPYRIGHT all */
 #ifndef CURL_DECLARED_${varname_upper}
 #define CURL_DECLARED_${varname_upper}
 extern const unsigned char ${varname}[];
