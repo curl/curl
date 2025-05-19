@@ -133,7 +133,9 @@ void Curl_dnscache_prune(struct Curl_easy *data);
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
-CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_connect);
+CURLcode Curl_once_resolved(struct Curl_easy *data,
+                            struct Curl_dns_entry *dns,
+                            bool *protocol_connect);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address

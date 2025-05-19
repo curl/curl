@@ -521,8 +521,8 @@ static void multi_done_locked(struct connectdata *conn,
   data->state.done = TRUE; /* called just now! */
   data->state.recent_conn_id = conn->connection_id;
 
-  if(conn->dns_entry)
-    Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
+  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
+  Curl_resolv_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
@@ -2165,7 +2165,7 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
     bool connected;
     /* Perform the next step in the connection phase, and then move on to the
        WAITCONNECT state */
-    result = Curl_once_resolved(data, &connected);
+    result = Curl_once_resolved(data, dns, &connected);
 
     if(result)
       /* if Curl_once_resolved() returns failure, the connection struct is

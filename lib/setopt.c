@@ -45,6 +45,7 @@
 #include "vtls/vtls.h"
 #include "curlx/warnless.h"
 #include "sendf.h"
+#include "hostip.h"
 #include "http2.h"
 #include "setopt.h"
 #include "multiif.h"
@@ -1602,6 +1603,10 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
       if(data->psl == &data->share->psl)
         data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
+      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
+        Curl_resolv_unlink(data, &data->state.dns[0]);
+        Curl_resolv_unlink(data, &data->state.dns[1]);
+      }
 
       data->share->dirty--;
 
