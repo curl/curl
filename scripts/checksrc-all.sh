@@ -15,7 +15,7 @@ for dir in $({
     fi
     [ -n "${1:-}" ] && find "$@" -name '*.[ch]'
   } | grep -v -F '/CMakeFiles/' | sed -E 's|/[^/]+$||' | sort -u); do
-  if ! ./scripts/checksrc.pl -v "${dir}"/*.[ch]; then
+  if ! ./scripts/checksrc.pl "${dir}"/*.[ch]; then
     anyfailed=1
   fi
 done
