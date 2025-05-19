@@ -109,7 +109,7 @@ def httpd(env) -> Generator[Httpd, None, None]:
 @pytest.fixture(scope='session')
 def nghttpx(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
-    if nghttpx.exists():
+    if nghttpx.exists() and env.have_h3():
         nghttpx.clear_logs()
         assert nghttpx.initial_start()
         yield nghttpx
