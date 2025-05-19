@@ -91,7 +91,7 @@ jobs:
         uses: cross-platform-actions/action@869c9e21f6b95e9d98d7bd23a0f1ebe97f09a500 # v0.28.0
         with:
           operating_system: 'openbsd'
-          version: '7.5'
+          version: '7.7'
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
@@ -137,7 +137,7 @@ jobs:
         uses: cross-platform-actions/action@869c9e21f6b95e9d98d7bd23a0f1ebe97f09a500 # v0.28.0
         with:
           operating_system: 'freebsd'
-          version: '14.1'
+          version: '14.2'
           architecture: ${{ matrix.arch }}
           run: |
             export MAKEFLAGS=-j3
