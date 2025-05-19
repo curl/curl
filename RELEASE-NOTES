@@ -4,7 +4,7 @@ curl and libcurl 8.14.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3424
+ Contributors:                 3425
 
 This release includes the following changes:
 
@@ -19,6 +19,7 @@ This release includes the following bugfixes:
 
  o _SEEALSO.md: remove spaces around command and man page section [166]
  o asny-thrdd: fix detach from running thread [191]
+ o asnyc-thrdd: explain how this is okay with a comment [200]
  o asyn resolver code improvements [50]
  o async-threaded resolver: use ref counter [10]
  o async: DoH improvements [99]
@@ -80,6 +81,7 @@ This release includes the following bugfixes:
  o docs/INSTALL.md: drop reference to removed configure option [83]
  o docs/libcurl: fix type and prototype problems in examples [121]
  o docs/libcurl: make examples build with picky compiler options [84]
+ o docs/libcurl: mention sensitive data/headers [206]
  o docs: add missing return statement in examples [85]
  o docs: fix incorrect shell substitution in docker run example command [51]
  o docs: update distros links
@@ -120,8 +122,11 @@ This release includes the following bugfixes:
  o lib: make Curl_easyopts const [44]
  o lib: unify conversions to/from hex [3]
  o libcurl-tutorial.md: fix read callback explanation [118]
+ o libssh: add NULL check for Curl_meta_get() [201]
  o libssh: fix memory leak [168]
+ o libssh: remove a condition that always equals false [202]
  o libtest/first: stop defining MEMDEBUG_NODEFINES [32]
+ o libtests: define CURL_DISABLE_DEPRECATION first [177]
  o make: clean tests better [60]
  o mbedtls: TLS 1.3 is max when mbedtls has 1.3 support [109]
  o metahash: add asserts to help analyzers [171]
@@ -144,6 +149,7 @@ This release includes the following bugfixes:
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
  o progress: avoid integer overflow when gathering total transfer size [128]
+ o pytest-xdist: pytest in parallel [204]
  o pytest: give parameterised tests better ids for read- and parsability [142]
  o pytest: make test_07_22 more lenient to exit codes [90]
  o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
@@ -170,6 +176,7 @@ This release includes the following bugfixes:
  o src: drop strcase.[ch] from tool builds [157]
  o src: include memdebug.h consistently with angle brackets <> [160]
  o src: rename curlx_safefree to tool_safefree [164]
+ o test1173.pl: whitelist some option-looking names that aren't options [203]
  o test1658: add unit test for the HTTPS RR decoder [28]
  o test: make unittest 1308 into a libtest [4]
  o tests/ech_tests.sh: sync shebang with rest of bash scripts [42]
@@ -200,10 +207,12 @@ This release includes the following bugfixes:
  o TODO: remove "nicer lacking perl message" [117]
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_getparam: clear argument only when needed [98]
+ o tool_operate: when retrying, only truncate regular files [165]
  o tool_paramhlp: avoid integer overflow in secs2ms() [152]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
  o typecheck-gcc.h: fix the typechecks [110]
  o urlapi: redirecting to "" is considered fine [149]
+ o urlapi: remove unneeded guards around PUNY2IDN [193]
  o VERSIONS: list all past releases [22]
  o vquic: consistent name for the stream struct across backends [135]
  o vquic: init for every call to recvmsg [134]
@@ -237,14 +246,15 @@ advice from friends like these:
 
   Abhinav Singhal, Andreas Westin, Andrei Florea, Andrew Kirillov, Andy Pan,
   antypanty on hackerone, Arian van Putten, bo0tzz on github, Bo Anderson,
-  Brian Chrzanowski, bruce.yoon, bsr13 on hackerone, calvin2021y on github,
-  Calvin Ruocco, Carlos Henrique Lima Melara, Christian Schmitz,
-  Christoph Jabs, Cole Helbling, Corinna Brandt, Dagobert Michelsen,
-  Dan Fandrich, Daniel Engberg, Daniel Fosco, Daniel McCarney, Daniel Stenberg,
-  Demi Marie Obenour, dependabot[bot], Dirk Feytons, epicmkirzinger on github,
-  Eric Knibbe, Fujii Hironori, gkarracer on github, Graham Christensen,
-  Harry Sintonen, Helmut Grohne, Int64x86 on github, Jake Yuesong Li,
-  James Fuller, Jean-Christophe Amiel, Jimmy Sjölund, Jixinqi,
+  Brendan Dolan-Gavitt, Brian Chrzanowski, bruce.yoon, bsr13 on hackerone,
+  calvin2021y on github, Calvin Ruocco, Carlos Henrique Lima Melara,
+  Christian Schmitz, Christoph Jabs, Cole Helbling, Corinna Brandt,
+  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel Fosco,
+  Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
+  Dirk Feytons, epicmkirzinger on github, Eric Knibbe, Fujii Hironori,
+  gkarracer on github, Gordon Parke, Graham Christensen, Harry Sintonen,
+  Helmut Grohne, Hiroki Kurosawa, Int64x86 on github, Jacob Mealey,
+  Jake Yuesong Li, James Fuller, Jean-Christophe Amiel, Jimmy Sjölund, Jixinqi,
   Jochen Sprickerhof, Joe Cise, Joel Depooter, Johan Eliasson, John Bampton,
   John Haugabook, Jonathan Rosa, Kai Pastor, kkalganov on github,
   Maksim Ściepanienka, Manuel Strehl, Marius Kleidl, Mathieu Garaud,
@@ -255,7 +265,7 @@ advice from friends like these:
   Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane,
   Viktor Szakats, wolfsage on hackerone, x1sc0 on github, xiadnoring on github,
   Yedaya Katsman, zopsicle on github
-  (82 contributors)
+  (86 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -423,6 +433,7 @@ References to bug reports and discussions on issues:
  [162] = https://curl.se/bug/?i=17301
  [163] = https://curl.se/bug/?i=17281
  [164] = https://curl.se/bug/?i=17270
+ [165] = https://curl.se/bug/?i=17371
  [166] = https://curl.se/bug/?i=17348
  [167] = https://curl.se/bug/?i=17275
  [168] = https://curl.se/bug/?i=17346
@@ -433,6 +444,7 @@ References to bug reports and discussions on issues:
  [174] = https://curl.se/bug/?i=17264
  [175] = https://curl.se/bug/?i=17263
  [176] = https://curl.se/bug/?i=17259
+ [177] = https://curl.se/bug/?i=17373
  [179] = https://curl.se/bug/?i=17258
  [180] = https://curl.se/bug/?i=17337
  [181] = https://curl.se/bug/?i=17330
@@ -446,9 +458,16 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=17329
  [190] = https://curl.se/bug/?i=17294
  [191] = https://curl.se/bug/?i=17256
+ [193] = https://curl.se/bug/?i=17364
  [194] = https://curl.se/bug/?i=17294
  [195] = https://curl.se/bug/?i=17321
  [196] = https://curl.se/bug/?i=17318
  [197] = https://curl.se/bug/?i=17317
  [198] = https://curl.se/bug/?i=17319
  [199] = https://curl.se/bug/?i=17316
+ [200] = https://curl.se/bug/?i=17365
+ [201] = https://curl.se/bug/?i=17359
+ [202] = https://curl.se/bug/?i=17358
+ [203] = https://curl.se/bug/?i=17361
+ [204] = https://curl.se/bug/?i=17295
+ [206] = https://curl.se/bug/?i=17353
