@@ -1134,5 +1134,7 @@ if($errors || $warnings || $verbose) {
         $serrors,
         $swarnings;
     }
-    exit 5; # return failure
+    if($errors || $warnings) {
+        exit 5; # return failure
+    }
 }
