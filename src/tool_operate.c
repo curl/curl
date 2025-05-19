@@ -648,8 +648,11 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(per->retry_remaining &&
      (!config->retry_maxtime ||
       (curlx_timediff(curlx_now(), per->retrystart) <
-       config->retry_maxtime*1000L)) )
+       config->retry_maxtime*1000L)) ) {
     result = retrycheck(config, per, result, retryp, delay);
+    if(!result && *retryp)
+      return CURLE_OK; /* retry! */
+  }
 
   if((global->progressmode == CURL_PROGRESS_BAR) &&
      per->progressbar.calls)
