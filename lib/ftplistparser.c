@@ -416,7 +416,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
       }
       else {
         parser->state.UNIX.main = PL_UNIX_FILETYPE;
-        /* continue to fall trough */
+        /* continue to fall through */
       }
       break;
     case PL_UNIX_TOTALSIZE_READING:
