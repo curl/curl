@@ -231,7 +231,6 @@ static void timer_cb(GlobalInfo* g, int revents)
      * epoll buffer (i.e. the timer may have fired multiple times). The event
      * count is cleared after the first call so future events in the epoll
      * buffer fails to read from the timer. */
-    /* !checksrc! disable ERRNOVAR 1 */
     if(errno == EAGAIN) {
       fprintf(MSG_OUT, "EAGAIN on tfd %d\n", g->tfd);
       return;
