@@ -53,7 +53,7 @@ The only reason we kept support for this version is for Windows CE - and we
 intend to remove support for that Operating System in this time frame as well.
 Bumping the minimum to VS2010. VS2008 is a pain to support.
 
-Previous discusson and details: https://github.com/curl/curl/discussions/15972
+Previous discussion and details: https://github.com/curl/curl/discussions/15972
 
 ## Past removals
 
