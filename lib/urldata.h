@@ -275,8 +275,8 @@ struct ssl_primary_config {
   char *password; /* TLS password (for, e.g., SRP) */
 #endif
   char *curves;          /* list of curves to use */
-  unsigned char ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
   unsigned int version_max; /* max supported version the client wants to use */
+  unsigned char ssl_options;  /* the CURLOPT_SSL_OPTIONS bitmask */
   unsigned char version;    /* what version the client wants to use */
   BIT(verifypeer);       /* set TRUE if this is desired */
   BIT(verifyhost);       /* set TRUE if CN/SAN must match hostname */
