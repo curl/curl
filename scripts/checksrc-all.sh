@@ -5,10 +5,7 @@
 
 {
   git ls-files '*.[ch]'
-  while [ -n "${1:-}" ]; do
-    find "$1" -name '*.[ch]' | grep -v -F '/CMakeFiles/'
-    shift
-  done
+  [ -n "$1" ] && find "$@" -name '*.[ch]' | grep -v -F '/CMakeFiles/'
 } | sed -E 's|/[^/]+$||' | sort -u | while read -r dir; do
   ./scripts/checksrc.pl "${dir}"/*.[ch]
 done
