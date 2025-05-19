@@ -5,14 +5,12 @@
 
 set -eu
 
-dirs="$({
-    git ls-files '*.[ch]'
-    [ -n "${1:-}" ] && find "$@" -name '*.[ch]' | grep -v -F '/CMakeFiles/'
-  } | sed -E 's|/[^/]+$||' | sort -u)"
-
 anyfailed=0
 
-for dir in ${dirs}; do
+for dir in $({
+    git ls-files '*.[ch]'
+    [ -n "${1:-}" ] && find "$@" -name '*.[ch]' | grep -v -F '/CMakeFiles/'
+  } | sed -E 's|/[^/]+$||' | sort -u); do
   if ! ./scripts/checksrc.pl -v "${dir}"/*.[ch]; then
     anyfailed=1
   fi
