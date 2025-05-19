@@ -270,9 +270,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
       if(memchr(form->name, 0, form->namelength))
         return CURL_FORMADD_NULL;
     }
-    if(!(form->flags & HTTPPOST_PTRNAME) &&
-       (form == first_form) &&
-       form->name) {
+    if(!(form->flags & HTTPPOST_PTRNAME) && form->name) {
       /* Note that there is small risk that form->name is NULL here if the app
          passed in a bad combo, so we check for that. */
 
@@ -322,6 +320,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   CURLformoption option;
   struct curl_forms *forms = NULL;
   char *avalue = NULL;
+  struct curl_httppost *newchain = NULL;
+  struct curl_httppost *lastnode = NULL;
 
   /* This is a state variable, that if TRUE means that we are parsing an
      array that we got passed to us. If FALSE we are parsing the input
@@ -622,10 +622,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     }
   }
 
-  if(CURL_FORMADD_OK == retval)
-    retval = FormAddCheck(first_form, httppost, last_post);
+  if(!retval)
+    retval = FormAddCheck(first_form, &newchain, &lastnode);
 
-  if(CURL_FORMADD_OK != retval)
+  if(retval)
     /* On error, free allocated fields for all nodes of the FormInfo linked
        list without deallocating nodes. List nodes are deallocated later on */
     free_formlist(first_form);
@@ -637,6 +637,24 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     struct FormInfo *ptr = first_form->more;
     free(first_form);
     first_form = ptr;
+  }
+
+  if(!retval) {
+    /* Only if all is fine, link the new chain into the provided list */
+    if(*last_post)
+      (*last_post)->next = newchain;
+    else
+      (*httppost) = newchain;
+
+    (*last_post) = lastnode;
+  }
+  else {
+    /* remove the newly created chain */
+    while(newchain) {
+      struct curl_httppost *next = newchain->next;
+      free(newchain);
+      newchain = next;
+    }
   }
 
   return retval;
