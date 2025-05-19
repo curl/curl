@@ -110,6 +110,8 @@ jobs:
           make test-ci
           make install
           popd
+          find build -name '*.[ch]'
+          cat build/lib/curl_config.h
           scripts/checksrc-all.sh build
 
   verify-out-of-tree-cmake:
