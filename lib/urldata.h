@@ -753,10 +753,6 @@ struct connectdata {
    * the connection is cleaned up (see Curl_hash_add2()).*/
   struct Curl_hash meta_hash;
 
-  /* 'remote_addr' is the particular IP we connected to. it is owned, set
-   * and NULLed by the connected socket filter (if there is one). */
-  const struct Curl_sockaddr_ex *remote_addr;
-
   struct hostname host;
   char *hostname_resolve; /* hostname to resolve to address, allocated */
   char *secondaryhostname; /* secondary socket hostname (ftp) */

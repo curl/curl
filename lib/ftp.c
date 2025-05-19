@@ -978,6 +978,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       port_min = port_max = 0;
 
     if(addrlen) {
+      const struct Curl_sockaddr_ex *remote_addr =
+       Curl_conn_get_remote_addr(data, FIRSTSOCKET);
+
+      DEBUGASSERT(remote_addr);
+      if(!remote_addr)
+        goto out;
       DEBUGASSERT(addr);
       if(addrlen >= sizeof(ipstr))
         goto out;
@@ -985,9 +991,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       ipstr[addrlen] = 0;
 
       /* attempt to get the address of the given interface name */
-      switch(Curl_if2ip(conn->remote_addr->family,
+      switch(Curl_if2ip(remote_addr->family,
 #ifdef USE_IPV6
-                        Curl_ipv6_scope(&conn->remote_addr->curl_sa_addr),
+                        Curl_ipv6_scope(&remote_addr->curl_sa_addr),
                         conn->scope_id,
 #endif
                         ipstr, hbuf, sizeof(hbuf))) {
