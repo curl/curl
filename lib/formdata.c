@@ -223,7 +223,6 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
                                  struct curl_httppost **last_post)
 {
   const char *prevtype = NULL;
-  CURLFORMcode retval = CURL_FORMADD_OK;
   struct FormInfo *form = NULL;
   struct curl_httppost *post = NULL;
 
@@ -246,8 +245,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
        ( (form->flags & HTTPPOST_READFILE) &&
          (form->flags & HTTPPOST_PTRCONTENTS) )
       ) {
-      retval = CURL_FORMADD_INCOMPLETE;
-      break;
+      return CURL_FORMADD_INCOMPLETE;
     }
     if(((form->flags & HTTPPOST_FILENAME) ||
         (form->flags & HTTPPOST_BUFFER)) &&
@@ -263,17 +261,14 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
 
       /* our contenttype is missing */
       form->contenttype = strdup(type);
-      if(!form->contenttype) {
-        retval = CURL_FORMADD_MEMORY;
-        break;
-      }
+      if(!form->contenttype)
+        return CURL_FORMADD_MEMORY;
+
       form->contenttype_alloc = TRUE;
     }
     if(form->name && form->namelength) {
-      if(memchr(form->name, 0, form->namelength)) {
-        retval = CURL_FORMADD_NULL;
-        break;
-      }
+      if(memchr(form->name, 0, form->namelength))
+        return CURL_FORMADD_NULL;
     }
     if(!(form->flags & HTTPPOST_PTRNAME) &&
        (form == first_form) &&
@@ -284,10 +279,9 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
       /* copy name (without strdup; possibly not null-terminated) */
       char *dupname = Curl_memdup0(form->name, form->namelength ?
                                    form->namelength : strlen(form->name));
-      if(!dupname) {
-        retval = CURL_FORMADD_MEMORY;
-        break;
-      }
+      if(!dupname)
+        return CURL_FORMADD_MEMORY;
+
       form->name = dupname;
       form->name_alloc = TRUE;
     }
@@ -301,24 +295,21 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
 
       form->value = Curl_memdup(form->value, clen);
 
-      if(!form->value) {
-        retval = CURL_FORMADD_MEMORY;
-        break;
-      }
+      if(!form->value)
+        return CURL_FORMADD_MEMORY;
+
       form->value_alloc = TRUE;
     }
     post = AddHttpPost(form, post, httppost, last_post);
 
-    if(!post) {
-      retval = CURL_FORMADD_MEMORY;
-      break;
-    }
+    if(!post)
+      return CURL_FORMADD_MEMORY;
 
     if(form->contenttype)
       prevtype = form->contenttype;
   }
 
-  return retval;
+  return CURL_FORMADD_OK;
 }
 
 static
