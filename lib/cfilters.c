@@ -738,7 +738,8 @@ cf_get_remote_addr(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   const struct Curl_sockaddr_ex *remote_addr = NULL;
   if(cf &&
-     !cf->cft->query(cf, data, CF_QUERY_REMOTE_ADDR, NULL, &remote_addr))
+     !cf->cft->query(cf, data, CF_QUERY_REMOTE_ADDR, NULL,
+                     CURL_UNCONST(&remote_addr)))
     return remote_addr;
   return NULL;
 }
