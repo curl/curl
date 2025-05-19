@@ -8,9 +8,13 @@ set -eu
 anyfailed=0
 
 for dir in $({
-    git ls-files '*.[ch]' || true
-    [ -n "${1:-}" ] && find "$@" -name '*.[ch]' | grep -v -F '/CMakeFiles/'
-  } | sed -E 's|/[^/]+$||' | sort -u); do
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      git ls-files '*.[ch]'
+    else
+      find . -name '*.[ch]'
+    fi
+    [ -n "${1:-}" ] && find "$@" -name '*.[ch]'
+  } | grep -v -F '/CMakeFiles/' | sed -E 's|/[^/]+$||' | sort -u); do
   if ! ./scripts/checksrc.pl -v "${dir}"/*.[ch]; then
     anyfailed=1
   fi
