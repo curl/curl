@@ -964,8 +964,6 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                     "conn->sock[], discarding", (int)ctx->sock[SP_LOCAL]);
         ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       }
-      if(cf->sockindex == FIRSTSOCKET)
-        cf->conn->remote_addr = NULL;
     }
     if(ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
       sclose(ctx->sock[SP_LOCAL]);
