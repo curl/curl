@@ -110,7 +110,7 @@ jobs:
           make test-ci
           make install
           popd
-          scripts/checksrc-all.sh build
+          scripts/checksrc-all.sh .
 
   verify-out-of-tree-cmake:
     runs-on: ubuntu-latest
