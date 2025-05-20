@@ -94,6 +94,26 @@ jobs:
       - name: REUSE Compliance Check
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
 
+  complexity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+        name: checkout
+
+      - name: install pmccabe
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            pmccabe
+
+      - name: check complexity scores
+        run: ./scripts/top-complexity
+
   miscchecks:
     runs-on: ubuntu-latest
     timeout-minutes: 5
