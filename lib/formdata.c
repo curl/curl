@@ -310,6 +310,19 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
   return CURL_FORMADD_OK;
 }
 
+/* Shallow cleanup. Remove the newly created chain, the structs only and not
+   the content they point to */
+static void free_chain(struct curl_httppost *c)
+{
+  while(c) {
+    struct curl_httppost *next = c->next;
+    if(c->more)
+      free_chain(c->more);
+    free(c);
+    c = next;
+  }
+}
+
 static
 CURLFORMcode FormAdd(struct curl_httppost **httppost,
                      struct curl_httppost **last_post,
@@ -648,14 +661,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 
     (*last_post) = lastnode;
   }
-  else {
-    /* remove the newly created chain */
-    while(newchain) {
-      struct curl_httppost *next = newchain->next;
-      free(newchain);
-      newchain = next;
-    }
-  }
+  else
+    free_chain(newchain);
 
   return retval;
 }
