@@ -2251,6 +2251,19 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return rc;
 }
 
+#ifndef CURL_DISABLE_ALTSVC
+static bool is_altsvc_error(CURLcode rc)
+{
+  switch(rc) {
+  case CURLE_OK:
+  case CURLE_OUT_OF_MEMORY:
+    return false;
+  default:
+    return true;
+  }
+}
+#endif
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime *nowp,
                                  struct Curl_easy *data)
@@ -2566,10 +2579,11 @@ do_connect:
 statemachine_end:
     /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(data->asi && data->asi->used && !data->asi->result) {
-      data->asi->result = result;
+    if(data->asi && data->asi->used && !data->asi->errored) {
+      data->asi->errored = is_altsvc_error(result);
 
-      if(result && !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+      if(data->asi->errored &&
+        !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
         data->mstate <= MSTATE_PROTOCONNECTING &&
         data->mstate >= MSTATE_CONNECT) {
         infof(data, "Alt-Svc connection failed(%d). "
