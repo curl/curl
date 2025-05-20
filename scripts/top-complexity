@@ -80,7 +80,7 @@ my %whitelist = (
     );
 
 # functions with complexity above this level causes the function to return error
-my $cutoff = 99;
+my $cutoff = 100;
 
 # functions above this complexity level are shown
 my $show = 80;
@@ -111,7 +111,13 @@ for my $l (@output) {
 
 }
 
+my $showncutoff;
 for my $e (sort {$where{$b} <=> $where{$a}} keys %where) {
+    if(!$showncutoff &&
+       ($where{$e} <= $cutoff)) {
+        print "\n---- threshold: $cutoff ----\n\n";
+        $showncutoff = 1;
+    }
     printf "%-5d %s%s\n", $where{$e}, $e,
         $perm{$e} ? " [ALLOWED]": "";
 }
