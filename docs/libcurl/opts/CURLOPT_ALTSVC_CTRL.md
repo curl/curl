@@ -58,7 +58,9 @@ the hostname from the URL is attempted instead.
 Failed connection problems that trigger this fallback include:
 1. bad addresses such as .onion
 2. non responsive servers
-3. etc ...
+3. bad SSL
+4. unsupported protocols
+5. bad response data
 
 ## CURLALTSVC_READONLYFILE
 
