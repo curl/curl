@@ -485,7 +485,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
     switch(parser->state.UNIX.sub.hlinks) {
     case PL_UNIX_HLINKS_PRESPACE:
       if(c != ' ') {
-        if(ISDIGIT(c)) {
+        if(ISDIGIT(c) && len) {
           parser->item_offset = len - 1;
           parser->item_length = 1;
           parser->state.UNIX.sub.hlinks = PL_UNIX_HLINKS_NUMBER;
@@ -850,7 +850,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
   case PL_WINNT_DIRORSIZE:
     switch(parser->state.NT.sub.dirorsize) {
     case PL_WINNT_DIRORSIZE_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_CONTENT;
