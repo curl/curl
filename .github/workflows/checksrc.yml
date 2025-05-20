@@ -104,6 +104,7 @@ jobs:
         name: checkout
 
       - name: install pmccabe
+        run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
