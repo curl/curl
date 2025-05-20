@@ -95,10 +95,10 @@ static const struct testcase testcases[] = {
   int msnprintf_result;
 
   for(i = 0;  i < CURL_ARRAYSIZE(testcases); i++) {
-    Curl_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
+    curlx_dyn_init(&canonical_query, CURL_MAX_HTTP_HEADER);
 
     result = canon_query(testcases[i].query_part, &canonical_query);
-    canonical_query_ptr = Curl_dyn_ptr(&canonical_query);
+    canonical_query_ptr = curlx_dyn_ptr(&canonical_query);
     msnprintf_result = curl_msnprintf(buffer, sizeof(buffer),
       "%s: Received \"%s\" and should be \"%s\"",
       testcases[i].testname, canonical_query_ptr,
@@ -107,7 +107,7 @@ static const struct testcase testcases[] = {
     fail_unless(!result && canonical_query_ptr && !strcmp(canonical_query_ptr,
       testcases[i].canonical_query),
     buffer);
-    Curl_dyn_free(&canonical_query);
+    curlx_dyn_free(&canonical_query);
  }
 
  #endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */

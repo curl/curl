@@ -502,10 +502,10 @@ static int compare_func(const void *a, const void *b)
 
   const struct pair *aa = a;
   const struct pair *bb = b;
-  const size_t aa_key_len = Curl_dyn_len(&aa->key);
-  const size_t bb_key_len = Curl_dyn_len(&bb->key);
-  const size_t aa_value_len = Curl_dyn_len(&aa->value);
-  const size_t bb_value_len = Curl_dyn_len(&bb->value);
+  const size_t aa_key_len = curlx_dyn_len(&aa->key);
+  const size_t bb_key_len = curlx_dyn_len(&bb->key);
+  const size_t aa_value_len = curlx_dyn_len(&aa->value);
+  const size_t bb_value_len = curlx_dyn_len(&bb->value);
   int compare;
 
   /* If one element is empty, the other is always sorted higher */
@@ -517,7 +517,7 @@ static int compare_func(const void *a, const void *b)
     return -1;
   if(bb_key_len == 0)
     return 1;
-  compare = strcmp(Curl_dyn_ptr(&aa->key), Curl_dyn_ptr(&bb->key));
+  compare = strcmp(curlx_dyn_ptr(&aa->key), curlx_dyn_ptr(&bb->key));
   if(compare) {
     return compare;
   }
@@ -529,7 +529,7 @@ static int compare_func(const void *a, const void *b)
     return -1;
   if(bb_value_len == 0)
     return 1;
-  compare = strcmp(Curl_dyn_ptr(&aa->value), Curl_dyn_ptr(&bb->value));
+  compare = strcmp(curlx_dyn_ptr(&aa->value), curlx_dyn_ptr(&bb->value));
 
   return compare;
 
@@ -543,7 +543,7 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
 
   struct Curl_str original_path;
 
-  Curl_str_assign(&original_path, q, len);
+  curlx_str_assign(&original_path, q, len);
 
   /* Normalized path will be either the same or shorter than the original
    * path, plus trailing slash */
@@ -555,14 +555,14 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
     }
   }
   else {
-    result = Curl_dyn_addn(new_path, q, len);
+    result = curlx_dyn_addn(new_path, q, len);
     if(result) {
       goto fail;
     }
   }
 
-  if(Curl_dyn_len(new_path) == 0) {
-    result = Curl_dyn_add(new_path, "/");
+  if(curlx_dyn_len(new_path) == 0) {
+    result = curlx_dyn_add(new_path, "/");
   }
 fail:
   return result;
@@ -602,8 +602,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   for(index = 0; index < num_query_components;
     index++) {
 
-    query_part_len = Curl_dyn_len(&query_array[index]);
-    query_part = Curl_dyn_ptr(&query_array[index]);
+    query_part_len = curlx_dyn_len(&query_array[index]);
+    query_part = curlx_dyn_ptr(&query_array[index]);
 
     in_key = query_part;
 
@@ -616,8 +616,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_key_len = offset - in_key;
     }
 
-    Curl_dyn_init(&encoded_query_array[index].key, query_part_len*3 + 1);
-    Curl_dyn_init(&encoded_query_array[index].value, query_part_len*3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].key, query_part_len*3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].value, query_part_len*3 + 1);
     counted_query_components++;
 
     /* Decode/encode the key */
@@ -639,8 +639,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
     }
     else {
       /* If there is no value, the value is an empty string */
-      Curl_dyn_init(&encoded_query_array[index].value, 2);
-      result = Curl_dyn_addn(&encoded_query_array[index].value, "", 1);
+      curlx_dyn_init(&encoded_query_array[index].value, 2);
+      result = curlx_dyn_addn(&encoded_query_array[index].value, "", 1);
     }
 
     if(result) {
@@ -655,22 +655,22 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   /* Append the query components together to make a full query string */
   for(index = 0; index < num_query_components; index++) {
 
-    key_ptr = Curl_dyn_ptr(&encoded_query_array[index].key);
-    value_ptr = Curl_dyn_ptr(&encoded_query_array[index].value);
+    key_ptr = curlx_dyn_ptr(&encoded_query_array[index].key);
+    value_ptr = curlx_dyn_ptr(&encoded_query_array[index].value);
 
     if(value_ptr && strlen(value_ptr)) {
-      result = Curl_dyn_addf(dq, "%s=%s&", key_ptr, value_ptr);
+      result = curlx_dyn_addf(dq, "%s=%s&", key_ptr, value_ptr);
     }
     else {
       /* Empty value is always encoded to key= */
-      result = Curl_dyn_addf(dq, "%s=&", key_ptr);
+      result = curlx_dyn_addf(dq, "%s=&", key_ptr);
     }
     if(result) {
       goto fail;
     }
   }
   /* Remove trailing & */
-  result = Curl_dyn_setlen(dq, Curl_dyn_len(dq)-1);
+  result = curlx_dyn_setlen(dq, curlx_dyn_len(dq)-1);
 
 fail:
   pair_array_free(&encoded_query_array[0], counted_query_components);
@@ -996,8 +996,8 @@ static void pair_array_free(struct pair *pair_array, size_t num_elements)
   size_t index;
 
   for(index = 0; index != num_elements; index++) {
-    Curl_dyn_free(&pair_array[index].key);
-    Curl_dyn_free(&pair_array[index].value);
+    curlx_dyn_free(&pair_array[index].key);
+    curlx_dyn_free(&pair_array[index].value);
   }
 
 }
@@ -1011,7 +1011,7 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
   size_t index;
 
   for(index = 0; index < num_elements; index++) {
-    Curl_dyn_free((&db[index]));
+    curlx_dyn_free((&db[index]));
   }
 
 }
@@ -1042,8 +1042,8 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
   for(pos = 0; pos < len; pos++) {
     if(source[pos] == split_by) {
       if(segment_length) {
-        Curl_dyn_init(&db[index], segment_length + 1);
-        result = Curl_dyn_addn(&db[index], &source[start],
+        curlx_dyn_init(&db[index], segment_length + 1);
+        result = curlx_dyn_addn(&db[index], &source[start],
           segment_length);
         if(result) {
           goto fail;
@@ -1062,8 +1062,8 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
   }
 
   if(segment_length) {
-    Curl_dyn_init(&db[index], segment_length + 1);
-    result = Curl_dyn_addn(&db[index], &source[start],
+    curlx_dyn_init(&db[index], segment_length + 1);
+    result = curlx_dyn_addn(&db[index], &source[start],
                            segment_length);
     if(result) {
       goto fail;
@@ -1087,21 +1087,21 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
 struct dynbuf *new_path)
 {
 
-  const char *p = Curl_str(original_path);
+  const char *p = curlx_str(original_path);
   CURLcode result = CURLE_OK;
   size_t index;
 
-  for(index = 0; index < Curl_strlen(original_path); index++) {
+  for(index = 0; index < curlx_strlen(original_path); index++) {
     /* Do not encode slashes or unreserved chars from RFC 3986 */
     unsigned char c = p[index];
     if(is_reserved_char(c) || c == '/') {
-      result = Curl_dyn_addn(new_path, &c, 1);
+      result = curlx_dyn_addn(new_path, &c, 1);
       if(result) {
         goto fail;
       }
     }
     else {
-      result = Curl_dyn_addf(new_path, "%%%02X", c);
+      result = curlx_dyn_addf(new_path, "%%%02X", c);
       if(result) {
         goto fail;
       }
@@ -1126,14 +1126,14 @@ static CURLcode encode_query_component(char *component, size_t len,
 
     if(is_reserved_char(this_char)) {
       /* Escape unreserved chars from RFC 3986 */
-      result = Curl_dyn_addn(db, &this_char, 1);
+      result = curlx_dyn_addn(db, &this_char, 1);
     }
     else if(this_char == '+') {
       /* Encode '+' as space */
-      result = Curl_dyn_add(db, "%20");
+      result = curlx_dyn_add(db, "%20");
     }
     else {
-      result = Curl_dyn_addf(db, "%%%02X", this_char);
+      result = curlx_dyn_addf(db, "%%%02X", this_char);
     }
     if(result) {
       goto fail;
@@ -1175,9 +1175,9 @@ static bool should_urlencode(struct Curl_str *service_name)
    * from the AWS SDK. Urls are already normalized by the curl url parser
    */
 
-  if(Curl_str_cmp(service_name, "s3") ||
-     Curl_str_cmp(service_name, "s3-express") ||
-     Curl_str_cmp(service_name, "s3-outposts")) {
+  if(curlx_str_cmp(service_name, "s3") ||
+     curlx_str_cmp(service_name, "s3-express") ||
+     curlx_str_cmp(service_name, "s3-outposts")) {
     return false;
   }
   return true;
