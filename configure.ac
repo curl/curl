@@ -4418,6 +4418,14 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
     fi
 )
 
+if test "x$USE_WINDOWS_SSPI" = "x1"; then
+  if test "$curl_cv_wince" = 'no'; then
+    LIBS="-lsecur32 $LIBS"
+  else
+    LIBS="-lsecurity $LIBS"
+  fi
+fi
+
 dnl ************************************************************
 dnl disable basic authentication
 dnl
