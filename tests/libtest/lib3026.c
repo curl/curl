@@ -25,7 +25,7 @@
 
 #include "testutil.h"
 #include "warnless.h"
-#include "curlx/timediff.h"
+#include "curlx/winapi.h"
 
 #define NUM_THREADS 100
 
