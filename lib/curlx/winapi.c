@@ -221,7 +221,6 @@ HMODULE curlx_winapi_load_library(LPCTSTR filename)
         hModule = pLoadLibraryEx ?
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
-
       }
       free(path);
     }
