@@ -75,11 +75,6 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct wssl_ctx *wssl);
 
-CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct wssl_ctx *wss,
-                                 const char *ssl_peer_key);
-
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -88,6 +83,10 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len);
+
+CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct wssl_ctx *wssl);
 
 
 #endif /* USE_WOLFSSL */

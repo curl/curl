@@ -513,3 +513,26 @@ class TestSSLUse:
             assert r.json['SSL_CIPHER'] in ciphers, r.dump_logs()
         else:
             assert r.exit_code != 0, r.dump_logs()
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_19_wrong_pin(self, env: Env, proto, httpd):
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--pinnedpubkey', 'sha256//ffff'
+        ])
+        # expect CURLE_SSL_PINNEDPUBKEYNOTMATCH
+        assert r.exit_code == 90, f'{r.dump_logs()}'
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_20_correct_pin(self, env: Env, proto, httpd):
+        curl = CurlClient(env=env)
+        creds = env.get_credentials(env.domain1)
+        assert creds
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '--pinnedpubkey', f'sha256//{creds.pub_sha256_b64()}'
+        ])
+        # expect CURLE_SSL_PINNEDPUBKEYNOTMATCH
+        assert r.exit_code == 0, f'{r.dump_logs()}'
+

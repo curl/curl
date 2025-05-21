@@ -187,6 +187,8 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
     }
     wolfSSL_X509_free(cert);
   }
+  if(!result)
+    result = Curl_wssl_verify_pinned(cf, data, &ctx->wssl);
 #endif
   /* on error, remove any session we might have in the pool */
   if(result)

@@ -1526,10 +1526,10 @@ static char *wssl_strerror(unsigned long error, char *buf,
   return buf;
 }
 
-static CURLcode wssl_verify_pinned(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct wssl_ctx *wssl)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -1540,7 +1540,6 @@ static CURLcode wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
-    struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
     WOLFSSL_X509 *x509;
     const char *x509_der;
     int x509_der_len;
@@ -2138,7 +2137,7 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
       result = wssl->hs_result;
       goto out;
     }
-    result = wssl_verify_pinned(cf, data);
+    result = Curl_wssl_verify_pinned(cf, data, wssl);
     if(result) {
       wssl->hs_result = result;
       goto out;
