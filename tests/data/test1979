@@ -3,6 +3,7 @@
 <keywords>
 unittest
 canon_string
+aws-sigv4
 </keywords>
 </info>
 
