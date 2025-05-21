@@ -31,6 +31,7 @@
 #include "curlx/version_win32.h"
 #include "curl_sspi.h"
 #include "curlx/warnless.h"
+#include "curlx/winapi.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
