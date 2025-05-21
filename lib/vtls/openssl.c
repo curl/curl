@@ -3846,8 +3846,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                               void *ssl_user_data,
                               Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-
   /* Let's make an SSL structure */
   if(octx->ssl)
     SSL_free(octx->ssl);
@@ -3860,7 +3858,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
-  if(conn_config->verifystatus)
+  if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
 
