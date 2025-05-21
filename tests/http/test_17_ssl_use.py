@@ -451,8 +451,6 @@ class TestSSLUse:
             pytest.skip("h3 not supported")
         if env.curl_uses_lib('gnutls'):
             pytest.skip("gnutls does not ignore --ciphers on TLSv1.3")
-        if env.curl_uses_lib('aws-lc'):
-            pytest.skip("AWS-LC does not ignore --ciphers on TLSv1.3")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[

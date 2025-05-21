@@ -3896,16 +3896,17 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 static CURLcode ossl_init_method(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct ssl_peer *peer,
-                                 const SSL_METHOD **pmethod)
+                                 const SSL_METHOD **pmethod,
+                                 unsigned int *pssl_version_min)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  unsigned int ssl_version_min = conn_config->version;
 
   *pmethod = NULL;
+  *pssl_version_min = conn_config->version;
   switch(peer->transport) {
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
-    switch(ssl_version_min) {
+    switch(*pssl_version_min) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
     case CURL_SSLVERSION_TLSv1_0:
@@ -3931,7 +3932,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
     }
     break;
   case TRNSPRT_QUIC:
-    ssl_version_min = CURL_SSLVERSION_TLSv1_3;
+    *pssl_version_min = CURL_SSLVERSION_TLSv1_3;
     if(conn_config->version_max &&
        (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
@@ -3972,11 +3973,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ctx_option_t ctx_options = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  unsigned int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
+  unsigned int ssl_version_min;
   char error_buffer[256];
 
   /* Make funny stuff to get random input */
@@ -3986,7 +3987,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   ssl_config->certverifyresult = !X509_V_OK;
 
-  result = ossl_init_method(cf, data, peer, &req_method);
+  result = ossl_init_method(cf, data, peer, &req_method, &ssl_version_min);
   if(result)
     return result;
   DEBUGASSERT(req_method);
