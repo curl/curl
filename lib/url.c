@@ -905,6 +905,17 @@ static bool url_match_fully_connected(struct connectdata *conn,
   return TRUE;
 }
 
+static bool url_match_multi(struct connectdata *conn,
+                            struct url_conn_match *m)
+{
+  if(CONN_INUSE(conn)) {
+    DEBUGASSERT(conn->attached_multi);
+    if(conn->attached_multi != m->data->multi)
+      return FALSE;
+  }
+  return TRUE;
+}
+
 static bool url_match_multiplex_needs(struct connectdata *conn,
                                       struct url_conn_match *m)
 {
@@ -915,25 +926,9 @@ static bool url_match_multiplex_needs(struct connectdata *conn,
       return FALSE;
     }
     m->seen_multiplex_conn = TRUE;
-    if(!m->may_multiplex)
+    if(!m->may_multiplex || !url_match_multi(conn, m))
       /* conn busy and transfer cannot be multiplexed */
       return FALSE;
-    else {
-      /* transfer and conn multiplex. Are they on the same multi? */
-      unsigned int mid;
-      if(Curl_uint_spbset_first(&conn->xfers_attached, &mid)) {
-        struct Curl_easy *entry = Curl_multi_get_easy(m->data->multi, mid);
-        DEBUGASSERT(entry);
-        if(!entry || (entry->multi != m->data->multi))
-          return FALSE;
-      }
-      else {
-        /* Since CONN_INUSE() checks the bitset, we SHOULD find a first
-         * mid in there. */
-        DEBUGASSERT(0);
-        return FALSE;
-      }
-    }
   }
   return TRUE;
 }
