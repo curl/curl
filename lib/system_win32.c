@@ -140,11 +140,11 @@ void Curl_win32_cleanup(long init_flags)
   }
 }
 
-#if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
+#ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
 
-#if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 
@@ -228,7 +228,6 @@ HMODULE Curl_load_library(LPCTSTR filename)
         hModule = pLoadLibraryEx ?
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
-
       }
       free(path);
     }
