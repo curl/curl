@@ -60,7 +60,7 @@ fi
 LINK=
 MODULES=
 # shellcheck disable=SC2034
-INCLUDES="'${TOPDIR}/lib'"
+INCLUDES="'${TOPDIR}/lib' '${TOPDIR}/lib/curlx'"
 
 # shellcheck disable=SC2153
 for SRC in ${CURLX_CFILES}
