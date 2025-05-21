@@ -133,11 +133,11 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
   return buf;
 }
 
-#if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
+#ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
 
-#if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 
