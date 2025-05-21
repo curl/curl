@@ -73,14 +73,15 @@ struct pair {
 static void dyn_array_free(struct dynbuf *db, size_t num_elements);
 static void pair_array_free(struct pair *pair_array, size_t num_elements);
 static CURLcode split_to_dyn_array(const char *source, char split_by,
-    struct dynbuf db[MAX_QUERY_COMPONENTS], size_t *num_splits);
+                                   struct dynbuf db[MAX_QUERY_COMPONENTS],
+                                   size_t *num_splits);
 static bool is_reserved_char(const char c);
 static CURLcode uri_encode_path(struct Curl_str *original_path,
-    struct dynbuf *new_path);
+                                struct dynbuf *new_path);
 static CURLcode encode_query_component(char *component, size_t len,
-  struct dynbuf *db);
+                                       struct dynbuf *db);
 static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-  struct dynbuf *out);
+                                       struct dynbuf *out);
 static bool should_urlencode(struct Curl_str *service_name);
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
@@ -583,15 +584,13 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   const char *in_key;
   char *in_value;
   char *offset;
-  char *key_ptr;
-  char *value_ptr;
   const char *query_part;
 
   if(!query)
     return result;
 
   result = split_to_dyn_array(query, '&', &query_array[0],
-    &num_query_components);
+                              &num_query_components);
   if(result) {
     goto fail;
   }
@@ -599,8 +598,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   /* Create list of pairs, each pair containing an encoded query
     * component */
 
-  for(index = 0; index < num_query_components;
-    index++) {
+  for(index = 0; index < num_query_components; index++) {
 
     query_part_len = curlx_dyn_len(&query_array[index]);
     query_part = curlx_dyn_ptr(&query_array[index]);
@@ -622,7 +620,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
 
     /* Decode/encode the key */
     result = http_aws_decode_encode(in_key, in_key_len,
-      &encoded_query_array[index].key);
+                                    &encoded_query_array[index].key);
     if(result) {
       goto fail;
     }
@@ -632,7 +630,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_value = offset + 1;
       in_value_len = query_part + query_part_len - (offset + 1);
       result = http_aws_decode_encode(in_value, in_value_len,
-        &encoded_query_array[index].value);
+                                      &encoded_query_array[index].value);
       if(result) {
         goto fail;
       }
@@ -650,30 +648,34 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
 
   /* Sort the encoded query components by key and value */
   qsort(&encoded_query_array, num_query_components,
-    sizeof(struct pair), compare_func);
+        sizeof(struct pair), compare_func);
 
   /* Append the query components together to make a full query string */
   for(index = 0; index < num_query_components; index++) {
 
-    key_ptr = curlx_dyn_ptr(&encoded_query_array[index].key);
-    value_ptr = curlx_dyn_ptr(&encoded_query_array[index].value);
-
-    if(value_ptr && strlen(value_ptr)) {
-      result = curlx_dyn_addf(dq, "%s=%s&", key_ptr, value_ptr);
-    }
-    else {
-      /* Empty value is always encoded to key= */
-      result = curlx_dyn_addf(dq, "%s=&", key_ptr);
+    if(index)
+      result = curlx_dyn_addn(dq, "&", 1);
+    if(!result) {
+      char *key_ptr = curlx_dyn_ptr(&encoded_query_array[index].key);
+      char *value_ptr = curlx_dyn_ptr(&encoded_query_array[index].value);
+      size_t vlen = curlx_dyn_len(&encoded_query_array[index].value);
+      if(value_ptr && vlen) {
+        result = curlx_dyn_addf(dq, "%s=%s", key_ptr, value_ptr);
+      }
+      else {
+        /* Empty value is always encoded to key= */
+        result = curlx_dyn_addf(dq, "%s=", key_ptr);
+      }
     }
     if(result) {
       goto fail;
     }
   }
-  /* Remove trailing & */
-  result = curlx_dyn_setlen(dq, curlx_dyn_len(dq)-1);
 
 fail:
-  pair_array_free(&encoded_query_array[0], counted_query_components);
+  if(counted_query_components)
+    /* the encoded_query_array might not be initialized yet */
+    pair_array_free(&encoded_query_array[0], counted_query_components);
   dyn_array_free(&query_array[0], num_query_components);
   return result;
 }
@@ -1010,10 +1012,8 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 {
   size_t index;
 
-  for(index = 0; index < num_elements; index++) {
+  for(index = 0; index < num_elements; index++)
     curlx_dyn_free((&db[index]));
-  }
-
 }
 
 /*
@@ -1023,28 +1023,25 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 */
 
 static CURLcode split_to_dyn_array(const char *source, char split_by,
-  struct dynbuf db[MAX_QUERY_COMPONENTS], size_t *num_splits_out)
+                                   struct dynbuf db[MAX_QUERY_COMPONENTS],
+                                   size_t *num_splits_out)
 {
-
   CURLcode result = CURLE_OK;
-
   size_t len = strlen(source);
-
   size_t pos = 0;     /* Position in result buffer */
   size_t start = 0;   /* Start of current segment */
   size_t segment_length = 0;
   size_t index = 0;
-  size_t num_splits;
+  size_t num_splits = 0;
 
   /* Split source_ptr on split_by and store the segment offsets and
    * length in array */
-  num_splits = 0;
   for(pos = 0; pos < len; pos++) {
     if(source[pos] == split_by) {
       if(segment_length) {
         curlx_dyn_init(&db[index], segment_length + 1);
         result = curlx_dyn_addn(&db[index], &source[start],
-          segment_length);
+                                segment_length);
         if(result) {
           goto fail;
         }
@@ -1064,14 +1061,14 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
   if(segment_length) {
     curlx_dyn_init(&db[index], segment_length + 1);
     result = curlx_dyn_addn(&db[index], &source[start],
-                           segment_length);
+                            segment_length);
     if(result) {
       goto fail;
     }
     if(++num_splits == MAX_QUERY_COMPONENTS) {
       goto fail;
     }
-}
+  }
 fail:
   *num_splits_out = num_splits;
   return result;
@@ -1084,9 +1081,8 @@ static bool is_reserved_char(const char c)
 }
 
 static CURLcode uri_encode_path(struct Curl_str *original_path,
-struct dynbuf *new_path)
+                                struct dynbuf *new_path)
 {
-
   const char *p = curlx_str(original_path);
   CURLcode result = CURLE_OK;
   size_t index;
@@ -1113,9 +1109,8 @@ fail:
 
 
 static CURLcode encode_query_component(char *component, size_t len,
-  struct dynbuf *db)
+                                       struct dynbuf *db)
 {
-
   size_t index;
   CURLcode result = CURLE_OK;
   unsigned char this_char;
@@ -1149,17 +1144,16 @@ fail:
 */
 
 static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-struct dynbuf *out)
+                                       struct dynbuf *out)
 {
-  CURLcode result = CURLE_OK;
   char *out_s;
   size_t out_s_len;
+  CURLcode result =
+    Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
 
-  result = Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
-
-  if(result) {
+  if(result)
     goto fail;
-  }
+
   result = encode_query_component(out_s, out_s_len, out);
   Curl_safefree(out_s);
 fail:
