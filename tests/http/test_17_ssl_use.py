@@ -535,4 +535,3 @@ class TestSSLUse:
         ])
         # expect CURLE_SSL_PINNEDPUBKEYNOTMATCH
         assert r.exit_code == 0, f'{r.dump_logs()}'
-
