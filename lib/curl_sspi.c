@@ -81,14 +81,15 @@ CURLcode Curl_sspi_global_init(void)
   /* If security interface is not yet initialized try to do this */
   if(!Curl_hSecDll) {
     /* Security Service Provider Interface (SSPI) functions are located in
-     * security.dll on WinNT 4.0 and in secur32.dll on Win9x. Win2K and XP
-     * have both these DLLs (security.dll forwards calls to secur32.dll) */
+     * security.dll on WinNT 4.0 and in secur32.dll on Win9x/WinCE. Win2K and
+     * XP have both these DLLs (security.dll forwards calls to secur32.dll) */
 
     /* Load SSPI dll into the address space of the calling process */
-    if(curlx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
-      Curl_hSecDll = Curl_load_library(TEXT("security.dll"));
-    else
-      Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
+    #ifdef UNDER_CE
+    Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
+    #else
+    Curl_hSecDll = Curl_load_library(TEXT("security.dll"));  /* WinNT 4.0+ */
+    #endif
     if(!Curl_hSecDll)
       return CURLE_FAILED_INIT;
 
