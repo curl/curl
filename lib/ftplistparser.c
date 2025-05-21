@@ -423,7 +423,8 @@ static CURLcode parse_unix(struct Curl_easy *data,
       parser->item_length++;
       if(c == '\r') {
         parser->item_length--;
-        curlx_dyn_setlen(&infop->buf, --len);
+        if(len)
+          curlx_dyn_setlen(&infop->buf, --len);
       }
       else if(c == '\n') {
         mem[parser->item_length - 1] = 0;
@@ -519,7 +520,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
   case PL_UNIX_USER:
     switch(parser->state.UNIX.sub.user) {
     case PL_UNIX_USER_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.user = PL_UNIX_USER_PARSING;
@@ -541,7 +542,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
   case PL_UNIX_GROUP:
     switch(parser->state.UNIX.sub.group) {
     case PL_UNIX_GROUP_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.group = PL_UNIX_GROUP_NAME;
@@ -564,7 +565,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
     switch(parser->state.UNIX.sub.size) {
     case PL_UNIX_SIZE_PRESPACE:
       if(c != ' ') {
-        if(ISDIGIT(c)) {
+        if(ISDIGIT(c) && len) {
           parser->item_offset = len - 1;
           parser->item_length = 1;
           parser->state.UNIX.sub.size = PL_UNIX_SIZE_NUMBER;
@@ -665,7 +666,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
   case PL_UNIX_FILENAME:
     switch(parser->state.UNIX.sub.filename) {
     case PL_UNIX_FILENAME_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.filename = PL_UNIX_FILENAME_NAME;
@@ -703,7 +704,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
   case PL_UNIX_SYMLINK:
     switch(parser->state.UNIX.sub.symlink) {
     case PL_UNIX_SYMLINK_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
@@ -754,7 +755,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
         parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_NAME;
       break;
     case PL_UNIX_SYMLINK_PRETARGET4:
-      if(c != '\r' && c != '\n') {
+      if(c != '\r' && c != '\n' && len) {
         parser->state.UNIX.sub.symlink = PL_UNIX_SYMLINK_TARGET;
         parser->item_offset = len - 1;
         parser->item_length = 1;
@@ -892,6 +893,8 @@ static CURLcode parse_winnt(struct Curl_easy *data,
       break;
     case PL_WINNT_FILENAME_CONTENT:
       parser->item_length++;
+      if(!len)
+        return CURLE_FTP_BAD_FILE_LIST;
       if(c == '\r') {
         parser->state.NT.sub.filename = PL_WINNT_FILENAME_WINEOL;
         mem[len - 1] = 0;
