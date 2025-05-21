@@ -3847,7 +3847,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                               Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  CURLcode result;
 
   /* Let's make an SSL structure */
   if(octx->ssl)
@@ -3882,9 +3881,11 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   }
 
 #ifdef USE_ECH_OPENSSL
-  result = ossl_init_ech(octx, cf, data, peer);
-  if(result)
-    return result;
+  {
+    CURLcode result = ossl_init_ech(octx, cf, data, peer);
+    if(result)
+      return result;
+  }
 #endif  /* USE_ECH_OPENSSL */
 
 #endif
