@@ -41,9 +41,6 @@ typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instead of if_nametoindex if available on Windows */
 extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
-
-/* This is used to dynamically load DLLs */
-HMODULE Curl_load_library(LPCTSTR filename);
 #else  /* _WIN32 */
 #define Curl_win32_init(x) CURLE_OK
 #endif /* !_WIN32 */

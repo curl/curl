@@ -28,6 +28,9 @@
 #define WINAPI_ERROR_LEN 100
 const char *curlx_get_winapi_error(int err, char *buf, size_t buflen);
 const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen);
+
+/* This is used to dynamically load DLLs */
+HMODULE Curl_load_library(LPCTSTR filename);
 #endif
 
 #endif /* HEADER_CURLX_WINAPI_H */
