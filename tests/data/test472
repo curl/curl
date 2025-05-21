@@ -33,7 +33,6 @@ http
 </server>
 <features>
 Debug
-Unicode
 aws
 </features>
 <name>
