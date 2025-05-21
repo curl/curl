@@ -3349,7 +3349,7 @@ static void conn_meta_freeentry(void *p)
  *
  * @param data The sessionhandle pointer
  * @param in_connect is set to the next connection data pointer
- * @param async is set TRUE when an async DNS resolution is pending
+ * @param reusedp is set to to TRUE if connection was reused
  * @see Curl_setup_conn()
  *
  */
