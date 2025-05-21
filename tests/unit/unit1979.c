@@ -50,13 +50,13 @@ UNITTEST_START
       "test-equals-encode",
       true,
       "/a=b",
-      "/a%3Db",
+      "/a%3Db"
     },
     {
       "test-equals-noencode",
       false,
       "/a=b",
-      "/a=b",
+      "/a=b"
     },
     {
       "test-s3-tables",
@@ -65,49 +65,49 @@ UNITTEST_START
       "soehartablebucket/jasoeharnamespace/jasoehartable/encryption",
       "/tables/arn%253Aaws%253As3tables%253Aus-east-1%253A022954301426%253Ab"
       "ucket%252Fjasoehartablebucket/jasoeharnamespace/jasoehartable/encrypt"
-      "ion",
+      "ion"
     },
     {
       "get-vanilla",
       true,
       "/",
-      "/",
+      "/"
     },
     {
       "get-unreserved",
       true,
       "/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-      "/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+      "/-._~0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     },
     {
       "get-slashes-unnormalized",
       false,
       "//example//",
-      "//example//",
+      "//example//"
     },
     {
       "get-space-normalized",
       true,
       "/example space/",
-      "/example%20space/",
+      "/example%20space/"
     },
     {
       "get-slash-dot-slash-unnormalized",
       false,
       "/./",
-      "/./",
+      "/./"
     },
     {
       "get-slash-unnormalized",
       false,
       "//",
-      "//",
+      "//"
     },
     {
       "get-relative-relative-unnormalized",
       false,
       "/example1/example2/../..",
-      "/example1/example2/../..",
+      "/example1/example2/../.."
     }
   };
 
