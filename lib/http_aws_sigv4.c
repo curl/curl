@@ -578,13 +578,6 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   size_t num_query_components;
   size_t counted_query_components = 0;
   size_t index;
-  size_t in_key_len;
-  size_t in_value_len;
-  size_t query_part_len;
-  const char *in_key;
-  char *in_value;
-  char *offset;
-  const char *query_part;
 
   if(!query)
     return result;
@@ -599,9 +592,11 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
     * component */
 
   for(index = 0; index < num_query_components; index++) {
-
-    query_part_len = curlx_dyn_len(&query_array[index]);
-    query_part = curlx_dyn_ptr(&query_array[index]);
+    const char *in_key;
+    size_t in_key_len;
+    char *offset;
+    size_t query_part_len = curlx_dyn_len(&query_array[index]);
+    char *query_part = curlx_dyn_ptr(&query_array[index]);
 
     in_key = query_part;
 
@@ -627,7 +622,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
 
     /* Decode/encode the value if it exists */
     if(offset && offset != (query_part + query_part_len - 1)) {
-      in_value = offset + 1;
+      size_t in_value_len;
+      const char *in_value = offset + 1;
       in_value_len = query_part + query_part_len - (offset + 1);
       result = http_aws_decode_encode(in_value, in_value_len,
                                       &encoded_query_array[index].value);
@@ -667,9 +663,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
         result = curlx_dyn_addf(dq, "%s=", key_ptr);
       }
     }
-    if(result) {
-      goto fail;
-    }
+    if(result)
+      break;
   }
 
 fail:
