@@ -77,7 +77,10 @@ This release includes the following bugfixes:
  o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
  o CURLOPT_XFERINFOFUNCTION.md: fix the callback return type in example [122]
  o curlx: move the docs to docs/internals/ [184]
+ o DEPRECATE.md: drop support for VS2008 [214]
+ o DEPRECATE.md: drop Windows CE support [216]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
+ o dns_entry: move from conn to data->state [178]
  o docs/INSTALL.md: drop reference to removed configure option [83]
  o docs/libcurl: fix type and prototype problems in examples [121]
  o docs/libcurl: make examples build with picky compiler options [84]
@@ -92,7 +95,10 @@ This release includes the following bugfixes:
  o ECH: reference the OpenSSL ECH feature branch [186]
  o etag-save.md: mention how using both options is a good idea [108]
  o eventfd: fix feature guards [24]
+ o formdata: cleanups [219]
  o ftp: fix bug in failed init [179]
+ o ftplistparser: add two overflow preventions [173]
+ o ftplistparser: split up into more functions [215]
  o generate.bat: exclude curlinfo.c from legacy VS projects [175]
  o genserv.pl: fail with a message if `openssl` is missing or failing [14]
  o headers: enforce a max number of response header to accept [163]
@@ -149,6 +155,7 @@ This release includes the following bugfixes:
  o processhelp.pm: always call `taskkill` with `-f` (force) [69]
  o processhelp.pm: avoid potential endless loop, log more (Windows) [5]
  o progress: avoid integer overflow when gathering total transfer size [128]
+ o pytest tls: extend coverage [217]
  o pytest-xdist: pytest in parallel [204]
  o pytest: give parameterised tests better ids for read- and parsability [142]
  o pytest: make test_07_22 more lenient to exit codes [90]
@@ -207,6 +214,7 @@ This release includes the following bugfixes:
  o TODO: remove "nicer lacking perl message" [117]
  o tool_cb_write.c: handle EINTR on flush [65]
  o tool_getparam: clear argument only when needed [98]
+ o tool_operate: make retrycheck() a separate function [218]
  o tool_operate: when retrying, only truncate regular files [165]
  o tool_paramhlp: avoid integer overflow in secs2ms() [152]
  o tool_parsecfg: make get_line handle lines ending on the buffer boundary [81]
@@ -441,10 +449,12 @@ References to bug reports and discussions on issues:
  [170] = https://curl.se/bug/?i=17297
  [171] = https://curl.se/bug/?i=17268
  [172] = https://curl.se/bug/?i=17298
+ [173] = https://curl.se/bug/?i=17397
  [174] = https://curl.se/bug/?i=17264
  [175] = https://curl.se/bug/?i=17263
  [176] = https://curl.se/bug/?i=17259
  [177] = https://curl.se/bug/?i=17373
+ [178] = https://curl.se/bug/?i=17383
  [179] = https://curl.se/bug/?i=17258
  [180] = https://curl.se/bug/?i=17337
  [181] = https://curl.se/bug/?i=17330
@@ -471,3 +481,9 @@ References to bug reports and discussions on issues:
  [203] = https://curl.se/bug/?i=17361
  [204] = https://curl.se/bug/?i=17295
  [206] = https://curl.se/bug/?i=17353
+ [214] = https://curl.se/bug/?i=17380
+ [215] = https://curl.se/bug/?i=17384
+ [216] = https://curl.se/bug/?i=17379
+ [217] = https://curl.se/bug/?i=17382
+ [218] = https://curl.se/bug/?i=17381
+ [219] = https://curl.se/bug/?i=17370
