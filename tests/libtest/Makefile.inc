@@ -26,6 +26,7 @@ TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
 WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h
 MULTIBYTE = ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h
+WINAPI = ../../lib/curlx/winapi.c ../../lib/curlx/winapi.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 MEMPTR = memptr.c
 
@@ -735,7 +736,7 @@ lib3010_LDADD = $(TESTUTIL_LIBS)
 lib3025_SOURCES = lib3025.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib3025_LDADD = $(TESTUTIL_LIBS)
 
-lib3026_SOURCES = lib3026.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib3026_SOURCES = lib3026.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(WINAPI)
 lib3026_LDADD = $(TESTUTIL_LIBS)
 
 lib3027_SOURCES = lib3027.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)

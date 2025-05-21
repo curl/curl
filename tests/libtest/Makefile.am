@@ -112,7 +112,7 @@ CLEANFILES += libtest_bundle.c
 if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS) $(MEMPTR)
+libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(WINAPI) $(INET_PTON) $(TIMEDIFF) $(THREADS) $(MEMPTR)
 endif
 else
 noinst_PROGRAMS = $(LIBTESTPROGS)
