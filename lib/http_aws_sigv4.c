@@ -72,7 +72,7 @@ struct pair {
 
 static void dyn_array_free(struct dynbuf *db, size_t num_elements);
 static void pair_array_free(struct pair *pair_array, size_t num_elements);
-static CURLcode split_to_dyn_array(const char *source, char split_by,
+static CURLcode split_to_dyn_array(const char *source,
                                    struct dynbuf db[MAX_QUERY_COMPONENTS],
                                    size_t *num_splits);
 static bool is_reserved_char(const char c);
@@ -582,7 +582,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   if(!query)
     return result;
 
-  result = split_to_dyn_array(query, '&', &query_array[0],
+  result = split_to_dyn_array(query, &query_array[0],
                               &num_query_components);
   if(result) {
     goto fail;
@@ -1012,12 +1012,14 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 }
 
 /*
-* Splits source string by split_by, and creates an array of dynbuf in db
-* db is initialized by this function
+* Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
+* db is initialized by this function.
 * Caller is responsible for freeing the array elements with dyn_array_free
 */
 
-static CURLcode split_to_dyn_array(const char *source, char split_by,
+#define SPLIT_BY '&'
+
+static CURLcode split_to_dyn_array(const char *source,
                                    struct dynbuf db[MAX_QUERY_COMPONENTS],
                                    size_t *num_splits_out)
 {
@@ -1029,10 +1031,10 @@ static CURLcode split_to_dyn_array(const char *source, char split_by,
   size_t index = 0;
   size_t num_splits = 0;
 
-  /* Split source_ptr on split_by and store the segment offsets and
-   * length in array */
+  /* Split source_ptr on SPLIT_BY and store the segment offsets and length in
+   * array */
   for(pos = 0; pos < len; pos++) {
-    if(source[pos] == split_by) {
+    if(source[pos] == SPLIT_BY) {
       if(segment_length) {
         curlx_dyn_init(&db[index], segment_length + 1);
         result = curlx_dyn_addn(&db[index], &source[start],
