@@ -734,7 +734,7 @@ static bool out_number(void *userp,
   int flags = p->flags;
   int width = p->width;
   int prec = p->prec;
-  bool is_alt = FALSE;
+  bool is_alt = flags & FLAGS_ALT;
   bool is_neg = FALSE;
   int base = 10;
 
