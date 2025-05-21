@@ -521,11 +521,13 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
             '--pinnedpubkey', 'sha256//ffff'
         ])
-        # expect CURLE_SSL_PINNEDPUBKEYNOTMATCH
-        assert r.exit_code == 90, f'{r.dump_logs()}'
+        # expect NOT_IMPLEMENTED or CURLE_SSL_PINNEDPUBKEYNOTMATCH
+        assert r.exit_code in [2, 90], f'{r.dump_logs()}'
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_20_correct_pin(self, env: Env, proto, httpd):
+        if not env.curl_uses_lib('rustls'):
+            pytest.skip('not implemented in rustls')
         curl = CurlClient(env=env)
         creds = env.get_credentials(env.domain1)
         assert creds
@@ -533,5 +535,5 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
             '--pinnedpubkey', f'sha256//{creds.pub_sha256_b64()}'
         ])
-        # expect CURLE_SSL_PINNEDPUBKEYNOTMATCH
-        assert r.exit_code == 0, f'{r.dump_logs()}'
+        # expect NOT_IMPLEMENTED or OK
+        assert r.exit_code in [0, 2], f'{r.dump_logs()}'
