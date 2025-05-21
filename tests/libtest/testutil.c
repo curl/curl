@@ -129,5 +129,3 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
       (double)(newer.tv_usec-older.tv_usec)/1000000.0;
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
-
-#endif
