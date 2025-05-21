@@ -516,8 +516,10 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_19_wrong_pin(self, env: Env, proto, httpd):
-        if not env.curl_uses_any_libs(['bearssl', 'rustls']):
-            pytest.skip('ignored in this TLS backend')
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if env.curl_uses_any_libs(['bearssl', 'rustls']):
+            pytest.skip('TLS backend ignores --pinnedpubkey')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
@@ -528,8 +530,8 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_20_correct_pin(self, env: Env, proto, httpd):
-        if not env.curl_uses_lib('rustls'):
-            pytest.skip('not implemented in rustls')
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         creds = env.get_credentials(env.domain1)
         assert creds
