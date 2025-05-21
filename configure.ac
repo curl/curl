@@ -1230,7 +1230,11 @@ fi
 if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
   if test "$curl_cv_native_windows" = "yes"; then
     dnl This is for Winsock systems
-    winsock_LIB="-lws2_32"
+    if test "$curl_cv_winuwp" = "yes"; then
+      winsock_LIB="-lws2_32"
+    else
+      winsock_LIB="-lws2_32 -liphlpapi"
+    fi
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
@@ -4197,6 +4201,7 @@ AC_CHECK_FUNCS([\
   getpwuid_r \
   getrlimit \
   gettimeofday \
+  if_nametoindex \
   mach_absolute_time \
   pipe \
   pipe2 \
@@ -4212,7 +4217,6 @@ AC_CHECK_FUNCS([\
 
 if test "$curl_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([\
-    if_nametoindex \
     realpath \
     sched_yield \
   ])
