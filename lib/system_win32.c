@@ -90,7 +90,7 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
-  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+  s_hIpHlpApiDll = curlx_winapi_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
 #ifdef UNDER_CE

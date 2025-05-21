@@ -156,7 +156,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #endif
 
 /*
- * Curl_load_library()
+ * curlx_winapi_load_library()
  *
  * This is used to dynamically load DLLs using the most secure method available
  * for the version of Windows that we are running on.
@@ -169,7 +169,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  *
  * Returns the handle of the module on success; otherwise NULL.
  */
-HMODULE Curl_load_library(LPCTSTR filename)
+HMODULE curlx_winapi_load_library(LPCTSTR filename)
 {
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;

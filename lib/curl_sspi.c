@@ -86,9 +86,9 @@ CURLcode Curl_sspi_global_init(void)
 
     /* Load SSPI dll into the address space of the calling process */
     if(curlx_verify_windows_version(4, 0, 0, PLATFORM_WINNT, VERSION_EQUAL))
-      Curl_hSecDll = Curl_load_library(TEXT("security.dll"));
+      Curl_hSecDll = curlx_winapi_load_library(TEXT("security.dll"));
     else
-      Curl_hSecDll = Curl_load_library(TEXT("secur32.dll"));
+      Curl_hSecDll = curlx_winapi_load_library(TEXT("secur32.dll"));
     if(!Curl_hSecDll)
       return CURLE_FAILED_INIT;
 
