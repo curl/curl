@@ -122,7 +122,7 @@ class TestErrors:
         ])
         if proto == 'http/1.0' and not env.curl_uses_lib('wolfssl') and \
                 (env.curl_is_debug() or
-                not env.curl_uses_any_libs(['openssl', 'libressl'])):
+                not env.curl_uses_any_libs(['openssl', 'libressl', 'aws-lc'])):
             # we are inconsistent if we fail or not in missing TLS shutdown
             # openssl code ignore such errors intentionally in non-debug builds
             r.check_exit_code(56)
