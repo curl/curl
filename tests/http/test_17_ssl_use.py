@@ -516,6 +516,8 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_19_wrong_pin(self, env: Env, proto, httpd):
+        if not env.curl_uses_any_libs(['bearssl', 'rustls']):
+            pytest.skip('ignored in this TLS backend')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
