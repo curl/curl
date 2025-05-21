@@ -518,7 +518,7 @@ class TestSSLUse:
     def test_17_19_wrong_pin(self, env: Env, proto, httpd):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if env.curl_uses_any_libs(['bearssl', 'rustls']):
+        if env.curl_uses_any_libs(['bearssl', 'rustls-ffi']):
             pytest.skip('TLS backend ignores --pinnedpubkey')
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
