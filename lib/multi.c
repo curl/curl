@@ -832,6 +832,8 @@ void Curl_detach_connection(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   if(conn) {
     Curl_uint_spbset_remove(&conn->xfers_attached, data->mid);
+    if(Curl_uint_spbset_empty(&conn->xfers_attached))
+      conn->attached_multi = NULL;
   }
   data->conn = NULL;
 }
@@ -849,6 +851,11 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(conn);
   data->conn = conn;
   Curl_uint_spbset_add(&conn->xfers_attached, data->mid);
+  /* all attached transfers must be from the same multi */
+  if(!conn->attached_multi)
+    conn->attached_multi = data->multi;
+  DEBUGASSERT(conn->attached_multi == data->multi);
+
   if(conn->handler && conn->handler->attach)
     conn->handler->attach(data, conn);
 }

@@ -828,6 +828,13 @@ struct connectdata {
 #endif                        /* however, some of them are ftp specific. */
 
   struct uint_spbset xfers_attached; /* mids of attached transfers */
+  /* A connection cache from a SHARE might be used in several multi handles.
+   * We MUST not reuse connections that are running in another multi,
+   * for concurrency reasons. That multi might run in another thread.
+   * `attached_multi` is set by the first transfer attached and cleared
+   * when the last one is detached.
+   * NEVER call anything on this multi, just check for equality. */
+  struct Curl_multi *attached_multi;
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
