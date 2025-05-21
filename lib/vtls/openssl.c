@@ -3614,6 +3614,348 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 
+
+static CURLcode
+ossl_init_session_and_alpns(struct ossl_ctx *octx,
+                            struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            const struct alpn_spec *alpns_requested,
+                            Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
+{
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct alpn_spec alpns;
+  char error_buffer[256];
+  CURLcode result;
+
+  Curl_alpn_copy(&alpns, alpns_requested);
+
+  octx->reused_session = FALSE;
+  if(ssl_config->primary.cache_session) {
+    struct Curl_ssl_session *scs = NULL;
+
+    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
+    if(!result && scs && scs->sdata && scs->sdata_len) {
+      const unsigned char *der_sessionid = scs->sdata;
+      size_t der_sessionid_size = scs->sdata_len;
+      SSL_SESSION *ssl_session = NULL;
+
+      /* If OpenSSL does not accept the session from the cache, this
+       * is not an error. We just continue without it. */
+      ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
+                                    (long)der_sessionid_size);
+      if(ssl_session) {
+        if(!SSL_set_session(octx->ssl, ssl_session)) {
+          infof(data, "SSL: SSL_set_session not accepted, "
+                "continuing without: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+        }
+        else {
+          infof(data, "SSL reusing session with ALPN '%s'",
+                scs->alpn ? scs->alpn : "-");
+          octx->reused_session = TRUE;
+#ifdef HAVE_OPENSSL_EARLYDATA
+          if(ssl_config->earlydata && scs->alpn &&
+             SSL_SESSION_get_max_early_data(ssl_session) &&
+             !cf->conn->connect_only &&
+             (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
+            bool do_early_data = FALSE;
+            if(sess_reuse_cb) {
+              result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
+              if(result)
+                return result;
+            }
+            if(do_early_data) {
+              /* We only try the ALPN protocol the session used before,
+               * otherwise we might send early data for the wrong protocol */
+              Curl_alpn_restrict_to(&alpns, scs->alpn);
+            }
+          }
+#else
+          (void)sess_reuse_cb;
+#endif
+        }
+        SSL_SESSION_free(ssl_session);
+      }
+      else {
+        infof(data, "SSL session not accepted by OpenSSL, continuing without");
+      }
+    }
+    Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
+  }
+
+#ifdef HAS_ALPN_OPENSSL
+  if(alpns.count) {
+    struct alpn_proto_buf proto;
+    memset(&proto, 0, sizeof(proto));
+    result = Curl_alpn_to_proto_buf(&proto, &alpns);
+    if(result) {
+      failf(data, "Error determining ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(SSL_set_alpn_protos(octx->ssl, proto.data, (int)proto.len)) {
+      failf(data, "Error setting ALPN");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+#endif
+
+  return CURLE_OK;
+}
+
+#ifdef USE_ECH_OPENSSL
+static CURLcode ossl_init_ech(struct ossl_ctx *octx,
+                              struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct ssl_peer *peer)
+{
+  unsigned char *ech_config = NULL;
+  size_t ech_config_len = 0;
+  char *outername = data->set.str[STRING_ECH_PUBLIC];
+  int trying_ech_now = 0;
+  CURLcode result;
+
+  if(!ECH_ENABLED(data))
+    return CURLE_OK;
+
+  if(data->set.tls_ech & CURLECH_GREASE) {
+    infof(data, "ECH: will GREASE ClientHello");
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+    SSL_set_enable_ech_grease(octx->ssl, 1);
+# else
+    SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
+# endif
+  }
+  else if(data->set.tls_ech & CURLECH_CLA_CFG) {
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+    /* have to do base64 decode here for BoringSSL */
+    const char *b64 = data->set.str[STRING_ECH_CONFIG];
+
+    if(!b64) {
+      infof(data, "ECH: ECHConfig from command line empty");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    ech_config_len = 2 * strlen(b64);
+    result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
+    if(result || !ech_config) {
+      infof(data, "ECH: cannot base64 decode ECHConfig from command line");
+      if(data->set.tls_ech & CURLECH_HARD)
+        return result;
+    }
+    if(SSL_set1_ech_config_list(octx->ssl, ech_config,
+                                ech_config_len) != 1) {
+      infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
+      if(data->set.tls_ech & CURLECH_HARD) {
+        free(ech_config);
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    free(ech_config);
+    trying_ech_now = 1;
+# else
+    ech_config = (unsigned char *) data->set.str[STRING_ECH_CONFIG];
+    if(!ech_config) {
+      infof(data, "ECH: ECHConfig from command line empty");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
+    if(SSL_set1_ech_config_list(octx->ssl, ech_config,
+                                ech_config_len) != 1) {
+      infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
+      if(data->set.tls_ech & CURLECH_HARD)
+        return CURLE_SSL_CONNECT_ERROR;
+    }
+    else
+      trying_ech_now = 1;
+# endif
+    infof(data, "ECH: ECHConfig from command line");
+  }
+  else {
+    struct Curl_dns_entry *dns = NULL;
+
+    if(peer->hostname)
+      dns = Curl_dnscache_get(data, peer->hostname, peer->port,
+                              cf->conn->ip_version);
+    if(!dns) {
+      infof(data, "ECH: requested but no DNS info available");
+      if(data->set.tls_ech & CURLECH_HARD)
+        return CURLE_SSL_CONNECT_ERROR;
+    }
+    else {
+      struct Curl_https_rrinfo *rinfo = NULL;
+
+      rinfo = dns->hinfo;
+      if(rinfo && rinfo->echconfiglist) {
+        unsigned char *ecl = rinfo->echconfiglist;
+        size_t elen = rinfo->echconfiglist_len;
+
+        infof(data, "ECH: ECHConfig from DoH HTTPS RR");
+        if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
+          infof(data, "ECH: SSL_set1_ech_config_list failed");
+          if(data->set.tls_ech & CURLECH_HARD)
+            return CURLE_SSL_CONNECT_ERROR;
+        }
+        else {
+          trying_ech_now = 1;
+          infof(data, "ECH: imported ECHConfigList of length %zu", elen);
+        }
+      }
+      else {
+        infof(data, "ECH: requested but no ECHConfig available");
+        if(data->set.tls_ech & CURLECH_HARD)
+          return CURLE_SSL_CONNECT_ERROR;
+      }
+      Curl_resolv_unlink(data, &dns);
+    }
+  }
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+  if(trying_ech_now && outername) {
+    infof(data, "ECH: setting public_name not supported with BoringSSL");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+# else
+  if(trying_ech_now && outername) {
+    infof(data, "ECH: inner: '%s', outer: '%s'",
+          peer->hostname ? peer->hostname : "NULL", outername);
+    result = SSL_ech_set1_server_names(octx->ssl,
+                                      peer->hostname, outername,
+                                      0 /* do send outer */);
+    if(result != 1) {
+      infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+# endif  /* OPENSSL_IS_BORINGSSL || OPENSSL_IS_AWSLC */
+  if(trying_ech_now
+     && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
+    infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  return CURLE_OK;
+}
+#endif /* USE_ECH_OPENSSL */
+
+
+static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
+                              struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct ssl_peer *peer,
+                              const struct alpn_spec *alpns_requested,
+                              void *ssl_user_data,
+                              Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
+{
+  /* Let's make an SSL structure */
+  if(octx->ssl)
+    SSL_free(octx->ssl);
+  octx->ssl = SSL_new(octx->ssl_ctx);
+  if(!octx->ssl) {
+    failf(data, "SSL: could not create a context (handle)");
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  SSL_set_app_data(octx->ssl, ssl_user_data);
+
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+  if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
+    SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
+#endif
+
+#if (defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)) && \
+    defined(ALLOW_RENEG)
+  SSL_set_renegotiate_mode(octx->ssl, ssl_renegotiate_freely);
+#endif
+
+  SSL_set_connect_state(octx->ssl);
+
+  octx->server_cert = NULL;
+#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
+  if(peer->sni) {
+    if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
+      failf(data, "Failed set SNI");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
+#ifdef USE_ECH_OPENSSL
+  {
+    CURLcode result = ossl_init_ech(octx, cf, data, peer);
+    if(result)
+      return result;
+  }
+#endif  /* USE_ECH_OPENSSL */
+
+#endif
+
+  return ossl_init_session_and_alpns(octx, cf, data, peer,
+                                     alpns_requested, sess_reuse_cb);
+}
+
+
+static CURLcode ossl_init_method(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct ssl_peer *peer,
+                                 const SSL_METHOD **pmethod,
+                                 unsigned int *pssl_version_min)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+
+  *pmethod = NULL;
+  *pssl_version_min = conn_config->version;
+  switch(peer->transport) {
+  case TRNSPRT_TCP:
+    /* check to see if we have been told to use an explicit SSL/TLS version */
+    switch(*pssl_version_min) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+    case CURL_SSLVERSION_TLSv1_0:
+    case CURL_SSLVERSION_TLSv1_1:
+    case CURL_SSLVERSION_TLSv1_2:
+    case CURL_SSLVERSION_TLSv1_3:
+      /* it will be handled later with the context options */
+  #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+      *pmethod = TLS_client_method();
+  #else
+      *pmethod = SSLv23_client_method();
+  #endif
+      break;
+    case CURL_SSLVERSION_SSLv2:
+      failf(data, "No SSLv2 support");
+      return CURLE_NOT_BUILT_IN;
+    case CURL_SSLVERSION_SSLv3:
+      failf(data, "No SSLv3 support");
+      return CURLE_NOT_BUILT_IN;
+    default:
+      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+    break;
+  case TRNSPRT_QUIC:
+    *pssl_version_min = CURL_SSLVERSION_TLSv1_3;
+    if(conn_config->version_max &&
+       (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
+      failf(data, "QUIC needs at least TLS version 1.3");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+#ifdef USE_OPENSSL_QUIC
+    *pmethod = OSSL_QUIC_client_method();
+#elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+    *pmethod = TLS_method();
+#else
+    *pmethod = SSLv23_client_method();
+#endif
+    break;
+  default:
+    failf(data, "unsupported transport %d in SSL init", peer->transport);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  return *pmethod ? CURLE_OK : CURLE_SSL_CONNECT_ERROR;
+}
+
+
 CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
@@ -3631,78 +3973,30 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ctx_option_t ctx_options = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  unsigned int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
   const bool verifypeer = conn_config->verifypeer;
+  unsigned int ssl_version_min;
   char error_buffer[256];
-  struct alpn_spec alpns;
 
   /* Make funny stuff to get random input */
   result = ossl_seed(data);
   if(result)
     return result;
 
-  Curl_alpn_copy(&alpns, alpns_requested);
   ssl_config->certverifyresult = !X509_V_OK;
 
-  switch(peer->transport) {
-  case TRNSPRT_TCP:
-    /* check to see if we have been told to use an explicit SSL/TLS version */
-    switch(ssl_version_min) {
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-    case CURL_SSLVERSION_TLSv1_3:
-      /* it will be handled later with the context options */
-  #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
-      req_method = TLS_client_method();
-  #else
-      req_method = SSLv23_client_method();
-  #endif
-      break;
-    case CURL_SSLVERSION_SSLv2:
-      failf(data, "No SSLv2 support");
-      return CURLE_NOT_BUILT_IN;
-    case CURL_SSLVERSION_SSLv3:
-      failf(data, "No SSLv3 support");
-      return CURLE_NOT_BUILT_IN;
-    default:
-      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    break;
-  case TRNSPRT_QUIC:
-    ssl_version_min = CURL_SSLVERSION_TLSv1_3;
-    if(conn_config->version_max &&
-       (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
-      failf(data, "QUIC needs at least TLS version 1.3");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-
-#ifdef USE_OPENSSL_QUIC
-    req_method = OSSL_QUIC_client_method();
-#elif (OPENSSL_VERSION_NUMBER >= 0x10100000L)
-    req_method = TLS_method();
-#else
-    req_method = SSLv23_client_method();
-#endif
-    break;
-  default:
-    failf(data, "unsupported transport %d in SSL init", peer->transport);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
+  result = ossl_init_method(cf, data, peer, &req_method, &ssl_version_min);
+  if(result)
+    return result;
+  DEBUGASSERT(req_method);
 
   DEBUGASSERT(!octx->ssl_ctx);
   octx->ssl_ctx =
 #ifdef OPENSSL_HAS_PROVIDERS
     data->state.libctx ?
-    SSL_CTX_new_ex(data->state.libctx, data->state.propq,
-                   req_method):
+    SSL_CTX_new_ex(data->state.libctx, data->state.propq, req_method):
 #endif
     SSL_CTX_new(req_method);
 
@@ -3966,235 +4260,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 
-  /* Let's make an SSL structure */
-  if(octx->ssl)
-    SSL_free(octx->ssl);
-  octx->ssl = SSL_new(octx->ssl_ctx);
-  if(!octx->ssl) {
-    failf(data, "SSL: could not create a context (handle)");
-    return CURLE_OUT_OF_MEMORY;
-  }
-
-  SSL_set_app_data(octx->ssl, ssl_user_data);
-
-#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
-  if(conn_config->verifystatus)
-    SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
-#endif
-
-#if (defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)) && \
-    defined(ALLOW_RENEG)
-  SSL_set_renegotiate_mode(octx->ssl, ssl_renegotiate_freely);
-#endif
-
-  SSL_set_connect_state(octx->ssl);
-
-  octx->server_cert = 0x0;
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  if(peer->sni) {
-    if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
-      failf(data, "Failed set SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-
-#ifdef USE_ECH_OPENSSL
-  if(ECH_ENABLED(data)) {
-    unsigned char *ech_config = NULL;
-    size_t ech_config_len = 0;
-    char *outername = data->set.str[STRING_ECH_PUBLIC];
-    int trying_ech_now = 0;
-
-    if(data->set.tls_ech & CURLECH_GREASE) {
-      infof(data, "ECH: will GREASE ClientHello");
-# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-      SSL_set_enable_ech_grease(octx->ssl, 1);
-# else
-      SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
-# endif
-    }
-    else if(data->set.tls_ech & CURLECH_CLA_CFG) {
-# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-      /* have to do base64 decode here for BoringSSL */
-      const char *b64 = data->set.str[STRING_ECH_CONFIG];
-
-      if(!b64) {
-        infof(data, "ECH: ECHConfig from command line empty");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      ech_config_len = 2 * strlen(b64);
-      result = curlx_base64_decode(b64, &ech_config, &ech_config_len);
-      if(result || !ech_config) {
-        infof(data, "ECH: cannot base64 decode ECHConfig from command line");
-        if(data->set.tls_ech & CURLECH_HARD)
-          return result;
-      }
-      if(SSL_set1_ech_config_list(octx->ssl, ech_config,
-                                  ech_config_len) != 1) {
-        infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-        if(data->set.tls_ech & CURLECH_HARD) {
-          free(ech_config);
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-      }
-      free(ech_config);
-      trying_ech_now = 1;
-# else
-      ech_config = (unsigned char *) data->set.str[STRING_ECH_CONFIG];
-      if(!ech_config) {
-        infof(data, "ECH: ECHConfig from command line empty");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
-      if(SSL_set1_ech_config_list(octx->ssl, ech_config,
-                                  ech_config_len) != 1) {
-        infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
-        if(data->set.tls_ech & CURLECH_HARD)
-          return CURLE_SSL_CONNECT_ERROR;
-      }
-      else
-        trying_ech_now = 1;
-# endif
-      infof(data, "ECH: ECHConfig from command line");
-    }
-    else {
-      struct Curl_dns_entry *dns = NULL;
-
-      if(peer->hostname)
-        dns = Curl_dnscache_get(data, peer->hostname, peer->port,
-                                cf->conn->ip_version);
-      if(!dns) {
-        infof(data, "ECH: requested but no DNS info available");
-        if(data->set.tls_ech & CURLECH_HARD)
-          return CURLE_SSL_CONNECT_ERROR;
-      }
-      else {
-        struct Curl_https_rrinfo *rinfo = NULL;
-
-        rinfo = dns->hinfo;
-        if(rinfo && rinfo->echconfiglist) {
-          unsigned char *ecl = rinfo->echconfiglist;
-          size_t elen = rinfo->echconfiglist_len;
-
-          infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-          if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-            infof(data, "ECH: SSL_set1_ech_config_list failed");
-            if(data->set.tls_ech & CURLECH_HARD)
-              return CURLE_SSL_CONNECT_ERROR;
-          }
-          else {
-            trying_ech_now = 1;
-            infof(data, "ECH: imported ECHConfigList of length %zu", elen);
-          }
-        }
-        else {
-          infof(data, "ECH: requested but no ECHConfig available");
-          if(data->set.tls_ech & CURLECH_HARD)
-            return CURLE_SSL_CONNECT_ERROR;
-        }
-        Curl_resolv_unlink(data, &dns);
-      }
-    }
-# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
-    if(trying_ech_now && outername) {
-      infof(data, "ECH: setting public_name not supported with BoringSSL");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-# else
-    if(trying_ech_now && outername) {
-      infof(data, "ECH: inner: '%s', outer: '%s'",
-            peer->hostname ? peer->hostname : "NULL", outername);
-      result = SSL_ech_set1_server_names(octx->ssl,
-                                        peer->hostname, outername,
-                                        0 /* do send outer */);
-      if(result != 1) {
-        infof(data, "ECH: rv failed to set server name(s) %d [ERROR]", result);
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-    }
-# endif  /* OPENSSL_IS_BORINGSSL || OPENSSL_IS_AWSLC */
-    if(trying_ech_now
-       && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
-      infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-#endif  /* USE_ECH_OPENSSL */
-
-#endif
-
-  octx->reused_session = FALSE;
-  if(ssl_config->primary.cache_session) {
-    struct Curl_ssl_session *scs = NULL;
-
-    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
-    if(!result && scs && scs->sdata && scs->sdata_len) {
-      const unsigned char *der_sessionid = scs->sdata;
-      size_t der_sessionid_size = scs->sdata_len;
-      SSL_SESSION *ssl_session = NULL;
-
-      /* If OpenSSL does not accept the session from the cache, this
-       * is not an error. We just continue without it. */
-      ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
-                                    (long)der_sessionid_size);
-      if(ssl_session) {
-        if(!SSL_set_session(octx->ssl, ssl_session)) {
-          infof(data, "SSL: SSL_set_session not accepted, "
-                "continuing without: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-        }
-        else {
-          infof(data, "SSL reusing session with ALPN '%s'",
-                scs->alpn ? scs->alpn : "-");
-          octx->reused_session = TRUE;
-#ifdef HAVE_OPENSSL_EARLYDATA
-          if(ssl_config->earlydata && scs->alpn &&
-             SSL_SESSION_get_max_early_data(ssl_session) &&
-             !cf->conn->connect_only &&
-             (SSL_version(octx->ssl) == TLS1_3_VERSION)) {
-            bool do_early_data = FALSE;
-            if(sess_reuse_cb) {
-              result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
-              if(result)
-                return result;
-            }
-            if(do_early_data) {
-              /* We only try the ALPN protocol the session used before,
-               * otherwise we might send early data for the wrong protocol */
-              Curl_alpn_restrict_to(&alpns, scs->alpn);
-            }
-          }
-#else
-          (void)sess_reuse_cb;
-#endif
-        }
-        SSL_SESSION_free(ssl_session);
-      }
-      else {
-        infof(data, "SSL session not accepted by OpenSSL, continuing without");
-      }
-    }
-    Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
-  }
-
-#ifdef HAS_ALPN_OPENSSL
-  if(alpns.count) {
-    struct alpn_proto_buf proto;
-    memset(&proto, 0, sizeof(proto));
-    result = Curl_alpn_to_proto_buf(&proto, &alpns);
-    if(result) {
-      failf(data, "Error determining ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    if(SSL_set_alpn_protos(octx->ssl, proto.data, (int)proto.len)) {
-      failf(data, "Error setting ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-#endif
-
-  return CURLE_OK;
+  return ossl_init_ssl(octx, cf, data, peer, alpns_requested,
+                       ssl_user_data, sess_reuse_cb);
 }
 
 static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,

@@ -316,6 +316,8 @@ class TestSSLUse:
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
         elif env.curl_uses_lib('quiche'):
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+        elif env.curl_uses_lib('aws-lc'):
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
         else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
             supported = [None, None, 'TLSv1.2', 'TLSv1.3']
         # test
@@ -448,7 +450,7 @@ class TestSSLUse:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if env.curl_uses_lib('gnutls'):
-            pytest.skip("gnutls does not ingore --ciphers on TLSv1.3")
+            pytest.skip("gnutls does not ignore --ciphers on TLSv1.3")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[

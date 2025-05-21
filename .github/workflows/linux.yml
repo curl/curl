@@ -143,7 +143,7 @@ jobs:
 
           - name: awslc
             install_packages: zlib1g-dev
-            install_steps: awslc
+            install_steps: awslc pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/awslc/lib" --with-openssl=$HOME/awslc --enable-ech
 
           - name: awslc
