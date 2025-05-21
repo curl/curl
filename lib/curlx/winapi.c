@@ -28,6 +28,7 @@
  * Variant of Curl_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
+#include "warnless.h"
 #include "winapi.h"
 
 #ifdef BUILDING_LIBCURL
