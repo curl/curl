@@ -36,11 +36,13 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef HAVE_IF_NAMETOINDEX
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+#endif
 
 /* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -90,6 +92,7 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
+#ifndef HAVE_IF_NAMETOINDEX
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
@@ -106,6 +109,7 @@ CURLcode Curl_win32_init(long flags)
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
   }
+#endif
 
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
@@ -123,11 +127,13 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+#ifndef HAVE_IF_NAMETOINDEX
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
     Curl_if_nametoindex = NULL;
   }
+#endif
 
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();

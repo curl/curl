@@ -36,11 +36,13 @@ extern bool Curl_isVistaOrGreater;
 CURLcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
 
+#ifndef HAVE_IF_NAMETOINDEX
 /* We use our own typedef here since some headers might lack this */
 typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
 
 /* This is used instead of if_nametoindex if available on Windows */
 extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
+#endif
 
 /* This is used to dynamically load DLLs */
 HMODULE Curl_load_library(LPCTSTR filename);
