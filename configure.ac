@@ -310,7 +310,7 @@ if test -x /usr/bin/caddy; then
   CADDY=/usr/bin/caddy
 elif test -x /usr/local/bin/caddy; then
   CADDY=/usr/local/bin/caddy
-elif test -x `brew --prefix`/bin/caddy; then
+elif test -x "`brew --prefix 2>/dev/null`/bin/caddy"; then
   CADDY=`brew --prefix`/bin/caddy
 fi
 AC_ARG_WITH(test-caddy,dnl
@@ -326,7 +326,7 @@ if test -x /usr/sbin/vsftpd; then
   VSFTPD=/usr/sbin/vsftpd
 elif test -x /usr/local/sbin/vsftpd; then
   VSFTPD=/usr/local/sbin/vsftpd
-elif test -x `brew --prefix`/sbin/vsftpd; then
+elif test -x "`brew --prefix 2>/dev/null`/sbin/vsftpd"; then
   VSFTPD=`brew --prefix`/sbin/vsftpd
 fi
 AC_ARG_WITH(test-vsftpd,dnl
