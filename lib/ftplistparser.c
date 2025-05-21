@@ -600,7 +600,7 @@ static CURLcode parse_unix(struct Curl_easy *data,
     switch(parser->state.UNIX.sub.time) {
     case PL_UNIX_TIME_PREPART1:
       if(c != ' ') {
-        if(ISALNUM(c)) {
+        if(ISALNUM(c) && len) {
           parser->item_offset = len -1;
           parser->item_length = 1;
           parser->state.UNIX.sub.time = PL_UNIX_TIME_PART1;
@@ -884,7 +884,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
   case PL_WINNT_FILENAME:
     switch(parser->state.NT.sub.filename) {
     case PL_WINNT_FILENAME_PRESPACE:
-      if(c != ' ') {
+      if(c != ' ' && len) {
         parser->item_offset = len -1;
         parser->item_length = 1;
         parser->state.NT.sub.filename = PL_WINNT_FILENAME_CONTENT;
