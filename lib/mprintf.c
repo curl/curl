@@ -69,12 +69,11 @@ const unsigned char Curl_ldigits[] = "0123456789abcdef";
 /* Upper-case digits.  */
 const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
-#define OUTCHAR(x)                                      \
-  do {                                                  \
-    if(!stream((unsigned char)x, userp))                \
-      done++;                                           \
-    else                                                \
-      return done; /* return on failure */              \
+#define OUTCHAR(x)                                       \
+  do {                                                   \
+    if(stream((unsigned char)x, userp))                  \
+      return TRUE;                                       \
+    (*donep)++;                                          \
   } while(0)
 
 /* Data type to read from the arglist */
@@ -620,6 +619,333 @@ static int parsefmt(const char *format,
   return PFMT_OK;
 }
 
+struct mproperty {
+  int width;            /* Width of a field.  */
+  int prec;             /* Precision of a field.  */
+  unsigned int flags;
+};
+
+static bool out_double(void *userp,
+                       int (*stream)(unsigned char, void *),
+                       struct mproperty *p,
+                       double dnum,
+                       char *work, int *donep)
+{
+  char formatbuf[32]="%";
+  char *fptr = &formatbuf[1];
+  size_t left = sizeof(formatbuf)-strlen(formatbuf);
+  int flags = p->flags;
+  int width = p->width;
+  int prec = p->prec;
+
+  if(flags & FLAGS_LEFT)
+    *fptr++ = '-';
+  if(flags & FLAGS_SHOWSIGN)
+    *fptr++ = '+';
+  if(flags & FLAGS_SPACE)
+    *fptr++ = ' ';
+  if(flags & FLAGS_ALT)
+    *fptr++ = '#';
+
+  *fptr = 0;
+
+  if(width >= 0) {
+    size_t dlen;
+    if(width >= BUFFSIZE)
+      width = BUFFSIZE - 1;
+    /* RECURSIVE USAGE */
+    dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
+    fptr += dlen;
+    left -= dlen;
+  }
+  if(prec >= 0) {
+    /* for each digit in the integer part, we can have one less
+       precision */
+    int maxprec = BUFFSIZE - 1;
+    double val = dnum;
+    int len;
+    if(prec > maxprec)
+      prec = maxprec - 1;
+    if(width > 0 && prec <= width)
+      maxprec -= width;
+    while(val >= 10.0) {
+      val /= 10;
+      maxprec--;
+    }
+
+    if(prec > maxprec)
+      prec = maxprec - 1;
+    if(prec < 0)
+      prec = 0;
+    /* RECURSIVE USAGE */
+    len = curl_msnprintf(fptr, left, ".%d", prec);
+    fptr += len;
+  }
+  if(flags & FLAGS_LONG)
+    *fptr++ = 'l';
+
+  if(flags & FLAGS_FLOATE)
+    *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
+  else if(flags & FLAGS_FLOATG)
+    *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
+  else
+    *fptr++ = 'f';
+
+  *fptr = 0; /* and a final null-termination */
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
+  /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
+     output characters */
+#ifdef HAVE_SNPRINTF
+  /* !checksrc! disable LONGLINE */
+  /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
+  (snprintf)(work, BUFFSIZE, formatbuf, dnum);
+#ifdef _WIN32
+  /* Old versions of the Windows CRT do not terminate the snprintf output
+     buffer if it reaches the max size so we do that here. */
+  work[BUFFSIZE - 1] = 0;
+#endif
+#else
+  (sprintf)(work, formatbuf, dnum);
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+  DEBUGASSERT(strlen(work) < BUFFSIZE);
+  while(*work) {
+    if(stream(*work++, userp))
+      return TRUE;
+    (*donep)++;
+  }
+  return 0;
+}
+
+static bool out_number(void *userp,
+                       int (*stream)(unsigned char, void *),
+                       struct mproperty *p,
+                       mp_uintmax_t num,
+                       mp_intmax_t nums,
+                       char *work, int *donep)
+{
+  const unsigned char *digits = Curl_ldigits;
+  int flags = p->flags;
+  int width = p->width;
+  int prec = p->prec;
+  bool is_alt = flags & FLAGS_ALT;
+  bool is_neg = FALSE;
+  int base = 10;
+
+  /* 'workend' points to the final buffer byte position, but with an extra
+     byte as margin to avoid the (FALSE?) warning Coverity gives us
+     otherwise */
+  char *workend = &work[BUFFSIZE - 2];
+  char *w;
+
+  if(flags & FLAGS_CHAR) {
+    /* Character.  */
+    if(!(flags & FLAGS_LEFT))
+      while(--width > 0)
+        OUTCHAR(' ');
+    OUTCHAR((char) num);
+    if(flags & FLAGS_LEFT)
+      while(--width > 0)
+        OUTCHAR(' ');
+    return FALSE;
+  }
+  if(flags & FLAGS_OCTAL)
+    /* Octal unsigned integer */
+    base = 8;
+
+  else if(flags & FLAGS_HEX) {
+    /* Hexadecimal unsigned integer */
+    digits = (flags & FLAGS_UPPER) ? Curl_udigits : Curl_ldigits;
+    base = 16;
+  }
+  else if(flags & FLAGS_UNSIGNED)
+    /* Decimal unsigned integer */
+    ;
+
+  else {
+    /* Decimal integer.  */
+    is_neg = (nums < 0);
+    if(is_neg) {
+      /* signed_num might fail to hold absolute negative minimum by 1 */
+      mp_intmax_t signed_num; /* Used to convert negative in positive.  */
+      signed_num = nums + (mp_intmax_t)1;
+      signed_num = -signed_num;
+      num = (mp_uintmax_t)signed_num;
+      num += (mp_uintmax_t)1;
+    }
+  }
+
+  /* Supply a default precision if none was given.  */
+  if(prec == -1)
+    prec = 1;
+
+  /* Put the number in WORK.  */
+  w = workend;
+  DEBUGASSERT(base <= 16);
+  switch(base) {
+  case 10:
+    while(num > 0) {
+      *w-- = (char)('0' + (num % 10));
+      num /= 10;
+    }
+    break;
+  default:
+    while(num > 0) {
+      *w-- = digits[num % base];
+      num /= base;
+    }
+    break;
+  }
+  width -= (int)(workend - w);
+  prec -= (int)(workend - w);
+
+  if(is_alt && base == 8 && prec <= 0) {
+    *w-- = '0';
+    --width;
+  }
+
+  if(prec > 0) {
+    width -= prec;
+    while(prec-- > 0 && w >= work)
+      *w-- = '0';
+  }
+
+  if(is_alt && base == 16)
+    width -= 2;
+
+  if(is_neg || (flags & FLAGS_SHOWSIGN) || (flags & FLAGS_SPACE))
+    --width;
+
+  if(!(flags & FLAGS_LEFT) && !(flags & FLAGS_PAD_NIL))
+    while(width-- > 0)
+      OUTCHAR(' ');
+
+  if(is_neg)
+    OUTCHAR('-');
+  else if(flags & FLAGS_SHOWSIGN)
+    OUTCHAR('+');
+  else if(flags & FLAGS_SPACE)
+    OUTCHAR(' ');
+
+  if(is_alt && base == 16) {
+    OUTCHAR('0');
+    if(flags & FLAGS_UPPER)
+      OUTCHAR('X');
+    else
+      OUTCHAR('x');
+  }
+
+  if(!(flags & FLAGS_LEFT) && (flags & FLAGS_PAD_NIL))
+    while(width-- > 0)
+      OUTCHAR('0');
+
+  /* Write the number.  */
+  while(++w <= workend) {
+    OUTCHAR(*w);
+  }
+
+  if(flags & FLAGS_LEFT)
+    while(width-- > 0)
+      OUTCHAR(' ');
+
+  return FALSE;
+}
+
+static const char nilstr[] = "(nil)";
+
+static bool out_string(void *userp,
+                       int (*stream)(unsigned char, void *),
+                       struct mproperty *p,
+                       const char *str,
+                       int *donep)
+{
+  int flags = p->flags;
+  int width = p->width;
+  int prec = p->prec;
+  size_t len;
+
+  if(!str) {
+    /* Write null string if there is space.  */
+    if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
+      str = nilstr;
+      len = sizeof(nilstr) - 1;
+      /* Disable quotes around (nil) */
+      flags &= ~(unsigned int)FLAGS_ALT;
+    }
+    else {
+      str = "";
+      len = 0;
+    }
+  }
+  else if(prec != -1)
+    len = (size_t)prec;
+  else if(*str == '\0')
+    len = 0;
+  else
+    len = strlen(str);
+
+  width -= (len > INT_MAX) ? INT_MAX : (int)len;
+
+  if(flags & FLAGS_ALT)
+    OUTCHAR('"');
+
+  if(!(flags & FLAGS_LEFT))
+    while(width-- > 0)
+      OUTCHAR(' ');
+
+  for(; len && *str; len--)
+    OUTCHAR(*str++);
+  if(flags & FLAGS_LEFT)
+    while(width-- > 0)
+      OUTCHAR(' ');
+
+  if(flags & FLAGS_ALT)
+    OUTCHAR('"');
+
+  return FALSE;
+}
+
+static bool out_pointer(void *userp,
+                        int (*stream)(unsigned char, void *),
+                        struct mproperty *p,
+                        const char *ptr,
+                        char *work,
+                        int *donep)
+{
+  /* Generic pointer.  */
+  if(ptr) {
+    size_t num = (size_t) ptr;
+
+    /* If the pointer is not NULL, write it as a %#x spec.  */
+    p->flags |= FLAGS_HEX|FLAGS_ALT;
+    if(out_number(userp, stream, p, num, 0, work, donep))
+      return TRUE;
+  }
+  else {
+    /* Write "(nil)" for a nil pointer.  */
+    const char *point;
+    int width = p->width;
+    int flags = p->flags;
+
+    width -= (int)(sizeof(nilstr) - 1);
+    if(flags & FLAGS_LEFT)
+      while(width-- > 0)
+        OUTCHAR(' ');
+    for(point = nilstr; *point; ++point)
+      OUTCHAR(*point);
+    if(!(flags & FLAGS_LEFT))
+      while(width-- > 0)
+        OUTCHAR(' ');
+  }
+  return FALSE;
+}
+
 /*
  * formatf() - the general printf function.
  *
@@ -644,8 +970,6 @@ static int formatf(
   const char *format,    /* %-formatted string */
   va_list ap_save) /* list of parameters */
 {
-  static const char nilstr[] = "(nil)";
-  const unsigned char *digits = Curl_ldigits;
   int done = 0;   /* number of characters written  */
   int i;
   int ocount = 0; /* number of output segments */
@@ -655,371 +979,102 @@ static int formatf(
   struct va_input input[MAX_PARAMETERS];
   char work[BUFFSIZE + 2];
 
-  /* 'workend' points to the final buffer byte position, but with an extra
-     byte as margin to avoid the (FALSE?) warning Coverity gives us
-     otherwise */
-  char *workend = &work[BUFFSIZE - 2];
-
   /* Parse the format string */
   if(parsefmt(format, output, input, &ocount, &icount, ap_save))
     return 0;
 
   for(i = 0; i < ocount; i++) {
     struct outsegment *optr = &output[i];
-    struct va_input *iptr;
-    bool is_alt;            /* Format spec modifiers.  */
-    int width;              /* Width of a field.  */
-    int prec;               /* Precision of a field.  */
-    bool is_neg;            /* Decimal integer is negative.  */
-    unsigned long base;     /* Base of a number to be written.  */
-    mp_uintmax_t num;       /* Integral values to be written.  */
-    mp_intmax_t signed_num; /* Used to convert negative in positive.  */
-    char *w;
+    struct va_input *iptr = &input[optr->input];
+    struct mproperty p;
     size_t outlen = optr->outlen;
-    unsigned int flags = optr->flags;
 
     if(outlen) {
       const char *str = optr->start;
-      for(; outlen && *str; outlen--)
-        OUTCHAR(*str++);
+      for(; outlen && *str; outlen--) {
+        if(stream(*str++, userp))
+          return done;
+        done++;
+      }
       if(optr->flags & FLAGS_SUBSTR)
         /* this is just a substring */
         continue;
     }
 
+    p.flags = optr->flags;
+
     /* pick up the specified width */
-    if(flags & FLAGS_WIDTHPARAM) {
-      width = (int)input[optr->width].val.nums;
-      if(width < 0) {
+    if(p.flags & FLAGS_WIDTHPARAM) {
+      p.width = (int)input[optr->width].val.nums;
+      if(p.width < 0) {
         /* "A negative field width is taken as a '-' flag followed by a
            positive field width." */
-        if(width == INT_MIN)
-          width = INT_MAX;
+        if(p.width == INT_MIN)
+          p.width = INT_MAX;
         else
-          width = -width;
-        flags |= FLAGS_LEFT;
-        flags &= ~(unsigned int)FLAGS_PAD_NIL;
+          p.width = -p.width;
+        p.flags |= FLAGS_LEFT;
+        p.flags &= ~(unsigned int)FLAGS_PAD_NIL;
       }
     }
     else
-      width = optr->width;
+      p.width = optr->width;
 
     /* pick up the specified precision */
-    if(flags & FLAGS_PRECPARAM) {
-      prec = (int)input[optr->precision].val.nums;
-      if(prec < 0)
+    if(p.flags & FLAGS_PRECPARAM) {
+      p.prec = (int)input[optr->precision].val.nums;
+      if(p.prec < 0)
         /* "A negative precision is taken as if the precision were
            omitted." */
-        prec = -1;
+        p.prec = -1;
     }
-    else if(flags & FLAGS_PREC)
-      prec = optr->precision;
+    else if(p.flags & FLAGS_PREC)
+      p.prec = optr->precision;
     else
-      prec = -1;
-
-    is_alt = (flags & FLAGS_ALT) ? 1 : 0;
-    iptr = &input[optr->input];
+      p.prec = -1;
 
     switch(iptr->type) {
     case FORMAT_INTU:
     case FORMAT_LONGU:
     case FORMAT_LONGLONGU:
-      flags |= FLAGS_UNSIGNED;
-      FALLTHROUGH();
+      p.flags |= FLAGS_UNSIGNED;
+      if(out_number(userp, stream, &p, iptr->val.numu, 0, work, &done))
+        return done;
+      break;
+
     case FORMAT_INT:
     case FORMAT_LONG:
     case FORMAT_LONGLONG:
-      num = iptr->val.numu;
-      if(flags & FLAGS_CHAR) {
-        /* Character.  */
-        if(!(flags & FLAGS_LEFT))
-          while(--width > 0)
-            OUTCHAR(' ');
-        OUTCHAR((char) num);
-        if(flags & FLAGS_LEFT)
-          while(--width > 0)
-            OUTCHAR(' ');
-        break;
-      }
-      if(flags & FLAGS_OCTAL) {
-        /* Octal unsigned integer */
-        base = 8;
-        is_neg = FALSE;
-      }
-      else if(flags & FLAGS_HEX) {
-        /* Hexadecimal unsigned integer */
-        digits = (flags & FLAGS_UPPER) ? Curl_udigits : Curl_ldigits;
-        base = 16;
-        is_neg = FALSE;
-      }
-      else if(flags & FLAGS_UNSIGNED) {
-        /* Decimal unsigned integer */
-        base = 10;
-        is_neg = FALSE;
-      }
-      else {
-        /* Decimal integer.  */
-        base = 10;
-
-        is_neg = (iptr->val.nums < (mp_intmax_t)0);
-        if(is_neg) {
-          /* signed_num might fail to hold absolute negative minimum by 1 */
-          signed_num = iptr->val.nums + (mp_intmax_t)1;
-          signed_num = -signed_num;
-          num = (mp_uintmax_t)signed_num;
-          num += (mp_uintmax_t)1;
-        }
-      }
-number:
-      /* Supply a default precision if none was given.  */
-      if(prec == -1)
-        prec = 1;
-
-      /* Put the number in WORK.  */
-      w = workend;
-      DEBUGASSERT(base <= 16);
-      switch(base) {
-      case 10:
-        while(num > 0) {
-          *w-- = (char)('0' + (num % 10));
-          num /= 10;
-        }
-        break;
-      default:
-        while(num > 0) {
-          *w-- = digits[num % base];
-          num /= base;
-        }
-        break;
-      }
-      width -= (int)(workend - w);
-      prec -= (int)(workend - w);
-
-      if(is_alt && base == 8 && prec <= 0) {
-        *w-- = '0';
-        --width;
-      }
-
-      if(prec > 0) {
-        width -= prec;
-        while(prec-- > 0 && w >= work)
-          *w-- = '0';
-      }
-
-      if(is_alt && base == 16)
-        width -= 2;
-
-      if(is_neg || (flags & FLAGS_SHOWSIGN) || (flags & FLAGS_SPACE))
-        --width;
-
-      if(!(flags & FLAGS_LEFT) && !(flags & FLAGS_PAD_NIL))
-        while(width-- > 0)
-          OUTCHAR(' ');
-
-      if(is_neg)
-        OUTCHAR('-');
-      else if(flags & FLAGS_SHOWSIGN)
-        OUTCHAR('+');
-      else if(flags & FLAGS_SPACE)
-        OUTCHAR(' ');
-
-      if(is_alt && base == 16) {
-        OUTCHAR('0');
-        if(flags & FLAGS_UPPER)
-          OUTCHAR('X');
-        else
-          OUTCHAR('x');
-      }
-
-      if(!(flags & FLAGS_LEFT) && (flags & FLAGS_PAD_NIL))
-        while(width-- > 0)
-          OUTCHAR('0');
-
-      /* Write the number.  */
-      while(++w <= workend) {
-        OUTCHAR(*w);
-      }
-
-      if(flags & FLAGS_LEFT)
-        while(width-- > 0)
-          OUTCHAR(' ');
+      if(out_number(userp, stream, &p, iptr->val.numu,
+                    iptr->val.nums, work, &done))
+        return done;
       break;
 
-    case FORMAT_STRING: {
-      const char *str;
-      size_t len;
-
-      str = iptr->val.str;
-      if(!str) {
-        /* Write null string if there is space.  */
-        if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
-          str = nilstr;
-          len = sizeof(nilstr) - 1;
-          /* Disable quotes around (nil) */
-          flags &= ~(unsigned int)FLAGS_ALT;
-        }
-        else {
-          str = "";
-          len = 0;
-        }
-      }
-      else if(prec != -1)
-        len = (size_t)prec;
-      else if(*str == '\0')
-        len = 0;
-      else
-        len = strlen(str);
-
-      width -= (len > INT_MAX) ? INT_MAX : (int)len;
-
-      if(flags & FLAGS_ALT)
-        OUTCHAR('"');
-
-      if(!(flags & FLAGS_LEFT))
-        while(width-- > 0)
-          OUTCHAR(' ');
-
-      for(; len && *str; len--)
-        OUTCHAR(*str++);
-      if(flags & FLAGS_LEFT)
-        while(width-- > 0)
-          OUTCHAR(' ');
-
-      if(flags & FLAGS_ALT)
-        OUTCHAR('"');
+    case FORMAT_STRING:
+      if(out_string(userp, stream, &p, iptr->val.str, &done))
+        return done;
       break;
-    }
 
     case FORMAT_PTR:
-      /* Generic pointer.  */
-      if(iptr->val.ptr) {
-        /* If the pointer is not NULL, write it as a %#x spec.  */
-        base = 16;
-        digits = (flags & FLAGS_UPPER) ? Curl_udigits : Curl_ldigits;
-        is_alt = TRUE;
-        num = (size_t) iptr->val.ptr;
-        is_neg = FALSE;
-        goto number;
-      }
-      else {
-        /* Write "(nil)" for a nil pointer.  */
-        const char *point;
-
-        width -= (int)(sizeof(nilstr) - 1);
-        if(flags & FLAGS_LEFT)
-          while(width-- > 0)
-            OUTCHAR(' ');
-        for(point = nilstr; *point != '\0'; ++point)
-          OUTCHAR(*point);
-        if(!(flags & FLAGS_LEFT))
-          while(width-- > 0)
-            OUTCHAR(' ');
-      }
+      if(out_pointer(userp, stream, &p, iptr->val.ptr, work, &done))
+        return done;
       break;
 
-    case FORMAT_DOUBLE: {
-      char formatbuf[32]="%";
-      char *fptr = &formatbuf[1];
-      size_t left = sizeof(formatbuf)-strlen(formatbuf);
-      int len;
-
-      if(flags & FLAGS_WIDTH)
-        width = optr->width;
-
-      if(flags & FLAGS_PREC)
-        prec = optr->precision;
-
-      if(flags & FLAGS_LEFT)
-        *fptr++ = '-';
-      if(flags & FLAGS_SHOWSIGN)
-        *fptr++ = '+';
-      if(flags & FLAGS_SPACE)
-        *fptr++ = ' ';
-      if(flags & FLAGS_ALT)
-        *fptr++ = '#';
-
-      *fptr = 0;
-
-      if(width >= 0) {
-        size_t dlen;
-        if(width >= BUFFSIZE)
-          width = BUFFSIZE - 1;
-        /* RECURSIVE USAGE */
-        dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
-        fptr += dlen;
-        left -= dlen;
-      }
-      if(prec >= 0) {
-        /* for each digit in the integer part, we can have one less
-           precision */
-        int maxprec = BUFFSIZE - 1;
-        double val = iptr->val.dnum;
-        if(prec > maxprec)
-          prec = maxprec - 1;
-        if(width > 0 && prec <= width)
-          maxprec -= width;
-        while(val >= 10.0) {
-          val /= 10;
-          maxprec--;
-        }
-
-        if(prec > maxprec)
-          prec = maxprec - 1;
-        if(prec < 0)
-          prec = 0;
-        /* RECURSIVE USAGE */
-        len = curl_msnprintf(fptr, left, ".%d", prec);
-        fptr += len;
-      }
-      if(flags & FLAGS_LONG)
-        *fptr++ = 'l';
-
-      if(flags & FLAGS_FLOATE)
-        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
-      else if(flags & FLAGS_FLOATG)
-        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
-      else
-        *fptr++ = 'f';
-
-      *fptr = 0; /* and a final null-termination */
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-      /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
-         output characters */
-#ifdef HAVE_SNPRINTF
-      /* !checksrc! disable LONGLINE */
-      /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
-      (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum);
-#ifdef _WIN32
-      /* Old versions of the Windows CRT do not terminate the snprintf output
-         buffer if it reaches the max size so we do that here. */
-      work[BUFFSIZE - 1] = 0;
-#endif
-#else
-      (sprintf)(work, formatbuf, iptr->val.dnum);
-#endif
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-      DEBUGASSERT(strlen(work) < BUFFSIZE);
-      for(fptr = work; *fptr; fptr++)
-        OUTCHAR(*fptr);
+    case FORMAT_DOUBLE:
+      if(out_double(userp, stream, &p, iptr->val.dnum, work, &done))
+        return done;
       break;
-    }
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
 #ifdef HAVE_LONG_LONG_TYPE
-      if(flags & FLAGS_LONGLONG)
+      if(p.flags & FLAGS_LONGLONG)
         *(LONG_LONG_TYPE *) iptr->val.ptr = (LONG_LONG_TYPE)done;
       else
 #endif
-        if(flags & FLAGS_LONG)
+        if(p.flags & FLAGS_LONG)
           *(long *) iptr->val.ptr = (long)done;
-      else if(!(flags & FLAGS_SHORT))
+      else if(!(p.flags & FLAGS_SHORT))
         *(int *) iptr->val.ptr = (int)done;
       else
         *(short *) iptr->val.ptr = (short)done;
