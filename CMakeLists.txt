@@ -1651,16 +1651,14 @@ if(WIN32)
   endif()
 
   # Pre-fill detection results based on target OS version
-  if(WINCE OR WINDOWS_STORE)
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600 AND  # Windows Vista or newer
+     (MINGW OR MSVC) AND
+     NOT WINCE AND NOT WINDOWS_STORE)
+    set(HAVE_IF_NAMETOINDEX 1)
+  else()
     set(HAVE_IF_NAMETOINDEX 0)
-  elseif(HAVE_WIN32_WINNT AND (MINGW OR MSVC))
-    if(HAVE_WIN32_WINNT LESS 0x0600)
-      set(HAVE_IF_NAMETOINDEX 0)
-    else()  # Windows Vista or newer
-      set(HAVE_IF_NAMETOINDEX 1)
-    endif()
-    unset(HAVE_IF_NAMETOINDEX CACHE)
   endif()
+  unset(HAVE_IF_NAMETOINDEX CACHE)
 endif()
 
 # Detect headers
