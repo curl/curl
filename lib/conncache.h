@@ -72,6 +72,9 @@ void Curl_cpool_init(struct cpool *cpool,
 /* Destroy all connections and free all members */
 void Curl_cpool_destroy(struct cpool *connc);
 
+/* Clear and cloce all connections in `data`'s conn pool. */
+void Curl_cpool_clear(struct Curl_easy *data);
+
 /* Init the transfer to be used within its connection pool.
  * Assigns `data->id`. */
 void Curl_cpool_xfer_init(struct Curl_easy *data);
