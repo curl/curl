@@ -42,6 +42,9 @@ static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+
+/* This is used to dynamically load DLLs */
+static HMODULE curl_load_library(LPCTSTR filename);
 #endif
 
 /* Curl_win32_init() performs Win32 global initialization */
@@ -93,7 +96,7 @@ CURLcode Curl_win32_init(long flags)
 #endif
 
 #ifndef HAVE_IF_NAMETOINDEX
-  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+  s_hIpHlpApiDll = curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
 #ifdef UNDER_CE
@@ -146,6 +149,8 @@ void Curl_win32_cleanup(long init_flags)
   }
 }
 
+#ifndef HAVE_IF_NAMETOINDEX
+
 #ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
@@ -169,7 +174,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #endif
 
 /*
- * Curl_load_library()
+ * curl_load_library()
  *
  * This is used to dynamically load DLLs using the most secure method available
  * for the version of Windows that we are running on.
@@ -182,7 +187,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  *
  * Returns the handle of the module on success; otherwise NULL.
  */
-HMODULE Curl_load_library(LPCTSTR filename)
+static HMODULE curl_load_library(LPCTSTR filename)
 {
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
@@ -245,5 +250,6 @@ HMODULE Curl_load_library(LPCTSTR filename)
   return NULL;
 #endif
 }
+#endif /* !HAVE_IF_NAMETOINDEX */
 
 #endif /* _WIN32 */
