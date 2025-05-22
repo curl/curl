@@ -175,8 +175,6 @@ struct Curl_multi {
   unsigned int maxconnects; /* if >0, a fixed limit of the maximum number of
                                entries we are allowed to grow the connection
                                cache to */
-  struct curltime conncache_stale_ts; /* all connections created before this
-                                         timestamp will be marked as stale */
 #define IPV6_UNKNOWN 0
 #define IPV6_DEAD    1
 #define IPV6_WORKS   2
@@ -195,8 +193,6 @@ struct Curl_multi {
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
-  BIT(check_conncache_stale); /* check whether the connections in conncache
-                                 are stale and not try reusing anymore */
 };
 
 #endif /* HEADER_CURL_MULTIHANDLE_H */

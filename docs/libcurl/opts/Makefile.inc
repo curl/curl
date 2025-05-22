@@ -102,7 +102,6 @@ man_MANS =                                      \
   CURLINFO_USED_PROXY.3                         \
   CURLINFO_XFER_ID.3                            \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
-  CURLMOPT_CONNCACHE_STALE.3                    \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAX_CONCURRENT_STREAMS.3             \
   CURLMOPT_MAX_HOST_CONNECTIONS.3               \

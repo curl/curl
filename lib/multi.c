@@ -244,9 +244,6 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->max_concurrent_streams = 100;
   multi->last_timeout_ms = -1;
 
-  multi->conncache_stale_ts = curlx_now();
-  multi->check_conncache_stale = FALSE;
-
   if(Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->msgsent, xfer_table_size) ||
@@ -3130,11 +3127,6 @@ CURLMcode curl_multi_setopt(CURLM *m,
         streams = 100;
       multi->max_concurrent_streams = (unsigned int)streams;
     }
-    break;
-  case CURLMOPT_CONNCACHE_STALE:
-    multi->check_conncache_stale = (0 != va_arg(param, long)) ? TRUE : FALSE;
-    if(multi->check_conncache_stale)
-      multi->conncache_stale_ts = curlx_now();
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;
