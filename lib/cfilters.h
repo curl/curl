@@ -149,7 +149,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  * - CF_QUERY_NEED_FLUSH: TRUE iff any of the filters have unsent data
  * - CF_QUERY_IP_INFO: res1 says if connection used IPv6, res2 is the
  *                   ip quadruple
- * - CF_QUERY_HOST_PORT: the remote host name and port a filter talks to
+ * - CF_QUERY_HOST_PORT: the remote hostname and port a filter talks to
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
