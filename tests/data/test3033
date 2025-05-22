@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_multi_setopt
+curl_easy_setopt
 connection reuse
 libtest
 </keywords>
@@ -17,11 +17,12 @@ Content-Length: 6
 -foo-
 </data>
 <datacheck>
-not set CURLMOPT_CONNCACHE_STALE for req #0
+not set CURLOPT_FRESH_CONNECT for req #0
 -foo-
-set CURLMOPT_CONNCACHE_STALE=1 for req #1
+set CURLOPT_FRESH_CONNECT=2 for req #1
+set CURLOPT_FORBID_REUSE=1 for req #1
 -foo-
-set CURLMOPT_CONNCACHE_STALE=0 for req #2
+not set CURLOPT_FRESH_CONNECT for req #2
 -foo-
 </datacheck>
 </reply>
@@ -33,7 +34,7 @@ set CURLMOPT_CONNCACHE_STALE=0 for req #2
 http
 </server>
 <name>
-CURLMOPT_CONNCACHE_STALE
+CURLOPT_FRESH_CONNECT=2
 </name>
 <tool>
 lib%TESTNUMBER

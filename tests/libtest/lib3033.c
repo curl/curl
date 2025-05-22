@@ -39,7 +39,7 @@ static int debug_func(CURL *handle, curl_infotype type, char *data,
   return 0;
 }
 
-static CURLcode stale_test(CURLM *multi, CURL *easy, char *url_3033, int index)
+static CURLcode req_test(CURLM *multi, CURL *easy, char *url_3033, int index)
 {
   CURLMsg *msg = NULL;
   CURLcode res = CURLE_OK;
@@ -49,19 +49,19 @@ static CURLcode stale_test(CURLM *multi, CURL *easy, char *url_3033, int index)
   curl_easy_setopt(easy, CURLOPT_URL, url_3033);
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_func);
-  curl_multi_add_handle(multi, easy);
-
   if(index == 0) {
-    curl_mprintf("not set CURLMOPT_CONNCACHE_STALE for req #0\n");
+    curl_mprintf("not set CURLOPT_FRESH_CONNECT for req #0\n");
   }
   else if(index == 1) {
-    curl_multi_setopt(multi, CURLMOPT_CONNCACHE_STALE, 1L);
-    curl_mprintf("set CURLMOPT_CONNCACHE_STALE=1 for req #1\n");
+    curl_easy_setopt(easy, CURLOPT_FRESH_CONNECT, 2L);
+    curl_mprintf("set CURLOPT_FRESH_CONNECT=2 for req #1\n");
+    curl_easy_setopt(easy, CURLOPT_FORBID_REUSE, 1L);
+    curl_mprintf("set CURLOPT_FORBID_REUSE=1 for req #1\n");
   }
   else if(index == 2) {
-    curl_multi_setopt(multi, CURLMOPT_CONNCACHE_STALE, 0L);
-    curl_mprintf("set CURLMOPT_CONNCACHE_STALE=0 for req #2\n");
+    curl_mprintf("not set CURLOPT_FRESH_CONNECT for req #2\n");
   }
+  curl_multi_add_handle(multi, easy);
 
   do {
     CURLMcode mres;
@@ -89,13 +89,13 @@ static CURLcode stale_test(CURLM *multi, CURL *easy, char *url_3033, int index)
       }
 
       curl_easy_getinfo(easy, CURLINFO_NUM_CONNECTS, &num_connects);
-      if(index == 1 && num_connects != 1) {
-        curl_mfprintf(stderr, "req 1 reused connection in pool\n");
+      if(index == 1 && num_connects == 0) {
+        curl_mfprintf(stderr, "req 1 should not reuse connection in pool\n");
         res = TEST_ERR_MAJOR_BAD;
         goto stale_test_cleanup;
       }
-      else if(index == 2 && num_connects > 0) {
-        curl_mfprintf(stderr, "req 2 not reused connection in pool\n");
+      else if(index == 2 && num_connects == 0) {
+        curl_mfprintf(stderr, "req 2 should not reuse connection in pool\n");
         res = TEST_ERR_MAJOR_BAD;
         goto stale_test_cleanup;
       }
@@ -119,13 +119,13 @@ CURLcode test(char *URL)
   multi_init(multi);
   easy_init(curl);
 
-  res = stale_test(multi, curl, URL, 0);
+  res = req_test(multi, curl, URL, 0);
   if(res != CURLE_OK)
     goto test_cleanup;
-  res = stale_test(multi, curl, URL, 1);
+  res = req_test(multi, curl, URL, 1);
   if(res != CURLE_OK)
     goto test_cleanup;
-  res = stale_test(multi, curl, URL, 2);
+  res = req_test(multi, curl, URL, 2);
   if(res != CURLE_OK)
     goto test_cleanup;
 
