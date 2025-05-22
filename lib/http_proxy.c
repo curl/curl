@@ -383,21 +383,21 @@ out:
   return result;
 }
 
-void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 const char **phost,
-                                 const char **pdisplay_host,
-                                 int *pport)
+CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2)
 {
-  (void)data;
-  if(!cf->connected) {
-    *phost = cf->conn->http_proxy.host.name;
-    *pdisplay_host = cf->conn->http_proxy.host.dispname;
-    *pport = (int)cf->conn->http_proxy.port;
+  switch(query) {
+  case CF_QUERY_HOST_PORT:
+    *pres1 = (int)cf->conn->http_proxy.port;
+    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    return CURLE_OK;
+  default:
+    break;
   }
-  else {
-    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
-  }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
 }
 
 static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
@@ -443,7 +443,6 @@ struct Curl_cftype Curl_cft_http_proxy = {
   http_proxy_cf_connect,
   http_proxy_cf_close,
   Curl_cf_def_shutdown,
-  Curl_cf_http_proxy_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -451,7 +450,7 @@ struct Curl_cftype Curl_cft_http_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  Curl_cf_http_proxy_query,
 };
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,

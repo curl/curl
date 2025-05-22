@@ -1577,6 +1577,10 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
 
   switch(query) {
+  case CF_QUERY_HOST_PORT:
+    *pres1 = (int)cf->conn->http_proxy.port;
+    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    return CURLE_OK;
   case CF_QUERY_NEED_FLUSH: {
     if(!Curl_bufq_is_empty(&ctx->outbufq) ||
        !Curl_bufq_is_empty(&ctx->tunnel.sendbuf)) {
@@ -1624,7 +1628,6 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_connect,
   cf_h2_proxy_close,
   cf_h2_proxy_shutdown,
-  Curl_cf_http_proxy_get_host,
   cf_h2_proxy_adjust_pollset,
   cf_h2_proxy_data_pending,
   cf_h2_proxy_send,

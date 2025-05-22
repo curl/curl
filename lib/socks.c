@@ -1199,21 +1199,23 @@ static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
   socks_proxy_cf_free(cf);
 }
 
-static void socks_cf_get_host(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const char **phost,
-                              const char **pdisplay_host,
-                              int *pport)
+static CURLcode socks_cf_query(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               int query, int *pres1, void *pres2)
 {
-  (void)data;
-  if(!cf->connected) {
-    *phost = cf->conn->socks_proxy.host.name;
-    *pdisplay_host = cf->conn->http_proxy.host.dispname;
-    *pport = (int)cf->conn->socks_proxy.port;
+  struct socks_state *sx = cf->ctx;
+
+  switch(query) {
+  case CF_QUERY_HOST_PORT:
+    *pres1 = sx->remote_port;
+    *((const char **)pres2) = sx->hostname;
+    return CURLE_OK;
+  default:
+    break;
   }
-  else {
-    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
-  }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
 }
 
 struct Curl_cftype Curl_cft_socks_proxy = {
@@ -1224,7 +1226,6 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   socks_proxy_cf_connect,
   socks_proxy_cf_close,
   Curl_cf_def_shutdown,
-  socks_cf_get_host,
   socks_cf_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -1232,7 +1233,7 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  socks_cf_query,
 };
 
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
