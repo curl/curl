@@ -74,6 +74,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
+      WINTARGET: 0x0501  # Windows XP
       PRJ_CFG: Debug
       SCHANNEL: 'ON'
       SHARED: 'ON'
