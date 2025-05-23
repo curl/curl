@@ -391,6 +391,7 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
 }
 #endif /* ! CURL_DISABLE_RTSP */
 
+#ifdef USE_SSL
 static void set_ssl_options(struct ssl_config_data *ssl,
                             struct ssl_primary_config *config,
                             long arg)
@@ -404,6 +405,7 @@ static void set_ssl_options(struct ssl_config_data *ssl,
   ssl->auto_client_cert = !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
   ssl->earlydata = !!(arg & CURLSSLOPT_EARLYDATA);
 }
+#endif
 
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
