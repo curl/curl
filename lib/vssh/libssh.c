@@ -2669,11 +2669,7 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
     *err = CURLE_FAILED_INIT;
     return -1;
   }
-  /* limit the writes to the maximum specified in Section 3 of
-   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
-   */
-  if(len > 32768)
-    len = 32768;
+
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   switch(sshc->sftp_send_state) {
     case 0:
@@ -2710,6 +2706,17 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
       return -1;
   }
 #else
+  /*
+   * limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   *
+   * libssh started applying appropriate read/write length limits
+   * internally since version 0.11.0, hence such an operation isn't
+   * needed for versions after (and including) 0.11.0.
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(sshc->sftp_file, mem, len);
 
   myssh_block2waitfor(conn, sshc, FALSE);
