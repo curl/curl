@@ -52,7 +52,7 @@ struct getout *new_getout(struct OperationConfig *config)
     /* move the last pointer */
     config->url_last = node;
 
-    node->flags = config->default_node_flags;
+    node->useremote = config->remote_name_all;
     node->num = outnum++;
   }
   return node;
