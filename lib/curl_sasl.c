@@ -816,7 +816,7 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
   /* Failing SASL authentication is a pain. Give a helping hand if
    * we were unable to select an AUTH mechanism.
    * `sasl->authmechs` are mechanisms offered by the peer
-   * `sasl->prefmech`  are mechanisms perferred by us */
+   * `sasl->prefmech`  are mechanisms preferred by us */
   unsigned short enabledmechs = sasl->authmechs & sasl->prefmech;
 
   if(!sasl->authmechs)
