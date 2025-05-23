@@ -75,8 +75,7 @@ my @output=`$cmd`;
 
 # these functions can have these scores, but not higher
 my %whitelist = (
-    'getparameter' => 142,
-    'single_transfer' => 124
+    'getparameter' => 142
     );
 
 # functions with complexity above this level causes the function to return error
