@@ -1717,7 +1717,6 @@ struct UserDefined {
                             us */
   BIT(wildcard_enabled); /* enable wildcard matching */
 #endif
-  BIT(hide_progress);    /* do not use the progress meter */
   BIT(http_fail_on_error);  /* fail on HTTP error codes >= 400 */
   BIT(http_keep_sending_on_error); /* for HTTP status codes >= 300 */
   BIT(http_transfer_encoding); /* request compressed HTTP transfer-encoding */
