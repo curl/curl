@@ -794,24 +794,24 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 #ifdef USE_KERBEROS5
-  static bool have_kerberos5 = TRUE;
+#define CURL_SASL_KERBEROS5   TRUE
 #else
-  static bool have_kerberos5 = FALSE;
+#define CURL_SASL_KERBEROS5   FALSE
 #endif
 #ifdef USE_GSASL
-  static bool have_gasl = TRUE;
+#define CURL_SASL_GASL        TRUE
 #else
-  static bool have_gasl = FALSE;
+#define CURL_SASL_GASL        FALSE
 #endif
 #ifdef CURL_DISABLE_DIGEST_AUTH
-  static bool have_digest = TRUE;
+#define CURL_SASL_DIGEST      TRUE
 #else
-  static bool have_digest = FALSE;
+#define CURL_SASL_DIGEST      FALSE
 #endif
 #ifndef USE_NTLM
-  static bool have_ntlm = TRUE;
+#define CURL_SASL_NTLM        TRUE
 #else
-  static bool have_ntlm = FALSE;
+#define CURL_SASL_NTLM        FALSE
 #endif
   /* Failing SASL authentication is a pain. Give a helping hand if
    * we were unable to select an AUTH mechanism.
@@ -829,17 +829,17 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
     if((enabledmechs & SASL_MECH_EXTERNAL) && data->conn->passwd[0])
       infof(data, "SASL: auth EXTERNAL not chosen with password");
     sasl_unchosen(data, SASL_MECH_GSSAPI, enabledmechs,
-                  have_kerberos5, Curl_auth_is_gssapi_supported(), NULL);
+                  CURL_SASL_KERBEROS5, Curl_auth_is_gssapi_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_SCRAM_SHA_256, enabledmechs,
-                  have_gasl, FALSE, NULL);
+                  CURL_SASL_GASL, FALSE, NULL);
     sasl_unchosen(data, SASL_MECH_SCRAM_SHA_1, enabledmechs,
-                  have_gasl, FALSE, NULL);
+                  CURL_SASL_GASL, FALSE, NULL);
     sasl_unchosen(data, SASL_MECH_DIGEST_MD5, enabledmechs,
-                  have_digest, Curl_auth_is_digest_supported(), NULL);
+                  CURL_SASL_DIGEST, Curl_auth_is_digest_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_CRAM_MD5, enabledmechs,
-                  have_digest, TRUE, NULL);
+                  CURL_SASL_DIGEST, TRUE, NULL);
     sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
-                  have_ntlm, Curl_auth_is_ntlm_supported(), NULL);
+                  CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
     sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs,  TRUE, TRUE,
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
