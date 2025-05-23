@@ -1613,6 +1613,89 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     return ifmissing;
 }
 
+static CURLUcode set_url_scheme(CURLU *u, const char *scheme,
+        unsigned int flags)
+{
+    size_t plen = strlen(scheme);
+    const char *s = scheme;
+    if((plen > MAX_SCHEME_LEN) || (plen < 1))
+      /* too long or too short */
+      return CURLUE_BAD_SCHEME;
+   /* verify that it is a fine scheme */
+    if(!(flags & CURLU_NON_SUPPORT_SCHEME) && !Curl_get_scheme_handler(scheme))
+      return CURLUE_UNSUPPORTED_SCHEME;
+    if(ISALPHA(*s)) {
+      /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
+      while(--plen) {
+        if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
+          s++; /* fine */
+        else
+          return CURLUE_BAD_SCHEME;
+      }
+    }
+    else
+      return CURLUE_BAD_SCHEME;
+    u->guessed_scheme = FALSE;
+    return CURLUE_OK;
+}
+
+static CURLUcode set_url_port(CURLU *u, const char *provided_port)
+{
+  char *tmp;
+  curl_off_t port;
+  if(!ISDIGIT(provided_port[0]))
+    /* not a number */
+    return CURLUE_BAD_PORT_NUMBER;
+  if(curlx_str_number(&provided_port, &port, 0xffff) || *provided_port)
+    /* weirdly provided number, not good! */
+    return CURLUE_BAD_PORT_NUMBER;
+  tmp = aprintf("%" CURL_FORMAT_CURL_OFF_T, port);
+  if(!tmp)
+    return CURLUE_OUT_OF_MEMORY;
+  free(u->port);
+  u->port = tmp;
+  u->portnum = (unsigned short)port;
+  return CURLUE_OK;
+}
+
+static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
+        unsigned int flags)
+{
+  /*
+   * Allow a new URL to replace the existing (if any) contents.
+   *
+   * If the existing contents is enough for a URL, allow a relative URL to
+   * replace it.
+   */
+  CURLUcode uc;
+  char *oldurl = NULL;
+
+  if(!part_size) {
+    /* a blank URL is not a valid URL unless we already have a complete one
+       and this is a redirect */
+    if(!curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+      /* success, meaning the "" is a fine relative URL, but nothing
+         changes */
+      free(oldurl);
+      return CURLUE_OK;
+    }
+    return CURLUE_MALFORMED_INPUT;
+  }
+
+  /* if the new thing is absolute or the old one is not (we could not get an
+   * absolute URL in 'oldurl'), then replace the existing with the new. */
+  if(Curl_is_absolute_url(url, NULL, 0,
+                          flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
+     || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+    return parseurl_and_replace(url, u, flags);
+  }
+  DEBUGASSERT(oldurl); /* it is set here */
+  /* apply the relative part to create a new URL */
+  uc = redirect_url(oldurl, url, u, flags);
+  free(oldurl);
+  return uc;
+}
+
 CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                        const char *part, unsigned int flags)
 {
@@ -1686,28 +1769,11 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
 
   switch(what) {
   case CURLUPART_SCHEME: {
-    size_t plen = strlen(part);
-    const char *s = part;
-    if((plen > MAX_SCHEME_LEN) || (plen < 1))
-      /* too long or too short */
-      return CURLUE_BAD_SCHEME;
-   /* verify that it is a fine scheme */
-    if(!(flags & CURLU_NON_SUPPORT_SCHEME) && !Curl_get_scheme_handler(part))
-      return CURLUE_UNSUPPORTED_SCHEME;
+    CURLUcode status = set_url_scheme(u, part, flags);
+    if(status)
+      return status;
     storep = &u->scheme;
     urlencode = FALSE; /* never */
-    if(ISALPHA(*s)) {
-      /* ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) */
-      while(--plen) {
-        if(ISALNUM(*s) || (*s == '+') || (*s == '-') || (*s == '.'))
-          s++; /* fine */
-        else
-          return CURLUE_BAD_SCHEME;
-      }
-    }
-    else
-      return CURLUE_BAD_SCHEME;
-    u->guessed_scheme = FALSE;
     break;
   }
   case CURLUPART_USER:
@@ -1727,23 +1793,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     storep = &u->zoneid;
     break;
   case CURLUPART_PORT:
-    if(!ISDIGIT(part[0]))
-      /* not a number */
-      return CURLUE_BAD_PORT_NUMBER;
-    else {
-      char *tmp;
-      curl_off_t port;
-      if(curlx_str_number(&part, &port, 0xffff) || *part)
-        /* weirdly provided number, not good! */
-        return CURLUE_BAD_PORT_NUMBER;
-      tmp = aprintf("%" CURL_FORMAT_CURL_OFF_T, port);
-      if(!tmp)
-        return CURLUE_OUT_OF_MEMORY;
-      free(u->port);
-      u->port = tmp;
-      u->portnum = (unsigned short)port;
-      return CURLUE_OK;
-    }
+    return set_url_port(u, part);
   case CURLUPART_PATH:
     urlskipslash = TRUE;
     leadingslash = TRUE; /* enforce */
@@ -1761,39 +1811,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     u->fragment_present = TRUE;
     break;
   case CURLUPART_URL: {
-    /*
-     * Allow a new URL to replace the existing (if any) contents.
-     *
-     * If the existing contents is enough for a URL, allow a relative URL to
-     * replace it.
-     */
-    CURLUcode uc;
-    char *oldurl;
-
-    if(!nalloc) {
-      /* a blank URL is not a valid URL unless we already have a complete one
-         and this is a redirect */
-      if(!curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
-        /* success, meaning the "" is a fine relative URL, but nothing
-           changes */
-        free(oldurl);
-        return CURLUE_OK;
-      }
-      return CURLUE_MALFORMED_INPUT;
-    }
-
-    /* if the new thing is absolute or the old one is not (we could not get an
-     * absolute URL in 'oldurl'), then replace the existing with the new. */
-    if(Curl_is_absolute_url(part, NULL, 0,
-                            flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
-       || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
-      return parseurl_and_replace(part, u, flags);
-    }
-    DEBUGASSERT(oldurl); /* it is set here */
-    /* apply the relative part to create a new URL */
-    uc = redirect_url(oldurl, part, u, flags);
-    free(oldurl);
-    return uc;
+    return set_url(u, part, nalloc, flags);
   }
   default:
     return CURLUE_UNKNOWN_PART;
