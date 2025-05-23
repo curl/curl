@@ -64,14 +64,14 @@ Previous discussion and details: https://github.com/curl/curl/discussions/15972
 
 ## Past removals
 
- - Pipelining
- - axTLS
- - PolarSSL
- - NPN
- - Support for systems without 64-bit data types
- - NSS
- - gskit
- - MinGW v1
- - NTLM_WB
- - space-separated `NOPROXY` patterns
- - hyper
+ - axTLS (removed in 7.63.0)
+ - Pipelining (removed in 7.65.0)
+ - PolarSSL (removed in 7.69.0)
+ - NPN (removed in 7.86.0)
+ - Support for systems without 64-bit data types (removed in 8.0.0)
+ - NSS (removed in 8.3.0)
+ - gskit (removed in 8.3.0)
+ - MinGW v1 (removed in 8.4.0)
+ - NTLM_WB (removed in 8.8.0)
+ - space-separated `NOPROXY` patterns (removed in 8.9.0)
+ - hyper (removed in 8.12.0)
