@@ -1025,7 +1025,7 @@ static CURLcode split_to_dyn_array(const char *source,
 {
   CURLcode result = CURLE_OK;
   size_t len = strlen(source);
-  size_t pos = 0;     /* Position in result buffer */
+  size_t pos;         /* Position in result buffer */
   size_t start = 0;   /* Start of current segment */
   size_t segment_length = 0;
   size_t index = 0;
@@ -1039,12 +1039,13 @@ static CURLcode split_to_dyn_array(const char *source,
         curlx_dyn_init(&db[index], segment_length + 1);
         result = curlx_dyn_addn(&db[index], &source[start],
                                 segment_length);
-        if(result) {
+        if(result)
           goto fail;
-        }
+
         segment_length = 0;
         index++;
         if(++num_splits == MAX_QUERY_COMPONENTS) {
+          result = CURLE_TOO_LARGE;
           goto fail;
         }
       }
@@ -1057,13 +1058,10 @@ static CURLcode split_to_dyn_array(const char *source,
 
   if(segment_length) {
     curlx_dyn_init(&db[index], segment_length + 1);
-    result = curlx_dyn_addn(&db[index], &source[start],
-                            segment_length);
-    if(result) {
-      goto fail;
-    }
-    if(++num_splits == MAX_QUERY_COMPONENTS) {
-      goto fail;
+    result = curlx_dyn_addn(&db[index], &source[start], segment_length);
+    if(!result) {
+      if(++num_splits == MAX_QUERY_COMPONENTS)
+        result = CURLE_TOO_LARGE;
     }
   }
 fail:
