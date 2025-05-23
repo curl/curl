@@ -180,10 +180,13 @@ struct ssh_conn {
 
   unsigned sftp_recv_state; /* 0 or 1 */
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  sftp_aio sftp_aio;
+  sftp_aio sftp_recv_aio;
+
+  sftp_aio sftp_send_aio;
   unsigned sftp_send_state; /* 0 or 1 */
-#endif
+#else
   int sftp_file_index; /* for async read */
+#endif
   sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
   sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
   sftp_attributes quote_attrs; /* used by the SFTP_QUOTE state */
