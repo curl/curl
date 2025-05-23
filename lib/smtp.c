@@ -590,11 +590,8 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data,
   if(!result) {
     if(progress == SASL_INPROGRESS)
       smtp_state(data, smtpc, SMTP_AUTH);
-    else {
-      /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported");
-      result = CURLE_LOGIN_DENIED;
-    }
+    else
+      result = Curl_sasl_is_blocked(&smtpc->sasl, data);
   }
 
   return result;

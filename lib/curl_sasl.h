@@ -162,4 +162,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress);
 
+CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data);
+
 #endif /* HEADER_CURL_SASL_H */
