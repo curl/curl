@@ -410,23 +410,8 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                        data->set.str[STRING_SSL_EC_CURVES]);
   }
 
-  {
-    long mask =
-      (data->set.ssl.enable_beast ?
-       CURLSSLOPT_ALLOW_BEAST : 0) |
-      (data->set.ssl.no_revoke ?
-       CURLSSLOPT_NO_REVOKE : 0) |
-      (data->set.ssl.no_partialchain ?
-       CURLSSLOPT_NO_PARTIALCHAIN : 0) |
-      (data->set.ssl.revoke_best_effort ?
-       CURLSSLOPT_REVOKE_BEST_EFFORT : 0) |
-      (data->set.ssl.native_ca_store ?
-       CURLSSLOPT_NATIVE_CA : 0) |
-      (data->set.ssl.auto_client_cert ?
-       CURLSSLOPT_AUTO_CLIENT_CERT : 0);
-
-    (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS, mask);
-  }
+  (void)curl_easy_setopt(doh, CURLOPT_SSL_OPTIONS,
+                         (long)data->set.ssl.primary.ssl_options);
 
   doh->state.internal = TRUE;
   doh->master_mid = data->mid; /* master transfer of this one */
