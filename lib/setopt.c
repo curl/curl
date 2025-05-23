@@ -391,6 +391,20 @@ static CURLcode setopt_RTSP_REQUEST(struct Curl_easy *data, long arg)
 }
 #endif /* ! CURL_DISABLE_RTSP */
 
+static void set_ssl_options(struct ssl_config_data *ssl,
+                            struct ssl_primary_config *config,
+                            long arg)
+{
+  config->ssl_options = (unsigned char)(arg & 0xff);
+  ssl->enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
+  ssl->no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
+  ssl->no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
+  ssl->revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
+  ssl->native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
+  ssl->auto_client_cert = !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
+  ssl->earlydata = !!(arg & CURLSSLOPT_EARLYDATA);
+}
+
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
@@ -1131,29 +1145,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.use_ssl = (unsigned char)arg;
     break;
   case CURLOPT_SSL_OPTIONS:
-    data->set.ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
-    data->set.ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
-    data->set.ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
-    data->set.ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
-    data->set.ssl.revoke_best_effort = !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
-    data->set.ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
-    data->set.ssl.auto_client_cert = !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
-    data->set.ssl.earlydata = !!(arg & CURLSSLOPT_EARLYDATA);
-    /* If a setting is added here it should also be added in dohprobe()
-       which sets its own CURLOPT_SSL_OPTIONS based on these settings. */
+    set_ssl_options(&data->set.ssl, &data->set.ssl.primary, arg);
     break;
 
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSL_OPTIONS:
-    data->set.proxy_ssl.primary.ssl_options = (unsigned char)(arg & 0xff);
-    data->set.proxy_ssl.enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
-    data->set.proxy_ssl.no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
-    data->set.proxy_ssl.no_partialchain = !!(arg & CURLSSLOPT_NO_PARTIALCHAIN);
-    data->set.proxy_ssl.revoke_best_effort =
-      !!(arg & CURLSSLOPT_REVOKE_BEST_EFFORT);
-    data->set.proxy_ssl.native_ca_store = !!(arg & CURLSSLOPT_NATIVE_CA);
-    data->set.proxy_ssl.auto_client_cert =
-      !!(arg & CURLSSLOPT_AUTO_CLIENT_CERT);
+    set_ssl_options(&data->set.proxy_ssl, &data->set.proxy_ssl.primary, arg);
     break;
 #endif
 
