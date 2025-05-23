@@ -549,23 +549,16 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   /* Normalized path will be either the same or shorter than the original
    * path, plus trailing slash */
 
-  if(do_uri_encode) {
+  if(do_uri_encode)
     result = uri_encode_path(&original_path, new_path);
-    if(result) {
-      goto fail;
-    }
-  }
-  else {
+  else
     result = curlx_dyn_addn(new_path, q, len);
-    if(result) {
-      goto fail;
-    }
+
+  if(!result) {
+    if(curlx_dyn_len(new_path) == 0)
+      result = curlx_dyn_add(new_path, "/");
   }
 
-  if(curlx_dyn_len(new_path) == 0) {
-    result = curlx_dyn_add(new_path, "/");
-  }
-fail:
   return result;
 }
 
@@ -1079,59 +1072,45 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
                                 struct dynbuf *new_path)
 {
   const char *p = curlx_str(original_path);
-  CURLcode result = CURLE_OK;
-  size_t index;
+  size_t i;
 
-  for(index = 0; index < curlx_strlen(original_path); index++) {
+  for(i = 0; i < curlx_strlen(original_path); i++) {
     /* Do not encode slashes or unreserved chars from RFC 3986 */
-    unsigned char c = p[index];
-    if(is_reserved_char(c) || c == '/') {
+    CURLcode result = CURLE_OK;
+    unsigned char c = p[i];
+    if(is_reserved_char(c) || c == '/')
       result = curlx_dyn_addn(new_path, &c, 1);
-      if(result) {
-        goto fail;
-      }
-    }
-    else {
+    else
       result = curlx_dyn_addf(new_path, "%%%02X", c);
-      if(result) {
-        goto fail;
-      }
-    }
+    if(result)
+      return result;
   }
-fail:
-  return result;
+
+  return CURLE_OK;
 }
 
 
 static CURLcode encode_query_component(char *component, size_t len,
                                        struct dynbuf *db)
 {
-  size_t index;
-  CURLcode result = CURLE_OK;
-  unsigned char this_char;
+  size_t i;
+  for(i = 0; i < len; i++) {
+    CURLcode result = CURLE_OK;
+    unsigned char this_char = component[i];
 
-  for(index = 0; index < len; index++) {
-
-    this_char = component[index];
-
-    if(is_reserved_char(this_char)) {
+    if(is_reserved_char(this_char))
       /* Escape unreserved chars from RFC 3986 */
       result = curlx_dyn_addn(db, &this_char, 1);
-    }
-    else if(this_char == '+') {
+    else if(this_char == '+')
       /* Encode '+' as space */
       result = curlx_dyn_add(db, "%20");
-    }
-    else {
+    else
       result = curlx_dyn_addf(db, "%%%02X", this_char);
-    }
-    if(result) {
-      goto fail;
-    }
-
+    if(result)
+      return result;
   }
-fail:
-  return result;
+
+  return CURLE_OK;
 }
 
 /*
@@ -1146,12 +1125,10 @@ static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
   CURLcode result =
     Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
 
-  if(result)
-    goto fail;
-
-  result = encode_query_component(out_s, out_s_len, out);
-  Curl_safefree(out_s);
-fail:
+  if(!result) {
+    result = encode_query_component(out_s, out_s_len, out);
+    Curl_safefree(out_s);
+  }
   return result;
 }
 
