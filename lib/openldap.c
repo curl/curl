@@ -491,7 +491,7 @@ static CURLcode oldap_perform_sasl(struct Curl_easy *data)
 
   oldap_state(data, li, OLDAP_SASL);
   if(!result && progress != SASL_INPROGRESS)
-    result = CURLE_LOGIN_DENIED;
+    result = Curl_sasl_is_blocked(&li->sasl, data);
   return result;
 }
 

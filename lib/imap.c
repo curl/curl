@@ -723,11 +723,8 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
     else if(!imapc->login_disabled && (imapc->preftype & IMAP_TYPE_CLEARTEXT))
       /* Perform clear text authentication */
       result = imap_perform_login(data, imapc, data->conn);
-    else {
-      /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported");
-      result = CURLE_LOGIN_DENIED;
-    }
+    else
+      result = Curl_sasl_is_blocked(&imapc->sasl, data);
   }
 
   return result;

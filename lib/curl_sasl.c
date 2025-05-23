@@ -756,4 +756,101 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
 
   return result;
 }
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
+                          unsigned short enabledmechs,
+                          bool built_in, bool platform,
+                          const char *param_missing)
+{
+  const char *mname = NULL;
+  size_t i;
+
+  if(!(enabledmechs & mech))
+    return;
+
+  for(i = 0; mechtable[i].name; ++i) {
+    if(mechtable[i].bit == mech) {
+      mname = mechtable[i].name;
+      break;
+    }
+  }
+  if(!mname)  /* should not happen */
+    return;
+  if(!built_in)
+    infof(data, "SASL: %s not builtin", mname);
+  else if(!platform)
+    infof(data, "SASL: %s not supported by the platform/libraries", mname);
+  else {
+    if(param_missing)
+      infof(data, "SASL: %s is missing %s", mname, param_missing);
+    if(!data->state.aptr.user)
+      infof(data, "SASL: %s is missing username", mname);
+  }
+}
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+
+CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef USE_KERBEROS5
+  static bool have_kerberos5 = TRUE;
+#else
+  static bool have_kerberos5 = FALSE;
+#endif
+#ifdef USE_GSASL
+  static bool have_gasl = TRUE;
+#else
+  static bool have_gasl = FALSE;
+#endif
+#ifdef CURL_DISABLE_DIGEST_AUTH
+  static bool have_digest = TRUE;
+#else
+  static bool have_digest = FALSE;
+#endif
+#ifndef USE_NTLM
+  static bool have_ntlm = TRUE;
+#else
+  static bool have_ntlm = FALSE;
+#endif
+  /* Failing SASL authentication is a pain. Give a helping hand if
+   * we were unable to select an AUTH mechanism.
+   * `sasl->authmechs` are mechanisms offered by the peer
+   * `sasl->prefmech`  are mechanisms perferred by us */
+  unsigned short enabledmechs = sasl->authmechs & sasl->prefmech;
+
+  if(!sasl->authmechs)
+    infof(data, "SASL: no auth mechanism was offered or recognized");
+  else if(!enabledmechs)
+    infof(data, "SASL: no overlap between offered and configured "
+          "auth mechanisms");
+  else {
+    infof(data, "SASL: no auth mechanism offered could be selected");
+    if((enabledmechs & SASL_MECH_EXTERNAL) && data->conn->passwd[0])
+      infof(data, "SASL: auth EXTERNAL not chosen with password");
+    sasl_unchosen(data, SASL_MECH_GSSAPI, enabledmechs,
+                  have_kerberos5, Curl_auth_is_gssapi_supported(), NULL);
+    sasl_unchosen(data, SASL_MECH_SCRAM_SHA_256, enabledmechs,
+                  have_gasl, FALSE, NULL);
+    sasl_unchosen(data, SASL_MECH_SCRAM_SHA_1, enabledmechs,
+                  have_gasl, FALSE, NULL);
+    sasl_unchosen(data, SASL_MECH_DIGEST_MD5, enabledmechs,
+                  have_digest, Curl_auth_is_digest_supported(), NULL);
+    sasl_unchosen(data, SASL_MECH_CRAM_MD5, enabledmechs,
+                  have_digest, TRUE, NULL);
+    sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
+                  have_ntlm, Curl_auth_is_ntlm_supported(), NULL);
+    sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs,  TRUE, TRUE,
+                  data->set.str[STRING_BEARER] ?
+                  NULL : "CURLOPT_XOAUTH2_BEARER");
+    sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs,  TRUE, TRUE,
+                  data->set.str[STRING_BEARER] ?
+                  NULL : "CURLOPT_XOAUTH2_BEARER");
+  }
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+  (void)sasl;
+  (void)data;
+  return CURLE_LOGIN_DENIED;
+}
+
 #endif /* protocols are enabled that use SASL */

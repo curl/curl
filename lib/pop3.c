@@ -726,11 +726,8 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_CLEARTEXT)
       /* Perform clear text authentication */
       result = pop3_perform_user(data, conn);
-    else {
-      /* Other mechanisms not supported */
-      infof(data, "No known authentication mechanisms supported");
-      result = CURLE_LOGIN_DENIED;
-    }
+    else
+      result = Curl_sasl_is_blocked(&pop3c->sasl, data);
   }
 
   return result;
