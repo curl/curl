@@ -529,7 +529,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->id = -1;
   data->mid = UINT_MAX;
   data->master_mid = UINT_MAX;
-  data->progress.flags |= PGRS_HIDE;
+  data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
 
   Curl_hash_init(&data->meta_hash, 23,

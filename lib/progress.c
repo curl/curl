@@ -136,8 +136,7 @@ int Curl_pgrsDone(struct Curl_easy *data)
   if(rc)
     return rc;
 
-  if(!(data->progress.flags & PGRS_HIDE) &&
-     !data->progress.callback)
+  if(!data->progress.hide && !data->progress.callback)
     /* only output if we do not use a progress callback and we are not
      * hidden */
     fprintf(data->set.err, "\n");
@@ -247,18 +246,20 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
-  data->progress.speeder_c = 0; /* reset the progress meter display */
-  data->progress.start = curlx_now();
-  data->progress.is_t_startransfer_set = FALSE;
-  data->progress.ul.limit.start = data->progress.start;
-  data->progress.dl.limit.start = data->progress.start;
-  data->progress.ul.limit.start_size = 0;
-  data->progress.dl.limit.start_size = 0;
-  data->progress.dl.cur_size = 0;
-  data->progress.ul.cur_size = 0;
-  /* clear all bits except HIDE and HEADERS_OUT */
-  data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
-  Curl_ratelimit(data, data->progress.start);
+  struct Progress *p = &data->progress;
+  p->speeder_c = 0; /* reset the progress meter display */
+  p->start = curlx_now();
+  p->is_t_startransfer_set = FALSE;
+  p->ul.limit.start = p->start;
+  p->dl.limit.start = p->start;
+  p->ul.limit.start_size = 0;
+  p->dl.limit.start_size = 0;
+  p->dl.cur_size = 0;
+  p->ul.cur_size = 0;
+  /* the sizes are unknown at start */
+  p->dl_size_known = FALSE;
+  p->ul_size_known = FALSE;
+  Curl_ratelimit(data, p->start);
 }
 
 /*
@@ -361,11 +362,11 @@ void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
     data->progress.dl.total_size = size;
-    data->progress.flags |= PGRS_DL_SIZE_KNOWN;
+    data->progress.dl_size_known = TRUE;
   }
   else {
     data->progress.dl.total_size = 0;
-    data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
+    data->progress.dl_size_known = FALSE;
   }
 }
 
@@ -373,11 +374,11 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
     data->progress.ul.total_size = size;
-    data->progress.flags |= PGRS_UL_SIZE_KNOWN;
+    data->progress.ul_size_known = TRUE;
   }
   else {
     data->progress.ul.total_size = 0;
-    data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
+    data->progress.ul_size_known = FALSE;
   }
 }
 
@@ -515,7 +516,7 @@ static void progress_meter(struct Curl_easy *data)
   char time_spent[10];
   curl_off_t cur_secs = (curl_off_t)p->timespent/1000000; /* seconds */
 
-  if(!(p->flags & PGRS_HEADERS_OUT)) {
+  if(!p->headers_out) {
     if(data->state.resume_from) {
       fprintf(data->set.err,
               "** Resuming transfer from byte position %" FMT_OFF_T "\n",
@@ -526,12 +527,12 @@ static void progress_meter(struct Curl_easy *data)
             "Time    Time     Time  Current\n"
             "                                 Dload  Upload   "
             "Total   Spent    Left  Speed\n");
-    p->flags |= PGRS_HEADERS_OUT; /* headers are shown */
+    p->headers_out = TRUE; /* headers are shown */
   }
 
   /* Figure out the estimated time of arrival for upload and download */
-  pgrs_estimates(&p->ul, (p->flags & PGRS_UL_SIZE_KNOWN), &ul_estm);
-  pgrs_estimates(&p->dl, (p->flags & PGRS_DL_SIZE_KNOWN), &dl_estm);
+  pgrs_estimates(&p->ul, (bool)p->ul_size_known, &ul_estm);
+  pgrs_estimates(&p->dl, (bool)p->dl_size_known, &dl_estm);
 
   /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
@@ -542,10 +543,10 @@ static void progress_meter(struct Curl_easy *data)
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size =
-    ((p->flags & PGRS_UL_SIZE_KNOWN) ? p->ul.total_size : p->ul.cur_size);
+    p->ul_size_known ? p->ul.total_size : p->ul.cur_size;
 
   dl_size =
-    ((p->flags & PGRS_DL_SIZE_KNOWN) ? p->dl.total_size : p->dl.cur_size);
+    p->dl_size_known ? p->dl.total_size : p->dl.cur_size;
 
   /* integer overflow check */
   if((CURL_OFF_T_MAX - total_expected_size) < dl_size)
@@ -593,7 +594,7 @@ static void progress_meter(struct Curl_easy *data)
  */
 static int pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
-  if(!(data->progress.flags & PGRS_HIDE)) {
+  if(!data->progress.hide) {
     if(data->set.fxferinfo) {
       int result;
       /* There is a callback set, call that */
