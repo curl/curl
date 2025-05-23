@@ -473,10 +473,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * Shut off the internal supported progress meter
      */
-    if(enabled)
-      data->progress.flags |= PGRS_HIDE;
-    else
-      data->progress.flags &= ~PGRS_HIDE;
+    data->progress.hide = enabled;
     break;
   case CURLOPT_NOBODY:
     /*

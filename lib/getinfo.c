@@ -422,11 +422,11 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
+    *param_offt = data->progress.dl_size_known ?
       data->progress.dl.total_size : -1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
+    *param_offt = data->progress.ul_size_known ?
       data->progress.ul.total_size : -1;
     break;
    case CURLINFO_TOTAL_TIME_T:
@@ -534,11 +534,11 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
     *param_doublep = (double)data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-    *param_doublep = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
+    *param_doublep = data->progress.dl_size_known ?
       (double)data->progress.dl.total_size : -1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
-    *param_doublep = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
+    *param_doublep = data->progress.ul_size_known ?
       (double)data->progress.ul.total_size : -1;
     break;
   case CURLINFO_REDIRECT_TIME:

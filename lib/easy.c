@@ -987,7 +987,7 @@ CURL *curl_easy_duphandle(CURL *d)
   if(dupset(outcurl, data))
     goto fail;
 
-  outcurl->progress.flags    = data->progress.flags;
+  outcurl->progress.hide     = data->progress.hide;
   outcurl->progress.callback = data->progress.callback;
 
 #ifndef CURL_DISABLE_COOKIES
@@ -1099,7 +1099,7 @@ void curl_easy_reset(CURL *d)
   /* zero out PureInfo data: */
   Curl_initinfo(data);
 
-  data->progress.flags |= PGRS_HIDE;
+  data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
   data->state.retrycount = 0;     /* reset the retry counter */
 
