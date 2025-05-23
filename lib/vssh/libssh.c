@@ -1460,9 +1460,9 @@ static int myssh_in_SFTP_SHUTDOWN(struct Curl_easy *data,
      before we proceed */
   ssh_set_blocking(sshc->ssh_session, 0);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  if(sshc->sftp_aio) {
-    sftp_aio_free(sshc->sftp_aio);
-    sshc->sftp_aio = NULL;
+  if(sshc->sftp_send_aio) {
+    sftp_aio_free(sshc->sftp_send_aio);
+    sshc->sftp_send_aio = NULL;
   }
 #endif
 
@@ -3035,21 +3035,21 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
     case 0:
       sftp_file_set_nonblocking(sshc->sftp_file);
       if(sftp_aio_begin_write(sshc->sftp_file, mem, len,
-                              &sshc->sftp_aio) == SSH_ERROR) {
+                              &sshc->sftp_send_aio) == SSH_ERROR) {
         return CURLE_SEND_ERROR;
       }
       sshc->sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
-      nwrite = sftp_aio_wait_write(&sshc->sftp_aio);
+      nwrite = sftp_aio_wait_write(&sshc->sftp_send_aio);
       myssh_block2waitfor(conn, sshc, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
       if(nwrite == SSH_AGAIN)
         return CURLE_AGAIN;
       else if(nwrite < 0)
         return CURLE_SEND_ERROR;
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
+      if(sshc->sftp_send_aio) {
+        sftp_aio_free(sshc->sftp_send_aio);
+        sshc->sftp_send_aio = NULL;
       }
       sshc->sftp_send_state = 0;
       *pnwritten = (size_t)nwrite;

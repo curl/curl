@@ -180,7 +180,7 @@ struct ssh_conn {
 
   unsigned sftp_recv_state; /* 0 or 1 */
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  sftp_aio sftp_aio;
+  sftp_aio sftp_send_aio;
   unsigned sftp_send_state; /* 0 or 1 */
 #endif
   int sftp_file_index; /* for async read */
