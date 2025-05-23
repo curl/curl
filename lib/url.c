@@ -395,9 +395,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->socks5auth = CURLAUTH_BASIC | CURLAUTH_GSSAPI;
 #endif
 
-  /* make libcurl quiet by default: */
-  set->hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
-
   Curl_mime_initpart(&set->mimepost);
 
   Curl_ssl_easy_config_init(data);
