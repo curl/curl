@@ -3657,7 +3657,11 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
         return result;
 
       result = ftp_statemach(data, ftpc, &complete);
-      *completep = (int)complete;
+      /* ftp_nb_type() might have skipped sending `TYPE A|I` when not
+       * deemed necessary and directly sent `STORE name`. If this was
+       * then complete, but we are still waiting on the data connection,
+       * the transfer has not been initiated yet. */
+      *completep = (int)(ftpc->wait_data_conn ? 0 : complete);
     }
     else {
       /* download */
