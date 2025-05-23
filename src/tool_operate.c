@@ -850,7 +850,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     if(!urlnode->url) {
       /* This node has no URL. Free node data without destroying the
          node itself nor modifying next pointer and continue to next */
-      urlnode->flags = 0;
+      urlnode->outset = urlnode->urlset = urlnode->useremote =
+        urlnode->uploadset = urlnode->noupload = urlnode->noglob = FALSE;
       state->up = 0;
       if(!warn_more_options) {
         /* only show this once */
@@ -898,7 +899,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     }
 
     if(!state->urlnum) {
-      if(!config->globoff && !(urlnode->flags & GETOUT_NOGLOB)) {
+      if(!config->globoff && !urlnode->noglob) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
         result = glob_url(&state->urls, urlnode->url, &state->urlnum,
@@ -1121,7 +1122,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
       }
 
-      if(((urlnode->flags&GETOUT_USEREMOTE) ||
+      if((urlnode->useremote ||
           (per->outfile && strcmp("-", per->outfile)))) {
 
         /*
@@ -1185,8 +1186,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             *skipped = TRUE;
           }
         }
-        if((urlnode->flags & GETOUT_USEREMOTE)
-           && config->content_disposition) {
+        if(urlnode->useremote && config->content_disposition) {
           /* Our header callback MIGHT set the filename */
           DEBUGASSERT(!outs->filename);
         }
@@ -1309,7 +1309,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       config->terminal_binary_ok =
         (per->outfile && !strcmp(per->outfile, "-"));
 
-      if(config->content_disposition && (urlnode->flags & GETOUT_USEREMOTE))
+      if(config->content_disposition && urlnode->useremote)
         hdrcbdata->honor_cd_filename = TRUE;
       else
         hdrcbdata->honor_cd_filename = FALSE;
@@ -1344,7 +1344,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     else {
       /* Free this URL node data without destroying the
          node itself nor modifying next pointer. */
-      urlnode->flags = 0;
+      urlnode->outset = urlnode->urlset = urlnode->useremote =
+        urlnode->uploadset = urlnode->noupload = urlnode->noglob = FALSE;
       glob_cleanup(&state->urls);
       state->urlnum = 0;
 

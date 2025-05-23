@@ -1045,7 +1045,7 @@ const struct LongShort *findlongopt(const char *opt)
 static ParameterError add_url(struct GlobalConfig *global,
                               struct OperationConfig *config,
                               const char *thisurl,
-                              int extraflags)
+                              bool remote_noglob)
 {
   ParameterError err = PARAM_OK;
   struct getout *url;
@@ -1056,7 +1056,7 @@ static ParameterError add_url(struct GlobalConfig *global,
   if(config->url_get) {
     /* there is a node here, if it already is filled-in continue to find
        an "empty" node */
-    while(config->url_get && (config->url_get->flags & GETOUT_URL))
+    while(config->url_get && config->url_get->urlset)
       config->url_get = config->url_get->next;
   }
 
@@ -1074,7 +1074,9 @@ static ParameterError add_url(struct GlobalConfig *global,
   else {
     /* fill in the URL */
     err = getstr(&url->url, thisurl, DENY_BLANK);
-    url->flags |= GETOUT_URL | extraflags;
+    url->urlset = TRUE;
+    if(remote_noglob)
+      url->useremote = url->noglob = TRUE;
     if(!err && (++config->num_urls > 1) &&
        (config->etag_save_file || config->etag_compare_file)) {
       errorf(global, "The etag options only work on a single URL");
@@ -1104,7 +1106,7 @@ static ParameterError parse_url(struct GlobalConfig *global,
       curlx_dyn_init(&line, 8092);
       while(my_get_line(f, &line, &error)) {
         const char *ptr = curlx_dyn_ptr(&line);
-        err = add_url(global, config, ptr, GETOUT_USEREMOTE | GETOUT_NOGLOB);
+        err = add_url(global, config, ptr, TRUE);
         if(err)
           break;
       }
@@ -1117,7 +1119,7 @@ static ParameterError parse_url(struct GlobalConfig *global,
     }
     return PARAM_READ_ERROR; /* file not found */
   }
-  return add_url(global, config, nextarg, 0);
+  return add_url(global, config, nextarg, FALSE);
 }
 
 
@@ -1298,7 +1300,7 @@ static ParameterError parse_output(struct OperationConfig *config,
   if(config->url_out) {
     /* there is a node here, if it already is filled-in continue to find
        an "empty" node */
-    while(config->url_out && (config->url_out->flags & GETOUT_OUTFILE))
+    while(config->url_out && config->url_out->outset)
       config->url_out = config->url_out->next;
   }
 
@@ -1317,8 +1319,8 @@ static ParameterError parse_output(struct OperationConfig *config,
 
   /* fill in the outfile */
   err = getstr(&url->outfile, nextarg, DENY_BLANK);
-  url->flags &= ~GETOUT_USEREMOTE; /* switch off */
-  url->flags |= GETOUT_OUTFILE;
+  url->useremote = FALSE; /* switch off */
+  url->outset = TRUE;
   return err;
 }
 
@@ -1328,7 +1330,7 @@ static ParameterError parse_remote_name(struct OperationConfig *config,
   ParameterError err = PARAM_OK;
   struct getout *url;
 
-  if(!toggle && !config->default_node_flags)
+  if(!toggle && !config->remote_name_all)
     return err; /* nothing to do */
 
   /* output file */
@@ -1337,7 +1339,7 @@ static ParameterError parse_remote_name(struct OperationConfig *config,
   if(config->url_out) {
     /* there is a node here, if it already is filled-in continue to find
        an "empty" node */
-    while(config->url_out && (config->url_out->flags & GETOUT_OUTFILE))
+    while(config->url_out && config->url_out->outset)
       config->url_out = config->url_out->next;
   }
 
@@ -1355,11 +1357,8 @@ static ParameterError parse_remote_name(struct OperationConfig *config,
     return PARAM_NO_MEM;
 
   url->outfile = NULL; /* leave it */
-  if(toggle)
-    url->flags |= GETOUT_USEREMOTE;  /* switch on */
-  else
-    url->flags &= ~GETOUT_USEREMOTE; /* switch off */
-  url->flags |= GETOUT_OUTFILE;
+  url->useremote = toggle;
+  url->outset = TRUE;
   return PARAM_OK;
 }
 
@@ -1444,7 +1443,7 @@ static ParameterError parse_upload_file(struct OperationConfig *config,
   if(config->url_ul) {
     /* there is a node here, if it already is filled-in continue to find
        an "empty" node */
-    while(config->url_ul && (config->url_ul->flags & GETOUT_UPLOAD))
+    while(config->url_ul && config->url_ul->uploadset)
       config->url_ul = config->url_ul->next;
   }
 
@@ -1460,9 +1459,9 @@ static ParameterError parse_upload_file(struct OperationConfig *config,
   if(!url)
     return PARAM_NO_MEM;
 
-  url->flags |= GETOUT_UPLOAD; /* mark -T used */
+  url->uploadset = TRUE; /* mark -T used */
   if(!*nextarg)
-    url->flags |= GETOUT_NOUPLOAD;
+    url->noupload = TRUE;
   else {
     /* "-" equals stdin, but keep the string around for now */
     err = getstr(&url->infile, nextarg, DENY_BLANK);
@@ -2831,7 +2830,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->nobuffer = (bool)(longopt ? !toggle : TRUE);
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
-      config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
+      config->remote_name_all = toggle;
       break;
     case C_OUTPUT_DIR: /* --output-dir */
       err = getstr(&config->output_dir, nextarg, DENY_BLANK);

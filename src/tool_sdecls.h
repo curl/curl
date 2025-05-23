@@ -64,16 +64,16 @@
 
 struct OutStruct {
   char *filename;
-  BIT(alloc_filename);
-  BIT(is_cd_filename);
-  BIT(s_isreg);
-  BIT(fopened);
   FILE *stream;
   curl_off_t bytes;
   curl_off_t init;
 #ifdef _WIN32
   unsigned char utf8seq[5];
 #endif
+  BIT(alloc_filename);
+  BIT(is_cd_filename);
+  BIT(s_isreg);
+  BIT(fopened);
 };
 
 /*
@@ -87,17 +87,15 @@ struct getout {
   char          *url;       /* the URL we deal with */
   char          *outfile;   /* where to store the output */
   char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
-  int            flags;     /* options - composed of GETOUT_* bits */
   int            num;       /* which URL number in an invocation */
+
+  BIT(outset);    /* when outfile is set */
+  BIT(urlset);    /* when URL is set */
+  BIT(uploadset); /* when -T is set */
+  BIT(useremote); /* use remote filename locally */
+  BIT(noupload);  /* if set, -T "" has been used */
+  BIT(noglob);    /* disable globbing for this URL */
 };
-
-#define GETOUT_OUTFILE    (1<<0)  /* set when outfile is deemed done */
-#define GETOUT_URL        (1<<1)  /* set when URL is deemed done */
-#define GETOUT_USEREMOTE  (1<<2)  /* use remote filename locally */
-#define GETOUT_UPLOAD     (1<<3)  /* if set, -T has been used */
-#define GETOUT_NOUPLOAD   (1<<4)  /* if set, -T "" has been used */
-#define GETOUT_NOGLOB     (1<<5)  /* disable globbing for this URL */
-
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
  */
