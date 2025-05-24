@@ -2254,7 +2254,8 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 #ifdef USE_MANUAL
         hugehelp();
 #else
-        puts("built-in manual was disabled at build-time");
+        warnf(global,
+              "built-in manual was disabled at build-time");
 #endif
       }
       /* Check if we were asked for the version information */
