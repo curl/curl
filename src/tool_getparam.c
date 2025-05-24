@@ -1831,6 +1831,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_RANDOM_FILE: /* --random-file */
     case C_EGD_FILE: /* --egd-file */
     case C_NTLM_WB: /* --ntlm-wb */
+    case C_NPN: /* --npn */
+    case C_SSLV2: /* --sslv2 */
+    case C_SSLV3: /* --sslv3 */
       warnf(global, "--%s is deprecated and has no function anymore",
             a->lname);
       break;
@@ -1897,9 +1900,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           warnf(global, "--trace overrides an earlier trace/verbose option");
         global->tracetype = TRACE_BIN;
       }
-      break;
-    case C_NPN: /* --npn */
-      warnf(global, "--npn is no longer supported");
       break;
     case C_TRACE_ASCII: /* --trace-ascii */
       err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
@@ -2387,12 +2387,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_TLS13_CIPHERS: /* --proxy-tls13-ciphers */
       err = getstr(&config->proxy_cipher13_list, nextarg, DENY_BLANK);
-      break;
-    case C_SSLV2: /* --sslv2 */
-      warnf(global, "Ignores instruction to use SSLv2");
-      break;
-    case C_SSLV3: /* --sslv3 */
-      warnf(global, "Ignores instruction to use SSLv3");
       break;
     case C_IPV4: /* --ipv4 */
       config->ip_version = CURL_IPRESOLVE_V4;
