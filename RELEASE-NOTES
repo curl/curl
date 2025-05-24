@@ -4,7 +4,7 @@ curl and libcurl 8.14.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3425
+ Contributors:                 3426
 
 This release includes the following changes:
 
@@ -61,6 +61,7 @@ This release includes the following bugfixes:
  o configure: catch asking for double resolver without https-rr [82]
  o configure: fix --disable-rt [20]
  o configure: restore link checks [25]
+ o configure: suppress command not found for brew [235]
  o conncache: make Curl_cpool_init return void [15]
  o connect: shutdown timer fix [132]
  o content_encoding: Transfer-Encoding parser improvements [31]
@@ -68,6 +69,7 @@ This release includes the following bugfixes:
  o contrithanks.sh: drop set -e [6]
  o cpool/cshutdown: force close connections under pressure [80]
  o curl: fix memory leak when -h is used in config file [161]
+ o curl: only warn once for --manual in manual-disabled build [205]
  o curl_get_line: handle lines ending on the buffer boundary [62]
  o curl_krb5: only use functions if FTP is still enabled [21]
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
@@ -81,6 +83,7 @@ This release includes the following bugfixes:
  o DEPRECATE.md: drop Windows CE support [216]
  o dist: drop duplicate entry from `CMAKE_DIST` [88]
  o dns_entry: move from conn to data->state [178]
+ o Dockerfile: update debian:bookworm-slim Docker digest to 90522ee [211]
  o docs/INSTALL.md: drop reference to removed configure option [83]
  o docs/libcurl: fix type and prototype problems in examples [121]
  o docs/libcurl: make examples build with picky compiler options [84]
@@ -111,6 +114,7 @@ This release includes the following bugfixes:
  o http: fix HTTP/2 handling of TE request header using "trailers" [130]
  o http: in alt-svc negotiation only allow supported HTTP versions [59]
  o http_aws_sigv4: add additional verbose log statements [39]
+ o http_aws_sigv4: improve sigv4 url encoding and canonicalization [240]
  o http_chunks: narrow variable scope for 'trlen' [199]
  o http_negotiate: fix non-SSL build with GSSAPI [23]
  o https-connect: fix httpsrr target check [36]
@@ -122,6 +126,7 @@ This release includes the following bugfixes:
  o KNOWN_BUGS: fix link in sivg4 issue 16.3 [26]
  o lib/src/docs/test: improve curl_easy_setopt() calls [116]
  o lib1560: use hex notation, drop non-ASCII exception [182]
+ o lib3026: drop DLL pre-load perf mitigation for old mingw [222]
  o lib: add const to clientwriter tables
  o lib: drop curlx_getpid, use fake pid in SMB [172]
  o lib: include files using known path [48]
@@ -157,6 +162,7 @@ This release includes the following bugfixes:
  o progress: avoid integer overflow when gathering total transfer size [128]
  o pytest tls: extend coverage [217]
  o pytest-xdist: pytest in parallel [204]
+ o pytest: add pinnedpubkey test cases [232]
  o pytest: give parameterised tests better ids for read- and parsability [142]
  o pytest: make test_07_22 more lenient to exit codes [90]
  o quic: no local idle connection timeout, ngtcp2 keep-alive [61]
@@ -169,6 +175,7 @@ This release includes the following bugfixes:
  o runtests: remove server verification after start [89]
  o runtests: split `SSH_PWD` into `SCP_PWD` and `SFTP_PWD`, and more [75]
  o rustls: make max size of cert and key reasonable [41]
+ o sasl: give help when unable to select AUTH [213]
  o scripts: completion.pl: sort the completion file for all shells [9]
  o scripts: drop unused import, formatting [95]
  o scripts: fix --opts-dir help in completion.pl
@@ -221,6 +228,7 @@ This release includes the following bugfixes:
  o typecheck-gcc.h: fix the typechecks [110]
  o urlapi: redirecting to "" is considered fine [149]
  o urlapi: remove unneeded guards around PUNY2IDN [193]
+ o urldata: remove the unused struct field 'hide_progress' [220]
  o VERSIONS: list all past releases [22]
  o vquic: consistent name for the stream struct across backends [135]
  o vquic: init for every call to recvmsg [134]
@@ -229,6 +237,7 @@ This release includes the following bugfixes:
  o VULN-DISCLOSURE-POLICY: use of weak algos [94]
  o winbuild: add the deprecation warning to the README [29]
  o winbuild: curl_get_line is not used for tool builds [158]
+ o windows: fix builds targeting WinXP, test it in CI [227]
  o wolfssl: fix to enable ALPN when available [67]
  o ws: fix the header replace check [144]
  o ws: store protocol context as connection meta data [136]
@@ -252,28 +261,29 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Andreas Westin, Andrei Florea, Andrew Kirillov, Andy Pan,
-  antypanty on hackerone, Arian van Putten, bo0tzz on github, Bo Anderson,
-  Brendan Dolan-Gavitt, Brian Chrzanowski, bruce.yoon, bsr13 on hackerone,
-  calvin2021y on github, Calvin Ruocco, Carlos Henrique Lima Melara,
-  Christian Schmitz, Christoph Jabs, Cole Helbling, Corinna Brandt,
-  Dagobert Michelsen, Dan Fandrich, Daniel Engberg, Daniel Fosco,
-  Daniel McCarney, Daniel Stenberg, Demi Marie Obenour, dependabot[bot],
-  Dirk Feytons, epicmkirzinger on github, Eric Knibbe, Fujii Hironori,
-  gkarracer on github, Gordon Parke, Graham Christensen, Harry Sintonen,
-  Helmut Grohne, Hiroki Kurosawa, Int64x86 on github, Jacob Mealey,
-  Jake Yuesong Li, James Fuller, Jean-Christophe Amiel, Jimmy Sjölund, Jixinqi,
-  Jochen Sprickerhof, Joe Cise, Joel Depooter, Johan Eliasson, John Bampton,
-  John Haugabook, Jonathan Rosa, Kai Pastor, kkalganov on github,
-  Maksim Ściepanienka, Manuel Strehl, Marius Kleidl, Mathieu Garaud,
-  Max Eliaser, mschroeder-fzj on github, NeimadTL, Niall O'Reilly,
-  Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
-  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique,
-  Sarah Gooding, sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing,
-  Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane,
-  Viktor Szakats, wolfsage on hackerone, x1sc0 on github, xiadnoring on github,
-  Yedaya Katsman, zopsicle on github
-  (86 contributors)
+  Abhinav Singhal, Aditya Garg, Andreas Westin, Andrei Florea, Andrew Kirillov,
+  Andy Pan, antypanty on hackerone, Arian van Putten, bo0tzz on github,
+  Bo Anderson, Brendan Dolan-Gavitt, Brian Chrzanowski, bruce.yoon,
+  bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
+  Carlos Henrique Lima Melara, Christian Schmitz, Christoph Jabs,
+  Cole Helbling, Corinna Brandt, Dagobert Michelsen, Dan Fandrich,
+  Daniel Engberg, Daniel Fosco, Daniel McCarney, Daniel Stenberg,
+  Demi Marie Obenour, dependabot[bot], Dirk Feytons, epicmkirzinger on github,
+  Eric Knibbe, Fujii Hironori, gkarracer on github, Gordon Parke,
+  Graham Christensen, Harry Sintonen, Helmut Grohne, Hiroki Kurosawa,
+  Int64x86 on github, Jacob Mealey, Jake Yuesong Li, James Fuller,
+  Jean-Christophe Amiel, Jimmy Sjölund, Jixinqi, Jochen Sprickerhof, Joe Cise,
+  Joel Depooter, Johan Eliasson, John Bampton, John Haugabook, Jonathan Rosa,
+  Kai Pastor, kkalganov on github, Maksim Ściepanienka, Manuel Strehl,
+  Marius Kleidl, Mathieu Garaud, Matt Jolly, Max Eliaser,
+  mschroeder-fzj on github, NeimadTL, Niall O'Reilly, Nigel Brittain,
+  Nils Goroll, Pavel Kropachev, PleaseJustDont, Rasmus Melchior Jacobsen,
+  Ray Satiro, renovate[bot], Samuel Henrique, Sarah Gooding,
+  sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing, Stephen Farrell,
+  Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane, Viktor Szakats,
+  wolfsage on hackerone, x1sc0 on github, xiadnoring on github, Yedaya Katsman,
+  zopsicle on github
+  (88 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -480,10 +490,19 @@ References to bug reports and discussions on issues:
  [202] = https://curl.se/bug/?i=17358
  [203] = https://curl.se/bug/?i=17361
  [204] = https://curl.se/bug/?i=17295
+ [205] = https://curl.se/bug/?i=17441
  [206] = https://curl.se/bug/?i=17353
+ [211] = https://curl.se/bug/?i=17416
+ [213] = https://curl.se/bug/?i=17420
  [214] = https://curl.se/bug/?i=17380
  [215] = https://curl.se/bug/?i=17384
  [216] = https://curl.se/bug/?i=17379
  [217] = https://curl.se/bug/?i=17382
  [218] = https://curl.se/bug/?i=17381
  [219] = https://curl.se/bug/?i=17370
+ [220] = https://curl.se/bug/?i=17430
+ [222] = https://curl.se/bug/?i=17414
+ [227] = https://curl.se/bug/?i=17415
+ [232] = https://curl.se/bug/?i=17412
+ [235] = https://curl.se/bug/?i=17407
+ [240] = https://curl.se/bug/?i=17129
