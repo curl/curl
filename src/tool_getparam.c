@@ -2806,10 +2806,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_MANUAL: /* --manual */
       if(toggle) { /* --no-manual shows no manual... */
-#ifndef USE_MANUAL
-        warnf(global,
-              "built-in manual was disabled at build-time");
-#endif
         err = PARAM_MANUAL_REQUESTED;
       }
       break;
