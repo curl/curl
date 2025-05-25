@@ -289,7 +289,7 @@ static int proxy_h2_client_new(struct Curl_cfilter *cf,
   /* with 1.50.0 */
   /* turn off RFC 9113 leading and trailing white spaces validation against
      HTTP field value. */
-  nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
+  //nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
 #endif
   rc = nghttp2_session_client_new3(&ctx->h2, cbs, cf, o, &mem);
   nghttp2_option_del(o);
