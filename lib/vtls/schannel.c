@@ -2150,10 +2150,7 @@ cleanup:
   */
   if(len && !backend->decdata_offset && backend->recv_connection_closed &&
      !backend->recv_sspi_close_notify) {
-    bool isWin2k = curlx_verify_windows_version(5, 0, 0, PLATFORM_WINNT,
-                                                VERSION_EQUAL);
-
-    if(isWin2k && sspi_status == SEC_E_OK)
+    if(sspi_status == SEC_E_OK)
       backend->recv_sspi_close_notify = TRUE;
     else {
       *err = CURLE_RECV_ERROR;
