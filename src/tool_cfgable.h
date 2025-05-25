@@ -218,7 +218,7 @@ struct OperationConfig {
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
 
-  long mime_options;        /* Mime option flags. */
+  unsigned long mime_options; /* Mime option flags. */
   long tftp_blksize;        /* TFTP BLKSIZE option */
   long alivetime;           /* keepalive-time */
   long alivecnt;            /* keepalive-cnt */
