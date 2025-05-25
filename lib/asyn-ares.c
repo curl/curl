@@ -945,7 +945,6 @@ CURLcode Curl_async_ares_set_dns_local_ip6(struct Curl_easy *data)
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)local_ip6;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
