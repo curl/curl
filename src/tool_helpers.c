@@ -62,8 +62,6 @@ const char *param2text(ParameterError error)
     return "the given option cannot be reversed with a --no- prefix";
   case PARAM_NUMBER_TOO_LARGE:
     return "too large number";
-  case PARAM_NO_NOT_BOOLEAN:
-    return "used '--no-' for option that is not a boolean";
   case PARAM_CONTDISP_RESUME_FROM:
     return "--continue-at and --remote-header-name cannot be combined";
   case PARAM_READ_ERROR:
