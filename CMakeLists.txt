@@ -2479,7 +2479,17 @@ if(NOT CURL_DISABLE_INSTALL)
       DESTINATION ${_install_cmake_dir})
   endif()
 
+  set(components_file "${CMAKE_CURRENT_BINARY_DIR}/CURLConfigComponents.cmake")
+  file(CONFIGURE OUTPUT "${components_file}" CONTENT [[
+  foreach(component IN ITEMS @SUPPORT_FEATURES@ @SUPPORT_PROTOCOLS@)
+    if(component MATCHES "^[-_a-zA-Z0-9]*$")
+      set(CURL_${component}_FOUND TRUE)
+    endif()
+  endforeach()
+  ]] @ONLY)
+
   install(FILES ${_version_config} ${_project_config}
+                ${components_file}
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)
