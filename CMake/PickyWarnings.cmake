@@ -57,7 +57,7 @@ endif()
 
 if(MSVC)
   list(APPEND _picky "-W4")  # Use the highest warning level for Visual Studio.
-  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
+  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-3]")
     list(APPEND _picky "-wd9025")  # silence: overriding '/Wn' with '/W4'
   endif()
 elseif(BORLAND)
