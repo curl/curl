@@ -53,6 +53,9 @@ responses libcurl switches method from POST to GET unless CURLOPT_POSTREDIR(3)
 instructs libcurl otherwise. All other redirect response codes make libcurl
 use the same method again.
 
+When libcurl switches method to GET, it then uses that method without sending
+any request body.
+
 For users who think the existing location following is too naive, too simple
 or just lacks features, it is easy to instead implement your own redirect
 follow logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3)
