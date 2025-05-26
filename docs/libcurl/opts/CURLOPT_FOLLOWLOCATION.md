@@ -54,7 +54,9 @@ instructs libcurl otherwise. All other redirect response codes make libcurl
 use the same method again.
 
 When libcurl switches method to GET, it then uses that method without sending
-any request body.
+any request body. If it does not change the method, it sends the subsequent
+request the same way as the previous one; including the request body if one
+was provided.
 
 For users who think the existing location following is too naive, too simple
 or just lacks features, it is easy to instead implement your own redirect
