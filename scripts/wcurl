@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.04.20"
+VERSION="2025.05.26"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -111,8 +111,7 @@ readonly PER_URL_PARAMETERS="\
     --location \
     --proto-default https \
     --remote-time \
-    --retry 10 \
-    --retry-max-time 10 "
+    --retry 5 "
 
 # Whether to invoke curl or not.
 DRY_RUN="false"
