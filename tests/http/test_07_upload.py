@@ -179,7 +179,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         count = 2
         upload_size = 128*1024
-        url = f'https://localhost:{env.https_port}/curltest/put?id=[0-{count-1}]'
+        url = f'https://localhost:{env.https_port}/curltest/put'
         client = LocalClient(name='hx-upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -195,7 +195,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         count = 2
         upload_size = 128*1024
-        url = f'https://localhost:{env.https_port}/curltest/put?id=[0-{count-1}]'
+        url = f'https://localhost:{env.https_port}/curltest/put'
         client = LocalClient(name='hx-upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -211,7 +211,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         count = 2
         upload_size = 128*1024
-        url = f'https://localhost:{env.https_port}/curltest/echo?id=[0-{count-1}]'
+        url = f'https://localhost:{env.https_port}/curltest/echo'
         client = LocalClient(name='hx-upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -564,7 +564,7 @@ class TestUpload:
         client = LocalClient(name='upload-pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&just_die=1'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=0&just_die=1'
         r = client.run(['-V', proto, url])
         exp_code = 52  # GOT_NOTHING
         if proto == 'h2' or proto == 'h3':
@@ -581,7 +581,7 @@ class TestUpload:
         client = LocalClient(name='upload-pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after_100=1'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=0&die_after_100=1'
         r = client.run(['-V', proto, url])
         exp_code = 52  # GOT_NOTHING
         if proto == 'h2' or proto == 'h3':
@@ -717,7 +717,7 @@ class TestUpload:
         port = env.port_for(proto)
         if proto != 'h3':
             port = env.nghttpx_https_port
-        url = f'https://{env.domain1}:{port}/curltest/put?id=[0-{count-1}]'
+        url = f'https://{env.domain1}:{port}/curltest/put'
         client = LocalClient(name='hx-upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
