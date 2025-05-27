@@ -38,8 +38,7 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
-#undef SAFETY_MARGIN
-#define SAFETY_MARGIN (11)
+#define T537_SAFETY_MARGIN (11)
 
 #if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
@@ -259,8 +258,8 @@ static int test_rlimit(int keep_open)
 #else
   if(rl.rlim_cur > 0) {
 #endif
-    /* soft limit minus SAFETY_MARGIN */
-    num_open.rlim_max = rl.rlim_cur - SAFETY_MARGIN;
+    /* soft limit minus T537_SAFETY_MARGIN */
+    num_open.rlim_max = rl.rlim_cur - T537_SAFETY_MARGIN;
   }
   else {
     /* a huge number of file descriptors */
@@ -351,7 +350,7 @@ static int test_rlimit(int keep_open)
                      "fds system limit seems close to %s", strbuff1);
       curl_mfprintf(stderr, "%s\n", strbuff);
 
-      num_open.rlim_max = num_open.rlim_cur - SAFETY_MARGIN;
+      num_open.rlim_max = num_open.rlim_cur - T537_SAFETY_MARGIN;
 
       num_open.rlim_cur -= num_open.rlim_max;
       rlim2str(strbuff1, sizeof(strbuff1), num_open.rlim_cur);
@@ -398,7 +397,7 @@ static int test_rlimit(int keep_open)
    * with an indication that select limit would be exceeded.
    */
 
-  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  num_open.rlim_cur = FD_SETSIZE - T537_SAFETY_MARGIN;
   if(num_open.rlim_max > num_open.rlim_cur) {
     curl_msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
               FD_SETSIZE);
@@ -409,7 +408,7 @@ static int test_rlimit(int keep_open)
     return -8;
   }
 
-  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  num_open.rlim_cur = FD_SETSIZE - T537_SAFETY_MARGIN;
   for(rl.rlim_cur = 0;
       rl.rlim_cur < num_open.rlim_max;
       rl.rlim_cur++) {

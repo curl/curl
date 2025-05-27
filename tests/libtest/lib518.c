@@ -38,11 +38,10 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
-#undef SAFETY_MARGIN
-#define SAFETY_MARGIN (16)
+#define T518_SAFETY_MARGIN (16)
 
 #define NUM_OPEN      (FD_SETSIZE + 10)
-#define NUM_NEEDED    (NUM_OPEN + SAFETY_MARGIN)
+#define NUM_NEEDED    (NUM_OPEN + T518_SAFETY_MARGIN)
 
 #if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
@@ -216,7 +215,7 @@ static int test_rlimit(int keep_open)
   /*
    * verify that soft limit is higher than NUM_NEEDED,
    * which is the number of file descriptors we would
-   * try to open plus SAFETY_MARGIN to not exhaust the
+   * try to open plus T518_SAFETY_MARGIN to not exhaust the
    * file descriptor pool
    */
 
@@ -385,7 +384,7 @@ static int test_rlimit(int keep_open)
    * with an indication that select limit would be exceeded.
    */
 
-  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  num_open.rlim_cur = FD_SETSIZE - T518_SAFETY_MARGIN;
   if(num_open.rlim_max > num_open.rlim_cur) {
     curl_msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
               FD_SETSIZE);
@@ -396,7 +395,7 @@ static int test_rlimit(int keep_open)
     return -10;
   }
 
-  num_open.rlim_cur = FD_SETSIZE - SAFETY_MARGIN;
+  num_open.rlim_cur = FD_SETSIZE - T518_SAFETY_MARGIN;
   for(rl.rlim_cur = 0;
       rl.rlim_cur < num_open.rlim_max;
       rl.rlim_cur++) {
