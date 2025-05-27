@@ -2691,10 +2691,13 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
         *err = CURLE_SEND_ERROR;
         return -1;
       }
-      if(sshc->sftp_send_aio) {
-        sftp_aio_free(sshc->sftp_send_aio);
-        sshc->sftp_send_aio = NULL;
-      }
+
+      /*
+       * sftp_aio_wait_write() would free sftp_send_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
+
       sshc->sftp_send_state = 0;
       return nwrite;
     default:
