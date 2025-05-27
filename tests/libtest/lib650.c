@@ -25,11 +25,6 @@
 
 #include "memdebug.h"
 
-
-
-static const char testname[] = "fieldname";
-
-
 /* This test attempts to use all form API features that are not
  * used elsewhere.
  */
@@ -58,6 +53,7 @@ CURLcode test(char *URL)
   char flbuf[32];
   long contentlength = 0;
 
+  static const char testname[] = "fieldname";
   static char testdata[] =
     "this is what we post to the silly web server";
 
