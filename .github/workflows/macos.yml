@@ -319,9 +319,9 @@ jobs:
         # zizmor: ignore[template-injection]
         run: |
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'
-          if [ -z '${{ matrix.build.torture }}' ]; then
-            TFLAGS+=' ~2037 ~2041'  # flaky
-          fi
+          #if [ -z '${{ matrix.build.torture }}' ]; then
+          #  TFLAGS+=' ~2037 ~2041'  # flaky
+          #fi
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ -n '${{ matrix.build.generate }}' ]; then
