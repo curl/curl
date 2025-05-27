@@ -22,8 +22,6 @@
 #
 ###########################################################################
 
-CURLPAGES = runtests.md testcurl.md
-
 # scripts used in test cases
 TESTSCRIPTS = \
  test1119.pl  \
@@ -49,8 +47,6 @@ TESTSCRIPTS = \
 
 EXTRA_DIST =        \
  CMakeLists.txt     \
- FILEFORMAT.md      \
- README.md          \
  allversions.pm     \
  appveyor.pm        \
  azure.pm           \
