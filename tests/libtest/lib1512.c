@@ -32,6 +32,7 @@
 
 #include "memdebug.h"
 
+#undef NUM_HANDLES
 #define NUM_HANDLES 2
 
 CURLcode test(char *URL)

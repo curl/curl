@@ -28,8 +28,10 @@
 #include "warnless.h"
 #include "memdebug.h"
 
+#undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
 
+#undef NUM_HANDLES
 #define NUM_HANDLES 4
 
 CURLcode test(char *URL)
