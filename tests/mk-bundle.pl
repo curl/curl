@@ -115,7 +115,6 @@ my @reused_symbols = (
 
 # TODO: Some of these may be #undef-ed manually at the end of each source
 my @reused_macros = (
-    "HEADER_REQUEST",
     "NUM_HANDLES",
     "SAFETY_MARGIN",
     "TEST_HANG_TIMEOUT",
