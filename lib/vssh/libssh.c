@@ -3047,10 +3047,13 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
         return CURLE_AGAIN;
       else if(nwrite < 0)
         return CURLE_SEND_ERROR;
-      if(sshc->sftp_send_aio) {
-        sftp_aio_free(sshc->sftp_send_aio);
-        sshc->sftp_send_aio = NULL;
-      }
+
+      /*
+       * sftp_aio_wait_write() would free sftp_send_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
+
       sshc->sftp_send_state = 0;
       *pnwritten = (size_t)nwrite;
       return CURLE_OK;
