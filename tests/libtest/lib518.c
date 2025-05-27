@@ -38,7 +38,9 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
+#undef SAFETY_MARGIN
 #define SAFETY_MARGIN (16)
+
 #define NUM_OPEN      (FD_SETSIZE + 10)
 #define NUM_NEEDED    (NUM_OPEN + SAFETY_MARGIN)
 

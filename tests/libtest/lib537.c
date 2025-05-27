@@ -38,6 +38,7 @@
 #error "this test requires FD_SETSIZE"
 #endif
 
+#undef SAFETY_MARGIN
 #define SAFETY_MARGIN (11)
 
 #if defined(_WIN32) || defined(MSDOS)
