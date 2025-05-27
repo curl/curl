@@ -40,6 +40,7 @@ static const char *testdata[]={
   NULL
 };
 
+#undef HEADER_REQUEST
 #ifdef LIB1946
 #define HEADER_REQUEST 0
 #else
