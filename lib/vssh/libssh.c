@@ -1070,6 +1070,81 @@ static int myssh_state_sftp_dowload_stat(struct Curl_easy *data,
   return rc;
 }
 
+static int myssh_state_sftp_readdir(struct Curl_easy *data,
+                                    struct ssh_conn *sshc,
+                                    struct SSHPROTO *sshp,
+                                    CURLcode *result_ptr)
+{
+  int rc = SSH_NO_ERROR;
+
+  curlx_dyn_reset(&sshc->readdir_buf);
+  if(sshc->readdir_attrs)
+    sftp_attributes_free(sshc->readdir_attrs);
+
+  sshc->readdir_attrs = sftp_readdir(sshc->sftp_session, sshc->sftp_dir);
+  if(sshc->readdir_attrs) {
+    sshc->readdir_filename = sshc->readdir_attrs->name;
+    sshc->readdir_longentry = sshc->readdir_attrs->longname;
+    sshc->readdir_len = strlen(sshc->readdir_filename);
+
+    if(data->set.list_only) {
+      char *tmpLine;
+
+      tmpLine = aprintf("%s\n", sshc->readdir_filename);
+      if(!tmpLine) {
+        myssh_state(data, sshc, SSH_SFTP_CLOSE);
+        sshc->actualcode = CURLE_OUT_OF_MEMORY;
+        return rc;
+      }
+      *result_ptr = Curl_client_write(data, CLIENTWRITE_BODY,
+                                      tmpLine, sshc->readdir_len + 1);
+      free(tmpLine);
+
+      if(*result_ptr) {
+        myssh_state(data, sshc, SSH_STOP);
+        return rc;
+      }
+    }
+    else {
+      if(curlx_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
+        sshc->actualcode = CURLE_OUT_OF_MEMORY;
+        myssh_state(data, sshc, SSH_STOP);
+        return rc;
+      }
+
+      if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
+         ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
+              SSH_S_IFLNK)) {
+        sshc->readdir_linkPath = aprintf("%s%s", sshp->path,
+                                         sshc->readdir_filename);
+
+        if(!sshc->readdir_linkPath) {
+          myssh_state(data, sshc, SSH_SFTP_CLOSE);
+          sshc->actualcode = CURLE_OUT_OF_MEMORY;
+          return rc;
+        }
+
+        myssh_state(data, sshc, SSH_SFTP_READDIR_LINK);
+        return rc;
+      }
+      myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
+      return rc;
+    }
+  }
+  else if(sftp_dir_eof(sshc->sftp_dir)) {
+    myssh_state(data, sshc, SSH_SFTP_READDIR_DONE);
+    return rc;
+  }
+  else {
+    failf(data, "Could not open remote file for reading: %s",
+          ssh_get_error(sshc->ssh_session));
+    MOVE_TO_SFTP_CLOSE_STATE();
+    return rc;
+  }
+
+  return rc;
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -1592,71 +1667,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_READDIR:
-      curlx_dyn_reset(&sshc->readdir_buf);
-      if(sshc->readdir_attrs)
-        sftp_attributes_free(sshc->readdir_attrs);
-
-      sshc->readdir_attrs = sftp_readdir(sshc->sftp_session, sshc->sftp_dir);
-      if(sshc->readdir_attrs) {
-        sshc->readdir_filename = sshc->readdir_attrs->name;
-        sshc->readdir_longentry = sshc->readdir_attrs->longname;
-        sshc->readdir_len = strlen(sshc->readdir_filename);
-
-        if(data->set.list_only) {
-          char *tmpLine;
-
-          tmpLine = aprintf("%s\n", sshc->readdir_filename);
-          if(!tmpLine) {
-            myssh_state(data, sshc, SSH_SFTP_CLOSE);
-            sshc->actualcode = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                     tmpLine, sshc->readdir_len + 1);
-          free(tmpLine);
-
-          if(result) {
-            myssh_state(data, sshc, SSH_STOP);
-            break;
-          }
-
-        }
-        else {
-          if(curlx_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
-            sshc->actualcode = CURLE_OUT_OF_MEMORY;
-            myssh_state(data, sshc, SSH_STOP);
-            break;
-          }
-
-          if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
-             ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
-              SSH_S_IFLNK)) {
-            sshc->readdir_linkPath = aprintf("%s%s", sshp->path,
-                                             sshc->readdir_filename);
-
-            if(!sshc->readdir_linkPath) {
-              myssh_state(data, sshc, SSH_SFTP_CLOSE);
-              sshc->actualcode = CURLE_OUT_OF_MEMORY;
-              break;
-            }
-
-            myssh_state(data, sshc, SSH_SFTP_READDIR_LINK);
-            break;
-          }
-          myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
-          break;
-        }
-      }
-      else if(sftp_dir_eof(sshc->sftp_dir)) {
-        myssh_state(data, sshc, SSH_SFTP_READDIR_DONE);
-        break;
-      }
-      else {
-        failf(data, "Could not open remote file for reading: %s",
-              ssh_get_error(sshc->ssh_session));
-        MOVE_TO_SFTP_CLOSE_STATE();
-        break;
-      }
+      rc = myssh_state_sftp_readdir(data, sshc, sshp, &result);
       break;
 
     case SSH_SFTP_READDIR_LINK:
