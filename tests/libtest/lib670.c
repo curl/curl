@@ -29,9 +29,6 @@
 
 #define PAUSE_TIME      5
 
-
-static const char testname[] = "field";
-
 struct ReadThis {
   CURL *easy;
   time_t origin;
@@ -94,6 +91,8 @@ static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 
 CURLcode test(char *URL)
 {
+  static const char testname[] = "field";
+
 #if defined(LIB670) || defined(LIB671)
   curl_mime *mime = NULL;
   curl_mimepart *part;
