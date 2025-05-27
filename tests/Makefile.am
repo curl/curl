@@ -102,7 +102,7 @@ DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
 
-CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid $(MANDISTPAGES)
+CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 
 curl:
 	@cd $(top_builddir) && $(MAKE)
