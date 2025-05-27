@@ -533,3 +533,6 @@ extern CURLcode test(char *URL); /* the actual test function provided by each
 /* Set default that each test may override */
 #undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
+
+#undef NUM_HANDLES
+#define NUM_HANDLES 4
