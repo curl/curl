@@ -2142,20 +2142,11 @@ cleanup:
      The behavior here is a matter of debate. We do not want to be vulnerable
      to a truncation attack however there is some browser precedent for
      ignoring the close_notify for compatibility reasons.
-
-     Additionally, Windows 2000 (v5.0) is a special case since it seems it
-     does not return close_notify. In that case if the connection was closed we
-     assume it was graceful (close_notify) since there does not seem to be a
-     way to tell.
   */
   if(len && !backend->decdata_offset && backend->recv_connection_closed &&
      !backend->recv_sspi_close_notify) {
-    if(sspi_status == SEC_E_OK)
-      backend->recv_sspi_close_notify = TRUE;
-    else {
-      *err = CURLE_RECV_ERROR;
-      failf(data, "schannel: server closed abruptly (missing close_notify)");
-    }
+    *err = CURLE_RECV_ERROR;
+    failf(data, "schannel: server closed abruptly (missing close_notify)");
   }
 
   /* Any error other than CURLE_AGAIN is an unrecoverable error. */
