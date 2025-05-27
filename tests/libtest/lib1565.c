@@ -31,7 +31,9 @@
 #include <pthread.h>
 #include <unistd.h>
 
+#undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
+
 #define CONN_NUM 3
 #define TIME_BETWEEN_START_SECS 2
 

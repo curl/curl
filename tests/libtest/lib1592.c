@@ -34,6 +34,7 @@
    non-threaded blocking resolver.  It doesn't matter that much because when
    the test passes, we never wait this long. We set it much higher to avoid
    issues when running on overloaded CI machines. */
+#undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 #include "test.h"

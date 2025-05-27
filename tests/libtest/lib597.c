@@ -29,6 +29,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
+#undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 /*
