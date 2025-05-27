@@ -22,13 +22,6 @@
 #
 ###########################################################################
 
-if BUILD_DOCS
-# if we disable man page building, ignore these
-RUNTESTS_DOCS = runtests.1
-TESTCURL_DOCS = testcurl.1
-MANFILES = $(RUNTESTS_DOCS) $(TESTCURL_DOCS)
-endif
-
 CURLPAGES = runtests.md testcurl.md
 
 # scripts used in test cases
@@ -95,8 +88,7 @@ EXTRA_DIST =        \
  util.py            \
  valgrind.pm        \
  valgrind.supp      \
- $(TESTSCRIPTS)     \
- $(CURLPAGES)
+ $(TESTSCRIPTS)
 
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
@@ -147,13 +139,6 @@ TEST_CI = $(TEST_NF) -r --retry=5 -j20
 
 PYTEST = pytest
 endif
-
-CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
-
-SUFFIXES = .1 .md
-
-.md.1:
-	$(CD2)$(CD2NROFF)
 
 # make sure that PERL is pointing to an executable
 perlcheck:
