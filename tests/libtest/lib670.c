@@ -29,12 +29,14 @@
 
 #define PAUSE_TIME      5
 
+#ifndef LIB670_H
+#define LIB670_H
 struct ReadThis {
   CURL *easy;
   time_t origin;
   int count;
 };
-
+#endif
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
