@@ -1145,6 +1145,57 @@ static int myssh_state_sftp_readdir(struct Curl_easy *data,
   return rc;
 }
 
+static int myssh_state_sftp_readdir_link(struct Curl_easy *data,
+                                         struct ssh_conn *sshc)
+{
+  int rc = SSH_NO_ERROR;
+
+  if(sshc->readdir_link_attrs)
+    sftp_attributes_free(sshc->readdir_link_attrs);
+
+  sshc->readdir_link_attrs = sftp_lstat(sshc->sftp_session,
+                                        sshc->readdir_linkPath);
+  if(sshc->readdir_link_attrs == 0) {
+    failf(data, "Could not read symlink for reading: %s",
+          ssh_get_error(sshc->ssh_session));
+    MOVE_TO_SFTP_CLOSE_STATE();
+    return rc;
+  }
+
+  if(!sshc->readdir_link_attrs->name) {
+    sshc->readdir_tmp = sftp_readlink(sshc->sftp_session,
+                                      sshc->readdir_linkPath);
+    if(!sshc->readdir_filename)
+      sshc->readdir_len = 0;
+    else
+      sshc->readdir_len = strlen(sshc->readdir_tmp);
+
+    sshc->readdir_longentry = NULL;
+    sshc->readdir_filename = sshc->readdir_tmp;
+  }
+  else {
+    sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
+    sshc->readdir_filename = sshc->readdir_link_attrs->name;
+    sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
+  }
+
+  Curl_safefree(sshc->readdir_linkPath);
+
+  if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
+                    sshc->readdir_filename)) {
+    sshc->actualcode = CURLE_OUT_OF_MEMORY;
+    return rc;
+  }
+
+  sftp_attributes_free(sshc->readdir_link_attrs);
+  sshc->readdir_link_attrs = NULL;
+  sshc->readdir_filename = NULL;
+  sshc->readdir_longentry = NULL;
+
+  myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
+  return rc;
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -1671,49 +1722,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_READDIR_LINK:
-      if(sshc->readdir_link_attrs)
-        sftp_attributes_free(sshc->readdir_link_attrs);
+      rc = myssh_state_sftp_readdir_link(data, sshc);
+      break;
 
-      sshc->readdir_link_attrs = sftp_lstat(sshc->sftp_session,
-                                            sshc->readdir_linkPath);
-      if(sshc->readdir_link_attrs == 0) {
-        failf(data, "Could not read symlink for reading: %s",
-              ssh_get_error(sshc->ssh_session));
-        MOVE_TO_SFTP_CLOSE_STATE();
-        break;
-      }
-
-      if(!sshc->readdir_link_attrs->name) {
-        sshc->readdir_tmp = sftp_readlink(sshc->sftp_session,
-                                          sshc->readdir_linkPath);
-        if(!sshc->readdir_filename)
-          sshc->readdir_len = 0;
-        else
-          sshc->readdir_len = strlen(sshc->readdir_tmp);
-        sshc->readdir_longentry = NULL;
-        sshc->readdir_filename = sshc->readdir_tmp;
-      }
-      else {
-        sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
-        sshc->readdir_filename = sshc->readdir_link_attrs->name;
-        sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
-      }
-
-      Curl_safefree(sshc->readdir_linkPath);
-
-      if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
-                        sshc->readdir_filename)) {
-        sshc->actualcode = CURLE_OUT_OF_MEMORY;
-        break;
-      }
-
-      sftp_attributes_free(sshc->readdir_link_attrs);
-      sshc->readdir_link_attrs = NULL;
-      sshc->readdir_filename = NULL;
-      sshc->readdir_longentry = NULL;
-
-      myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
-      FALLTHROUGH();
     case SSH_SFTP_READDIR_BOTTOM:
       if(curlx_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
