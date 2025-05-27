@@ -73,7 +73,7 @@ CURLcode test(char *URL)
 
   easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
 
-  /* get NUM_HANDLES easy handles */
+  /* get NUM_URLS easy handles */
   for(i = 0; i < NUM_URLS; i++) {
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
