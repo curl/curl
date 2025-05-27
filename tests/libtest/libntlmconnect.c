@@ -30,9 +30,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#undef TEST_HANG_TIMEOUT
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 #define MAX_EASY_HANDLES 3
 
 static int ntlm_counter[MAX_EASY_HANDLES];
