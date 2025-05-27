@@ -28,8 +28,8 @@
 static const char *TEST_DATA_STRING = "Test data";
 static int cb_count = 0;
 
-static int
-resolver_alloc_cb_fail(void *resolver_state, void *reserved, void *userdata)
+static int resolver_alloc_cb_fail(void *resolver_state, void *reserved,
+                                  void *userdata)
 {
   (void)resolver_state;
   (void)reserved;
@@ -43,8 +43,8 @@ resolver_alloc_cb_fail(void *resolver_state, void *reserved, void *userdata)
   return 1;
 }
 
-static int
-resolver_alloc_cb_pass(void *resolver_state, void *reserved, void *userdata)
+static int resolver_alloc_cb_pass(void *resolver_state, void *reserved,
+                                  void *userdata)
 {
   (void)resolver_state;
   (void)reserved;
@@ -84,7 +84,8 @@ CURLcode test(char *URL)
   res = curl_easy_perform(curl);
   if(res != CURLE_COULDNT_RESOLVE_HOST) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
-            "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n", res);
+                  "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n",
+                  res);
     if(res == CURLE_OK)
       res = TEST_ERR_FAILURE;
     goto test_cleanup;

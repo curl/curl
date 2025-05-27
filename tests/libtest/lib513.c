@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t513_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   (void)ptr;
   (void)size;
@@ -61,7 +61,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t513_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, NULL);

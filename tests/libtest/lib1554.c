@@ -36,8 +36,8 @@ static const char *ldata_names[] = {
   "NULL",
 };
 
-static void test_lock(CURL *handle, curl_lock_data data,
-                      curl_lock_access laccess, void *useptr)
+static void t1554_test_lock(CURL *handle, curl_lock_data data,
+                            curl_lock_access laccess, void *useptr)
 {
   (void)handle;
   (void)data;
@@ -46,7 +46,7 @@ static void test_lock(CURL *handle, curl_lock_data data,
   curl_mprintf("-> Mutex lock %s\n", ldata_names[data]);
 }
 
-static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t1554_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   (void)handle;
   (void)data;
@@ -70,8 +70,8 @@ CURLcode test(char *URL)
   }
 
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
-  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
+  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t1554_test_lock);
+  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, t1554_test_unlock);
 
   /* Loop the transfer and cleanup the handle properly every lap. This will
      still reuse connections since the pool is in the shared object! */

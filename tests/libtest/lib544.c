@@ -25,16 +25,20 @@
 
 #include "memdebug.h"
 
-static char teststring[] =
-{   'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
-    'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
-    'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
-    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
-
 CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
+
+  static const char teststring_init[] = {
+    'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
+    'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
+    'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
+    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
+
+  char teststring[sizeof(teststring_init)];
+
+  memcpy(teststring, teststring_init, sizeof(teststring_init));
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

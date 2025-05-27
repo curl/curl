@@ -54,8 +54,6 @@ static void setupcallbacks(CURL *curl)
   testcounter = 0;
 }
 
-#else
-#define setupcallbacks(x) Curl_nop_stmt
 #endif
 
 
@@ -89,7 +87,9 @@ CURLcode test(char *URL)
   if(libtest_arg3 && !strcmp(libtest_arg3, "activeftp"))
     test_setopt(curl, CURLOPT_FTPPORT, "-");
 
+#ifdef LIB585
   setupcallbacks(curl);
+#endif
 
   res = curl_easy_perform(curl);
 
@@ -181,5 +181,3 @@ test_cleanup:
 
   return res;
 }
-
-#undef setupcallbacks

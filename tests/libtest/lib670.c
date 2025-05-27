@@ -29,19 +29,17 @@
 
 #define PAUSE_TIME      5
 
-
-static const char testname[] = "field";
-
-struct ReadThis {
+#ifndef LIB670_C
+#define LIB670_C
+struct t670_ReadThis {
   CURL *easy;
   time_t origin;
   int count;
 };
 
-
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t670_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct ReadThis *pooh = (struct ReadThis *) userp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *) userp;
   time_t delta;
 
   if(size * nmemb < 1)
@@ -64,12 +62,16 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   curl_mfprintf(stderr, "Read callback called after EOF\n");
   exit(1);
 }
+#endif
 
 #if !defined(LIB670) && !defined(LIB672)
-static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
-                    curl_off_t ultotal, curl_off_t ulnow)
+#ifndef LIB670_XFERINFO_C
+#define LIB670_XFERINFO_C
+static int t670_xferinfo(void *clientp,
+                         curl_off_t dltotal, curl_off_t dlnow,
+                         curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct ReadThis *pooh = (struct ReadThis *) clientp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *) clientp;
 
   (void) dltotal;
   (void) dlnow;
@@ -91,9 +93,12 @@ static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
   return 0;
 }
 #endif
+#endif
 
 CURLcode test(char *URL)
 {
+  static const char testname[] = "field";
+
 #if defined(LIB670) || defined(LIB671)
   curl_mime *mime = NULL;
   curl_mimepart *part;
@@ -110,7 +115,7 @@ CURLcode test(char *URL)
   int still_running = 0;
 #endif
 
-  struct ReadThis pooh;
+  struct t670_ReadThis pooh;
   CURLcode res = TEST_ERR_FAILURE;
 
   /*
@@ -147,7 +152,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  res = curl_mime_data_cb(part, (curl_off_t) 2, read_callback,
+  res = curl_mime_data_cb(part, (curl_off_t) 2, t670_read_cb,
                           NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
@@ -166,7 +171,7 @@ CURLcode test(char *URL)
   }
 
   /* We want to use our own read function. */
-  test_setopt(pooh.easy, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(pooh.easy, CURLOPT_READFUNCTION, t670_read_cb);
 
   /* Send a multi-part formpost. */
   test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
@@ -237,7 +242,7 @@ CURLcode test(char *URL)
 #else
   /* Use the easy interface. */
   test_setopt(pooh.easy, CURLOPT_XFERINFODATA, &pooh);
-  test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, xferinfo);
+  test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
   test_setopt(pooh.easy, CURLOPT_NOPROGRESS, 0L);
   res = curl_easy_perform(pooh.easy);
 #endif

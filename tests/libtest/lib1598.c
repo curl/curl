@@ -34,7 +34,7 @@
 /*
  * carefully not leak memory on OOM
  */
-static int trailers_callback(struct curl_slist **list, void *userdata)
+static int t1598_trailers_callback(struct curl_slist **list, void *userdata)
 {
   struct curl_slist *nlist = NULL;
   struct curl_slist *nlist2 = NULL;
@@ -52,10 +52,10 @@ static int trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-static const char *post_data = "xxx=yyy&aaa=bbbbb";
-
 CURLcode test(char *URL)
 {
+  static const char *post_data = "xxx=yyy&aaa=bbbbb";
+
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
   /* http and proxy header list */
@@ -89,7 +89,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(post_data));
   test_setopt(curl, CURLOPT_POSTFIELDS, post_data);
-  test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
+  test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1598_trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
