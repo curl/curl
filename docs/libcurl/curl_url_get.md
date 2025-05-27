@@ -146,8 +146,8 @@ CURLU_GUESS_SCHEME is used.
 
 ## CURLUPART_URL
 
-When asked to return the full URL, curl_url_get(3) returns a normalized and
-possibly cleaned up version using all available URL parts.
+When asked to return the full URL, curl_url_get(3) returns a slightly cleaned
+up version of the complete URL using all available parts.
 
 We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized" as
 possible since IDN allows hostnames to be written in many different ways that
