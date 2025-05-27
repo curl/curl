@@ -679,9 +679,9 @@ jobs:
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi
-            #if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
-            #  TFLAGS+=' ~2077 ~2078'  # valgrind errors
-            #fi
+            if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
+              TFLAGS+=' ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
+            fi
           fi
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
