@@ -135,6 +135,10 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 
   if(result)
     Curl_http_auth_cleanup_negotiate(conn);
+  else {
+    Curl_auth_cleanup_spnego(&conn->negotiate);
+    Curl_auth_cleanup_spnego(&conn->proxyneg);
+  }
 
   return result;
 }
