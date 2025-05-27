@@ -38,9 +38,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#undef TEST_HANG_TIMEOUT
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 #define PROXY libtest_arg2
 #define PROXYUSERPWD libtest_arg3
 #define HOST test_argv[4]
