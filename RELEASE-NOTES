@@ -4,7 +4,7 @@ curl and libcurl 8.14.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3426
+ Contributors:                 3427
 
 This release includes the following changes:
 
@@ -74,9 +74,12 @@ This release includes the following bugfixes:
  o curl_krb5: only use functions if FTP is still enabled [21]
  o curl_multibyte: fixup low-level calls, include in unity builds [55]
  o curl_osslq: remove a leftover debug fprintf() call [140]
+ o curl_url_get.md: don't call it normalized [212]
  o curl_version_info.md: clarify ssl_version for MultiSSL [145]
  o CURLMOPT_TIMERFUNCTION.md: correct the example [162]
  o CURLOPT_ERRORBUFFER.md: buffer is read only after curl takes ownership [93]
+ o CURLOPT_FOLLOWLOCATION.md: switch to GET => no body [208]
+ o CURLOPT_READFUNCTION.md: mention the seek callback [209]
  o CURLOPT_XFERINFOFUNCTION.md: fix the callback return type in example [122]
  o curlx: move the docs to docs/internals/ [184]
  o DEPRECATE.md: drop support for VS2008 [214]
@@ -90,6 +93,7 @@ This release includes the following bugfixes:
  o docs/libcurl: mention sensitive data/headers [206]
  o docs: add missing return statement in examples [85]
  o docs: fix incorrect shell substitution in docker run example command [51]
+ o docs: fix typo in retry.md [192]
  o docs: update distros links
  o doh: httpsrr fix [71]
  o doh: make sure CURLOPT_PROTOCOLS is set a with a "long" arg [124]
@@ -100,6 +104,7 @@ This release includes the following bugfixes:
  o eventfd: fix feature guards [24]
  o formdata: cleanups [219]
  o ftp: fix bug in failed init [179]
+ o ftp: fix race in upload handling [207]
  o ftplistparser: add two overflow preventions [173]
  o ftplistparser: split up into more functions [215]
  o generate.bat: exclude curlinfo.c from legacy VS projects [175]
@@ -253,37 +258,39 @@ For all changes ever done in curl:
 Planned upcoming removals include:
 
  o Support for the msh3 HTTP/3 backend
+ o Supporting curl builds using VS2008
+ o The Secure Transport and BearSSL TLS backends
  o The winbuild build system
- o TLS libraries not supporting TLS 1.3
+ o Windows CE support
 
  See https://curl.se/dev/deprecate.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Abhinav Singhal, Aditya Garg, Andreas Westin, Andrei Florea, Andrew Kirillov,
-  Andy Pan, antypanty on hackerone, Arian van Putten, bo0tzz on github,
-  Bo Anderson, Brendan Dolan-Gavitt, Brian Chrzanowski, bruce.yoon,
-  bsr13 on hackerone, calvin2021y on github, Calvin Ruocco,
-  Carlos Henrique Lima Melara, Christian Schmitz, Christoph Jabs,
-  Cole Helbling, Corinna Brandt, Dagobert Michelsen, Dan Fandrich,
-  Daniel Engberg, Daniel Fosco, Daniel McCarney, Daniel Stenberg,
+  Abhinav Singhal, Aditya Garg, Alberto Leiva Popper, Andreas Westin,
+  Andrei Florea, Andrew Kirillov, Andy Pan, antypanty on hackerone,
+  Arian van Putten, bo0tzz on github, Bo Anderson, Brendan Dolan-Gavitt,
+  Brian Chrzanowski, bruce.yoon, bsr13 on hackerone, calvin2021y on github,
+  Calvin Ruocco, Carlos Henrique Lima Melara, Christian Schmitz,
+  Christoph Jabs, Cole Helbling, Corinna Brandt, Dagobert Michelsen,
+  Dan Fandrich, Daniel Engberg, Daniel Fosco, Daniel McCarney, Daniel Stenberg,
   Demi Marie Obenour, dependabot[bot], Dirk Feytons, epicmkirzinger on github,
   Eric Knibbe, Fujii Hironori, gkarracer on github, Gordon Parke,
   Graham Christensen, Harry Sintonen, Helmut Grohne, Hiroki Kurosawa,
   Int64x86 on github, Jacob Mealey, Jake Yuesong Li, James Fuller,
-  Jean-Christophe Amiel, Jimmy Sjölund, Jixinqi, Jochen Sprickerhof, Joe Cise,
-  Joel Depooter, Johan Eliasson, John Bampton, John Haugabook, Jonathan Rosa,
-  Kai Pastor, kkalganov on github, Maksim Ściepanienka, Manuel Strehl,
-  Marius Kleidl, Mathieu Garaud, Matt Jolly, Max Eliaser,
-  mschroeder-fzj on github, NeimadTL, Niall O'Reilly, Nigel Brittain,
-  Nils Goroll, Pavel Kropachev, PleaseJustDont, Rasmus Melchior Jacobsen,
-  Ray Satiro, renovate[bot], Samuel Henrique, Sarah Gooding,
-  sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing, Stephen Farrell,
-  Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane, Viktor Szakats,
-  wolfsage on hackerone, x1sc0 on github, xiadnoring on github, Yedaya Katsman,
-  zopsicle on github
-  (88 contributors)
+  Jean-Christophe Amiel, Jeroen Ooms, Jimmy Sjölund, Jixinqi,
+  Jochen Sprickerhof, Joe Cise, JoelAtWisetech on github, Joel Depooter,
+  Johan Eliasson, John Bampton, John Haugabook, Jonathan Rosa, Kai Pastor,
+  kkalganov on github, Maksim Ściepanienka, Manuel Strehl, Marius Kleidl,
+  Mathieu Garaud, Matt Jolly, Max Eliaser, mschroeder-fzj on github, NeimadTL,
+  Niall O'Reilly, Nigel Brittain, Nils Goroll, Pavel Kropachev, PleaseJustDont,
+  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Samuel Henrique,
+  Sarah Gooding, sbernatsky on github, Sergey, Sören Tempel, Stefan Eissing,
+  Stephen Farrell, Tal Regev, Thomas Klausner, Tomas Volf, Travis Lane,
+  Viktor Szakats, wolfsage on hackerone, x1sc0 on github, xiadnoring on github,
+  Yedaya Katsman, zopsicle on github
+  (91 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -478,6 +485,7 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=17329
  [190] = https://curl.se/bug/?i=17294
  [191] = https://curl.se/bug/?i=17256
+ [192] = https://curl.se/bug/?i=17443
  [193] = https://curl.se/bug/?i=17364
  [194] = https://curl.se/bug/?i=17294
  [195] = https://curl.se/bug/?i=17321
@@ -492,7 +500,11 @@ References to bug reports and discussions on issues:
  [204] = https://curl.se/bug/?i=17295
  [205] = https://curl.se/bug/?i=17441
  [206] = https://curl.se/bug/?i=17353
+ [207] = https://curl.se/bug/?i=17394
+ [208] = https://curl.se/bug/?i=17454
+ [209] = https://curl.se/bug/?i=17455
  [211] = https://curl.se/bug/?i=17416
+ [212] = https://curl.se/bug/?i=16829
  [213] = https://curl.se/bug/?i=17420
  [214] = https://curl.se/bug/?i=17380
  [215] = https://curl.se/bug/?i=17384
