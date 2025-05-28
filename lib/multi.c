@@ -3182,7 +3182,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
     /* splay the lowest to the bottom */
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
-    /* this will not return NULL from a non-emtpy tree, but some compilers
+    /* this will not return NULL from a non-empty tree, but some compilers
      * are not convinced of that. Analyzers are hard. */
     *expire_time = multi->timetree ? multi->timetree->key : tv_zero;
 
