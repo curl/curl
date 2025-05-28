@@ -261,6 +261,7 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
+  curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
   if(use_earlydata)
@@ -328,7 +329,6 @@ int main(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   CURLM *multi_handle;
-  struct CURLMsg *m;
   CURLSH *share;
   const char *url;
   const char *method = "PUT";
@@ -505,6 +505,7 @@ int main(int argc, char *argv[])
     do {
       int still_running; /* keep number of running handles */
       CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+      struct CURLMsg *m;
 
       if(still_running) {
         /* wait for activity, timeout or "nothing" */
@@ -523,8 +524,11 @@ int main(int argc, char *argv[])
           curl_multi_remove_handle(multi_handle, e);
           t = get_transfer_for_easy(e);
           if(t) {
+            long res_status;
+            curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &res_status);
             t->done = 1;
-            fprintf(stderr, "[t-%d] FINISHED\n", t->idx);
+            fprintf(stderr, "[t-%d] FINISHED, result=%d, response=%ld\n",
+                    t->idx, m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;
               curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
