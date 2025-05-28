@@ -1,0 +1,33 @@
+<testcase>
+<info>
+<keywords>
+MULTI
+</keywords>
+</info>
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+multi - add many easy handles
+</name>
+<command>
+</command>
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>

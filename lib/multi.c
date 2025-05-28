@@ -347,7 +347,8 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   if(unused <= min_unused) {
      /* make it a 64 multiple, since our bitsets frow by that and
       * small (easy_multi) grows to at least 64 on first resize. */
-    unsigned int newsize = ((capacity + min_unused) + 63) / 64;
+    unsigned int newsize = (((capacity + min_unused) + 63) / 64) * 64;
+    DEBUGASSERT(newsize > capacity);
     /* Grow the bitsets first. Should one fail, we do not need
      * to downsize the already resized ones. The sets continue
      * to work properly when larger than the table, but not
