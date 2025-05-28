@@ -50,6 +50,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LDAP_FOUND)
+  set(LDAP_VERSION "${LDAP_ldap_VERSION}")
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
