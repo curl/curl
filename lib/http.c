@@ -1176,6 +1176,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   bool reachedmax = FALSE;
   char *follow_url = NULL;
   CURLUcode uc;
+  CURLcode rewind_result;
+  bool switch_to_get = FALSE;
 
   DEBUGASSERT(type != FOLLOW_NONE);
 
@@ -1333,7 +1335,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 
   data->state.url = follow_url;
   data->state.url_alloc = TRUE;
-  Curl_req_soft_reset(&data->req, data);
+  rewind_result = Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
   if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
      data->set.str[STRING_CUSTOMREQUEST] &&
@@ -1382,8 +1384,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_301))
+       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       http_switch_to_get(data, 301);
+      switch_to_get = TRUE;
+    }
     break;
   case 302: /* Found */
     /* (quote from RFC7231, section 6.4.3)
@@ -1405,8 +1409,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_302))
+       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       http_switch_to_get(data, 302);
+      switch_to_get = TRUE;
+    }
     break;
 
   case 303: /* See Other */
@@ -1419,8 +1425,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
        ((data->state.httpreq != HTTPREQ_POST &&
          data->state.httpreq != HTTPREQ_POST_FORM &&
          data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !(data->set.keep_post & CURL_REDIR_POST_303)))
+        !(data->set.keep_post & CURL_REDIR_POST_303))) {
       http_switch_to_get(data, 303);
+      switch_to_get = TRUE;
+    }
     break;
   case 304: /* Not Modified */
     /* 304 means we did a conditional request and it was "Not modified".
@@ -1437,6 +1445,12 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     break;
   }
+
+  /* When rewind of upload data failed and we are not switching to GET,
+   * we need to fail the follow, as we cannot send the data again. */
+  if(rewind_result && !switch_to_get)
+    return rewind_result;
+
   Curl_pgrsTime(data, TIMER_REDIRECT);
   Curl_pgrsResetTransferSizes(data);
 

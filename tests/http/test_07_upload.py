@@ -606,6 +606,30 @@ class TestUpload:
                           extra_args=['--trace-config', 'all'])
         r.check_stats(count=count, http_status=413, exitcode=0)
 
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("httpcode", [301, 302, 307, 308])
+    def test_07_44_put_redir(self, env: Env, httpd, nghttpx, proto, httpcode):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 1
+        upload_size = 128*1024
+        url = f'https://localhost:{env.https_port}/curltest/put-redir-{httpcode}'
+        client = LocalClient(name='hx-upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-l', '-S', f'{upload_size}', '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        results = [int(m.group(1)) for line in r.trace_lines
+                     if (m := re.match(r'.* FINISHED, result=(\d+), response=(\d+)', line))]
+        httpcodes = [int(m.group(2)) for line in r.trace_lines
+                     if (m := re.match(r'.* FINISHED, result=(\d+), response=(\d+)', line))]
+        if httpcode == 308:
+            assert results[0] == 65, f'{r}'  # could not rewind input
+        else:
+            assert httpcodes[0] == httpcode, f'{r}'
+
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto):
