@@ -109,7 +109,7 @@ class TestBasic:
         r.check_stats(http_status=200, count=1, exitcode=0,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
-        # got the Conten-Length: header, but did not download anything
+        # got the Content-Length: header, but did not download anything
         assert r.responses[0]['header']['content-length'] == '30', f'{r.responses[0]}'
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'
 
@@ -149,7 +149,7 @@ class TestBasic:
     # http: large response headers
     # send 48KB+ sized response headers to check we handle that correctly
     # larger than 64KB headers expose a bug in Apache HTTP/2 that is not
-    # RSTing the stream correclty when its internal limits are exceeded.
+    # RSTing the stream correctly when its internal limits are exceeded.
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_01_11_large_resp_headers(self, env: Env, httpd, proto):
         if proto == 'h3' and not env.have_h3():

@@ -483,7 +483,7 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data,
            result, ssldone));
   if(!result && ssldone) {
     smtpc->ssldone = ssldone;
-    /* perform EHLO now, changes smpt->state out of SMTP_UPGRADETLS */
+    /* perform EHLO now, changes smtp->state out of SMTP_UPGRADETLS */
     result = smtp_perform_ehlo(data, smtpc);
   }
 out:

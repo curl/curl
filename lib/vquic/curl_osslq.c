@@ -2370,7 +2370,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
 #else
     *pres1 = 100;
 #endif
-    CURL_TRC_CF(data, cf, "query max_conncurrent -> %d", *pres1);
+    CURL_TRC_CF(data, cf, "query max_concurrent -> %d", *pres1);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

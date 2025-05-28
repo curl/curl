@@ -1135,7 +1135,7 @@ static bool url_match_destination(struct connectdata *conn,
       /* We are in an IMAPS vs IMAP like case. We expect `conn` to have SSL */
       if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
         DEBUGF(infof(m->data,
-          "Connection #%" FMT_OFF_T " has compatible protocol famiy, "
+          "Connection #%" FMT_OFF_T " has compatible protocol family, "
           "but no SSL, no match", conn->connection_id));
         return FALSE;
       }

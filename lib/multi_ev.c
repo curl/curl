@@ -303,7 +303,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   CURLMcode mresult;
 
   /* The transfer `data` reports in `ps` the sockets it is interested
-   * in and which combinatino of CURL_POLL_IN/CURL_POLL_OUT it wants
+   * in and which combination of CURL_POLL_IN/CURL_POLL_OUT it wants
    * to have monitored for events.
    * There can be more than 1 transfer interested in the same socket
    * and 1 transfer might be interested in more than 1 socket.

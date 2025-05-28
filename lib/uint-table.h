@@ -34,7 +34,7 @@ struct uint_tbl {
   void **rows;  /* array of void* holding entries */
   Curl_uint_tbl_entry_dtor *entry_dtor;
   unsigned int nrows;  /* length of `rows` array */
-  unsigned int nentries; /* entris in table */
+  unsigned int nentries; /* entries in table */
   unsigned int last_key_added; /* UINT_MAX or last key added */
 #ifdef DEBUGBUILD
   int init;

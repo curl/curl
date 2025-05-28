@@ -229,7 +229,7 @@ class TestProxy:
         indata = open(srcfile).readlines()
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
-            assert respdata == indata, f'resonse {i} differs'
+            assert respdata == indata, f'response {i} differs'
         assert r.total_connects == 1, r.dump_logs()
 
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
