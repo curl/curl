@@ -250,7 +250,7 @@ UNITTEST_START
       "\x00\x03" /* data size */
       "\x02" /* ALPN length byte */
       "h2"
-      "\x00\x02" /* RR (2 == NO DEFALT ALPN) */
+      "\x00\x02" /* RR (2 == NO DEFAULT ALPN) */
       "\x00\x00", /* must be zero */
       24,
       "r:0|p:0|name.some.|alpn:10|no-def-alpn|"
@@ -263,7 +263,7 @@ UNITTEST_START
       "\x00\x03" /* data size */
       "\x02" /* ALPN length byte */
       "h2"
-      "\x00\x02" /* RR (2 == NO DEFALT ALPN) */
+      "\x00\x02" /* RR (2 == NO DEFAULT ALPN) */
       "\x00\x01" /* must be zero */
       "\xff",
       25,
@@ -277,7 +277,7 @@ UNITTEST_START
       "\x00\x03" /* data size */
       "\x02" /* ALPN length byte */
       "h2"
-      "\x00\x02" /* RR (2 == NO DEFALT ALPN) */
+      "\x00\x02" /* RR (2 == NO DEFAULT ALPN) */
       "\x00\x01", /* must be zero */
       /* missing last byte in the packet */
       24,
@@ -478,7 +478,7 @@ UNITTEST_START
       "h2"
       "\x02" /* ALPN length byte */
       "h1"
-      "\x00\x02" /* RR (2 == NO DEFALT ALPN) */
+      "\x00\x02" /* RR (2 == NO DEFAULT ALPN) */
       "\x00\x00" /* must be zero */
       "\x00\x03" /* RR (3 == PORT) */
       "\x00\x02" /* data size */

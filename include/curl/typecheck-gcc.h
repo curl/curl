@@ -178,7 +178,7 @@
               _curl_easy_getinfo_err_curl_slist();                      \
           if(curlcheck_tlssessioninfo_info(info))                       \
             if(!curlcheck_arr((arg), struct curl_tlssessioninfo *))     \
-              _curl_easy_getinfo_err_curl_tlssesssioninfo();            \
+              _curl_easy_getinfo_err_curl_tlssessioninfo();            \
           if(curlcheck_certinfo_info(info))                             \
             if(!curlcheck_arr((arg), struct curl_certinfo *))           \
               _curl_easy_getinfo_err_curl_certinfo();                   \
@@ -295,7 +295,7 @@ CURLWARNING(_curl_easy_getinfo_err_double,
             "curl_easy_getinfo expects a pointer to double")
 CURLWARNING(_curl_easy_getinfo_err_curl_slist,
             "curl_easy_getinfo expects a pointer to 'struct curl_slist *'")
-CURLWARNING(_curl_easy_getinfo_err_curl_tlssesssioninfo,
+CURLWARNING(_curl_easy_getinfo_err_curl_tlssessioninfo,
             "curl_easy_getinfo expects a pointer to "
             "'struct curl_tlssessioninfo *'")
 CURLWARNING(_curl_easy_getinfo_err_curl_certinfo,
