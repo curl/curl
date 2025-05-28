@@ -35,6 +35,7 @@
 
 CURLcode test(char *URL)
 {
+  CURL *easies[1000];
   CURLM *m;
   CURLcode res = CURLE_FAILED_INIT;
   CURLMcode mres;
@@ -48,12 +49,14 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
+  memset(easies, 0, sizeof(easies));
   for(i = 0; i < 1000; i++) {
     CURL *e = curl_easy_init();
     if(!e) {
       res = CURLE_OUT_OF_MEMORY;
       goto test_cleanup;
     }
+    easies[i] = e;
 
     res = curl_easy_setopt(e, CURLOPT_URL, "https://www.example.com/");
     if(!res)
@@ -74,6 +77,13 @@ test_cleanup:
   if(res)
     printf("ERROR: %s\n", curl_easy_strerror(res));
 
+  for(i = 0; i < 1000; i++) {
+    if(easies[i]) {
+      curl_multi_add_handle(m, easies[i]);
+      curl_easy_cleanup(easies[i]);
+      easies[i] = NULL;
+    }
+  }
   curl_multi_cleanup(m);
   curl_global_cleanup();
 
