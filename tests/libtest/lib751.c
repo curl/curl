@@ -38,6 +38,7 @@ CURLcode test(char *URL)
   CURLM *m;
   CURLcode res = CURLE_FAILED_INIT;
   CURLMcode mres;
+  int i;
 
   (void)URL;
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -47,7 +48,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  for(int i = 0; i < 1000; i++) {
+  for(i = 0; i < 1000; i++) {
     CURL *e = curl_easy_init();
     if(!e) {
       res = CURLE_OUT_OF_MEMORY;
