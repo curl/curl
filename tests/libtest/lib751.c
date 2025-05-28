@@ -42,6 +42,8 @@ CURLcode test(char *URL)
   int i;
 
   (void)URL;
+  memset(easies, 0, sizeof(easies));
+
   curl_global_init(CURL_GLOBAL_DEFAULT);
   m = curl_multi_init();
   if(!m) {
@@ -49,7 +51,6 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  memset(easies, 0, sizeof(easies));
   for(i = 0; i < 1000; i++) {
     CURL *e = curl_easy_init();
     if(!e) {
