@@ -24,7 +24,7 @@ manner. Parallel transfer means that curl runs up to N concurrent transfers
 simultaneously and if there are more than N transfers to handle, it starts new
 ones when earlier transfers finish.
 
-With parallel transfers, the progress meter output is different than when
+With parallel transfers, the progress meter output is different from when
 doing serial transfers, as it then displays the transfer status for multiple
 transfers in a single line.
 

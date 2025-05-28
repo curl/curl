@@ -15,5 +15,5 @@ Example:
 # `--tcp-fastopen`
 
 Enable use of TCP Fast Open (RFC 7413). TCP Fast Open is a TCP extension that
-allows data to get sent earlier over the connection (before the final
+allows data to be sent earlier over the connection (before the final
 handshake ACK) if the client and server have been connected previously.

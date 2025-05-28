@@ -18,7 +18,7 @@ Example:
 
 # `--max-time`
 
-Set maximum time in seconds that you allow each transfer to take. Prevents
+Set the maximum time in seconds that you allow each transfer to take. Prevents
 your batch jobs from hanging for hours due to slow networks or links going
 down. This option accepts decimal values (added in 7.32.0).
 

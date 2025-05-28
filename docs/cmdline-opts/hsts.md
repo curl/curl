@@ -22,7 +22,7 @@ filename again if it has been modified.
 
 If curl is told to use HTTP:// for a transfer involving a hostname that exists
 in the HSTS cache, it upgrades the transfer to use HTTPS. Each HSTS cache
-entry has an individual life time after which the upgrade is no longer
+entry has an individual lifetime after which the upgrade is no longer
 performed.
 
 Specify a "" filename (zero length) to avoid loading/saving and make curl just

@@ -28,7 +28,7 @@ particular backend to use for this invocation.
 If curl supports more than one TLS library like this, the ones that are *not*
 selected by default are listed within parentheses. Thus, if you do not specify
 which backend to use (with the `CURL_SSL_BACKEND` environment variable) the
-one listed without parentheses is used. Such builds also has `MultiSSL` set as
+one listed without parentheses is used. Such builds also have `MultiSSL` set as
 a feature.
 
 The second line (starts with `Release-Date:`) shows the release date.

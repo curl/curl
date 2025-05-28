@@ -29,7 +29,7 @@ If the connection is done without TLS, this option has no effect. This
 includes QUIC-using (HTTP/3) transfers.
 
 ## default
-Use up to recommended TLS version.
+Use up to the recommended TLS version.
 
 ## 1.0
 Use up to TLSv1.0.

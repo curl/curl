@@ -14,7 +14,7 @@ Example:
 
 # `--remove-on-error`
 
-Remove output file if an error occurs. If curl returns an error when told to
+Remove the output file if an error occurs. If curl returns an error when told to
 save output in a local file. This prevents curl from leaving a partial file in
 the case of an error during transfer.
 

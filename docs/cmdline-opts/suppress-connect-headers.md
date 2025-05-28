@@ -16,7 +16,7 @@ Example:
 
 # `--suppress-connect-headers`
 
-When --proxytunnel is used and a CONNECT request is made do not output proxy
+When --proxytunnel is used and a CONNECT request is made, do not output proxy
 CONNECT response headers. This option is meant to be used with --dump-header
 or --show-headers which are used to show protocol headers in the output. It
 has no effect on debug options such as --verbose or --trace, or any

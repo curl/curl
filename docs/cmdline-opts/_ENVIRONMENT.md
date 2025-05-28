@@ -40,7 +40,7 @@ accesses the target URL directly, and
 
 accesses the target URL through the proxy.
 
-The list of hostnames can also be include numerical IP addresses, and IPv6
+The list of hostnames can also include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
 IP addresses can be specified using CIDR notation: an appended slash and
@@ -106,7 +106,7 @@ BoringSSL, GnuTLS, wolfSSL and Rustls.
 
 ## `USERPROFILE` <dir>
 On Windows, this variable is used when trying to find the home directory. If
-the other, primary, variable are all unset. If set, curl uses the path
+the other, primary, variables are all unset. If set, curl uses the path
 **"$USERPROFILE\Application Data"**.
 
 ## `XDG_CONFIG_HOME` <dir>

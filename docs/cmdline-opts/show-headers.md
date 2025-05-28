@@ -27,7 +27,7 @@ the data. --dump-header exists to save headers in a separate stream.
 To view the request headers, consider the --verbose option.
 
 Prior to 7.75.0 curl did not print the headers if --fail was used in
-combination with this option and there was error reported by server.
+combination with this option and there was an error reported by the server.
 
 This option was called --include before 8.10.0. The previous name remains
 functional.

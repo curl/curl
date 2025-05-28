@@ -37,13 +37,13 @@ verbosity when the option is mentioned in the command line *and* curl config
 files.
 
 Using it twice, e.g. `-vv`, outputs time (--trace-time) and transfer ids
-(--trace-ids), as well as enable tracing for all protocols (--trace-config
+(--trace-ids), as well as enabling tracing for all protocols (--trace-config
 protocol).
 
-Adding a third verbose outputs transfer content (--trace-ascii %) and enable
+Adding a third verbose outputs transfer content (--trace-ascii %) and enables
 tracing of more components (--trace-config read,write,ssl).
 
-A forth time adds tracing of all network components. (--trace-config network).
+A fourth time adds tracing of all network components. (--trace-config network).
 
 Any addition of the verbose option after that has no effect.
 
