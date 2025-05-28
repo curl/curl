@@ -922,7 +922,7 @@ static int myssh_state_upload_init(struct Curl_easy *data,
   return rc;
 }
 
-static int myssh_state_sftp_dowload_stat(struct Curl_easy *data,
+static int myssh_state_sftp_download_stat(struct Curl_easy *data,
                                          struct ssh_conn *sshc)
 {
   curl_off_t size;
@@ -1751,7 +1751,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_DOWNLOAD_STAT:
-      rc = myssh_state_sftp_dowload_stat(data, sshc);
+      rc = myssh_state_sftp_download_stat(data, sshc);
       break;
 
     case SSH_SFTP_CLOSE:
