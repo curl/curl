@@ -29,7 +29,7 @@ content: do not add newlines or carriage returns, they only mess things up for
 you.
 
 Headers specified with this option are not included in requests that curl
-knows are not be sent to a proxy.
+knows are not to be sent to a proxy.
 
 This option can take an argument in @filename style, which then adds a header
 for each line in the input file (added in 7.55.0). Using @- makes curl read

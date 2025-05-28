@@ -19,7 +19,7 @@ Example:
 # `--capath`
 
 Use the specified certificate directory to verify the peer. Multiple paths can
-be provided by separated with colon (`:`) (e.g. `path1:path2:path3`). The
+be provided by separating them with colon (`:`) (e.g. `path1:path2:path3`). The
 certificates must be in PEM format, and if curl is built against OpenSSL, the
 directory must have been processed using the c_rehash utility supplied with
 OpenSSL. Using --capath can allow OpenSSL-powered curl to make SSL-connections

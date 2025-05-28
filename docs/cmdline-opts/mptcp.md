@@ -24,7 +24,7 @@ servers, such as mobile networks where a device may switch between WiFi and
 cellular data or in wired networks with multiple Internet Service Providers.
 
 This option is currently only supported on Linux starting from kernel 5.6. Only
-TCP connections are modified, hence this option does not effect HTTP/3 (QUIC)
+TCP connections are modified, hence this option does not affect HTTP/3 (QUIC)
 or UDP connections.
 
 The server curl connects to must also support MPTCP. If not, the connection

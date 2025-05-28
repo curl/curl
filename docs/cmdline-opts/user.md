@@ -29,8 +29,8 @@ still.
 On systems where it works, curl hides the given option argument from process
 listings. This is not enough to protect credentials from possibly getting seen
 by other users on the same system as they still are visible for a moment
-before cleared. Such sensitive data should be retrieved from a file instead or
-similar and never used in clear text in a command line.
+before being cleared. Such sensitive data should be retrieved from a file
+instead or similar and never used in clear text in a command line.
 
 When using Kerberos V5 with a Windows based server you should include the
 Windows domain name in the username, in order for the server to successfully

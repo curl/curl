@@ -21,7 +21,7 @@ Example:
 Same as --capath but used in HTTPS proxy context.
 
 Use the specified certificate directory to verify the proxy. Multiple paths
-can be provided by separated with colon (`:`) (e.g. `path1:path2:path3`). The
+can be provided by separating them with colon (`:`) (e.g. `path1:path2:path3`). The
 certificates must be in PEM format, and if curl is built against OpenSSL, the
 directory must have been processed using the c_rehash utility supplied with
 OpenSSL. Using --proxy-capath can allow OpenSSL-powered curl to make
