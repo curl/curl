@@ -11,7 +11,7 @@ SPDX-License-Identifier: curl
 Lots of people download binary distributions of curl and libcurl. This
 document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
-libcurl from source code.
+libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
@@ -30,7 +30,7 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the `GIT-INFO.md` file in the root directory for specific instructions on how
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
 to proceed.
 
 # Unix
@@ -208,11 +208,69 @@ multi-threaded dynamic C runtime.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the `sh`
+Almost identical to the Unix installation. Essentially run the configure script in the
+curl source tree root with `sh configure`, then run `make`.
+
+To expand on building with `cygwin` first ensure it is in your path, and there are no
+conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items
+in your path that would conflict with `cygwin` commands, making sure you have the `sh`
 executable in `/bin/` or you see the configure fail toward the end.
 
-Run `make`
+Download the setup installer from
+[`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
+packages are needed for the install. For more on installing packages visit
+[`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
+
+Either run setup-x86_64.exe, then search and select packages individually, or try:
+
+    setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
+
+If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
+the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
+until you reach the "Select Packages" window; then select packages, click next, and finish
+the `cygwin` package installation.
+
+Download the latest version of the `cygwin` packages required (*and suggested*) for a successful install:
+
+<details>
+    <summary>Package List</summary>
+
+```
+ binutil - required
+ gcc-core - required
+ libpsl-devel - required
+ libtool - required
+ perl - required
+ make - required
+ - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
+   ln -s /usr/bin/make /usr/bin/gmake
+```
+
+</details>
+
+Once all the packages have been installed, begin the process of installing curl from the source code:
+
+ <details>
+     <summary>configure_options</summary>
+
+```
+    --with-gnutls
+    --with-mbedtls
+    --with-openssl (also works for OpenSSL forks)
+    --with-rustls
+    --with-wolfssl
+    --without-ssl
+```
+
+ </details>
+
+ 1. `sh configure <configure_options>`
+ 2. `make`
+
+If any error occurs during curl installation, try:
+ - reinstalling the required `cygwin` packages from the list above
+ - temporarily move `cygwin` to the top of your path
+ - install all of the suggested `cygwin` packages
 
 ## MS-DOS
 
