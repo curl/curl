@@ -218,7 +218,7 @@ Curl_getaddrinfo_ex(const char *nodename,
  *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data of a given hostent.
- * Curl_addrinfo is meant to work like the addrinfo struct does for a IPv6
+ * Curl_addrinfo is meant to work like the addrinfo struct does for an IPv6
  * stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
