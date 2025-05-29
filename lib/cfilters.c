@@ -907,7 +907,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 }
 
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t blen, ssize_t *n)
+                        char *buf, size_t blen, size_t *n)
 {
   CURLcode result = CURLE_OK;
   ssize_t nread;

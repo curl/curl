@@ -562,7 +562,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
                         char *buf, size_t buffersize,
-                        ssize_t *pnread);
+                        size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
