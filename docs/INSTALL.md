@@ -11,9 +11,11 @@ SPDX-License-Identifier: curl
 Lots of people download binary distributions of curl and libcurl. This
 document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
-libcurl from source code.
+libcurl from [source code](https://curl.se/download.html#:~:text=offer%2E-,Packages).
 
 ## Building using vcpkg
+
+[curl source code](https://curl.se/download.html#Win32)
 
 You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 
@@ -30,10 +32,12 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the `GIT-INFO.md` file in the root directory for specific instructions on how
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
 to proceed.
 
 # Unix
+
+[curl source code](https://curl.se/download.html#Linux)
 
 A normal Unix installation is made in three or four steps (after you have
 unpacked the source archive):
@@ -178,6 +182,8 @@ library check.
 
 # Windows
 
+[curl source code](https://curl.se/download.html#Win32)
+
 Building for Windows XP is required as a minimum.
 
 You can build curl with:
@@ -208,13 +214,80 @@ multi-threaded dynamic C runtime.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the `sh`
+[curl source code](https://curl.se/download.html#Win64cygwin)
+
+Almost identical to the Unix installation. Essentially run the configure script in the
+curl source tree root with `sh configure`, then run `make`. 
+
+To expand on building with cygwin first ensure it is in your path, and there are no 
+conflicting tools (*i.e. Chocolatey with sed package*). If so move cygwin ahead of any items 
+in your path that would conflict with cygwin commands, making sure you have the `sh` 
 executable in `/bin/` or you see the configure fail toward the end.
 
-Run `make`
+You'll need to download the setup installer from 
+[cygwin](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional cygwin 
+packages will be needed for the install. For more on installing packages visit 
+[cygwin setup cli](https://www.cygwin.com/faq/faq.html#faq.setup.cli). 
+ 
+Either run setup-x86_64.exe, then search and select packages indiviually, or try:
+
+    setup-x86_64.exe -P binutil gcc-core libpsl-devel libtool perl make
+    
+If the latter, matching packages should appear in the install rows after selecting 
+the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts 
+until you reach the "Select Packages" window; then select packages, click next, and finish 
+the cygwin package installation.
+ 
+Unless specifed, download the latest version of the package. The cygwin packages required (*and suggested*) for a succesful install are:
+
+<details>
+    <summary>Cygwin Package List</summary>
+    
+ - binutil - *required*
+ - gcc-core - *required*
+ - libpsl-devel - *required*
+ - libtool (latest or 2.5.4-1) - *required*
+ -  perl - *required*
+ -  make - *required*
+    - NOTE - if there is an error regarding cmake, in the **cygwin terminal** run ` ln -s /usr/bin/make /usr/bin/gmake `.
+ - libuv1 - *suggested*
+ - libarchive13 - *suggested*
+ - libcurl4 - *suggested* 
+ - libexpat1 - *suggested*
+ - libjsoncpp25 - *suggested*
+ - librhash0 - *suggested*
+
+</details>
+ 
+Once all the packages have been installed, begin the process of installing curl from the source code:
+
+ <details>
+     <summary>configure_options</summary>
+
+  --with-amissl <br>
+  --with-bearssl <br>
+  --with-gnutls <br>
+  --with-mbedtls <br>
+  --with-openssl (also works for BoringSSL and LibreSSL) <br>
+  --with-rustls <br>
+  --with-schannel <br>
+  --with-secure-transport <br>
+  --with-wolfssl <br>
+  --without-ssl <br>
+     
+ </details>
+
+ 1. ` sh configure <configure_options> ` 
+ 2. ` make `
+  
+If any errror occurs during curl installation, try:
+ - reinstalling the required cygwin packages from the list above
+ - temporarily move cygwin to the top of your path
+ - install all of the suggested cygwin packages
 
 ## MS-DOS
+
+[curl source code](https://curl.se/download.html#DOS)
 
 You can use either autotools or cmake:
 
@@ -250,6 +323,8 @@ Notes:
    been changed between releases.
 
 ## AmigaOS
+
+[curl source code](https://curl.se/download.html#AmigaOS)
 
 You can use either autotools or cmake:
 
@@ -340,6 +415,8 @@ another SSL backend such as OpenSSL.
 
 # Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
 
+[curl source code](https://curl.se/download.html#MacOSX)
+
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
 Transport for SSL/TLS, use the configure option `--with-secure-transport`.
@@ -419,6 +496,8 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
+[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
+
 When building curl for Android you can you CMake or curl's `configure` script.
 
 Before you can build curl for Android, you need to install the Android NDK
@@ -473,6 +552,8 @@ LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the
 
 # IBM i
 
+[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
+
 For IBM i (formerly OS/400), you can use curl in two different ways:
 
 - Natively, running in the **ILE**. The obvious use is being able to call curl
@@ -505,6 +586,8 @@ Do not panic. curl and your program are not broken. You can fix this by:
 - Alternatively, start the job with the `ALWMLTTHD` parameter set to `*YES`.
 
 # Cross compile
+
+[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
 
 Download and unpack the curl package.
 
