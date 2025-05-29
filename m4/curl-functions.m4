@@ -2357,7 +2357,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
      test "$tst_works_inet_ntop" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_NTOP, 1,
-      [Define to 1 if you have a IPv6 capable working inet_ntop function.])
+      [Define to 1 if you have an IPv6 capable working inet_ntop function.])
     curl_cv_func_inet_ntop="yes"
   else
     AC_MSG_RESULT([no])
@@ -2511,7 +2511,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
      test "$tst_works_inet_pton" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_PTON, 1,
-      [Define to 1 if you have a IPv6 capable working inet_pton function.])
+      [Define to 1 if you have an IPv6 capable working inet_pton function.])
     curl_cv_func_inet_pton="yes"
   else
     AC_MSG_RESULT([no])

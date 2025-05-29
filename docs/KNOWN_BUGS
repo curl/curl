@@ -447,7 +447,7 @@ problems may have been fixed or changed somewhat since this was written.
 10.1 --interface with link-scoped IPv6 address
 
  When you give the `--interface` option telling curl to use a specific
- interface for its outgoing traffic in combination with a IPv6 address in the
+ interface for its outgoing traffic in combination with an IPv6 address in the
  URL that uses a link-local scope, curl might pick the wrong address from the
  named interface and the subsequent transfer fails.
 
