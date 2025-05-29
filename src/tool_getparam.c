@@ -509,14 +509,13 @@ static void
 GetFileAndPassword(const char *nextarg, char **file, char **password)
 {
   char *certname, *passphrase;
-  if(nextarg) {
-    parse_cert_parameter(nextarg, &certname, &passphrase);
-    free(*file);
-    *file = certname;
-    if(passphrase) {
-      free(*password);
-      *password = passphrase;
-    }
+  /* nextarg is never NULL here */
+  parse_cert_parameter(nextarg, &certname, &passphrase);
+  free(*file);
+  *file = certname;
+  if(passphrase) {
+    free(*password);
+    *password = passphrase;
   }
 }
 
@@ -1090,7 +1089,8 @@ static ParameterError parse_url(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 const char *nextarg)
 {
-  if(nextarg && (nextarg[0] == '@')) {
+  /* nextarg is never NULL here */
+  if(nextarg[0] == '@') {
     /* read URLs from a file, treat all as -O */
     struct dynbuf line;
     ParameterError err = PARAM_OK;
