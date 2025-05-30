@@ -509,7 +509,7 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
   *do_early_data = FALSE;
 #ifdef WOLFSSL_EARLY_DATA
   connssl->earlydata_max = wolfSSL_SESSION_get_max_early_data(
-                            wolfSSL_get_session(wssl->ssl));
+    wolfSSL_get_session(wssl->ssl));
 #else
   (void)wssl;
   connssl->earlydata_max = 0;
@@ -574,11 +574,19 @@ wssl_setup_session(struct Curl_cfilter *cf,
             if(result)
               goto  out;
           }
+#ifdef WOLFSSL_EARLY_DATA
           if(do_early_data) {
+            unsigned int edmax = (scs->earlydata_max < UINT_MAX) ?
+              (unsigned int)scs->earlydata_max : UINT_MAX;
             /* We only try the ALPN protocol the session used before,
              * otherwise we might send early data for the wrong protocol */
             Curl_alpn_restrict_to(alpns, scs->alpn);
+            wolfSSL_set_max_early_data(wss->ssl, edmax);
           }
+#else
+          /* Should never enable when not supported */
+          DEBUGASSERT(!do_early_data);
+#endif
         }
       }
       wolfSSL_SESSION_free(session);
@@ -930,14 +938,6 @@ wssl_legacy_CTX_set_max_proto_version(WOLFSSL_CTX* ctx, int version)
   "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
   "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
 #define QUIC_GROUPS "P-256:P-384:P-521"
-
-#if defined(HAVE_SECRET_CALLBACK)
-static void keylog_callback(const WOLFSSL *ssl, const char *line)
-{
-  (void)ssl;
-  Curl_tls_keylog_write_line(line);
-}
-#endif
 
 CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
                             struct Curl_cfilter *cf,
