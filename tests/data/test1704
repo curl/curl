@@ -33,7 +33,7 @@ h2c
 http
 </server>
 <name>
-HTTP/1 doing HTTP/2 Upgrade: getting a HTTP/2 101 response
+HTTP/1 doing HTTP/2 Upgrade: getting an HTTP/2 101 response
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2

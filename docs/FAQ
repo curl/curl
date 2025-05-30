@@ -1411,7 +1411,7 @@ FAQ
 
 6. License Issues
 
-  curl and libcurl are released under a MIT/X derivative license. The license
+  curl and libcurl are released under an MIT/X derivative license. The license
   is liberal and should not impose a problem for your project. This section is
   just a brief summary for the cases we get the most questions. (Parts of this
   section was much enhanced by Bjorn Reese.)

@@ -410,7 +410,7 @@ static int test_rlimit(int keep_open)
     }
   }
 
-#endif /* using a FD_SETSIZE bound select() */
+#endif /* using an FD_SETSIZE bound select() */
 
   /*
    * Old or 'backwards compatible' implementations of stdio do not allow

@@ -318,9 +318,9 @@ was specified in the URL. That was a bug fixed in 7.62.0, which added
 
 ## LDAP
 
-The path part of a LDAP request can be used to specify the: Distinguished
-Name, Attributes, Scope, Filter and Extension for a LDAP search. Each field is
-separated by a question mark and when that field is not required an empty
+The path part of an LDAP request can be used to specify the: Distinguished
+Name, Attributes, Scope, Filter and Extension for an LDAP search. Each field
+is separated by a question mark and when that field is not required an empty
 string with the question mark separator should be included.
 
 Search for the `DN` as `My Organization`:
@@ -336,8 +336,8 @@ Search for an empty `DN` and request information about the
 
     ldap://ldap.example.com/?rootDomainNamingContext
 
-For more information about the individual components of a LDAP URL please
-see [RFC 4516](https://datatracker.ietf.org/doc/html/rfc4516).
+For more information about the individual components of an LDAP URL please see
+[RFC 4516](https://datatracker.ietf.org/doc/html/rfc4516).
 
 ## POP3
 
