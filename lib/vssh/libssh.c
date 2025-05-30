@@ -923,7 +923,7 @@ static int myssh_state_upload_init(struct Curl_easy *data,
 }
 
 static int myssh_state_sftp_download_stat(struct Curl_easy *data,
-                                         struct ssh_conn *sshc)
+                                          struct ssh_conn *sshc)
 {
   curl_off_t size;
   int rc = 0;
