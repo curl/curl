@@ -37,7 +37,7 @@ https-mtls
 HTTPS GET with client authentication (mtls)
 </name>
 <command>
---cacert %CERTDIR/certs/test-ca.crt --cert %CERTDIR/certs/test-client-cert.crt --key %CERTDIR/certs/test-client-cert.key https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER
+--cacert %CERTDIR/certs/test-ca.crt --cert %CERTDIR/certs/test-client-eku-only.crt --key %CERTDIR/certs/test-client-eku-only.key https://localhost:%HTTPS-MTLSPORT/%TESTNUMBER
 </command>
 </client>
 

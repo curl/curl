@@ -31,7 +31,8 @@ CERTCONFIGS = \
   test-localhost0h.prm \
   test-localhost-san-first.prm \
   test-localhost-san-last.prm \
-  test-client-cert.prm
+  test-client-cert.prm \
+  test-client-eku-only.prm
 
 GENERATEDCERTS = \
   test-ca.cacert \
