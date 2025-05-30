@@ -219,23 +219,23 @@ multi-threaded dynamic C runtime.
 Almost identical to the Unix installation. Essentially run the configure script in the
 curl source tree root with `sh configure`, then run `make`.
 
-To expand on building with `cygwin` first ensure it is in your path, and there are no 
-conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items 
-in your path that would conflict with `cygwin` commands, making sure you have the `sh` 
+To expand on building with `cygwin` first ensure it is in your path, and there are no
+conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items
+in your path that would conflict with `cygwin` commands, making sure you have the `sh`
 executable in `/bin/` or you see the configure fail toward the end.
 
-You will need to download the setup installer from 
-[cygwin](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional `cygwin` 
-packages are needed for the install. For more on installing packages visit 
-[cygwin setup](https://www.cygwin.com/faq/faq.html#faq.setup.cli). 
+Download the setup installer from
+[`cygwin`](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional `cygwin`
+packages are needed for the install. For more on installing packages visit
+[cygwin setup](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
     setup-x86_64.exe -P binutil gcc-core libpsl-devel libtool perl make
 
-If the latter, matching packages should appear in the install rows after selecting 
-the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts 
-until you reach the "Select Packages" window; then select packages, click next, and finish 
+If the latter, matching packages should appear in the install rows after selecting
+the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
+until you reach the "Select Packages" window; then select packages, click next, and finish
 the `cygwin` package installation.
 
 Unless specified, download the latest version of the package. The `cygwin` packages required (*and suggested*) for a successful install are:
@@ -243,20 +243,22 @@ Unless specified, download the latest version of the package. The `cygwin` packa
 <details>
     <summary>Package List</summary>
 
-    binutil - required
-    gcc-core - required
-    libpsl-devel - required
-    libtool (latest or 2.5.4-1) - required
-    perl - required
-    make - required
-    - NOTE - if there is an error regarding cmake, open the cygwin terminal, and run:
-      ln -s /usr/bin/make /usr/bin/gmake
-    libuv1 - suggested
-    libarchive13 - suggested
-    libcurl4 - suggested 
-    libexpat1 - suggested
-    libjsoncpp25 - suggested
-    librhash0 - suggested
+```
+ binutil - required
+ gcc-core - required
+ libpsl-devel - required
+ libtool (latest or 2.5.4-1) - required
+ perl - required
+ make - required
+ - NOTE - if there is an error regarding cmake, open the cygwin terminal, and run:
+   ln -s /usr/bin/make /usr/bin/gmake
+ libuv1 - suggested
+ libarchive13 - suggested
+ libcurl4 - suggested
+ libexpat1 - suggested
+ libjsoncpp25 - suggested
+ librhash0 - suggested
+```
 
 </details>
 
@@ -265,20 +267,22 @@ Once all the packages have been installed, begin the process of installing curl 
  <details>
      <summary>configure_options</summary>
 
-    --with-amissl 
-    --with-bearssl 
-    --with-gnutls 
-    --with-mbedtls 
-    --with-openssl (also works for BoringSSL and LibreSSL) 
-    --with-rustls 
-    --with-schannel 
-    --with-secure-transport 
-    --with-wolfssl 
+```
+    --with-amissl
+    --with-bearssl
+    --with-gnutls
+    --with-mbedtls
+    --with-openssl (also works for BoringSSL and LibreSSL)
+    --with-rustls
+    --with-schannel
+    --with-secure-transport
+    --with-wolfssl
     --without-ssl
+```
 
  </details>
 
- 1. ` sh configure <configure_options> ` 
+ 1. ` sh configure <configure_options> `
  2. ` make `
 
 If any error occurs during curl installation, try:
