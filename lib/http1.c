@@ -209,7 +209,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     path = target;
     path_len = target_len;
 
-    /* URL parser wants 0-termination */
+    /* URL parser wants null-termination */
     if(target_len >= sizeof(tmp))
       goto out;
     memcpy(tmp, target, target_len);
