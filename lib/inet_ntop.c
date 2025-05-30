@@ -56,7 +56,7 @@
  * Returns `dst' (as a const)
  * Note:
  *  - uses no statics
- *  - takes a unsigned char* not an in_addr as input
+ *  - takes an unsigned char* not an in_addr as input
  */
 static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 {

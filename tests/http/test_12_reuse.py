@@ -77,7 +77,7 @@ class TestReuse:
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_03_as_follow_h2h3(self, env: Env, httpd, configures_httpd, nghttpx):
-        # write a alt-svc file that advises h3 instead of h2
+        # write an alt-svc file that advises h3 instead of h2
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
         self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')
         curl = CurlClient(env=env)
@@ -91,7 +91,7 @@ class TestReuse:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_04_as_follow_h3h2(self, env: Env, httpd, configures_httpd, nghttpx):
         count = 2
-        # write a alt-svc file the advises h2 instead of h3
+        # write an alt-svc file the advises h2 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_04.txt')
         ts = datetime.now() + timedelta(hours=24)
         expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
@@ -113,7 +113,7 @@ class TestReuse:
     def test_12_05_as_follow_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3` an Alt-Svc redirection from h3 to h1 is allowed
         count = 2
-        # write a alt-svc file the advises h1 instead of h3
+        # write an alt-svc file the advises h1 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
         ts = datetime.now() + timedelta(hours=24)
         expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
@@ -135,7 +135,7 @@ class TestReuse:
     def test_12_06_as_ignore_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3-only` an Alt-Svc redirection from h3 to h1 is ignored
         count = 2
-        # write a alt-svc file the advises h1 instead of h3
+        # write an alt-svc file the advises h1 instead of h3
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
         ts = datetime.now() + timedelta(hours=24)
         expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
@@ -156,7 +156,7 @@ class TestReuse:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_07_as_ignore_h2h3(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http2` an Alt-Svc redirection from h2 to h3 is ignored
-        # write a alt-svc file that advises h3 instead of h2
+        # write an alt-svc file that advises h3 instead of h2
         asfile = os.path.join(env.gen_dir, 'alt-svc-12_03.txt')
         self.create_asfile(asfile, f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.h3_port}')
         curl = CurlClient(env=env)
