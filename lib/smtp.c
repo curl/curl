@@ -601,7 +601,7 @@ static CURLcode smtp_perform_authentication(struct Curl_easy *data,
  *
  * smtp_perform_command()
  *
- * Sends a SMTP based command.
+ * Sends an SMTP based command.
  */
 static CURLcode smtp_perform_command(struct Curl_easy *data,
                                      struct smtp_conn *smtpc,
@@ -1036,7 +1036,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
     if(smtpcode != 1) {
       if(data->set.use_ssl && !Curl_conn_is_ssl(data->conn, FIRSTSOCKET)) {
-        /* We do not have a SSL/TLS connection yet, but SSL is requested */
+        /* We do not have an SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */
           result = smtp_perform_starttls(data, smtpc);

@@ -29,8 +29,8 @@ Bypass the AltSvc HTTPS protocol restriction if this variable exists.
 
 ## `CURL_DBG_SOCK_RBLOCK`
 
-The percentage of recv() calls that should be answered with a EAGAIN at random.
-For TCP/UNIX sockets.
+The percentage of recv() calls that should be answered with an EAGAIN at
+random. For TCP/UNIX sockets.
 
 ## `CURL_DBG_SOCK_RMAX`
 
@@ -42,8 +42,8 @@ maximum of 400 bytes.
 
 ## `CURL_DBG_SOCK_WBLOCK`
 
-The percentage of send() calls that should be answered with a EAGAIN at random.
-For TCP/UNIX sockets.
+The percentage of send() calls that should be answered with an EAGAIN at
+random. For TCP/UNIX sockets.
 
 ## `CURL_DBG_SOCK_WPARTIAL`
 

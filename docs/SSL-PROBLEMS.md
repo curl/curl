@@ -40,8 +40,8 @@ SPDX-License-Identifier: curl
 
   Some broken servers fail to support the protocol negotiation properly that
   SSL servers are supposed to handle. This may cause the connection to fail
-  completely. Sometimes you may need to explicitly select a SSL version to use
-  when connecting to make the connection succeed.
+  completely. Sometimes you may need to explicitly select an SSL version to
+  use when connecting to make the connection succeed.
 
   An additional complication can be that modern SSL libraries sometimes are
   built with support for older SSL and TLS versions disabled.

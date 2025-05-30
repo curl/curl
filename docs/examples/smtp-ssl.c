@@ -100,7 +100,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
     /* This is the URL for your mailserver. Note the use of smtps:// rather
-     * than smtp:// to request a SSL based connection. */
+     * than smtp:// to request an SSL based connection. */
     curl_easy_setopt(curl, CURLOPT_URL, "smtps://mainserver.example.net");
 
     /* If you want to connect to a site who is not using a certificate that is

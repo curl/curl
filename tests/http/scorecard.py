@@ -667,7 +667,7 @@ def parse_size(s):
 
 def main():
     parser = argparse.ArgumentParser(prog='scorecard', description="""
-        Run a range of tests to give a scorecard for a HTTP protocol
+        Run a range of tests to give a scorecard for an HTTP protocol
         'h3' or 'h2' implementation in curl.
         """)
     parser.add_argument("-v", "--verbose", action='count', default=1,

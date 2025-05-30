@@ -2022,7 +2022,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSL_CTX_DATA:
     /*
-     * Set a SSL_CTX callback parameter pointer
+     * Set an SSL_CTX callback parameter pointer
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {
@@ -2787,7 +2787,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
     /*
-     * Set a SSL_CTX callback
+     * Set an SSL_CTX callback
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX)) {

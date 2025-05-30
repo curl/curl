@@ -658,7 +658,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   if(conn->bits.tls_enable_alpn) {
 #ifdef USE_HTTPSRR
-    /* Is there a HTTPSRR use its ALPNs here.
+    /* Is there an HTTPSRR use its ALPNs here.
      * We are here after having selected a connection to a host+port and
      * can no longer change that. Any HTTPSRR advice for other hosts and ports
      * we need to ignore. */

@@ -21,7 +21,7 @@ The most important feat of connection filters is that they can be stacked on
 top of each other (or "chained" if you prefer that metaphor). In the common
 scenario that you want to retrieve a `https:` URL with curl, you need 2 basic
 things to send the request and get the response: a TCP connection, represented
-by a `socket` and a SSL instance en- and decrypt over that socket. You write
+by a `socket` and an SSL instance en- and decrypt over that socket. You write
 your request to the SSL instance, which encrypts and writes that data to the
 socket, which then sends the bytes over the network.
 

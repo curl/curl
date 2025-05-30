@@ -113,7 +113,7 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
-/* All about a SSL session ticket */
+/* All about an SSL session ticket */
 struct Curl_ssl_session {
   const void *sdata;           /* session ticket data, plain bytes */
   size_t sdata_len;            /* number of bytes in sdata */

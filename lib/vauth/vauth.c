@@ -39,7 +39,7 @@
 /*
  * Curl_auth_build_spn()
  *
- * This is used to build a SPN string in the following formats:
+ * This is used to build an SPN string in the following formats:
  *
  * service/host@realm (Not currently used)
  * service/host       (Not used by GSS-API)

@@ -82,7 +82,7 @@ static const struct testit headers[] = {
   { "2.example.com", NULL,
     "max-age=\"21536000\"; includeSubDomains; includeSubDomains;",
     CURLE_BAD_FUNCTION_ARGUMENT },
-  /* use a unknown directive "include" that should be ignored */
+  /* use an unknown directive "include" that should be ignored */
   { "3.example.com", NULL, "max-age=\"21536000\"; include; includeSubDomains;",
     CURLE_OK },
   /* remove the "3.example.com" one, should still match the example.com */
