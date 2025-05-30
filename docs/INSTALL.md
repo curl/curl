@@ -217,73 +217,74 @@ multi-threaded dynamic C runtime.
 [curl source code](https://curl.se/download.html#Win64cygwin)
 
 Almost identical to the Unix installation. Essentially run the configure script in the
-curl source tree root with `sh configure`, then run `make`. 
+curl source tree root with `sh configure`, then run `make`.
 
-To expand on building with cygwin first ensure it is in your path, and there are no 
-conflicting tools (*i.e. Chocolatey with sed package*). If so move cygwin ahead of any items 
-in your path that would conflict with cygwin commands, making sure you have the `sh` 
+To expand on building with `cygwin` first ensure it is in your path, and there are no 
+conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items 
+in your path that would conflict with `cygwin` commands, making sure you have the `sh` 
 executable in `/bin/` or you see the configure fail toward the end.
 
-You'll need to download the setup installer from 
-[cygwin](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional cygwin 
-packages will be needed for the install. For more on installing packages visit 
-[cygwin setup cli](https://www.cygwin.com/faq/faq.html#faq.setup.cli). 
- 
-Either run setup-x86_64.exe, then search and select packages indiviually, or try:
+You will need to download the setup installer from 
+[cygwin](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional `cygwin` 
+packages are needed for the install. For more on installing packages visit 
+[cygwin setup](https://www.cygwin.com/faq/faq.html#faq.setup.cli). 
+
+Either run setup-x86_64.exe, then search and select packages individually, or try:
 
     setup-x86_64.exe -P binutil gcc-core libpsl-devel libtool perl make
-    
+
 If the latter, matching packages should appear in the install rows after selecting 
 the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts 
 until you reach the "Select Packages" window; then select packages, click next, and finish 
-the cygwin package installation.
- 
-Unless specifed, download the latest version of the package. The cygwin packages required (*and suggested*) for a succesful install are:
+the `cygwin` package installation.
+
+Unless specified, download the latest version of the package. The `cygwin` packages required (*and suggested*) for a successful install are:
 
 <details>
-    <summary>Cygwin Package List</summary>
-    
- - binutil - *required*
- - gcc-core - *required*
- - libpsl-devel - *required*
- - libtool (latest or 2.5.4-1) - *required*
- -  perl - *required*
- -  make - *required*
-    - NOTE - if there is an error regarding cmake, in the **cygwin terminal** run ` ln -s /usr/bin/make /usr/bin/gmake `.
- - libuv1 - *suggested*
- - libarchive13 - *suggested*
- - libcurl4 - *suggested* 
- - libexpat1 - *suggested*
- - libjsoncpp25 - *suggested*
- - librhash0 - *suggested*
+    <summary>Package List</summary>
+
+    binutil - required
+    gcc-core - required
+    libpsl-devel - required
+    libtool (latest or 2.5.4-1) - required
+    perl - required
+    make - required
+    - NOTE - if there is an error regarding cmake, open the cygwin terminal, and run:
+      ln -s /usr/bin/make /usr/bin/gmake
+    libuv1 - suggested
+    libarchive13 - suggested
+    libcurl4 - suggested 
+    libexpat1 - suggested
+    libjsoncpp25 - suggested
+    librhash0 - suggested
 
 </details>
- 
+
 Once all the packages have been installed, begin the process of installing curl from the source code:
 
  <details>
      <summary>configure_options</summary>
 
-  --with-amissl <br>
-  --with-bearssl <br>
-  --with-gnutls <br>
-  --with-mbedtls <br>
-  --with-openssl (also works for BoringSSL and LibreSSL) <br>
-  --with-rustls <br>
-  --with-schannel <br>
-  --with-secure-transport <br>
-  --with-wolfssl <br>
-  --without-ssl <br>
-     
+    --with-amissl 
+    --with-bearssl 
+    --with-gnutls 
+    --with-mbedtls 
+    --with-openssl (also works for BoringSSL and LibreSSL) 
+    --with-rustls 
+    --with-schannel 
+    --with-secure-transport 
+    --with-wolfssl 
+    --without-ssl
+
  </details>
 
  1. ` sh configure <configure_options> ` 
  2. ` make `
-  
-If any errror occurs during curl installation, try:
- - reinstalling the required cygwin packages from the list above
- - temporarily move cygwin to the top of your path
- - install all of the suggested cygwin packages
+
+If any error occurs during curl installation, try:
+ - reinstalling the required `cygwin` packages from the list above
+ - temporarily move `cygwin` to the top of your path
+ - install all of the suggested `cygwin` packages
 
 ## MS-DOS
 
