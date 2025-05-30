@@ -71,7 +71,7 @@ does not decode the scheme, the port number or the full URL.
 The query component also gets plus-to-space conversion as a bonus when this
 bit is set.
 
-Note that this URL decoding is charset unaware and you get a zero terminated
+Note that this URL decoding is charset unaware and you get a null-terminated
 string back with data that could be intended for a particular encoding.
 
 If there are byte values lower than 32 in the decoded string, the get
