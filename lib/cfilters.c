@@ -733,6 +733,17 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   return CURL_SOCKET_BAD;
 }
 
+static const struct Curl_sockaddr_ex *
+cf_get_remote_addr(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  const struct Curl_sockaddr_ex *remote_addr = NULL;
+  if(cf &&
+     !cf->cft->query(cf, data, CF_QUERY_REMOTE_ADDR, NULL,
+                     CURL_UNCONST(&remote_addr)))
+    return remote_addr;
+  return NULL;
+}
+
 CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int *is_ipv6, struct ip_quadruple *ipquad)
@@ -753,6 +764,13 @@ curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
   if(cf && !cf->connected)
     return Curl_conn_cf_get_socket(cf, data);
   return data->conn ? data->conn->sock[sockindex] : CURL_SOCKET_BAD;
+}
+
+const struct Curl_sockaddr_ex *
+Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn ? data->conn->cfilter[sockindex] : NULL;
+  return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)

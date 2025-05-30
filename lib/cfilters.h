@@ -177,6 +177,9 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
 #define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   -  */
+/* pass in a `const struct Curl_sockaddr_ex **` as `pres2`. Gets set
+ * to NULL when not connected. */
+#define CF_QUERY_REMOTE_ADDR       10  /* -          `Curl_sockaddr_ex *` */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -438,6 +441,10 @@ CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
  * Returns CURL_SOCKET_BAD if not available.
  */
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
+
+/* Return a pointer to the connected socket address or NULL. */
+const struct Curl_sockaddr_ex *
+Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex);
 
 /**
  * Tell filters to forget about the socket at sockindex.
