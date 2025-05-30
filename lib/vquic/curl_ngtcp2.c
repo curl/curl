@@ -1667,14 +1667,16 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else {
-    sent = Curl_bufq_write(&stream->sendbuf, buf, len, err);
+    size_t nwritten;
+    *err = Curl_bufq_write(&stream->sendbuf, buf, len, &nwritten);
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send, add to "
-                "sendbuf(len=%zu) -> %zd, %d",
-                stream->id, len, sent, *err);
-    if(sent < 0) {
+                "sendbuf(len=%zu) -> %d, %zu",
+                stream->id, len, *err, nwritten);
+    if(*err) {
+      sent = -1;
       goto out;
     }
-
+    sent = (ssize_t)nwritten;
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
   }
 
@@ -1756,9 +1758,9 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
  * Read a network packet to send from ngtcp2 into `buf`.
  * Return number of bytes written or -1 with *err set.
  */
-static ssize_t read_pkt_to_send(void *userp,
-                                unsigned char *buf, size_t buflen,
-                                CURLcode *err)
+static CURLcode read_pkt_to_send(void *userp,
+                                 unsigned char *buf, size_t buflen,
+                                 size_t *pnread)
 {
   struct pkt_io_ctx *x = userp;
   struct cf_ngtcp2_ctx *ctx = x->cf->ctx;
@@ -1768,7 +1770,9 @@ static ssize_t read_pkt_to_send(void *userp,
   uint32_t flags;
   int64_t stream_id;
   int fin;
-  ssize_t nwritten = 0, n;
+  ssize_t n;
+
+  *pnread = 0;
   veccnt = 0;
   stream_id = -1;
   fin = 0;
@@ -1780,7 +1784,6 @@ static ssize_t read_pkt_to_send(void *userp,
    * When ngtcp2 is happy (because it has no other frame that would fit
    * or it has nothing more to send), it returns the total length
    * of the assembled packet. This may be 0 if there was nothing to send. */
-  *err = CURLE_OK;
   for(;;) {
 
     if(ctx->h3conn && ngtcp2_conn_get_max_data_left(ctx->qconn)) {
@@ -1790,8 +1793,7 @@ static ssize_t read_pkt_to_send(void *userp,
         failf(x->data, "nghttp3_conn_writev_stream returned error: %s",
               nghttp3_strerror((int)veccnt));
         cf_ngtcp2_h3_err_set(x->cf, x->data, (int)veccnt);
-        *err = CURLE_SEND_ERROR;
-        return -1;
+        return CURLE_SEND_ERROR;
       }
     }
 
@@ -1803,9 +1805,7 @@ static ssize_t read_pkt_to_send(void *userp,
                                   (const ngtcp2_vec *)vec, veccnt, x->ts);
     if(n == 0) {
       /* nothing to send */
-      *err = CURLE_AGAIN;
-      nwritten = -1;
-      goto out;
+      return CURLE_AGAIN;
     }
     else if(n < 0) {
       switch(n) {
@@ -1837,9 +1837,7 @@ static ssize_t read_pkt_to_send(void *userp,
         failf(x->data, "ngtcp2_conn_writev_stream returned error: %s",
               ngtcp2_strerror((int)n));
         cf_ngtcp2_err_set(x->cf, x->data, (int)n);
-        *err = CURLE_SEND_ERROR;
-        nwritten = -1;
-        goto out;
+        return CURLE_SEND_ERROR;
       }
     }
 
@@ -1855,12 +1853,10 @@ static ssize_t read_pkt_to_send(void *userp,
 
     if(n > 0) {
       /* packet assembled, leave */
-      nwritten = n;
-      goto out;
+      *pnread = (size_t)n;
+      return CURLE_OK;
     }
   }
-out:
-  return nwritten;
 }
 
 static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
@@ -1868,7 +1864,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
                                    struct pkt_io_ctx *pktx)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  ssize_t nread;
+  size_t nread;
   size_t max_payload_size, path_max_payload_size, max_pktcnt;
   size_t pktcnt = 0;
   size_t gsolen = 0;  /* this disables gso until we have a clue */
@@ -1913,9 +1909,9 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
 
   for(;;) {
     /* add the next packet to send, if any, to our buffer */
-    nread = Curl_bufq_sipn(&ctx->q.sendbuf, max_payload_size,
-                           read_pkt_to_send, pktx, &curlcode);
-    if(nread < 0) {
+    curlcode = Curl_bufq_sipn(&ctx->q.sendbuf, max_payload_size,
+                              read_pkt_to_send, pktx, &nread);
+    if(curlcode) {
       if(curlcode != CURLE_AGAIN)
         return curlcode;
       /* Nothing more to add, flush and leave */
@@ -1934,10 +1930,10 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     if(pktcnt == 0) {
       /* first packet in buffer. This is either of a known, "good"
        * payload size or it is a PMTUD. We will see. */
-      gsolen = (size_t)nread;
+      gsolen = nread;
     }
-    else if((size_t)nread > gsolen ||
-            (gsolen > path_max_payload_size && (size_t)nread != gsolen)) {
+    else if(nread > gsolen ||
+            (gsolen > path_max_payload_size && nread != gsolen)) {
       /* The just added packet is a PMTUD *or* the one(s) before the
        * just added were PMTUD and the last one is smaller.
        * Flush the buffer before the last add. */
@@ -1954,7 +1950,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       continue;
     }
 
-    if(++pktcnt >= max_pktcnt || (size_t)nread < gsolen) {
+    if(++pktcnt >= max_pktcnt || nread < gsolen) {
       /* Reached MAX_PKT_BURST *or*
        * the capacity of our buffer *or*
        * last add was shorter than the previous ones, flush */
@@ -2129,8 +2125,9 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       /* Ignore amount written. sendbuf was empty and has always room for
        * NGTCP2_MAX_UDP_PAYLOAD_SIZE. It can only completely fail, in which
        * case `result` is set non zero. */
-      (void)Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
-                            (size_t)nwritten, &result);
+      size_t n;
+      result = Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
+                               (size_t)nwritten, &n);
       if(result) {
         CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
                     "aborting shutdown", result);

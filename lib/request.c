@@ -338,20 +338,18 @@ static CURLcode req_flush(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static ssize_t add_from_client(void *reader_ctx,
-                               unsigned char *buf, size_t buflen,
-                               CURLcode *err)
+static CURLcode add_from_client(void *reader_ctx,
+                                unsigned char *buf, size_t buflen,
+                                size_t *pnread)
 {
   struct Curl_easy *data = reader_ctx;
-  size_t nread;
+  CURLcode result;
   bool eos;
 
-  *err = Curl_client_read(data, (char *)buf, buflen, &nread, &eos);
-  if(*err)
-    return -1;
-  if(eos)
+  result = Curl_client_read(data, (char *)buf, buflen, pnread, &eos);
+  if(!result && eos)
     data->req.eos_read = TRUE;
-  return (ssize_t)nread;
+  return result;
 }
 
 static CURLcode req_send_buffer_add(struct Curl_easy *data,
@@ -359,13 +357,12 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
                                     size_t hds_len)
 {
   CURLcode result = CURLE_OK;
-  ssize_t n;
-  n = Curl_bufq_write(&data->req.sendbuf,
-                      (const unsigned char *)buf, blen, &result);
-  if(n < 0)
+  size_t n;
+  result = Curl_bufq_cwrite(&data->req.sendbuf, buf, blen, &n);
+  if(result)
     return result;
   /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
-  DEBUGASSERT((size_t)n == blen);
+  DEBUGASSERT(n == blen);
   data->req.sendbuf_hds_len += hds_len;
   return CURLE_OK;
 }
@@ -437,9 +434,10 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
      !data->req.eos_read &&
      !(data->req.keepon & KEEP_SEND_PAUSE) &&
      !Curl_bufq_is_full(&data->req.sendbuf)) {
-    ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
-                                   add_from_client, data, &result);
-    if(nread < 0 && result != CURLE_AGAIN)
+    size_t nread;
+    result = Curl_bufq_sipn(&data->req.sendbuf, 0,
+                            add_from_client, data, &nread);
+    if(result && result != CURLE_AGAIN)
       return result;
   }
 
