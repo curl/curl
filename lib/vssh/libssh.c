@@ -1070,6 +1070,132 @@ static int myssh_state_sftp_download_stat(struct Curl_easy *data,
   return rc;
 }
 
+static int myssh_state_sftp_readdir(struct Curl_easy *data,
+                                    struct ssh_conn *sshc,
+                                    struct SSHPROTO *sshp,
+                                    CURLcode *result_ptr)
+{
+  int rc = SSH_NO_ERROR;
+
+  curlx_dyn_reset(&sshc->readdir_buf);
+  if(sshc->readdir_attrs)
+    sftp_attributes_free(sshc->readdir_attrs);
+
+  sshc->readdir_attrs = sftp_readdir(sshc->sftp_session, sshc->sftp_dir);
+  if(sshc->readdir_attrs) {
+    sshc->readdir_filename = sshc->readdir_attrs->name;
+    sshc->readdir_longentry = sshc->readdir_attrs->longname;
+    sshc->readdir_len = strlen(sshc->readdir_filename);
+
+    if(data->set.list_only) {
+      char *tmpLine;
+
+      tmpLine = aprintf("%s\n", sshc->readdir_filename);
+      if(!tmpLine) {
+        myssh_state(data, sshc, SSH_SFTP_CLOSE);
+        sshc->actualcode = CURLE_OUT_OF_MEMORY;
+        return rc;
+      }
+      *result_ptr = Curl_client_write(data, CLIENTWRITE_BODY,
+                                      tmpLine, sshc->readdir_len + 1);
+      free(tmpLine);
+
+      if(*result_ptr) {
+        myssh_state(data, sshc, SSH_STOP);
+        return rc;
+      }
+    }
+    else {
+      if(curlx_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
+        sshc->actualcode = CURLE_OUT_OF_MEMORY;
+        myssh_state(data, sshc, SSH_STOP);
+        return rc;
+      }
+
+      if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
+         ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
+              SSH_S_IFLNK)) {
+        sshc->readdir_linkPath = aprintf("%s%s", sshp->path,
+                                         sshc->readdir_filename);
+
+        if(!sshc->readdir_linkPath) {
+          myssh_state(data, sshc, SSH_SFTP_CLOSE);
+          sshc->actualcode = CURLE_OUT_OF_MEMORY;
+          return rc;
+        }
+
+        myssh_state(data, sshc, SSH_SFTP_READDIR_LINK);
+        return rc;
+      }
+      myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
+      return rc;
+    }
+  }
+  else if(sftp_dir_eof(sshc->sftp_dir)) {
+    myssh_state(data, sshc, SSH_SFTP_READDIR_DONE);
+    return rc;
+  }
+  else {
+    failf(data, "Could not open remote file for reading: %s",
+          ssh_get_error(sshc->ssh_session));
+    MOVE_TO_SFTP_CLOSE_STATE();
+    return rc;
+  }
+
+  return rc;
+}
+
+static int myssh_state_sftp_readdir_link(struct Curl_easy *data,
+                                         struct ssh_conn *sshc)
+{
+  int rc = SSH_NO_ERROR;
+
+  if(sshc->readdir_link_attrs)
+    sftp_attributes_free(sshc->readdir_link_attrs);
+
+  sshc->readdir_link_attrs = sftp_lstat(sshc->sftp_session,
+                                        sshc->readdir_linkPath);
+  if(sshc->readdir_link_attrs == 0) {
+    failf(data, "Could not read symlink for reading: %s",
+          ssh_get_error(sshc->ssh_session));
+    MOVE_TO_SFTP_CLOSE_STATE();
+    return rc;
+  }
+
+  if(!sshc->readdir_link_attrs->name) {
+    sshc->readdir_tmp = sftp_readlink(sshc->sftp_session,
+                                      sshc->readdir_linkPath);
+    if(!sshc->readdir_filename)
+      sshc->readdir_len = 0;
+    else
+      sshc->readdir_len = strlen(sshc->readdir_tmp);
+
+    sshc->readdir_longentry = NULL;
+    sshc->readdir_filename = sshc->readdir_tmp;
+  }
+  else {
+    sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
+    sshc->readdir_filename = sshc->readdir_link_attrs->name;
+    sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
+  }
+
+  Curl_safefree(sshc->readdir_linkPath);
+
+  if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
+                    sshc->readdir_filename)) {
+    sshc->actualcode = CURLE_OUT_OF_MEMORY;
+    return rc;
+  }
+
+  sftp_attributes_free(sshc->readdir_link_attrs);
+  sshc->readdir_link_attrs = NULL;
+  sshc->readdir_filename = NULL;
+  sshc->readdir_longentry = NULL;
+
+  myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
+  return rc;
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -1592,117 +1718,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_READDIR:
-      curlx_dyn_reset(&sshc->readdir_buf);
-      if(sshc->readdir_attrs)
-        sftp_attributes_free(sshc->readdir_attrs);
-
-      sshc->readdir_attrs = sftp_readdir(sshc->sftp_session, sshc->sftp_dir);
-      if(sshc->readdir_attrs) {
-        sshc->readdir_filename = sshc->readdir_attrs->name;
-        sshc->readdir_longentry = sshc->readdir_attrs->longname;
-        sshc->readdir_len = strlen(sshc->readdir_filename);
-
-        if(data->set.list_only) {
-          char *tmpLine;
-
-          tmpLine = aprintf("%s\n", sshc->readdir_filename);
-          if(!tmpLine) {
-            myssh_state(data, sshc, SSH_SFTP_CLOSE);
-            sshc->actualcode = CURLE_OUT_OF_MEMORY;
-            break;
-          }
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                     tmpLine, sshc->readdir_len + 1);
-          free(tmpLine);
-
-          if(result) {
-            myssh_state(data, sshc, SSH_STOP);
-            break;
-          }
-
-        }
-        else {
-          if(curlx_dyn_add(&sshc->readdir_buf, sshc->readdir_longentry)) {
-            sshc->actualcode = CURLE_OUT_OF_MEMORY;
-            myssh_state(data, sshc, SSH_STOP);
-            break;
-          }
-
-          if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
-             ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
-              SSH_S_IFLNK)) {
-            sshc->readdir_linkPath = aprintf("%s%s", sshp->path,
-                                             sshc->readdir_filename);
-
-            if(!sshc->readdir_linkPath) {
-              myssh_state(data, sshc, SSH_SFTP_CLOSE);
-              sshc->actualcode = CURLE_OUT_OF_MEMORY;
-              break;
-            }
-
-            myssh_state(data, sshc, SSH_SFTP_READDIR_LINK);
-            break;
-          }
-          myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
-          break;
-        }
-      }
-      else if(sftp_dir_eof(sshc->sftp_dir)) {
-        myssh_state(data, sshc, SSH_SFTP_READDIR_DONE);
-        break;
-      }
-      else {
-        failf(data, "Could not open remote file for reading: %s",
-              ssh_get_error(sshc->ssh_session));
-        MOVE_TO_SFTP_CLOSE_STATE();
-        break;
-      }
+      rc = myssh_state_sftp_readdir(data, sshc, sshp, &result);
       break;
 
     case SSH_SFTP_READDIR_LINK:
-      if(sshc->readdir_link_attrs)
-        sftp_attributes_free(sshc->readdir_link_attrs);
+      rc = myssh_state_sftp_readdir_link(data, sshc);
+      break;
 
-      sshc->readdir_link_attrs = sftp_lstat(sshc->sftp_session,
-                                            sshc->readdir_linkPath);
-      if(sshc->readdir_link_attrs == 0) {
-        failf(data, "Could not read symlink for reading: %s",
-              ssh_get_error(sshc->ssh_session));
-        MOVE_TO_SFTP_CLOSE_STATE();
-        break;
-      }
-
-      if(!sshc->readdir_link_attrs->name) {
-        sshc->readdir_tmp = sftp_readlink(sshc->sftp_session,
-                                          sshc->readdir_linkPath);
-        if(!sshc->readdir_filename)
-          sshc->readdir_len = 0;
-        else
-          sshc->readdir_len = strlen(sshc->readdir_tmp);
-        sshc->readdir_longentry = NULL;
-        sshc->readdir_filename = sshc->readdir_tmp;
-      }
-      else {
-        sshc->readdir_len = strlen(sshc->readdir_link_attrs->name);
-        sshc->readdir_filename = sshc->readdir_link_attrs->name;
-        sshc->readdir_longentry = sshc->readdir_link_attrs->longname;
-      }
-
-      Curl_safefree(sshc->readdir_linkPath);
-
-      if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
-                        sshc->readdir_filename)) {
-        sshc->actualcode = CURLE_OUT_OF_MEMORY;
-        break;
-      }
-
-      sftp_attributes_free(sshc->readdir_link_attrs);
-      sshc->readdir_link_attrs = NULL;
-      sshc->readdir_filename = NULL;
-      sshc->readdir_longentry = NULL;
-
-      myssh_state(data, sshc, SSH_SFTP_READDIR_BOTTOM);
-      FALLTHROUGH();
     case SSH_SFTP_READDIR_BOTTOM:
       if(curlx_dyn_addn(&sshc->readdir_buf, "\n", 1))
         result = CURLE_OUT_OF_MEMORY;
@@ -1783,9 +1805,14 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
          before we proceed */
       ssh_set_blocking(sshc->ssh_session, 0);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
+      if(sshc->sftp_send_aio) {
+        sftp_aio_free(sshc->sftp_send_aio);
+        sshc->sftp_send_aio = NULL;
+      }
+
+      if(sshc->sftp_recv_aio) {
+        sftp_aio_free(sshc->sftp_recv_aio);
+        sshc->sftp_recv_aio = NULL;
       }
 #endif
 
@@ -2664,24 +2691,20 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
     *err = CURLE_FAILED_INIT;
     return -1;
   }
-  /* limit the writes to the maximum specified in Section 3 of
-   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
-   */
-  if(len > 32768)
-    len = 32768;
+
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   switch(sshc->sftp_send_state) {
     case 0:
       sftp_file_set_nonblocking(sshc->sftp_file);
       if(sftp_aio_begin_write(sshc->sftp_file, mem, len,
-                              &sshc->sftp_aio) == SSH_ERROR) {
+                              &sshc->sftp_send_aio) == SSH_ERROR) {
         *err = CURLE_SEND_ERROR;
         return -1;
       }
       sshc->sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
-      nwrite = sftp_aio_wait_write(&sshc->sftp_aio);
+      nwrite = sftp_aio_wait_write(&sshc->sftp_send_aio);
       myssh_block2waitfor(conn, sshc, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
       if(nwrite == SSH_AGAIN) {
         *err = CURLE_AGAIN;
@@ -2691,10 +2714,13 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
         *err = CURLE_SEND_ERROR;
         return -1;
       }
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
-      }
+
+      /*
+       * sftp_aio_wait_write() would free sftp_send_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
+
       sshc->sftp_send_state = 0;
       return nwrite;
     default:
@@ -2702,6 +2728,17 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
       return -1;
   }
 #else
+  /*
+   * limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   *
+   * libssh started applying appropriate read/write length limits
+   * internally since version 0.11.0, hence such an operation isn't
+   * needed for versions after (and including) 0.11.0.
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(sshc->sftp_file, mem, len);
 
   myssh_block2waitfor(conn, sshc, FALSE);
@@ -2742,18 +2779,31 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
   switch(sshc->sftp_recv_state) {
     case 0:
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      if(sftp_aio_begin_read(sshc->sftp_file, len,
+                             &sshc->sftp_recv_aio) == SSH_ERROR) {
+        *err = CURLE_RECV_ERROR;
+        return -1;
+      }
+#else
       sshc->sftp_file_index =
         sftp_async_read_begin(sshc->sftp_file, (uint32_t)len);
       if(sshc->sftp_file_index < 0) {
         *err = CURLE_RECV_ERROR;
         return -1;
       }
+#endif
 
       FALLTHROUGH();
     case 1:
       sshc->sftp_recv_state = 1;
+
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      nread = sftp_aio_wait_read(&sshc->sftp_recv_aio, mem, len);
+#else
       nread = sftp_async_read(sshc->sftp_file, mem, (uint32_t)len,
                               (uint32_t)sshc->sftp_file_index);
+#endif
 
       myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
 
@@ -2765,6 +2815,12 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
         *err = CURLE_RECV_ERROR;
         return -1;
       }
+
+      /*
+       * sftp_aio_wait_read() would free sftp_recv_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
 
       sshc->sftp_recv_state = 0;
       return nread;
