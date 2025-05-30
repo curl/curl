@@ -574,6 +574,7 @@ wssl_setup_session(struct Curl_cfilter *cf,
             if(result)
               goto  out;
           }
+#ifdef WOLFSSL_EARLY_DATA
           if(do_early_data) {
             unsigned int edmax = (scs->earlydata_max < UINT_MAX) ?
                                  (unsigned int)scs->earlydata_max : UINT_MAX;
@@ -582,6 +583,10 @@ wssl_setup_session(struct Curl_cfilter *cf,
             Curl_alpn_restrict_to(alpns, scs->alpn);
             wolfSSL_set_max_early_data(wss->ssl, edmax);
           }
+#else
+          /* Should never enable when not supported */
+          DEBUGASSERT(!do_early_data);
+#endif
         }
       }
       wolfSSL_SESSION_free(session);
