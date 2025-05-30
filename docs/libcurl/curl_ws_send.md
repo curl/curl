@@ -91,7 +91,6 @@ int main(void)
   CURL *curl = curl_easy_init();
 
   curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com/");
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
   /* start HTTPS connection and upgrade to WSS, then return control */
   curl_easy_perform(curl);
 
