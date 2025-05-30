@@ -11,7 +11,7 @@ SPDX-License-Identifier: curl
 Lots of people download binary distributions of curl and libcurl. This
 document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
-libcurl from [source code](https://curl.se/download.html#:~:text=offer%2E-,Packages).
+libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
@@ -225,7 +225,7 @@ in your path that would conflict with `cygwin` commands, making sure you have th
 executable in `/bin/` or you see the configure fail toward the end.
 
 Download the setup installer from
-[`cygwin`](https://cygwin.com/#:~:text=Installing%20Cygwin) to begin. Additional `cygwin`
+[`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
 packages are needed for the install. For more on installing packages visit
 [`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
 
@@ -268,22 +268,18 @@ Once all the packages have been installed, begin the process of installing curl 
      <summary>configure_options</summary>
 
 ```
-    --with-amissl
-    --with-bearssl
     --with-gnutls
     --with-mbedtls
-    --with-openssl (also works for BoringSSL and LibreSSL)
+    --with-openssl (also works for OpenSSL forks)
     --with-rustls
-    --with-schannel
-    --with-secure-transport
     --with-wolfssl
     --without-ssl
 ```
 
  </details>
 
- 1. ` sh configure <configure_options> `
- 2. ` make `
+ 1. `sh configure <configure_options>`
+ 2. `make`
 
 If any error occurs during curl installation, try:
  - reinstalling the required `cygwin` packages from the list above
