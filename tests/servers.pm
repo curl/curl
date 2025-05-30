@@ -1025,6 +1025,7 @@ sub verifytelnet {
 
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
+                 'https-mtls' => \&verifypid,
                  'rtsp' => \&verifyrtsp,
                  'ftp' => \&verifyftp,
                  'pop3' => \&verifyftp,
@@ -2361,7 +2362,7 @@ sub startservers {
         $what =~ s/[^a-z0-9\/-]//g;
 
         my $certfile;
-        if($what =~ /^(ftp|gopher|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
+        if($what =~ /^(ftp|gopher|http|imap|pop3|smtp)s|https-mtls((\d*)(-ipv6|-unix|))$/) {
             $certfile = ($whatlist[1]) ? $whatlist[1] : 'certs/test-localhost.pem';
         }
 
