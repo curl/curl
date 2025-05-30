@@ -233,7 +233,7 @@ static void unload_file(gnutls_datum_t data)
 }
 
 
-/* this function does a SSL/TLS (re-)handshake */
+/* this function does an SSL/TLS (re-)handshake */
 static CURLcode handshake(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {

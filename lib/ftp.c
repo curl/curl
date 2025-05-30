@@ -2716,7 +2716,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 #endif
 
       if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
-        /* We do not have a SSL/TLS control connection yet, but FTPS is
+        /* We do not have an SSL/TLS control connection yet, but FTPS is
            requested. Try a FTPS connection now */
 
         ftpc->count3 = 0;

@@ -45,7 +45,7 @@
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
-/* This is used to populate the domain in a SSPI identity structure */
+/* This is used to populate the domain in an SSPI identity structure */
 CURLcode Curl_override_sspi_http_realm(const char *chlg,
                                        SEC_WINNT_AUTH_IDENTITY *identity);
 

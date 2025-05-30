@@ -400,9 +400,9 @@ problems may have been fixed or changed somewhat since this was written.
 
 9.1 SFTP does not do CURLOPT_POSTQUOTE correct
 
- When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP server
- using the multi interface, the commands are not being sent correctly and
- instead the connection is "cancelled" (the operation is considered done)
+ When libcurl sends CURLOPT_POSTQUOTE commands when connected to an SFTP
+ server using the multi interface, the commands are not being sent correctly
+ and instead the connection is "cancelled" (the operation is considered done)
  prematurely. There is a half-baked (busy-looping) patch provided in the bug
  report but it cannot be accepted as-is. See
  https://curl.se/bug/view.cgi?id=748

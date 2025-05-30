@@ -361,7 +361,7 @@ file. If the path is omitted entirely then the directory listing for the root
 / home directory is returned.
 
 ## SMB
-The path part of a SMB request specifies the file to retrieve and from what
+The path part of an SMB request specifies the file to retrieve and from what
 share and directory or the share to upload to and as such, may not be omitted.
 If the username is embedded in the URL then it must contain the domain name
 and as such, the backslash must be URL encoded as %2f.
@@ -373,7 +373,7 @@ curl supports SMB version 1 (only)
 
 ## SMTP
 
-The path part of a SMTP request specifies the hostname to present during
+The path part of an SMTP request specifies the hostname to present during
 communication with the mail server. If the path is omitted, then libcurl
 attempts to resolve the local computer's hostname. However, this may not
 return the fully qualified domain name that is required by some mail servers

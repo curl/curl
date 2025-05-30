@@ -459,7 +459,7 @@ to adjust those variables accordingly. After that you can build curl like this:
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
 Note that this does not give you SSL/TLS support. If you need SSL/TLS, you
-have to build curl with a SSL/TLS library, e.g. OpenSSL, because it is
+have to build curl with an SSL/TLS library, e.g. OpenSSL, because it is
 impossible for curl to access Android's native SSL/TLS layer. To build curl
 for Android using OpenSSL, follow the OpenSSL build instructions and then
 install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy

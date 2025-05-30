@@ -752,7 +752,7 @@
 
 11.1 File listing support
 
- Add support for listing the contents of a SMB share. The output should
+ Add support for listing the contents of an SMB share. The output should
  probably be the same as/similar to FTP.
 
 11.2 Honor file timestamps
