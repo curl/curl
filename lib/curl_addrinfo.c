@@ -468,7 +468,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
   sa_un = (void *) ai->ai_addr;
   sa_un->sun_family = AF_UNIX;
 
-  /* sun_path must be able to store the NUL-terminated path */
+  /* sun_path must be able to store the null-terminated path */
   path_len = strlen(path) + 1;
   if(path_len > sizeof(sa_un->sun_path)) {
     free(ai);

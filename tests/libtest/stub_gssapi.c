@@ -227,7 +227,7 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  /* Overwrite null terminator */
+  /* Overwrite null-terminator */
   memset(token + used, 'A', length - used);
 
   *context_handle = ctx;

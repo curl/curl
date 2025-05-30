@@ -279,7 +279,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
           blen = ntail;
         }
       }
-      /* avoid strcasecompare because the host name is not null terminated */
+      /* avoid strcasecompare because the host name is not null-terminated */
       if((hlen == ntail) && strncasecompare(hostname, sts->host, hlen))
         return sts;
     }
@@ -430,7 +430,7 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     time_t expires;
     const char *hp = curlx_str(&host);
 
-    /* The date parser works on a null terminated string. The maximum length
+    /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
     memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
     dbuf[curlx_strlen(&date)] = 0;

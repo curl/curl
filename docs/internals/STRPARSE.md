@@ -18,7 +18,7 @@ if(curlx_str_word(&line, &word1, MAX) ||
   fprintf(stderr, "ERROR\n");
 ~~~
 
-The input pointer **must** point to a null terminated buffer area or these
+The input pointer **must** point to a null-terminated buffer area or these
 functions risk continuing "off the edge".
 
 ## Strings

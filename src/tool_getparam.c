@@ -78,7 +78,7 @@ static ParameterError getstrn(char **str, const char *val,
     return PARAM_NO_MEM;
 
   memcpy(*str, val, len);
-  (*str)[len] = 0; /* null terminate */
+  (*str)[len] = 0; /* null-terminate */
 
   return PARAM_OK;
 }

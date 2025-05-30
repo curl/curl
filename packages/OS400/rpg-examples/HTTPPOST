@@ -118,7 +118,7 @@
       *
      d len             s             10u 0
       *
-        len = %scan(X'00': string: 1: length); // Limit to zero-terminated string
+        len = %scan(X'00': string: 1: length); // Limit to null-terminated string
         if len = 0;
             len = length + 1;
         endif;

@@ -68,10 +68,10 @@ username/password are not exported.
 
 ## Session Key
 
-This is a printable, 0-terminated string that starts with **hostname:port**
-the session ticket is originating from and also contains all relevant
-SSL parameters used in the connection. The key also carries the name
-and version number of the TLS backend used.
+This is a printable, null-terminated string that starts with **hostname:port**
+the session ticket is originating from and also contains all relevant SSL
+parameters used in the connection. The key also carries the name and version
+number of the TLS backend used.
 
 It is recommended to only persist **session_key** when it can be protected
 from outside access. Since the hostname appears in plain text, it would
