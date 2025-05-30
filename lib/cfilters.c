@@ -499,7 +499,7 @@ out:
 
 bool Curl_conn_is_setup(struct connectdata *conn, int sockindex)
 {
-  return conn->cfilter[sockindex];
+  return (conn->cfilter[sockindex] != NULL);
 }
 
 bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
