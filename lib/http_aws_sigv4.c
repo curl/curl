@@ -133,7 +133,7 @@ static void trim_headers(struct curl_slist *head)
       else
         *store++ = *value++;
     }
-    *store = 0; /* null terminate */
+    *store = 0; /* null-terminate */
   }
 }
 

@@ -400,9 +400,9 @@ problems may have been fixed or changed somewhat since this was written.
 
 9.1 SFTP does not do CURLOPT_POSTQUOTE correct
 
- When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP server
- using the multi interface, the commands are not being sent correctly and
- instead the connection is "cancelled" (the operation is considered done)
+ When libcurl sends CURLOPT_POSTQUOTE commands when connected to an SFTP
+ server using the multi interface, the commands are not being sent correctly
+ and instead the connection is "cancelled" (the operation is considered done)
  prematurely. There is a half-baked (busy-looping) patch provided in the bug
  report but it cannot be accepted as-is. See
  https://curl.se/bug/view.cgi?id=748
@@ -447,7 +447,7 @@ problems may have been fixed or changed somewhat since this was written.
 10.1 --interface with link-scoped IPv6 address
 
  When you give the `--interface` option telling curl to use a specific
- interface for its outgoing traffic in combination with a IPv6 address in the
+ interface for its outgoing traffic in combination with an IPv6 address in the
  URL that uses a link-local scope, curl might pick the wrong address from the
  named interface and the subsequent transfer fails.
 

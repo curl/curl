@@ -214,7 +214,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     /* Attempt to get the Windows system path */
     UINT systemdirlen = GetSystemDirectory(NULL, 0);
     if(systemdirlen) {
-      /* Allocate space for the full DLL path (Room for the null terminator
+      /* Allocate space for the full DLL path (Room for the null-terminator
          is included in systemdirlen) */
       size_t filenamelen = _tcslen(filename);
       TCHAR *path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));

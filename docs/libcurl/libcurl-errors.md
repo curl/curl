@@ -105,7 +105,7 @@ CURLOPT_ACCEPTTIMEOUT_MS(3) (or the internal default) timeout expired.
 ## CURLE_FTP_WEIRD_PASV_REPLY (13)
 
 libcurl failed to get a sensible result back from the server as a response to
-either a PASV or a EPSV command. The server is flawed.
+either a PASV or an EPSV command. The server is flawed.
 
 ## CURLE_FTP_WEIRD_227_FORMAT (14)
 

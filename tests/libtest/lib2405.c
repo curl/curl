@@ -29,7 +29,7 @@
  *  HTTP1 amd HTTP2 (no multiplexing) two transfers (expected two descriptors),
  *  HTTP2 with multiplexing (expected one descriptors)
  *  Improper inputs to the API result in CURLM_BAD_FUNCTION_ARGUMENT.
- *  Sending a empty ufds, and size = 0 will return the number of fds needed.
+ *  Sending an empty ufds, and size = 0 will return the number of fds needed.
  *  Sending a non-empty ufds, but smaller than the fds needed will result in a
  *    CURLM_OUT_OF_MEMORY, and a number of fds that is >= to the number needed.
  *

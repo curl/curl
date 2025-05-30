@@ -35,7 +35,7 @@
 /*
   List of URLs to fetch.
 
-  If you intend to use a SSL-based protocol here you might need to setup TLS
+  If you intend to use an SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
   https://curl.se/libcurl/c/threadsafe.html

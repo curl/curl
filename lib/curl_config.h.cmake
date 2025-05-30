@@ -327,10 +327,10 @@
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
-/* Define to 1 if you have a IPv6 capable working inet_ntop function. */
+/* Define to 1 if you have an IPv6 capable working inet_ntop function. */
 #cmakedefine HAVE_INET_NTOP 1
 
-/* Define to 1 if you have a IPv6 capable working inet_pton function. */
+/* Define to 1 if you have an IPv6 capable working inet_pton function. */
 #cmakedefine HAVE_INET_PTON 1
 
 /* Define to 1 if symbol `sa_family_t' exists */

@@ -394,7 +394,7 @@ CONNECT_REQ_INIT:
     /*
      * This is currently not supporting "Identification Protocol (RFC1413)".
      */
-    socksreq[8] = 0; /* ensure empty userid is NUL-terminated */
+    socksreq[8] = 0; /* ensure empty userid is null-terminated */
     if(sx->proxy_user) {
       size_t plen = strlen(sx->proxy_user);
       if(plen > 255) {

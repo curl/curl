@@ -32,7 +32,7 @@ struct dynbuf;
 
 /**
  * A single header entry.
- * `name` and `value` are non-NULL and always NUL terminated.
+ * `name` and `value` are non-NULL and always null-terminated.
  */
 struct dynhds_entry {
   char *name;
@@ -113,7 +113,7 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
                               const char *name, size_t namelen);
 
 /**
- * Return how often the given 0-terminated name appears in `dynhds`.
+ * Return how often the given null-terminated name appears in `dynhds`.
  * Names are case-insensitive.
  */
 size_t Curl_dynhds_ccount_name(struct dynhds *dynhds, const char *name);

@@ -128,5 +128,8 @@ By adding the client reader interface, any protocol can control how/if it wants 
 The protocols on the other hand no longer have to care to package data most efficiently. At any time, should more data be needed, it can be read from the client. This is used when sending HTTP requests headers to add as much request body data to the initial sending as there is room for.
 
 Future enhancements based on the client readers:
-* `expect-100` handling: place that into a HTTP specific reader at `CURL_CR_PROTOCOL` and eliminate the checks in the generic transfer parts.
-* `eos forwarding`: transfer should forward an `eos` flag to the connection filters. Filters like HTTP/2 and HTTP/3 can make use of that, terminating streams early. This would also eliminate length checks in stream handling.
+* `expect-100` handling: place that into an HTTP specific reader at
+  `CURL_CR_PROTOCOL` and eliminate the checks in the generic transfer parts.
+* `eos forwarding`: transfer should forward an `eos` flag to the connection
+  filters. Filters like HTTP/2 and HTTP/3 can make use of that, terminating
+  streams early. This would also eliminate length checks in stream handling.

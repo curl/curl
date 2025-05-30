@@ -85,7 +85,7 @@ char Curl_raw_tolower(char in)
 /* Copy an upper case version of the string from src to dest. The
  * strings may overlap. No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be
- * NUL-terminated if that limit is reached.
+ * null-terminated if that limit is reached.
  */
 void Curl_strntoupper(char *dest, const char *src, size_t n)
 {
@@ -100,7 +100,7 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
 /* Copy a lower case version of the string from src to dest. The
  * strings may overlap. No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be
- * NUL-terminated if that limit is reached.
+ * null-terminated if that limit is reached.
  */
 void Curl_strntolower(char *dest, const char *src, size_t n)
 {
@@ -112,7 +112,7 @@ void Curl_strntolower(char *dest, const char *src, size_t n)
   } while(*src++ && --n);
 }
 
-/* Compare case-sensitive NUL-terminated strings, taking care of possible
+/* Compare case-sensitive null-terminated strings, taking care of possible
  * null pointers. Return true if arguments match.
  */
 bool Curl_safecmp(char *a, char *b)

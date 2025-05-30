@@ -331,7 +331,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     }
   }
 
-  /* Null terminate the buffer */
+  /* null-terminate the buffer */
   ca_file_buffer[ca_file_bufsize] = '\0';
 
   result = add_certs_data_to_store(trust_store,

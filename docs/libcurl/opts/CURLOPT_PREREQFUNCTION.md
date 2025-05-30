@@ -58,14 +58,14 @@ This function is passed the following arguments:
 
 ## `conn_primary_ip`
 
-A null-terminated pointer to a C string containing the primary IP of the
+A pointer to a null-terminated C string containing the primary IP of the
 remote server established with this connection. For FTP, this is the IP for
 the control connection. IPv6 addresses are represented without surrounding
 brackets.
 
 ## `conn_local_ip`
 
-A null-terminated pointer to a C string containing the originating IP for this
+A pointer to a null-terminated C string containing the originating IP for this
 connection. IPv6 addresses are represented without surrounding brackets.
 
 ## `conn_primary_port`

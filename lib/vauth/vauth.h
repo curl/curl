@@ -60,7 +60,7 @@ struct gsasldata;
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data);
 
-/* This is used to build a SPN string */
+/* This is used to build an SPN string */
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm);

@@ -723,7 +723,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
                  "%s%c"  /* OS */
                  "%s", /* client name */
                  smbc->user, 0, smbc->domain, 0, CURL_OS, 0, CLIENTNAME);
-  p++; /* count the final null termination */
+  p++; /* count the final null-termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
@@ -754,7 +754,7 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
                  "%s%c"      /* share */
                  "%s",       /* service */
                  conn->host.name, smbc->share, 0, SERVICENAME);
-  p++; /* count the final null termination */
+  p++; /* count the final null-termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 

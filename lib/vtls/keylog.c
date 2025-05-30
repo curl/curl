@@ -94,7 +94,7 @@ Curl_tls_keylog_write_line(const char *line)
 
   linelen = strlen(line);
   if(linelen == 0 || linelen > sizeof(buf) - 2) {
-    /* Empty line or too big to fit in a LF and NUL. */
+    /* Empty line or too big to fit in an LF and NUL. */
     return FALSE;
   }
 

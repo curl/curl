@@ -238,7 +238,7 @@
  See https://github.com/curl/curl/issues/4915 and lib1541.c
 
  The share interface offers CURL_LOCK_DATA_HSTS to have multiple easy handle
- share a HSTS cache, but this is not thread-safe.
+ share an HSTS cache, but this is not thread-safe.
 
 1.5 get rid of PATH_MAX
 
@@ -752,7 +752,7 @@
 
 11.1 File listing support
 
- Add support for listing the contents of a SMB share. The output should
+ Add support for listing the contents of an SMB share. The output should
  probably be the same as/similar to FTP.
 
 11.2 Honor file timestamps

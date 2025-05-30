@@ -1146,7 +1146,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
 #ifdef USE_IPV6
   if(!conn->bits.ftp_use_eprt && conn->bits.ipv6)
-    /* EPRT is disabled but we are connected to a IPv6 host, so we ignore the
+    /* EPRT is disabled but we are connected to an IPv6 host, so we ignore the
        request and enable EPRT again! */
     conn->bits.ftp_use_eprt = TRUE;
 #endif
@@ -1278,7 +1278,7 @@ static CURLcode ftp_state_use_pasv(struct Curl_easy *data,
 
 #ifdef PF_INET6
   if(!conn->bits.ftp_use_epsv && conn->bits.ipv6)
-    /* EPSV is disabled but we are connected to a IPv6 host, so we ignore the
+    /* EPSV is disabled but we are connected to an IPv6 host, so we ignore the
        request and enable EPSV again! */
     conn->bits.ftp_use_epsv = TRUE;
 #endif
@@ -2716,8 +2716,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 #endif
 
       if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
-        /* We do not have a SSL/TLS control connection yet, but FTPS is
-           requested. Try a FTPS connection now */
+        /* We do not have an SSL/TLS control connection yet, but FTPS is
+           requested. Try an FTPS connection now */
 
         ftpc->count3 = 0;
         switch(data->set.ftpsslauth) {

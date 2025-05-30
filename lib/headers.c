@@ -217,7 +217,7 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
 
   /* skip all trailing space letters */
   while((end > header) && ISBLANK(*end))
-    *end-- = 0; /* nul terminate */
+    *end-- = 0; /* null-terminate */
   return CURLE_OK;
 }
 
@@ -323,7 +323,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
   memcpy(hs->buffer, header, hlen);
-  hs->buffer[hlen] = 0; /* nul terminate */
+  hs->buffer[hlen] = 0; /* null-terminate */
 
   result = namevalue(hs->buffer, hlen, type, &name, &value);
   if(!result) {

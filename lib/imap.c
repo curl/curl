@@ -1032,7 +1032,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 
   (void)instate; /* no use for this yet */
 
-  /* Do we have a untagged response? */
+  /* Do we have an untagged response? */
   if(imapcode == '*') {
     line += 2;
 

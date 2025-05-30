@@ -225,9 +225,9 @@
 
 /* Vista */
 #if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && !defined(UNDER_CE)
-/* Define to 1 if you have a IPv6 capable working inet_ntop function. */
+/* Define to 1 if you have an IPv6 capable working inet_ntop function. */
 #define HAVE_INET_NTOP 1
-/* Define to 1 if you have a IPv6 capable working inet_pton function. */
+/* Define to 1 if you have an IPv6 capable working inet_pton function. */
 #define HAVE_INET_PTON 1
 #endif
 

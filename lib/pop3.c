@@ -874,7 +874,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
   line = curlx_dyn_ptr(&pop3c->pp.recvbuf);
   len = pop3c->pp.nfinal;
 
-  /* Do we have a untagged continuation response? */
+  /* Do we have an untagged continuation response? */
   if(pop3code == '*') {
     /* Does the server support the STLS capability? */
     if(len >= 4 && !memcmp(line, "STLS", 4))

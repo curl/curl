@@ -129,7 +129,7 @@ void Curl_sspi_global_cleanup(void)
 /*
  * Curl_create_sspi_identity()
  *
- * This is used to populate a SSPI identity structure based on the supplied
+ * This is used to populate an SSPI identity structure based on the supplied
  * username and password.
  *
  * Parameters:
@@ -221,7 +221,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 /*
  * Curl_sspi_free_identity()
  *
- * This is used to free the contents of a SSPI identifier structure.
+ * This is used to free the contents of an SSPI identifier structure.
  *
  * Parameters:
  *

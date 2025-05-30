@@ -3638,7 +3638,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
         /* We expect more response from HTTP/2 later */
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
-        k->httpversion_sent = 20; /* It's a HTTP/2 request now */
+        k->httpversion_sent = 20; /* It's an HTTP/2 request now */
         /* Any remaining `buf` bytes are already HTTP/2 and passed to
          * be processed. */
         result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);

@@ -83,7 +83,7 @@ Username to use when invoking the *ntlm-wb* tool.
 
 ## `SSLKEYLOGFILE`
 
-When set and libcurl runs with a SSL backend that supports this feature,
+When set and libcurl runs with an SSL backend that supports this feature,
 libcurl saves SSL secrets into the given filename. Using those SSL secrets,
 other tools (such as Wireshark) can decrypt the SSL communication and
 analyze/view the traffic.
