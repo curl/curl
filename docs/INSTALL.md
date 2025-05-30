@@ -15,8 +15,6 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
-[curl source code](https://curl.se/download.html#Win32)
-
 You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 
     git clone https://github.com/Microsoft/vcpkg.git
@@ -36,8 +34,6 @@ the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in 
 to proceed.
 
 # Unix
-
-[curl source code](https://curl.se/download.html#Linux)
 
 A normal Unix installation is made in three or four steps (after you have
 unpacked the source archive):
@@ -182,8 +178,6 @@ library check.
 
 # Windows
 
-[curl source code](https://curl.se/download.html#Win32)
-
 Building for Windows XP is required as a minimum.
 
 You can build curl with:
@@ -214,8 +208,6 @@ multi-threaded dynamic C runtime.
 
 ## Cygwin
 
-[curl source code](https://curl.se/download.html#Win64cygwin)
-
 Almost identical to the Unix installation. Essentially run the configure script in the
 curl source tree root with `sh configure`, then run `make`.
 
@@ -231,14 +223,14 @@ packages are needed for the install. For more on installing packages visit
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
-    setup-x86_64.exe -P binutil gcc-core libpsl-devel libtool perl make
+    setup-x86_64.exe -P binutils, gcc-core, libpsl-devel, libtool, perl, make
 
-If the latter, matching packages should appear in the install rows after selecting
+If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
 the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
 until you reach the "Select Packages" window; then select packages, click next, and finish
 the `cygwin` package installation.
 
-Unless specified, download the latest version of the package. The `cygwin` packages required (*and suggested*) for a successful install are:
+Download the latest version of the `cygwin` packages required (*and suggested*) for a successful install:
 
 <details>
     <summary>Package List</summary>
@@ -247,7 +239,7 @@ Unless specified, download the latest version of the package. The `cygwin` packa
  binutil - required
  gcc-core - required
  libpsl-devel - required
- libtool (latest or 2.5.4-1) - required
+ libtool - required
  perl - required
  make - required
  - NOTE - if there is an error regarding cmake, open the cygwin terminal, and run:
@@ -255,9 +247,6 @@ Unless specified, download the latest version of the package. The `cygwin` packa
  libuv1 - suggested
  libarchive13 - suggested
  libcurl4 - suggested
- libexpat1 - suggested
- libjsoncpp25 - suggested
- librhash0 - suggested
 ```
 
 </details>
@@ -287,8 +276,6 @@ If any error occurs during curl installation, try:
  - install all of the suggested `cygwin` packages
 
 ## MS-DOS
-
-[curl source code](https://curl.se/download.html#DOS)
 
 You can use either autotools or cmake:
 
@@ -324,8 +311,6 @@ Notes:
    been changed between releases.
 
 ## AmigaOS
-
-[curl source code](https://curl.se/download.html#AmigaOS)
 
 You can use either autotools or cmake:
 
@@ -416,8 +401,6 @@ another SSL backend such as OpenSSL.
 
 # Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
 
-[curl source code](https://curl.se/download.html#MacOSX)
-
 On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
 implementation, Secure Transport, instead of OpenSSL. To build with Secure
 Transport for SSL/TLS, use the configure option `--with-secure-transport`.
@@ -497,8 +480,6 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
-
 When building curl for Android you can you CMake or curl's `configure` script.
 
 Before you can build curl for Android, you need to install the Android NDK
@@ -553,8 +534,6 @@ LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the
 
 # IBM i
 
-[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
-
 For IBM i (formerly OS/400), you can use curl in two different ways:
 
 - Natively, running in the **ILE**. The obvious use is being able to call curl
@@ -587,8 +566,6 @@ Do not panic. curl and your program are not broken. You can fix this by:
 - Alternatively, start the job with the `ALWMLTTHD` parameter set to `*YES`.
 
 # Cross compile
-
-[curl source code](https://curl.se/download.html#:~:text=offer%2E-,Packages)
 
 Download and unpack the curl package.
 
