@@ -440,7 +440,7 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   if(!u)
     goto locout;
 
-  /* Create a NUL-terminated and whitespace-stripped copy of Location: */
+  /* Create a null-terminated and whitespace-stripped copy of Location: */
   copyloc = malloc(llen + 1);
   if(!copyloc)
     goto locout;

@@ -163,7 +163,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
  *
  * If the source buffer is indicated to be base64 encoded, this appends the
  * decoded data, binary or whatever, to the destination. The source buffer
- * may not hold binary data, only a null terminated string is valid content.
+ * may not hold binary data, only a null-terminated string is valid content.
  *
  * Destination buffer will be enlarged and relocated as needed.
  *
@@ -264,7 +264,7 @@ static int decodedata(char  **buf,   /* dest buffer */
  * and the size of the data is stored at the addresses that caller specifies.
  *
  * If the returned data is a string the returned size will be the length of
- * the string excluding null termination. Otherwise it will just be the size
+ * the string excluding null-termination. Otherwise it will just be the size
  * of the returned binary data.
  *
  * Calling function is responsible to free returned buffer.

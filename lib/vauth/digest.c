@@ -165,7 +165,7 @@ static char *auth_digest_string_quoted(const char *source)
 {
   char *dest;
   const char *s = source;
-  size_t n = 1; /* null terminator */
+  size_t n = 1; /* null-terminator */
 
   /* Calculate size needed */
   while(*s) {

@@ -2007,7 +2007,7 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
     return CURLE_AGAIN;
 
   if(rc > 0) {
-    /* It seems that this string is not always NULL terminated */
+    /* It seems that this string is not always null-terminated */
     sshp->readdir_filename[rc] = '\0';
     free(sshc->homedir);
     sshc->homedir = strdup(sshp->readdir_filename);

@@ -104,7 +104,7 @@ void *Curl_memdup(const void *src, size_t length)
  * Curl_memdup0(source, length)
  *
  * Copies the 'source' string to a newly allocated buffer (that is returned).
- * Copies 'length' bytes then adds a null terminator.
+ * Copies 'length' bytes then adds a null-terminator.
  *
  * Returns the new pointer or NULL on failure.
  *

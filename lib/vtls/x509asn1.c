@@ -256,7 +256,7 @@ static const char *getASN1Element(struct Curl_asn1Element *elem,
 #ifdef WANT_EXTRACT_CERTINFO
 
 /*
- * Search the null terminated OID or OID identifier in local table.
+ * Search the null-terminated OID or OID identifier in local table.
  * Return the table entry pointer or NULL if not found.
  */
 static const struct Curl_OID *searchOID(const char *oid)

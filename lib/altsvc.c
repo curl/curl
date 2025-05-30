@@ -190,7 +190,7 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
     char dbuf[MAX_ALTSVC_DATELEN + 1];
     time_t expires;
 
-    /* The date parser works on a null terminated string. The maximum length
+    /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
     memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
     dbuf[curlx_strlen(&date)] = 0;

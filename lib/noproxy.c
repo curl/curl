@@ -234,7 +234,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
             /* if the bits variable gets a crazy value here, that is fine as
                the value will then be rejected in the cidr function */
             bits = (unsigned int)atoi(slash + 1);
-            *slash = 0; /* null terminate there */
+            *slash = 0; /* null-terminate there */
           }
           if(type == TYPE_IPV6)
             match = Curl_cidr6_match(name, check, bits);

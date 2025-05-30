@@ -768,8 +768,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     do {
       end_pos = strstr(begin_pos, ";sha256//");
       /*
-       * if there is an end_pos, null terminate,
-       * otherwise it will go to the end of the original string
+       * if there is an end_pos, null-terminate, otherwise it will go to the
+       * end of the original string
        */
       if(end_pos)
         end_pos[0] = '\0';
@@ -845,8 +845,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     }
 
     /*
-     * Otherwise we will assume it is PEM and try to decode it
-     * after placing null terminator
+     * Otherwise we will assume it is PEM and try to decode it after placing
+     * null-terminator
      */
     pem_read = pubkey_pem_to_der(curlx_dyn_ptr(&buf), &pem_ptr, &pem_len);
     /* if it was not read successfully, exit */

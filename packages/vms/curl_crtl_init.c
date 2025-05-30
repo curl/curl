@@ -131,7 +131,7 @@ static int sys_trnlnm(const char *logname,
 
   if($VMS_STATUS_SUCCESS(status)) {
 
-    /* Null terminate and return the string */
+    /* Null-terminate and return the string */
     /*--------------------------------------*/
     value[result] = '\0';
   }

@@ -32,7 +32,7 @@ struct dynbuf;
 
 /**
  * A single header entry.
- * `name` and `value` are non-NULL and always NUL terminated.
+ * `name` and `value` are non-NULL and always null-terminated.
  */
 struct dynhds_entry {
   char *name;

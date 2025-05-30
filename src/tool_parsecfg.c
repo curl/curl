@@ -237,10 +237,10 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
 /*
  * Copies the string from line to the buffer at param, unquoting
- * backslash-quoted characters and NUL-terminating the output string.
- * Stops at the first non-backslash-quoted double quote character or the
- * end of the input string. param must be at least as long as the input
- * string. Returns the pointer after the last handled input character.
+ * backslash-quoted characters and null-terminating the output string. Stops
+ * at the first non-backslash-quoted double quote character or the end of the
+ * input string. param must be at least as long as the input string. Returns
+ * the pointer after the last handled input character.
  */
 static const char *unslashquote(const char *line, char *param)
 {
@@ -317,7 +317,7 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 }
 
 /*
- * Returns a line from the given file. Every line is NULL terminated (no
+ * Returns a line from the given file. Every line is null-terminated (no
  * newline). Skips #-commented and space/tabs-only lines automatically.
  */
 bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)
