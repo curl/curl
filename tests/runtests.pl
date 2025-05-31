@@ -871,11 +871,6 @@ sub checksystemfeatures {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
     }
-    if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
-        logmsg("*\n",
-               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
-               "*\n");
-    }
 
     logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
                    $run_duphandle?"test-duphandle ":"",
@@ -884,9 +879,6 @@ sub checksystemfeatures {
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
-
-    # Disable memory tracking when using threaded resolver
-    $feature{"TrackMemory"} = $feature{"TrackMemory"} && !$feature{"threaded-resolver"};
 
 }
 
