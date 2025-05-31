@@ -57,6 +57,7 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+#include "altsvc.h"
 
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
@@ -2250,6 +2251,19 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return rc;
 }
 
+#ifndef CURL_DISABLE_ALTSVC
+static bool is_altsvc_error(CURLcode rc)
+{
+  switch(rc) {
+  case CURLE_OK:
+  case CURLE_OUT_OF_MEMORY:
+    return false;
+  default:
+    return true;
+  }
+}
+#endif
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime *nowp,
                                  struct Curl_easy *data)
@@ -2331,6 +2345,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       FALLTHROUGH();
 
     case MSTATE_CONNECT:
+
+#ifndef CURL_DISABLE_ALTSVC
+do_connect:
+#endif
       rc = state_connect(multi, data, nowp, &result);
       break;
 
@@ -2559,6 +2577,34 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
 statemachine_end:
+    /* maybe retry if altsvc is breaking */
+#ifndef CURL_DISABLE_ALTSVC
+    if(data->asi && data->asi->used && !data->asi->errored) {
+      data->asi->errored = is_altsvc_error(result);
+
+      if(data->asi->errored &&
+        !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+        data->mstate <= MSTATE_PROTOCONNECTING &&
+        data->mstate >= MSTATE_CONNECT) {
+        infof(data, "Alt-Svc connection failed(%d). "
+                    "Retrying with original target", result);
+
+        if(data->conn) {
+          struct connectdata *conn = data->conn;
+
+          Curl_detach_connection(data);
+          Curl_conn_terminate(data, conn, TRUE);
+        }
+
+        /* some code paths in !FTP do not call this */
+        Curl_async_destroy(data);
+
+        stream_error = FALSE;
+        multistate(data, MSTATE_CONNECT);
+        goto do_connect;
+      }
+    }
+#endif
 
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {

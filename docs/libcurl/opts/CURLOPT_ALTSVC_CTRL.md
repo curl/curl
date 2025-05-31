@@ -26,6 +26,7 @@ CURLOPT_ALTSVC_CTRL - control alt-svc behavior
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
+#define CURLALTSVC_NO_RETRY     (1<<6)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 ~~~
@@ -50,6 +51,16 @@ and HTTP/3 bits are only set if libcurl was built with support for those
 versions.
 
 Setting any bit enables the alt-svc engine.
+
+If the connection fails when trying to connect to an alternative host,
+the hostname from the URL is attempted instead.
+
+Failed connection problems that trigger this fallback include:
+1. bad addresses such as .onion
+2. non responsive servers
+3. bad SSL
+4. unsupported protocols
+5. bad response data
 
 ## CURLALTSVC_READONLYFILE
 
