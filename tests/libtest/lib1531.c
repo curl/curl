@@ -28,8 +28,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 static char const testData[] = ".abc\0xyz";
 static curl_off_t const testDataSize = sizeof(testData) - 1;
 

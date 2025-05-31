@@ -35,8 +35,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 static const char uploadthis[] =
   "this is the blurb we want to upload\n";
 

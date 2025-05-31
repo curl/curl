@@ -113,14 +113,6 @@ my @reused_symbols = (
     "xferinfo",
     );
 
-# TODO: Some of these may be #undef-ed manually at the end of each source
-my @reused_macros = (
-    "HEADER_REQUEST",
-    "NUM_HANDLES",
-    "SAFETY_MARGIN",
-    "TEST_HANG_TIMEOUT",
-    );
-
 my $tlist = "";
 
 while(my $line = <$fh>) {
@@ -139,11 +131,6 @@ while(my $line = <$fh>) {
         print "#define $namu\n";
         print "#include \"$src\"\n";
         print "#undef $namu\n";
-
-        # Reset macros re-used by multiple tests
-        foreach my $undef ("test", @reused_macros) {
-            print "#undef $undef\n";
-        }
 
         print "\n";
 
