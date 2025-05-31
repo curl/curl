@@ -68,7 +68,7 @@ CURL_IGNORE_DEPRECATION         7.87.0
 CURL_IPRESOLVE_V4               7.10.8
 CURL_IPRESOLVE_V6               7.10.8
 CURL_IPRESOLVE_WHATEVER         7.10.8
-CURL_ISOCPP                     7.10.2
+CURL_ISOCPP                     7.10.2        -           8.14.1
 CURL_LOCK_ACCESS_NONE           7.10.3
 CURL_LOCK_ACCESS_SHARED         7.10.3
 CURL_LOCK_ACCESS_SINGLE         7.10.3
