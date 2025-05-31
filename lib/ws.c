@@ -1384,6 +1384,10 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
       if(n < 0 && (result != CURLE_AGAIN))
         goto out;
       ws->sendbuf_payload += Curl_bufq_len(&ws->sendbuf) - prev_len;
+      if(!ws->sendbuf_payload) {
+        result = CURLE_AGAIN;
+        goto out;
+      }
     }
 
     /* flush, blocking when in callback */
