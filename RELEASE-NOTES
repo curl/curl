@@ -4,17 +4,27 @@ curl and libcurl 8.14.1
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3427
+ Contributors:                 3428
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o http: fail early when rewind of input failed when following redirects [2]
- o multi: fix add_handle resizing [3]
- o tool_getparam: refactored, simplified [4]
  o BUG-BOUNTY.md. mention the medium bounty amount in 2025 [5]
+ o cmake: fix missed version number for multi-pkg-config detections [14]
+ o docs: fix typos [12]
+ o http: fail early when rewind of input failed when following redirects [2]
+ o misc: fix spelling [15]
+ o misc: we write *an* IPv6 address [10]
+ o multi: fix add_handle resizing [3]
+ o spelling: 'a' vs 'an' [8]
+ o spelling: call it null-terminate consistently [6]
+ o tests: await portfile to be complete [1]
+ o tests: move test docs into /docs [16]
+ o tool_getparam: refactored, simplified [4]
+ o tool_getparam: remove two nextarg NULL checks [11]
+ o wolfssl: fix sending of early data [7]
 
 This release includes the following known bugs:
 
@@ -37,10 +47,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+  Daniel Stenberg, Ethan Everett, Jeroen Ooms, John Bampton, Samuel Henrique,
+  Stefan Eissing, Viktor Szakats, x-xiang on github
+  (8 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=17492
  [2] = https://curl.se/bug/?i=17472
  [3] = https://curl.se/bug/?i=17473
  [4] = https://curl.se/bug/?i=17448
  [5] = https://curl.se/bug/?i=17470
+ [6] = https://curl.se/bug/?i=17489
+ [7] = https://curl.se/bug/?i=17481
+ [8] = https://curl.se/bug/?i=17487
+ [10] = https://curl.se/bug/?i=17484
+ [11] = https://curl.se/bug/?i=17483
+ [12] = https://curl.se/bug/?i=17480
+ [14] = https://curl.se/bug/?i=16980
+ [15] = https://curl.se/bug/?i=17478
+ [16] = https://curl.se/bug/?i=17463
