@@ -29,6 +29,7 @@
 package servers;
 
 use IO::Socket;
+use Time::HiRes;
 use strict;
 use warnings;
 
@@ -1145,8 +1146,16 @@ sub runhttpserver {
 
     # where is it?
     my $port = 0;
-    if(!$port_or_path) {
+    my $waits = 0;
+    # wait at max 15 seconds to the port file to become valid
+    while(!$port_or_path && ($waits < (15 * 10))) {
         $port = $port_or_path = pidfromfile($portfile);
+        Time::HiRes::sleep(0.1) unless $port_or_path;
+        ++$waits;
+    }
+    if(!$port) {
+        logmsg "RUN: failed waiting for server to produce port file $portfile\n";
+        return (1, 0, 0, 0);
     }
 
     if($verb) {
