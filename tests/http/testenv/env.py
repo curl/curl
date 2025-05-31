@@ -53,8 +53,16 @@ def init_config_from(conf_path):
 
 
 TESTS_HTTPD_PATH = os.path.dirname(os.path.dirname(__file__))
+PROJ_PATH = os.path.dirname(os.path.dirname(TESTS_HTTPD_PATH))
 TOP_PATH = os.path.join(os.getcwd(), os.path.pardir)
-DEF_CONFIG = init_config_from(os.path.join(TOP_PATH, 'tests', 'http', 'config.ini'))
+CONFIG_PATH = os.path.join(TOP_PATH, 'tests', 'http', 'config.ini')
+if not os.path.exists(CONFIG_PATH):
+    ALT_CONFIG_PATH = os.path.join(PROJ_PATH, 'tests', 'http', 'config.ini')
+    if not os.path.exists(ALT_CONFIG_PATH):
+        raise Exception(f'unable to find config.ini in {CONFIG_PATH} nor {ALT_CONFIG_PATH}')
+    TOP_PATH = PROJ_PATH
+    CONFIG_PATH = ALT_CONFIG_PATH
+DEF_CONFIG = init_config_from(CONFIG_PATH)
 CURL = os.path.join(TOP_PATH, 'src', 'curl')
 
 
