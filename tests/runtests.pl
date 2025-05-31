@@ -834,11 +834,6 @@ sub checksystemfeatures {
     chomp $has_shared;
     $has_shared = $has_shared eq "yes";
 
-    if(!$feature{"TrackMemory"} && $torture) {
-        die "can't run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
-    }
-
     my $hostname=join(' ', runclientoutput("hostname"));
     chomp $hostname;
     my $hosttype=join(' ', runclientoutput("uname -a"));
@@ -872,9 +867,15 @@ sub checksystemfeatures {
         logmsg "* Jobs: $jobs\n";
     }
     if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
+        # Disable memory tracking when using threaded resolver
+        $feature{"TrackMemory"} = 0;
         logmsg("*\n",
                "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
                "*\n");
+    }
+    if(!$feature{"TrackMemory"} && $torture) {
+        die "can't run torture tests since curl was built without ".
+            "TrackMemory feature (--enable-curldebug)";
     }
 
     logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
@@ -884,9 +885,6 @@ sub checksystemfeatures {
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
-
-    # Disable memory tracking when using threaded resolver
-    $feature{"TrackMemory"} = $feature{"TrackMemory"} && !$feature{"threaded-resolver"};
 
 }
 
