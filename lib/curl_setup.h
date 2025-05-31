@@ -590,9 +590,9 @@
 #error "too small curl_off_t"
 #else
    /* assume SIZEOF_CURL_OFF_T == 8 */
-#  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
+#  define CURL_OFF_T_MAX 0x7FFFFFFFFFFFFFFF
 #endif
-#define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
+#define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
 #if (SIZEOF_CURL_OFF_T != 8)
 #  error "curl_off_t must be exactly 64 bits"
