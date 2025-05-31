@@ -46,9 +46,6 @@
 # fnmatch differences are just too common to make testing them sensible
 1307
 1316
-# test 1510 causes problems on the CI on GitHub
-# example: https://travis-ci.org/curl/curl/builds/81633600
-1510
 1512
 # test 1801 causes problems in CI builds
 # https://github.com/curl/curl/issues/380
