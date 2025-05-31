@@ -1,0 +1,84 @@
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+<client>
+<name>
+ws: Peculiar frame sizes
+</name>
+<features>
+Debug
+ws
+</features>
+<server>
+http
+</server>
+<tool>
+lib2700
+</tool>
+<command>
+ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+<setenv>
+CURL_WS_FORCE_ZERO_MASK=1
+</setenv>
+</client>
+
+<reply>
+<servercmd>
+upgrade
+</servercmd>
+
+# Full list of frames: see <verify.stdout> below
+# Frames with sizes around special cases of the frame encoding
+#   see https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
+#    - 0: empty frame
+#    - 125: largest payload with 7-bit encoding
+#    - 126: smallest payload with 16-bit encoding AND this value in first byte indicates 16-bit encoding
+#    - 127: this value in first byte indicates 64-bit encoding
+#    - 65535: largest payload with 16-bit length encoding
+#    - 65536: smallest payload with 64-bit length encoding
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 101 Switching to WebSockets
+Server: server/%TESTNUMBER
+Upgrade: Websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
+
+%hex[%81%00]hex%%hex[%81%7d]hex%%repeat[125 x _]%%hex[%81%7e%00%7e]hex%%repeat[126 x _]%%hex[%81%7e%00%7f]hex%%repeat[127 x _]%%hex[%81%7e%ff%ff]hex%%repeat[65535 x _]%%hex[%81%7f%00%00%00%00%00%01%00%00]hex%%repeat[65536 x _]%%hex[%88%00]hex%
+</data>
+</reply>
+
+<verify>
+
+# Exact echo of reply data with additional masking
+<protocol nonewline="yes">
+%hex[%81%80%00%00%00%00]hex%%hex[%81%fd%00%00%00%00]hex%%repeat[125 x _]%%hex[%81%fe%00%7e%00%00%00%00]hex%%repeat[126 x _]%%hex[%81%fe%00%7f%00%00%00%00]hex%%repeat[127 x _]%%hex[%81%fe%ff%ff%00%00%00%00]hex%%repeat[65535 x _]%%hex[%81%ff%00%00%00%00%00%01%00%00%00%00%00%00]hex%%repeat[65536 x _]%%hex[%88%80%00%00%00%00]hex%
+</protocol>
+
+<stdout>
+txt fin [0]
+txt fin [125] %repeat[125 x _]%
+txt fin [126] %repeat[126 x _]%
+txt fin [127] %repeat[127 x _]%
+txt fin [65535] %repeat[65535 x _]%
+txt fin [65536] %repeat[65536 x _]%
+close [0]
+</stdout>
+
+# CURLE_OK
+<errorcode>
+0
+</errorcode>
+
+# Strip HTTP header from <protocol>
+<strip>
+^GET /.*
+^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*
+^\s*$
+</strip>
+</verify>
+</testcase>
