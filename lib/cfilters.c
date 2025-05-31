@@ -67,19 +67,6 @@ CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
 static void conn_report_connect_stats(struct Curl_easy *data,
                                       struct connectdata *conn);
 
-void Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const char **phost, const char **pdisplay_host,
-                          int *pport)
-{
-  if(cf->next)
-    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
-  else {
-    *phost = cf->conn->host.name;
-    *pdisplay_host = cf->conn->host.dispname;
-    *pport = cf->conn->primary.remote_port;
-  }
-}
-
 void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct easy_pollset *ps)
@@ -673,24 +660,28 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
   return Curl_poll(pfds, npfds, timeout_ms);
 }
 
-void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
-                        const char **phost, const char **pdisplay_host,
-                        int *pport)
+void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
+                                const char **phost, int *pport)
 {
-  struct Curl_cfilter *cf;
+  struct Curl_cfilter *cf, *cf_proxy = NULL;
 
   DEBUGASSERT(data->conn);
   cf = data->conn->cfilter[sockindex];
-  if(cf) {
-    cf->cft->get_host(cf, data, phost, pdisplay_host, pport);
+  /* Find the "lowest" tunneling proxy filter that has not connected yet. */
+  while(cf && !cf->connected) {
+    if((cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY)) ==
+       (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY))
+       cf_proxy = cf;
+    cf = cf->next;
   }
-  else {
-    /* Some filter ask during shutdown for this, mainly for debugging
-     * purposes. We hand out the defaults, however this is not always
-     * accurate, as the connection might be tunneled, etc. But all that
-     * state is already gone here. */
+  /* cf_proxy (!= NULL) is not connected yet. It is talking
+   * to an interim host and any authentication or other things apply
+   * to this interim host and port. */
+  if(!cf_proxy || cf_proxy->cft->query(cf_proxy, data, CF_QUERY_HOST_PORT,
+                                       pport, CURL_UNCONST(phost))) {
+    /* Everything connected or query unsuccessful, the overall
+     * connection's destination is the answer */
     *phost = data->conn->host.name;
-    *pdisplay_host = data->conn->host.dispname;
     *pport = data->conn->remote_port;
   }
 }

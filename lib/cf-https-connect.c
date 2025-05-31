@@ -561,7 +561,6 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_connect,
   cf_hc_close,
   cf_hc_shutdown,
-  Curl_cf_def_get_host,
   cf_hc_adjust_pollset,
   cf_hc_data_pending,
   Curl_cf_def_send,
