@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 
+#include <curl/curl.h>
 #include "timediff.h"
 
 #include <limits.h>

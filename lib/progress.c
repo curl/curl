@@ -44,18 +44,18 @@ static void time2str(char *r, curl_off_t seconds)
     strcpy(r, "--:--:--");
     return;
   }
-  h = seconds / CURL_OFF_T_C(3600);
-  if(h <= CURL_OFF_T_C(99)) {
-    curl_off_t m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
-    curl_off_t s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
+  h = seconds / 3600;
+  if(h <= 99) {
+    curl_off_t m = (seconds - (h * 3600)) / 60;
+    curl_off_t s = (seconds - (h * 3600)) - (m * 60);
     msnprintf(r, 9, "%2" FMT_OFF_T ":%02" FMT_OFF_T ":%02" FMT_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
-    curl_off_t d = seconds / CURL_OFF_T_C(86400);
-    h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
-    if(d <= CURL_OFF_T_C(999))
+    curl_off_t d = seconds / 86400;
+    h = (seconds - (d * 86400)) / 3600;
+    if(d <= 999)
       msnprintf(r, 9, "%3" FMT_OFF_T "d %02" FMT_OFF_T "h", d, h);
     else
       msnprintf(r, 9, "%7" FMT_OFF_T "d", d);
@@ -67,39 +67,39 @@ static void time2str(char *r, curl_off_t seconds)
    Add suffix k, M, G when suitable... */
 static char *max5data(curl_off_t bytes, char *max5)
 {
-#define ONE_KILOBYTE  CURL_OFF_T_C(1024)
-#define ONE_MEGABYTE (CURL_OFF_T_C(1024) * ONE_KILOBYTE)
-#define ONE_GIGABYTE (CURL_OFF_T_C(1024) * ONE_MEGABYTE)
-#define ONE_TERABYTE (CURL_OFF_T_C(1024) * ONE_GIGABYTE)
-#define ONE_PETABYTE (CURL_OFF_T_C(1024) * ONE_TERABYTE)
+#define ONE_KILOBYTE (curl_off_t)1024
+#define ONE_MEGABYTE (1024 * ONE_KILOBYTE)
+#define ONE_GIGABYTE (1024 * ONE_MEGABYTE)
+#define ONE_TERABYTE (1024 * ONE_GIGABYTE)
+#define ONE_PETABYTE (1024 * ONE_TERABYTE)
 
-  if(bytes < CURL_OFF_T_C(100000))
+  if(bytes < 100000)
     msnprintf(max5, 6, "%5" FMT_OFF_T, bytes);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_KILOBYTE)
+  else if(bytes < 10000 * ONE_KILOBYTE)
     msnprintf(max5, 6, "%4" FMT_OFF_T "k", bytes/ONE_KILOBYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
+  else if(bytes < 100 * ONE_MEGABYTE)
     /* 'XX.XM' is good as long as we are less than 100 megs */
     msnprintf(max5, 6, "%2" FMT_OFF_T ".%0"
               FMT_OFF_T "M", bytes/ONE_MEGABYTE,
-              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/10) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
+  else if(bytes < 10000 * ONE_MEGABYTE)
     /* 'XXXXM' is good until we are at 10000MB or above */
     msnprintf(max5, 6, "%4" FMT_OFF_T "M", bytes/ONE_MEGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
+  else if(bytes < 100 * ONE_GIGABYTE)
     /* 10000 MB - 100 GB, we show it as XX.XG */
     msnprintf(max5, 6, "%2" FMT_OFF_T ".%0"
               FMT_OFF_T "G", bytes/ONE_GIGABYTE,
-              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/10) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_GIGABYTE)
+  else if(bytes < 10000 * ONE_GIGABYTE)
     /* up to 10000GB, display without decimal: XXXXG */
     msnprintf(max5, 6, "%4" FMT_OFF_T "G", bytes/ONE_GIGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_TERABYTE)
+  else if(bytes < 10000 * ONE_TERABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
     msnprintf(max5, 6, "%4" FMT_OFF_T "T", bytes/ONE_TERABYTE);
 
@@ -296,7 +296,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
    * stay below 'limit'.
    */
   if(size < CURL_OFF_T_MAX/1000)
-    minimum = (timediff_t) (CURL_OFF_T_C(1000) * size / speed_limit);
+    minimum = (timediff_t) (1000 * size / speed_limit);
   else {
     minimum = (timediff_t) (size / speed_limit);
     if(minimum < TIMEDIFF_T_MAX/1000)
@@ -455,7 +455,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
       /* Calculate the average speed the last 'span_ms' milliseconds */
       amount = p->speeder[nowindex]- p->speeder[checkindex];
 
-      if(amount > CURL_OFF_T_C(4294967) /* 0xffffffff/1000 */)
+      if(amount > (0xffffffff/1000))
         /* the 'amount' value is bigger than would fit in 32 bits if
            multiplied with 1000, so we use the double math for this */
         p->current_speed = (curl_off_t)
@@ -463,7 +463,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
       else
         /* the 'amount' value is small enough to fit within 32 bits even
            when multiplied with 1000 */
-        p->current_speed = amount*CURL_OFF_T_C(1000)/span_ms;
+        p->current_speed = amount * 1000/span_ms;
     }
     else
       /* the first second we use the average */
@@ -482,9 +482,9 @@ struct pgrs_estimate {
 
 static curl_off_t pgrs_est_percent(curl_off_t total, curl_off_t cur)
 {
-  if(total > CURL_OFF_T_C(10000))
-    return cur / (total/CURL_OFF_T_C(100));
-  else if(total > CURL_OFF_T_C(0))
+  if(total > 10000)
+    return cur / (total / 100);
+  else if(total > 0)
     return (cur*100) / total;
   return 0;
 }
@@ -495,7 +495,7 @@ static void pgrs_estimates(struct pgrs_dir *d,
 {
   est->secs = 0;
   est->percent = 0;
-  if(total_known && (d->speed > CURL_OFF_T_C(0))) {
+  if(total_known && (d->speed > 0)) {
     est->secs = d->total_size / d->speed;
     est->percent = pgrs_est_percent(d->total_size, d->cur_size);
   }

@@ -32,39 +32,39 @@
    Add suffix k, M, G when suitable... */
 static char *max5data(curl_off_t bytes, char *max5)
 {
-#define ONE_KILOBYTE  CURL_OFF_T_C(1024)
-#define ONE_MEGABYTE (CURL_OFF_T_C(1024) * ONE_KILOBYTE)
-#define ONE_GIGABYTE (CURL_OFF_T_C(1024) * ONE_MEGABYTE)
-#define ONE_TERABYTE (CURL_OFF_T_C(1024) * ONE_GIGABYTE)
-#define ONE_PETABYTE (CURL_OFF_T_C(1024) * ONE_TERABYTE)
+#define ONE_KILOBYTE (curl_off_t)1024
+#define ONE_MEGABYTE (1024 * ONE_KILOBYTE)
+#define ONE_GIGABYTE (1024 * ONE_MEGABYTE)
+#define ONE_TERABYTE (1024 * ONE_GIGABYTE)
+#define ONE_PETABYTE (1024 * ONE_TERABYTE)
 
-  if(bytes < CURL_OFF_T_C(100000))
+  if(bytes < 100000)
     msnprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_KILOBYTE)
+  else if(bytes < 10000 * ONE_KILOBYTE)
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
+  else if(bytes < 100 * ONE_MEGABYTE)
     /* 'XX.XM' is good as long as we are less than 100 megs */
     msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
-              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/10) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
+  else if(bytes < 10000 * ONE_MEGABYTE)
     /* 'XXXXM' is good until we are at 10000MB or above */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
+  else if(bytes < 100 * ONE_GIGABYTE)
     /* 10000 MB - 100 GB, we show it as XX.XG */
     msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
               CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE,
-              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/CURL_OFF_T_C(10)) );
+              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/10) );
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_GIGABYTE)
+  else if(bytes < 10000 * ONE_GIGABYTE)
     /* up to 10000GB, display without decimal: XXXXG */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE);
 
-  else if(bytes < CURL_OFF_T_C(10000) * ONE_TERABYTE)
+  else if(bytes < 10000 * ONE_TERABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "T", bytes/ONE_TERABYTE);
 
@@ -110,19 +110,19 @@ static void time2str(char *r, curl_off_t seconds)
     strcpy(r, "--:--:--");
     return;
   }
-  h = seconds / CURL_OFF_T_C(3600);
-  if(h <= CURL_OFF_T_C(99)) {
-    curl_off_t m = (seconds - (h*CURL_OFF_T_C(3600))) / CURL_OFF_T_C(60);
-    curl_off_t s = (seconds - (h*CURL_OFF_T_C(3600))) - (m*CURL_OFF_T_C(60));
+  h = seconds / 3600;
+  if(h <= 99) {
+    curl_off_t m = (seconds - (h * 3600)) / 60;
+    curl_off_t s = (seconds - (h * 3600)) - (m * 60);
     msnprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T ":%02" CURL_FORMAT_CURL_OFF_T
               ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
-    curl_off_t d = seconds / CURL_OFF_T_C(86400);
-    h = (seconds - (d*CURL_OFF_T_C(86400))) / CURL_OFF_T_C(3600);
-    if(d <= CURL_OFF_T_C(999))
+    curl_off_t d = seconds / 86400;
+    h = (seconds - (d * 86400)) / 3600;
+    if(d <= 999)
       msnprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
                 "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
     else
