@@ -1733,6 +1733,7 @@ struct UserDefined {
 #endif
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
   BIT(reuse_fresh);    /* do not reuse an existing connection  */
+  BIT(clear_cpool);    /* clear all existing connections in cpool */
   BIT(no_signal);      /* do not use any signal/alarm handler */
   BIT(tcp_nodelay);    /* whether to enable TCP_NODELAY or not */
   BIT(ignorecl);       /* ignore content length */

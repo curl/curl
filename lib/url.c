@@ -486,6 +486,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ws_no_auto_pong = FALSE;
 #endif
 
+  set->clear_cpool = FALSE; /* not clear cpool by default */
+
   return result;
 }
 
@@ -3685,6 +3687,11 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   DEBUGASSERT(conn->user);
   DEBUGASSERT(conn->passwd);
+
+  /* If clear_cpool is TRUE, clear all existing connections in cpool, in order
+     to prevent their reuse. */
+  if(data->set.clear_cpool)
+    Curl_cpool_clear(data);
 
   /* reuse_fresh is TRUE if we are told to use a new connection by force, but
      we only acknowledge this option if this is not a reused connection

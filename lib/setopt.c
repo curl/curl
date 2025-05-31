@@ -453,8 +453,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * This transfer shall not use a previously cached connection but
      * should be made with a fresh new connect!
+     * When set to 2, this transfer shall also clear all connections in cpool
+     * in order to prevent their reuse.
      */
     data->set.reuse_fresh = enabled;
+    data->set.clear_cpool = (uarg == 2) ? TRUE : FALSE;
     break;
   case CURLOPT_VERBOSE:
     /*

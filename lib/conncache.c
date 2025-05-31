@@ -88,6 +88,7 @@ static void cpool_discard_conn(struct cpool *cpool,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                bool aborted);
+static struct cpool *cpool_get_instance(struct Curl_easy *data);
 
 static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
@@ -230,6 +231,26 @@ void Curl_cpool_destroy(struct cpool *cpool)
     sigpipe_restore(&pipe_st);
     Curl_hash_destroy(&cpool->dest2bundle);
   }
+}
+
+void Curl_cpool_clear(struct Curl_easy *data)
+{
+  struct cpool *cpool = cpool_get_instance(data);
+  struct connectdata *conn;
+
+  if(!cpool)
+    return;
+
+  CPOOL_LOCK(cpool, data);
+  infof(data, "Connection pool clearing all %zu connections", cpool->num_conn);
+  conn = cpool_get_first(cpool);
+  while(conn) {
+    cpool_remove_conn(cpool, conn);
+    connclose(conn, "clear all");
+    cpool_discard_conn(cpool, cpool->idata, conn, FALSE);
+    conn = cpool_get_first(cpool);
+  }
+  CPOOL_UNLOCK(cpool, data);
 }
 
 static struct cpool *cpool_get_instance(struct Curl_easy *data)
