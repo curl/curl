@@ -56,10 +56,10 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
       curl_off_t converted = (curl_off_t)ft.dwLowDateTime
         | ((curl_off_t)ft.dwHighDateTime) << 32;
 
-      if(converted < CURL_OFF_T_C(116444736000000000))
+      if(converted < 116444736000000000LL)
         warnf(global, "Failed to get filetime: underflow");
       else {
-        *stamp = (converted - CURL_OFF_T_C(116444736000000000)) / 10000000;
+        *stamp = (converted - 116444736000000000LL) / 10000000;
         rc = 0;
       }
     }
@@ -101,7 +101,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
 
     /* 910670515199 is the maximum Unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
-    if(filetime > CURL_OFF_T_C(910670515199)) {
+    if(filetime > 910670515199LL) {
       warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on outfile: overflow", filetime);
       curlx_unicodefree(tchar_filename);
@@ -115,7 +115,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
     curlx_unicodefree(tchar_filename);
     if(hfile != INVALID_HANDLE_VALUE) {
       curl_off_t converted = ((curl_off_t)filetime * 10000000) +
-        CURL_OFF_T_C(116444736000000000);
+        116444736000000000LL;
       FILETIME ft;
       ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
       ft.dwHighDateTime = (DWORD)(converted >> 32);
