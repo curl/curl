@@ -244,9 +244,6 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
  make - required
  - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
    ln -s /usr/bin/make /usr/bin/gmake
- libuv1 - suggested
- libarchive13 - suggested
- libcurl4 - suggested
 ```
 
 </details>
