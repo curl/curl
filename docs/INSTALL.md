@@ -242,7 +242,7 @@ Download the latest version of the `cygwin` packages required (*and suggested*) 
  libtool - required
  perl - required
  make - required
- - NOTE - if there is an error regarding cmake, open the cygwin terminal, and run:
+ - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
    ln -s /usr/bin/make /usr/bin/gmake
  libuv1 - suggested
  libarchive13 - suggested
