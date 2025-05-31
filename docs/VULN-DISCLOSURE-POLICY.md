@@ -80,7 +80,7 @@ announcement.
   Bounty team and the reporter is asked to request the reward from them after
   the issue has been completely handled and published by curl.
 
-- No more than 10 days before release, inform
+- No more than seven days before release, inform
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
   to prepare them about the upcoming public security vulnerability
   announcement - attach the advisory draft for information with CVE and
