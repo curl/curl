@@ -88,7 +88,7 @@ static const struct LongShort aliases[]= {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
   {"alpn",                       ARG_BOOL|ARG_NO|ARG_TLS, ' ', C_ALPN},
   {"alt-svc",                    ARG_STRG, ' ', C_ALT_SVC},
-  {"anyauth",                    ARG_BOOL, ' ', C_ANYAUTH},
+  {"anyauth",                    ARG_NONE, ' ', C_ANYAUTH},
   {"append",                     ARG_BOOL, 'a', C_APPEND},
   {"aws-sigv4",                  ARG_STRG, ' ', C_AWS_SIGV4},
   {"basic",                      ARG_BOOL, ' ', C_BASIC},
@@ -1698,6 +1698,9 @@ static ParameterError opt_none(struct GlobalConfig *global,
                                const struct LongShort *a)
 {
   switch(a->cmd) {
+  case C_ANYAUTH: /* --anyauth */
+    config->authtype = CURLAUTH_ANY;
+    break;
   case C_DUMP_CA_EMBED: /* --dump-ca-embed */
     return PARAM_CA_EMBED_REQUESTED;
 
@@ -1827,11 +1830,6 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     break;
   case C_BASIC: /* --basic */
     togglebit(toggle, &config->authtype, CURLAUTH_BASIC);
-    break;
-  case C_ANYAUTH: /* --anyauth */
-    if(toggle)
-      config->authtype = CURLAUTH_ANY;
-    /* --no-anyauth simply does not touch it */
     break;
 #ifdef USE_WATT32
   case C_WDEBUG: /* --wdebug */
