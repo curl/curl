@@ -69,6 +69,7 @@ LIB_VAUTH_HFILES =      \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
+  vtls/apple.c              \
   vtls/bearssl.c            \
   vtls/cipher_suite.c       \
   vtls/gtls.c               \
@@ -88,6 +89,7 @@ LIB_VTLS_CFILES =           \
   vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
+  vtls/apple.h              \
   vtls/bearssl.h            \
   vtls/cipher_suite.h       \
   vtls/gtls.h               \
