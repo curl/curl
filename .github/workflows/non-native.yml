@@ -72,7 +72,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              export TFLAGS='-j4'
+              export TFLAGS='-j8'
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
@@ -112,7 +112,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
+              export TFLAGS='-j8'
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
@@ -169,7 +169,7 @@ jobs:
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time make -C tests
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
-                time make test-ci V=1 TFLAGS='-j4'
+                time make test-ci V=1 TFLAGS='-j8'
               fi
             fi
             if [ "${desc#*!examples*}" = "${desc}" ]; then
@@ -206,6 +206,7 @@ jobs:
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
+                export TFLAGS='-j8'
                 time cmake --build bld --target test-ci
               fi
             fi
