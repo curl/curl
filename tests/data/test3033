@@ -1,0 +1,54 @@
+<testcase>
+<info>
+<keywords>
+curl_easy_setopt
+connection reuse
+libtest
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Content-Length: 6
+
+-foo-
+</data>
+<datacheck>
+not set CURLOPT_FRESH_CONNECT for req #0
+-foo-
+set CURLOPT_FRESH_CONNECT=2 for req #1
+set CURLOPT_FORBID_REUSE=1 for req #1
+-foo-
+not set CURLOPT_FRESH_CONNECT for req #2
+-foo-
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+CURLOPT_FRESH_CONNECT=2
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>
