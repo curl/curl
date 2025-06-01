@@ -206,6 +206,7 @@ jobs:
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
               if [ "${desc#*!runtests*}" = "${desc}" ]; then
+                export TFLAGS='-j4'
                 time cmake --build bld --target test-ci
               fi
             fi
