@@ -223,7 +223,7 @@ packages are needed for the install. For more on installing packages visit
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
-    setup-x86_64.exe -P binutils, gcc-core, libpsl-devel, libtool, perl, make
+    setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
 
 If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
 the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
