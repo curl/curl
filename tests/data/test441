@@ -31,6 +31,7 @@ http
 HSTS
 proxy
 https
+!nwf
 </features>
 
 # no trailing dot in the file only in the URL

@@ -17,6 +17,7 @@ local-http
 !bearssl
 !Schannel
 !sectransp
+!nwf
 !wolfssl
 </features>
 <server>

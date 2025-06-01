@@ -755,6 +755,24 @@ if(CURL_USE_SECTRANSP)
   message(WARNING "Secure Transport does not support TLS 1.3.")
 endif()
 
+if(CURL_USE_NWF)
+  set(_use_core_foundation_and_core_services ON)
+
+  find_library(NETWORK_FRAMEWORK NAMES "Network")
+  mark_as_advanced(NETWORK_FRAMEWORK)
+  if(NOT NETWORK_FRAMEWORK)
+    message(FATAL_ERROR "Network framework not found")
+  endif()
+  list(APPEND CURL_LIBS "-framework Network")
+
+  set(_ssl_enabled ON)
+  set(USE_NWF ON)
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "network-framework")
+    set(_valid_default_ssl_backend TRUE)
+  endif()
+endif()
+
 if(_use_core_foundation_and_core_services)
   find_library(COREFOUNDATION_FRAMEWORK NAMES "CoreFoundation")
   mark_as_advanced(COREFOUNDATION_FRAMEWORK)

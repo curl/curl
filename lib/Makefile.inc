@@ -82,6 +82,7 @@ LIB_VTLS_CFILES =           \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
+  vtls/nwf.c                \
   vtls/vtls.c               \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
@@ -97,6 +98,7 @@ LIB_VTLS_HFILES =           \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
+  vtls/nwf.h                \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \

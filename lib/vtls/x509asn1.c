@@ -24,17 +24,18 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) ||      \
-  defined(USE_SCHANNEL) || defined(USE_SECTRANSP) ||    \
-  defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+#if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || defined(USE_SCHANNEL) ||   \
+    defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_RUSTLS) ||  \
+    defined(USE_NWF)
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS) || defined(USE_WOLFSSL) || defined(USE_RUSTLS)
+  defined(USE_MBEDTLS) || defined(USE_WOLFSSL) || defined(USE_RUSTLS) ||      \
+  defined(USE_NWF)
 #define WANT_PARSEX509 /* uses Curl_parseX509() */
 #endif
 
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+  defined(USE_MBEDTLS) || defined(USE_RUSTLS) || defined(USE_NWF)
 #define WANT_EXTRACT_CERTINFO /* uses Curl_extract_certinfo() */
 #endif
 
