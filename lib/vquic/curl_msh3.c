@@ -361,17 +361,16 @@ static CURLcode write_resp_raw(struct Curl_easy *data,
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(!stream)
     return CURLE_RECV_ERROR;
 
-  nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
-  if(nwritten < 0) {
+  result = Curl_bufq_write(&stream->recvbuf, mem, memlen, &nwritten);
+  if(result)
     return result;
-  }
 
-  if((size_t)nwritten < memlen) {
+  if(nwritten < memlen) {
     /* This MUST not happen. Our recbuf is dimensioned to hold the
      * full max_stream_window and then some for this very reason. */
     DEBUGASSERT(0);
@@ -597,12 +596,15 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *err = CURLE_OK;
 
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
-    nread = Curl_bufq_read(&stream->recvbuf,
-                           (unsigned char *)buf, len, err);
-    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %zd, %d",
-                len, nread, *err);
-    if(nread < 0)
+    size_t n;
+    *err = Curl_bufq_cread(&stream->recvbuf, buf, len, &n);
+    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %d, %zu",
+                len, *err, n);
+    if(*err) {
+      nread = -1;
       goto out;
+    }
+    nread = (ssize_t)n;
     if(stream->closed)
       h3_drain_stream(cf, data);
   }

@@ -593,10 +593,10 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   }
 
   if(nbytes) {
-    ssize_t nwritten;
-    nwritten = Curl_bufq_write(&ctx->buf, (const unsigned char *)buf,
-                               nbytes, &result);
-    if(nwritten < 0) {
+    size_t nwritten;
+    result = Curl_bufq_write(&ctx->buf, (const unsigned char *)buf,
+                             nbytes, &nwritten);
+    if(result) {
       infof(data, "WS: error adding data to buffer %d", result);
       return result;
     }
@@ -695,8 +695,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
 {
   unsigned char firstbyte = 0;
   unsigned char head[14];
-  size_t hlen;
-  ssize_t n;
+  size_t hlen, n;
 
   if(payload_len < 0) {
     failf(data, "WS: starting new frame with negative payload length %"
@@ -758,16 +757,16 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   /* reset for payload to come */
   enc->xori = 0;
 
-  n = Curl_bufq_write(out, head, hlen, err);
-  if(n < 0)
+  *err = Curl_bufq_write(out, head, hlen, &n);
+  if(*err)
     return -1;
-  if((size_t)n != hlen) {
+  if(n != hlen) {
     /* We use a bufq with SOFT_LIMIT, writing should always succeed */
     DEBUGASSERT(0);
     *err = CURLE_SEND_ERROR;
     return -1;
   }
-  return n;
+  return (ssize_t)n;
 }
 
 static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
@@ -775,8 +774,7 @@ static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
                                     const unsigned char *buf, size_t buflen,
                                     struct bufq *out, CURLcode *err)
 {
-  ssize_t n;
-  size_t i, len;
+  size_t i, len, n;
 
   if(Curl_bufq_is_full(out)) {
     *err = CURLE_AGAIN;
@@ -790,8 +788,8 @@ static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
 
   for(i = 0; i < len; ++i) {
     unsigned char c = buf[i] ^ enc->mask[enc->xori];
-    n = Curl_bufq_write(out, &c, 1, err);
-    if(n < 0) {
+    *err = Curl_bufq_write(out, &c, 1, &n);
+    if(*err) {
       if((*err != CURLE_AGAIN) || !i)
         return -1;
       break;
@@ -968,14 +966,15 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   }
 
   if(data->set.connect_only) {
-    ssize_t nwritten;
+    size_t nwritten;
     /* In CONNECT_ONLY setup, the payloads from `mem` need to be received
      * when using `curl_ws_recv` later on after this transfer is already
      * marked as DONE. */
-    nwritten = Curl_bufq_write(&ws->recvbuf, (const unsigned char *)mem,
-                               nread, &result);
-    if(nwritten < 0)
+    result = Curl_bufq_write(&ws->recvbuf, (const unsigned char *)mem,
+                             nread, &nwritten);
+    if(result)
       return result;
+    DEBUGASSERT(nread == nwritten);
     infof(data, "%zu bytes websocket payload", nread);
   }
   else { /* !connect_only */
@@ -1051,17 +1050,12 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
   return nwritten;
 }
 
-static ssize_t nw_in_recv(void *reader_ctx,
-                          unsigned char *buf, size_t buflen,
-                          CURLcode *err)
+static CURLcode nw_in_recv(void *reader_ctx,
+                           unsigned char *buf, size_t buflen,
+                           size_t *pnread)
 {
   struct Curl_easy *data = reader_ctx;
-  size_t nread;
-
-  *err = curl_easy_recv(data, buf, buflen, &nread);
-  if(*err)
-    return -1;
-  return (ssize_t)nread;
+  return curl_easy_recv(data, buf, buflen, pnread);
 }
 
 CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
@@ -1106,10 +1100,10 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
 
     /* receive more when our buffer is empty */
     if(Curl_bufq_is_empty(&ws->recvbuf)) {
-      ssize_t n = Curl_bufq_slurp(&ws->recvbuf, nw_in_recv, data, &result);
-      if(n < 0) {
+      size_t n;
+      result = Curl_bufq_slurp(&ws->recvbuf, nw_in_recv, data, &n);
+      if(result)
         return result;
-      }
       else if(n == 0) {
         /* connection closed */
         infof(data, "connection expectedly closed?");

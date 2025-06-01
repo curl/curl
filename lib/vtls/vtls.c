@@ -1372,7 +1372,7 @@ static CURLcode ssl_cf_set_earlydata(struct Curl_cfilter *cf,
                                      const void *buf, size_t blen)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  ssize_t nwritten = 0;
+  size_t nwritten = 0;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_await);
@@ -1380,10 +1380,10 @@ static CURLcode ssl_cf_set_earlydata(struct Curl_cfilter *cf,
   if(blen) {
     if(blen > connssl->earlydata_max)
       blen = connssl->earlydata_max;
-    nwritten = Curl_bufq_write(&connssl->earlydata, buf, blen, &result);
+    result = Curl_bufq_write(&connssl->earlydata, buf, blen, &nwritten);
     CURL_TRC_CF(data, cf, "ssl_cf_set_earlydata(len=%zu) -> %zd",
                 blen, nwritten);
-    if(nwritten < 0)
+    if(result)
       return result;
   }
   return CURLE_OK;
