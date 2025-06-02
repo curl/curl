@@ -1315,18 +1315,19 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   CURLcode result;
+  bool no_underlying = Curl_ssl_supports(data, SSLSUPP_NO_UNDERLYING);
 
   if(cf->connected && (connssl->state != ssl_connection_deferred)) {
     *done = TRUE;
     return CURLE_OK;
   }
 
-  if(!cf->next) {
+  if(!no_underlying && !cf->next) {
     *done = FALSE;
     return CURLE_FAILED_INIT;
   }
 
-  if(!cf->next->connected) {
+  if(!no_underlying && !cf->next->connected) {
     result = cf->next->cft->do_connect(cf->next, data, done);
     if(result || !*done)
       return result;
@@ -1445,13 +1446,13 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
-  bool result;
+  bool result = FALSE;
 
   CF_DATA_SAVE(save, cf, data);
   if(connssl->ssl_impl->data_pending &&
      connssl->ssl_impl->data_pending(cf, data))
     result = TRUE;
-  else
+  else if(cf->next)
     result = cf->next->cft->has_data_pending(cf->next, data);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -1599,6 +1600,13 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
     if(cf->connected && !Curl_ssl_cf_is_proxy(cf))
       *when = connssl->handshake_done;
     return CURLE_OK;
+  }
+  case CF_QUERY_SOCKET: {
+    if(Curl_ssl_supports(data, SSLSUPP_NO_UNDERLYING)) {
+      *(curl_socket_t*)pres2 = cf->conn->sock[cf->sockindex];
+      return CURLE_OK;
+    }
+    break;
   }
   default:
     break;
