@@ -1647,6 +1647,8 @@ if(WIN32)
     # Windows XP is required for freeaddrinfo, getaddrinfo
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
+
+  set(HAVE_SYS_SOCKET_H 0)
 else()
   list(APPEND CURL_INCLUDES "sys/socket.h")
   set(HAVE_SYS_SOCKET_H 1)
