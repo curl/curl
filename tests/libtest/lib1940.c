@@ -28,7 +28,7 @@
 
 #ifndef LIB1940_C
 #define LIB1940_C
-static const char *testdata[]={
+static const char *t1940_testdata[]={
   "daTE",
   "Server",
   "content-type",
@@ -42,7 +42,7 @@ static const char *testdata[]={
   NULL
 };
 
-static size_t write_cb(char *data, size_t n, size_t l, void *userp)
+static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* take care of the data here, ignored in this example */
   (void)data;
@@ -50,13 +50,13 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   return n*l;
 }
 
-static void showem(CURL *easy, int header_request, unsigned int type)
+static void t1940_showem(CURL *easy, int header_request, unsigned int type)
 {
   int i;
   struct curl_header *header;
-  for(i = 0; testdata[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0, type,
-                                     header_request, &header)) {
+  for(i = 0; t1940_testdata[i]; i++) {
+    if(CURLHE_OK == curl_easy_header(easy, t1940_testdata[i], 0,
+                                     type, header_request, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
         size_t index = 0;
@@ -67,8 +67,8 @@ static void showem(CURL *easy, int header_request, unsigned int type)
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, testdata[i], index, type,
-                                           header_request, &header))
+          if(CURLHE_OK != curl_easy_header(easy, t1940_testdata[i], index,
+                                           type, header_request, &header))
             break;
         } while(1);
       }
@@ -99,7 +99,7 @@ CURLcode test(char *URL)
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
+  easy_setopt(easy, CURLOPT_WRITEFUNCTION, t1940_write_cb);
 
   /* if there's a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
@@ -110,13 +110,13 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  showem(easy, header_request, CURLH_HEADER);
+  t1940_showem(easy, header_request, CURLH_HEADER);
   if(libtest_arg2 && *libtest_arg2) {
     /* now show connect headers only */
-    showem(easy, header_request, CURLH_CONNECT);
+    t1940_showem(easy, header_request, CURLH_CONNECT);
   }
-  showem(easy, header_request, CURLH_1XX);
-  showem(easy, header_request, CURLH_TRAILER);
+  t1940_showem(easy, header_request, CURLH_1XX);
+  t1940_showem(easy, header_request, CURLH_TRAILER);
 
 test_cleanup:
   curl_easy_cleanup(easy);
