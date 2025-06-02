@@ -24,16 +24,6 @@
 #include "test.h"
 
 #include "memdebug.h"
-
-static const char * const testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
-
-
 struct WriteThis {
   int counter;
 };
@@ -84,6 +74,14 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
+  static const char * const testpost[]={
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL
+  };
+
   struct WriteThis *pooh = (struct WriteThis *)userp;
   const char *data;
 
