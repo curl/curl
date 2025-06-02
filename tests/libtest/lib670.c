@@ -66,8 +66,11 @@ static size_t t670_read_callback(char *ptr, size_t size,
 #endif
 
 #if !defined(LIB670) && !defined(LIB672)
-static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
-                    curl_off_t ultotal, curl_off_t ulnow)
+#ifndef LIB670_XFERINFO_C
+#define LIB670_XFERINFO_C
+static int t670_xferinfo(void *clientp,
+                         curl_off_t dltotal, curl_off_t dlnow,
+                         curl_off_t ultotal, curl_off_t ulnow)
 {
   struct ReadThis *pooh = (struct ReadThis *) clientp;
 
@@ -90,6 +93,7 @@ static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 
   return 0;
 }
+#endif
 #endif
 
 CURLcode test(char *URL)
@@ -239,7 +243,7 @@ CURLcode test(char *URL)
 #else
   /* Use the easy interface. */
   test_setopt(pooh.easy, CURLOPT_XFERINFODATA, &pooh);
-  test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, xferinfo);
+  test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
   test_setopt(pooh.easy, CURLOPT_NOPROGRESS, 0L);
   res = curl_easy_perform(pooh.easy);
 #endif
