@@ -49,16 +49,10 @@ HEADER
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
-    "ReadWriteSockets",
-    "Sockets",
     "Tdata",
-    "addFd",
-    "checkFdSet",
     "checkForCompletion",
     "close_file_descriptors",
     "curl",  # shadow
-    "curlSocketCallback",
-    "curlTimerCallback",
     "cyclic_add",
     "easy",  # unit
     "fopen_works",
@@ -70,7 +64,6 @@ my @reused_symbols = (
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
-    "removeFd",
     "rlim2str",
     "run_thread",
     "seek_callback",
@@ -86,7 +79,6 @@ my @reused_symbols = (
     "transfer_status",
     "unit_setup",  # unit
     "unit_stop",  # unit
-    "updateFdSet",
     "userdata",
     "xferinfo",
     );
