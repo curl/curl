@@ -26,6 +26,8 @@
 
 #include "memdebug.h"
 
+#ifndef LIB1940_C
+#define LIB1940_C
 static const char *testdata[]={
   "daTE",
   "Server",
@@ -40,20 +42,21 @@ static const char *testdata[]={
   NULL
 };
 
-#undef HEADER_REQUEST
-#ifdef LIB1946
-#define HEADER_REQUEST 0
-#else
-#define HEADER_REQUEST -1
-#endif
+static size_t write_cb(char *data, size_t n, size_t l, void *userp)
+{
+  /* take care of the data here, ignored in this example */
+  (void)data;
+  (void)userp;
+  return n*l;
+}
 
-static void showem(CURL *easy, unsigned int type)
+static void showem(CURL *easy, int header_request, unsigned int type)
 {
   int i;
   struct curl_header *header;
   for(i = 0; testdata[i]; i++) {
     if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0, type,
-                                     HEADER_REQUEST, &header)) {
+                                     header_request, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
         size_t index = 0;
@@ -65,7 +68,7 @@ static void showem(CURL *easy, unsigned int type)
           if(++index == amount)
             break;
           if(CURLHE_OK != curl_easy_header(easy, testdata[i], index, type,
-                                           HEADER_REQUEST, &header))
+                                           header_request, &header))
             break;
         } while(1);
       }
@@ -76,18 +79,19 @@ static void showem(CURL *easy, unsigned int type)
     }
   }
 }
+#endif
 
-static size_t write_cb(char *data, size_t n, size_t l, void *userp)
-{
-  /* take care of the data here, ignored in this example */
-  (void)data;
-  (void)userp;
-  return n*l;
-}
 CURLcode test(char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;
+
+  int header_request;
+#ifdef LIB1946
+  header_request = 0;
+#else
+  header_request = -1;
+#endif
 
   global_init(CURL_GLOBAL_DEFAULT);
   easy_init(easy);
@@ -106,13 +110,13 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  showem(easy, CURLH_HEADER);
+  showem(easy, header_request, CURLH_HEADER);
   if(libtest_arg2 && *libtest_arg2) {
     /* now show connect headers only */
-    showem(easy, CURLH_CONNECT);
+    showem(easy, header_request, CURLH_CONNECT);
   }
-  showem(easy, CURLH_1XX);
-  showem(easy, CURLH_TRAILER);
+  showem(easy, header_request, CURLH_1XX);
+  showem(easy, header_request, CURLH_TRAILER);
 
 test_cleanup:
   curl_easy_cleanup(easy);
