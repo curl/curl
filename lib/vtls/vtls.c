@@ -1765,6 +1765,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
+  multissl_setup(NULL);
   (void)data;
   return (Curl_ssl->supports & ssl_option);
 }
