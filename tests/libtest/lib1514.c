@@ -30,6 +30,8 @@
 
 #include "memdebug.h"
 
+#ifndef LIB670_C
+#define LIB670_C
 struct WriteThis {
   char *readptr;
   size_t sizeleft;
@@ -51,6 +53,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 
   return 0;                         /* no more data left to deliver */
 }
+#endif
 
 CURLcode test(char *URL)
 {
