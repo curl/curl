@@ -81,7 +81,6 @@ my @reused_symbols = (
     "store_errmsg",
     "suburl",
     "test_failure",  # shadow
-    "test_fire",
     "test_lock",
     "test_parse",  # unit
     "test_rlimit",
