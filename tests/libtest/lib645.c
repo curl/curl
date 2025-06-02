@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static const char t643_testdata[]=
+static const char t645_testdata[]=
   "dummy\n";
 
 struct t643_WriteThis {
@@ -42,9 +42,7 @@ static size_t t643_read_callback(char *ptr, size_t size,
   if(size*nmemb < 1)
     return 0;
 
-  eof = pooh->sizeleft <= 0;
-  if(!eof)
-    pooh->sizeleft--;
+  eof = !*pooh->readptr;
 
   if(!eof) {
     *ptr = *pooh->readptr;           /* copy one single byte */
@@ -67,7 +65,6 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   curl_off_t datasize = -1;
 
   pooh.readptr = t643_testdata;
-  datasize = (curl_off_t)strlen(t643_testdata);
   pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
@@ -120,7 +117,6 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
      a file upload but still using the callback */
 
   pooh2.readptr = t643_testdata;
-  datasize = (curl_off_t)strlen(t643_testdata);
   pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
