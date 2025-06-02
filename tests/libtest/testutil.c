@@ -129,3 +129,24 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
       (double)(newer.tv_usec-older.tv_usec)/1000000.0;
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
+
+void tutil_rlim2str(char *buf, size_t len, rlim_t val)
+{
+#ifdef RLIM_INFINITY
+  if(val == RLIM_INFINITY) {
+    curl_msnprintf(buf, len, "INFINITY");
+    return;
+  }
+#endif
+#ifdef HAVE_LONGLONG
+  if(sizeof(rlim_t) > sizeof(long))
+    curl_msnprintf(buf, len, "%llu", (unsigned long long)val);
+  else
+#endif
+  {
+    if(sizeof(rlim_t) < sizeof(long))
+      curl_msnprintf(buf, len, "%u", (unsigned int)val);
+    else
+      curl_msnprintf(buf, len, "%lu", (unsigned long)val);
+  }
+}

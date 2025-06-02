@@ -42,4 +42,6 @@ long tutil_tvdiff(struct timeval t1, struct timeval t2);
  */
 double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
 
+void tutil_rlim2str(char *buf, size_t len, rlim_t val);
+
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */

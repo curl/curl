@@ -64,7 +64,6 @@ my @reused_symbols = (
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
-    "rlim2str",
     "run_thread",
     "seek_callback",
     "store_errmsg",
