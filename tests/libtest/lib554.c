@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static const char t554_testdata[]=
+static char t554_testdata[]=
   "this is what we post to the silly web server\n";
 
 struct t554_WriteThis {

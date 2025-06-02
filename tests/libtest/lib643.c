@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static const char t643_testdata[]=
+static char t643_testdata[]=
   "dummy\n";
 
 struct t643_WriteThis {

@@ -62,7 +62,7 @@ CURLcode test(char *URL)
   CURLcode result = CURLE_OK;
   CURLcode res = CURLE_OK;
 
-  static const char testdata[]="dummy";
+  static char testdata[]="dummy";
 
   struct t1514_WriteThis pooh = { testdata, sizeof(testdata)-1 };
 

@@ -29,6 +29,8 @@
 
 #define PAUSE_TIME      5
 
+#undef easy
+
 #ifndef LIB670_C
 #define LIB670_C
 struct t670_ReadThis {
