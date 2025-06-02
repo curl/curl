@@ -82,14 +82,14 @@ int main(int argc, char *argv[])
      as source easily. You may choose to either not use them or implement
      them yourself.
 
+  CURLOPT_DEBUGFUNCTION was set to a function pointer
+  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_WRITEDATA was set to an object pointer
   CURLOPT_WRITEFUNCTION was set to a function pointer
   CURLOPT_READDATA was set to an object pointer
   CURLOPT_READFUNCTION was set to a function pointer
   CURLOPT_SEEKDATA was set to an object pointer
   CURLOPT_SEEKFUNCTION was set to a function pointer
-  CURLOPT_DEBUGFUNCTION was set to a function pointer
-  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_HEADERFUNCTION was set to a function pointer
   CURLOPT_HEADERDATA was set to an object pointer
   CURLOPT_ERRORBUFFER was set to an object pointer
