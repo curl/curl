@@ -83,7 +83,6 @@ my @reused_symbols = (
     "test_failure",  # shadow
     "test_parse",  # unit
     "test_rlimit",
-    "testbuf",
     "testcase",  # unit
     "testdata",
     "tests",  # unit
