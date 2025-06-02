@@ -25,8 +25,6 @@
 
 #include "memdebug.h"
 
-#ifndef LIB1576_C
-#define LIB1576_C
 static char t1576_testdata[] = "request indicates that the client, which made";
 
 static size_t t1576_read_callback(char *ptr, size_t size,
@@ -49,7 +47,6 @@ static int t1576_seek_callback(void *ptr, curl_off_t offset, int origin)
     return CURL_SEEKFUNC_FAIL;
   return CURL_SEEKFUNC_OK;
 }
-#endif
 
 CURLcode test(char *URL)
 {
