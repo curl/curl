@@ -63,8 +63,8 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1540 lib1541 lib1542 lib1543         lib1545 \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
  lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 lib1571 \
-                         lib1576 lib1578 \
- lib1591 lib1592 lib1593 lib1594 lib1596 lib1597 lib1598 \
+                         lib1576 \
+ lib1591 lib1592 lib1593 lib1594         lib1597 lib1598 \
  \
  lib1662 \
  \
