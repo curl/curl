@@ -25,17 +25,18 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
+static char t667_testdata[]=
   "dummy";
 
-struct WriteThis {
+struct t667_WriteThis {
   char *readptr;
   curl_off_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t667_read_callback(char *ptr, size_t size,
+                                 size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t667_WriteThis *pooh = (struct t667_WriteThis *)userp;
   int eof;
 
   if(size*nmemb < 1)
@@ -60,7 +61,7 @@ CURLcode test(char *URL)
   curl_mime *mime = NULL;
   curl_mimepart *part;
   CURLcode res = TEST_ERR_FAILURE;
-  struct WriteThis pooh;
+  struct t667_WriteThis pooh;
 
   /*
    * Check proper handling of mime encoder feature when the part read callback
@@ -84,8 +85,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t) strlen(testdata);
+  pooh.readptr = t667_testdata;
+  pooh.sizeleft = (curl_off_t) strlen(t667_testdata);
 
   /* Build the mime tree. */
   mime = curl_mime_init(easy);
@@ -93,7 +94,8 @@ CURLcode test(char *URL)
   curl_mime_name(part, "field");
   curl_mime_encoder(part, "base64");
   /* Using an undefined length forces chunked transfer. */
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, NULL, &pooh);
+  curl_mime_data_cb(part, (curl_off_t) -1, t667_read_callback,
+                    NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
   test_setopt(easy, CURLOPT_MIMEPOST, mime);

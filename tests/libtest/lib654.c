@@ -25,10 +25,10 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
+static char t654_testdata[]=
   "dummy\n";
 
-struct WriteThis {
+struct t654_WriteThis {
   char *readptr;
   curl_off_t sizeleft;
   int freecount;
@@ -36,14 +36,15 @@ struct WriteThis {
 
 static void free_callback(void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *) userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *) userp;
 
   pooh->freecount++;
 }
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t654_read_callback(char *ptr, size_t size,
+                                 size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;
 
   if(size*nmemb < 1)
@@ -70,7 +71,7 @@ CURLcode test(char *URL)
   curl_mimepart *part;
   struct curl_slist *hdrs = NULL;
   CURLcode res = TEST_ERR_FAILURE;
-  struct WriteThis pooh;
+  struct t654_WriteThis pooh;
 
   /*
    * Check proper copy/release of mime post data bound to a duplicated
@@ -94,8 +95,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t) strlen(testdata);
+  pooh.readptr = t654_testdata;
+  pooh.sizeleft = (curl_off_t) strlen(t654_testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
@@ -110,8 +111,8 @@ CURLcode test(char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, free_callback,
-                    &pooh);
+  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_callback, NULL,
+                    free_callback, &pooh);
 
   /* Bind mime data to its easy handle. */
   test_setopt(easy, CURLOPT_MIMEPOST, mime);

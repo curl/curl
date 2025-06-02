@@ -25,16 +25,17 @@
 
 #include "memdebug.h"
 
-static char testdata[]="this is what we post to the silly web server\n";
+static char t508_testdata[]="this is what we post to the silly web server\n";
 
-struct WriteThis {
+struct t508_WriteThis {
   char *readptr;
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t508_read_callback(char *ptr, size_t size,
+                                  size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t508_WriteThis *pooh = (struct t508_WriteThis *)userp;
 
   if(size*nmemb < 1)
     return 0;
@@ -54,10 +55,10 @@ CURLcode test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
 
-  struct WriteThis pooh;
+  struct t508_WriteThis pooh;
 
-  pooh.readptr = testdata;
-  pooh.sizeleft = strlen(testdata);
+  pooh.readptr = t508_testdata;
+  pooh.sizeleft = strlen(t508_testdata);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -81,7 +82,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t508_read_callback);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);

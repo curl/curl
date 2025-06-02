@@ -49,11 +49,9 @@ HEADER
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
-    "ReadThis",
     "ReadWriteSockets",
     "Sockets",
     "Tdata",
-    "WriteThis",
     "addFd",
     "checkFdSet",
     "checkForCompletion",

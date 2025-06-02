@@ -23,22 +23,23 @@
  ***************************************************************************/
 #include "test.h"
 
-static char testdata[]="mooaaa";
+static char t1662_testdata[]="mooaaa";
 
-struct WriteThis {
+struct t1662_WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1662_read_callback(char *ptr, size_t size,
+                                  size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
-  size_t len = strlen(testdata);
+  struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
+  size_t len = strlen(t1662_testdata);
 
   if(size*nmemb < len)
     return 0;
 
   if(pooh->sizeleft) {
-    memcpy(ptr, testdata, strlen(testdata));
+    memcpy(ptr, t1662_testdata, strlen(t1662_testdata));
     pooh->sizeleft = 0;
     return len;
   }
@@ -53,7 +54,7 @@ CURLcode test(char *URL)
   CURL *hnd;
   curl_mime *mime1;
   curl_mimepart *part1;
-  struct WriteThis pooh = { 1 };
+  struct t1662_WriteThis pooh = { 1 };
 
   mime1 = NULL;
 
@@ -67,7 +68,7 @@ CURLcode test(char *URL)
     mime1 = curl_mime_init(hnd);
     if(mime1) {
       part1 = curl_mime_addpart(mime1);
-      curl_mime_data_cb(part1, -1, read_callback, NULL, NULL, &pooh);
+      curl_mime_data_cb(part1, -1, t1662_read_callback, NULL, NULL, &pooh);
       curl_mime_filename(part1, "poetry.txt");
       curl_mime_name(part1, "content");
       curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);

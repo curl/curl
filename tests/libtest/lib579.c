@@ -24,7 +24,8 @@
 #include "test.h"
 
 #include "memdebug.h"
-struct WriteThis {
+
+struct t579_WriteThis {
   int counter;
 };
 
@@ -72,7 +73,8 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   return 0;
 }
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t579_read_callback(char *ptr, size_t size,
+                                  size_t nmemb, void *userp)
 {
   static const char * const testpost[]={
     "one",
@@ -82,7 +84,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     NULL
   };
 
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t579_WriteThis *pooh = (struct t579_WriteThis *)userp;
   const char *data;
 
   if(size*nmemb < 1)
@@ -104,7 +106,7 @@ CURLcode test(char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct curl_slist *slist = NULL;
-  struct WriteThis pooh;
+  struct t579_WriteThis pooh;
   pooh.counter = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -134,7 +136,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t579_read_callback);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);
