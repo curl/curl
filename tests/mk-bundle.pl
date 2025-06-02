@@ -92,7 +92,6 @@ my @reused_symbols = (
     "testcase",  # unit
     "testdata",
     "testfd",
-    "testname",
     "testpost",
     "tests",  # unit
     "trailers_callback",
