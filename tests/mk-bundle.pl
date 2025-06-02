@@ -80,7 +80,6 @@ my @reused_symbols = (
     "run_thread",
     "seek_callback",
     "send_ping",
-    "showem",
     "store_errmsg",
     "suburl",
     "test_failure",  # shadow
