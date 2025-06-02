@@ -29,8 +29,8 @@
 
 #define PAUSE_TIME      5
 
-#ifndef LIB670_H
-#define LIB670_H
+#ifndef LIB670_C
+#define LIB670_C
 struct ReadThis {
   CURL *easy;
   time_t origin;
