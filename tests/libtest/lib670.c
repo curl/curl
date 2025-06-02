@@ -31,7 +31,7 @@
 
 #ifndef LIB670_C
 #define LIB670_C
-struct ReadThis {
+struct t670_ReadThis {
   CURL *easy;
   time_t origin;
   int count;
@@ -40,7 +40,7 @@ struct ReadThis {
 static size_t t670_read_callback(char *ptr, size_t size,
                                  size_t nmemb, void *userp)
 {
-  struct ReadThis *pooh = (struct ReadThis *) userp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *) userp;
   time_t delta;
 
   if(size * nmemb < 1)
@@ -72,7 +72,7 @@ static int t670_xferinfo(void *clientp,
                          curl_off_t dltotal, curl_off_t dlnow,
                          curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct ReadThis *pooh = (struct ReadThis *) clientp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *) clientp;
 
   (void) dltotal;
   (void) dlnow;
@@ -116,7 +116,7 @@ CURLcode test(char *URL)
   int still_running = 0;
 #endif
 
-  struct ReadThis pooh;
+  struct t670_ReadThis pooh;
   CURLcode res = TEST_ERR_FAILURE;
 
   /*
