@@ -657,7 +657,7 @@ static void gen_cb_setopts(struct GlobalConfig *global,
                            CURL *curl)
 {
   (void) global; /* for builds without --libcurl */
-
+  (void) config;
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
   my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);
