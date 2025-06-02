@@ -1663,6 +1663,8 @@ if(WIN32)
     set(HAVE_IF_NAMETOINDEX 0)
   endif()
   unset(HAVE_IF_NAMETOINDEX CACHE)
+
+  set(HAVE_SYS_SOCKET_H 0)
 else()
   list(APPEND CURL_INCLUDES "sys/socket.h")
   set(HAVE_SYS_SOCKET_H 1)
