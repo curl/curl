@@ -69,9 +69,7 @@ my @reused_symbols = (
     "hash_static",  # unit
     "header_callback",
     "ioctlcallback",
-    "msgbuff",
     "mydtor",  # unit
-    "num_open",
     "progress_callback",
     "read_callback",
     "recv_pong",
@@ -91,7 +89,6 @@ my @reused_symbols = (
     "testbuf",
     "testcase",  # unit
     "testdata",
-    "testfd",
     "tests",  # unit
     "trailers_callback",
     "transfer_status",
