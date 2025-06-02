@@ -4,27 +4,43 @@ curl and libcurl 8.14.1
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3428
+ Contributors:                 3429
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o asyn-thrdd: fix cleanup when RR fails due to OOM [20]
  o BUG-BOUNTY.md. mention the medium bounty amount in 2025 [5]
  o cmake: fix missed version number for multi-pkg-config detections [14]
+ o curl: upload from '.' fix [9]
+ o docs/tests: remove mention of hyper [23]
  o docs: fix typos [12]
+ o ftp: fix teardown of DATA connection in done [31]
  o http: fail early when rewind of input failed when following redirects [2]
+ o license: update some copyright links to curl.se [24]
+ o memanalyze.pl: fix getaddrinfo/freeaddrinfo checks [25]
  o misc: fix spelling [15]
  o misc: we write *an* IPv6 address [10]
  o multi: fix add_handle resizing [3]
  o spelling: 'a' vs 'an' [8]
  o spelling: call it null-terminate consistently [6]
+ o test1510: fix expectation [19]
  o tests: await portfile to be complete [1]
+ o tests: fix checks for https-mtls proto [30]
+ o tests: improve server start reliability [18]
  o tests: move test docs into /docs [16]
+ o tests: re-enable 1510, document heimdal memleak [22]
+ o tests: test mtls also w/ clientAuth EKU only [28]
+ o tests: test mtls with --insecure [29]
+ o tool_getparam: make --no-anyauth not be accepted [13]
  o tool_getparam: refactored, simplified [4]
  o tool_getparam: remove two nextarg NULL checks [11]
+ o VULN-DISCLOSURE-POLICY.md: the distros list wants <= 7 days embargo [26]
  o wolfssl: fix sending of early data [7]
+ o ws: handle blocked sends better [27]
+ o ws: tests and fixes [17]
 
 This release includes the following known bugs:
 
@@ -47,9 +63,11 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Ethan Everett, Jeroen Ooms, John Bampton, Samuel Henrique,
-  Stefan Eissing, Viktor Szakats, x-xiang on github
-  (8 contributors)
+  Calvin Ruocco, Dan Fandrich, Daniel Stenberg, denandz on github,
+  Ethan Everett, Jacob Mealey, Jeroen Ooms, John Bampton,
+  Rasmus Melchior Jacobsen, Samuel Henrique, Stefan Eissing, Viktor Szakats,
+  x-xiang on github, Yedaya Katsman, z2_
+  (15 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -61,9 +79,25 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=17489
  [7] = https://curl.se/bug/?i=17481
  [8] = https://curl.se/bug/?i=17487
+ [9] = https://curl.se/bug/?i=17513
  [10] = https://curl.se/bug/?i=17484
  [11] = https://curl.se/bug/?i=17483
  [12] = https://curl.se/bug/?i=17480
+ [13] = https://curl.se/bug/?i=17508
  [14] = https://curl.se/bug/?i=16980
  [15] = https://curl.se/bug/?i=17478
  [16] = https://curl.se/bug/?i=17463
+ [17] = https://curl.se/bug/?i=17136
+ [18] = https://curl.se/bug/?i=17516
+ [19] = https://curl.se/bug/?i=17515
+ [20] = https://curl.se/bug/?i=17507
+ [22] = https://curl.se/bug/?i=17462
+ [23] = https://curl.se/bug/?i=17500
+ [24] = https://curl.se/bug/?i=17502
+ [25] = https://curl.se/bug/?i=17503
+ [26] = https://curl.se/bug/?i=17497
+ [27] = https://curl.se/bug/?i=17496
+ [28] = https://curl.se/bug/?i=17493
+ [29] = https://curl.se/bug/?i=17493
+ [30] = https://curl.se/bug/?i=17493
+ [31] = https://curl.se/bug/?i=17482
