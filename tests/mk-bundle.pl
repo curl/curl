@@ -72,12 +72,10 @@ my @reused_symbols = (
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
-    "recv_pong",
     "removeFd",
     "rlim2str",
     "run_thread",
     "seek_callback",
-    "send_ping",
     "store_errmsg",
     "suburl",
     "test_failure",  # shadow
@@ -92,8 +90,6 @@ my @reused_symbols = (
     "unit_stop",  # unit
     "updateFdSet",
     "userdata",
-    "websocket",
-    "websocket_close",
     "xferinfo",
     );
 

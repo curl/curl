@@ -27,7 +27,7 @@
 #ifndef CURL_DISABLE_WEBSOCKETS
 #if 0
 
-static CURLcode send_ping(CURL *curl, const char *send_payload)
+static CURLcode t2301_send_ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
   CURLcode result =
@@ -38,7 +38,7 @@ static CURLcode send_ping(CURL *curl, const char *send_payload)
   return result;
 }
 
-static CURLcode recv_pong(CURL *curl, const char *expected_payload)
+static CURLcode t2301_recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
   unsigned int rflags;
@@ -67,7 +67,7 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 }
 
 /* just close the connection */
-static void websocket_close(CURL *curl)
+static void t2301_websocket_close(CURL *curl)
 {
   size_t sent;
   CURLcode result =
@@ -76,18 +76,18 @@ static void websocket_close(CURL *curl)
                 "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
 }
 
-static void websocket(CURL *curl)
+static void t2301_websocket(CURL *curl)
 {
   int i = 0;
   curl_mfprintf(stderr, "ws: websocket() starts\n");
   do {
-    if(send_ping(curl, "foobar"))
+    if(t2301_send_ping(curl, "foobar"))
       return;
-    if(recv_pong(curl, "foobar"))
+    if(t2301_recv_pong(curl, "foobar"))
       return;
     sleep(2);
   } while(i++ < 10);
-  websocket_close(curl);
+  t2301_websocket_close(curl);
 }
 
 #endif
@@ -141,7 +141,7 @@ CURLcode test(char *URL)
     curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
 #if 0
     if(res == CURLE_OK)
-      websocket(curl);
+      t2301_websocket(curl);
 #endif
     /* always cleanup */
     curl_easy_cleanup(curl);
