@@ -25,6 +25,8 @@
 
 #include "memdebug.h"
 
+#ifndef LIB510_C
+#define LIB510_C
 static const char * const testpost[]={
   "one",
   "two",
@@ -60,6 +62,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   }
   return 0;                         /* no more data left to deliver */
 }
+#endif
 
 CURLcode test(char *URL)
 {
