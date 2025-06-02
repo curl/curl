@@ -38,8 +38,8 @@ struct userdata {
 };
 
 /* lock callback */
-static void test_lock(CURL *handle, curl_lock_data data,
-                      curl_lock_access laccess, void *useptr)
+static void t586_test_lock(CURL *handle, curl_lock_data data,
+                           curl_lock_access laccess, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -69,7 +69,7 @@ static void test_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t586_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -160,11 +160,11 @@ CURLcode test(char *URL)
 
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_LOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
+    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t586_test_lock);
   }
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_UNLOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
+    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, t586_test_unlock);
   }
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_USERDATA\n");
