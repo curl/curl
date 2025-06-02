@@ -72,9 +72,9 @@ jobs:
 
       - name: 'cache quictls'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-quictls-no-deprecated
+        id: cache-quictls2-no-deprecated
         env:
-          cache-name: cache-quictls-no-deprecated
+          cache-name: cache-quictls2-no-deprecated
         with:
           path: ~/quictls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
@@ -127,7 +127,7 @@ jobs:
       - id: settings
         if: |
           steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
-          steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
+          steps.cache-quictls2-no-deprecated.outputs.cache-hit != 'true' ||
           steps.cache-gnutls.outputs.cache-hit != 'true' ||
           steps.cache-wolfssl.outputs.cache-hit != 'true' ||
           steps.cache-nghttp3.outputs.cache-hit != 'true' ||
@@ -163,10 +163,10 @@ jobs:
           make -j1 install_sw
 
       - name: 'build quictls'
-        if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
+        if: steps.cache-quictls2-no-deprecated.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl quictls
+          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/quictls
           cd quictls
           ./config no-deprecated --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -359,9 +359,9 @@ jobs:
 
       - name: 'cache quictls'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-quictls-no-deprecated
+        id: cache-quictls2-no-deprecated
         env:
-          cache-name: cache-quictls-no-deprecated
+          cache-name: cache-quictls2-no-deprecated
         with:
           path: ~/quictls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1

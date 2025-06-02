@@ -494,18 +494,18 @@ jobs:
       - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-quictls
+        id: cache-quictls2
         env:
-          cache-name: cache-quictls
+          cache-name: cache-quictls2
         with:
           path: ~/quictls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
 
       - name: 'build quictls'
-        if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
+        if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls2.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
-          cd openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/quictls
+          cd quictls
           ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
