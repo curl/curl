@@ -74,7 +74,6 @@ my @reused_symbols = (
     "num_open",
     "progress_callback",
     "read_callback",
-    "readcallback",
     "recv_pong",
     "removeFd",
     "rlim2str",
