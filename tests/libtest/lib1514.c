@@ -30,8 +30,8 @@
 
 #include "memdebug.h"
 
-#ifndef LIB670_C
-#define LIB670_C
+#ifndef LIB1514_C
+#define LIB1514_C
 struct t1514_WriteThis {
   char *readptr;
   size_t sizeleft;
