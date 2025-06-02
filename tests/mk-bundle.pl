@@ -87,7 +87,6 @@ my @reused_symbols = (
     "test_failure",  # shadow
     "test_fire",
     "test_lock",
-    "test_once",
     "test_parse",  # unit
     "test_rlimit",
     "test_unlock",
