@@ -32,14 +32,15 @@
 
 #ifndef LIB670_C
 #define LIB670_C
-struct WriteThis {
+struct t1514_WriteThis {
   char *readptr;
   size_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1514_read_callback(char *ptr, size_t size,
+                                  size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t1514_WriteThis *pooh = (struct t1514_WriteThis *)userp;
 
   if(size*nmemb < 1)
     return 0;
@@ -63,7 +64,7 @@ CURLcode test(char *URL)
 
   static const char testdata[]="dummy";
 
-  struct WriteThis pooh = { testdata, sizeof(testdata)-1 };
+  struct t1514_WriteThis pooh = { testdata, sizeof(testdata)-1 };
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -72,7 +73,7 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_POST, 1L);
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
-  easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1514_read_callback);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
 #ifdef LIB1539
   /* speak HTTP 1.0 - no chunked! */
