@@ -206,54 +206,6 @@ static const uint16_t default_ciphers[] = {
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 };
 
-/* pinned public key support tests */
-
-/* version 1 supports macOS 10.12+ and iOS 10+ */
-#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
-    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
-#define SECTRANSP_PINNEDPUBKEY_V1 1
-#endif
-
-/* version 2 supports macOS 10.7+ */
-#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
-#define SECTRANSP_PINNEDPUBKEY_V2 1
-#endif
-
-#if defined(SECTRANSP_PINNEDPUBKEY_V1) || defined(SECTRANSP_PINNEDPUBKEY_V2)
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define SECTRANSP_PINNEDPUBKEY 1
-#endif /* SECTRANSP_PINNEDPUBKEY */
-
-#ifdef SECTRANSP_PINNEDPUBKEY
-/* both new and old APIs return rsa keys missing the spki header (not DER) */
-static const unsigned char rsa4096SpkiHeader[] = {
-                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
-
-static const unsigned char rsa2048SpkiHeader[] = {
-                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-/* the *new* version does not return DER encoded ecdsa certs like the old... */
-static const unsigned char ecDsaSecp256r1SpkiHeader[] = {
-                                       0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x08, 0x2a, 0x86, 0x48,
-                                       0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
-                                       0x42, 0x00};
-
-static const unsigned char ecDsaSecp384r1SpkiHeader[] = {
-                                       0x30, 0x76, 0x30, 0x10, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x05, 0x2b, 0x81, 0x04,
-                                       0x00, 0x22, 0x03, 0x62, 0x00};
-#endif /* SECTRANSP_PINNEDPUBKEY_V1 */
-#endif /* SECTRANSP_PINNEDPUBKEY */
-
 static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
                                          void *buf,
                                          size_t *dataLength)  /* IN/OUT */
@@ -974,208 +926,14 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
+static CURLcode verify_cert(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            SSLContextRef ctx)
 {
-  char *sep_start, *sep_end, *cert_start, *cert_end;
-  size_t i, j, err;
-  size_t len;
-  char *b64;
-
-  /* Jump through the separators at the beginning of the certificate. */
-  sep_start = strstr(in, "-----");
-  if(!sep_start)
-    return 0;
-  cert_start = strstr(sep_start + 1, "-----");
-  if(!cert_start)
-    return -1;
-
-  cert_start += 5;
-
-  /* Find separator after the end of the certificate. */
-  cert_end = strstr(cert_start, "-----");
-  if(!cert_end)
-    return -1;
-
-  sep_end = strstr(cert_end + 1, "-----");
-  if(!sep_end)
-    return -1;
-  sep_end += 5;
-
-  len = cert_end - cert_start;
-  b64 = malloc(len + 1);
-  if(!b64)
-    return -1;
-
-  /* Create base64 string without linefeeds. */
-  for(i = 0, j = 0; i < len; i++) {
-    if(cert_start[i] != '\r' && cert_start[i] != '\n')
-      b64[j++] = cert_start[i];
-  }
-  b64[j] = '\0';
-
-  err = curlx_base64_decode((const char *)b64, out, outlen);
-  free(b64);
-  if(err) {
-    free(*out);
-    return -1;
-  }
-
-  return sep_end - in;
-}
-
-#define MAX_CERTS_SIZE (50*1024*1024) /* arbitrary - to catch mistakes */
-
-static int read_cert(const char *file, unsigned char **out, size_t *outlen)
-{
-  int fd;
-  ssize_t n;
-  unsigned char buf[512];
-  struct dynbuf certs;
-
-  curlx_dyn_init(&certs, MAX_CERTS_SIZE);
-
-  fd = open(file, 0);
-  if(fd < 0)
-    return -1;
-
-  for(;;) {
-    n = read(fd, buf, sizeof(buf));
-    if(!n)
-      break;
-    if(n < 0) {
-      close(fd);
-      curlx_dyn_free(&certs);
-      return -1;
-    }
-    if(curlx_dyn_addn(&certs, buf, n)) {
-      close(fd);
-      return -1;
-    }
-  }
-  close(fd);
-
-  *out = curlx_dyn_uptr(&certs);
-  *outlen = curlx_dyn_len(&certs);
-
-  return 0;
-}
-
-static CURLcode append_cert_to_array(struct Curl_easy *data,
-                                     const unsigned char *buf, size_t buflen,
-                                     CFMutableArrayRef array)
-{
-    char *certp;
-    CURLcode result;
-    SecCertificateRef cacert;
-    CFDataRef certdata;
-
-    certdata = CFDataCreate(kCFAllocatorDefault, buf, (CFIndex)buflen);
-    if(!certdata) {
-      failf(data, "SSL: failed to allocate array for CA certificate");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    cacert = SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
-    CFRelease(certdata);
-    if(!cacert) {
-      failf(data, "SSL: failed to create SecCertificate from CA certificate");
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    /* Check if cacert is valid. */
-    result = apple_copy_cert_subject(data, cacert, &certp);
-    switch(result) {
-      case CURLE_OK:
-        break;
-      case CURLE_PEER_FAILED_VERIFICATION:
-        CFRelease(cacert);
-        return CURLE_SSL_CACERT_BADFILE;
-      case CURLE_OUT_OF_MEMORY:
-      default:
-        CFRelease(cacert);
-        return result;
-    }
-    free(certp);
-
-    CFArrayAppendValue(array, cacert);
-    CFRelease(cacert);
-
-    return CURLE_OK;
-}
-
-static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const unsigned char *certbuf, size_t buflen,
-                                SSLContextRef ctx)
-{
-  int n = 0;
-  CURLcode rc;
-  long res;
-  unsigned char *der;
-  size_t derlen, offset = 0;
-  OSStatus ret;
-  SecTrustResultType trust_eval;
-  CFMutableArrayRef array = NULL;
-  SecTrustRef trust = NULL;
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
-  (void)cf;
-  /*
-   * Certbuf now contains the contents of the certificate file, which can be
-   * - a single DER certificate,
-   * - a single PEM certificate or
-   * - a bunch of PEM certificates (certificate bundle).
-   *
-   * Go through certbuf, and convert any PEM certificate in it into DER
-   * format.
-   */
-  array = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-  if(!array) {
-    failf(data, "SSL: out of memory creating CA certificate array");
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-
-  while(offset < buflen) {
-    n++;
-
-    /*
-     * Check if the certificate is in PEM format, and convert it to DER. If
-     * this fails, we assume the certificate is in DER format.
-     */
-    res = pem_to_der((const char *)certbuf + offset, &der, &derlen);
-    if(res < 0) {
-      failf(data, "SSL: invalid CA certificate #%d (offset %zu) in bundle",
-            n, offset);
-      result = CURLE_SSL_CACERT_BADFILE;
-      goto out;
-    }
-    offset += res;
-
-    if(res == 0 && offset == 0) {
-      /* This is not a PEM file, probably a certificate in DER format. */
-      rc = append_cert_to_array(data, certbuf, buflen, array);
-      if(rc != CURLE_OK) {
-        CURL_TRC_CF(data, cf, "append_cert for CA failed");
-        result = rc;
-        goto out;
-      }
-      break;
-    }
-    else if(res == 0) {
-      /* No more certificates in the bundle. */
-      break;
-    }
-
-    rc = append_cert_to_array(data, der, derlen, array);
-    free(der);
-    if(rc != CURLE_OK) {
-      CURL_TRC_CF(data, cf, "append_cert for CA failed");
-      result = rc;
-      goto out;
-    }
-  }
-
-  ret = SSLCopyPeerTrust(ctx, &trust);
+  SecTrustRef trust = NULL;
+  SecTrustResultType trust_eval = 0;
+  OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
   if(!trust) {
     failf(data, "SSL: error getting certificate chain");
     goto out;
@@ -1185,24 +943,17 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     goto out;
   }
 
-  CURL_TRC_CF(data, cf, "setting %d trust anchors", n);
-  ret = SecTrustSetAnchorCertificates(trust, array);
-  if(ret != noErr) {
-    failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
+  result = apple_setup_trust(cf, data, trust);
+  if(result)
     goto out;
-  }
-  ret = SecTrustSetAnchorCertificatesOnly(trust, TRUE);
-  if(ret != noErr) {
-    failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
-    goto out;
-  }
 
-  trust_eval = 0;
   ret = SecTrustEvaluate(trust, &trust_eval);
   if(ret != noErr) {
     failf(data, "SecTrustEvaluate() returned error %d", ret);
     goto out;
   }
+
+  result = CURLE_PEER_FAILED_VERIFICATION;
 
   switch(trust_eval) {
     case kSecTrustResultUnspecified:
@@ -1229,157 +980,8 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
 out:
   if(trust)
     CFRelease(trust);
-  if(array)
-    CFRelease(array);
   return result;
 }
-
-static CURLcode verify_cert(struct Curl_cfilter *cf,
-                            struct Curl_easy *data, const char *cafile,
-                            const struct curl_blob *ca_info_blob,
-                            SSLContextRef ctx)
-{
-  CURLcode result;
-  unsigned char *certbuf;
-  size_t buflen;
-  bool free_certbuf = FALSE;
-
-  if(ca_info_blob) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
-    certbuf = ca_info_blob->data;
-    buflen = ca_info_blob->len;
-  }
-  else if(cafile) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);
-    if(read_cert(cafile, &certbuf, &buflen) < 0) {
-      failf(data, "SSL: failed to read or invalid CA certificate");
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-    free_certbuf = TRUE;
-  }
-  else
-    return CURLE_SSL_CACERT_BADFILE;
-
-  result = verify_cert_buf(cf, data, certbuf, buflen, ctx);
-  if(free_certbuf)
-    free(certbuf);
-  return result;
-}
-
-
-#ifdef SECTRANSP_PINNEDPUBKEY
-static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
-                                    SSLContextRef ctx,
-                                    const char *pinnedpubkey)
-{  /* Scratch */
-  size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  const unsigned char *pubkey = NULL;
-  unsigned char *realpubkey = NULL;
-  const unsigned char *spkiHeader = NULL;
-  CFDataRef publicKeyBits = NULL;
-
-  /* Result is returned to caller */
-  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-
-  /* if a path was not specified, do not pin */
-  if(!pinnedpubkey)
-    return CURLE_OK;
-
-
-  if(!ctx)
-    return result;
-
-  do {
-    SecTrustRef trust;
-    OSStatus ret;
-    SecKeyRef keyRef;
-
-    ret = SSLCopyPeerTrust(ctx, &trust);
-    if(ret != noErr || !trust)
-      break;
-
-    keyRef = SecTrustCopyPublicKey(trust);
-    CFRelease(trust);
-    if(!keyRef)
-      break;
-
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-
-    publicKeyBits = SecKeyCopyExternalRepresentation(keyRef, NULL);
-    CFRelease(keyRef);
-    if(!publicKeyBits)
-      break;
-
-#elif SECTRANSP_PINNEDPUBKEY_V2
-
-    {
-      OSStatus success;
-      success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
-                              &publicKeyBits);
-      CFRelease(keyRef);
-      if(success != errSecSuccess || !publicKeyBits)
-        break;
-    }
-
-#endif /* SECTRANSP_PINNEDPUBKEY_V2 */
-
-    pubkeylen = (size_t)CFDataGetLength(publicKeyBits);
-    pubkey = (const unsigned char *)CFDataGetBytePtr(publicKeyBits);
-
-    switch(pubkeylen) {
-      case 526:
-        /* 4096 bit RSA pubkeylen == 526 */
-        spkiHeader = rsa4096SpkiHeader;
-        break;
-      case 270:
-        /* 2048 bit RSA pubkeylen == 270 */
-        spkiHeader = rsa2048SpkiHeader;
-        break;
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-      case 65:
-        /* ecDSA secp256r1 pubkeylen == 65 */
-        spkiHeader = ecDsaSecp256r1SpkiHeader;
-        spkiHeaderLength = 26;
-        break;
-      case 97:
-        /* ecDSA secp384r1 pubkeylen == 97 */
-        spkiHeader = ecDsaSecp384r1SpkiHeader;
-        spkiHeaderLength = 23;
-        break;
-      default:
-        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
-#elif SECTRANSP_PINNEDPUBKEY_V2
-      default:
-        /* ecDSA secp256r1 pubkeylen == 91 header already included?
-         * ecDSA secp384r1 header already included too
-         * we assume rest of algorithms do same, so do nothing
-         */
-        result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
-                                    pubkeylen);
-#endif /* SECTRANSP_PINNEDPUBKEY_V2 */
-        continue; /* break from loop */
-    }
-
-    realpubkeylen = pubkeylen + spkiHeaderLength;
-    realpubkey = malloc(realpubkeylen);
-    if(!realpubkey)
-      break;
-
-    memcpy(realpubkey, spkiHeader, spkiHeaderLength);
-    memcpy(realpubkey + spkiHeaderLength, pubkey, pubkeylen);
-
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
-                                  realpubkeylen);
-
-  } while(0);
-
-  Curl_safefree(realpubkey);
-  if(publicKeyBits)
-    CFRelease(publicKeyBits);
-
-  return result;
-}
-#endif /* SECTRANSP_PINNEDPUBKEY */
 
 static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
@@ -1413,9 +1015,7 @@ check_handshake:
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&
            conn_config->verifypeer) {
-          CURLcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
+          CURLcode result = verify_cert(cf, data, backend->ssl_ctx);
           if(result)
             return result;
         }
@@ -1624,17 +1224,28 @@ check_handshake:
     /* we have been connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
-#ifdef SECTRANSP_PINNEDPUBKEY
+#ifdef APPLE_PINNEDPUBKEY
     if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
-      CURLcode result =
-        pkp_pin_peer_pubkey(data, backend->ssl_ctx,
-                            data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+      SecTrustRef trust = NULL;
+      CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+      OSStatus ret = SSLCopyPeerTrust(backend->ssl_ctx, &trust);
+      if(ret != noErr || !trust) {
+        failf(data, "SSL: failed to retrieve peer trust");
+        return result;
+      }
+
+      result = apple_pin_peer_pubkey(data, trust,
+        data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+
+      CFRelease(trust);
+
       if(result) {
         failf(data, "SSL: public key does not match pinned public key");
         return result;
       }
     }
-#endif /* SECTRANSP_PINNEDPUBKEY */
+#endif /* APPLE_PINNEDPUBKEY */
 
     /* Informational message */
     (void)SSLGetNegotiatedCipher(backend->ssl_ctx, &cipher);
@@ -2152,9 +1763,7 @@ again:
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&
            conn_config->verifypeer) {
-          CURLcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
+          CURLcode result = verify_cert(cf, data, backend->ssl_ctx);
           if(result) {
             *curlcode = result;
             return -1;
@@ -2185,9 +1794,9 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CERTINFO |
-#ifdef SECTRANSP_PINNEDPUBKEY
+#ifdef APPLE_PINNEDPUBKEY
   SSLSUPP_PINNEDPUBKEY |
-#endif /* SECTRANSP_PINNEDPUBKEY */
+#endif /* APPLE_PINNEDPUBKEY */
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST,
 

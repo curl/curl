@@ -34,6 +34,24 @@
 #include "../cfilters.h"
 #include "vtls.h"
 
+/* pinned public key support tests */
+
+/* version 1 supports macOS 10.12+ and iOS 10+ */
+#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
+    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
+#define APPLE_PINNEDPUBKEY_V1 1
+#endif
+
+/* version 2 supports macOS 10.7+ */
+#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
+#define APPLE_PINNEDPUBKEY_V2 1
+#endif
+
+#if defined(APPLE_PINNEDPUBKEY_V1) || defined(APPLE_PINNEDPUBKEY_V2)
+/* this backend supports CURLOPT_PINNEDPUBLICKEY */
+#define APPLE_PINNEDPUBKEY 1
+#endif /* APPLE_PINNEDPUBKEY */
+
 bool apple_is_file(const char *filename);
 
 OSStatus apple_copy_identity(struct Curl_easy *data,
@@ -50,6 +68,16 @@ CURLcode apple_collect_cert_single(struct Curl_cfilter *cf,
 CURLcode apple_collect_cert_trust(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   SecTrustRef trust);
+
+CURLcode apple_setup_trust(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           SecTrustRef trust);
+
+#ifdef APPLE_PINNEDPUBKEY
+CURLcode apple_pin_peer_pubkey(struct Curl_easy *data,
+                               SecTrustRef trust,
+                               const char *pinnedpubkey);
+#endif
 
 #endif
 
