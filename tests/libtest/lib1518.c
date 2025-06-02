@@ -29,8 +29,8 @@
 
 #ifndef LIB1518_C
 #define LIB1518_C
-static size_t writecb(char *buffer, size_t size, size_t nitems,
-                      void *outstream)
+static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
+                             void *outstream)
 {
   (void)buffer;
   (void)size;
@@ -86,7 +86,7 @@ CURLcode test(char *URL)
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t1518_write_cb);
 
   curl_mprintf("res %d\n"
                "status %ld\n"

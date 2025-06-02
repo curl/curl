@@ -100,7 +100,7 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
   return len;
 }
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct transfer_status *st = (struct transfer_status *)userp;
 
@@ -126,7 +126,7 @@ CURLcode test(char *URL)
   st.easy = curls; /* to allow callbacks access */
 
   easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
+  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1541_write_cb);
   easy_setopt(curls, CURLOPT_WRITEDATA, &st);
   easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
   easy_setopt(curls, CURLOPT_HEADERDATA, &st);

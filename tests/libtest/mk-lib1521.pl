@@ -219,8 +219,8 @@ struct testdata {
 #define OFF_HI (curl_off_t) $maxofft
 #define OFF_NO (curl_off_t) 0
 
-static size_t writecb(char *buffer, size_t size, size_t nitems,
-                      void *outstream)
+static size_t t1521_write_cb(char *buffer, size_t size, size_t nitems,
+                             void *outstream)
 {
   (void)buffer;
   (void)size;

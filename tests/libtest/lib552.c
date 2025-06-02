@@ -141,8 +141,8 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb,
-                             void *stream)
+static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb,
+                            void *stream)
 {
   int amount = curlx_uztosi(size * nmemb);
   curl_mprintf("%.*s", amount, (char *)ptr);
@@ -196,7 +196,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
   /* Write callback */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t552_write_cb);
 
   /* Ioctl function */
   test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);

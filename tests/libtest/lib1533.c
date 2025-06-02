@@ -76,7 +76,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nitems,
 }
 
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb,
+static size_t t1533_write_cb(char *ptr, size_t size, size_t nmemb,
                              void *userdata)
 {
   struct cb_data *data = (struct cb_data *)userdata;
@@ -157,7 +157,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_READDATA, &data);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t1533_write_cb);
   test_setopt(curl, CURLOPT_WRITEDATA, &data);
 
   result = perform_and_check_connections(curl,

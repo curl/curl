@@ -103,9 +103,6 @@ my @reused_symbols = (
     "userdata",
     "websocket",
     "websocket_close",
-    "write_callback",
-    "write_cb",
-    "writecb",
     "xferinfo",
     );
 

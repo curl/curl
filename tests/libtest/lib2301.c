@@ -92,7 +92,7 @@ static void websocket(CURL *curl)
 
 #endif
 
-static size_t writecb(char *b, size_t size, size_t nitems, void *p)
+static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
 {
   CURL *easy = p;
   unsigned char *buffer = (unsigned char *)b;
@@ -135,7 +135,7 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "webbie-sox/3");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_WS_OPTIONS, (long)CURLWS_RAW_MODE);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t2301_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
     res = curl_easy_perform(curl);
     curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
