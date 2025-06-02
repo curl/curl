@@ -25,11 +25,14 @@
 
 #include "memdebug.h"
 
+#ifndef LIB544_C
+#define LIB544_C
 static char teststring[] =
 {   'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
     'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
     'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
     'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
+#endif
 
 CURLcode test(char *URL)
 {

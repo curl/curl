@@ -98,7 +98,6 @@ my @reused_symbols = (
     "testname",
     "testpost",
     "tests",  # unit
-    "teststring",
     "trailers_callback",
     "transfer_status",
     "unit_setup",  # unit
