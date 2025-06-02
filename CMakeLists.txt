@@ -1648,12 +1648,16 @@ if(WIN32)
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
 
-  set(HAVE_SYS_SOCKET_H 0)
+  set(HAVE_SYS_TIME_H ${MINGW})
 else()
   list(APPEND CURL_INCLUDES "sys/socket.h")
-  list(APPEND CURL_INCLUDES "sys/time.h")
   set(HAVE_SYS_SOCKET_H 1)
+
   set(HAVE_SYS_TIME_H 1)
+endif()
+
+if(HAVE_SYS_TIME_H)
+  list(APPEND CURL_INCLUDES "sys/time.h")
 endif()
 
 # Detect headers
