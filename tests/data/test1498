@@ -1,0 +1,56 @@
+<testcase>
+# Similar to test 60 and 1068
+<info>
+<keywords>
+HTTP
+HTTP PUT
+chunked Transfer-Encoding
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP PUT from stdin using period
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T .
+</command>
+<stdin>
+%repeat[2000 x hej]%
+</stdin>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+PUT /bzz/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Transfer-Encoding: chunked
+Expect: 100-continue
+
+1771
+%repeat[2000 x hej]%
+
+0
+
+</protocol>
+</verify>
+</testcase>
