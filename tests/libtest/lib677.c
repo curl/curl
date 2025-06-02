@@ -27,11 +27,11 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static const char testcmd[] = "A1 IDLE\r\n";
-static char testbuf[1024];
-
 CURLcode test(char *URL)
 {
+  static const char testcmd[] = "A1 IDLE\r\n";
+  static char testbuf[1024];
+
   CURLM *mcurl;
   CURL *curl = NULL;
   int mrun;
