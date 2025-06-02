@@ -36,9 +36,9 @@ struct ReadThis {
   time_t origin;
   int count;
 };
-#endif
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t670_read_callback(char *ptr, size_t size,
+                                 size_t nmemb, void *userp)
 {
   struct ReadThis *pooh = (struct ReadThis *) userp;
   time_t delta;
@@ -63,6 +63,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   curl_mfprintf(stderr, "Read callback called after EOF\n");
   exit(1);
 }
+#endif
 
 #if !defined(LIB670) && !defined(LIB672)
 static int xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
@@ -148,7 +149,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  res = curl_mime_data_cb(part, (curl_off_t) 2, read_callback,
+  res = curl_mime_data_cb(part, (curl_off_t) 2, t670_read_callback,
                           NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
@@ -167,7 +168,7 @@ CURLcode test(char *URL)
   }
 
   /* We want to use our own read function. */
-  test_setopt(pooh.easy, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(pooh.easy, CURLOPT_READFUNCTION, t670_read_callback);
 
   /* Send a multi-part formpost. */
   test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
