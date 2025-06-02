@@ -57,5 +57,10 @@ FTP and SFTP range downloads only support the simple 'start-stop' syntax
 (optionally with one of the numbers omitted). FTP use depends on the extended
 FTP command SIZE.
 
+When using this option for HTTP uploads using POST or PUT, functionality is
+not guaranteed. The HTTP protocol has no standard interoperable resume upload
+and curl uses a set of headers for this purpose that once proved working for
+some servers and have been left for those who find that useful.
+
 This command line option is mutually exclusive with --continue-at: you can only
 use one of them for a single transfer.
