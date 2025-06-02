@@ -2691,6 +2691,8 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
   NULL,                               /* get_channel_binding */
+  NULL,                               /* cntrl */
+  NULL,                               /* is_alive */
 };
 
 #if defined(__GNUC__) && defined(__APPLE__)

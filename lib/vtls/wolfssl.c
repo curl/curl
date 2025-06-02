@@ -2289,6 +2289,8 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wssl_recv,                       /* recv decrypted data */
   wssl_send,                       /* send data to encrypt */
   NULL,                            /* get_channel_binding */
+  NULL,                            /* cntrl */
+  NULL,                            /* is_alive */
 };
 
 #endif

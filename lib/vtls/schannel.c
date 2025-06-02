@@ -2775,6 +2775,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
   NULL,                              /* get_channel_binding */
+  NULL,                              /* cntrl */
+  NULL,                              /* is_alive */
 };
 
 #endif /* USE_SCHANNEL */

@@ -5651,7 +5651,9 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #endif
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
-  ossl_get_channel_binding  /* get_channel_binding */
+  ossl_get_channel_binding, /* get_channel_binding */
+  NULL,                     /* cntrl */
+  NULL,                     /* is_alive */
 };
 
 #endif /* USE_OPENSSL */

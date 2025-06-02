@@ -2215,6 +2215,8 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
   NULL,                          /* get_channel_binding */
+  NULL,                          /* cntrl */
+  NULL,                          /* is_alive */
 };
 
 #endif /* USE_GNUTLS */
