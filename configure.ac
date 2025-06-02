@@ -3959,13 +3959,18 @@ case "$OPT_FISH_FPATH" in
 esac
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
+if test "$curl_cv_native_windows" != 'yes'; then
+  AC_DEFINE(HAVE_SYS_SOCKET_H, 1, [if you have <sys/socket.h>])
+  AC_DEFINE(HAVE_SYS_TIME_H, 1, [if you have <sys/time.h>])
+  HAVE_SYS_SOCKET_H=1
+  HAVE_SYS_TIME_H=1
+fi
+
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
   sys/types.h \
-  sys/time.h \
   sys/select.h \
-  sys/socket.h \
   sys/ioctl.h \
   unistd.h \
   arpa/inet.h \
