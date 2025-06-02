@@ -51,11 +51,9 @@ HEADER
 my @reused_symbols = (
     "Tdata",
     "checkForCompletion",
-    "close_file_descriptors",
     "curl",  # shadow
     "cyclic_add",
     "easy",  # unit
-    "fopen_works",
     "getMicroSecondTimeout",
     "geterr",
     "hash_static",  # unit
@@ -66,11 +64,9 @@ my @reused_symbols = (
     "read_callback",
     "run_thread",
     "seek_callback",
-    "store_errmsg",
     "suburl",
     "test_failure",  # shadow
     "test_parse",  # unit
-    "test_rlimit",
     "testcase",  # unit
     "testdata",
     "tests",  # unit

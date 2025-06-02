@@ -55,7 +55,7 @@ static int *t518_testfd = NULL;
 static struct rlimit t518_num_open;
 static char t518_msgbuff[256];
 
-static void store_errmsg(const char *msg, int err)
+static void t518_store_errmsg(const char *msg, int err)
 {
   if(!err)
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s", msg);
@@ -64,7 +64,7 @@ static void store_errmsg(const char *msg, int err)
                    err, strerror(err));
 }
 
-static void close_file_descriptors(void)
+static void t518_close_file_descriptors(void)
 {
   for(t518_num_open.rlim_cur = 0;
       t518_num_open.rlim_cur < t518_num_open.rlim_max;
@@ -75,7 +75,7 @@ static void close_file_descriptors(void)
   t518_testfd = NULL;
 }
 
-static int fopen_works(void)
+static int t518_fopen_works(void)
 {
   FILE *fpa[3];
   int i;
@@ -87,7 +87,7 @@ static int fopen_works(void)
   for(i = 0; i < 3; i++) {
     fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
     if(!fpa[i]) {
-      store_errmsg("fopen failed", errno);
+      t518_store_errmsg("fopen failed", errno);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
       ret = 0;
       break;
@@ -100,7 +100,7 @@ static int fopen_works(void)
   return ret;
 }
 
-static int test_rlimit(int keep_open)
+static int t518_test_rlimit(int keep_open)
 {
   rlim_t nitems, i;
   int *memchunk = NULL;
@@ -112,7 +112,7 @@ static int test_rlimit(int keep_open)
   /* get initial open file limits */
 
   if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-    store_errmsg("getrlimit() failed", errno);
+    t518_store_errmsg("getrlimit() failed", errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     return -1;
   }
@@ -149,7 +149,7 @@ static int test_rlimit(int keep_open)
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
         /* on failure don't abort just issue a warning */
-        store_errmsg("setrlimit() failed", errno);
+        t518_store_errmsg("setrlimit() failed", errno);
         curl_mfprintf(stderr, "%s\n", t518_msgbuff);
         t518_msgbuff[0] = '\0';
       }
@@ -160,7 +160,7 @@ static int test_rlimit(int keep_open)
     rl.rlim_cur = rl.rlim_max;
     if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
       /* on failure don't abort just issue a warning */
-      store_errmsg("setrlimit() failed", errno);
+      t518_store_errmsg("setrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
       t518_msgbuff[0] = '\0';
     }
@@ -168,7 +168,7 @@ static int test_rlimit(int keep_open)
     /* get current open file limits */
 
     if(getrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      store_errmsg("getrlimit() failed", errno);
+      t518_store_errmsg("getrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
       return -3;
     }
@@ -209,7 +209,7 @@ static int test_rlimit(int keep_open)
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_cur);
     curl_msnprintf(strbuff, sizeof(strbuff), "fds needed %s > system limit %s",
                    strbuff1, strbuff2);
-    store_errmsg(strbuff, 0);
+    t518_store_errmsg(strbuff, 0);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     return -4;
   }
@@ -219,7 +219,7 @@ static int test_rlimit(int keep_open)
    * avoid a low memory condition once the file descriptors are
    * open. System conditions that could make the test fail should
    * be addressed in the precheck phase. This chunk of memory shall
-   * be always free()ed before exiting the test_rlimit() function so
+   * be always free()ed before exiting the t518_test_rlimit() function so
    * that it becomes available to the test.
    */
 
@@ -238,7 +238,7 @@ static int test_rlimit(int keep_open)
     }
   } while(nitems && !memchunk);
   if(!memchunk) {
-    store_errmsg("memchunk, malloc() failed", errno);
+    t518_store_errmsg("memchunk, malloc() failed", errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     return -5;
   }
@@ -261,7 +261,7 @@ static int test_rlimit(int keep_open)
     curl_msnprintf(strbuff, sizeof(strbuff),
                    "unable to allocate an array for %s "
                    "file descriptors, would overflow size_t", strbuff1);
-    store_errmsg(strbuff, 0);
+    t518_store_errmsg(strbuff, 0);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     free(memchunk);
     return -6;
@@ -275,7 +275,7 @@ static int test_rlimit(int keep_open)
   t518_testfd = malloc(sizeof(*t518_testfd) *
                        (size_t)(t518_num_open.rlim_max));
   if(!t518_testfd) {
-    store_errmsg("testfd, malloc() failed", errno);
+    t518_store_errmsg("testfd, malloc() failed", errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     free(memchunk);
     return -7;
@@ -298,7 +298,7 @@ static int test_rlimit(int keep_open)
   t518_testfd[0] = open(DEV_NULL, O_RDONLY);
   if(t518_testfd[0] < 0) {
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
-    store_errmsg(strbuff, errno);
+    t518_store_errmsg(strbuff, errno);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     free(t518_testfd);
     t518_testfd = NULL;
@@ -334,7 +334,7 @@ static int test_rlimit(int keep_open)
       tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_cur);
       curl_msnprintf(strbuff, sizeof(strbuff),
                      "fds needed %s > system limit %s", strbuff2, strbuff1);
-      store_errmsg(strbuff, 0);
+      t518_store_errmsg(strbuff, 0);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
 
       for(t518_num_open.rlim_cur = 0;
@@ -368,9 +368,9 @@ static int test_rlimit(int keep_open)
   if(t518_num_open.rlim_max > t518_num_open.rlim_cur) {
     curl_msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
                    FD_SETSIZE);
-    store_errmsg(strbuff, 0);
+    t518_store_errmsg(strbuff, 0);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
-    close_file_descriptors();
+    t518_close_file_descriptors();
     free(memchunk);
     return -10;
   }
@@ -383,9 +383,9 @@ static int test_rlimit(int keep_open)
        ((unsigned int)t518_testfd[rl.rlim_cur] > t518_num_open.rlim_cur)) {
       curl_msnprintf(strbuff, sizeof(strbuff), "select limit is FD_SETSIZE %d",
                      FD_SETSIZE);
-      store_errmsg(strbuff, 0);
+      t518_store_errmsg(strbuff, 0);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
-      close_file_descriptors();
+      t518_close_file_descriptors();
       free(memchunk);
       return -11;
     }
@@ -402,15 +402,15 @@ static int test_rlimit(int keep_open)
    * if it is capable of fopen()ing some additional files.
    */
 
-  if(!fopen_works()) {
+  if(!t518_fopen_works()) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_max);
     curl_msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
               strbuff1);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     curl_msnprintf(strbuff, sizeof(strbuff),
                    "fopen fails with lots of fds open");
-    store_errmsg(strbuff, 0);
-    close_file_descriptors();
+    t518_store_errmsg(strbuff, 0);
+    t518_close_file_descriptors();
     free(memchunk);
     return -12;
   }
@@ -423,7 +423,7 @@ static int test_rlimit(int keep_open)
   /* close file descriptors unless instructed to keep them */
 
   if(!keep_open) {
-    close_file_descriptors();
+    t518_close_file_descriptors();
   }
 
   return 0;
@@ -436,14 +436,14 @@ CURLcode test(char *URL)
 
   if(!strcmp(URL, "check")) {
     /* used by the test script to ask if we can run this test or not */
-    if(test_rlimit(FALSE)) {
+    if(t518_test_rlimit(FALSE)) {
       curl_mfprintf(stdout, "test_rlimit problem: %s\n", t518_msgbuff);
       return TEST_ERR_FAILURE;
     }
     return CURLE_OK; /* sure, run this! */
   }
 
-  if(test_rlimit(TRUE)) {
+  if(t518_test_rlimit(TRUE)) {
     /* failure */
     return TEST_ERR_MAJOR_BAD;
   }
@@ -453,14 +453,14 @@ CURLcode test(char *URL)
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    close_file_descriptors();
+    t518_close_file_descriptors();
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
-    close_file_descriptors();
+    t518_close_file_descriptors();
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -472,7 +472,7 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-  close_file_descriptors();
+  t518_close_file_descriptors();
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
