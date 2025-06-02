@@ -27,6 +27,8 @@
 
 /* Test inspired by github issue 3340 */
 
+#ifndef LIB1518_C
+#define LIB1518_C
 static size_t writecb(char *buffer, size_t size, size_t nitems,
                       void *outstream)
 {
@@ -36,6 +38,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems,
   (void)outstream;
   return 0;
 }
+#endif
 
 CURLcode test(char *URL)
 {
