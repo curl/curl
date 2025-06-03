@@ -27,14 +27,6 @@
 
 #ifndef LIB510_C
 #define LIB510_C
-static const char * const t510_testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
-
 
 struct t510_WriteThis {
   int counter;
@@ -43,13 +35,21 @@ struct t510_WriteThis {
 static size_t t510_read_callback(char *ptr, size_t size, size_t nmemb,
                                  void *userp)
 {
+  static const char * const testpost[] = {
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL
+  };
+
   struct t510_WriteThis *pooh = (struct t510_WriteThis *)userp;
   const char *data;
 
   if(size*nmemb < 1)
     return 0;
 
-  data = t510_testpost[pooh->counter];
+  data = testpost[pooh->counter];
 
   if(data) {
     size_t len = strlen(data);
