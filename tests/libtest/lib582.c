@@ -42,7 +42,8 @@ struct t582_ReadWriteSockets {
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd, int mention)
+static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
+                          int mention)
 {
   int i;
 
@@ -62,7 +63,8 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd, int me
 /**
  * Add a file descriptor to a sockets array.
  */
-static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd, const char *what)
+static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
+                       const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
