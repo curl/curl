@@ -32,12 +32,6 @@
 
 #include "memdebug.h"
 
-/* build request url */
-static char *t572_suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
-
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
  */
@@ -72,7 +66,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
   /* SETUP */
-  stream_uri = t572_suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -87,7 +81,7 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  stream_uri = t572_suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -127,7 +121,7 @@ CURLcode test(char *URL)
   paramsf = NULL;
 
   /* Heartbeat GET_PARAMETERS */
-  stream_uri = t572_suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -142,7 +136,7 @@ CURLcode test(char *URL)
 
   /* POST GET_PARAMETERS */
 
-  stream_uri = t572_suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -161,7 +155,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
 
   /* Make sure we can do a normal request now */
-  stream_uri = t572_suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

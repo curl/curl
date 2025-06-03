@@ -163,14 +163,6 @@ static void *t506_test_fire(void *ptr)
   return NULL;
 }
 
-
-/* build request url */
-static char *t506_suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
-
-
 /* test function */
 CURLcode test(char *URL)
 {
@@ -265,7 +257,7 @@ CURLcode test(char *URL)
   for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
-    tdata.url   = t506_suburl(URL, i); /* must be curl_free()d */
+    tdata.url   = tutil_suburl(URL, i); /* must be curl_free()d */
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
@@ -286,7 +278,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  url = t506_suburl(URL, i);
+  url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);
@@ -313,7 +305,7 @@ CURLcode test(char *URL)
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-  url = t506_suburl(URL, i);
+  url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);
