@@ -49,7 +49,6 @@ HEADER
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
-    "easy",  # unit
     "unit_setup",  # unit
     "unit_stop",  # unit
     );

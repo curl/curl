@@ -48,26 +48,26 @@
 #include "curl_trc.h"
 #include "memdebug.h"
 
-static CURL *easy;
+static CURL *t2600_easy;
 
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
+  t2600_easy = curl_easy_init();
+  if(!t2600_easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
   curl_global_trace("all");
-  curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(t2600_easy, CURLOPT_VERBOSE, 1L);
   return res;
 }
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(t2600_easy);
   curl_global_cleanup();
 }
 
@@ -312,23 +312,23 @@ static void test_connect(struct test_case *tc)
 
   list = curl_slist_append(NULL, tc->resolve_info);
   fail_unless(list, "error allocating resolve list entry");
-  curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
-  curl_easy_setopt(easy, CURLOPT_IPRESOLVE, (long)tc->ip_version);
-  curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS,
+  curl_easy_setopt(t2600_easy, CURLOPT_RESOLVE, list);
+  curl_easy_setopt(t2600_easy, CURLOPT_IPRESOLVE, (long)tc->ip_version);
+  curl_easy_setopt(t2600_easy, CURLOPT_CONNECTTIMEOUT_MS,
                    (long)tc->connect_timeout_ms);
-  curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
+  curl_easy_setopt(t2600_easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                    (long)tc->he_timeout_ms);
 
-  curl_easy_setopt(easy, CURLOPT_URL, tc->url);
+  curl_easy_setopt(t2600_easy, CURLOPT_URL, tc->url);
   memset(&tr, 0, sizeof(tr));
   tr.cf6.family = "v6";
   tr.cf4.family = "v4";
 
   tr.started = curlx_now();
-  tr.result = curl_easy_perform(easy);
+  tr.result = curl_easy_perform(t2600_easy);
   tr.ended = curlx_now();
 
-  curl_easy_setopt(easy, CURLOPT_RESOLVE, NULL);
+  curl_easy_setopt(t2600_easy, CURLOPT_RESOLVE, NULL);
   curl_slist_free_all(list);
   list = NULL;
   current_tc = NULL;
