@@ -408,6 +408,20 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     EVP_PKEY *pubkey = NULL;
     int j;
     const ASN1_BIT_STRING *psig = NULL;
+    unsigned char *der_buf = NULL;
+    int der_len;
+
+    der_len = i2d_X509(x, &der_buf);
+    if(der_len < 0)
+      break;
+
+    result = Curl_ssl_push_certdata(data, i, der_buf, der_len);
+    OPENSSL_free(der_buf);
+    if(result)
+      break;
+
+    if(!data->set.ssl.certinfo)
+      continue;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
     result = push_certinfo(data, mem, "Subject", i);
@@ -3861,8 +3875,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
-  if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
-    SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
+  SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
 
 #if (defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)) && \
@@ -3979,7 +3992,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
-  const bool verifypeer = conn_config->verifypeer;
   unsigned int ssl_version_min;
   char error_buffer[256];
 
@@ -4219,10 +4231,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* OpenSSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
-   * anyway. In the latter case the result of the verification is checked with
-   * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(octx->ssl_ctx,
-                     verifypeer ? SSL_VERIFY_PEER : SSL_VERIFY_NONE, NULL);
+   * anyway. We check the verification with SSL_get_verify_result() below,
+   * assuming nothing else ends up overriding it. */
+  SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
 
   /* Enable logging of secrets to the file specified in env SSLKEYLOGFILE. */
 #ifdef HAVE_KEYLOG_CALLBACK
@@ -4802,6 +4813,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
+  CURLCVcode verify_cb_result;
   long lerr;
   X509 *issuer;
   BIO *fp = NULL;
@@ -4810,6 +4822,12 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   BIO *mem = BIO_new(BIO_s_mem());
   bool strict = (conn_config->verifypeer || conn_config->verifyhost);
   struct dynbuf dname;
+#ifdef OPENSSL_IS_AWSLC
+  const uint8_t *ocsp_buf = NULL;
+#else
+  unsigned char *ocsp_buf = NULL;
+#endif
+  long ocsp_len = 0;
 
   DEBUGASSERT(octx);
 
@@ -4824,9 +4842,22 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(data->set.ssl.certinfo)
-    /* asked to gather certificate info */
-    (void)ossl_certchain(data, octx->ssl);
+  /* gather certificate info */
+  result = ossl_certchain(data, octx->ssl);
+  if(result)
+    return result;
+
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
+  ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_buf);
+  if(ocsp_len < 0)
+    ocsp_len = 0;
+#endif
+
+  verify_cb_result = Curl_ssl_verify_cb(data, cf, ocsp_buf, ocsp_len);
+  if(verify_cb_result == CURLCV_REJECT) {
+    infof(data, "  external certificate verification FAILED");
+    return CURLE_PEER_FAILED_VERIFICATION;
+  }
 
   octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!octx->server_cert) {
@@ -4863,7 +4894,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
   BIO_free(mem);
 
-  if(conn_config->verifyhost) {
+  if(conn_config->verifyhost && verify_cb_result == CURLCV_PASS) {
     result = ossl_verifyhost(data, conn, peer, octx->server_cert);
     if(result) {
       X509_free(octx->server_cert);
@@ -4959,9 +4990,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     lerr = SSL_get_verify_result(octx->ssl);
     ssl_config->certverifyresult = lerr;
     if(lerr != X509_V_OK) {
-      if(conn_config->verifypeer) {
-        /* We probably never reach this, because SSL_connect() will fail
-           and we return earlier if verifypeer is set? */
+      if(conn_config->verifypeer && verify_cb_result == CURLCV_PASS) {
         if(strict)
           failf(data, "SSL certificate verify result: %s (%ld)",
                 X509_verify_cert_error_string(lerr), lerr);
