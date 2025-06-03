@@ -55,7 +55,6 @@ my @reused_symbols = (
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
-    "seek_callback",
     "test_failure",  # shadow
     "test_parse",  # unit
     "testcase",  # unit
