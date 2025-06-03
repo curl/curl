@@ -37,8 +37,8 @@ struct t1514_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t1514_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *userp)
+static size_t t1514_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *userp)
 {
   struct t1514_WriteThis *pooh = (struct t1514_WriteThis *)userp;
 

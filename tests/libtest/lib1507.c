@@ -38,8 +38,8 @@
 
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
-static size_t t1507_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *userp)
+static size_t t1507_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *userp)
 {
   (void)ptr;
   (void)size;

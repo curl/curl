@@ -73,8 +73,8 @@ static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
   return 0;
 }
 
-static size_t t579_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t579_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   static const char * const testpost[]={
     "one",

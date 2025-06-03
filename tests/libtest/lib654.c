@@ -41,8 +41,8 @@ static void free_callback(void *userp)
   pooh->freecount++;
 }
 
-static size_t t654_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t654_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;

@@ -33,8 +33,8 @@ struct t645_WriteThis {
   curl_off_t sizeleft;
 };
 
-static size_t t645_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t645_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   struct t645_WriteThis *pooh = (struct t645_WriteThis *)userp;
   int eof;

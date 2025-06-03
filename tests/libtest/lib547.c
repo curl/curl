@@ -33,9 +33,7 @@
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 #ifndef LIB548
-static size_t t547_read_callback(char  *ptr,
-                                 size_t size,
-                                 size_t nmemb,
+static size_t t547_read_callback(char *ptr, size_t size, size_t nmemb,
                                  void *clientp)
 {
   int *counter = (int *)clientp;

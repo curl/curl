@@ -35,8 +35,8 @@ static const char *chunks[]={
   NULL
 };
 
-static size_t t1901_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *stream)
+static size_t t1901_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *stream)
 {
   static int ix = 0;
   (void)size;

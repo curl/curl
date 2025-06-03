@@ -29,8 +29,8 @@ struct t1662_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t1662_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *userp)
+static size_t t1662_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *userp)
 {
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
   size_t len = strlen(t1662_testdata);

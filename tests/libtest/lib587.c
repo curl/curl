@@ -33,8 +33,8 @@ struct t587_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t587_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t587_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   (void)ptr;
   (void)size;

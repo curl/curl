@@ -39,8 +39,8 @@ struct t670_ReadThis {
   int count;
 };
 
-static size_t t670_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t670_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   struct t670_ReadThis *pooh = (struct t670_ReadThis *) userp;
   time_t delta;

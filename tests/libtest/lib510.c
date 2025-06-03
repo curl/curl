@@ -40,8 +40,8 @@ struct t510_WriteThis {
   int counter;
 };
 
-static size_t t510_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t510_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   struct t510_WriteThis *pooh = (struct t510_WriteThis *)userp;
   const char *data;

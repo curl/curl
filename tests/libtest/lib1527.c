@@ -33,8 +33,8 @@
 
 static char testdata[] = "Hello Cloud!\n";
 
-static size_t t1527_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *stream)
+static size_t t1527_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
   if(amount < strlen(testdata)) {

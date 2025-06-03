@@ -33,8 +33,8 @@ struct t667_WriteThis {
   curl_off_t sizeleft;
 };
 
-static size_t t667_read_callback(char *ptr, size_t size,
-                                 size_t nmemb, void *userp)
+static size_t t667_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *userp)
 {
   struct t667_WriteThis *pooh = (struct t667_WriteThis *)userp;
   int eof;

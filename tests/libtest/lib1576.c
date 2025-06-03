@@ -27,8 +27,8 @@
 
 static char t1576_testdata[] = "request indicates that the client, which made";
 
-static size_t t1576_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *stream)
+static size_t t1576_read_callback(char *ptr, size_t size, size_t nmemb,
+                                  void *stream)
 {
   size_t amount = nmemb * size; /* Total bytes curl wants */
   if(amount < strlen(t1576_testdata)) {
