@@ -43,19 +43,6 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-struct t1609_testcase {
-  /* host:port:address[,address]... */
-  const char *optval;
-
-  /* lowercase host and port to retrieve the addresses from hostcache */
-  const char *host;
-  int port;
-
-  /* 0 to 9 addresses expected from hostcache */
-  const char *address[10];
-};
-
-
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
  1) if there is already existing host:port pair in the DNS cache and
@@ -88,18 +75,30 @@ Test:
  expected result: cached address has zero timestamp and new address
 */
 
-static const struct t1609_testcase tests[] = {
-  /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.2",
-    "test.com", 80, { "127.0.0.2", }
-  },
-};
-
 UNITTEST_START
 {
+  struct testcase {
+    /* host:port:address[,address]... */
+    const char *optval;
+
+    /* lowercase host and port to retrieve the addresses from hostcache */
+    const char *host;
+    int port;
+
+    /* 0 to 9 addresses expected from hostcache */
+    const char *address[10];
+  };
+
+  static const struct testcase tests[] = {
+    /* spaces aren't allowed, for now */
+    { "test.com:80:127.0.0.1",
+      "test.com", 80, { "127.0.0.1", }
+    },
+    { "test.com:80:127.0.0.2",
+      "test.com", 80, { "127.0.0.2", }
+    },
+  };
+
   int i;
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
