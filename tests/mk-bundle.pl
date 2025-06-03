@@ -52,7 +52,6 @@ my @reused_symbols = (
     "curl",  # shadow
     "easy",  # unit
     "test_failure",  # shadow
-    "test_parse",  # unit
     "testcase",  # unit
     "tests",  # unit
     "unit_setup",  # unit
