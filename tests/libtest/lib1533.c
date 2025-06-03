@@ -40,7 +40,6 @@ struct cb_data {
   size_t remaining_bytes;
 };
 
-
 static void reset_data(struct cb_data *data, CURL *curl)
 {
   data->easy_handle = curl;
@@ -49,9 +48,8 @@ static void reset_data(struct cb_data *data, CURL *curl)
   data->remaining_bytes = 3;
 }
 
-
-static size_t read_callback(char *ptr, size_t size, size_t nitems,
-                            void *userdata)
+static size_t t1533_read_callback(char *ptr, size_t size, size_t nitems,
+                                  void *userdata)
 {
   struct cb_data *data = (struct cb_data *)userdata;
 
@@ -155,7 +153,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE,
               (curl_off_t)data.remaining_bytes);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1533_read_callback);
   test_setopt(curl, CURLOPT_READDATA, &data);
   test_setopt(curl, CURLOPT_WRITEFUNCTION, t1533_write_cb);
   test_setopt(curl, CURLOPT_WRITEDATA, &data);

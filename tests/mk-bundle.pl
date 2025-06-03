@@ -53,7 +53,6 @@ my @reused_symbols = (
     "easy",  # unit
     "hash_static",  # unit
     "mydtor",  # unit
-    "read_callback",
     "test_failure",  # shadow
     "test_parse",  # unit
     "testcase",  # unit

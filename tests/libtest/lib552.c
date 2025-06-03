@@ -128,7 +128,8 @@ static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t t552_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
   size_t  available = sizeof(databuf) - current_offset; /* What we have to
@@ -193,7 +194,7 @@ CURLcode test(char *URL)
 
   /* Setup read callback */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t552_read_callback);
 
   /* Write callback */
   test_setopt(curl, CURLOPT_WRITEFUNCTION, t552_write_cb);

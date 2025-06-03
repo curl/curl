@@ -38,7 +38,8 @@
 
 #define MULTI_PERFORM_HANG_TIMEOUT 60 * 1000
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1507_read_callback(char *ptr, size_t size,
+                                  size_t nmemb, void *userp)
 {
   (void)ptr;
   (void)size;
@@ -73,7 +74,7 @@ CURLcode test(char *URL)
    curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
 #endif
    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+   curl_easy_setopt(curl, CURLOPT_READFUNCTION, t1507_read_callback);
    curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
    curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);

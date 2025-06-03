@@ -38,10 +38,8 @@
 static const char uploadthis[] =
   "this is the blurb we want to upload\n";
 
-static size_t read_callback(char  *ptr,
-                            size_t size,
-                            size_t nmemb,
-                            void *clientp)
+static size_t t555_read_callback(char *ptr, size_t size, size_t nmemb,
+                                 void *clientp)
 {
   int *counter = (int *)clientp;
 
@@ -96,7 +94,7 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
   easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
-  easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t555_read_callback);
   easy_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */
