@@ -31,19 +31,20 @@
 #include <stdio.h>
 #include "memdebug.h"
 
-static char testdata[] = "Hello Cloud!\r\n";
 static size_t consumed = 0;
 
 static size_t t1591_read_callback(char *ptr, size_t size, size_t nmemb,
                                   void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
+  static const char testdata[] = "Hello Cloud!\r\n";
+
+  size_t amount = nmemb * size; /* Total bytes curl wants */
 
   if(consumed == strlen(testdata)) {
     return 0;
   }
 
-  if(amount > strlen(testdata)-consumed) {
+  if(amount > strlen(testdata) - consumed) {
     amount = strlen(testdata);
   }
 

@@ -56,7 +56,6 @@ my @reused_symbols = (
     "test_failure",  # shadow
     "test_parse",  # unit
     "testcase",  # unit
-    "testdata",
     "tests",  # unit
     "unit_setup",  # unit
     "unit_stop",  # unit

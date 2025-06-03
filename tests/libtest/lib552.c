@@ -30,14 +30,13 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct testdata {
+struct t552_testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text,
+                 FILE *stream, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
@@ -84,12 +83,11 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userp)
 {
-  struct testdata *config = (struct testdata *)userp;
+  struct t552_testdata *config = (struct t552_testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
@@ -141,7 +139,6 @@ static size_t t552_read_callback(char *ptr, size_t size, size_t nmemb,
   return given;
 }
 
-
 static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb,
                             void *stream)
 {
@@ -150,7 +147,6 @@ static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb,
   (void)stream;
   return size * nmemb;
 }
-
 
 static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
@@ -165,13 +161,11 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_UNKNOWNCMD;
 }
 
-
-
 CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct testdata config;
+  struct t552_testdata config;
   size_t i;
   static const char fill[] = "test data";
 
