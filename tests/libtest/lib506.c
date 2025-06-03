@@ -22,6 +22,8 @@
  *
  ***************************************************************************/
 #include "test.h"
+
+#include "testutil.h"
 #include "memdebug.h"
 
 static const char * const HOSTHEADER = "Host: www.host.foo.com";

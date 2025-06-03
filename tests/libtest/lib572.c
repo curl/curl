@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #endif
 
+#include "testutil.h"
 #include "memdebug.h"
 
 /*
