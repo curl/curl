@@ -299,9 +299,11 @@ static long wssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
     ret = 1;
     break;
 #ifdef WOLFSSL_BIO_CTRL_EOF
-  case WOLFSSL_BIO_CTRL_EOF:
+  case WOLFSSL_BIO_CTRL_EOF: {
     /* EOF has been reached on input? */
-    return !cf->next || !cf->next->connected;
+    struct ssl_connect_data *connssl = cf->ctx;
+    return connssl->peer_closed;
+  }
 #endif
   default:
     ret = 0;
