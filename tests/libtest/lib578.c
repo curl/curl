@@ -30,8 +30,8 @@ static char testdata[]="this is a short string.\n";
 
 static size_t data_size = CURL_ARRAYSIZE(testdata);
 
-static int progress_callback(void *clientp, double dltotal, double dlnow,
-                             double ultotal, double ulnow)
+static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
+                                  double ultotal, double ulnow)
 {
   FILE *moo = fopen(libtest_arg2, "wb");
 
@@ -44,7 +44,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
       curl_mfprintf(moo, "PASSED, UL data matched data size\n");
     else
       curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
-              ulnow, ultotal);
+                    ulnow, ultotal);
     fclose(moo);
   }
   return 0;
@@ -79,7 +79,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t578_progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

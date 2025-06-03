@@ -45,8 +45,8 @@ static void progress_final_report(void)
   started = FALSE;
 }
 
-static int progress_callback(void *clientp, double dltotal, double dlnow,
-                             double ultotal, double ulnow)
+static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
+                                  double ultotal, double ulnow)
 {
   (void)clientp; /* UNUSED */
   (void)dltotal; /* UNUSED */
@@ -61,7 +61,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   if(!started) {
     FILE *moo = fopen(libtest_arg2, "ab");
     curl_mfprintf(moo ? moo : stderr, "Progress: start UL %zu/%zu\n",
-                                last_ul, last_ul_total);
+                  last_ul, last_ul_total);
     if(moo)
       fclose(moo);
     else
@@ -74,7 +74,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 }
 
 static size_t t579_read_callback(char *ptr, size_t size,
-                                  size_t nmemb, void *userp)
+                                 size_t nmemb, void *userp)
 {
   static const char * const testpost[]={
     "one",
@@ -155,7 +155,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t579_progress_callback);
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
