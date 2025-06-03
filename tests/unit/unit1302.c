@@ -28,15 +28,15 @@
 #include "curlx/base64.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *t1302_testdata;
+static struct Curl_easy *t1302_easy;
 
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  t1302_testdata = curl_easy_init();
-  if(!t1302_testdata) {
+  t1302_easy = curl_easy_init();
+  if(!t1302_easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
@@ -45,7 +45,7 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(t1302_testdata);
+  curl_easy_cleanup(t1302_easy);
   curl_global_cleanup();
 }
 

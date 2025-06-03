@@ -40,15 +40,15 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *t1302_testdata;
+static struct Curl_easy *t1302_easy;
 static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
 static CURLcode unit_setup(void)
 {
-  t1302_testdata = curl_easy_init();
-  if(!t1302_testdata) {
+  t1302_easy = curl_easy_init();
+  if(!t1302_easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
@@ -66,7 +66,7 @@ static void unit_stop(void)
   free(data_key);
   Curl_dnscache_destroy(&hp);
 
-  curl_easy_cleanup(t1302_testdata);
+  curl_easy_cleanup(t1302_easy);
   curl_global_cleanup();
 }
 
