@@ -59,7 +59,6 @@ my @reused_symbols = (
     "tests",  # unit
     "unit_setup",  # unit
     "unit_stop",  # unit
-    "xferinfo",
     );
 
 my $tlist = "";
