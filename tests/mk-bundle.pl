@@ -47,12 +47,6 @@ print <<HEADER
 HEADER
     ;
 
-# TODO: Some of these might be subject for de-duplication or sync.
-my @reused_symbols = (
-    "unit_setup",  # unit
-    "unit_stop",  # unit
-    );
-
 my $tlist = "";
 
 while(my $line = <$fh>) {
@@ -63,7 +57,7 @@ while(my $line = <$fh>) {
         my $src = "$2.c";
 
         # Make common symbols unique across test sources
-        foreach my $symb ("test", @reused_symbols) {
+        foreach my $symb ("test", "unit_setup", "unit_stop") {
             print "#undef $symb\n";
             print "#define $symb ${symb}_$name\n";
         }
