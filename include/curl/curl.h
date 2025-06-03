@@ -2876,6 +2876,11 @@ CURL_EXTERN void curl_slist_free_all(struct curl_slist *list);
  */
 CURL_EXTERN time_t curl_getdate(const char *p, const time_t *unused);
 
+struct curl_certdata {
+  size_t size;
+  void *data;
+};
+
 /* info about the certificate chain, for SSL backends that support it. Asked
    for with CURLOPT_CERTINFO / CURLINFO_CERTINFO */
 struct curl_certinfo {
@@ -2884,6 +2889,8 @@ struct curl_certinfo {
                                    linked list with textual information for a
                                    certificate in the format "name:content".
                                    eg "Subject:foo", "Issuer:bar", etc. */
+  struct curl_certdata *certdata; /* array of actual DER representation
+                                     of each cert */
 };
 
 /* Information about the SSL library used and the respective internal SSL

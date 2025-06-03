@@ -573,10 +573,14 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
     for(i = 0; i < ci->num_of_certs; i++) {
       curl_slist_free_all(ci->certinfo[i]);
       ci->certinfo[i] = NULL;
+      free(ci->certdata[i].data);
+      ci->certdata[i].data = NULL;
     }
 
     free(ci->certinfo); /* free the actual array too */
+    free(ci->certdata);
     ci->certinfo = NULL;
+    ci->certdata = NULL;
     ci->num_of_certs = 0;
   }
 }
@@ -585,6 +589,7 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
 {
   struct curl_certinfo *ci = &data->info.certs;
   struct curl_slist **table;
+  struct curl_certdata *cdata;
 
   /* Free any previous certificate information structures */
   Curl_ssl_free_certinfo(data);
@@ -594,8 +599,15 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
   if(!table)
     return CURLE_OUT_OF_MEMORY;
 
+  cdata = calloc((size_t) num, sizeof(struct curl_certdata));
+  if(!cdata) {
+    free(table);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   ci->num_of_certs = num;
   ci->certinfo = table;
+  ci->certdata = cdata;
 
   return CURLE_OK;
 }
@@ -633,6 +645,26 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
 
   ci->certinfo[certnum] = nl;
   return result;
+}
+
+CURLcode Curl_ssl_push_certdata(struct Curl_easy *data,
+                                int certnum,
+                                const void *buf,
+                                size_t len)
+{
+  struct curl_certinfo *ci = &data->info.certs;
+
+  DEBUGASSERT(certnum < ci->num_of_certs);
+  DEBUGASSERT(!ci->certdata[certnum].size);
+  DEBUGASSERT(!ci->certdata[certnum].data);
+
+  ci->certdata[certnum].data = malloc(len);
+  if(!ci->certdata[certnum].data)
+    return CURLE_OUT_OF_MEMORY;
+  memcpy(ci->certdata[certnum].data, buf, len);
+  ci->certdata[certnum].size = len;
+
+  return CURLE_OK;
 }
 
 /* get length bytes of randomness */
