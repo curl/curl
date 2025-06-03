@@ -51,8 +51,6 @@ HEADER
 my @reused_symbols = (
     "curl",  # shadow
     "easy",  # unit
-    "test_failure",  # shadow
-    "tests",  # unit
     "unit_setup",  # unit
     "unit_stop",  # unit
     );
