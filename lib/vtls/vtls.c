@@ -85,6 +85,10 @@
 #include "../strdup.h"
 #include "../rand.h"
 
+#ifdef USE_APPLE_SECTRUST
+#include <Security/Security.h>
+#endif /* USE_APPLE_SECTRUST */
+
 /* The last #include files should be: */
 #include "../curl_memory.h"
 #include "../memdebug.h"
@@ -611,6 +615,230 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
 
   return CURLE_OK;
 }
+
+#ifdef USE_APPLE_SECTRUST
+#define SSL_SYSTEM_VERIFIER
+
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
+  && MAC_OS_X_VERSION_MAX_ALLOWED >= 101400)    \
+  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
+  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#define SUPPORTS_SecTrustEvaluateWithError 1
+#endif
+
+#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
+  && ((defined(MAC_OS_X_VERSION_MIN_REQUIRED)     \
+  && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)     \
+  || (defined(__IPHONE_OS_VERSION_MIN_REQUIRED)   \
+  && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+#define REQUIRES_SecTrustEvaluateWithError 1
+#endif
+
+#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
+  && !defined(HAVE_BUILTIN_AVAILABLE)             \
+  && !defined(REQUIRES_SecTrustEvaluateWithError)
+#undef SUPPORTS_SecTrustEvaluateWithError
+#endif
+
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
+  && MAC_OS_X_VERSION_MAX_ALLOWED >= 100900)    \
+  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
+  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#define SUPPORTS_SecOCSP 1
+#endif
+
+static CURLCVcode Curl_ssl_system_verify(struct Curl_easy *data,
+                                         struct curl_certdata *cdata,
+                                         int chain_len,
+                                         const char *hostname,
+                                         const void *ocsp_buf,
+                                         size_t ocsp_len)
+{
+  CURLCVcode ret = CURLCV_REJECT;
+  SecTrustRef trust = NULL;
+  SecPolicyRef policy = NULL;
+  CFMutableArrayRef policies = NULL;
+  CFMutableArrayRef cert_array = NULL;
+  CFStringRef host_str = NULL;
+  CFErrorRef error = NULL;
+  OSStatus status = noErr;
+  int i;
+
+  if(data->set.ssl.primary.verifyhost) {
+    host_str = CFStringCreateWithCString(NULL, hostname,
+      kCFStringEncodingUTF8);
+    if(!host_str) {
+      failf(data, "SSL: failed to allocate string for hostname");
+      goto out;
+    }
+  }
+
+  policies = CFArrayCreateMutable(NULL, 2, &kCFTypeArrayCallBacks);
+  if(!policies) {
+    failf(data, "SSL: failed to allocate array for policies");
+    goto out;
+  }
+
+  policy = SecPolicyCreateSSL(true, host_str);
+  if(!policy) {
+    failf(data, "SSL: failed to allocate security policy");
+    goto out;
+  }
+
+  CFArrayAppendValue(policies, policy);
+  CFRelease(policy);
+  policy = NULL;
+
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
+  if(!data->set.ssl.no_revoke) {
+    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
+      /* Even without this set, validation will seemingly-unavoidably fail
+       * for certificates that trustd already knows to be revoked.
+       * This policy further allows trustd to consult CRLs and OCSP data
+       * to determine revocation status (which it may then cache). */
+      CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
+      if(!data->set.ssl.revoke_best_effort) {
+        revocation_flags |= kSecRevocationRequirePositiveResponse;
+      }
+
+      policy = SecPolicyCreateRevocation(revocation_flags);
+      if(!policy) {
+        failf(data, "SSL: failed to allocate revocation policy");
+        goto out;
+      }
+
+      CFArrayAppendValue(policies, policy);
+    }
+  }
+#endif
+
+  cert_array = CFArrayCreateMutable(NULL,
+    chain_len, &kCFTypeArrayCallBacks);
+  if(!cert_array) {
+    failf(data, "SSL: failed to allocate array for cert chain");
+    goto out;
+  }
+
+  for(i = 0; i < chain_len; i++) {
+    SecCertificateRef cert;
+    CFDataRef certdata =
+      CFDataCreate(NULL, cdata[i].data, (CFIndex)cdata[i].size);
+    if(!certdata) {
+      failf(data, "SSL: failed to allocate CFData for chain cert");
+      goto out;
+    }
+
+    cert = SecCertificateCreateWithData(NULL, certdata);
+    CFRelease(certdata);
+    if(!cert) {
+      failf(data, "SSL: failed to create SecCertificateRef for chain cert");
+      goto out;
+    }
+
+    CFArrayAppendValue(cert_array, cert);
+    CFRelease(cert);
+  }
+
+  status = SecTrustCreateWithCertificates(cert_array, policies, &trust);
+  if(status != noErr || !trust) {
+    failf(data, "SSL: failed to create validation trust");
+    goto out;
+  }
+
+#if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
+  if(ocsp_len > 0) {
+    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
+      CFDataRef ocspdata =
+        CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
+
+      status = SecTrustSetOCSPResponse(trust, ocspdata);
+      CFRelease(ocspdata);
+      if(status != noErr) {
+        failf(data, "SSL: failed to set OCSP response: %i", (int)status);
+        goto out;
+      }
+    }
+  }
+#else
+  (void)ocsp_buf;
+  (void)ocsp_len;
+#endif
+
+#ifdef SUPPORTS_SecTrustEvaluateWithError
+#if defined(HAVE_BUILTIN_AVAILABLE)
+  if(__builtin_available(macOS 10.14, iOS 12, tvOS 12, watchOS 5, *)) {
+#else
+  if(1) {
+#endif
+    ret = SecTrustEvaluateWithError(trust, &error)
+      ? CURLCV_ACCEPT : CURLCV_REJECT;
+    if(error) {
+      CFIndex code = CFErrorGetCode(error);
+      CFStringRef error_desc = CFErrorCopyDescription(error);
+
+      if(error_desc) {
+        CFIndex size = CFStringGetMaximumSizeForEncoding(
+          CFStringGetLength(error_desc), kCFStringEncodingUTF8);
+        char *desc_str = malloc(size);
+        if(desc_str) {
+          if(CFStringGetCString(error_desc, desc_str, size,
+            kCFStringEncodingUTF8)) {
+            failf(data, "SSL: trust evaluation returned error: %s", desc_str);
+          }
+          else {
+            failf(data, "SSL: failed to convert trust error string: %i",
+              (int)code);
+          }
+          free(desc_str);
+        }
+        else {
+          failf(data, "SSL: failed to allocate trust error string: %i",
+            (int)code);
+        }
+      }
+      else {
+        infof(data, "SSL: trust evaluation returned error %ld", code);
+      }
+
+      if(error_desc)
+        CFRelease(error_desc);
+    }
+  }
+  else
+#endif
+  {
+#ifndef REQUIRES_SecTrustEvaluateWithError
+    SecTrustResultType sec_result;
+    status = SecTrustEvaluate(trust, &sec_result);
+
+    if(status != noErr) {
+      failf(data, "SSL: trust evaluation returned error %i", (int)status);
+    }
+    else if(status == kSecTrustResultUnspecified ||
+      status == kSecTrustResultProceed) {
+      /* "unspecified" means system-trusted with no explicit user setting */
+      ret = CURLCV_ACCEPT;
+    }
+#endif /* REQUIRES_SecTrustEvaluateWithError */
+  }
+
+out:
+  if(error)
+    CFRelease(error);
+  if(host_str)
+    CFRelease(host_str);
+  if(policies)
+    CFRelease(policies);
+  if(policy)
+    CFRelease(policy);
+  if(cert_array)
+    CFRelease(cert_array);
+  if(trust)
+    CFRelease(trust);
+  return ret;
+}
+
+#endif /* USE_APPLE_SECTRUST */
 
 CURLCVcode Curl_ssl_verify_cb(struct Curl_easy *data, struct Curl_cfilter *cf,
                               const void *ocsp_buf, size_t ocsp_len)

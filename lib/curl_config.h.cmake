@@ -688,6 +688,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if Secure Transport is enabled */
 #cmakedefine USE_SECTRANSP 1
 
+/* if Apple system certificate validation is enabled */
+#cmakedefine USE_APPLE_SECTRUST 1
+
 /* if SSL session export support is available */
 #cmakedefine USE_SSLS_EXPORT 1
 
