@@ -54,7 +54,6 @@ my @reused_symbols = (
     "cyclic_add",
     "easy",  # unit
     "getMicroSecondTimeout",
-    "geterr",
     "hash_static",  # unit
     "header_callback",
     "mydtor",  # unit

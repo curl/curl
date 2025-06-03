@@ -275,7 +275,7 @@ static void errnull(const char *name, CURLcode val, int lineno)
          name, val, curl_easy_strerror(val), lineno);
 }
 
-static void geterr(const char *name, CURLcode val, int lineno)
+static void t1521_geterr(const char *name, CURLcode val, int lineno)
 {
   printf("CURLINFO_%s returned %d, \\"%s\\" on line %d\\n",
          name, val, curl_easy_strerror(val), lineno);
@@ -556,7 +556,7 @@ MOO
           ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
        my ($info, $type)=($1, $2);
        my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
-       my $check = "  if(res)\n    geterr(\"$info\", res, __LINE__);\n";
+       my $check = "  if(res)\n    t1521_geterr(\"$info\", res, __LINE__);\n";
        if($type eq "STRING") {
          print $fh "$c &charp);\n$check";
        }

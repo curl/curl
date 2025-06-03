@@ -36,7 +36,7 @@ struct transfer_status {
 
 #define KN(a)   a, #a
 
-static int geterr(const char *name, CURLcode val, int lineno)
+static int t1541_geterr(const char *name, CURLcode val, int lineno)
 {
   curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
                name, val, curl_easy_strerror(val), lineno);
@@ -59,7 +59,7 @@ static void check_time(CURL *easy, int key, const char *name,
   curl_off_t tval;
   CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
   if(res) {
-    geterr(name, res, __LINE__);
+    t1541_geterr(name, res, __LINE__);
   }
   else
     report_time(name, where, tval, tval > 0);
@@ -71,7 +71,7 @@ static void check_time0(CURL *easy, int key, const char *name,
   curl_off_t tval;
   CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
   if(res) {
-    geterr(name, res, __LINE__);
+    t1541_geterr(name, res, __LINE__);
   }
   else
     report_time(name, where, tval, !tval);
