@@ -918,13 +918,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     init_flags |= GNUTLS_NO_TICKETS;
 #endif
 
-#if defined(GNUTLS_NO_STATUS_REQUEST)
-  if(!config->verifystatus)
-    /* Disable the "status_request" TLS extension, enabled by default since
-       GnuTLS 3.8.0. */
-    init_flags |= GNUTLS_NO_STATUS_REQUEST;
-#endif
-
   CURL_TRC_CF(data, cf, "gnutls_init(flags=%x), earlydata=%zu",
               init_flags, earlydata_max);
   rc = gnutls_init(&gtls->session, init_flags);
@@ -1038,13 +1031,11 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     }
   }
 
-  if(config->verifystatus) {
-    rc = gnutls_ocsp_status_request_enable_client(gtls->session,
-                                                  NULL, 0, NULL);
-    if(rc != GNUTLS_E_SUCCESS) {
-      failf(data, "gnutls_ocsp_status_request_enable_client() failed: %d", rc);
-      return CURLE_SSL_CONNECT_ERROR;
-    }
+  rc = gnutls_ocsp_status_request_enable_client(gtls->session,
+                                                NULL, 0, NULL);
+  if(rc != GNUTLS_E_SUCCESS && config->verifystatus) {
+    failf(data, "gnutls_ocsp_status_request_enable_client() failed: %d", rc);
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   return CURLE_OK;
@@ -1309,7 +1300,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
 }
 
 CURLcode
-Curl_gtls_verifyserver(struct Curl_easy *data,
+Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,
                        gnutls_session_t session,
                        struct ssl_primary_config *config,
                        struct ssl_config_data *ssl_config,
@@ -1325,8 +1317,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   char certname[65] = ""; /* limited to 64 chars by ASN.1 */
   size_t size;
   time_t certclock;
-  int rc;
+  int rc, get_status_rc;
   CURLcode result = CURLE_OK;
+  CURLCVcode verify_cb_result;
+  gnutls_datum_t status_request = {0};
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const char *ptr;
   int algo;
@@ -1374,7 +1368,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     infof(data, " common name: WARNING could not obtain");
   }
 
-  if(data->set.ssl.certinfo && chainp) {
+  if(chainp) {
     unsigned int i;
 
     result = Curl_ssl_init_certinfo(data, (int)cert_list_size);
@@ -1391,7 +1385,16 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     }
   }
 
-  if(config->verifypeer) {
+  get_status_rc = gnutls_ocsp_status_request_get(session, &status_request);
+
+  verify_cb_result = Curl_ssl_verify_cb(data, cf, status_request.data,
+    status_request.size);
+  if(verify_cb_result == CURLCV_REJECT) {
+    infof(data, "  external certificate verification FAILED");
+    return CURLE_PEER_FAILED_VERIFICATION;
+  }
+
+  if(config->verifypeer && verify_cb_result == CURLCV_PASS) {
     /* This function will try to verify the peer's certificate and return its
        status (trusted, invalid etc.). The value of status should be one or
        more of the gnutls_certificate_status_t enumerated elements bitwise
@@ -1437,19 +1440,16 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     infof(data, "  server certificate verification SKIPPED");
 
   if(config->verifystatus) {
-    gnutls_datum_t status_request;
     gnutls_ocsp_resp_t ocsp_resp;
     gnutls_ocsp_cert_status_t status;
     gnutls_x509_crl_reason_t reason;
 
-    rc = gnutls_ocsp_status_request_get(session, &status_request);
-
-    if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
+    if(get_status_rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
       failf(data, "No OCSP response received");
       return CURLE_SSL_INVALIDCERTSTATUS;
     }
 
-    if(rc < 0) {
+    if(get_status_rc < 0) {
       failf(data, "Invalid OCSP response received");
       return CURLE_SSL_INVALIDCERTSTATUS;
     }
@@ -1767,7 +1767,7 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
 #endif
   CURLcode result;
 
-  result = Curl_gtls_verifyserver(data, session, conn_config, ssl_config,
+  result = Curl_gtls_verifyserver(cf, data, session, conn_config, ssl_config,
                                   &connssl->peer, pinned_key);
   if(result)
     goto out;
