@@ -172,7 +172,7 @@ static int t530_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int checkForCompletion(CURLM *curl, int *success)
+static int t582_checkForCompletion(CURLM *curl, int *success)
 {
   int result = 0;
   *success = 0;
@@ -308,7 +308,7 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
     goto test_cleanup;
   }
 
-  while(!checkForCompletion(m, &success)) {
+  while(!t582_checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
