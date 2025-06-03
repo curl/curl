@@ -45,9 +45,8 @@ int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
  * for the unit test to inspect. Since we know that we're only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
-int
-debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
-                void *userptr)
+int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
+              void *userptr)
 {
   (void)handle;
   (void)type;
@@ -58,8 +57,7 @@ debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
   return 0;
 }
 
-static CURLcode
-unit_setup(void)
+static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -74,8 +72,7 @@ unit_setup(void)
   return res;
 }
 
-static void
-unit_stop(void)
+static void unit_stop(void)
 {
   curl_easy_cleanup(testdata);
   curl_global_cleanup();
