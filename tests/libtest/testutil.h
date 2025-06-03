@@ -25,6 +25,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
+#include <limits.h>
+
 struct timeval tutil_tvnow(void);
 
 /*
