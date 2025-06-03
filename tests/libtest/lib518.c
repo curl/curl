@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
