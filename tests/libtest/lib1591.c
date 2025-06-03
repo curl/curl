@@ -55,7 +55,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 /*
  * carefully not leak memory on OOM
  */
-static int trailers_callback(struct curl_slist **list, void *userdata)
+static int t1591_trailers_callback(struct curl_slist **list, void *userdata)
 {
   struct curl_slist *nlist = NULL;
   struct curl_slist *nlist2 = NULL;
@@ -103,7 +103,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-  test_setopt(curl, CURLOPT_TRAILERFUNCTION, trailers_callback);
+  test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
 
   res = curl_easy_perform(curl);

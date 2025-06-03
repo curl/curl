@@ -61,7 +61,6 @@ my @reused_symbols = (
     "testcase",  # unit
     "testdata",
     "tests",  # unit
-    "trailers_callback",
     "unit_setup",  # unit
     "unit_stop",  # unit
     "xferinfo",
