@@ -163,7 +163,7 @@ static int checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int getMicroSecondTimeout(struct timeval *timeout)
+static int t582_getMicroSecondTimeout(struct timeval *timeout)
 {
   struct timeval now;
   ssize_t result;
@@ -318,7 +318,7 @@ CURLcode test(char *URL)
     t582_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = getMicroSecondTimeout(&timeout);
+      int usTimeout = t582_getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
@@ -333,7 +333,8 @@ CURLcode test(char *URL)
     t582_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
     t582_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
 
-    if(timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0) {
+    if(timeout.tv_sec != (time_t)-1 &&
+       t582_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
       notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }

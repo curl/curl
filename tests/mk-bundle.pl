@@ -53,7 +53,6 @@ my @reused_symbols = (
     "curl",  # shadow
     "cyclic_add",
     "easy",  # unit
-    "getMicroSecondTimeout",
     "hash_static",  # unit
     "header_callback",
     "mydtor",  # unit
