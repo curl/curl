@@ -612,6 +612,37 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
   return CURLE_OK;
 }
 
+CURLCVcode Curl_ssl_verify_cb(struct Curl_easy *data, struct Curl_cfilter *cf,
+                              const void *ocsp_buf, size_t ocsp_len)
+{
+  CURLCVcode ret = CURLCV_PASS;
+
+#ifdef SSL_SYSTEM_VERIFIER
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct ssl_primary_config *config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct curl_certinfo *ci = &data->info.certs;
+  char *server = connssl->peer.sni ?
+    connssl->peer.sni : connssl->peer.hostname;
+
+  if(ret == CURLCV_PASS
+    && config->verifypeer
+    && ssl_config->native_ca_store
+    /* && !config->CAfile
+    && !config->CApath */) {
+    ret = Curl_ssl_system_verify(data, ci->certdata, ci->num_of_certs,
+      server, ocsp_buf, ocsp_len);
+  }
+#else
+  (void)data;
+  (void)cf;
+  (void)ocsp_buf;
+  (void)ocsp_len;
+#endif
+
+  return ret;
+}
+
 /*
  * 'value' is NOT a null-terminated string
  */

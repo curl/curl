@@ -170,6 +170,12 @@ void Curl_ssl_version(char *buffer, size_t size);
 /* Certificate information list handling. */
 #define CURL_X509_STR_MAX  100000
 
+typedef enum {
+  CURLCV_ACCEPT,
+  CURLCV_REJECT,
+  CURLCV_PASS
+} CURLCVcode;
+
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
 CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
 CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data, int certnum,
@@ -179,6 +185,9 @@ CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
                                 const char *label, const char *value);
 CURLcode Curl_ssl_push_certdata(struct Curl_easy *data, int certnum,
                                 const void *buf, size_t len);
+CURLCVcode Curl_ssl_verify_cb(struct Curl_easy *data,
+                              struct Curl_cfilter *cf,
+                              const void *ocsp_buf, size_t ocsp_len);
 
 /* Functions to be used by SSL library adaptation functions */
 
