@@ -31,7 +31,7 @@
 
 static struct Curl_hash hash_static;
 
-static void mydtor(void *p)
+static void t1602_mydtor(void *p)
 {
   int *ptr = (int *)p;
   free(ptr);
@@ -40,7 +40,7 @@ static void mydtor(void *p)
 static CURLcode unit_setup(void)
 {
   Curl_hash_init(&hash_static, 7, Curl_hash_str,
-                 curlx_str_key_compare, mydtor);
+                 curlx_str_key_compare, t1602_mydtor);
   return CURLE_OK;
 }
 

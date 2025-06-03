@@ -29,7 +29,7 @@
 
 static struct uint_hash hash_static;
 
-static void mydtor(unsigned int id, void *elem)
+static void t1616_mydtor(unsigned int id, void *elem)
 {
   int *ptr = (int *)elem;
   (void)id;
@@ -38,7 +38,7 @@ static void mydtor(unsigned int id, void *elem)
 
 static CURLcode unit_setup(void)
 {
-  Curl_uint_hash_init(&hash_static, 15, mydtor);
+  Curl_uint_hash_init(&hash_static, 15, t1616_mydtor);
   return CURLE_OK;
 }
 

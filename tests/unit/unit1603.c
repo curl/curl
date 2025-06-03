@@ -30,7 +30,7 @@
 static struct Curl_hash hash_static;
 static const size_t slots = 3;
 
-static void mydtor(void *p)
+static void t1603_mydtor(void *p)
 {
   /* Data are statically allocated */
  (void)p; /* unused */
@@ -49,7 +49,7 @@ static void my_elem_dtor(void *key, size_t key_len, void *p)
 static CURLcode unit_setup(void)
 {
   Curl_hash_init(&hash_static, slots, Curl_hash_str,
-                 curlx_str_key_compare, mydtor);
+                 curlx_str_key_compare, t1603_mydtor);
   return CURLE_OK;
 }
 
