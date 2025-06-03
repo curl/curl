@@ -96,7 +96,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
 }
 
 /* build request url */
-static char *suburl(const char *base, int i)
+static char *t571_suburl(const char *base, int i)
 {
   return curl_maprintf("%s%.4d", base, i);
 }
@@ -129,7 +129,7 @@ CURLcode test(char *URL)
   }
   test_setopt(curl, CURLOPT_URL, URL);
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = t571_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -151,7 +151,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
 
   /* This PLAY starts the interleave */
-  stream_uri = suburl(URL, request++);
+  stream_uri = t571_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -166,7 +166,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
 
   /* The DESCRIBE request will try to consume data after the Content */
-  stream_uri = suburl(URL, request++);
+  stream_uri = t571_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -180,7 +180,7 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = t571_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

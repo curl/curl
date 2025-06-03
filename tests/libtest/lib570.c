@@ -25,7 +25,7 @@
 #include "memdebug.h"
 
 /* build request url */
-static char *suburl(const char *base, int i)
+static char *t570_suburl(const char *base, int i)
 {
   return curl_maprintf("%s%.4d", base, i);
 }
@@ -57,7 +57,7 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = t570_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -78,7 +78,7 @@ CURLcode test(char *URL)
                     "RAW/RAW/UDP;unicast;client_port=3056-3057");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = t570_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -93,7 +93,7 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_PLAY);
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = t570_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
