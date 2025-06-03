@@ -74,10 +74,6 @@ include Makefile.inc
 
 if DOING_NATIVE_WINDOWS
 CSOURCES += dllmain.c
-else
-if DOING_CYGWIN
-CSOURCES += dllmain.c
-endif
 endif
 
 if USE_UNITY
@@ -88,11 +84,6 @@ if CURLDEBUG
 # We must compile this source separately to avoid memdebug.h redefinitions
 # applying to it.
 curl_EXCLUDE += memdebug.c
-endif
-# For Cygwin always compile dllmain.c as a separate unit since it
-# includes windows.h, which should not be included in other units.
-if DOING_CYGWIN
-curl_EXCLUDE += dllmain.c
 endif
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c

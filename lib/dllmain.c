@@ -28,22 +28,13 @@
 #include <openssl/crypto.h>
 #endif
 
-/* The fourth-to-last include */
-#ifdef __CYGWIN__
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#ifdef _WIN32
-#undef _WIN32
-#endif
-#endif
-
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
-/* DllMain() must only be defined for Windows and Cygwin DLL builds. */
-#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(CURL_STATICLIB)
+/* DllMain() must only be defined for Windows DLL builds. */
+#if defined(_WIN32) && !defined(CURL_STATICLIB)
 
 #if defined(USE_OPENSSL) && \
     !defined(OPENSSL_IS_AWSLC) && \
