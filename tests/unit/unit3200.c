@@ -42,9 +42,9 @@ static CURLcode unit_setup(void)
   return CURLE_OK;
 }
 
-static CURLcode unit_stop(void)
+static void unit_stop(void)
 {
-  return CURLE_OK;
+  return;
 }
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
