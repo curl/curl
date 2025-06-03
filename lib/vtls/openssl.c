@@ -698,9 +698,11 @@ static long ossl_bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
     ret = 1;
     break;
 #ifdef BIO_CTRL_EOF
-  case BIO_CTRL_EOF:
+  case BIO_CTRL_EOF: {
     /* EOF has been reached on input? */
-    return !cf->next || !cf->next->connected;
+    struct ssl_connect_data *connssl = cf->ctx;
+    return connssl->peer_closed;
+  }
 #endif
   default:
     ret = 0;
