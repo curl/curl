@@ -27,7 +27,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct t1541_transfer_status {
   CURL *easy;
   int hd_count;
   int bd_count;
@@ -77,10 +77,10 @@ static void check_time0(CURL *easy, int key, const char *name,
     report_time(name, where, tval, !tval);
 }
 
-static size_t header_callback(char *ptr, size_t size, size_t nmemb,
-                              void *userp)
+static size_t t1541_header_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
   size_t len = size * nmemb;
 
   (void)ptr;
@@ -102,7 +102,7 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
 
 static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
 
   (void)ptr;
   (void)st;
@@ -114,7 +114,7 @@ CURLcode test(char *URL)
 {
   CURL *curls = NULL;
   CURLcode res = CURLE_OK;
-  struct transfer_status st;
+  struct t1541_transfer_status st;
 
   start_test_timing();
 
@@ -128,7 +128,7 @@ CURLcode test(char *URL)
   easy_setopt(curls, CURLOPT_URL, URL);
   easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1541_write_cb);
   easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
+  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1541_header_callback);
   easy_setopt(curls, CURLOPT_HEADERDATA, &st);
 
   easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);

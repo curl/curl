@@ -52,7 +52,6 @@ my @reused_symbols = (
     "curl",  # shadow
     "easy",  # unit
     "hash_static",  # unit
-    "header_callback",
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
@@ -63,7 +62,6 @@ my @reused_symbols = (
     "testdata",
     "tests",  # unit
     "trailers_callback",
-    "transfer_status",
     "unit_setup",  # unit
     "unit_stop",  # unit
     "xferinfo",
