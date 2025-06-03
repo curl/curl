@@ -35,7 +35,6 @@ static bool unit_setup(void)
 
 static void unit_stop(void)
 {
-
 }
 
 /*
