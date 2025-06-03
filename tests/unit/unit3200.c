@@ -44,7 +44,6 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  return;
 }
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
