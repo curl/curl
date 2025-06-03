@@ -235,7 +235,7 @@ UNITTEST_START
     { "x",                        "",                       NOMATCH },
 
     /* backslash */
-    { "\\",                       "\\",                     MATCH|LINUX_NOMATCH},
+    { "\\",                       "\\",                   MATCH|LINUX_NOMATCH},
     { "\\\\",                     "\\",                     MATCH },
     { "\\\\",                     "\\\\",                   NOMATCH },
     { "\\?",                      "?",                      MATCH },
@@ -272,7 +272,8 @@ UNITTEST_START
     { "",                         "",                       MATCH},
     {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
      "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
-     "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
+     "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]"
+     "*",
                                   "a",                      NOMATCH|LINUX_FAIL}
   };
 
