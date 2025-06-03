@@ -50,7 +50,6 @@ HEADER
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
     "curl",  # shadow
-    "cyclic_add",
     "easy",  # unit
     "hash_static",  # unit
     "header_callback",

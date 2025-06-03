@@ -214,7 +214,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode cyclic_add(void)
+static CURLcode t645_cyclic_add(void)
 {
   CURL *easy = curl_easy_init();
   curl_mime *mime = curl_mime_init(easy);
@@ -252,7 +252,7 @@ CURLcode test(char *URL)
     res = t645_test_once(URL, FALSE); /* new */
 
   if(!res)
-    res = cyclic_add();
+    res = t645_cyclic_add();
 
   curl_global_cleanup();
 
