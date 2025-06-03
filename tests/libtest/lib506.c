@@ -29,12 +29,12 @@ static const char * const HOSTHEADER = "Host: www.host.foo.com";
 #define THREADS 2
 
 /* struct containing data of a thread */
-struct Tdata {
+struct t506_Tdata {
   CURLSH *share;
   char *url;
 };
 
-struct userdata {
+struct t506_userdata {
   const char *text;
   int counter;
 };
@@ -46,7 +46,7 @@ static void t506_test_lock(CURL *handle, curl_lock_data data,
                            curl_lock_access laccess, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t506_userdata *user = (struct t506_userdata *)useptr;
   int locknum;
 
   (void)handle;
@@ -85,7 +85,7 @@ static void t506_test_lock(CURL *handle, curl_lock_data data,
 static void t506_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t506_userdata *user = (struct t506_userdata *)useptr;
   int locknum;
   (void)handle;
   switch(data) {
@@ -131,7 +131,7 @@ static void *t506_test_fire(void *ptr)
 {
   CURLcode code;
   struct curl_slist *headers;
-  struct Tdata *tdata = (struct Tdata*)ptr;
+  struct t506_Tdata *tdata = (struct t506_Tdata*)ptr;
   CURL *curl;
 
   curl = curl_easy_init();
@@ -165,7 +165,7 @@ static void *t506_test_fire(void *ptr)
 
 
 /* build request url */
-static char *suburl(const char *base, int i)
+static char *t506_suburl(const char *base, int i)
 {
   return curl_maprintf("%s%.4d", base, i);
 }
@@ -178,14 +178,14 @@ CURLcode test(char *URL)
   CURLSHcode scode = CURLSHE_OK;
   CURLcode code = CURLE_OK;
   char *url = NULL;
-  struct Tdata tdata;
+  struct t506_Tdata tdata;
   CURL *curl;
   CURLSH *share;
   struct curl_slist *headers = NULL;
   struct curl_slist *cookies = NULL;
   struct curl_slist *next_cookie = NULL;
   int i;
-  struct userdata user;
+  struct t506_userdata user;
 
   user.text = "Pigs in space";
   user.counter = 0;
@@ -265,7 +265,7 @@ CURLcode test(char *URL)
   for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
-    tdata.url   = suburl(URL, i); /* must be curl_free()d */
+    tdata.url   = t506_suburl(URL, i); /* must be curl_free()d */
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
@@ -286,7 +286,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  url = suburl(URL, i);
+  url = t506_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);
@@ -313,7 +313,7 @@ CURLcode test(char *URL)
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-  url = suburl(URL, i);
+  url = t506_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);

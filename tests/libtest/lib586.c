@@ -27,12 +27,12 @@
 #define THREADS 2
 
 /* struct containing data of a thread */
-struct Tdata {
+struct t586_Tdata {
   CURLSH *share;
   char *url;
 };
 
-struct userdata {
+struct t586_userdata {
   const char *text;
   int counter;
 };
@@ -42,7 +42,7 @@ static void t586_test_lock(CURL *handle, curl_lock_data data,
                            curl_lock_access laccess, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t586_userdata *user = (struct t586_userdata *)useptr;
 
   (void)handle;
   (void)laccess;
@@ -72,7 +72,7 @@ static void t586_test_lock(CURL *handle, curl_lock_data data,
 static void t586_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t586_userdata *user = (struct t586_userdata *)useptr;
   (void)handle;
   switch(data) {
     case CURL_LOCK_DATA_SHARE:
@@ -99,7 +99,7 @@ static void t586_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 static void *t586_test_fire(void *ptr)
 {
   CURLcode code;
-  struct Tdata *tdata = (struct Tdata*)ptr;
+  struct t586_Tdata *tdata = (struct t586_Tdata*)ptr;
   CURL *curl;
 
   curl = curl_easy_init();
@@ -134,11 +134,11 @@ CURLcode test(char *URL)
   CURLcode res = CURLE_OK;
   CURLSHcode scode = CURLSHE_OK;
   char *url;
-  struct Tdata tdata;
+  struct t586_Tdata tdata;
   CURL *curl;
   CURLSH *share;
   int i;
-  struct userdata user;
+  struct t586_userdata user;
 
   user.text = "Pigs in space";
   user.counter = 0;

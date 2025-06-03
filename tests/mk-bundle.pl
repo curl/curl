@@ -49,7 +49,6 @@ HEADER
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
-    "Tdata",
     "checkForCompletion",
     "curl",  # shadow
     "cyclic_add",
@@ -62,7 +61,6 @@ my @reused_symbols = (
     "progress_callback",
     "read_callback",
     "seek_callback",
-    "suburl",
     "test_failure",  # shadow
     "test_parse",  # unit
     "testcase",  # unit
@@ -72,7 +70,6 @@ my @reused_symbols = (
     "transfer_status",
     "unit_setup",  # unit
     "unit_stop",  # unit
-    "userdata",
     "xferinfo",
     );
 
