@@ -43,7 +43,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-struct testcase {
+struct t1607_testcase {
   /* host:port:address[,address]... */
   const char *optval;
 
@@ -69,7 +69,7 @@ static const char skip = 0;
 #endif
 
 /* CURLOPT_RESOLVE address parsing tests */
-static const struct testcase tests[] = {
+static const struct t1607_testcase tests[] = {
   /* spaces aren't allowed, for now */
   { "test.com:80:127.0.0.1, 127.0.0.2",
     "test.com", 80, TRUE, { NULL, }

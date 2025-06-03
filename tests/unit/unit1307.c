@@ -57,13 +57,13 @@ static void unit_stop(void)
 #define MAC_NOMATCH ((CURL_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
 #define MAC_FAIL ((CURL_FNMATCH_FAIL << MAC_SHIFT) | MAC_DIFFER)
 
-struct testcase {
+struct t1307_testcase {
   const char *pattern;
   const char *string;
   int result;
 };
 
-static const struct testcase tests[] = {
+static const struct t1307_testcase tests[] = {
   /* brackets syntax */
   {"*[*[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["

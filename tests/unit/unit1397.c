@@ -36,13 +36,13 @@ static void unit_stop(void)
 /* only these backends define the tested functions */
 #if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 #include "vtls/hostcheck.h"
-struct testcase {
+struct t1397_testcase {
   const char *host;
   const char *pattern;
   bool match;
 };
 
-static struct testcase tests[] = {
+static struct t1397_testcase tests[] = {
   {"", "", FALSE},
   {"a", "", FALSE},
   {"", "b", FALSE},

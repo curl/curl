@@ -43,7 +43,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-struct testcase {
+struct t1609_testcase {
   /* host:port:address[,address]... */
   const char *optval;
 
@@ -88,7 +88,7 @@ Test:
  expected result: cached address has zero timestamp and new address
 */
 
-static const struct testcase tests[] = {
+static const struct t1609_testcase tests[] = {
   /* spaces aren't allowed, for now */
   { "test.com:80:127.0.0.1",
     "test.com", 80, { "127.0.0.1", }
