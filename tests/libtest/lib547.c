@@ -55,9 +55,9 @@ static size_t t547_read_callback(char  *ptr,
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr ioctlcallback(CURL *handle,
-                               int cmd,
-                               void *clientp)
+static curlioerr t547_ioctl_callback(CURL *handle,
+                                     int cmd,
+                                     void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
@@ -97,7 +97,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */
-  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  test_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
   test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
   test_setopt(curl, CURLOPT_READFUNCTION, t547_read_callback);

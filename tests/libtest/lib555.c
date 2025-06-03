@@ -60,9 +60,9 @@ static size_t read_callback(char  *ptr,
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr ioctlcallback(CURL *handle,
-                               int cmd,
-                               void *clientp)
+static curlioerr t547_ioctl_callback(CURL *handle,
+                                     int cmd,
+                                     void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
@@ -93,7 +93,7 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* read the POST data from a callback */
-  easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  easy_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
   easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
   easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);

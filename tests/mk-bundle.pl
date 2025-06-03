@@ -58,7 +58,6 @@ my @reused_symbols = (
     "geterr",
     "hash_static",  # unit
     "header_callback",
-    "ioctlcallback",
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
