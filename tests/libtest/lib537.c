@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #endif
 
+#include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
 
