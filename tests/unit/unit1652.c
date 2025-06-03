@@ -137,7 +137,8 @@ UNITTEST_START
   Curl_infof(t1652_easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 1");
-  fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 1");
+  fail_unless(output[sizeof(output) - 1] == '\0',
+              "Truncation of infof input 1");
 
   /* Just over the limit with newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
@@ -145,7 +146,8 @@ UNITTEST_START
   Curl_infof(t1652_easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 2");
-  fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 2");
+  fail_unless(output[sizeof(output) - 1] == '\0',
+              "Truncation of infof input 2");
 
   /* Way over the limit for truncation via '...' */
   memset(input, '\0', sizeof(input));
@@ -153,7 +155,8 @@ UNITTEST_START
   Curl_infof(t1652_easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 3");
-  fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
+  fail_unless(output[sizeof(output) - 1] == '\0',
+              "Truncation of infof input 3");
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
