@@ -42,7 +42,7 @@ static CURLcode test_failure = CURLE_OK;
 static CURLM *testmulti = NULL;
 static const char *url;
 
-static void *run_thread(void *ptr)
+static void *t1565_run_thread(void *ptr)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;
@@ -110,7 +110,7 @@ CURLcode test(char *URL)
 
   url = URL;
 
-  result = pthread_create(&tid, NULL, run_thread, NULL);
+  result = pthread_create(&tid, NULL, t1565_run_thread, NULL);
   if(!result)
     tid_valid = true;
   else {

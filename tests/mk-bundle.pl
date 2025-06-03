@@ -62,7 +62,6 @@ my @reused_symbols = (
     "mydtor",  # unit
     "progress_callback",
     "read_callback",
-    "run_thread",
     "seek_callback",
     "suburl",
     "test_failure",  # shadow
