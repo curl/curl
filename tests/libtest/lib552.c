@@ -121,7 +121,6 @@ static int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */

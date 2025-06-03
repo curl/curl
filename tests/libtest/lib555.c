@@ -58,9 +58,8 @@ static size_t t555_read_callback(char *ptr, size_t size, size_t nmemb,
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr t555_ioctl_callback(CURL *handle,
-                                     int cmd,
-                                     void *clientp)
+
+static curlioerr t555_ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
