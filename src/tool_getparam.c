@@ -2881,6 +2881,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = PARAM_OPTION_UNKNOWN;
         break;
       }
+      toggle = !(a->desc & ARG_NO);
     }
     if((a->desc & ARG_TLS) && !feature_ssl) {
       err = PARAM_LIBCURL_DOESNT_SUPPORT;
