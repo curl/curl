@@ -130,6 +130,7 @@ double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
   return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
 }
 
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 void tutil_rlim2str(char *buf, size_t len, rlim_t val)
 {
 #ifdef RLIM_INFINITY
@@ -150,3 +151,4 @@ void tutil_rlim2str(char *buf, size_t len, rlim_t val)
       curl_msnprintf(buf, len, "%lu", (unsigned long)val);
   }
 }
+#endif

@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include <limits.h>
-
 struct timeval tutil_tvnow(void);
 
 /*
@@ -44,6 +42,14 @@ long tutil_tvdiff(struct timeval t1, struct timeval t2);
  */
 double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
 
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
+
+#include <limits.h>
+
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 void tutil_rlim2str(char *buf, size_t len, rlim_t val);
+#endif
 
 #endif  /* HEADER_CURL_LIBTEST_TESTUTIL_H */
