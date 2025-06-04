@@ -2027,8 +2027,7 @@ static ssize_t wssl_recv(struct Curl_cfilter *cf,
       }
       else if(!wssl->io_result && connssl->peer_closed) {
         CURL_TRC_CF(data, cf, "wssl_recv(len=%zu) -> CLOSED", blen);
-        *curlcode = CURLE_OK;
-        return 0;
+        failf(data, "Connection closed abruptly");
       }
       else {
         char error_buffer[256];

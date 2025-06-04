@@ -5369,6 +5369,10 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
           /* logging handling in underlying filter already */
           *curlcode = octx->io_result;
         }
+        else if(connssl->peer_closed) {
+          failf(data, "Connection closed abruptly");
+          *curlcode = CURLE_RECV_ERROR;
+        }
         else {
           /* We should no longer get here nowadays. But handle
            * the error in case of some weirdness in the OSSL stack */
