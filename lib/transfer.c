@@ -115,7 +115,7 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 }
 #endif
 
-static int data_pending(struct Curl_easy *data)
+static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
@@ -124,8 +124,9 @@ static int data_pending(struct Curl_easy *data)
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
-    Curl_conn_data_pending(data, FIRSTSOCKET);
+  return (!rcvd_eagain &&
+          conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP)) ||
+         Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
 /*
@@ -271,6 +272,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   int maxloops = 10;
   curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
+  bool rcvd_eagain = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
@@ -303,23 +305,25 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
         bytestoread = (size_t)data->set.max_recv_speed;
     }
 
+    rcvd_eagain = FALSE;
     nread = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &result);
     if(nread < 0) {
       if(CURLE_AGAIN != result)
         goto out; /* real error */
+      rcvd_eagain = TRUE;
       result = CURLE_OK;
       if(data->req.download_done && data->req.no_body &&
          !data->req.resp_trailer) {
         DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
                "not waiting for EOS"));
         nread = 0;
-        /* continue as if we read the EOS */
+        /* continue as if we received the EOS */
       }
       else
         break; /* get out of loop */
     }
 
-    /* We only get a 0-length read on EndOfStream */
+    /* We only get a 0-length receive at the end of the response */
     blen = (size_t)nread;
     is_eos = (blen == 0);
     *didwhat |= KEEP_RECV;
@@ -355,12 +359,14 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
   } while(maxloops--);
 
-  if((maxloops <= 0) || data_pending(data)) {
-    /* did not read until EAGAIN or there is still pending data, mark as
-       read-again-please */
+  if(!rcvd_eagain || data_pending(data, rcvd_eagain)) {
+    /* Did not read until EAGAIN or there is still data pending
+     * in buffers. Mark as read-again via simulated SELECT results. */
     data->state.select_bits = CURL_CSELECT_IN;
     if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
       data->state.select_bits |= CURL_CSELECT_OUT;
+    CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, "
+               "set select_bits=%x", data->state.select_bits);
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
