@@ -993,11 +993,11 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
           struct ip_quadruple ipquad;
           int is_ipv6;
           if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
-            const char *host, *disphost;
+            const char *host;
             int port;
-            cf->next->cft->get_host(cf->next, data, &host, &disphost, &port);
+            Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
             CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
-                        disphost, ipquad.remote_ip, ipquad.remote_port);
+                        host, ipquad.remote_ip, ipquad.remote_port);
           }
         }
         data->info.numconnects++; /* to track the # of connections made */
@@ -1134,7 +1134,6 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_connect,
   cf_he_close,
   cf_he_shutdown,
-  Curl_cf_def_get_host,
   cf_he_adjust_pollset,
   cf_he_data_pending,
   Curl_cf_def_send,
@@ -1398,7 +1397,6 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_connect,
   cf_setup_close,
   Curl_cf_def_shutdown,
-  Curl_cf_def_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,

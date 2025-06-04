@@ -2761,7 +2761,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_ngtcp2_connect,
   cf_ngtcp2_close,
   cf_ngtcp2_shutdown,
-  Curl_cf_def_get_host,
   cf_ngtcp2_adjust_pollset,
   cf_ngtcp2_data_pending,
   cf_ngtcp2_send,

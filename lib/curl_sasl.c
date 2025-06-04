@@ -349,7 +349,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   saslstate state1 = SASL_STOP;
   saslstate state2 = SASL_FINAL;
-  const char *hostname, *disp_hostname;
+  const char *hostname;
   int port;
 #if defined(USE_KERBEROS5) || defined(USE_NTLM)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
@@ -359,7 +359,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   const char *oauth_bearer = data->set.str[STRING_BEARER];
   struct bufref nullmsg;
 
-  Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &disp_hostname, &port);
+  Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
   Curl_bufref_init(&nullmsg);
   Curl_bufref_init(&resp);
   sasl->force_ir = force_ir;    /* Latch for future use */
@@ -535,7 +535,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   saslstate newstate = SASL_FINAL;
   struct bufref resp;
-  const char *hostname, *disp_hostname;
+  const char *hostname;
   int port;
 #if defined(USE_KERBEROS5) || defined(USE_NTLM) \
     || !defined(CURL_DISABLE_DIGEST_AUTH)
@@ -546,7 +546,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   const char *oauth_bearer = data->set.str[STRING_BEARER];
   struct bufref serverdata;
 
-  Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &disp_hostname, &port);
+  Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
   Curl_bufref_init(&serverdata);
   Curl_bufref_init(&resp);
   *progress = SASL_INPROGRESS;
