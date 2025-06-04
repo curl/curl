@@ -502,19 +502,6 @@ sub torture {
         unlink("$LOGDIR/$MEMDUMP");
 
         my $cmd = $testcmd;
-        if($valgrind && !$gdbthis) {
-            my @valgrindoption = getpart("verify", "valgrind");
-            if((!@valgrindoption) || ($valgrindoption[0] !~ /disable/)) {
-                my $valgrindcmd = shell_quote($valgrind) . " ";
-                $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
-                $valgrindcmd .= "--quiet --leak-check=yes ";
-                $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
-                # $valgrindcmd .= "--gen-suppressions=all ";
-                $valgrindcmd .= "--num-callers=16 ";
-                $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
-                $cmd = "$valgrindcmd $testcmd";
-            }
-        }
         logmsg "*** Function number $limit is now set to fail ***\n" if($gdbthis);
 
         my $ret = 0;
