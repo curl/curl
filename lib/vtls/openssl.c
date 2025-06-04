@@ -388,7 +388,8 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   sk = SSL_get_peer_cert_chain(ssl);
   if(!sk) {
-    return CURLE_OUT_OF_MEMORY;
+    /* We didn't get a chain from the server; leave 0 certs in the list */
+    return CURLE_OK;
   }
 
   numcerts = sk_X509_num(sk);
