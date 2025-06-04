@@ -4,7 +4,7 @@ curl and libcurl 8.14.1
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3429
+ Contributors:                 3431
 
 This release includes the following changes:
 
@@ -12,9 +12,13 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o asyn-thrdd: fix cleanup when RR fails due to OOM [20]
+ o autotools: recognize more Linux targets when setting `-D_GNU_SOURCE` [35]
  o BUG-BOUNTY.md. mention the medium bounty amount in 2025 [5]
  o cmake: fix missed version number for multi-pkg-config detections [14]
+ o cmdline-docs: mention HTTP resumed uploads to be shaky [21]
+ o curl: make -N handled correctly [34]
  o curl: upload from '.' fix [9]
+ o dllmain: exclude from Cygwin builds [32]
  o docs/tests: remove mention of hyper [23]
  o docs: fix typos [12]
  o ftp: fix teardown of DATA connection in done [31]
@@ -34,6 +38,7 @@ This release includes the following bugfixes:
  o tests: re-enable 1510, document heimdal memleak [22]
  o tests: test mtls also w/ clientAuth EKU only [28]
  o tests: test mtls with --insecure [29]
+ o tls BIOs: handle BIO_CTRL_EOF correctly [33]
  o tool_getparam: make --no-anyauth not be accepted [13]
  o tool_getparam: refactored, simplified [4]
  o tool_getparam: remove two nextarg NULL checks [11]
@@ -64,10 +69,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Calvin Ruocco, Dan Fandrich, Daniel Stenberg, denandz on github,
-  Ethan Everett, Jacob Mealey, Jeroen Ooms, John Bampton,
-  Rasmus Melchior Jacobsen, Samuel Henrique, Stefan Eissing, Viktor Szakats,
-  x-xiang on github, Yedaya Katsman, z2_
-  (15 contributors)
+  Ethan Everett, Jacob Mealey, Jeremy Drake, Jeroen Ooms, John Bampton,
+  Kadambini Nema, Michael Kaufmann, Rasmus Melchior Jacobsen, Ray Satiro,
+  Samuel Henrique, Stefan Eissing, Viktor Szakats, x-xiang on github,
+  Yedaya Katsman, Yuyi Wang, z2_
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -91,6 +97,7 @@ References to bug reports and discussions on issues:
  [18] = https://curl.se/bug/?i=17516
  [19] = https://curl.se/bug/?i=17515
  [20] = https://curl.se/bug/?i=17507
+ [21] = https://curl.se/bug/?i=17521
  [22] = https://curl.se/bug/?i=17462
  [23] = https://curl.se/bug/?i=17500
  [24] = https://curl.se/bug/?i=17502
@@ -101,3 +108,7 @@ References to bug reports and discussions on issues:
  [29] = https://curl.se/bug/?i=17493
  [30] = https://curl.se/bug/?i=17493
  [31] = https://curl.se/bug/?i=17482
+ [32] = https://curl.se/bug/?i=17262
+ [33] = https://curl.se/bug/?i=17471
+ [34] = https://curl.se/bug/?i=17527
+ [35] = https://curl.se/bug/?i=17512
