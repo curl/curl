@@ -5364,31 +5364,28 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
         nread = -1;
         goto out;
       }
-      /* For debug builds be a little stricter and error on any
-         SSL_ERROR_SYSCALL. For example a server may have closed the connection
-         abruptly without a close_notify alert. For compatibility with older
-         peers we do not do this by default. #4624
-
-         We can use this to gauge how many users may be affected, and
-         if it goes ok eventually transition to allow in dev and release with
-         the newest OpenSSL: #if (OPENSSL_VERSION_NUMBER >= 0x10101000L) */
-#ifdef DEBUGBUILD
-      if(err == SSL_ERROR_SYSCALL) {
-        int sockerr = SOCKERRNO;
-        if(sockerr)
-          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
-        else {
-          msnprintf(error_buffer, sizeof(error_buffer),
-                    "Connection closed abruptly");
+      else if(err == SSL_ERROR_SYSCALL) {
+        if(octx->io_result) {
+          /* logging handling in underlying filter already */
+          *curlcode = octx->io_result;
         }
-        failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d"
-              " (Fatal because this is a curl debug build)",
-              error_buffer, sockerr);
-        *curlcode = CURLE_RECV_ERROR;
+        else {
+          /* We should no longer get here nowadays. But handle
+           * the error in case of some weirdness in the OSSL stack */
+          int sockerr = SOCKERRNO;
+          if(sockerr)
+            Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+          else {
+            msnprintf(error_buffer, sizeof(error_buffer),
+                      "Connection closed abruptly");
+          }
+          failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
+                error_buffer, sockerr);
+          *curlcode = CURLE_RECV_ERROR;
+        }
         nread = -1;
         goto out;
       }
-#endif
     }
   }
 
