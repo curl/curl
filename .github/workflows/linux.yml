@@ -40,25 +40,25 @@ env:
   CURL_CI: github
   CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
   # unhandled
-  bearssl-version: 0.6
+  BEARSSL_VERSION: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
-  libressl-version: 4.1.0
+  LIBRESSL_VERSION: 4.1.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  wolfssl-version: 5.8.0
+  WOLFSSL_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  wolfssh-version: 1.4.19
+  WOLFSSH_VERSION: 1.4.19
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
-  mbedtls-version: 3.6.3
+  MBEDTLS_VERSION: 3.6.3
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
-  msh3-version: 0.6.0
+  MSH3_VERSION: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.52.0
+  AWSLC_VERSION: 1.52.0
   # handled in renovate.json
-  openssl-version: 3.5.0
+  OPENSSL_VERSION: 3.5.0
   # handled in renovate.json
-  quictls-version: 3.3.0
+  QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  rustls-version: 0.15.0
+  RUSTLS_VERSION: 0.15.0
 
 jobs:
   linux:
@@ -348,15 +348,15 @@ jobs:
           cache-name: cache-bearssl
         with:
           path: ~/bearssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.bearssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BEARSSL_VERSION }}
 
       - name: 'build bearssl'
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://bearssl.org/bearssl-${{ env.bearssl-version }}.tar.gz
-          tar -xzf bearssl-${{ env.bearssl-version }}.tar.gz
-          cd bearssl-${{ env.bearssl-version }}
+            https://bearssl.org/bearssl-${{ env.BEARSSL_VERSION }}.tar.gz
+          tar -xzf bearssl-${{ env.BEARSSL_VERSION }}.tar.gz
+          cd bearssl-${{ env.BEARSSL_VERSION }}
           make
           mkdir -p $HOME/bearssl/lib $HOME/bearssl/include
           cp inc/*.h $HOME/bearssl/include
@@ -370,15 +370,15 @@ jobs:
           cache-name: cache-libressl
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
-          tar -xzf libressl-${{ env.libressl-version }}.tar.gz
-          cd libressl-${{ env.libressl-version }}
+            https://github.com/libressl/portable/releases/download/v${{ env.LIBRESSL_VERSION }}/libressl-${{ env.LIBRESSL_VERSION }}.tar.gz
+          tar -xzf libressl-${{ env.LIBRESSL_VERSION }}.tar.gz
+          cd libressl-${{ env.LIBRESSL_VERSION }}
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
@@ -390,15 +390,15 @@ jobs:
           cache-name: cache-wolfssl-all
         with:
           path: ~/wolfssl-all
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
-          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
-          cd wolfssl-${{ env.wolfssl-version }}-stable
+            https://github.com/wolfSSL/wolfssl/archive/v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
+          tar -xzf v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
+          cd wolfssl-${{ env.WOLFSSL_VERSION }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
@@ -412,15 +412,15 @@ jobs:
           cache-name: cache-wolfssl-opensslextra
         with:
           path: ~/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
-          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
-          cd wolfssl-${{ env.wolfssl-version }}-stable
+            https://github.com/wolfSSL/wolfssl/archive/v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
+          tar -xzf v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
+          cd wolfssl-${{ env.WOLFSSL_VERSION }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
@@ -434,15 +434,15 @@ jobs:
           cache-name: cache-wolfssh
         with:
           path: ~/wolfssh
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssh-version }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSH_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssh'
         if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssh/archive/v${{ env.wolfssh-version }}-stable.tar.gz
-          tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
-          cd wolfssh-${{ env.wolfssh-version }}-stable
+            https://github.com/wolfSSL/wolfssh/archive/v${{ env.WOLFSSH_VERSION }}-stable.tar.gz
+          tar -xzf v${{ env.WOLFSSH_VERSION }}-stable.tar.gz
+          cd wolfssh-${{ env.WOLFSSH_VERSION }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
             --disable-examples --prefix=$HOME/wolfssh
@@ -456,15 +456,15 @@ jobs:
           cache-name: cache-mbedtls-threadsafe
         with:
           path: ~/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mbedtls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${{ env.mbedtls-version }}/mbedtls-${{ env.mbedtls-version }}.tar.bz2
-          tar -xjf mbedtls-${{ env.mbedtls-version }}.tar.bz2
-          cd mbedtls-${{ env.mbedtls-version }}
+            https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${{ env.MBEDTLS_VERSION }}/mbedtls-${{ env.MBEDTLS_VERSION }}.tar.bz2
+          tar -xjf mbedtls-${{ env.MBEDTLS_VERSION }}.tar.bz2
+          cd mbedtls-${{ env.MBEDTLS_VERSION }}
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
@@ -480,12 +480,12 @@ jobs:
           cache-name: cache-openssl-tsan
         with:
           path: ~/openssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'build openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.OPENSSL_VERSION }} https://github.com/openssl/openssl
           cd openssl
           CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -499,12 +499,12 @@ jobs:
           cache-name: cache-quictls
         with:
           path: ~/quictls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
 
       - name: 'build quictls'
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.QUICTLS_VERSION }}-quic1 https://github.com/quictls/openssl
           cd openssl
           ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -518,12 +518,12 @@ jobs:
           cache-name: cache-msh3
         with:
           path: ~/msh3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.msh3-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MSH3_VERSION }}
 
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.msh3-version }} --recursive https://github.com/nibanks/msh3
+          git clone --quiet --depth=1 -b v${{ env.MSH3_VERSION }} --recursive https://github.com/nibanks/msh3
           cd msh3
           cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3
           cmake --build .
@@ -537,17 +537,17 @@ jobs:
           cache-name: cache-awslc
         with:
           path: ~/awslc
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'build awslc'
         if: contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
-          tar -xzf v${{ env.awslc-version }}.tar.gz
-          mkdir aws-lc-${{ env.awslc-version }}-build
-          cd aws-lc-${{ env.awslc-version }}-build
-          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+            https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.AWSLC_VERSION }}.tar.gz
+          tar -xzf v${{ env.AWSLC_VERSION }}.tar.gz
+          mkdir aws-lc-${{ env.AWSLC_VERSION }}-build
+          cd aws-lc-${{ env.AWSLC_VERSION }}-build
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.AWSLC_VERSION }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -559,13 +559,13 @@ jobs:
           cache-name: cache-rustls
         with:
           path: ~/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.RUSTLS_VERSION }}
 
       - name: 'fetch rustls deb'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/rustls
-          curl -L https://github.com/rustls/rustls-ffi/releases/download/v${{ env.rustls-version }}/librustls_${{ env.rustls-version }}_amd64.deb.zip -o ~/rustls/librustls.zip
+          curl -L https://github.com/rustls/rustls-ffi/releases/download/v${{ env.RUSTLS_VERSION }}/librustls_${{ env.RUSTLS_VERSION }}_amd64.deb.zip -o ~/rustls/librustls.zip
           unzip ~/rustls/librustls.zip -d ~/rustls
           rm ~/rustls/librustls.zip
 
@@ -573,7 +573,7 @@ jobs:
         # Note: we don't check cache-hit here. If the cache is hit, we still need to dpkg install the deb.
         if: contains(matrix.build.install_steps, 'rustls')
         run: |
-          sudo dpkg -i ~/rustls/librustls_${{ env.rustls-version }}_amd64.deb
+          sudo dpkg -i ~/rustls/librustls_${{ env.RUSTLS_VERSION }}_amd64.deb
 
       - name: 'install Intel compilers'
         if: contains(matrix.build.install_steps, 'intel')

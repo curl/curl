@@ -660,7 +660,7 @@ jobs:
     timeout-minutes: 10
     env:
       MAKEFLAGS: -j 4
-      toolchain-version: '0.59.1'
+      TOOLCHAIN_VERSION: '0.59.1'
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -678,7 +678,7 @@ jobs:
         id: cache-compiler
         with:
           path: ~/opt/mingw32ce
-          key: ${{ runner.os }}-mingw32ce-${{ env.toolchain-version }}-amd64
+          key: ${{ runner.os }}-mingw32ce-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (mingw32ce)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
@@ -686,7 +686,7 @@ jobs:
         run: |
           cd "${HOME}" || exit 1
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
-            --location 'https://downloads.sourceforge.net/cegcc/cegcc/${{ env.toolchain-version }}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2' | tar -x
+            --location 'https://downloads.sourceforge.net/cegcc/cegcc/${{ env.TOOLCHAIN_VERSION }}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2' | tar -x
           ls -l
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -771,7 +771,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      openssh_windows-version: 'v9.8.1.0p1-Preview'
+      OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
@@ -913,7 +913,7 @@ jobs:
           else  # OpenSSH-Windows
             cd /c || exit 1  # no D: drive on windows-11-arm runners
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-              --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
+              --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.OPENSSH_WINDOWS_VERSION }}/OpenSSH-Win64.zip' --output bin.zip
             unzip bin.zip
             rm -f bin.zip
           fi

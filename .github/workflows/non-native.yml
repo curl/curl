@@ -260,7 +260,7 @@ jobs:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
-      libressl-version: 4.1.0
+      LIBRESSL_VERSION: 4.1.0
     strategy:
       fail-fast: false
       matrix:
@@ -316,14 +316,14 @@ jobs:
           cache-name: cache-libressl
         with:
           path: ~/libressl
-          key: iOS-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: iOS-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
           curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
-          cd libressl-${{ env.libressl-version }}
+            https://github.com/libressl/portable/releases/download/v${{ env.LIBRESSL_VERSION }}/libressl-${{ env.LIBRESSL_VERSION }}.tar.gz | tar -x
+          cd libressl-${{ env.LIBRESSL_VERSION }}
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
           cmake -B . -G Ninja \
             -DHAVE_ENDIAN_H=0 \
@@ -492,7 +492,7 @@ jobs:
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
-      toolchain-version: '3.4'
+      TOOLCHAIN_VERSION: '3.4'
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -508,14 +508,14 @@ jobs:
         id: cache-compiler
         with:
           path: ~/djgpp
-          key: ${{ runner.os }}-djgpp-${{ env.toolchain-version }}-amd64
+          key: ${{ runner.os }}-djgpp-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (djgpp)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         run: |
           cd "${HOME}" || exit 1
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
-            --location 'https://github.com/andrewwutw/build-djgpp/releases/download/v${{ env.toolchain-version }}/djgpp-linux64-gcc1220.tar.bz2' | tar -xj
+            --location 'https://github.com/andrewwutw/build-djgpp/releases/download/v${{ env.TOOLCHAIN_VERSION }}/djgpp-linux64-gcc1220.tar.bz2' | tar -xj
           cd djgpp || exit 1
           for f in wat3211b.zip zlb13b.zip ssl102ub.zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \

@@ -40,21 +40,21 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   # handled in renovate.json
-  openssl-version: 3.5.0
+  OPENSSL_VERSION: 3.5.0
   # handled in renovate.json
-  quictls-version: 3.3.0
+  QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
-  gnutls-version: 3.8.9
+  GNUTLS_VERSION: 3.8.9
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  wolfssl-version: 5.8.0
+  WOLFSSL_VERSION: 5.8.0
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
-  nghttp3-version: 1.10.1
+  NGHTTP3_VERSION: 1.10.1
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  ngtcp2-version: 1.13.0
+  NGTCP2_VERSION: 1.13.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  nghttp2-version: 1.65.0
+  NGHTTP2_VERSION: 1.65.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
-  quiche-version: 0.23.5
+  QUICHE_VERSION: 0.23.5
 
 jobs:
   build-cache:
@@ -68,7 +68,7 @@ jobs:
           cache-name: cache-openssl-http3
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.openssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache quictls'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -77,7 +77,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
 
       - name: 'cache gnutls'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -86,7 +86,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
 
       - name: 'cache wolfssl'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -95,7 +95,7 @@ jobs:
           cache-name: cache-wolfssl
         with:
           path: ~/wolfssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp3'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -104,7 +104,7 @@ jobs:
           cache-name: cache-nghttp3
         with:
           path: ~/nghttp3/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache ngtcp2'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -113,7 +113,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.openssl-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp2'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
@@ -122,7 +122,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
         if: |
@@ -156,7 +156,7 @@ jobs:
         if: steps.cache-openssl-http3.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.OPENSSL_VERSION }} https://github.com/openssl/openssl
           cd openssl
           ./config --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -166,7 +166,7 @@ jobs:
         if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl quictls
+          git clone --quiet --depth=1 -b openssl-${{ env.QUICTLS_VERSION }}-quic1 https://github.com/quictls/openssl quictls
           cd quictls
           ./config no-deprecated --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -176,7 +176,7 @@ jobs:
         if: steps.cache-gnutls.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b ${{ env.gnutls-version }} https://github.com/gnutls/gnutls.git
+          git clone --quiet --depth=1 -b ${{ env.GNUTLS_VERSION }} https://github.com/gnutls/gnutls.git
           cd gnutls
           ./bootstrap
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -190,7 +190,7 @@ jobs:
         if: steps.cache-wolfssl.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.wolfssl-version }}-stable https://github.com/wolfSSL/wolfssl.git
+          git clone --quiet --depth=1 -b v${{ env.WOLFSSL_VERSION }}-stable https://github.com/wolfSSL/wolfssl.git
           cd wolfssl
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
@@ -202,7 +202,7 @@ jobs:
         if: steps.cache-nghttp3.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
+          git clone --quiet --depth=1 -b v${{ env.NGHTTP3_VERSION }} https://github.com/ngtcp2/nghttp3
           cd nghttp3
           git submodule update --init --depth=1
           autoreconf -fi
@@ -217,7 +217,7 @@ jobs:
         # building twice to get crypto libs for ossl and quictls installed
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.ngtcp2-version }} https://github.com/ngtcp2/ngtcp2
+          git clone --quiet --depth=1 -b v${{ env.NGTCP2_VERSION }} https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -233,7 +233,7 @@ jobs:
         if: steps.cache-nghttp2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
+          git clone --quiet --depth=1 -b v${{ env.NGHTTP2_VERSION }} https://github.com/nghttp2/nghttp2
           cd nghttp2
           git submodule update --init --depth=1
           autoreconf -fi
@@ -354,7 +354,7 @@ jobs:
           cache-name: cache-openssl-http3
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.openssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache quictls'
@@ -364,7 +364,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
@@ -375,7 +375,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
@@ -386,7 +386,7 @@ jobs:
           cache-name: cache-wolfssl
         with:
           path: ~/wolfssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nghttp3'
@@ -396,7 +396,7 @@ jobs:
           cache-name: cache-nghttp3
         with:
           path: ~/nghttp3/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2'
@@ -406,7 +406,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.openssl-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nghttp2'
@@ -416,7 +416,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
@@ -427,13 +427,13 @@ jobs:
           cache-name: cache-quiche
         with:
           path: ~/quiche
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quiche-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
         if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b ${{ env.quiche-version }} --recursive https://github.com/cloudflare/quiche.git
+          git clone --quiet --depth=1 -b ${{ env.QUICHE_VERSION }} --recursive https://github.com/cloudflare/quiche.git
           cd quiche
           #### Work-around https://github.com/curl/curl/issues/7927 #######
           #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
