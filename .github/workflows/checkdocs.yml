@@ -53,7 +53,7 @@ jobs:
   #      # config file help: https://github.com/amperser/proselint/
   #      - name: create proselint config
   #        run: |
-  #          cat <<JSON > $HOME/.proselintrc.json
+  #          cat <<JSON > ~/.proselintrc.json
   #          {
   #            "checks": {
   #              "typography.diacritical_marks": false,
@@ -74,7 +74,7 @@ jobs:
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
   #      - name: create second proselint config
   #        run: |
-  #          cat <<JSON > $HOME/.proselintrc.json
+  #          cat <<JSON > ~/.proselintrc.json
   #          {
   #            "checks": {
   #              "typography.diacritical_marks": false,
