@@ -543,7 +543,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
                                  void **msg)
 {
   char *buf = smbc->recv_buf;
-  ssize_t bytes_read;
+  size_t bytes_read;
   size_t nbt_size;
   size_t msg_size;
   size_t len = MAX_MESSAGE_SIZE - smbc->got;

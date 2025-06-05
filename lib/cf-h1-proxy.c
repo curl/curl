@@ -379,7 +379,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     return CURLE_OK;
 
   while(ts->keepon) {
-    ssize_t nread;
+    size_t nread;
     char byte;
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
@@ -397,7 +397,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       break;
     }
 
-    if(nread <= 0) {
+    if(!nread) {
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->state.aptr.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,

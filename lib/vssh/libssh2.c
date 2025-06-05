@@ -3291,7 +3291,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
                             size_t length, int flags, void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
-  ssize_t nread;
+  size_t nread;
   CURLcode result;
   struct connectdata *conn = data->conn;
   Curl_recv *backup = conn->recv[0];
@@ -3312,7 +3312,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
   else if(result)
     return -1; /* generic error */
   Curl_debug(data, CURLINFO_DATA_IN, (const char *)buffer, (size_t)nread);
-  return nread;
+  return (ssize_t)nread;
 }
 
 static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
@@ -3978,7 +3978,6 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
   if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
-
   }
   else if(nread < 0) {
     *err = libssh2_session_error_to_CURLE((int)nread);

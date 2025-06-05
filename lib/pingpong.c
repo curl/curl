@@ -266,7 +266,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
                               int sockindex,
                               char *buffer,
                               size_t buflen,
-                              ssize_t *nread)
+                              size_t *nread)
 {
   CURLcode result;
 #ifdef HAVE_GSSAPI
@@ -294,7 +294,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  ssize_t gotbytes;
+  size_t gotbytes;
   char buffer[900];
 
   *code = 0; /* 0 for errors or not done */
@@ -321,7 +321,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(result)
         return result;
 
-      if(gotbytes <= 0) {
+      if(!gotbytes) {
         failf(data, "response reading failed (errno: %d)", SOCKERRNO);
         return CURLE_RECV_ERROR;
       }
