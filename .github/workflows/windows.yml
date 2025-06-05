@@ -724,7 +724,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
+          PATH=~/opt/mingw32ce/bin:"$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
@@ -761,7 +761,7 @@ jobs:
 
       - name: 'build'
         run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
+          PATH=~/opt/mingw32ce/bin:"$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
@@ -775,7 +775,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
+          PATH=~/opt/mingw32ce/bin:"$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
@@ -785,7 +785,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
+          PATH=~/opt/mingw32ce/bin:"$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
