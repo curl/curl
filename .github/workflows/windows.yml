@@ -603,11 +603,11 @@ jobs:
     steps:
       - name: 'install packages'
         timeout-minutes: 5
-        # zizmor: ignore[template-injection]
+        env:
+          INSTALL_PACKAGES: ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
         run: |
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 \
-            ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
+          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${INSTALL_PACKAGES}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
