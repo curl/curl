@@ -36,9 +36,9 @@ Pass a pointer to a null-terminated string as parameter. The string should be
 the filename of your private key. The default format is "PEM" and can be
 changed with CURLOPT_SSLKEYTYPE(3).
 
-(Windows, iOS and macOS) This option is ignored by Secure Transport and
-Schannel SSL backends because they expect the private key to be already present
-in the key-chain or PKCS#12 file containing the certificate.
+(Windows) This option is ignored by the Schannel SSL backend because it
+expects the private key to be already present in the key-chain or PKCS#12 file
+containing the certificate.
 
 The application does not have to keep the string around after setting this
 option.
