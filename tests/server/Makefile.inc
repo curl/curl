@@ -34,6 +34,7 @@ UTILS = getpart.c util.c
 CURLX_CFILES = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/inet_pton.c \
+  ../../lib/curlx/inet_ntop.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
