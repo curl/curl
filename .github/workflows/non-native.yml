@@ -349,22 +349,26 @@ jobs:
         run: autoreconf -fi
 
       - name: 'configure'
+        env:
+          MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
+          MATRIX_GENERATE: '${{ matrix.build.generate }}'
+          MATRIX_GENERATOR: '${{ matrix.build.generator }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
-            [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
+            [ -n "${MATRIX_GENERATOR}" ] && options="-G ${MATRIX_GENERATOR}"
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
-              ${{ matrix.build.generate }} ${options}
+              ${MATRIX_GENERATE} ${options}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
               --host=aarch64-apple-darwin \
               --with-apple-idn \
-              ${{ matrix.build.configure }}
+              ${MATRIX_CONFIGURE}
           fi
 
       - name: 'configure log'
