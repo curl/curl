@@ -446,7 +446,7 @@ jobs:
           xcrun --sdk macosx --show-sdk-version || true
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
