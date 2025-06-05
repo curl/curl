@@ -68,6 +68,7 @@ jobs:
     timeout-minutes: 45
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
     strategy:
       fail-fast: false
       matrix:
@@ -602,7 +603,7 @@ jobs:
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
-          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
+          [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
@@ -680,7 +681,7 @@ jobs:
         # zizmor: ignore[template-injection]
         run: |
           if [ -z '${{ matrix.build.torture }}' ]; then
-            if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
+            if [[ "${MATRIX_INSTALL_STEPS}" = *'wolfssh'* ]]; then
               TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
             fi
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
