@@ -326,16 +326,16 @@ jobs:
         if: ${{ !matrix.build.clang-tidy }}
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         env:
+          TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
-        # zizmor: ignore[template-injection]
         run: |
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target "${TEST_TARGET}"
           else
-            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            make -C bld V=1 "${TEST_TARGET}"
           fi
 
       - name: 'install pytest prereqs'
