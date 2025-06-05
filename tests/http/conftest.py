@@ -36,6 +36,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
 
+log = logging.getLogger(__name__)
+
 
 def pytest_report_header(config):
     # Env inits its base properties only once, we can report them here
@@ -110,6 +112,8 @@ def httpd(env) -> Generator[Httpd, None, None]:
 def nghttpx(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
     nghttpx = NghttpxQuic(env=env)
     if nghttpx.exists():
+        if not nghttpx.supports_h3() and env.have_h3_curl():
+            log.warning('nghttpx does not support QUIC, but curl does')
         nghttpx.clear_logs()
         assert nghttpx.initial_start()
         yield nghttpx
