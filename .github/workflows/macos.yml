@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 45
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
-      CC: ${{ matrix.compiler }}
+      CC: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
@@ -361,7 +361,7 @@ jobs:
     timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
-      CC: ${{ matrix.compiler }}
+      CC: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
