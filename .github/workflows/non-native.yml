@@ -271,7 +271,7 @@ jobs:
         build:
           - name: 'libressl'
             install_steps: libressl
-            configure: --with-openssl=~/libressl --without-libpsl
+            configure: --with-openssl=/Users/runner/libressl --without-libpsl
 
           - name: 'libressl'
             install_steps: libressl
