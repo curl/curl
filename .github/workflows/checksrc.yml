@@ -161,32 +161,5 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install yq
 
-      - name: shellcheck GHA
-        run: |
-          {
-            echo '#!/usr/bin/env bash'
-            git ls-files '.github/workflows/*.yml' | while read -r f; do
-              echo "### ${f} ###"
-              yq eval '.. | select(has("run") and (.run | type == "!!str")) | .run + "\ntrue\n"' "${f}"
-            done
-          } | sed -E 's|\$\{\{ .+ \}\}|GHA_EXPRESSION|g' > _ci-shell-code.sh
-
-          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
-          if ! shellcheck _ci-shell-code.sh; then
-            cat _ci-shell-code.sh
-          fi
-
-      - name: shellcheck circleci
-        run: |
-          {
-            echo '#!/usr/bin/env bash'
-            git ls-files '.circleci/*.yml' | while read -r f; do
-              echo "### ${f} ###"
-              yq eval '.. | select(has("command") and (.command | type == "!!str")) | .command + "\ntrue\n"' "${f}"
-            done
-          } > _ci-shell-code.sh
-
-          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
-          if ! shellcheck _ci-shell-code.sh; then
-            cat _ci-shell-code.sh
-          fi
+      - name: shellcheck
+        run: .github/scripts/shellcheck-ci.sh
