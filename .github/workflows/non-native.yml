@@ -55,6 +55,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
+          environment_variables: MATRIX_ARCH
           operating_system: 'netbsd'
           version: '10.1'
           architecture: ${{ matrix.arch }}
@@ -97,6 +98,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
+          environment_variables: MATRIX_ARCH
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
@@ -148,6 +150,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
         with:
+          environment_variables: CC MATRIX_ARCH MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
           version: '14.2'
           architecture: ${{ matrix.arch }}
@@ -190,6 +193,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
         with:
+          environment_variables: CC MATRIX_ARCH MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
           version: '14.1'
           architecture: ${{ matrix.arch }}
