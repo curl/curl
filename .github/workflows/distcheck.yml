@@ -57,7 +57,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
+          ./configure --prefix="$HOME/temp" --without-ssl --without-libpsl
           make
           make test-ci
           make install
