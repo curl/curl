@@ -318,9 +318,11 @@ jobs:
       - name: 'run tests'
         if: ${{ !matrix.build.clang-tidy }}
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
+        env:
+          TFLAGS: '${{ matrix.build.tflags }}'
         # zizmor: ignore[template-injection]
         run: |
-          export TFLAGS='-j20 ${{ matrix.build.tflags }}'
+          TFLAGS="-j20 ${TFLAGS}"
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
