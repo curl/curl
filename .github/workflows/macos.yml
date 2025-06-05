@@ -61,6 +61,7 @@ jobs:
       CC: '${{ matrix.compiler }}'
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_COMPILER: '${{ matrix.compiler }}'
+      MATRIX_INSTALL: '${{ matrix.build.install }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
       fail-fast: false
@@ -195,7 +196,7 @@ jobs:
             pkgconf libpsl libssh2 \
             ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }} \
-            ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
