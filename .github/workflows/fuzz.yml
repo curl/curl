@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Fuzzer
+name: Curl-Fuzzer
 
 'on':
   push:
