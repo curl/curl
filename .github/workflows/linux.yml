@@ -70,6 +70,7 @@ jobs:
     timeout-minutes: 45
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
       MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MAKE_PREFIX: '${{ matrix.build.make-prefix }}'
     strategy:
@@ -320,14 +321,12 @@ jobs:
             libtool autoconf automake pkgconf \
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
-            ${{ matrix.build.install_packages }} \
+            ${MATRIX_INSTALL_PACKAGES} \
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
           python3 -m venv ~/venv
 
       - name: 'install prereqs'
         if: contains(matrix.build.name, 'i686')
-        env:
-          MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo dpkg --add-architecture i386
@@ -683,25 +682,25 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         env:
+          TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
-        # zizmor: ignore[template-injection]
         run: |
-          if [ -z '${{ matrix.build.torture }}' ]; then
+          if [ "${TEST_TARGET}" = 'test-ci' ]; then
             if [[ "${MATRIX_INSTALL_STEPS}" = *'wolfssh'* ]]; then
               TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
             fi
-            if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
+            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi
-            if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
+            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            cmake --build bld --verbose --target "${TEST_TARGET}"
           else
-            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+            make -C bld V=1 "${TEST_TARGET}"
           fi
 
       - name: 'install pytest prereqs'
