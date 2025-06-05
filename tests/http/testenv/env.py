@@ -199,7 +199,7 @@ class EnvConfig:
             try:
                 self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
                 self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
-            except:
+            except RuntimeError:
                 # not a working nghttpx
                 log.exception('checking nghttpx version')
                 self.nghttpx = None
