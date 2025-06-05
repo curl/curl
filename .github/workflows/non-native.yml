@@ -406,6 +406,7 @@ jobs:
     timeout-minutes: 25
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         include:
@@ -433,7 +434,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
               -DANDROID_ABI=arm64-v8a \
               -DANDROID_PLATFORM='android-${{ matrix.platform }}' \
@@ -462,7 +463,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose
           else
             make -C bld V=1
@@ -473,7 +474,7 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -481,7 +482,7 @@ jobs:
 
       - name: 'build examples'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
@@ -493,6 +494,7 @@ jobs:
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
       TOOLCHAIN_VERSION: '3.4'
     strategy:
       matrix:
@@ -531,7 +533,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=DOS \
               -DCMAKE_SYSTEM_PROCESSOR=x86 \
@@ -571,7 +573,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -583,7 +585,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -592,7 +594,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
