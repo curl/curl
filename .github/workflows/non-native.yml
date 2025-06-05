@@ -259,6 +259,7 @@ jobs:
       MAKEFLAGS: -j 4
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
       LIBRESSL_VERSION: 4.1.0
     strategy:
@@ -346,7 +347,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
@@ -374,7 +375,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${{ matrix.build.options }} --parallel 4 --verbose
           else
             make -C bld V=1
@@ -385,7 +386,7 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${{ matrix.build.options }} --parallel 4 --target testdeps --verbose
           else
             make -C bld V=1 -C tests
@@ -393,7 +394,7 @@ jobs:
 
       - name: 'build examples'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld ${{ matrix.build.options }} --parallel 4 --target curl-examples --verbose
           else
             make -C bld examples V=1
