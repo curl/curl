@@ -271,16 +271,16 @@ jobs:
         build:
           - name: 'libressl'
             install_steps: libressl
-            configure: --with-openssl="$HOME/libressl" --without-libpsl
+            configure: --with-openssl=~/libressl --without-libpsl
 
           - name: 'libressl'
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+              -DOPENSSL_INCLUDE_DIR=~/libressl/include
+              -DOPENSSL_SSL_LIBRARY=~/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=~/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'libressl'
@@ -290,9 +290,9 @@ jobs:
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+              -DOPENSSL_INCLUDE_DIR=~/libressl/include
+              -DOPENSSL_SSL_LIBRARY=~/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=~/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
     steps:
