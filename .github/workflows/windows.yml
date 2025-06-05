@@ -89,19 +89,21 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
@@ -257,6 +259,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
@@ -283,7 +286,7 @@ jobs:
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
-                ${{ matrix.config }}
+                ${MATRIX_CONFIG}
             done
             if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
               echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -295,7 +298,7 @@ jobs:
               --prefix="${HOME}"/install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
@@ -487,6 +490,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
@@ -499,7 +503,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -862,6 +866,8 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
@@ -887,7 +893,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
