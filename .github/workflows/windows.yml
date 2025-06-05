@@ -186,6 +186,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_TEST: '${{ matrix.test }}'
     strategy:
       matrix:
         include:
@@ -257,7 +258,7 @@ jobs:
         env:
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
-          if [ '${{ matrix.test }}' = 'uwp' ]; then
+          if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
             if [[ '${{ matrix.env }}' != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
@@ -274,7 +275,7 @@ jobs:
                 options='-DCMAKE_C_COMPILER=gcc'
               fi
               [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
-              [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
@@ -325,7 +326,7 @@ jobs:
             mv bld/src/.libs/curl.exe bld/src/curl.exe
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
+          if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
 
