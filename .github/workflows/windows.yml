@@ -777,6 +777,7 @@ jobs:
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
       OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
@@ -910,9 +911,9 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+          if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
+          elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
@@ -950,9 +951,9 @@ jobs:
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
-          if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
+          if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL}" = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
