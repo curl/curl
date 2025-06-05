@@ -49,6 +49,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         include:
@@ -90,7 +91,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
@@ -119,7 +120,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld V=1 install
@@ -130,7 +131,7 @@ jobs:
         run: |
           PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
           bld/src/curl.exe --disable --version
@@ -140,7 +141,7 @@ jobs:
         timeout-minutes: 15
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld V=1 -C tests
@@ -157,7 +158,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --target test-ci
           else
@@ -169,7 +170,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld V=1 examples
@@ -184,6 +185,7 @@ jobs:
         shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         include:
@@ -264,7 +266,7 @@ jobs:
               CFLAGS_CMAKE="-specs=$(cygpath -w "${specs}")"
             fi
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             for _chkprefill in '' ${{ matrix.chkprefill }}; do
               if [[ '${{ matrix.env }}' = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
@@ -306,7 +308,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld V=1 install
@@ -315,7 +317,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
@@ -331,12 +333,12 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}  # Save time by skipping this for autotools
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld V=1 -C tests
           fi
-          if [ '${{ matrix.build }}' != 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" != 'cmake' ]; then
             # avoid libtool's .exe wrappers
             mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
@@ -378,7 +380,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --target test-ci
           else
@@ -390,7 +392,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld V=1 examples
@@ -575,6 +577,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       fail-fast: false
       matrix:
@@ -601,7 +604,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             if [ '${{ matrix.compiler }}' = 'clang-tidy' ]; then
               options+=' -DCURL_CLANG_TIDY=ON'
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
@@ -637,7 +640,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -649,7 +652,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -658,7 +661,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
@@ -671,6 +674,7 @@ jobs:
     env:
       MAKEFLAGS: -j 4
       TOOLCHAIN_VERSION: '0.59.1'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -706,7 +710,7 @@ jobs:
       - name: 'configure'
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
@@ -743,7 +747,7 @@ jobs:
       - name: 'build'
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -757,7 +761,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -767,7 +771,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
