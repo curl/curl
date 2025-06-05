@@ -669,9 +669,10 @@ jobs:
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
+        env:
+          TFLAGS: '${{ matrix.build.tflags }}'
         # zizmor: ignore[template-injection]
         run: |
-          export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
               TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
