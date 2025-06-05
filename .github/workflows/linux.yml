@@ -237,10 +237,7 @@ jobs:
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
             install_steps: skipall
             configure: --with-openssl --enable-debug --with-libssh2 --disable-unity
-            configure-prefix: >-
-              CC=clang
-              scan-build
-
+            configure-prefix: CC=clang scan-build
             make-prefix: scan-build --status-bugs
 
           - name: address-sanitizer
