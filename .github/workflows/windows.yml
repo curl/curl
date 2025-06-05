@@ -473,11 +473,13 @@ jobs:
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
+        env:
+          MATRIX_URL: '${{ matrix.url }}'
         run: |
           cd /d || exit 1
           mkdir my-cache
           cd my-cache || exit 1
-          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
+          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https "${MATRIX_URL}"
           pwd
           7z x -y pack.bin >/dev/null
           rm -r -f pack.bin
