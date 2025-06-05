@@ -249,6 +249,8 @@ jobs:
       - build-cache
     runs-on: 'ubuntu-latest'
     timeout-minutes: 45
+    env:
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
     strategy:
       fail-fast: false
       matrix:
@@ -462,7 +464,7 @@ jobs:
           if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
@@ -487,7 +489,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose
           else
             make -C bld V=1
@@ -498,7 +500,7 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
@@ -514,7 +516,7 @@ jobs:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
             make -C bld V=1 test-ci
@@ -532,7 +534,7 @@ jobs:
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
           source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
             make -C bld V=1 pytest-ci
@@ -540,7 +542,7 @@ jobs:
 
       - name: 'build examples'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
