@@ -131,6 +131,8 @@ jobs:
           - { build: 'autotools', arch: 'arm64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
+    env:
+      MATRIX_OPTIONS: '${{ matrix.options }}'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -159,7 +161,7 @@ jobs:
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking \
               ${options} \
-              ${{ matrix.options }} \
+              ${MATRIX_OPTIONS} \
               || { tail -n 1000 config.log; false; }
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
@@ -196,7 +198,7 @@ jobs:
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
-              ${{ matrix.options }} \
+              ${MATRIX_OPTIONS} \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
@@ -433,6 +435,8 @@ jobs:
         run: autoreconf -fi
 
       - name: 'configure'
+        env:
+          MATRIX_OPTIONS: '${{ matrix.options }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
@@ -441,7 +445,7 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              ${{ matrix.options }}
+              ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -449,7 +453,7 @@ jobs:
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
               --host=aarch64-linux-android${{ matrix.platform }} \
-              ${{ matrix.options }}
+              ${MATRIX_OPTIONS}
           fi
 
       - name: 'configure log'
