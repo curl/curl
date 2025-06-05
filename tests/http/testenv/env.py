@@ -86,6 +86,7 @@ class NghttpxUtil:
                     cls.VERSION_FULL = line
             if cls.VERSION_FULL is None:
                 raise RuntimeError(f'{cmd}: unable to determine version')
+        return cls.VERSION_FULL
 
     @staticmethod
     def version_with_h3(version):
@@ -197,9 +198,10 @@ class EnvConfig:
         if self.nghttpx is not None:
             try:
                 self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
-                self.nghttpx_with_h3 = NghttpxUtil.supports_h3(self._nghttpx_version)
-            except:
+                self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
+            except RuntimeError as ex:
                 # not a working nghttpx
+                log.error(f'checking nghttpx version: {ex}')
                 self.nghttpx = None
 
         self.caddy = self.config['caddy']['caddy']
