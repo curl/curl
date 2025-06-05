@@ -579,6 +579,7 @@ jobs:
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
@@ -606,7 +607,7 @@ jobs:
       - name: 'configure'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            if [ '${{ matrix.compiler }}' = 'clang-tidy' ]; then
+            if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
               options+=' -DCURL_CLANG_TIDY=ON'
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCMAKE_C_COMPILER=clang'
