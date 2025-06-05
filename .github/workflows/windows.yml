@@ -260,6 +260,7 @@ jobs:
         timeout-minutes: 5
         env:
           CFLAGS: '${{ matrix.cflags }}'
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_TYPE: '${{ matrix.type }}'
@@ -274,7 +275,7 @@ jobs:
             fi
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            for _chkprefill in '' ${{ matrix.chkprefill }}; do
+            for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
               else
@@ -495,11 +496,12 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" -G Ninja ${options} \
@@ -873,9 +875,10 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
