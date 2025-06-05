@@ -228,6 +228,8 @@ jobs:
       - name: 'configure'
         env:
           MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
+          MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
+          MATRIX_GENERATE: ${{ matrix.build.generate }}
         run: |
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
@@ -252,7 +254,7 @@ jobs:
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-                ${{ matrix.build.generate }} ${options}
+                ${MATRIX_GENERATE} ${options}
             done
             if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
               echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -272,7 +274,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
-              ${{ matrix.build.configure }} ${options}
+              ${MATRIX_CONFIGURE} ${options}
           fi
 
       - name: 'configure log'
