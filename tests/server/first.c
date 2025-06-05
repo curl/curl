@@ -39,7 +39,7 @@ int main(int argc, char **argv)
   main_func = NULL;
   {
     size_t tmp;
-    for(tmp = 0; s_mains[tmp].ptr; ++tmp) {
+    for(tmp = 0; tmp < CURL_ARRAYSIZE(s_mains); ++tmp) {
       if(strcmp(main_name, s_mains[tmp].name) == 0) {
         main_func = s_mains[tmp].ptr;
         break;

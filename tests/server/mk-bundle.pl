@@ -82,8 +82,7 @@ foreach my $src (@src) {
 
 print <<FOOTER
 static const struct onemain s_mains[] = {
-${tlist}  {NULL, NULL}
-};
+$tlist};
 
 #include "first.c"
 FOOTER
