@@ -438,11 +438,12 @@ jobs:
       - name: 'configure'
         env:
           MATRIX_OPTIONS: '${{ matrix.options }}'
+          MATRIX_PLATFORM: '${{ matrix.platform }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld -G Ninja \
               -DANDROID_ABI=arm64-v8a \
-              -DANDROID_PLATFORM='android-${{ matrix.platform }}' \
+              -DANDROID_PLATFORM="android-${MATRIX_PLATFORM}" \
               -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
@@ -450,10 +451,10 @@ jobs:
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang" \
+              CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
-              --host=aarch64-linux-android${{ matrix.platform }} \
+              --host="aarch64-linux-android${MATRIX_PLATFORM}" \
               ${MATRIX_OPTIONS}
           fi
 
