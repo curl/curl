@@ -221,11 +221,11 @@ jobs:
           cd ngtcp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
-            PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig" --enable-lib-only --with-quictls
+            PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig --enable-lib-only --with-quictls
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
-            PKG_CONFIG_PATH="$HOME/openssl/build/lib/pkgconfig:$HOME/gnutls/build/lib/pkgconfig:$HOME/wolfssl/build/lib/pkgconfig" \
+            PKG_CONFIG_PATH=~/openssl/build/lib/pkgconfig:~/gnutls/build/lib/pkgconfig:~/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
 
@@ -238,7 +238,7 @@ jobs:
           git submodule update --init --depth=1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
-            PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
+            PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig \
             LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib" \
             --enable-http3
           make install
