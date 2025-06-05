@@ -151,4 +151,4 @@ jobs:
       - name: zizmor
         run: |
           brew install zizmor
-          zizmor .github/workflows/*.yml
+          zizmor --pedantic .github/workflows/*.yml
