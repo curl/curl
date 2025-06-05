@@ -242,9 +242,9 @@ jobs:
             install_steps: pytest randcurl
             configure: >-
               CC=clang
-              CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
-              LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
-              LIBS="-ldl -lubsan"
+              CFLAGS='-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g'
+              LDFLAGS='-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer'
+              LIBS='-ldl -lubsan'
               --with-openssl --enable-debug
 
           - name: thread-sanitizer
@@ -252,8 +252,8 @@ jobs:
             install_steps: pytest openssl-tsan
             configure: >-
               CC=clang
-              CFLAGS="-fsanitize=thread -g"
-              LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl/lib"
+              CFLAGS='-fsanitize=thread -g'
+              LDFLAGS='-fsanitize=thread -Wl,-rpath,$HOME/openssl/lib'
               --with-openssl=$HOME/openssl --enable-debug
 
           - name: memory-sanitizer
@@ -261,9 +261,9 @@ jobs:
             install_steps: randcurl
             configure: >-
               CC=clang
-              CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
-              LDFLAGS="-fsanitize=memory"
-              LIBS="-ldl"
+              CFLAGS='-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g'
+              LDFLAGS='-fsanitize=memory'
+              LIBS='-ldl'
               --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
 
           - name: event-based
@@ -493,7 +493,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
+          CC='clang' CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
