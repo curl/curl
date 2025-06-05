@@ -175,7 +175,7 @@ jobs:
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
-      old-cmake-version: 3.11.4
+      OLD_CMAKE_VERSION: 3.11.4
     strategy:
       fail-fast: false
       matrix:
@@ -197,23 +197,23 @@ jobs:
           if [[ '${{ matrix.image }}' = *'windows'* ]]; then
             cd "${HOME}" || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location 'https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-win64-x64.zip' --output bin.zip
+              --location 'https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-win64-x64.zip' --output bin.zip
             unzip -q bin.zip
             rm -f bin.zip
-            printf '%s' "${HOME}/cmake-${{ env.old-cmake-version }}-win64-x64/bin/cmake.exe" > "${HOME}/old-cmake-path.txt"
+            printf '%s' "${HOME}/cmake-${OLD_CMAKE_VERSION}-win64-x64/bin/cmake.exe" > "${HOME}/old-cmake-path.txt"
           elif [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
             sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
             cd "${HOME}" || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Linux-x86_64.tar.gz | tar -xzf -
-            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Linux-x86_64/bin/cmake" > "${HOME}/old-cmake-path.txt"
+              --location https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64.tar.gz | tar -xzf -
+            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64/bin/cmake" > "${HOME}/old-cmake-path.txt"
           else
             brew install libpsl openssl
             cd "${HOME}" || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Darwin-x86_64.tar.gz | tar -xzf -
-            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > "${HOME}/old-cmake-path.txt"
+              --location https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64.tar.gz | tar -xzf -
+            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > "${HOME}/old-cmake-path.txt"
           fi
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
