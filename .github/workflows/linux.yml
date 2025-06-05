@@ -359,7 +359,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz"
           tar -xzf "bearssl-${BEARSSL_VERSION}.tar.gz"
-          cd "bearssl-${BEARSSL_VERSION}"
+          cd "bearssl-${BEARSSL_VERSION}" || exit
           make
           mkdir -p ~/bearssl/lib ~/bearssl/include
           cp inc/*.h ~/bearssl/include
@@ -381,7 +381,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz"
           tar -xzf "libressl-${LIBRESSL_VERSION}.tar.gz"
-          cd "libressl-${LIBRESSL_VERSION}"
+          cd "libressl-${LIBRESSL_VERSION}" || exit
           ./configure --disable-dependency-tracking --prefix="$HOME/libressl"
           make install
 
@@ -401,7 +401,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
           tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
-          cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          cd "wolfssl-${WOLFSSL_VERSION}-stable" || exit
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples --prefix="$HOME/wolfssl-all"
@@ -423,7 +423,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
           tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
-          cd "wolfssl-${WOLFSSL_VERSION}-stable"
+          cd "wolfssl-${WOLFSSL_VERSION}-stable" || exit
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix="$HOME/wolfssl-opensslextra"
@@ -445,7 +445,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssh/archive/v${WOLFSSH_VERSION}-stable.tar.gz"
           tar -xzf "v${WOLFSSH_VERSION}-stable.tar.gz"
-          cd "wolfssh-${WOLFSSH_VERSION}-stable"
+          cd "wolfssh-${WOLFSSH_VERSION}-stable" || exit
           ./autogen.sh
           ./configure --disable-dependency-tracking --with-wolfssl="$HOME/wolfssl-opensslextra" --enable-scp --enable-sftp --disable-term \
             --disable-examples --prefix="$HOME/wolfssh"
@@ -467,7 +467,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2"
           tar -xjf "mbedtls-${MBEDTLS_VERSION}.tar.bz2"
-          cd "mbedtls-${MBEDTLS_VERSION}"
+          cd "mbedtls-${MBEDTLS_VERSION}" || exit
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=~/mbedtls \
@@ -489,7 +489,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
-          cd openssl
+          cd openssl || exit
           CC='clang' CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix="$HOME/openssl" --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
@@ -508,7 +508,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl
-          cd openssl
+          cd openssl || exit
           ./config --prefix="$HOME/quictls" --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
@@ -527,7 +527,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
-          cd msh3
+          cd msh3 || exit
           cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/msh3
           cmake --build .
           cmake --install .
@@ -549,7 +549,7 @@ jobs:
             "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz"
           tar -xzf "v${AWSLC_VERSION}.tar.gz"
           mkdir "aws-lc-${AWSLC_VERSION}-build"
-          cd "aws-lc-${AWSLC_VERSION}-build"
+          cd "aws-lc-${AWSLC_VERSION}-build" || exit
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=~/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
@@ -585,7 +585,7 @@ jobs:
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
           sudo apt-get -o Dpkg::Use-Pty=0 install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
-          printenv >> $GITHUB_ENV
+          printenv >> "$GITHUB_ENV"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -611,7 +611,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX=~/curl \
-              -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
           else
@@ -653,7 +653,7 @@ jobs:
           else
             libcurla=bld/lib/.libs/libcurl.a
           fi
-          ./scripts/singleuse.pl --unit ${libcurla}
+          ./scripts/singleuse.pl --unit "${libcurla}"
 
       - name: 'check curl -V output'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
@@ -726,7 +726,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
         run: |
           mkdir run
-          cd run
+          cd run || exit
           ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'

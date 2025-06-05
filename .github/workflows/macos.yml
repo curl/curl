@@ -197,12 +197,13 @@ jobs:
             ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }} \
             ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
-          if test -d $(brew --prefix)/include/openssl; then
+          if [ -d "$(brew --prefix)/include/openssl" ]; then
             brew unlink openssl
           fi
 
@@ -210,7 +211,7 @@ jobs:
         run: |
           [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
           [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
-          which "${CC}"; "${CC}" --version || true
+          command -v "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           xcrun --sdk macosx --show-sdk-version || true
@@ -271,7 +272,7 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min="${MATRIX_MACOS_VERSION_MIN}""
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
@@ -432,14 +433,14 @@ jobs:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'toolchain versions'
         run: |
           [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
           [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
-          which "${CC}"; "${CC}" --version || true
+          command -v "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           xcrun --sdk macosx --show-sdk-version || true

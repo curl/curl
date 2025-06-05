@@ -56,12 +56,12 @@ jobs:
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
-          pushd curl-99.98.97
+          pushd curl-99.98.97 || exit
           ./configure --prefix="$HOME/temp" --without-ssl --without-libpsl
           make
           make test-ci
           make install
-          popd
+          popd || exit
           # basic check of the installed files
           bash scripts/installcheck.sh ~/temp
           rm -rf curl-99.98.97
@@ -81,11 +81,11 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
           mkdir build
-          pushd build
+          pushd build || exit
           ../curl-99.98.97/configure --without-ssl --without-libpsl
           make
           make test-ci
-          popd
+          popd || exit
           rm -rf build
           rm -rf curl-99.98.97
 
@@ -102,14 +102,14 @@ jobs:
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
-          pushd curl-99.98.97
+          pushd curl-99.98.97 || exit
           mkdir build
-          pushd build
+          pushd build || exit
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
           make
           make test-ci
           make install
-          popd
+          popd || exit
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
@@ -125,7 +125,7 @@ jobs:
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
-          pushd curl-99.98.97
+          pushd curl-99.98.97 || exit
           cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
           make -C build
 
@@ -162,7 +162,7 @@ jobs:
         run: |
           mkdir _verify
           mv curl-9.10.11.tar.gz _verify
-          cd _verify
+          cd _verify || exit
           ../scripts/verify-release curl-9.10.11.tar.gz
 
   cmake-integration:
@@ -230,7 +230,7 @@ jobs:
 
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
@@ -239,11 +239,11 @@ jobs:
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
-          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
+          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
       - name: 'via find_package OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
@@ -252,4 +252,4 @@ jobs:
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
-          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON

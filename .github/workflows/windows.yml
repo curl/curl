@@ -699,8 +699,8 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         run: |
-          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'cache compiler (mingw32ce)'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4

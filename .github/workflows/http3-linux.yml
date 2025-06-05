@@ -151,8 +151,8 @@ jobs:
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \
             apache2 apache2-dev libnghttp2-dev
-          echo 'CC=gcc-12' >> $GITHUB_ENV
-          echo 'CXX=g++-12' >> $GITHUB_ENV
+          echo 'CC=gcc-12' >> "$GITHUB_ENV"
+          echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build openssl'
         if: steps.cache-openssl-http3.outputs.cache-hit != 'true'
@@ -347,8 +347,8 @@ jobs:
             texinfo texlive texlive-extra-utils autopoint libev-dev libuv1-dev \
             apache2 apache2-dev libnghttp2-dev vsftpd
           python3 -m venv ~/venv
-          echo 'CC=gcc-12' >> $GITHUB_ENV
-          echo 'CXX=g++-12' >> $GITHUB_ENV
+          echo 'CC=gcc-12' >> "$GITHUB_ENV"
+          echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'cache openssl'
         if: matrix.build.name == 'openssl' || matrix.build.name == 'openssl-quic'
@@ -446,6 +446,7 @@ jobs:
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
           ln -s libquiche.so target/release/libquiche.so.0
           mkdir -v quiche/deps/boringssl/src/lib
+          # shellcheck disable=SC2046
           ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
           # include dir
@@ -470,7 +471,7 @@ jobs:
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
-              -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
           else
