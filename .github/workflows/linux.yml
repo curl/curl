@@ -387,7 +387,7 @@ jobs:
             "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz"
           tar -xzf "libressl-${LIBRESSL_VERSION}.tar.gz"
           cd "libressl-${LIBRESSL_VERSION}"
-          ./configure --disable-dependency-tracking --prefix=$HOME/libressl
+          ./configure --disable-dependency-tracking --prefix="$HOME/libressl"
           make install
 
       - name: 'cache wolfssl (all)'
@@ -409,7 +409,7 @@ jobs:
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
-            --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
+            --disable-benchmark --disable-crypttests --disable-examples --prefix="$HOME/wolfssl-all"
           make install
 
       - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
@@ -431,7 +431,7 @@ jobs:
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
-            --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
+            --disable-benchmark --disable-crypttests --disable-examples --prefix="$HOME/wolfssl-opensslextra"
           make install
 
       - name: 'cache wolfssh'
@@ -452,8 +452,8 @@ jobs:
           tar -xzf "v${WOLFSSH_VERSION}-stable.tar.gz"
           cd "wolfssh-${WOLFSSH_VERSION}-stable"
           ./autogen.sh
-          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
-            --disable-examples --prefix=$HOME/wolfssh
+          ./configure --disable-dependency-tracking --with-wolfssl="$HOME/wolfssl-opensslextra" --enable-scp --enable-sftp --disable-term \
+            --disable-examples --prefix="$HOME/wolfssh"
           make install
 
       - name: 'cache mbedtls'
@@ -495,7 +495,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC='clang' CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
+          CC='clang' CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix="$HOME/openssl" --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -514,7 +514,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl
           cd openssl
-          ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
+          ./config --prefix="$HOME/quictls" --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
