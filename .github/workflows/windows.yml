@@ -259,6 +259,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         env:
+          CFLAGS: '${{ matrix.cflags }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_TYPE: '${{ matrix.type }}'
@@ -283,7 +284,7 @@ jobs:
               [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
+                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
