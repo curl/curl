@@ -209,9 +209,17 @@ sub initserverconfig {
     $USER = $ENV{USER};          # Linux
     if (!$USER) {
         $USER = $ENV{USERNAME};     # Windows
-        if (!$USER) {
-            $USER = $ENV{LOGNAME};  # Some Unix (I think)
-        }
+    }
+    if (!$USER) {
+        $USER = $ENV{LOGNAME};  # Some Unix (I think)
+    }
+    if (!$USER) {
+        $USER = `whoami`;
+        chomp $USER;
+    }
+    if (!$USER) {
+        $USER = `id -un`;
+        chomp $USER;
     }
     init_serverpidfile_hash();
 }
