@@ -307,7 +307,6 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     rcvd_eagain = FALSE;
     nread = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &result);
     if(nread < 0) {
-      rcvd_eagain = (result == CURLE_AGAIN);
       if(CURLE_AGAIN != result)
         goto out; /* real error */
       rcvd_eagain = TRUE;
