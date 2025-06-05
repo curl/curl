@@ -372,12 +372,13 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
+          MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           TFLAGS="-j8 ${TFLAGS}"
           if [ "${MATRIX_SYS}" != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-            if [[ '${{ matrix.install }}' = *'libssh2-wincng'* ]]; then
+            if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             fi
           fi
@@ -965,12 +966,13 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
+          MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+          if [[ "${MATRIX_INSTALL}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
