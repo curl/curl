@@ -136,6 +136,9 @@ jobs:
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
     env:
+      CC: '${{ matrix.compiler }}'
+      MATRIX_ARCH: '${{ matrix.arch }}'
+      MATRIX_DESC: '${{ matrix.desc }}'
       MATRIX_OPTIONS: '${{ matrix.options }}'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -144,10 +147,6 @@ jobs:
       - name: 'autotools'
         if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
-        env:
-          CC: '${{ matrix.compiler }}'
-          MATRIX_ARCH: '${{ matrix.arch }}'
-          MATRIX_DESC: '${{ matrix.desc }}'
         with:
           operating_system: 'freebsd'
           version: '14.2'
