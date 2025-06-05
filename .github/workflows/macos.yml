@@ -206,7 +206,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
           [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
@@ -233,7 +233,7 @@ jobs:
           fi
 
           if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
-            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+            CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
             CC+=" --sysroot=${sysroot}"
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
@@ -426,7 +426,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
           [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
@@ -458,7 +458,7 @@ jobs:
           fi
 
           if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
-            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+            CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
             CC+=" --sysroot=${sysroot}"
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
