@@ -796,6 +796,7 @@ jobs:
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_INSTALL: '${{ matrix.install }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
@@ -859,7 +860,7 @@ jobs:
 
       - name: 'vcpkg build'
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${{ matrix.install }} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
+        run: vcpkg x-set-installed ${MATRIX_INSTALL} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -966,7 +967,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
-          MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           export CURL_DIRSUFFIX="${MATRIX_TYPE}"
