@@ -52,6 +52,8 @@ jobs:
           persist-credentials: false
       - name: 'cmake'
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
         with:
           operating_system: 'netbsd'
           version: '10.1'
@@ -70,7 +72,7 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld
             bld/src/curl --disable --version
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
               export TFLAGS='-j8'
               time cmake --build bld --target test-ci
@@ -92,6 +94,8 @@ jobs:
           persist-credentials: false
       - name: 'cmake'
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        env:
+          MATRIX_ARCH: '${{ matrix.arch }}'
         with:
           operating_system: 'openbsd'
           version: '7.7'
@@ -110,7 +114,7 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld
             bld/src/curl --disable --version
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
               export TFLAGS='-j8'
               time cmake --build bld --target test-ci
@@ -140,6 +144,10 @@ jobs:
       - name: 'autotools'
         if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        env:
+          CC: '${{ matrix.compiler }}'
+          MATRIX_ARCH: '${{ matrix.arch }}'
+          MATRIX_DESC: '${{ matrix.desc }}'
         with:
           operating_system: 'freebsd'
           version: '14.2'
@@ -151,11 +159,11 @@ jobs:
             time sudo pkg install -y autoconf automake libtool \
               pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
             time autoreconf -fi
-            export CC='${{ matrix.compiler }}'
-            if [ '${{ matrix.arch }}' != 'x86_64' ]; then
+            if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
               options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
             fi
-            mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld || exit
+            time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="$HOME/install" \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
@@ -167,14 +175,13 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time make install
             src/curl --disable --version
-            desc='${{ matrix.desc }}'
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time make -C tests
-              if [ "${desc#*!runtests*}" = "${desc}" ]; then
+              if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
                 time make test-ci V=1 TFLAGS='-j8'
               fi
             fi
-            if [ "${desc#*!examples*}" = "${desc}" ]; then
+            if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
               echo '::group::build examples'
               time make examples
               echo '::endgroup::'
@@ -192,7 +199,7 @@ jobs:
             time sudo pkg install -y cmake-core ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
             time cmake -B bld -G Ninja \
-              -DCMAKE_C_COMPILER='${{ matrix.compiler }}' \
+              -DCMAKE_C_COMPILER="${CC}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
@@ -204,15 +211,14 @@ jobs:
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld
             bld/src/curl --disable --version
-            desc='${{ matrix.desc }}'
-            if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              if [ "${desc#*!runtests*}" = "${desc}" ]; then
+              if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
                 export TFLAGS='-j8'
                 time cmake --build bld --target test-ci
               fi
             fi
-            if [ "${desc#*!examples*}" = "${desc}" ]; then
+            if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
               echo '::group::build examples'
               time cmake --build bld --target curl-examples
               echo '::endgroup::'
@@ -238,7 +244,8 @@ jobs:
             export MAKEFLAGS=-j3
             export CURL_CI=github
             time autoreconf -fi
-            mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld || exit
+            time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="$HOME/install" \
               --with-openssl \
               --disable-dependency-tracking \
