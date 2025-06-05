@@ -81,7 +81,7 @@ jobs:
       - name: 'cmake build-only (out-of-tree, libssh2)'
         run: |
           mkdir bld-1
-          cd bld-1
+          cd bld-1 || exit
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
           make install
@@ -97,7 +97,7 @@ jobs:
       - name: 'cmake generate (out-of-tree, c-ares, zstd, gssapi)'
         run: |
           mkdir bld-cares
-          cd bld-cares
+          cd bld-cares || exit
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
@@ -127,7 +127,7 @@ jobs:
       - name: 'configure (out-of-tree, c-ares, libssh2, zstd, gssapi)'
         run: |
           mkdir bld-am
-          cd bld-am
+          cd bld-am || exit
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../install-am

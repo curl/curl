@@ -56,7 +56,7 @@ commands:
             echo "Installing wolfSSL $WOLFSSL_VERSION"
             curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VERSION-stable.tar.gz
             tar -xzf v$WOLFSSL_VERSION-stable.tar.gz
-            cd wolfssl-$WOLFSSL_VERSION-stable
+            cd wolfssl-$WOLFSSL_VERSION-stable || exit
             ./autogen.sh
             ./configure --disable-dependency-tracking --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
             make install
@@ -70,7 +70,7 @@ commands:
             echo "Installing wolfSSH $WOLFSSH_VERSION"
             curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v$WOLFSSH_VERSION-stable.tar.gz
             tar -xzf v$WOLFSSH_VERSION-stable.tar.gz
-            cd wolfssh-$WOLFSSH_VERSION-stable
+            cd wolfssh-$WOLFSSH_VERSION-stable || exit
             ./autogen.sh
             ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-term --disable-examples
             make install

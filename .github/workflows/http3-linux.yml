@@ -157,9 +157,9 @@ jobs:
       - name: 'build openssl'
         if: steps.cache-openssl-http3.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
-          cd openssl
+          cd openssl || exit
           ./config --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
@@ -167,9 +167,9 @@ jobs:
       - name: 'build quictls'
         if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
-          cd quictls
+          cd quictls || exit
           ./config no-deprecated --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
@@ -177,9 +177,9 @@ jobs:
       - name: 'build gnutls'
         if: steps.cache-gnutls.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls.git
-          cd gnutls
+          cd gnutls || exit
           ./bootstrap
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             LDFLAGS="-Wl,-rpath,$PWD/build/lib -L$PWD/build/lib" \
@@ -191,9 +191,9 @@ jobs:
       - name: 'build wolfssl'
         if: steps.cache-wolfssl.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl.git
-          cd wolfssl
+          cd wolfssl || exit
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$PWD/build
@@ -203,9 +203,9 @@ jobs:
       - name: 'build nghttp3'
         if: steps.cache-nghttp3.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
-          cd nghttp3
+          cd nghttp3 || exit
           git submodule update --init --depth=1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -218,9 +218,9 @@ jobs:
         if: steps.cache-ngtcp2.outputs.cache-hit != 'true'
         # building twice to get crypto libs for ossl and quictls installed
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
-          cd ngtcp2
+          cd ngtcp2 || exit
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig --enable-lib-only --with-quictls
@@ -234,9 +234,9 @@ jobs:
       - name: 'build nghttp2'
         if: steps.cache-nghttp2.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
-          cd nghttp2
+          cd nghttp2 || exit
           git submodule update --init --depth=1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -436,9 +436,9 @@ jobs:
       - name: 'build quiche and boringssl'
         if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
-          cd ~
+          cd ~ || exit
           git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
-          cd quiche
+          cd quiche || exit
           #### Work-around https://github.com/curl/curl/issues/7927 #######
           #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
           sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
