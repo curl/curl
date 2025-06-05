@@ -470,7 +470,7 @@ jobs:
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
-          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=~/mbedtls \
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX:PATH=~/mbedtls \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
@@ -528,7 +528,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
           cd msh3
-          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/msh3
+          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=~/msh3
           cmake --build .
           cmake --install .
 
@@ -550,7 +550,7 @@ jobs:
           tar -xzf "v${AWSLC_VERSION}.tar.gz"
           mkdir "aws-lc-${AWSLC_VERSION}-build"
           cd "aws-lc-${AWSLC_VERSION}-build"
-          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=~/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX:PATH=~/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -610,7 +610,7 @@ jobs:
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX=~/curl \
+              -DCMAKE_INSTALL_PREFIX:PATH=~/curl \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}

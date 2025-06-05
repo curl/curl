@@ -337,7 +337,7 @@ jobs:
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
           cmake -B . -G Ninja \
             -DHAVE_ENDIAN_H=0 \
-            -DCMAKE_INSTALL_PREFIX=~/libressl \
+            -DCMAKE_INSTALL_PREFIX:PATH=~/libressl \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
             -DBUILD_SHARED_LIBS=OFF \
