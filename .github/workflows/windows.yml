@@ -775,6 +775,9 @@ jobs:
       run:
         shell: msys2 {0}
     env:
+      MATRIX_ARCH: '${{ matrix.arch }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
       OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
@@ -836,7 +839,7 @@ jobs:
 
       - name: 'vcpkg build'
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        run: vcpkg x-set-installed ${{ matrix.install }} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -847,21 +850,21 @@ jobs:
         run: |
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
             options=''
-            if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
               ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
-            [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
-            [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
+            [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
+            [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
+            [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-              -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
-              -DCMAKE_C_COMPILER_TARGET='${{ matrix.arch }}-${{ matrix.plat }}' \
+              -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
+              -DCMAKE_C_COMPILER_TARGET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
@@ -893,7 +896,7 @@ jobs:
         timeout-minutes: 1
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
-          if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
+          if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
           fi
@@ -911,7 +914,7 @@ jobs:
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            if [ '${{ matrix.image }}' != 'windows-2025' ]; then
+            if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
@@ -923,7 +926,7 @@ jobs:
             rm -f bin.zip
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          if [ '${{ matrix.image }}' != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
+          if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           fi
 
