@@ -201,7 +201,7 @@ class EnvConfig:
                 self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
             except:
                 # not a working nghttpx
-                log.exception(f'checking nghttpx version')
+                log.exception('checking nghttpx version')
                 self.nghttpx = None
 
         self.caddy = self.config['caddy']['caddy']
