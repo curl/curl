@@ -40,8 +40,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Search relevant commit message lines starting with Closes/Merges
+        env:
+          GITHUB_EVENT_BEFORE: '${{ github.event.before }}'
+          GITHUB_EVENT_AFTER: '${{ github.event.after }}'
         run: |
-          git log --format=email '${{ github.event.before }}..${{ github.event.after }}' | \
+          git log --format=email '${GITHUB_EVENT_BEFORE}..${GITHUB_EVENT_AFTER}' | \
             grep -Ei '^Close[sd]? ' | sort | uniq | tee log
         if: steps.check.outputs.label == 'hacktoberfest'
 
