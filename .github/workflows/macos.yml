@@ -251,7 +251,7 @@ jobs:
               [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' -DVSFTPD=NO'  # Skip ~20 tests that stretch run time by 7x on macOS
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
-                -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
+                -DCMAKE_INSTALL_PREFIX=~/curl \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -316,8 +316,8 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ !matrix.build.clang-tidy }}
         run: |
-          python3 -m venv $HOME/venv
-          source $HOME/venv/bin/activate
+          python3 -m venv ~/venv
+          source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
@@ -328,8 +328,8 @@ jobs:
         # zizmor: ignore[template-injection]
         run: |
           TFLAGS="-j20 ${TFLAGS}"
-          source $HOME/venv/bin/activate
-          rm -f $HOME/.curlrc
+          source ~/venv/bin/activate
+          rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
@@ -339,7 +339,7 @@ jobs:
       - name: 'install pytest prereqs'
         if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
@@ -348,7 +348,7 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
