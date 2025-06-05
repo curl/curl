@@ -140,7 +140,7 @@ jobs:
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
-            LDFLAGS: '-Wl,-rpath,/home/runner/msh3/lib -Wl,-rpath,/home/runner/quictls/lib'
+            LDFLAGS: -Wl,-rpath,/home/runner/msh3/lib -Wl,-rpath,/home/runner/quictls/lib
             configure: --with-msh3=/home/runner/msh3 --with-openssl=/home/runner/quictls --enable-debug
 
           - name: msh3
@@ -245,24 +245,24 @@ jobs:
           - name: address-sanitizer
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
-            CFLAGS: '-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g'
-            LDFLAGS: '-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer'
-            LIBS: '-ldl -lubsan'
+            CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer
+            LIBS: -ldl -lubsan
             configure: CC=clang --with-openssl --enable-debug
 
           - name: thread-sanitizer
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssl-tsan
-            CFLAGS: '-fsanitize=thread -g'
-            LDFLAGS: '-fsanitize=thread -Wl,-rpath,/home/runner/openssl/lib'
+            CFLAGS: -fsanitize=thread -g
+            LDFLAGS: -fsanitize=thread -Wl,-rpath,/home/runner/openssl/lib
             configure: CC=clang --with-openssl=/home/runner/openssl --enable-debug
 
           - name: memory-sanitizer
             install_packages: clang
             install_steps: randcurl
-            CFLAGS: '-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g'
-            LDFLAGS: '-fsanitize=memory'
-            LIBS: '-ldl'
+            CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
+            LDFLAGS: -fsanitize=memory
+            LIBS: -ldl
             configure: CC=clang --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
 
           - name: event-based
