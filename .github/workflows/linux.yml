@@ -596,6 +596,8 @@ jobs:
 
       - name: 'configure'
         env:
+          MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
+          MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
@@ -605,13 +607,13 @@ jobs:
               -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              ${{ matrix.build.generate }}
+              ${MATRIX_GENERATE}
           else
             mkdir bld && cd bld && \
             ${{ matrix.build.configure-prefix }} \
             ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
-              ${{ matrix.build.configure }}
+              ${MATRIX_CONFIGURE}
           fi
 
       - name: 'configure log'
