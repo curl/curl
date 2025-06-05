@@ -260,11 +260,12 @@ jobs:
         timeout-minutes: 5
         env:
           MATRIX_CONFIG: '${{ matrix.config }}'
+          MATRIX_ENV: '${{ matrix.env }}'
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-            if [[ '${{ matrix.env }}' != 'clang'* ]]; then
+            if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
               CFLAGS="-specs=${specs}"
@@ -273,7 +274,7 @@ jobs:
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             for _chkprefill in '' ${{ matrix.chkprefill }}; do
-              if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+              if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
               else
                 options='-DCMAKE_C_COMPILER=gcc'
