@@ -162,7 +162,7 @@ jobs:
             if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
               options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
             fi
-            mkdir bld && cd bld || exit
+            mkdir bld && cd bld
             time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="$HOME/install" \
               --with-openssl \
@@ -244,7 +244,7 @@ jobs:
             export MAKEFLAGS=-j3
             export CURL_CI=github
             time autoreconf -fi
-            mkdir bld && cd bld || exit
+            mkdir bld && cd bld
             time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="$HOME/install" \
               --with-openssl \
@@ -533,10 +533,10 @@ jobs:
       - name: 'install compiler (djgpp)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         run: |
-          cd ~ || exit 1
+          cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
             --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" | tar -xj
-          cd djgpp || exit 1
+          cd djgpp
           for f in wat3211b.zip zlb13b.zip ssl102ub.zip; do
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
               "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output bin.zip
