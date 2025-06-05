@@ -635,8 +635,7 @@ class TestDownload:
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
                 continue
-            m = re.match(r'\[1-1] \* SSL reusing session.*', line)
-            if m:
+            if re.match(r'\[1-1] \* SSL reusing session.*', line):
                 reused_session = True
         assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'

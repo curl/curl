@@ -387,6 +387,16 @@ class Env:
         return False
 
     @staticmethod
+    def curl_lib_version_before(libname: str, lib_version) -> bool:
+        lversion = Env.curl_lib_version(libname)
+        if lversion != 'unknown':
+            if m := re.match(r'(\d+\.\d+\.\d+).*', lversion):
+                lversion = m.group(1)
+            return Env.CONFIG.versiontuple(lib_version) > \
+                   Env.CONFIG.versiontuple(lversion)
+        return False
+
+    @staticmethod
     def curl_os() -> str:
         return Env.CONFIG.curl_props['os']
 
