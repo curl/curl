@@ -226,6 +226,8 @@ jobs:
         run: autoreconf -fi
 
       - name: 'configure'
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
         run: |
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
@@ -240,7 +242,7 @@ jobs:
           fi
 
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
+            for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               options=''
               [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
               [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DVSFTPD=NO'  # Skip ~20 tests that stretch run time by 7x on macOS
