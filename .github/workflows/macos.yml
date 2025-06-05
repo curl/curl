@@ -132,7 +132,7 @@ jobs:
           - name: 'quictls libssh2 !ldap 10.15'
             compiler: clang
             install: quictls
-            configure: --enable-debug --disable-ldap --with-openssl=/opt/homebrew/opt/quictls LDFLAGS='-w -L/opt/homebrew/opt/quictls/lib'
+            configure: --enable-debug --disable-ldap --with-openssl=/opt/homebrew/opt/quictls LDFLAGS=-L/opt/homebrew/opt/quictls/lib
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
