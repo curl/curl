@@ -149,17 +149,12 @@ jobs:
           persist-credentials: false
         name: checkout
 
-      - name: zizmor GHA
-        run: |
-          brew install zizmor
-          zizmor --pedantic .github/workflows/*.yml
-
       - name: install prereqs
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install yq
+          brew install yq zizmor
+
+      - name: zizmor GHA
+        run: zizmor --pedantic .github/workflows/*.yml
 
       - name: shellcheck
         run: .github/scripts/shellcheck-ci.sh
