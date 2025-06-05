@@ -186,6 +186,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_SYS: '${{ matrix.sys }}'
       MATRIX_TEST: '${{ matrix.test }}'
     strategy:
       matrix:
@@ -274,7 +275,7 @@ jobs:
               else
                 options='-DCMAKE_C_COMPILER=gcc'
               fi
-              [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
+              [ "${MATRIX_SYS}" = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
               [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
@@ -371,7 +372,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           TFLAGS="-j8 ${TFLAGS}"
-          if [ '${{ matrix.sys }}' != 'msys' ]; then
+          if [ "${MATRIX_SYS}" != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             if [[ '${{ matrix.install }}' = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
