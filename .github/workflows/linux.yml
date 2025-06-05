@@ -634,11 +634,13 @@ jobs:
         run: grep -H -v '^#' bld/tests/config bld/tests/http/config.ini || true
 
       - name: 'build'
+        env:
+          MATRIX_MAKE_CUSTOM_TARGET: '${{ matrix.build.make-custom-target }}'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose
           else
-            ${MATRIX_MAKE_PREFIX} make -C bld V=1 ${{ matrix.build.make-custom-target }}
+            ${MATRIX_MAKE_PREFIX} make -C bld V=1 ${MATRIX_MAKE_CUSTOM_TARGET}
           fi
 
       - name: 'single-use function check'
