@@ -37,6 +37,7 @@ check_PROGRAMS = \
   default-scheme \
   externalsocket \
   fileupload \
+  ftp-delete \
   ftp-wildcard \
   ftpget \
   ftpgetinfo \
