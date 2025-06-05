@@ -90,7 +90,7 @@ class NghttpxUtil:
 
     @staticmethod
     def version_with_h3(version):
-        return re.match(r'.* ngtcp2/\d+\.\d+\.\d+.*', version)
+        return re.match(r'.* ngtcp2/\d+\.\d+\.\d+.*', version) is not None
 
 
 class EnvConfig:
