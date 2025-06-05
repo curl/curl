@@ -262,6 +262,7 @@ jobs:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_OPTIONS: ${{ matrix.build.options }}
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
       LIBRESSL_VERSION: 4.1.0
     strategy:
@@ -378,7 +379,7 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld ${{ matrix.build.options }} --parallel 4 --verbose
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --verbose
           else
             make -C bld V=1
           fi
@@ -389,7 +390,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target testdeps --verbose
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target testdeps --verbose
           else
             make -C bld V=1 -C tests
           fi
@@ -397,7 +398,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld ${{ matrix.build.options }} --parallel 4 --target curl-examples --verbose
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples --verbose
           else
             make -C bld examples V=1
           fi
