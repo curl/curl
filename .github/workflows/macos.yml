@@ -59,7 +59,6 @@ jobs:
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
-      CFLAGS: ''
     strategy:
       fail-fast: false
       matrix:
