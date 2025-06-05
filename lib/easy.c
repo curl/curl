@@ -1241,7 +1241,6 @@ static CURLcode easy_connection(struct Curl_easy *data,
 CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
 {
   CURLcode result;
-  ssize_t n1;
   struct connectdata *c;
   struct Curl_easy *data = d;
 
@@ -1258,13 +1257,7 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
     Curl_attach_connection(data, c);
 
   *n = 0;
-  result = Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, &n1);
-
-  if(result)
-    return result;
-
-  *n = (size_t)n1;
-  return CURLE_OK;
+  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
 }
 
 #ifndef CURL_DISABLE_WEBSOCKETS

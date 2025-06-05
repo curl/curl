@@ -1314,8 +1314,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   int poll_cnt;
   curl_off_t total_dl = 0;
   curl_off_t total_ul = 0;
+  ssize_t snread;
 #endif
-  ssize_t nread;
   struct curltime now;
   bool keepon = TRUE;
   char buffer[4*1024];
@@ -1464,6 +1464,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
+        size_t nread;
         result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would have blocked. Loop again */
         if(result == CURLE_AGAIN)
@@ -1475,7 +1476,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         /* returned zero but actually received 0 or less here,
            the server closed the connection and we bail out */
-        else if(nread <= 0) {
+        else if(!nread) {
           keepon = FALSE;
           break;
         }
@@ -1550,6 +1551,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
+        size_t nread;
         result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would have blocked. Loop again */
         if(result == CURLE_AGAIN)
@@ -1567,7 +1569,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         /* returned zero but actually received 0 or less here,
            the server closed the connection and we bail out */
-        else if(nread <= 0) {
+        else if(!nread) {
           keepon = FALSE;
           break;
         }
@@ -1590,34 +1592,34 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
       }
 
-      nread = 0;
+      snread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buffer, sizeof(buffer));
+          snread = read(pfd[1].fd, buffer, sizeof(buffer));
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
+        snread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
                                             data->state.in);
-        if(nread == CURL_READFUNC_ABORT) {
+        if(snread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
           break;
         }
-        if(nread == CURL_READFUNC_PAUSE)
+        if(snread == CURL_READFUNC_PAUSE)
           break;
       }
 
-      if(nread > 0) {
-        result = send_telnet_data(data, tn, buffer, nread);
+      if(snread > 0) {
+        result = send_telnet_data(data, tn, buffer, snread);
         if(result) {
           keepon = FALSE;
           break;
         }
-        total_ul += nread;
+        total_ul += snread;
         Curl_pgrsSetUploadCounter(data, total_ul);
       }
-      else if(nread < 0)
+      else if(snread < 0)
         keepon = FALSE;
 
       break;

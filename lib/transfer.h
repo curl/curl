@@ -132,7 +132,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
  */
 CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
-                        ssize_t *pnrcvd);
+                        size_t *pnrcvd);
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data);
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);

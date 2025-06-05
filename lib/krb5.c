@@ -479,19 +479,18 @@ socket_read(struct Curl_easy *data, int sockindex, void *to, size_t len)
 {
   char *to_p = to;
   CURLcode result;
-  ssize_t nread = 0;
+  size_t nread = 0;
 
   while(len > 0) {
     result = Curl_conn_recv(data, sockindex, to_p, len, &nread);
-    if(nread > 0) {
-      len -= nread;
-      to_p += nread;
-    }
-    else {
-      if(result == CURLE_AGAIN)
-        continue;
+    if(result == CURLE_AGAIN)
+      continue;
+    if(result)
       return result;
-    }
+    if(nread > len)
+      return CURLE_RECV_ERROR;
+    len -= nread;
+    to_p += nread;
   }
   return CURLE_OK;
 }
@@ -590,9 +589,9 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
 
   /* Handle clear text response. */
   if(conn->sec_complete == 0 || conn->data_prot == PROT_CLEAR) {
-    ssize_t nread;
+    size_t nread;
     *err = Curl_conn_recv(data, sockindex, buffer, len, &nread);
-    return nread;
+    return *err ? -1 : (ssize_t)nread;
   }
 
   if(conn->in_buffer.eof_flag) {
