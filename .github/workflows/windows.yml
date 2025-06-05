@@ -123,7 +123,7 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -144,7 +144,7 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -162,7 +162,7 @@ jobs:
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             make -C bld V=1 test-ci
           fi
@@ -173,7 +173,7 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
@@ -316,7 +316,7 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -341,7 +341,7 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -390,7 +390,7 @@ jobs:
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
@@ -401,7 +401,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
