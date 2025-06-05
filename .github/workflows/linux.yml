@@ -60,6 +60,8 @@ env:
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.0
 
+# '$HOME' == '~' == '/home/runner'
+
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
@@ -320,7 +322,7 @@ jobs:
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }} \
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
-          python3 -m venv $HOME/venv
+          python3 -m venv ~/venv
 
       - name: 'install prereqs'
         if: contains(matrix.build.name, 'i686')
@@ -335,7 +337,7 @@ jobs:
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${MATRIX_INSTALL_PACKAGES}
-          python3 -m venv $HOME/venv
+          python3 -m venv ~/venv
 
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
@@ -364,9 +366,9 @@ jobs:
           tar -xzf "bearssl-${BEARSSL_VERSION}.tar.gz"
           cd "bearssl-${BEARSSL_VERSION}"
           make
-          mkdir -p $HOME/bearssl/lib $HOME/bearssl/include
-          cp inc/*.h $HOME/bearssl/include
-          cp build/libbearssl.* $HOME/bearssl/lib
+          mkdir -p ~/bearssl/lib ~/bearssl/include
+          cp inc/*.h ~/bearssl/include
+          cp build/libbearssl.* ~/bearssl/lib
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
@@ -473,7 +475,7 @@ jobs:
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
-          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=~/mbedtls \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
@@ -531,7 +533,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
           cd msh3
-          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3
+          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/msh3
           cmake --build .
           cmake --install .
 
@@ -553,7 +555,7 @@ jobs:
           tar -xzf "v${AWSLC_VERSION}.tar.gz"
           mkdir "aws-lc-${AWSLC_VERSION}-build"
           cd "aws-lc-${AWSLC_VERSION}-build"
-          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=~/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -609,7 +611,7 @@ jobs:
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
+              -DCMAKE_INSTALL_PREFIX=~/curl \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
@@ -674,7 +676,7 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
         run: |
-          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
@@ -695,7 +697,7 @@ jobs:
               TFLAGS+=' ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
             fi
           fi
-          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
@@ -705,7 +707,7 @@ jobs:
       - name: 'install pytest prereqs'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
@@ -714,7 +716,7 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
