@@ -65,9 +65,7 @@ while(my $line = <$fh>) {
         print "#define $namu\n";
         print "#include \"$src\"\n";
         print "#undef $namu\n";
-
         print "\n";
-
         $tlist .= "  {\"$name\", test_$name},\n";
     }
 }
