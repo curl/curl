@@ -735,7 +735,7 @@ jobs:
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR:PATH=~/opt/mingw32ce/arm-mingw32ce/lib \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \

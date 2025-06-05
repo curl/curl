@@ -82,7 +82,7 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-         echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+         echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:

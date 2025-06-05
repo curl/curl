@@ -316,7 +316,7 @@ jobs:
           xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || true
           xcrun --sdk iphoneos --show-sdk-version || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')

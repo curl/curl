@@ -203,7 +203,7 @@ jobs:
       - name: 'brew unlink openssl'
         if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
-          if [ -d "$(brew --prefix)/include/openssl" ]; then
+          if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
           fi
 
@@ -217,7 +217,7 @@ jobs:
           xcrun --sdk macosx --show-sdk-version || true
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -446,7 +446,7 @@ jobs:
           xcrun --sdk macosx --show-sdk-version || true
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -484,7 +484,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
