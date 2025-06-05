@@ -100,7 +100,7 @@ jobs:
               ${MATRIX_CONFIG}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME/install" \
               --with-libssh2 \
               --disable-dependency-tracking \
               ${MATRIX_CONFIG}
@@ -298,7 +298,7 @@ jobs:
           else
             export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME/install" \
               --with-libssh2 \
               --disable-dependency-tracking \
               ${MATRIX_CONFIG}

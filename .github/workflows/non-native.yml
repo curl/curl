@@ -156,7 +156,7 @@ jobs:
               options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
             fi
             mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME/install" \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking \
@@ -239,7 +239,7 @@ jobs:
             export CURL_CI=github
             time autoreconf -fi
             mkdir bld && cd bld && time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME/install" \
               --with-openssl \
               --disable-dependency-tracking \
               || { tail -n 1000 config.log; false; }
