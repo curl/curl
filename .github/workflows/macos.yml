@@ -367,6 +367,8 @@ jobs:
       MATRIX_BUILD: '${{ matrix.build }}'
       MATRIX_COMPILER: '${{ matrix.compiler }}'
       MATRIX_CONFIG: '${{ matrix.config }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_MACOS_VERSION_MIN: '${{ matrix.macos-version-min }}'
     strategy:
       fail-fast: false
       matrix:
@@ -446,7 +448,7 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ '${{ matrix.image }}' = 'macos-15' ] ; then
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ] ; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
             /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi
@@ -466,7 +468,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ "${MATRIX_CONFIG}" = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
-            [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
@@ -488,7 +490,7 @@ jobs:
             fi
             [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ "${MATRIX_CONFIG}" = 'SecureTransport' ] && options+=' --with-secure-transport'
-            [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
+            [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
