@@ -69,6 +69,9 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
+    /* clean up the FTP commands list */
+    curl_slist_free_all(headerlist);
+
     if(CURLE_OK != res) {
       /* we failed */
       fprintf(stderr, "curl told us %d\n", res);
