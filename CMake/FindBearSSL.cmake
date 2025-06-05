@@ -25,14 +25,13 @@
 #
 # Input variables:
 #
-# - `BEARSSL_INCLUDE_DIR`:   The BearSSL include directory.
-# - `BEARSSL_LIBRARY`:       Path to `bearssl` library.
+# - `BEARSSL_INCLUDE_DIR`:  The BearSSL include directory.
+# - `BEARSSL_LIBRARY`:      Path to `bearssl` library.
 #
-# Result variables:
+# Defines:
 #
-# - `BEARSSL_FOUND`:         System has BearSSL.
-# - `BEARSSL_INCLUDE_DIRS`:  The BearSSL include directories.
-# - `BEARSSL_LIBRARIES`:     The BearSSL library names.
+# - `BEARSSL_FOUND`:        System has BearSSL.
+# - `CURL::bearssl`:        BearSSL library target.
 
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   message(WARNING "BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.")
@@ -56,3 +55,19 @@ if(BEARSSL_FOUND)
 endif()
 
 mark_as_advanced(BEARSSL_INCLUDE_DIR BEARSSL_LIBRARY)
+
+if(BEARSSL_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_bearssl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::bearssl)
+    add_library(CURL::bearssl INTERFACE IMPORTED)
+    set_target_properties(CURL::bearssl PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_bearssl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_bearssl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_bearssl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_bearssl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_bearssl_LIBRARIES}")
+  endif()
+endif()

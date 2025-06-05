@@ -25,18 +25,14 @@
 #
 # Input variables:
 #
-# - `WOLFSSL_INCLUDE_DIR`:   The wolfSSL include directory.
-# - `WOLFSSL_LIBRARY`:       Path to `wolfssl` library.
+# - `WOLFSSL_INCLUDE_DIR`:  The wolfSSL include directory.
+# - `WOLFSSL_LIBRARY`:      Path to `wolfssl` library.
 #
-# Result variables:
+# Defines:
 #
-# - `WOLFSSL_FOUND`:         System has wolfSSL.
-# - `WOLFSSL_INCLUDE_DIRS`:  The wolfSSL include directories.
-# - `WOLFSSL_LIBRARIES`:     The wolfSSL library names.
-# - `WOLFSSL_LIBRARY_DIRS`:  The wolfSSL library directories.
-# - `WOLFSSL_PC_REQUIRES`:   The wolfSSL pkg-config packages.
-# - `WOLFSSL_CFLAGS`:        Required compiler flags.
-# - `WOLFSSL_VERSION`:       Version of wolfSSL.
+# - `WOLFSSL_FOUND`:        System has wolfSSL.
+# - `WOLFSSL_VERSION`:      Version of wolfSSL.
+# - `CURL::wolfssl`:        wolfSSL library target.
 
 if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
   message(WARNING "WolfSSL_INCLUDE_DIR is deprecated, use WOLFSSL_INCLUDE_DIR instead.")
@@ -47,19 +43,20 @@ if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
   set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
 endif()
 
-set(WOLFSSL_PC_REQUIRES "wolfssl")
+set(_wolfssl_pc_requires "wolfssl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED WOLFSSL_INCLUDE_DIR AND
    NOT DEFINED WOLFSSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(WOLFSSL ${WOLFSSL_PC_REQUIRES})
+  pkg_check_modules(_wolfssl ${_wolfssl_pc_requires})
 endif()
 
-if(WOLFSSL_FOUND)
+if(_wolfssl_FOUND)
   set(WolfSSL_FOUND TRUE)
-  string(REPLACE ";" " " WOLFSSL_CFLAGS "${WOLFSSL_CFLAGS}")
-  message(STATUS "Found WolfSSL (via pkg-config): ${WOLFSSL_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
+  set(WOLFSSL_FOUND TRUE)
+  set(WOLFSSL_VERSION ${_wolfssl_VERSION})
+  message(STATUS "Found WolfSSL (via pkg-config): ${_wolfssl_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
 else()
   find_path(WOLFSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h")
   find_library(WOLFSSL_LIBRARY NAMES "wolfssl")
@@ -84,17 +81,35 @@ else()
   )
 
   if(WOLFSSL_FOUND)
-    set(WOLFSSL_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
-    set(WOLFSSL_LIBRARIES    ${WOLFSSL_LIBRARY})
+    set(_wolfssl_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
+    set(_wolfssl_LIBRARIES    ${WOLFSSL_LIBRARY})
   endif()
 
   mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
 endif()
 
-if(WOLFSSL_FOUND AND NOT WIN32)
-  find_library(MATH_LIBRARY NAMES "m")
-  if(MATH_LIBRARY)
-    list(APPEND WOLFSSL_LIBRARIES ${MATH_LIBRARY})  # for log and pow
+if(WOLFSSL_FOUND)
+  if(WIN32)
+    list(APPEND _wolfssl_LIBRARIES "crypt32")
+  else()
+    find_library(MATH_LIBRARY NAMES "m")
+    if(MATH_LIBRARY)
+      list(APPEND _wolfssl_LIBRARIES ${MATH_LIBRARY})  # for log and pow
+    endif()
+    mark_as_advanced(MATH_LIBRARY)
   endif()
-  mark_as_advanced(MATH_LIBRARY)
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_wolfssl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::wolfssl)
+    add_library(CURL::wolfssl INTERFACE IMPORTED)
+    set_target_properties(CURL::wolfssl PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_wolfssl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_wolfssl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_wolfssl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_wolfssl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_wolfssl_LIBRARIES}")
+  endif()
 endif()
