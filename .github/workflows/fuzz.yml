@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Curl-Fuzzer
+name: Fuzzer
 
 'on':
   push:
@@ -34,10 +34,6 @@ name: Curl-Fuzzer
       - 'projects/**'
       - 'tests/data/**'
       - 'winbuild/**'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: true
 
 permissions: {}
 
