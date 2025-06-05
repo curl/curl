@@ -239,7 +239,7 @@ jobs:
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig \
-            LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib" \
+            LDFLAGS="-Wl,-rpath,/home/runner/quictls/build/lib" \
             --enable-http3
           make install
 
@@ -258,37 +258,37 @@ jobs:
           - name: openssl
             PKG_CONFIG_PATH: '~/openssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/openssl/build/lib"
-              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-openssl=$HOME/openssl/build --enable-ssls-export
+              LDFLAGS="-Wl,-rpath,/home/runner/openssl/build/lib"
+              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
 
           - name: quictls
             PKG_CONFIG_PATH: '~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib"
-              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-openssl=$HOME/quictls/build --enable-ssls-export
+              LDFLAGS="-Wl,-rpath,/home/runner/quictls/build/lib"
+              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
 
           - name: gnutls
             PKG_CONFIG_PATH: '~/gnutls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/gnutls/build/lib"
-              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-gnutls=$HOME/gnutls/build --enable-ssls-export
+              LDFLAGS="-Wl,-rpath,/home/runner/gnutls/build/lib"
+              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
 
           - name: wolfssl
             PKG_CONFIG_PATH: '~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/wolfssl/build/lib"
-              --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-wolfssl=$HOME/wolfssl/build
+              LDFLAGS="-Wl,-rpath,/home/runner/wolfssl/build/lib"
+              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
               --with-libuv
 
@@ -296,38 +296,38 @@ jobs:
             PKG_CONFIG_PATH: '~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
-              -DTEST_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
-              -DHTTPD_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+              -DTEST_NGHTTPX=~/nghttp2/build/bin/nghttpx
+              -DHTTPD_NGHTTPX=~/nghttp2/build/bin/nghttpx
               -DUSE_ECH=ON
               -DCURL_USE_LIBUV=ON
 
           - name: openssl-quic
             PKG_CONFIG_PATH: '~/openssl/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/openssl/build/lib"
+              LDFLAGS="-Wl,-rpath,/home/runner/openssl/build/lib"
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-openssl=$HOME/openssl/build --with-openssl-quic
-              --with-nghttp3=$HOME/nghttp3/build
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-openssl=/home/runner/openssl/build --with-openssl-quic
+              --with-nghttp3=/home/runner/nghttp3/build
               --with-libuv
 
           - name: quiche
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/quiche/target/release"
-              --with-openssl=$HOME/quiche/quiche/deps/boringssl/src
+              LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
+              --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
               --enable-warnings --enable-werror --enable-debug
-              --with-quiche=$HOME/quiche/target/release
-              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-quiche=/home/runner/quiche/target/release
+              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
               --with-libuv
 
           - name: quiche
             PKG_CONFIG_PATH: '~/quiche/target/release'
             generate: >-
-              -DOPENSSL_ROOT_DIR=$HOME/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
+              -DOPENSSL_ROOT_DIR=~/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
               -DUSE_QUICHE=ON
-              -DTEST_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
-              -DHTTPD_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+              -DTEST_NGHTTPX=~/nghttp2/build/bin/nghttpx
+              -DHTTPD_NGHTTPX=~/nghttp2/build/bin/nghttpx
               -DCURL_CA_FALLBACK=ON
               -DCURL_USE_LIBUV=ON
 
@@ -510,14 +510,14 @@ jobs:
 
       - name: 'install test prereqs'
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
@@ -526,7 +526,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest event based'
@@ -535,7 +535,7 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          source $HOME/venv/bin/activate
+          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
