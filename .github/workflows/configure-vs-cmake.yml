@@ -59,8 +59,8 @@ jobs:
       - name: 'dump generated files'
         run: |
           for f in libcurl.pc curl-config; do
-            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
-            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'
@@ -77,11 +77,12 @@ jobs:
     steps:
       - name: 'install packages'
         run: |
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'toolchain versions'
         run: |
-         echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+         echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -109,8 +110,8 @@ jobs:
       - name: 'dump generated files'
         run: |
           for f in libcurl.pc curl-config; do
-            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
-            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'
@@ -158,8 +159,8 @@ jobs:
       - name: 'dump generated files'
         run: |
           for f in libcurl.pc curl-config; do
-            echo "::group::AM ${f}"; cat bld-am/"${f}" | grep -v '^#' || true; echo '::endgroup::'
-            echo "::group::CM ${f}"; cat bld-cm/"${f}" | grep -v '^#' || true; echo '::endgroup::'
+            echo "::group::AM ${f}"; grep -v '^#' bld-am/"${f}" || true; echo '::endgroup::'
+            echo "::group::CM ${f}"; grep -v '^#' bld-cm/"${f}" || true; echo '::endgroup::'
           done
 
       - name: 'compare generated curl_config.h files'

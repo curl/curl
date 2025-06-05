@@ -49,6 +49,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         include:
@@ -88,19 +89,22 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
@@ -119,8 +123,9 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+            cmake --install bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -130,7 +135,7 @@ jobs:
         run: |
           PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
           bld/src/curl.exe --disable --version
@@ -140,8 +145,8 @@ jobs:
         timeout-minutes: 15
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -149,15 +154,17 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
           PATH=/usr/bin
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          TFLAGS="-j8 ${TFLAGS}"
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             make -C bld V=1 test-ci
           fi
@@ -167,8 +174,8 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
@@ -182,6 +189,9 @@ jobs:
         shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_SYS: '${{ matrix.sys }}'
+      MATRIX_TEST: '${{ matrix.test }}'
     strategy:
       matrix:
         include:
@@ -250,32 +260,39 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          CFLAGS: '${{ matrix.cflags }}'
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
+          MATRIX_ENV: '${{ matrix.env }}'
+          MATRIX_TYPE: '${{ matrix.type }}'
         run: |
-          if [ '${{ matrix.test }}' = 'uwp' ]; then
+          if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-            if [[ '${{ matrix.env }}' != 'clang'* ]]; then
+            if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
               CFLAGS="-specs=${specs}"
               CFLAGS_CMAKE="-specs=$(cygpath -w "${specs}")"
             fi
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            for _chkprefill in '' ${{ matrix.chkprefill }}; do
-              if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
+              if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
               else
                 options='-DCMAKE_C_COMPILER=gcc'
               fi
-              [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
-              [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ "${MATRIX_SYS}" = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
+              [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
-                -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+                -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
+                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
+                -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
-                ${{ matrix.config }}
+                ${MATRIX_CONFIG}
             done
             if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
               echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -284,10 +301,10 @@ jobs:
           else
             export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+              --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
@@ -298,12 +315,14 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+          cat bld/cmake_install.cmake || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+            cmake --install bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -311,7 +330,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
@@ -319,7 +338,7 @@ jobs:
             mv bld/src/.libs/curl.exe bld/src/curl.exe
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
+          if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
 
@@ -327,12 +346,12 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}  # Save time by skipping this for autotools
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
-          if [ '${{ matrix.build }}' != 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" != 'cmake' ]; then
             # avoid libtool's .exe wrappers
             mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
@@ -360,11 +379,14 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          MATRIX_INSTALL: '${{ matrix.install }}'
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
-          if [ '${{ matrix.sys }}' != 'msys' ]; then
+          TFLAGS="-j8 ${TFLAGS}"
+          if [ "${MATRIX_SYS}" != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-            if [[ '${{ matrix.install }}' = *'libssh2-wincng'* ]]; then
+            if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             fi
           fi
@@ -372,9 +394,9 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
@@ -384,8 +406,8 @@ jobs:
         if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
@@ -399,6 +421,7 @@ jobs:
         shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
+      MATRIX_DIR: '${{ matrix.dir }}'
     strategy:
       matrix:
         include:
@@ -457,11 +480,13 @@ jobs:
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
+        env:
+          MATRIX_URL: '${{ matrix.url }}'
         run: |
-          cd /d || exit 1
+          cd /d
           mkdir my-cache
-          cd my-cache || exit 1
-          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
+          cd my-cache
+          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https "${MATRIX_URL}"
           pwd
           7z x -y pack.bin >/dev/null
           rm -r -f pack.bin
@@ -475,18 +500,22 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
+          MATRIX_TYPE: '${{ matrix.type }}'
         run: |
-          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" -G Ninja ${options} \
               -DCMAKE_C_COMPILER=gcc \
-              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -505,7 +534,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -519,7 +548,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
@@ -542,9 +571,11 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -555,7 +586,7 @@ jobs:
       - name: 'build examples'
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
@@ -565,6 +596,8 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
@@ -575,11 +608,11 @@ jobs:
     steps:
       - name: 'install packages'
         timeout-minutes: 5
-        # zizmor: ignore[template-injection]
+        env:
+          INSTALL_PACKAGES: ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
         run: |
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 \
-            ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
+          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${INSTALL_PACKAGES}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -591,8 +624,8 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            if [ '${{ matrix.compiler }}' = 'clang-tidy' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
               options+=' -DCURL_CLANG_TIDY=ON'
               options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
               options+=' -DCMAKE_C_COMPILER=clang'
@@ -627,7 +660,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -639,7 +672,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -648,7 +681,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
@@ -660,7 +693,8 @@ jobs:
     timeout-minutes: 10
     env:
       MAKEFLAGS: -j 4
-      toolchain-version: '0.59.1'
+      TOOLCHAIN_VERSION: '0.59.1'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         build: [autotools, cmake]
@@ -670,23 +704,23 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         run: |
-          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+          # shellcheck disable=SC2181,SC2034
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'cache compiler (mingw32ce)'
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
           path: ~/opt/mingw32ce
-          key: ${{ runner.os }}-mingw32ce-${{ env.toolchain-version }}-amd64
+          key: ${{ runner.os }}-mingw32ce-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (mingw32ce)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
-          cd "${HOME}" || exit 1
+          cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
-            --location 'https://downloads.sourceforge.net/cegcc/cegcc/${{ env.toolchain-version }}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2' | tar -x
+            --location "https://downloads.sourceforge.net/cegcc/cegcc/${TOOLCHAIN_VERSION}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2" | tar -x
           ls -l
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -696,7 +730,7 @@ jobs:
       - name: 'configure'
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
@@ -706,7 +740,7 @@ jobs:
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
               -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
@@ -733,7 +767,7 @@ jobs:
       - name: 'build'
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -747,7 +781,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
@@ -757,7 +791,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
@@ -771,7 +805,13 @@ jobs:
       run:
         shell: msys2 {0}
     env:
-      openssh_windows-version: 'v9.8.1.0p1-Preview'
+      MATRIX_ARCH: '${{ matrix.arch }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_INSTALL: '${{ matrix.install }}'
+      MATRIX_OPENSSH: '${{ matrix.openssh }}'
+      MATRIX_PLAT: '${{ matrix.plat }}'
+      MATRIX_TYPE: '${{ matrix.type }}'
+      OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
@@ -831,7 +871,7 @@ jobs:
 
       - name: 'vcpkg build'
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        run: vcpkg x-set-installed ${MATRIX_INSTALL} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -839,24 +879,27 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
-            if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
               ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
-            [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
-            [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
+            [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
+            [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
+            [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-              -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
-              -DCMAKE_C_COMPILER_TARGET='${{ matrix.arch }}-${{ matrix.plat }}' \
+              -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
+              -DCMAKE_C_COMPILER_TARGET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
@@ -864,7 +907,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -882,43 +925,43 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
-          if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
-            'bld/src/${{ matrix.type }}/curl.exe' --disable --version
+          if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
+            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
+            "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
           fi
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.openssh }}' = '' ]; then  # MSYS2 openssh
+          if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          elif [ '${{ matrix.openssh }}' = 'OpenSSH-Windows-builtin' ]; then
+          elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
-            if [ '${{ matrix.image }}' != 'windows-2025' ]; then
+            if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
           else  # OpenSSH-Windows
-            cd /c || exit 1  # no D: drive on windows-11-arm runners
+            cd /c  # no D: drive on windows-11-arm runners
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
-              --location 'https://github.com/PowerShell/Win32-OpenSSH/releases/download/${{ env.openssh_windows-version }}/OpenSSH-Win64.zip' --output bin.zip
+              --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
             unzip bin.zip
             rm -f bin.zip
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          if [ '${{ matrix.image }}' != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
+          if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           fi
 
@@ -935,26 +978,28 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          export CURL_DIRSUFFIX="${MATRIX_TYPE}"
+          TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+          if [[ "${MATRIX_INSTALL}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
-          if [ -n '${{ matrix.openssh }}' ]; then  # OpenSSH-Windows
+          if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL}" = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
             fi
             PATH="/c/OpenSSH-Win64:$PATH"
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples
