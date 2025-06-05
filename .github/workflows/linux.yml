@@ -69,6 +69,7 @@ jobs:
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
+      MATRIX_MAKE_PREFIX: '${{ matrix.build.make-prefix }}'
     strategy:
       fail-fast: false
       matrix:
@@ -634,9 +635,9 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build bld --verbose
+            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose
           else
-            ${{ matrix.build.make-prefix }} make -C bld V=1 ${{ matrix.build.make-custom-target }}
+            ${MATRIX_MAKE_PREFIX} make -C bld V=1 ${{ matrix.build.make-custom-target }}
           fi
 
       - name: 'single-use function check'
@@ -728,7 +729,7 @@ jobs:
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build bld --verbose --target curl-examples
+            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples
           else
-            ${{ matrix.build.make-prefix }} make -C bld V=1 examples
+            ${MATRIX_MAKE_PREFIX} make -C bld V=1 examples
           fi
