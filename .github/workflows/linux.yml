@@ -66,6 +66,8 @@ jobs:
     runs-on: ${{ matrix.build.image || 'ubuntu-latest' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 45
+    env:
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
     strategy:
       fail-fast: false
       matrix:
@@ -598,7 +600,7 @@ jobs:
           if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
             export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
           fi
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
@@ -626,7 +628,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${{ matrix.build.make-prefix }} cmake --build bld --verbose
           else
             ${{ matrix.build.make-prefix }} make -C bld V=1 ${{ matrix.build.make-custom-target }}
@@ -636,7 +638,7 @@ jobs:
         if: ${{ contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF') }}
         run: |
           git config --global --add safe.directory "*"
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             libcurla=bld/lib/libcurl.a
           else
             libcurla=bld/lib/.libs/libcurl.a
@@ -654,7 +656,7 @@ jobs:
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
@@ -685,7 +687,7 @@ jobs:
             fi
           fi
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
@@ -704,7 +706,7 @@ jobs:
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
             make -C bld V=1 pytest-ci
@@ -720,7 +722,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${{ matrix.build.make-prefix }} cmake --build bld --verbose --target curl-examples
           else
             ${{ matrix.build.make-prefix }} make -C bld V=1 examples
