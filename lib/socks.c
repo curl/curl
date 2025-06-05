@@ -85,10 +85,12 @@ struct socks_state {
   unsigned char buffer[CURL_SOCKS_BUF_SIZE];
   unsigned char *outp; /* send from this pointer */
 
+  const char *remote_type;
   const char *hostname;
   int remote_port;
   const char *proxy_user;
   const char *proxy_password;
+  int proxy_type;
 };
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
@@ -284,9 +286,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
                                struct socks_state *sx,
                                struct Curl_easy *data)
 {
-  struct connectdata *conn = cf->conn;
-  const bool protocol4a =
-    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A);
+  const bool protocol4a = (sx->proxy_type == CURLPROXY_SOCKS4A);
   unsigned char *socksreq = sx->buffer;
   CURLcode result;
   CURLproxycode presult;
@@ -295,10 +295,11 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
     /* SOCKS4 can only do IPv4, insist! */
-    conn->ip_version = CURL_IPRESOLVE_V4;
-    if(conn->bits.httpproxy)
-      infof(data, "SOCKS4%s: connecting to HTTP proxy %s port %d",
-            protocol4a ? "a" : "", sx->hostname, sx->remote_port);
+    cf->conn->ip_version = CURL_IPRESOLVE_V4;
+    if(sx->remote_type)
+      infof(data, "SOCKS4%s: connecting to %s %s port %d",
+            protocol4a ? "a" : "", sx->remote_type,
+            sx->hostname, sx->remote_port);
 
     infof(data, "SOCKS4 communication to %s:%d",
           sx->hostname, sx->remote_port);
@@ -565,13 +566,11 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
     o  REP    Reply field:
     o  X'00' succeeded
   */
-  struct connectdata *conn = cf->conn;
   unsigned char *socksreq = sx->buffer;
   size_t idx;
   CURLcode result;
   CURLproxycode presult;
-  bool socks5_resolve_local =
-    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5);
+  bool socks5_resolve_local = (sx->proxy_type == CURLPROXY_SOCKS5);
   const size_t hostname_len = strlen(sx->hostname);
   size_t len = 0;
   const unsigned char auth = data->set.socks5auth;
@@ -580,9 +579,9 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
-    if(conn->bits.httpproxy)
-      infof(data, "SOCKS5: connecting to HTTP proxy %s port %d",
-            sx->hostname, sx->remote_port);
+    if(sx->remote_type)
+      infof(data, "SOCKS5: connecting to %s %s port %d",
+            sx->remote_type, sx->hostname, sx->remote_port);
 
     /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
     if(!socks5_resolve_local && hostname_len > 255) {
@@ -884,7 +883,7 @@ CONNECT_RESOLVE_REMOTE:
          IPv4 == 1 */
       unsigned char ip4[4];
 #ifdef USE_IPV6
-      if(conn->bits.ipv6_ip) {
+      if(cf->conn->bits.ipv6_ip) {
         char ip6[16];
         if(1 != curlx_inet_pton(AF_INET6, sx->hostname, ip6))
           return CURLPX_BAD_ADDRESS_TYPE;
@@ -918,7 +917,7 @@ CONNECT_REQ_SEND:
     socksreq[len++] = (unsigned char)(sx->remote_port & 0xff);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(conn->socks5_gssapi_enctype) {
+    if(cf->conn->socks5_gssapi_enctype) {
       failf(data, "SOCKS5 GSS-API protection not yet implemented.");
       return CURLPX_GSSAPI_PROTECTION;
     }
@@ -938,7 +937,7 @@ CONNECT_REQ_SEND:
       return CURLPX_OK;
     }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(conn->socks5_gssapi_enctype) {
+    if(cf->conn->socks5_gssapi_enctype) {
       failf(data, "SOCKS5 GSS-API protection not yet implemented.");
       return CURLPX_GSSAPI_PROTECTION;
     }
@@ -1020,7 +1019,7 @@ CONNECT_REQ_SEND:
 
     /* At this point we already read first 10 bytes */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(!conn->socks5_gssapi_enctype) {
+    if(!cf->conn->socks5_gssapi_enctype) {
       /* decrypt_gssapi_blockread already read the whole packet */
 #endif
       if(len > 10) {
@@ -1059,9 +1058,8 @@ static CURLcode connect_SOCKS(struct Curl_cfilter *cf,
 {
   CURLcode result = CURLE_OK;
   CURLproxycode pxresult = CURLPX_OK;
-  struct connectdata *conn = cf->conn;
 
-  switch(conn->socks_proxy.proxytype) {
+  switch(sxstate->proxy_type) {
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
     pxresult = do_SOCKS5(cf, sxstate, data);
@@ -1084,15 +1082,6 @@ static CURLcode connect_SOCKS(struct Curl_cfilter *cf,
   return result;
 }
 
-static void socks_proxy_cf_free(struct Curl_cfilter *cf)
-{
-  struct socks_state *sxstate = cf->ctx;
-  if(sxstate) {
-    free(sxstate);
-    cf->ctx = NULL;
-  }
-}
-
 /* After a TCP connection to the proxy has been verified, this function does
    the next magic steps. If 'done' is not set TRUE, it is not done yet and
    must be called again.
@@ -1104,10 +1093,8 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
                                        struct Curl_easy *data,
                                        bool *done)
 {
-  CURLcode result;
-  struct connectdata *conn = cf->conn;
-  int sockindex = cf->sockindex;
   struct socks_state *sx = cf->ctx;
+  CURLcode result;
 
   if(cf->connected) {
     *done = TRUE;
@@ -1130,27 +1117,18 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
      * but ignore the "connect to port" (use the secondary port)
      */
     sxstate(sx, data, CONNECT_SOCKS_INIT);
-    sx->hostname =
-      conn->bits.httpproxy ?
-      conn->http_proxy.host.name :
-      conn->bits.conn_to_host ?
-      conn->conn_to_host.name :
-      sockindex == SECONDARYSOCKET ?
-      conn->secondaryhostname : conn->host.name;
-    sx->remote_port =
-      conn->bits.httpproxy ? (int)conn->http_proxy.port :
-      sockindex == SECONDARYSOCKET ? conn->secondary_port :
-      conn->bits.conn_to_port ? conn->conn_to_port :
-      conn->remote_port;
-    sx->proxy_user = conn->socks_proxy.user;
-    sx->proxy_password = conn->socks_proxy.passwd;
+    DEBUGASSERT(sx->hostname);
+    DEBUGASSERT(sx->remote_port > 0);
   }
 
   result = connect_SOCKS(cf, sx, data);
   if(!result && sx->state == CONNECT_DONE) {
     cf->connected = TRUE;
-    Curl_verboseconnect(data, conn, cf->sockindex);
-    socks_proxy_cf_free(cf);
+    infof(data, "SOCKS connected %sto %s%s%s port %d",
+          (cf->sockindex == FIRSTSOCKET) ? "" : "2nd connection ",
+          sx->remote_type ? sx->remote_type : "",
+          sx->remote_type ? " " : "",
+          sx->hostname, sx->remote_port);
   }
 
   *done = cf->connected;
@@ -1185,18 +1163,21 @@ static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
-
-  DEBUGASSERT(cf->next);
+  struct socks_state *sx = cf->ctx;
   cf->connected = FALSE;
-  socks_proxy_cf_free(cf);
-  cf->next->cft->do_close(cf->next, data);
+  sx->state = CONNECT_INIT;
+  DEBUGASSERT(cf->next);
+  if(cf->next)
+    cf->next->cft->do_close(cf->next, data);
 }
 
 static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
+  struct socks_state *sx = cf->ctx;
   (void)data;
-  socks_proxy_cf_free(cf);
+  free(sx);
+  cf->ctx = NULL;
 }
 
 static void socks_cf_get_host(struct Curl_cfilter *cf,
@@ -1236,15 +1217,36 @@ struct Curl_cftype Curl_cft_socks_proxy = {
 };
 
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
-                                          struct Curl_easy *data)
+                                          struct Curl_easy *data,
+                                          int proxy_type,
+                                          const char *remote_type,
+                                          const char *remote_host,
+                                          int remote_port,
+                                          const char *proxy_user,
+                                          const char *proxy_password)
 {
   struct Curl_cfilter *cf;
+  struct socks_state *sx;
   CURLcode result;
 
   (void)data;
+  sx = calloc(1, sizeof(*sx));
+  if(!sx)
+    return CURLE_OUT_OF_MEMORY;
+
   result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, NULL);
-  if(!result)
+  if(!result) {
     Curl_conn_cf_insert_after(cf_at, cf);
+    sx->proxy_type = proxy_type;
+    sx->remote_type = remote_type;
+    sx->hostname = remote_host;
+    sx->remote_port = remote_port;
+    sx->proxy_user = proxy_user;
+    sx->proxy_password = proxy_password;
+    cf->ctx = sx;
+    sx = NULL;
+  }
+  free(sx);
   return result;
 }
 
