@@ -239,7 +239,7 @@ jobs:
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig \
-            LDFLAGS="-Wl,-rpath,/home/runner/quictls/build/lib" \
+            LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib \
             --enable-http3
           make install
 
@@ -258,36 +258,36 @@ jobs:
           - name: openssl
             PKG_CONFIG_PATH: '~/openssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/openssl/build/lib"
+              LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
 
           - name: quictls
             PKG_CONFIG_PATH: '~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/quictls/build/lib"
+              LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
 
           - name: gnutls
             PKG_CONFIG_PATH: '~/gnutls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/gnutls/build/lib"
+              LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
 
           - name: wolfssl
             PKG_CONFIG_PATH: '~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/wolfssl/build/lib"
+              LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
               --with-libuv
@@ -304,20 +304,20 @@ jobs:
           - name: openssl-quic
             PKG_CONFIG_PATH: '~/openssl/build/lib/pkgconfig'
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/openssl/build/lib"
+              LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
               --with-nghttp3=/home/runner/nghttp3/build
               --with-libuv
 
           - name: quiche
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
+              LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
               --enable-warnings --enable-werror --enable-debug
               --with-quiche=/home/runner/quiche/target/release
-              --with-test-nghttpx="/home/runner/nghttp2/build/bin/nghttpx"
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-ca-fallback
               --with-libuv
 
