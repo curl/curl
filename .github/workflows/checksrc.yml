@@ -153,3 +153,23 @@ jobs:
         run: |
           brew install zizmor
           zizmor --pedantic .github/workflows/*.yml
+
+      - name: shellcheck
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install yq
+
+          {
+            echo '#!/usr/bin/env bash'
+            git ls-files '*.yml' | while read -r f; do
+              echo "### ${f} ###"
+              yq eval '.. | select(has("run") and (.run | type == "!!str")) | .run + "\ntrue\n"' "${f}"
+            done
+          } | sed -E 's|\$\{\{ .+ \}\}|GHA_EXPRESSION|g' > _gha-shell-code.sh
+
+          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
+          if ! shellcheck _gha-shell-code.sh; then
+            cat _gha-shell-code.sh
+          fi
