@@ -229,7 +229,7 @@ jobs:
         env:
           MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
-          MATRIX_GENERATE: ${{ matrix.build.generate }}
+          MATRIX_GENERATE: '${{ matrix.build.generate }}'
         run: |
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
