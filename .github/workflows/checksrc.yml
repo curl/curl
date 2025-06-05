@@ -139,8 +139,8 @@ jobs:
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
-  ghacheck:
-    name: GHA analysis
+  cicheck:
+    name: CI analysis
     runs-on: macos-latest
     timeout-minutes: 1
     steps:
@@ -149,27 +149,44 @@ jobs:
           persist-credentials: false
         name: checkout
 
-      - name: zizmor
+      - name: zizmor GHA
         run: |
           brew install zizmor
           zizmor --pedantic .github/workflows/*.yml
 
-      - name: shellcheck
+      - name: install prereqs
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install yq
 
+      - name: shellcheck GHA
+        run: |
           {
             echo '#!/usr/bin/env bash'
-            git ls-files '*.yml' | while read -r f; do
+            git ls-files '.github/workflows/*.yml' | while read -r f; do
               echo "### ${f} ###"
               yq eval '.. | select(has("run") and (.run | type == "!!str")) | .run + "\ntrue\n"' "${f}"
             done
-          } | sed -E 's|\$\{\{ .+ \}\}|GHA_EXPRESSION|g' > _gha-shell-code.sh
+          } | sed -E 's|\$\{\{ .+ \}\}|GHA_EXPRESSION|g' > _ci-shell-code.sh
 
           export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
-          if ! shellcheck _gha-shell-code.sh; then
-            cat _gha-shell-code.sh
+          if ! shellcheck _ci-shell-code.sh; then
+            cat _ci-shell-code.sh
+          fi
+
+      - name: shellcheck circleci
+        run: |
+          {
+            echo '#!/usr/bin/env bash'
+            git ls-files '.circleci/*.yml' | while read -r f; do
+              echo "### ${f} ###"
+              yq eval '.. | select(has("command") and (.command | type == "!!str")) | .command + "\ntrue\n"' "${f}"
+            done
+          } > _ci-shell-code.sh
+
+          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
+          if ! shellcheck _ci-shell-code.sh; then
+            cat _ci-shell-code.sh
           fi
