@@ -190,13 +190,14 @@ jobs:
         # Run this command with retries because of spurious failures seen
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
-        # zizmor: ignore[template-injection]
+        env:
+          INSTALL_PACKAGES: >-
+            ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
+            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }}
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
+
         run: |
-          echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
-            pkgconf libpsl libssh2 \
-            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
-            ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }} \
-            ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo pkgconf libpsl libssh2 ${INSTALL_PACKAGES} ${MATRIX_INSTALL} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
