@@ -298,8 +298,8 @@ jobs:
             PKG_CONFIG_PATH: '~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig'
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
-              -DTEST_NGHTTPX=~/nghttp2/build/bin/nghttpx
-              -DHTTPD_NGHTTPX=~/nghttp2/build/bin/nghttpx
+              -DTEST_NGHTTPX:PATH=~/nghttp2/build/bin/nghttpx
+              -DHTTPD_NGHTTPX:PATH=~/nghttp2/build/bin/nghttpx
               -DUSE_ECH=ON
               -DCURL_USE_LIBUV=ON
 
@@ -326,10 +326,10 @@ jobs:
           - name: quiche
             PKG_CONFIG_PATH: '~/quiche/target/release'
             generate: >-
-              -DOPENSSL_ROOT_DIR=~/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
+              -DOPENSSL_ROOT_DIR:PATH=~/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
               -DUSE_QUICHE=ON
-              -DTEST_NGHTTPX=~/nghttp2/build/bin/nghttpx
-              -DHTTPD_NGHTTPX=~/nghttp2/build/bin/nghttpx
+              -DTEST_NGHTTPX:PATH=~/nghttp2/build/bin/nghttpx
+              -DHTTPD_NGHTTPX:PATH=~/nghttp2/build/bin/nghttpx
               -DCURL_CA_FALLBACK=ON
               -DCURL_USE_LIBUV=ON
 

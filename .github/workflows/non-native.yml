@@ -278,9 +278,9 @@ jobs:
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
-              -DOPENSSL_INCLUDE_DIR=~/libressl/include
-              -DOPENSSL_SSL_LIBRARY=~/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY=~/libressl/lib/libcrypto.a
+              -DOPENSSL_INCLUDE_DIR:PATH=~/libressl/include
+              -DOPENSSL_SSL_LIBRARY:PATH=~/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY:PATH=~/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'libressl'
@@ -290,9 +290,9 @@ jobs:
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR=~/libressl/include
-              -DOPENSSL_SSL_LIBRARY=~/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY=~/libressl/lib/libcrypto.a
+              -DOPENSSL_INCLUDE_DIR:PATH=~/libressl/include
+              -DOPENSSL_SSL_LIBRARY:PATH=~/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY:PATH=~/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
     steps:
@@ -548,16 +548,16 @@ jobs:
               -DCMAKE_SYSTEM_NAME=DOS \
               -DCMAKE_SYSTEM_PROCESSOR=x86 \
               -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-              -DCMAKE_C_COMPILER=~/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+              -DCMAKE_C_COMPILER:PATH=~/djgpp/bin/i586-pc-msdosdjgpp-gcc \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_LIBPSL=OFF \
-              -DOPENSSL_INCLUDE_DIR=~/djgpp/include \
-              -DOPENSSL_SSL_LIBRARY=~/djgpp/lib/libssl.a \
-              -DOPENSSL_CRYPTO_LIBRARY=~/djgpp/lib/libcrypto.a \
-              -DZLIB_INCLUDE_DIR=~/djgpp/include \
-              -DZLIB_LIBRARY=~/djgpp/lib/libz.a \
-              -DWATT_ROOT=~/djgpp/net/watt
+              -DOPENSSL_INCLUDE_DIR:PATH=~/djgpp/include \
+              -DOPENSSL_SSL_LIBRARY:PATH=~/djgpp/lib/libssl.a \
+              -DOPENSSL_CRYPTO_LIBRARY:PATH=~/djgpp/lib/libcrypto.a \
+              -DZLIB_INCLUDE_DIR:PATH=~/djgpp/include \
+              -DZLIB_LIBRARY:PATH=~/djgpp/lib/libz.a \
+              -DWATT_ROOT:PATH=~/djgpp/net/watt
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
