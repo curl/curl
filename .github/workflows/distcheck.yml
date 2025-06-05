@@ -63,7 +63,7 @@ jobs:
           make install
           popd
           # basic check of the installed files
-          bash scripts/installcheck.sh $HOME/temp
+          bash scripts/installcheck.sh ~/temp
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
@@ -196,25 +196,25 @@ jobs:
       - name: 'install prereqs'
         run: |
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
-            cd "${HOME}" || exit 1
+            cd ~ || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-win64-x64.zip" --output bin.zip
             unzip -q bin.zip
             rm -f bin.zip
-            printf '%s' "${HOME}/cmake-${OLD_CMAKE_VERSION}-win64-x64/bin/cmake.exe" > "${HOME}/old-cmake-path.txt"
+            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-win64-x64/bin/cmake.exe" > ~/old-cmake-path.txt
           elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
             sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
-            cd "${HOME}" || exit 1
+            cd ~ || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64.tar.gz" | tar -xzf -
-            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64/bin/cmake" > "${HOME}/old-cmake-path.txt"
+            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64/bin/cmake" > ~/old-cmake-path.txt
           else
             brew install libpsl openssl
-            cd "${HOME}" || exit 1
+            cd ~ || exit 1
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64.tar.gz" | tar -xzf -
-            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > "${HOME}/old-cmake-path.txt"
+            printf '%s' "$PWD/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > ~/old-cmake-path.txt
           fi
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -230,7 +230,7 @@ jobs:
 
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
+          export TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
@@ -243,7 +243,7 @@ jobs:
 
       - name: 'via find_package OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
+          export TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
