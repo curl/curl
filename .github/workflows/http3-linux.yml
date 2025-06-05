@@ -156,7 +156,7 @@ jobs:
         if: steps.cache-openssl-http3.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.OPENSSL_VERSION }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           ./config --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -166,7 +166,7 @@ jobs:
         if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.QUICTLS_VERSION }}-quic1 https://github.com/quictls/openssl quictls
+          git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
           cd quictls
           ./config no-deprecated --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -176,7 +176,7 @@ jobs:
         if: steps.cache-gnutls.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b ${{ env.GNUTLS_VERSION }} https://github.com/gnutls/gnutls.git
+          git clone --quiet --depth=1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls.git
           cd gnutls
           ./bootstrap
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -190,7 +190,7 @@ jobs:
         if: steps.cache-wolfssl.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.WOLFSSL_VERSION }}-stable https://github.com/wolfSSL/wolfssl.git
+          git clone --quiet --depth=1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl.git
           cd wolfssl
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
@@ -202,7 +202,7 @@ jobs:
         if: steps.cache-nghttp3.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.NGHTTP3_VERSION }} https://github.com/ngtcp2/nghttp3
+          git clone --quiet --depth=1 -b "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
           cd nghttp3
           git submodule update --init --depth=1
           autoreconf -fi
@@ -217,7 +217,7 @@ jobs:
         # building twice to get crypto libs for ossl and quictls installed
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.NGTCP2_VERSION }} https://github.com/ngtcp2/ngtcp2
+          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
@@ -233,7 +233,7 @@ jobs:
         if: steps.cache-nghttp2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.NGHTTP2_VERSION }} https://github.com/nghttp2/nghttp2
+          git clone --quiet --depth=1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
           cd nghttp2
           git submodule update --init --depth=1
           autoreconf -fi
@@ -433,7 +433,7 @@ jobs:
         if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b ${{ env.QUICHE_VERSION }} --recursive https://github.com/cloudflare/quiche.git
+          git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
           cd quiche
           #### Work-around https://github.com/curl/curl/issues/7927 #######
           #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####

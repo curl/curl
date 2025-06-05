@@ -354,9 +354,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://bearssl.org/bearssl-${{ env.BEARSSL_VERSION }}.tar.gz
-          tar -xzf bearssl-${{ env.BEARSSL_VERSION }}.tar.gz
-          cd bearssl-${{ env.BEARSSL_VERSION }}
+            "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz"
+          tar -xzf "bearssl-${BEARSSL_VERSION}.tar.gz"
+          cd "bearssl-${BEARSSL_VERSION}"
           make
           mkdir -p $HOME/bearssl/lib $HOME/bearssl/include
           cp inc/*.h $HOME/bearssl/include
@@ -376,9 +376,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/libressl/portable/releases/download/v${{ env.LIBRESSL_VERSION }}/libressl-${{ env.LIBRESSL_VERSION }}.tar.gz
-          tar -xzf libressl-${{ env.LIBRESSL_VERSION }}.tar.gz
-          cd libressl-${{ env.LIBRESSL_VERSION }}
+            "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz"
+          tar -xzf "libressl-${LIBRESSL_VERSION}.tar.gz"
+          cd "libressl-${LIBRESSL_VERSION}"
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
@@ -396,9 +396,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssl/archive/v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
-          tar -xzf v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
-          cd wolfssl-${{ env.WOLFSSL_VERSION }}-stable
+            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
+          tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
+          cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
@@ -418,9 +418,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssl/archive/v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
-          tar -xzf v${{ env.WOLFSSL_VERSION }}-stable.tar.gz
-          cd wolfssl-${{ env.WOLFSSL_VERSION }}-stable
+            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
+          tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
+          cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
@@ -440,9 +440,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssh/archive/v${{ env.WOLFSSH_VERSION }}-stable.tar.gz
-          tar -xzf v${{ env.WOLFSSH_VERSION }}-stable.tar.gz
-          cd wolfssh-${{ env.WOLFSSH_VERSION }}-stable
+            "https://github.com/wolfSSL/wolfssh/archive/v${WOLFSSH_VERSION}-stable.tar.gz"
+          tar -xzf "v${WOLFSSH_VERSION}-stable.tar.gz"
+          cd "wolfssh-${WOLFSSH_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
             --disable-examples --prefix=$HOME/wolfssh
@@ -462,9 +462,9 @@ jobs:
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${{ env.MBEDTLS_VERSION }}/mbedtls-${{ env.MBEDTLS_VERSION }}.tar.bz2
-          tar -xjf mbedtls-${{ env.MBEDTLS_VERSION }}.tar.bz2
-          cd mbedtls-${{ env.MBEDTLS_VERSION }}
+            "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2"
+          tar -xjf "mbedtls-${MBEDTLS_VERSION}.tar.bz2"
+          cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
@@ -485,7 +485,7 @@ jobs:
       - name: 'build openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.OPENSSL_VERSION }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -504,7 +504,7 @@ jobs:
       - name: 'build quictls'
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.QUICTLS_VERSION }}-quic1 https://github.com/quictls/openssl
+          git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl
           cd openssl
           ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
           make
@@ -523,7 +523,7 @@ jobs:
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.MSH3_VERSION }} --recursive https://github.com/nibanks/msh3
+          git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
           cd msh3
           cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3
           cmake --build .
@@ -543,11 +543,11 @@ jobs:
         if: contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.AWSLC_VERSION }}.tar.gz
-          tar -xzf v${{ env.AWSLC_VERSION }}.tar.gz
-          mkdir aws-lc-${{ env.AWSLC_VERSION }}-build
-          cd aws-lc-${{ env.AWSLC_VERSION }}-build
-          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.AWSLC_VERSION }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+            "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz"
+          tar -xzf "v${AWSLC_VERSION}.tar.gz"
+          mkdir "aws-lc-${AWSLC_VERSION}-build"
+          cd "aws-lc-${AWSLC_VERSION}-build"
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -565,7 +565,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/rustls
-          curl -L https://github.com/rustls/rustls-ffi/releases/download/v${{ env.RUSTLS_VERSION }}/librustls_${{ env.RUSTLS_VERSION }}_amd64.deb.zip -o ~/rustls/librustls.zip
+          curl -L "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" -o ~/rustls/librustls.zip
           unzip ~/rustls/librustls.zip -d ~/rustls
           rm ~/rustls/librustls.zip
 
@@ -573,7 +573,7 @@ jobs:
         # Note: we don't check cache-hit here. If the cache is hit, we still need to dpkg install the deb.
         if: contains(matrix.build.install_steps, 'rustls')
         run: |
-          sudo dpkg -i ~/rustls/librustls_${{ env.RUSTLS_VERSION }}_amd64.deb
+          sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
 
       - name: 'install Intel compilers'
         if: contains(matrix.build.install_steps, 'intel')
