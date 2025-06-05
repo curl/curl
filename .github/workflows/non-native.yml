@@ -137,95 +137,86 @@ jobs:
           - { build: 'autotools', arch: 'arm64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
-    env:
-      CC: '${{ matrix.compiler }}'
-      MATRIX_ARCH: '${{ matrix.arch }}'
-      MATRIX_BUILD: '${{ matrix.build }}'
-      MATRIX_DESC: '${{ matrix.desc }}'
-      MATRIX_OPTIONS: '${{ matrix.options }}'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-      - name: 'autotools'
-        if: ${{ matrix.build == 'autotools' }}
+      - name: '${{ matrix.build }}'
         uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        env:
+          CC: '${{ matrix.compiler }}'
+          MATRIX_ARCH: '${{ matrix.arch }}'
+          MATRIX_BUILD: '${{ matrix.build }}'
+          MATRIX_DESC: '${{ matrix.desc }}'
+          MATRIX_OPTIONS: '${{ matrix.options }}'
         with:
           environment_variables: CC MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
           version: '14.2'
           architecture: ${{ matrix.arch }}
           run: |
-            export MAKEFLAGS=-j3
             export CURL_CI=github
             # https://ports.freebsd.org/
-            time sudo pkg install -y autoconf automake libtool \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
-            time autoreconf -fi
-            if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
-              options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
-            fi
-            mkdir bld && cd bld
-            time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
-              --prefix="$HOME/install" \
-              --with-openssl \
-              --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-              --disable-dependency-tracking \
-              ${options} \
-              ${MATRIX_OPTIONS} \
-              || { tail -n 1000 config.log; false; }
-            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time make install
-            src/curl --disable --version
-            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
-              time make -C tests
-              if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
-                time make test-ci V=1 TFLAGS='-j8'
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              time sudo pkg install -y cmake-core ninja perl5 \
+                pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+              time cmake -B bld -G Ninja \
+                -DCMAKE_C_COMPILER="${CC}" \
+                -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+                -DCURL_WERROR=ON \
+                -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+                -DCURL_USE_OPENSSL=ON \
+                -DCURL_USE_GSSAPI=ON \
+                ${MATRIX_OPTIONS} \
+                || { cat bld/CMakeFiles/CMake*.yaml; false; }
+              echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+              echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+              time cmake --build bld
+              bld/src/curl --disable --version
+              if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+                time cmake --build bld --target testdeps
+                if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
+                  export TFLAGS='-j8'
+                  time cmake --build bld --target test-ci
+                fi
               fi
-            fi
-            if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
-              echo '::group::build examples'
-              time make examples
-              echo '::endgroup::'
-            fi
-
-      - name: 'cmake'
-        if: ${{ matrix.build == 'cmake' }}
-        uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
-        with:
-          environment_variables: CC MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
-          operating_system: 'freebsd'
-          version: '14.1'
-          architecture: ${{ matrix.arch }}
-          run: |
-            # https://ports.freebsd.org/
-            time sudo pkg install -y cmake-core ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
-            time cmake -B bld -G Ninja \
-              -DCMAKE_C_COMPILER="${CC}" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-              -DCURL_WERROR=ON \
-              -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
-              -DCURL_USE_OPENSSL=ON \
-              -DCURL_USE_GSSAPI=ON \
-              ${MATRIX_OPTIONS} \
-              || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
-            time cmake --build bld
-            bld/src/curl --disable --version
-            if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
-              time cmake --build bld --target testdeps
-              if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
-                export TFLAGS='-j8'
-                time cmake --build bld --target test-ci
+              if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
+                echo '::group::build examples'
+                time cmake --build bld --target curl-examples
+                echo '::endgroup::'
               fi
-            fi
-            if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
-              echo '::group::build examples'
-              time cmake --build bld --target curl-examples
-              echo '::endgroup::'
+            else
+              export MAKEFLAGS=-j3
+              time sudo pkg install -y autoconf automake libtool \
+                pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+              time autoreconf -fi
+              if [ "${MATRIX_ARCH}" != 'x86_64' ]; then
+                options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
+              fi
+              mkdir bld && cd bld
+              time ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
+                --prefix="$HOME/install" \
+                --with-openssl \
+                --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
+                --disable-dependency-tracking \
+                ${options} \
+                ${MATRIX_OPTIONS} \
+                || { tail -n 1000 config.log; false; }
+              echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
+              echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
+              time make install
+              src/curl --disable --version
+              if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
+                time make -C tests
+                if [ "${MATRIX_DESC#*!runtests*}" = "${MATRIX_DESC}" ]; then
+                  time make test-ci V=1 TFLAGS='-j8'
+                fi
+              fi
+              if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
+                echo '::group::build examples'
+                time make examples
+                echo '::endgroup::'
+              fi
             fi
 
   omnios:
