@@ -308,17 +308,20 @@ jobs:
     steps:
       - name: 'install prereqs'
         if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
-        # zizmor: ignore[template-injection]
+        env:
+          INSTALL_PACKAGES: >-
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }}
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
+
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
-            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
+            ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES} \
-            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
           python3 -m venv ~/venv
 
       - name: 'install prereqs'
