@@ -250,6 +250,8 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           if [ '${{ matrix.test }}' = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
@@ -272,7 +274,7 @@ jobs:
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
-                -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+                -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \
                 ${{ matrix.config }}
@@ -475,6 +477,8 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_TYPE: '${{ matrix.type }}'
         run: |
           PATH="/d/my-cache/${{ matrix.dir }}/bin:$PATH"
           for _chkprefill in '' ${{ matrix.chkprefill }}; do
@@ -482,7 +486,7 @@ jobs:
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" -G Ninja ${options} \
               -DCMAKE_C_COMPILER=gcc \
-              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
+              -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
@@ -771,6 +775,7 @@ jobs:
       run:
         shell: msys2 {0}
     env:
+      MATRIX_TYPE: '${{ matrix.type }}'
       OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
@@ -882,21 +887,21 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
-            'bld/src/${{ matrix.type }}/curl.exe' --disable --version
+            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
+            "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
           fi
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -936,7 +941,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          export CURL_DIRSUFFIX='${{ matrix.type }}'
+          export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           export TFLAGS='-j8 ${{ matrix.tflags }}'
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
@@ -951,10 +956,10 @@ jobs:
             fi
             PATH="/c/OpenSSH-Win64:$PATH"
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples
