@@ -59,6 +59,8 @@ jobs:
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: '${{ matrix.compiler }}'
+      MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
@@ -204,8 +206,8 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && "${CC}" --print-sysroot
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
@@ -224,19 +226,19 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+          if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
           else
             sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
 
-          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+          if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
             CC+=" --sysroot=${sysroot}"
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             for _chkprefill in '' ${{ matrix.build.chkprefill }}; do
               options=''
               [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
@@ -255,10 +257,10 @@ jobs:
             fi
           else
             export CFLAGS
-            if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
             fi
-            if [ '${{ matrix.compiler }}' != 'clang' ]; then
+            if [ "${MATRIX_COMPILER}" != 'clang' ]; then
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
@@ -284,7 +286,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose
           else
             make -C bld V=1
@@ -299,7 +301,7 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
@@ -320,7 +322,7 @@ jobs:
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
             make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
@@ -339,7 +341,7 @@ jobs:
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
           source $HOME/venv/bin/activate
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
             make -C bld V=1 pytest-ci
@@ -348,7 +350,7 @@ jobs:
       - name: 'build examples'
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
-          if [ -n '${{ matrix.build.generate }}' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-examples
           else
             make -C bld examples V=1
@@ -362,6 +364,9 @@ jobs:
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: '${{ matrix.compiler }}'
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
+      MATRIX_CONFIG: '${{ matrix.config }}'
     strategy:
       fail-fast: false
       matrix:
@@ -421,8 +426,8 @@ jobs:
 
       - name: 'toolchain versions'
         run: |
-          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && "${CC}" --print-sysroot
+          [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          [[ "${MATRIX_COMPILER}" = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
@@ -441,26 +446,26 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [ '${{ matrix.compiler }}' = 'gcc-13' ] && [ '${{ matrix.image }}' = 'macos-15' ] ; then
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ '${{ matrix.image }}' = 'macos-15' ] ; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
             /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi
 
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+          if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
           else
             sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
 
-          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+          if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
             CC+=" --sysroot=${sysroot}"
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
-            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
+            [ "${MATRIX_CONFIG}" = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON \
@@ -474,15 +479,15 @@ jobs:
               ${options}
           else
             export CFLAGS
-            if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            if [[ "${MATRIX_COMPILER}" = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
             fi
-            if [ '${{ matrix.compiler }}' != 'clang' ]; then
+            if [ "${MATRIX_COMPILER}" != 'clang' ]; then
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
-            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
+            [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
+            [ "${MATRIX_CONFIG}" = 'SecureTransport' ] && options+=' --with-secure-transport'
             [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -504,7 +509,7 @@ jobs:
 
       - name: 'build / ${{ matrix.build }}'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose
           else
             make -C bld V=1
