@@ -318,6 +318,9 @@ class TestSSLUse:
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
         elif env.curl_uses_lib('aws-lc'):
             supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+        elif env.curl_uses_lib('openssl') and \
+            env.curl_lib_version_before('openssl', '3.0.0'):
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
         else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
             supported = [None, None, 'TLSv1.2', 'TLSv1.3']
         # test
