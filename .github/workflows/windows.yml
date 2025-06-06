@@ -81,7 +81,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: matrix.build == 'automake'
+        if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
         run: |
           PATH=/usr/bin
@@ -108,7 +108,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: |
           PATH=/usr/bin
           cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
@@ -141,7 +141,7 @@ jobs:
           bld/src/curl.exe --disable --version
 
       - name: 'build tests'
-        if: matrix.tflags != 'skipall'
+        if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         run: |
           PATH=/usr/bin
@@ -152,7 +152,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         env:
           TFLAGS: '${{ matrix.tflags }}'
@@ -170,7 +170,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: matrix.build == 'cmake'
+        if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
         run: |
           PATH=/usr/bin
@@ -221,7 +221,7 @@ jobs:
         shell: pwsh
 
       - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
-        if: matrix.sys == 'msys'
+        if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
@@ -237,7 +237,7 @@ jobs:
             ${{ matrix.install }}
 
       - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
-        if: matrix.sys != 'msys'
+        if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           update: ${{ matrix.sys == 'clangarm64' }}  # delete this line on next msys2/setup-msys2 bump
@@ -254,7 +254,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: matrix.build == 'autotools'
+        if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
         run: autoreconf -fi
 
@@ -308,7 +308,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -343,7 +343,7 @@ jobs:
           fi
 
       - name: 'build tests'
-        if: matrix.tflags != 'skipall'  # Save time by skipping this for autotools
+        if: ${{ matrix.tflags != 'skipall' }}  # Save time by skipping this for autotools
         timeout-minutes: 10
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -360,14 +360,14 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
       - name: 'downgrade msys2-runtime'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
@@ -377,7 +377,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
@@ -403,7 +403,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun')  # Save time by skipping this for autotools running tests
+        if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
         timeout-minutes: 5
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -478,7 +478,7 @@ jobs:
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
-        if: steps.cache-compiler.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         env:
           MATRIX_URL: '${{ matrix.url }}'
@@ -523,7 +523,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -545,21 +545,21 @@ jobs:
           bld/src/curl.exe --disable --version
 
       - name: 'build tests'
-        if: matrix.tflags != 'skipall'
+        if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'downgrade msys2-runtime'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
@@ -569,7 +569,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
           TFLAGS: '${{ matrix.tflags }}'
@@ -619,7 +619,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: matrix.build == 'autotools'
+        if: ${{ matrix.build == 'autotools' }}
         run: autoreconf -fi
 
       - name: 'configure'
@@ -650,7 +650,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -670,7 +670,7 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: matrix.build == 'cmake' && matrix.compiler != 'clang-tidy'  # Save time by skipping this for autotools and clang-tidy
+        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -679,7 +679,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: matrix.compiler != 'clang-tidy'  # Save time by skipping this for clang-tidy
+        if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
@@ -701,7 +701,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        if: matrix.build == 'autotools'
+        if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         run: |
           # shellcheck disable=SC2181,SC2034
@@ -715,7 +715,7 @@ jobs:
           key: ${{ runner.os }}-mingw32ce-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (mingw32ce)'
-        if: steps.cache-compiler.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
         run: |
           cd ~
@@ -756,7 +756,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -778,7 +778,7 @@ jobs:
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: matrix.build == 'cmake'  # skip for autotools to save time
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -788,7 +788,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: matrix.build == 'cmake'  # skip for autotools to save time
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -915,7 +915,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -937,12 +937,12 @@ jobs:
           fi
 
       - name: 'build tests'
-        if: matrix.tflags != 'skipall'
+        if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
@@ -966,7 +966,7 @@ jobs:
           fi
 
       - name: 'downgrade msys2-runtime'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 2
         # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
         # causing runtests.pl to run at 2-3x reduced speed.
@@ -976,7 +976,7 @@ jobs:
           fi
 
       - name: 'run tests'
-        if: matrix.tflags != 'skipall' && matrix.tflags != 'skiprun'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         env:
           TFLAGS: '${{ matrix.tflags }}'
@@ -1001,5 +1001,5 @@ jobs:
 
       - name: 'build examples'
         timeout-minutes: 5
-        if: contains(matrix.name, '+examples')
+        if: ${{ contains(matrix.name, '+examples') }}
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples

@@ -16,12 +16,12 @@ permissions: {}
 jobs:
   split:
     runs-on: ubuntu-latest
-    if: github.event.sender.login == 'appveyor[bot]'
+    if: ${{ github.event.sender.login == 'appveyor[bot]' }}
     permissions:
       statuses: write
     steps:
       - name: Create individual AppVeyor build statuses
-        if: github.event.sha && github.event.target_url
+        if: ${{ github.event.sha && github.event.target_url }}
         env:
           APPVEYOR_COMMIT_SHA: ${{ github.event.sha }}
           APPVEYOR_TARGET_URL: ${{ github.event.target_url }}

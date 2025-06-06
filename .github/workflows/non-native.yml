@@ -317,7 +317,7 @@ jobs:
 
     steps:
       - name: 'brew install'
-        if: matrix.build.configure
+        if: ${{ matrix.build.configure }}
         run: |
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
@@ -365,7 +365,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: matrix.build.configure
+        if: ${{ matrix.build.configure }}
         run: autoreconf -fi
 
       - name: 'configure'
@@ -392,7 +392,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -456,7 +456,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: matrix.build == 'autotools'
+        if: ${{ matrix.build == 'autotools' }}
         run: autoreconf -fi
 
       - name: 'configure'
@@ -483,7 +483,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -544,7 +544,7 @@ jobs:
           key: ${{ runner.os }}-djgpp-${{ env.TOOLCHAIN_VERSION }}-amd64
 
       - name: 'install compiler (djgpp)'
-        if: steps.cache-compiler.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
@@ -593,7 +593,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -613,7 +613,7 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: matrix.build == 'cmake'  # skip for autotools to save time
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -622,7 +622,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: matrix.build == 'cmake'  # skip for autotools to save time
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
