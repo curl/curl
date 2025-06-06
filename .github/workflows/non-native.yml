@@ -63,6 +63,7 @@ jobs:
             # https://pkgsrc.se/
             time sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX:PATH=~/curl-prefix \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
@@ -72,6 +73,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld
+            time cmake --install bld
             bld/src/curl --disable --version
             if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
@@ -107,6 +109,7 @@ jobs:
             # https://www.openbsd.org/faq/faq15.html
             time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
             time cmake -B bld -G Ninja \
+              -DCMAKE_INSTALL_PREFIX:PATH=~/curl-prefix \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
@@ -115,6 +118,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld
+            time cmake --install bld
             bld/src/curl --disable --version
             if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
