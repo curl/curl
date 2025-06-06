@@ -95,13 +95,13 @@ jobs:
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
-              -DCMAKE_INSTALL_PREFIX:PATH=~/curl \
+              -DCMAKE_INSTALL_PREFIX:PATH=~/curl-prefix \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="$HOME"/curl \
+              --prefix="$HOME"/curl-prefix \
               --with-libssh2 \
               --disable-dependency-tracking \
               ${MATRIX_CONFIG}
@@ -287,7 +287,7 @@ jobs:
               [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_INSTALL_PREFIX:PATH=~/curl \
+                -DCMAKE_INSTALL_PREFIX:PATH=~/curl-prefix \
                 -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
                 -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
@@ -301,7 +301,7 @@ jobs:
           else
             export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="$HOME"/curl \
+              --prefix="$HOME"/curl-prefix \
               --with-libssh2 \
               --disable-dependency-tracking \
               ${MATRIX_CONFIG}
