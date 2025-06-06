@@ -202,7 +202,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
+        if: contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls')
         run: |
           if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
@@ -225,7 +225,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build.configure }}
+        if: matrix.build.configure
         run: autoreconf -fi
 
       - name: 'configure'
@@ -282,7 +282,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: ${{ !cancelled() }}
+        if: !cancelled()
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -305,7 +305,7 @@ jobs:
         run: bld/src/curl --disable --version
 
       - name: 'cmake install'
-        if: ${{ matrix.build.generate }}
+        if: matrix.build.generate
         run: cmake --install bld --strip
 
       - name: 'build tests'
@@ -317,14 +317,14 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !matrix.build.clang-tidy }}
+        if: !matrix.build.clang-tidy
         run: |
           python3 -m venv ~/venv
           source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ !matrix.build.clang-tidy }}
+        if: !matrix.build.clang-tidy
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         env:
           TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
@@ -340,13 +340,13 @@ jobs:
           fi
 
       - name: 'install pytest prereqs'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest')
         run: |
           source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest')
         env:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
@@ -359,7 +359,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: ${{ contains(matrix.build.name, '+examples') }}
+        if: contains(matrix.build.name, '+examples')
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-examples
@@ -433,7 +433,7 @@ jobs:
           - { compiler: gcc-14, build: autotools }
     steps:
       - name: 'install autotools'
-        if: ${{ matrix.build == 'autotools' }}
+        if: matrix.build == 'autotools'
         run: |
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
@@ -455,7 +455,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build == 'autotools' }}
+        if: matrix.build == 'autotools'
         run: autoreconf -fi
 
       - name: 'configure / ${{ matrix.build }}'
@@ -513,7 +513,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: ${{ !cancelled() }}
+        if: !cancelled()
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'

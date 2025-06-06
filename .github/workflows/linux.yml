@@ -586,7 +586,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build.configure }}
+        if: matrix.build.configure
         run: autoreconf -fi
 
       - name: 'configure'
@@ -617,7 +617,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: ${{ !cancelled() }}
+        if: !cancelled()
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
@@ -639,7 +639,7 @@ jobs:
           fi
 
       - name: 'single-use function check'
-        if: ${{ contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF') }}
+        if: contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')
         run: |
           git config --global --add safe.directory "*"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -650,15 +650,15 @@ jobs:
           ./scripts/singleuse.pl --unit "${libcurla}"
 
       - name: 'check curl -V output'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        if: matrix.build.make-custom-target != 'tidy'
         run: bld/src/curl -V
 
       - name: 'cmake install'
-        if: ${{ matrix.build.generate }}
+        if: matrix.build.generate
         run: cmake --install bld --strip
 
       - name: 'build tests'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
+        if: !contains(matrix.build.install_steps, 'skipall')
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target testdeps
@@ -667,13 +667,13 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
+        if: !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null
         run: |
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        if: !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun')
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         env:
           TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
@@ -717,14 +717,14 @@ jobs:
           fi
 
       - name: 'randcurl'
-        if: ${{ contains(matrix.build.install_steps, 'randcurl') }}
+        if: contains(matrix.build.install_steps, 'randcurl')
         run: |
           mkdir run
           cd run
           ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        if: matrix.build.make-custom-target != 'tidy'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples

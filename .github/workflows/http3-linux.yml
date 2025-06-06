@@ -455,7 +455,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build.configure }}
+        if: matrix.build.configure
         run: autoreconf -fi
 
       - name: 'configure'
@@ -477,7 +477,7 @@ jobs:
           fi
 
       - name: 'configure log'
-        if: ${{ !cancelled() }}
+        if: !cancelled()
         run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
