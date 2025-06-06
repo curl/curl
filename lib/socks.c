@@ -136,7 +136,6 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
     blen -= nread;
     *pnread += nread;
   }
-  return 0;
 }
 #endif
 
