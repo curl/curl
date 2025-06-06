@@ -84,6 +84,12 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
       }
     }
+    else {
+      if(curlx_dyn_add(&npath, "/")) {
+        free(working_path);
+        return CURLE_OUT_OF_MEMORY;
+      }
+    }
   }
 
   if(curlx_dyn_len(&npath)) {
