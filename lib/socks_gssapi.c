@@ -115,8 +115,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   struct connectdata *conn = cf->conn;
   curl_socket_t sock = conn->sock[cf->sockindex];
   CURLcode code;
-  ssize_t actualread;
-  ssize_t nwritten;
+  size_t actualread;
+  size_t nwritten;
   int result;
   OM_uint32 gss_major_status, gss_minor_status, gss_status;
   OM_uint32 gss_ret_flags;
@@ -210,8 +210,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       us_length = htons((unsigned short)gss_send_token.length);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4,
-                                   FALSE, &code);
+      code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4,
+                               FALSE, &nwritten);
       if(code || (4 != nwritten)) {
         failf(data, "Failed to send GSS-API authentication request.");
         gss_release_name(&gss_status, &server);
@@ -221,10 +221,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
         return CURLE_COULDNT_CONNECT;
       }
 
-      nwritten = Curl_conn_cf_send(cf->next, data,
-                                   (char *)gss_send_token.value,
-                                   gss_send_token.length, FALSE, &code);
-      if(code || ((ssize_t)gss_send_token.length != nwritten)) {
+      code = Curl_conn_cf_send(cf->next, data,
+                               (char *)gss_send_token.value,
+                               gss_send_token.length, FALSE, &nwritten);
+      if(code || (gss_send_token.length != nwritten)) {
         failf(data, "Failed to send GSS-API authentication token.");
         gss_release_name(&gss_status, &server);
         gss_release_buffer(&gss_status, &gss_recv_token);
@@ -418,8 +418,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
-                               &code);
+  code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
+                           &nwritten);
   if(code  || (4 != nwritten)) {
     failf(data, "Failed to send GSS-API encryption request.");
     gss_release_buffer(&gss_status, &gss_w_token);
@@ -429,8 +429,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   if(data->set.socks5_gssapi_nec) {
     memcpy(socksreq, &gss_enc, 1);
-    nwritten = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
-                                 &code);
+    code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
+                             &nwritten);
     if(code || ( 1 != nwritten)) {
       failf(data, "Failed to send GSS-API encryption type.");
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -438,10 +438,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
   }
   else {
-    nwritten = Curl_conn_cf_send(cf->next, data,
-                                 (char *)gss_w_token.value,
-                                 gss_w_token.length, FALSE, &code);
-    if(code || ((ssize_t)gss_w_token.length != nwritten)) {
+    code = Curl_conn_cf_send(cf->next, data, (char *)gss_w_token.value,
+                             gss_w_token.length, FALSE, &nwritten);
+    if(code || (gss_w_token.length != nwritten)) {
       failf(data, "Failed to send GSS-API encryption type.");
       gss_release_buffer(&gss_status, &gss_w_token);
       gss_delete_sec_context(&gss_status, &gss_context, NULL);

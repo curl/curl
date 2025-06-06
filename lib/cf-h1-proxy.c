@@ -252,7 +252,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   size_t request_len = curlx_dyn_len(&ts->request_data);
   size_t blen = request_len;
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(blen <= ts->nsent)
     goto out;  /* we are done */
@@ -260,16 +260,15 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   blen -= ts->nsent;
   buf += ts->nsent;
 
-  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
-  if(nwritten < 0) {
-    if(result == CURLE_AGAIN) {
+  result = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &nwritten);
+  if(result) {
+    if(result == CURLE_AGAIN)
       result = CURLE_OK;
-    }
     goto out;
   }
 
-  DEBUGASSERT(blen >= (size_t)nwritten);
-  ts->nsent += (size_t)nwritten;
+  DEBUGASSERT(blen >= nwritten);
+  ts->nsent += nwritten;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
 
 out:
