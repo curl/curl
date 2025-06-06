@@ -182,7 +182,7 @@ jobs:
           cd gnutls
           ./bootstrap
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            LDFLAGS='-Wl,-rpath,~/build/lib -L~/build/lib' \
+            LDFLAGS="-Wl,-rpath,$PWD/build/lib -L$PWD/build/lib" \
             --with-included-libtasn1 --with-included-unistring \
             --disable-guile --disable-doc --disable-tests --disable-tools
           make
