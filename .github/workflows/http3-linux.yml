@@ -56,8 +56,6 @@ env:
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   QUICHE_VERSION: 0.23.5
 
-# '$HOME' == '~' == '/home/runner'
-
 jobs:
   build-cache:
     runs-on: ubuntu-latest
