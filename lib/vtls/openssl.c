@@ -4120,6 +4120,20 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_options(octx->ssl_ctx, ctx_options);
   SSL_CTX_set_read_ahead(octx->ssl_ctx, 1);
 
+  /* Max TLS1.2 record size 0x4000 + 0x800.
+     OpenSSL supports processing "jumbo TLS record" (8 TLS records) in one go
+     for some algorithms, so match that here.
+     Experimentation shows that a slightly larger buffer is needed
+      to avoid short reads.
+
+     However using a large buffer (8 packets) actually decreases performance.
+     4 packets is better.
+   */
+
+#ifdef HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN
+  SSL_CTX_set_default_read_buffer_len(octx->ssl_ctx, 0x401e * 4);
+#endif
+
 #ifdef SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
