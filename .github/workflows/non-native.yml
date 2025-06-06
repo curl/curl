@@ -298,9 +298,9 @@ jobs:
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
-              -DOPENSSL_INCLUDE_DIR="$HOME"/libressl/include
-              -DOPENSSL_SSL_LIBRARY="$HOME"/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME"/libressl/lib/libcrypto.a
+              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
+              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'libressl'
@@ -310,9 +310,9 @@ jobs:
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR="$HOME"/libressl/include
-              -DOPENSSL_SSL_LIBRARY="$HOME"/libressl/lib/libssl.a
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME"/libressl/lib/libcrypto.a
+              -DOPENSSL_INCLUDE_DIR=/Users/runner/libressl/include
+              -DOPENSSL_SSL_LIBRARY=/Users/runner/libressl/lib/libssl.a
+              -DOPENSSL_CRYPTO_LIBRARY=/Users/runner/libressl/lib/libcrypto.a
               -DCURL_USE_LIBPSL=OFF
 
     steps:
@@ -351,7 +351,7 @@ jobs:
           # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
           cmake -B . -G Ninja \
             -DHAVE_ENDIAN_H=0 \
-            -DCMAKE_INSTALL_PREFIX="$HOME"/libressl \
+            -DCMAKE_INSTALL_PREFIX=/Users/runner/libressl \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
             -DBUILD_SHARED_LIBS=OFF \
