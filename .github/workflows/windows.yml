@@ -891,8 +891,8 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             cmake -B "bld${_chkprefill}" ${options} \
-              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+              -DCMAKE_TOOLCHAIN_FILE:PATH="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_INSTALLED_DIR:PATH="$VCPKG_INSTALLATION_ROOT/installed" \
               -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_COMPILER_TARGET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_FLAGS="${cflags}" \
