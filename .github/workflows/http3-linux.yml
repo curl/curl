@@ -160,7 +160,7 @@ jobs:
           cd ~
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix="$PWD/build" --libdir=lib no-makedepend no-apps no-docs no-tests
+          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -170,7 +170,7 @@ jobs:
           cd ~
           git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
           cd quictls
-          ./config no-deprecated --prefix="$PWD/build" --libdir=lib no-makedepend no-apps no-docs no-tests
+          ./config no-deprecated --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
@@ -181,7 +181,7 @@ jobs:
           git clone --quiet --depth=1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls.git
           cd gnutls
           ./bootstrap
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             LDFLAGS='-Wl,-rpath,~/build/lib -L~/build/lib' \
             --with-included-libtasn1 --with-included-unistring \
             --disable-guile --disable-doc --disable-tests --disable-tools
@@ -196,7 +196,7 @@ jobs:
           cd wolfssl
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
-            --disable-benchmark --disable-crypttests --disable-examples --prefix="$PWD/build"
+            --disable-benchmark --disable-crypttests --disable-examples --prefix="$PWD"/build
           make
           make install
 
@@ -208,7 +208,7 @@ jobs:
           cd nghttp3
           git submodule update --init --depth=1
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" --enable-lib-only
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only
           make
           make install
 
@@ -220,11 +220,11 @@ jobs:
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig --enable-lib-only --with-quictls
           make install
           make clean
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=~/openssl/build/lib/pkgconfig:~/gnutls/build/lib/pkgconfig:~/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
@@ -237,7 +237,7 @@ jobs:
           cd nghttp2
           git submodule update --init --depth=1
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" \
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig \
             LDFLAGS=-Wl,-rpath,~/quictls/build/lib \
             --enable-http3
