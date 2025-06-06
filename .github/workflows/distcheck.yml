@@ -63,7 +63,7 @@ jobs:
           make install
           popd
           # basic check of the installed files
-          bash scripts/installcheck.sh ~/temp
+          bash scripts/installcheck.sh "$HOME"/temp
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
