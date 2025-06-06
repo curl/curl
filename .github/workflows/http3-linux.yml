@@ -208,9 +208,7 @@ jobs:
           cd nghttp3
           git submodule update --init --depth=1
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix="$PWD/build" \
-            PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig" \
-            --enable-lib-only
+          ./configure --disable-dependency-tracking --prefix="$PWD/build" --enable-lib-only
           make
           make install
 
