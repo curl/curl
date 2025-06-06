@@ -383,6 +383,13 @@ issue.
 `writedelay: [secs]` delay this amount between reply packets (each packet
   being 512 bytes payload)
 
+### `<dns>`
+
+Commands for the test DNS server.
+
+- `A: [dotted ipv4 address]` - set IPv4 address to return
+- `AAAA: [numerical IPv6 address]` - set IPv6 address to return
+
 ## `<client>`
 
 ### `<server>`
