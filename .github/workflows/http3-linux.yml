@@ -256,7 +256,7 @@ jobs:
       matrix:
         build:
           - name: openssl
-            #PKG_CONFIG_PATH: ~/openssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/openssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
@@ -265,7 +265,7 @@ jobs:
               --with-libuv
 
           - name: quictls
-            #PKG_CONFIG_PATH: ~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/quictls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
@@ -274,7 +274,7 @@ jobs:
               --with-libuv
 
           - name: gnutls
-            #PKG_CONFIG_PATH: ~/gnutls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/gnutls/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
@@ -283,7 +283,7 @@ jobs:
               --with-libuv
 
           - name: wolfssl
-            #PKG_CONFIG_PATH: ~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
               --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
@@ -293,7 +293,7 @@ jobs:
               --with-libuv
 
           - name: wolfssl
-            #PKG_CONFIG_PATH: ~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/wolfssl/build/lib/pkgconfig:~/nghttp3/build/lib/pkgconfig:~/ngtcp2/build/lib/pkgconfig:~/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
               -DTEST_NGHTTPX:PATH=~/nghttp2/build/bin/nghttpx
@@ -302,7 +302,7 @@ jobs:
               -DCURL_USE_LIBUV=ON
 
           - name: openssl-quic
-            #PKG_CONFIG_PATH: ~/openssl/build/lib/pkgconfig
+            PKG_CONFIG_PATH: ~/openssl/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
@@ -322,7 +322,7 @@ jobs:
               --with-libuv
 
           - name: quiche
-            #PKG_CONFIG_PATH: ~/quiche/target/release
+            PKG_CONFIG_PATH: ~/quiche/target/release
             generate: >-
               -DOPENSSL_ROOT_DIR:PATH=~/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
               -DUSE_QUICHE=ON

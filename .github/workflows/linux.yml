@@ -125,7 +125,7 @@ jobs:
           - name: mbedtls
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            #PKG_CONFIG_PATH: ~/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
+            PKG_CONFIG_PATH: ~/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
           - name: mbedtls-pkg
@@ -146,7 +146,7 @@ jobs:
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
-            #PKG_CONFIG_PATH: ~/msh3/lib/pkgconfig  # Broken as of v0.6.0
+            PKG_CONFIG_PATH: ~/msh3/lib/pkgconfig  # Broken as of v0.6.0
             generate: -DOPENSSL_ROOT_DIR:PATH=~/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR:PATH=~/msh3/include -DMSH3_LIBRARY:PATH=~/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
