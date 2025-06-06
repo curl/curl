@@ -47,8 +47,7 @@ jobs:
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --without-brotli
 
       - name: 'run cmake'
-        run: |
-          cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DCURL_BROTLI=OFF
+        run: cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DCURL_BROTLI=OFF
 
       - name: 'configure log'
         run: cat bld-am/config.log 2>/dev/null || true
@@ -81,8 +80,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'toolchain versions'
-        run: |
-         echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
+        run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:

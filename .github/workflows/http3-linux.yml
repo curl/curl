@@ -133,8 +133,8 @@ jobs:
           steps.cache-nghttp3.outputs.cache-hit != 'true' ||
           steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
           steps.cache-nghttp2.outputs.cache-hit != 'true'
-        run: |
-          echo 'needs-build=true' >> $GITHUB_OUTPUT
+
+        run: echo 'needs-build=true' >> $GITHUB_OUTPUT
 
       - name: 'install build prereqs'
         if: steps.settings.outputs.needs-build == 'true'
