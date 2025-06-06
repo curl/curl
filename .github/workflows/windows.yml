@@ -483,6 +483,7 @@ jobs:
         env:
           MATRIX_URL: '${{ matrix.url }}'
         run: |
+          ld -l / || true
           cd /d
           mkdir my-cache
           cd my-cache
