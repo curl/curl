@@ -63,7 +63,7 @@ jobs:
             # https://pkgsrc.se/
             time sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             time cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX:PATH=~/curl-install \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
@@ -109,7 +109,7 @@ jobs:
             # https://www.openbsd.org/faq/faq15.html
             time sudo pkg_add cmake ninja brotli openldap-client-- libssh2 libidn2 libpsl nghttp2 py3-six py3-impacket
             time cmake -B bld -G Ninja \
-              -DCMAKE_INSTALL_PREFIX:PATH=~/curl-install \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
@@ -173,7 +173,7 @@ jobs:
 
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               time cmake -B bld -G Ninja \
-                -DCMAKE_INSTALL_PREFIX:PATH=~/curl-install \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
                 -DCMAKE_C_COMPILER="${CC}" \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
                 -DCURL_WERROR=ON \

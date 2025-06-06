@@ -254,7 +254,7 @@ jobs:
               [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' -DVSFTPD=NO'  # Skip ~20 tests that stretch run time by 7x on macOS
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
-                -DCMAKE_INSTALL_PREFIX:PATH=~/curl-install \
+                -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
