@@ -80,52 +80,52 @@ jobs:
           - name: bearssl
             install_packages: zlib1g-dev
             install_steps: bearssl pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/bearssl/lib --with-bearssl=/home/runner/bearssl --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,~/bearssl/lib --with-bearssl=/home/runner/bearssl --enable-debug
 
           - name: bearssl clang
             install_packages: zlib1g-dev clang
             install_steps: bearssl
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/bearssl/lib --with-bearssl=/home/runner/bearssl --enable-debug
+            configure: CC=clang LDFLAGS=-Wl,-rpath,~/bearssl/lib --with-bearssl=/home/runner/bearssl --enable-debug
 
           - name: libressl heimdal
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,~/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: libressl heimdal valgrind
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
             install_steps: libressl
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+            generate: -DOPENSSL_ROOT_DIR:PATH=~/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: libressl clang
             install_packages: zlib1g-dev clang
             install_steps: libressl
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
+            configure: CC=clang LDFLAGS=-Wl,-rpath,~/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
           - name: wolfssl-all
             install_packages: zlib1g-dev
             install_steps: wolfssl-all
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,~/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: wolfssl-opensslextra wolfssh
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --enable-ech --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,~/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: mbedtls
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,~/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
 
           - name: mbedtls clang
             install_packages: libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            configure: CC=clang LDFLAGS=-Wl,-rpath,~/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
 
           - name: mbedtls
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
+            PKG_CONFIG_PATH: ~/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
           - name: mbedtls-pkg
@@ -140,24 +140,24 @@ jobs:
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
-            LDFLAGS: -Wl,-rpath,/home/runner/msh3/lib -Wl,-rpath,/home/runner/quictls/lib
+            LDFLAGS: -Wl,-rpath,~/msh3/lib -Wl,-rpath,~/quictls/lib
             configure: --with-msh3=/home/runner/msh3 --with-openssl=/home/runner/quictls --enable-debug
 
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
-            PKG_CONFIG_PATH: /home/runner/msh3/lib/pkgconfig  # Broken as of v0.6.0
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=/home/runner/msh3/include -DMSH3_LIBRARY=/home/runner/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
+            PKG_CONFIG_PATH: ~/msh3/lib/pkgconfig  # Broken as of v0.6.0
+            generate: -DOPENSSL_ROOT_DIR:PATH=~/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR:PATH=~/msh3/include -DMSH3_LIBRARY:PATH=~/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
             install_packages: zlib1g-dev
             install_steps: awslc pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
+            configure: LDFLAGS=-Wl,-rpath,~/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: awslc
             install_packages: zlib1g-dev
             install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
+            generate: -DOPENSSL_ROOT_DIR:PATH=~/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: openssl default
             install_steps: pytest
@@ -231,7 +231,7 @@ jobs:
           - name: clang-tidy
             install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
             install_steps: skipall wolfssl-opensslextra wolfssh
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
+            configure: LDFLAGS=-Wl,-rpath,~/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
 
           - name: scanbuild
@@ -254,7 +254,7 @@ jobs:
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssl-tsan
             CFLAGS: -fsanitize=thread -g
-            LDFLAGS: -fsanitize=thread -Wl,-rpath,/home/runner/openssl/lib
+            LDFLAGS: -fsanitize=thread -Wl,-rpath,~/openssl/lib
             configure: CC=clang --with-openssl=/home/runner/openssl --enable-debug
 
           - name: memory-sanitizer
