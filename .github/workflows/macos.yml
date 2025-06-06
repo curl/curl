@@ -368,7 +368,7 @@ jobs:
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
-    if: ${{ true }}  # Set to `true` to enable this test matrix. It runs quickly.
+    if: true  # Set to `true` to enable this test matrix. It runs quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
