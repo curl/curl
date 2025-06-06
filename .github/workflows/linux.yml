@@ -146,8 +146,8 @@ jobs:
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
-            PKG_CONFIG_PATH: ~/msh3/lib/pkgconfig  # Broken as of v0.6.0
-            generate: -DOPENSSL_ROOT_DIR:PATH=~/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR:PATH=~/msh3/include -DMSH3_LIBRARY:PATH=~/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
+            PKG_CONFIG_PATH: /home/runner/msh3/lib/pkgconfig  # Broken as of v0.6.0
+            generate: -DOPENSSL_ROOT_DIR:PATH=~/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=/home/runner/msh3/include -DMSH3_LIBRARY=/home/runner/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
             install_packages: zlib1g-dev
@@ -525,7 +525,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
           cd msh3
-          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX:PATH=~/msh3
+          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/home/runner/msh3
           cmake --build .
           cmake --install .
 
