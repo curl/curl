@@ -564,7 +564,8 @@ jobs:
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/rustls
-          curl -L "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" -o ~/rustls/librustls.zip
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
+            "https://github.com/rustls/rustls-ffi/releases/download/v${RUSTLS_VERSION}/librustls_${RUSTLS_VERSION}_amd64.deb.zip" -o ~/rustls/librustls.zip
           unzip ~/rustls/librustls.zip -d ~/rustls
           rm ~/rustls/librustls.zip
 
