@@ -315,6 +315,7 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+          cat bld/cmake_install.cmake || true
 
       - name: 'build'
         timeout-minutes: 10
