@@ -130,7 +130,7 @@ jobs:
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
-            --prefix="$PWD"/../install-am
+            --prefix="$PWD"/../curl-install-am
 
       - name: 'autoconf curl_config.h'
         run: |
