@@ -729,7 +729,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          PATH=~/opt/mingw32ce/bin:"$PATH"
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
@@ -739,7 +739,7 @@ jobs:
               -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
               -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
               -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
-              -DMINGW32CE_LIBRARY_DIR="$HOME"/opt/mingw32ce/arm-mingw32ce/lib \
+              -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
               -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
@@ -766,7 +766,7 @@ jobs:
 
       - name: 'build'
         run: |
-          PATH=~/opt/mingw32ce/bin:"$PATH"
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
@@ -780,7 +780,7 @@ jobs:
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          PATH=~/opt/mingw32ce/bin:"$PATH"
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
@@ -790,7 +790,7 @@ jobs:
       - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
-          PATH=~/opt/mingw32ce/bin:"$PATH"
+          PATH="$HOME/opt/mingw32ce/bin:$PATH"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
