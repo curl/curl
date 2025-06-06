@@ -333,7 +333,7 @@ jobs:
           echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - name: 'cache libressl'
-        if: contains(matrix.build.install_steps, 'libressl')
+        if: ${{ contains(matrix.build.install_steps, 'libressl') }}
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-libressl
         env:
@@ -343,7 +343,7 @@ jobs:
           key: iOS-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl'
-        if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
+        if: ${{ contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true' }}
         run: |
           curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -x

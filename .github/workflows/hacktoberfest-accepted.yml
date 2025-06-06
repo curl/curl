@@ -40,7 +40,7 @@ jobs:
             gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')" >> "$GITHUB_OUTPUT"
 
       - name: Search relevant commit message lines starting with Closes/Merges
-        if: steps.check.outputs.label == 'hacktoberfest'
+        if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GITHUB_EVENT_BEFORE: '${{ github.event.before }}'
           GITHUB_EVENT_AFTER: '${{ github.event.after }}'
@@ -49,7 +49,7 @@ jobs:
             grep -Ei '^Close[sd]? ' | sort | uniq | tee log
 
       - name: Search for Number-based PR references
-        if: steps.check.outputs.label == 'hacktoberfest'
+        if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
@@ -60,7 +60,7 @@ jobs:
               gh pr edit {} --add-label 'hacktoberfest-accepted'
 
       - name: Search for URL-based PR references
-        if: steps.check.outputs.label == 'hacktoberfest'
+        if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
