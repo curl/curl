@@ -493,7 +493,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC='clang' CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix="$HOME/openssl" --libdir=lib no-makedepend no-apps no-docs no-tests
+          CC=clang CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix="$HOME/openssl" --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
 
