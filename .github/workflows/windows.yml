@@ -483,7 +483,11 @@ jobs:
         env:
           MATRIX_URL: '${{ matrix.url }}'
         run: |
-          ld -l / || true
+          echo '---------------------'
+          ls -l /c || true
+          echo '---------------------'
+          ls -l /d || true
+          echo '---------------------'
           cd /d
           mkdir my-cache
           cd my-cache
@@ -506,7 +510,11 @@ jobs:
           MATRIX_CONFIG: '${{ matrix.config }}'
           MATRIX_TYPE: '${{ matrix.type }}'
         run: |
-          ls -l / || true
+          echo '---------------------'
+          ls -l /c || true
+          echo '---------------------'
+          ls -l /d || true
+          echo '---------------------'
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
