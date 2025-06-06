@@ -485,7 +485,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
+              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
@@ -499,7 +499,7 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=' --with-openssl=/opt/homebrew/opt/openssl'
+            [ "${MATRIX_CONFIG}" = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ "${MATRIX_CONFIG}" = 'SecureTransport' ] && options+=' --with-secure-transport'
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
