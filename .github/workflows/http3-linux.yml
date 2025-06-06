@@ -126,18 +126,18 @@ jobs:
 
       - id: settings
         if: |
-          steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
-          steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
-          steps.cache-gnutls.outputs.cache-hit != 'true' ||
-          steps.cache-wolfssl.outputs.cache-hit != 'true' ||
-          steps.cache-nghttp3.outputs.cache-hit != 'true' ||
-          steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
-          steps.cache-nghttp2.outputs.cache-hit != 'true'
+          ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
+              steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
+              steps.cache-gnutls.outputs.cache-hit != 'true' ||
+              steps.cache-wolfssl.outputs.cache-hit != 'true' ||
+              steps.cache-nghttp3.outputs.cache-hit != 'true' ||
+              steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
+              steps.cache-nghttp2.outputs.cache-hit != 'true' }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
       - name: 'install build prereqs'
-        if: steps.settings.outputs.needs-build == 'true'
+        if: ${{ steps.settings.outputs.needs-build == 'true' }}
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -153,7 +153,7 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build openssl'
-        if: steps.cache-openssl-http3.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
@@ -163,7 +163,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build quictls'
-        if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
@@ -173,7 +173,7 @@ jobs:
           make -j1 install_sw
 
       - name: 'build gnutls'
-        if: steps.cache-gnutls.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls.git
@@ -187,7 +187,7 @@ jobs:
           make install
 
       - name: 'build wolfssl'
-        if: steps.cache-wolfssl.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-wolfssl.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl.git
@@ -199,7 +199,7 @@ jobs:
           make install
 
       - name: 'build nghttp3'
-        if: steps.cache-nghttp3.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-nghttp3.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
@@ -211,7 +211,7 @@ jobs:
           make install
 
       - name: 'build ngtcp2'
-        if: steps.cache-ngtcp2.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
         # building twice to get crypto libs for ossl and quictls installed
         run: |
           cd ~
@@ -228,7 +228,7 @@ jobs:
           make install
 
       - name: 'build nghttp2'
-        if: steps.cache-nghttp2.outputs.cache-hit != 'true'
+        if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
@@ -347,7 +347,7 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'cache openssl'
-        if: matrix.build.name == 'openssl' || matrix.build.name == 'openssl-quic'
+        if: ${{ matrix.build.name == 'openssl' || matrix.build.name == 'openssl-quic' }}
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-openssl-http3
         env:
@@ -368,7 +368,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
-        if: matrix.build.name == 'gnutls'
+        if: ${{ matrix.build.name == 'gnutls' }}
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-gnutls
         env:
@@ -379,7 +379,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
-        if: matrix.build.name == 'wolfssl'
+        if: ${{ matrix.build.name == 'wolfssl' }}
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-wolfssl
         env:
@@ -420,7 +420,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
-        if: matrix.build.name == 'quiche'
+        if: ${{ matrix.build.name == 'quiche' }}
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-quiche
         env:
@@ -430,7 +430,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
-        if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
+        if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
