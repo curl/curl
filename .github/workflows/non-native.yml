@@ -568,26 +568,26 @@ jobs:
               -DCMAKE_SYSTEM_NAME=DOS \
               -DCMAKE_SYSTEM_PROCESSOR=x86 \
               -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-              -DCMAKE_C_COMPILER="$HOME"/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+              -DCMAKE_C_COMPILER="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_LIBPSL=OFF \
-              -DOPENSSL_INCLUDE_DIR="$HOME"/djgpp/include \
-              -DOPENSSL_SSL_LIBRARY="$HOME"/djgpp/lib/libssl.a \
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME"/djgpp/lib/libcrypto.a \
-              -DZLIB_INCLUDE_DIR="$HOME"/djgpp/include \
-              -DZLIB_LIBRARY="$HOME"/djgpp/lib/libz.a \
-              -DWATT_ROOT="$HOME"/djgpp/net/watt
+              -DOPENSSL_INCLUDE_DIR="$HOME/djgpp/include" \
+              -DOPENSSL_SSL_LIBRARY="$HOME/djgpp/lib/libssl.a" \
+              -DOPENSSL_CRYPTO_LIBRARY="$HOME/djgpp/lib/libcrypto.a" \
+              -DZLIB_INCLUDE_DIR="$HOME/djgpp/include" \
+              -DZLIB_LIBRARY="$HOME/djgpp/lib/libz.a" \
+              -DWATT_ROOT="$HOME/djgpp/net/watt"
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              CC=~/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-              AR=~/djgpp/bin/i586-pc-msdosdjgpp-ar \
-              RANLIB=~/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
-              WATT_ROOT=~/djgpp/net/watt \
+              CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
+              AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
+              RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
+              WATT_ROOT="$HOME/djgpp/net/watt" \
               --host=i586-pc-msdosdjgpp \
-              --with-openssl="$HOME"/djgpp \
-              --with-zlib="$HOME"/djgpp \
+              --with-openssl="$HOME/djgpp" \
+              --with-zlib="$HOME/djgpp" \
               --without-libpsl \
               --disable-shared
           fi
