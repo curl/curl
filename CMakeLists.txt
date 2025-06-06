@@ -679,6 +679,7 @@ endif()
 
 if(APPLE)
   cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS (Secure Transport)" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_APPLE_SECTRUST "Enable Apple OS native certificate validation" ${APPLE} CURL_ENABLE_SSL OFF)
 endif()
 if(WIN32)
   cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF CURL_ENABLE_SSL OFF)
@@ -739,7 +740,7 @@ if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
 endif()
 
-if(CURL_USE_SECTRANSP)
+if(CURL_USE_APPLE_SECTRUST OR CURL_USE_SECTRANSP)
   set(_use_core_foundation_and_core_services ON)
 
   find_library(SECURITY_FRAMEWORK NAMES "Security")
@@ -748,7 +749,9 @@ if(CURL_USE_SECTRANSP)
     message(FATAL_ERROR "Security framework not found")
   endif()
   list(APPEND CURL_LIBS "-framework Security")
+endif()
 
+if(CURL_USE_SECTRANSP)
   set(_ssl_enabled ON)
   set(USE_SECTRANSP ON)
 
@@ -757,6 +760,10 @@ if(CURL_USE_SECTRANSP)
   endif()
 
   message(WARNING "Secure Transport does not support TLS 1.3.")
+endif()
+
+if(CURL_USE_APPLE_SECTRUST)
+  set(USE_APPLE_SECTRUST ON)
 endif()
 
 if(_use_core_foundation_and_core_services)

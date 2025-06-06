@@ -24,6 +24,7 @@
 #include "curlcheck.h"
 
 #include "vtls/x509asn1.h"
+#include "vtls/vtls_int.h"
 
 static CURLcode unit_setup(void)
 {
@@ -360,6 +361,11 @@ UNITTEST_START
 
   data = curl_easy_init();
   if(data) {
+    if(Curl_ssl_init_certinfo(data, 1) != CURLE_OK) {
+      curl_mfprintf(stderr, "Curl_ssl_init_certinfo() failed\n");
+      return TEST_ERR_MAJOR_BAD;
+    }
+
     result = Curl_extract_certinfo(data, 0, beg, end);
 
     fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
@@ -370,6 +376,7 @@ UNITTEST_START
       for(i = 0; i < 45; i++) {
         unsigned char backup = cert[i];
         cert[i] = (unsigned char) (byte & 0xff);
+        (void) Curl_ssl_init_certinfo(data, 1);
         (void) Curl_extract_certinfo(data, 0, beg, end);
         cert[i] = backup;
       }

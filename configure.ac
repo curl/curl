@@ -296,6 +296,12 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
+OPT_APPLE_SECTRUST=$curl_cv_apple
+AC_ARG_WITH(apple-certificate-trust,dnl
+AS_HELP_STRING([--without-apple-certificate-trust],[disable Apple OS native SSL/TLS]),[
+  OPT_APPLE_SECTRUST=no
+])
+
 TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
@@ -2126,6 +2132,8 @@ CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_BEARSSL
 CURL_WITH_RUSTLS
+
+CURL_WITH_APPLE_SECTRUST
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
