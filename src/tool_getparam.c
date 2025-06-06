@@ -1900,6 +1900,9 @@ static ParameterError opt_bool(struct GlobalConfig *global,
   case C_SESSIONID: /* --sessionid */
     config->disable_sessionid = !toggle;
     break;
+  case C_FTP_PASV: /* --ftp-pasv */
+    tool_safefree(config->ftpport);
+    break;
   case C_FTP_SSL_CONTROL: /* --ftp-ssl-control */
     config->ftp_ssl_control = toggle;
     break;
@@ -2292,9 +2295,6 @@ static ParameterError opt_filestring(struct GlobalConfig *global,
     break;
   case C_URL: /* --url */
     err = parse_url(global, config, nextarg);
-    break;
-  case C_FTP_PASV: /* --ftp-pasv */
-    tool_safefree(config->ftpport);
     break;
   case C_SOCKS5: /* --socks5 */
     /*  socks5 proxy to use, and resolves the name locally and passes on the
