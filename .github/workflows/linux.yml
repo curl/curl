@@ -321,7 +321,7 @@ jobs:
             libtool autoconf automake pkgconf \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${INSTALL_PACKAGES} \
-            ${MATRIX_INSTALL_PACKAGES} \
+            ${MATRIX_INSTALL_PACKAGES}
           python3 -m venv ~/venv
 
       - name: 'install prereqs'
