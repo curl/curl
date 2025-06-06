@@ -745,7 +745,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
   size_t nread;
-  CURLcode result;
+  CURLcode result, r2;
 
   DEBUGASSERT(data);
   /* OpenSSL catches this case, so should we. */
@@ -770,9 +770,9 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   /* Before returning server replies to the SSL instance, we need
    * to have setup the x509 store or verification will fail. */
   if(!octx->x509_store_setup) {
-    result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
-    if(result) {
-      octx->io_result = result;
+    r2 = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
+    if(r2) {
+      octx->io_result = r2;
       return -1;
     }
     octx->x509_store_setup = TRUE;
