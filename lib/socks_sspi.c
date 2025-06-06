@@ -208,7 +208,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
       code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
-                               &writte);
+                               &written);
       if(code || (4 != written)) {
         failf(data, "Failed to send SSPI authentication request.");
         free(service_name);
