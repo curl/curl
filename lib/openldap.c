@@ -1254,15 +1254,17 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
       CURLcode err = CURLE_RECV_ERROR;
+      size_t nread;
 
       if(!li) {
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      err = (li->recv)(data, FIRSTSOCKET, buf, len, &ret);
+      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
       if(err == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
+      ret = err ? -1 : (ber_slen_t)nread;
     }
   }
   return ret;
@@ -1277,15 +1279,17 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
       CURLcode err = CURLE_SEND_ERROR;
+      size_t nwritten;
 
       if(!li) {
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &ret);
+      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
       if(err == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
+      ret = err ? -1 : (ber_slen_t)nwritten;
     }
   }
   return ret;
