@@ -360,8 +360,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz"
-          tar -xzf "bearssl-${BEARSSL_VERSION}.tar.gz"
+            "https://bearssl.org/bearssl-${BEARSSL_VERSION}.tar.gz" | tar -xz
           cd "bearssl-${BEARSSL_VERSION}"
           make
           mkdir -p ~/bearssl/lib ~/bearssl/include
@@ -382,8 +381,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz"
-          tar -xzf "libressl-${LIBRESSL_VERSION}.tar.gz"
+            "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           ./configure --disable-dependency-tracking --prefix="$HOME/libressl"
           make install
@@ -402,8 +400,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
-          tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
+            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
@@ -424,8 +421,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz"
-          tar -xzf "v${WOLFSSL_VERSION}-stable.tar.gz"
+            "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
@@ -446,8 +442,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/wolfSSL/wolfssh/archive/v${WOLFSSH_VERSION}-stable.tar.gz"
-          tar -xzf "v${WOLFSSH_VERSION}-stable.tar.gz"
+            "https://github.com/wolfSSL/wolfssh/archive/v${WOLFSSH_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssh-${WOLFSSH_VERSION}-stable"
           ./autogen.sh
           ./configure --disable-dependency-tracking --with-wolfssl="$HOME/wolfssl-opensslextra" --enable-scp --enable-sftp --disable-term \
@@ -468,8 +463,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2"
-          tar -xjf "mbedtls-${MBEDTLS_VERSION}.tar.bz2"
+            "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
@@ -549,8 +543,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz"
-          tar -xzf "v${AWSLC_VERSION}.tar.gz"
+            "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
           mkdir "aws-lc-${AWSLC_VERSION}-build"
           cd "aws-lc-${AWSLC_VERSION}-build"
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX:PATH=~/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
