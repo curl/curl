@@ -69,7 +69,7 @@ jobs:
         env:
           cache-name: cache-openssl-http3
         with:
-          path: ~/openssl/build
+          path: /home/runner/openssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache quictls'
@@ -78,7 +78,7 @@ jobs:
         env:
           cache-name: cache-quictls-no-deprecated
         with:
-          path: ~/quictls/build
+          path: /home/runner/quictls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
 
       - name: 'cache gnutls'
@@ -87,7 +87,7 @@ jobs:
         env:
           cache-name: cache-gnutls
         with:
-          path: ~/gnutls/build
+          path: /home/runner/gnutls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
 
       - name: 'cache wolfssl'
@@ -96,7 +96,7 @@ jobs:
         env:
           cache-name: cache-wolfssl
         with:
-          path: ~/wolfssl/build
+          path: /home/runner/wolfssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp3'
@@ -105,7 +105,7 @@ jobs:
         env:
           cache-name: cache-nghttp3
         with:
-          path: ~/nghttp3/build
+          path: /home/runner/nghttp3/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache ngtcp2'
@@ -114,7 +114,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2
         with:
-          path: ~/ngtcp2/build
+          path: /home/runner/ngtcp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp2'
@@ -123,7 +123,7 @@ jobs:
         env:
           cache-name: cache-nghttp2
         with:
-          path: ~/nghttp2/build
+          path: /home/runner/nghttp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
@@ -355,7 +355,7 @@ jobs:
         env:
           cache-name: cache-openssl-http3
         with:
-          path: ~/openssl/build
+          path: /home/runner/openssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -365,7 +365,7 @@ jobs:
         env:
           cache-name: cache-quictls-no-deprecated
         with:
-          path: ~/quictls/build
+          path: /home/runner/quictls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
           fail-on-cache-miss: true
 
@@ -376,7 +376,7 @@ jobs:
         env:
           cache-name: cache-gnutls
         with:
-          path: ~/gnutls/build
+          path: /home/runner/gnutls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
           fail-on-cache-miss: true
 
@@ -387,7 +387,7 @@ jobs:
         env:
           cache-name: cache-wolfssl
         with:
-          path: ~/wolfssl/build
+          path: /home/runner/wolfssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -397,7 +397,7 @@ jobs:
         env:
           cache-name: cache-nghttp3
         with:
-          path: ~/nghttp3/build
+          path: /home/runner/nghttp3/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
@@ -407,7 +407,7 @@ jobs:
         env:
           cache-name: cache-ngtcp2
         with:
-          path: ~/ngtcp2/build
+          path: /home/runner/ngtcp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
@@ -417,7 +417,7 @@ jobs:
         env:
           cache-name: cache-nghttp2
         with:
-          path: ~/nghttp2/build
+          path: /home/runner/nghttp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
@@ -428,7 +428,7 @@ jobs:
         env:
           cache-name: cache-quiche
         with:
-          path: ~/quiche
+          path: /home/runner/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'

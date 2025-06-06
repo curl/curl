@@ -353,7 +353,7 @@ jobs:
         env:
           cache-name: cache-bearssl
         with:
-          path: ~/bearssl
+          path: /home/runner/bearssl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BEARSSL_VERSION }}
 
       - name: 'build bearssl'
@@ -374,7 +374,7 @@ jobs:
         env:
           cache-name: cache-libressl
         with:
-          path: ~/libressl
+          path: /home/runner/libressl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl'
@@ -393,7 +393,7 @@ jobs:
         env:
           cache-name: cache-wolfssl-all
         with:
-          path: ~/wolfssl-all
+          path: /home/runner/wolfssl-all
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
@@ -414,7 +414,7 @@ jobs:
         env:
           cache-name: cache-wolfssl-opensslextra
         with:
-          path: ~/wolfssl-opensslextra
+          path: /home/runner/wolfssl-opensslextra
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssl (opensslextra)'
@@ -435,7 +435,7 @@ jobs:
         env:
           cache-name: cache-wolfssh
         with:
-          path: ~/wolfssh
+          path: /home/runner/wolfssh
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.WOLFSSH_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'build wolfssh'
@@ -456,7 +456,7 @@ jobs:
         env:
           cache-name: cache-mbedtls-threadsafe
         with:
-          path: ~/mbedtls
+          path: /home/runner/mbedtls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls'
@@ -479,7 +479,7 @@ jobs:
         env:
           cache-name: cache-openssl-tsan
         with:
-          path: ~/openssl
+          path: /home/runner/openssl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'build openssl (thread sanitizer)'
@@ -498,7 +498,7 @@ jobs:
         env:
           cache-name: cache-quictls
         with:
-          path: ~/quictls
+          path: /home/runner/quictls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
 
       - name: 'build quictls'
@@ -517,7 +517,7 @@ jobs:
         env:
           cache-name: cache-msh3
         with:
-          path: ~/msh3
+          path: /home/runner/msh3
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MSH3_VERSION }}
 
       - name: 'build msh3'
@@ -536,7 +536,7 @@ jobs:
         env:
           cache-name: cache-awslc
         with:
-          path: ~/awslc
+          path: /home/runner/awslc
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'build awslc'
