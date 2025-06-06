@@ -105,7 +105,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --without-ssl --enable-debug --prefix="$PWD"/pkg --without-libpsl
+          ../configure --without-ssl --enable-debug --prefix="$PWD"/curl-prefix --without-libpsl
           make
           make test-ci
           make install
