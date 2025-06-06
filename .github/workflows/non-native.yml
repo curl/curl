@@ -339,7 +339,7 @@ jobs:
         env:
           cache-name: cache-libressl
         with:
-          path: /Users/runner/libressl
+          path: ~/libressl
           key: iOS-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
       - name: 'build libressl'
