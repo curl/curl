@@ -124,7 +124,9 @@ jobs:
         name: checkout
 
       - name: shellcheck
-        run: .github/scripts/shellcheck.sh
+        run: |
+          shellcheck --version
+          .github/scripts/shellcheck.sh
 
       - name: spacecheck
         run: .github/scripts/spacecheck.pl
@@ -150,11 +152,12 @@ jobs:
         name: checkout
 
       - name: install prereqs
-        run: |
-          brew install shellcheck yq zizmor
+        run: brew install shellcheck yq zizmor
 
       - name: zizmor GHA
         run: zizmor --pedantic .github/workflows/*.yml
 
       - name: shellcheck
-        run: .github/scripts/shellcheck-ci.sh
+        run: |
+          shellcheck --version
+          .github/scripts/shellcheck-ci.sh
