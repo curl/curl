@@ -153,7 +153,7 @@ static const struct LongShort aliases[]= {
   {"ftp-alternative-to-user",    ARG_STRG, ' ', C_FTP_ALTERNATIVE_TO_USER},
   {"ftp-create-dirs",            ARG_BOOL, ' ', C_FTP_CREATE_DIRS},
   {"ftp-method",                 ARG_STRG, ' ', C_FTP_METHOD},
-  {"ftp-pasv",                   ARG_BOOL, ' ', C_FTP_PASV},
+  {"ftp-pasv",                   ARG_NONE, ' ', C_FTP_PASV},
   {"ftp-port",                   ARG_STRG, 'P', C_FTP_PORT},
   {"ftp-pret",                   ARG_BOOL, ' ', C_FTP_PRET},
   {"ftp-skip-pasv-ip",           ARG_BOOL, ' ', C_FTP_SKIP_PASV_IP},
@@ -1703,6 +1703,9 @@ static ParameterError opt_none(struct GlobalConfig *global,
     break;
   case C_DUMP_CA_EMBED: /* --dump-ca-embed */
     return PARAM_CA_EMBED_REQUESTED;
+  case C_FTP_PASV: /* --ftp-pasv */
+    tool_safefree(config->ftpport);
+    break;
 
   case C_HTTP1_0: /* --http1.0 */
     /* HTTP version 1.0 */
@@ -1899,9 +1902,6 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     break;
   case C_SESSIONID: /* --sessionid */
     config->disable_sessionid = !toggle;
-    break;
-  case C_FTP_PASV: /* --ftp-pasv */
-    tool_safefree(config->ftpport);
     break;
   case C_FTP_SSL_CONTROL: /* --ftp-ssl-control */
     config->ftp_ssl_control = toggle;
