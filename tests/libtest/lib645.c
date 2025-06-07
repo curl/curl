@@ -25,10 +25,8 @@
 
 #include "memdebug.h"
 
-static char t645_testdata[] = "dummy\n";
-
 struct t645_WriteThis {
-  char *readptr;
+  const char *readptr;
   curl_off_t sizeleft;
 };
 
@@ -53,6 +51,8 @@ static size_t t645_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode t645_test_once(char *URL, bool oldstyle)
 {
+  static const char testdata[] = "dummy\n";
+
   CURL *curl;
   CURLcode res = CURLE_OK;
 
@@ -62,7 +62,7 @@ static CURLcode t645_test_once(char *URL, bool oldstyle)
   struct t645_WriteThis pooh2;
   curl_off_t datasize = -1;
 
-  pooh.readptr = t645_testdata;
+  pooh.readptr = testdata;
   pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
@@ -114,7 +114,7 @@ static CURLcode t645_test_once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = t645_testdata;
+  pooh2.readptr = testdata;
   pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
