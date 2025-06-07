@@ -35,8 +35,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static const char uploadthis[] =
-  "this is the blurb we want to upload\n";
+static const char uploadthis[] = "this is the blurb we want to upload\n";
 
 static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
