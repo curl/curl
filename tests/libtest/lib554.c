@@ -49,7 +49,7 @@ static size_t t554_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode t554_test_once(char *URL, bool oldstyle)
 {
-  static const char testdata[]=
+  static const char testdata[] =
     "this is what we post to the silly web server\n";
 
   CURL *curl;
