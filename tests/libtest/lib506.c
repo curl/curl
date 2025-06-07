@@ -26,7 +26,6 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-static const char * const HOSTHEADER = "Host: www.host.foo.com";
 #define JAR libtest_arg2
 #define THREADS 2
 
@@ -119,14 +118,12 @@ static void t506_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
   user->counter++;
 }
 
-
 /* build host entry */
 static struct curl_slist *sethost(struct curl_slist *headers)
 {
   (void)headers;
-  return curl_slist_append(NULL, HOSTHEADER);
+  return curl_slist_append(NULL, "Host: www.host.foo.com");
 }
-
 
 /* the dummy thread function */
 static void *t506_test_fire(void *ptr)
