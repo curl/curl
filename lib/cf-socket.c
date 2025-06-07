@@ -996,8 +996,6 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
     socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
     ctx->sock = CURL_SOCKET_BAD;
-    if(ctx->active && cf->sockindex == FIRSTSOCKET)
-      cf->conn->remote_addr = NULL;
     ctx->active = FALSE;
     memset(&ctx->started_at, 0, sizeof(ctx->started_at));
     memset(&ctx->connected_at, 0, sizeof(ctx->connected_at));
@@ -1496,8 +1494,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
     nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
-                      &cf->conn->remote_addr->curl_sa_addr,
-                      cf->conn->remote_addr->addrlen);
+                      &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
   else
@@ -1631,7 +1628,6 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   set_local_ip(cf, data);
   if(cf->sockindex == FIRSTSOCKET) {
     cf->conn->primary = ctx->ip;
-    cf->conn->remote_addr = &ctx->addr;
   #ifdef USE_IPV6
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6);
   #endif
@@ -1712,6 +1708,11 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   case CF_QUERY_SOCKET:
     DEBUGASSERT(pres2);
     *((curl_socket_t *)pres2) = ctx->sock;
+    return CURLE_OK;
+  case CF_QUERY_REMOTE_ADDR:
+    DEBUGASSERT(pres2);
+    *((const struct Curl_sockaddr_ex **)pres2) = cf->connected ?
+                                                 &ctx->addr : NULL;
     return CURLE_OK;
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
