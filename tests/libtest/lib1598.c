@@ -52,10 +52,10 @@ static int t1598_trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-static const char *post_data = "xxx=yyy&aaa=bbbbb";
-
 CURLcode test(char *URL)
 {
+  static const char *post_data = "xxx=yyy&aaa=bbbbb";
+
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
   /* http and proxy header list */
