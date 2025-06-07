@@ -31,26 +31,26 @@
 #define TO "<recipient@example.com>"
 #define FROM "<sender@example.com>"
 
-static const char *payload_text[] = {
-  "From: different\r\n",
-  "To: another\r\n",
-  "\r\n",
-  "\r\n",
-  ".\r\n",
-  ".\r\n",
-  "\r\n",
-  ".\r\n",
-  "\r\n",
-  "body",
-  NULL
-};
-
 struct upload_status {
   int lines_read;
 };
 
 static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
+  static const char *payload_text[] = {
+    "From: different\r\n",
+    "To: another\r\n",
+    "\r\n",
+    "\r\n",
+    ".\r\n",
+    ".\r\n",
+    "\r\n",
+    ".\r\n",
+    "\r\n",
+    "body",
+    NULL
+  };
+
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
 
