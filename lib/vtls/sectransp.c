@@ -35,12 +35,9 @@
 #include "../urldata.h" /* for the Curl_easy definition */
 #include "../curlx/base64.h"
 #include "../curlx/strparse.h"
-#include "../multiif.h"
 #include "../strcase.h"
-#include "x509asn1.h"
-#include "vtls_scache.h"
-#include "../strerror.h"
 #include "cipher_suite.h"
+#include "vtls_scache.h"
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -100,7 +97,6 @@
    (You set this at build-time using the compiler command line option
    "-mmacosx-version-min.") */
 #define CURL_SUPPORT_MAC_10_5 MAC_OS_X_VERSION_MIN_REQUIRED <= 1050
-#define CURL_SUPPORT_MAC_10_6 MAC_OS_X_VERSION_MIN_REQUIRED <= 1060
 #define CURL_SUPPORT_MAC_10_7 MAC_OS_X_VERSION_MIN_REQUIRED <= 1070
 #define CURL_SUPPORT_MAC_10_8 MAC_OS_X_VERSION_MIN_REQUIRED <= 1080
 #define CURL_SUPPORT_MAC_10_9 MAC_OS_X_VERSION_MIN_REQUIRED <= 1090
@@ -121,7 +117,6 @@
 #define CURL_BUILD_MAC_10_13 0
 #define CURL_BUILD_MAC_10_15 0
 #define CURL_SUPPORT_MAC_10_5 0
-#define CURL_SUPPORT_MAC_10_6 0
 #define CURL_SUPPORT_MAC_10_7 0
 #define CURL_SUPPORT_MAC_10_8 0
 #define CURL_SUPPORT_MAC_10_9 0
@@ -138,11 +133,11 @@
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
+#include "apple.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "sectransp.h"
 #include "../curl_printf.h"
-#include "../strdup.h"
 
 #include "../curl_memory.h"
 /* The last #include file should be: */
@@ -210,54 +205,6 @@ static const uint16_t default_ciphers[] = {
   TLS_CHACHA20_POLY1305_SHA256,                     /* 0x1303 */
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
 };
-
-/* pinned public key support tests */
-
-/* version 1 supports macOS 10.12+ and iOS 10+ */
-#if ((TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || \
-    (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED  >= 101200))
-#define SECTRANSP_PINNEDPUBKEY_V1 1
-#endif
-
-/* version 2 supports macOS 10.7+ */
-#if (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
-#define SECTRANSP_PINNEDPUBKEY_V2 1
-#endif
-
-#if defined(SECTRANSP_PINNEDPUBKEY_V1) || defined(SECTRANSP_PINNEDPUBKEY_V2)
-/* this backend supports CURLOPT_PINNEDPUBLICKEY */
-#define SECTRANSP_PINNEDPUBKEY 1
-#endif /* SECTRANSP_PINNEDPUBKEY */
-
-#ifdef SECTRANSP_PINNEDPUBKEY
-/* both new and old APIs return rsa keys missing the spki header (not DER) */
-static const unsigned char rsa4096SpkiHeader[] = {
-                                       0x30, 0x82, 0x02, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x02, 0x0f, 0x00};
-
-static const unsigned char rsa2048SpkiHeader[] = {
-                                       0x30, 0x82, 0x01, 0x22, 0x30, 0x0d,
-                                       0x06, 0x09, 0x2a, 0x86, 0x48, 0x86,
-                                       0xf7, 0x0d, 0x01, 0x01, 0x01, 0x05,
-                                       0x00, 0x03, 0x82, 0x01, 0x0f, 0x00};
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-/* the *new* version does not return DER encoded ecdsa certs like the old... */
-static const unsigned char ecDsaSecp256r1SpkiHeader[] = {
-                                       0x30, 0x59, 0x30, 0x13, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x08, 0x2a, 0x86, 0x48,
-                                       0xce, 0x3d, 0x03, 0x01, 0x07, 0x03,
-                                       0x42, 0x00};
-
-static const unsigned char ecDsaSecp384r1SpkiHeader[] = {
-                                       0x30, 0x76, 0x30, 0x10, 0x06, 0x07,
-                                       0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02,
-                                       0x01, 0x06, 0x05, 0x2b, 0x81, 0x04,
-                                       0x00, 0x22, 0x03, 0x62, 0x00};
-#endif /* SECTRANSP_PINNEDPUBKEY_V1 */
-#endif /* SECTRANSP_PINNEDPUBKEY */
 
 static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
                                          void *buf,
@@ -362,362 +309,6 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   }
 }
 #endif /* CURL_BUILD_MAC */
-
-/* Apple provides a myriad of ways of getting information about a certificate
-   into a string. Some are not available under iOS or newer cats. Here's a
-   unified function for getting a string describing the certificate that ought
-   to work in all cats starting with Leopard. */
-CF_INLINE CFStringRef getsubject(SecCertificateRef cert)
-{
-  CFStringRef server_cert_summary = CFSTR("(null)");
-
-#if CURL_BUILD_IOS
-  /* iOS: There is only one way to do this. */
-  server_cert_summary = SecCertificateCopySubjectSummary(cert);
-#else
-#if CURL_BUILD_MAC_10_7
-  /* Lion & later: Get the long description if we can. */
-  if(&SecCertificateCopyLongDescription)
-    server_cert_summary =
-      SecCertificateCopyLongDescription(NULL, cert, NULL);
-  else
-#endif /* CURL_BUILD_MAC_10_7 */
-#if CURL_BUILD_MAC_10_6
-  /* Snow Leopard: Get the certificate summary. */
-  if(&SecCertificateCopySubjectSummary)
-    server_cert_summary = SecCertificateCopySubjectSummary(cert);
-  else
-#endif /* CURL_BUILD_MAC_10_6 */
-  /* Leopard is as far back as we go... */
-  (void)SecCertificateCopyCommonName(cert, &server_cert_summary);
-#endif /* CURL_BUILD_IOS */
-  return server_cert_summary;
-}
-
-static CURLcode CopyCertSubject(struct Curl_easy *data,
-                                SecCertificateRef cert, char **certp)
-{
-  CFStringRef c = getsubject(cert);
-  CURLcode result = CURLE_OK;
-  const char *direct;
-  char *cbuf = NULL;
-  *certp = NULL;
-
-  if(!c) {
-    failf(data, "SSL: invalid CA certificate subject");
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
-
-  /* If the subject is already available as UTF-8 encoded (ie 'direct') then
-     use that, else convert it. */
-  direct = CFStringGetCStringPtr(c, kCFStringEncodingUTF8);
-  if(direct) {
-    *certp = strdup(direct);
-    if(!*certp) {
-      failf(data, "SSL: out of memory");
-      result = CURLE_OUT_OF_MEMORY;
-    }
-  }
-  else {
-    size_t cbuf_size = ((size_t)CFStringGetLength(c) * 4) + 1;
-    cbuf = calloc(1, cbuf_size);
-    if(cbuf) {
-      if(!CFStringGetCString(c, cbuf, (CFIndex)cbuf_size,
-                             kCFStringEncodingUTF8)) {
-        failf(data, "SSL: invalid CA certificate subject");
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      else
-        /* pass back the buffer */
-        *certp = cbuf;
-    }
-    else {
-      failf(data, "SSL: could not allocate %zu bytes of memory", cbuf_size);
-      result = CURLE_OUT_OF_MEMORY;
-    }
-  }
-  if(result)
-    free(cbuf);
-  CFRelease(c);
-  return result;
-}
-
-#if CURL_SUPPORT_MAC_10_6
-/* The SecKeychainSearch API was deprecated in Lion, and using it will raise
-   deprecation warnings, so let's not compile this unless it is necessary: */
-static OSStatus CopyIdentityWithLabelOldSchool(char *label,
-                                               SecIdentityRef *out_c_a_k)
-{
-  OSStatus status = errSecItemNotFound;
-  SecKeychainAttributeList attr_list;
-  SecKeychainAttribute attr;
-  SecKeychainSearchRef search = NULL;
-  SecCertificateRef cert = NULL;
-
-  /* Set up the attribute list: */
-  attr_list.count = 1L;
-  attr_list.attr = &attr;
-
-  /* Set up our lone search criterion: */
-  attr.tag = kSecLabelItemAttr;
-  attr.data = label;
-  attr.length = (UInt32)strlen(label);
-
-  /* Start searching: */
-  status = SecKeychainSearchCreateFromAttributes(NULL,
-                                                 kSecCertificateItemClass,
-                                                 &attr_list,
-                                                 &search);
-  if(status == noErr) {
-    status = SecKeychainSearchCopyNext(search,
-                                       (SecKeychainItemRef *)&cert);
-    if(status == noErr && cert) {
-      /* If we found a certificate, does it have a private key? */
-      status = SecIdentityCreateWithCertificate(NULL, cert, out_c_a_k);
-      CFRelease(cert);
-    }
-  }
-
-  if(search)
-    CFRelease(search);
-  return status;
-}
-#endif /* CURL_SUPPORT_MAC_10_6 */
-
-static OSStatus CopyIdentityWithLabel(char *label,
-                                      SecIdentityRef *out_cert_and_key)
-{
-  OSStatus status = errSecItemNotFound;
-
-#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
-  CFArrayRef keys_list;
-  CFIndex keys_list_count;
-  CFIndex i;
-
-  /* SecItemCopyMatching() was introduced in iOS and Snow Leopard.
-     kSecClassIdentity was introduced in Lion. If both exist, let's use them
-     to find the certificate. */
-  if(&SecItemCopyMatching && kSecClassIdentity) {
-    CFTypeRef keys[5];
-    CFTypeRef values[5];
-    CFDictionaryRef query_dict;
-    CFStringRef label_cf = CFStringCreateWithCString(NULL, label,
-      kCFStringEncodingUTF8);
-
-    /* Set up our search criteria and expected results: */
-    values[0] = kSecClassIdentity; /* we want a certificate and a key */
-    keys[0] = kSecClass;
-    values[1] = kCFBooleanTrue;    /* we want a reference */
-    keys[1] = kSecReturnRef;
-    values[2] = kSecMatchLimitAll; /* kSecMatchLimitOne would be better if the
-                                    * label matching below worked correctly */
-    keys[2] = kSecMatchLimit;
-    /* identity searches need a SecPolicyRef in order to work */
-    values[3] = SecPolicyCreateSSL(FALSE, NULL);
-    keys[3] = kSecMatchPolicy;
-    /* match the name of the certificate (does not work in macOS 10.12.1) */
-    values[4] = label_cf;
-    keys[4] = kSecAttrLabel;
-    query_dict = CFDictionaryCreate(NULL, (const void **)keys,
-                                    (const void **)values, 5L,
-                                    &kCFCopyStringDictionaryKeyCallBacks,
-                                    &kCFTypeDictionaryValueCallBacks);
-    CFRelease(values[3]);
-
-    /* Do we have a match? */
-    status = SecItemCopyMatching(query_dict, (CFTypeRef *) &keys_list);
-
-    /* Because kSecAttrLabel matching does not work with kSecClassIdentity,
-     * we need to find the correct identity ourselves */
-    if(status == noErr) {
-      keys_list_count = CFArrayGetCount(keys_list);
-      *out_cert_and_key = NULL;
-      status = 1;
-      for(i = 0; i < keys_list_count; i++) {
-        OSStatus err = noErr;
-        SecCertificateRef cert = NULL;
-        const void *item = CFArrayGetValueAtIndex(keys_list, i);
-        SecIdentityRef identity = (SecIdentityRef)CURL_UNCONST(item);
-        err = SecIdentityCopyCertificate(identity, &cert);
-        if(err == noErr) {
-          CFStringRef common_name = NULL;
-          OSStatus copy_status = noErr;
-#if CURL_BUILD_IOS
-          common_name = SecCertificateCopySubjectSummary(cert);
-#elif CURL_BUILD_MAC_10_7
-          copy_status = SecCertificateCopyCommonName(cert, &common_name);
-#endif
-          if(copy_status == noErr &&
-            CFStringCompare(common_name, label_cf, 0) == kCFCompareEqualTo) {
-            CFRelease(cert);
-            CFRelease(common_name);
-            CFRetain(identity);
-            *out_cert_and_key = identity;
-            status = noErr;
-            break;
-          }
-          if(common_name)
-            CFRelease(common_name);
-        }
-        CFRelease(cert);
-      }
-    }
-
-    if(keys_list)
-      CFRelease(keys_list);
-    CFRelease(query_dict);
-    CFRelease(label_cf);
-  }
-  else {
-#if CURL_SUPPORT_MAC_10_6
-    /* On Leopard and Snow Leopard, fall back to SecKeychainSearch. */
-    status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_SUPPORT_MAC_10_6 */
-  }
-#elif CURL_SUPPORT_MAC_10_6
-  /* For developers building on older cats, we have no choice but to fall back
-     to SecKeychainSearch. */
-  status = CopyIdentityWithLabelOldSchool(label, out_cert_and_key);
-#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
-  return status;
-}
-
-static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
-                                           const struct curl_blob *blob,
-                                           const char *cPassword,
-                                           SecIdentityRef *out_cert_and_key)
-{
-  OSStatus status = errSecItemNotFound;
-  CFURLRef pkcs_url = NULL;
-  CFStringRef password = cPassword ? CFStringCreateWithCString(NULL,
-    cPassword, kCFStringEncodingUTF8) : NULL;
-  CFDataRef pkcs_data = NULL;
-
-  /* We can import P12 files on iOS or macOS 10.7 or later: */
-  /* These constants are documented as having first appeared in 10.6 but they
-     raise linker errors when used on that cat for some reason. */
-#if CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS
-  bool resource_imported;
-
-  if(blob) {
-    pkcs_data = CFDataCreate(kCFAllocatorDefault,
-                             (const unsigned char *)blob->data,
-                             (CFIndex)blob->len);
-    status = (pkcs_data != NULL) ? errSecSuccess : errSecAllocate;
-    resource_imported = (pkcs_data != NULL);
-  }
-  else {
-    pkcs_url =
-      CFURLCreateFromFileSystemRepresentation(NULL,
-                                              (const UInt8 *)cPath,
-                                              (CFIndex)strlen(cPath), FALSE);
-    resource_imported =
-      CFURLCreateDataAndPropertiesFromResource(NULL,
-                                               pkcs_url, &pkcs_data,
-                                               NULL, NULL, &status);
-  }
-
-  if(resource_imported) {
-    CFArrayRef items = NULL;
-
-  /* On iOS SecPKCS12Import will never add the client certificate to the
-   * Keychain.
-   *
-   * It gives us back a SecIdentityRef that we can use directly. */
-#if CURL_BUILD_IOS
-    const void *cKeys[] = {kSecImportExportPassphrase};
-    const void *cValues[] = {password};
-    CFDictionaryRef options = CFDictionaryCreate(NULL, cKeys, cValues,
-      password ? 1L : 0L, NULL, NULL);
-
-    if(options) {
-      status = SecPKCS12Import(pkcs_data, options, &items);
-      CFRelease(options);
-    }
-
-
-  /* On macOS SecPKCS12Import will always add the client certificate to
-   * the Keychain.
-   *
-   * As this does not match iOS, and apps may not want to see their client
-   * certificate saved in the user's keychain, we use SecItemImport
-   * with a NULL keychain to avoid importing it.
-   *
-   * This returns a SecCertificateRef from which we can construct a
-   * SecIdentityRef.
-   */
-#elif CURL_BUILD_MAC_10_7
-    SecItemImportExportKeyParameters keyParams;
-    SecExternalFormat inputFormat = kSecFormatPKCS12;
-    SecExternalItemType inputType = kSecItemTypeCertificate;
-
-    memset(&keyParams, 0x00, sizeof(keyParams));
-    keyParams.version    = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-    keyParams.passphrase = password;
-
-    status = SecItemImport(pkcs_data, NULL, &inputFormat, &inputType,
-                           0, &keyParams, NULL, &items);
-#endif
-
-
-    /* Extract the SecIdentityRef */
-    if(status == errSecSuccess && items && CFArrayGetCount(items)) {
-      CFIndex i, count;
-      count = CFArrayGetCount(items);
-
-      for(i = 0; i < count; i++) {
-        const CFTypeRef item = CFArrayGetValueAtIndex(items, i);
-        CFTypeID itemID = CFGetTypeID(item);
-
-        if(itemID == CFDictionaryGetTypeID()) {
-          const CFTypeRef identity = CFDictionaryGetValue(
-                                           (CFDictionaryRef)item,
-                                           kSecImportItemIdentity);
-          CFRetain(identity);
-          *out_cert_and_key = (SecIdentityRef)CURL_UNCONST(identity);
-          break;
-        }
-#if CURL_BUILD_MAC_10_7
-        else if(itemID == SecCertificateGetTypeID()) {
-          status = SecIdentityCreateWithCertificate(NULL,
-                                         (SecCertificateRef)CURL_UNCONST(item),
-                                         out_cert_and_key);
-          break;
-        }
-#endif
-      }
-    }
-
-    if(items)
-      CFRelease(items);
-    CFRelease(pkcs_data);
-  }
-#endif /* CURL_BUILD_MAC_10_7 || CURL_BUILD_IOS */
-  if(password)
-    CFRelease(password);
-  if(pkcs_url)
-    CFRelease(pkcs_url);
-  return status;
-}
-
-/* This code was borrowed from nss.c, with some modifications:
- * Determine whether the nickname passed in is a filename that needs to
- * be loaded as a PEM or a nickname.
- *
- * returns 1 for a file
- * returns 0 for not a file
- */
-CF_INLINE bool is_file(const char *filename)
-{
-  struct_stat st;
-
-  if(!filename)
-    return FALSE;
-
-  if(stat(filename, &st) == 0)
-    return S_ISREG(st.st_mode);
-  return FALSE;
-}
 
 static CURLcode
 sectransp_set_ssl_version_min_max(struct Curl_easy *data,
@@ -1040,11 +631,10 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ssl_cablob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  char * const ssl_cert = ssl_config->primary.clientcert;
-  const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   char *ciphers;
   OSStatus err = noErr;
   CURLcode result;
+  SecIdentityRef cert_and_key = NULL;
 #if CURL_BUILD_MAC
   int darwinver_maj = 0, darwinver_min = 0;
 
@@ -1122,102 +712,42 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #endif /* CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11 */
   }
 
-  if(ssl_config->key) {
-    infof(data, "WARNING: SSL: CURLOPT_SSLKEY is ignored by Secure "
-          "Transport. The private key must be in the Keychain.");
-  }
+  err = apple_copy_identity(data, ssl_config, &cert_and_key);
+  if(cert_and_key) {
+    SecCertificateRef cert = NULL;
+    CFTypeRef certs_c[1];
+    CFArrayRef certs;
 
-  if(ssl_cert || ssl_cert_blob) {
-    bool is_cert_data = ssl_cert_blob != NULL;
-    bool is_cert_file = (!is_cert_data) && is_file(ssl_cert);
-    SecIdentityRef cert_and_key = NULL;
+    /* If we found one, print it out: */
+    err = SecIdentityCopyCertificate(cert_and_key, &cert);
+    if(err == noErr) {
+      char *certp;
+      result = apple_copy_cert_subject(data, cert, &certp);
+      if(!result) {
+        infof(data, "Client certificate: %s", certp);
+        free(certp);
+      }
 
-    /* User wants to authenticate with a client cert. Look for it. Assume that
-       the user wants to use an identity loaded from the Keychain. If not, try
-       it as a file on disk */
-
-    if(!is_cert_data)
-      err = CopyIdentityWithLabel(ssl_cert, &cert_and_key);
-    else
-      err = !noErr;
-    if((err != noErr) && (is_cert_file || is_cert_data)) {
-      if(!ssl_config->cert_type)
-        infof(data, "SSL: Certificate type not set, assuming "
-              "PKCS#12 format.");
-      else if(!strcasecompare(ssl_config->cert_type, "P12")) {
-        failf(data, "SSL: The Security framework only supports "
-              "loading identities that are in PKCS#12 format.");
+      CFRelease(cert);
+      if(result == CURLE_PEER_FAILED_VERIFICATION)
         return CURLE_SSL_CERTPROBLEM;
-      }
-
-      err = CopyIdentityFromPKCS12File(ssl_cert, ssl_cert_blob,
-                                       ssl_config->key_passwd,
-                                       &cert_and_key);
+      if(result)
+        return result;
     }
-
-    if(err == noErr && cert_and_key) {
-      SecCertificateRef cert = NULL;
-      CFTypeRef certs_c[1];
-      CFArrayRef certs;
-
-      /* If we found one, print it out: */
-      err = SecIdentityCopyCertificate(cert_and_key, &cert);
-      if(err == noErr) {
-        char *certp;
-        result = CopyCertSubject(data, cert, &certp);
-        if(!result) {
-          infof(data, "Client certificate: %s", certp);
-          free(certp);
-        }
-
-        CFRelease(cert);
-        if(result == CURLE_PEER_FAILED_VERIFICATION)
-          return CURLE_SSL_CERTPROBLEM;
-        if(result)
-          return result;
-      }
-      certs_c[0] = cert_and_key;
-      certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
-                            &kCFTypeArrayCallBacks);
-      err = SSLSetCertificate(backend->ssl_ctx, certs);
-      if(certs)
-        CFRelease(certs);
-      if(err != noErr) {
-        failf(data, "SSL: SSLSetCertificate() failed: OSStatus %d", err);
-        return CURLE_SSL_CERTPROBLEM;
-      }
-      CFRelease(cert_and_key);
-    }
-    else {
-      const char *cert_showfilename_error =
-        is_cert_data ? "(memory blob)" : ssl_cert;
-
-      switch(err) {
-      case errSecAuthFailed: case -25264: /* errSecPkcs12VerifyFailure */
-        failf(data, "SSL: Incorrect password for the certificate \"%s\" "
-                    "and its private key.", cert_showfilename_error);
-        break;
-      case -26275: /* errSecDecode */ case -25257: /* errSecUnknownFormat */
-        failf(data, "SSL: Couldn't make sense of the data in the "
-                    "certificate \"%s\" and its private key.",
-                    cert_showfilename_error);
-        break;
-      case -25260: /* errSecPassphraseRequired */
-        failf(data, "SSL The certificate \"%s\" requires a password.",
-                    cert_showfilename_error);
-        break;
-      case errSecItemNotFound:
-        failf(data, "SSL: cannot find the certificate \"%s\" and its private "
-                    "key in the Keychain.", cert_showfilename_error);
-        break;
-      default:
-        failf(data, "SSL: cannot load the certificate \"%s\" and its private "
-                    "key: OSStatus %d", cert_showfilename_error, err);
-        break;
-      }
+    certs_c[0] = cert_and_key;
+    certs = CFArrayCreate(NULL, (const void **)certs_c, 1L,
+                          &kCFTypeArrayCallBacks);
+    err = SSLSetCertificate(backend->ssl_ctx, certs);
+    if(certs)
+      CFRelease(certs);
+    CFRelease(cert_and_key);
+    if(err != noErr) {
+      failf(data, "SSL: SSLSetCertificate() failed: OSStatus %d", err);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
+  if(err)
+    return CURLE_SSL_CERTPROBLEM;
 
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
@@ -1274,7 +804,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
   if((ssl_cafile || ssl_cablob) && verifypeer) {
     bool is_cert_data = ssl_cablob != NULL;
-    bool is_cert_file = (!is_cert_data) && is_file(ssl_cafile);
+    bool is_cert_file = (!is_cert_data) && apple_is_file(ssl_cafile);
 
     if(!(is_cert_file || is_cert_data)) {
       failf(data, "SSL: cannot load CA certificate file %s",
@@ -1396,208 +926,14 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static long pem_to_der(const char *in, unsigned char **out, size_t *outlen)
+static CURLcode verify_cert(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            SSLContextRef ctx)
 {
-  char *sep_start, *sep_end, *cert_start, *cert_end;
-  size_t i, j, err;
-  size_t len;
-  char *b64;
-
-  /* Jump through the separators at the beginning of the certificate. */
-  sep_start = strstr(in, "-----");
-  if(!sep_start)
-    return 0;
-  cert_start = strstr(sep_start + 1, "-----");
-  if(!cert_start)
-    return -1;
-
-  cert_start += 5;
-
-  /* Find separator after the end of the certificate. */
-  cert_end = strstr(cert_start, "-----");
-  if(!cert_end)
-    return -1;
-
-  sep_end = strstr(cert_end + 1, "-----");
-  if(!sep_end)
-    return -1;
-  sep_end += 5;
-
-  len = cert_end - cert_start;
-  b64 = malloc(len + 1);
-  if(!b64)
-    return -1;
-
-  /* Create base64 string without linefeeds. */
-  for(i = 0, j = 0; i < len; i++) {
-    if(cert_start[i] != '\r' && cert_start[i] != '\n')
-      b64[j++] = cert_start[i];
-  }
-  b64[j] = '\0';
-
-  err = curlx_base64_decode((const char *)b64, out, outlen);
-  free(b64);
-  if(err) {
-    free(*out);
-    return -1;
-  }
-
-  return sep_end - in;
-}
-
-#define MAX_CERTS_SIZE (50*1024*1024) /* arbitrary - to catch mistakes */
-
-static int read_cert(const char *file, unsigned char **out, size_t *outlen)
-{
-  int fd;
-  ssize_t n;
-  unsigned char buf[512];
-  struct dynbuf certs;
-
-  curlx_dyn_init(&certs, MAX_CERTS_SIZE);
-
-  fd = open(file, 0);
-  if(fd < 0)
-    return -1;
-
-  for(;;) {
-    n = read(fd, buf, sizeof(buf));
-    if(!n)
-      break;
-    if(n < 0) {
-      close(fd);
-      curlx_dyn_free(&certs);
-      return -1;
-    }
-    if(curlx_dyn_addn(&certs, buf, n)) {
-      close(fd);
-      return -1;
-    }
-  }
-  close(fd);
-
-  *out = curlx_dyn_uptr(&certs);
-  *outlen = curlx_dyn_len(&certs);
-
-  return 0;
-}
-
-static CURLcode append_cert_to_array(struct Curl_easy *data,
-                                     const unsigned char *buf, size_t buflen,
-                                     CFMutableArrayRef array)
-{
-    char *certp;
-    CURLcode result;
-    SecCertificateRef cacert;
-    CFDataRef certdata;
-
-    certdata = CFDataCreate(kCFAllocatorDefault, buf, (CFIndex)buflen);
-    if(!certdata) {
-      failf(data, "SSL: failed to allocate array for CA certificate");
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    cacert = SecCertificateCreateWithData(kCFAllocatorDefault, certdata);
-    CFRelease(certdata);
-    if(!cacert) {
-      failf(data, "SSL: failed to create SecCertificate from CA certificate");
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-
-    /* Check if cacert is valid. */
-    result = CopyCertSubject(data, cacert, &certp);
-    switch(result) {
-      case CURLE_OK:
-        break;
-      case CURLE_PEER_FAILED_VERIFICATION:
-        CFRelease(cacert);
-        return CURLE_SSL_CACERT_BADFILE;
-      case CURLE_OUT_OF_MEMORY:
-      default:
-        CFRelease(cacert);
-        return result;
-    }
-    free(certp);
-
-    CFArrayAppendValue(array, cacert);
-    CFRelease(cacert);
-
-    return CURLE_OK;
-}
-
-static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const unsigned char *certbuf, size_t buflen,
-                                SSLContextRef ctx)
-{
-  int n = 0;
-  CURLcode rc;
-  long res;
-  unsigned char *der;
-  size_t derlen, offset = 0;
-  OSStatus ret;
-  SecTrustResultType trust_eval;
-  CFMutableArrayRef array = NULL;
-  SecTrustRef trust = NULL;
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
-  (void)cf;
-  /*
-   * Certbuf now contains the contents of the certificate file, which can be
-   * - a single DER certificate,
-   * - a single PEM certificate or
-   * - a bunch of PEM certificates (certificate bundle).
-   *
-   * Go through certbuf, and convert any PEM certificate in it into DER
-   * format.
-   */
-  array = CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
-  if(!array) {
-    failf(data, "SSL: out of memory creating CA certificate array");
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
-
-  while(offset < buflen) {
-    n++;
-
-    /*
-     * Check if the certificate is in PEM format, and convert it to DER. If
-     * this fails, we assume the certificate is in DER format.
-     */
-    res = pem_to_der((const char *)certbuf + offset, &der, &derlen);
-    if(res < 0) {
-      failf(data, "SSL: invalid CA certificate #%d (offset %zu) in bundle",
-            n, offset);
-      result = CURLE_SSL_CACERT_BADFILE;
-      goto out;
-    }
-    offset += res;
-
-    if(res == 0 && offset == 0) {
-      /* This is not a PEM file, probably a certificate in DER format. */
-      rc = append_cert_to_array(data, certbuf, buflen, array);
-      if(rc != CURLE_OK) {
-        CURL_TRC_CF(data, cf, "append_cert for CA failed");
-        result = rc;
-        goto out;
-      }
-      break;
-    }
-    else if(res == 0) {
-      /* No more certificates in the bundle. */
-      break;
-    }
-
-    rc = append_cert_to_array(data, der, derlen, array);
-    free(der);
-    if(rc != CURLE_OK) {
-      CURL_TRC_CF(data, cf, "append_cert for CA failed");
-      result = rc;
-      goto out;
-    }
-  }
-
-  ret = SSLCopyPeerTrust(ctx, &trust);
+  SecTrustRef trust = NULL;
+  SecTrustResultType trust_eval = 0;
+  OSStatus ret = SSLCopyPeerTrust(ctx, &trust);
   if(!trust) {
     failf(data, "SSL: error getting certificate chain");
     goto out;
@@ -1607,24 +943,17 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     goto out;
   }
 
-  CURL_TRC_CF(data, cf, "setting %d trust anchors", n);
-  ret = SecTrustSetAnchorCertificates(trust, array);
-  if(ret != noErr) {
-    failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
+  result = apple_setup_trust(cf, data, trust);
+  if(result)
     goto out;
-  }
-  ret = SecTrustSetAnchorCertificatesOnly(trust, TRUE);
-  if(ret != noErr) {
-    failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
-    goto out;
-  }
 
-  trust_eval = 0;
   ret = SecTrustEvaluate(trust, &trust_eval);
   if(ret != noErr) {
     failf(data, "SecTrustEvaluate() returned error %d", ret);
     goto out;
   }
+
+  result = CURLE_PEER_FAILED_VERIFICATION;
 
   switch(trust_eval) {
     case kSecTrustResultUnspecified:
@@ -1651,157 +980,8 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
 out:
   if(trust)
     CFRelease(trust);
-  if(array)
-    CFRelease(array);
   return result;
 }
-
-static CURLcode verify_cert(struct Curl_cfilter *cf,
-                            struct Curl_easy *data, const char *cafile,
-                            const struct curl_blob *ca_info_blob,
-                            SSLContextRef ctx)
-{
-  CURLcode result;
-  unsigned char *certbuf;
-  size_t buflen;
-  bool free_certbuf = FALSE;
-
-  if(ca_info_blob) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from config blob");
-    certbuf = ca_info_blob->data;
-    buflen = ca_info_blob->len;
-  }
-  else if(cafile) {
-    CURL_TRC_CF(data, cf, "verify_peer, CA from file '%s'", cafile);
-    if(read_cert(cafile, &certbuf, &buflen) < 0) {
-      failf(data, "SSL: failed to read or invalid CA certificate");
-      return CURLE_SSL_CACERT_BADFILE;
-    }
-    free_certbuf = TRUE;
-  }
-  else
-    return CURLE_SSL_CACERT_BADFILE;
-
-  result = verify_cert_buf(cf, data, certbuf, buflen, ctx);
-  if(free_certbuf)
-    free(certbuf);
-  return result;
-}
-
-
-#ifdef SECTRANSP_PINNEDPUBKEY
-static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
-                                    SSLContextRef ctx,
-                                    const char *pinnedpubkey)
-{  /* Scratch */
-  size_t pubkeylen, realpubkeylen, spkiHeaderLength = 24;
-  const unsigned char *pubkey = NULL;
-  unsigned char *realpubkey = NULL;
-  const unsigned char *spkiHeader = NULL;
-  CFDataRef publicKeyBits = NULL;
-
-  /* Result is returned to caller */
-  CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
-
-  /* if a path was not specified, do not pin */
-  if(!pinnedpubkey)
-    return CURLE_OK;
-
-
-  if(!ctx)
-    return result;
-
-  do {
-    SecTrustRef trust;
-    OSStatus ret;
-    SecKeyRef keyRef;
-
-    ret = SSLCopyPeerTrust(ctx, &trust);
-    if(ret != noErr || !trust)
-      break;
-
-    keyRef = SecTrustCopyPublicKey(trust);
-    CFRelease(trust);
-    if(!keyRef)
-      break;
-
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-
-    publicKeyBits = SecKeyCopyExternalRepresentation(keyRef, NULL);
-    CFRelease(keyRef);
-    if(!publicKeyBits)
-      break;
-
-#elif SECTRANSP_PINNEDPUBKEY_V2
-
-    {
-      OSStatus success;
-      success = SecItemExport(keyRef, kSecFormatOpenSSL, 0, NULL,
-                              &publicKeyBits);
-      CFRelease(keyRef);
-      if(success != errSecSuccess || !publicKeyBits)
-        break;
-    }
-
-#endif /* SECTRANSP_PINNEDPUBKEY_V2 */
-
-    pubkeylen = (size_t)CFDataGetLength(publicKeyBits);
-    pubkey = (const unsigned char *)CFDataGetBytePtr(publicKeyBits);
-
-    switch(pubkeylen) {
-      case 526:
-        /* 4096 bit RSA pubkeylen == 526 */
-        spkiHeader = rsa4096SpkiHeader;
-        break;
-      case 270:
-        /* 2048 bit RSA pubkeylen == 270 */
-        spkiHeader = rsa2048SpkiHeader;
-        break;
-#ifdef SECTRANSP_PINNEDPUBKEY_V1
-      case 65:
-        /* ecDSA secp256r1 pubkeylen == 65 */
-        spkiHeader = ecDsaSecp256r1SpkiHeader;
-        spkiHeaderLength = 26;
-        break;
-      case 97:
-        /* ecDSA secp384r1 pubkeylen == 97 */
-        spkiHeader = ecDsaSecp384r1SpkiHeader;
-        spkiHeaderLength = 23;
-        break;
-      default:
-        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
-#elif SECTRANSP_PINNEDPUBKEY_V2
-      default:
-        /* ecDSA secp256r1 pubkeylen == 91 header already included?
-         * ecDSA secp384r1 header already included too
-         * we assume rest of algorithms do same, so do nothing
-         */
-        result = Curl_pin_peer_pubkey(data, pinnedpubkey, pubkey,
-                                    pubkeylen);
-#endif /* SECTRANSP_PINNEDPUBKEY_V2 */
-        continue; /* break from loop */
-    }
-
-    realpubkeylen = pubkeylen + spkiHeaderLength;
-    realpubkey = malloc(realpubkeylen);
-    if(!realpubkey)
-      break;
-
-    memcpy(realpubkey, spkiHeader, spkiHeaderLength);
-    memcpy(realpubkey + spkiHeaderLength, pubkey, pubkeylen);
-
-    result = Curl_pin_peer_pubkey(data, pinnedpubkey, realpubkey,
-                                  realpubkeylen);
-
-  } while(0);
-
-  Curl_safefree(realpubkey);
-  if(publicKeyBits)
-    CFRelease(publicKeyBits);
-
-  return result;
-}
-#endif /* SECTRANSP_PINNEDPUBKEY */
 
 static CURLcode sectransp_connect_step2(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
@@ -1835,9 +1015,7 @@ check_handshake:
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&
            conn_config->verifypeer) {
-          CURLcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
+          CURLcode result = verify_cert(cf, data, backend->ssl_ctx);
           if(result)
             return result;
         }
@@ -2046,17 +1224,28 @@ check_handshake:
     /* we have been connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
-#ifdef SECTRANSP_PINNEDPUBKEY
+#ifdef APPLE_PINNEDPUBKEY
     if(data->set.str[STRING_SSL_PINNEDPUBLICKEY]) {
-      CURLcode result =
-        pkp_pin_peer_pubkey(data, backend->ssl_ctx,
-                            data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+      SecTrustRef trust = NULL;
+      CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+
+      OSStatus ret = SSLCopyPeerTrust(backend->ssl_ctx, &trust);
+      if(ret != noErr || !trust) {
+        failf(data, "SSL: failed to retrieve peer trust");
+        return result;
+      }
+
+      result = apple_pin_peer_pubkey(data, trust,
+        data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
+
+      CFRelease(trust);
+
       if(result) {
         failf(data, "SSL: public key does not match pinned public key");
         return result;
       }
     }
-#endif /* SECTRANSP_PINNEDPUBKEY */
+#endif /* APPLE_PINNEDPUBKEY */
 
     /* Informational message */
     (void)SSLGetNegotiatedCipher(backend->ssl_ctx, &cipher);
@@ -2132,48 +1321,6 @@ check_handshake:
   }
 }
 
-static CURLcode
-add_cert_to_certinfo(struct Curl_easy *data,
-                     const SecCertificateRef server_cert,
-                     int idx)
-{
-  CURLcode result = CURLE_OK;
-  const char *beg;
-  const char *end;
-  CFDataRef cert_data = SecCertificateCopyData(server_cert);
-
-  if(!cert_data)
-    return CURLE_PEER_FAILED_VERIFICATION;
-
-  beg = (const char *)CFDataGetBytePtr(cert_data);
-  end = beg + CFDataGetLength(cert_data);
-  result = Curl_extract_certinfo(data, idx, beg, end);
-  CFRelease(cert_data);
-  return result;
-}
-
-static CURLcode
-collect_server_cert_single(struct Curl_cfilter *cf, struct Curl_easy *data,
-                           const SecCertificateRef server_cert,
-                           CFIndex idx)
-{
-  CURLcode result = CURLE_OK;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  if(data->set.verbose) {
-    char *certp;
-    result = CopyCertSubject(data, server_cert, &certp);
-    if(!result) {
-      infof(data, "Server certificate: %s", certp);
-      free(certp);
-    }
-  }
-#endif
-  if(ssl_config->certinfo)
-    result = add_cert_to_certinfo(data, server_cert, (int)idx);
-  return result;
-}
-
 /* This should be called during step3 of the connection at the earliest */
 static CURLcode collect_server_cert(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
@@ -2210,14 +1357,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
   /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
      a null trust, so be on guard for that: */
   if(err == noErr && trust) {
-    count = SecTrustGetCertificateCount(trust);
-    if(ssl_config->certinfo)
-      result = Curl_ssl_init_certinfo(data, (int)count);
-    for(i = 0L ; !result && (i < count) ; i++) {
-      server_cert = SecTrustGetCertificateAtIndex(trust, i);
-      result = collect_server_cert_single(cf, data, server_cert, i);
-    }
-    CFRelease(trust);
+    result = apple_collect_cert_trust(cf, data, trust);
   }
 #else
   /* SSLCopyPeerCertificates() is deprecated as of Mountain Lion.
@@ -2232,14 +1372,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
     /* For some reason, SSLCopyPeerTrust() can return noErr and yet return
        a null trust, so be on guard for that: */
     if(err == noErr && trust) {
-      count = SecTrustGetCertificateCount(trust);
-      if(ssl_config->certinfo)
-        result = Curl_ssl_init_certinfo(data, (int)count);
-      for(i = 0L ; !result && (i < count) ; i++) {
-        server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        result = collect_server_cert_single(cf, data, server_cert, i);
-      }
-      CFRelease(trust);
+      result = apple_collect_cert_trust(cf, data, trust);
     }
   }
   else {
@@ -2253,7 +1386,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
       for(i = 0L ; !result && (i < count) ; i++) {
         const void *item = CFArrayGetValueAtIndex(server_certs, i);
         server_cert = (SecCertificateRef)CURL_UNCONST(item);
-        result = collect_server_cert_single(cf, data, server_cert, i);
+        result = apple_collect_cert_single(cf, data, server_cert, i);
       }
       CFRelease(server_certs);
     }
@@ -2270,7 +1403,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
     for(i = 0L ; !result && (i < count) ; i++) {
       const void *item = CFArrayGetValueAtIndex(server_certs, i);
       server_cert = (SecCertificateRef)CURL_UNCONST(item);
-      result = collect_server_cert_single(cf, data, server_cert, i);
+      result = apple_collect_cert_single(cf, data, server_cert, i);
     }
     CFRelease(server_certs);
   }
@@ -2630,9 +1763,7 @@ again:
       case -9841:
         if((conn_config->CAfile || conn_config->ca_info_blob) &&
            conn_config->verifypeer) {
-          CURLcode result = verify_cert(cf, data, conn_config->CAfile,
-                                        conn_config->ca_info_blob,
-                                        backend->ssl_ctx);
+          CURLcode result = verify_cert(cf, data, backend->ssl_ctx);
           if(result) {
             *curlcode = result;
             return -1;
@@ -2663,9 +1794,9 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 
   SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CERTINFO |
-#ifdef SECTRANSP_PINNEDPUBKEY
+#ifdef APPLE_PINNEDPUBKEY
   SSLSUPP_PINNEDPUBKEY |
-#endif /* SECTRANSP_PINNEDPUBKEY */
+#endif /* APPLE_PINNEDPUBKEY */
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST,
 
@@ -2691,6 +1822,8 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
   NULL,                               /* get_channel_binding */
+  NULL,                               /* cntrl */
+  NULL,                               /* is_alive */
 };
 
 #if defined(__GNUC__) && defined(__APPLE__)

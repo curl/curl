@@ -428,7 +428,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    *  CURLOPT_CAINFO / --cacert.
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
-     Curl_ssl_backend() != CURLSSLBACKEND_SECURETRANSPORT) {
+     Curl_ssl_backend() != CURLSSLBACKEND_SECURETRANSPORT &&
+     Curl_ssl_backend() != CURLSSLBACKEND_NETWORKFRAMEWORK) {
 #ifdef CURL_CA_BUNDLE
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)

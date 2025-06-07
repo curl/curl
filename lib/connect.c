@@ -256,22 +256,22 @@ addr_next_match(const struct Curl_addrinfo *addr, int family)
 
 /* retrieves ip address and port from a sockaddr structure.
    note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
-bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
+bool Curl_addr2string(const struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port)
 {
-  struct sockaddr_in *si = NULL;
+  const struct sockaddr_in *si = NULL;
 #ifdef USE_IPV6
-  struct sockaddr_in6 *si6 = NULL;
+  const struct sockaddr_in6 *si6 = NULL;
 #endif
 #if (defined(HAVE_SYS_UN_H) || defined(WIN32_SOCKADDR_UN)) && defined(AF_UNIX)
-  struct sockaddr_un *su = NULL;
+  const struct sockaddr_un *su = NULL;
 #else
   (void)salen;
 #endif
 
   switch(sa->sa_family) {
     case AF_INET:
-      si = (struct sockaddr_in *)(void *) sa;
+      si = (const struct sockaddr_in *)(const void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si->sin_port);
         *port = us_port;
@@ -280,7 +280,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
       break;
 #ifdef USE_IPV6
     case AF_INET6:
-      si6 = (struct sockaddr_in6 *)(void *) sa;
+      si6 = (const struct sockaddr_in6 *)(const void *) sa;
       if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si6->sin6_port);
         *port = us_port;
@@ -291,7 +291,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #if (defined(HAVE_SYS_UN_H) || defined(WIN32_SOCKADDR_UN)) && defined(AF_UNIX)
     case AF_UNIX:
       if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
-        su = (struct sockaddr_un*)sa;
+        su = (const struct sockaddr_un*)sa;
         msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       }
       else
@@ -1265,6 +1265,8 @@ static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
   struct cf_setup_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct Curl_dns_entry *dns = data->state.dns[cf->sockindex];
+  bool want_ssl = false;
+  bool no_underlying = false;
 
   if(cf->connected) {
     *done = TRUE;
@@ -1276,13 +1278,24 @@ connect_sub_chain:
   if(!dns)
     return CURLE_FAILED_INIT;
 
+#ifdef USE_SSL
+  if((ctx->ssl_mode == CURL_CF_SSL_ENABLE
+      || (ctx->ssl_mode != CURL_CF_SSL_DISABLE
+         && cf->conn->handler->flags & PROTOPT_SSL))) {
+    want_ssl = true;
+    if(Curl_ssl_supports(data, SSLSUPP_NO_UNDERLYING)) {
+      no_underlying = true;
+    }
+  }
+#endif /* USE_SSL */
+
   if(cf->next && !cf->next->connected) {
     result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
 
-  if(ctx->state < CF_SETUP_CNNCT_EYEBALLS) {
+  if(ctx->state < CF_SETUP_CNNCT_EYEBALLS && !no_underlying) {
     result = cf_he_insert_after(cf, data, ctx->transport);
     if(result)
       return result;
@@ -1293,7 +1306,8 @@ connect_sub_chain:
 
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
-  if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
+  if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy
+    && !no_underlying) {
     result = Curl_cf_socks_proxy_insert_after(cf, data);
     if(result)
       return result;
@@ -1302,7 +1316,8 @@ connect_sub_chain:
       goto connect_sub_chain;
   }
 
-  if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
+  if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy
+    && !no_underlying) {
 #ifdef USE_SSL
     if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
@@ -1328,7 +1343,7 @@ connect_sub_chain:
   if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
 #if !defined(CURL_DISABLE_PROXY)
     if(data->set.haproxyprotocol) {
-      if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
+      if(Curl_conn_is_ssl(cf->conn, cf->sockindex) || no_underlying) {
         failf(data, "haproxy protocol not support with SSL "
               "encryption in place (QUIC?)");
         return CURLE_UNSUPPORTED_PROTOCOL;
@@ -1345,9 +1360,7 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #ifdef USE_SSL
-    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE
-        || (ctx->ssl_mode != CURL_CF_SSL_DISABLE
-           && cf->conn->handler->flags & PROTOPT_SSL)) /* we want SSL */
+    if(want_ssl /* we want SSL */
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)

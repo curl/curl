@@ -30,6 +30,7 @@ http
 <features>
 SSL
 proxy
+!nwf
 </features>
 <name>
 HTTPS GET with failed proxy auth (CONNECT 1.0)
