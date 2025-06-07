@@ -26,7 +26,7 @@
 #include "memdebug.h"
 
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
-static char t578_testdata[]="this is a short string.\n";
+static char t578_testdata[] = "this is a short string.\n";
 
 static size_t data_size = CURL_ARRAYSIZE(t578_testdata);
 
