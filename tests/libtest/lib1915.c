@@ -28,11 +28,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct entry {
-  const char *name;
-  const char *exp;
-};
-
 struct state {
   int index;
 };
@@ -41,6 +36,11 @@ struct state {
 static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
                             void *userp)
 {
+  struct entry {
+    const char *name;
+    const char *exp;
+  };
+
   static const struct entry preload_hosts[] = {
 #if (SIZEOF_TIME_T < 5)
     { "1.example.com", "20370320 01:02:03" },
