@@ -27,16 +27,15 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static const char *chunks[]={
-  "one",
-  "two",
-  "three",
-  "four",
-  NULL
-};
-
 static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
+  static const char *chunks[] = {
+    "one",
+    "two",
+    "three",
+    "four",
+    NULL
+  };
   static int ix = 0;
   (void)size;
   (void)nmemb;
