@@ -26,7 +26,7 @@
 #include "memdebug.h"
 
 struct t654_WriteThis {
-  char *readptr;
+  const char *readptr;
   curl_off_t sizeleft;
   int freecount;
 };
@@ -61,7 +61,7 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 CURLcode test(char *URL)
 {
-  static char testdata[] = "dummy\n";
+  static const char testdata[] = "dummy\n";
 
   CURL *easy = NULL;
   CURL *easy2 = NULL;
