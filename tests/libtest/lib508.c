@@ -25,10 +25,8 @@
 
 #include "memdebug.h"
 
-static char t508_testdata[]="this is what we post to the silly web server\n";
-
 struct t508_WriteThis {
-  char *readptr;
+  const char *readptr;
   size_t sizeleft;
 };
 
@@ -51,13 +49,16 @@ static size_t t508_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 CURLcode test(char *URL)
 {
+  static const char testdata[] =
+    "this is what we post to the silly web server\n";
+
   CURL *curl;
   CURLcode res = CURLE_OK;
 
   struct t508_WriteThis pooh;
 
-  pooh.readptr = t508_testdata;
-  pooh.sizeleft = strlen(t508_testdata);
+  pooh.readptr = testdata;
+  pooh.sizeleft = strlen(testdata);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
