@@ -28,11 +28,11 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static char const testData[] = ".abc\0xyz";
-static curl_off_t const testDataSize = sizeof(testData) - 1;
-
 CURLcode test(char *URL)
 {
+  static char const testData[] = ".abc\0xyz";
+  static curl_off_t const testDataSize = sizeof(testData) - 1;
+
   CURL *easy;
   CURLM *multi_handle;
   int still_running; /* keep number of running handles */
