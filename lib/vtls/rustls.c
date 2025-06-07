@@ -101,9 +101,11 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
   CURLcode result;
   int ret = 0;
-  ssize_t nread = Curl_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
-                                    (char *)buf, len, &result);
-  if(nread < 0) {
+  size_t nread;
+
+  result = Curl_conn_cf_recv(io_ctx->cf->next, io_ctx->data,
+                             (char *)buf, len, &nread);
+  if(result) {
     nread = 0;
     /* !checksrc! disable ERRNOVAR 4 */
     if(CURLE_AGAIN == result)
@@ -114,8 +116,8 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   else if(nread == 0)
     connssl->peer_closed = TRUE;
   *out_n = (uintptr_t)nread;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %zd, %d",
-              len, nread, result);
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %d, %zu",
+              len, result, nread);
   return ret;
 }
 
@@ -125,10 +127,11 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   const struct io_ctx *io_ctx = userdata;
   CURLcode result;
   int ret = 0;
-  ssize_t nwritten = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
-                                       (const char *)buf, len, FALSE,
-                                       &result);
-  if(nwritten < 0) {
+  size_t nwritten;
+
+  result = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
+                             (const char *)buf, len, FALSE, &nwritten);
+  if(result) {
     nwritten = 0;
     if(CURLE_AGAIN == result)
       ret = EAGAIN;
@@ -136,8 +139,8 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (uintptr_t)nwritten;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
-              len, nwritten, result);
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %d, %zu",
+              len, result, nwritten);
   return ret;
 }
 

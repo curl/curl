@@ -326,51 +326,54 @@ static CURLcode rtmp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
-                         size_t len, CURLcode *err)
+static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
+                          size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
+  CURLcode result = CURLE_OK;
   ssize_t nread;
 
   (void)sockindex; /* unused */
-  if(!r) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  *pnread = 0;
+  if(!r)
+    return CURLE_FAILED_INIT;
 
   nread = RTMP_Read(r, buf, curlx_uztosi(len));
   if(nread < 0) {
     if(r->m_read.status == RTMP_READ_COMPLETE ||
        r->m_read.status == RTMP_READ_EOF) {
       data->req.size = data->req.bytecount;
-      nread = 0;
     }
     else
-      *err = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
   }
-  return nread;
+  else
+    *pnread = (size_t)nread;
+
+  return result;
 }
 
-static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
-                         const void *buf, size_t len, bool eos, CURLcode *err)
+static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
+                          const void *buf, size_t len, bool eos,
+                          size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
-  ssize_t num;
+  ssize_t nwritten;
 
   (void)sockindex; /* unused */
   (void)eos; /* unused */
-  if(!r) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  *pnwritten = 0;
+  if(!r)
+    return CURLE_FAILED_INIT;
 
-  num = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
-  if(num < 0)
-    *err = CURLE_SEND_ERROR;
+  nwritten = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
+  if(nwritten < 0)
+    return CURLE_SEND_ERROR;
 
-  return num;
+  *pnwritten = (size_t)nwritten;
+  return CURLE_OK;
 }
 
 void Curl_rtmp_version(char *version, size_t len)

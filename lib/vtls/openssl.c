@@ -717,22 +717,23 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
-  CURLcode result = CURLE_SEND_ERROR;
+  size_t nwritten;
+  CURLcode result;
 
   DEBUGASSERT(data);
   if(blen < 0)
     return 0;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
-                               &result);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, err=%d",
-              blen, (int)nwritten, result);
+  result = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
+                             &nwritten);
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
+              blen, result, nwritten);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
-  if(nwritten < 0) {
+  if(result) {
     if(CURLE_AGAIN == result)
       BIO_set_retry_write(bio);
+    return -1;
   }
   return (int)nwritten;
 }
@@ -743,8 +744,8 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nread;
-  CURLcode result = CURLE_RECV_ERROR;
+  size_t nread;
+  CURLcode result, r2;
 
   DEBUGASSERT(data);
   /* OpenSSL catches this case, so should we. */
@@ -753,12 +754,12 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   if(blen < 0)
     return 0;
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &result);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, err=%d",
-              blen, (int)nread, result);
+  result = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &nread);
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, %zu",
+              blen, result, nread);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
-  if(nread < 0) {
+  if(result) {
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
@@ -769,15 +770,14 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   /* Before returning server replies to the SSL instance, we need
    * to have setup the x509 store or verification will fail. */
   if(!octx->x509_store_setup) {
-    result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
-    if(result) {
-      octx->io_result = result;
+    r2 = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
+    if(r2) {
+      octx->io_result = r2;
       return -1;
     }
     octx->x509_store_setup = TRUE;
   }
-
-  return (int)nread;
+  return result ? -1 : (int)nread;
 }
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
