@@ -25,10 +25,8 @@
 
 #include "memdebug.h"
 
-static char t668_testdata[]= "dummy";
-
 struct t668_WriteThis {
-  char *readptr;
+  const char *readptr;
   curl_off_t sizeleft;
 };
 
@@ -50,6 +48,8 @@ static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 CURLcode test(char *URL)
 {
+  static const char testdata[] = "dummy";
+
   CURL *easy = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
@@ -77,8 +77,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structures. */
-  pooh1.readptr = t668_testdata;
-  pooh1.sizeleft = (curl_off_t) strlen(t668_testdata);
+  pooh1.readptr = testdata;
+  pooh1.sizeleft = (curl_off_t) strlen(testdata);
   pooh2 = pooh1;
 
   /* Build the mime tree. */
@@ -86,7 +86,7 @@ CURLcode test(char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field1");
   /* Early end of data detection can be done because the data size is known. */
-  curl_mime_data_cb(part, (curl_off_t) strlen(t668_testdata),
+  curl_mime_data_cb(part, (curl_off_t) strlen(testdata),
                     t668_read_cb, NULL, NULL, &pooh1);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field2");
