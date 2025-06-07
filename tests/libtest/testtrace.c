@@ -33,8 +33,8 @@ static time_t epoch_offset; /* for test time tracing */
 static int    known_offset; /* for test time tracing */
 
 static void libtest_debug_dump(const char *timebuf, const char *text,
-                               FILE *stream,
-                               const unsigned char *ptr, size_t size, int nohex)
+                               FILE *stream, const unsigned char *ptr,
+                               size_t size, int nohex)
 {
   size_t i;
   size_t c;
