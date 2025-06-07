@@ -25,16 +25,14 @@
 
 #include "memdebug.h"
 
-static char testdata[]= "dummy";
-
-struct WriteThis {
-  char *readptr;
+struct t668_WriteThis {
+  const char *readptr;
   curl_off_t sizeleft;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t668_WriteThis *pooh = (struct t668_WriteThis *)userp;
   size_t len = strlen(pooh->readptr);
 
   (void) size; /* Always 1.*/
@@ -50,11 +48,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 
 CURLcode test(char *URL)
 {
+  static const char testdata[] = "dummy";
+
   CURL *easy = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   CURLcode res = TEST_ERR_FAILURE;
-  struct WriteThis pooh1, pooh2;
+  struct t668_WriteThis pooh1, pooh2;
 
   /*
    * Check early end of part data detection.
@@ -87,12 +87,13 @@ CURLcode test(char *URL)
   curl_mime_name(part, "field1");
   /* Early end of data detection can be done because the data size is known. */
   curl_mime_data_cb(part, (curl_off_t) strlen(testdata),
-                    read_callback, NULL, NULL, &pooh1);
+                    t668_read_cb, NULL, NULL, &pooh1);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field2");
   /* Using an undefined length forces chunked transfer and disables early
      end of data detection for this part. */
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, NULL, &pooh2);
+  curl_mime_data_cb(part, (curl_off_t) -1, t668_read_cb,
+                    NULL, NULL, &pooh2);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field3");
   /* Regular file part sources early end of data can be detected because

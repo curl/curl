@@ -26,7 +26,7 @@
 
 #include "memdebug.h"
 
-static size_t writecb(char *data, size_t n, size_t l, void *userp)
+static size_t t1947_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* ignore the data */
   (void)data;
@@ -47,7 +47,7 @@ CURLcode test(char *URL)
 
   /* perform a request that involves redirection */
   easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1947_write_cb);
   easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   res = curl_easy_perform(curl);
   if(res) {

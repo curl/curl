@@ -26,15 +26,15 @@
 #include "speedcheck.h"
 #include "urldata.h"
 
-static struct Curl_easy *easy;
+static struct Curl_easy *t1606_easy;
 
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
+  t1606_easy = curl_easy_init();
+  if(!t1606_easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
@@ -43,7 +43,7 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(t1606_easy);
   curl_global_cleanup();
 }
 
@@ -57,14 +57,14 @@ static int runawhile(long time_limit,
   CURLcode result;
   int finaltime;
 
-  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
-  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, time_limit);
-  Curl_speedinit(easy);
+  curl_easy_setopt(t1606_easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
+  curl_easy_setopt(t1606_easy, CURLOPT_LOW_SPEED_TIME, time_limit);
+  Curl_speedinit(t1606_easy);
 
   do {
     /* fake the current transfer speed */
-    easy->progress.current_speed = speed;
-    result = Curl_speedcheck(easy, now);
+    t1606_easy->progress.current_speed = speed;
+    result = Curl_speedcheck(t1606_easy, now);
     if(result)
       break;
     /* step the time */

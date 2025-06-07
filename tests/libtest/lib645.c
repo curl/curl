@@ -25,22 +25,20 @@
 
 #include "memdebug.h"
 
-struct t643_WriteThis {
+struct t645_WriteThis {
   const char *readptr;
   curl_off_t sizeleft;
 };
 
-static size_t t643_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t645_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct t643_WriteThis *pooh = (struct t643_WriteThis *)userp;
+  struct t645_WriteThis *pooh = (struct t645_WriteThis *)userp;
   int eof;
 
   if(size*nmemb < 1)
     return 0;
 
-  eof = pooh->sizeleft <= 0;
-  if(!eof)
-    pooh->sizeleft--;
+  eof = !*pooh->readptr;
 
   if(!eof) {
     *ptr = *pooh->readptr;           /* copy one single byte */
@@ -51,7 +49,7 @@ static size_t t643_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode t643_test_once(char *URL, bool oldstyle)
+static CURLcode t645_test_once(char *URL, bool oldstyle)
 {
   static const char testdata[] = "dummy\n";
 
@@ -60,12 +58,11 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
 
   curl_mime *mime = NULL;
   curl_mimepart *part = NULL;
-  struct t643_WriteThis pooh;
-  struct t643_WriteThis pooh2;
+  struct t645_WriteThis pooh;
+  struct t645_WriteThis pooh2;
   curl_off_t datasize = -1;
 
   pooh.readptr = testdata;
-  datasize = (curl_off_t)strlen(testdata);
   pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
@@ -96,7 +93,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   if(oldstyle) {
     res = curl_mime_name(part, "sendfile");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_cb,
+      res = curl_mime_data_cb(part, datasize, t645_read_cb,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "postit2.c");
@@ -105,7 +102,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
     /* new style */
     res = curl_mime_name(part, "sendfile alternative");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_cb,
+      res = curl_mime_data_cb(part, datasize, t645_read_cb,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "file name 2");
@@ -118,7 +115,6 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
      a file upload but still using the callback */
 
   pooh2.readptr = testdata;
-  datasize = (curl_off_t)strlen(testdata);
   pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
@@ -132,7 +128,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   /* Fill in the file upload part */
   res = curl_mime_name(part, "callbackdata");
   if(!res)
-    res = curl_mime_data_cb(part, datasize, t643_read_cb,
+    res = curl_mime_data_cb(part, datasize, t645_read_cb,
                             NULL, NULL, &pooh2);
 
   if(res)
@@ -216,7 +212,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode t643_cyclic_add(void)
+static CURLcode t645_cyclic_add(void)
 {
   CURL *easy = curl_easy_init();
   curl_mime *mime = curl_mime_init(easy);
@@ -249,12 +245,12 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = t643_test_once(URL, TRUE); /* old */
+  res = t645_test_once(URL, TRUE); /* old */
   if(!res)
-    res = t643_test_once(URL, FALSE); /* new */
+    res = t645_test_once(URL, FALSE); /* new */
 
   if(!res)
-    res = t643_cyclic_add();
+    res = t645_cyclic_add();
 
   curl_global_cleanup();
 

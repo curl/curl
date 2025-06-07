@@ -28,7 +28,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct t1540_transfer_status {
   CURL *easy;
   int halted;
   int counter; /* count write callback invokes */
@@ -41,7 +41,7 @@ static int please_continue(void *userp,
                            curl_off_t ultotal,
                            curl_off_t ulnow)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1540_transfer_status *st = (struct t1540_transfer_status *)userp;
   (void)dltotal;
   (void)dlnow;
   (void)ultotal;
@@ -57,8 +57,8 @@ static int please_continue(void *userp,
   return 0; /* go on */
 }
 
-static size_t header_callback(char *ptr, size_t size, size_t nmemb,
-                              void *userp)
+static size_t t1540_header_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userp)
 {
   size_t len = size * nmemb;
   (void)userp;
@@ -66,9 +66,9 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
   return len;
 }
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1540_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1540_transfer_status *st = (struct t1540_transfer_status *)userp;
   size_t len = size * nmemb;
   st->counter++;
   if(st->counter > 1) {
@@ -87,7 +87,7 @@ CURLcode test(char *URL)
 {
   CURL *curls = NULL;
   CURLcode res = CURLE_OK;
-  struct transfer_status st;
+  struct t1540_transfer_status st;
 
   start_test_timing();
 
@@ -99,9 +99,9 @@ CURLcode test(char *URL)
   st.easy = curls; /* to allow callbacks access */
 
   easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
+  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1540_write_cb);
   easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
+  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1540_header_callback);
   easy_setopt(curls, CURLOPT_HEADERDATA, &st);
 
   easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, please_continue);

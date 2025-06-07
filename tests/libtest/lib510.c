@@ -25,22 +25,24 @@
 
 #include "memdebug.h"
 
-static const char * const testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
+#ifndef LIB510_C
+#define LIB510_C
 
-
-struct WriteThis {
+struct t510_WriteThis {
   int counter;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  static const char * const testpost[] = {
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL
+  };
+
+  struct t510_WriteThis *pooh = (struct t510_WriteThis *)userp;
   const char *data;
 
   if(size*nmemb < 1)
@@ -60,13 +62,14 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   }
   return 0;                         /* no more data left to deliver */
 }
+#endif
 
 CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct curl_slist *slist = NULL;
-  struct WriteThis pooh;
+  struct t510_WriteThis pooh;
   pooh.counter = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -96,7 +99,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t510_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);

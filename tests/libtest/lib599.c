@@ -25,8 +25,8 @@
 
 #include "memdebug.h"
 
-static int progress_callback(void *clientp, double dltotal,
-                             double dlnow, double ultotal, double ulnow)
+static int t599_progress_callback(void *clientp, double dltotal,
+                                  double dlnow, double ultotal, double ulnow)
 {
   (void)clientp;
   (void)ulnow;
@@ -64,7 +64,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t599_progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

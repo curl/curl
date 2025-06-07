@@ -29,22 +29,21 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-struct Sockets {
+struct t582_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
   int max_count;  /* max number of sockets that fit in allocated array */
 };
 
-struct ReadWriteSockets {
-  struct Sockets read, write;
+struct t582_ReadWriteSockets {
+  struct t582_Sockets read, write;
 };
 
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
+static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
+                          int mention)
 {
   int i;
 
@@ -64,14 +63,15 @@ static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
 /**
  * Add a file descriptor to a sockets array.
  */
-static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
+static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
+                       const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
   curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
-  removeFd(sockets, fd, 0);
+  t582_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
    */
@@ -96,23 +96,23 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
-static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
-                              void *userp, void *socketp)
+static int t582_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+                                   void *userp, void *socketp)
 {
-  struct ReadWriteSockets *sockets = userp;
+  struct t582_ReadWriteSockets *sockets = userp;
 
   (void)easy; /* unused */
   (void)socketp; /* unused */
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
-    addFd(&sockets->read, s, "read");
+    t582_addFd(&sockets->read, s, "read");
 
   if(action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
-    addFd(&sockets->write, s, "write");
+    t582_addFd(&sockets->write, s, "write");
 
   if(action == CURL_POLL_REMOVE) {
-    removeFd(&sockets->read, s, 1);
-    removeFd(&sockets->write, s, 0);
+    t582_removeFd(&sockets->read, s, 1);
+    t582_removeFd(&sockets->write, s, 0);
   }
 
   return 0;
@@ -121,7 +121,7 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
 /**
  * Callback invoked by curl to set a timeout.
  */
-static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
+static int t582_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
   struct timeval *timeout = userp;
 
@@ -139,7 +139,7 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int checkForCompletion(CURLM *curl, int *success)
+static int t582_checkForCompletion(CURLM *curl, int *success)
 {
   int result = 0;
   *success = 0;
@@ -165,7 +165,7 @@ static int checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int getMicroSecondTimeout(struct timeval *timeout)
+static int t582_getMicroSecondTimeout(struct timeval *timeout)
 {
   struct timeval now;
   ssize_t result;
@@ -181,8 +181,8 @@ static int getMicroSecondTimeout(struct timeval *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
-                        curl_socket_t *maxFd)
+static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set* fdset,
+                             curl_socket_t *maxFd)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
@@ -214,8 +214,8 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
-                       int evBitmask, const char *name)
+static void t582_checkFdSet(CURLM *curl, struct t582_Sockets *sockets,
+                            fd_set *fdset, int evBitmask, const char *name)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
@@ -233,7 +233,7 @@ CURLcode test(char *URL)
   int hd;
   struct_stat file_info;
   CURLM *m = NULL;
-  struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t582_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct timeval timeout = {0};
   timeout.tv_sec = (time_t)-1;
@@ -300,15 +300,15 @@ CURLcode test(char *URL)
 
   multi_init(m);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, curlSocketCallback);
+  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, t582_curlSocketCallback);
   multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, curlTimerCallback);
+  multi_setopt(m, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
   multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
 
   multi_add_handle(m, curl);
 
-  while(!checkForCompletion(m, &success)) {
+  while(!t582_checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
@@ -316,11 +316,11 @@ CURLcode test(char *URL)
 
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
-    updateFdSet(&sockets.read, &readSet, &maxFd);
-    updateFdSet(&sockets.write, &writeSet, &maxFd);
+    t582_updateFdSet(&sockets.read, &readSet, &maxFd);
+    t582_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = getMicroSecondTimeout(&timeout);
+      int usTimeout = t582_getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
@@ -332,10 +332,11 @@ CURLcode test(char *URL)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
-    checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    t582_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
+    t582_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
 
-    if(timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0) {
+    if(timeout.tv_sec != (time_t)-1 &&
+       t582_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
       notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }

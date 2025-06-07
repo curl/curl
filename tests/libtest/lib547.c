@@ -33,10 +33,7 @@
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 #ifndef LIB548
-static size_t readcallback(char  *ptr,
-                           size_t size,
-                           size_t nmemb,
-                           void *clientp)
+static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
   int *counter = (int *)clientp;
 
@@ -55,9 +52,8 @@ static size_t readcallback(char  *ptr,
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr ioctlcallback(CURL *handle,
-                               int cmd,
-                               void *clientp)
+
+static curlioerr t547_ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
@@ -67,9 +63,6 @@ static curlioerr ioctlcallback(CURL *handle,
   }
   return CURLIOE_OK;
 }
-
-
-
 #endif
 
 CURLcode test(char *URL)
@@ -100,10 +93,10 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */
-  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
+  test_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
   test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
-  test_setopt(curl, CURLOPT_READFUNCTION, readcallback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t547_read_cb);
   test_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */

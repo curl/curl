@@ -22,13 +22,9 @@
  *
  ***************************************************************************/
 #include "test.h"
-#include "memdebug.h"
 
-/* build request url */
-static char *suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
+#include "testutil.h"
+#include "memdebug.h"
 
 /*
  * Test Session ID capture
@@ -79,7 +75,7 @@ CURLcode test(char *URL)
 
   /* Go through the various Session IDs */
   for(i = 0; i < 3; i++) {
-    stream_uri = suburl(URL, request++);
+    stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
@@ -99,7 +95,7 @@ CURLcode test(char *URL)
     curl_mfprintf(idfile, "Got Session ID: [%s]\n", rtsp_session_id);
     rtsp_session_id = NULL;
 
-    stream_uri = suburl(URL, request++);
+    stream_uri = tutil_suburl(URL, request++);
     if(!stream_uri) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;

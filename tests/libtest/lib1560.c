@@ -1906,7 +1906,7 @@ static int huge(void)
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;
-  CURLUPart part[]= {
+  CURLUPart part[] = {
     CURLUPART_SCHEME,
     CURLUPART_USER,
     CURLUPART_PASSWORD,

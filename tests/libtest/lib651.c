@@ -25,10 +25,10 @@
 
 #include "memdebug.h"
 
-static char testbuf[17000]; /* more than 16K */
-
 CURLcode test(char *URL)
 {
+  static char testbuf[17000]; /* more than 16K */
+
   CURL *curl;
   CURLcode res = CURLE_OK;
   CURLFORMcode formrc;

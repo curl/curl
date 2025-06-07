@@ -25,8 +25,6 @@
 
 # Bundle up individual tests into a single binary. The resulting binary can run
 # individual tests by passing their name (without '.c') as the first argument.
-#
-# Usage: mk-bundle.pl [<server_c>]
 
 use strict;
 use warnings;
@@ -82,8 +80,7 @@ foreach my $src (@src) {
 
 print <<FOOTER
 static const struct onemain s_mains[] = {
-${tlist}  {NULL, NULL}
-};
+$tlist};
 
 #include "first.c"
 FOOTER
