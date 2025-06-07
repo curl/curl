@@ -28,19 +28,6 @@
 
 #ifndef LIB1940_C
 #define LIB1940_C
-static const char *t1940_testdata[]={
-  "daTE",
-  "Server",
-  "content-type",
-  "content-length",
-  "location",
-  "set-cookie",
-  "silly-thing",
-  "fold",
-  "blank",
-  "Blank2",
-  NULL
-};
 
 static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 {
@@ -52,10 +39,24 @@ static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 
 static void t1940_showem(CURL *easy, int header_request, unsigned int type)
 {
+  static const char *testdata[] = {
+    "daTE",
+    "Server",
+    "content-type",
+    "content-length",
+    "location",
+    "set-cookie",
+    "silly-thing",
+    "fold",
+    "blank",
+    "Blank2",
+    NULL
+  };
+
   int i;
   struct curl_header *header;
-  for(i = 0; t1940_testdata[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, t1940_testdata[i], 0,
+  for(i = 0; testdata[i]; i++) {
+    if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0,
                                      type, header_request, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
@@ -67,7 +68,7 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, t1940_testdata[i], index,
+          if(CURLHE_OK != curl_easy_header(easy, testdata[i], index,
                                            type, header_request, &header))
             break;
         } while(1);
