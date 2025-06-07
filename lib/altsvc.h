@@ -48,6 +48,9 @@ struct altsvcinfo {
   char *filename;
   struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
+
+  BIT(errored);
+  BIT(used);
 };
 
 const char *Curl_alpnid2str(enum alpnid id);
