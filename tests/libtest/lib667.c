@@ -25,10 +25,8 @@
 
 #include "memdebug.h"
 
-static char t667_testdata[] = "dummy";
-
 struct t667_WriteThis {
-  char *readptr;
+  const char *readptr;
   curl_off_t sizeleft;
 };
 
@@ -55,6 +53,8 @@ static size_t t667_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 CURLcode test(char *URL)
 {
+  static const char testdata[] = "dummy";
+
   CURL *easy = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
@@ -83,8 +83,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = t667_testdata;
-  pooh.sizeleft = (curl_off_t) strlen(t667_testdata);
+  pooh.readptr = testdata;
+  pooh.sizeleft = (curl_off_t) strlen(testdata);
 
   /* Build the mime tree. */
   mime = curl_mime_init(easy);
