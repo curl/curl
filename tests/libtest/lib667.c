@@ -33,8 +33,7 @@ struct t667_WriteThis {
   curl_off_t sizeleft;
 };
 
-static size_t t667_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t667_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t667_WriteThis *pooh = (struct t667_WriteThis *)userp;
   int eof;
@@ -94,7 +93,7 @@ CURLcode test(char *URL)
   curl_mime_name(part, "field");
   curl_mime_encoder(part, "base64");
   /* Using an undefined length forces chunked transfer. */
-  curl_mime_data_cb(part, (curl_off_t) -1, t667_read_callback,
+  curl_mime_data_cb(part, (curl_off_t) -1, t667_read_cb,
                     NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */

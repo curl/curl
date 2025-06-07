@@ -37,8 +37,7 @@ struct t670_ReadThis {
   int count;
 };
 
-static size_t t670_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t670_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t670_ReadThis *pooh = (struct t670_ReadThis *) userp;
   time_t delta;
@@ -153,7 +152,7 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  res = curl_mime_data_cb(part, (curl_off_t) 2, t670_read_callback,
+  res = curl_mime_data_cb(part, (curl_off_t) 2, t670_read_cb,
                           NULL, NULL, &pooh);
 
   /* Bind mime data to its easy handle. */
@@ -172,7 +171,7 @@ CURLcode test(char *URL)
   }
 
   /* We want to use our own read function. */
-  test_setopt(pooh.easy, CURLOPT_READFUNCTION, t670_read_callback);
+  test_setopt(pooh.easy, CURLOPT_READFUNCTION, t670_read_cb);
 
   /* Send a multi-part formpost. */
   test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);

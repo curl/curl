@@ -38,8 +38,7 @@ static void free_callback(void *userp)
   pooh->freecount++;
 }
 
-static size_t t654_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;
@@ -110,7 +109,7 @@ CURLcode test(char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_callback, NULL,
+  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_cb, NULL,
                     free_callback, &pooh);
 
   /* Bind mime data to its easy handle. */

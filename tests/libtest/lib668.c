@@ -32,8 +32,7 @@ struct t668_WriteThis {
   curl_off_t sizeleft;
 };
 
-static size_t t668_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t668_WriteThis *pooh = (struct t668_WriteThis *)userp;
   size_t len = strlen(pooh->readptr);
@@ -88,12 +87,12 @@ CURLcode test(char *URL)
   curl_mime_name(part, "field1");
   /* Early end of data detection can be done because the data size is known. */
   curl_mime_data_cb(part, (curl_off_t) strlen(t668_testdata),
-                    t668_read_callback, NULL, NULL, &pooh1);
+                    t668_read_cb, NULL, NULL, &pooh1);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field2");
   /* Using an undefined length forces chunked transfer and disables early
      end of data detection for this part. */
-  curl_mime_data_cb(part, (curl_off_t) -1, t668_read_callback,
+  curl_mime_data_cb(part, (curl_off_t) -1, t668_read_cb,
                     NULL, NULL, &pooh2);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field3");
