@@ -57,7 +57,6 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
-extern HMODULE Curl_hSecDll;
 extern PSecurityFunctionTable Curl_pSecFn;
 
 /* Provide some definitions missing in old headers */

@@ -59,6 +59,10 @@
 #error "We cannot compile without socket() support!"
 #endif
 
+#if defined(HAVE_IF_NAMETOINDEX) && defined(_WIN32)
+#include <iphlpapi.h>
+#endif
+
 #include <limits.h>
 
 #include "doh.h"
@@ -1795,10 +1799,10 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #if defined(HAVE_IF_NAMETOINDEX) || defined(_WIN32)
       /* Zone identifier is not numeric */
       unsigned int scopeidx = 0;
-#ifdef _WIN32
-      scopeidx = Curl_if_nametoindex(zoneid);
-#else
+#ifdef HAVE_IF_NAMETOINDEX
       scopeidx = if_nametoindex(zoneid);
+#else
+      scopeidx = Curl_if_nametoindex(zoneid);
 #endif
       if(!scopeidx) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
