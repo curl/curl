@@ -84,7 +84,8 @@ CURLcode test(char *URL)
   res = curl_easy_perform(curl);
   if(res != CURLE_COULDNT_RESOLVE_HOST) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
-            "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n", res);
+                  "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n",
+                  res);
     if(res == CURLE_OK)
       res = TEST_ERR_FAILURE;
     goto test_cleanup;
