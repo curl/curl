@@ -29,8 +29,7 @@ struct t1662_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t1662_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
   size_t len = strlen(t1662_testdata);
@@ -68,7 +67,7 @@ CURLcode test(char *URL)
     mime1 = curl_mime_init(hnd);
     if(mime1) {
       part1 = curl_mime_addpart(mime1);
-      curl_mime_data_cb(part1, -1, t1662_read_callback, NULL, NULL, &pooh);
+      curl_mime_data_cb(part1, -1, t1662_read_cb, NULL, NULL, &pooh);
       curl_mime_filename(part1, "poetry.txt");
       curl_mime_name(part1, "content");
       curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);

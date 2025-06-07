@@ -33,8 +33,7 @@ struct t554_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t554_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t554_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t554_WriteThis *pooh = (struct t554_WriteThis *)userp;
 
@@ -154,7 +153,7 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, t554_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t554_read_cb);
 
   /* send a multi-part formpost */
   test_setopt(curl, CURLOPT_HTTPPOST, formpost);

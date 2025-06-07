@@ -35,8 +35,7 @@ static const char *chunks[]={
   NULL
 };
 
-static size_t t1901_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *stream)
+static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static int ix = 0;
   (void)size;
@@ -65,7 +64,7 @@ CURLcode test(char *URL)
        ignores it */
     easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 4L);
     easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
-    easy_setopt(curl, CURLOPT_READFUNCTION, t1901_read_callback);
+    easy_setopt(curl, CURLOPT_READFUNCTION, t1901_read_cb);
     easy_setopt(curl, CURLOPT_POST, 1L);
     easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);

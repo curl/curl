@@ -30,8 +30,7 @@ struct t1517_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t1517_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t1517_WriteThis *pooh = (struct t1517_WriteThis *)userp;
   size_t tocopy = size * nmemb;
@@ -98,7 +97,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, t1517_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1517_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);

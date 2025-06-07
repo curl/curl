@@ -33,8 +33,7 @@
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 #ifndef LIB548
-static size_t t547_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *clientp)
+static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
   int *counter = (int *)clientp;
 
@@ -97,7 +96,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
   test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
 
-  test_setopt(curl, CURLOPT_READFUNCTION, t547_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t547_read_cb);
   test_setopt(curl, CURLOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */

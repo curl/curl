@@ -32,8 +32,7 @@ struct t510_WriteThis {
   int counter;
 };
 
-static size_t t510_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   static const char * const testpost[] = {
     "one",
@@ -100,7 +99,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, t510_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t510_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);

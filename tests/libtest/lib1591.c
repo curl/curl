@@ -33,8 +33,7 @@
 
 static size_t consumed = 0;
 
-static size_t t1591_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *stream)
+static size_t t1591_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static const char testdata[] = "Hello Cloud!\r\n";
 
@@ -104,7 +103,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1591_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1591_read_cb);
   test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
 

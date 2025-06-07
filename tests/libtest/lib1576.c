@@ -27,8 +27,7 @@
 
 static char t1576_testdata[] = "request indicates that the client, which made";
 
-static size_t t1576_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *stream)
+static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t amount = nmemb * size; /* Total bytes curl wants */
   if(amount < strlen(t1576_testdata)) {
@@ -71,7 +70,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1576_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1576_read_cb);
   test_setopt(curl, CURLOPT_SEEKFUNCTION, t1576_seek_callback);
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1576_testdata));
 

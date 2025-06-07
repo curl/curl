@@ -37,8 +37,7 @@ struct t1514_WriteThis {
   size_t sizeleft;
 };
 
-static size_t t1514_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t t1514_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t1514_WriteThis *pooh = (struct t1514_WriteThis *)userp;
 
@@ -73,7 +72,7 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_POST, 1L);
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
-  easy_setopt(curl, CURLOPT_READFUNCTION, t1514_read_callback);
+  easy_setopt(curl, CURLOPT_READFUNCTION, t1514_read_cb);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
 #ifdef LIB1539
   /* speak HTTP 1.0 - no chunked! */

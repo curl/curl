@@ -34,8 +34,7 @@
 
 static const char t1525_testdata[] = "Hello Cloud!\n";
 
-static size_t t1525_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *stream)
+static size_t t1525_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
   if(amount < strlen(t1525_testdata)) {
@@ -82,7 +81,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_HTTP);
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1525_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1525_read_cb);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1525_testdata));
 

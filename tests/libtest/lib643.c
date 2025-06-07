@@ -32,8 +32,7 @@ struct t643_WriteThis {
   curl_off_t sizeleft;
 };
 
-static size_t t643_read_callback(char *ptr, size_t size, size_t nmemb,
-                                 void *userp)
+static size_t t643_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t643_WriteThis *pooh = (struct t643_WriteThis *)userp;
   int eof;
@@ -97,7 +96,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   if(oldstyle) {
     res = curl_mime_name(part, "sendfile");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_callback,
+      res = curl_mime_data_cb(part, datasize, t643_read_cb,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "postit2.c");
@@ -106,7 +105,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
     /* new style */
     res = curl_mime_name(part, "sendfile alternative");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_callback,
+      res = curl_mime_data_cb(part, datasize, t643_read_cb,
                               NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "file name 2");
@@ -133,7 +132,7 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   /* Fill in the file upload part */
   res = curl_mime_name(part, "callbackdata");
   if(!res)
-    res = curl_mime_data_cb(part, datasize, t643_read_callback,
+    res = curl_mime_data_cb(part, datasize, t643_read_cb,
                             NULL, NULL, &pooh2);
 
   if(res)

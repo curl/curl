@@ -49,8 +49,7 @@ struct upload_status {
   int lines_read;
 };
 
-static size_t t1520_read_callback(char *ptr, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
@@ -98,7 +97,7 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, t1520_read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1520_read_cb);
   test_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   test_setopt(curl, CURLOPT_MAIL_FROM, FROM);
   test_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
