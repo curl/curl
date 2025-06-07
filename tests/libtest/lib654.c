@@ -25,9 +25,6 @@
 
 #include "memdebug.h"
 
-static char t654_testdata[]=
-  "dummy\n";
-
 struct t654_WriteThis {
   char *readptr;
   curl_off_t sizeleft;
@@ -65,6 +62,8 @@ static size_t t654_read_callback(char *ptr, size_t size, size_t nmemb,
 
 CURLcode test(char *URL)
 {
+  static char testdata[] = "dummy\n";
+
   CURL *easy = NULL;
   CURL *easy2 = NULL;
   curl_mime *mime = NULL;
@@ -95,8 +94,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = t654_testdata;
-  pooh.sizeleft = (curl_off_t) strlen(t654_testdata);
+  pooh.readptr = testdata;
+  pooh.sizeleft = (curl_off_t) strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
