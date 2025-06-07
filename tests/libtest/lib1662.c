@@ -23,29 +23,28 @@
  ***************************************************************************/
 #include "test.h"
 
-static char t1662_testdata[]="mooaaa";
-
 struct t1662_WriteThis {
   size_t sizeleft;
 };
 
 static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
+  static const char testdata[] = "mooaaa";
+
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
-  size_t len = strlen(t1662_testdata);
+  size_t len = strlen(testdata);
 
   if(size*nmemb < len)
     return 0;
 
   if(pooh->sizeleft) {
-    memcpy(ptr, t1662_testdata, strlen(t1662_testdata));
+    memcpy(ptr, testdata, strlen(testdata));
     pooh->sizeleft = 0;
     return len;
   }
 
   return 0;                         /* no more data left to deliver */
 }
-
 
 CURLcode test(char *URL)
 {
