@@ -25,11 +25,8 @@
 
 #include "memdebug.h"
 
-static char t554_testdata[]=
-  "this is what we post to the silly web server\n";
-
 struct t554_WriteThis {
-  char *readptr;
+  const char *readptr;
   size_t sizeleft;
 };
 
@@ -52,6 +49,9 @@ static size_t t554_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode t554_test_once(char *URL, bool oldstyle)
 {
+  static const char testdata[]=
+    "this is what we post to the silly web server\n";
+
   CURL *curl;
   CURLcode res = CURLE_OK;
   CURLFORMcode formrc;
@@ -61,8 +61,8 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
   struct t554_WriteThis pooh;
   struct t554_WriteThis pooh2;
 
-  pooh.readptr = t554_testdata;
-  pooh.sizeleft = strlen(t554_testdata);
+  pooh.readptr = testdata;
+  pooh.sizeleft = strlen(testdata);
 
   /* Fill in the file upload field */
   if(oldstyle) {
@@ -91,8 +91,8 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = t554_testdata;
-  pooh2.sizeleft = strlen(t554_testdata);
+  pooh2.readptr = testdata;
+  pooh2.sizeleft = strlen(testdata);
 
   /* Fill in the file upload field */
   formrc = curl_formadd(&formpost,
