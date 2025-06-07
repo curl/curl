@@ -25,8 +25,7 @@
 
 #include "memdebug.h"
 
-static char t667_testdata[]=
-  "dummy";
+static char t667_testdata[] = "dummy";
 
 struct t667_WriteThis {
   char *readptr;
