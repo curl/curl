@@ -62,6 +62,7 @@
 #include "wolfssl.h"        /* wolfSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
 #include "sectransp.h"      /* Secure Transport (Darwin) version */
+#include "nwf.h"            /* Network.framework version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "bearssl.h"        /* BearSSL versions */
 #include "rustls.h"         /* Rustls versions */
@@ -973,6 +974,8 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
   NULL,                              /* get_channel_binding */
+  NULL,                              /* cntrl */
+  NULL,                              /* is_alive */
 };
 
 const struct Curl_ssl *Curl_ssl =
@@ -988,6 +991,8 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_rustls;
 #elif defined(USE_OPENSSL)
   &Curl_ssl_openssl;
+#elif defined(USE_NWF)
+  &Curl_ssl_nwf;
 #elif defined(USE_SECTRANSP)
   &Curl_ssl_sectransp;
 #elif defined(USE_SCHANNEL)
@@ -1010,6 +1015,9 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_OPENSSL)
   &Curl_ssl_openssl,
+#endif
+#if defined(USE_NWF)
+  &Curl_ssl_nwf,
 #endif
 #if defined(USE_SECTRANSP)
   &Curl_ssl_sectransp,
@@ -1313,18 +1321,19 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   CURLcode result;
+  bool no_underlying = Curl_ssl_supports(data, SSLSUPP_NO_UNDERLYING);
 
   if(cf->connected && (connssl->state != ssl_connection_deferred)) {
     *done = TRUE;
     return CURLE_OK;
   }
 
-  if(!cf->next) {
+  if(!no_underlying && !cf->next) {
     *done = FALSE;
     return CURLE_FAILED_INIT;
   }
 
-  if(!cf->next->connected) {
+  if(!no_underlying && !cf->next->connected) {
     result = cf->next->cft->do_connect(cf->next, data, done);
     if(result || !*done)
       return result;
@@ -1443,13 +1452,13 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
-  bool result;
+  bool result = FALSE;
 
   CF_DATA_SAVE(save, cf, data);
   if(connssl->ssl_impl->data_pending &&
      connssl->ssl_impl->data_pending(cf, data))
     result = TRUE;
-  else
+  else if(cf->next)
     result = cf->next->cft->has_data_pending(cf->next, data);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -1598,6 +1607,13 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
       *when = connssl->handshake_done;
     return CURLE_OK;
   }
+  case CF_QUERY_SOCKET: {
+    if(Curl_ssl_supports(data, SSLSUPP_NO_UNDERLYING)) {
+      *(curl_socket_t*)pres2 = cf->conn->sock[cf->sockindex];
+      return CURLE_OK;
+    }
+    break;
+  }
   default:
     break;
   }
@@ -1606,12 +1622,30 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  if(connssl->ssl_impl->cntrl) {
+    return connssl->ssl_impl->cntrl(cf, data, event, arg1, arg2);
+  }
+
+  return CURLE_OK;
+}
+
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
   /*
    * This function tries to determine connection status.
    */
+  struct ssl_connect_data *connssl = cf->ctx;
+
+  if(connssl->ssl_impl->is_alive) {
+    return connssl->ssl_impl->is_alive(cf, data, input_pending);
+  }
+
   return cf->next ?
     cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
@@ -1630,7 +1664,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  Curl_cf_def_cntrl,
+  ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
@@ -1651,7 +1685,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  Curl_cf_def_cntrl,
+  ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
@@ -1765,6 +1799,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
+  multissl_setup(NULL);
   (void)data;
   return (Curl_ssl->supports & ssl_option);
 }

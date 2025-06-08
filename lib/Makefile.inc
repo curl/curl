@@ -69,6 +69,7 @@ LIB_VAUTH_HFILES =      \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
+  vtls/apple.c              \
   vtls/bearssl.c            \
   vtls/cipher_suite.c       \
   vtls/gtls.c               \
@@ -81,6 +82,7 @@ LIB_VTLS_CFILES =           \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
+  vtls/nwf.c                \
   vtls/vtls.c               \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
@@ -88,6 +90,7 @@ LIB_VTLS_CFILES =           \
   vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
+  vtls/apple.h              \
   vtls/bearssl.h            \
   vtls/cipher_suite.h       \
   vtls/gtls.h               \
@@ -95,6 +98,7 @@ LIB_VTLS_HFILES =           \
   vtls/keylog.h             \
   vtls/mbedtls.h            \
   vtls/mbedtls_threadlock.h \
+  vtls/nwf.h                \
   vtls/openssl.h            \
   vtls/rustls.h             \
   vtls/schannel.h           \

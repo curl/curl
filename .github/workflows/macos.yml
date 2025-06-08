@@ -150,6 +150,9 @@ jobs:
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
+          - name: 'Network.framework debug'
+            generate: -DCURL_USE_NWF=ON -DENABLE_DEBUG=ON
+            macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON

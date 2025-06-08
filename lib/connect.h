@@ -71,7 +71,7 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
-bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
+bool Curl_addr2string(const struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port);
 
 /*

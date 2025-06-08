@@ -185,7 +185,10 @@ struct Curl_ssl {
 
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
-
+  CURLcode (*cntrl)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                    int event, int arg1, void *arg2);
+  bool (*is_alive)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                   bool *input_pending);
 };
 
 extern const struct Curl_ssl *Curl_ssl;
