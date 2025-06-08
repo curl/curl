@@ -1625,7 +1625,8 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
      bad in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to. */
 
-  if(!dead_connection && conn->bits.protoconnstart) {
+  if(!dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &smtpc->pp)) {
     if(!smtp_perform_quit(data, smtpc))
       (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
   }
