@@ -1780,12 +1780,11 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
   (void)data;
   if(imapc) {
     /* We cannot send quit unconditionally. If this connection is stale or
-       bad in any way, sending quit and waiting around here will make the
+       bad in any way (pingpong has pending data to send),
+       sending quit and waiting around here will make the
        disconnect wait in vain and cause more problems than we need to. */
-
-    /* The IMAP session may or may not have been allocated/setup at this
-       point! */
-    if(!dead_connection && conn->bits.protoconnstart) {
+    if(!dead_connection && conn->bits.protoconnstart &&
+       !Curl_pp_needs_flush(data, &imapc->pp)) {
       if(!imap_perform_logout(data, imapc))
         (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
     }

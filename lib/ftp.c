@@ -4117,7 +4117,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      will try to send the QUIT command, otherwise it will just return.
   */
   ftpc->shutdown = TRUE;
-  if(dead_connection)
+  if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;
 
   /* The FTP session may or may not have been allocated/setup at this point! */
