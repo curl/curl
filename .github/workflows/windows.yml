@@ -832,7 +832,7 @@ jobs:
 
           - name: 'schannel +examples'
             install-vcpkg: 'zlib libssh2[core,zlib]'
-            install-msys2: 'mingw-w64-ucrt-x86_64-brotli'
+            install-msys2: 'pkgconf mingw-w64-ucrt-x86_64-brotli'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
