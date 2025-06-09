@@ -153,9 +153,11 @@ int tool_readbusy_cb(void *clientp,
       config->readbusy = FALSE;
       curl_easy_pause(per->curl, CURLPAUSE_CONT);
     }
-    else
-      /* sleep half a period */
-      tool_go_sleep(25);
+    else {
+      /* sleep */
+      curl_easy_pause(per->curl, CURLPAUSE_CONT);
+      tool_go_sleep(1);
+    }
   }
 
   return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
