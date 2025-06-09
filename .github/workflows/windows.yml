@@ -907,6 +907,10 @@ jobs:
               mingwroot='/c/msys64/ucrt64'
             fi
             export PKG_CONFIG_PATH="${mingwroot}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+            export PKG_CONFIG_LIBDIR="${mingwroot}/lib/pkgconfig"
+            echo '--------------------------'
+            ls -l "${mingwroot}/lib/pkgconfig"
+            echo '--------------------------'
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
