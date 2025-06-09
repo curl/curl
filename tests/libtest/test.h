@@ -89,26 +89,24 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
 extern int unitfail;
 
 /*
-** TEST_ERR_* values must be greater than CURL_LAST CURLcode in order
-** to avoid confusion with any CURLcode or CURLMcode. These TEST_ERR_*
-** codes are returned to signal test specific situations and should
-** not get mixed with CURLcode or CURLMcode values.
-**
+** TEST_ERR_* values must within the CURLcode range to not cause compiler
+** errors.
+
 ** For portability reasons TEST_ERR_* values should be less than 127.
 */
 
-#define TEST_ERR_MAJOR_BAD     CURLE_RESERVED126
-#define TEST_ERR_RUNS_FOREVER  CURLE_RESERVED125
-#define TEST_ERR_EASY_INIT     CURLE_RESERVED124
-#define TEST_ERR_MULTI         CURLE_RESERVED123
-#define TEST_ERR_NUM_HANDLES   CURLE_RESERVED122
-#define TEST_ERR_SELECT        CURLE_RESERVED121
-#define TEST_ERR_SUCCESS       CURLE_RESERVED120
-#define TEST_ERR_FAILURE       CURLE_RESERVED119
-#define TEST_ERR_USAGE         CURLE_RESERVED118
-#define TEST_ERR_FOPEN         CURLE_RESERVED117
-#define TEST_ERR_FSTAT         CURLE_RESERVED116
-#define TEST_ERR_BAD_TIMEOUT   CURLE_RESERVED115
+#define TEST_ERR_MAJOR_BAD     CURLE_OBSOLETE20
+#define TEST_ERR_RUNS_FOREVER  CURLE_OBSOLETE24
+#define TEST_ERR_EASY_INIT     CURLE_OBSOLETE29
+#define TEST_ERR_MULTI         CURLE_OBSOLETE32
+#define TEST_ERR_NUM_HANDLES   CURLE_OBSOLETE34
+#define TEST_ERR_SELECT        CURLE_OBSOLETE40
+#define TEST_ERR_SUCCESS       CURLE_OBSOLETE41
+#define TEST_ERR_FAILURE       CURLE_OBSOLETE44
+#define TEST_ERR_USAGE         CURLE_OBSOLETE46
+#define TEST_ERR_FOPEN         CURLE_OBSOLETE50
+#define TEST_ERR_FSTAT         CURLE_OBSOLETE51
+#define TEST_ERR_BAD_TIMEOUT   CURLE_OBSOLETE57
 
 /*
 ** Macros for test source code readability/maintainability.
