@@ -858,7 +858,7 @@ jobs:
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         with:
-          msystem: ucrt64
+          msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: ${{ contains(matrix.image, 'arm') }}
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
