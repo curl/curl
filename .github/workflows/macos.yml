@@ -132,7 +132,7 @@ jobs:
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix quictls) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/quictls -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON
