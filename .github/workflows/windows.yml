@@ -832,7 +832,7 @@ jobs:
 
           - name: 'schannel +examples'
             install-vcpkg: 'zlib libssh2[core,zlib]'
-            install-msys2: 'pkgconf mingw-w64-ucrt-x86_64-brotli'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -906,10 +906,10 @@ jobs:
             else
               mingwroot='/c/msys64/ucrt64'
             fi
-            export PKG_CONFIG_PATH="${mingwroot}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-            export PKG_CONFIG_LIBDIR="${mingwroot}/lib/pkgconfig"
             echo '--------------------------'
-            ls -l "${mingwroot}/lib/pkgconfig"
+            ls -l "${mingwroot}/include"
+            echo '--------------------------'
+            ls -l "${mingwroot}/lib"
             echo '--------------------------'
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
@@ -922,8 +922,8 @@ jobs:
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-              -DCMAKE_PREFIX_PATH="${mingwroot}/lib/pkgconfig" \
+              -DCMAKE_INCLUDE_PATH="${mingwroot}/include" \
+              -DCMAKE_LIBRARY_PATH="${mingwroot}/lib" \
               -DBUILD_SHARED_LIBS=OFF \
               -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
               -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" --debug-find \
