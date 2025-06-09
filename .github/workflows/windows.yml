@@ -808,7 +808,7 @@ jobs:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_ENV: '${{ matrix.env }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
-      MATRIX_INSTALL: '${{ matrix.install }}'
+      MATRIX_INSTALL_VCPKG: '${{ matrix.install-vcpkg }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
@@ -818,7 +818,7 @@ jobs:
       matrix:
         include:
           - name: '!ssl +examples'
-            install: 'zlib libssh2[core,zlib]'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'uwp'
@@ -831,7 +831,7 @@ jobs:
               -DUSE_WIN32_IDN=ON
 
           - name: 'schannel +examples'
-            install: 'zlib libssh2[core,zlib]'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -843,7 +843,7 @@ jobs:
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
 
           - name: 'schannel U'
-            install: 'zlib libssh2[core,zlib]'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
             env: 'clang-aarch64'
             plat: 'windows'
@@ -865,6 +865,7 @@ jobs:
           path-type: inherit
           install: >-
             mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install-msys2 }}
 
       - name: 'vcpkg versions'
         timeout-minutes: 1
@@ -873,8 +874,9 @@ jobs:
           vcpkg version
 
       - name: 'vcpkg build'
+        if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${MATRIX_INSTALL} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
+        run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -994,12 +996,12 @@ jobs:
           export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ "${MATRIX_INSTALL}" = *'libssh2[core,zlib]'* ]]; then
+          if [[ "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ "${MATRIX_INSTALL}" = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL_VCPKG}" = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
