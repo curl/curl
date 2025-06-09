@@ -806,6 +806,7 @@ jobs:
         shell: msys2 {0}
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
+      MATRIX_ENV: '${{ matrix.env }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
       MATRIX_INSTALL: '${{ matrix.install }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
@@ -819,6 +820,7 @@ jobs:
           - name: '!ssl +examples'
             install: 'zlib libssh2[core,zlib]'
             arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'uwp'
             type: 'Debug'
             image: 'windows-2025'
@@ -827,11 +829,11 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_ENABLE_SSL=OFF
               -DUSE_WIN32_IDN=ON
-              -DCURL_USE_LIBPSL=OFF
 
           - name: 'schannel +examples'
             install: 'zlib libssh2[core,zlib]'
             arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
             chkprefill: '_chkprefill'
@@ -839,11 +841,11 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
-              -DCURL_USE_LIBPSL=OFF
 
           - name: 'schannel U'
             install: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
+            env: 'clang-aarch64'
             plat: 'windows'
             type: 'Debug'
             image: 'windows-11-arm'
@@ -852,7 +854,6 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-              -DCURL_USE_LIBPSL=OFF
 
       fail-fast: false
     steps:
@@ -862,6 +863,8 @@ jobs:
           release: ${{ contains(matrix.image, 'arm') }}
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
 
       - name: 'vcpkg versions'
         timeout-minutes: 1
@@ -907,6 +910,8 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
+              -DLIBPSL_INCLUDE_DIR="C:/msys64/${MATRIX_ENV}/include" \
+              -DLIBPSL_LIBRARY="C:/msys64/${MATRIX_ENV}/lib/libpsl.a" \
               ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
