@@ -152,7 +152,7 @@ jobs:
         name: checkout
 
       - name: install prereqs
-        run: brew install shellcheck yq zizmor
+        run: brew install shellcheck zizmor
 
       - name: zizmor GHA
         run: zizmor --pedantic .github/workflows/*.yml
