@@ -832,7 +832,7 @@ jobs:
 
           - name: 'schannel +examples'
             install-vcpkg: 'zlib libssh2[core,zlib]'
-            install-msys2: 'mingw-w64-ucrt-x86_64-zstd'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -842,6 +842,11 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DBROTLI_INCLUDE_DIR=/c/msys64/ucrt64/include
+              -DBROTLICOMMON_LIBRARY=/c/msys64/ucrt64/lib/libbrotlicommon.dll.a
+              -DBROTLIDEC_LIBRARY=/c/msys64/ucrt64/lib/libbrotlidec.dll.a
+              -DZSTD_INCLUDE_DIR=/c/msys64/ucrt64/include
+              -DZSTD_LIBRARY=/c/msys64/ucrt64/lib/libzstd.dll.a
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
@@ -907,8 +912,6 @@ jobs:
               mingwroot='/c/msys64/ucrt64'
             fi
             cmake -B "bld${_chkprefill}" ${options} \
-              -DCMAKE_INCLUDE_PATH="${mingwroot}/include" \
-              -DCMAKE_LIBRARY_PATH="${mingwroot}/lib" \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
               -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
@@ -919,6 +922,8 @@ jobs:
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
+              -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
+              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a"
               -DBUILD_SHARED_LIBS=OFF \
               ${MATRIX_CONFIG}
           done
