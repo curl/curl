@@ -807,7 +807,8 @@ jobs:
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
-      MATRIX_INSTALL: '${{ matrix.install }}'
+      MATRIX_INSTALL_MSYS2: '${{ matrix.install-msys2 }}'
+      MATRIX_INSTALL_VCPKG: '${{ matrix.install-vcpkg }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
@@ -817,8 +818,9 @@ jobs:
       matrix:
         include:
           - name: '!ssl +examples'
-            install: 'zlib libssh2[core,zlib]'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'uwp'
             type: 'Debug'
             image: 'windows-2025'
@@ -827,23 +829,46 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_ENABLE_SSL=OFF
               -DUSE_WIN32_IDN=ON
-              -DCURL_USE_LIBPSL=OFF
 
-          - name: 'schannel +examples'
-            install: 'zlib libssh2[core,zlib]'
+          - name: 'openssl +examples'
+            install-msys2: >-
+              mingw-w64-ucrt-x86_64-brotli
+              mingw-w64-ucrt-x86_64-zlib
+              mingw-w64-ucrt-x86_64-zstd
+              mingw-w64-ucrt-x86_64-openssl
+              mingw-w64-ucrt-x86_64-libssh2
+              mingw-w64-ucrt-x86_64-nghttp2
+
             arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
-              -DCURL_USE_SCHANNEL=ON
+              -DCURL_USE_OPENSSL=ON
+              -DOPENSSL_INCLUDE_DIR=/ucrt64/include
+              -DSSL_EAY_DEBUG=/ucrt64/lib/libssl.dll.a
+              -DSSL_EAY_RELEASE=/ucrt64/lib/libssl.dll.a
+              -DLIB_EAY_DEBUG=/ucrt64/lib/libcrypto.dll.a
+              -DLIB_EAY_RELEASE=/ucrt64/lib/libcrypto.dll.a
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
-              -DCURL_USE_LIBPSL=OFF
+              -DBROTLI_INCLUDE_DIR=/ucrt64/include
+              -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
+              -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
+              -DZSTD_INCLUDE_DIR=/ucrt64/include
+              -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
+              -DZLIB_INCLUDE_DIR=/ucrt64/include
+              -DZLIB_LIBRARY=/ucrt64/lib/libz.dll.a
+              -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
+              -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
+              -DNGHTTP2_INCLUDE_DIR=/ucrt64/include
+              -DNGHTTP2_LIBRARY=/ucrt64/lib/libnghttp2.dll.a
 
           - name: 'schannel U'
-            install: 'zlib libssh2[core,zlib]'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'arm64'
+            env: 'clang-aarch64'
             plat: 'windows'
             type: 'Debug'
             image: 'windows-11-arm'
@@ -852,26 +877,30 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-              -DCURL_USE_LIBPSL=OFF
 
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         with:
-          msystem: ucrt64
+          msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: ${{ contains(matrix.image, 'arm') }}
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install-msys2 }}
 
       - name: 'vcpkg versions'
+        if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
       - name: 'vcpkg build'
+        if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 45
-        run: vcpkg x-set-installed ${MATRIX_INSTALL} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
+        run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -883,6 +912,7 @@ jobs:
           MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
+          [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
@@ -895,17 +925,21 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
+              options+=" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+              options+=" -DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed"
+              options+=" -DVCPKG_TARGET_TRIPLET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+              options+=" -DCMAKE_C_COMPILER_TARGET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+            fi
             cmake -B "bld${_chkprefill}" ${options} \
-              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-              -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
-              -DCMAKE_C_COMPILER_TARGET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
+              -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
+              -DLIBPSL_LIBRARY="${MINGW_PREFIX}/lib/libpsl.dll.a" \
               -DBUILD_SHARED_LIBS=OFF \
               ${MATRIX_CONFIG}
           done
@@ -984,12 +1018,14 @@ jobs:
           export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ "${MATRIX_INSTALL}" = *'libssh2[core,zlib]'* ]]; then
+          if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
+                "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ "${MATRIX_INSTALL}" = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL_MSYS2} " = *'libssh '* || \
+                  "${MATRIX_INSTALL_VCPKG} " = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
