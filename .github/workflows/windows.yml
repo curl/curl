@@ -832,6 +832,7 @@ jobs:
 
           - name: 'schannel +examples'
             install-vcpkg: 'zlib libssh2[core,zlib]'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -905,6 +906,7 @@ jobs:
             else
               mingwroot='/c/msys64/ucrt64'
             fi
+            export PKG_CONFIG_PATH="${mingwroot}/lib/pkgconfig:${PKG_CONFIG_PATH}"
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
