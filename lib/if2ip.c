@@ -52,7 +52,7 @@
 #  include <inet.h>
 #endif
 
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "strcase.h"
 #include "if2ip.h"
 /* The last 3 #include files should be in this order */
@@ -162,7 +162,7 @@ if2ip_result_t Curl_if2ip(int af,
               addr =
                 &((struct sockaddr_in *)(void *)iface->ifa_addr)->sin_addr;
             res = IF2IP_FOUND;
-            ip = Curl_inet_ntop(af, addr, ipstr, sizeof(ipstr));
+            ip = curlx_inet_ntop(af, addr, ipstr, sizeof(ipstr));
             msnprintf(buf, buf_size, "%s%s", ip, scope);
             break;
           }
@@ -235,7 +235,7 @@ if2ip_result_t Curl_if2ip(int af,
 
   s = (struct sockaddr_in *)(void *)&req.ifr_addr;
   memcpy(&in, &s->sin_addr, sizeof(in));
-  r = Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
+  r = curlx_inet_ntop(s->sin_family, &in, buf, buf_size);
 
   sclose(dummy);
   if(!r)

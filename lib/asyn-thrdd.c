@@ -61,7 +61,6 @@
 #include "share.h"
 #include "url.h"
 #include "multiif.h"
-#include "inet_ntop.h"
 #include "curl_threads.h"
 #include "strdup.h"
 

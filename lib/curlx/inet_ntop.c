@@ -20,7 +20,7 @@
  * Original code by Paul Vixie. "curlified" by Gisle Vanem.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -35,7 +35,6 @@
 #endif
 
 #include "inet_ntop.h"
-#include "curl_printf.h"
 
 #define IN6ADDRSZ       16
 /* #define INADDRSZ         4 */
@@ -65,8 +64,9 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 
   DEBUGASSERT(size >= 16);
 
-  tmp[0] = '\0';
-  (void)msnprintf(tmp, sizeof(tmp), "%d.%d.%d.%d",
+  /* this sprintf() does not overflow the buffer. Avoids snprintf to work more
+     widely. Avoids the msnprintf family to work as a curlx function. */
+  (void)(sprintf)(tmp, "%d.%d.%d.%d",
                   ((int)((unsigned char)src[0])) & 0xff,
                   ((int)((unsigned char)src[1])) & 0xff,
                   ((int)((unsigned char)src[2])) & 0xff,
@@ -162,7 +162,21 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       tp += strlen(tp);
       break;
     }
-    tp += msnprintf(tp, 5, "%x", words[i]);
+    else {
+      /* Lower-case digits. Can't use the set from mprintf.c since this
+         needs to work as a curlx function */
+      static const unsigned char ldigits[] = "0123456789abcdef";
+
+      unsigned int w = words[i];
+      /* output lowercase 16bit hex number but ignore leading zeroes */
+      if(w & 0xf000)
+        *tp++ = ldigits[(w & 0xf000) >> 12];
+      if(w & 0xff00)
+        *tp++ = ldigits[(w & 0x0f00) >> 8];
+      if(w & 0xfff0)
+        *tp++ = ldigits[(w & 0x00f0) >> 4];
+      *tp++ = ldigits[(w & 0x000f)];
+    }
   }
 
   /* Was it a trailing run of 0x00's?
@@ -196,7 +210,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
  * code. This is to avoid losing the actual last Winsock error. When this
  * function returns NULL, check errno not SOCKERRNO.
  */
-char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
+char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
   switch(af) {
   case AF_INET:

@@ -25,6 +25,7 @@
 LIB_CURLX_CFILES = \
   curlx/base64.c   \
   curlx/dynbuf.c   \
+  curlx/inet_ntop.c \
   curlx/inet_pton.c \
   curlx/multibyte.c \
   curlx/nonblock.c \
@@ -39,6 +40,7 @@ LIB_CURLX_HFILES = \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
+  curlx/inet_ntop.h \
   curlx/inet_pton.h \
   curlx/multibyte.h \
   curlx/nonblock.h \
@@ -208,7 +210,6 @@ LIB_CFILES =         \
   idn.c              \
   if2ip.c            \
   imap.c             \
-  inet_ntop.c        \
   krb5.c             \
   ldap.c             \
   llist.c            \
@@ -345,7 +346,6 @@ LIB_HFILES =         \
   idn.h              \
   if2ip.h            \
   imap.h             \
-  inet_ntop.h        \
   llist.h            \
   macos.h            \
   memdebug.h         \
