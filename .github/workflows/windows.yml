@@ -800,7 +800,6 @@ jobs:
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: ${{ matrix.image || 'windows-latest' }}
-    timeout-minutes: 15
     defaults:
       run:
         shell: msys2 {0}
@@ -867,8 +866,8 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
 
       - name: 'vcpkg versions'
-        timeout-minutes: 1
         run: |
+          PATH=/usr/bin find /c -name 'libpsl*.a' -o -name 'libpsl.h' || true
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
@@ -910,9 +909,14 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              -DLIBPSL_INCLUDE_DIR="C:/msys64/${MATRIX_ENV}/include" \
-              -DLIBPSL_LIBRARY="C:/msys64/${MATRIX_ENV}/lib/libpsl.a" \
+              -DLIBPSL_INCLUDE_DIR="/c/msys64/ucrt64/include" \
+              -DLIBPSL_LIBRARY="/c/msys64/ucrt64/lib/libpsl.dll.a" \
               ${MATRIX_CONFIG}
+            # /c/msys64/ucrt64/bin/
+            # /c/msys64/ucrt64/include/libpsl.h
+            # /c/msys64/ucrt64/lib/libpsl.a
+            # /c/msys64/ucrt64/lib/libpsl.dll.a
+            # /c/msys64/ucrt64/lib/pkgconfig/libpsl.pc
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
