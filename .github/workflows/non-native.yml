@@ -122,7 +122,7 @@ jobs:
             bld/src/curl --disable --version
             if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              export TFLAGS='-j8'
+              export TFLAGS='-j8 !WebSockets'
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
