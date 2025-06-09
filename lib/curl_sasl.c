@@ -573,8 +573,8 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
      sasl_choose_oauth2(data, &sctx) ||
      sasl_choose_plain(data, &sctx) ||
      sasl_choose_login(data, &sctx)) {
-    /* selected one */
-    DEBUGASSERT(sctx.mech);
+    /* selected, either we have a mechanism or a failure */
+    DEBUGASSERT(sctx.mech || sctx.result);
   }
 
   if(!sctx.result && sctx.mech) {
