@@ -685,17 +685,11 @@ ${SIZEOF_TIME_T_CODE}
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
 
-/* if Secure Transport is enabled */
-#cmakedefine USE_SECTRANSP 1
-
 /* if SSL session export support is available */
 #cmakedefine USE_SSLS_EXPORT 1
 
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
-
-/* if BearSSL is enabled */
-#cmakedefine USE_BEARSSL 1
 
 /* if Rustls is enabled */
 #cmakedefine USE_RUSTLS 1

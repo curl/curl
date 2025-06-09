@@ -96,8 +96,7 @@ are NULL ciphers, offering no encryption whatsoever.)
 ### TLS 1.2 (1.1, 1.0) cipher suites
 
 Setting TLS 1.2 cipher suites is supported by curl with OpenSSL, LibreSSL,
-BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+),
-Secure Transport (curl 7.77.0+) and BearSSL (curl 7.83.0+). Schannel does not
+BoringSSL, mbedTLS (curl 8.8.0+), wolfSSL (curl 7.53.0+). Schannel does not
 support setting cipher suites directly, but does support setting algorithms
 (curl 7.61.0+), see Schannel notes below.
 
@@ -201,7 +200,7 @@ ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305 \
 ```
 Restrict TLS 1.2 ciphers to `aes128-gcm` and `chacha20`, use default TLS 1.3
 ciphers (if TLS 1.3 is available). Works with OpenSSL, LibreSSL, BoringSSL,
-mbedTLS, wolfSSL, Secure Transport and BearSSL.
+mbedTLS and wolfSSL.
 
 ## ciphers, the GnuTLS way
 
@@ -266,8 +265,6 @@ Restrict to only TLS 1.2 with the `CAMELLIA-128-GCM` cipher.
 - [wolfSSL cipher support documentation](https://www.wolfssl.com/documentation/manuals/wolfssl/chapter04.html#cipher-support)
 - [mbedTLS cipher suites reference](https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/ssl__ciphersuites_8h/)
 - [Schannel cipher suites documentation](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-schannel)
-- [BearSSL supported crypto](https://www.bearssl.org/support.html)
-- [Secure Transport cipher suite values](https://developer.apple.com/documentation/security/1550981-ssl_cipher_suite_values)
 - [IANA cipher suites list](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4)
 - [Wikipedia cipher suite article](https://en.wikipedia.org/wiki/Cipher_suite)
 - [GnuTLS Priority Strings](https://gnutls.org/manual/html_node/Priority-Strings.html)
