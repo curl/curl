@@ -32,7 +32,6 @@ CMAKE_DIST =                                    \
  CMake/curl-config.cmake.in                     \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
- CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
  CMake/FindGSS.cmake                            \

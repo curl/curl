@@ -12,16 +12,9 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## TLS libraries without 1.3 support
+## Nothing
 
-curl drops support for TLS libraries without TLS 1.3 capability after May
-2025.
-
-It requires that a curl build using the library should be able to negotiate
-and use TLS 1.3, or else it is not good enough.
-
-As of May 2024, the libraries that need to get fixed to remain supported after
-May 2025 are: BearSSL and Secure Transport.
+Nothing is currently scheduled to be removed.
 
 ## msh3 support
 
@@ -75,3 +68,5 @@ Previous discussion and details: https://github.com/curl/curl/discussions/15972
  - NTLM_WB (removed in 8.8.0)
  - space-separated `NOPROXY` patterns (removed in 8.9.0)
  - hyper (removed in 8.12.0)
+ - Secure Transport (8.15.0)
+ - BearSSL (8.15.0)

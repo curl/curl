@@ -15,7 +15,6 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - Schannel
-  - Secure Transport
   - wolfSSL
 Added-in: 7.1
 ---
@@ -35,16 +34,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLCERT, char *cert);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the filename of your client certificate. The default format is `P12` on Secure
-Transport and `PEM` on other engines, and can be changed with
-CURLOPT_SSLCERTTYPE(3).
+the filename of your client certificate. The default format is `PEM` but can
+be changed with CURLOPT_SSLCERTTYPE(3).
 
-With Secure Transport, this can also be the nickname of the certificate you
-wish to authenticate with as it is named in the security database. If you want
-to use a file from the current directory, please precede it with `./` prefix,
-in order to avoid confusion with a nickname.
-
-(Schannel only) Client certificates can be specified by a path expression to a
+(Schannel) Client certificates can be specified by a path expression to a
 certificate store. (You can import *PFX* to a store first). You can use
 "\<store location\>\\\<store name\>\\\<thumbprint\>" to refer to a certificate
 in the system certificates store, for example,
