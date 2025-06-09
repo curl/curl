@@ -918,9 +918,11 @@ jobs:
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
+              -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
+              -DCMAKE_PREFIX_PATH="${mingwroot}/lib/pkgconfig" \
               -DBUILD_SHARED_LIBS=OFF \
               -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
-              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" \
+              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" --debug-find \
               ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
