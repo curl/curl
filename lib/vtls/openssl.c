@@ -122,6 +122,12 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+     !defined(LIBRESSL_VERSION_NUMBER) && \
+     !defined(OPENSSL_IS_BORINGSSL))
+  #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
+#endif
+
 #include "../curlx/warnless.h"
 
 /* The last #include files should be: */
