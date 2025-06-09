@@ -800,6 +800,7 @@ jobs:
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: ${{ matrix.image || 'windows-latest' }}
+    timeout-minutes: 15
     defaults:
       run:
         shell: msys2 {0}
@@ -866,8 +867,8 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
 
       - name: 'vcpkg versions'
+        timeout-minutes: 1
         run: |
-          PATH=/usr/bin find /c -name 'libpsl*.a' -o -name 'libpsl.h' || true
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
@@ -897,6 +898,11 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            if [ "${MATRIX_ARCH}" = 'arm64' ]; then
+              mingwroot='/c/a/_temp/msys64/clangarm64'
+            else
+              mingwroot='/c/msys64/ucrt64'
+            fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
@@ -909,14 +915,9 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DBUILD_SHARED_LIBS=OFF \
-              -DLIBPSL_INCLUDE_DIR="/c/msys64/ucrt64/include" \
-              -DLIBPSL_LIBRARY="/c/msys64/ucrt64/lib/libpsl.dll.a" \
+              -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
+              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" \
               ${MATRIX_CONFIG}
-            # /c/msys64/ucrt64/bin/
-            # /c/msys64/ucrt64/include/libpsl.h
-            # /c/msys64/ucrt64/lib/libpsl.a
-            # /c/msys64/ucrt64/lib/libpsl.dll.a
-            # /c/msys64/ucrt64/lib/pkgconfig/libpsl.pc
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
