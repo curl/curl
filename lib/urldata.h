@@ -357,93 +357,6 @@ typedef enum {
   GSS_AUTHSUCC
 } curlnegotiate;
 
-/* Struct used for GSSAPI (Kerberos V5) authentication */
-#if defined(USE_KERBEROS5)
-struct kerberos5data {
-#if defined(USE_WINDOWS_SSPI)
-  CredHandle *credentials;
-  CtxtHandle *context;
-  TCHAR *spn;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
-  size_t token_max;
-  BYTE *output_token;
-#else
-  gss_ctx_id_t context;
-  gss_name_t spn;
-#endif
-};
-#endif
-
-/* Struct used for SCRAM-SHA-1 authentication */
-#ifdef USE_GSASL
-#include <gsasl.h>
-struct gsasldata {
-  Gsasl *ctx;
-  Gsasl_session *client;
-};
-#endif
-
-/* Struct used for NTLM challenge-response authentication */
-#if defined(USE_NTLM)
-struct ntlmdata {
-#ifdef USE_WINDOWS_SSPI
-/* The sslContext is used for the Schannel bindings. The
- * api is available on the Windows 7 SDK and later.
- */
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  CtxtHandle *sslContext;
-#endif
-  CredHandle *credentials;
-  CtxtHandle *context;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
-  size_t token_max;
-  BYTE *output_token;
-  BYTE *input_token;
-  size_t input_token_len;
-  TCHAR *spn;
-#else
-  unsigned int flags;
-  unsigned char nonce[8];
-  unsigned int target_info_len;
-  void *target_info; /* TargetInfo received in the NTLM type-2 message */
-#endif
-};
-#endif
-
-/* Struct used for Negotiate (SPNEGO) authentication */
-#ifdef USE_SPNEGO
-struct negotiatedata {
-#ifdef HAVE_GSSAPI
-  OM_uint32 status;
-  gss_ctx_id_t context;
-  gss_name_t spn;
-  gss_buffer_desc output_token;
-  struct dynbuf channel_binding_data;
-#else
-#ifdef USE_WINDOWS_SSPI
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
-  CtxtHandle *sslContext;
-#endif
-  DWORD status;
-  CredHandle *credentials;
-  CtxtHandle *context;
-  SEC_WINNT_AUTH_IDENTITY identity;
-  SEC_WINNT_AUTH_IDENTITY *p_identity;
-  TCHAR *spn;
-  size_t token_max;
-  BYTE *output_token;
-  size_t output_token_length;
-#endif
-#endif
-  BIT(noauthpersist);
-  BIT(havenoauthpersist);
-  BIT(havenegdata);
-  BIT(havemultiplerequests);
-};
-#endif
-
 #ifdef CURL_DISABLE_PROXY
 #define CONN_IS_PROXIED(x) 0
 #else
@@ -823,10 +736,6 @@ struct connectdata {
   struct sockaddr_in local_addr;
 #endif
 
-#if defined(USE_KERBEROS5)    /* Consider moving some of the above GSS-API */
-  struct kerberos5data krb5;  /* variables into the structure definition, */
-#endif                        /* however, some of them are ftp specific. */
-
   struct uint_spbset xfers_attached; /* mids of attached transfers */
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
@@ -841,26 +750,14 @@ struct connectdata {
   CtxtHandle *sslContext;
 #endif
 
-#ifdef USE_GSASL
-  struct gsasldata gsasl;
-#endif
-
 #if defined(USE_NTLM)
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;
-
-  struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
-                               because it authenticates connections, not
-                               single requests! */
-  struct ntlmdata proxyntlm; /* NTLM data for proxy */
 #endif
 
 #ifdef USE_SPNEGO
   curlnegotiate http_negotiate_state;
   curlnegotiate proxy_negotiate_state;
-
-  struct negotiatedata negotiate; /* state data for host Negotiate auth */
-  struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
 #ifdef USE_UNIX_SOCKETS

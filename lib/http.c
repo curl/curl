@@ -3221,8 +3221,10 @@ static CURLcode http_header(struct Curl_easy *data,
     }
 #ifdef USE_SPNEGO
     if(HD_IS(hd, hdlen, "Persistent-Auth:")) {
-      struct negotiatedata *negdata = &conn->negotiate;
+      struct negotiatedata *negdata = Curl_auth_nego_get(conn, FALSE);
       struct auth *authp = &data->state.authhost;
+      if(!negdata)
+        return CURLE_OUT_OF_MEMORY;
       if(authp->picked == CURLAUTH_NEGOTIATE) {
         char *persistentauth = Curl_copy_header_value(hd);
         if(!persistentauth)
