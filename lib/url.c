@@ -3143,7 +3143,8 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_ALTSVC
-  if(data->asi && !host && (port == -1) &&
+  /* only use altsvc if its the first time we tried it */
+  if(data->asi && !host && (port == -1) && !data->asi->errored &&
      ((conn->handler->protocol == CURLPROTO_HTTPS) ||
 #ifdef DEBUGBUILD
       /* allow debug builds to circumvent the HTTPS restriction */
@@ -3207,6 +3208,9 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;
+
+      data->asi->used = TRUE;
+
       conn->conn_to_host.rawalloc = hostd;
       conn->conn_to_host.name = hostd;
       conn->bits.conn_to_host = TRUE;
@@ -3862,6 +3866,12 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
   DEBUGASSERT(dns);
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
+  if(conn->handler->flags & PROTOPT_NONETWORK) {
+    /* nothing to setup when not using a network */
+    *protocol_done = TRUE;
+    return result;
+  }
+
   if(!conn->bits.reuse)
     result = Curl_conn_setup(data, conn, FIRSTSOCKET, dns,
                              CURL_CF_SSL_DEFAULT);
@@ -3880,6 +3890,11 @@ CURLcode Curl_connect(struct Curl_easy *data,
   CURLcode result;
   struct connectdata *conn;
   bool reused = FALSE;
+
+#ifndef CURL_DISABLE_ALTSVC
+  if(data->asi)
+    data->asi->used = FALSE;
+#endif
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
   *protocol_done = FALSE;
