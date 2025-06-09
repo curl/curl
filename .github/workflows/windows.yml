@@ -906,12 +906,9 @@ jobs:
             else
               mingwroot='/c/msys64/ucrt64'
             fi
-            echo '--------------------------'
-            ls -l "${mingwroot}/include"
-            echo '--------------------------'
-            ls -l "${mingwroot}/lib"
-            echo '--------------------------'
             cmake -B "bld${_chkprefill}" ${options} \
+              -DCMAKE_INCLUDE_PATH="${mingwroot}/include" \
+              -DCMAKE_LIBRARY_PATH="${mingwroot}/lib" \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
               -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
@@ -922,11 +919,7 @@ jobs:
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCMAKE_INCLUDE_PATH="${mingwroot}/include" \
-              -DCMAKE_LIBRARY_PATH="${mingwroot}/lib" \
               -DBUILD_SHARED_LIBS=OFF \
-              -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
-              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" --debug-find \
               ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
