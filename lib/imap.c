@@ -1788,9 +1788,6 @@ static CURLcode imap_disconnect(struct Curl_easy *data,
       if(!imap_perform_logout(data, imapc))
         (void)imap_block_statemach(data, imapc, TRUE); /* ignore errors */
     }
-
-    /* Cleanup the SASL module */
-    Curl_sasl_cleanup(conn, imapc->sasl.authused);
   }
   return CURLE_OK;
 }

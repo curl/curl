@@ -941,7 +941,6 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
-    Curl_sasl_cleanup(conn, li->sasl.authused);
   }
   return CURLE_OK;
 }
