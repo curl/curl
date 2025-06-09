@@ -923,7 +923,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
-              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a"
+              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" \
               -DBUILD_SHARED_LIBS=OFF \
               ${MATRIX_CONFIG}
           done
