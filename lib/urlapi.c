@@ -31,7 +31,7 @@
 #include "escape.h"
 #include "curl_ctype.h"
 #include "curlx/inet_pton.h"
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"
 #include "curlx/strparse.h"
@@ -513,7 +513,7 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     hostname[hlen] = 0; /* end the address there */
     if(1 != curlx_inet_pton(AF_INET6, hostname, dest))
       return CURLUE_BAD_IPV6;
-    if(Curl_inet_ntop(AF_INET6, dest, hostname, hlen)) {
+    if(curlx_inet_ntop(AF_INET6, dest, hostname, hlen)) {
       hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }
