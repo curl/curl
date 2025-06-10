@@ -800,18 +800,6 @@ ${SIZEOF_TIME_T_CODE}
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}
 
-/* Define for large files, on AIX-style hosts. */
-#cmakedefine _LARGE_FILES ${_LARGE_FILES}
-
-/* define this if you need it to compile thread-safe code */
-#cmakedefine _THREAD_SAFE ${_THREAD_SAFE}
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#cmakedefine const ${const}
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#cmakedefine size_t ${size_t}
-
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}
 
