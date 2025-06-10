@@ -2262,13 +2262,17 @@ if(NOT CURL_DISABLE_INSTALL)
   set(CONFIGURE_OPTIONS       "")
   set(CURLVERSION             "${_curl_version}")
   set(VERSIONNUM              "${_curl_version_num}")
+  # cmake-lint: disable=C0103
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
+  # cmake-lint: disable=C0103
   set(exec_prefix             "\${prefix}")
+  # cmake-lint: disable=C0103
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
     set(includedir            "${CMAKE_INSTALL_INCLUDEDIR}")
   else()
     set(includedir            "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
   endif()
+  # cmake-lint: disable=C0103
   if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
     set(libdir                "${CMAKE_INSTALL_LIBDIR}")
   else()
