@@ -771,10 +771,9 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     errorf(tdata->global, "accept error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
+
   char clientIp[INET_ADDRSTRLEN];
-  unsigned short clientPort;
   inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
-    clientPort = ntohs(clientAddr.sin_port);
 
   closesocket(tdata->socket_l);
   tdata->socket_l = INVALID_SOCKET;
@@ -782,19 +781,19 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
-   for(;;) {
-     r = ReadFile(tdata->stdin_handle, buffer,
+  for(;;) {
+    r = ReadFile(tdata->stdin_handle, buffer,
       sizeof(buffer), &n, NULL);
-     if(r == 0)
-       break;
-     if(n == -1 || n == 0)
-       break;
-     nwritten = send(socket_w, buffer, n, 0);
-     if(nwritten == SOCKET_ERROR)
-       break;
-     if(nwritten != n)
-       break;
-   }
+    if(r == 0)
+      break;
+    if(n == -1 || n == 0)
+      break;
+    nwritten = send(socket_w, buffer, n, 0);
+    if(nwritten == SOCKET_ERROR)
+      break;
+    if(nwritten != n)
+      break;
+  }
 ThreadCleanup:
   CloseHandle(tdata->stdin_handle);
   tdata->stdin_handle = NULL;
