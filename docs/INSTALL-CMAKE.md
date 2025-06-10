@@ -387,8 +387,8 @@ Details via CMake
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
 - `OPENSSL_INCLUDE_DIR`:                    The OpenSSL include directory.
-- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library.
-- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library.
+- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library. When targeting MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
+- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library. When targeting MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
