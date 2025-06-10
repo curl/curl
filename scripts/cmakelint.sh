@@ -60,10 +60,10 @@
     --macro-pattern '(curl_[0-9a-z_]+|check_include_file_concat_curl)' \
     --global-var-pattern '[A-Z][0-9A-Z_]+' \
     --internal-var-pattern '_[a-z][0-9a-z_]+' \
-    --local-var-pattern '_[a-z][a-z0-9_]+' \
+    --local-var-pattern '_[a-z][0-9a-z_]+' \
     --private-var-pattern '_[0-9a-z_]+' \
     --public-var-pattern '([A-Z][0-9A-Z_]+|[A-Z][A-Za-z0-9]+_FOUND|[a-z]+_SOURCES|prefix|exec_prefix|includedir|libdir|ssize_t|_FILE_OFFSET_BITS)' \
-    --argument-var-pattern '_[a-z][a-z0-9_]+' \
+    --argument-var-pattern '_[a-z][0-9a-z_]+' \
     --keyword-pattern '[A-Z][0-9A-Z_]+' \
     --max-conditionals-custom-parser 2 \
     --min-statement-spacing 1 \
