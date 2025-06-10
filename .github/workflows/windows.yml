@@ -829,9 +829,9 @@ jobs:
               -DCURL_ENABLE_SSL=OFF
               -DUSE_WIN32_IDN=ON
 
-          - name: 'schannel +examples'
-            install-vcpkg: 'zlib libssh2[core,zlib]'
-            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd'
+          - name: 'openssl +examples'
+            install-vcpkg: 'zlib'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -846,6 +846,9 @@ jobs:
               -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
               -DZSTD_INCLUDE_DIR=/ucrt64/include
               -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
+              -DOPENSSL_ROOT_DIR=/ucrt64
+              -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
+              -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
@@ -869,6 +872,8 @@ jobs:
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
           install: >-
+            mingw-w64-${{ matrix.env }}-zlib
+            mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
 
