@@ -1635,8 +1635,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
     }
     stream = H3_STREAM_CTX(ctx, data);
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send, opened with %zd bytes",
-                stream->id, sent);
   }
   else if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] xfer write failed", stream->id);
