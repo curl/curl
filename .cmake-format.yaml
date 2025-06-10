@@ -25,7 +25,7 @@ lint:
   # regular expression pattern describing valid function names
   function_pattern: 'curl_[0-9a-z_]+'
   # regular expression pattern describing valid macro names
-  macro_pattern: 'curl_[0-9a-z_]+'
+  macro_pattern: '(curl_[0-9a-z_]+|check_include_file_concat_curl)'
   # regular expression pattern describing valid names for variables with global (cache) scope
   global_var_pattern: '[A-Z][0-9A-Z_]+'
   # regular expression pattern describing valid names for variables with global scope (but internal semantic)

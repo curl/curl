@@ -27,7 +27,7 @@
 # This macro is intended to be called multiple times with a sequence of
 # possibly dependent header files.  Some headers depend on others to be
 # compiled correctly.
-macro(check_include_file_concat_curl _file _variable)  # cmake-lint: disable=C0103
+macro(check_include_file_concat_curl _file _variable)
   check_include_files("${CURL_INCLUDES};${_file}" ${_variable})
   if(${_variable})
     list(APPEND CURL_INCLUDES ${_file})
