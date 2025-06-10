@@ -61,11 +61,28 @@
 #include "memdebug.h"
 
 
-static CURLcode setopt_set_timout_sec(timediff_t *ptimeout_ms, long secs)
+static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
-  if((secs < 0) || (secs > (INT_MAX/1000)))
+  if(secs < 0)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  *ptimeout_ms = (timediff_t)secs * 1000;
+  if(secs > (TIMEDIFF_T_MAX/1000))
+    *ptimeout_ms = TIMEDIFF_T_MAX;
+  else
+    *ptimeout_ms = (timediff_t)secs * 1000;
+  return CURLE_OK;
+}
+
+static CURLcode setopt_set_timeout_ms(timediff_t *ptimeout_ms, long ms)
+{
+  if(ms < 0)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#if LONG_MAX > TIMEDIFF_T_MAX
+  if(ms > TIMEDIFF_T_MAX) {
+    *ptimeout_ms = TIMEDIFF_T_MAX;
+    return CURLE_OK;
+  }
+#endif
+  *ptimeout_ms = (timediff_t)ms;
   return CURLE_OK;
 }
 
@@ -535,21 +552,15 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.server_response_timeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.server_response_timeout, arg);
+
   case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
     /*
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= INT_MAX))
-      data->set.server_response_timeout = (unsigned int)arg;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_ms(&data->set.server_response_timeout, arg);
+
 #ifndef CURL_DISABLE_TFTP
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
@@ -892,10 +903,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * The maximum time for curl to wait for FTP server connect
      */
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.accepttimeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.accepttimeout, arg);
+
   case CURLOPT_WILDCARDMATCH:
     data->set.wildcard_enabled = enabled;
     break;
@@ -952,33 +961,19 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use for a single transfer
      * operation.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.timeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.timeout, arg);
 
   case CURLOPT_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.timeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.timeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT:
     /*
      * The maximum time you allow curl to use to connect.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.connecttimeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.connecttimeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.connecttimeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.connecttimeout, arg);
 
   case CURLOPT_RESUME_FROM:
     /*
@@ -1356,10 +1351,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.suppress_connect_headers = enabled;
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.happy_eyeballs_timeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.happy_eyeballs_timeout, arg);
+
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = enabled;
@@ -1375,9 +1368,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.upkeep_interval_ms = arg;
     break;
   case CURLOPT_MAXAGE_CONN:
-    return setopt_set_timout_sec(&data->set.conn_max_idle_ms, arg);
+    return setopt_set_timeout_sec(&data->set.conn_max_idle_ms, arg);
+
   case CURLOPT_MAXLIFETIME_CONN:
-    return setopt_set_timout_sec(&data->set.conn_max_age_ms, arg);
+    return setopt_set_timeout_sec(&data->set.conn_max_age_ms, arg);
+
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTS_CTRL:
     if(arg & CURLHSTS_ENABLE) {
