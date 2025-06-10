@@ -806,7 +806,6 @@ jobs:
         shell: msys2 {0}
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
-      MATRIX_ENV: '${{ matrix.env }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
       MATRIX_INSTALL_VCPKG: '${{ matrix.install-vcpkg }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
