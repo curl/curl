@@ -27,8 +27,8 @@
 # command-line, or else all relevant files in git, or if not in a git
 # repository, all files starting in the tree rooted in the current directory.
 #
-# cmakelint can be installed from PyPi with the command "python3 -m pip install
-# cmakelint".
+# cmake-lint can be installed from PyPi with the command "python3 -m pip
+# install cmakelang".
 #
 # The xargs invocation is portable, but does not preserve spaces in file names.
 # If such a file is ever added, then this can be portably fixed by switching to
@@ -45,6 +45,4 @@
   fi
 } | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in|\.c)$' \
   | xargs \
-  cmakelint \
-    --spaces=2 --linelength=132 \
-    --filter=-whitespace/indent,-convention/filename,-package/stdargs,-readability/wonkycase
+  cmake-lint --suppress-decorations
