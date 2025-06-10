@@ -841,11 +841,11 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_USE_SCHANNEL=ON
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
-              -DBROTLI_INCLUDE_DIR=/c/msys64/ucrt64/include
-              -DBROTLICOMMON_LIBRARY=/c/msys64/ucrt64/lib/libbrotlicommon.dll.a
-              -DBROTLIDEC_LIBRARY=/c/msys64/ucrt64/lib/libbrotlidec.dll.a
-              -DZSTD_INCLUDE_DIR=/c/msys64/ucrt64/include
-              -DZSTD_LIBRARY=/c/msys64/ucrt64/lib/libzstd.dll.a
+              -DBROTLI_INCLUDE_DIR=/ucrt64/include
+              -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
+              -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
+              -DZSTD_INCLUDE_DIR=/ucrt64/include
+              -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
@@ -905,11 +905,6 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            if [ "${MATRIX_ARCH}" = 'arm64' ]; then
-              mingwroot="/c/a/_temp/msys64${MINGW_PREFIX}"
-            else
-              mingwroot="/c/msys64${MINGW_PREFIX}"
-            fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
               -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
@@ -921,8 +916,8 @@ jobs:
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DLIBPSL_INCLUDE_DIR="${mingwroot}/include" \
-              -DLIBPSL_LIBRARY="${mingwroot}/lib/libpsl.dll.a" \
+              -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
+              -DLIBPSL_LIBRARY="${MINGW_PREFIX}/lib/libpsl.dll.a" \
               -DBUILD_SHARED_LIBS=OFF \
               ${MATRIX_CONFIG}
           done
