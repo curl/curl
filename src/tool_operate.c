@@ -1072,7 +1072,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
     /* non - blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
-    int f = win32_stdin_read_thread(global);
+    int f = (int)win32_stdin_read_thread(global);
 
     if(f == INVALID_SOCKET)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET"

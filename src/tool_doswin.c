@@ -749,7 +749,7 @@ struct win_thread_data {
   HANDLE stdin_handle;
   /* This is the listen socket for the thread. It is closed after the first
       connection. */
-  int socket_l;
+  SOCKET socket_l;
   /* This is the global config - used for printing errors and so forth */
   struct GlobalConfig *global;
 };
@@ -768,7 +768,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     &clientAddrLen);
 
   if(socket_w == INVALID_SOCKET) {
-    errorf(tdata->global, "accept error: %08x\n", GetLastError());
+    errorf(tdata->global, "accept error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
   char clientIp[INET_ADDRSTRLEN];
@@ -779,11 +779,11 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   closesocket(tdata->socket_l);
   tdata->socket_l = INVALID_SOCKET;
   if(SOCKET_ERROR == shutdown(socket_w, SD_RECEIVE)) {
-    errorf(tdata->global, "shutdown error: %08x\n", GetLastError());
+    errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
    for(;;) {
-     BOOL r = ReadFile(tdata->stdin_handle, buffer,
+     r = ReadFile(tdata->stdin_handle, buffer,
       sizeof(buffer), &n, NULL);
      if(r == 0)
        break;
@@ -815,7 +815,6 @@ static SOCKET socket_r = INVALID_SOCKET;
 int win32_stdin_read_thread(struct GlobalConfig *global)
 {
   int stdin_fd;
-  int stdin_fmode;
   int result;
   bool r;
   int rc = 0, socksize = 0;
@@ -841,7 +840,7 @@ int win32_stdin_read_thread(struct GlobalConfig *global)
       IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
     if(tdata->socket_l == -1) {
-      errorf(global, "WSASocket error: %08x", GetLastError());
+      errorf(global, "WSASocket error: %08lx", GetLastError());
       break;
     }
 
@@ -852,20 +851,20 @@ int win32_stdin_read_thread(struct GlobalConfig *global)
     /* Bind to any available loopback port */
     result = bind(tdata->socket_l, (SOCKADDR*)&selfaddr, socksize);
     if(result == SOCKET_ERROR) {
-      errorf(global, "bind error: %08x", GetLastError());
+      errorf(global, "bind error: %08lx", GetLastError());
       break;
     }
 
     /* Bind to any available loopback port */
     result = getsockname(tdata->socket_l, (SOCKADDR*)&selfaddr, &socksize);
     if(result == SOCKET_ERROR) {
-      errorf(global, "getsockname error: %08x", GetLastError());
+      errorf(global, "getsockname error: %08lx", GetLastError());
       break;
     }
 
     result = listen(tdata->socket_l, 1);
     if(result == SOCKET_ERROR) {
-      errorf(global, "listen error: %08x\n", GetLastError());
+      errorf(global, "listen error: %08lx\n", GetLastError());
       break;
     }
 
@@ -875,7 +874,7 @@ int win32_stdin_read_thread(struct GlobalConfig *global)
       0, FALSE, DUPLICATE_SAME_ACCESS);
 
     if(!r) {
-      errorf(global, "DuplicateHandle error: %08x", GetLastError());
+      errorf(global, "DuplicateHandle error: %08lx", GetLastError());
       break;
     }
 
@@ -886,31 +885,30 @@ int win32_stdin_read_thread(struct GlobalConfig *global)
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
         tdata, 0, NULL);
     if(!stdin_thread) {
-      errorf(global, "CreateThread error: %08x", GetLastError());
+      errorf(global, "CreateThread error: %08lx", GetLastError());
       break;
     }
 
     /* Connect to the thread and rearrange our own STDIN handles */
-    socket_r = (int)WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP,
-        NULL, 0, NULL);
+    socket_r = (int)socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_r == INVALID_SOCKET) {
-      errorf(global, "socket error: %08x", GetLastError());
+      errorf(global, "socket error: %08lx", GetLastError());
       break;
     }
 
     if(SOCKET_ERROR == connect(socket_r, (SOCKADDR*)&selfaddr, socksize)) {
-      errorf(global, "connect error: %08x", GetLastError());
+      errorf(global, "connect error: %08lx", GetLastError());
       break;
     }
 
     if(SOCKET_ERROR == shutdown(socket_r, SD_SEND)) {
-      errorf(global, "shutdown error: %08x", GetLastError());
+      errorf(global, "shutdown error: %08lx", GetLastError());
       break;
     }
 
     /* Set the stdin handle to read from the socket. */
     if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
-      errorf(global, "SetStdHandle error: %08x", GetLastError());
+      errorf(global, "SetStdHandle error: %08lx", GetLastError());
       break;
     }
 
