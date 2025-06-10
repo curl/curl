@@ -830,8 +830,8 @@ jobs:
               -DUSE_WIN32_IDN=ON
 
           - name: 'openssl +examples'
-            install-vcpkg: 'zlib'
-            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -847,8 +847,6 @@ jobs:
               -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
               -DZSTD_INCLUDE_DIR=/ucrt64/include
               -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
-              -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
-              -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
@@ -897,7 +895,6 @@ jobs:
           MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
-            cflags=''
             options=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
@@ -905,7 +902,6 @@ jobs:
               ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            cflags+=" -external:I $VCPKG_INSTALLATION_ROOT/installed/${MATRIX_ARCH}-${MATRIX_PLAT}/include"
             [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
