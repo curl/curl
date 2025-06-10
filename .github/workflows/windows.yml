@@ -807,6 +807,7 @@ jobs:
     env:
       MATRIX_ARCH: '${{ matrix.arch }}'
       MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_INSTALL_MSYS2: '${{ matrix.install-vcpkg }}'
       MATRIX_INSTALL_VCPKG: '${{ matrix.install-vcpkg }}'
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
@@ -830,8 +831,8 @@ jobs:
               -DUSE_WIN32_IDN=ON
 
           - name: 'openssl +examples'
-            install-vcpkg: 'zlib libssh2[core,zlib]'
             install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -876,6 +877,7 @@ jobs:
             ${{ matrix.install-msys2 }}
 
       - name: 'vcpkg versions'
+        if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
@@ -908,11 +910,13 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
+              options+=" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+              options+=" -DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed"
+              options+=" -DVCPKG_TARGET_TRIPLET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+              options+=" -DCMAKE_C_COMPILER_TARGET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+            fi
             cmake -B "bld${_chkprefill}" ${options} \
-              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-              -DVCPKG_TARGET_TRIPLET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
-              -DCMAKE_C_COMPILER_TARGET="${MATRIX_ARCH}-${MATRIX_PLAT}" \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
@@ -999,12 +1003,14 @@ jobs:
           export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
-          if [[ "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
+          if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
+                "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
           if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
             TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
-            if [[ "${MATRIX_INSTALL_VCPKG}" = *'libssh '* ]]; then
+            if [[ "${MATRIX_INSTALL_MSYS2} " = *'libssh '* || \
+                  "${MATRIX_INSTALL_VCPKG} " = *'libssh '* ]]; then
               TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
             else
               TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
