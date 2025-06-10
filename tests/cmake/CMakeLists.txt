@@ -47,15 +47,15 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
    TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # Double-inclusion test
-  foreach(result_var IN ITEMS
+  foreach(_result_var IN ITEMS
       CURL_FOUND
       CURL_SUPPORTS_HTTPS
       CURL_SUPPORTS_Largefile
       CURL_VERSION
       CURL_VERSION_STRING
-    )
-    if(NOT ${result_var})
-      message(FATAL_ERROR "'${result_var}' variable expected, but not set by the CURL package.")
+  )
+    if(NOT ${_result_var})
+      message(FATAL_ERROR "'${_result_var}' variable expected, but not set by the CURL package.")
     endif()
   endforeach()
   # Show variables set by find_package()

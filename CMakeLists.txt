@@ -520,7 +520,7 @@ if(PERL_EXECUTABLE)
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
   )
   add_custom_target(curl-ca-firefox
-    COMMENT "generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
+    COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
   )
@@ -1735,7 +1735,7 @@ foreach(_variable IN ITEMS
     HAVE_SYS_SOCKET_H
     HAVE_SYS_TYPES_H
     HAVE_UNISTD_H
-    )
+)
   if(${_variable})
     string(APPEND CURL_TEST_DEFINES " -D${_variable}")
   endif()
@@ -1900,7 +1900,7 @@ foreach(_curl_test IN ITEMS
     HAVE_BOOL_T
     STDC_HEADERS
     HAVE_ATOMIC
-    )
+)
   curl_internal_test(${_curl_test})
 endforeach()
 
@@ -2062,6 +2062,7 @@ endif()
 # (= regenerate it).
 function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
+  # cmake-lint: disable=W0106
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
