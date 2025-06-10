@@ -65,10 +65,13 @@ static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
   if(secs < 0)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(secs > (TIMEDIFF_T_MAX/1000))
+#if LONG_MAX > (TIMEDIFF_T_MAX/1000)
+  if(secs > (TIMEDIFF_T_MAX/1000)) {
     *ptimeout_ms = TIMEDIFF_T_MAX;
-  else
-    *ptimeout_ms = (timediff_t)secs * 1000;
+    return CURLE_OK;
+  }
+#endif
+  *ptimeout_ms = (timediff_t)secs * 1000;
   return CURLE_OK;
 }
 
