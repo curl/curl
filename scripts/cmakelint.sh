@@ -23,6 +23,10 @@
 #
 ###########################################################################
 
+# https://cmake-format.readthedocs.io/en/latest/cmake-lint.html
+# https://cmake-format.readthedocs.io/en/latest/lint-usage.html
+# https://github.com/cheshirekow/cmake_format/blob/master/cmakelang/configuration.py
+
 # Run cmakelint on the curl source code. It will check all files given on the
 # command-line, or else all relevant files in git, or if not in a git
 # repository, all files starting in the tree rooted in the current directory.
