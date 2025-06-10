@@ -677,27 +677,29 @@ static bool conn_maxage(struct Curl_easy *data,
                         struct connectdata *conn,
                         struct curltime now)
 {
-  timediff_t idletime, lifetime;
+  timediff_t age_ms;
 
-  idletime = curlx_timediff(now, conn->lastused);
-  idletime /= 1000; /* integer seconds is fine */
+  if(data->set.maxage_conn) {
+    age_ms = curlx_timediff(now, conn->lastused);
 
-  if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%" FMT_TIMEDIFF_T
-          " seconds idle), disconnect it", idletime);
-    return TRUE;
+    if(age_ms > (data->set.maxage_conn * 1000)) {
+      infof(data, "Too old connection (%" FMT_TIMEDIFF_T
+            " ms idle, max idle is %ld sec), disconnect it",
+            age_ms, data->set.maxage_conn);
+      return TRUE;
+    }
   }
 
-  lifetime = curlx_timediff(now, conn->created);
-  lifetime /= 1000; /* integer seconds is fine */
-
-  if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
-    infof(data,
-          "Too old connection (%" FMT_TIMEDIFF_T
-          " seconds since creation), disconnect it", lifetime);
-    return TRUE;
+  if(data->set.maxlifetime_conn) {
+    age_ms = curlx_timediff(now, conn->created);
+    if(age_ms > (data->set.maxlifetime_conn * 1000)) {
+      infof(data,
+            "Too old connection (created %" FMT_TIMEDIFF_T
+            " ms ago, max lifetime is %ld sec), disconnect it",
+            age_ms, data->set.maxlifetime_conn);
+      return TRUE;
+    }
   }
-
 
   return FALSE;
 }
