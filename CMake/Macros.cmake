@@ -65,6 +65,7 @@ macro(curl_internal_test _curl_test)
   endif()
 endmacro()
 
+# Option for dependencies that accepts an 'AUTO' value, which enables the dependency if detected.
 macro(curl_dependency_option _option_name _find_name _desc_name)
   set(${_option_name} "AUTO" CACHE STRING "Build curl with ${_desc_name} support (AUTO, ON or OFF)")
   set_property(CACHE ${_option_name} PROPERTY STRINGS "AUTO" "ON" "OFF")

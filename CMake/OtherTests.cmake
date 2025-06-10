@@ -25,6 +25,7 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
+# #include header if condition is true
 macro(curl_add_header_include _check _header)
   if(${_check})
     set(_source_epilogue "${_source_epilogue}
