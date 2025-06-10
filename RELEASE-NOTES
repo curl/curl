@@ -4,7 +4,7 @@ curl and libcurl 8.14.2
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3431
+ Contributors:                 3432
 
 This release includes the following changes:
 
@@ -12,13 +12,19 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
+ o curl.h: remove the "RESERVED" error codes [2]
+ o curl_path: make SFTP handle a path like /~ properly. [11]
  o docs/examples: add ftp-delete.c [5]
  o INSTALL.md: cygwin details and add source code link [4]
+ o pingpong: on disconnect, check for unflushed pingpong state [12]
  o pytest: adapt for runs with openssl-1.1.1
  o pytest: disable test_07_37 and test_07_36 with openssl's quic [1]
  o SCP/SFTP: avoid busy loop after EAGAIN [8]
  o system.h: remove some macros [6]
  o test1117: reduce write delays [9]
+ o tests/servers.pm: add more ways to figure out current user [17]
+ o tool_getparam: fix --ftp-pasv [15]
+ o tool_operate: fix return code when --retry is used but not triggered [13]
 
 This release includes the following known bugs:
 
@@ -41,15 +47,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, John Haugabook, Stefan Eissing
-  (3 contributors)
+  Carlos Henrique Lima Melara, Dan Fandrich, Daniel Stenberg, fjaell on github,
+  John Haugabook, Stefan Eissing, Viktor Szakats
+  (7 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=17539
+ [2] = https://curl.se/bug/?i=17563
  [3] = https://curl.se/bug/?i=17535
  [4] = https://curl.se/bug/?i=17485
  [5] = https://curl.se/bug/?i=17540
  [6] = https://curl.se/bug/?i=17498
  [8] = https://curl.se/bug/?i=17533
  [9] = https://curl.se/bug/?i=17530
+ [11] = https://curl.se/bug/?i=17534
+ [12] = https://curl.se/bug/?i=17555
+ [13] = https://curl.se/bug/?i=17554
+ [15] = https://curl.se/bug/?i=17545
+ [17] = https://curl.se/bug/?i=17544
