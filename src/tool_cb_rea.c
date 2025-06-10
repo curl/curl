@@ -97,7 +97,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #ifdef _WIN32
     rc = recv(per->infd, buffer, sz * nmemb, 0);
     if(rc < 0) {
-      if(WSAGetLastError() == WSAEWOULDBLOCK) {
+      if(SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_SETERRNO(0);
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;
