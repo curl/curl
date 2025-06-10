@@ -386,6 +386,9 @@ Details via CMake
 ## Dependency options (via CMake)
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
+- `OPENSSL_INCLUDE_DIR`:                    The OpenSSL include directory.
+- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
+- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
@@ -440,6 +443,11 @@ Details via CMake
 - `NGHTTP3_LIBRARY`:                        Path to `nghttp3` library.
 - `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory.
 - `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library.
+- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Path to `ngtcp2_crypto_boringssl` library.
+- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Path to `ngtcp2_crypto_gnutls` library.
+- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Path to `ngtcp2_crypto_ossl` library.
+- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Path to `ngtcp2_crypto_quictls` library.
+- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Path to `ngtcp2_crypto_wolfssl` library.
 - `NETTLE_INCLUDE_DIR`:                     The nettle include directory.
 - `NETTLE_LIBRARY`:                         Path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Path to `pthread` library. (for Rustls)
