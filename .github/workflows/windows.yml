@@ -903,7 +903,7 @@ jobs:
           MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
           MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
-          sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
+          [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
