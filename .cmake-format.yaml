@@ -93,7 +93,7 @@ format:
 # Options affecting the linter
 lint:
   # a list of lint codes to disable
-  disabled_codes: [ 'C0113' ]
+  disabled_codes: ['C0113']
   # regular expression pattern describing valid function names
   function_pattern: curl_[0-9a-z_]+
   # regular expression pattern describing valid macro names
