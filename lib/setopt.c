@@ -60,6 +60,15 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static bool setopt_long_as_pos_timediff(long l)
+{
+#if LONG_MAX > TIMEDIFF_T_MAX
+  return (l >= 0) && (l <= TIMEDIFF_T_MAX);
+#else
+  return (l >= 0);
+#endif
+}
+
 CURLcode Curl_setstropt(char **charp, const char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
@@ -1366,20 +1375,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.upkeep_interval_ms = arg;
     break;
   case CURLOPT_MAXAGE_CONN:
-#if LONG_MAX > TIMEDIFF_T_MAX
-    if((arg < 0) || (arg > TIMEDIFF_T_MAX))
-#else
-    if(arg < 0)
-#endif
+    if(!setopt_long_as_pos_timediff(arg))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.conn_max_idle_ms = (timediff_t)arg;
     break;
   case CURLOPT_MAXLIFETIME_CONN:
-#if LONG_MAX > TIMEDIFF_T_MAX
-    if((arg < 0) || (arg > TIMEDIFF_T_MAX))
-#else
-    if(arg < 0)
-#endif
+    if(!setopt_long_as_pos_timediff(arg))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.conn_max_age_ms = (timediff_t)arg;
     break;
