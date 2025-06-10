@@ -880,7 +880,12 @@ jobs:
         if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
         run: |
-          cat /ucrt64/include/zconf.h
+          echo '----------------'
+          cat "${MINGW_PREFIX}/include/zconf.h" || true
+          echo '----------------'
+          cat C:/msys64/ucrt64/include/zconf.h || true
+          echo '----------------'
+          cat /c/msys64/ucrt64/include/zconf.h || true
           echo '----------------'
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
