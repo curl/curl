@@ -87,15 +87,39 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
-  rc = read(per->infd, buffer, sz*nmemb);
-  if(rc < 0) {
-    if(errno == EAGAIN) {
-      CURL_SETERRNO(0);
-      config->readbusy = TRUE;
-      return CURL_READFUNC_PAUSE;
+  /* If we are on Windows, and using `-T .`, then per->infd points to a socket
+   connected to stdin via a reader thread, and needs to be read with recv()
+   Make sure we are in non-blocking mode and infd is not regular stdin
+   On Linux per->infd should be stdin (0) and the block below should not
+   execute */
+  if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+    rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
+    if(rc < 0) {
+      if(SOCKERRNO == SOCKEWOULDBLOCK) {
+        CURL_SETERRNO(0);
+        config->readbusy = TRUE;
+        return CURL_READFUNC_PAUSE;
+      }
+
+      rc = 0;
     }
-    /* since size_t is unsigned we cannot return negative values fine */
-    rc = 0;
+#else
+    warnf(per->config->global, "per->infd != 0: FD == %d. This behavior"
+          " is only supported on desktop Windows", per->infd);
+#endif
+  }
+  else {
+    rc = read(per->infd, buffer, sz*nmemb);
+    if(rc < 0) {
+      if(errno == EAGAIN) {
+        CURL_SETERRNO(0);
+        config->readbusy = TRUE;
+        return CURL_READFUNC_PAUSE;
+      }
+      /* since size_t is unsigned we cannot return negative values fine */
+      rc = 0;
+    }
   }
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {

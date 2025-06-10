@@ -572,8 +572,22 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(!curl || !config)
     return result;
 
-  if(per->infdopen)
-    close(per->infd);
+  if(per->uploadfile) {
+    if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+      sclose(per->infd);
+#else
+      warnf(per->config->global, "Closing per->infd != 0: FD == "
+            "%d. This behavior is only supported on desktop "
+            " Windows", per->infd);
+#endif
+    }
+  }
+  else {
+    if(per->infdopen) {
+      close(per->infd);
+    }
+  }
 
   if(per->skip)
     goto skip;
@@ -1066,6 +1080,26 @@ static void check_stdin_upload(struct GlobalConfig *global,
 
   CURLX_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+    /* non-blocking stdin behavior on Windows is challenging
+       Spawn a new thread that will read from stdin and write
+       out to a socket */
+    curl_socket_t f = win32_stdin_read_thread(global);
+
+    if(f == CURL_SOCKET_BAD)
+      warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "
+            "falling back to blocking mode");
+    else if(f > INT_MAX) {
+      warnf(global, "win32_stdin_read_thread returned identifier "
+            "larger than INT_MAX. This should not happen unless "
+            "the upper 32 bits of a Windows socket have started "
+            "being used for something... falling back to blocking "
+            "mode");
+      sclose(f);
+    }
+    else
+      per->infd = (int)f;
+#endif
     if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
       warnf(global,
             "fcntl failed on fd=%d: %s", per->infd, strerror(errno));
