@@ -1366,14 +1366,14 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.upkeep_interval_ms = arg;
     break;
   case CURLOPT_MAXAGE_CONN:
-    if(arg < 0)
+    if((arg < 0) || (arg > TIMEDIFF_T_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxage_conn = arg;
+    data->set.conn_max_idle_ms = (timediff_t)arg;
     break;
   case CURLOPT_MAXLIFETIME_CONN:
-    if(arg < 0)
+    if((arg < 0) || (arg > TIMEDIFF_T_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxlifetime_conn = arg;
+    data->set.conn_max_age_ms = (timediff_t)arg;
     break;
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTS_CTRL:

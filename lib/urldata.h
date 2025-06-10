@@ -1515,9 +1515,9 @@ struct UserDefined {
 #endif
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
-  long maxage_conn;     /* in seconds, max idle time to allow a connection that
+  timediff_t conn_max_idle_ms; /* max idle time to allow a connection that
                            is to be reused */
-  long maxlifetime_conn; /* in seconds, max time since creation to allow a
+  timediff_t conn_max_age_ms; /* max time since creation to allow a
                             connection that is to be reused */
 #ifndef CURL_DISABLE_TFTP
   long tftp_blksize;    /* in bytes, 0 means use default */
