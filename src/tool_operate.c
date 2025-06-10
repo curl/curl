@@ -1068,6 +1068,18 @@ static void check_stdin_upload(struct GlobalConfig *global,
 
   CURL_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
+#ifdef _WIN32
+    /* non - blocking stdin behavior on Windows is challenging
+       Spawn a new thread that will read from stdin and write
+       out to a socket */
+    int f = win32_stdin_read_thread(global);
+
+    if(f == INVALID_SOCKET)
+      warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET"
+          "will fall back to blocking mode");
+    else
+      per->infd = f;
+#endif
     if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
       warnf(global,
             "fcntl failed on fd=%d: %s", per->infd, strerror(errno));

@@ -88,6 +88,23 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
+#ifdef _WIN32
+  /* If we are on Windows, and using `-T .`, then per->infd points to a socket
+   connected to STDIN via a reader thread, and needs to be read with recv()
+   Make sure we're in non-blocking mode and the infd isnt regular STDIN */
+  if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+    rc = recv(per->infd, buffer, sz * nmemb, 0);
+    if(rc < 0) {
+      if(WSAGetLastError() == WSAEWOULDBLOCK) {
+        CURL_SETERRNO(0);
+        config->readbusy = TRUE;
+        return CURL_READFUNC_PAUSE;
+      }
+
+      rc = 0;
+    }
+  }
+#else
   rc = read(per->infd, buffer, sz*nmemb);
   if(rc < 0) {
     if(errno == EAGAIN) {
@@ -98,6 +115,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     /* since size_t is unsigned we cannot return negative values fine */
     rc = 0;
   }
+#endif
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */
