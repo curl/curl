@@ -37,7 +37,6 @@ my %remove = (
     '#define CURL_EXTERN_SYMBOL' => 1,
     '#define CURL_OS "Linux"' => 1,
     '#define CURL_OS "x86_64-pc-linux-gnu"' => 1,
-    '#define FILE_OFFSET_BITS 64' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
     '#define HAVE_BROTLI 1' => 1,
@@ -91,6 +90,7 @@ my %remove = (
     '#define PACKAGE_VERSION "-"' => 1,
     '#define SIZEOF_LONG_LONG 8' => 1,
     '#define VERSION "-"' => 1,
+    '#define _FILE_OFFSET_BITS 64' => 1,
     );
 
 sub filter {

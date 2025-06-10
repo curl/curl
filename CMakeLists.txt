@@ -2519,7 +2519,6 @@ if(NOT CURL_DISABLE_INSTALL)
       @ONLY)
 
     add_custom_target(curl_uninstall
-      COMMENT "running cmake_uninstall.cmake"
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 
