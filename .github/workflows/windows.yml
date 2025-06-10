@@ -839,14 +839,14 @@ jobs:
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
-              -DCURL_USE_SCHANNEL=ON
+              -DCURL_USE_OPENSSL=ON
+              -DOPENSSL_ROOT_DIR=/ucrt64
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DBROTLI_INCLUDE_DIR=/ucrt64/include
               -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
               -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
               -DZSTD_INCLUDE_DIR=/ucrt64/include
               -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
-              -DOPENSSL_ROOT_DIR=/ucrt64
               -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
               -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
 
@@ -872,8 +872,6 @@ jobs:
           cache: ${{ contains(matrix.image, 'arm') }}
           path-type: inherit
           install: >-
-            mingw-w64-${{ matrix.env }}-zlib
-            mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
 
