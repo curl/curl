@@ -877,8 +877,6 @@ jobs:
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
-          echo '------------'
-          env
 
       - name: 'vcpkg build'
         if: ${{ matrix.install-vcpkg  }}
@@ -908,9 +906,9 @@ jobs:
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ "${MATRIX_ARCH}" = 'arm64' ]; then
-              mingwroot='/c/a/_temp/msys64/clangarm64'
+              mingwroot="/c/a/_temp/msys64${MINGW_PREFIX}"
             else
-              mingwroot='/c/msys64/ucrt64'
+              mingwroot="/c/msys64${MINGW_PREFIX}"
             fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
