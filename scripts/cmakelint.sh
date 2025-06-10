@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) Dan Fandrich, <dan@coneharvesters.com>, et al.
+# Copyright (C) Dan Fandrich, <dan@coneharvesters.com>, Viktor Szakats, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
