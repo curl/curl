@@ -811,7 +811,7 @@ ThreadCleanup:
 static HANDLE stdin_thread = NULL;
 static SOCKET socket_r = INVALID_SOCKET;
 
-int win32_stdin_read_thread(struct GlobalConfig *global)
+SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
 {
   int stdin_fd;
   int result;
