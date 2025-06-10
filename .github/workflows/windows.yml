@@ -831,7 +831,8 @@ jobs:
               -DUSE_WIN32_IDN=ON
 
           - name: 'openssl +examples'
-            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zlib mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2'
+            install-msys2: 'mingw-w64-ucrt-x86_64-brotli mingw-w64-ucrt-x86_64-zstd mingw-w64-ucrt-x86_64-openssl'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
             env: 'ucrt-x86_64'
             plat: 'windows'
@@ -849,10 +850,6 @@ jobs:
               -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
               -DZSTD_INCLUDE_DIR=/ucrt64/include
               -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
-              -DZLIB_INCLUDE_DIR=/ucrt64/include
-              -DZLIB_LIBRARY=/ucrt64/lib/libz.dll.a
-              -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
-              -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'
