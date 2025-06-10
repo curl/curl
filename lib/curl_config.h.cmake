@@ -806,12 +806,6 @@ ${SIZEOF_TIME_T_CODE}
 /* define this if you need it to compile thread-safe code */
 #cmakedefine _THREAD_SAFE ${_THREAD_SAFE}
 
-/* Define to empty if `const' does not conform to ANSI C. */
-#cmakedefine const ${const}
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#cmakedefine size_t ${size_t}
-
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}
 
