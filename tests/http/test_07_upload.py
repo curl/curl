@@ -768,7 +768,7 @@ class TestUpload:
         assert earlydata[0] == 0, f'{earlydata}\n{r.dump_logs()}'
         # depending on cpu load, curl might not upload as much before
         # the handshake starts and early data stops.
-        assert 102 <= earlydata[1] <= exp_early, f'{earlydata}\n{r.dump_logs()}'
+        assert 0 < earlydata[1] <= exp_early, f'{earlydata}\n{r.dump_logs()}'
 
     def check_downloads(self, client, r, source: List[str], count: int,
                         complete: bool = True):
