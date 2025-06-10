@@ -44,5 +44,28 @@
     find . -type f | sed 's@^\./@@'
   fi
 } | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in|\.c)$' \
-  | xargs -I {} \
-  cmake-lint --suppress-decorations {} --config-files .github/scripts/cmake-format.yaml
+  | xargs \
+  cmake-lint \
+    --suppress-decorations \
+    --disable \
+    --line-width 132 \
+    --tab-size 2 \
+    --use-tabchars false \
+    --disabled-codes C0113 \
+    --function-pattern 'curl_[0-9a-z_]+' \
+    --macro-pattern '(curl_[0-9a-z_]+|check_include_file_concat_curl)' \
+    --global-var-pattern '[A-Z][0-9A-Z_]+' \
+    --internal-var-pattern '_[a-z][0-9a-z_]+' \
+    --local-var-pattern '_[a-z][a-z0-9_]+' \
+    --private-var-pattern '_[0-9a-z_]+' \
+    --public-var-pattern '([A-Z][0-9A-Z_]+|[A-Z][A-Za-z0-9]+_FOUND|[a-z]+_SOURCES|prefix|exec_prefix|includedir|libdir|ssize_t|_FILE_OFFSET_BITS)' \
+    --argument-var-pattern '_[a-z][a-z0-9_]+' \
+    --keyword-pattern '[A-Z][0-9A-Z_]+' \
+    --max-conditionals-custom-parser 2 \
+    --min-statement-spacing 1 \
+    --max-statement-spacing 2 \
+    --max-returns 6 \
+    --max-branches 12 \
+    --max-arguments 5 \
+    --max-localvars 15 \
+    --max-statements 50
