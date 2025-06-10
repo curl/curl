@@ -144,6 +144,7 @@ int tool_readbusy_cb(void *clientp,
 {
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
+  static curl_off_t ulprev;
 
   (void)dltotal;  /* unused */
   (void)dlnow;  /* unused */
@@ -151,33 +152,35 @@ int tool_readbusy_cb(void *clientp,
   (void)ulnow;  /* unused */
 
   if(config->readbusy) {
-    /* lame code to keep the rate down because the input might not deliver
-       anything, get paused again and come back here immediately */
-    static timediff_t rate = 500;
-    static struct curltime prev;
-    static curl_off_t ulprev;
-
     if(ulprev == ulnow) {
-      /* it did not upload anything since last call */
-      struct curltime now = curlx_now();
-      if(prev.tv_sec)
-        /* get a rolling average rate */
-        rate -= rate/4 - curlx_timediff(now, prev)/4;
-      prev = now;
+#ifndef _WIN32
+      fd_set bits;
+      struct timeval timeout;
+      /* wait this long at the most */
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 1000;
+
+      FD_ZERO(&bits);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+      FD_SET(per->infd, &bits);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
+      select(per->infd + 1, &bits, NULL, NULL, &timeout);
+#else
+      /* sleep */
+      curlx_wait_ms(1);
+#endif
     }
-    else {
-      rate = 50;
-      ulprev = ulnow;
-    }
-    if(rate >= 50) {
-      /* keeps the looping down to 20 times per second in the crazy case */
-      config->readbusy = FALSE;
-      curl_easy_pause(per->curl, CURLPAUSE_CONT);
-    }
-    else
-      /* sleep half a period */
-      curlx_wait_ms(25);
+
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
+
+  ulprev = ulnow;
 
   return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
 }
