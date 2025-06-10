@@ -701,7 +701,7 @@ struct connectdata {
   struct Curl_cfilter *cfilter[2]; /* connection filters */
   struct {
     struct curltime start[2]; /* when filter shutdown started */
-    unsigned int timeout_ms; /* 0 means no timeout */
+    timediff_t timeout_ms; /* 0 means no timeout */
   } shutdown;
 
   struct ssl_primary_config ssl_config;
@@ -1412,9 +1412,9 @@ struct UserDefined {
 #endif
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
-  long maxage_conn;     /* in seconds, max idle time to allow a connection that
+  timediff_t conn_max_idle_ms; /* max idle time to allow a connection that
                            is to be reused */
-  long maxlifetime_conn; /* in seconds, max time since creation to allow a
+  timediff_t conn_max_age_ms; /* max time since creation to allow a
                             connection that is to be reused */
 #ifndef CURL_DISABLE_TFTP
   long tftp_blksize;    /* in bytes, 0 means use default */
@@ -1460,7 +1460,7 @@ struct UserDefined {
 #endif
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
-  unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
+  timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
   unsigned char ftp_filemethod; /* how to get to a file: curl_ftpfile  */
   unsigned char ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
@@ -1504,11 +1504,11 @@ struct UserDefined {
   void *wildcardptr;
 #endif
 
-  unsigned int timeout;        /* ms, 0 means no timeout */
-  unsigned int connecttimeout; /* ms, 0 means default timeout */
-  unsigned int happy_eyeballs_timeout; /* ms, 0 is a valid value */
-  unsigned int server_response_timeout; /* ms, 0 means no timeout */
-  unsigned int shutdowntimeout; /* ms, 0 means default timeout */
+  timediff_t timeout;   /* ms, 0 means no timeout */
+  timediff_t connecttimeout; /* ms, 0 means default timeout */
+  timediff_t happy_eyeballs_timeout; /* ms, 0 is a valid value */
+  timediff_t server_response_timeout; /* ms, 0 means no timeout */
+  timediff_t shutdowntimeout; /* ms, 0 means default timeout */
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
