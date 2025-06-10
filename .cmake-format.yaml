@@ -112,7 +112,7 @@ lint:
   private_var_pattern: _[0-9a-z_]+
   # regular expression pattern describing valid names for public
   # directory variables
-  public_var_pattern: '([A-Z][0-9A-Z_]+|[A-Z][A-Za-z0-9]+_FOUND|[a-z]+_SOURCES|prefix|exec_prefix|includedir|libdir)'
+  public_var_pattern: '([A-Z][0-9A-Z_]+|[A-Z][A-Za-z0-9]+_FOUND|[a-z]+_SOURCES|prefix|exec_prefix|includedir|libdir|ssize_t|_FILE_OFFSET_BITS)'
   # regular expression pattern describing valid names for
   # function/macro arguments and loop variables.
   argument_var_pattern: '_[a-z][a-z0-9_]+'

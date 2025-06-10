@@ -798,10 +798,10 @@ ${SIZEOF_TIME_T_CODE}
 #cmakedefine CURL_WITH_MULTI_SSL 1
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#cmakedefine _FILE_OFFSET_BITS ${CURL_FILE_OFFSET_BITS}
+#cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}
 
 /* the signed version of size_t */
-#cmakedefine ssize_t ${TYPE_SSIZE_T}
+#cmakedefine ssize_t ${ssize_t}
 
 /* Define to 1 if you have the mach_absolute_time function. */
 #cmakedefine HAVE_MACH_ABSOLUTE_TIME 1
