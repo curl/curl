@@ -53,7 +53,7 @@ if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
       CURL_SUPPORTS_Largefile
       CURL_VERSION
       CURL_VERSION_STRING
-    )
+  )
     if(NOT ${result_var})
       message(FATAL_ERROR "'${result_var}' variable expected, but not set by the CURL package.")
     endif()
