@@ -60,13 +60,13 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static bool setopt_long_as_pos_timediff(long l)
+
+static CURLcode setopt_set_timout_sec(timediff_t *ptimeout_ms, long secs)
 {
-#if LONG_MAX > TIMEDIFF_T_MAX
-  return (l >= 0) && (l <= TIMEDIFF_T_MAX);
-#else
-  return (l >= 0);
-#endif
+  if((secs < 0) || (secs > (INT_MAX/1000)))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  *ptimeout_ms = (timediff_t)secs * 1000;
+  return CURLE_OK;
 }
 
 CURLcode Curl_setstropt(char **charp, const char *s)
@@ -1375,15 +1375,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.upkeep_interval_ms = arg;
     break;
   case CURLOPT_MAXAGE_CONN:
-    if(!setopt_long_as_pos_timediff(arg))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.conn_max_idle_ms = (timediff_t)arg;
-    break;
+    return setopt_set_timout_sec(&data->set.conn_max_idle_ms, arg);
   case CURLOPT_MAXLIFETIME_CONN:
-    if(!setopt_long_as_pos_timediff(arg))
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.conn_max_age_ms = (timediff_t)arg;
-    break;
+    return setopt_set_timout_sec(&data->set.conn_max_age_ms, arg);
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTS_CTRL:
     if(arg & CURLHSTS_ENABLE) {
