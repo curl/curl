@@ -341,7 +341,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
         list(APPEND _picky_tmp "-clang:${_ccopt}")
       endif()
     endforeach()
-    set("${_wlist}" ${_picky_tmp})
+    set("${_wlist}" ${_picky_tmp})  # cmake-lint: disable=C0103
   endforeach()
 endif()
 
