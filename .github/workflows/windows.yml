@@ -877,6 +877,8 @@ jobs:
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
+          echo '------------'
+          env
 
       - name: 'vcpkg build'
         if: ${{ matrix.install-vcpkg  }}
