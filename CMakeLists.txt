@@ -1725,7 +1725,7 @@ foreach(_variable IN ITEMS
     HAVE_SYS_SOCKET_H
     HAVE_SYS_TYPES_H
     HAVE_UNISTD_H
-    )
+)
   if(${_variable})
     string(APPEND CURL_TEST_DEFINES " -D${_variable}")
   endif()
@@ -1890,7 +1890,7 @@ foreach(_curl_test IN ITEMS
     HAVE_BOOL_T
     STDC_HEADERS
     HAVE_ATOMIC
-    )
+)
   curl_internal_test(${_curl_test})
 endforeach()
 
