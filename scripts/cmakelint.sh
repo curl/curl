@@ -44,5 +44,5 @@
     find . -type f | sed 's@^\./@@'
   fi
 } | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in|\.c)$' \
-  | xargs \
-  cmake-lint --suppress-decorations
+  | xargs -I {} \
+  cmake-lint --suppress-decorations {} --config-files .github/scripts/cmake-format.yaml
