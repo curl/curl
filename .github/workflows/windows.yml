@@ -840,7 +840,9 @@ jobs:
             config: >-
               -DENABLE_DEBUG=ON
               -DCURL_USE_OPENSSL=ON
-              -DOPENSSL_ROOT_DIR=/ucrt64
+              -DOPENSSL_INCLUDE_DIR=/ucrt64/include
+              -DOPENSSL_SSL_LIBRARY=/ucrt64/lib/libssl.dll.a
+              -DOPENSSL_CRYPTO_LIBRARY=/ucrt64/lib/libcrypto.dll.a
               -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
               -DBROTLI_INCLUDE_DIR=/ucrt64/include
               -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
