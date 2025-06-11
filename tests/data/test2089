@@ -26,8 +26,6 @@ MooMoo
 <features>
 SSL
 !Schannel
-!sectransp
-!bearssl
 local-http
 </features>
 <server>
