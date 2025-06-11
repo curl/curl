@@ -158,7 +158,7 @@ typedef unsigned int curl_prot_t;
 #include "request.h"
 #include "netrc.h"
 
-/* return the count of bytes sent, or -1 on error */
+/* On error return, the value of `pnwritten` has no meaning */
 typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
                              int sockindex,            /* socketindex */
                              const void *buf,          /* data to write */
@@ -166,7 +166,7 @@ typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
                              bool eos,                 /* last chunk */
                              size_t *pnwritten);       /* how much sent */
 
-/* return the count of bytes read, or -1 on error */
+/* On error return, the value of `pnread` has no meaning */
 typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
                              int sockindex,            /* socketindex */
                              char *buf,                /* store data here */
