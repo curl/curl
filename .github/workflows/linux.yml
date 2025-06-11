@@ -578,7 +578,7 @@ jobs:
           else
             mkdir bld && cd bld && \
             ${MATRIX_CONFIGURE_PREFIX} \
-            ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
           fi

@@ -100,7 +100,7 @@ jobs:
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
@@ -300,7 +300,7 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
@@ -642,7 +642,7 @@ jobs:
               -DCURL_USE_LIBPSL=OFF \
               ${options}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
@@ -748,7 +748,7 @@ jobs:
               -DCURL_USE_LIBPSL=OFF
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
               --host=arm-mingw32ce \
               --with-schannel \
               --without-libpsl \

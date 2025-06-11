@@ -128,7 +128,7 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 

@@ -471,7 +471,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
           fi
