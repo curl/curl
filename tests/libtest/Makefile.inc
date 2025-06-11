@@ -46,7 +46,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
  lib583 lib584 lib585 lib586        lib589 lib590 lib591 lib597 lib598   \
  lib599 \
- lib643        lib645 lib650 lib651 lib652 lib653 lib654 lib655 lib658   \
+ lib643               lib650 lib651 lib652 lib653 lib654 lib655 lib658   \
  lib659 lib661 lib666 lib667 lib668 \
  lib670 lib671 lib672 lib673 lib674 lib676 lib677 lib678 lib694 lib695   \
  lib696 \
@@ -289,8 +289,6 @@ lib598_SOURCES = lib598.c $(SUPPORTFILES)
 lib599_SOURCES = lib599.c $(SUPPORTFILES) $(MULTIBYTE)
 
 lib643_SOURCES = lib643.c $(SUPPORTFILES)
-
-lib645_SOURCES = lib645.c $(SUPPORTFILES)
 
 lib650_SOURCES = lib650.c $(SUPPORTFILES)
 
