@@ -66,7 +66,6 @@ else {
 
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
-/* !checksrc! disable INCLUDEDUP all */
 /* !checksrc! disable UNUSEDIGNORE all */
 
 #include "first.h"
