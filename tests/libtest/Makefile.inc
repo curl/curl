@@ -133,6 +133,7 @@ SOURCES = \
   lib694.c \
   lib695.c \
   lib751.c \
+  lib1156.c \
   lib1301.c \
   lib1308.c \
   lib1485.c \
@@ -140,7 +141,6 @@ SOURCES = \
   lib1501.c \
   lib1502.c \
   lib1506.c \
-  lib1156.c \
   lib1507.c \
   lib1508.c \
   lib1509.c \
