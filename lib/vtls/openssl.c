@@ -5667,7 +5667,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine,          /* set_engine or provider */
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
-  NULL,                     /* false_start */
 #ifndef OPENSSL_NO_SHA256
   ossl_sha256sum,           /* sha256sum */
 #else

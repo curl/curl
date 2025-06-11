@@ -2760,7 +2760,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   NULL,                              /* set_engine */
   NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
-  NULL,                              /* false_start */
   schannel_sha256sum,                /* sha256sum */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */

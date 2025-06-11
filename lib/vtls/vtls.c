@@ -876,16 +876,6 @@ bool Curl_ssl_cert_status_request(void)
   return FALSE;
 }
 
-/*
- * Check whether the SSL backend supports false start.
- */
-bool Curl_ssl_false_start(void)
-{
-  if(Curl_ssl->false_start)
-    return Curl_ssl->false_start();
-  return FALSE;
-}
-
 static int multissl_init(void)
 {
   if(multissl_setup(NULL))
@@ -966,7 +956,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* set_engine */
   NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
-  NULL,                              /* false_start */
   NULL,                              /* sha256sum */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
