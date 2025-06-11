@@ -3959,10 +3959,6 @@ case "$OPT_FISH_FPATH" in
 esac
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
-if test "$curl_cv_native_windows" != 'yes'; then
-  HAVE_SYS_SOCKET_H=1
-fi
-
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
@@ -4016,7 +4012,7 @@ dnl default includes
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -4096,14 +4092,13 @@ AC_CHECK_TYPE(sa_family_t,
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
+#else
 #include <sys/socket.h>
 #endif
     ])
   ],
 [
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 ])

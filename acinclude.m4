@@ -600,9 +600,7 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
      #ifdef HAVE_SYS_TYPES_H
      #include <sys/types.h>
      #endif
-     #ifdef HAVE_SYS_SOCKET_H
      #include <sys/socket.h>
-     #endif
      #ifdef HAVE_NETINET_IN_H
      #include <netinet/in.h>
      #endif
@@ -636,9 +634,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_SOCKET_H
       #include <sys/socket.h>
-      #endif
       #endif
     ]],[[
       recv(0, 0, 0, 0);
@@ -684,9 +680,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_SOCKET_H
       #include <sys/socket.h>
-      #endif
       #endif
     ]],[[
       char s[] = "";
@@ -728,9 +722,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         #ifdef HAVE_SYS_TYPES_H
         #include <sys/types.h>
         #endif
-        #ifdef HAVE_SYS_SOCKET_H
         #include <sys/socket.h>
-        #endif
         #endif
       ]],[[
         int flag = MSG_NOSIGNAL;
@@ -768,15 +760,13 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         #endif
         #include <winsock2.h>
         #else
+        #include <sys/socket.h>
         #include <sys/time.h>
         #endif
         #ifdef HAVE_SYS_TYPES_H
         #include <sys/types.h>
         #endif
         #include <time.h>
-        #ifdef HAVE_SYS_SOCKET_H
-        #include <sys/socket.h>
-        #endif
       ]],[[
         struct timeval ts;
         ts.tv_sec  = 0;
@@ -1045,6 +1035,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #endif
       #include <winsock2.h>
       #else
+      #include <sys/socket.h>
       #include <sys/time.h>
       #endif
       #ifdef HAVE_SYS_TYPES_H
@@ -1056,9 +1047,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #include <sys/select.h>
       #elif defined(HAVE_UNISTD_H)
       #include <unistd.h>
-      #endif
-      #ifdef HAVE_SYS_SOCKET_H
-      #include <sys/socket.h>
       #endif
       $curl_includes_bsdsocket
       #endif

@@ -37,9 +37,6 @@ curl_includes_arpa_inet="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
@@ -49,6 +46,8 @@ curl_includes_arpa_inet="\
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#else
+#include <sys/socket.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
@@ -92,7 +91,7 @@ curl_includes_ifaddrs="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -243,7 +242,7 @@ curl_includes_stropts="\
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -270,7 +269,7 @@ curl_includes_sys_socket="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 /* includes end */"
