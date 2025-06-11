@@ -77,16 +77,16 @@ my $tlist = "";
 
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/) {
-        my $name = $1;
+        my $src = $1;
         # Make common symbols unique across test sources
         foreach my $symb ("test", "unit_setup", "unit_stop") {
             print "#undef $symb\n";
-            print "#define $symb ${symb}_$name\n";
+            print "#define $symb ${symb}_$src\n";
         }
 
-        print "#include \"$src\"\n";
+        print "#include \"$src.c\"\n";
         print "\n";
-        $tlist .= "  {\"$name\", test_$name},\n";
+        $tlist .= "  {\"$src\", test_$src},\n";
     }
 }
 
