@@ -53,7 +53,6 @@ while(my $line = <$fh>) {
     chomp $line;
     if($line =~ /([a-z0-9]+)_SOURCES\ =\ ([a-z0-9]+)\.c/) {
         my $name = $1;
-        my $namu = uc($name);
         my $src = "$2.c";
 
         # Make common symbols unique across test sources
@@ -62,9 +61,7 @@ while(my $line = <$fh>) {
             print "#define $symb ${symb}_$name\n";
         }
 
-        print "#define $namu\n";
         print "#include \"$src\"\n";
-        print "#undef $namu\n";
         print "\n";
         $tlist .= "  {\"$name\", test_$name},\n";
     }
