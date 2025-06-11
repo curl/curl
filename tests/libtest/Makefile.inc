@@ -24,12 +24,11 @@
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
-WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h
+WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h ../../lib/curlx/timediff.c ../../lib/curlx/timediff.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 MEMPTR = memptr.c
 
 # these files are used in every single test program below
-TIMEDIFF = ../../lib/curlx/timediff.c ../../lib/curlx/timediff.h
 FIRSTFILES = first.c first.h
 SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h
 
