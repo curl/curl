@@ -73,24 +73,6 @@ endif
 AM_LDFLAGS =
 AM_CFLAGS =
 
-libstubgss_la_LDFLAGS_EXTRA =
-
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libstubgss_la_LDFLAGS_EXTRA += -no-undefined
-endif
-
-# Build a stub gssapi implementation for testing
-if BUILD_STUB_GSS
-noinst_LTLIBRARIES += libstubgss.la
-
-libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
-libstubgss_la_LDFLAGS = $(AM_LDFLAGS) $(libstubgss_la_LDFLAGS_EXTRA) -avoid-version -rpath /nowhere
-libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
-libstubgss_la_LIBADD =
-libstubgss_la_DEPENDENCIES =
-endif
-
 BUNDLE = libtests
 
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(SOURCES) lib1521.c
@@ -105,6 +87,18 @@ if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
 libtests_SOURCES += $(WARNLESS)
+endif
+
+# Build a stub gssapi implementation for testing
+if BUILD_STUB_GSS
+noinst_LTLIBRARIES += libstubgss.la
+
+if CURL_LT_SHLIB_USE_NO_UNDEFINED
+AM_LDFLAGS += -no-undefined
+endif
+AM_LDFLAGS += -avoid-version -rpath /nowhere
+AM_CFLAGS += -g
+libtests_SOURCES += stub_gssapi.c stub_gssapi.h
 endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
