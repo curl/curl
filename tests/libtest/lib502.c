@@ -31,7 +31,7 @@
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib502(char *URL)
 {
   CURL *c = NULL;
   CURLM *m = NULL;

@@ -23,29 +23,22 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include "vtls/hostcheck.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1397(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
+  UNITTEST_BEGIN_SIMPLE
 
 /* only these backends define the tested functions */
 #if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
-#include "vtls/hostcheck.h"
 
-UNITTEST_START
-{
   struct testcase {
     const char *host;
     const char *pattern;
     bool match;
   };
 
-  static struct testcase tests[] = {
+  static const struct testcase tests[] = {
     {"", "", FALSE},
     {"a", "", FALSE},
     {"", "b", FALSE},
@@ -114,12 +107,7 @@ UNITTEST_START
       unitfail++;
     }
   }
-}
-
-UNITTEST_STOP
-#else
-
-UNITTEST_START
-
-UNITTEST_STOP
 #endif
+
+  UNITTEST_END_SIMPLE
+}

@@ -33,7 +33,7 @@
  * Two FTP uploads, the second with no content sent.
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib541(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -49,7 +49,7 @@ CURLcode test(char *URL)
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
@@ -63,7 +63,7 @@ CURLcode test(char *URL)
   if(hd == -1) {
     /* can't open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;

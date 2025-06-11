@@ -30,11 +30,11 @@ static int new_fnmatch(void *ptr,
 {
   (void)ptr;
   curl_mfprintf(stderr, "lib574: match string '%s' against pattern '%s'\n",
-          string, pattern);
+                string, pattern);
   return CURL_FNMATCHFUNC_MATCH;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib574(char *URL)
 {
   CURLcode res;
   CURL *curl;

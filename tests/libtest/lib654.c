@@ -59,7 +59,7 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib654(char *URL)
 {
   static const char testdata[] = "dummy\n";
 
@@ -151,7 +151,7 @@ CURLcode test(char *URL)
 
   if(pooh.freecount != 2) {
     curl_mfprintf(stderr, "free_callback() called %d times instead of 2\n",
-            pooh.freecount);
+                  pooh.freecount);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }

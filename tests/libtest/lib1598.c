@@ -52,7 +52,7 @@ static int t1598_trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1598(char *URL)
 {
   static const char *post_data = "xxx=yyy&aaa=bbbbb";
 
@@ -65,7 +65,6 @@ CURLcode test(char *URL)
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
-
 
   curl = curl_easy_init();
   if(!curl) {

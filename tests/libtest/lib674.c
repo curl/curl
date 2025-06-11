@@ -31,7 +31,7 @@
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib674(char *URL)
 {
   CURL *handle = NULL;
   CURL *handle2;
@@ -52,12 +52,11 @@ CURLcode test(char *URL)
   uc = curl_url_set(urlp, CURLUPART_URL, URL, 0);
   if(uc) {
     curl_mfprintf(stderr, "problem setting CURLUPART_URL: %s.",
-            curl_url_strerror(uc));
+                  curl_url_strerror(uc));
     goto test_cleanup;
   }
 
   /* demonstrate override behavior */
-
 
   easy_setopt(handle, CURLOPT_CURLU, urlp);
   easy_setopt(handle, CURLOPT_VERBOSE, 1L);

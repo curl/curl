@@ -29,30 +29,26 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-static CURLcode unit_setup(void)
+static CURLcode t1607_setup(void)
 {
   CURLcode res = CURLE_OK;
-
   global_init(CURL_GLOBAL_ALL);
-
   return res;
 }
-/* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
-   addresses, so we have to do that as well. */
-static const char skip = 0;
+
+static CURLcode test_unit1607(char *arg)
+{
+  /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
+     addresses, so we have to do that as well. */
+  static const char skip = 0;
 #ifdef USE_IPV6
 #define IPV6ONLY(x) x
 #else
 #define IPV6ONLY(x) &skip
 #endif
 
-UNITTEST_START
-{
+  UNITTEST_BEGIN(t1607_setup())
+
   struct testcase {
     /* host:port:address[,address]... */
     const char *optval;
@@ -233,5 +229,6 @@ error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
+
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

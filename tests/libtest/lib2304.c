@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -109,9 +108,11 @@ static void t2304_websocket(CURL *curl)
   } while(i++ < 10);
   t2304_websocket_close(curl);
 }
+#endif
 
-CURLcode test(char *URL)
+static CURLcode test_lib2304(char *URL)
 {
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
 
@@ -135,8 +136,7 @@ CURLcode test(char *URL)
   }
   curl_global_cleanup();
   return res;
-}
-
 #else
-NO_SUPPORT_BUILT_IN
+  NO_SUPPORT_BUILT_IN
 #endif
+}

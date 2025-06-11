@@ -247,14 +247,7 @@ sub server_exe {
     if(!defined $ext) {
         $ext = 'SRV';
     }
-    my $cmd;
-    if($ENV{'CURL_TEST_BUNDLES'}) {
-        $cmd = $SRVDIR . "servers" . exe_ext($ext) . " $name";
-    }
-    else {
-        $cmd = $SRVDIR . $name . exe_ext($ext);
-    }
-    return exerunner() . "$cmd";
+    return exerunner() . $SRVDIR . "servers" . exe_ext($ext) . " $name";
 }
 
 
@@ -266,13 +259,7 @@ sub server_exe_args {
     if(!defined $ext) {
         $ext = 'SRV';
     }
-    my @cmd;
-    if($ENV{'CURL_TEST_BUNDLES'}) {
-        @cmd = ($SRVDIR . "servers" . exe_ext($ext), $name);
-    }
-    else {
-        @cmd = ($SRVDIR . $name . exe_ext($ext));
-    }
+    my @cmd = ($SRVDIR . "servers" . exe_ext($ext), $name);
     if($ENV{'CURL_TEST_EXE_RUNNER'}) {
         unshift @cmd, $ENV{'CURL_TEST_EXE_RUNNER'};
     }

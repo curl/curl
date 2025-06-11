@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "server_setup.h"
+#include "curl_setup.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -54,7 +54,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -385,7 +384,7 @@ static int send_response(curl_socket_t sock,
   return 0;
 }
 
-int main(int argc, char **argv)
+static int test_dnsd(int argc, char **argv)
 {
   srvr_sockaddr_union_t me;
   ssize_t n = 0;

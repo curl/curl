@@ -27,7 +27,6 @@
 #include "hash.h"
 #include <memdebug.h> /* LAST include file */
 
-static struct Curl_hash t1603_hash_static;
 static const size_t slots = 3;
 
 static void t1603_mydtor(void *p)
@@ -46,19 +45,24 @@ static void my_elem_dtor(void *key, size_t key_len, void *p)
   ++elem_dtor_calls;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1603_setup(struct Curl_hash *hash_static)
 {
-  Curl_hash_init(&t1603_hash_static, slots, Curl_hash_str,
+  Curl_hash_init(hash_static, slots, Curl_hash_str,
                  curlx_str_key_compare, t1603_mydtor);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1603_stop(struct Curl_hash *hash_static)
 {
-  Curl_hash_destroy(&t1603_hash_static);
+  Curl_hash_destroy(hash_static);
 }
 
-UNITTEST_START
+static CURLcode test_unit1603(char *arg)
+{
+  struct Curl_hash hash_static;
+
+  UNITTEST_BEGIN(t1603_setup(&hash_static))
+
   char key1[] = "key1";
   char key2[] = "key2b";
   char key3[] = "key3";
@@ -78,100 +82,100 @@ UNITTEST_START
                   "Warning: hashes are not computed as expected on this "
                   "architecture; test coverage will be less comprehensive\n");
 
-  nodep = Curl_hash_add(&t1603_hash_static, &key1, strlen(key1), &key1);
+  nodep = Curl_hash_add(&hash_static, &key1, strlen(key1), &key1);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(nodep == key1, "hash retrieval failed");
 
-  nodep = Curl_hash_add(&t1603_hash_static, &key2, strlen(key2), &key2);
+  nodep = Curl_hash_add(&hash_static, &key2, strlen(key2), &key2);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key2, strlen(key2));
+  nodep = Curl_hash_pick(&hash_static, &key2, strlen(key2));
   fail_unless(nodep == key2, "hash retrieval failed");
 
-  nodep = Curl_hash_add(&t1603_hash_static, &key3, strlen(key3), &key3);
+  nodep = Curl_hash_add(&hash_static, &key3, strlen(key3), &key3);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key3, strlen(key3));
+  nodep = Curl_hash_pick(&hash_static, &key3, strlen(key3));
   fail_unless(nodep == key3, "hash retrieval failed");
 
   /* The fourth element exceeds the number of slots & collides */
-  nodep = Curl_hash_add(&t1603_hash_static, &key4, strlen(key4), &key4);
+  nodep = Curl_hash_add(&hash_static, &key4, strlen(key4), &key4);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(nodep == key4, "hash retrieval failed");
 
   /* Make sure all elements are still accessible */
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(nodep == key1, "hash retrieval failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key2, strlen(key2));
+  nodep = Curl_hash_pick(&hash_static, &key2, strlen(key2));
   fail_unless(nodep == key2, "hash retrieval failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key3, strlen(key3));
+  nodep = Curl_hash_pick(&hash_static, &key3, strlen(key3));
   fail_unless(nodep == key3, "hash retrieval failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(nodep == key4, "hash retrieval failed");
 
   /* Delete the second of two entries in a bucket */
-  rc = Curl_hash_delete(&t1603_hash_static, &key4, strlen(key4));
+  rc = Curl_hash_delete(&hash_static, &key4, strlen(key4));
   fail_unless(rc == 0, "hash delete failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(nodep == key1, "hash retrieval failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(!nodep, "hash retrieval should have failed");
 
   /* Insert that deleted node again */
-  nodep = Curl_hash_add(&t1603_hash_static, &key4, strlen(key4), &key4);
+  nodep = Curl_hash_add(&hash_static, &key4, strlen(key4), &key4);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(nodep == key4, "hash retrieval failed");
 
   /* Delete the first of two entries in a bucket */
-  rc = Curl_hash_delete(&t1603_hash_static, &key1, strlen(key1));
+  rc = Curl_hash_delete(&hash_static, &key1, strlen(key1));
   fail_unless(rc == 0, "hash delete failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(!nodep, "hash retrieval should have failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(nodep == key4, "hash retrieval failed");
 
   /* Delete the remaining one of two entries in a bucket */
-  rc = Curl_hash_delete(&t1603_hash_static, &key4, strlen(key4));
+  rc = Curl_hash_delete(&hash_static, &key4, strlen(key4));
   fail_unless(rc == 0, "hash delete failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(!nodep, "hash retrieval should have failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key4, strlen(key4));
+  nodep = Curl_hash_pick(&hash_static, &key4, strlen(key4));
   fail_unless(!nodep, "hash retrieval should have failed");
 
   /* Delete an already deleted node */
-  rc = Curl_hash_delete(&t1603_hash_static, &key4, strlen(key4));
+  rc = Curl_hash_delete(&hash_static, &key4, strlen(key4));
   fail_unless(rc, "hash delete should have failed");
 
   /* Replace an existing node */
-  nodep = Curl_hash_add(&t1603_hash_static, &key1, strlen(key1), &notakey);
+  nodep = Curl_hash_add(&hash_static, &key1, strlen(key1), &notakey);
   fail_unless(nodep, "insertion into hash failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key1, strlen(key1));
+  nodep = Curl_hash_pick(&hash_static, &key1, strlen(key1));
   fail_unless(nodep == notakey, "hash retrieval failed");
 
   /* Make sure all remaining elements are still accessible */
-  nodep = Curl_hash_pick(&t1603_hash_static, &key2, strlen(key2));
+  nodep = Curl_hash_pick(&hash_static, &key2, strlen(key2));
   fail_unless(nodep == key2, "hash retrieval failed");
-  nodep = Curl_hash_pick(&t1603_hash_static, &key3, strlen(key3));
+  nodep = Curl_hash_pick(&hash_static, &key3, strlen(key3));
   fail_unless(nodep == key3, "hash retrieval failed");
 
   /* Add element with own destructor */
-  nodep = Curl_hash_add2(&t1603_hash_static, &key1, strlen(key1), &key1,
+  nodep = Curl_hash_add2(&hash_static, &key1, strlen(key1), &key1,
                          my_elem_dtor);
   fail_unless(nodep, "add2 insertion into hash failed");
   fail_unless(elem_dtor_calls == 0, "element destructor count should be 0");
   /* Add it again, should invoke destructor on first */
-  nodep = Curl_hash_add2(&t1603_hash_static, &key1, strlen(key1), &key1,
+  nodep = Curl_hash_add2(&hash_static, &key1, strlen(key1), &key1,
                          my_elem_dtor);
   fail_unless(nodep, "add2 again, insertion into hash failed");
   fail_unless(elem_dtor_calls == 1, "element destructor count should be 1");
   /* remove, should invoke destructor */
-  rc = Curl_hash_delete(&t1603_hash_static, &key1, strlen(key1));
+  rc = Curl_hash_delete(&hash_static, &key1, strlen(key1));
   fail_unless(rc == 0, "hash delete failed");
   fail_unless(elem_dtor_calls == 2, "element destructor count should be 1");
 
-
   /* Clean up */
-  Curl_hash_clean(&t1603_hash_static);
+  Curl_hash_clean(&hash_static);
 
-UNITTEST_STOP
+  UNITTEST_END(t1603_stop(&hash_static))
+}

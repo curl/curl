@@ -26,67 +26,64 @@
 #include "urldata.h"
 #include "url.h"
 
+#include "tool_xattr.h"
+
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode test_tool1621(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-}
+#ifdef USE_XATTR  /* Required for stripcredentials() */
 
-#ifndef USE_XATTR
-/* stripcredentials isn't available in this case */
+  struct checkthis {
+    const char *input;
+    const char *output;
+  };
 
-UNITTEST_START
-UNITTEST_STOP
-#else
+  static const struct checkthis tests[] = {
+    { "ninja://foo@example.com", "(null)" },  /* unsupported scheme */
+#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
+    { "pop3s://foo@example.com", "pop3s://example.com/" },
+#endif
+#ifndef CURL_DISABLE_LDAP
+    { "ldap://foo@example.com", "ldap://example.com/" },
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
+    { "https://foo@example.com", "https://example.com/" },
+    { "https://localhost:45", "https://localhost:45/" },
+    { "https://foo@localhost:45", "https://localhost:45/" },
+    { "https://user:pass@localhost:45", "https://localhost:45/" },
+#endif
+#ifndef CURL_DISABLE_HTTP
+    { "http://daniel:password@localhost", "http://localhost/" },
+    { "http://daniel@localhost", "http://localhost/" },
+    { "http://localhost/", "http://localhost/" },
+    { "http://odd%40host/", "(null)" },  /* bad host */
+    { "http://user@odd%40host/", "(null)" },  /* bad host */
+    { "http://host/@path/", "http://host/@path/" },
+    { "http://emptypw:@host/", "http://host/" },
+    { "http://:emptyuser@host/", "http://host/" },
+    { "http://odd%40user@host/", "http://host/" },
+    { "http://only%40one%40host/", "(null)" },  /* bad host */
+    { "http://odder%3auser@host/", "http://host/" },
+#endif
+    { NULL, NULL } /* end marker */
+  };
 
-char *stripcredentials(const char *url);
-
-struct checkthis {
-  const char *input;
-  const char *output;
-};
-
-static const struct checkthis tests[] = {
-  { "ninja://foo@example.com", "(null)" },  /* unsupported scheme */
-  { "pop3s://foo@example.com", "pop3s://example.com/" },
-  { "ldap://foo@example.com", "ldap://example.com/" },
-  { "https://foo@example.com", "https://example.com/" },
-  { "https://localhost:45", "https://localhost:45/" },
-  { "https://foo@localhost:45", "https://localhost:45/" },
-  { "http://daniel:password@localhost", "http://localhost/" },
-  { "http://daniel@localhost", "http://localhost/" },
-  { "https://user:pass@localhost:45", "https://localhost:45/" },
-  { "http://localhost/", "http://localhost/" },
-  { "http://odd%40host/", "(null)" },  /* bad host */
-  { "http://user@odd%40host/", "(null)" },  /* bad host */
-  { "http://host/@path/", "http://host/@path/" },
-  { "http://emptypw:@host/", "http://host/" },
-  { "http://:emptyuser@host/", "http://host/" },
-  { "http://odd%40user@host/", "http://host/" },
-  { "http://only%40one%40host/", "(null)" },  /* bad host */
-  { "http://odder%3auser@host/", "http://host/" },
-  { NULL, NULL } /* end marker */
-};
-
-UNITTEST_START
-{
   int i;
 
   for(i = 0; tests[i].input; i++) {
     const char *url = tests[i].input;
     char *stripped = stripcredentials(url);
-    char *strippedstr = stripped ? stripped : "(null)";
-    printf("Test %u got input \"%s\", output: \"%s\"\n",
-           i, tests[i].input, strippedstr);
+    const char *strippedstr = stripped ? stripped : "(null)";
+    printf("Test %u got input \"%s\", output: \"%s\", expected: \"%s\"\n",
+           i, tests[i].input, strippedstr, tests[i].output);
 
     fail_if(strcmp(tests[i].output, strippedstr), tests[i].output);
     curl_free(stripped);
   }
-}
-UNITTEST_STOP
 #endif
+
+  UNITTEST_END_SIMPLE
+}

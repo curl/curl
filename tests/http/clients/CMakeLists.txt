@@ -24,7 +24,7 @@
 
 add_custom_target(test-http-clients)
 
-# Get 'check_PROGRAMS' variable
+# Get check_PROGRAMS variable
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -42,7 +42,6 @@ foreach(_target IN LISTS check_PROGRAMS)
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  set_target_properties(${_target_name} PROPERTIES
-    OUTPUT_NAME "${_target}" UNITY_BUILD OFF
-    PROJECT_LABEL "Test client ${_target}")
+  set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" ROJECT_LABEL "Test client ${_target}"
+    UNITY_BUILD OFFP)
 endforeach()

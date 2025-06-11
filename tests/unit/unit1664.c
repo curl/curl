@@ -30,26 +30,21 @@
 #include <netinet/in6.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "curlx/strparse.h"
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1664_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static CURLcode test_unit1664(char *arg)
 {
-  curl_global_cleanup();
-}
+  UNITTEST_BEGIN(t1664_setup())
 
-UNITTEST_START
-{
   static const char *wordparse[] = {
     "word",
     "word ",
@@ -487,5 +482,5 @@ UNITTEST_START
     }
   }
 
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

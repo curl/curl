@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_PROTOCOL */
 
-CURLcode test(char *URL)
+static CURLcode test_lib1535(char *URL)
 {
   CURL *curl, *dupe = NULL;
   long protocol;
@@ -112,7 +112,6 @@ CURLcode test(char *URL)
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
-
 
   /* Test that a protocol is properly initialized on curl_easy_reset.
   */

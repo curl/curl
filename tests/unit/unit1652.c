@@ -32,21 +32,16 @@
  * updated to still be valid.
  */
 
-static struct Curl_easy *t1652_easy;
-
 static char input[4096];
 static char output[4096];
-
-int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
-              void *userptr);
 
 /*
  * This debugf callback is simply dumping the string into the static buffer
  * for the unit test to inspect. Since we know that we're only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
-int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
-              void *userptr)
+static int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
+                     void *userptr)
 {
   (void)handle;
   (void)type;
@@ -57,24 +52,24 @@ int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
   return 0;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1652_setup(struct Curl_easy **easy)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  t1652_easy = curl_easy_init();
-  if(!t1652_easy) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  curl_easy_setopt(t1652_easy, CURLOPT_DEBUGFUNCTION, debugf_cb);
-  curl_easy_setopt(t1652_easy, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(*easy, CURLOPT_DEBUGFUNCTION, debugf_cb);
+  curl_easy_setopt(*easy, CURLOPT_VERBOSE, 1L);
   return res;
 }
 
-static void unit_stop(void)
+static void t1652_stop(struct Curl_easy *easy)
 {
-  curl_easy_cleanup(t1652_easy);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
@@ -87,7 +82,11 @@ static int verify(const char *info, const char *two)
   return strncmp(info, two, nl - info);
 }
 
-UNITTEST_START
+static CURLcode test_unit1652(char *arg)
+{
+  struct Curl_easy *easy;
+
+  UNITTEST_BEGIN(t1652_setup(&easy))
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -100,18 +99,18 @@ UNITTEST_START
 
   /* Injecting a simple short string via a format */
   curl_msnprintf(input, sizeof(input), "Simple Test");
-  Curl_infof(t1652_easy, "%s", input);
+  Curl_infof(easy, "%s", input);
   fail_unless(verify(output, input) == 0, "Simple string test");
 
   /* Injecting a few different variables with a format */
-  Curl_infof(t1652_easy, "%s %u testing %lu", input, 42, 43L);
+  Curl_infof(easy, "%s %u testing %lu", input, 42, 43L);
   fail_unless(verify(output, "Simple Test 42 testing 43\n") == 0,
               "Format string");
 
   /* Variations of empty strings */
-  Curl_infof(t1652_easy, "");
+  Curl_infof(easy, "");
   fail_unless(strlen(output) == 1, "Empty string");
-  Curl_infof(t1652_easy, "%s", (char *)NULL);
+  Curl_infof(easy, "%s", (char *)NULL);
   fail_unless(verify(output, "(nil)") == 0, "Passing NULL as string");
 
   /* Note: libcurl's tracebuffer hold 2048 bytes, so the max strlen() we
@@ -124,7 +123,7 @@ UNITTEST_START
   /* A string just long enough to not be truncated */
   memset(input, '\0', sizeof(input));
   memset(input, 'A', 2045);
-  Curl_infof(t1652_easy, "%s", input);
+  Curl_infof(easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   /* output is input + \n */
   fail_unless(strlen(output) == 2046, "No truncation of infof input");
@@ -134,7 +133,7 @@ UNITTEST_START
 
   /* Just over the limit without newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
-  Curl_infof(t1652_easy, "%s", input);
+  Curl_infof(easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 1");
   fail_unless(output[sizeof(output) - 1] == '\0',
@@ -143,7 +142,7 @@ UNITTEST_START
   /* Just over the limit with newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   memset(input + 2045 + 4, '\n', 1);
-  Curl_infof(t1652_easy, "%s", input);
+  Curl_infof(easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 2");
   fail_unless(output[sizeof(output) - 1] == '\0',
@@ -152,7 +151,7 @@ UNITTEST_START
   /* Way over the limit for truncation via '...' */
   memset(input, '\0', sizeof(input));
   memset(input, 'A', sizeof(input) - 1);
-  Curl_infof(t1652_easy, "%s", input);
+  Curl_infof(easy, "%s", input);
   fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 3");
   fail_unless(output[sizeof(output) - 1] == '\0',
@@ -162,4 +161,5 @@ UNITTEST_START
 #pragma GCC diagnostic pop
 #endif
 
-UNITTEST_STOP
+  UNITTEST_END(t1652_stop(easy))
+}

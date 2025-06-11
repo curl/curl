@@ -41,7 +41,7 @@
 
 #include <sys/stat.h>
 
-CURLcode test(char *URL)
+static CURLcode test_lib1592(char *URL)
 {
   int stillRunning;
   CURLM *multiHandle = NULL;

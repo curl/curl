@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #include "memdebug.h"
@@ -46,7 +45,8 @@ static size_t t1945_write_cb(char *data, size_t n, size_t l, void *userp)
   (void)userp;
   return n*l;
 }
-CURLcode test(char *URL)
+
+static CURLcode test_lib1945(char *URL)
 {
   CURL *easy;
   CURLcode res = CURLE_OK;

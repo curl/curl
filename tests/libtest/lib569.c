@@ -29,7 +29,7 @@
 /*
  * Test Session ID capture
  */
-CURLcode test(char *URL)
+static CURLcode test_lib569(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -68,7 +68,7 @@ CURLcode test(char *URL)
   res = curl_easy_perform(curl);
   if(res != (int)CURLE_BAD_FUNCTION_ARGUMENT) {
     curl_mfprintf(stderr, "This should have failed. "
-            "Cannot setup without a Transport: header");
+                  "Cannot setup without a Transport: header");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }

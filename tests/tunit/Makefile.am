@@ -41,7 +41,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(top_srcdir)/tests/tunit
 
-EXTRA_DIST = CMakeLists.txt README.md
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -49,7 +52,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
-        $(top_builddir)/lib/libcurl.la      \
+        $(top_builddir)/lib/libcurl.la       \
         @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
@@ -60,21 +63,15 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-BUNDLE=tunits
+AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 if BUILD_UNITTESTS
-if USE_TEST_BUNDLES
-tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > tool_bundle.c
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_tunits_SOURCES = tool_bundle.c
-CLEANFILES = tool_bundle.c
-else
-# Makefile.inc provides neat definitions
-include Makefile.inc
-noinst_PROGRAMS = $(TOOLPROGS)
-endif
+nodist_tunits_SOURCES = $(BUNDLE_SRC)
+CLEANFILES = $(BUNDLE_SRC)
 else
 noinst_PROGRAMS =
 endif
@@ -87,7 +84,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/tool_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

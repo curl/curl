@@ -40,27 +40,21 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
 
-EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  CMakeLists.txt mk-lib1521.pl .checksrc
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, MEMPTR, CURLX_SRCS, TESTFILES variables
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(MEMPTR) $(TESTFILES) \
+  test307.pl test610.pl test613.pl test1013.pl test1022.pl mk-lib1521.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-CLEANFILES = lib1521.c
-
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-
 # Dependencies (may need to be overridden)
-LDADD = $(SUPPORTFILES_LIBS)
-
-# Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
-# LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
-include Makefile.inc
+LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
 noinst_LTLIBRARIES =
 
@@ -74,49 +68,38 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
+AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
+
 AM_LDFLAGS =
 AM_CFLAGS =
-
-libstubgss_la_LDFLAGS_EXTRA =
-
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libstubgss_la_LDFLAGS_EXTRA += -no-undefined
-endif
 
 # Build a stub gssapi implementation for testing
 if BUILD_STUB_GSS
 noinst_LTLIBRARIES += libstubgss.la
 
 libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
-libstubgss_la_LDFLAGS = $(AM_LDFLAGS) $(libstubgss_la_LDFLAGS_EXTRA) -avoid-version -rpath /nowhere
+libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
+if CURL_LT_SHLIB_USE_NO_UNDEFINED
+libstubgss_la_LDFLAGS += -no-undefined
+endif
 libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-
 libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
-
 libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
-BUNDLE=libtests
-
-if USE_TEST_BUNDLES
-libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
+bundle_EXCLUDE =
+if USE_CPPFLAG_CURL_STATICLIB
+# These are part of the libcurl static lib. Add them here when linking shared.
+bundle_EXCLUDE += $(MEMPTR) $(CURLX_SRCS)
+endif
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMPTR) $(CURLX_SRCS) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMPTR) $(CURLX_SRCS) --test $(TESTFILES) lib1521.c --exclude $(bundle_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_libtests_SOURCES = libtest_bundle.c
-libtests_SOURCES = $(TESTUTIL) $(TSTTRACE)
-libtests_LDADD = $(TESTUTIL_LIBS)
-CLEANFILES += libtest_bundle.c
-
-if USE_CPPFLAG_CURL_STATICLIB
-else
-# These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS) $(MEMPTR)
-endif
-else
-noinst_PROGRAMS = $(LIBTESTPROGS)
-endif
+nodist_libtests_SOURCES = $(BUNDLE_SRC)
+libtests_SOURCES = $(bundle_EXCLUDE)
+CLEANFILES = $(BUNDLE_SRC) lib1521.c
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h lib1521.c
@@ -129,7 +112,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc: lib1521.c
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/libtest_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

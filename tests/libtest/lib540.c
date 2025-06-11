@@ -42,10 +42,7 @@
 #define PROXYUSERPWD libtest_arg3
 #define HOST test_argv[4]
 
-#undef NUM_HANDLES
-#define NUM_HANDLES 2
-
-static CURL *testeh[NUM_HANDLES];
+static CURL *testeh[2];
 
 static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
                      struct curl_slist *headers)
@@ -166,13 +163,13 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
       if(!msg)
         break;
       if(msg->msg == CURLMSG_DONE) {
-        int i;
+        size_t i;
         CURL *e = msg->easy_handle;
         curl_mfprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
-                curl_easy_strerror(msg->data.result));
+                      curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
-        for(i = 0; i < NUM_HANDLES; i++) {
+        for(i = 0; i < CURL_ARRAYSIZE(testeh); i++) {
           if(testeh[i] == e) {
             testeh[i] = NULL;
             break;
@@ -191,15 +188,15 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
   return CURLE_OK;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib540(char *URL)
 {
   CURLM *cm = NULL;
   struct curl_slist *headers = NULL;
   char buffer[246]; /* naively fixed-size */
   CURLcode res = CURLE_OK;
-  int i;
+  size_t i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for(i = 0; i < CURL_ARRAYSIZE(testeh); i++)
     testeh[i] = NULL;
 
   start_test_timing();
@@ -241,7 +238,7 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(testeh); i++) {
     curl_multi_remove_handle(cm, testeh[i]);
     curl_easy_cleanup(testeh[i]);
   }

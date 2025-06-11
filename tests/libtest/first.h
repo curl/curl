@@ -23,17 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION 1
-#include "curl_setup.h"
-#include <curl/curl.h>
+#include "test.h"
 
-typedef CURLcode (*test_func_t)(char *);
+typedef CURLcode (*entry_func_t)(char *);
 
-#ifdef CURLTESTS_BUNDLED
-struct onetest {
+struct entry_s {
   const char *name;
-  test_func_t ptr;
+  entry_func_t ptr;
 };
-#endif
 
 #endif /* HEADER_LIBTEST_FIRST_H */

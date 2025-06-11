@@ -36,7 +36,7 @@
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
  */
-CURLcode test(char *URL)
+static CURLcode test_lib572(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -58,7 +58,6 @@ CURLcode test(char *URL)
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-
 
   test_setopt(curl, CURLOPT_HEADERDATA, stdout);
   test_setopt(curl, CURLOPT_WRITEDATA, stdout);

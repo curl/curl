@@ -27,7 +27,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1900(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd = NULL;

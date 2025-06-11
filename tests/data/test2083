@@ -21,7 +21,7 @@ ftp
 Pre-request callback for FTP
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>

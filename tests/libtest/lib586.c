@@ -119,7 +119,7 @@ static void *t586_test_fire(void *ptr)
   if(code != CURLE_OK) {
     int i = 0;
     curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
-            tdata->url, i, (int)code);
+                  tdata->url, i, (int)code);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -129,7 +129,7 @@ static void *t586_test_fire(void *ptr)
 }
 
 /* test function */
-CURLcode test(char *URL)
+static CURLcode test_lib586(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLSHcode scode = CURLSHE_OK;
@@ -237,7 +237,7 @@ test_cleanup:
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
     curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
-            (int)scode);
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

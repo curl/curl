@@ -58,7 +58,7 @@ static int resolver_alloc_cb_pass(void *resolver_state, void *reserved,
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib655(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

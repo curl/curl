@@ -21,8 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-# Shared between Makefile.am and CMakeLists.txt
+# Shared between CMakeLists.txt and Makefile.am
 
 man_MANS = \
  curl_easy_cleanup.3 \

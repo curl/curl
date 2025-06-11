@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /* sws.c: simple (silly?) web server
 
@@ -53,7 +53,6 @@
 #include "getpart.h"
 #include "inet_pton.h"
 #include "util.h"
-#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -1989,7 +1988,7 @@ static int service_connection(curl_socket_t msgsock,
   return -1;
 }
 
-int main(int argc, char *argv[])
+static int test_sws(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

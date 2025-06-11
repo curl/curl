@@ -28,7 +28,7 @@
 /*
  * Test a simple OPTIONS request with a custom header
  */
-CURLcode test(char *URL)
+static CURLcode test_lib567(char *URL)
 {
   CURLcode res;
   CURL *curl;

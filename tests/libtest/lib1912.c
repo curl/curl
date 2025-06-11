@@ -31,7 +31,7 @@
   curl_mfprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", \
                 name, exp);
 
-CURLcode test(char *URL)
+static CURLcode test_lib1912(char *URL)
 {
 /* Only test if GCC typechecking is available */
   int error = 0;

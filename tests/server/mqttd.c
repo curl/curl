@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 #include <stdlib.h>
 #include <string.h>
 #include "util.h"
@@ -55,7 +55,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
-#include "server_sockaddr.h"
 
 #include "tool_binmode.h"
 
@@ -882,7 +881,7 @@ static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
 }
 
 
-int main(int argc, char *argv[])
+static int test_mqttd(int argc, char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;

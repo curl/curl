@@ -25,15 +25,6 @@
 
 #include "curl_fnmatch.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #ifndef CURL_DISABLE_FTP
 
 /*
@@ -72,14 +63,10 @@ static const char *ret2name(int i)
   /* not reached */
 }
 
-enum system {
-  SYSTEM_CUSTOM,
-  SYSTEM_LINUX,
-  SYSTEM_MACOS
-};
-
-UNITTEST_START
+static CURLcode test_unit1307(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   struct testcase {
     const char *pattern;
     const char *string;
@@ -278,6 +265,13 @@ UNITTEST_START
   };
 
   int i;
+
+  enum system {
+    SYSTEM_CUSTOM,
+    SYSTEM_LINUX,
+    SYSTEM_MACOS
+  };
+
   enum system machine;
 
 #ifdef HAVE_FNMATCH
@@ -311,12 +305,16 @@ UNITTEST_START
       fail("pattern mismatch");
     }
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else
 
-UNITTEST_START
-UNITTEST_STOP
+static CURLcode test_unit1307(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
 
 #endif

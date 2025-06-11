@@ -28,16 +28,11 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1620_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
-}
-
-static void unit_stop(void)
-{
-  curl_global_cleanup();
 }
 
 static void t1620_parse(
@@ -74,8 +69,10 @@ static void t1620_parse(
   free(options);
 }
 
-UNITTEST_START
+static CURLcode test_unit1620(char *arg)
 {
+  UNITTEST_BEGIN(t1620_setup())
+
   CURLcode rc;
   struct Curl_easy *empty;
   enum dupstring i;
@@ -131,5 +128,5 @@ UNITTEST_START
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

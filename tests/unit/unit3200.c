@@ -25,67 +25,59 @@
 #include "curl_get_line.h"
 #include "memdebug.h"
 
+static CURLcode test_unit3200(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
-
-/* The test XML does not supply a way to write files without newlines
- * so we write our own
- */
-
-#define C64 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-#define C256 C64 C64 C64 C64
-#define C1024 C256 C256 C256 C256
-#define C4096 C1024 C1024 C1024 C1024
-
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
-#define NUMTESTS 6
-static const char *filecontents[] = {
-  /* Both should be read */
-  "LINE1\n"
-  "LINE2 NEWLINE\n",
+  /* The test XML does not supply a way to write files without newlines
+   * so we write our own
+   */
 
-  /* Both should be read */
-  "LINE1\n"
-  "LINE2 NONEWLINE",
+#define C64 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+#define C256 C64 C64 C64 C64
+#define C1024 C256 C256 C256 C256
+#define C4096 C1024 C1024 C1024 C1024
 
-  /* Only first should be read */
-  "LINE1\n"
-  C4096,
+  static const char *filecontents[] = {
+    /* Both should be read */
+    "LINE1\n"
+    "LINE2 NEWLINE\n",
 
-  /* First line should be read */
-  "LINE1\n"
-  C4096 "SOME EXTRA TEXT",
+    /* Both should be read */
+    "LINE1\n"
+    "LINE2 NONEWLINE",
 
-  /* Only first should be read */
-  "LINE1\n"
-  C4096 "SOME EXTRA TEXT\n"
-  "LINE3\n",
+    /* Only first should be read */
+    "LINE1\n"
+    C4096,
 
-  "LINE1\x1aTEST"
-};
+    /* First line should be read */
+    "LINE1\n"
+    C4096 "SOME EXTRA TEXT",
+
+    /* Only first should be read */
+    "LINE1\n"
+    C4096 "SOME EXTRA TEXT\n"
+    "LINE3\n",
+
+    "LINE1\x1aTEST"
+  };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic warning "-Woverlength-strings"
+#pragma GCC diagnostic pop
 #endif
 
-
-UNITTEST_START
   size_t i;
   int rc = 0;
-  for(i = 0; i < NUMTESTS; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(filecontents); i++) {
     FILE *fp;
     struct dynbuf buf;
     size_t len = 4096;
@@ -170,21 +162,8 @@ UNITTEST_START
     curl_mfprintf(stderr, "OK\n");
   }
   return (CURLcode)rc;
-UNITTEST_STOP
-
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-
-#else
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-static void unit_stop(void)
-{
-}
-UNITTEST_START
-UNITTEST_STOP
 
 #endif
+
+  UNITTEST_END_SIMPLE
+}

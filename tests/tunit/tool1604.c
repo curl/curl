@@ -32,18 +32,7 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 #if defined(_WIN32) || defined(MSDOS)
-
 static char *getflagstr(int flags)
 {
   char *buf = malloc(256);
@@ -71,16 +60,21 @@ static char *getcurlcodestr(int cc)
   }
   return buf;
 }
+#endif
 
-struct data {
-  const char *input;
-  int flags;
-  const char *expected_output;
-  SANITIZEcode expected_result;
-};
+static CURLcode test_tool1604(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
-UNITTEST_START
-{ /* START sanitize_file_name */
+#if defined(_WIN32) || defined(MSDOS)
+  struct data {
+    const char *input;
+    int flags;
+    const char *expected_output;
+    SANITIZEcode expected_result;
+  };
+
+  /* START sanitize_file_name */
   struct data data[] = {
     { "", 0,
       "", SANITIZE_ERR_OK
@@ -256,13 +250,10 @@ UNITTEST_START
     free(received_ccstr);
     free(expected_ccstr);
   }
-} /* END sanitize_file_name */
-
+  /* END sanitize_file_name */
 #else
-UNITTEST_START
-{
   fprintf(stderr, "Skipped test not for this platform\n");
-}
 #endif /* _WIN32 || MSDOS */
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -77,7 +76,6 @@ static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
   return blen;
 }
 
-
 static size_t t2302_write_cb(char *buffer, size_t size, size_t nitems, void *p)
 {
   struct ws_data *ws_data = p;
@@ -92,9 +90,11 @@ static size_t t2302_write_cb(char *buffer, size_t size, size_t nitems, void *p)
     curl_mfprintf(stderr, "returns error from callback\n");
   return nitems;
 }
+#endif
 
-CURLcode test(char *URL)
+static CURLcode test_lib2302(char *URL)
 {
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct ws_data ws_data;
@@ -124,8 +124,7 @@ CURLcode test(char *URL)
   }
   curl_global_cleanup();
   return res;
-}
-
 #else
-NO_SUPPORT_BUILT_IN
+  NO_SUPPORT_BUILT_IN
 #endif
+}

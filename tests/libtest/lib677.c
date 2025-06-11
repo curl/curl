@@ -27,7 +27,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib677(char *URL)
 {
   static const char testcmd[] = "A1 IDLE\r\n";
   static char testbuf[1024];
@@ -89,7 +89,7 @@ CURLcode test(char *URL)
         }
         else if(ec) {
           curl_mfprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
@@ -110,7 +110,7 @@ CURLcode test(char *URL)
         }
         else if(ec) {
           curl_mfprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }

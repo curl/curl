@@ -85,7 +85,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
     else {
       if(memcmp(RTP_DATA, data + i, message_size - i) != 0) {
         curl_mprintf("RTP PAYLOAD END CORRUPTED (%d), [%s]\n",
-               message_size - i, data + i);
+                     message_size - i, data + i);
         /* return failure; */
       }
     }
@@ -97,7 +97,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib571(char *URL)
 {
   CURLcode res;
   CURL *curl;

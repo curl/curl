@@ -21,9 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-#include "first.h"
-
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */
 #endif
@@ -120,9 +117,10 @@ int main(int argc, char **argv)
 {
   char *URL;
   CURLcode result;
-  int basearg;
-  test_func_t test_func;
+  entry_func_t entry_func;
+  char *entry_name;
   char *env;
+  size_t tmp;
 
   CURL_SET_BINMODE(stdout);
 
@@ -137,61 +135,38 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  test_argc = argc;
-  test_argv = argv;
+  test_argc = argc - 1;
+  test_argv = argv + 1;
 
-#ifdef CURLTESTS_BUNDLED
-  {
-    char *test_name;
-
-    --test_argc;
-    ++test_argv;
-
-    basearg = 2;
-
-    if(argc < (basearg + 1)) {
-      curl_mfprintf(stderr, "Pass testname and URL as arguments please\n");
-      return 1;
-    }
-
-    test_name = argv[basearg - 1];
-    test_func = NULL;
-    {
-      size_t tmp;
-      for(tmp = 0; tmp < CURL_ARRAYSIZE(s_tests); ++tmp) {
-        if(strcmp(test_name, s_tests[tmp].name) == 0) {
-          test_func = s_tests[tmp].ptr;
-          break;
-        }
-      }
-    }
-
-    if(!test_func) {
-      curl_mfprintf(stderr, "Test '%s' not found.\n", test_name);
-      return 1;
-    }
-  }
-#else
-  basearg = 1;
-
-  if(argc < (basearg + 1)) {
-    curl_mfprintf(stderr, "Pass URL as argument please\n");
+  if(argc < 3) {
+    curl_mfprintf(stderr, "Pass testname and URL as arguments please\n");
     return 1;
   }
 
-  test_func = test;
-#endif
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+      entry_func = s_entries[tmp].ptr;
+      break;
+    }
+  }
 
-  if(argc > (basearg + 1))
-    libtest_arg2 = argv[basearg + 1];
+  if(!entry_func) {
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
+    return 1;
+  }
 
-  if(argc > (basearg + 2))
-    libtest_arg3 = argv[basearg + 2];
+  if(argc > 3)
+    libtest_arg2 = argv[3];
 
-  if(argc > (basearg + 2))
-    libtest_arg4 = argv[basearg + 3];
+  if(argc > 4)
+    libtest_arg3 = argv[4];
 
-  URL = argv[basearg]; /* provide this to the rest */
+  if(argc > 5)
+    libtest_arg4 = argv[5];
+
+  URL = argv[2]; /* provide this to the rest */
 
   env = getenv("CURL_TESTNUM");
   if(env)
@@ -201,7 +176,7 @@ int main(int argc, char **argv)
 
   curl_mfprintf(stderr, "URL: %s\n", URL);
 
-  result = test_func(URL);
+  result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32

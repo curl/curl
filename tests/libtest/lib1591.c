@@ -74,7 +74,7 @@ static int t1591_trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1591(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -85,7 +85,6 @@ CURLcode test(char *URL)
     curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
-
 
   curl = curl_easy_init();
   if(!curl) {

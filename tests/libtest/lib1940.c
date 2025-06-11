@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #include "memdebug.h"
@@ -78,7 +77,7 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
   }
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1940(char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;

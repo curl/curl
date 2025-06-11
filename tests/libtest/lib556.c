@@ -26,7 +26,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib556(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -85,7 +85,7 @@ again:
         if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
 #endif
           curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
-                  errno, strerror(errno));
+                        errno, strerror(errno));
           res = TEST_ERR_FAILURE;
           break;
         }
