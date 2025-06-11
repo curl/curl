@@ -52,11 +52,8 @@ CLEANFILES = lib1521.c
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-
 # Dependencies (may need to be overridden)
-LDADD = $(SUPPORTFILES_LIBS)
+LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
 # LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
@@ -103,7 +100,6 @@ libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) li
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c
 libtests_SOURCES = $(TESTUTIL)
-libtests_LDADD = $(TESTUTIL_LIBS)
 CLEANFILES += libtest_bundle.c
 
 if USE_CPPFLAG_CURL_STATICLIB
