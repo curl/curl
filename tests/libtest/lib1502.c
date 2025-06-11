@@ -23,7 +23,7 @@
  ***************************************************************************/
 /*
  * This source code is used for lib1502, lib1503, lib1504 and lib1505 with
- * only the 4th arg controlling the cleanup sequence.
+ * only the testnum controlling the cleanup sequence.
  *
  * Test case 1502 converted from bug report #3575448, identifying a memory
  * leak in the CURLOPT_RESOLVE handling with the multi interface.
