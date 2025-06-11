@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'INET_PTON', 'TIMEDIFF', 'THREADS', 'MEMPTR'
+# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'TIMEDIFF', 'THREADS', 'MEMPTR'
 # 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -48,7 +48,7 @@ set(libtests_SOURCES "libtest_bundle.c")
 list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
 if(LIB_SELECTED STREQUAL LIB_SHARED)
   # These are part of the libcurl static lib. Add them here when linking shared.
-  list(APPEND libtests_SOURCES ${WARNLESS} ${INET_PTON} ${TIMEDIFF} ${THREADS} ${MEMPTR})
+  list(APPEND libtests_SOURCES ${WARNLESS} ${TIMEDIFF} ${THREADS} ${MEMPTR})
 endif()
 
 foreach(_target IN LISTS LIBTESTPROGS)
@@ -60,7 +60,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM _sources ${WARNLESS} ${INET_PTON} ${TIMEDIFF} ${THREADS})
+    list(REMOVE_ITEM _sources ${WARNLESS} ${TIMEDIFF} ${THREADS})
   endif()
 
   string(TOUPPER ${_target} _upper_target)
