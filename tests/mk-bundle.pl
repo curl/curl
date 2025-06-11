@@ -26,7 +26,7 @@
 # Bundle up individual tests into a single binary. The resulting binary can run
 # individual tests by passing their name (without '.c') as the first argument.
 #
-# Usage: mk-bundle.pl [<directory>]
+# Usage: mk-bundle.pl [<directory>|<C files>]
 
 use strict;
 use warnings;
