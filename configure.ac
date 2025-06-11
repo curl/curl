@@ -3961,7 +3961,6 @@ AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
 if test "$curl_cv_native_windows" != 'yes'; then
   AC_DEFINE(HAVE_SYS_SOCKET_H, 1, [if you have <sys/socket.h>])
-  AC_DEFINE(HAVE_SYS_TIME_H, 1, [if you have <sys/time.h>])
   HAVE_SYS_SOCKET_H=1
   HAVE_SYS_TIME_H=1
 fi
