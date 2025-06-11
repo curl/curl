@@ -44,8 +44,6 @@ CURLcode test(char *URL)
   CURLM *multi = NULL;
   int still_running;
   CURLcode res = CURLE_OK;
-  int arg4 = 0;
-
   char redirect[160];
 
   /* DNS cache injection */
@@ -122,8 +120,7 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-  arg4 = libtest_arg4 ? atoi(libtest_arg4) : 0;
-  switch(arg4) {
+  switch(testnum) {
   case 1502:
   default:
     /* undocumented cleanup sequence - type UA */

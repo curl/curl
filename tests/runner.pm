@@ -756,6 +756,9 @@ sub singletest_prepare {
     # write the instructions to file
     writearray("$LOGDIR/$SERVERCMD", \@ftpservercmd);
 
+    # provide an environment variable
+    $ENV{'CURL_TESTNUM'} = $testnum;
+
     # create (possibly-empty) files before starting the test
     for my $partsuffix (('', '1', '2', '3', '4')) {
         my @inputfile=getpart("client", "file".$partsuffix);
