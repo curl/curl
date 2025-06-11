@@ -40,8 +40,8 @@
 int Curl_blockread_all(struct Curl_cfilter *cf,
                        struct Curl_easy *data,
                        char *buf,
-                       ssize_t buffersize,
-                       ssize_t *n);
+                       size_t blen,
+                       size_t *pnread);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
 /*

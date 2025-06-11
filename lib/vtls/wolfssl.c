@@ -319,7 +319,7 @@ static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten, skiplen = 0;
+  size_t nwritten, skiplen = 0;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
@@ -333,21 +333,21 @@ static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio,
     skiplen = (ssize_t)(blen - wssl->io_send_blocked_len);
     blen = wssl->io_send_blocked_len;
   }
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
+  result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
   wssl->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
-              blen, nwritten, result);
+  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %d, %zu",
+              blen, result, nwritten);
 #ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
 #endif
-  if(nwritten < 0 && CURLE_AGAIN == result) {
+  if(CURLE_AGAIN == result) {
     wolfSSL_BIO_set_retry_write(bio);
     if(wssl->shutting_down && !wssl->io_send_blocked_len)
       wssl->io_send_blocked_len = blen;
   }
   else if(!result && skiplen)
     nwritten += skiplen;
-  return (int)nwritten;
+  return result ? -1 : (int)nwritten;
 }
 
 static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
@@ -356,7 +356,7 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nread;
+  size_t nread;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
@@ -376,17 +376,17 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
     }
   }
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
+  result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
   wssl->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
+  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %d, %zu", blen, result, nread);
 #ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
 #endif
-  if(nread < 0 && CURLE_AGAIN == result)
+  if(CURLE_AGAIN == result)
     wolfSSL_BIO_set_retry_read(bio);
   else if(nread == 0)
     connssl->peer_closed = TRUE;
-  return (int)nread;
+  return result ? -1 : (int)nread;
 }
 
 static WOLFSSL_BIO_METHOD *wssl_bio_cf_method = NULL;

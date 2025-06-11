@@ -1443,29 +1443,26 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   return result;
 }
 
-static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const void *buf, size_t blen,
-                           bool eos, CURLcode *err)
+static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            const void *buf, size_t blen,
+                            bool eos, size_t *pnwritten)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
-  ssize_t nwritten = 0, early_written = 0;
+  CURLcode result = CURLE_OK;
 
   (void)eos;
-  *err = CURLE_OK;
+  *pnwritten = 0;
   CF_DATA_SAVE(save, cf, data);
 
   if(connssl->state == ssl_connection_deferred) {
     bool done = FALSE;
-    *err = ssl_cf_connect_deferred(cf, data, buf, blen, &done);
-    if(*err) {
-      nwritten = -1;
+    result = ssl_cf_connect_deferred(cf, data, buf, blen, &done);
+    if(result)
       goto out;
-    }
     else if(!done) {
-      *err = CURLE_AGAIN;
-      nwritten = -1;
+      result = CURLE_AGAIN;
       goto out;
     }
     DEBUGASSERT(connssl->state == ssl_connection_complete);
@@ -1474,12 +1471,12 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   if(connssl->earlydata_skip) {
     if(connssl->earlydata_skip >= blen) {
       connssl->earlydata_skip -= blen;
-      *err = CURLE_OK;
-      nwritten = (ssize_t)blen;
+      result = CURLE_OK;
+      *pnwritten = blen;
       goto out;
     }
     else {
-      early_written = connssl->earlydata_skip;
+      *pnwritten = connssl->earlydata_skip;
       buf = ((const char *)buf) + connssl->earlydata_skip;
       blen -= connssl->earlydata_skip;
       connssl->earlydata_skip = 0;
@@ -1487,56 +1484,56 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   }
 
   /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
-  if(blen > 0)
-    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, blen, err);
-
-  if(nwritten >= 0)
-    nwritten += early_written;
+  if(blen > 0) {
+    ssize_t nwritten;
+    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, blen, &result);
+    if(nwritten > 0)
+      *pnwritten += (size_t)nwritten;
+  }
 
 out:
   CF_DATA_RESTORE(cf, save);
-  return nwritten;
+  return result;
 }
 
-static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
-                           struct Curl_easy *data, char *buf, size_t len,
-                           CURLcode *err)
+static CURLcode ssl_cf_recv(struct Curl_cfilter *cf,
+                            struct Curl_easy *data, char *buf, size_t len,
+                            size_t *pnread)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
+  CURLcode result = CURLE_OK;
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
-  *err = CURLE_OK;
+  *pnread = 0;
   if(connssl->state == ssl_connection_deferred) {
     bool done = FALSE;
-    *err = ssl_cf_connect_deferred(cf, data, NULL, 0, &done);
-    if(*err) {
-      nread = -1;
+    result = ssl_cf_connect_deferred(cf, data, NULL, 0, &done);
+    if(result)
       goto out;
-    }
     else if(!done) {
-      *err = CURLE_AGAIN;
-      nread = -1;
+      result = CURLE_AGAIN;
       goto out;
     }
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
 
-  nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, err);
+  nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, &result);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);
+    *pnread = (size_t)nread;
   }
   else if(nread == 0) {
     /* eof */
-    *err = CURLE_OK;
+    result = CURLE_OK;
   }
 
 out:
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len,
-              nread, *err);
+  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %d, %zd", len,
+              result, *pnread);
   CF_DATA_RESTORE(cf, save);
-  return nread;
+  return result;
 }
 
 static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
