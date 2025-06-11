@@ -59,7 +59,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1518         lib1520 lib1521 lib1522 lib1523 \
  lib1525 lib1526 lib1527 lib1528 lib1529 lib1530 lib1531 lib1532 lib1533 \
  lib1534 lib1535 lib1536 lib1537 lib1538 \
- lib1540 lib1541 lib1542 lib1543         lib1545 \
+ lib1540 lib1541 lib1542                 lib1545 \
  lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
  lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 lib1571 \
                          lib1576 \
@@ -437,9 +437,6 @@ lib1541_LDADD = $(TESTUTIL_LIBS)
 
 lib1542_SOURCES = lib1542.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(WARNLESS)
 lib1542_LDADD = $(TESTUTIL_LIBS)
-
-lib1543_SOURCES = lib1518.c $(SUPPORTFILES)
-lib1543_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1543
 
 lib1545_SOURCES = lib1545.c $(SUPPORTFILES)
 

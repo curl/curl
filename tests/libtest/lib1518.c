@@ -27,8 +27,6 @@
 
 /* Test inspired by github issue 3340 */
 
-#ifndef LIB1518_C
-#define LIB1518_C
 static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
                              void *outstream)
 {
@@ -38,7 +36,6 @@ static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
   (void)outstream;
   return 0;
 }
-#endif
 
 CURLcode test(char *URL)
 {
@@ -48,18 +45,15 @@ CURLcode test(char *URL)
   long curlRedirectCount;
   char *effectiveUrl = NULL;
   char *redirectUrl = NULL;
-#ifdef LIB1543
   CURLU *urlu = NULL;
-#endif
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-#ifdef LIB1543
-  /* set CURLOPT_URLU */
-  {
+  if(testnum == 1543) {
+    /* set CURLOPT_URLU */
     CURLUcode rc = CURLUE_OK;
     urlu = curl_url();
     if(urlu)
@@ -68,14 +62,13 @@ CURLcode test(char *URL)
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_CURLU, urlu);
+    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   }
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-#else
-  test_setopt(curl, CURLOPT_URL, URL);
-  /* just to make it explicit and visible in this test: */
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
-#endif
-
+  else {
+    test_setopt(curl, CURLOPT_URL, URL);
+    /* just to make it explicit and visible in this test: */
+    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+  }
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
@@ -104,8 +97,7 @@ test_cleanup:
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-#ifdef LIB1543
-  curl_url_cleanup(urlu);
-#endif
+  if(testnum == 1543)
+    curl_url_cleanup(urlu);
   return res;
 }
