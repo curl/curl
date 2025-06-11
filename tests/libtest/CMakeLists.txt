@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'THREADS', 'MEMPTR'
+# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'MEMPTR'
 # 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -48,7 +48,7 @@ set(libtests_SOURCES "libtest_bundle.c")
 list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
 if(LIB_SELECTED STREQUAL LIB_SHARED)
   # These are part of the libcurl static lib. Add them here when linking shared.
-  list(APPEND libtests_SOURCES ${WARNLESS} ${THREADS} ${MEMPTR})
+  list(APPEND libtests_SOURCES ${WARNLESS} ${MEMPTR})
 endif()
 
 foreach(_target IN LISTS LIBTESTPROGS)
@@ -60,7 +60,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM _sources ${WARNLESS} ${THREADS})
+    list(REMOVE_ITEM _sources ${WARNLESS})
   endif()
 
   string(TOUPPER ${_target} _upper_target)
