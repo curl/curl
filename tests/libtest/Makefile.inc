@@ -40,7 +40,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526               lib530          \
  lib533               lib536 lib537 lib539 lib540 lib541 lib542 lib543   \
- lib544 lib545                                                           \
+ lib544                                                                  \
  lib547 lib548 lib549 lib552 lib553 lib554 lib555 lib556 lib557 lib558   \
  lib559 lib560 lib562 lib564        lib566 lib567 lib568 lib569 lib570   \
  lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
@@ -175,9 +175,6 @@ lib542_SOURCES = lib542.c $(SUPPORTFILES)
 lib543_SOURCES = lib543.c $(SUPPORTFILES)
 
 lib544_SOURCES = lib544.c $(SUPPORTFILES)
-
-lib545_SOURCES = lib544.c $(SUPPORTFILES)
-lib545_CPPFLAGS = $(AM_CPPFLAGS) -DLIB545
 
 lib547_SOURCES = lib547.c $(SUPPORTFILES)
 

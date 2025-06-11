@@ -55,9 +55,8 @@ CURLcode test(char *URL)
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-#ifdef LIB545
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
-#endif
+  if(testnum == 545)
+    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
 
   test_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
 
