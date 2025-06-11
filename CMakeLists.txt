@@ -2328,7 +2328,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   HAVE_LIBZ ZLIB_VERSION_MAJOR
   #   HAVE_ZSTD
   #   USE_ARES
-  #   USE_BEARSSL
   #   USE_GNUTLS
   #   USE_GSASL
   #   USE_LIBPSL
@@ -2363,7 +2362,6 @@ if(NOT CURL_DISABLE_INSTALL)
     FILES
       ${_version_config}
       ${_project_config}
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBearSSL.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBrotli.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindCares.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
