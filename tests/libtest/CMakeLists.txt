@@ -48,11 +48,10 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _sources ${WARNLESS} ${MEMPTR})
 endif()
 
-set(_target_name "${_target}")
-add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
-add_dependencies(testdeps ${_target_name})
-target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
-target_include_directories(${_target_name} PRIVATE
+add_executable(libtests EXCLUDE_FROM_ALL ${_sources})
+add_dependencies(testdeps libtests)
+target_link_libraries(libtests ${LIB_SELECTED} ${CURL_LIBS})
+target_include_directories(libtests PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
@@ -60,7 +59,7 @@ target_include_directories(${_target_name} PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
 )
-set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-set_target_properties(${_target_name} PROPERTIES
-  OUTPUT_NAME "${_target}"
-  PROJECT_LABEL "Test libtest ${_target}")
+set_property(TARGET libtests APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+set_target_properties(libtests PROPERTIES
+  OUTPUT_NAME libtests
+  PROJECT_LABEL "Test libtests")
