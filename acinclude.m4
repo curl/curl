@@ -757,7 +757,7 @@ dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -767,12 +767,11 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         #define WIN32_LEAN_AND_MEAN
         #endif
         #include <winsock2.h>
+        #else
+        #include <sys/time.h>
         #endif
         #ifdef HAVE_SYS_TYPES_H
         #include <sys/types.h>
-        #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
         #endif
         #include <time.h>
         #ifdef HAVE_SYS_SOCKET_H
@@ -804,7 +803,7 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
-  AC_CHECK_HEADERS(sys/types.h sys/time.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
 
@@ -813,7 +812,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_TIME_H
+      #ifndef _WIN32
       #include <sys/time.h>
       #endif
       #include <time.h>
@@ -839,7 +838,7 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
-  AC_CHECK_HEADERS(sys/types.h sys/time.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for raw monotonic clock_gettime])
   #
   AC_COMPILE_IFELSE([
@@ -847,7 +846,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_TIME_H
+      #ifndef _WIN32
       #include <sys/time.h>
       #endif
       #include <time.h>
@@ -893,7 +892,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
             #ifdef HAVE_SYS_TYPES_H
             #include <sys/types.h>
             #endif
-            #ifdef HAVE_SYS_TIME_H
+            #ifndef _WIN32
             #include <sys/time.h>
             #endif
             #include <time.h>
@@ -946,7 +945,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           #ifdef HAVE_SYS_TYPES_H
           #include <sys/types.h>
           #endif
-          #ifdef HAVE_SYS_TIME_H
+          #ifndef _WIN32
           #include <sys/time.h>
           #endif
           #include <time.h>
@@ -1045,12 +1044,11 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #define WIN32_LEAN_AND_MEAN
       #endif
       #include <winsock2.h>
+      #else
+      #include <sys/time.h>
       #endif
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
-      #endif
-      #ifdef HAVE_SYS_TIME_H
-      #include <sys/time.h>
       #endif
       #include <time.h>
       #ifndef _WIN32

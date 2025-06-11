@@ -329,13 +329,13 @@ curl_includes_time="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #  include <sys/time.h>
 #endif
 #include <time.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/time.h,
+    sys/types.h,
     [], [], [$curl_includes_time])
 ])
 
