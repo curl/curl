@@ -913,11 +913,11 @@ sub singletest_run {
             $CMDLINE=$LIBDIR . $tool;
         }
         elsif($tool =~ /^tool/) {
-            $tool = "tunits" . exe_ext('TOOL')
+            $tool = "tunits" . exe_ext('TOOL');
             $CMDLINE=$TUNITDIR . $tool;
         }
         elsif($tool =~ /^unit/) {
-            $tool = "units" . exe_ext('TOOL')
+            $tool = "units" . exe_ext('TOOL');
             $CMDLINE=$UNITDIR . $tool;
         }
 
