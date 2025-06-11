@@ -2875,19 +2875,20 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
   return myssh_done(data, sshc, status);
 }
 
-static ssize_t scp_send(struct Curl_easy *data, int sockindex,
-                        const void *mem, size_t len, bool eos, CURLcode *err)
+static CURLcode scp_send(struct Curl_easy *data, int sockindex,
+                         const void *mem, size_t len, bool eos,
+                         size_t *pnwritten)
 {
   int rc;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+
   (void) sockindex; /* we only support SCP on the fixed known primary socket */
   (void)eos;
+  *pnwritten = 0;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  if(!sshc)
+    return CURLE_FAILED_INIT;
 
   rc = ssh_scp_write(sshc->scp_session, mem, len);
 
@@ -2897,32 +2898,30 @@ static ssize_t scp_send(struct Curl_easy *data, int sockindex,
    * Currently rc can only be number of bytes read or SSH_ERROR. */
   myssh_block2waitfor(conn, sshc, (rc == SSH_AGAIN));
 
-  if(rc == SSH_AGAIN) {
-    *err = CURLE_AGAIN;
-    return 0;
-  }
+  if(rc == SSH_AGAIN)
+    return CURLE_AGAIN;
   else
 #endif
-  if(rc != SSH_OK) {
-    *err = CURLE_SSH;
-    return -1;
-  }
+  if(rc != SSH_OK)
+    return CURLE_SSH;
 
-  return len;
+  *pnwritten = len;
+  return CURLE_OK;
 }
 
-static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
-                        char *mem, size_t len, CURLcode *err)
+static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
+                         char *mem, size_t len, size_t *pnread)
 {
-  ssize_t nread;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+  ssize_t nread;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+  *pnread = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   /* libssh returns int */
   nread = ssh_scp_read(sshc->scp_session, mem, len);
 
@@ -2932,13 +2931,11 @@ static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
    * Currently rc can only be SSH_OK or SSH_ERROR. */
 
   myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
-  if(nread == SSH_AGAIN) {
-    *err = CURLE_AGAIN;
-    nread = -1;
-  }
+  if(nread == SSH_AGAIN)
+    return CURLE_AGAIN;
 #endif
-
-  return nread;
+  *pnread = (size_t)nread;
+  return CURLE_OK;
 }
 
 /*
@@ -3038,20 +3035,21 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 }
 
 /* return number of sent bytes */
-static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, bool eos,
-                         CURLcode *err)
+static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
+                          const void *mem, size_t len, bool eos,
+                          size_t *pnwritten)
 {
-  ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  ssize_t nwrite;
+
   (void)sockindex;
   (void)eos;
+  *pnwritten = 0;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   /* limit the writes to the maximum specified in Section 3 of
    * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
    */
@@ -3063,31 +3061,27 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
       sftp_file_set_nonblocking(sshc->sftp_file);
       if(sftp_aio_begin_write(sshc->sftp_file, mem, len,
                               &sshc->sftp_aio) == SSH_ERROR) {
-        *err = CURLE_SEND_ERROR;
-        return -1;
+        return CURLE_SEND_ERROR;
       }
       sshc->sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
       nwrite = sftp_aio_wait_write(&sshc->sftp_aio);
       myssh_block2waitfor(conn, sshc, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
-      if(nwrite == SSH_AGAIN) {
-        *err = CURLE_AGAIN;
-        return 0;
-      }
-      else if(nwrite < 0) {
-        *err = CURLE_SEND_ERROR;
-        return -1;
-      }
+      if(nwrite == SSH_AGAIN)
+        return CURLE_AGAIN;
+      else if(nwrite < 0)
+        return CURLE_SEND_ERROR;
       if(sshc->sftp_aio) {
         sftp_aio_free(sshc->sftp_aio);
         sshc->sftp_aio = NULL;
       }
       sshc->sftp_send_state = 0;
-      return nwrite;
+      *pnwritten = (size_t)nwrite;
+      return CURLE_OK;
     default:
       /* we never reach here */
-      return -1;
+      return CURLE_SEND_ERROR;
   }
 #else
   nwrite = sftp_write(sshc->sftp_file, mem, len);
@@ -3101,12 +3095,11 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
   }
   else
 #endif
-  if(nwrite < 0) {
-    *err = CURLE_SSH;
-    nwrite = -1;
-  }
+  if(nwrite < 0)
+    return CURLE_SSH;
 
-  return nwrite;
+  *pnwritten = (size_t)nwrite;
+  return CURLE_OK;
 #endif
 }
 
@@ -3114,28 +3107,26 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
  * Return number of received (decrypted) bytes
  * or <0 on error
  */
-static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
-                         char *mem, size_t len, CURLcode *err)
+static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
+                          char *mem, size_t len, size_t *pnread)
 {
-  ssize_t nread;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  ssize_t nread;
+
   (void)sockindex;
+  *pnread = 0;
 
   DEBUGASSERT(len < CURL_MAX_READ_SIZE);
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  if(!sshc)
+    return CURLE_FAILED_INIT;
 
   switch(sshc->sftp_recv_state) {
     case 0:
       sshc->sftp_file_index =
         sftp_async_read_begin(sshc->sftp_file, (uint32_t)len);
-      if(sshc->sftp_file_index < 0) {
-        *err = CURLE_RECV_ERROR;
-        return -1;
-      }
+      if(sshc->sftp_file_index < 0)
+        return CURLE_RECV_ERROR;
 
       FALLTHROUGH();
     case 1:
@@ -3145,21 +3136,18 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
       myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
 
-      if(nread == SSH_AGAIN) {
-        *err = CURLE_AGAIN;
-        return -1;
-      }
-      else if(nread < 0) {
-        *err = CURLE_RECV_ERROR;
-        return -1;
-      }
+      if(nread == SSH_AGAIN)
+        return CURLE_AGAIN;
+      else if(nread < 0)
+        return CURLE_RECV_ERROR;
 
       sshc->sftp_recv_state = 0;
-      return nread;
+      *pnread = (size_t)nread;
+      return CURLE_OK;
 
     default:
       /* we never reach here */
-      return -1;
+      return CURLE_RECV_ERROR;
   }
 }
 

@@ -159,19 +159,19 @@ typedef unsigned int curl_prot_t;
 #include "netrc.h"
 
 /* return the count of bytes sent, or -1 on error */
-typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
-                            int sockindex,            /* socketindex */
-                            const void *buf,          /* data to write */
-                            size_t len,               /* max amount to write */
-                            bool eos,                 /* last chunk */
-                            CURLcode *err);           /* error to return */
+typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
+                             int sockindex,            /* socketindex */
+                             const void *buf,          /* data to write */
+                             size_t len,               /* amount to send */
+                             bool eos,                 /* last chunk */
+                             size_t *pnwritten);       /* how much sent */
 
 /* return the count of bytes read, or -1 on error */
-typedef ssize_t (Curl_recv)(struct Curl_easy *data,   /* transfer */
-                            int sockindex,            /* socketindex */
-                            char *buf,                /* store data here */
-                            size_t len,               /* max amount to read */
-                            CURLcode *err);           /* error to return */
+typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
+                             int sockindex,            /* socketindex */
+                             char *buf,                /* store data here */
+                             size_t len,               /* max amount to read */
+                             size_t *pnread);          /* how much received */
 
 #include "mime.h"
 #include "imap.h"

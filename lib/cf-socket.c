@@ -1456,17 +1456,18 @@ static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
 
 #endif /* USE_WINSOCK */
 
-static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, bool eos,
-                              CURLcode *err)
+static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                               const void *buf, size_t len, bool eos,
+                               size_t *pnwritten)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
   ssize_t nwritten;
   size_t orig_len = len;
+  CURLcode result = CURLE_OK;
 
   (void)eos; /* unused */
-  *err = CURLE_OK;
+  *pnwritten = 0;
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;
 
@@ -1477,10 +1478,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     Curl_rand_bytes(data, FALSE, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
-      *err = CURLE_AGAIN;
-      nwritten = -1;
       cf->conn->sock[cf->sockindex] = fdsave;
-      return nwritten;
+      return CURLE_AGAIN;
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->wpartial_percent > 0 && len > 8) {
@@ -1503,7 +1502,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
     nwritten = swrite(ctx->sock, buf, len);
 
-  if(-1 == nwritten) {
+  if(nwritten < 0) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1520,36 +1519,38 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      *err = CURLE_AGAIN;
+      result = CURLE_AGAIN;
     }
     else {
       char buffer[STRERROR_LEN];
       failf(data, "Send failure: %s",
             Curl_strerror(sockerr, buffer, sizeof(buffer)));
       data->state.os_errno = sockerr;
-      *err = CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
     }
   }
+  else
+    *pnwritten = (size_t)nwritten;
 
 #if defined(USE_WINSOCK)
-  if(!*err)
+  if(!result)
     win_update_sndbuf_size(ctx);
 #endif
 
-  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
-              orig_len, (int)nwritten, *err);
+  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
+              orig_len, result, *pnwritten);
   cf->conn->sock[cf->sockindex] = fdsave;
-  return nwritten;
+  return result;
 }
 
-static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              char *buf, size_t len, CURLcode *err)
+static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                               char *buf, size_t len, size_t *pnread)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
   ssize_t nread;
 
-  *err = CURLE_OK;
-
+  *pnread = 0;
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial reads */
   if(cf->cft != &Curl_cft_udp && ctx->rblock_percent > 0) {
@@ -1557,8 +1558,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
-      *err = CURLE_AGAIN;
-      return -1;
+      return CURLE_AGAIN;
     }
   }
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
@@ -1569,10 +1569,9 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 #endif
 
-  *err = CURLE_OK;
   nread = sread(ctx->sock, buf, len);
 
-  if(-1 == nread) {
+  if(nread < 0) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1588,25 +1587,25 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
       ) {
       /* this is just a case of EWOULDBLOCK */
-      *err = CURLE_AGAIN;
+      result = CURLE_AGAIN;
     }
     else {
       char buffer[STRERROR_LEN];
-
       failf(data, "Recv failure: %s",
             Curl_strerror(sockerr, buffer, sizeof(buffer)));
       data->state.os_errno = sockerr;
-      *err = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
     }
   }
+  else
+    *pnread = (size_t)nread;
 
-  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
-              *err);
-  if(nread > 0 && !ctx->got_first_byte) {
+  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
+  if(!result && !ctx->got_first_byte) {
     ctx->first_byte_at = curlx_now();
     ctx->got_first_byte = TRUE;
   }
-  return nread;
+  return result;
 }
 
 static void cf_socket_update_data(struct Curl_cfilter *cf,

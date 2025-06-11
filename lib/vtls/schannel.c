@@ -897,7 +897,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 static CURLcode
 schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  ssize_t written = -1;
+  size_t written = 0;
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
@@ -1128,18 +1128,18 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                "sending %lu bytes.", outbuf.cbBuffer));
 
   /* send initial handshake data which is now stored in output buffer */
-  written = Curl_conn_cf_send(cf->next, data,
-                              outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
-                              &result);
+  result = Curl_conn_cf_send(cf->next, data,
+                             outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
+                             &written);
   Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
+  if((result != CURLE_OK) || (outbuf.cbBuffer != written)) {
     failf(data, "schannel: failed to send initial handshake data: "
-          "sent %zd of %lu bytes", written, outbuf.cbBuffer);
+          "sent %zu of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   DEBUGF(infof(data, "schannel: sent initial handshake data: "
-               "sent %zd bytes", written));
+               "sent %zu bytes", written));
 
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = FALSE;
@@ -1161,7 +1161,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   int i;
-  ssize_t nread = -1, written = -1;
+  size_t nread = 0, written = 0;
   unsigned char *reallocated_buffer;
   SecBuffer outbuf[3];
   SecBufferDesc outbuf_desc;
@@ -1229,12 +1229,12 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
-      nread = Curl_conn_cf_recv(cf->next, data,
-                               (char *) (backend->encdata_buffer +
-                                         backend->encdata_offset),
-                               backend->encdata_length -
-                               backend->encdata_offset,
-                               &result);
+      result = Curl_conn_cf_recv(cf->next, data,
+                                 (char *) (backend->encdata_buffer +
+                                           backend->encdata_offset),
+                                 backend->encdata_length -
+                                 backend->encdata_offset,
+                                 &nread);
       if(result == CURLE_AGAIN) {
         connssl->io_need = CURL_SSL_IO_NEED_RECV;
         DEBUGF(infof(data, "schannel: failed to receive handshake, "
@@ -1250,7 +1250,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
       backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
     }
 
     SCH_DEV(infof(data,
@@ -1317,13 +1317,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                        "sending %lu bytes.", outbuf[i].cbBuffer));
 
           /* send handshake token to server */
-          written = Curl_conn_cf_send(cf->next, data,
-                                      outbuf[i].pvBuffer, outbuf[i].cbBuffer,
-                                      FALSE, &result);
+          result = Curl_conn_cf_send(cf->next, data,
+                                     outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                     FALSE, &written);
           if((result != CURLE_OK) ||
-             (outbuf[i].cbBuffer != (size_t) written)) {
+             (outbuf[i].cbBuffer != written)) {
             failf(data, "schannel: failed to send next handshake data: "
-                  "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
+                  "sent %zu of %lu bytes", written, outbuf[i].cbBuffer);
             return CURLE_SSL_CONNECT_ERROR;
           }
         }
@@ -1800,7 +1800,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     /* send entire message or fail */
     while(len > (size_t)written) {
-      ssize_t this_write = 0;
+      size_t this_write = 0;
       int what;
       timediff_t timeout_ms = Curl_timeleft(data, NULL, FALSE);
       if(timeout_ms < 0) {
@@ -1830,9 +1830,9 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       /* socket is writable */
 
-       this_write = Curl_conn_cf_send(cf->next, data,
-                                      ptr + written, len - written,
-                                      FALSE, &result);
+       result = Curl_conn_cf_send(cf->next, data,
+                                  ptr + written, len - written,
+                                  FALSE, &this_write);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
@@ -1841,7 +1841,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         break;
       }
 
-      written += this_write;
+      written += (ssize_t)this_write;
     }
   }
   else if(sspi_status == SEC_E_INSUFFICIENT_MEMORY) {
@@ -1866,7 +1866,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
               char *buf, size_t len, CURLcode *err)
 {
   size_t size = 0;
-  ssize_t nread = -1;
+  size_t nread = 0;
   struct ssl_connect_data *connssl = cf->ctx;
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
@@ -1950,10 +1950,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                   backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
-    nread = Curl_conn_cf_recv(cf->next, data,
-                              (char *)(backend->encdata_buffer +
-                                    backend->encdata_offset),
-                              size, err);
+    *err = Curl_conn_cf_recv(cf->next, data,
+                             (char *)(backend->encdata_buffer +
+                                      backend->encdata_offset),
+                             size, &nread);
     if(*err) {
       if(*err == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
@@ -1966,10 +1966,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->recv_connection_closed = TRUE;
       DEBUGF(infof(data, "schannel: server closed the connection"));
     }
-    else if(nread > 0) {
-      backend->encdata_offset += (size_t)nread;
+    else {
+      backend->encdata_offset += nread;
       backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
     }
   }
 
@@ -2279,14 +2279,16 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
-      ssize_t written = Curl_conn_cf_send(cf->next, data,
-                                          outbuf.pvBuffer, outbuf.cbBuffer,
-                                          FALSE, &result);
+      size_t written;
+
+      result = Curl_conn_cf_send(cf->next, data,
+                                 outbuf.pvBuffer, outbuf.cbBuffer,
+                                 FALSE, &written);
       Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
-        if(written < (ssize_t)outbuf.cbBuffer) {
+        if(written < outbuf.cbBuffer) {
           failf(data, "schannel: failed to send close msg: %s"
-                " (bytes written: %zd)", curl_easy_strerror(result), written);
+                " (bytes written: %zu)", curl_easy_strerror(result), written);
           result = CURLE_SEND_ERROR;
           goto out;
         }
