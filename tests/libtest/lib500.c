@@ -82,7 +82,7 @@ CURLcode test(char *URL)
   if(libtest_arg3 && !strcmp(libtest_arg3, "activeftp"))
     test_setopt(curl, CURLOPT_FTPPORT, "-");
 
-  if(testnum == 585)
+  if(testnum == 585 || testnum == 586 || testnum == 595 || testnum == 596)
     setupcallbacks(curl);
 
   res = curl_easy_perform(curl);
