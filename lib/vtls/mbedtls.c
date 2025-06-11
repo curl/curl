@@ -1214,6 +1214,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   int nwritten;
 
   (void)data;
+  *pnwritten = 0;
   DEBUGASSERT(backend);
   /* mbedtls is picky when a mbedtls_ssl_write) was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
