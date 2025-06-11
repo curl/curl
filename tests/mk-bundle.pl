@@ -31,10 +31,38 @@
 use strict;
 use warnings;
 
-my $src_dir = @ARGV ? $ARGV[0] : ".";
+my @src;
 
-# Read list of tests
-open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
+if(scalar @ARGV <= 1) {
+    # reading Makefile.inc
+    my $src_dir = @ARGV ? $ARGV[0] : ".";
+    # Read list of tests
+    open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
+    while(my $line = <$fh>) {
+        chomp $line;
+        if($line =~ /[a-z0-9]+_SOURCES\ =\ ([a-z0-9]+\.c)/) {
+            push @src, $1;
+        }
+    }
+    close $fh;
+}
+else {
+    # receiving list of files from the command-line
+    my %exclude;
+    my $in_exclude = 0;
+    foreach my $src (@ARGV) {
+        if($in_exclude) {
+            $exclude{$src} = 1;
+        }
+        elsif($src eq "--exclude") {
+            $in_exclude = 1;
+        }
+        else {
+            push @src, $src;
+        }
+    }
+}
+
 
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
@@ -49,24 +77,20 @@ HEADER
 
 my $tlist = "";
 
-while(my $line = <$fh>) {
-    chomp $line;
-    if($line =~ /([a-z0-9]+)_SOURCES\ =/) {
+foreach my $src (@src) {
+    if($src =~ /([a-z0-9]+)\.c$/) {
         my $name = $1;
-
         # Make common symbols unique across test sources
         foreach my $symb ("test", "unit_setup", "unit_stop") {
             print "#undef $symb\n";
             print "#define $symb ${symb}_$name\n";
         }
 
-        print "#include \"$name.c\"\n";
+        print "#include \"$src\"\n";
         print "\n";
         $tlist .= "  {\"$name\", test_$name},\n";
     }
 }
-
-close $fh;
 
 print <<FOOTER
 static const struct onetest s_tests[] = {
