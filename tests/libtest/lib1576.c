@@ -74,7 +74,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1576_testdata));
 
   test_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");
-  if(testnum == 1578) {
+  if(testnum == 1578 || testnum == 1580) {
     test_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_FIRSTONLY);
   }
   else {
