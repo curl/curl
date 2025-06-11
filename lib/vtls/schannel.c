@@ -1845,12 +1845,12 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   Curl_safefree(ptr);
 
-  if(len == (size_t)written)
+  if(len == *pnwritten)
     /* Encrypted message including header, data and trailer entirely sent.
        The return value is the number of unencrypted bytes that were sent. */
-    written = outbuf[1].cbBuffer;
+    *pnwritten = outbuf[1].cbBuffer;
 
-  return written;
+  return result;
 }
 
 static CURLcode
@@ -1950,7 +1950,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(result) {
       if(result == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
-      else if(reszlt == CURLE_RECV_ERROR)
+      else if(result == CURLE_RECV_ERROR)
         infof(data, "schannel: recv returned CURLE_RECV_ERROR");
       else
         infof(data, "schannel: recv returned error %d", result);
