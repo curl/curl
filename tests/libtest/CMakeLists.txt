@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get '*_SOURCES', 'TESTUTIL', 'WARNLESS', 'FIRSTFILES' variables
+# Get 'SOURCES', 'TESTUTIL', 'WARNLESS', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -36,7 +36,7 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT "libtest_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${SOURCES} > "libtest_bundle.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"

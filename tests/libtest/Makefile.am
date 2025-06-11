@@ -55,7 +55,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 # Dependencies (may need to be overridden)
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
-# Makefile.inc provides the source defines (TESTUTIL, lib*_SOURCES)
+# Makefile.inc provides the source defines (SOURCES, TESTUTIL, WARNLESS, FIRSTFILES)
 include Makefile.inc
 
 noinst_LTLIBRARIES =
@@ -94,7 +94,7 @@ endif
 BUNDLE = libtests
 
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(SOURCES) > libtest_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c
