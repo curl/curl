@@ -30,9 +30,7 @@ CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
-#ifdef LIB696
   int transfers = 0;
-#endif
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -50,9 +48,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-#ifdef LIB696
 again:
-#endif
 
   res = curl_easy_perform(curl);
 
@@ -101,12 +97,12 @@ again:
       res = TEST_ERR_FAILURE;
   }
 
-#ifdef LIB696
-  ++transfers;
-  /* perform the transfer a second time */
-  if(!res && transfers == 1)
-    goto again;
-#endif
+  if(testnum == 696) {
+    ++transfers;
+    /* perform the transfer a second time */
+    if(!res && transfers == 1)
+      goto again;
+  }
 
 test_cleanup:
 
