@@ -79,11 +79,6 @@ extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 
 extern void wait_ms(int ms); /* wait this many milliseconds */
 
-#ifndef CURLTESTS_BUNDLED_TEST_H
-extern CURLcode test(char *URL); /* the actual test function provided by each
-                                    individual libXXX.c file */
-#endif
-
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
 extern int unitfail;
@@ -500,21 +495,10 @@ extern int unitfail;
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
 
-#ifndef CURLTESTS_BUNDLED_TEST_H
-#define NO_SUPPORT_BUILT_IN                     \
-  CURLcode test(char *URL)                      \
-  {                                             \
-    (void)URL;                                  \
-    curl_mfprintf(stderr, "Missing support\n");       \
-    return CURLE_UNSUPPORTED_PROTOCOL;          \
-  }
-#endif
-
 /* ---------------------------------------------------------------- */
 
 #endif /* HEADER_CURL_TEST_H */
 
-#ifdef CURLTESTS_BUNDLED_TEST_H
 extern CURLcode test(char *URL); /* the actual test function provided by each
                                     individual libXXX.c file */
 
@@ -526,7 +510,6 @@ extern CURLcode test(char *URL); /* the actual test function provided by each
     curl_mfprintf(stderr, "Missing support\n");       \
     return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
-#endif
 
 /* Set default that each test may override */
 #undef TEST_HANG_TIMEOUT

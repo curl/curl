@@ -29,11 +29,9 @@
 
 typedef CURLcode (*test_func_t)(char *);
 
-#ifdef CURLTESTS_BUNDLED
 struct onetest {
   const char *name;
   test_func_t ptr;
 };
-#endif
 
 #endif /* HEADER_LIBTEST_FIRST_H */

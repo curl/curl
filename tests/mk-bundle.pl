@@ -69,8 +69,6 @@ print <<HEADER
 /* !checksrc! disable INCLUDEDUP all */
 /* !checksrc! disable UNUSEDIGNORE all */
 
-#define CURLTESTS_BUNDLED
-#define CURLTESTS_BUNDLED_TEST_H
 #include "first.h"
 HEADER
     ;
@@ -95,8 +93,6 @@ foreach my $src (@src) {
 print <<FOOTER
 static const struct onetest s_tests[] = {
 $tlist};
-
-#undef CURLTESTS_BUNDLED_TEST_H
 
 #include "first.c"
 FOOTER
