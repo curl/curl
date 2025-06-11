@@ -64,10 +64,12 @@ if(NOT WIN32)
 endif()
 
 set(_source_epilogue "#undef inline")
-curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
   #ifdef _MSC_VER
   #include <winsock2.h>
+  #endif
+  #ifndef _WIN32
+  #include <sys/time.h>
   #endif
   #include <time.h>
   int main(void)
@@ -101,9 +103,11 @@ elseif(BSD OR CMAKE_SYSTEM_NAME MATCHES "BSD")
 endif()
 
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
-  set(_source_epilogue "#undef inline")
+  set(_source_epilogue "#undef inline
+    #ifndef _WIN32
+    #include <sys/time.h>
+    #endif")
   curl_add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
-  curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
   curl_add_header_include(HAVE_NETDB_H "netdb.h")
   check_c_source_compiles("${_source_epilogue}
     int main(void)
@@ -144,8 +148,8 @@ endif()
 if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
   set(_source_epilogue "#undef inline")
   curl_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
-  curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
   check_c_source_compiles("${_source_epilogue}
+    #include <sys/time.h>
     #include <time.h>
     int main(void)
     {
