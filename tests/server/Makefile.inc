@@ -64,49 +64,11 @@ FIRSTFILES = \
 INET_PTON = \
   ../../lib/curlx/inet_pton.c
 
-resolve_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  resolve.c
-resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-resolve_CFLAGS = $(AM_CFLAGS)
-
-rtspd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  rtspd.c
-rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-rtspd_CFLAGS = $(AM_CFLAGS)
-
-sockfilt_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  sockfilt.c
-sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-sockfilt_CFLAGS = $(AM_CFLAGS)
-
-socksd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  socksd.c
-socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-socksd_CFLAGS = $(AM_CFLAGS)
-
-mqttd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  mqttd.c
-mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-mqttd_CFLAGS = $(AM_CFLAGS)
-
-sws_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  sws.c
-sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-sws_CFLAGS = $(AM_CFLAGS)
-
-tftpd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  tftpd.c \
-  tftp.h
-tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-tftpd_CFLAGS = $(AM_CFLAGS)
-
-dnsd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  dnsd.c
-dnsd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-dnsd_CFLAGS = $(AM_CFLAGS)
+resolve_SOURCES = resolve.c
+rtspd_SOURCES = server_sockaddr.h rtspd.c
+sockfilt_SOURCES = server_sockaddr.h sockfilt.c
+socksd_SOURCES = server_sockaddr.h socksd.c
+mqttd_SOURCES = server_sockaddr.h mqttd.c
+sws_SOURCES = server_sockaddr.h sws.c
+tftpd_SOURCES = server_sockaddr.h tftpd.c tftp.h
+dnsd_SOURCES = dnsd.c
