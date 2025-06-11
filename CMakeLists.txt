@@ -1663,17 +1663,14 @@ if(WIN32)
     set(HAVE_IF_NAMETOINDEX 0)
   endif()
   unset(HAVE_IF_NAMETOINDEX CACHE)
-
-  set(HAVE_SYS_TIME_H ${MINGW})
 else()
   set(HAVE_SYS_SOCKET_H 1)
-  set(HAVE_SYS_TIME_H 1)
 endif()
 
 if(HAVE_SYS_SOCKET_H)
   list(APPEND CURL_INCLUDES "sys/socket.h")
 endif()
-if(HAVE_SYS_TIME_H)
+if(NOT WIN32 OR MINGW)
   list(APPEND CURL_INCLUDES "sys/time.h")
 endif()
 
