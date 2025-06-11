@@ -38,7 +38,7 @@ add_custom_command(
   OUTPUT "libtest_bundle.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${SOURCES} "lib1521.c" > "libtest_bundle.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${SOURCES} "lib1521.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
