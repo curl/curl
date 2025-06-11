@@ -21,9 +21,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# files used only in some libcurl test programs
+# common files used by test programs
 TESTUTIL = testutil.c testutil.h testtrace.c testtrace.h
-# these files are referenced from the bundle source
+# files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
 WARNLESS =                     \
