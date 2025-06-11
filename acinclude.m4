@@ -618,7 +618,7 @@ dnl Test if the socket recv() function is available,
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   #
   AC_MSG_CHECKING([for recv])
   AC_LINK_IFELSE([
@@ -664,7 +664,7 @@ dnl Test if the socket send() function is available,
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   #
   AC_MSG_CHECKING([for send])
   AC_LINK_IFELSE([
@@ -708,7 +708,7 @@ dnl -------------------------------------------------
 dnl Check for MSG_NOSIGNAL
 
 AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_CACHE_CHECK([for MSG_NOSIGNAL], [curl_cv_msg_nosignal], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -749,7 +749,7 @@ dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1023,7 +1023,7 @@ dnl Test if the socket select() function is available.
 AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/select.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/select.h)
   #
   AC_MSG_CHECKING([for select])
   AC_LINK_IFELSE([
