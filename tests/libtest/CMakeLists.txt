@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'SOURCES', 'TESTUTIL', 'WARNLESS', 'FIRSTFILES' variables
+# Get 'SOURCES', 'TESTUTIL', 'LIBCURLX', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -44,7 +44,7 @@ add_custom_command(
 
 set(_sources "libtest_bundle.c" ${TESTUTIL})
 if(LIB_SELECTED STREQUAL LIB_SHARED)
-  list(APPEND _sources ${WARNLESS})  # These are part of the libcurl static lib. Add them here when linking shared.
+  list(APPEND _sources ${LIBCURLX})  # These are part of the libcurl static lib. Add them here when linking shared.
 endif()
 
 add_executable(libtests EXCLUDE_FROM_ALL ${_sources})
