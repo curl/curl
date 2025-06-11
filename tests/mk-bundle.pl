@@ -63,11 +63,11 @@ else {
     }
 }
 
-
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
 
 #include "first.h"
+
 HEADER
     ;
 
