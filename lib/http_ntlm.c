@@ -168,7 +168,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     authp = &data->state.authhost;
   }
   ntlm = Curl_auth_ntlm_get(conn, proxy);
-  DEBUGASSERT(ntlm);
   if(!ntlm)
     return CURLE_OUT_OF_MEMORY;
   authp->done = FALSE;
