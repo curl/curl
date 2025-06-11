@@ -38,13 +38,22 @@ static size_t t554_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
     return 0;
 
   if(pooh->sizeleft) {
-    *ptr = pooh->readptr[0]; /* copy one single byte */
-    pooh->readptr++;                 /* advance pointer */
-    pooh->sizeleft--;                /* less data left */
-    return 1;                        /* we return 1 byte at a time! */
+    *ptr = pooh->readptr[0];  /* copy one single byte */
+    pooh->readptr++;          /* advance pointer */
+    pooh->sizeleft--;         /* less data left */
+    return 1;                 /* we return 1 byte at a time! */
   }
 
-  return 0;                         /* no more data left to deliver */
+  return 0;                   /* no more data left to deliver */
+}
+
+static size_t t587_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
+{
+  (void)ptr;
+  (void)size;
+  (void)nmemb;
+  (void)userp;
+  return CURL_READFUNC_ABORT;
 }
 
 static CURLcode t554_test_once(char *URL, bool oldstyle)
@@ -153,7 +162,12 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, t554_read_cb);
+  if(testnum == 587) {
+    test_setopt(curl, CURLOPT_READFUNCTION, t587_read_cb);
+  }
+  else {
+    test_setopt(curl, CURLOPT_READFUNCTION, t554_read_cb);
+  }
 
   /* send a multi-part formpost */
   test_setopt(curl, CURLOPT_HTTPPOST, formpost);

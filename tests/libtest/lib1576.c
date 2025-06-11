@@ -52,7 +52,6 @@ CURLcode test(char *URL)
   CURLcode res;
   CURL *curl;
   struct curl_slist *pHeaderList = NULL;
-  int testno = atoi(libtest_arg2);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -75,7 +74,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1576_testdata));
 
   test_setopt(curl, CURLOPT_CUSTOMREQUEST, "CURL");
-  if(testno == 1578) {
+  if(testnum == 1578 || testnum == 1580) {
     test_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_FIRSTONLY);
   }
   else {

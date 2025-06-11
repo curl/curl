@@ -68,7 +68,6 @@ static curlioerr t555_ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_OK;
 }
 
-
 CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;

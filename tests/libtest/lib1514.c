@@ -30,8 +30,6 @@
 
 #include "memdebug.h"
 
-#ifndef LIB1514_C
-#define LIB1514_C
 struct t1514_WriteThis {
   char *readptr;
   size_t sizeleft;
@@ -53,7 +51,6 @@ static size_t t1514_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
   return 0;                         /* no more data left to deliver */
 }
-#endif
 
 CURLcode test(char *URL)
 {
@@ -74,10 +71,11 @@ CURLcode test(char *URL)
   /* Purposely omit to set CURLOPT_POSTFIELDSIZE */
   easy_setopt(curl, CURLOPT_READFUNCTION, t1514_read_cb);
   easy_setopt(curl, CURLOPT_READDATA, &pooh);
-#ifdef LIB1539
-  /* speak HTTP 1.0 - no chunked! */
-  easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-#endif
+
+  if(testnum == 1539) {
+    /* speak HTTP 1.0 - no chunked! */
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+  }
 
   result = curl_easy_perform(curl);
 

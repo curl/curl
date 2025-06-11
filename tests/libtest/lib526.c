@@ -27,13 +27,13 @@
  * sharing within the multi handle all transfers are performed on the same
  * persistent connection.
  *
- * This source code is used for lib526, lib527 and lib532 with only #ifdefs
+ * This source code is used for test526, test527 and test532 with branches
  * controlling the small differences.
  *
- * - lib526 closes all easy handles after
+ * - test526 closes all easy handles after
  *   they all have transferred the file over the single connection
- * - lib527 closes each easy handle after each single transfer.
- * - lib532 uses only a single easy handle that is removed, reset and then
+ * - test527 closes each easy handle after each single transfer.
+ * - test532 uses only a single easy handle that is removed, reset and then
  *   re-added for each transfer
  *
  * Test case 526, 527 and 532 use FTP, while test 528 uses the lib526 tool but
@@ -92,16 +92,19 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
 
     if(!running) {
-#ifdef LIB527
-      /* NOTE: this code does not remove the handle from the multi handle
-         here, which would be the nice, sane and documented way of working.
-         This however tests that the API survives this abuse gracefully. */
-      curl_easy_cleanup(curl[current]);
-      curl[current] = NULL;
-#endif
+
+      if(testnum == 527) {
+        /* NOTE: this code does not remove the handle from the multi handle
+           here, which would be the nice, sane and documented way of working.
+           This however tests that the API survives this abuse gracefully. */
+        curl_easy_cleanup(curl[current]);
+        curl[current] = NULL;
+      }
+
       if(++current < NUM_HANDLES) {
         curl_mfprintf(stderr, "Advancing to URL %d\n", current);
-#ifdef LIB532
+
+        if(testnum == 532) {
         /* first remove the only handle we use */
         curl_multi_remove_handle(m, curl[0]);
 
@@ -114,9 +117,10 @@ CURLcode test(char *URL)
 
         /* re-add it */
         multi_add_handle(m, curl[0]);
-#else
-        multi_add_handle(m, curl[current]);
-#endif
+        }
+        else {
+          multi_add_handle(m, curl[current]);
+        }
       }
       else {
         break; /* done */
@@ -138,45 +142,37 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-#if defined(LIB526)
+  if(testnum == 526 || testnum == 528) {
+    /* proper cleanup sequence - type PB */
 
-  /* test 526 and 528 */
-  /* proper cleanup sequence - type PB */
-
-  for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(m, curl[i]);
-    curl_easy_cleanup(curl[i]);
+    for(i = 0; i < NUM_HANDLES; i++) {
+      curl_multi_remove_handle(m, curl[i]);
+      curl_easy_cleanup(curl[i]);
+    }
+    curl_multi_cleanup(m);
+    curl_global_cleanup();
   }
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  else if(testnum == 527) {
+    /* Upon non-failure test flow the easy's have already been cleanup'ed. In
+       case there is a failure we arrive here with easy's that have not been
+       cleanup'ed yet, in this case we have to cleanup them or otherwise these
+       will be leaked, let's use undocumented cleanup sequence - type UB */
 
-#elif defined(LIB527)
+    if(res != CURLE_OK)
+      for(i = 0; i < NUM_HANDLES; i++)
+        curl_easy_cleanup(curl[i]);
 
-  /* test 527 */
+    curl_multi_cleanup(m);
+    curl_global_cleanup();
+  }
+  else { /* testnum == 532 */
+    /* undocumented cleanup sequence - type UB */
 
-  /* Upon non-failure test flow the easy's have already been cleanup'ed. In
-     case there is a failure we arrive here with easy's that have not been
-     cleanup'ed yet, in this case we have to cleanup them or otherwise these
-     will be leaked, let's use undocumented cleanup sequence - type UB */
-
-  if(res != CURLE_OK)
     for(i = 0; i < NUM_HANDLES; i++)
       curl_easy_cleanup(curl[i]);
-
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
-
-#elif defined(LIB532)
-
-  /* test 532 */
-  /* undocumented cleanup sequence - type UB */
-
-  for(i = 0; i < NUM_HANDLES; i++)
-    curl_easy_cleanup(curl[i]);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
-
-#endif
+    curl_multi_cleanup(m);
+    curl_global_cleanup();
+  }
 
   return res;
 }

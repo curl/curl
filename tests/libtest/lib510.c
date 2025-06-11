@@ -25,9 +25,6 @@
 
 #include "memdebug.h"
 
-#ifndef LIB510_C
-#define LIB510_C
-
 struct t510_WriteThis {
   int counter;
 };
@@ -62,7 +59,6 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   }
   return 0;                         /* no more data left to deliver */
 }
-#endif
 
 CURLcode test(char *URL)
 {
@@ -113,10 +109,10 @@ CURLcode test(char *URL)
   /* enforce chunked transfer by setting the header */
   test_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
-#ifdef LIB565
-  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
-  test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
-#endif
+  if(testnum == 565) {
+    test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+    test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
+  }
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

@@ -38,9 +38,14 @@ static size_t t643_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   if(size*nmemb < 1)
     return 0;
 
-  eof = pooh->sizeleft <= 0;
-  if(!eof)
-    pooh->sizeleft--;
+  if(testnum == 643) {
+    eof = pooh->sizeleft <= 0;
+    if(!eof)
+      pooh->sizeleft--;
+  }
+  else {
+    eof = !*pooh->readptr;
+  }
 
   if(!eof) {
     *ptr = *pooh->readptr;           /* copy one single byte */
@@ -65,7 +70,8 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
   curl_off_t datasize = -1;
 
   pooh.readptr = testdata;
-  datasize = (curl_off_t)strlen(testdata);
+  if(testnum == 643)
+    datasize = (curl_off_t)strlen(testdata);
   pooh.sizeleft = datasize;
 
   curl = curl_easy_init();
@@ -118,7 +124,8 @@ static CURLcode t643_test_once(char *URL, bool oldstyle)
      a file upload but still using the callback */
 
   pooh2.readptr = testdata;
-  datasize = (curl_off_t)strlen(testdata);
+  if(testnum == 643)
+    datasize = (curl_off_t)strlen(testdata);
   pooh2.sizeleft = datasize;
 
   part = curl_mime_addpart(mime);
