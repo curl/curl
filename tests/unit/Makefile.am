@@ -61,18 +61,12 @@ endif
 BUNDLE=units
 
 if BUILD_UNITTESTS
-if USE_TEST_BUNDLES
 unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = unit_bundle.c
 CLEANFILES = unit_bundle.c
-else
-# Makefile.inc provides neat definitions
-include Makefile.inc
-noinst_PROGRAMS = $(UNITPROGS)
-endif
 else
 noinst_PROGRAMS =
 endif

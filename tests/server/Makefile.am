@@ -64,7 +64,6 @@ include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES)
 
-if USE_TEST_BUNDLES
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
 if CURLDEBUG
@@ -80,9 +79,6 @@ servers_SOURCES = $(server_EXCLUDE)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = server_bundle.c
-else
-noinst_PROGRAMS = $(SERVERPROGS)
-endif
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

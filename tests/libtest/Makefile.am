@@ -99,7 +99,6 @@ endif
 
 BUNDLE=libtests
 
-if USE_TEST_BUNDLES
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 
@@ -113,9 +112,6 @@ if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
 libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS) $(MEMPTR)
-endif
-else
-noinst_PROGRAMS = $(LIBTESTPROGS)
 endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h

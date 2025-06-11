@@ -651,29 +651,6 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
 
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
 
-dnl -----------------------
-dnl whether to bundle tests
-dnl -----------------------
-
-want_test_bundles='no'
-AC_MSG_CHECKING([whether to build tests into single-binary bundles])
-AC_ARG_ENABLE(test-bundles,
-AS_HELP_STRING([--enable-test-bundles],[Enable test bundles])
-AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
-[ case "$enableval" in
-  yes)
-    want_test_bundles='yes'
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
-  esac ],
-    AC_MSG_RESULT([no])
-)
-
-AM_CONDITIONAL([USE_TEST_BUNDLES], [test "$want_test_bundles" = 'yes'])
-
 dnl ************************************************************
 dnl switch off particular protocols
 dnl

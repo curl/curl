@@ -63,18 +63,12 @@ endif
 BUNDLE=tunits
 
 if BUILD_UNITTESTS
-if USE_TEST_BUNDLES
 tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > tool_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = tool_bundle.c
 CLEANFILES = tool_bundle.c
-else
-# Makefile.inc provides neat definitions
-include Makefile.inc
-noinst_PROGRAMS = $(TOOLPROGS)
-endif
 else
 noinst_PROGRAMS =
 endif
