@@ -202,9 +202,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    result = !ntlm ? CURLE_OUT_OF_MEMORY :
-      Curl_auth_create_ntlm_type1_message(data, userp, passwdp, service,
-                                          hostname, ntlm, &ntlmmsg);
+    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp, service,
+                                                 hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
       result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
