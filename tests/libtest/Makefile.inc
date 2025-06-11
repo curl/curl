@@ -23,10 +23,19 @@
 ###########################################################################
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h testtrace.c testtrace.h
-WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h ../../lib/curlx/timediff.c ../../lib/curlx/timediff.h ../../lib/curl_threads.c ../../lib/curl_threads.h memptr.c
-
 # these files are used in every single test program below
 FIRSTFILES = first.c first.h
+
+WARNLESS =                     \
+  ../../lib/curlx/warnless.c   \
+  ../../lib/curlx/warnless.h   \
+  ../../lib/curlx/multibyte.c  \
+  ../../lib/curlx/multibyte.h  \
+  ../../lib/curlx/timediff.c   \
+  ../../lib/curlx/timediff.h   \
+  ../../lib/curl_threads.c     \
+  ../../lib/curl_threads.h     \
+  memptr.c
 
 libntlmconnect_SOURCES = libntlmconnect.c
 libauthretry_SOURCES = libauthretry.c
