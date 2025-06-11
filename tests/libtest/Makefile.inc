@@ -38,8 +38,8 @@ LIBCURLX =                     \
   memptr.c
 
 SOURCES = \
-  libntlmconnect.c \
   libauthretry.c \
+  libntlmconnect.c \
   libprereq.c \
   lib500.c \
   lib501.c \
