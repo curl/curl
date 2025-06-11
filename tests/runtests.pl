@@ -882,7 +882,6 @@ sub checksystemfeatures {
     logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
                    $run_duphandle?"test-duphandle ":"",
                    $run_event_based?"event-based ":"",
-                   $bundle?"bundle ":"",
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
@@ -2501,15 +2500,6 @@ EOHELP
         exit;
     }
     shift @ARGV;
-}
-
-# Detect a test bundle build.
-# Do not look for 'tunits' and 'units' because not all configurations build them.
-if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
-   -e $SRVDIR . "servers" . exe_ext('SRV')) {
-    # use test bundles
-    $bundle=1;
-    $ENV{'CURL_TEST_BUNDLES'} = 1;
 }
 
 delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);

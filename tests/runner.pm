@@ -909,21 +909,15 @@ sub singletest_run {
         }
 
         if($tool =~ /^lib/) {
-            if($bundle) {
-                $tool = "libtests" . exe_ext('TOOL');
-            }
+            $tool = "libtests" . exe_ext('TOOL');
             $CMDLINE=$LIBDIR . $tool;
         }
         elsif($tool =~ /^tool/) {
-            if($bundle) {
-                $tool = "tunits" . exe_ext('TOOL')
-            }
+            $tool = "tunits" . exe_ext('TOOL')
             $CMDLINE=$TUNITDIR . $tool;
         }
         elsif($tool =~ /^unit/) {
-            if($bundle) {
-                $tool = "units" . exe_ext('TOOL')
-            }
+            $tool = "units" . exe_ext('TOOL')
             $CMDLINE=$UNITDIR . $tool;
         }
 
@@ -934,13 +928,11 @@ sub singletest_run {
 
         $CMDLINE=exerunner() . $CMDLINE;
 
-        if($bundle) {
-            if($gdbthis) {
-                $cmdargs =" $tool_name$cmdargs";
-            }
-            else {
-                $CMDLINE.=" $tool_name";
-            }
+        if($gdbthis) {
+            $cmdargs =" $tool_name$cmdargs";
+        }
+        else {
+            $CMDLINE.=" $tool_name";
         }
 
         $DBGCURL=$CMDLINE;

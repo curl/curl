@@ -71,7 +71,6 @@ BEGIN {
         %feature
         %keywords
         @protocols
-        $bundle
         $dev_null
     );
 }
@@ -141,6 +140,5 @@ our @protocols;   # array of lowercase supported protocol servers
 our %feature;     # hash of enabled features
 our %keywords;    # hash of keywords from the test spec
 our $has_shared;  # built as a shared library
-our $bundle = 0;  # use bundled server, libtest, unit binaries
 
 1;
