@@ -28,7 +28,6 @@ MEMPTR = memptr.c
 
 # these files are used in every single test program below
 FIRSTFILES = first.c first.h
-SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h
 
 # These are all libcurl test programs
 LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \

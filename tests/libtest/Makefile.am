@@ -55,8 +55,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 # Dependencies (may need to be overridden)
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
-# Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
-# LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
+# Makefile.inc provides the source defines (TESTUTIL, LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
 
 noinst_LTLIBRARIES =
