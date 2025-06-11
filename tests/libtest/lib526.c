@@ -92,7 +92,6 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
 
     if(!running) {
-
       if(testnum == 527) {
         /* NOTE: this code does not remove the handle from the multi handle
            here, which would be the nice, sane and documented way of working.
@@ -100,23 +99,21 @@ CURLcode test(char *URL)
         curl_easy_cleanup(curl[current]);
         curl[current] = NULL;
       }
-
       if(++current < NUM_HANDLES) {
         curl_mfprintf(stderr, "Advancing to URL %d\n", current);
-
         if(testnum == 532) {
-        /* first remove the only handle we use */
-        curl_multi_remove_handle(m, curl[0]);
+          /* first remove the only handle we use */
+          curl_multi_remove_handle(m, curl[0]);
 
-        /* make us reuse the same handle all the time, and try resetting
-           the handle first too */
-        curl_easy_reset(curl[0]);
-        easy_setopt(curl[0], CURLOPT_URL, URL);
-        /* go verbose */
-        easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
+          /* make us reuse the same handle all the time, and try resetting
+             the handle first too */
+          curl_easy_reset(curl[0]);
+          easy_setopt(curl[0], CURLOPT_URL, URL);
+          /* go verbose */
+          easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
 
-        /* re-add it */
-        multi_add_handle(m, curl[0]);
+          /* re-add it */
+          multi_add_handle(m, curl[0]);
         }
         else {
           multi_add_handle(m, curl[current]);
@@ -142,7 +139,7 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-  if(testnum == 526 || testnum == 528) {
+  if((testnum == 526) || (testnum == 528)) {
     /* proper cleanup sequence - type PB */
 
     for(i = 0; i < NUM_HANDLES; i++) {
@@ -164,8 +161,9 @@ test_cleanup:
 
     curl_multi_cleanup(m);
     curl_global_cleanup();
+
   }
-  else { /* testnum == 532 */
+  else if(testnum == 532) {
     /* undocumented cleanup sequence - type UB */
 
     for(i = 0; i < NUM_HANDLES; i++)

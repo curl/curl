@@ -97,7 +97,6 @@ test_cleanup:
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  if(testnum == 1543)
-    curl_url_cleanup(urlu);
+  curl_url_cleanup(urlu);
   return res;
 }
