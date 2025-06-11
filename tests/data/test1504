@@ -32,13 +32,13 @@ Funny-head: yesyes
 http
 </server>
 <tool>
-lib%TESTNUMBER
+lib1502
 </tool>
 <name>
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence UB
 </name>
 <command>
-http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
+http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP 2
 </command>
 </client>
 
