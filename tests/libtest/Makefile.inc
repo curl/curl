@@ -192,7 +192,6 @@ lib1517_SOURCES = lib1517.c
 lib1518_SOURCES = lib1518.c
 lib1520_SOURCES = lib1520.c
 nodist_lib1521_SOURCES = lib1521.c
-lib1521_CPPFLAGS = $(AM_CPPFLAGS) -I$(srcdir)
 lib1522_SOURCES = lib1522.c
 lib1523_SOURCES = lib1523.c
 lib1525_SOURCES = lib1525.c
