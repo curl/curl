@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'MEMPTR', 'FIRSTFILES' variables
+# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'WARNLESS', 'MEMPTR', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -44,7 +44,7 @@ add_custom_command(
 
 set(LIBTESTPROGS "libtests")
 set(libtests_SOURCES "libtest_bundle.c")
-list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
+list(APPEND libtests_SOURCES ${TESTUTIL})
 if(LIB_SELECTED STREQUAL LIB_SHARED)
   # These are part of the libcurl static lib. Add them here when linking shared.
   list(APPEND libtests_SOURCES ${WARNLESS} ${MEMPTR})

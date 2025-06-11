@@ -102,7 +102,7 @@ libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) li
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c
-libtests_SOURCES = $(TESTUTIL) $(TSTTRACE)
+libtests_SOURCES = $(TESTUTIL)
 libtests_LDADD = $(TESTUTIL_LIBS)
 CLEANFILES += libtest_bundle.c
 
