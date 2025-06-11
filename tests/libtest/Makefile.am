@@ -40,8 +40,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
 
+# Makefile.inc provides the source defines (SOURCES, TESTUTIL, WARNLESS, FIRSTFILES)
+include Makefile.inc
+
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  CMakeLists.txt mk-lib1521.pl .checksrc
+  CMakeLists.txt mk-lib1521.pl .checksrc $(SOURCES)
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
@@ -54,9 +57,6 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies (may need to be overridden)
 LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-
-# Makefile.inc provides the source defines (SOURCES, TESTUTIL, WARNLESS, FIRSTFILES)
-include Makefile.inc
 
 noinst_LTLIBRARIES =
 
