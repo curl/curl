@@ -2312,23 +2312,23 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
   if(backend->cred && backend->ctxt &&
      !backend->recv_sspi_close_notify && !backend->recv_connection_closed) {
     char buffer[1024];
-    ssize_t nread;
+    size_t nread;
 
-    nread = schannel_recv(cf, data, buffer, sizeof(buffer), &result);
-    if(nread > 0) {
-      /* still data coming in? */
+    result = schannel_recv(cf, data, buffer, sizeof(buffer), &nread);
+    if(result == CURLE_AGAIN) {
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    }
+    else if(result) {
+      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
+      result = CURLE_RECV_ERROR;
     }
     else if(nread == 0) {
       /* We got the close notify alert and are done. */
       backend->recv_connection_closed = TRUE;
       *done = TRUE;
     }
-    else if(nread < 0 && result == CURLE_AGAIN) {
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-    }
     else {
-      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
-      result = CURLE_RECV_ERROR;
+      /* still data coming in? */
     }
   }
 
