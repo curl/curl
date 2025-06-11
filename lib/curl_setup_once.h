@@ -96,7 +96,7 @@
 #  endif
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 
