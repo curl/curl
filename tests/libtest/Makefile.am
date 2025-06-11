@@ -90,9 +90,7 @@ noinst_LTLIBRARIES += libstubgss.la
 libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
 libstubgss_la_LDFLAGS = $(AM_LDFLAGS) $(libstubgss_la_LDFLAGS_EXTRA) -avoid-version -rpath /nowhere
 libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-
 libstubgss_la_SOURCES = stub_gssapi.c stub_gssapi.h
-
 libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
