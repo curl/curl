@@ -22,37 +22,31 @@
 #
 ###########################################################################
 
-# Get 'TOOLPROGS', '*_SOURCES', 'TOOLFILES' variables
+# Get 'SOURCES', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(
   OUTPUT "tool_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "tool_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${SOURCES} > "tool_bundle.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TOOLFILES}
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${SOURCES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
-set(TOOLPROGS "tunits")
-set(tunits_SOURCES "tool_bundle.c")
-
-foreach(_target IN LISTS TOOLPROGS)
-  set(_target_name "${_target}")
-  add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
-  add_dependencies(testdeps ${_target_name})
-  target_link_libraries(${_target_name} curltool curlu)
-  target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
-    "${PROJECT_SOURCE_DIR}/src"
-    "${PROJECT_SOURCE_DIR}/tests/libtest"
-    "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
-  )
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-  target_include_directories(${_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/tests/tunit")
-  set_target_properties(${_target_name} PROPERTIES
-    OUTPUT_NAME "${_target}"
-    PROJECT_LABEL "Test tunit ${_target}")
-endforeach()
+add_executable(tunits EXCLUDE_FROM_ALL "tool_bundle.c")
+add_dependencies(testdeps tunits)
+target_link_libraries(tunits curltool curlu)
+target_include_directories(tunits PRIVATE
+  "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
+  "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
+  "${PROJECT_SOURCE_DIR}/src"
+  "${PROJECT_SOURCE_DIR}/tests/libtest"
+  "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
+)
+set_property(TARGET tunits APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+target_include_directories(tunits PRIVATE "${PROJECT_SOURCE_DIR}/tests/tunit")
+set_target_properties(tunits PROPERTIES
+  OUTPUT_NAME "tunits"
+  PROJECT_LABEL "Test tunits")

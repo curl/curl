@@ -41,7 +41,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(top_srcdir)/tests/tunit
 
-EXTRA_DIST = CMakeLists.txt README.md
+EXTRA_DIST = CMakeLists.txt README.md $(SOURCES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -63,8 +63,8 @@ endif
 BUNDLE = tunits
 
 if BUILD_UNITTESTS
-tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > tool_bundle.c
+tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(SOURCES)
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(SOURCES) > tool_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = tool_bundle.c
