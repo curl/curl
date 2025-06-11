@@ -1663,11 +1663,9 @@ if(WIN32)
     set(HAVE_IF_NAMETOINDEX 0)
   endif()
   unset(HAVE_IF_NAMETOINDEX CACHE)
-else()
-  set(HAVE_SYS_SOCKET_H 1)
 endif()
 
-if(HAVE_SYS_SOCKET_H)
+if(NOT WIN32)
   list(APPEND CURL_INCLUDES "sys/socket.h")
 endif()
 if(NOT WIN32 OR MINGW)
@@ -1729,7 +1727,6 @@ foreach(_variable IN ITEMS
     HAVE_STDBOOL_H
     HAVE_STROPTS_H
     HAVE_SYS_IOCTL_H
-    HAVE_SYS_SOCKET_H
     HAVE_SYS_TYPES_H
     HAVE_UNISTD_H
 )
@@ -1874,7 +1871,7 @@ if(WIN32)
   list(APPEND CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   check_type_size("ADDRESS_FAMILY" SIZEOF_ADDRESS_FAMILY)
   set(HAVE_ADDRESS_FAMILY ${HAVE_SIZEOF_ADDRESS_FAMILY})
-elseif(HAVE_SYS_SOCKET_H)
+else()
   list(APPEND CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
   set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
