@@ -1106,6 +1106,8 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   const char *ptr;
   int rc;
 
+  Curl_ssl_push_certdata(data, certnum, beg, end - beg);
+
   if(!data->set.ssl.certinfo)
     if(certnum)
       return CURLE_OK;
