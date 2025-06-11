@@ -60,7 +60,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-BUNDLE=tunits
+BUNDLE = tunits
 
 if BUILD_UNITTESTS
 tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc

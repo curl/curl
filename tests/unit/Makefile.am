@@ -58,7 +58,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-BUNDLE=units
+BUNDLE = units
 
 if BUILD_UNITTESTS
 unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
