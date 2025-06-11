@@ -26,9 +26,6 @@
 
 #include "memdebug.h"
 
-#ifndef LIB1940_C
-#define LIB1940_C
-
 static size_t t1940_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* take care of the data here, ignored in this example */
@@ -80,7 +77,6 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
     }
   }
 }
-#endif
 
 CURLcode test(char *URL)
 {
@@ -88,11 +84,12 @@ CURLcode test(char *URL)
   CURLcode res = CURLE_OK;
 
   int header_request;
-#ifdef LIB1946
-  header_request = 0;
-#else
-  header_request = -1;
-#endif
+  if(testnum == 1946) {
+    header_request = 0;
+  }
+  else {
+    header_request = -1;
+  }
 
   global_init(CURL_GLOBAL_DEFAULT);
   easy_init(easy);
