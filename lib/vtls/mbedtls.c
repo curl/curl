@@ -1203,16 +1203,18 @@ out:
   return result;
 }
 
-static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                         const void *mem, size_t len,
-                         CURLcode *curlcode)
+static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          const void *mem, size_t len,
+                          size_t *pnwritten)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  int ret = -1;
+  CURLcode result = CURLE_OK;
+  int nwritten;
 
   (void)data;
+  *pnwritten = 0;
   DEBUGASSERT(backend);
   /* mbedtls is picky when a mbedtls_ssl_write) was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
@@ -1225,28 +1227,29 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = backend->send_blocked_len;
   }
 
-  ret = mbedtls_ssl_write(&backend->ssl, (const unsigned char *)mem, len);
+  nwritten = mbedtls_ssl_write(&backend->ssl, (const unsigned char *)mem, len);
 
-  if(ret < 0) {
+  if(nwritten >= 0) {
+    *pnwritten = (size_t)nwritten;
+    backend->send_blocked = FALSE;
+  }
+  else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
-                len, -ret);
-    *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_WRITE)
+                len, -nwritten);
+    result = ((nwritten == MBEDTLS_ERR_SSL_WANT_WRITE)
 #ifdef HAS_TLS13_SUPPORT
-      || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+      || (nwritten == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
 #endif
       ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
-    ret = -1;
-    if((*curlcode == CURLE_AGAIN) && !backend->send_blocked) {
+    if((result == CURLE_AGAIN) && !backend->send_blocked) {
       backend->send_blocked = TRUE;
       backend->send_blocked_len = len;
     }
   }
-  else {
-    CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d", len, ret);
-    backend->send_blocked = FALSE;
-  }
 
-  return ret;
+  CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d, %zu",
+              len, result, *pnwritten);
+  return result;
 }
 
 static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
@@ -1365,48 +1368,48 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                         char *buf, size_t buffersize,
-                         CURLcode *curlcode)
+static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t buffersize,
+                          size_t *pnread)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  int ret = -1;
+  CURLcode result = CURLE_OK;
+  int nread;
 
   (void)data;
   DEBUGASSERT(backend);
+  *pnread = 0;
 
-  ret = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf,
-                         buffersize);
-  if(ret <= 0) {
+  nread = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, buffersize);
+  if(nread > 0)
+    *pnread = (size_t)nread;
+  else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
-                buffersize, -ret);
-    switch(ret) {
+                buffersize, -nread);
+    switch(nread) {
 #ifdef HAS_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
       mbed_new_session(cf, data);
       FALLTHROUGH();
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
-      *curlcode = CURLE_AGAIN;
-      ret = -1;
+      result = CURLE_AGAIN;
       break;
     case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
-      *curlcode = CURLE_OK;
-      ret = 0;
+      result = CURLE_OK;
       break;
     default: {
       char errorbuf[128];
-      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "ssl_read returned: (-0x%04X) %s", -ret, errorbuf);
-      *curlcode = CURLE_RECV_ERROR;
-      ret = -1;
+      mbedtls_strerror(nread, errorbuf, sizeof(errorbuf));
+      failf(data, "ssl_read returned: (-0x%04X) %s", -nread, errorbuf);
+      result = CURLE_RECV_ERROR;
       break;
     }
     }
   }
-  return (ssize_t)ret;
+  return result;
 }
 
 static size_t mbedtls_version(char *buffer, size_t size)
