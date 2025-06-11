@@ -69,7 +69,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  \
  lib1900 lib1901 \
  lib1903 lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
-         lib1915 lib1916 lib1917 lib1918 lib1919 \
+         lib1915 lib1916         lib1918 lib1919 \
  lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
  lib1945 lib1946 lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
  lib1960 lib1964 \
@@ -542,9 +542,6 @@ lib1915_SOURCES = lib1915.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(WARNLESS)
 lib1915_LDADD = $(TESTUTIL_LIBS)
 
 lib1916_SOURCES = lib1916.c $(SUPPORTFILES) $(WARNLESS)
-
-lib1917_SOURCES = lib1916.c $(SUPPORTFILES) $(WARNLESS)
-lib1917_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1917
 
 lib1918_SOURCES = lib1918.c $(SUPPORTFILES) $(WARNLESS)
 
