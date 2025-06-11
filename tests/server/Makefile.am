@@ -62,7 +62,7 @@ AM_CPPFLAGS += -DWITHOUT_LIBCURL
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES) $(UTIL)
+EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl
 
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
@@ -75,7 +75,7 @@ server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(CURLX_SRC
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
-servers_SOURCES = $(server_EXCLUDE)
+servers_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(FIRSTFILES)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = server_bundle.c
