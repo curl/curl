@@ -29,53 +29,6 @@ MEMPTR = memptr.c
 # these files are used in every single test program below
 FIRSTFILES = first.c first.h
 
-# These are all libcurl test programs
-LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
- lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
- lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
- lib520 lib521 lib523 lib524 lib525 lib526               lib530          \
- lib533               lib536 lib537 lib539 lib540 lib541 lib542 lib543   \
- lib544                                                                  \
- lib547        lib549 lib552 lib553 lib554 lib555 lib556 lib557 lib558   \
- lib559 lib560 lib562 lib564        lib566 lib567 lib568 lib569 lib570   \
- lib571 lib572 lib573 lib574 lib575 lib576        lib578 lib579 lib582   \
- lib583               lib586        lib589 lib590 lib591 lib597 lib598   \
- lib599 \
- lib643               lib650 lib651 lib652 lib653 lib654 lib655 lib658   \
- lib659 lib661 lib666 lib667 lib668 \
- lib670                      lib674 lib676 lib677 lib678 lib694 lib695   \
- lib751 \
- lib1156 \
- lib1301 \
- lib1308 \
- lib1485 \
- lib1500 lib1501 lib1502                         lib1506 lib1507 lib1508 \
- lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
- lib1518         lib1520 lib1521 lib1522 lib1523 \
- lib1525 lib1526 lib1527 lib1528 lib1529 lib1530 lib1531 lib1532 lib1533 \
- lib1534 lib1535 lib1536 lib1537 lib1538 \
- lib1540 lib1541 lib1542                 lib1545 \
- lib1550 lib1551 lib1552 lib1553 lib1554 lib1555 lib1556 lib1557 \
- lib1558 lib1559 lib1560 lib1564 lib1565 lib1567 lib1568 lib1569 lib1571 \
-                         lib1576 \
- lib1591 lib1592 lib1593 lib1594         lib1597 lib1598 \
- \
- lib1662 \
- \
- lib1900 lib1901 \
- lib1903 lib1905 lib1906 lib1907 lib1908 lib1910 lib1911 lib1912 lib1913 \
-         lib1915 lib1916         lib1918 lib1919 \
- lib1933 lib1934 lib1935 lib1936 lib1937 lib1938 lib1939 lib1940 \
- lib1945         lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
- lib1960 lib1964 \
- lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 lib1977 lib1978 \
- lib2301 lib2302 lib2304 lib2306 lib2308 lib2309 \
- lib2402 lib2404 lib2405 \
- lib2502 \
- lib2700 \
- lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102 lib3103 lib3104 lib3105 lib3207 lib3208
-
 libntlmconnect_SOURCES = libntlmconnect.c
 libauthretry_SOURCES = libauthretry.c
 libprereq_SOURCES = libprereq.c
