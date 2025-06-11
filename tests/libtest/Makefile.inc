@@ -24,8 +24,7 @@
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h
 TSTTRACE = testtrace.c testtrace.h
-WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h
-MULTIBYTE = ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h
+WARNLESS = ../../lib/curlx/warnless.c ../../lib/curlx/warnless.h ../../lib/curlx/multibyte.c ../../lib/curlx/multibyte.h
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 MEMPTR = memptr.c
 
