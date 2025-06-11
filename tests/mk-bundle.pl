@@ -51,9 +51,8 @@ my $tlist = "";
 
 while(my $line = <$fh>) {
     chomp $line;
-    if($line =~ /([a-z0-9]+)_SOURCES\ =\ ([a-z0-9]+)\.c/) {
+    if($line =~ /([a-z0-9]+)_SOURCES\ =/) {
         my $name = $1;
-        my $src = "$2.c";
 
         # Make common symbols unique across test sources
         foreach my $symb ("test", "unit_setup", "unit_stop") {
@@ -61,7 +60,7 @@ while(my $line = <$fh>) {
             print "#define $symb ${symb}_$name\n";
         }
 
-        print "#include \"$src\"\n";
+        print "#include \"$name.c\"\n";
         print "\n";
         $tlist .= "  {\"$name\", test_$name},\n";
     }
