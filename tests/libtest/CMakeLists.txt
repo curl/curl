@@ -44,8 +44,7 @@ add_custom_command(
 
 set(_sources "libtest_bundle.c" ${TESTUTIL})
 if(LIB_SELECTED STREQUAL LIB_SHARED)
-  # These are part of the libcurl static lib. Add them here when linking shared.
-  list(APPEND _sources ${WARNLESS} ${MEMPTR})
+  list(APPEND _sources ${WARNLESS} ${MEMPTR})  # These are part of the libcurl static lib. Add them here when linking shared.
 endif()
 
 add_executable(libtests EXCLUDE_FROM_ALL ${_sources})
