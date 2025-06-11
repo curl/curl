@@ -178,10 +178,10 @@ struct Curl_ssl {
 
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
-  ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        char *buf, size_t len, CURLcode *code);
-  ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        const void *mem, size_t len, CURLcode *code);
+  CURLcode (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         char *buf, size_t len, size_t *pnread);
+  CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         const void *mem, size_t len, size_t *pnwritten);
 
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
