@@ -82,11 +82,8 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib3100 lib3101 lib3102 lib3103 lib3104 lib3105 lib3207 lib3208
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
-
 libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-
 lib500_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
 lib501_SOURCES = lib501.c $(SUPPORTFILES)
 lib502_SOURCES = lib502.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
