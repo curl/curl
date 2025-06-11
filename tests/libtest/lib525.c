@@ -42,12 +42,7 @@ CURLcode test(char *URL)
   start_test_timing();
 
   if(!libtest_arg2) {
-    if(testnum == 529) {
-      curl_mfprintf(stderr, "Usage: lib529 [url] [uploadfile]\n");
-    }
-    else { /* testnum == 525 */
-      curl_mfprintf(stderr, "Usage: lib525 [url] [uploadfile]\n");
-    }
+    curl_mfprintf(stderr, "Usage: test [url] [uploadfile]\n");
     return TEST_ERR_USAGE;
   }
 
