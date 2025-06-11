@@ -62,7 +62,7 @@ AM_CPPFLAGS += -DWITHOUT_LIBCURL
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES)
+EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES) $(UTIL)
 
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
