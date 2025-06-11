@@ -38,7 +38,7 @@ lib%TESTNUMBER
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence UA
 </name>
 <command>
-http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
+http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP 1502
 </command>
 </client>
 

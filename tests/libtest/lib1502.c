@@ -124,27 +124,27 @@ test_cleanup:
 
   arg4 = libtest_arg4 ? atoi(libtest_arg4) : 0;
   switch(arg4) {
-  case 0:
+  case 1502:
   default:
     /* undocumented cleanup sequence - type UA */
     curl_multi_cleanup(multi);
     curl_easy_cleanup(easy);
     curl_global_cleanup();
     break;
-  case 1:
+  case 1503:
     /* proper cleanup sequence - type PA */
     curl_multi_remove_handle(multi, easy);
     curl_multi_cleanup(multi);
     curl_easy_cleanup(easy);
     curl_global_cleanup();
     break;
-  case 2:
+  case 1504:
     /* undocumented cleanup sequence - type UB */
     curl_easy_cleanup(easy);
     curl_multi_cleanup(multi);
     curl_global_cleanup();
     break;
-  case 3:
+  case 1505:
     /* proper cleanup sequence - type PB */
     curl_multi_remove_handle(multi, easy);
     curl_easy_cleanup(easy);

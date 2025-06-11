@@ -38,7 +38,7 @@ lib1502
 HTTP multi with CURLOPT_RESOLVE, cleanup sequence PA
 </name>
 <command>
-http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP 1
+http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP 1503
 </command>
 </client>
 
