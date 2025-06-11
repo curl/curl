@@ -67,6 +67,7 @@ CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
+  int counter = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -88,7 +89,6 @@ CURLcode test(char *URL)
     test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
   }
   else {
-    int counter = 0;
     /* 547 style, which means reading the POST data from a callback */
     test_setopt(curl, CURLOPT_IOCTLFUNCTION, t547_ioctl_callback);
     test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
