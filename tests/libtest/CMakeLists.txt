@@ -48,7 +48,6 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _sources ${WARNLESS} ${MEMPTR})
 endif()
 
-string(TOUPPER ${_target} _upper_target)
 set(_target_name "${_target}")
 add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
 add_dependencies(testdeps ${_target_name})
@@ -61,7 +60,7 @@ target_include_directories(${_target_name} PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
 )
-set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "${_upper_target}")
+set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 set_target_properties(${_target_name} PROPERTIES
   OUTPUT_NAME "${_target}"
   PROJECT_LABEL "Test libtest ${_target}")
