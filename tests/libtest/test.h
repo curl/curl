@@ -71,7 +71,7 @@ extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 /* argc and argv as passed in to the main() function */
 extern int test_argc;
 extern char **test_argv;
-
+extern int testnum;
 extern struct timeval tv_test_start; /* for test timing */
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
