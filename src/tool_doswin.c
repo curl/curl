@@ -757,7 +757,9 @@ struct win_thread_data {
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
-  DWORD n, nwritten;
+  char clientIp[INET_ADDRSTRLEN];
+  DWORD n;
+  int nwritten;
   char buffer[BUFSIZ];
   BOOL r;
 
@@ -772,7 +774,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     goto ThreadCleanup;
   }
 
-  char clientIp[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
 
   closesocket(tdata->socket_l);
@@ -786,7 +787,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       sizeof(buffer), &n, NULL);
     if(r == 0)
       break;
-    if(n == -1 || n == 0)
+    if(n == 0)
       break;
     nwritten = send(socket_w, buffer, n, 0);
     if(nwritten == SOCKET_ERROR)
@@ -835,10 +836,10 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     }
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = (int)WSASocket(AF_INET, SOCK_STREAM,
+    tdata->socket_l = WSASocket(AF_INET, SOCK_STREAM,
       IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
-    if(tdata->socket_l == -1) {
+    if(tdata->socket_l == INVALID_SOCKET) {
       errorf(global, "WSASocket error: %08lx", GetLastError());
       break;
     }
