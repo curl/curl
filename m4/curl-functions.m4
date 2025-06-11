@@ -51,7 +51,7 @@ curl_includes_arpa_inet="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
+    sys/types.h netinet/in.h arpa/inet.h,
     [], [], [$curl_includes_arpa_inet])
 ])
 
@@ -102,7 +102,7 @@ curl_includes_ifaddrs="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h netinet/in.h ifaddrs.h,
+    sys/types.h netinet/in.h ifaddrs.h,
     [], [], [$curl_includes_ifaddrs])
 ])
 
@@ -253,7 +253,7 @@ curl_includes_stropts="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h unistd.h sys/socket.h sys/ioctl.h stropts.h,
+    sys/types.h unistd.h sys/ioctl.h stropts.h,
     [], [], [$curl_includes_stropts])
 ])
 
@@ -274,7 +274,7 @@ curl_includes_sys_socket="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h,
+    sys/types.h,
     [], [], [$curl_includes_sys_socket])
 ])
 
