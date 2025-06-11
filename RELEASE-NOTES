@@ -1,4 +1,4 @@
-curl and libcurl 8.14.2
+curl and libcurl 8.15.0
 
  Public curl releases:         269
  Command line options:         269
@@ -8,23 +8,38 @@ curl and libcurl 8.14.2
 
 This release includes the following changes:
 
+ o TLS: remove support for Secure Transport and BearSSL [19]
 
 This release includes the following bugfixes:
 
+ o build: assume `sys/socket.h`, `sys/time.h` on non-Windows (as in `curl/curl.h`) [21]
+ o cmake: document OpenSSL and ngtcp2 crypto lib custom variables [29]
+ o cmake: drop never propagated C macros [22]
+ o cmake: replace `cmakelint` with `cmake-lint` from `cmakelang`, fix issues [20]
  o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
  o curl.h: remove the "RESERVED" error codes [2]
  o curl_path: make SFTP handle a path like /~ properly. [11]
  o docs/examples: add ftp-delete.c [5]
  o INSTALL.md: cygwin details and add source code link [4]
+ o libssh: de-complex myssh_statemach_act() [18]
  o pingpong: on disconnect, check for unflushed pingpong state [12]
  o pytest: adapt for runs with openssl-1.1.1
  o pytest: disable test_07_37 and test_07_36 with openssl's quic [1]
+ o RELEASE-PROCEDURE.md: update docs/VERSIONS [7]
+ o schannel: drop Windows 2000 compatibility logic [26]
  o SCP/SFTP: avoid busy loop after EAGAIN [8]
  o system.h: remove some macros [6]
  o test1117: reduce write delays [9]
  o tests/servers.pm: add more ways to figure out current user [17]
+ o tests: drop mk-bundle exceptions [25]
+ o tests: fail torture if !valgrind&threaded resolver [31]
+ o tests: torture: don't duplicate valgrind command [32]
  o tool_getparam: fix --ftp-pasv [15]
  o tool_operate: fix return code when --retry is used but not triggered [13]
+ o url: fix connection lifetime checks [14]
+ o urlapi: simplify and split into sub functions [16]
+ o vauth: move auth structs to conn meta data [30]
+ o windows: reduce/stop loading DLLs at runtime [27]
 
 This release includes the following known bugs:
 
@@ -38,7 +53,6 @@ Planned upcoming removals include:
 
  o Support for the msh3 HTTP/3 backend
  o Supporting curl builds using VS2008
- o The Secure Transport and BearSSL TLS backends
  o The winbuild build system
  o Windows CE support
 
@@ -47,9 +61,10 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Carlos Henrique Lima Melara, Dan Fandrich, Daniel Stenberg, fjaell on github,
-  John Haugabook, Stefan Eissing, Viktor Szakats
-  (7 contributors)
+  Carlos Henrique Lima Melara, Christian Weisgerber, Dan Fandrich,
+  Daniel Stenberg, fjaell on github, John Haugabook, Orgad Shaneh, Ray Satiro,
+  renovate[bot], Stefan Eissing, Viktor Szakats, Yedaya Katsman
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -59,10 +74,25 @@ References to bug reports and discussions on issues:
  [4] = https://curl.se/bug/?i=17485
  [5] = https://curl.se/bug/?i=17540
  [6] = https://curl.se/bug/?i=17498
+ [7] = https://curl.se/bug/?i=17584
  [8] = https://curl.se/bug/?i=17533
  [9] = https://curl.se/bug/?i=17530
  [11] = https://curl.se/bug/?i=17534
  [12] = https://curl.se/bug/?i=17555
  [13] = https://curl.se/bug/?i=17554
+ [14] = https://curl.se/bug/?i=17571
  [15] = https://curl.se/bug/?i=17545
+ [16] = https://curl.se/bug/?i=17565
  [17] = https://curl.se/bug/?i=17544
+ [18] = https://curl.se/bug/?i=17573
+ [19] = https://curl.se/bug/?i=16677
+ [20] = https://curl.se/bug/?i=17576
+ [21] = https://curl.se/bug/?i=17522
+ [22] = https://curl.se/bug/?i=17580
+ [25] = https://curl.se/bug/?i=17468
+ [26] = https://curl.se/bug/?i=17447
+ [27] = https://curl.se/bug/?i=17413
+ [29] = https://curl.se/bug/?i=17574
+ [30] = https://curl.se/bug/?i=17557
+ [31] = https://curl.se/bug/?i=17501
+ [32] = https://curl.se/bug/?i=17501
