@@ -3914,13 +3914,6 @@ case "$OPT_FISH_FPATH" in
 esac
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
-if test "$curl_cv_native_windows" != 'yes'; then
-  AC_DEFINE(HAVE_SYS_SOCKET_H, 1, [if you have <sys/socket.h>])
-  AC_DEFINE(HAVE_SYS_TIME_H, 1, [if you have <sys/time.h>])
-  HAVE_SYS_SOCKET_H=1
-  HAVE_SYS_TIME_H=1
-fi
-
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
@@ -3966,7 +3959,7 @@ dnl default includes
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_SELECT_H
@@ -3974,7 +3967,7 @@ dnl default includes
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -4054,14 +4047,13 @@ AC_CHECK_TYPE(sa_family_t,
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
+#else
 #include <sys/socket.h>
 #endif
     ])
   ],
 [
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 ])
@@ -4074,7 +4066,7 @@ AC_CHECK_TYPE([suseconds_t],[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#ifndef _WIN32
 #include <sys/time.h>
 #endif
 ])
