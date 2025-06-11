@@ -26,18 +26,16 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_TEST_BUNDLES)
-  add_custom_command(
-    OUTPUT "tool_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "tool_bundle.c"
-    DEPENDS
-      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TOOLFILES}
-      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    VERBATIM)
+add_custom_command(
+  OUTPUT "tool_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "tool_bundle.c"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TOOLFILES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+  VERBATIM)
 
-  set(TOOLPROGS "tunits")
-  set(tunits_SOURCES "tool_bundle.c")
-endif()
+set(TOOLPROGS "tunits")
+set(tunits_SOURCES "tool_bundle.c")
 
 foreach(_target IN LISTS TOOLPROGS)
   set(_target_name "${_target}")
@@ -53,9 +51,7 @@ foreach(_target IN LISTS TOOLPROGS)
     "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
   )
   set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-  if(CURL_TEST_BUNDLES)
-    target_include_directories(${_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/tests/tunit")
-  endif()
+  target_include_directories(${_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/tests/tunit")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test tunit ${_target}")

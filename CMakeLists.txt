@@ -287,14 +287,11 @@ if(ENABLE_CURLDEBUG)
   list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
-option(CURL_TEST_BUNDLES "Build tests into single-binary bundles" OFF)
-
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   # clang-tidy is not looking into #included sources, thus not compatible with
   # unity builds and test bundles.
   set(CMAKE_UNITY_BUILD OFF)
-  set(CURL_TEST_BUNDLES OFF)
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")

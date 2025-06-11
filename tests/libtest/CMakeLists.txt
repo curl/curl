@@ -35,22 +35,20 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-if(CURL_TEST_BUNDLES)
-  add_custom_command(
-    OUTPUT "libtest_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
-    DEPENDS
-      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    VERBATIM)
+add_custom_command(
+  OUTPUT "libtest_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+  VERBATIM)
 
-  set(LIBTESTPROGS "libtests")
-  set(libtests_SOURCES "libtest_bundle.c")
-  list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
-  if(LIB_SELECTED STREQUAL LIB_SHARED)
-    # These are part of the libcurl static lib. Add them here when linking shared.
-    list(APPEND libtests_SOURCES ${WARNLESS} ${MULTIBYTE} ${INET_PTON} ${TIMEDIFF} ${THREADS} ${MEMPTR})
-  endif()
+set(LIBTESTPROGS "libtests")
+set(libtests_SOURCES "libtest_bundle.c")
+list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
+if(LIB_SELECTED STREQUAL LIB_SHARED)
+  # These are part of the libcurl static lib. Add them here when linking shared.
+  list(APPEND libtests_SOURCES ${WARNLESS} ${MULTIBYTE} ${INET_PTON} ${TIMEDIFF} ${THREADS} ${MEMPTR})
 endif()
 
 foreach(_target IN LISTS LIBTESTPROGS)
@@ -78,10 +76,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
     "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
     "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
   )
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-  if(NOT CURL_TEST_BUNDLES)
-    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
-  endif()
+  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "${_upper_target}")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test libtest ${_target}")
