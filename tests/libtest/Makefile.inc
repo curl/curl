@@ -23,7 +23,7 @@
 ###########################################################################
 # files used only in some libcurl test programs
 TESTUTIL = testutil.c testutil.h testtrace.c testtrace.h
-# these files are used in every single test program below
+# these files are referenced from the bundle source
 FIRSTFILES = first.c first.h
 
 WARNLESS =                     \
