@@ -59,7 +59,7 @@ endif
 
 AM_CPPFLAGS += -DWITHOUT_LIBCURL
 
-# Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, CURLX_SRCS, UTILS, FIRSTFILES)
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(TESTFILES) $(UTILS) $(FIRSTFILES)
@@ -70,8 +70,8 @@ if CURLDEBUG
 server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
-server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(TESTFILES) $(MEMDEBUG) $(UTILS) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl --util $(MEMDEBUG) $(UTILS) --input $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
+server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
+	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl --util $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --input $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
