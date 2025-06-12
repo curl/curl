@@ -84,8 +84,10 @@ foreach my $src (@src) {
                 print "#undef $symb\n";
                 print "#define $symb ${symb}_$name\n";
             }
-
             print "#include \"$src\"\n";
+            foreach my $symb ("test", "unit_setup", "unit_stop") {
+                print "#undef $symb\n";
+            }
             print "\n";
             $tlist .= "  {\"$name\", test_$name},\n";
         }
