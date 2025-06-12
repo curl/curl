@@ -1373,7 +1373,7 @@ static curl_socket_t sockfilt_sockdaemon(curl_socket_t sock,
 }
 
 
-static int entry(int argc, char *argv[])
+static int test(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

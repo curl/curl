@@ -385,7 +385,7 @@ static int send_response(curl_socket_t sock,
   return 0;
 }
 
-static int entry(int argc, char **argv)
+static int test(int argc, char **argv)
 {
   srvr_sockaddr_union_t me;
   ssize_t n = 0;

@@ -35,7 +35,7 @@ if(!@ARGV) {
 
 # Specific sources to exclude or add as an extra source file
 my @src;
-my @globals = ("entry");
+my @globals = ("test");
 my %exclude;
 my %util;
 my $in_exclude = 0;
