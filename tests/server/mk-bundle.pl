@@ -79,7 +79,7 @@ foreach my $src (@src) {
             }
         }
         else {
-            # Make 'main' unique across server sources
+            # Make common symbols unique across sources
             print "#undef main\n";
             print "#define main main_$name\n";
             print "int main_$name(int argc, char **argv);\n";

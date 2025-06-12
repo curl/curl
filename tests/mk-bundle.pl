@@ -79,7 +79,7 @@ foreach my $src (@src) {
             }
         }
         else {
-            # Make common symbols unique across test sources
+            # Make common symbols unique across sources
             foreach my $symb ("test", "unit_setup", "unit_stop") {
                 print "#undef $symb\n";
                 print "#define $symb ${symb}_$name\n";
