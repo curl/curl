@@ -1907,6 +1907,9 @@ static CURLcode ossl_set_engine(struct Curl_easy *data, const char *name)
       result = CURLE_SSL_ENGINE_INITFAILED;
       e = NULL;
     }
+    else {
+      result = CURLE_OK;
+    }
     data->state.engine = e;
     return result;
   }
