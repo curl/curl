@@ -917,23 +917,23 @@ static void multissl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   Curl_ssl->close(cf, data);
 }
 
-static ssize_t multissl_recv_plain(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   char *buf, size_t len, CURLcode *code)
+static CURLcode multissl_recv_plain(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    char *buf, size_t len, size_t *pnread)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->recv_plain(cf, data, buf, len, code);
+  return Curl_ssl->recv_plain(cf, data, buf, len, pnread);
 }
 
-static ssize_t multissl_send_plain(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   const void *mem, size_t len,
-                                   CURLcode *code)
+static CURLcode multissl_send_plain(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    const void *mem, size_t len,
+                                    size_t *pnwritten)
 {
   if(multissl_setup(NULL))
     return CURLE_FAILED_INIT;
-  return Curl_ssl->send_plain(cf, data, mem, len, code);
+  return Curl_ssl->send_plain(cf, data, mem, len, pnwritten);
 }
 
 static const struct Curl_ssl Curl_ssl_multi = {
@@ -1474,10 +1474,10 @@ static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
 
   /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
   if(blen > 0) {
-    ssize_t nwritten;
-    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, blen, &result);
-    if(nwritten > 0)
-      *pnwritten += (size_t)nwritten;
+    size_t nwritten;
+    result = connssl->ssl_impl->send_plain(cf, data, buf, blen, &nwritten);
+    if(!result)
+      *pnwritten += nwritten;
   }
 
 out:
@@ -1492,7 +1492,6 @@ static CURLcode ssl_cf_recv(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
   *pnread = 0;
@@ -1508,19 +1507,9 @@ static CURLcode ssl_cf_recv(struct Curl_cfilter *cf,
     DEBUGASSERT(connssl->state == ssl_connection_complete);
   }
 
-  nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, &result);
-  if(nread > 0) {
-    DEBUGASSERT((size_t)nread <= len);
-    *pnread = (size_t)nread;
-  }
-  else if(nread == 0) {
-    /* eof */
-    result = CURLE_OK;
-  }
+  result = connssl->ssl_impl->recv_plain(cf, data, buf, len, pnread);
 
 out:
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %d, %zd", len,
-              result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
 }

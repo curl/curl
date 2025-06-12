@@ -1948,48 +1948,49 @@ static bool gtls_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-static ssize_t gtls_send(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
-                         const void *buf,
-                         size_t blen,
-                         CURLcode *curlcode)
+static CURLcode gtls_send(struct Curl_cfilter *cf,
+                          struct Curl_easy *data,
+                          const void *buf,
+                          size_t blen,
+                          size_t *pnwritten)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
-  ssize_t rc;
-  size_t nwritten, total_written = 0;
+  CURLcode result = CURLE_OK;
+  ssize_t nwritten;
+  size_t remain = blen;
 
   (void)data;
   DEBUGASSERT(backend);
+  *pnwritten = 0;
 
-  while(blen) {
+  while(remain) {
     backend->gtls.io_result = CURLE_OK;
-    rc = gnutls_record_send(backend->gtls.session, buf, blen);
+    nwritten = gnutls_record_send(backend->gtls.session, buf, remain);
 
-    if(rc < 0) {
-      if(total_written && (rc == GNUTLS_E_AGAIN)) {
-        *curlcode = CURLE_OK;
-        rc = (ssize_t)total_written;
+    if(nwritten >= 0) {
+      *pnwritten += (size_t)nwritten;
+      DEBUGASSERT((size_t)nwritten <= remain);
+      buf = (char *)CURL_UNCONST(buf) + (size_t)nwritten;
+      remain -= (size_t)nwritten;
+    }
+    else {
+      if(*pnwritten && (nwritten == GNUTLS_E_AGAIN)) {
+        result = CURLE_OK;
         goto out;
       }
-      *curlcode = (rc == GNUTLS_E_AGAIN) ?
+      result = (nwritten == GNUTLS_E_AGAIN) ?
         CURLE_AGAIN :
         (backend->gtls.io_result ? backend->gtls.io_result : CURLE_SEND_ERROR);
-
-      rc = -1;
       goto out;
     }
-    nwritten = (size_t)rc;
-    total_written += nwritten;
-    DEBUGASSERT(nwritten <= blen);
-    buf = (char *)CURL_UNCONST(buf) + nwritten;
-    blen -= nwritten;
   }
-  rc = total_written;
 
 out:
-  return rc;
+  CURL_TRC_CF(data, cf, "gtls_send(len=%zu) -> %d, %zu",
+              blen, result, *pnwritten);
+  return result;
 }
 
 /*
@@ -2095,50 +2096,49 @@ static void gtls_close(struct Curl_cfilter *cf,
 #endif
 }
 
-static ssize_t gtls_recv(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
-                         char *buf,
-                         size_t buffersize,
-                         CURLcode *curlcode)
+static CURLcode gtls_recv(struct Curl_cfilter *cf,
+                          struct Curl_easy *data,
+                          char *buf, size_t blen,
+                          size_t *pnread)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
-  ssize_t ret;
+  CURLcode result = CURLE_OK;
+  ssize_t nread;
 
   (void)data;
   DEBUGASSERT(backend);
 
-  ret = gnutls_record_recv(backend->gtls.session, buf, buffersize);
-  if((ret == GNUTLS_E_AGAIN) || (ret == GNUTLS_E_INTERRUPTED)) {
-    *curlcode = CURLE_AGAIN;
-    ret = -1;
-    goto out;
-  }
+  nread = gnutls_record_recv(backend->gtls.session, buf, blen);
 
-  if(ret == GNUTLS_E_REHANDSHAKE) {
-    /* BLOCKING call, this is bad but a work-around for now. Fixing this "the
-       proper way" takes a whole lot of work. */
-    CURLcode result = handshake(cf, data);
-    if(result)
-      *curlcode = result;
-    else
-      *curlcode = CURLE_AGAIN; /* then return as if this was a wouldblock */
-    ret = -1;
-    goto out;
-  }
-
-  if(ret < 0) {
-    failf(data, "GnuTLS recv error (%d): %s",
-          (int)ret, gnutls_strerror((int)ret));
-    *curlcode = backend->gtls.io_result ?
-      backend->gtls.io_result : CURLE_RECV_ERROR;
-    ret = -1;
-    goto out;
+  if(nread >= 0)
+    *pnread = (size_t)nread;
+  else {
+    if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
+      result = CURLE_AGAIN;
+      goto out;
+    }
+    else if(nread == GNUTLS_E_REHANDSHAKE) {
+      /* BLOCKING call, this is bad but a work-around for now. Fixing this "the
+         proper way" takes a whole lot of work. */
+      result = handshake(cf, data);
+      if(!result)
+        result = CURLE_AGAIN; /* then return as if this was a wouldblock */
+      goto out;
+    }
+    else {
+      failf(data, "GnuTLS recv error (%d): %s",
+            (int)nread, gnutls_strerror((int)nread));
+      result = backend->gtls.io_result ?
+        backend->gtls.io_result : CURLE_RECV_ERROR;
+      goto out;
+    }
   }
 
 out:
-  return ret;
+  CURL_TRC_CF(data, cf, "gtls_recv(len=%zu) -> 0, %zu", blen, *pnread);
+  return result;
 }
 
 size_t Curl_gtls_version(char *buffer, size_t size)
