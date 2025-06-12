@@ -792,7 +792,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     nwritten = send(socket_w, buffer, n, 0);
     if(nwritten == SOCKET_ERROR)
       break;
-    if(nwritten != n)
+    if((DWORD)nwritten != n)
       break;
   }
 ThreadCleanup:

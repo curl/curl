@@ -95,7 +95,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    execute */
   if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
 #ifdef _WIN32
-    rc = recv(per->infd, buffer, sz * nmemb, 0);
+    rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_SETERRNO(0);
