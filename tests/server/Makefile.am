@@ -70,8 +70,8 @@ if CURLDEBUG
 server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
-server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(UTIL) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(UTIL) $(SOURCES) --exclude $(server_EXCLUDE) > server_bundle.c
+server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(SOURCES) $(MEMDEBUG) $(UTIL) $(FIRSTFILES)
+	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(SOURCES) --util $(MEMDEBUG) $(UTIL) --exclude $(server_EXCLUDE) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c

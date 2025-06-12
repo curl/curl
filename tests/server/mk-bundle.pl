@@ -30,19 +30,30 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [<inputs>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
 my @src;
 my %exclude;
+my %util;
 my $in_exclude = 0;
+my $in_util = 0;
 foreach my $src (@ARGV) {
     if($in_exclude) {
         $exclude{$src} = 1;
     }
+    elsif($in_util) {
+        $util{$src} = 1;
+        push @src, $src;
+    }
     elsif($src eq "--exclude") {
         $in_exclude = 1;
+        $in_util = 0;
+    }
+    elsif($src eq "--util") {
+        $in_exclude = 0;
+        $in_util = 1;
     }
     else {
         push @src, $src;
@@ -60,21 +71,23 @@ HEADER
 my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /\.c$/) {
-        if(!exists $exclude{$src}) {
-            # Misc .c source to include
-            print "#include \"$src\"\n\n";
+    if($src =~ /([a-z0-9]+)\.c$/) {
+        my $name = $1;
+        if(exists $util{$src}) {
+            if(!exists $exclude{$src}) {
+                print "#include \"$src\"\n\n";  # Misc .c source to include
+            }
         }
-    }
-    elsif($src !~ /\.h$/) {
-        # Make 'main' unique across server sources
-        print "#undef main\n";
-        print "#define main main_$src\n";
-        print "int main_$src(int argc, char **argv);\n";
-        print "#include \"$src.c\"\n";
-        print "#undef main\n";
-        print "\n";
-        $tlist .= "  {\"$src\", main_$src},\n";
+        else {
+            # Make 'main' unique across server sources
+            print "#undef main\n";
+            print "#define main main_$name\n";
+            print "int main_$name(int argc, char **argv);\n";
+            print "#include \"$src\"\n";
+            print "#undef main\n";
+            print "\n";
+            $tlist .= "  {\"$name\", main_$name},\n";
+        }
     }
 }
 
