@@ -28,6 +28,7 @@ MEMDEBUG = \
 
 CURLX_SRCS = \
   ../../lib/curlx/base64.c \
+  ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
@@ -58,9 +59,6 @@ UTIL = \
 FIRSTFILES = \
   first.c \
   first.h
-
-INET_PTON = \
-  ../../lib/curlx/inet_pton.c
 
 SOURCES = \
   dnsd.c \
