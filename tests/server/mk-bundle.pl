@@ -35,6 +35,7 @@ if(!@ARGV) {
 
 # Specific sources to exclude or add as an extra source file
 my @src;
+my @globals = ("main");
 my %exclude;
 my %util;
 my $in_exclude = 0;
@@ -84,16 +85,17 @@ foreach my $src (@src) {
         }
         else {
             # Make common symbols unique across sources
-            foreach my $symb ("main") {
+            foreach my $symb (@globals) {
                 print "#undef $symb\n";
                 print "#define $symb ${symb}_$name\n";
             }
             print "#include \"$src\"\n";
-            foreach my $symb ("main") {
+            foreach my $symb (@globals) {
                 print "#undef $symb\n";
             }
             print "\n";
-            $tlist .= "  {\"$name\", main_$name},\n";
+            my $entry = $globals[0];
+            $tlist .= "  {\"$name\", ${entry}_$name},\n";
         }
     }
 }
