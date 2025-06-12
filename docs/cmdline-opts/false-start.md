@@ -5,7 +5,7 @@ Long: false-start
 Help: Enable TLS False Start
 Protocols: TLS
 Added: 7.42.0
-Category: tls
+Category: deprecated
 Multi: boolean
 See-also:
   - tcp-fastopen
