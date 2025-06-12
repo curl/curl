@@ -92,23 +92,6 @@
   } while(0)
 
 
-#define UNITTEST_START                          \
-  static CURLcode test(char *arg)               \
-  {                                             \
-    (void)arg;                                  \
-    if(unit_setup()) {                          \
-      fail("unit_setup() FAILURE");             \
-    }                                           \
-    else {
-
-#define UNITTEST_STOP                           \
-      goto unit_test_abort; /* avoid warning */ \
-unit_test_abort:                                \
-      unit_stop();                              \
-    }                                           \
-    return (CURLcode)unitfail;                  \
-  }
-
 #define UNITTEST_BEGIN_SIMPLE                   \
   (void)arg;                                    \
   {
