@@ -62,7 +62,7 @@ AM_CPPFLAGS += -DWITHOUT_LIBCURL
 # Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, UTILS, FIRSTFILES)
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(MEMDEBUG) $(UTILS) $(FIRSTFILES) $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(TESTFILES) $(MEMDEBUG) $(UTILS) $(FIRSTFILES)
 
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
