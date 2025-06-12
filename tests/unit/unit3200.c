@@ -25,6 +25,10 @@
 #include "curl_get_line.h"
 #include "memdebug.h"
 
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
@@ -33,47 +37,43 @@
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
-/* The test XML does not supply a way to write files without newlines
- * so we write our own
- */
+  /* The test XML does not supply a way to write files without newlines
+   * so we write our own
+   */
 
 #define C64 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 #define C256 C64 C64 C64 C64
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
-static const char *filecontents[] = {
-  /* Both should be read */
-  "LINE1\n"
-  "LINE2 NEWLINE\n",
+  static const char *filecontents[] = {
+    /* Both should be read */
+    "LINE1\n"
+    "LINE2 NEWLINE\n",
 
-  /* Both should be read */
-  "LINE1\n"
-  "LINE2 NONEWLINE",
+    /* Both should be read */
+    "LINE1\n"
+    "LINE2 NONEWLINE",
 
-  /* Only first should be read */
-  "LINE1\n"
-  C4096,
+    /* Only first should be read */
+    "LINE1\n"
+    C4096,
 
-  /* First line should be read */
-  "LINE1\n"
-  C4096 "SOME EXTRA TEXT",
+    /* First line should be read */
+    "LINE1\n"
+    C4096 "SOME EXTRA TEXT",
 
-  /* Only first should be read */
-  "LINE1\n"
-  C4096 "SOME EXTRA TEXT\n"
-  "LINE3\n",
+    /* Only first should be read */
+    "LINE1\n"
+    C4096 "SOME EXTRA TEXT\n"
+    "LINE3\n",
 
-  "LINE1\x1aTEST"
-};
+    "LINE1\x1aTEST"
+  };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
 
   size_t i;
   int rc = 0;
@@ -163,15 +163,7 @@ static CURLcode test(char *arg)
   }
   return (CURLcode)rc;
 
-  UNITTEST_END_SIMPLE
-}
-
-#else
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  UNITTEST_END_SIMPLE
-}
-
 #endif
+
+  UNITTEST_END_SIMPLE
+}
