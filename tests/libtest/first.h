@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION 1
 #include "curl_setup.h"
 #include <curl/curl.h>
 

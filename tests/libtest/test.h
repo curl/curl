@@ -30,7 +30,6 @@
    knowledge about the system we're building this on */
 
 #define CURL_NO_OLDIES
-#define CURL_DISABLE_DEPRECATION 1
 
 #include "curl_setup.h"
 
