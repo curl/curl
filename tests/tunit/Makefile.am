@@ -41,6 +41,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(top_srcdir)/tests/tunit
 
+# Makefile.inc provides the source defines (TESTFILES, FIRSTFILES)
+include Makefile.inc
+
 EXTRA_DIST = CMakeLists.txt README.md $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
