@@ -30,13 +30,12 @@
 CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                            struct Curl_addrinfo **addr);
 
-#define NUM_ADDRS 8
-static struct Curl_addrinfo addrs[NUM_ADDRS];
+static struct Curl_addrinfo addrs[8];
 
 static CURLcode unit_setup(void)
 {
-  int i;
-  for(i = 0; i < NUM_ADDRS - 1; i++) {
+  size_t i;
+  for(i = 0; i < CURL_ARRAYSIZE(addrs) - 1; i++) {
     addrs[i].ai_next = &addrs[i + 1];
   }
 
