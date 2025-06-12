@@ -3212,9 +3212,9 @@ static CURLcode http_header_p(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
 
 #ifndef CURL_DISABLE_PROXY
-  struct connectdata *conn = data->conn;
   const char *v = HD_VAL(hd, hdlen, "Proxy-Connection:");
   if(v) {
+    struct connectdata *conn = data->conn;
     if((k->httpversion == 10) && conn->bits.httpproxy &&
        HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
       /*
@@ -3249,6 +3249,7 @@ static CURLcode http_header_p(struct Curl_easy *data,
   }
 #ifdef USE_SPNEGO
   if(HD_IS(hd, hdlen, "Persistent-Auth:")) {
+    struct connectdata *conn = data->conn;
     struct negotiatedata *negdata = Curl_auth_nego_get(conn, FALSE);
     struct auth *authp = &data->state.authhost;
     if(!negdata)
