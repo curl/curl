@@ -3006,10 +3006,9 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
 static CURLcode http_header_a(struct Curl_easy *data,
                               const char *hd, size_t hdlen)
 {
-  struct connectdata *conn = data->conn;
-  struct SingleRequest *k = &data->req;
-  const char *v;
 #ifndef CURL_DISABLE_ALTSVC
+  const char *v;
+  struct connectdata *conn = data->conn;
   v = (data->asi &&
        (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
 #ifdef DEBUGBUILD
@@ -3021,11 +3020,16 @@ static CURLcode http_header_a(struct Curl_easy *data,
          )) ? HD_VAL(hd, hdlen, "Alt-Svc:") : NULL;
   if(v) {
     /* the ALPN of the current request */
+    struct SingleRequest *k = &data->req;
     enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
       (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
     return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
                              curlx_uitous((unsigned int)conn->remote_port));
   }
+#else
+  (void)data;
+  (void)hd;
+  (void)hdlen;
 #endif
   return CURLE_OK;
 }
