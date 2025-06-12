@@ -29,7 +29,7 @@
 
 typedef CURLcode (*entry_func_t)(char *);
 
-struct onetest {
+struct entry_s {
   const char *name;
   entry_func_t ptr;
 };

@@ -25,7 +25,7 @@
  ***************************************************************************/
 typedef int (*entry_func_t)(int, char **);
 
-struct onemain {
+struct entry_s {
   const char *name;
   entry_func_t ptr;
 };
