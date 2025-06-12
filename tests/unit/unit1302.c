@@ -28,30 +28,9 @@
 #include "curlx/base64.h"
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode t1302_setup(struct Curl_easy **easy)
-{
-  CURLcode res = CURLE_OK;
-
-  global_init(CURL_GLOBAL_ALL);
-  *easy = curl_easy_init();
-  if(!*easy) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
-  }
-  return res;
-}
-
-static void t1302_stop(struct Curl_easy *easy)
-{
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-}
-
 static CURLcode test(char *arg)
 {
-  struct Curl_easy *easy;
-
-  UNITTEST_BEGIN(t1302_setup(&easy))
+  UNITTEST_BEGIN_SIMPLE
 
   char *output;
   unsigned char *decoded;
@@ -189,5 +168,5 @@ static CURLcode test(char *arg)
   fail_unless(size == 0, "size should be 0");
   fail_if(decoded, "returned pointer should be NULL");
 
-  UNITTEST_END(t1302_stop(easy))
+  UNITTEST_END_SIMPLE
 }
