@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   char *URL;
   CURLcode result;
   entry_func_t entry_func;
-  char *test_name;
+  char *entry_name;
   char *env;
   size_t tmp;
 
@@ -146,17 +146,17 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  test_name = argv[1];
+  entry_name = argv[1];
   entry_func = NULL;
   for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
-    if(strcmp(test_name, s_entries[tmp].name) == 0) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
       entry_func = s_entries[tmp].ptr;
       break;
     }
   }
 
   if(!entry_func) {
-    curl_mfprintf(stderr, "Test '%s' not found.\n", test_name);
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 1;
   }
 
