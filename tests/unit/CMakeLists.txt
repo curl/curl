@@ -34,7 +34,7 @@ add_custom_command(
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
-add_executable(units EXCLUDE_FROM_ALL "unit_bundle.c")
+add_executable(units EXCLUDE_FROM_ALL ${UTILS} "unit_bundle.c")
 add_dependencies(testdeps units)
 target_link_libraries(units curltool curlu)
 target_include_directories(units PRIVATE

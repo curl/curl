@@ -64,8 +64,8 @@ endif
 BUNDLE = units
 
 if BUILD_UNITTESTS
-unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(TESTFILES)
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(TESTFILES) > unit_bundle.c
+unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(UTILS) $(TESTFILES) > unit_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = unit_bundle.c
