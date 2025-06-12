@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'TESTFILES', 'UTILS', 'CURLX_SRCS', 'MEMPTR', 'FIRSTFILES' variables
+# Get 'TESTFILES', 'CURLX_SRCS', 'MEMPTR', 'UTILS', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
