@@ -40,12 +40,9 @@ my %util;
 my $in_exclude = 0;
 my $in_util = 0;
 foreach my $src (@ARGV) {
-    if($in_exclude) {
-        $exclude{$src} = 1;
-    }
-    elsif($in_util) {
-        $util{$src} = 1;
-        push @src, $src;
+    if($src eq "--input") {
+        $in_exclude = 0;
+        $in_util = 0;
     }
     elsif($src eq "--exclude") {
         $in_exclude = 1;
@@ -55,9 +52,12 @@ foreach my $src (@ARGV) {
         $in_exclude = 0;
         $in_util = 1;
     }
-    elsif($src eq "--input") {
-        $in_exclude = 0;
-        $in_util = 0;
+    elsif($in_exclude) {
+        $exclude{$src} = 1;
+    }
+    elsif($in_util) {
+        $util{$src} = 1;
+        push @src, $src;
     }
     else {
         push @src, $src;
