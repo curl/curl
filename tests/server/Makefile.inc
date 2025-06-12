@@ -47,7 +47,7 @@ FIRSTFILES = \
   first.c \
   first.h
 
-SOURCES = \
+TESTS = \
   dnsd.c \
   mqttd.c \
   resolve.c \

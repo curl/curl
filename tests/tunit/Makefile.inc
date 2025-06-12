@@ -27,7 +27,7 @@
 FIRSTFILES = ../libtest/first.c
 
 # These are all tool unit test programs
-SOURCES = \
+TESTS = \
   tool1394.c \
   tool1604.c \
   tool1621.c

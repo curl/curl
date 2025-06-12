@@ -22,15 +22,15 @@
 #
 ###########################################################################
 
-# Get 'SOURCES', 'FIRSTFILES' variables
+# Get 'TESTS', 'FIRSTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(
   OUTPUT "unit_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${SOURCES} > "unit_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TESTS} > "unit_bundle.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${SOURCES}
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${TESTS}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
