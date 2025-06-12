@@ -96,7 +96,7 @@ foreach my $src (@src) {
 }
 
 print <<FOOTER
-static const struct onemain s_mains[] = {
+static const struct onemain s_entries[] = {
 $tlist};
 
 #include "first.c"

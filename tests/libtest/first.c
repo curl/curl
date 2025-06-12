@@ -148,9 +148,9 @@ int main(int argc, char **argv)
 
   test_name = argv[1];
   test_func = NULL;
-  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_tests); ++tmp) {
-    if(strcmp(test_name, s_tests[tmp].name) == 0) {
-      test_func = s_tests[tmp].ptr;
+  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+    if(strcmp(test_name, s_entries[tmp].name) == 0) {
+      test_func = s_entries[tmp].ptr;
       break;
     }
   }
