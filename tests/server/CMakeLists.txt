@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'SERVERPROGS', '<target>_SOURCES' variables, 'MEMDEBUG', 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'FIRSTFILES'
+# Get 'SOURCES', 'MEMDEBUG', 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'FIRSTFILES'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -32,15 +32,13 @@ endif()
 
 add_custom_command(
   OUTPUT "server_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${SERVERPROGS} > "server_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${SOURCES} > "server_bundle.c"
   DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES} ${SOURCES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
-set(servers_SOURCES ${MEMDEBUG} ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
-
-add_executable(servers EXCLUDE_FROM_ALL ${${_target}_SOURCES})
+add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"

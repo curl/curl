@@ -22,8 +22,6 @@
 #
 ###########################################################################
 
-SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd mqttd dnsd
-
 MEMDEBUG = \
   ../../lib/memdebug.c \
   ../../lib/memdebug.h
@@ -64,11 +62,13 @@ FIRSTFILES = \
 INET_PTON = \
   ../../lib/curlx/inet_pton.c
 
-resolve_SOURCES = resolve.c
-rtspd_SOURCES = server_sockaddr.h rtspd.c
-sockfilt_SOURCES = server_sockaddr.h sockfilt.c
-socksd_SOURCES = server_sockaddr.h socksd.c
-mqttd_SOURCES = server_sockaddr.h mqttd.c
-sws_SOURCES = server_sockaddr.h sws.c
-tftpd_SOURCES = server_sockaddr.h tftpd.c tftp.h
-dnsd_SOURCES = dnsd.c
+SOURCES = \
+  dnsd.c \
+  mqttd.c \
+  resolve.c \
+  rtspd.c \
+  sockfilt.c \
+  socksd.c \
+  sws.c \
+  tftpd.c tftp.h \
+  server_sockaddr.h
