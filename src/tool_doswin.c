@@ -917,12 +917,12 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
   } while(0);
 
   if(rc != 1) {
-    if(socket_r != INVALID_SOCKET) {
+    if(socket_r != INVALID_SOCKET && tdata) {
       if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
         tdata->stdin_handle) {
-        /* restore STDIN */
-        SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
-         tdata->stdin_handle = NULL;
+          /* restore STDIN */
+          SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
+          tdata->stdin_handle = NULL;
         }
 
       closesocket(socket_r);
