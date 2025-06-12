@@ -39,9 +39,9 @@ static CURLcode t1600_setup(CURL **easy)
   return res;
 }
 
-static void t1600_stop(CURL **easy)
+static void t1600_stop(CURL *easy)
 {
-  curl_easy_cleanup(*easy);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
@@ -74,5 +74,5 @@ static CURLcode test(char *arg)
                 "\x36\x9d\xae\x06\x84\x7e\xe1\xc1\x4a\x94\x39\xea\x6f\x44\x8c\x65\x00\x00\x00\x00\x00", 21);
 #endif
 
-  UNITTEST_END(t1600_stop(&easy))
+  UNITTEST_END(t1600_stop(easy))
 }
