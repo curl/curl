@@ -87,7 +87,7 @@ enum HandleState {
   NoMoreHandles
 };
 
-CURLcode test(char *url)
+CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLM *multi = NULL;
@@ -95,7 +95,7 @@ CURLcode test(char *url)
   int i;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
-  size_t urllen = strlen(url) + 4 + 1;
+  size_t urllen = strlen(URL) + 4 + 1;
   char *full_url = malloc(urllen);
 
   start_test_timing();
@@ -132,11 +132,11 @@ CURLcode test(char *url)
       easy_init(ntlm_easy[num_handles]);
 
       if(num_handles % 3 == 2) {
-        curl_msnprintf(full_url, urllen, "%s0200", url);
+        curl_msnprintf(full_url, urllen, "%s0200", URL);
         easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       }
       else {
-        curl_msnprintf(full_url, urllen, "%s0100", url);
+        curl_msnprintf(full_url, urllen, "%s0100", URL);
         easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
       easy_setopt(ntlm_easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
