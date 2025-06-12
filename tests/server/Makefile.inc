@@ -30,7 +30,7 @@ MEMDEBUG = \
   ../../lib/memdebug.c \
   ../../lib/memdebug.h
 
-CURLFX_SRCS = \
+CURLX_SRCS = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
