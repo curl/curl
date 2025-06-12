@@ -38,17 +38,6 @@ CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
-CURLX_HDRS = \
-  ../../lib/curlx/base64.h \
-  ../../lib/curlx/curlx.h \
-  ../../lib/curlx/multibyte.h \
-  ../../lib/curlx/nonblock.h \
-  ../../lib/curlx/timediff.h \
-  ../../lib/curlx/timeval.h \
-  ../../lib/curlx/version_win32.h \
-  ../../lib/curlx/warnless.h \
-  ../../lib/curlx/winapi.h
-
 UTIL = \
   getpart.c \
   getpart.h \
