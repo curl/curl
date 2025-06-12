@@ -41,11 +41,11 @@ AM_CPPFLAGS =                    \
   -I$(top_srcdir)/tests/libtest  \
   -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (TESTS, TESTUTILS, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (TESTFILES, TESTUTILS, UTILS, FIRSTFILES)
 include Makefile.inc
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  CMakeLists.txt mk-lib1521.pl .checksrc $(TESTS)
+  CMakeLists.txt mk-lib1521.pl .checksrc $(TESTFILES)
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
@@ -91,8 +91,8 @@ endif
 
 BUNDLE = libtests
 
-libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(TESTS) lib1521.c
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(TESTS) lib1521.c > libtest_bundle.c
+libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(TESTFILES) lib1521.c > libtest_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c

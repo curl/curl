@@ -29,7 +29,7 @@ FIRSTFILES = \
   ../libtest/first.h
 
 # These are all unit test programs
-TESTS = \
+TESTFILES = \
   unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c unit1307.c \
              unit1309.c unit1323.c \
   unit1330.c            unit1395.c unit1396.c unit1397.c unit1398.c \

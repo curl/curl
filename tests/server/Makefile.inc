@@ -45,7 +45,7 @@ UTILS = \
 
 FIRSTFILES = first.c first.h
 
-TESTS = \
+TESTFILES = \
   dnsd.c \
   mqttd.c \
   resolve.c \

@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'TESTS', 'MEMDEBUG', 'UTILS', 'FIRSTFILES'
+# Get 'TESTFILES', 'MEMDEBUG', 'UTILS', 'FIRSTFILES'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -32,9 +32,9 @@ endif()
 
 add_custom_command(
   OUTPUT "server_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${TESTS} > "server_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${TESTFILES} > "server_bundle.c"
   DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES} ${TESTS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES} ${TESTFILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
