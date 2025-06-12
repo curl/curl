@@ -27,7 +27,7 @@
 
 static CURL *t1605_easy;
 
-static CURLcode unit_setup(void)
+static CURLcode t1605_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -40,7 +40,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t1605_stop(void)
 {
   curl_easy_cleanup(t1605_easy);
   curl_global_cleanup();
@@ -48,7 +48,7 @@ static void unit_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1605_setup)
 
   int len;
   char *esc;
@@ -59,5 +59,5 @@ static CURLcode test(char *arg)
   esc = curl_easy_unescape(t1605_easy, "%41%41%41%41", -1, &len);
   fail_unless(esc == NULL, "negative string length can't work");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1605_stop)
 }

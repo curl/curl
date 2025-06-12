@@ -28,7 +28,7 @@
 
 static CURL *t1600_easy;
 
-static CURLcode unit_setup(void)
+static CURLcode t1600_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -41,7 +41,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t1600_stop(void)
 {
   curl_easy_cleanup(t1600_easy);
   curl_global_cleanup();
@@ -49,7 +49,7 @@ static void unit_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1600_setup)
 
 #if defined(USE_NTLM) && (!defined(USE_WINDOWS_SSPI) || \
                           defined(USE_WIN32_CRYPTO))
@@ -74,5 +74,5 @@ static CURLcode test(char *arg)
                 "\x36\x9d\xae\x06\x84\x7e\xe1\xc1\x4a\x94\x39\xea\x6f\x44\x8c\x65\x00\x00\x00\x00\x00", 21);
 #endif
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1600_stop)
 }

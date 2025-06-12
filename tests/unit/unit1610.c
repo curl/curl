@@ -25,21 +25,21 @@
 
 #include "curl_sha256.h"
 
-static CURLcode unit_setup(void)
+static CURLcode t1610_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1610_stop(void)
 {
   curl_global_cleanup();
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1610_setup)
 
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
     || defined(USE_LIBSSH2)
@@ -64,5 +64,5 @@ static CURLcode test(char *arg)
                 "\x15\xae", CURL_SHA256_DIGEST_LENGTH);
 #endif
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1610_stop)
 }

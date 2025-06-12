@@ -29,14 +29,14 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1607_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1607_stop(void)
 {
   curl_global_cleanup();
 }
@@ -52,7 +52,7 @@ static const char skip = 0;
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1607_setup)
 
   struct testcase {
     /* host:port:address[,address]... */
@@ -235,5 +235,5 @@ error:
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1607_stop)
 }

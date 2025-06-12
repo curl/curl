@@ -36,20 +36,20 @@ static void t1616_mydtor(unsigned int id, void *elem)
   free(ptr);
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1616_setup(void)
 {
   Curl_uint_hash_init(&t1616_hash_static, 15, t1616_mydtor);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1616_stop(void)
 {
   Curl_uint_hash_destroy(&t1616_hash_static);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1616_setup)
 
   int *value, *v;
   int *value2;
@@ -85,5 +85,5 @@ static CURLcode test(char *arg)
   v = Curl_uint_hash_get(&t1616_hash_static, key);
   abort_unless(!v, "lookup missing entry failed");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1616_stop)
 }

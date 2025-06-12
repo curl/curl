@@ -46,21 +46,21 @@ static void my_elem_dtor(void *key, size_t key_len, void *p)
   ++elem_dtor_calls;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1603_setup(void)
 {
   Curl_hash_init(&t1603_hash_static, slots, Curl_hash_str,
                  curlx_str_key_compare, t1603_mydtor);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1603_stop(void)
 {
   Curl_hash_destroy(&t1603_hash_static);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1603_setup)
 
   char key1[] = "key1";
   char key2[] = "key2b";
@@ -177,5 +177,5 @@ static CURLcode test(char *arg)
   /* Clean up */
   Curl_hash_clean(&t1603_hash_static);
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1603_stop)
 }

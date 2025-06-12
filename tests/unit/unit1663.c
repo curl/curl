@@ -36,14 +36,14 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1663_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1663_stop(void)
 {
   curl_global_cleanup();
 }
@@ -81,7 +81,7 @@ static void t1663_parse(
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1663_setup)
 
   t1663_parse("dev", "dev", NULL, NULL, CURLE_OK);
   t1663_parse("if!eth0", NULL, "eth0", NULL, CURLE_OK);
@@ -96,5 +96,5 @@ static CURLcode test(char *arg)
   t1663_parse("ifhost!eth0", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
   t1663_parse("ifhost!eth0!", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1663_stop)
 }

@@ -28,7 +28,7 @@
 
 static struct Curl_easy *t1606_easy;
 
-static CURLcode unit_setup(void)
+static CURLcode t1606_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -41,7 +41,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t1606_stop(void)
 {
   curl_easy_cleanup(t1606_easy);
   curl_global_cleanup();
@@ -79,7 +79,7 @@ static int runawhile(long time_limit,
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1606_setup)
 
   fail_unless(runawhile(41, 41, 40, 0) == 41,
               "wrong low speed timeout");
@@ -94,5 +94,5 @@ static CURLcode test(char *arg)
   fail_unless(runawhile(10, 50, 100, 2) == 36,
               "bad timeout");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1606_stop)
 }

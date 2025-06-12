@@ -30,14 +30,14 @@
 static char *s_login;
 static char *s_password;
 
-static CURLcode unit_setup(void)
+static CURLcode t1304_setup(void)
 {
   s_password = NULL;
   s_login = NULL;
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1304_stop(void)
 {
   Curl_safefree(s_password);
   Curl_safefree(s_login);
@@ -45,7 +45,7 @@ static void unit_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1304_setup)
 
   int result;
   struct store_netrc store;
@@ -180,7 +180,7 @@ static CURLcode test(char *arg)
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1304_stop)
 }
 
 #else

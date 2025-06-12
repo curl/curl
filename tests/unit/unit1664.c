@@ -36,21 +36,21 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1664_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1664_stop(void)
 {
   curl_global_cleanup();
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1664_setup)
 
   static const char *wordparse[] = {
     "word",
@@ -489,5 +489,5 @@ static CURLcode test(char *arg)
     }
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1664_stop)
 }

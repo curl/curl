@@ -36,20 +36,20 @@ static void test_free(void *p)
   free(p);
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1661_setup(void)
 {
   Curl_bufref_init(&bufref);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1661_stop(void)
 {
   Curl_bufref_free(&bufref);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1661_setup)
 
   const char *buffer = NULL;
   CURLcode result = CURLE_OK;
@@ -117,5 +117,5 @@ static CURLcode test(char *arg)
   fail_unless(!bufref.len, "Initial length must be NULL");
   fail_unless(!bufref.dtor, "Destructor must be NULL");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1661_stop)
 }

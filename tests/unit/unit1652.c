@@ -57,7 +57,7 @@ int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
   return 0;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1652_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -72,7 +72,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t1652_stop(void)
 {
   curl_easy_cleanup(t1652_easy);
   curl_global_cleanup();
@@ -89,7 +89,7 @@ static int verify(const char *info, const char *two)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1652_setup)
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -164,5 +164,5 @@ static CURLcode test(char *arg)
 #pragma GCC diagnostic pop
 #endif
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1652_stop)
 }

@@ -35,7 +35,7 @@ static CURLcode test(char *arg)
 }
 #else
 
-static void unit_stop(void)
+static void t1660_stop(void)
 {
   curl_global_cleanup();
 }
@@ -172,6 +172,6 @@ static CURLcode test(char *arg)
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1660_stop)
 }
 #endif

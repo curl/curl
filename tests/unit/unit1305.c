@@ -45,7 +45,7 @@ static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
-static CURLcode unit_setup(void)
+static CURLcode t1305_setup(void)
 {
   t1305_easy = curl_easy_init();
   if(!t1305_easy) {
@@ -57,7 +57,7 @@ static CURLcode unit_setup(void)
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1305_stop(void)
 {
   if(data_node) {
     Curl_freeaddrinfo(data_node->addr);
@@ -111,7 +111,7 @@ static CURLcode create_node(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1305_setup)
 
   struct Curl_dns_entry *nodep;
   size_t key_len;
@@ -129,5 +129,5 @@ static CURLcode test(char *arg)
     data_node = NULL;
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1305_stop)
 }

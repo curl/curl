@@ -28,14 +28,14 @@
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
 
-static CURLcode unit_setup(void)
+static CURLcode t1658_setup(void)
 {
   /* whatever you want done first */
   curl_global_init(CURL_GLOBAL_ALL);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1658_stop(void)
 {
   curl_global_cleanup();
   /* done before shutting down and exiting */
@@ -129,7 +129,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1658_setup)
 
   /* The "SvcParamKeys" specified within the HTTPS RR packet *must* be
      provided in numerical order. */
@@ -544,7 +544,7 @@ static CURLcode test(char *arg)
     curl_easy_cleanup(easy);
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1658_stop)
 }
 
 #else /* CURL_DISABLE_DOH or not HTTPSRR enabled */

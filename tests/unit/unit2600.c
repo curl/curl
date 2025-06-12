@@ -50,7 +50,7 @@
 
 static CURL *t2600_easy;
 
-static CURLcode unit_setup(void)
+static CURLcode t2600_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -65,7 +65,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t2600_stop(void)
 {
   curl_easy_cleanup(t2600_easy);
   curl_global_cleanup();
@@ -391,7 +391,7 @@ static struct test_case TEST_CASES[] = {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t2600_setup)
 
   size_t i;
 
@@ -399,5 +399,5 @@ static CURLcode test(char *arg)
     test_connect(&TEST_CASES[i]);
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t2600_stop)
 }

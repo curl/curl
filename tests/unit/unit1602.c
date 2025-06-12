@@ -37,21 +37,21 @@ static void t1602_mydtor(void *p)
   free(ptr);
 }
 
-static CURLcode unit_setup(void)
+static CURLcode t1602_setup(void)
 {
   Curl_hash_init(&t1602_hash_static, 7, Curl_hash_str,
                  curlx_str_key_compare, t1602_mydtor);
   return CURLE_OK;
 }
 
-static void unit_stop(void)
+static void t1602_stop(void)
 {
   Curl_hash_destroy(&t1602_hash_static);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1602_setup)
 
   int *value;
   int *value2;
@@ -80,5 +80,5 @@ static CURLcode test(char *arg)
     free(value2);
   abort_unless(nodep, "insertion into hash failed");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1602_stop)
 }

@@ -28,14 +28,14 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1620_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1620_stop(void)
 {
   curl_global_cleanup();
 }
@@ -76,7 +76,7 @@ static void t1620_parse(
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1620_setup)
 
   CURLcode rc;
   struct Curl_easy *empty;
@@ -133,5 +133,5 @@ static CURLcode test(char *arg)
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1620_stop)
 }

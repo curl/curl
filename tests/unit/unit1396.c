@@ -25,14 +25,14 @@
 
 static CURL *hnd;
 
-static CURLcode unit_setup(void)
+static CURLcode t1396_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
+static void t1396_stop(void)
 {
   if(hnd)
     curl_easy_cleanup(hnd);
@@ -48,7 +48,7 @@ struct test {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1396_setup)
 
   /* unescape, this => that */
   const struct test list1[]={
@@ -115,5 +115,5 @@ static CURLcode test(char *arg)
     curl_free(out);
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1396_stop)
 }

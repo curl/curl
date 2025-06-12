@@ -29,7 +29,7 @@
 
 static struct Curl_easy *t1303_easy;
 
-static CURLcode unit_setup(void)
+static CURLcode t1303_setup(void)
 {
   CURLcode res = CURLE_OK;
 
@@ -42,7 +42,7 @@ static CURLcode unit_setup(void)
   return res;
 }
 
-static void unit_stop(void)
+static void t1303_stop(void)
 {
   curl_easy_cleanup(t1303_easy);
   curl_global_cleanup();
@@ -79,7 +79,7 @@ struct timetest {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1303_setup)
 
   struct curltime now;
   unsigned int i;
@@ -153,5 +153,5 @@ static CURLcode test(char *arg)
       fail(run[i].comment);
   }
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1303_stop)
 }

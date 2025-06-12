@@ -27,7 +27,7 @@
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-static void unit_stop(void)
+static void t1653_stop(void)
 {
   curl_global_cleanup();
 }
@@ -221,5 +221,5 @@ fail:
   free(ipv6port);
   curl_url_cleanup(u);
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(t1653_stop)
 }
