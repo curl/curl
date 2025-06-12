@@ -32,12 +32,14 @@
 #ifdef _WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
+#  include <ws2tcpip.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
 
 #include "tool_bname.h"
 #include "tool_doswin.h"
+#include "tool_msgs.h"
 
 #include <curlx.h>
 #include <memdebug.h> /* keep this as LAST include */
