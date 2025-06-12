@@ -1077,9 +1077,10 @@ static void check_stdin_upload(struct GlobalConfig *global,
     if(f == INVALID_SOCKET)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "
           "will fall back to blocking mode");
-    else if(f > INT_MAX){
+    else if(f > INT_MAX) {
       warnf(global, "win32_stdin_read_thread returned identifier "
           "larger than INT_MAX, will fall back to blocking mode");
+    }
     else
       per->infd = (int)f;
 #endif
