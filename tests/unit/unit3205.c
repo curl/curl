@@ -37,7 +37,6 @@ static CURLcode test(char *arg)
     const char *openssl;
   };
   static const struct test_cs_entry test_cs_list[] = {
-#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
     { 0x1301, "TLS_AES_128_GCM_SHA256",
               NULL },
     { 0x1302, "TLS_AES_256_GCM_SHA384",
@@ -48,7 +47,6 @@ static CURLcode test(char *arg)
               NULL },
     { 0x1305, "TLS_AES_128_CCM_8_SHA256",
               NULL },
-#endif
     { 0xC02B, "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
               "ECDHE-ECDSA-AES128-GCM-SHA256" },
     { 0xC02C, "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
@@ -114,8 +112,6 @@ static CURLcode test(char *arg)
               "ECDH-RSA-AES128-GCM-SHA256" },
     { 0xC032, "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384",
               "ECDH-RSA-AES256-GCM-SHA384" },
-#endif
-#if defined(USE_MBEDTLS)
     { 0x0001, "TLS_RSA_WITH_NULL_MD5",
               "NULL-MD5" },
     { 0x0002, "TLS_RSA_WITH_NULL_SHA",
@@ -202,8 +198,6 @@ static CURLcode test(char *arg)
               "ECDHE-PSK-AES256-CBC-SHA" },
     { 0xCCAB, "TLS_PSK_WITH_CHACHA20_POLY1305_SHA256",
               "PSK-CHACHA20-POLY1305" },
-#endif
-#if defined(USE_MBEDTLS)
     { 0xC09C, "TLS_RSA_WITH_AES_128_CCM",
               "AES128-CCM" },
     { 0xC09D, "TLS_RSA_WITH_AES_256_CCM",
@@ -220,8 +214,6 @@ static CURLcode test(char *arg)
               "ECDHE-ECDSA-AES128-CCM8" },
     { 0xC0AF, "TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8",
               "ECDHE-ECDSA-AES256-CCM8" },
-#endif
-#if defined(USE_MBEDTLS)
     /* entries marked ns are non-"standard", they are not in OpenSSL */
     { 0x0041, "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA",
               "CAMELLIA128-SHA" },
@@ -449,15 +441,9 @@ static CURLcode test(char *arg)
     const char *str;
   };
   static const struct test_str_entry test_str_list[] = {
-#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
     { 0x1301, "TLS_AES_128_GCM_SHA256"},
     { 0x1302, "TLS_AES_256_GCM_SHA384"},
     { 0x1303, "TLS_CHACHA20_POLY1305_SHA256"},
-#else
-    { 0x0000, "TLS_AES_128_GCM_SHA256"},
-    { 0x0000, "TLS_AES_256_GCM_SHA384"},
-    { 0x0000, "TLS_CHACHA20_POLY1305_SHA256"},
-#endif
     { 0xC02B, "ECDHE-ECDSA-AES128-GCM-SHA256"},
     { 0xC02F, "ECDHE-RSA-AES128-GCM-SHA256"},
     { 0xC02C, "ECDHE-ECDSA-AES256-GCM-SHA384"},
