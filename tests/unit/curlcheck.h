@@ -93,7 +93,7 @@
 
 
 #define UNITTEST_START                          \
-  CURLcode test(char *arg)                      \
+  static CURLcode test(char *arg)               \
   {                                             \
     (void)arg;                                  \
     if(unit_setup()) {                          \
