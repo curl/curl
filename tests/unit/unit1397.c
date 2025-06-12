@@ -23,13 +23,14 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-/* only these backends define the tested functions */
-#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 #include "vtls/hostcheck.h"
 
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
+
+/* only these backends define the tested functions */
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 
   struct testcase {
     const char *host;
@@ -106,16 +107,7 @@ static CURLcode test(char *arg)
       unitfail++;
     }
   }
-
-  UNITTEST_END_SIMPLE
-}
-
-#else
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  UNITTEST_END_SIMPLE
-}
-
 #endif
+
+  UNITTEST_END_SIMPLE
+}
