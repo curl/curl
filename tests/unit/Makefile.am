@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
 
-EXTRA_DIST = CMakeLists.txt README.md
+EXTRA_DIST = CMakeLists.txt README.md $(SOURCES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -61,8 +61,8 @@ endif
 BUNDLE = units
 
 if BUILD_UNITTESTS
-unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
+unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(SOURCES)
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(SOURCES) > unit_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = unit_bundle.c
