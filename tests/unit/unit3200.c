@@ -28,6 +28,11 @@
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverlength-strings"
+#endif
+
 /* The test XML does not supply a way to write files without newlines
  * so we write our own
  */
@@ -37,12 +42,6 @@
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverlength-strings"
-#endif
-
-#define NUMTESTS 6
 static const char *filecontents[] = {
   /* Both should be read */
   "LINE1\n"
@@ -78,7 +77,7 @@ static CURLcode test(char *arg)
 
   size_t i;
   int rc = 0;
-  for(i = 0; i < NUMTESTS; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(filecontents); i++) {
     FILE *fp;
     struct dynbuf buf;
     size_t len = 4096;
