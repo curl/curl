@@ -25,12 +25,11 @@
 
 #include "doh.h" /* from the lib dir */
 
-#ifndef CURL_DISABLE_DOH
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
+#ifndef CURL_DISABLE_DOH
   /*
    * Prove detection of write overflow using a short buffer and a name
    * of maximal valid length.
@@ -172,15 +171,7 @@ static CURLcode test(char *arg)
     fail_unless(olen == olen1, "bad buffer length");
   } while(0);
 
+#endif /* CURL_DISABLE_DOH */
+
   UNITTEST_END_SIMPLE
 }
-
-#else /* CURL_DISABLE_DOH */
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  UNITTEST_END_SIMPLE
-}
-
-#endif
