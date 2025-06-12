@@ -32,7 +32,7 @@ CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
 static struct Curl_addrinfo addrs[8];
 
-static CURLcode unit_setup(void)
+static CURLcode t1608_setup(void)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(addrs) - 1; i++) {
@@ -44,7 +44,7 @@ static CURLcode unit_setup(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(unit_setup)
+  UNITTEST_BEGIN(t1608_setup)
 
   int i;
   CURLcode code;
