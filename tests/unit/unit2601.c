@@ -27,15 +27,6 @@
 #include "bufq.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 static const char *tail_err(struct bufq *q)
 {
   struct buf_chunk *chunk;
@@ -249,7 +240,10 @@ static void check_bufq(size_t pool_spares,
     Curl_bufcp_free(&pool);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
   struct bufq q;
   ssize_t n;
   CURLcode result;
@@ -277,4 +271,5 @@ UNITTEST_START
   check_bufq(8, 8000, 10, 1234, 1234, BUFQ_OPT_NONE);
   check_bufq(8, 1024, 4, 129, 127, BUFQ_OPT_NO_SPARES);
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

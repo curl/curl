@@ -25,17 +25,9 @@
 
 #include "curl_md5.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
 #if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
     || !defined(CURL_DISABLE_DIGEST_AUTH)
@@ -56,5 +48,5 @@ UNITTEST_START
                 "\x87\x5f\x22", MD5_DIGEST_LEN);
 #endif
 
-
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

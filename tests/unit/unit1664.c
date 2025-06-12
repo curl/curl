@@ -48,8 +48,10 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   static const char *wordparse[] = {
     "word",
     "word ",
@@ -487,5 +489,5 @@ UNITTEST_START
     }
   }
 
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

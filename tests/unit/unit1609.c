@@ -29,18 +29,16 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
-
   global_init(CURL_GLOBAL_ALL);
-
   return res;
+}
+
+static void unit_stop(void)
+{
+  curl_global_cleanup();
 }
 
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
@@ -75,8 +73,10 @@ Test:
  expected result: cached address has zero timestamp and new address
 */
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   struct testcase {
     /* host:port:address[,address]... */
     const char *optval;
@@ -217,5 +217,6 @@ error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

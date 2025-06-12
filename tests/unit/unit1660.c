@@ -26,23 +26,19 @@
 #include "urldata.h"
 #include "hsts.h"
 
-static CURLcode unit_setup(void)
+#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
+  UNITTEST_BEGIN_SIMPLE
+  puts("nothing to do when HTTP or HSTS are disabled");
+  UNITTEST_END_SIMPLE
 }
+#else
 
 static void unit_stop(void)
 {
   curl_global_cleanup();
 }
-
-#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
-UNITTEST_START
-{
-  puts("nothing to do when HTTP or HSTS are disabled");
-}
-UNITTEST_STOP
-#else
 
 struct testit {
   const char *host;
@@ -115,8 +111,10 @@ static void showsts(struct stsentry *e, const char *chost)
   }
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   CURLcode result;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
@@ -173,6 +171,7 @@ UNITTEST_START
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP
 #endif

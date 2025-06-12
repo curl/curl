@@ -37,7 +37,9 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
 
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
     || defined(USE_LIBSSH2)
@@ -62,5 +64,5 @@ UNITTEST_START
                 "\x15\xae", CURL_SHA256_DIGEST_LENGTH);
 #endif
 
-
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

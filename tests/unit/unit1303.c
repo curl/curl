@@ -77,8 +77,10 @@ struct timetest {
   const char *comment;
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   struct curltime now;
   unsigned int i;
 
@@ -150,5 +152,6 @@ UNITTEST_START
     if(timeout != run[i].result)
       fail(run[i].comment);
   }
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

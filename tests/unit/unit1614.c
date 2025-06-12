@@ -25,16 +25,6 @@
 
 #include "noproxy.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 struct check {
   const char *a;
   const char *n;
@@ -48,9 +38,11 @@ struct noproxy {
   bool match;
 };
 
-UNITTEST_START
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_PROXY)
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_PROXY)
   int i;
   int err = 0;
   struct check list4[]= {
@@ -161,6 +153,7 @@ UNITTEST_START
     }
   }
   fail_if(err, "errors");
-}
 #endif
-UNITTEST_STOP
+
+  UNITTEST_END_SIMPLE
+}

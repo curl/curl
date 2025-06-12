@@ -25,17 +25,9 @@
 
 #include "curl_md4.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
 #ifdef USE_CURL_NTLM_CORE
   const char string1[] = "1";
@@ -56,5 +48,5 @@ UNITTEST_START
                 "\x0b", MD4_DIGEST_LENGTH);
 #endif
 
-
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

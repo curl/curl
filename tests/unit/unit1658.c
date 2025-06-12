@@ -25,6 +25,9 @@
 
 #include "doh.h" /* from the lib dir */
 
+/* DoH + HTTPSRR are required */
+#if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
+
 static CURLcode unit_setup(void)
 {
   /* whatever you want done first */
@@ -37,9 +40,6 @@ static void unit_stop(void)
   curl_global_cleanup();
   /* done before shutting down and exiting */
 }
-
-/* DoH + HTTPSRR are required */
-#if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
 
 extern CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                         const unsigned char *cp, size_t len,
@@ -127,8 +127,10 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
   }
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   /* The "SvcParamKeys" specified within the HTTPS RR packet *must* be
      provided in numerical order. */
 
@@ -541,13 +543,16 @@ UNITTEST_START
     }
     curl_easy_cleanup(easy);
   }
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP
 
 #else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
 
-UNITTEST_START
-/* nothing to do, just succeed */
-UNITTEST_STOP
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
 
 #endif

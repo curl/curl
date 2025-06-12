@@ -28,22 +28,14 @@ extern int dedotdotify(const char *input, size_t clen, char **out);
 
 #include "memdebug.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 struct dotdot {
   const char *input;
   const char *output;
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
   unsigned int i;
   int fails = 0;
@@ -148,4 +140,5 @@ UNITTEST_START
 
   fail_if(fails, "output mismatched");
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

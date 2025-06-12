@@ -79,8 +79,10 @@ static void t1663_parse(
   free(host);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   t1663_parse("dev", "dev", NULL, NULL, CURLE_OK);
   t1663_parse("if!eth0", NULL, "eth0", NULL, CURLE_OK);
   t1663_parse("host!myname", NULL, NULL, "myname", CURLE_OK);
@@ -93,5 +95,6 @@ UNITTEST_START
   t1663_parse("ifhost!", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
   t1663_parse("ifhost!eth0", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
   t1663_parse("ifhost!eth0!", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

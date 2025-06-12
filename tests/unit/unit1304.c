@@ -43,8 +43,10 @@ static void unit_stop(void)
   Curl_safefree(s_login);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   int result;
   struct store_netrc store;
 
@@ -177,18 +179,16 @@ UNITTEST_START
   abort_unless(s_login != NULL, "returned NULL!");
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP
 
 #else
-static CURLcode unit_setup(void)
+
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
 }
-static void unit_stop(void)
-{
-}
-UNITTEST_START
-UNITTEST_STOP
 
 #endif

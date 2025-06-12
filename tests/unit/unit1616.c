@@ -47,7 +47,10 @@ static void unit_stop(void)
   Curl_uint_hash_destroy(&t1616_hash_static);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
+
   int *value, *v;
   int *value2;
   bool ok;
@@ -82,4 +85,5 @@ UNITTEST_START
   v = Curl_uint_hash_get(&t1616_hash_static, key);
   abort_unless(!v, "lookup missing entry failed");
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

@@ -26,19 +26,11 @@
 #include "urldata.h"
 #include "altsvc.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-UNITTEST_START
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
-{
   char outname[256];
   CURL *curl;
   CURLcode result;
@@ -132,6 +124,7 @@ UNITTEST_START
   curl_easy_cleanup(curl);
 fail:
   Curl_altsvc_cleanup(&asi);
-}
 #endif
-UNITTEST_STOP
+
+  UNITTEST_END_SIMPLE
+}

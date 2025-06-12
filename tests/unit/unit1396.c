@@ -28,7 +28,6 @@ static CURL *hnd;
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
-
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
@@ -47,8 +46,10 @@ struct test {
   int outlen;
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   /* unescape, this => that */
   const struct test list1[]={
     {"%61", 3, "a", 1},
@@ -113,5 +114,6 @@ UNITTEST_START
 
     curl_free(out);
   }
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

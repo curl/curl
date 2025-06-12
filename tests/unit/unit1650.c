@@ -26,16 +26,6 @@
 #include "doh.h"
 #include "dynbuf.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 #ifndef CURL_DISABLE_DOH
 #define DNS_PREAMBLE "\x00\x00\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"
 #define LABEL_TEST "\x04\x74\x65\x73\x74"
@@ -59,7 +49,6 @@ struct dohrequest {
   size_t size;
   DOHcode rc;
 };
-
 
 static const struct dohrequest req[] = {
   {"test.host.name", DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
@@ -153,8 +142,10 @@ static const struct dohresp resp[] = {
 
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   size_t size = 0;
   unsigned char buffer[256];
   size_t i;
@@ -285,13 +276,16 @@ UNITTEST_START
     }
     fail_if(d.numcname, "bad cname counter");
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else /* CURL_DISABLE_DOH */
-UNITTEST_START
-/* nothing to do, just succeed */
-UNITTEST_STOP
 
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
 
 #endif

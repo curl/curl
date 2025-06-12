@@ -27,14 +27,6 @@
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-
-static CURLU *u;
-
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
 static void unit_stop(void)
 {
   curl_global_cleanup();
@@ -42,8 +34,7 @@ static void unit_stop(void)
 
 #define free_and_clear(x) free(x); x = NULL
 
-static CURLUcode parse_port(CURLU *url,
-                           char *h, bool has_scheme)
+static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
 {
   struct dynbuf host;
   CURLUcode ret;
@@ -55,8 +46,12 @@ static CURLUcode parse_port(CURLU *url,
   return ret;
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
+  CURLU *u;
+
   CURLUcode ret;
   char *ipv6port = NULL;
   char *portnum;
@@ -226,5 +221,5 @@ fail:
   free(ipv6port);
   curl_url_cleanup(u);
 
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

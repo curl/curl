@@ -77,7 +77,10 @@ static int runawhile(long time_limit,
   return finaltime;
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
+
   fail_unless(runawhile(41, 41, 40, 0) == 41,
               "wrong low speed timeout");
   fail_unless(runawhile(21, 21, 20, 0) == 21,
@@ -90,4 +93,6 @@ UNITTEST_START
               "should not time out");
   fail_unless(runawhile(10, 50, 100, 2) == 36,
               "bad timeout");
-UNITTEST_STOP
+
+  UNITTEST_END(unit_stop)
+}

@@ -109,8 +109,9 @@ static CURLcode create_node(void)
   return CURLE_OK;
 }
 
-
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
 
   struct Curl_dns_entry *nodep;
   size_t key_len;
@@ -128,4 +129,5 @@ UNITTEST_START
     data_node = NULL;
   }
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

@@ -47,8 +47,10 @@ static void unit_stop(void)
   Curl_bufref_free(&bufref);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   const char *buffer = NULL;
   CURLcode result = CURLE_OK;
 
@@ -114,5 +116,6 @@ UNITTEST_START
   fail_unless(!bufref.ptr, "Initial reference must be NULL");
   fail_unless(!bufref.len, "Initial length must be NULL");
   fail_unless(!bufref.dtor, "Destructor must be NULL");
+
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

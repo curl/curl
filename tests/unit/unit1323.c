@@ -25,24 +25,16 @@
 
 #include "timeval.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 struct a {
   struct curltime first;
   struct curltime second;
   time_t result;
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   struct a tests[] = {
     { {36762, 8345 }, {36761, 995926 }, 13 },
     { {36761, 995926 }, {36762, 8345 }, -13 },
@@ -64,5 +56,6 @@ UNITTEST_START
       fail("unexpected result!");
     }
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP

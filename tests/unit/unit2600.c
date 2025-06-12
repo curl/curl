@@ -389,7 +389,9 @@ static struct test_case TEST_CASES[] = {
 #endif
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
 
   size_t i;
 
@@ -397,4 +399,5 @@ UNITTEST_START
     test_connect(&TEST_CASES[i]);
   }
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

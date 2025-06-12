@@ -25,15 +25,6 @@
 
 #include "vtls/x509asn1.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL)
 
 /* cert captured from gdb when connecting to curl.se on October 26
@@ -344,8 +335,10 @@ static unsigned char cert[] = {
   0x61, 0x54, 0x4A, 0x2B, 0xB7, 0x6A, 0x12, 0x08, 0xFB,
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   CURLcode result;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
@@ -378,15 +371,17 @@ UNITTEST_START
     curl_easy_cleanup(data);
   }
   curl_global_cleanup();
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
   puts("not tested since Curl_extract_certinfo() is not built-in");
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #endif

@@ -87,7 +87,9 @@ static int verify(const char *info, const char *two)
   return strncmp(info, two, nl - info);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -162,4 +164,5 @@ UNITTEST_START
 #pragma GCC diagnostic pop
 #endif
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

@@ -74,8 +74,10 @@ static void t1620_parse(
   free(options);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   CURLcode rc;
   struct Curl_easy *empty;
   enum dupstring i;
@@ -131,5 +133,5 @@ UNITTEST_START
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
+  UNITTEST_END(unit_stop)
 }
-UNITTEST_STOP

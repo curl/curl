@@ -46,7 +46,10 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
+
   int len;
   char *esc;
 
@@ -56,4 +59,5 @@ UNITTEST_START
   esc = curl_easy_unescape(t1605_easy, "%41%41%41%41", -1, &len);
   fail_unless(esc == NULL, "negative string length can't work");
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

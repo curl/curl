@@ -26,17 +26,6 @@
 #include "splay.h"
 #include "warnless.h"
 
-
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 static void splayprint(struct Curl_tree *t, int d, char output)
 {
   struct Curl_tree *node;
@@ -68,7 +57,9 @@ static void splayprint(struct Curl_tree *t, int d, char output)
   splayprint(t->smaller, d + 1, output);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
 /* number of nodes to add to the splay tree */
 #define NUM_NODES 50
@@ -141,4 +132,5 @@ UNITTEST_START
 
   fail_unless(root == NULL, "tree not empty when it should be");
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

@@ -49,7 +49,10 @@ static void unit_stop(void)
   Curl_hash_destroy(&t1602_hash_static);
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN(unit_setup)
+
   int *value;
   int *value2;
   int *nodep;
@@ -77,4 +80,5 @@ UNITTEST_START
     free(value2);
   abort_unless(nodep, "insertion into hash failed");
 
-UNITTEST_STOP
+  UNITTEST_END(unit_stop)
+}

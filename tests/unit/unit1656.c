@@ -25,16 +25,6 @@
 
 #include "vtls/x509asn1.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
 
 struct test_spec {
@@ -94,8 +84,10 @@ static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
   return TRUE;
 }
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   size_t i;
   struct dynbuf dbuf;
   bool all_ok = TRUE;
@@ -115,15 +107,17 @@ UNITTEST_START
 
   curlx_dyn_free(&dbuf);
   curl_global_cleanup();
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
   puts("not tested since Curl_x509_GTime2str() is not built-in");
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #endif

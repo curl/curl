@@ -36,19 +36,10 @@ static void test_Curl_llist_dtor(void *key, void *value)
   (void)value;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode test(char *arg)
 {
-  Curl_llist_init(&llist, test_Curl_llist_dtor);
-  Curl_llist_init(&llist_destination, test_Curl_llist_dtor);
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-}
-
-UNITTEST_START
-{
   int unusedData_case1 = 1;
   int unusedData_case2 = 2;
   int unusedData_case3 = 3;
@@ -61,6 +52,9 @@ UNITTEST_START
   struct Curl_llist_node *element_prev;
   struct Curl_llist_node *to_remove;
   size_t llist_size;
+
+  Curl_llist_init(&llist, test_Curl_llist_dtor);
+  Curl_llist_init(&llist_destination, test_Curl_llist_dtor);
 
   /**
    * testing llist_init
@@ -271,5 +265,6 @@ UNITTEST_START
 
   Curl_llist_destroy(&llist, NULL);
   Curl_llist_destroy(&llist_destination, NULL);
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
