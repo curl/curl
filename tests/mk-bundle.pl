@@ -35,7 +35,7 @@ if(!@ARGV) {
 
 # Specific sources to exclude or add as an extra source file
 my @src;
-my @globals = ("main");
+my @globals = ("entry");
 my %exclude;
 my %util;
 my $in_exclude = 0;
@@ -93,9 +93,6 @@ foreach my $src (@src) {
                 print "#define $symb ${symb}_$name\n";
             }
             print "#include \"$src\"\n";
-            foreach my $symb (@globals) {
-                print "#undef $symb\n";
-            }
             print "\n";
             my $entry = $globals[0];
             $tlist .= "  {\"$name\", ${entry}_$name},\n";

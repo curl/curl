@@ -914,7 +914,7 @@ static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
 }
 
 
-static int main(int argc, char *argv[])
+static int entry(int argc, char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;

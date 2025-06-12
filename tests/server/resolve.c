@@ -49,7 +49,7 @@
 /* include memdebug.h last */
 #include <memdebug.h>
 
-static int main(int argc, char *argv[])
+static int entry(int argc, char *argv[])
 {
   int arg = 1;
   const char *host = NULL;
