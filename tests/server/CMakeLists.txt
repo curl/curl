@@ -32,9 +32,9 @@ endif()
 
 add_custom_command(
   OUTPUT "server_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${TESTFILES} > "server_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TESTFILES} > "server_bundle.c"
   DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" ${FIRSTFILES} ${TESTFILES}
+    "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${TESTFILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 

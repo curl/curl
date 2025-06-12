@@ -35,7 +35,7 @@ if(!@ARGV) {
 
 # Specific sources to exclude or add as an extra source file
 my @src;
-my @globals = ("test", "unit_setup", "unit_stop");
+my @globals = ("main");
 my %exclude;
 my %util;
 my $in_exclude = 0;
@@ -52,6 +52,9 @@ foreach my $src (@ARGV) {
     elsif($src eq "--util") {
         $in_exclude = 0;
         $in_util = 1;
+    }
+    elsif($src =~ /^--globals=(.+)/) {
+        @globals = split(',', $1);
     }
     elsif($in_exclude) {
         $exclude{$src} = 1;
