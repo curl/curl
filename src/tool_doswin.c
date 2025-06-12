@@ -838,11 +838,11 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     }
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = WSASocket(AF_INET, SOCK_STREAM,
+    tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
       IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
     if(tdata->socket_l == INVALID_SOCKET) {
-      errorf(global, "WSASocket error: %08lx", GetLastError());
+      errorf(global, "WSASocketW error: %08lx", GetLastError());
       break;
     }
 
