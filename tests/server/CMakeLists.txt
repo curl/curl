@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'SOURCES', 'MEMDEBUG', 'CURLX_SRCS', 'UTIL', 'FIRSTFILES'
+# Get 'SOURCES', 'MEMDEBUG', 'UTIL', 'FIRSTFILES'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -38,7 +38,7 @@ add_custom_command(
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
-add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${UTIL} "server_bundle.c")
+add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${UTIL} "server_bundle.c")
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"

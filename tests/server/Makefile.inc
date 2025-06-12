@@ -26,7 +26,7 @@ MEMDEBUG = \
   ../../lib/memdebug.c \
   ../../lib/memdebug.h
 
-CURLX_SRCS = \
+UTIL = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
@@ -36,9 +36,7 @@ CURLX_SRCS = \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/version_win32.c \
   ../../lib/curlx/warnless.c \
-  ../../lib/curlx/winapi.c
-
-UTIL = \
+  ../../lib/curlx/winapi.c \
   getpart.c \
   getpart.h \
   util.c \
