@@ -28,7 +28,8 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(
   OUTPUT "tool_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" --globals=test,unit_setup,unit_stop ${TESTFILES} > "tool_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${TESTFILES}
+    --globals=test,unit_setup,unit_stop > "tool_bundle.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} ${TESTFILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
