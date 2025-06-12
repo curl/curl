@@ -45,7 +45,7 @@ AM_CPPFLAGS =                    \
 include Makefile.inc
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  CMakeLists.txt mk-lib1521.pl .checksrc $(TESTFILES)
+  CMakeLists.txt mk-lib1521.pl .checksrc $(TESTFILES) $(TESTUTILS) $(UTILS) $(FIRSTFILES)
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
