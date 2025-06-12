@@ -116,11 +116,15 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
-  else
+  else {
+    DEBUGF(infof(data, "pp_statematch, select, timeout=%" FMT_TIMEDIFF_T
+           ", sendleft=%zu",
+           timeout_ms, pp->sendleft));
     rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
                            CURL_SOCKET_BAD,
                            pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
                            interval_ms);
+  }
 
   if(block) {
     /* if we did not wait, we do not have to spend time on this now */
