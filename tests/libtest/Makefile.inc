@@ -21,10 +21,10 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# common files used by test programs
-TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
+# common files used by test programs
+TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
 
 UTILS = memptr.c
 

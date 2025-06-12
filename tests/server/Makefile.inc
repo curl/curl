@@ -22,6 +22,15 @@
 #
 ###########################################################################
 
+FIRSTFILES = first.c first.h
+
+UTILS = \
+  getpart.c \
+  getpart.h \
+  util.c \
+  util.h \
+  server_setup.h
+
 MEMDEBUG = \
   ../../lib/memdebug.c \
   ../../lib/memdebug.h
@@ -37,15 +46,6 @@ CURLFX_SRCS = \
   ../../lib/curlx/version_win32.c \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c \
-
-UTILS = \
-  getpart.c \
-  getpart.h \
-  util.c \
-  util.h \
-  server_setup.h
-
-FIRSTFILES = first.c first.h
 
 TESTFILES = \
   dnsd.c \
