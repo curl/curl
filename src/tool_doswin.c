@@ -32,7 +32,6 @@
 #ifdef _WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
-#  include <ws2tcpip.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
@@ -759,7 +758,6 @@ struct win_thread_data {
 static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 {
   struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
-  char clientIp[INET_ADDRSTRLEN];
   DWORD n;
   int nwritten;
   char buffer[BUFSIZ];
@@ -775,8 +773,6 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     errorf(tdata->global, "accept error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
-
-  inet_ntop(AF_INET, &clientAddr.sin_addr, clientIp, INET_ADDRSTRLEN);
 
   closesocket(tdata->socket_l);
   tdata->socket_l = INVALID_SOCKET;
