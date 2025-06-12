@@ -108,3 +108,17 @@ unit_test_abort:                                \
     }                                           \
     return (CURLcode)unitfail;                  \
   }
+
+#define UNITTEST_BEGIN                          \
+  (void)arg;                                    \
+  if(unit_setup()) {                            \
+    fail("unit_setup() FAILURE");               \
+  }                                             \
+  else {
+
+#define UNITTEST_END                            \
+    goto unit_test_abort; /* avoid warning */   \
+unit_test_abort:                                \
+    unit_stop();                                \
+  }                                             \
+  return (CURLcode)unitfail;
