@@ -26,40 +26,23 @@
 # Bundle up individual tests into a single binary. The resulting binary can run
 # individual tests by passing their name (without '.c') as the first argument.
 #
-# Usage: mk-bundle.pl [<directory>|<C files>]
+# Usage: mk-bundle.pl <c-files>
 
 use strict;
 use warnings;
 
 my @src;
-
-if(scalar @ARGV <= 1) {
-    # reading Makefile.inc
-    my $src_dir = @ARGV ? $ARGV[0] : ".";
-    # Read list of tests
-    open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
-    while(my $line = <$fh>) {
-        chomp $line;
-        if($line =~ /[a-z0-9]+_SOURCES\ =\ ([a-z0-9]+\.c)/) {
-            push @src, $1;
-        }
+my %exclude;
+my $in_exclude = 0;
+foreach my $src (@ARGV) {
+    if($in_exclude) {
+        $exclude{$src} = 1;
     }
-    close $fh;
-}
-else {
-    # receiving list of files from the command-line
-    my %exclude;
-    my $in_exclude = 0;
-    foreach my $src (@ARGV) {
-        if($in_exclude) {
-            $exclude{$src} = 1;
-        }
-        elsif($src eq "--exclude") {
-            $in_exclude = 1;
-        }
-        else {
-            push @src, $src;
-        }
+    elsif($src eq "--exclude") {
+        $in_exclude = 1;
+    }
+    else {
+        push @src, $src;
     }
 }
 
