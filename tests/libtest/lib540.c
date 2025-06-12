@@ -191,7 +191,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
   return CURLE_OK;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLM *cm = NULL;
   struct curl_slist *headers = NULL;

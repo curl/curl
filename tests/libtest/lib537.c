@@ -440,7 +440,7 @@ static int t537_test_rlimit(int keep_open)
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -492,7 +492,7 @@ test_cleanup:
 
 #else /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   (void)URL;
   curl_mprintf("system lacks necessary system function(s)");

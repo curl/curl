@@ -97,7 +97,7 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
  * Read/write HSTS cache entries via callback.
  */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd;

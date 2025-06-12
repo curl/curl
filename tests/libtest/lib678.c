@@ -97,7 +97,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
   return code;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);

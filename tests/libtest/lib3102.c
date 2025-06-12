@@ -89,7 +89,7 @@ static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

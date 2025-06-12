@@ -51,7 +51,7 @@ static size_t t667_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   static const char testdata[] = "dummy";
 

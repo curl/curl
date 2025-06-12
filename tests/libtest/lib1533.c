@@ -123,7 +123,7 @@ static CURLcode perform_and_check_connections(CURL *curl,
 }
 
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   struct cb_data data;
   CURL *curl = NULL;

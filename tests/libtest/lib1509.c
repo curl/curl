@@ -32,7 +32,7 @@ size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
 
 static unsigned long realHeaderSize = 0;
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   long headerSize;
   CURLcode code;

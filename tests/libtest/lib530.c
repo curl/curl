@@ -376,7 +376,7 @@ test_cleanup:
   return res;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode rc;
   /* rerun the same transfer multiple times and make it fail in different

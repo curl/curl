@@ -28,7 +28,7 @@
 #include "memdebug.h"
 
 #define EXCESSIVE 10*1000*1000
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;

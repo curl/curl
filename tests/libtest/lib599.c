@@ -41,7 +41,7 @@ static int t599_progress_callback(void *clientp, double dltotal,
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

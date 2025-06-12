@@ -36,7 +36,7 @@
 /*
  * Test the Client->Server ANNOUNCE functionality (PUT style)
  */
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;

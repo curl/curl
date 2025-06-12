@@ -36,7 +36,7 @@
    to allow old and slow machines to run this test too */
 #define MAX_BLOCKED_TIME_MS 500
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURLM *mhandle = NULL;

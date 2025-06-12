@@ -33,7 +33,7 @@
  * FTP get with NOBODY but no HEADER
  */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

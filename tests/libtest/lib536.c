@@ -37,7 +37,7 @@ static void proxystat(CURL *curl)
   }
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl;

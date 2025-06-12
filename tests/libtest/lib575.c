@@ -35,7 +35,7 @@
  * 3. with multi interface
  */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *handle = NULL;
   CURL *duphandle = NULL;

@@ -52,7 +52,7 @@ static void setupcallbacks(CURL *curl)
   testcounter = 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;

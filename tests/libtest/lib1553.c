@@ -41,7 +41,7 @@ static int t1553_xferinfo(void *p,
   return 1; /* fail as fast as we can */
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curls = NULL;
   CURLM *multi = NULL;

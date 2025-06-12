@@ -36,7 +36,7 @@
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
  */
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;

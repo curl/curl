@@ -44,7 +44,7 @@ static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode code;
   CURL *curl = NULL;

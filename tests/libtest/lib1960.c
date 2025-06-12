@@ -75,7 +75,7 @@ static int sockopt_cb(void *clientp,
 
 
 /* Expected args: URL IP PORT */
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = TEST_ERR_MAJOR_BAD;
@@ -147,7 +147,7 @@ test_cleanup:
   return res;
 }
 #else
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   (void)URL;
   curl_mprintf("lacks inet_pton\n");

@@ -208,7 +208,7 @@ static CURLcode recv_frame(CURL *curl, bool *stop)
   return res;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   bool stop = false;

@@ -47,7 +47,7 @@ static int progressKiller(void *arg,
   return 1;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

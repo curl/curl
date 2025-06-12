@@ -34,7 +34,7 @@ static size_t t1947_write_cb(char *data, size_t n, size_t l, void *userp)
   return n*l;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "test.h"
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *eh = NULL;
   CURLcode res = CURLE_OK;

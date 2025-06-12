@@ -501,7 +501,7 @@ extern int unitfail;
 
 #undef NO_SUPPORT_BUILT_IN
 #define NO_SUPPORT_BUILT_IN                     \
-  CURLcode test(char *URL)                      \
+  statuc CURLcode test(char *URL)               \
   {                                             \
     (void)URL;                                  \
     curl_mfprintf(stderr, "Missing support\n");       \

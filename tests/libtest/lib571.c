@@ -97,7 +97,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;

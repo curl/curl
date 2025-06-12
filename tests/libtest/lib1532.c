@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_RESPONSE_CODE */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   long httpcode;

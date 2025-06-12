@@ -29,7 +29,7 @@
 
 #define URL2 libtest_arg2
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   /* first a fine GET response, then a bad one */
   CURL *cl;

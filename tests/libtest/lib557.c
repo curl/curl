@@ -1541,7 +1541,7 @@ static int test_return_codes(void)
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */

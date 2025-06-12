@@ -32,7 +32,7 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
   return len;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLFORMcode rc;
   int res;

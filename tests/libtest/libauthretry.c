@@ -82,7 +82,7 @@ static long parse_auth_name(const char *arg)
   return CURLAUTH_NONE;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl = NULL;

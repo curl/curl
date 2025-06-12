@@ -55,7 +55,7 @@ static CURLcode run(CURL *hnd, long limit, long time)
   return curl_easy_perform(hnd);
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode ret;
   CURL *hnd;

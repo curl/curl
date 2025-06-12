@@ -2018,7 +2018,7 @@ err:
   return 1;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   (void)URL; /* not used */
 

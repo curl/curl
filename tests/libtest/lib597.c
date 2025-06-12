@@ -38,7 +38,7 @@
  * with function curl_multi_info_read().
  */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *easy = NULL;
   CURLM *multi = NULL;

@@ -184,7 +184,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 
 #endif
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   int i;

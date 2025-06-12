@@ -87,7 +87,7 @@ enum HandleState {
   NoMoreHandles
 };
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLM *multi = NULL;

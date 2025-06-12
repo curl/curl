@@ -120,7 +120,7 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   return nitems;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

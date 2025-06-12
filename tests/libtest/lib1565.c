@@ -88,7 +88,7 @@ test_cleanup:
   return NULL;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   int still_running;
   int num;
@@ -202,7 +202,7 @@ test_cleanup:
 }
 
 #else /* without pthread, this test doesn't work */
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   (void)URL;
   return CURLE_OK;

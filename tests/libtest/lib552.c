@@ -158,7 +158,7 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_UNKNOWNCMD;
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

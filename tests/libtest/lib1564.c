@@ -29,7 +29,7 @@
 
 #define WAKEUP_NUM 10
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURLM *multi = NULL;
   int numfds;

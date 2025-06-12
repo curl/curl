@@ -74,7 +74,7 @@ static int t1591_trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;

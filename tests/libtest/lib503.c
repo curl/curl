@@ -35,7 +35,7 @@
  * auth info.
  */
 
-CURLcode test(char *URL)
+static CURLcode test(char *URL)
 {
   CURL *c = NULL;
   CURLM *m = NULL;
