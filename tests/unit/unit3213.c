@@ -27,26 +27,7 @@
 #include "uint-spbset.h"
 #include "curl_trc.h"
 
-static unsigned int s1_3213[] = {  /* spread numbers, some at slot edges */
-  0, 1, 4, 17, 63, 64, 65, 66,
-  90, 99,
-};
-static unsigned int s2_3213[] = { /* set with all bits in slot1 set */
-  64, 65, 66, 67, 68, 69, 70, 71,
-  72, 73, 74, 75, 76, 77, 78, 79,
-  80, 81, 82, 83, 84, 85, 86, 87,
-  88, 89, 90, 91, 92, 93, 94, 95,
-  96, 97, 98, 99, 100, 101, 102, 103,
-  104, 105, 106, 107, 108, 109, 110, 111,
-  112, 113, 114, 115, 116, 117, 118, 119,
-  120, 121, 122, 123, 124, 125, 126, 127,
-};
-static unsigned int s3_3213[] = {  /* very spread numbers */
-  2232, 5167, 8204, 8526, 8641, 10056, 10140, 10611,
-  10998, 11626, 13735, 15539, 17947, 24295, 27833, 30318,
-};
-
-static void check_spbset(const char *name, unsigned int *s, size_t slen)
+static void check_spbset(const char *name, const unsigned int *s, size_t slen)
 {
   struct uint_spbset bset;
   size_t i, j;
@@ -112,9 +93,28 @@ static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  check_spbset("s1", s1_3213, CURL_ARRAYSIZE(s1_3213));
-  check_spbset("s2", s2_3213, CURL_ARRAYSIZE(s2_3213));
-  check_spbset("s3", s3_3213, CURL_ARRAYSIZE(s3_3213));
+  static const unsigned int s1[] = { /* spread numbers, some at slot edges */
+    0, 1, 4, 17, 63, 64, 65, 66,
+    90, 99,
+  };
+  static const unsigned int s2[] = { /* set with all bits in slot1 set */
+    64, 65, 66, 67, 68, 69, 70, 71,
+    72, 73, 74, 75, 76, 77, 78, 79,
+    80, 81, 82, 83, 84, 85, 86, 87,
+    88, 89, 90, 91, 92, 93, 94, 95,
+    96, 97, 98, 99, 100, 101, 102, 103,
+    104, 105, 106, 107, 108, 109, 110, 111,
+    112, 113, 114, 115, 116, 117, 118, 119,
+    120, 121, 122, 123, 124, 125, 126, 127,
+  };
+  static const unsigned int s3[] = {  /* very spread numbers */
+    2232, 5167, 8204, 8526, 8641, 10056, 10140, 10611,
+    10998, 11626, 13735, 15539, 17947, 24295, 27833, 30318,
+  };
+
+  check_spbset("s1", s1, CURL_ARRAYSIZE(s1));
+  check_spbset("s2", s2, CURL_ARRAYSIZE(s2));
+  check_spbset("s3", s3, CURL_ARRAYSIZE(s3));
 
   UNITTEST_END_SIMPLE
 }
