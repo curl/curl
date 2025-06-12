@@ -542,13 +542,13 @@ static CURLcode test(char *arg)
   /* test Curl_cipher_suite_walk_str() */
   {
     const char *ptr, *end = cs_test_string;
-    int i = 0;
+    int j = 0;
     uint16_t id;
     size_t len;
 
     for(ptr = cs_test_string; ptr[0] != '\0'; ptr = end) {
-      const struct test_str_entry *test = &test_str_list[i];
-      abort_if(i == CURL_ARRAYSIZE(test_str_list), "should have been done");
+      const struct test_str_entry *test = &test_str_list[j];
+      abort_if(j == CURL_ARRAYSIZE(test_str_list), "should have been done");
 
       id = Curl_cipher_suite_walk_str(&ptr, &end);
       len = end - ptr;
@@ -567,7 +567,7 @@ static CURLcode test(char *arg)
         unitfail++;
         goto unit_test_abort;
       }
-      i++;
+      j++;
     }
   }
 #endif /* defined(USE_MBEDTLS) || defined(USE_RUSTLS) */
