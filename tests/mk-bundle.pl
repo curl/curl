@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>] --globals=<func1[,func2]>\n";
 }
 
 # Specific sources to exclude or add as an extra source file
