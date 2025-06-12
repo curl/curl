@@ -72,7 +72,7 @@ static CURLcode test(char *arg)
   };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic warning "-Woverlength-strings"
+#pragma GCC diagnostic pop
 #endif
 
   list[0].cp = calloc(1, too_long + 1);
@@ -106,10 +106,6 @@ static CURLcode test(char *arg)
   }
 
   free(CURL_UNCONST(list[0].cp));
-
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 #endif
 
