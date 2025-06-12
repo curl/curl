@@ -26,15 +26,15 @@ TESTUTIL = testutil.c testutil.h testtrace.c testtrace.h
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
-LIBCURLX =                     \
-  ../../lib/curlx/warnless.c   \
-  ../../lib/curlx/warnless.h   \
-  ../../lib/curlx/multibyte.c  \
-  ../../lib/curlx/multibyte.h  \
-  ../../lib/curlx/timediff.c   \
-  ../../lib/curlx/timediff.h   \
-  ../../lib/curl_threads.c     \
-  ../../lib/curl_threads.h     \
+UTIL = \
+  ../../lib/curlx/warnless.c \
+  ../../lib/curlx/warnless.h \
+  ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/multibyte.h \
+  ../../lib/curlx/timediff.c \
+  ../../lib/curlx/timediff.h \
+  ../../lib/curl_threads.c \
+  ../../lib/curl_threads.h \
   memptr.c
 
 SOURCES = libauthretry.c libntlmconnect.c libprereq.c                                       \

@@ -41,7 +41,7 @@ AM_CPPFLAGS =                    \
   -I$(top_srcdir)/tests/libtest  \
   -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (SOURCES, TESTUTIL, LIBCURLX, FIRSTFILES)
+# Makefile.inc provides the source defines (SOURCES, TESTUTIL, UTIL, FIRSTFILES)
 include Makefile.inc
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
@@ -87,7 +87,7 @@ CLEANFILES += libtest_bundle.c
 if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(LIBCURLX)
+libtests_SOURCES += $(UTIL)
 endif
 
 # Build a stub gssapi implementation for testing
