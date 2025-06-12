@@ -26,11 +26,6 @@
 #include "urldata.h"
 #include "altsvc.h"
 
-static void t1654_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -131,5 +126,5 @@ fail:
   Curl_altsvc_cleanup(&asi);
 #endif
 
-  UNITTEST_END(t1654_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

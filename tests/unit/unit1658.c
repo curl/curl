@@ -35,12 +35,6 @@ static CURLcode t1658_setup(void)
   return CURLE_OK;
 }
 
-static void t1658_stop(void)
-{
-  curl_global_cleanup();
-  /* done before shutting down and exiting */
-}
-
 extern CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
                                         const unsigned char *cp, size_t len,
                                         struct Curl_https_rrinfo **hrr);
@@ -544,7 +538,7 @@ static CURLcode test(char *arg)
     curl_easy_cleanup(easy);
   }
 
-  UNITTEST_END(t1658_stop)
+  UNITTEST_END(curl_global_cleanup)
 }
 
 #else /* CURL_DISABLE_DOH or not HTTPSRR enabled */

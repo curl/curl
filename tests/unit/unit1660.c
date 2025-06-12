@@ -35,11 +35,6 @@ static CURLcode test(char *arg)
 }
 #else
 
-static void t1660_stop(void)
-{
-  curl_global_cleanup();
-}
-
 struct testit {
   const char *host;
   const char *chost; /* if non-NULL, use to lookup with */
@@ -172,6 +167,6 @@ static CURLcode test(char *arg)
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  UNITTEST_END(t1660_stop)
+  UNITTEST_END(curl_global_cleanup)
 }
 #endif

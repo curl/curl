@@ -36,11 +36,6 @@ static CURLcode t1607_setup(void)
   return res;
 }
 
-static void t1607_stop(void)
-{
-  curl_global_cleanup();
-}
-
 /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
    addresses, so we have to do that as well. */
 static const char skip = 0;
@@ -235,5 +230,5 @@ error:
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
 
-  UNITTEST_END(t1607_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

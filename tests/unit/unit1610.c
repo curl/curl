@@ -32,11 +32,6 @@ static CURLcode t1610_setup(void)
   return res;
 }
 
-static void t1610_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN(t1610_setup)
@@ -64,5 +59,5 @@ static CURLcode test(char *arg)
                 "\x15\xae", CURL_SHA256_DIGEST_LENGTH);
 #endif
 
-  UNITTEST_END(t1610_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

@@ -35,11 +35,6 @@ static CURLcode t1620_setup(void)
   return res;
 }
 
-static void t1620_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static void t1620_parse(
   const char *input,
   const char *exp_username,
@@ -133,5 +128,5 @@ static CURLcode test(char *arg)
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
-  UNITTEST_END(t1620_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

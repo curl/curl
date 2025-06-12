@@ -36,11 +36,6 @@ static CURLcode t1609_setup(void)
   return res;
 }
 
-static void t1609_stop(void)
-{
-  curl_global_cleanup();
-}
-
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
  1) if there is already existing host:port pair in the DNS cache and
@@ -218,5 +213,5 @@ error:
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
 
-  UNITTEST_END(t1609_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

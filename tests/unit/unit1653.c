@@ -27,11 +27,6 @@
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-static void t1653_stop(void)
-{
-  curl_global_cleanup();
-}
-
 #define free_and_clear(x) free(x); x = NULL
 
 static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
@@ -221,5 +216,5 @@ fail:
   free(ipv6port);
   curl_url_cleanup(u);
 
-  UNITTEST_END(t1653_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

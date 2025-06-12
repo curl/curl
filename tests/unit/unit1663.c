@@ -43,11 +43,6 @@ static CURLcode t1663_setup(void)
   return res;
 }
 
-static void t1663_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static void t1663_parse(
   const char *input_data,
   const char *exp_dev,
@@ -96,5 +91,5 @@ static CURLcode test(char *arg)
   t1663_parse("ifhost!eth0", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
   t1663_parse("ifhost!eth0!", NULL, NULL, NULL, CURLE_BAD_FUNCTION_ARGUMENT);
 
-  UNITTEST_END(t1663_stop)
+  UNITTEST_END(curl_global_cleanup)
 }

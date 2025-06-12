@@ -43,11 +43,6 @@ static CURLcode unit_setup(void)
   return CURLE_OK;
 }
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN(unit_setup)
@@ -75,7 +70,7 @@ static CURLcode test(char *arg)
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
 
-  UNITTEST_END(unit_stop)
+  UNITTEST_END(curl_global_cleanup)
 }
 
 #else

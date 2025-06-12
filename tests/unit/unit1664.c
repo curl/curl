@@ -43,11 +43,6 @@ static CURLcode t1664_setup(void)
   return res;
 }
 
-static void t1664_stop(void)
-{
-  curl_global_cleanup();
-}
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN(t1664_setup)
@@ -489,5 +484,5 @@ static CURLcode test(char *arg)
     }
   }
 
-  UNITTEST_END(t1664_stop)
+  UNITTEST_END(curl_global_cleanup)
 }
