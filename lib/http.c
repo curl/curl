@@ -3209,12 +3209,11 @@ static CURLcode http_header_l(struct Curl_easy *data,
 static CURLcode http_header_p(struct Curl_easy *data,
                               const char *hd, size_t hdlen)
 {
-  struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
-  const char *v;
 
 #ifndef CURL_DISABLE_PROXY
-  v = HD_VAL(hd, hdlen, "Proxy-Connection:");
+  struct connectdata *conn = data->conn;
+  const char *v = HD_VAL(hd, hdlen, "Proxy-Connection:");
   if(v) {
     if((k->httpversion == 10) && conn->bits.httpproxy &&
        HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
