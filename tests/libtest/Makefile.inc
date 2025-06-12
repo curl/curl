@@ -26,7 +26,7 @@ TESTUTIL = testutil.c testutil.h testtrace.c testtrace.h
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
-UTIL = \
+UTILS = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/warnless.h \
   ../../lib/curlx/multibyte.c \
