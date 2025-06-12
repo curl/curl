@@ -5413,8 +5413,9 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
   }
 
 out:
-  if((nread < 0) && (*curlcode == CURLE_AGAIN)) {
+  if(!nread || ((nread < 0) && (*curlcode == CURLE_AGAIN))) {
     /* This happens when:
+     * - we read an EOF
      * - OpenSSLs buffers are empty, there is no more data
      * - OpenSSL read is blocked on writing something first
      * - an incomplete TLS packet is buffered that cannot be read
