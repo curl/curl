@@ -69,7 +69,7 @@ static const char *filecontents[] = {
 };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic warning "-Woverlength-strings"
+#pragma GCC diagnostic pop
 #endif
 
 static CURLcode test(char *arg)
@@ -166,10 +166,6 @@ static CURLcode test(char *arg)
 
   UNITTEST_END_SIMPLE
 }
-
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
 #else
 
