@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 {
   char *URL;
   CURLcode result;
-  test_func_t test_func;
+  entry_func_t entry_func;
   char *test_name;
   char *env;
   size_t tmp;
@@ -147,15 +147,15 @@ int main(int argc, char **argv)
   }
 
   test_name = argv[1];
-  test_func = NULL;
+  entry_func = NULL;
   for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
     if(strcmp(test_name, s_entries[tmp].name) == 0) {
-      test_func = s_entries[tmp].ptr;
+      entry_func = s_entries[tmp].ptr;
       break;
     }
   }
 
-  if(!test_func) {
+  if(!entry_func) {
     curl_mfprintf(stderr, "Test '%s' not found.\n", test_name);
     return 1;
   }
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 
   curl_mfprintf(stderr, "URL: %s\n", URL);
 
-  result = test_func(URL);
+  result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32

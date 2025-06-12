@@ -27,7 +27,7 @@
 
 int main(int argc, char **argv)
 {
-  main_func_t main_func;
+  entry_func_t entry_func;
   char *main_name;
 
   if(argc < 2) {
@@ -36,18 +36,18 @@ int main(int argc, char **argv)
   }
 
   main_name = argv[1];
-  main_func = NULL;
+  entry_func = NULL;
   {
     size_t tmp;
     for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
       if(strcmp(main_name, s_entries[tmp].name) == 0) {
-        main_func = s_entries[tmp].ptr;
+        entry_func = s_entries[tmp].ptr;
         break;
       }
     }
   }
 
-  if(!main_func) {
+  if(!entry_func) {
     fprintf(stderr, "Test '%s' not found.\n", main_name);
     return 99;
   }
@@ -55,5 +55,5 @@ int main(int argc, char **argv)
   --argc;
   ++argv;
 
-  return main_func(argc, argv);
+  return entry_func(argc, argv);
 }

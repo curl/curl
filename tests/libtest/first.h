@@ -27,11 +27,11 @@
 #include "curl_setup.h"
 #include <curl/curl.h>
 
-typedef CURLcode (*test_func_t)(char *);
+typedef CURLcode (*entry_func_t)(char *);
 
 struct onetest {
   const char *name;
-  test_func_t ptr;
+  entry_func_t ptr;
 };
 
 #endif /* HEADER_LIBTEST_FIRST_H */

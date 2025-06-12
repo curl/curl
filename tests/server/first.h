@@ -23,11 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-typedef int (*main_func_t)(int, char **);
+typedef int (*entry_func_t)(int, char **);
 
 struct onemain {
   const char *name;
-  main_func_t ptr;
+  entry_func_t ptr;
 };
 
 #endif /* HEADER_SERVER_FIRST_H */
