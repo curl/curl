@@ -450,19 +450,9 @@ static CURLcode test(char *arg)
     { 0xC030, "ECDHE-RSA-AES256-GCM-SHA384"},
     { 0xCCA9, "ECDHE-ECDSA-CHACHA20-POLY1305"},
     { 0xCCA8, "ECDHE-RSA-CHACHA20-POLY1305"},
-#if defined(USE_MBEDTLS)
     { 0x009E, "DHE-RSA-AES128-GCM-SHA256"},
     { 0x009F, "DHE-RSA-AES256-GCM-SHA384"},
-#else
-    { 0x0000, "DHE-RSA-AES128-GCM-SHA256"},
-    { 0x0000, "DHE-RSA-AES256-GCM-SHA384"},
-#endif
-#if defined(USE_MBEDTLS)
     { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305"},
-#else
-    { 0x0000, "DHE-RSA-CHACHA20-POLY1305"},
-#endif
-#if defined(USE_MBEDTLS)
     { 0xC023, "ECDHE-ECDSA-AES128-SHA256" },
     { 0xC027, "ECDHE-RSA-AES128-SHA256" },
     { 0xC009, "ECDHE-ECDSA-AES128-SHA" },
@@ -471,38 +461,14 @@ static CURLcode test(char *arg)
     { 0xC028, "ECDHE-RSA-AES256-SHA384" },
     { 0xC00A, "ECDHE-ECDSA-AES256-SHA" },
     { 0xC014, "ECDHE-RSA-AES256-SHA" },
-#else
-    { 0x0000, "ECDHE-ECDSA-AES128-SHA256" },
-    { 0x0000, "ECDHE-RSA-AES128-SHA256" },
-    { 0x0000, "ECDHE-ECDSA-AES128-SHA" },
-    { 0x0000, "ECDHE-RSA-AES128-SHA" },
-    { 0x0000, "ECDHE-ECDSA-AES256-SHA384" },
-    { 0x0000, "ECDHE-RSA-AES256-SHA384" },
-    { 0x0000, "ECDHE-ECDSA-AES256-SHA" },
-    { 0x0000, "ECDHE-RSA-AES256-SHA" },
-#endif
-#if defined(USE_MBEDTLS)
     { 0x0067, "DHE-RSA-AES128-SHA256" },
     { 0x006B, "DHE-RSA-AES256-SHA256" },
-#else
-    { 0x0000, "DHE-RSA-AES128-SHA256" },
-    { 0x0000, "DHE-RSA-AES256-SHA256" },
-#endif
-#if defined(USE_MBEDTLS)
     { 0x009C, "AES128-GCM-SHA256" },
     { 0x009D, "AES256-GCM-SHA384" },
     { 0x003C, "AES128-SHA256" },
     { 0x003D, "AES256-SHA256" },
     { 0x002F, "AES128-SHA" },
     { 0x0035, "AES256-SHA" },
-#else
-    { 0x0000, "AES128-GCM-SHA256" },
-    { 0x0000, "AES256-GCM-SHA384" },
-    { 0x0000, "AES128-SHA256" },
-    { 0x0000, "AES256-SHA256" },
-    { 0x0000, "AES128-SHA" },
-    { 0x0000, "AES256-SHA" },
-#endif
     { 0x0000, "DES-CBC3-SHA" },
     { 0x0000, "GIBBERISH" },
     { 0x0000, "" },
