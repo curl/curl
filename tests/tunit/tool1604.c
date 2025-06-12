@@ -39,7 +39,6 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-
 }
 
 #if defined(_WIN32) || defined(MSDOS)

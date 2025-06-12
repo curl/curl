@@ -38,7 +38,6 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-
 }
 
 UNITTEST_START
