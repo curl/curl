@@ -816,7 +816,6 @@ static SOCKET socket_r = INVALID_SOCKET;
 
 SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
 {
-  int stdin_fd;
   int result;
   bool r;
   int rc = 0, socksize = 0;
@@ -911,22 +910,6 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     /* Set the stdin handle to read from the socket. */
     if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
       errorf(global, "SetStdHandle error: %08lx", GetLastError());
-      break;
-    }
-
-    /* Need to redirect file descriptor 0 also. _open_osfhandle makes
-       a new file descriptor from an existing handle. Should always be
-       _O_BINARY. CURL_SET_BINMODE(stdin) is called prior to this
-       function. */
-    stdin_fd = _open_osfhandle((intptr_t)GetStdHandle(STD_INPUT_HANDLE),
-        _O_RDONLY | _O_BINARY);
-    if(stdin_fd == -1) {
-      errorf(global, "stdin_fd == -1 \n");
-      break;
-    }
-
-    if(dup2(stdin_fd, STDIN_FILENO) != 0) {
-      errorf(global, "dup2 != 0 \n");
       break;
     }
 
