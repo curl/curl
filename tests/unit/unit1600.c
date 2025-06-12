@@ -26,22 +26,22 @@
 #include "urldata.h"
 #include "curl_ntlm_core.h"
 
-static CURLcode t1600_setup(CURL *easy)
+static CURLcode t1600_setup(CURL **easy)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
   return res;
 }
 
-static void t1600_stop(CURL *easy)
+static void t1600_stop(CURL **easy)
 {
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(*easy);
   curl_global_cleanup();
 }
 
