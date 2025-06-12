@@ -22,7 +22,7 @@
 #
 ###########################################################################
 # common files used by test programs
-TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h
+TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
