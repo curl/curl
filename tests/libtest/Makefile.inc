@@ -26,7 +26,7 @@ FIRSTFILES = first.c first.h
 # common files used by test programs
 TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
 
-UTILS = memptr.c
+MEMPTR = memptr.c
 
 CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
