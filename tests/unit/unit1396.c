@@ -48,7 +48,7 @@ struct test {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1396_setup)
+  UNITTEST_BEGIN(t1396_setup())
 
   /* unescape, this => that */
   const struct test list1[]={
@@ -115,5 +115,5 @@ static CURLcode test(char *arg)
     curl_free(out);
   }
 
-  UNITTEST_END(t1396_stop)
+  UNITTEST_END(t1396_stop())
 }

@@ -126,5 +126,5 @@ fail:
   Curl_altsvc_cleanup(&asi);
 #endif
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

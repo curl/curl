@@ -104,7 +104,7 @@ unit_test_abort:                                \
 
 #define UNITTEST_BEGIN(setupfunc)               \
   (void)arg;                                    \
-  if(setupfunc()) {                             \
+  if(setupfunc) {                               \
     fail("unit_setup() FAILURE");               \
     return (CURLcode)unitfail;                  \
   }                                             \
@@ -114,5 +114,5 @@ unit_test_abort:                                \
     goto unit_test_abort; /* avoid warning */   \
   }                                             \
 unit_test_abort:                                \
-  stopfunc();                                   \
+  stopfunc;                                     \
   return (CURLcode)unitfail;

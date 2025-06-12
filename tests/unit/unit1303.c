@@ -79,7 +79,7 @@ struct timetest {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1303_setup)
+  UNITTEST_BEGIN(t1303_setup())
 
   struct curltime now;
   unsigned int i;
@@ -153,5 +153,5 @@ static CURLcode test(char *arg)
       fail(run[i].comment);
   }
 
-  UNITTEST_END(t1303_stop)
+  UNITTEST_END(t1303_stop())
 }

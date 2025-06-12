@@ -49,7 +49,7 @@ static void t1600_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1600_setup)
+  UNITTEST_BEGIN(t1600_setup())
 
 #if defined(USE_NTLM) && (!defined(USE_WINDOWS_SSPI) || \
                           defined(USE_WIN32_CRYPTO))
@@ -74,5 +74,5 @@ static CURLcode test(char *arg)
                 "\x36\x9d\xae\x06\x84\x7e\xe1\xc1\x4a\x94\x39\xea\x6f\x44\x8c\x65\x00\x00\x00\x00\x00", 21);
 #endif
 
-  UNITTEST_END(t1600_stop)
+  UNITTEST_END(t1600_stop())
 }

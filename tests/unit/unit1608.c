@@ -44,7 +44,7 @@ static CURLcode t1608_setup(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1608_setup)
+  UNITTEST_BEGIN(t1608_setup())
 
   int i;
   CURLcode code;
@@ -69,7 +69,7 @@ static CURLcode test(char *arg)
 
   abort_unless(addrhead != addrs, "addresses are not being reordered");
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }
 
 #else

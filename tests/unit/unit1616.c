@@ -49,7 +49,7 @@ static void t1616_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1616_setup)
+  UNITTEST_BEGIN(t1616_setup())
 
   int *value, *v;
   int *value2;
@@ -57,7 +57,6 @@ static CURLcode test(char *arg)
 
   unsigned int key = 20;
   unsigned int key2 = 25;
-
 
   value = malloc(sizeof(int));
   abort_unless(value != NULL, "Out of memory");
@@ -85,5 +84,5 @@ static CURLcode test(char *arg)
   v = Curl_uint_hash_get(&t1616_hash_static, key);
   abort_unless(!v, "lookup missing entry failed");
 
-  UNITTEST_END(t1616_stop)
+  UNITTEST_END(t1616_stop())
 }

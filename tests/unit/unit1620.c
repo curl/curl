@@ -71,7 +71,7 @@ static void t1620_parse(
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1620_setup)
+  UNITTEST_BEGIN(t1620_setup())
 
   CURLcode rc;
   struct Curl_easy *empty;
@@ -128,5 +128,5 @@ static CURLcode test(char *arg)
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

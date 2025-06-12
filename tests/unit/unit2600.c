@@ -391,7 +391,7 @@ static struct test_case TEST_CASES[] = {
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t2600_setup)
+  UNITTEST_BEGIN(t2600_setup())
 
   size_t i;
 
@@ -399,5 +399,5 @@ static CURLcode test(char *arg)
     test_connect(&TEST_CASES[i]);
   }
 
-  UNITTEST_END(t2600_stop)
+  UNITTEST_END(t2600_stop())
 }

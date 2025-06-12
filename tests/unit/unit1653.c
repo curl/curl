@@ -216,5 +216,5 @@ fail:
   free(ipv6port);
   curl_url_cleanup(u);
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

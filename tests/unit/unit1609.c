@@ -70,7 +70,7 @@ Test:
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1609_setup)
+  UNITTEST_BEGIN(t1609_setup())
 
   struct testcase {
     /* host:port:address[,address]... */
@@ -213,5 +213,5 @@ error:
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

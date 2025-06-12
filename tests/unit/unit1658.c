@@ -123,7 +123,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1658_setup)
+  UNITTEST_BEGIN(t1658_setup())
 
   /* The "SvcParamKeys" specified within the HTTPS RR packet *must* be
      provided in numerical order. */
@@ -538,7 +538,7 @@ static CURLcode test(char *arg)
     curl_easy_cleanup(easy);
   }
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }
 
 #else /* CURL_DISABLE_DOH or not HTTPSRR enabled */

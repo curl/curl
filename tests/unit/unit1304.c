@@ -45,7 +45,7 @@ static void t1304_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1304_setup)
+  UNITTEST_BEGIN(t1304_setup())
 
   int result;
   struct store_netrc store;
@@ -180,7 +180,7 @@ static CURLcode test(char *arg)
   fail_unless(strncmp(s_login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
 
-  UNITTEST_END(t1304_stop)
+  UNITTEST_END(t1304_stop())
 }
 
 #else

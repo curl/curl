@@ -51,7 +51,7 @@ static void t1302_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1302_setup)
+  UNITTEST_BEGIN(t1302_setup())
 
   char *output;
   unsigned char *decoded;
@@ -189,5 +189,5 @@ static CURLcode test(char *arg)
   fail_unless(size == 0, "size should be 0");
   fail_if(decoded, "returned pointer should be NULL");
 
-  UNITTEST_END(t1302_stop)
+  UNITTEST_END(t1302_stop())
 }

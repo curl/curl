@@ -167,6 +167,6 @@ static CURLcode test(char *arg)
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }
 #endif

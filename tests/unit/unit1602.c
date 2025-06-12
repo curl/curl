@@ -51,7 +51,7 @@ static void t1602_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1602_setup)
+  UNITTEST_BEGIN(t1602_setup())
 
   int *value;
   int *value2;
@@ -80,5 +80,5 @@ static CURLcode test(char *arg)
     free(value2);
   abort_unless(nodep, "insertion into hash failed");
 
-  UNITTEST_END(t1602_stop)
+  UNITTEST_END(t1602_stop())
 }

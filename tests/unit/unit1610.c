@@ -34,7 +34,7 @@ static CURLcode t1610_setup(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1610_setup)
+  UNITTEST_BEGIN(t1610_setup())
 
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
     || defined(USE_LIBSSH2)
@@ -59,5 +59,5 @@ static CURLcode test(char *arg)
                 "\x15\xae", CURL_SHA256_DIGEST_LENGTH);
 #endif
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

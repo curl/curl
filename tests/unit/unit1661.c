@@ -49,7 +49,7 @@ static void t1661_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1661_setup)
+  UNITTEST_BEGIN(t1661_setup())
 
   const char *buffer = NULL;
   CURLcode result = CURLE_OK;
@@ -117,5 +117,5 @@ static CURLcode test(char *arg)
   fail_unless(!bufref.len, "Initial length must be NULL");
   fail_unless(!bufref.dtor, "Destructor must be NULL");
 
-  UNITTEST_END(t1661_stop)
+  UNITTEST_END(t1661_stop())
 }

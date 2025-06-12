@@ -89,7 +89,7 @@ static int verify(const char *info, const char *two)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1652_setup)
+  UNITTEST_BEGIN(t1652_setup())
 
 #if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -164,5 +164,5 @@ static CURLcode test(char *arg)
 #pragma GCC diagnostic pop
 #endif
 
-  UNITTEST_END(t1652_stop)
+  UNITTEST_END(t1652_stop())
 }

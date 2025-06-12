@@ -46,7 +46,7 @@ static void t3212_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t3212_setup)
+  UNITTEST_BEGIN(t3212_setup())
 
   unsigned int i, key, n;
   void *entry;
@@ -130,5 +130,5 @@ static CURLcode test(char *arg)
   fail_unless(Curl_uint_tbl_add(&tbl, &dummy, &key), "failed to add again");
   fail_unless(key == 17, "unexpected key assigned");
 
-  UNITTEST_END(t3212_stop)
+  UNITTEST_END(t3212_stop())
 }

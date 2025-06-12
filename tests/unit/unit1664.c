@@ -45,7 +45,7 @@ static CURLcode t1664_setup(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1664_setup)
+  UNITTEST_BEGIN(t1664_setup())
 
   static const char *wordparse[] = {
     "word",
@@ -484,5 +484,5 @@ static CURLcode test(char *arg)
     }
   }
 
-  UNITTEST_END(curl_global_cleanup)
+  UNITTEST_END(curl_global_cleanup())
 }

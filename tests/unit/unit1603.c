@@ -60,7 +60,7 @@ static void t1603_stop(void)
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1603_setup)
+  UNITTEST_BEGIN(t1603_setup())
 
   char key1[] = "key1";
   char key2[] = "key2b";
@@ -177,5 +177,5 @@ static CURLcode test(char *arg)
   /* Clean up */
   Curl_hash_clean(&t1603_hash_static);
 
-  UNITTEST_END(t1603_stop)
+  UNITTEST_END(t1603_stop())
 }
