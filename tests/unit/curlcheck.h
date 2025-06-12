@@ -109,16 +109,26 @@ unit_test_abort:                                \
     return (CURLcode)unitfail;                  \
   }
 
-#define UNITTEST_BEGIN                          \
+#define UNITTEST_BEGIN_SIMPLE                   \
   (void)arg;                                    \
-  if(unit_setup()) {                            \
+  {
+
+#define UNITTEST_END_SIMPLE                     \
+    goto unit_test_abort; /* avoid warning */   \
+unit_test_abort:                                \
+  }                                             \
+  return (CURLcode)unitfail;
+
+#define UNITTEST_BEGIN(setupfunc)               \
+  (void)arg;                                    \
+  if(setupfunc()) {                             \
     fail("unit_setup() FAILURE");               \
   }                                             \
   else {
 
-#define UNITTEST_END                            \
+#define UNITTEST_END(stopfunc)                  \
     goto unit_test_abort; /* avoid warning */   \
 unit_test_abort:                                \
-    unit_stop();                                \
+    stopfunc();                                 \
   }                                             \
   return (CURLcode)unitfail;

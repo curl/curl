@@ -29,8 +29,7 @@
 
 static CURLcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
-  return res;
+  return CURLE_OK;
 }
 
 static void unit_stop(void)

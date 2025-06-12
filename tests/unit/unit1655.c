@@ -27,13 +27,11 @@
 
 static CURLcode unit_setup(void)
 {
-  /* whatever you want done first */
   return CURLE_OK;
 }
 
 static void unit_stop(void)
 {
-    /* done before shutting down and exiting */
 }
 
 #ifndef CURL_DISABLE_DOH
