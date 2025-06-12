@@ -102,9 +102,9 @@
     else {
 
 #define UNITTEST_STOP                           \
-    goto unit_test_abort; /* avoid warning */   \
+      goto unit_test_abort; /* avoid warning */ \
 unit_test_abort:                                \
-    unit_stop();                                \
-  }                                             \
-  return (CURLcode)unitfail;                    \
+      unit_stop();                              \
+    }                                           \
+    return (CURLcode)unitfail;                  \
   }
