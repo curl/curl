@@ -28,15 +28,6 @@
 #include "http1.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #ifndef CURL_DISABLE_HTTP
 struct tcase {
   const char **input;
@@ -180,7 +171,9 @@ static struct tcase TEST6a = {
 };
 #endif
 
-UNITTEST_START
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
 #ifndef CURL_DISABLE_HTTP
   parse_success(&TEST1a);
@@ -192,4 +185,5 @@ UNITTEST_START
   parse_success(&TEST6a);
 #endif
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

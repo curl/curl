@@ -37,15 +37,6 @@
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
@@ -81,8 +72,10 @@ static const char *filecontents[] = {
 #pragma GCC diagnostic warning "-Woverlength-strings"
 #endif
 
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
-UNITTEST_START
   size_t i;
   int rc = 0;
   for(i = 0; i < NUMTESTS; i++) {
@@ -170,21 +163,20 @@ UNITTEST_START
     curl_mfprintf(stderr, "OK\n");
   }
   return (CURLcode)rc;
-UNITTEST_STOP
+
+  UNITTEST_END_SIMPLE
+}
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
 #else
-static CURLcode unit_setup(void)
+
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
 }
-static void unit_stop(void)
-{
-}
-UNITTEST_START
-UNITTEST_STOP
 
 #endif

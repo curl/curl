@@ -28,26 +28,22 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #ifndef USE_XATTR
 /* stripcredentials isn't available in this case */
 
-UNITTEST_START
-UNITTEST_STOP
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
 #else
 
 char *stripcredentials(const char *url);
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   struct checkthis {
     const char *input;
     const char *output;
@@ -87,6 +83,7 @@ UNITTEST_START
     fail_if(strcmp(tests[i].output, strippedstr), tests[i].output);
     curl_free(stripped);
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 #endif

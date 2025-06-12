@@ -25,15 +25,6 @@
 
 #include "vtls/cipher_suite.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 
 struct test_cs_entry {
@@ -527,8 +518,10 @@ static const struct test_str_entry test_str_list[] = {
   { 0x0000, "" },
 };
 
-UNITTEST_START
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   for(size_t i = 0; i < CURL_ARRAYSIZE(test_cs_list); i++) {
     const struct test_cs_entry *test = &test_cs_list[i];
     const char *expect;
@@ -624,12 +617,16 @@ UNITTEST_START
       i++;
     }
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else /* defined(USE_MBEDTLS) */
 
-UNITTEST_START
-UNITTEST_STOP
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+  UNITTEST_END_SIMPLE
+}
 
 #endif /* defined(USE_MBEDTLS) || defined(USE_RUSTLS) */

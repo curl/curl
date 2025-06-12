@@ -31,16 +31,9 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode test(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
   const char *values[] = {
     /* -E parameter */        /* exp. cert name */  /* exp. passphrase */
@@ -129,4 +122,5 @@ UNITTEST_START
       free(passphrase);
   }
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

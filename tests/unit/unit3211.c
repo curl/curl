@@ -27,11 +27,6 @@
 #include "uint-bset.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
 static unsigned int s1[] = {  /* spread numbers, some at slot edges */
   0, 1, 4, 17, 63, 64, 65, 66,
   90, 99,
@@ -140,14 +135,12 @@ static void check_set(const char *name, unsigned int capacity,
   Curl_uint_bset_destroy(&bset);
 }
 
-static void unit_stop(void)
+static CURLcode test(char *arg)
 {
-}
-
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
   check_set("s1", 100, s1, CURL_ARRAYSIZE(s1));
   check_set("s2", 1000, s2, CURL_ARRAYSIZE(s2));
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

@@ -25,16 +25,6 @@
 #include "vssh/curl_path.h"
 #include "memdebug.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
-
 struct set {
   const char *cp;
   const char *expect; /* the returned content */
@@ -43,9 +33,12 @@ struct set {
   CURLcode result;
 };
 
-UNITTEST_START
-#ifdef USE_SSH
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
+#ifdef USE_SSH
+
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
@@ -113,11 +106,12 @@ UNITTEST_START
   }
 
   free(CURL_UNCONST(list[0].cp));
-}
+
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
 #endif
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

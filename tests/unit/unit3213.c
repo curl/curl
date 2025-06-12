@@ -27,11 +27,6 @@
 #include "uint-spbset.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
 static unsigned int s1_3213[] = {  /* spread numbers, some at slot edges */
   0, 1, 4, 17, 63, 64, 65, 66,
   90, 99,
@@ -113,15 +108,13 @@ static void check_spbset(const char *name, unsigned int *s, size_t slen)
   Curl_uint_spbset_destroy(&bset);
 }
 
-static void unit_stop(void)
+static CURLcode test(char *arg)
 {
-}
-
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
   check_spbset("s1", s1_3213, CURL_ARRAYSIZE(s1_3213));
   check_spbset("s2", s2_3213, CURL_ARRAYSIZE(s2_3213));
   check_spbset("s3", s3_3213, CURL_ARRAYSIZE(s3_3213));
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

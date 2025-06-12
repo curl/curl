@@ -44,8 +44,10 @@ static void unit_stop(void)
   Curl_uint_tbl_destroy(&tbl);
 }
 
-static void check3212(void)
+static CURLcode test(char *arg)
 {
+  UNITTEST_BEGIN(unit_setup)
+
   unsigned int i, key, n;
   void *entry;
 
@@ -127,10 +129,6 @@ static void check3212(void)
   Curl_uint_tbl_remove(&tbl, 17);
   fail_unless(Curl_uint_tbl_add(&tbl, &dummy, &key), "failed to add again");
   fail_unless(key == 17, "unexpected key assigned");
+
+  UNITTEST_END(unit_stop)
 }
-
-UNITTEST_START
-
-check3212();
-
-UNITTEST_STOP
