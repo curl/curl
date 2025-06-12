@@ -28,21 +28,13 @@
 
 #include "memdebug.h" /* LAST include file */
 
-#ifndef USE_XATTR
-/* stripcredentials isn't available in this case */
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  UNITTEST_END_SIMPLE
-}
-#else
 
-char *stripcredentials(const char *url);
+#ifdef USE_XATTR  /* Required for stripcredentials() */
 
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
+  char *stripcredentials(const char *url);
 
   struct checkthis {
     const char *input;
@@ -83,7 +75,7 @@ static CURLcode test(char *arg)
     fail_if(strcmp(tests[i].output, strippedstr), tests[i].output);
     curl_free(stripped);
   }
+#endif
 
   UNITTEST_END_SIMPLE
 }
-#endif
