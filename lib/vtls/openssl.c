@@ -769,8 +769,11 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     if(CURLE_AGAIN == result)
       BIO_set_retry_read(bio);
   }
-  else if(nread == 0) {
-    connssl->peer_closed = TRUE;
+  else {
+    /* feeding data to OpenSSL means SSL_read() might succeed */
+    connssl->input_pending = TRUE;
+    if(nread == 0)
+      connssl->peer_closed = TRUE;
   }
 
   /* Before returning server replies to the SSL instance, we need
@@ -5216,13 +5219,8 @@ static bool ossl_data_pending(struct Curl_cfilter *cf,
                               const struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
-
   (void)data;
-  DEBUGASSERT(connssl && octx);
-  if(octx->ssl && SSL_pending(octx->ssl))
-    return TRUE;
-  return FALSE;
+  return connssl->input_pending;
 }
 
 static ssize_t ossl_send(struct Curl_cfilter *cf,
@@ -5415,6 +5413,15 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
   }
 
 out:
+  if(!nread || ((nread < 0) && (*curlcode == CURLE_AGAIN))) {
+    /* This happens when:
+     * - we read an EOF
+     * - OpenSSLs buffers are empty, there is no more data
+     * - OpenSSL read is blocked on writing something first
+     * - an incomplete TLS packet is buffered that cannot be read
+     *   until more data arrives */
+    connssl->input_pending = FALSE;
+  }
   return nread;
 }
 

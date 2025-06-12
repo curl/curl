@@ -127,6 +127,7 @@ struct ssl_connect_data {
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
   BIT(prefs_checked);               /* SSL preferences have been checked */
+  BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
 
