@@ -88,7 +88,6 @@ foreach my $src (@src) {
                 print "#undef $symb\n";
                 print "#define $symb ${symb}_$name\n";
             }
-            print "CURLcode test_$name(char *URL);\n";
             print "#include \"$src\"\n";
             foreach my $symb ("test", "unit_setup", "unit_stop") {
                 print "#undef $symb\n";
