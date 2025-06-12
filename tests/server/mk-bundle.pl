@@ -80,11 +80,15 @@ foreach my $src (@src) {
         }
         else {
             # Make common symbols unique across sources
-            print "#undef main\n";
-            print "#define main main_$name\n";
+            foreach my $symb ("main") {
+                print "#undef $symb\n";
+                print "#define $symb ${symb}_$name\n";
+            }
             print "int main_$name(int argc, char **argv);\n";
             print "#include \"$src\"\n";
-            print "#undef main\n";
+            foreach my $symb ("main") {
+                print "#undef $symb\n";
+            }
             print "\n";
             $tlist .= "  {\"$name\", main_$name},\n";
         }
