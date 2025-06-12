@@ -54,6 +54,10 @@ int main(void)
 }
 ~~~
 
+# DEPRECATED
+
+Deprecated since 8.15.0.
+
 # %AVAILABILITY%
 
 # RETURN VALUE
