@@ -121,7 +121,8 @@ static CURLcode test(char *arg)
       }
       else {
         if(d == DOH_OK) {
-          fail_unless(olen <= sizeof(victim.dohbuffer), "wrote outside bounds");
+          fail_unless(olen <= sizeof(victim.dohbuffer),
+            "wrote outside bounds");
           fail_unless(olen > strlen(name), "unrealistic low size");
         }
       }
