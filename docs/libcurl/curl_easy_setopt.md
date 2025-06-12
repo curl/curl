@@ -1118,7 +1118,7 @@ Enable use of ALPN. See CURLOPT_SSL_ENABLE_ALPN(3)
 
 ## CURLOPT_SSL_FALSESTART
 
-Enable TLS False Start. See CURLOPT_SSL_FALSESTART(3)
+**Deprecated option** Enable TLS False Start. See CURLOPT_SSL_FALSESTART(3)
 
 ## CURLOPT_SSL_OPTIONS
 
