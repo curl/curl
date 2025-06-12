@@ -25,21 +25,35 @@
 
 # Bundle up individual tests into a single binary. The resulting binary can run
 # individual tests by passing their name (without '.c') as the first argument.
-#
-# Usage: mk-bundle.pl <c-files>
 
 use strict;
 use warnings;
 
+if(!@ARGV) {
+    die "Usage: $0 [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
+}
+
+# Specific sources to exclude or add as an extra source file
 my @src;
 my %exclude;
+my %util;
 my $in_exclude = 0;
+my $in_util = 0;
 foreach my $src (@ARGV) {
     if($in_exclude) {
         $exclude{$src} = 1;
     }
+    elsif($in_util) {
+        $util{$src} = 1;
+        push @src, $src;
+    }
     elsif($src eq "--exclude") {
         $in_exclude = 1;
+        $in_util = 0;
+    }
+    elsif($src eq "--util") {
+        $in_exclude = 0;
+        $in_util = 1;
     }
     else {
         push @src, $src;
@@ -59,15 +73,22 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/) {
         my $name = $1;
-        # Make common symbols unique across test sources
-        foreach my $symb ("test", "unit_setup", "unit_stop") {
-            print "#undef $symb\n";
-            print "#define $symb ${symb}_$name\n";
+        if(exists $util{$src}) {
+            if(!exists $exclude{$src}) {
+                print "#include \"$src\"\n\n";  # Misc .c source to include
+            }
         }
+        else {
+            # Make common symbols unique across test sources
+            foreach my $symb ("test", "unit_setup", "unit_stop") {
+                print "#undef $symb\n";
+                print "#define $symb ${symb}_$name\n";
+            }
 
-        print "#include \"$src\"\n";
-        print "\n";
-        $tlist .= "  {\"$name\", test_$name},\n";
+            print "#include \"$src\"\n";
+            print "\n";
+            $tlist .= "  {\"$name\", test_$name},\n";
+        }
     }
 }
 
