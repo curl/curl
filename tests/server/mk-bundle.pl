@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
@@ -54,6 +54,10 @@ foreach my $src (@ARGV) {
     elsif($src eq "--util") {
         $in_exclude = 0;
         $in_util = 1;
+    }
+    elsif($src eq "--input") {
+        $in_exclude = 0;
+        $in_util = 0;
     }
     else {
         push @src, $src;
