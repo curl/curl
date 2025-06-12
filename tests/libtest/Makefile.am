@@ -41,7 +41,7 @@ AM_CPPFLAGS =                    \
   -I$(top_srcdir)/tests/libtest  \
   -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (TESTS, TESTUTIL, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (TESTS, TESTUTILS, UTILS, FIRSTFILES)
 include Makefile.inc
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
@@ -96,7 +96,7 @@ libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c
-libtests_SOURCES = $(TESTUTIL)
+libtests_SOURCES = $(TESTUTILS)
 CLEANFILES += libtest_bundle.c
 
 if USE_CPPFLAG_CURL_STATICLIB
