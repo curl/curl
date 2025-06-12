@@ -1954,7 +1954,8 @@ typedef enum {
   CURLOPT(CURLOPT_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 232),
 
   /* Set if we should enable TLS false start. */
-  CURLOPT(CURLOPT_SSL_FALSESTART, CURLOPTTYPE_LONG, 233),
+  CURLOPTDEPRECATED(CURLOPT_SSL_FALSESTART, CURLOPTTYPE_LONG, 233,
+                    8.15.0, "Has no function"),
 
   /* Do not squash dot-dot sequences */
   CURLOPT(CURLOPT_PATH_AS_IS, CURLOPTTYPE_LONG, 234),
