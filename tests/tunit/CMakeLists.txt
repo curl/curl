@@ -44,9 +44,9 @@ target_include_directories(tunits PRIVATE
   "${PROJECT_SOURCE_DIR}/src"
   "${PROJECT_SOURCE_DIR}/tests/libtest"
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
+  "${PROJECT_SOURCE_DIR}/tests/tunit"
 )
 set_property(TARGET tunits APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-target_include_directories(tunits PRIVATE "${PROJECT_SOURCE_DIR}/tests/tunit")
 set_target_properties(tunits PROPERTIES
   OUTPUT_NAME "tunits"
   PROJECT_LABEL "Test tunits")
