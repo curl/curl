@@ -43,9 +43,7 @@ UTILS = \
   util.h \
   server_setup.h
 
-FIRSTFILES = \
-  first.c \
-  first.h
+FIRSTFILES = first.c first.h
 
 TESTS = \
   dnsd.c \
