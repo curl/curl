@@ -38,35 +38,31 @@ add_custom_command(
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 
-set(SERVERPROGS "servers")
 set(servers_SOURCES ${MEMDEBUG} ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} "server_bundle.c")
 
-foreach(_target IN LISTS SERVERPROGS)
-  set(_target_name "${_target}")
-  add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
-  add_dependencies(testdeps ${_target_name})
-  target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/lib/curlx"     # for curlx
-    "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
-    "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
-  )
-  target_link_libraries(${_target_name} ${CURL_LIBS})
-  if(ENABLE_SERVER_DEBUG)
-    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-  endif()
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
-  # Test servers simply are standalone programs that do not use libcurl
-  # library.  For convenience and to ease portability of these servers,
-  # some source code files from the libcurl subdirectory are also used
-  # to build the servers.  In order to achieve proper linkage of these
-  # files on Windows targets it is necessary to build the test servers
-  # with CURL_STATICLIB defined, independently of how libcurl is built.
-  if(WIN32)
-    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
-  endif()
-  set_target_properties(${_target_name} PROPERTIES
-    OUTPUT_NAME "${_target}"
-    PROJECT_LABEL "Test server ${_target}")
-endforeach()
+add_executable(servers EXCLUDE_FROM_ALL ${${_target}_SOURCES})
+add_dependencies(testdeps servers)
+target_include_directories(servers PRIVATE
+  "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
+  "${PROJECT_SOURCE_DIR}/lib/curlx"     # for curlx
+  "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
+  "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
+)
+target_link_libraries(servers ${CURL_LIBS})
+if(ENABLE_SERVER_DEBUG)
+  set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+endif()
+set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
+# Test servers simply are standalone programs that do not use libcurl
+# library.  For convenience and to ease portability of these servers,
+# some source code files from the libcurl subdirectory are also used
+# to build the servers.  In order to achieve proper linkage of these
+# files on Windows targets it is necessary to build the test servers
+# with CURL_STATICLIB defined, independently of how libcurl is built.
+if(WIN32)
+  set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+endif()
+set_target_properties(servers PROPERTIES
+  OUTPUT_NAME "servers"
+  PROJECT_LABEL "Test servers")
