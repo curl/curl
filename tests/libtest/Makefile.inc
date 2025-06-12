@@ -26,7 +26,9 @@ TESTUTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
-UTILS = \
+UTILS = memptr.c
+
+CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/warnless.h \
   ../../lib/curlx/multibyte.c \
@@ -35,7 +37,6 @@ UTILS = \
   ../../lib/curlx/timediff.h \
   ../../lib/curl_threads.c \
   ../../lib/curl_threads.h \
-  memptr.c
 
 TESTFILES = libauthretry.c libntlmconnect.c libprereq.c                                     \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c lib508.c lib509.c \

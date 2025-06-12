@@ -41,7 +41,7 @@ AM_CPPFLAGS =                    \
   -I$(top_srcdir)/tests/libtest  \
   -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (TESTFILES, TESTUTILS, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (TESTFILES, TESTUTILS, CURLX_SRCS, UTILS, FIRSTFILES)
 include Makefile.inc
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
@@ -102,7 +102,7 @@ CLEANFILES += libtest_bundle.c
 if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(UTILS)
+libtests_SOURCES += $(CURLX_SRCS) $(UTILS)
 endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
