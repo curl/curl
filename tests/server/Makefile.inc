@@ -40,7 +40,7 @@ CURLX_SRCS = \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/version_win32.c \
   ../../lib/curlx/warnless.c \
-  ../../lib/curlx/winapi.c \
+  ../../lib/curlx/winapi.c
 
 TESTFILES = \
   dnsd.c \

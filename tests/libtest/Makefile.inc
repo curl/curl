@@ -36,7 +36,7 @@ CURLX_SRCS = \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timediff.h \
   ../../lib/curl_threads.c \
-  ../../lib/curl_threads.h \
+  ../../lib/curl_threads.h
 
 TESTFILES = libauthretry.c libntlmconnect.c libprereq.c                                     \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c lib508.c lib509.c \
