@@ -28,6 +28,8 @@ FIRSTFILES = \
   ../libtest/first.c \
   ../libtest/first.h
 
+UTILS = curlcheck.h
+
 # These are all unit test programs
 TESTFILES = \
   unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c unit1307.c \
