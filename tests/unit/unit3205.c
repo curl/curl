@@ -25,11 +25,11 @@
 
 #include "vtls/cipher_suite.h"
 
-#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
+
+#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 
   struct test_cs_entry {
     uint16_t id;
@@ -617,16 +617,7 @@ static CURLcode test(char *arg)
       i++;
     }
   }
-
-  UNITTEST_END_SIMPLE
-}
-
-#else /* defined(USE_MBEDTLS) */
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
-  UNITTEST_END_SIMPLE
-}
-
 #endif /* defined(USE_MBEDTLS) || defined(USE_RUSTLS) */
+
+  UNITTEST_END_SIMPLE
+}
