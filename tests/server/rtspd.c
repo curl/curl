@@ -1000,7 +1000,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 }
 
 
-int main(int argc, char *argv[])
+static int main(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

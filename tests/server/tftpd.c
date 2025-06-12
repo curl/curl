@@ -528,7 +528,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   return j;
 }
 
-int main(int argc, char **argv)
+static int main(int argc, char **argv)
 {
   srvr_sockaddr_union_t me;
   struct tftphdr *tp;

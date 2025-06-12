@@ -1989,7 +1989,7 @@ static int service_connection(curl_socket_t msgsock,
   return -1;
 }
 
-int main(int argc, char *argv[])
+static int main(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

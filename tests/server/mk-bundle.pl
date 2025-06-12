@@ -88,7 +88,6 @@ foreach my $src (@src) {
                 print "#undef $symb\n";
                 print "#define $symb ${symb}_$name\n";
             }
-            print "int main_$name(int argc, char **argv);\n";
             print "#include \"$src\"\n";
             foreach my $symb ("main") {
                 print "#undef $symb\n";
