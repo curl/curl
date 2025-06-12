@@ -474,7 +474,8 @@ static CURLcode test(char *arg)
     { 0x0000, "" },
   };
 
-  for(size_t i = 0; i < CURL_ARRAYSIZE(test_cs_list); i++) {
+  size_t i;
+  for(i = 0; i < CURL_ARRAYSIZE(test_cs_list); i++) {
     const struct test_cs_entry *test = &test_cs_list[i];
     const char *expect;
     char buf[64] = "";
