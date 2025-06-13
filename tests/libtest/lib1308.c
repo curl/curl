@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include <curl/curl.h>
-
 static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);

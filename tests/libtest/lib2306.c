@@ -25,8 +25,6 @@
 #include "test.h"
 #include "testtrace.h"
 
-#include <curl/curl.h>
-
 static CURLcode test_lib2306(char *URL)
 {
   /* first a fine GET response, then a bad one */

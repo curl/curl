@@ -30,8 +30,6 @@
 #include <netinet/in6.h>
 #endif
 
-#include <curl/curl.h>
-
 #include "cf-socket.h"
 
 #include "memdebug.h" /* LAST include file */

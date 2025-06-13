@@ -25,8 +25,6 @@
 #include "test.h"
 #include "testtrace.h"
 
-#include <curl/curl.h>
-
 static size_t cb_curl(char *buffer, size_t size, size_t nmemb, void *userp)
 {
   (void)buffer;
