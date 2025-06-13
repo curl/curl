@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-static CURL *hnd;
-
 static CURLcode t1396_setup(void)
 {
   CURLcode res = CURLE_OK;
@@ -32,10 +30,10 @@ static CURLcode t1396_setup(void)
   return res;
 }
 
-static void t1396_stop(void)
+static void t1396_stop(CURL *easy)
 {
-  if(hnd)
-    curl_easy_cleanup(hnd);
+  if(easy)
+    curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
@@ -48,6 +46,8 @@ struct test {
 
 static CURLcode test(char *arg)
 {
+  CURL *easy;
+
   UNITTEST_BEGIN(t1396_setup())
 
   /* unescape, this => that */
@@ -82,11 +82,11 @@ static CURLcode test(char *arg)
   };
   int i;
 
-  hnd = curl_easy_init();
-  abort_unless(hnd != NULL, "returned NULL!");
+  easy = curl_easy_init();
+  abort_unless(easy != NULL, "returned NULL!");
   for(i = 0; list1[i].in; i++) {
     int outlen;
-    char *out = curl_easy_unescape(hnd,
+    char *out = curl_easy_unescape(easy,
                                    list1[i].in, list1[i].inlen,
                                    &outlen);
 
@@ -102,7 +102,7 @@ static CURLcode test(char *arg)
 
   for(i = 0; list2[i].in; i++) {
     int outlen;
-    char *out = curl_easy_escape(hnd, list2[i].in, list2[i].inlen);
+    char *out = curl_easy_escape(easy, list2[i].in, list2[i].inlen);
     abort_unless(out != NULL, "returned NULL!");
 
     outlen = (int)strlen(out);
@@ -115,5 +115,5 @@ static CURLcode test(char *arg)
     curl_free(out);
   }
 
-  UNITTEST_END(t1396_stop())
+  UNITTEST_END(t1396_stop(easy))
 }
