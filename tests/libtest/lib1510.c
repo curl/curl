@@ -27,10 +27,10 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define NUM_URLS 4
-
 static CURLcode test_lib1510(char *URL)
 {
+  static const int NUM_URLS = 4;
+
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   int i;
