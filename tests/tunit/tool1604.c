@@ -60,13 +60,6 @@ static char *getcurlcodestr(int cc)
   }
   return buf;
 }
-
-struct data {
-  const char *input;
-  int flags;
-  const char *expected_output;
-  SANITIZEcode expected_result;
-};
 #endif
 
 static CURLcode test(char *arg)
@@ -74,6 +67,13 @@ static CURLcode test(char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #if defined(_WIN32) || defined(MSDOS)
+  struct data {
+    const char *input;
+    int flags;
+    const char *expected_output;
+    SANITIZEcode expected_result;
+  };
+
   /* START sanitize_file_name */
   struct data data[] = {
     { "", 0,
