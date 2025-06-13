@@ -40,7 +40,7 @@ static int pending_num = 0;
 static CURLcode t1565_test_failure = CURLE_OK;
 
 static CURLM *testmulti = NULL;
-static const char *url;
+static const char *t1565_url;
 
 static void *t1565_run_thread(void *ptr)
 {
@@ -55,7 +55,7 @@ static void *t1565_run_thread(void *ptr)
 
     easy_init(easy);
 
-    easy_setopt(easy, CURLOPT_URL, url);
+    easy_setopt(easy, CURLOPT_URL, t1565_url);
     easy_setopt(easy, CURLOPT_VERBOSE, 0L);
 
     pthread_mutex_lock(&lock);
@@ -108,7 +108,7 @@ static CURLcode test(char *URL)
 
   multi_init(testmulti);
 
-  url = URL;
+  t1565_url = URL;
 
   result = pthread_create(&tid, NULL, t1565_run_thread, NULL);
   if(!result)
