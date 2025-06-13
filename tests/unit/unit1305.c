@@ -40,19 +40,12 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *t1305_easy;
 static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
 static CURLcode t1305_setup(void)
 {
-  t1305_easy = curl_easy_init();
-  if(!t1305_easy) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
-  }
-
   Curl_dnscache_init(&hp, 7);
   return CURLE_OK;
 }
@@ -65,9 +58,6 @@ static void t1305_stop(void)
   }
   free(data_key);
   Curl_dnscache_destroy(&hp);
-
-  curl_easy_cleanup(t1305_easy);
-  curl_global_cleanup();
 }
 
 static struct Curl_addrinfo *fake_ai(void)
