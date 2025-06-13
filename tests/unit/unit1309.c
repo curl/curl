@@ -61,19 +61,19 @@ static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-/* number of nodes to add to the splay tree */
-#define NUM_NODES 50
+  /* number of nodes to add to the splay tree */
+  static const int num_nodes = 50;
 
   struct Curl_tree *root, *removed;
-  struct Curl_tree nodes[NUM_NODES*3];
-  size_t storage[NUM_NODES*3];
+  struct Curl_tree nodes[num_nodes*3];
+  size_t storage[num_nodes*3];
   int rc;
   int i, j;
   struct curltime tv_now = {0, 0};
   root = NULL;              /* the empty tree */
 
   /* add nodes */
-  for(i = 0; i < NUM_NODES; i++) {
+  for(i = 0; i < num_nodes; i++) {
     struct curltime key;
 
     key.tv_sec = 0;
@@ -86,8 +86,8 @@ static CURLcode test(char *arg)
   puts("Result:");
   splayprint(root, 0, 1);
 
-  for(i = 0; i < NUM_NODES; i++) {
-    int rem = (i + 7)%NUM_NODES;
+  for(i = 0; i < num_nodes; i++) {
+    int rem = (i + 7)%num_nodes;
     printf("Tree look:\n");
     splayprint(root, 0, 1);
     curl_mprintf("remove pointer %d, payload %zu\n", rem,
@@ -103,7 +103,7 @@ static CURLcode test(char *arg)
   fail_unless(root == NULL, "tree not empty after removing all nodes");
 
   /* rebuild tree */
-  for(i = 0; i < NUM_NODES; i++) {
+  for(i = 0; i < num_nodes; i++) {
     struct curltime key;
 
     key.tv_sec = 0;
