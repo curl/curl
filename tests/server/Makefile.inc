@@ -50,5 +50,5 @@ TESTFILES = \
   sockfilt.c \
   socksd.c \
   sws.c \
-  tftpd.c tftp.h \
+  tftpd.c \
   server_sockaddr.h
