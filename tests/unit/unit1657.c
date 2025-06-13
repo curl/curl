@@ -33,7 +33,8 @@ struct test1657_spec {
   CURLcode exp_result;
 };
 
-static CURLcode make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
+static CURLcode make1657_nested(const struct test1657_spec *spec,
+                                struct dynbuf *buf)
 {
   CURLcode r;
   size_t i;
@@ -60,7 +61,7 @@ static const struct test1657_spec test1657_specs[] = {
   { make1657_nested, 1024, CURLE_BAD_FUNCTION_ARGUMENT },
 };
 
-static bool do_test1657(struct test1657_spec *spec, size_t i,
+static bool do_test1657(const struct test1657_spec *spec, size_t i,
                         struct dynbuf *buf)
 {
   CURLcode result;
