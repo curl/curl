@@ -31,7 +31,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--test] [<tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>] --srcdir <srcdir>\n";
+    die "Usage: $0 [--test <tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>] [--srcdir <srcdir>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
