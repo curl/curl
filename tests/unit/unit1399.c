@@ -26,8 +26,6 @@
 #include "urldata.h"
 #include "progress.h"
 
-static int usec_magnitude = 1000000;
-
 /*
  * Invoke Curl_pgrsTime for TIMER_STARTSINGLE to trigger the behavior that
  * manages is_t_startransfer_set, but fake the t_startsingle time for purposes
@@ -44,6 +42,8 @@ static void fake_t_startsingle_time(struct Curl_easy *data,
 
 static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
 {
+  static int usec_magnitude = 1000000;
+
   int time_sec = (int)(time_usec / usec_magnitude);
   bool same = (time_sec == expected_seconds);
   curl_mfprintf(stderr, "is %d us same as %d seconds? %s\n",
