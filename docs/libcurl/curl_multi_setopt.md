@@ -68,6 +68,10 @@ CURLMOPT_MAX_HOST_CONNECTIONS(3)
 
 Max simultaneously open connections. See CURLMOPT_MAX_TOTAL_CONNECTIONS(3)
 
+## CURLMOPT_NETWORK_CHANGED
+
+Signal that the network has changed. See CURLMOPT_NETWORK_CHANGED(3)
+
 ## CURLMOPT_PIPELINING
 
 Enable HTTP multiplexing. See CURLMOPT_PIPELINING(3)
