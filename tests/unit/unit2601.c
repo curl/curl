@@ -76,12 +76,12 @@ static void dump_bufq(struct bufq *q, const char *msg)
   curl_mfprintf(stderr, "- spares: %zu\n", n);
 }
 
-static unsigned char test_data[32*1024];
-
 static void check_bufq(size_t pool_spares,
                        size_t chunk_size, size_t max_chunks,
                        size_t wsize, size_t rsize, int opts)
 {
+  static unsigned char test_data[32*1024];
+
   struct bufq q;
   struct bufc_pool pool;
   size_t max_len = chunk_size * max_chunks;
