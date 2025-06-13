@@ -843,7 +843,7 @@ static bool url_match_connect_config(struct connectdata *conn,
                                      struct url_conn_match *m)
 {
   /* connect-only or to-be-closed connections will not be reused */
-  if(conn->connect_only || conn->bits.close)
+  if(conn->connect_only || conn->bits.close || conn->bits.no_reuse)
     return FALSE;
 
   /* ip_version must match */

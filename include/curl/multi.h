@@ -395,6 +395,9 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* network has changed, adjust caches/connection reuse */
+  CURLOPT(CURLMOPT_NETWORK_CHANGED, CURLOPTTYPE_LONG, 17),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 

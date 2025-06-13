@@ -3235,6 +3235,18 @@ CURLMcode curl_multi_setopt(CURLM *m,
       multi->max_concurrent_streams = (unsigned int)streams;
     }
     break;
+  case CURLMOPT_NETWORK_CHANGED: {
+      long val = va_arg(param, long);
+      if(val >= 2) {
+        /* clear DNS cache */
+        Curl_dnscache_clear(multi->admin);
+      }
+      if(val >= 1) {
+        /* do not reuse existing connections */
+        Curl_cpool_nw_changed(multi->admin);
+      }
+    break;
+  }
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;

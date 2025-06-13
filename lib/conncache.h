@@ -163,4 +163,8 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
                           struct connectdata *conn,
                           Curl_cpool_conn_do_cb *cb, void *cbdata);
 
+/* Close all unused connections, prevent reuse of existing ones. */
+void Curl_cpool_nw_changed(struct Curl_easy *data);
+
+
 #endif /* HEADER_CURL_CONNCACHE_H */
