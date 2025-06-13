@@ -25,15 +25,15 @@
 
 #include "timeval.h"
 
-struct a {
-  struct curltime first;
-  struct curltime second;
-  time_t result;
-};
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
+
+  struct a {
+    struct curltime first;
+    struct curltime second;
+    time_t result;
+  };
 
   struct a tests[] = {
     { {36762, 8345 }, {36761, 995926 }, 13 },
@@ -41,6 +41,7 @@ static CURLcode test(char *arg)
     { {36761, 995926 }, {0, 0}, 36761995 },
     { {0, 0}, {36761, 995926 }, -36761995 },
   };
+
   size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
