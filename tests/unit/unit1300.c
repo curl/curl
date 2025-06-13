@@ -25,10 +25,6 @@
 
 #include "llist.h"
 
-static struct Curl_llist llist;
-
-static struct Curl_llist llist_destination;
-
 static void test_Curl_llist_dtor(void *key, void *value)
 {
   /* used by the llist API, does nothing here */
@@ -39,6 +35,9 @@ static void test_Curl_llist_dtor(void *key, void *value)
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
+
+  struct Curl_llist llist;
+  struct Curl_llist llist_destination;
 
   int unusedData_case1 = 1;
   int unusedData_case2 = 2;
