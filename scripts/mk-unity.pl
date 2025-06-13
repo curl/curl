@@ -42,11 +42,11 @@ my @src;
 my %exclude;
 my $in_exclude = 0;
 foreach my $src (@ARGV) {
-    if($in_exclude) {
-        $exclude{$src} = 1;
-    }
-    elsif($src eq "--exclude") {
+    if($src eq "--exclude") {
         $in_exclude = 1;
+    }
+    elsif($in_exclude) {
+        $exclude{$src} = 1;
     }
     else {
         push @src, $src;
@@ -59,7 +59,7 @@ HEADER
     ;
 
 foreach my $src (@src) {
-    if($src =~ /\.c$/g && !exists $exclude{$src}) {
+    if($src =~ /\.c$/ && !exists $exclude{$src}) {
         if(-e "$srcdir/$src") {
             print "#include \"$srcdir/$src\"\n";
         }
