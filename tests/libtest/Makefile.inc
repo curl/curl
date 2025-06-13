@@ -38,7 +38,7 @@ CURLX_SRCS = \
   ../../lib/curl_threads.c \
   ../../lib/curl_threads.h
 
-TESTFILES = libntlmconnect.c libprereq.c                                                    \
+TESTFILES = libprereq.c                                                                     \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c lib508.c lib509.c \
   lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c lib516.c lib517.c lib518.c lib519.c \
   lib520.c lib521.c lib523.c lib524.c lib525.c lib526.c                   lib530.c          \
@@ -77,7 +77,7 @@ TESTFILES = libntlmconnect.c libprereq.c                                        
   lib1945.c           lib1947.c lib1948.c lib1955.c lib1956.c lib1957.c lib1958.c lib1959.c \
   lib1960.c lib1964.c \
   lib1970.c lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c lib1978.c \
-  lib2023.c \
+  lib2023.c lib2032.c \
   lib2301.c lib2302.c lib2304.c lib2306.c lib2308.c lib2309.c \
   lib2402.c lib2404.c lib2405.c \
   lib2502.c \
