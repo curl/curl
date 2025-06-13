@@ -71,7 +71,7 @@ server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
 server_bundle.c: $(top_srcdir)/tests/mk-bundle.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --first --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --input $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c

@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--first] [--input] [<inputs>] [--include <include-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--test] [<tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
@@ -39,9 +39,9 @@ my %exclude;
 my %include;
 my $in_exclude = 0;
 my $in_include = 0;
-my $first = 0;  # enclose generated code between first.h and first.c
+my $any_test = 0;
 foreach my $src (@ARGV) {
-    if($src eq "--input") {
+    if($src eq "--test") {
         $in_exclude = 0;
         $in_include = 0;
     }
@@ -53,9 +53,6 @@ foreach my $src (@ARGV) {
         $in_exclude = 0;
         $in_include = 1;
     }
-    elsif($src eq "--first") {
-        $first = 1;
-    }
     elsif($in_exclude) {
         $exclude{$src} = 1;
     }
@@ -65,11 +62,12 @@ foreach my $src (@ARGV) {
     }
     else {
         push @src, $src;
+        $any_test = 1;
     }
 }
 
 print "/* !checksrc! disable COPYRIGHT all */\n\n";
-if($first) {
+if($any_test) {
     print "#include \"first.h\"\n\n";
 }
 
@@ -92,10 +90,7 @@ foreach my $src (@src) {
     }
 }
 
-if($tlist ne "") {
+if($any_test) {
     print "static const struct entry_s s_entries[] = {\n$tlist};\n";
-}
-
-if($first) {
     print "\n#include \"first.c\"\n";
 }
