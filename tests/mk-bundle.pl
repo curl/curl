@@ -93,9 +93,11 @@ foreach my $src (@src) {
     }
 }
 
+if($tlist ne "") {
+    print "static const struct entry_s s_entries[] = {\n$tlist};\n";
+}
+
 print <<FOOTER
-static const struct entry_s s_entries[] = {
-$tlist};
 
 #include "first.c"
 FOOTER
