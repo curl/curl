@@ -27,6 +27,7 @@ smtp
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 SMTP CRAM-MD5 authentication

@@ -62,6 +62,7 @@ http
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP with proxy Digest and site Digest with creds in URLs

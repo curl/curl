@@ -44,6 +44,7 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
 HTTP retry after closed connection and empty response

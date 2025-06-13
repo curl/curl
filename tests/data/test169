@@ -81,6 +81,7 @@ NTLM
 SSL
 !SSPI
 proxy
+digest
 </features>
 <name>
 HTTP with proxy-requiring-NTLM to site-requiring-Digest

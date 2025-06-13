@@ -56,6 +56,7 @@ Mime
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP POST multipart with Expect: header using proxy anyauth (Digest)
