@@ -90,16 +90,16 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
-        my $fn = $src;
-        if($srcdir ne "" && -e "$srcdir/$fn") {
-            $fn = $srcdir . "/" . $fn;
-        }
         if($embed) {
+            my $fn = $src;
+            if($srcdir ne "" && -e "$srcdir/$fn") {
+                $fn = $srcdir . "/" . $fn;
+            }
             my $content = do { local $/; open my $fh, '<', $fn or die $!; <$fh> };
             print $content;
         }
         else {
-            print "#include \"$fn\"\n";
+            print "#include \"$src\"\n";
         }
         if(not exists $include{$src}) {  # register test entry function
             $tlist .= "  {\"$name\", test_$name},\n";
