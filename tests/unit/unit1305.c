@@ -63,7 +63,7 @@ static void t1305_stop(void)
 static struct Curl_addrinfo *fake_ai(void)
 {
   static struct Curl_addrinfo *ai;
-  static const char dummy[]="dummy";
+  static const char dummy[] = "dummy";
   size_t namelen = sizeof(dummy); /* including the null-terminator */
 
   ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
