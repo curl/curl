@@ -359,7 +359,7 @@ static CURLcode test(char *arg)
 
   UNITTEST_BEGIN(t2600_setup(&easy))
 
-  static struct test_case TEST_CASES[] = {
+  static const struct test_case TEST_CASES[] = {
     /* TIMEOUT_MS,    FAIL_MS      CREATED    DURATION     Result, HE_PREF */
     /* CNCT   HE      v4    v6     v4 v6      MIN   MAX */
     { 1, TURL, "test.com:123:192.0.2.1", CURL_IPRESOLVE_WHATEVER,

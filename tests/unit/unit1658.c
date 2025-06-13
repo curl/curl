@@ -128,7 +128,7 @@ static CURLcode test(char *arg)
   /* The "SvcParamKeys" specified within the HTTPS RR packet *must* be
      provided in numerical order. */
 
-  static struct test t[] = {
+  static const struct test t[] = {
     {
       "single h2 alpn",
       (const unsigned char *)"\x00\x00" /* 16-bit prio */

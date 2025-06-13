@@ -38,7 +38,7 @@ static CURLcode test(char *arg)
     bool match;
   };
 
-  static struct testcase tests[] = {
+  static const struct testcase tests[] = {
     {"", "", FALSE},
     {"a", "", FALSE},
     {"", "b", FALSE},

@@ -59,7 +59,7 @@ static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static struct test_spec test_specs[] = {
+  static const struct test_spec test_specs[] = {
   { "190321134340", "1903-21-13 43:40:00", CURLE_OK },
   { "", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
   { "WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
