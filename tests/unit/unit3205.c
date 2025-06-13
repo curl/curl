@@ -36,6 +36,7 @@ static CURLcode test(char *arg)
     const char *rfc;
     const char *openssl;
   };
+
   static const struct test_cs_entry test_cs_list[] = {
     { 0x1301, "TLS_AES_128_GCM_SHA256",
               NULL },
