@@ -28,7 +28,7 @@
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
 
 struct test1657_spec {
-  CURLcode (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
+  CURLcode (*setbuf)(const struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
   CURLcode exp_result;
 };
