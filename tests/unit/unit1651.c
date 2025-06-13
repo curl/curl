@@ -372,7 +372,7 @@ static CURLcode test(char *arg)
   }
   curl_global_cleanup();
 #else
-  puts("not tested since Curl_extract_certinfo() is not built-in");
+  puts("not tested since Curl_extract_certinfo() is not built in");
 #endif
 
   UNITTEST_END_SIMPLE

@@ -117,7 +117,7 @@ static CURLcode test(char *arg)
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
-  puts("not tested since Curl_x509_GTime2str() is not built-in");
+  puts("not tested since Curl_x509_GTime2str() is not built in");
   UNITTEST_END_SIMPLE
 }
 
