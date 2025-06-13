@@ -63,12 +63,6 @@ static const char *ret2name(int i)
   /* not reached */
 }
 
-enum system {
-  SYSTEM_CUSTOM,
-  SYSTEM_LINUX,
-  SYSTEM_MACOS
-};
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -271,6 +265,13 @@ static CURLcode test(char *arg)
   };
 
   int i;
+
+  enum system {
+    SYSTEM_CUSTOM,
+    SYSTEM_LINUX,
+    SYSTEM_MACOS
+  };
+
   enum system machine;
 
 #ifdef HAVE_FNMATCH
