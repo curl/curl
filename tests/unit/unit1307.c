@@ -63,7 +63,7 @@ static const char *ret2name(int i)
   /* not reached */
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1307(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -311,7 +311,7 @@ static CURLcode test(char *arg)
 
 #else
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1307(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

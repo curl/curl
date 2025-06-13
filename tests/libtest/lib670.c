@@ -87,7 +87,7 @@ static int t670_xferinfo(void *clientp,
   return 0;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib670(char *URL)
 {
   static const char testname[] = "field";
 

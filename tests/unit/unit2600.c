@@ -353,7 +353,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
 #define TC_TMOT     90000  /* 90 sec max test duration */
 #define CNCT_TMOT   60000  /* 60sec connect timeout */
 
-static CURLcode test(char *arg)
+static CURLcode test_unit2600(char *arg)
 {
   CURL *easy;
 

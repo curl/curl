@@ -112,7 +112,7 @@ static void parse_success(const struct tcase *t)
 }
 #endif
 
-static CURLcode test(char *arg)
+static CURLcode test_unit2603(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

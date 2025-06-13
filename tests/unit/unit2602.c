@@ -28,7 +28,7 @@
 #include "dynhds.h"
 #include "curl_trc.h"
 
-static CURLcode test(char *arg)
+static CURLcode test_unit2602(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

@@ -68,7 +68,7 @@ Test:
  expected result: cached address has zero timestamp and new address
 */
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1609(char *arg)
 {
   UNITTEST_BEGIN(t1609_setup())
 

@@ -26,7 +26,7 @@
 #include "http_aws_sigv4.h"
 #include "dynbuf.h"
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1979(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

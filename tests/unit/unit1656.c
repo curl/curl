@@ -56,7 +56,7 @@ static bool do_test(const struct test_spec *spec, size_t i,
   return TRUE;
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1656(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -114,7 +114,7 @@ static CURLcode test(char *arg)
 
 #else
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1656(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   puts("not tested since Curl_x509_GTime2str() is not built in");

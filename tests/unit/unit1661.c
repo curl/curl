@@ -45,7 +45,7 @@ static void t1661_stop(struct bufref *bufref)
   Curl_bufref_free(bufref);
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1661(char *arg)
 {
   struct bufref bufref;
 

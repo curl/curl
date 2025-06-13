@@ -28,7 +28,7 @@ extern int dedotdotify(const char *input, size_t clen, char **out);
 
 #include "memdebug.h"
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1395(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

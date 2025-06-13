@@ -27,7 +27,7 @@
 
 #include <curl/multi.h>
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1567(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;

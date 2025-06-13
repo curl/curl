@@ -240,7 +240,7 @@ static void check_bufq(size_t pool_spares,
     Curl_bufcp_free(&pool);
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit2601(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

@@ -882,7 +882,7 @@ static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
 }
 
 
-static int test(int argc, char *argv[])
+static int test_mqttd(int argc, char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;

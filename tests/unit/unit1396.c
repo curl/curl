@@ -37,7 +37,7 @@ static void t1396_stop(CURL *easy)
   curl_global_cleanup();
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1396(char *arg)
 {
   CURL *easy;
 

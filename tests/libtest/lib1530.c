@@ -37,7 +37,7 @@ static curl_socket_t opensocket(void *clientp,
   return CURL_SOCKET_BAD;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1530(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;

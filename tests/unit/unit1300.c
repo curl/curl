@@ -32,7 +32,7 @@ static void test_Curl_llist_dtor(void *key, void *value)
   (void)value;
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1300(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

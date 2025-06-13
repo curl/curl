@@ -57,7 +57,7 @@ static void splayprint(struct Curl_tree *t, int d, char output)
   splayprint(t->smaller, d + 1, output);
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1309(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

@@ -99,7 +99,7 @@ static CURLcode create_node(void)
   return CURLE_OK;
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1305(char *arg)
 {
   UNITTEST_BEGIN(t1305_setup())
 

@@ -47,7 +47,7 @@ static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1507(char *URL)
 {
    CURLcode res = CURLE_OK;
    CURL *curl = NULL;

@@ -65,7 +65,7 @@ static void t1303_stop(struct Curl_easy *easy)
  * N           various values of now
  */
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1303(char *arg)
 {
   struct Curl_easy *easy;
 

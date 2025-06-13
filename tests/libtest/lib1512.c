@@ -35,7 +35,7 @@
 #undef NUM_HANDLES
 #define NUM_HANDLES 2
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1512(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {NULL, NULL};

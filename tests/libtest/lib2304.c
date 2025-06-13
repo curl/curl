@@ -110,7 +110,7 @@ static void t2304_websocket(CURL *curl)
   t2304_websocket_close(curl);
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib2304(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

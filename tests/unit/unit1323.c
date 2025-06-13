@@ -25,7 +25,7 @@
 
 #include "timeval.h"
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1323(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

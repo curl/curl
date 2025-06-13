@@ -426,7 +426,7 @@ static int t518_test_rlimit(int keep_open)
   return 0;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib518(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -478,7 +478,7 @@ test_cleanup:
 
 #else /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
 
-static CURLcode test(char *URL)
+static CURLcode test_lib518(char *URL)
 {
   (void)URL;
   curl_mprintf("system lacks necessary system function(s)");

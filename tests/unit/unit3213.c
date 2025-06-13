@@ -89,7 +89,7 @@ static void check_spbset(const char *name, const unsigned int *s, size_t slen)
   Curl_uint_spbset_destroy(&bset);
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit3213(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_PROTOCOL */
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1535(char *URL)
 {
   CURL *curl, *dupe = NULL;
   long protocol;

@@ -225,7 +225,7 @@ static void t582_checkFdSet(CURLM *curl, struct t582_Sockets *sockets,
   }
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib582(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;

@@ -43,7 +43,7 @@ static CURLcode t1664_setup(void)
   return res;
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1664(char *arg)
 {
   UNITTEST_BEGIN(t1664_setup())
 

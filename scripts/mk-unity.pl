@@ -95,11 +95,7 @@ foreach my $src (@src) {
             }
         }
         else {
-            # Make entry functions unique across sources
-            print "#undef test\n";
-            print "#define test test_$name\n";
             print "#include \"$src\"\n";
-            print "\n";
             $tlist .= "  {\"$name\", test_$name},\n";
         }
     }

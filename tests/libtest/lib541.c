@@ -33,7 +33,7 @@
  * Two FTP uploads, the second with no content sent.
  */
 
-static CURLcode test(char *URL)
+static CURLcode test_lib541(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

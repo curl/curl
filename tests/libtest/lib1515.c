@@ -101,7 +101,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1515(char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;

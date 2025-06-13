@@ -28,7 +28,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1594(char *URL)
 {
   struct curl_slist *header = NULL;
   curl_off_t retry;

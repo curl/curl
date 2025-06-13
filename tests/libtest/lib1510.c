@@ -29,7 +29,7 @@
 
 #define NUM_URLS 4
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1510(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;

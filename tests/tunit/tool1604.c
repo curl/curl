@@ -62,7 +62,7 @@ static char *getcurlcodestr(int cc)
 }
 #endif
 
-static CURLcode test(char *arg)
+static CURLcode test_tool1604(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

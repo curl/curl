@@ -87,7 +87,7 @@ enum HandleState {
   NoMoreHandles
 };
 
-static CURLcode test(char *URL)  /* libntlmconnect */
+static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
 {
   CURLcode res = CURLE_OK;
   CURLM *multi = NULL;

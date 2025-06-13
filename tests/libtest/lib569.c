@@ -29,7 +29,7 @@
 /*
  * Test Session ID capture
  */
-static CURLcode test(char *URL)
+static CURLcode test_lib569(char *URL)
 {
   CURLcode res;
   CURL *curl;

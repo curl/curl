@@ -57,7 +57,7 @@ static void t1603_stop(struct Curl_hash *hash_static)
   Curl_hash_destroy(hash_static);
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1603(char *arg)
 {
   struct Curl_hash hash_static;
 

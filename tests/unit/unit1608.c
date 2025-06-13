@@ -42,7 +42,7 @@ static CURLcode t1608_setup(void)
   return CURLE_OK;
 }
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1608(char *arg)
 {
   UNITTEST_BEGIN(t1608_setup())
 
@@ -74,7 +74,7 @@ static CURLcode test(char *arg)
 
 #else
 
-static CURLcode test(char *arg)
+static CURLcode test_unit1608(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

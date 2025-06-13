@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1568(char *URL)
 {
   CURLcode ret;
   CURL *hnd;

@@ -370,7 +370,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test_lib2405(char *URL)
 {
   CURLcode res = CURLE_OK;
   unsigned int fd_count = 0;

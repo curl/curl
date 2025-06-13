@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_SCHEME */
 
-static CURLcode test(char *URL)
+static CURLcode test_lib1536(char *URL)
 {
   CURL *curl, *dupe = NULL;
   char *scheme;
