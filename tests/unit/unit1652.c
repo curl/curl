@@ -35,16 +35,13 @@
 static char input[4096];
 static char output[4096];
 
-int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
-              void *userptr);
-
 /*
  * This debugf callback is simply dumping the string into the static buffer
  * for the unit test to inspect. Since we know that we're only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
-int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
-              void *userptr)
+static int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
+                     void *userptr)
 {
   (void)handle;
   (void)type;
