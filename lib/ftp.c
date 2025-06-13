@@ -765,7 +765,12 @@ static CURLcode ftp_state_user(struct Curl_easy *data,
 static CURLcode ftp_state_pwd(struct Curl_easy *data,
                               struct ftp_conn *ftpc)
 {
-  CURLcode result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
+  CURLcode result;
+#ifdef DEBUGBUILD
+  if(!data->id && getenv("CURL_FTP_PWD_STOP"))
+    return CURLE_OK;
+#endif
+  result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
   if(!result)
     ftp_state(data, ftpc, FTP_PWD);
 
