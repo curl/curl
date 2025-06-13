@@ -26,28 +26,27 @@
 #include "speedcheck.h"
 #include "urldata.h"
 
-static struct Curl_easy *t1606_easy;
-
-static CURLcode t1606_setup(void)
+static CURLcode t1606_setup(struct Curl_easy **easy)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  t1606_easy = curl_easy_init();
-  if(!t1606_easy) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
   return res;
 }
 
-static void t1606_stop(void)
+static void t1606_stop(struct Curl_easy *easy)
 {
-  curl_easy_cleanup(t1606_easy);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
-static int runawhile(long time_limit,
+static int runawhile(struct Curl_easy *easy,
+                     long time_limit,
                      long speed_limit,
                      curl_off_t speed,
                      int dec)
@@ -57,14 +56,14 @@ static int runawhile(long time_limit,
   CURLcode result;
   int finaltime;
 
-  curl_easy_setopt(t1606_easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
-  curl_easy_setopt(t1606_easy, CURLOPT_LOW_SPEED_TIME, time_limit);
-  Curl_speedinit(t1606_easy);
+  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
+  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, time_limit);
+  Curl_speedinit(easy);
 
   do {
     /* fake the current transfer speed */
-    t1606_easy->progress.current_speed = speed;
-    result = Curl_speedcheck(t1606_easy, now);
+    easy->progress.current_speed = speed;
+    result = Curl_speedcheck(easy, now);
     if(result)
       break;
     /* step the time */
@@ -79,20 +78,22 @@ static int runawhile(long time_limit,
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1606_setup())
+  struct Curl_easy *easy;
 
-  fail_unless(runawhile(41, 41, 40, 0) == 41,
+  UNITTEST_BEGIN(t1606_setup(&easy))
+
+  fail_unless(runawhile(easy, 41, 41, 40, 0) == 41,
               "wrong low speed timeout");
-  fail_unless(runawhile(21, 21, 20, 0) == 21,
+  fail_unless(runawhile(easy, 21, 21, 20, 0) == 21,
               "wrong low speed timeout");
-  fail_unless(runawhile(60, 60, 40, 0) == 60,
+  fail_unless(runawhile(easy, 60, 60, 40, 0) == 60,
               "wrong log speed timeout");
-  fail_unless(runawhile(50, 50, 40, 0) == 50,
+  fail_unless(runawhile(easy, 50, 50, 40, 0) == 50,
               "wrong log speed timeout");
-  fail_unless(runawhile(40, 40, 40, 0) == 99,
+  fail_unless(runawhile(easy, 40, 40, 40, 0) == 99,
               "should not time out");
-  fail_unless(runawhile(10, 50, 100, 2) == 36,
+  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36,
               "bad timeout");
 
-  UNITTEST_END(t1606_stop())
+  UNITTEST_END(t1606_stop(easy))
 }
