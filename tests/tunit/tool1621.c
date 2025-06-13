@@ -43,14 +43,21 @@ static CURLcode test(char *arg)
 
   static const struct checkthis tests[] = {
     { "ninja://foo@example.com", "(null)" },  /* unsupported scheme */
+#if defined(USE_SSL) && !defined(CURL_DISABLE_POP3)
     { "pop3s://foo@example.com", "pop3s://example.com/" },
+#endif
+#ifndef CURL_DISABLE_LDAP
     { "ldap://foo@example.com", "ldap://example.com/" },
+#endif
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
     { "https://foo@example.com", "https://example.com/" },
     { "https://localhost:45", "https://localhost:45/" },
     { "https://foo@localhost:45", "https://localhost:45/" },
+    { "https://user:pass@localhost:45", "https://localhost:45/" },
+#endif
+#ifndef CURL_DISABLE_HTTP
     { "http://daniel:password@localhost", "http://localhost/" },
     { "http://daniel@localhost", "http://localhost/" },
-    { "https://user:pass@localhost:45", "https://localhost:45/" },
     { "http://localhost/", "http://localhost/" },
     { "http://odd%40host/", "(null)" },  /* bad host */
     { "http://user@odd%40host/", "(null)" },  /* bad host */
@@ -60,6 +67,7 @@ static CURLcode test(char *arg)
     { "http://odd%40user@host/", "http://host/" },
     { "http://only%40one%40host/", "(null)" },  /* bad host */
     { "http://odder%3auser@host/", "http://host/" },
+#endif
     { NULL, NULL } /* end marker */
   };
 
