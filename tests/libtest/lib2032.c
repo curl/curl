@@ -81,14 +81,14 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-enum HandleState {
-  ReadyForNewHandle,
-  NeedSocketForNewHandle,
-  NoMoreHandles
-};
-
 static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
 {
+  enum HandleState {
+    ReadyForNewHandle,
+    NeedSocketForNewHandle,
+    NoMoreHandles
+  };
+
   CURLcode res = CURLE_OK;
   CURLM *multi = NULL;
   int running;
