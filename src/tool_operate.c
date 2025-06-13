@@ -574,8 +574,18 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(!curl || !config)
     return result;
 
-  if(per->infdopen)
-    close(per->infd);
+  if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+    sclose(per->infd);
+#else
+    warnf(per->config->global, "Closing per->infd != 0: %d", per->infd);
+#endif
+  }
+  else {
+    if(per->infdopen) {
+      close(per->infd);
+    }
+  }
 
   if(per->skip)
     goto skip;
@@ -1080,6 +1090,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
     else if(f > INT_MAX) {
       warnf(global, "win32_stdin_read_thread returned identifier "
           "larger than INT_MAX, will fall back to blocking mode");
+      sclose(f);
     }
     else
       per->infd = (int)f;

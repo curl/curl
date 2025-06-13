@@ -775,7 +775,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     goto ThreadCleanup;
   }
 
-  closesocket(tdata->socket_l);
+  closesocket(tdata->socket_l); /* sclose here fails test 1498 */
   tdata->socket_l = INVALID_SOCKET;
   if(SOCKET_ERROR == shutdown(socket_w, SD_RECEIVE)) {
     errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
@@ -798,11 +798,15 @@ ThreadCleanup:
   CloseHandle(tdata->stdin_handle);
   tdata->stdin_handle = NULL;
   if(tdata->socket_l != INVALID_SOCKET) {
-    closesocket(tdata->socket_l);
+    sclose(tdata->socket_l);
     tdata->socket_l = INVALID_SOCKET;
   }
   if(socket_w != INVALID_SOCKET)
-    closesocket(socket_w);
+    sclose(socket_w);
+
+  if(tdata) {
+    free(tdata);
+  }
 
   return 0;
 }
@@ -894,6 +898,9 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
       break;
     }
 
+    /* Hard close the socket on closesocket() */
+    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
+
     if(SOCKET_ERROR == connect(socket_r, (SOCKADDR*)&selfaddr, socksize)) {
       errorf(global, "connect error: %08lx", GetLastError());
       break;
@@ -922,7 +929,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
           tdata->stdin_handle = NULL;
         }
 
-      closesocket(socket_r);
+      sclose(socket_r);
       socket_r = INVALID_SOCKET;
     }
 
@@ -935,7 +942,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
       if(tdata->stdin_handle)
         CloseHandle(tdata->stdin_handle);
       if(tdata->socket_l != INVALID_SOCKET)
-        closesocket(tdata->socket_l);
+        sclose(tdata->socket_l);
 
       free(tdata);
     }
