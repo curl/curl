@@ -91,7 +91,7 @@ foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
         my $fn = $src;
-        if($srcdir ne "" && -e "$srcdir/$fn") {
+        if($srcdir ne "" && (exists $include{$src} || $embed) && -e "$srcdir/$fn") {
             $fn = $srcdir . "/" . $fn;
         }
         if($embed) {
