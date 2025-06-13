@@ -30,11 +30,11 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NETWORK_CHANGED,
 Pass a long for **value**. The set number determines how the multi
 handle should adapt to a change in the network.
 
-`1`: do not reuse any existing connection in the multi's connection cache.
-This closes all connections that are not in use. Ongoing transfers
-continue on the connections they operate on.
+`1`: do not reuse any existing connection in the multi handle's
+connection cache. This closes all connections that are not in use.
+Ongoing transfers continue on the connections they operate on.
 
-`2`: in addition to `1` also clear the multi's DNS cache.
+`2`: in addition to `1` also clear the multi handle's DNS cache.
 
 This option can be set at any time and repeatedly. Any connection created or
 DNS information cached afterwards is considered fresh again.
