@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--test] [<tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--test] [<tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>] --srcdir <srcdir>\n";
 }
 
 # Specific sources to exclude or add as an extra source file
@@ -39,6 +39,8 @@ my %exclude;
 my %include;
 my $in_exclude = 0;
 my $in_include = 0;
+my $srcdir = "";
+my $in_srcdir = 0;
 my $any_test = 0;
 foreach my $src (@ARGV) {
     if($src eq "--test") {
@@ -52,6 +54,13 @@ foreach my $src (@ARGV) {
     elsif($src eq "--include") {
         $in_exclude = 0;
         $in_include = 1;
+    }
+    elsif($src eq "--srcdir") {
+        $in_srcdir = 1;
+    }
+    elsif($in_srcdir) {
+        $srcdir = $src;
+        $in_srcdir = 0;
     }
     elsif($in_exclude) {
         $exclude{$src} = 1;
@@ -77,7 +86,12 @@ foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
         if(exists $include{$src}) {  # Misc .c source to include
-            print "#include \"$src\"\n";
+            if($srcdir ne "" && -e "$srcdir/$src") {
+                print "#include \"$srcdir/$src\"\n";
+            }
+            else {
+                print "#include \"$src\"\n";
+            }
         }
         else {
             # Make entry functions unique across sources
