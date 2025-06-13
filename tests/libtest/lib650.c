@@ -39,7 +39,6 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
   return len;
 }
 
-
 static CURLcode test_lib650(char *URL)
 {
   CURL *curl = NULL;

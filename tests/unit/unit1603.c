@@ -174,7 +174,6 @@ static CURLcode test_unit1603(char *arg)
   fail_unless(rc == 0, "hash delete failed");
   fail_unless(elem_dtor_calls == 2, "element destructor count should be 1");
 
-
   /* Clean up */
   Curl_hash_clean(&hash_static);
 

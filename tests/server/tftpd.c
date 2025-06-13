@@ -861,7 +861,6 @@ static int test_tftpd(int argc, char **argv)
     }
 
     logmsg("end of one transfer");
-
   }
 
 tftpd_cleanup:

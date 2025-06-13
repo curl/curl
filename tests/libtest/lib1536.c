@@ -109,7 +109,6 @@ static CURLcode test_lib1536(char *URL)
     goto test_cleanup;
   }
 
-
   /* Test that a scheme is properly initialized on curl_easy_reset.
   */
 

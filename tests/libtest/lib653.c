@@ -27,7 +27,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-
 static CURLcode test_lib653(char *URL)
 {
   CURL *curls = NULL;

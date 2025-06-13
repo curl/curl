@@ -59,7 +59,6 @@ static CURLcode test_lib572(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   test_setopt(curl, CURLOPT_HEADERDATA, stdout);
   test_setopt(curl, CURLOPT_WRITEDATA, stdout);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

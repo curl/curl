@@ -1555,29 +1555,17 @@ static CURLcode test_lib557(char *URL)
 #endif
 
   errors += test_pos_arguments();
-
   errors += test_weird_arguments();
-
   errors += test_unsigned_short_formatting();
-
   errors += test_signed_short_formatting();
-
   errors += test_unsigned_int_formatting();
-
   errors += test_signed_int_formatting();
-
   errors += test_unsigned_long_formatting();
-
   errors += test_signed_long_formatting();
-
   errors += test_curl_off_t_formatting();
-
   errors += test_string_formatting();
-
   errors += test_float_formatting();
-
   errors += test_oct_hex_formatting();
-
   errors += test_return_codes();
 
   if(errors)

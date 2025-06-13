@@ -110,7 +110,6 @@ static CURLcode test_lib1534(char *URL)
     goto test_cleanup;
   }
 
-
   /* Test that a filetime is properly initialized on curl_easy_reset.
   */
 

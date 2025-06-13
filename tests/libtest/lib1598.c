@@ -66,7 +66,6 @@ static CURLcode test_lib1598(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");

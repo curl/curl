@@ -154,7 +154,6 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_QUOTE, slist);
    res = curl_easy_perform(curl);
 
-
 test_cleanup:
 
    if(res)

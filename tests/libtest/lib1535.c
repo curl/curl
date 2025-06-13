@@ -113,7 +113,6 @@ static CURLcode test_lib1535(char *URL)
     goto test_cleanup;
   }
 
-
   /* Test that a protocol is properly initialized on curl_easy_reset.
   */
 

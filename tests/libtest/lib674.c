@@ -58,7 +58,6 @@ static CURLcode test_lib674(char *URL)
 
   /* demonstrate override behavior */
 
-
   easy_setopt(handle, CURLOPT_CURLU, urlp);
   easy_setopt(handle, CURLOPT_VERBOSE, 1L);
 
