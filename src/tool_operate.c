@@ -574,12 +574,14 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   if(!curl || !config)
     return result;
 
-  if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+  if(per->uploadfile) {
+    if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-    sclose(per->infd);
+      sclose(per->infd);
 #else
-    warnf(per->config->global, "Closing per->infd != 0: %d", per->infd);
+      warnf(per->config->global, "Closing per->infd != 0: %d", per->infd);
 #endif
+    }
   }
   else {
     if(per->infdopen) {
