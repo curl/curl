@@ -43,9 +43,7 @@ static const struct xattr_mapping {
 
 /* returns a new URL that needs to be freed */
 /* @unittest: 1621 */
-#ifdef UNITTESTS
-char *stripcredentials(const char *url);
-#else
+#ifndef UNITTESTS
 static
 #endif
 char *stripcredentials(const char *url)

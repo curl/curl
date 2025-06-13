@@ -26,6 +26,8 @@
 #include "urldata.h"
 #include "url.h"
 
+#include "tool_xattr.h"
+
 #include "memdebug.h" /* LAST include file */
 
 static CURLcode test(char *arg)
@@ -33,8 +35,6 @@ static CURLcode test(char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #ifdef USE_XATTR  /* Required for stripcredentials() */
-
-  char *stripcredentials(const char *url);  /* copied from tool_xattr.c */
 
   struct checkthis {
     const char *input;
