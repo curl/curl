@@ -49,7 +49,7 @@ For the actual C file, here's a simple example:
 
     #include "a libcurl header.h" /* from the lib dir */
 
-    static CURLcode test(char *arg)
+    static CURLcode test_unit9998(char *arg)
     {
       UNITTEST_BEGIN_SIMPLE
 
@@ -81,9 +81,9 @@ Here's an example using optional initialization and cleanup:
       /* done before shutting down and exiting */
     }
 
-    static CURLcode test(char *arg)
+    static CURLcode test_unit9999(char *arg)
     {
-      UNITTEST_BEGIN(unit_setup)
+      UNITTEST_BEGIN(unit_setup())
 
       /* here you start doing things and checking that the results are good */
 
@@ -92,6 +92,6 @@ Here's an example using optional initialization and cleanup:
 
       /* you end the test code like this: */
 
-      UNITTEST_END(unit_stop)
+      UNITTEST_END(unit_stop())
     }
 ~~~
