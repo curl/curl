@@ -68,7 +68,7 @@ static CURLcode test(char *arg)
   for(i = 0; tests[i].input; i++) {
     const char *url = tests[i].input;
     char *stripped = stripcredentials(url);
-    char *strippedstr = stripped ? stripped : "(null)";
+    const char *strippedstr = stripped ? stripped : "(null)";
     printf("Test %u got input \"%s\", output: \"%s\"\n",
            i, tests[i].input, strippedstr);
 
