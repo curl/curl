@@ -95,12 +95,8 @@ foreach my $src (@src) {
             $fn = $srcdir . "/" . $fn;
         }
         if($embed) {
-            open my $fh, "<", "$fn" or die "Cannot open '$fn': $!";
-            my $content = do { local $/; <$fh> };
-            while(my $line = <$fh>) {
-                print $line;
-            }
-            close $fh;
+            my $content = do { local $/; open my $fh, '<', $fn or die $!; <$fh> };
+            print $content;
         }
         else {
             print "#include \"$fn\"\n";
