@@ -30,28 +30,28 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--first] [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--first] [--input] [<inputs>] [--include <include-c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
 my @src;
 my %exclude;
-my %util;
+my %include;
 my $in_exclude = 0;
-my $in_util = 0;
+my $in_include = 0;
 my $first = 0;  # enclose generated code between first.h and first.c
 foreach my $src (@ARGV) {
     if($src eq "--input") {
         $in_exclude = 0;
-        $in_util = 0;
+        $in_include = 0;
     }
     elsif($src eq "--exclude") {
         $in_exclude = 1;
-        $in_util = 0;
+        $in_include = 0;
     }
-    elsif($src eq "--util") {
+    elsif($src eq "--include") {
         $in_exclude = 0;
-        $in_util = 1;
+        $in_include = 1;
     }
     elsif($src eq "--first") {
         $first = 1;
@@ -59,8 +59,8 @@ foreach my $src (@ARGV) {
     elsif($in_exclude) {
         $exclude{$src} = 1;
     }
-    elsif($in_util) {
-        $util{$src} = 1;
+    elsif($in_include) {
+        $include{$src} = 1;
         push @src, $src;
     }
     else {
@@ -78,7 +78,7 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
-        if(exists $util{$src}) {  # Misc .c source to include
+        if(exists $include{$src}) {  # Misc .c source to include
             print "#include \"$src\"\n";
         }
         else {
