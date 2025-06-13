@@ -39,7 +39,7 @@
 int fwrite_xattr(CURL *curl, const char *url, int fd);
 
 #ifdef UNITTESTS
-char *stripcredentials(const char *url);
+UNITTEST char *stripcredentials(const char *url);
 #endif
 
 #else

@@ -43,10 +43,7 @@ static const struct xattr_mapping {
 
 /* returns a new URL that needs to be freed */
 /* @unittest: 1621 */
-#ifndef UNITTESTS
-static
-#endif
-char *stripcredentials(const char *url)
+UNITTEST char *stripcredentials(const char *url)
 {
   CURLU *u;
   CURLUcode uc;
