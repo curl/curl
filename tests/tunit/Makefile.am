@@ -68,8 +68,8 @@ AM_CPPFLAGS += -DCURL_DISABLE_DEPRECATION
 BUNDLE = tunits
 
 if BUILD_UNITTESTS
-tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --test $(TESTFILES) > tool_bundle.c
+tool_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) > tool_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = tool_bundle.c

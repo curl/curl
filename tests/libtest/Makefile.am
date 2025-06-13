@@ -93,8 +93,8 @@ endif
 
 BUNDLE = libtests
 
-libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --test $(TESTFILES) lib1521.c > libtest_bundle.c
+libtest_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) lib1521.c > libtest_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = libtest_bundle.c

@@ -66,8 +66,8 @@ AM_CPPFLAGS += -DCURL_DISABLE_DEPRECATION
 BUNDLE = units
 
 if BUILD_UNITTESTS
-unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(UTILS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --include $(UTILS) --test $(TESTFILES) > unit_bundle.c
+unit_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > unit_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = unit_bundle.c
