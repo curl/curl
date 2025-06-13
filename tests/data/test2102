@@ -23,6 +23,10 @@ Funny-head: yesyes
 
 -foo-
 </data>
+<dns>
+A: %HOSTIP
+AAAA: %HOST6IP
+</dns>
 </reply>
 
 #

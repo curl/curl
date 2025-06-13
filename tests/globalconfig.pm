@@ -61,6 +61,7 @@ BEGIN {
         $run_duphandle
         $run_event_based
         $SERVERCMD
+        $DNSCMD
         $SERVERIN
         $srcdir
         $TESTDIR
@@ -135,6 +136,7 @@ our $SERVERIN="server.input";   # what curl sent the server
 our $PROXYIN="proxy.input";     # what curl sent the proxy
 our $MEMDUMP="memdump";         # file that the memory debugging creates
 our $SERVERCMD="server.cmd";    # copy server instructions here
+our $DNSCMD="dnsd.cmd";         # write DNS instructions here
 
 # other config variables
 our @protocols;   # array of lowercase supported protocol servers

@@ -30,6 +30,8 @@ MEMDEBUG = \
 
 CURLX_SRCS = \
   ../../lib/curlx/base64.c \
+  ../../lib/curlx/inet_pton.c \
+  ../../lib/curlx/inet_ntop.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
@@ -42,6 +44,8 @@ CURLX_SRCS = \
 CURLX_HDRS = \
   ../../lib/curlx/base64.h \
   ../../lib/curlx/curlx.h \
+  ../../lib/curlx/inet_pton.h \
+  ../../lib/curlx/inet_ntop.h \
   ../../lib/curlx/multibyte.h \
   ../../lib/curlx/nonblock.h \
   ../../lib/curlx/timediff.h \
@@ -61,9 +65,6 @@ FIRSTFILES = \
   first.c \
   first.h
 
-INET_PTON = \
-  ../../lib/curlx/inet_pton.c
-
 resolve_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   resolve.c
 resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
@@ -75,13 +76,13 @@ rtspd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
 rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 rtspd_CFLAGS = $(AM_CFLAGS)
 
-sockfilt_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+sockfilt_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   sockfilt.c
 sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
-socksd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+socksd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
@@ -93,7 +94,7 @@ mqttd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
-sws_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
+sws_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
   server_sockaddr.h \
   sws.c
 sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
