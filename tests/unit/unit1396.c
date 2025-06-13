@@ -37,21 +37,21 @@ static void t1396_stop(CURL *easy)
   curl_global_cleanup();
 }
 
-struct test {
-  const char *in;
-  int inlen;
-  const char *out;
-  int outlen;
-};
-
 static CURLcode test(char *arg)
 {
   CURL *easy;
 
   UNITTEST_BEGIN(t1396_setup())
 
+  struct test {
+    const char *in;
+    int inlen;
+    const char *out;
+    int outlen;
+  };
+
   /* unescape, this => that */
-  const struct test list1[]={
+  const struct test list1[] = {
     {"%61", 3, "a", 1},
     {"%61a", 4, "aa", 2},
     {"%61b", 4, "ab", 2},
@@ -67,7 +67,7 @@ static CURLcode test(char *arg)
     {NULL, 0, NULL, 0} /* end of list marker */
   };
   /* escape, this => that */
-  const struct test list2[]={
+  const struct test list2[] = {
     {"a", 1, "a", 1},
     {"/", 1, "%2F", 3},
     {"a=b", 3, "a%3Db", 5},

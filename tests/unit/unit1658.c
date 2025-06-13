@@ -41,13 +41,6 @@ extern CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
 extern void doh_print_httpsrr(struct Curl_easy *data,
                               struct Curl_https_rrinfo *hrr);
 
-struct test {
-  const char *name;
-  const unsigned char *dns;
-  size_t len; /* size of the dns packet */
-  const char *expect;
-};
-
 /*
  * The idea here is that we pass one DNS packet at the time to the decoder. we
  * then generate a string output with the results and compare if it matches
@@ -127,6 +120,13 @@ static CURLcode test(char *arg)
 
   /* The "SvcParamKeys" specified within the HTTPS RR packet *must* be
      provided in numerical order. */
+
+  struct test {
+    const char *name;
+    const unsigned char *dns;
+    size_t len; /* size of the dns packet */
+    const char *expect;
+  };
 
   static const struct test t[] = {
     {
