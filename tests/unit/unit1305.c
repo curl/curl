@@ -107,7 +107,7 @@ static CURLcode test(char *arg)
   size_t key_len;
 
   /* Test 1305 exits without adding anything to the hash */
-  if(strcmp(arg, "1305") != 0) {
+  if(testnum == 1306) {
     CURLcode rc = create_node();
     abort_unless(rc == CURLE_OK, "data node creation failed");
     key_len = strlen(data_key);
