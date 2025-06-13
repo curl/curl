@@ -23,8 +23,9 @@
 #
 ###########################################################################
 
-# Bundle up individual tests into a single binary. The resulting binary can run
-# individual tests by passing their name (without '.c') as the first argument.
+# Helper script for "unity"-like support in autotools and to bundle up tests
+# for both autotools and cmake. It generates the umbrella C source that
+# includes the individual source files and tests.
 
 use strict;
 use warnings;
