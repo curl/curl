@@ -4,7 +4,6 @@
 
 server_bundle.c
 servers
-buildinfo
 dnsd
 mqttd
 resolve
