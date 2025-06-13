@@ -32,7 +32,6 @@
 #ifdef _WIN32
 #  include <stdlib.h>
 #  include <tlhelp32.h>
-#  include <processthreadsapi.h>
 #  include "tool_cfgable.h"
 #  include "tool_libinfo.h"
 #endif
