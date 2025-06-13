@@ -37,6 +37,43 @@
 
 #include <curl/curl.h>
 
+/* Avoid warning in FD_SET() with pre-2020 Cygwin/MSYS releases:
+ * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
+ * may change the sign of the result [-Wsign-conversion]
+ */
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#ifdef __DJGPP__
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+#elif defined(_MSC_VER)
+#pragma warning(disable:4127)  /* conditional expression is constant */
+#endif
+
+/* Auxiliary function that waits on the socket. */
+static int wait_on_socket(curl_socket_t sockfd, long timeout_ms)
+{
+  struct timeval tv;
+  fd_set infd, outfd, errfd;
+  int res;
+
+  tv.tv_sec = timeout_ms / 1000;
+  tv.tv_usec = (int)(timeout_ms % 1000) * 1000;
+
+  FD_ZERO(&infd);
+  FD_ZERO(&outfd);
+  FD_ZERO(&errfd);
+
+  FD_SET(sockfd, &errfd); /* always check for error */
+  FD_SET(sockfd, &infd);
+
+  /* select() returns the number of signalled sockets or -1 */
+  res = select((int)sockfd + 1, &infd, &outfd, &errfd, &tv);
+  return res;
+}
+
 static int ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
@@ -51,27 +88,47 @@ static int recv_pong(CURL *curl, const char *expected_payload)
   size_t rlen;
   const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
-    if(meta->flags & CURLWS_PONG) {
-      int same = 0;
-      fprintf(stderr, "ws: got PONG back\n");
-      if(rlen == strlen(expected_payload)) {
-        if(!memcmp(expected_payload, buffer, rlen)) {
-          fprintf(stderr, "ws: got the same payload back\n");
-          same = 1;
-        }
-      }
-      if(!same)
-        fprintf(stderr, "ws: did NOT get the same payload back\n");
-    }
-    else {
-      fprintf(stderr, "recv_pong: got %u bytes rflags %x\n", (int)rlen,
-              meta->flags);
-    }
+  CURLcode result;
+  curl_socket_t sockfd;
+
+  result = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+
+  if(result != CURLE_OK) {
+    printf("Error: %s\n", curl_easy_strerror(result));
+    return 1;
   }
-  fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
-          (unsigned int)result, (unsigned int)rlen);
+
+  do {
+    result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+    if(result == CURLE_AGAIN && !wait_on_socket(sockfd, 1000)) {
+      printf("Error: timeout.\n");
+      break;
+    }
+  } while(result == CURLE_AGAIN);
+
+  if(result != CURLE_OK) {
+    fprintf(stderr, "ws: curl_ws_recv returned %u, received %u\n",
+            (unsigned int)result, (unsigned int)rlen);
+    return (int)result;
+  }
+
+  if(meta->flags & CURLWS_PONG) {
+    int same = 0;
+    fprintf(stderr, "ws: got PONG back\n");
+    if(rlen == strlen(expected_payload)) {
+      if(!memcmp(expected_payload, buffer, rlen)) {
+        fprintf(stderr, "ws: got the same payload back\n");
+        same = 1;
+      }
+    }
+    if(!same)
+      fprintf(stderr, "ws: did NOT get the same payload back\n");
+  }
+  else {
+    fprintf(stderr, "recv_pong: got %u bytes rflags %x\n", (int)rlen,
+            meta->flags);
+  }
+
   return (int)result;
 }
 
