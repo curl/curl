@@ -42,7 +42,22 @@ struct testit {
   const CURLcode result; /* parse result */
 };
 
-static const struct testit headers[] = {
+static void showsts(struct stsentry *e, const char *chost)
+{
+  if(!e)
+    printf("'%s' is not HSTS\n", chost);
+  else {
+    curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
+                 chost, e->host, e->expires,
+                 e->includeSubDomains ? " includeSubDomains" : "");
+  }
+}
+
+static CURLcode test(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
+  static const struct testit headers[] = {
   /* two entries read from disk cache, verify first */
   { "-", "readfrom.example", NULL, CURLE_OK},
   { "-", "old.example", NULL, CURLE_OK},
@@ -93,22 +108,7 @@ static const struct testit headers[] = {
   /* make this live for 7 seconds */
   { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
   { NULL, NULL, NULL, CURLE_OK }
-};
-
-static void showsts(struct stsentry *e, const char *chost)
-{
-  if(!e)
-    printf("'%s' is not HSTS\n", chost);
-  else {
-    curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
-                 chost, e->host, e->expires,
-                 e->includeSubDomains ? " includeSubDomains" : "");
-  }
-}
-
-static CURLcode test(char *arg)
-{
-  UNITTEST_BEGIN_SIMPLE
+  };
 
   CURLcode result;
   struct stsentry *e;
