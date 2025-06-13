@@ -35,13 +35,6 @@ static CURLcode test(char *arg)
 }
 #else
 
-struct testit {
-  const char *host;
-  const char *chost; /* if non-NULL, use to lookup with */
-  const char *hdr; /* if NULL, just do the lookup */
-  const CURLcode result; /* parse result */
-};
-
 static void showsts(struct stsentry *e, const char *chost)
 {
   if(!e)
@@ -56,6 +49,13 @@ static void showsts(struct stsentry *e, const char *chost)
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
+
+  struct testit {
+    const char *host;
+    const char *chost; /* if non-NULL, use to lookup with */
+    const char *hdr; /* if NULL, just do the lookup */
+    const CURLcode result; /* parse result */
+  };
 
   static const struct testit headers[] = {
   /* two entries read from disk cache, verify first */
