@@ -65,16 +65,6 @@ static void t1303_stop(struct Curl_easy *easy)
  * N           various values of now
  */
 
-struct timetest {
-  int now_s;
-  int now_us;
-  unsigned int timeout_ms;
-  unsigned int connecttimeout_ms;
-  bool connecting;
-  timediff_t result;
-  const char *comment;
-};
-
 static CURLcode test(char *arg)
 {
   struct Curl_easy *easy;
@@ -83,6 +73,16 @@ static CURLcode test(char *arg)
 
   struct curltime now;
   unsigned int i;
+
+  struct timetest {
+    int now_s;
+    int now_us;
+    unsigned int timeout_ms;
+    unsigned int connecttimeout_ms;
+    bool connecting;
+    timediff_t result;
+    const char *comment;
+  };
 
   const struct timetest run[] = {
   /* both timeouts set, not connecting */
