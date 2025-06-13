@@ -130,6 +130,9 @@ void Curl_dnscache_destroy(struct Curl_dnscache *dns);
 /* prune old entries from the DNS cache */
 void Curl_dnscache_prune(struct Curl_easy *data);
 
+/* clear the DNS cache */
+void Curl_dnscache_clear(struct Curl_easy *data);
+
 /* IPv4 threadsafe resolve function used for synch and asynch builds */
 struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port);
 
