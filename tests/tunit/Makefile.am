@@ -69,7 +69,7 @@ BUNDLE = tunits
 
 if BUILD_UNITTESTS
 tool_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(TESTFILES) > tool_bundle.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl --first $(TESTFILES) > tool_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = tool_bundle.c

@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--first] [--input] [<inputs>] [--util <util-c-sources>] [--exclude <exclude-c-sources>]\n";
 }
 
 # Specific sources to exclude or add as an extra source file
@@ -39,6 +39,7 @@ my %exclude;
 my %util;
 my $in_exclude = 0;
 my $in_util = 0;
+my $first = 0;  # enclose generated code between first.h and first.c
 foreach my $src (@ARGV) {
     if($src eq "--input") {
         $in_exclude = 0;
@@ -52,6 +53,9 @@ foreach my $src (@ARGV) {
         $in_exclude = 0;
         $in_util = 1;
     }
+    elsif($src eq "--first") {
+        $first = 1;
+    }
     elsif($in_exclude) {
         $exclude{$src} = 1;
     }
@@ -64,13 +68,10 @@ foreach my $src (@ARGV) {
     }
 }
 
-print <<HEADER
-/* !checksrc! disable COPYRIGHT all */
-
-#include "first.h"
-
-HEADER
-    ;
+print "/* !checksrc! disable COPYRIGHT all */\n\n";
+if($first) {
+    print "#include \"first.h\"\n\n";
+}
 
 my $tlist = "";
 
@@ -97,8 +98,6 @@ if($tlist ne "") {
     print "static const struct entry_s s_entries[] = {\n$tlist};\n";
 }
 
-print <<FOOTER
-
-#include "first.c"
-FOOTER
-    ;
+if($first) {
+    print "\n#include \"first.c\"\n";
+}
