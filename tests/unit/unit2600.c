@@ -102,7 +102,7 @@ struct test_result {
   struct ai_family_stats cf6;
 };
 
-static struct test_case *current_tc;
+static const struct test_case *current_tc;
 static struct test_result *current_tr;
 
 struct cf_test_ctx {
@@ -159,7 +159,7 @@ static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
   Curl_pollset_set(data, ps, 1, TRUE, TRUE);
 }
 
-static struct Curl_cftype cft_test = {
+static const struct Curl_cftype cft_test = {
   "TEST",
   CF_TYPE_IP_CONNECT,
   CURL_LOG_LVL_NONE,
@@ -236,7 +236,7 @@ out:
   return result;
 }
 
-static void check_result(struct test_case *tc,
+static void check_result(const struct test_case *tc,
                          struct test_result *tr)
 {
   char msg[256];
@@ -299,7 +299,7 @@ static void check_result(struct test_case *tc,
   }
 }
 
-static void test_connect(CURL *easy, struct test_case *tc)
+static void test_connect(CURL *easy, const struct test_case *tc)
 {
   struct test_result tr;
   struct curl_slist *list = NULL;
