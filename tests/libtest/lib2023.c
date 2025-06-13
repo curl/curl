@@ -42,7 +42,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
 
   curl_msnprintf(full_url, len, "%s%04d", url, seq);
   curl_mfprintf(stderr, "Sending new request %d to %s with credential %s "
-          "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
+                "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
@@ -82,7 +82,7 @@ static long parse_auth_name(const char *arg)
   return CURLAUTH_NONE;
 }
 
-static CURLcode test(char *URL)
+static CURLcode test(char *URL)  /* libauthretry */
 {
   CURLcode res;
   CURL *curl = NULL;
