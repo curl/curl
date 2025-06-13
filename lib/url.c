@@ -234,22 +234,24 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data = *datap;
   *datap = NULL;
 
-  /* Detach connection if any is left. This should not be normal, but can be
-     the case for example with CONNECT_ONLY + recv/send (test 556) */
-  Curl_detach_connection(data);
-  if(!data->state.internal) {
-    if(data->multi)
-      /* This handle is still part of a multi handle, take care of this first
-         and detach this handle from there. */
-      curl_multi_remove_handle(data->multi, data);
-
-    if(data->multi_easy) {
+  if(!data->state.internal && data->multi) {
+    /* This handle is still part of a multi handle, take care of this first
+       and detach this handle from there.
+       This detaches the connection. */
+    curl_multi_remove_handle(data->multi, data);
+  }
+  else {
+    /* Detach connection if any is left. This should not be normal, but can be
+       the case for example with CONNECT_ONLY + recv/send (test 556) */
+    Curl_detach_connection(data);
+    if(!data->state.internal && data->multi_easy) {
       /* when curl_easy_perform() is used, it creates its own multi handle to
          use and this is the one */
       curl_multi_cleanup(data->multi_easy);
       data->multi_easy = NULL;
     }
   }
+  DEBUGASSERT(!data->conn || data->state.internal);
 
   Curl_expire_clear(data); /* shut off any timers left */
 

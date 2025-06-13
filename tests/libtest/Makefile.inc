@@ -59,7 +59,7 @@ TESTFILES = \
   lib643.c                   lib650.c lib651.c lib652.c lib653.c lib654.c lib655.c lib658.c \
   lib659.c lib661.c lib666.c lib667.c lib668.c \
   lib670.c                            lib674.c lib676.c lib677.c lib678.c lib694.c lib695.c \
-  lib751.c \
+  lib751.c lib753.c \
   lib1156.c \
   lib1301.c \
   lib1308.c \
