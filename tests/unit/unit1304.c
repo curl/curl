@@ -27,10 +27,10 @@
 
 #ifndef CURL_DISABLE_NETRC
 
-static void t1304_stop(char *password, char *login)
+static void t1304_stop(char **password, char **login)
 {
-  Curl_safefree(password);
-  Curl_safefree(login);
+  Curl_safefree(*password);
+  Curl_safefree(*login);
 }
 
 static CURLcode test(char *arg)
@@ -173,7 +173,7 @@ static CURLcode test(char *arg)
   fail_unless(strncmp(login, "none", 4) == 0, "login should be 'none'");
   Curl_netrc_cleanup(&store);
 
-  UNITTEST_END(t1304_stop(password, login))
+  UNITTEST_END(t1304_stop(&password, &login))
 }
 
 #else
