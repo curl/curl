@@ -29,24 +29,23 @@
 
 #define TBL_SIZE    100
 
-static struct uint_tbl tbl;
-
-static int dummy;
-
-static CURLcode t3212_setup(void)
+static CURLcode t3212_setup(struct uint_tbl *tbl)
 {
-  Curl_uint_tbl_init(&tbl, NULL);
-  return Curl_uint_tbl_resize(&tbl, TBL_SIZE);
+  Curl_uint_tbl_init(tbl, NULL);
+  return Curl_uint_tbl_resize(tbl, TBL_SIZE);
 }
 
-static void t3212_stop(void)
+static void t3212_stop(struct uint_tbl *tbl)
 {
-  Curl_uint_tbl_destroy(&tbl);
+  Curl_uint_tbl_destroy(tbl);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t3212_setup())
+  struct uint_tbl tbl;
+  int dummy;
+
+  UNITTEST_BEGIN(t3212_setup(&tbl))
 
   unsigned int i, key, n;
   void *entry;
@@ -130,5 +129,5 @@ static CURLcode test(char *arg)
   fail_unless(Curl_uint_tbl_add(&tbl, &dummy, &key), "failed to add again");
   fail_unless(key == 17, "unexpected key assigned");
 
-  UNITTEST_END(t3212_stop())
+  UNITTEST_END(t3212_stop(&tbl))
 }
