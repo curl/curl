@@ -25,8 +25,6 @@
 #include "bufref.h"
 #include "memdebug.h"
 
-static struct bufref bufref;
-
 static int freecount = 0;
 
 static void test_free(void *p)
@@ -36,20 +34,22 @@ static void test_free(void *p)
   free(p);
 }
 
-static CURLcode t1661_setup(void)
+static CURLcode t1661_setup(struct bufref *bufref)
 {
-  Curl_bufref_init(&bufref);
+  Curl_bufref_init(bufref);
   return CURLE_OK;
 }
 
-static void t1661_stop(void)
+static void t1661_stop(struct bufref *bufref)
 {
-  Curl_bufref_free(&bufref);
+  Curl_bufref_free(bufref);
 }
 
 static CURLcode test(char *arg)
 {
-  UNITTEST_BEGIN(t1661_setup())
+  struct bufref bufref;
+
+  UNITTEST_BEGIN(t1661_setup(&bufref))
 
   const char *buffer = NULL;
   CURLcode result = CURLE_OK;
@@ -111,5 +111,5 @@ static CURLcode test(char *arg)
   fail_unless(!bufref.len, "Initial length must be NULL");
   fail_unless(!bufref.dtor, "Destructor must be NULL");
 
-  UNITTEST_END(t1661_stop())
+  UNITTEST_END(t1661_stop(&bufref))
 }
