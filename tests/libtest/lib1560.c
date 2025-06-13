@@ -39,12 +39,6 @@
 #include "warnless.h"
 #include "memdebug.h" /* LAST include file */
 
-struct part {
-  CURLUPart part;
-  const char *name;
-};
-
-
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
 {
@@ -53,6 +47,12 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
   char buf[256];
   char *bufp = &buf[0];
   size_t len = sizeof(buf);
+
+  struct part {
+    CURLUPart part;
+    const char *name;
+  };
+
   struct part parts[] = {
     {CURLUPART_SCHEME, "scheme"},
     {CURLUPART_USER, "user"},
