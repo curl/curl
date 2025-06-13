@@ -86,16 +86,13 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
-        if(exists $include{$src}) {  # Misc .c source to include
-            if($srcdir ne "" && -e "$srcdir/$src") {
-                print "#include \"$srcdir/$src\"\n";
-            }
-            else {
-                print "#include \"$src\"\n";
-            }
+        if($srcdir ne "" && -e "$srcdir/$src") {
+            print "#include \"$srcdir/$src\"\n";
         }
         else {
             print "#include \"$src\"\n";
+        }
+        if(not exists $include{$src}) {  # register test entry function
             $tlist .= "  {\"$name\", test_$name},\n";
         }
     }
