@@ -27,8 +27,6 @@
 
 #include <curl/curl.h>
 
-#define URL2 libtest_arg2
-
 static CURLcode test_lib2306(char *URL)
 {
   /* first a fine GET response, then a bad one */
@@ -45,7 +43,7 @@ static CURLcode test_lib2306(char *URL)
     goto test_cleanup;
 
   /* reuse handle, do a second transfer */
-  easy_setopt(cl, CURLOPT_URL, URL2);
+  easy_setopt(cl, CURLOPT_URL, libtest_arg2);
   res = curl_easy_perform(cl);
 
 test_cleanup:
