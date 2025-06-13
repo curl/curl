@@ -36,7 +36,8 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT "libtest_bundle.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES} "lib1521.c" > "libtest_bundle.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES} "lib1521.c"
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${FIRSTFILES} ${TESTFILES} "lib1521.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"

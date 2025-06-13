@@ -292,6 +292,7 @@ if(CURL_CLANG_TIDY)
   # clang-tidy is not looking into #included sources, thus not compatible with
   # unity builds and test bundles.
   set(CMAKE_UNITY_BUILD OFF)
+  set(CURL_MK_UNITY_OPTION "--embed")
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
