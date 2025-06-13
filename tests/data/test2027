@@ -177,6 +177,7 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <tool>
 lib2023

@@ -30,6 +30,7 @@ imap
 !SSPI
 Debug
 crypto
+digest
 </features>
 <name>
 IMAP DIGEST-MD5 graceful cancellation

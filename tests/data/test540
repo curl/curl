@@ -68,6 +68,7 @@ lib%TESTNUMBER
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP proxy auth Digest multi API re-using connection
