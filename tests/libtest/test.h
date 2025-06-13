@@ -494,18 +494,16 @@ extern int unitfail;
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
 
+#define NO_SUPPORT_BUILT_IN                     \
+  {                                             \
+    (void)URL;                                  \
+    curl_mfprintf(stderr, "Missing support\n"); \
+    return CURLE_UNSUPPORTED_PROTOCOL;          \
+  }
+
 /* ---------------------------------------------------------------- */
 
 #endif /* HEADER_CURL_TEST_H */
-
-#undef NO_SUPPORT_BUILT_IN
-#define NO_SUPPORT_BUILT_IN                     \
-  static CURLcode test(char *URL)               \
-  {                                             \
-    (void)URL;                                  \
-    curl_mfprintf(stderr, "Missing support\n");       \
-    return CURLE_UNSUPPORTED_PROTOCOL;          \
-  }
 
 /* Set default that each test may override */
 #undef TEST_HANG_TIMEOUT
