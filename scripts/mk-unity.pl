@@ -23,48 +23,89 @@
 #
 ###########################################################################
 
-# Helper script for "unity"-like support in autotools, to generate the umbrella
-# C source that includes the individual source files. Reads Makefile.inc and
-# accepts the variable name containing all the source files to include. Also
-# allow a list of exceptions that are to be excluded from the generated file.
+# Helper script for "unity"-like support in autotools and to bundle up tests
+# for both autotools and cmake. It generates the umbrella C source that
+# includes the individual source files and tests.
 
 use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [<c-sources>] [--exclude <exclude-c-sources>]\n";
+    die "Usage: $0 [--test] [<tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>] --srcdir <srcdir>\n";
 }
-
-my $srcdir = shift @ARGV;
 
 # Specific sources to exclude or add as an extra source file
 my @src;
 my %exclude;
+my %include;
 my $in_exclude = 0;
+my $in_include = 0;
+my $srcdir = "";
+my $in_srcdir = 0;
+my $any_test = 0;
 foreach my $src (@ARGV) {
-    if($src eq "--exclude") {
+    if($src eq "--test") {
+        $in_exclude = 0;
+        $in_include = 0;
+    }
+    elsif($src eq "--exclude") {
         $in_exclude = 1;
+        $in_include = 0;
+    }
+    elsif($src eq "--include") {
+        $in_exclude = 0;
+        $in_include = 1;
+    }
+    elsif($src eq "--srcdir") {
+        $in_srcdir = 1;
+    }
+    elsif($in_srcdir) {
+        $srcdir = $src;
+        $in_srcdir = 0;
     }
     elsif($in_exclude) {
         $exclude{$src} = 1;
     }
+    elsif($in_include) {
+        $include{$src} = 1;
+        push @src, $src;
+    }
     else {
         push @src, $src;
+        $any_test = 1;
     }
 }
 
-print <<HEADER
-/* !checksrc! disable COPYRIGHT all */
-HEADER
-    ;
+print "/* !checksrc! disable COPYRIGHT all */\n\n";
+if($any_test) {
+    print "#include \"first.h\"\n\n";
+}
+
+my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /\.c$/ && !exists $exclude{$src}) {
-        if(-e "$srcdir/$src") {
-            print "#include \"$srcdir/$src\"\n";
+    if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
+        my $name = $1;
+        if(exists $include{$src}) {  # Misc .c source to include
+            if($srcdir ne "" && -e "$srcdir/$src") {
+                print "#include \"$srcdir/$src\"\n";
+            }
+            else {
+                print "#include \"$src\"\n";
+            }
         }
         else {
+            # Make entry functions unique across sources
+            print "#undef test\n";
+            print "#define test test_$name\n";
             print "#include \"$src\"\n";
+            print "\n";
+            $tlist .= "  {\"$name\", test_$name},\n";
         }
     }
+}
+
+if($any_test) {
+    print "static const struct entry_s s_entries[] = {\n$tlist};\n";
+    print "\n#include \"first.c\"\n";
 }
