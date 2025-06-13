@@ -1084,7 +1084,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      * No TLS backends support false start anymore.
      */
     return CURLE_NOT_BUILT_IN;
-    break;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CERTINFO))
