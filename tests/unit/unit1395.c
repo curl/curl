@@ -28,17 +28,18 @@ extern int dedotdotify(const char *input, size_t clen, char **out);
 
 #include "memdebug.h"
 
-struct dotdot {
-  const char *input;
-  const char *output;
-};
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
   unsigned int i;
   int fails = 0;
+
+  struct dotdot {
+    const char *input;
+    const char *output;
+  };
+
   const struct dotdot pairs[] = {
     { "%2f%2e%2e%2f/../a", "%2f%2e%2e%2f/a" },
     { "%2f%2e%2e%2f/../", "%2f%2e%2e%2f/" },
