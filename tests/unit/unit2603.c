@@ -29,16 +29,6 @@
 #include "curl_trc.h"
 
 #ifndef CURL_DISABLE_HTTP
-struct tcase {
-  const char **input;
-  const char *default_scheme;
-  const char *method;
-  const char *scheme;
-  const char *authority;
-  const char *path;
-  size_t header_count;
-  size_t input_remain;
-};
 
 static void check_eq(const char *s, const char *exp_s, const char *name)
 {
@@ -58,6 +48,17 @@ static void check_eq(const char *s, const char *exp_s, const char *name)
     fail("unexpected req component");
   }
 }
+
+struct tcase {
+  const char **input;
+  const char *default_scheme;
+  const char *method;
+  const char *scheme;
+  const char *authority;
+  const char *path;
+  size_t header_count;
+  size_t input_remain;
+};
 
 static void parse_success(struct tcase *t)
 {
