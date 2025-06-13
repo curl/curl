@@ -61,7 +61,6 @@ static CURLcode test(char *arg)
    * 2: reference will be NULL
    * 3: destructor will be NULL
    */
-
   fail_unless(!bufref.ptr, "Initial reference must be NULL");
   fail_unless(!bufref.len, "Initial length must be NULL");
   fail_unless(!bufref.dtor, "Destructor must be NULL");
@@ -69,7 +68,6 @@ static CURLcode test(char *arg)
   /**
    * testing Curl_bufref_set
    */
-
   buffer = malloc(13);
   abort_unless(buffer, "Out of memory");
   Curl_bufref_set(&bufref, buffer, 13, test_free);
@@ -81,20 +79,17 @@ static CURLcode test(char *arg)
   /**
    * testing Curl_bufref_ptr
    */
-
   fail_unless((const char *) Curl_bufref_ptr(&bufref) == buffer,
               "Wrong pointer value returned");
 
   /**
    * testing Curl_bufref_len
    */
-
   fail_unless(Curl_bufref_len(&bufref) == 13, "Wrong data size returned");
 
   /**
    * testing Curl_bufref_memdup
    */
-
   result = Curl_bufref_memdup(&bufref, "1661", 3);
   abort_unless(result == CURLE_OK, curl_easy_strerror(result));
   fail_unless(freecount == 1, "Destructor not called");
@@ -110,7 +105,6 @@ static CURLcode test(char *arg)
   /**
    * testing Curl_bufref_free
    */
-
   Curl_bufref_free(&bufref);
   fail_unless(freecount == 1, "Wrong destructor called");
   fail_unless(!bufref.ptr, "Initial reference must be NULL");
