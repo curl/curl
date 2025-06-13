@@ -33,7 +33,8 @@ struct test_spec {
   CURLcode exp_result;
 };
 
-static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
+static bool do_test(const struct test_spec *spec, size_t i,
+                    struct dynbuf *dbuf)
 {
   CURLcode result;
   const char *in = spec->input;
