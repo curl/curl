@@ -38,8 +38,8 @@ static CURLcode make1657_nested(const struct test1657_spec *spec,
 {
   CURLcode r;
   size_t i;
-  unsigned char open_undef[] = { 0x32,  0x80 };
-  unsigned char close_undef[] = { 0x00,  0x00 };
+  unsigned char open_undef[] = { 0x32, 0x80 };
+  unsigned char close_undef[] = { 0x00, 0x00 };
 
   for(i = 0; i < spec->n; ++i) {
     r = curlx_dyn_addn(buf, open_undef, sizeof(open_undef));
