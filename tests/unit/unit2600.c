@@ -159,31 +159,31 @@ static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
   Curl_pollset_set(data, ps, 1, TRUE, TRUE);
 }
 
-static const struct Curl_cftype cft_test = {
-  "TEST",
-  CF_TYPE_IP_CONNECT,
-  CURL_LOG_LVL_NONE,
-  cf_test_destroy,
-  cf_test_connect,
-  Curl_cf_def_close,
-  Curl_cf_def_shutdown,
-  Curl_cf_def_get_host,
-  cf_test_adjust_pollset,
-  Curl_cf_def_data_pending,
-  Curl_cf_def_send,
-  Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
-  Curl_cf_def_conn_is_alive,
-  Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
-};
-
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai,
                                int transport)
 {
+  static const struct Curl_cftype cft_test = {
+    "TEST",
+    CF_TYPE_IP_CONNECT,
+    CURL_LOG_LVL_NONE,
+    cf_test_destroy,
+    cf_test_connect,
+    Curl_cf_def_close,
+    Curl_cf_def_shutdown,
+    Curl_cf_def_get_host,
+    cf_test_adjust_pollset,
+    Curl_cf_def_data_pending,
+    Curl_cf_def_send,
+    Curl_cf_def_recv,
+    Curl_cf_def_cntrl,
+    Curl_cf_def_conn_is_alive,
+    Curl_cf_def_conn_keep_alive,
+    Curl_cf_def_query,
+  };
+
   struct cf_test_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   timediff_t created_at;
