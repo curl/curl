@@ -53,7 +53,7 @@ static CURLcode make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
   return CURLE_OK;
 }
 
-static struct test1657_spec test1657_specs[] = {
+static const struct test1657_spec test1657_specs[] = {
   { make1657_nested, 3, CURLE_OK },
   { make1657_nested, 16, CURLE_OK },
   { make1657_nested, 17, CURLE_BAD_FUNCTION_ARGUMENT },
