@@ -94,7 +94,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    On linux per->infd should be STDIN (0) and the block below should not
    execute */
   if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
     rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {

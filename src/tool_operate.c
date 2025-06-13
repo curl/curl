@@ -1068,7 +1068,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
 
   CURL_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
     /* non - blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */

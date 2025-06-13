@@ -742,6 +742,7 @@ CURLcode win32_init(void)
   return CURLE_OK;
 }
 
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -945,6 +946,8 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
   assert(socket_r != INVALID_SOCKET);
   return socket_r;
 }
+
+#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
 
 #endif /* _WIN32 */
 
