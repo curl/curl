@@ -79,7 +79,7 @@ foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
         if(exists $util{$src}) {  # Misc .c source to include
-            print "#include \"$src\"\n\n";
+            print "#include \"$src\"\n";
         }
         else {
             # Make entry functions unique across sources
