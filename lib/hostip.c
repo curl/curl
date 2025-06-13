@@ -290,6 +290,16 @@ void Curl_dnscache_prune(struct Curl_easy *data)
   dnscache_unlock(data, dnscache);
 }
 
+void Curl_dnscache_clear(struct Curl_easy *data)
+{
+  struct Curl_dnscache *dnscache = dnscache_get(data);
+  if(dnscache) {
+    dnscache_lock(data, dnscache);
+    Curl_hash_clean(&dnscache->entries);
+    dnscache_unlock(data, dnscache);
+  }
+}
+
 #ifdef USE_ALARM_TIMEOUT
 /* Beware this is a global and unique instance. This is used to store the
    return address that we can jump back to from inside a signal handler. This
