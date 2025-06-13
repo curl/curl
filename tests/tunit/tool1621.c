@@ -34,7 +34,7 @@ static CURLcode test(char *arg)
 
 #ifdef USE_XATTR  /* Required for stripcredentials() */
 
-  char *stripcredentials(const char *url);
+  char *stripcredentials(const char *url);  /* copied from tool_xattr.c */
 
   struct checkthis {
     const char *input;
