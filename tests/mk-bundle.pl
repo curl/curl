@@ -78,8 +78,8 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
         my $name = $1;
-        if(exists $util{$src}) {
-            print "#include \"$src\"\n\n";  # Misc .c source to include
+        if(exists $util{$src}) {  # Misc .c source to include
+            print "#include \"$src\"\n\n";
         }
         else {
             # Make entry functions unique across sources
