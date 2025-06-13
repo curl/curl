@@ -25,19 +25,19 @@
 #include "vssh/curl_path.h"
 #include "memdebug.h"
 
-struct set {
-  const char *cp;
-  const char *expect; /* the returned content */
-  const char *next;   /* what cp points to after the call */
-  const char *home;
-  CURLcode result;
-};
-
 static CURLcode test(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
 #ifdef USE_SSH
+
+  struct set {
+    const char *cp;
+    const char *expect; /* the returned content */
+    const char *next;   /* what cp points to after the call */
+    const char *home;
+    CURLcode result;
+  };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
