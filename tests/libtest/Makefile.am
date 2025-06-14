@@ -94,11 +94,11 @@ BUNDLE = libtests
 BUNDLE_SRC = libtest_bundle.c
 
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMPTR) $(CURLX_SRCS) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = $(BUNDLE_SRC)
-libtests_SOURCES = $(UTILS)
+libtests_SOURCES =
 CLEANFILES += $(BUNDLE_SRC)
 
 if USE_CPPFLAG_CURL_STATICLIB
