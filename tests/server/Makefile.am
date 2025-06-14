@@ -40,10 +40,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/server
 
-# Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, CURLX_SRCS, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (FIRSTFILES, UTILS, MEMDEBUG, CURLX_SRCS, TESTFILES)
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc $(TESTFILES) $(UTILS) $(FIRSTFILES)
+EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -73,7 +73,7 @@ if CURLDEBUG
 server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)

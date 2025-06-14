@@ -41,7 +41,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(top_srcdir)/tests/tunit
 
-# Makefile.inc provides the source defines (TESTFILES, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (FIRSTFILES, UTILS, TESTFILES)
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
@@ -69,7 +69,7 @@ BUNDLE = tunits
 BUNDLE_SRC = tool_bundle.c
 
 if BUILD_UNITTESTS
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(UTILS) $(TESTFILES) $(FIRSTFILES)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)

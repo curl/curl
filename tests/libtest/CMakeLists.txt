@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'TESTFILES', 'MEMPTR', 'CURLX_SRCS', 'UTILS', 'FIRSTFILES' variables
+# Get 'FIRSTFILES', 'UTILS', 'MEMPTR', 'CURLX_SRCS', 'TESTFILES' variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -39,7 +39,7 @@ add_custom_command(
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES} "lib1521.c"
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${TESTFILES} "lib1521.c" ${FIRSTFILES}
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" ${FIRSTFILES} ${TESTFILES} "lib1521.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
   VERBATIM)
 

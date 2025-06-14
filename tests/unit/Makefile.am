@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (TESTFILES, UTILS, FIRSTFILES)
+# Makefile.inc provides the source defines (FIRSTFILES, UTILS, TESTFILES)
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
@@ -67,7 +67,7 @@ BUNDLE = units
 BUNDLE_SRC = unit_bundle.c
 
 if BUILD_UNITTESTS
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(UTILS) $(TESTFILES) $(FIRSTFILES)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
