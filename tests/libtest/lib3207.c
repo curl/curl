@@ -42,7 +42,7 @@ struct Ctx {
   const char *URL;
   CURLSH *share;
   CURLcode result;
-  int thread_id;
+  size_t thread_id;
   struct curl_slist *contents;
 };
 
@@ -144,7 +144,7 @@ static void t3207_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 
 static void execute(CURLSH *share, struct Ctx *ctx)
 {
-  int i;
+  size_t i;
   curl_mutex_t mutexes[CURL_LOCK_DATA_LAST - 1];
   curl_thread_t thread[THREAD_SIZE];
   for(i = 0; i < CURL_ARRAYSIZE(mutexes); i++) {
@@ -175,7 +175,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 
 static void execute(CURLSH *share, struct Ctx *ctx)
 {
-  int i;
+  size_t i;
   (void) share;
   for(i = 0; i < THREAD_SIZE; i++) {
     test_thread((void *)&ctx[i]);
@@ -187,7 +187,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 static CURLcode test_lib3207(char *URL)
 {
   CURLcode res = CURLE_OK;
-  int i;
+  size_t i;
   CURLSH* share;
   struct Ctx ctx[THREAD_SIZE];
 

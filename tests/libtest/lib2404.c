@@ -33,7 +33,7 @@ static CURLcode test_lib2404(char *URL)
   CURL *curl[NUM_HANDLES] = {0};
   int running;
   CURLM *m = NULL;
-  int i;
+  size_t i;
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
@@ -66,7 +66,7 @@ static CURLcode test_lib2404(char *URL)
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
                    "https://localhost:%s/path/2404%04i",
-                   port, i + 1);
+                   port, (int)i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */
@@ -83,7 +83,7 @@ static CURLcode test_lib2404(char *URL)
 
     easy_setopt(curl[i], CURLOPT_RESOLVE, slist);
 
-    easy_setopt(curl[i], CURLOPT_STREAM_WEIGHT, (long)128 + i);
+    easy_setopt(curl[i], CURLOPT_STREAM_WEIGHT, (long)i + 128);
   }
 
   curl_mfprintf(stderr, "Start at URL 0\n");

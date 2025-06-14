@@ -54,8 +54,8 @@ static CURLcode test_lib526(char *URL)
   CURL *curl[NUM_HANDLES];
   int running;
   CURLM *m = NULL;
-  int current = 0;
-  int i;
+  size_t current = 0;
+  size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
     curl[i] = NULL;
@@ -100,7 +100,7 @@ static CURLcode test_lib526(char *URL)
         curl[current] = NULL;
       }
       if(++current < CURL_ARRAYSIZE(curl)) {
-        curl_mfprintf(stderr, "Advancing to URL %d\n", current);
+        curl_mfprintf(stderr, "Advancing to URL %d\n", (int)current);
         if(testnum == 532) {
           /* first remove the only handle we use */
           curl_multi_remove_handle(m, curl[0]);
