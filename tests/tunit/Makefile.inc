@@ -22,6 +22,9 @@
 #
 ###########################################################################
 
+BUNDLE = tunits
+BUNDLE_SRC = tool_bundle.c
+
 # files referenced from the bundle source
 FIRSTFILES = ../libtest/first.c ../libtest/first.h
 

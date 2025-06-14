@@ -22,6 +22,9 @@
 #
 ###########################################################################
 
+BUNDLE = servers
+BUNDLE_SRC = server_bundle.c
+
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 

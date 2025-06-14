@@ -88,9 +88,6 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
-BUNDLE = libtests
-BUNDLE_SRC = libtest_bundle.c
-
 bundle_EXCLUDE =
 if USE_CPPFLAG_CURL_STATICLIB
 # These are part of the libcurl static lib. Add them here when linking shared.

@@ -64,9 +64,6 @@ endif
 
 AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
 
-BUNDLE = servers
-BUNDLE_SRC = server_bundle.c
-
 bundle_EXCLUDE =
 if ENABLE_SERVER_DEBUG
 if CURLDEBUG

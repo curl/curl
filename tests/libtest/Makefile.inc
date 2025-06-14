@@ -22,6 +22,9 @@
 #
 ###########################################################################
 
+BUNDLE = libtests
+BUNDLE_SRC = libtest_bundle.c
+
 # files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
