@@ -67,18 +67,18 @@ AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
 BUNDLE = servers
 BUNDLE_SRC = server_bundle.c
 
-server_EXCLUDE =
+bundle_EXCLUDE =
 if ENABLE_SERVER_DEBUG
 if CURLDEBUG
-server_EXCLUDE += $(MEMDEBUG)
+bundle_EXCLUDE += $(MEMDEBUG)
 endif
 endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) --test $(TESTFILES) --exclude $(bundle_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_servers_SOURCES = $(BUNDLE_SRC)
-servers_SOURCES = $(server_EXCLUDE)
+servers_SOURCES = $(bundle_EXCLUDE)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = $(BUNDLE_SRC)
