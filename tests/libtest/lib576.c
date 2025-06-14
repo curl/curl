@@ -73,7 +73,8 @@ static long chunk_bgn(const void *f, void *ptr, int remains)
   if(finfo->filetype == CURLFILETYPE_FILE) {
     ch_d->print_content = 1;
     curl_mprintf("Content:\n"
-      "-------------------------------------------------------------\n");
+                 "-------------------------------------------"
+                 "------------------\n");
   }
   if(strcmp(finfo->filename, "someothertext.txt") == 0) {
     curl_mprintf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");

@@ -173,7 +173,7 @@ static CURLcode test_lib517(char *URL)
     time_t out = curl_getdate(dates[i].input, NULL);
     if(out != dates[i].output) {
       curl_mprintf("WRONGLY %s => %ld (instead of %ld)\n",
-             dates[i].input, (long)out, (long)dates[i].output);
+                   dates[i].input, (long)out, (long)dates[i].output);
       error++;
     }
   }

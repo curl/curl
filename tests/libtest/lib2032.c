@@ -53,8 +53,8 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 
   if(CURLE_OK != code) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
@@ -73,7 +73,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       curl_mfprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
-              curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
+                    curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
@@ -159,7 +159,7 @@ static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
     multi_perform(multi, &running);
 
     curl_mfprintf(stderr, "%s:%d running %d state %d\n",
-            __FILE__, __LINE__, running, state);
+                  __FILE__, __LINE__, running, state);
 
     abort_on_test_timeout();
 

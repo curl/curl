@@ -77,7 +77,7 @@ static CURLcode test_lib695(char *URL)
   /* Check for errors */
   if(res != CURLE_OK)
     curl_mfprintf(stderr, "curl_easy_perform() 1 failed: %s\n",
-            curl_easy_strerror(res));
+                  curl_easy_strerror(res));
   else {
     /* phase two, create a mime struct using the mime1 handle */
     mime2 = curl_mime_init(curl);
@@ -91,7 +91,7 @@ static CURLcode test_lib695(char *URL)
 
     if(res != CURLE_OK)
       curl_mfprintf(stderr, "curl_mime_subparts() failed: %sn",
-              curl_easy_strerror(res));
+                    curl_easy_strerror(res));
     else {
       mime1 = NULL;
 
@@ -101,7 +101,7 @@ static CURLcode test_lib695(char *URL)
       /* Check for errors */
       if(res != CURLE_OK)
         curl_mfprintf(stderr, "curl_easy_perform() 2 failed: %s\n",
-                curl_easy_strerror(res));
+                      curl_easy_strerror(res));
     }
   }
 

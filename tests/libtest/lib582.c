@@ -157,7 +157,7 @@ static int t582_checkForCompletion(CURLM *curl, int *success)
     }
     else {
       curl_mfprintf(stderr, "Got an unexpected message from curl: %i\n",
-              (int)message->msg);
+                    (int)message->msg);
       result = 1;
       *success = 0;
     }
@@ -207,7 +207,7 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
   if(result != CURLM_OK) {
     curl_mfprintf(stderr, "Curl error on %s (%i) %s\n",
-            info, result, curl_multi_strerror(result));
+                  info, result, curl_multi_strerror(result));
   }
 }
 
@@ -250,7 +250,7 @@ static CURLcode test_lib582(char *URL)
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
@@ -264,7 +264,7 @@ static CURLcode test_lib582(char *URL)
   if(hd == -1) {
     /* can't open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_FSTAT;

@@ -1839,7 +1839,7 @@ static int get_nothing(void)
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
     if(rc != CURLUE_NO_ZONEID)
       curl_mfprintf(stderr, "unexpected return code %u on line %u\n", (int)rc,
-              __LINE__);
+                    __LINE__);
 
     curl_url_cleanup(u);
   }

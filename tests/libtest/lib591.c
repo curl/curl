@@ -48,7 +48,7 @@ static CURLcode test_lib591(char *URL)
   upload = fopen(libtest_arg3, "rb");
   if(!upload) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg3);
     return TEST_ERR_FOPEN;
   }

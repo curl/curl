@@ -73,7 +73,7 @@ static CURLcode test_lib583(char *URL)
   mres = curl_multi_remove_handle(multiHandle, curl);
   if(mres) {
     curl_mfprintf(stderr, "curl_multi_remove_handle() failed, "
-            "with code %d\n", (int)mres);
+                  "with code %d\n", (int)mres);
     res = TEST_ERR_MULTI;
   }
   else

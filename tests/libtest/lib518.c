@@ -402,7 +402,7 @@ static int t518_test_rlimit(int keep_open)
   if(!t518_fopen_works()) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_max);
     curl_msnprintf(strbuff, sizeof(strbuff), "fopen fails with %s fds open",
-              strbuff1);
+                   strbuff1);
     curl_mfprintf(stderr, "%s\n", t518_msgbuff);
     curl_msnprintf(strbuff, sizeof(strbuff),
                    "fopen fails with lots of fds open");

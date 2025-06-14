@@ -89,7 +89,7 @@ static CURLcode test_lib677(char *URL)
         }
         else if(ec) {
           curl_mfprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
@@ -110,7 +110,7 @@ static CURLcode test_lib677(char *URL)
         }
         else if(ec) {
           curl_mfprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }

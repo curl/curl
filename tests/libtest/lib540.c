@@ -166,7 +166,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
         size_t i;
         CURL *e = msg->easy_handle;
         curl_mfprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
-                curl_easy_strerror(msg->data.result));
+                      curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
         for(i = 0; i < CURL_ARRAYSIZE(testeh); i++) {

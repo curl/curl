@@ -96,7 +96,7 @@ static CURLcode test_lib573(char *URL)
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
   if(connect_time < dbl_epsilon) {
     curl_mfprintf(stderr, "connect time %e is < epsilon %e\n",
-            connect_time, dbl_epsilon);
+                  connect_time, dbl_epsilon);
     res = TEST_ERR_MAJOR_BAD;
   }
 

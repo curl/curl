@@ -37,7 +37,7 @@ static void progress_final_report(void)
 {
   FILE *moo = fopen(libtest_arg2, "ab");
   curl_mfprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
-                              last_ul, last_ul_total);
+                last_ul, last_ul_total);
   if(moo)
     fclose(moo);
   else
