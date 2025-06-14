@@ -66,14 +66,15 @@ endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 BUNDLE = tunits
+BUNDLE_SRC = tool_bundle.c
 
 if BUILD_UNITTESTS
-tool_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > tool_bundle.c
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_tunits_SOURCES = tool_bundle.c
-CLEANFILES = tool_bundle.c
+nodist_tunits_SOURCES = $(BUNDLE_SRC)
+CLEANFILES = $(BUNDLE_SRC)
 else
 noinst_PROGRAMS =
 endif
@@ -86,7 +87,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/tool_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

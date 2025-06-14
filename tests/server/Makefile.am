@@ -65,6 +65,7 @@ endif
 AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
 
 BUNDLE = servers
+BUNDLE_SRC = server_bundle.c
 
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
@@ -72,15 +73,15 @@ if CURLDEBUG
 server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
-server_bundle.c: $(top_srcdir)/scripts/mk-unity.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_servers_SOURCES = server_bundle.c
+nodist_servers_SOURCES = $(BUNDLE_SRC)
 servers_SOURCES = $(server_EXCLUDE)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
-CLEANFILES = server_bundle.c
+CLEANFILES = $(BUNDLE_SRC)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -90,7 +91,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/server_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

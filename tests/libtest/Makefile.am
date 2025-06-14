@@ -91,14 +91,15 @@ libstubgss_la_DEPENDENCIES =
 endif
 
 BUNDLE = libtests
+BUNDLE_SRC = libtest_bundle.c
 
-libtest_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) lib1521.c > libtest_bundle.c
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_libtests_SOURCES = libtest_bundle.c
+nodist_libtests_SOURCES = $(BUNDLE_SRC)
 libtests_SOURCES = $(UTILS)
-CLEANFILES += libtest_bundle.c
+CLEANFILES += $(BUNDLE_SRC)
 
 if USE_CPPFLAG_CURL_STATICLIB
 else
@@ -117,7 +118,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc: lib1521.c
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/libtest_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI
