@@ -59,7 +59,7 @@ target_include_directories(libtests PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
 )
-set_property(TARGET libtests APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+set_property(TARGET libtests APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "CURL_DISABLE_DEPRECATION")
 set_target_properties(libtests PROPERTIES
   OUTPUT_NAME libtests
   PROJECT_LABEL "Test libtests")
