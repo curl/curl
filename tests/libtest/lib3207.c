@@ -147,7 +147,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
   int i;
   curl_mutex_t mutexes[CURL_LOCK_DATA_LAST - 1];
   curl_thread_t thread[THREAD_SIZE];
-  for(i = 0; i < CURL_LOCK_DATA_LAST - 1; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(mutexes); i++) {
     Curl_mutex_init(&mutexes[i]);
   }
   curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t3207_test_lock);
@@ -155,10 +155,10 @@ static void execute(CURLSH *share, struct Ctx *ctx)
   curl_share_setopt(share, CURLSHOPT_USERDATA, (void *)mutexes);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
-  for(i = 0; i < THREAD_SIZE; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(thread); i++) {
     thread[i] = Curl_thread_create(test_thread, (void *)&ctx[i]);
   }
-  for(i = 0; i < THREAD_SIZE; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(thread); i++) {
     if(thread[i]) {
       Curl_thread_join(&thread[i]);
       Curl_thread_destroy(&thread[i]);
@@ -166,7 +166,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
   }
   curl_share_setopt(share, CURLSHOPT_LOCKFUNC, NULL);
   curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, NULL);
-  for(i = 0; i < CURL_LOCK_DATA_LAST - 1; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(mutexes); i++) {
     Curl_mutex_destroy(&mutexes[i]);
   }
 }
@@ -199,7 +199,7 @@ static CURLcode test_lib3207(char *URL)
     goto test_cleanup;
   }
 
-  for(i = 0; i < THREAD_SIZE; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(ctx); i++) {
     ctx[i].share = share;
     ctx[i].URL = URL;
     ctx[i].thread_id = i;
@@ -209,7 +209,7 @@ static CURLcode test_lib3207(char *URL)
 
   execute(share, ctx);
 
-  for(i = 0; i < THREAD_SIZE; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(ctx); i++) {
     if(ctx[i].result) {
       res = ctx[i].result;
     }
