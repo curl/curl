@@ -57,15 +57,15 @@ static CURLcode test_lib526(char *URL)
   int current = 0;
   int i;
 
-  for(i = 0; i < NUM_HANDLES; i++)
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
     curl[i] = NULL;
 
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     easy_init(curl[i]);
     /* specify target */
     easy_setopt(curl[i], CURLOPT_URL, URL);
@@ -99,7 +99,7 @@ static CURLcode test_lib526(char *URL)
         curl_easy_cleanup(curl[current]);
         curl[current] = NULL;
       }
-      if(++current < NUM_HANDLES) {
+      if(++current < CURL_ARRAYSIZE(curl)) {
         curl_mfprintf(stderr, "Advancing to URL %d\n", current);
         if(testnum == 532) {
           /* first remove the only handle we use */
@@ -142,7 +142,7 @@ test_cleanup:
   if((testnum == 526) || (testnum == 528)) {
     /* proper cleanup sequence - type PB */
 
-    for(i = 0; i < NUM_HANDLES; i++) {
+    for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
       curl_multi_remove_handle(m, curl[i]);
       curl_easy_cleanup(curl[i]);
     }
@@ -156,7 +156,7 @@ test_cleanup:
        will be leaked, let's use undocumented cleanup sequence - type UB */
 
     if(res != CURLE_OK)
-      for(i = 0; i < NUM_HANDLES; i++)
+      for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
         curl_easy_cleanup(curl[i]);
 
     curl_multi_cleanup(m);
@@ -166,7 +166,7 @@ test_cleanup:
   else if(testnum == 532) {
     /* undocumented cleanup sequence - type UB */
 
-    for(i = 0; i < NUM_HANDLES; i++)
+    for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
       curl_easy_cleanup(curl[i]);
     curl_multi_cleanup(m);
     curl_global_cleanup();

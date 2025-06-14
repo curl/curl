@@ -59,8 +59,8 @@ static CURLcode test_lib2402(char *URL)
 
   multi_setopt(m, CURLMOPT_MAXCONNECTS, 1L);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
@@ -86,7 +86,7 @@ static CURLcode test_lib2402(char *URL)
 
   curl_mfprintf(stderr, "Start at URL 0\n");
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* add handle to multi */
     multi_add_handle(m, curl[i]);
 
@@ -124,7 +124,7 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }
