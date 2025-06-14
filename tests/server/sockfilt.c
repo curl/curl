@@ -105,7 +105,7 @@
 #include "inet_pton.h"
 #include "util.h"
 #include "timediff.h"
-#include "warnless.h"
+#include "warnless.h" /* for read() */
 
 #include "tool_binmode.h"
 
