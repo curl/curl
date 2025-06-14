@@ -35,9 +35,9 @@ add_custom_command(
   VERBATIM)
 
 add_custom_command(
-  OUTPUT "libtest_bundle.c"
+  OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES} "lib1521.c"
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES} "lib1521.c"
   VERBATIM)
@@ -47,7 +47,7 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _sources ${MEMPTR} ${CURLX_SRCS})  # These are part of the libcurl static lib. Add them here when linking shared.
 endif()
 
-add_executable(libtests EXCLUDE_FROM_ALL ${_sources} ${UTILS} "libtest_bundle.c")
+add_executable(libtests EXCLUDE_FROM_ALL ${_sources} ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps libtests)
 target_link_libraries(libtests ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(libtests PRIVATE

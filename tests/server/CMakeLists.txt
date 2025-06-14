@@ -31,14 +31,14 @@ if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
 endif()
 
 add_custom_command(
-  OUTPUT "server_bundle.c"
+  OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES}
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "server_bundle.c"
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
-add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${UTILS} "server_bundle.c")
+add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
