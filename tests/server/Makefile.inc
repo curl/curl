@@ -24,7 +24,7 @@
 
 FIRSTFILES = first.c first.h
 
-UTILS = getpart.c getpart.h util.c util.h server_setup.h
+UTILS = getpart.c getpart.h util.c util.h
 
 MEMDEBUG = \
   ../../lib/memdebug.c \

@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /* adjust for old MSVC */
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
