@@ -50,8 +50,6 @@ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-CLEANFILES = lib1521.c
-
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
@@ -104,7 +102,7 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = $(BUNDLE_SRC)
 libtests_SOURCES = $(bundle_EXCLUDE)
-CLEANFILES += $(BUNDLE_SRC)
+CLEANFILES = $(BUNDLE_SRC) lib1521.c
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h lib1521.c
