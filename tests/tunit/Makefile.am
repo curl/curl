@@ -41,10 +41,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(top_srcdir)/tests/tunit
 
-# Makefile.inc provides the source defines (TESTFILES, FIRSTFILES)
+# Makefile.inc provides the source defines (TESTFILES, UTILS, FIRSTFILES)
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt README.md $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -68,8 +68,8 @@ AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 BUNDLE = tunits
 
 if BUILD_UNITTESTS
-tool_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) > tool_bundle.c
+tool_bundle.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > tool_bundle.c
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = tool_bundle.c

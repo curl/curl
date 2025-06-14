@@ -26,7 +26,7 @@
 FIRSTFILES = first.c first.h
 
 # common files used by test programs
-UTILS = testutil.c testutil.h testtrace.c testtrace.h test.h
+UTILS = testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
 
 MEMPTR = memptr.c
 

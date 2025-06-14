@@ -25,6 +25,9 @@
 # files referenced from the bundle source
 FIRSTFILES = ../libtest/first.c ../libtest/first.h
 
+# common files used by test programs
+UTILS = ../unit/curlcheck.h
+
 # all tool unit test programs
 TESTFILES = \
   tool1394.c \
