@@ -73,7 +73,7 @@ if CURLDEBUG
 server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
