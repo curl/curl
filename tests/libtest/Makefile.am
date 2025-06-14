@@ -43,8 +43,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Makefile.inc provides the source defines (TESTFILES, MEMPTR, CURLX_SRCS, UTILS, FIRSTFILES)
 include Makefile.inc
 
-EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  CMakeLists.txt mk-lib1521.pl .checksrc $(TESTFILES) $(MEMPTR) $(UTILS) $(FIRSTFILES)
+EXTRA_DIST = CMakeLists.txt .checksrc $(TESTFILES) $(MEMPTR) $(UTILS) $(FIRSTFILES) \
+  test307.pl test610.pl test613.pl test1013.pl test1022.pl mk-lib1521.pl
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 
