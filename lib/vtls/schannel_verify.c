@@ -94,8 +94,8 @@ struct cert_chain_engine_config_win8 {
   DWORD dwExclusiveFlags;
 };
 
+/* Not defined before mingw-w64 4.0.0 */
 #ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
-/* Not defined for any MINGW build */
 #define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
 #endif
 
@@ -114,7 +114,6 @@ struct cert_chain_engine_config_win7 {
   HCERTSTORE hExclusiveRoot;
   HCERTSTORE hExclusiveTrustedPeople;
 };
-
 
 #ifndef UNDER_CE
 static int is_cr_or_lf(char c)
