@@ -290,7 +290,7 @@ endif()
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   # clang-tidy is not looking into #included sources, thus not compatible with
-  # unity builds and test bundles.
+  # unity builds. Make test bundles compatible by embedding source code.
   set(CMAKE_UNITY_BUILD OFF)
   set(CURL_MK_UNITY_OPTION "--embed")
   set(_tidy_checks "")
