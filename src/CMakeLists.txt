@@ -79,11 +79,10 @@ if(BUILD_STATIC_CURL)
 endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
-  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
+  "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"        # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"  # for curlx functions
-  # This is needed as tool_hugehelp.c is generated in the binary dir
-  "${PROJECT_SOURCE_DIR}/src"  # for "tool_hugehelp.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
 add_executable(${EXE_NAME} ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen})
