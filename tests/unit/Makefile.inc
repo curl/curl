@@ -23,7 +23,7 @@
 ###########################################################################
 
 BUNDLE = units
-BUNDLE_SRC = unit_bundle.c
+BUNDLE_SRC = units.c
 
 # files referenced from the bundle source
 FIRSTFILES = ../libtest/first.c ../libtest/first.h

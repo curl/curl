@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: curl
 
 servers
-server_bundle.c
+servers.c
