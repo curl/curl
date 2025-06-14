@@ -52,7 +52,7 @@ target_link_libraries(servers ${CURL_LIBS})
 if(ENABLE_SERVER_DEBUG)
   set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 endif()
-set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
+set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL" "CURL_NO_OLDIES")
 # Test servers simply are standalone programs that do not use libcurl
 # library.  For convenience and to ease portability of these servers,
 # some source code files from the libcurl subdirectory are also used

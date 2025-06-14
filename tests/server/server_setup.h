@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 
-#define CURL_NO_OLDIES
-
 #include "curl_setup.h" /* portability help from the lib directory */
 
 #endif /* HEADER_CURL_SERVER_SETUP_H */

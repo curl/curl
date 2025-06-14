@@ -29,8 +29,6 @@
    need both of them in the include path), so that we get good in-depth
    knowledge about the system we're building this on */
 
-#define CURL_NO_OLDIES
-
 #include "curl_setup.h"
 
 #include <curl/curl.h>
