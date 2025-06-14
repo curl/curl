@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
