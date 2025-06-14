@@ -499,6 +499,9 @@ extern int unitfail;
     return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 
+/* global default */
+#define NUM_HANDLES 4
+
 /* ---------------------------------------------------------------- */
 
 #endif /* HEADER_CURL_TEST_H */
@@ -506,6 +509,3 @@ extern int unitfail;
 /* Set default that each test may override */
 #undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 60 * 1000
-
-#undef NUM_HANDLES
-#define NUM_HANDLES 4
