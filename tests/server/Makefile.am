@@ -38,7 +38,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/lib/curlx      \
               -I$(top_srcdir)/src            \
-              -I$(top_srcdir)/tests/server
+              -I$(srcdir)
 
 # Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES variables
 include Makefile.inc

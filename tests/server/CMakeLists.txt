@@ -43,7 +43,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"     # for curlx
   "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
-  "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")

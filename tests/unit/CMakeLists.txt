@@ -41,8 +41,8 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
   "${PROJECT_SOURCE_DIR}/src"
-  "${PROJECT_SOURCE_DIR}/tests/libtest"
-  "${PROJECT_SOURCE_DIR}/tests/unit"
+  "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")

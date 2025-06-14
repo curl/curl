@@ -39,7 +39,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit     \
-              -I$(top_srcdir)/tests/tunit
+              -I$(srcdir)
 
 # Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
 include Makefile.inc
