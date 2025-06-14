@@ -32,13 +32,10 @@
 
 #include "memdebug.h"
 
-#undef NUM_HANDLES
-#define NUM_HANDLES 2
-
 static CURLcode test_lib1512(char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {NULL, NULL};
+  CURL *curl[2] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;
   char dnsentry[256];
@@ -57,8 +54,8 @@ static CURLcode test_lib1512(char *URL)
   curl_mprintf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
@@ -78,8 +75,8 @@ static CURLcode test_lib1512(char *URL)
   /* make the first one populate the GLOBAL cache */
   easy_setopt(curl[0], CURLOPT_RESOLVE, slist);
 
-  /* run NUM_HANDLES transfers */
-  for(i = 0; (i < NUM_HANDLES) && !res; i++) {
+  /* run each transfer */
+  for(i = 0; (i < CURL_ARRAYSIZE(curl)) && !res; i++) {
     res = curl_easy_perform(curl[i]);
     if(res)
       goto test_cleanup;
