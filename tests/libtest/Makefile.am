@@ -93,19 +93,18 @@ endif
 BUNDLE = libtests
 BUNDLE_SRC = libtest_bundle.c
 
+bundle_EXCLUDE =
+if USE_CPPFLAG_CURL_STATICLIB
+# These are part of the libcurl static lib. Add them here when linking shared.
+bundle_EXCLUDE += $(MEMPTR) $(CURLX_SRCS)
+endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMPTR) $(CURLX_SRCS) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMPTR) $(CURLX_SRCS) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMPTR) $(CURLX_SRCS) --test $(TESTFILES) lib1521.c --exclude $(bundle_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_libtests_SOURCES = $(BUNDLE_SRC)
-libtests_SOURCES =
+libtests_SOURCES = $(bundle_EXCLUDE)
 CLEANFILES += $(BUNDLE_SRC)
-
-if USE_CPPFLAG_CURL_STATICLIB
-else
-# These are part of the libcurl static lib. Add them here when linking shared.
-libtests_SOURCES += $(MEMPTR) $(CURLX_SRCS)
-endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h lib1521.c
