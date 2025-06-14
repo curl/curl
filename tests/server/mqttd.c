@@ -55,7 +55,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
-#include "server_sockaddr.h"
 
 #include "tool_binmode.h"
 

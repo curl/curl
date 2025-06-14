@@ -122,6 +122,17 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                      struct sockaddr_un *sau);
 #endif /* USE_UNIX_SOCKETS */
 
+typedef union {
+  struct sockaddr      sa;
+  struct sockaddr_in   sa4;
+#ifdef USE_IPV6
+  struct sockaddr_in6  sa6;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  struct sockaddr_un   sau;
+#endif
+} srvr_sockaddr_union_t;
+
 unsigned short util_ultous(unsigned long ulnum);
 
 #endif  /* HEADER_CURL_SERVER_UTIL_H */

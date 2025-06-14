@@ -53,7 +53,6 @@
 #include "getpart.h"
 #include "inet_pton.h"
 #include "util.h"
-#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>

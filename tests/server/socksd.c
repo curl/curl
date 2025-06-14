@@ -76,7 +76,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "inet_pton.h"
 #include "util.h"
-#include "server_sockaddr.h"
 #include "tool_binmode.h"
 
 /* include memdebug.h last */
