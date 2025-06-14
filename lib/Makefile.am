@@ -57,8 +57,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include   \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-include Makefile.soname
-
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
 AM_CFLAGS =
@@ -69,7 +67,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-# Makefile.inc provides the CSOURCES and HHEADERS defines
+# Get CSOURCES, HHEADERS variables
 include Makefile.inc
 
 if DOING_NATIVE_WINDOWS
@@ -103,6 +101,8 @@ libcurl_la_LDFLAGS_EXTRA =
 libcurl_la_CFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_VERSION_INFO
+# Get VERSIONCHANGE, VERSIONADD, VERSIONDEL, VERSIONINFO variables
+include Makefile.soname
 libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
 endif
 

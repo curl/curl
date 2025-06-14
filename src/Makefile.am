@@ -67,6 +67,7 @@ if USE_UNICODE
 UNICODEFLAG = -municode
 endif
 
+# Get CURL_CFILES, CURLX_CFILES, CURL_HFILES variables
 include Makefile.inc
 
 curl_cfiles_gen =

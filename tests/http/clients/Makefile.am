@@ -58,7 +58,7 @@ LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-# Makefile.inc provides the check_PROGRAMS define
+# Get check_PROGRAMS variable
 include Makefile.inc
 
 all: $(check_PROGRAMS)

@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Get 'CERTCONFIG_CA', 'CERTCONFIGS', 'GENERATEDCERTS', 'SRPFILES' variables
+# Get CERTCONFIG_CA, CERTCONFIGS, GENERATEDCERTS, SRPFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 

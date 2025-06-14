@@ -21,8 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
-# These are all libcurl example programs to be test compiled
 check_PROGRAMS = \
   h2-pausing \
   h2-serverpush \

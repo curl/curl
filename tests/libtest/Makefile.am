@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(top_srcdir)/tests/unit
 
-# Makefile.inc provides the source defines (BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, MEMPTR, CURLX_SRCS, TESTFILES)
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, MEMPTR, CURLX_SRCS, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(MEMPTR) $(TESTFILES) \

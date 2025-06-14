@@ -23,6 +23,7 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign
 
+# Get CERTCONFIG_CA, CERTCONFIGS, GENERATEDCERTS, SRPFILES variables
 include Makefile.inc
 
 EXTRA_DIST = $(CERTCONFIG_CA) $(CERTCONFIGS) $(SRPFILES) CMakeLists.txt \

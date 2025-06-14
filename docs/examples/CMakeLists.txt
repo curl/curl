@@ -24,7 +24,7 @@
 
 add_custom_target(curl-examples)
 
-# Get 'check_PROGRAMS' variable
+# Get check_PROGRAMS variable
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
