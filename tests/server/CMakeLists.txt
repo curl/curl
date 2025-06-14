@@ -26,10 +26,6 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  set_source_files_properties("../../lib/memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
-endif()
-
 add_custom_command(
   OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES}
@@ -37,6 +33,10 @@ add_custom_command(
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
+
+if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
+  set_source_files_properties("../../lib/memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+endif()
 
 add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps servers)
