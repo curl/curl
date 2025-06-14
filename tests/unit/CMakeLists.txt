@@ -47,6 +47,4 @@ target_include_directories(units PRIVATE
 )
 set_property(TARGET units APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 set_property(TARGET units APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")  # unit tests are small pretend-libcurl-programs
-set_target_properties(units PROPERTIES
-  OUTPUT_NAME "units"
-  PROJECT_LABEL "Test units")
+set_target_properties(units PROPERTIES OUTPUT_NAME "units" PROJECT_LABEL "Test units")

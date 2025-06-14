@@ -47,6 +47,4 @@ target_include_directories(tunits PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/tunit"
 )
 set_property(TARGET tunits APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
-set_target_properties(tunits PROPERTIES
-  OUTPUT_NAME "tunits"
-  PROJECT_LABEL "Test tunits")
+set_target_properties(tunits PROPERTIES OUTPUT_NAME "tunits" PROJECT_LABEL "Test tunits")

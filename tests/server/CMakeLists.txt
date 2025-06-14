@@ -61,6 +61,4 @@ set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL
 if(WIN32)
   set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(servers PROPERTIES
-  OUTPUT_NAME "servers"
-  PROJECT_LABEL "Test servers")
+set_target_properties(servers PROPERTIES OUTPUT_NAME "servers" PROJECT_LABEL "Test servers")
