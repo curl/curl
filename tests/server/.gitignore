@@ -2,13 +2,5 @@
 #
 # SPDX-License-Identifier: curl
 
-server_bundle.c
 servers
-dnsd
-mqttd
-resolve
-rtspd
-sockfilt
-socksd
-sws
-tftpd
+server_bundle.c

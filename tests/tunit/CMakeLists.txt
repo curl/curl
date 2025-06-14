@@ -34,7 +34,7 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
-add_executable(tunits EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
+add_executable(tunits EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps tunits)
 target_link_libraries(tunits curltool curlu)
 target_include_directories(tunits PRIVATE

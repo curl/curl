@@ -2,6 +2,5 @@
 #
 # SPDX-License-Identifier: curl
 
-/tool[0-9][0-9][0-9][0-9]
-tool_bundle.c
 tunits
+tool_bundle.c
