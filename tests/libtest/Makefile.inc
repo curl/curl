@@ -26,10 +26,10 @@
 BUNDLE = libtests
 BUNDLE_SRC = libtests.c
 
-# files referenced from the bundle source
+# Files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
-# common files used by test programs
+# Common files used by test programs
 UTILS = testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
 
 MEMPTR = memptr.c
@@ -44,7 +44,7 @@ CURLX_SRCS = \
   ../../lib/curl_threads.c \
   ../../lib/curl_threads.h
 
-# all libtest programs
+# All libtest programs
 TESTFILES = \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c lib508.c lib509.c \
   lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c lib516.c lib517.c lib518.c lib519.c \

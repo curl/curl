@@ -26,13 +26,13 @@
 BUNDLE = tunits
 BUNDLE_SRC = tunits.c
 
-# files referenced from the bundle source
+# Files referenced from the bundle source
 FIRSTFILES = ../libtest/first.c ../libtest/first.h
 
-# common files used by test programs
+# Common files used by test programs
 UTILS = ../unit/curlcheck.h
 
-# all tool unit test programs
+# All tool unit test programs
 TESTFILES = \
   tool1394.c \
   tool1604.c \
