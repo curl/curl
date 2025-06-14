@@ -74,7 +74,7 @@ server_EXCLUDE += $(MEMDEBUG)
 endif
 endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_servers_SOURCES = $(BUNDLE_SRC)
