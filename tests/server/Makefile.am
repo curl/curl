@@ -40,10 +40,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/server
 
-# Prevent LIBS from being used for all link targets
-LIBS = $(BLANK_AT_MAKETIME)
+# Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, CURLX_SRCS, UTILS, FIRSTFILES)
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt .checksrc $(TESTFILES) $(UTILS) $(FIRSTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
+
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
 
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
@@ -59,10 +64,7 @@ endif
 
 AM_CPPFLAGS += -DWITHOUT_LIBCURL
 
-# Makefile.inc provides the source defines (TESTFILES, MEMDEBUG, CURLX_SRCS, UTILS, FIRSTFILES)
-include Makefile.inc
-
-EXTRA_DIST = CMakeLists.txt .checksrc $(TESTFILES) $(UTILS) $(FIRSTFILES)
+BUNDLE = servers
 
 server_EXCLUDE =
 if ENABLE_SERVER_DEBUG
@@ -73,7 +75,7 @@ endif
 server_bundle.c: $(top_srcdir)/scripts/mk-unity.pl $(TESTFILES) $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) $(FIRSTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(MEMDEBUG) $(CURLX_SRCS) $(UTILS) --test $(TESTFILES) --exclude $(server_EXCLUDE) > server_bundle.c
 
-noinst_PROGRAMS = servers
+noinst_PROGRAMS = $(BUNDLE)
 nodist_servers_SOURCES = server_bundle.c
 servers_SOURCES = $(server_EXCLUDE)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
@@ -94,3 +96,6 @@ checksrc:
 if NOT_CURL_CI
 all-local: checksrc
 endif
+
+clean-local:
+	rm -f $(BUNDLE)
