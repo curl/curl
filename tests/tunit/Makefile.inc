@@ -22,11 +22,10 @@
 #
 ###########################################################################
 
-# these files are used in every single unit test program
+# files referenced from the bundle source
+FIRSTFILES = ../libtest/first.c ../libtest/first.h
 
-FIRSTFILES = ../libtest/first.c
-
-# These are all tool unit test programs
+# all tool unit test programs
 TESTFILES = \
   tool1394.c \
   tool1604.c \

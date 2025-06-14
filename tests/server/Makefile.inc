@@ -22,8 +22,10 @@
 #
 ###########################################################################
 
+# files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
+# common files used by test programs
 UTILS = getpart.c getpart.h util.c util.h
 
 MEMDEBUG = \
@@ -42,6 +44,7 @@ CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
+# all test servers
 TESTFILES = \
   dnsd.c \
   mqttd.c \

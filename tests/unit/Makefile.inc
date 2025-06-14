@@ -22,15 +22,13 @@
 #
 ###########################################################################
 
-# these files are used in every single unit test program
+# files referenced from the bundle source
+FIRSTFILES = ../libtest/first.c ../libtest/first.h
 
-FIRSTFILES = \
-  ../libtest/first.c \
-  ../libtest/first.h
-
+# common files used by test programs
 UTILS = curlcheck.h
 
-# These are all unit test programs
+# all unit test programs
 TESTFILES = \
   unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c unit1307.c \
              unit1309.c unit1323.c \
