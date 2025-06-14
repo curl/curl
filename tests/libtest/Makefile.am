@@ -93,7 +93,7 @@ endif
 BUNDLE = libtests
 BUNDLE_SRC = libtest_bundle.c
 
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES) lib1521.c
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(TESTFILES) lib1521.c $(FIRSTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
