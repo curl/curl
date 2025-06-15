@@ -21,27 +21,28 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-add_custom_target(test-http-clients)
-
-# Get check_PROGRAMS variable
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-foreach(_target IN LISTS check_PROGRAMS)
-  set(_target_name "curlt-client-${_target}")
-  add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c")
-  add_dependencies(testdeps ${_target_name})
-  add_dependencies(test-http-clients ${_target_name})
-  target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-  )
-  target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
-  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES" "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
-  if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
-    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
-  endif()
-  set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" ROJECT_LABEL "Test client ${_target}"
-    UNITY_BUILD OFFP)
-endforeach()
+add_custom_command(
+  OUTPUT "${BUNDLE_SRC}"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES}
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
+  VERBATIM)
+
+add_executable(http-clients EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
+add_dependencies(testdeps http-clients)
+target_include_directories(http-clients PRIVATE
+  "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
+)
+target_link_libraries(http-clients ${LIB_SELECTED} ${CURL_LIBS})
+set_property(TARGET http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
+  "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
+if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
+  set_property(TARGET http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+endif()
+set_target_properties(http-clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)

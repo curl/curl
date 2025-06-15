@@ -180,7 +180,7 @@ class TestUpload:
         count = 2
         upload_size = 128*1024
         url = f'https://localhost:{env.https_port}/curltest/put'
-        client = LocalClient(name='hx-upload', env=env)
+        client = LocalClient(name='hx_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -196,7 +196,7 @@ class TestUpload:
         count = 2
         upload_size = 128*1024
         url = f'https://localhost:{env.https_port}/curltest/put'
-        client = LocalClient(name='hx-upload', env=env)
+        client = LocalClient(name='hx_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -212,7 +212,7 @@ class TestUpload:
         count = 2
         upload_size = 128*1024
         url = f'https://localhost:{env.https_port}/curltest/echo'
-        client = LocalClient(name='hx-upload', env=env)
+        client = LocalClient(name='hx_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -543,7 +543,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
-        client = LocalClient(name='upload-pausing', env=env, timeout=60)
+        client = LocalClient(name='upload_pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after=0'
@@ -565,7 +565,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
-        client = LocalClient(name='upload-pausing', env=env, timeout=60)
+        client = LocalClient(name='upload_pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=0&just_die=1'
@@ -582,7 +582,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 fails here")
-        client = LocalClient(name='upload-pausing', env=env, timeout=60)
+        client = LocalClient(name='upload_pausing', env=env, timeout=60)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=0&die_after_100=1'
@@ -618,7 +618,7 @@ class TestUpload:
         count = 1
         upload_size = 128*1024
         url = f'https://localhost:{env.https_port}/curltest/put-redir-{httpcode}'
-        client = LocalClient(name='hx-upload', env=env)
+        client = LocalClient(name='hx_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -746,7 +746,7 @@ class TestUpload:
         if proto != 'h3':
             port = env.nghttpx_https_port
         url = f'https://{env.domain1}:{port}/curltest/put'
-        client = LocalClient(name='hx-upload', env=env)
+        client = LocalClient(name='hx_upload', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

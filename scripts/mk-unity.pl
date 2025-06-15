@@ -76,7 +76,7 @@ if($any_test) {
 my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /([a-z0-9]+)\.c$/) {
+    if($src =~ /([a-z0-9_]+)\.c$/) {
         my $name = $1;
         if($embed) {
             my $fn = $src;
