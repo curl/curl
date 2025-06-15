@@ -30,7 +30,7 @@ BUNDLE_SRC = clients.c
 FIRSTFILES = first.c first.h
 
 # Common files used by test programs
-UTILS = util.c util.h
+UTILS = util.c
 
 # All test clients
 TESTFILES = \
