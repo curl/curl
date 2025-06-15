@@ -31,12 +31,13 @@
 
 #ifndef _MSC_VER
 
-#define PAUSE_READ_AFTER  1
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
                             void *userdata)
 {
+  static const size_t PAUSE_READ_AFTER = 1;
+
   (void)size;
   (void)nmemb;
   (void)userdata;
