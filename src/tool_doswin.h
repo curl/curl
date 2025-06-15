@@ -55,6 +55,10 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void);
 CURLcode win32_init(void);
 
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+curl_socket_t win32_stdin_read_thread(struct GlobalConfig *global);
+#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
+
 #endif /* _WIN32 */
 
 #endif /* _WIN32 || MSDOS */
