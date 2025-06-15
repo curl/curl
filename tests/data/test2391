@@ -1,0 +1,72 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/3
+QUICv2
+POST
+verbose logs
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+http/3
+</features>
+<name>
+HTTP POST over HTTP/3 with QUICv2
+</name>
+<command>
+--http3 v2 --data "param1=value1&param2=value2" https://nghttp2.org/httpbin/post
+</command>
+<verbose/>
+<output>
+{
+  "args": {},
+  "data": "param1=value1&param2=value2",
+  "files": {},
+  "form": {
+    "param1": "value1",
+    "param2": "value2"
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Content-Length": "27",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "nghttp2.org",
+    "User-Agent": "curl/%CURL_VERSION_MAJOR.%CURL_VERSION_MINOR.%CURL_VERSION_PATCH"
+  },
+  "json": null,
+  "origin": "%CLIENTIP",
+  "url": "https://nghttp2.org/httpbin/post"
+}
+</output>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<log>
+# Ensure that some basic HTTP/3 and connection messages appear
+ löytyi
+QUIC connect to .*
+HTTP/3 default connection
+</log>
+<file name="stdout%TESTNUMBER">
+<jsonconverthtml/>
+<contains>
+  "url": "https://nghttp2.org/httpbin/post"
+</contains>
+<contains>
+  "data": "param1=value1&amp;param2=value2"
+</contains>
+<contains>
+    "param1": "value1"
+</contains>
+<contains>
+    "param2": "value2"
+</contains>
+</file>
+<errorcode>0</errorcode>
+</verify>
+</testcase>
