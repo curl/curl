@@ -233,7 +233,7 @@ static int test_hx_upload(int argc, char *argv[])
   const char *resolve = NULL;
   int ch;
 
-  while((ch = getopt(argc, argv, "aefhlm:n:A:F:M:P:r:RS:V:")) != -1) {
+  while((ch = cgetopt(argc, argv, "aefhlm:n:A:F:M:P:r:RS:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage_hx_upload(NULL);
@@ -251,38 +251,38 @@ static int test_hx_upload(int argc, char *argv[])
       announce_length = 1;
       break;
     case 'm':
-      max_parallel = (size_t)strtol(optarg, NULL, 10);
+      max_parallel = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'n':
-      transfer_count_u = (size_t)strtol(optarg, NULL, 10);
+      transfer_count_u = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'A':
-      abort_offset = (size_t)strtol(optarg, NULL, 10);
+      abort_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'F':
-      fail_offset = (size_t)strtol(optarg, NULL, 10);
+      fail_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'M':
-      method = optarg;
+      method = coptarg;
       break;
     case 'P':
-      pause_offset = (size_t)strtol(optarg, NULL, 10);
+      pause_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'r':
-      resolve = optarg;
+      resolve = coptarg;
       break;
     case 'R':
       reuse_easy = 1;
       break;
     case 'S':
-      send_total = (size_t)strtol(optarg, NULL, 10);
+      send_total = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'V': {
-      if(!strcmp("http/1.1", optarg))
+      if(!strcmp("http/1.1", coptarg))
         http_version = CURL_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if(!strcmp("h2", coptarg))
         http_version = CURL_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if(!strcmp("h3", coptarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_upload("invalid http version");
@@ -295,8 +295,8 @@ static int test_hx_upload(int argc, char *argv[])
       return 1;
     }
   }
-  argc -= optind;
-  argv += optind;
+  argc -= coptind;
+  argv += coptind;
 
   if(max_parallel > 1 && reuse_easy) {
     usage_hx_upload("cannot mix -R and -P");

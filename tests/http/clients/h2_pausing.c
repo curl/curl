@@ -99,17 +99,17 @@ static int test_h2_pausing(int argc, char *argv[])
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
 
-  while((ch = getopt(argc, argv, "hV:")) != -1) {
+  while((ch = cgetopt(argc, argv, "hV:")) != -1) {
     switch(ch) {
     case 'h':
       usage_h2_pausing(NULL);
       return 2;
     case 'V': {
-      if(!strcmp("http/1.1", optarg))
+      if(!strcmp("http/1.1", coptarg))
         http_version = CURL_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if(!strcmp("h2", coptarg))
         http_version = CURL_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if(!strcmp("h3", coptarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_h2_pausing("invalid http version");
@@ -122,8 +122,8 @@ static int test_h2_pausing(int argc, char *argv[])
       return 1;
     }
   }
-  argc -= optind;
-  argv += optind;
+  argc -= coptind;
+  argv += coptind;
 
   if(argc != 1) {
     fprintf(stderr, "ERROR: need URL as argument\n");
