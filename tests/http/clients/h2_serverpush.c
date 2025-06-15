@@ -65,7 +65,7 @@ static int my_trace(CURL *handle, curl_infotype type,
 
 #define OUTPUTFILE "download_0.data"
 
-static int setup(CURL *hnd, const char *url)
+static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
   FILE *out = fopen(OUTPUTFILE, "wb");
   if(!out)
@@ -142,7 +142,7 @@ out:
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+static int main_h2_serverpush(int argc, char *argv[])
 {
   CURL *easy;
   CURLM *multi_handle;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-  if(setup(easy, url)) {
+  if(setup_h2_serverpush(easy, url)) {
     fprintf(stderr, "failed\n");
     return 1;
   }

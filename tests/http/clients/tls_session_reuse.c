@@ -72,7 +72,7 @@ static int add_transfer(CURLM *multi, CURLSH *share,
   return 0;
 }
 
-int main(int argc, char *argv[])
+static int main_tls_session_reuse(int argc, char *argv[])
 {
   const char *url;
   CURLM *multi = NULL;

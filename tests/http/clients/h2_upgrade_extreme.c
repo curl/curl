@@ -33,7 +33,7 @@ static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
   return size * nmemb;
 }
 
-int main(int argc, char *argv[])
+static int main_h2_upgrade_extreme(int argc, char *argv[])
 {
   const char *url;
   CURLM *multi = NULL;
