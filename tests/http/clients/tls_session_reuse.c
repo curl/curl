@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
+static size_t write_tse_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
 {
   (void)ptr;
   (void)opaque;
@@ -54,7 +54,7 @@ static int add_transfer(CURLM *multi, CURLSH *share,
   curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
   curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
   curl_easy_setopt(easy, CURLOPT_HTTP_VERSION, http_version);
-  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_tse_cb);
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
   curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
   curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER, 0L);
