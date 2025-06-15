@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _MSC_VER
 static int verbose_u = 1;
 
 struct transfer_u {
@@ -208,14 +207,12 @@ static void usage_hx_upload(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
-#endif /* !_MSC_VER */
 
 /*
  * Download a file over HTTP/2, take care of server push.
  */
 static int test_hx_upload(int argc, char *argv[])
 {
-#ifndef _MSC_VER
   CURLM *multi_handle;
   CURLSH *share;
   const char *url;
@@ -501,10 +498,4 @@ static int test_hx_upload(int argc, char *argv[])
   curl_share_cleanup(share);
 
   return 0;
-#else
-  (void)argc;
-  (void)argv;
-  fprintf(stderr, "Not supported with this compiler.\n");
-  return 1;
-#endif /* !_MSC_VER */
 }

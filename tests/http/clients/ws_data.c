@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,
                            size_t r_offset, size_t nread, size_t exp_len)
@@ -186,7 +186,7 @@ static void usage_ws_data(const char *msg)
 
 static int test_ws_data(int argc, char *argv[])
 {
-#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;

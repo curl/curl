@@ -31,7 +31,6 @@
 #define strdup _strdup
 #endif
 
-#ifndef _MSC_VER
 static int verbose_d = 1;
 
 struct transfer_d {
@@ -180,14 +179,12 @@ static void usage_hx_download(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
-#endif /* !_MSC_VER */
 
 /*
  * Download a file over HTTP/2, take care of server push.
  */
 static int test_hx_download(int argc, char *argv[])
 {
-#ifndef _MSC_VER
   CURLM *multi_handle;
   struct CURLMsg *m;
   CURLSH *share;
@@ -454,10 +451,4 @@ cleanup:
   free(resolve);
 
   return result;
-#else
-  (void)argc;
-  (void)argv;
-  fprintf(stderr, "Not supported with this compiler.\n");
-  return 1;
-#endif /* !_MSC_VER */
 }
