@@ -45,4 +45,4 @@ set_property(TARGET test-http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_
 if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
   set_property(TARGET test-http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(test-http-clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}")
+set_target_properties(test-http-clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
