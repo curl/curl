@@ -26,19 +26,22 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-add_custom_command(
-  OUTPUT "${BUNDLE_SRC}"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES}
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
-  DEPENDS
-    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
-  VERBATIM)
-
+set(_bundle_exclude "")
 if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  set_source_files_properties("../../lib/memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  set(_bundle_exclude "${MEMDEBUG}")
 endif()
 
-add_executable(servers EXCLUDE_FROM_ALL ${MEMDEBUG} ${CURLX_SRCS} ${UTILS} "${BUNDLE_SRC}")
+add_custom_command(
+  OUTPUT "${BUNDLE_SRC}"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+    --include ${UTILS} ${MEMDEBUG} ${CURLX_SRCS} --test ${TESTFILES} --exclude ${_bundle_exclude}
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    ${FIRSTFILES} ${UTILS} ${MEMDEBUG} ${CURLX_SRCS} ${TESTFILES}
+  VERBATIM)
+
+add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_bundle_exclude})
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
@@ -61,4 +64,4 @@ set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL
 if(WIN32)
   set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(servers PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}")
+set_target_properties(servers PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
