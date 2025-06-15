@@ -36,7 +36,7 @@ add_custom_command(
     ${FIRSTFILES} ${UTILS} ${CURLX_SRCS} ${TESTFILES}
   VERBATIM)
 
-add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_sources_extra})
+add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
