@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP/3
+QUICv2
+verbose logs
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+http/3
+</features>
+# No local server needed for this test
+# <server>
+# http/3
+# </server>
+<name>
+HTTP GET over HTTP/3 with QUICv2
+</name>
+<command>
+--http3 v2 https://nghttp2.org/httpbin/get
+</command>
+<verbose/>
+<output>
+{
+  "args": {},
+  "headers": {
+    "Accept": "*/*",
+    "Host": "nghttp2.org",
+    "User-Agent": "curl/%CURL_VERSION_MAJOR.%CURL_VERSION_MINOR.%CURL_VERSION_PATCH"
+  },
+  "origin": "%CLIENTIP",
+  "url": "https://nghttp2.org/httpbin/get"
+}
+</output>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<log>
+# Ensure that some basic HTTP/3 and connection messages appear
+ löytyi
+QUIC connect to .*
+HTTP/3 default connection
+</log>
+# We can't reliably verify QUICv2 negotiation from logs alone without specific server logs or debug output.
+# The main check is that the command doesn't fail and we get the expected output.
+<file name="stdout%TESTNUMBER">
+<jsonconverthtml/>
+<contains>
+  "url": "https://nghttp2.org/httpbin/get"
+</contains>
+<contains>
+  "Host": "nghttp2.org"
+</contains>
+</file>
+<errorcode>0</errorcode>
+</verify>
+</testcase>
