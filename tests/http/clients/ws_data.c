@@ -29,12 +29,6 @@
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 static CURLcode check_recv(const struct curl_ws_frame *frame,
                            size_t r_offset, size_t nread, size_t exp_len)
 {
@@ -70,10 +64,6 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
   }
   return CURLE_OK;
 }
-
-#if defined(__TANDEM)
-# include <cextdecs.h(PROCESS_DELAY_)>
-#endif
 
 static CURLcode data_echo(CURL *curl, size_t count,
                           size_t plen_min, size_t plen_max)
