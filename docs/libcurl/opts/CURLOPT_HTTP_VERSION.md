@@ -88,6 +88,14 @@ given in the URL, with fallback to earlier HTTP versions if needed.
 server given in the URL and does not downgrade to earlier HTTP version if the
 server does not support HTTP/3.
 
+## CURL_HTTP_VERSION_3_V2
+
+(Added in curl 8.x.x) This option makes libcurl attempt to use HTTP/3 over
+QUICv2 to the host given in the URL. For HTTPS only. For HTTP, this option
+makes libcurl return an error. If QUICv2 is not supported or cannot be
+negotiated, it may fall back to other HTTP versions based on server
+capabilities and curl's configuration.
+
 # DEFAULT
 
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
