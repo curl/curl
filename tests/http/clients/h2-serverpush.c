@@ -83,10 +83,9 @@ static int setup(CURL *hnd, const char *url)
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
 
-#if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
-#endif
+
   return 0; /* all is good */
 }
 

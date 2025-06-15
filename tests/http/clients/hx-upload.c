@@ -187,10 +187,9 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
     curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
   }
 
-#if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
-#endif
+
   return 0; /* all is good */
 }
 
