@@ -1,5 +1,5 @@
-#ifndef HEADER_SERVER_FIRST_H
-#define HEADER_SERVER_FIRST_H
+#ifndef HEADER_CLIENT_FIRST_H
+#define HEADER_CLIENT_FIRST_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -216,4 +216,4 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-#endif /* HEADER_SERVER_FIRST_H */
+#endif /* HEADER_CLIENT_FIRST_H */
