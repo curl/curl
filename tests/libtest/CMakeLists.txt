@@ -26,6 +26,12 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+set(_bundle_exclude "")
+if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
+  # These are part of the libcurl static lib. Add them here when linking shared.
+  list(APPEND _bundle_exclude ${MEMPTR} ${CURLX_SRCS})
+endif()
+
 add_custom_command(
   OUTPUT "lib1521.c"
   COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${PROJECT_SOURCE_DIR}/include/curl/curl.h" "lib1521.c"
@@ -36,18 +42,15 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT "${BUNDLE_SRC}"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES} "lib1521.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+    --include ${UTILS} ${MEMPTR} ${CURLX_SRCS} --test ${TESTFILES} "lib1521.c" --exclude ${_bundle_exclude}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES} "lib1521.c"
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    ${FIRSTFILES} ${UTILS} ${MEMPTR} ${CURLX_SRCS} ${TESTFILES} "lib1521.c"
   VERBATIM)
 
-set(_sources "")
-if(LIB_SELECTED STREQUAL LIB_SHARED)
-  list(APPEND _sources ${MEMPTR} ${CURLX_SRCS})  # These are part of the libcurl static lib. Add them here when linking shared.
-endif()
-
-add_executable(libtests EXCLUDE_FROM_ALL ${_sources} ${UTILS} "${BUNDLE_SRC}")
+add_executable(libtests EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_bundle_exclude})
 add_dependencies(testdeps libtests)
 target_link_libraries(libtests ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(libtests PRIVATE
@@ -59,4 +62,4 @@ target_include_directories(libtests PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for curlcheck.h
 )
 set_property(TARGET libtests APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}" "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
-set_target_properties(libtests PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}")
+set_target_properties(libtests PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
