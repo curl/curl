@@ -37,6 +37,7 @@ struct entry_s {
 #include <curl/curl.h>
 
 #include <stdio.h>
+#include <stdlib.h>  /* for EXIT_SUCCESS, calloc(), free(), strtol() */
 #include <string.h>  /* for strchr() */
 
 #ifdef _WIN32
