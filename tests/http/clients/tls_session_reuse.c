@@ -21,11 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <curl/curl.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 static size_t write_tse_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
 {

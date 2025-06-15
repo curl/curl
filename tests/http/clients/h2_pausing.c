@@ -23,12 +23,7 @@
  ***************************************************************************/
 /* This is based on the PoC client of issue #11982
  */
-#include <curl/curl.h>
-
 #include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 static void usage_h2_pausing(const char *msg)
 {
