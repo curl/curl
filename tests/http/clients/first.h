@@ -221,7 +221,6 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-#if 1
 static int coptind;
 static char *coptarg;
 
@@ -284,10 +283,5 @@ static int cgetopt(int argc, char * const argv[], const char *optstring)
     }
   }
 }
-#else
-#define cgetopt getopt
-#define coptarg optarg
-#define coptind optind
-#endif
 
 #endif /* HEADER_CLIENT_FIRST_H */
