@@ -40,7 +40,8 @@ target_include_directories(test-http-clients PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
 target_link_libraries(test-http-clients ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
-set_property(TARGET test-http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
+set_property(TARGET test-http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
+  "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
 if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
   set_property(TARGET test-http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
