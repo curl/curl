@@ -751,7 +751,7 @@ struct win_thread_data {
   HANDLE stdin_handle;
   /* This is the listen socket for the thread. It is closed after the first
       connection. */
-  SOCKET socket_l;
+  curl_socket_t socket_l;
   /* This is the global config - used for printing errors and so forth */
   struct GlobalConfig *global;
 };
@@ -768,7 +768,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   int clientAddrLen = sizeof(clientAddr);
 
   SOCKET socket_w = accept(tdata->socket_l, (SOCKADDR*)&clientAddr,
-    &clientAddrLen);
+                           &clientAddrLen);
 
   if(socket_w == INVALID_SOCKET) {
     errorf(tdata->global, "accept error: %08lx\n", GetLastError());
@@ -777,13 +777,12 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 
   closesocket(tdata->socket_l); /* sclose here fails test 1498 */
   tdata->socket_l = INVALID_SOCKET;
-  if(SOCKET_ERROR == shutdown(socket_w, SD_RECEIVE)) {
+  if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
     errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
   for(;;) {
-    r = ReadFile(tdata->stdin_handle, buffer,
-      sizeof(buffer), &n, NULL);
+    r = ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL);
     if(r == 0)
       break;
     if(n == 0)
@@ -839,7 +838,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
     tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
-      IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+                                 IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
     if(tdata->socket_l == INVALID_SOCKET) {
       errorf(global, "WSASocketW error: %08lx", GetLastError());
@@ -872,8 +871,8 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
 
     /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
     r = DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
-      GetCurrentProcess(), &tdata->stdin_handle,
-      0, FALSE, DUPLICATE_SAME_ACCESS);
+                        GetCurrentProcess(), &tdata->stdin_handle,
+                        0, FALSE, DUPLICATE_SAME_ACCESS);
 
     if(!r) {
       errorf(global, "DuplicateHandle error: %08lx", GetLastError());
@@ -885,14 +884,14 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
        from the stdin handle or file descriptor 0 will be reading from the
        socket that is fed by the thread. */
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
-        tdata, 0, NULL);
+                                tdata, 0, NULL);
     if(!stdin_thread) {
       errorf(global, "CreateThread error: %08lx", GetLastError());
       break;
     }
 
     /* Connect to the thread and rearrange our own STDIN handles */
-    socket_r = (int)socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    socket_r = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_r == INVALID_SOCKET) {
       errorf(global, "socket error: %08lx", GetLastError());
       break;
@@ -901,12 +900,12 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     /* Hard close the socket on closesocket() */
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
-    if(SOCKET_ERROR == connect(socket_r, (SOCKADDR*)&selfaddr, socksize)) {
+    if(connect(socket_r, (SOCKADDR*)&selfaddr, socksize) == SOCKET_ERROR) {
       errorf(global, "connect error: %08lx", GetLastError());
       break;
     }
 
-    if(SOCKET_ERROR == shutdown(socket_r, SD_SEND)) {
+    if(shutdown(socket_r, SD_SEND) == SOCKET_ERROR) {
       errorf(global, "shutdown error: %08lx", GetLastError());
       break;
     }

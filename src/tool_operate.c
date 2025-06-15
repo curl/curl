@@ -1081,17 +1081,17 @@ static void check_stdin_upload(struct GlobalConfig *global,
   CURL_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-    /* non - blocking stdin behavior on Windows is challenging
+    /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
     SOCKET f = win32_stdin_read_thread(global);
 
     if(f == INVALID_SOCKET)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "
-          "will fall back to blocking mode");
+            "will fall back to blocking mode");
     else if(f > INT_MAX) {
       warnf(global, "win32_stdin_read_thread returned identifier "
-          "larger than INT_MAX, will fall back to blocking mode");
+            "larger than INT_MAX, will fall back to blocking mode");
       sclose(f);
     }
     else

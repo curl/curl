@@ -89,9 +89,9 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
   /* If we are on Windows, and using `-T .`, then per->infd points to a socket
-   connected to STDIN via a reader thread, and needs to be read with recv()
-   Make sure we are in non-blocking mode and infd is not regular STDIN
-   On linux per->infd should be STDIN (0) and the block below should not
+   connected to stdin via a reader thread, and needs to be read with recv()
+   Make sure we are in non-blocking mode and infd is not regular stdin
+   On Linux per->infd should be stdin (0) and the block below should not
    execute */
   if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
