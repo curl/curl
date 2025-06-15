@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
   if(!multi_handle)
     ERR();
 
-  for(i = 0; i < HANDLECOUNT; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK)
       ERR();
   }
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     if(!still_running) {
       int as_expected = 1;
       fprintf(stderr, "INFO: no more handles running\n");
-      for(i = 0; i < HANDLECOUNT; i++) {
+      for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         if(!handles[i].paused) {
           fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", i);
           as_expected = 0;
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     /* !checksrc! disable EQUALSNULL 1 */
     while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
-        for(i = 0; i < HANDLECOUNT; i++) {
+        for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
           if(msg->easy_handle == handles[i].h) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
               fprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
@@ -262,12 +262,12 @@ int main(int argc, char *argv[])
 
     /* Successfully paused? */
     if(!all_paused) {
-      for(i = 0; i < HANDLECOUNT; i++) {
+      for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         if(!handles[i].paused) {
           break;
         }
       }
-      all_paused = (i == HANDLECOUNT);
+      all_paused = (i == CURL_ARRAYSIZE(handles));
       if(all_paused) {
         fprintf(stderr, "INFO: all transfers paused\n");
         /* give transfer some rounds to mess things up */
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
     }
     if(resume_round > 0 && rounds == resume_round) {
       /* time to resume */
-      for(i = 0; i < HANDLECOUNT; i++) {
+      for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         fprintf(stderr, "INFO: [%d] resumed\n", i);
         handles[i].resumed = 1;
         curl_easy_pause(handles[i].h, CURLPAUSE_CONT);
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
   }
 
 out:
-  for(i = 0; i < HANDLECOUNT; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     curl_multi_remove_handle(multi_handle, handles[i].h);
     curl_easy_cleanup(handles[i].h);
   }
