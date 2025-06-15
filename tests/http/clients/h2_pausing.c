@@ -279,7 +279,6 @@ out:
     curl_easy_cleanup(handles[i].h);
   }
 
-
   curl_slist_free_all(resolve);
   curl_free(host);
   curl_free(port);
