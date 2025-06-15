@@ -27,11 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
 #ifdef _WIN32
 #define strdup _strdup
 #endif

@@ -38,6 +38,13 @@ struct entry_s {
   entry_func_t ptr;
 };
 
+#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
+
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*

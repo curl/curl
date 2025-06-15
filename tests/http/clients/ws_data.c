@@ -29,11 +29,6 @@
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
 
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
 #ifdef _WIN32
 #include <windows.h>
 #else

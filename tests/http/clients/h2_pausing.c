@@ -30,13 +30,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
 #ifndef _MSC_VER
 static void usage_h2_pausing(const char *msg)
 {
