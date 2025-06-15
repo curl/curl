@@ -85,6 +85,7 @@ static void usage_upload_pausing(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
+#endif /* !_MSC_VER */
 
 static int test_upload_pausing(int argc, char *argv[])
 {
