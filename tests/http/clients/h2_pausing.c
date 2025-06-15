@@ -30,6 +30,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+
 #ifndef _MSC_VER
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
@@ -214,7 +216,7 @@ int main(int argc, char *argv[])
       fprintf(stderr, "INFO: no more handles running\n");
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         if(!handles[i].paused) {
-          fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", i);
+          fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", (int)i);
           as_expected = 0;
         }
         else if(handles[i].paused != 1) {
@@ -223,7 +225,7 @@ int main(int argc, char *argv[])
           as_expected = 0;
         }
         else if(!handles[i].resumed) {
-          fprintf(stderr, "ERROR: [%d] NOT resumed!\n", i);
+          fprintf(stderr, "ERROR: [%d] NOT resumed!\n", (int)i);
           as_expected = 0;
         }
         else if(handles[i].errored != 1) {
@@ -250,7 +252,7 @@ int main(int argc, char *argv[])
           if(msg->easy_handle == handles[i].h) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
               fprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
-                      "result %d - wtf?\n", i, handles[i].paused,
+                      "result %d - wtf?\n", (int)i, handles[i].paused,
                       handles[i].resumed, msg->data.result);
               rc = 1;
               goto out;
@@ -277,7 +279,7 @@ int main(int argc, char *argv[])
     if(resume_round > 0 && rounds == resume_round) {
       /* time to resume */
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-        fprintf(stderr, "INFO: [%d] resumed\n", i);
+        fprintf(stderr, "INFO: [%d] resumed\n", (int)i);
         handles[i].resumed = 1;
         curl_easy_pause(handles[i].h, CURLPAUSE_CONT);
       }
