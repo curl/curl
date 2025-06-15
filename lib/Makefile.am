@@ -76,9 +76,7 @@ CSOURCES += dllmain.c
 endif
 
 if USE_UNITY
-# Keep these separate to avoid duplicate definitions when linking libtests
-# in static mode.
-curl_EXCLUDE = curl_threads.c curlx/timediff.c curlx/warnless.c
+curl_EXCLUDE =
 if CURLDEBUG
 # We must compile this source separately to avoid memdebug.h redefinitions
 # applying to it.
