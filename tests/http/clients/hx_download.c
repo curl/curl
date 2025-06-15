@@ -205,7 +205,7 @@ static int test_hx_download(int argc, char *argv[])
   int fresh_connect = 0;
   int result = 0;
 
-  while((ch = getopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
+  while((ch = cgetopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
@@ -221,39 +221,39 @@ static int test_hx_download(int argc, char *argv[])
       forbid_reuse_d = 1;
       break;
     case 'm':
-      max_parallel = (size_t)strtol(optarg, NULL, 10);
+      max_parallel = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'n':
-      transfer_count_d = (size_t)strtol(optarg, NULL, 10);
+      transfer_count_d = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'x':
       fresh_connect = 1;
       break;
     case 'A':
-      abort_offset = (size_t)strtol(optarg, NULL, 10);
+      abort_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'F':
-      fail_offset = (size_t)strtol(optarg, NULL, 10);
+      fail_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'M':
-      max_host_conns = (size_t)strtol(optarg, NULL, 10);
+      max_host_conns = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'P':
-      pause_offset = (size_t)strtol(optarg, NULL, 10);
+      pause_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'r':
       free(resolve);
-      resolve = strdup(optarg);
+      resolve = strdup(coptarg);
       break;
     case 'T':
-      max_total_conns = (size_t)strtol(optarg, NULL, 10);
+      max_total_conns = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'V': {
-      if(!strcmp("http/1.1", optarg))
+      if(!strcmp("http/1.1", coptarg))
         http_version = CURL_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if(!strcmp("h2", coptarg))
         http_version = CURL_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if(!strcmp("h3", coptarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
@@ -268,8 +268,8 @@ static int test_hx_download(int argc, char *argv[])
       goto cleanup;
     }
   }
-  argc -= optind;
-  argv += optind;
+  argc -= coptind;
+  argv += coptind;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");

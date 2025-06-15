@@ -193,20 +193,20 @@ static int test_ws_data(int argc, char *argv[])
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch;
 
-  while((ch = getopt(argc, argv, "c:hm:M:")) != -1) {
+  while((ch = cgetopt(argc, argv, "c:hm:M:")) != -1) {
     switch(ch) {
     case 'h':
       usage_ws_data(NULL);
       res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     case 'c':
-      count = (size_t)strtol(optarg, NULL, 10);
+      count = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'm':
-      plen_min = (size_t)strtol(optarg, NULL, 10);
+      plen_min = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'M':
-      plen_max = (size_t)strtol(optarg, NULL, 10);
+      plen_max = (size_t)strtol(coptarg, NULL, 10);
       break;
     default:
       usage_ws_data("invalid option");
@@ -214,8 +214,8 @@ static int test_ws_data(int argc, char *argv[])
       goto cleanup;
     }
   }
-  argc -= optind;
-  argv += optind;
+  argc -= coptind;
+  argv += coptind;
 
   if(!plen_max)
     plen_max = plen_min;

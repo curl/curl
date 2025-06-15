@@ -37,11 +37,13 @@ struct entry_s {
 #include <curl/curl.h>
 
 #include <stdio.h>
+#include <string.h>  /* for strchr() */
 
 #ifdef _WIN32
 #include <windows.h>  /* for Sleep() */
 #else
 #include <sys/time.h>  /* for usleep() */
+#include <unistd.h>  /* for usleep() */
 #endif
 #ifdef __TANDEM
 #include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
@@ -211,33 +213,33 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-static char *optarg = NULL;
-static int optind = 1;
-static int optopt;
+static char *coptarg = NULL;
+static int coptind = 1;
 
-static int getopt(int argc, char * const argv[], const char *optstring)
+static int cgetopt(int argc, char * const argv[], const char *optstring)
 {
-  const char *arg = argv[optind];
+  const char *arg = argv[coptind];
   const char *opt;
+  int opto;
 
-  if(optind >= argc || arg[0] != '-' || arg[0] == '\0')
+  if(coptind >= argc || arg[0] != '-' || arg[0] == '\0')
     return -1;
 
-  optopt = arg[1];
-  opt = strchr(optstring, optopt);
+  opto = arg[1];
+  opt = strchr(optstring, opto);
 
   if(!opt)
     return '?';
 
   if(opt[1] == ':') {
-    optind++;
-    if(optind >= argc)
+    coptind++;
+    if(coptind >= argc)
       return '?';
-    optarg = argv[optind];
-    optind++;
+    coptarg = argv[coptind];
+    coptind++;
   }
 
-  return optopt;
+  return opto;
 }
 
 #endif /* HEADER_CLIENT_FIRST_H */
