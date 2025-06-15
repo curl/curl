@@ -21,11 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * WebSockets pingpong
- * </DESC>
- */
-/* curl stuff */
 #include "curl_setup.h"
 #include <curl/curl.h>
 
