@@ -26,22 +26,22 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set(_bundle_exclude "")
+set(_sources_extra "")
 if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  list(APPEND _bundle_exclude ${MEMDEBUG})
+  list(APPEND _sources_extra ${MEMDEBUG})
 endif()
 
 add_custom_command(
   OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS} ${MEMDEBUG} ${CURLX_SRCS} --test ${TESTFILES} --exclude ${_bundle_exclude}
+    --include ${UTILS} ${CURLX_SRCS} --test ${TESTFILES}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES} ${UTILS} ${MEMDEBUG} ${CURLX_SRCS} ${TESTFILES}
+    ${FIRSTFILES} ${UTILS} ${CURLX_SRCS} ${TESTFILES}
   VERBATIM)
 
-add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_bundle_exclude})
+add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_sources_extra})
 add_dependencies(testdeps servers)
 target_include_directories(servers PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
