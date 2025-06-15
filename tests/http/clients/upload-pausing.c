@@ -21,10 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * upload pausing
- * </DESC>
- */
 /* This is based on the PoC client of issue #11769
  */
 #include <curl/curl.h>
@@ -39,103 +35,6 @@
 #endif
 
 #ifndef _MSC_VER
-static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
-{
-  /*
-   * This is the trace look that is similar to what libcurl makes on its
-   * own.
-   */
-  static const char * const s_infotype[] = {
-    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
-  };
-  if(idsbuf && *idsbuf)
-    fprintf(log, "%s%s", idsbuf, s_infotype[type]);
-  else
-    fputs(s_infotype[type], log);
-}
-
-#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
-#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
-                                   CURL_FORMAT_CURL_OFF_T "] "
-/*
-** callback for CURLOPT_DEBUGFUNCTION
-*/
-static int debug_cb(CURL *handle, curl_infotype type,
-                    char *data, size_t size,
-                    void *userdata)
-{
-  FILE *output = stderr;
-  static int newl = 0;
-  static int traced_data = 0;
-  char idsbuf[60];
-  curl_off_t xfer_id, conn_id;
-
-  (void)handle; /* not used */
-  (void)userdata;
-
-  if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
-                     conn_id);
-    }
-    else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
-    }
-  }
-  else
-    idsbuf[0] = 0;
-
-  switch(type) {
-  case CURLINFO_HEADER_OUT:
-    if(size > 0) {
-      size_t st = 0;
-      size_t i;
-      for(i = 0; i < size - 1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
-            log_line_start(output, idsbuf, type);
-          }
-          (void)fwrite(data + st, i - st + 1, 1, output);
-          st = i + 1;
-          newl = 0;
-        }
-      }
-      if(!newl)
-        log_line_start(output, idsbuf, type);
-      (void)fwrite(data + st, i - st + 1, 1, output);
-    }
-    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
-    traced_data = 0;
-    break;
-  case CURLINFO_TEXT:
-  case CURLINFO_HEADER_IN:
-    if(!newl)
-      log_line_start(output, idsbuf, type);
-    (void)fwrite(data, size, 1, output);
-    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
-    traced_data = 0;
-    break;
-  case CURLINFO_DATA_OUT:
-  case CURLINFO_DATA_IN:
-  case CURLINFO_SSL_DATA_IN:
-  case CURLINFO_SSL_DATA_OUT:
-    if(!traced_data) {
-      if(!newl)
-        log_line_start(output, idsbuf, type);
-      fprintf(output, "[%ld bytes data]\n", (long)size);
-      newl = 0;
-      traced_data = 1;
-    }
-    break;
-  default: /* nada */
-    newl = 0;
-    traced_data = 1;
-    break;
-  }
-
-  return 0;
-}
 
 #define PAUSE_READ_AFTER  1
 static size_t total_read = 0;
