@@ -79,6 +79,15 @@
 #include "../memdebug.h"
 
 
+/* Supported QUIC versions */
+static const uint32_t available_versions_v1[] = {
+  NGTCP2_PROTO_VER_V1
+};
+static const uint32_t available_versions_v2[] = {
+  NGTCP2_PROTO_VER_V2,
+  NGTCP2_PROTO_VER_V1
+};
+
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_MAX_DATA (1*1024*1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
@@ -448,7 +457,20 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->log_printf = NULL;
 #endif
 
-  (void)data;
+  if(data->set.httpwant == CURL_HTTP_VERSION_3_V2) {
+    s->original_version = NGTCP2_PROTO_VER_V2;
+    s->available_versions = available_versions_v2;
+    s->available_versionslen = sizeof(available_versions_v2) /
+                                sizeof(available_versions_v2[0]);
+  }
+  else {
+    /* Default to V1 if not V2 or if data is NULL (should not happen in practice here) */
+    s->original_version = NGTCP2_PROTO_VER_V1;
+    s->available_versions = available_versions_v1;
+    s->available_versionslen = sizeof(available_versions_v1) /
+                                sizeof(available_versions_v1[0]);
+  }
+
   s->initial_ts = pktx->ts;
   s->handshake_timeout = QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * ctx->max_stream_window;
@@ -845,7 +867,7 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* lost_datagram */
   ngtcp2_crypto_get_path_challenge_data_cb,
   cb_stream_stop_sending,
-  NULL, /* version_negotiation */
+  ngtcp2_crypto_version_negotiation_cb, /* version_negotiation */
   cb_recv_rx_key,
   NULL, /* recv_tx_key */
   NULL, /* early_data_rejected */
@@ -2502,9 +2524,20 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   ngtcp2_addr_init(&ctx->connected_path.remote,
                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
 
+  uint32_t client_chosen_version = NGTCP2_PROTO_VER_V1;
+
+  if(data->set.httpwant == CURL_HTTP_VERSION_3_V2) {
+    client_chosen_version = NGTCP2_PROTO_VER_V2;
+  }
+
+  if(data->set.verbose) {
+    infof(data, "Attempting HTTP/3 QUIC version %d",
+          (client_chosen_version == NGTCP2_PROTO_VER_V2) ? 2 : 1);
+  }
+
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
-                              NGTCP2_PROTO_VER_V1, &ng_callbacks,
+                              client_chosen_version, &ng_callbacks,
                               &ctx->settings, &ctx->transport_params,
                               NULL, cf);
   if(rc)
