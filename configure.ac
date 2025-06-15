@@ -579,25 +579,6 @@ case $host_os in
     ;;
 esac
 
-dnl Apply curl debug options to test servers
-OPT_SERVER_DEBUG="default"
-AC_ARG_ENABLE(server-debug,
-AS_HELP_STRING([--enable-server-debug],[Enable debug options for test servers])
-AS_HELP_STRING([--disable-server-debug],[Disable debug options for test servers]),
-OPT_SERVER_DEBUG=$enableval)
-case "$OPT_SERVER_DEBUG" in
-  no)
-    dnl --disable-server-debug option used
-    want_server_debug="no"
-    ;;
-  *)
-    dnl --enable-server-debug option used or not specified
-    want_server_debug="no"
-    ;;
-esac
-AC_MSG_RESULT([$want_server_debug])
-AM_CONDITIONAL(ENABLE_SERVER_DEBUG, test x$want_server_debug = xyes)
-
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
