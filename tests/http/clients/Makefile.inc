@@ -27,7 +27,7 @@ BUNDLE = clients
 BUNDLE_SRC = clients.c
 
 # Files referenced from the bundle source
-FIRSTFILES = ../../libtest/first.c ../../libtest/first.h
+FIRSTFILES = first.c first.h
 
 # Common files used by test programs
 UTILS = util.c util.h
