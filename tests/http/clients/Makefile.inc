@@ -23,13 +23,20 @@
 ###########################################################################
 # Shared between CMakeLists.txt and Makefile.am
 
-check_PROGRAMS = \
-  h2-pausing \
-  h2-serverpush \
-  h2-upgrade-extreme \
-  hx-download \
-  hx-upload \
-  tls-session-reuse \
-  upload-pausing \
-  ws-data \
-  ws-pingpong
+BUNDLE = clients
+BUNDLE_SRC = clients.c
+
+# Files referenced from the bundle source
+FIRSTFILES = first.c first.h
+
+# All test clients
+TESTFILES = \
+  h2_pausing.c \
+  h2_serverpush.c \
+  h2_upgrade_extreme.c \
+  hx_download.c \
+  hx_upload.c \
+  tls_session_reuse.c \
+  upload_pausing.c \
+  ws_data.c \
+  ws_pingpong.c
