@@ -70,13 +70,13 @@ Here's an example using optional initialization and cleanup:
 
     #include "a libcurl header.h" /* from the lib dir */
 
-    static CURLcode t9999_setup( void )
+    static CURLcode t9999_setup(void)
     {
       /* whatever you want done first */
       return CURLE_OK;
     }
 
-    static void t9999_stop( void )
+    static void t9999_stop(void)
     {
       /* done before shutting down and exiting */
     }
