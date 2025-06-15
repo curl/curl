@@ -216,4 +216,35 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
+#ifdef _MSC_VER
+static char *optarg = NULL;
+static int optind = 1;
+static int optopt;
+
+static int getopt(int argc, char * const argv[], const char *optstring)
+{
+  const char *arg = argv[optind];
+  const char *opt;
+
+  if(optind >= argc || arg[0] != '-' || arg[0] == '\0')
+    return -1;
+
+  optopt = arg[1];
+  opt = strchr(optstring, optopt);
+
+  if(!opt)
+    return '?';
+
+  if(opt[1] == ':') {
+    optind++;
+    if(optind >= argc)
+      return '?';
+    optarg = argv[optind];
+    optind++;
+  }
+
+  return optopt;
+}
+#endif
+
 #endif /* HEADER_CLIENT_FIRST_H */

@@ -30,7 +30,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef _MSC_VER
 static void usage_h2_pausing(const char *msg)
 {
   if(msg)
@@ -82,11 +81,8 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   return realsize;
 }
 
-#endif /* !_MSC_VER */
-
 static int test_h2_pausing(int argc, char *argv[])
 {
-#ifndef _MSC_VER
   struct handle handles[2];
   CURLM *multi_handle;
   int still_running = 1, msgs_left, numfds;
@@ -287,10 +283,4 @@ out:
   curl_global_cleanup();
 
   return rc;
-#else
-  (void)argc;
-  (void)argv;
-  fprintf(stderr, "Not supported with this compiler.\n");
-  return 1;
-#endif /* !_MSC_VER */
 }

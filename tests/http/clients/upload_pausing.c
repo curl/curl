@@ -29,8 +29,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef _MSC_VER
-
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
@@ -85,11 +83,9 @@ static void usage_upload_pausing(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
-#endif /* !_MSC_VER */
 
 static int test_upload_pausing(int argc, char *argv[])
 {
-#ifndef _MSC_VER
   CURL *curl;
   CURLcode rc = CURLE_OK;
   CURLU *cu;
@@ -201,10 +197,4 @@ static int test_upload_pausing(int argc, char *argv[])
   curl_global_cleanup();
 
   return (int)rc;
-#else
-  (void)argc;
-  (void)argv;
-  fprintf(stderr, "Not supported with this compiler.\n");
-  return 1;
-#endif /* !_MSC_VER */
 }
