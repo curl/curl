@@ -51,7 +51,7 @@ static void usage(const char *msg)
 
 struct handle
 {
-  int idx;
+  size_t idx;
   int paused;
   int resumed;
   int errored;
@@ -69,23 +69,23 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   if(curl_easy_getinfo(handle->h, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                        &totalsize) == CURLE_OK)
     fprintf(stderr, "INFO: [%d] write, Content-Length %"CURL_FORMAT_CURL_OFF_T
-            "\n", handle->idx, totalsize);
+            "\n", (int)handle->idx, totalsize);
 
   if(!handle->resumed) {
     ++handle->paused;
     fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
-            handle->idx, handle->paused, (long)realsize);
+            (int)handle->idx, handle->paused, (long)realsize);
     assert(handle->paused == 1);
     return CURL_WRITEFUNC_PAUSE;
   }
   if(handle->fail_write) {
     ++handle->errored;
     fprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
-            handle->idx, (long)realsize, handle->errored);
+            (int)handle->idx, (long)realsize, handle->errored);
     return CURL_WRITEFUNC_ERROR;
   }
   fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
-          handle->idx, (long)realsize);
+          (int)handle->idx, (long)realsize);
   return realsize;
 }
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
         }
         else if(handles[i].paused != 1) {
           fprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
-                  i, handles[i].paused);
+                  (int)i, handles[i].paused);
           as_expected = 0;
         }
         else if(!handles[i].resumed) {
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
         }
         else if(handles[i].errored != 1) {
           fprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
-                  i, handles[i].errored);
+                  (int)i, handles[i].errored);
           as_expected = 0;
         }
       }
