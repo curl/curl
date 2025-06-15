@@ -80,16 +80,6 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
 # include <cextdecs.h(PROCESS_DELAY_)>
 #endif
 
-/* just close the connection */
-static void websocket_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
-}
-
 static CURLcode data_echo(CURL *curl, size_t count,
                           size_t plen_min, size_t plen_max)
 {

@@ -76,16 +76,6 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
   return CURLE_RECV_ERROR;
 }
 
-/* just close the connection */
-static void websocket_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
-}
-
 #if defined(__TANDEM)
 # include <cextdecs.h(PROCESS_DELAY_)>
 #endif
