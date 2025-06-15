@@ -145,3 +145,13 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
     fputc('\n', stderr); /* newline */
   }
 }
+
+/* just close the connection */
+static void websocket_close(CURL *curl)
+{
+  size_t sent;
+  CURLcode result =
+    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  fprintf(stderr,
+          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+}
