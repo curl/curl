@@ -3023,12 +3023,12 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                  the next token is another option. */
             }
             else if (potential_arg) { /* Mandatory argument expected by other options */
-                nextarg_param = convert_tchar_to_UTF8(potential_arg);
-                if(!nextarg_param) {
+              nextarg_param = convert_tchar_to_UTF8(potential_arg);
+              if(!nextarg_param) {
                   unicodefree(orig_opt);
-                  return PARAM_NO_MEM;
-                }
-                passarg = TRUE;
+                return PARAM_NO_MEM;
+              }
+              passarg = TRUE;
             }
           }
           /* If i == argc - 1, nextarg_param remains NULL.
