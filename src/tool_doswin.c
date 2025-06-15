@@ -770,13 +770,13 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   SOCKET socket_w = accept(tdata->socket_l, (SOCKADDR*)&clientAddr,
                            &clientAddrLen);
 
-  if(socket_w == INVALID_SOCKET) {
+  if(socket_w == CURL_SOCKET_BAD) {
     errorf(tdata->global, "accept error: %08lx\n", GetLastError());
     goto ThreadCleanup;
   }
 
   closesocket(tdata->socket_l); /* sclose here fails test 1498 */
-  tdata->socket_l = INVALID_SOCKET;
+  tdata->socket_l = CURL_SOCKET_BAD;
   if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
     errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
     goto ThreadCleanup;
@@ -796,11 +796,11 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
 ThreadCleanup:
   CloseHandle(tdata->stdin_handle);
   tdata->stdin_handle = NULL;
-  if(tdata->socket_l != INVALID_SOCKET) {
+  if(tdata->socket_l != CURL_SOCKET_BAD) {
     sclose(tdata->socket_l);
-    tdata->socket_l = INVALID_SOCKET;
+    tdata->socket_l = CURL_SOCKET_BAD;
   }
-  if(socket_w != INVALID_SOCKET)
+  if(socket_w != CURL_SOCKET_BAD)
     sclose(socket_w);
 
   if(tdata) {
@@ -812,7 +812,7 @@ ThreadCleanup:
 
 /* The background thread that reads and buffers the true stdin. */
 static HANDLE stdin_thread = NULL;
-static SOCKET socket_r = INVALID_SOCKET;
+static SOCKET socket_r = CURL_SOCKET_BAD;
 
 SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
 {
@@ -822,7 +822,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
   struct win_thread_data *tdata = NULL;
   SOCKADDR_IN selfaddr;
 
-  if(socket_r != INVALID_SOCKET) {
+  if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
     return socket_r;
   }
@@ -840,7 +840,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
                                  IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
-    if(tdata->socket_l == INVALID_SOCKET) {
+    if(tdata->socket_l == CURL_SOCKET_BAD) {
       errorf(global, "WSASocketW error: %08lx", GetLastError());
       break;
     }
@@ -892,7 +892,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
 
     /* Connect to the thread and rearrange our own STDIN handles */
     socket_r = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(socket_r == INVALID_SOCKET) {
+    if(socket_r == CURL_SOCKET_BAD) {
       errorf(global, "socket error: %08lx", GetLastError());
       break;
     }
@@ -920,7 +920,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
   } while(0);
 
   if(rc != 1) {
-    if(socket_r != INVALID_SOCKET && tdata) {
+    if(socket_r != CURL_SOCKET_BAD && tdata) {
       if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
         tdata->stdin_handle) {
           /* restore STDIN */
@@ -929,7 +929,7 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
         }
 
       sclose(socket_r);
-      socket_r = INVALID_SOCKET;
+      socket_r = CURL_SOCKET_BAD;
     }
 
     if(stdin_thread) {
@@ -940,16 +940,16 @@ SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
     if(tdata) {
       if(tdata->stdin_handle)
         CloseHandle(tdata->stdin_handle);
-      if(tdata->socket_l != INVALID_SOCKET)
+      if(tdata->socket_l != CURL_SOCKET_BAD)
         sclose(tdata->socket_l);
 
       free(tdata);
     }
 
-    return INVALID_SOCKET;
+    return CURL_SOCKET_BAD;
   }
 
-  assert(socket_r != INVALID_SOCKET);
+  assert(socket_r != CURL_SOCKET_BAD);
   return socket_r;
 }
 

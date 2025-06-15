@@ -1086,7 +1086,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
        out to a socket */
     SOCKET f = win32_stdin_read_thread(global);
 
-    if(f == INVALID_SOCKET)
+    if(f == CURL_SOCKET_BAD)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "
             "will fall back to blocking mode");
     else if(f > INT_MAX) {
