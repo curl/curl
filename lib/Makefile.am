@@ -52,7 +52,8 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -I$(top_builddir)/lib
+              -I$(top_builddir)/lib     \
+              -I$(srcdir)
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -75,9 +76,7 @@ CSOURCES += dllmain.c
 endif
 
 if USE_UNITY
-# Keep these separate to avoid duplicate definitions when linking libtests
-# in static mode.
-curl_EXCLUDE = curl_threads.c curlx/timediff.c curlx/warnless.c
+curl_EXCLUDE =
 if CURLDEBUG
 # We must compile this source separately to avoid memdebug.h redefinitions
 # applying to it.
