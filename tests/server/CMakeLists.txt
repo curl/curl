@@ -28,7 +28,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 set(_bundle_exclude "")
 if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  set(_bundle_exclude "${MEMDEBUG}")
+  list(APPEND _bundle_exclude ${MEMDEBUG})
 endif()
 
 add_custom_command(
