@@ -28,11 +28,6 @@
 #include <string.h>
 
 #ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
-#ifndef _MSC_VER
 static int verbose_u = 1;
 
 struct transfer_u {

@@ -30,11 +30,6 @@
 #include <stdlib.h>
 
 #ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
-#ifndef _MSC_VER
 
 #define PAUSE_READ_AFTER  1
 static size_t total_read = 0;
