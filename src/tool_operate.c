@@ -579,7 +579,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
       sclose(per->infd);
 #else
-      warnf(per->config->global, "Closing per->infd != 0: %d", per->infd);
+      warnf(per->config->global, "Closing per->infd != 0: FD == "
+            "%d. This behavior is only supported on desktop "
+            " Windows", per->infd);
 #endif
     }
   }
@@ -1088,10 +1090,13 @@ static void check_stdin_upload(struct GlobalConfig *global,
 
     if(f == CURL_SOCKET_BAD)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "
-            "will fall back to blocking mode");
+            "falling back to blocking mode");
     else if(f > INT_MAX) {
       warnf(global, "win32_stdin_read_thread returned identifier "
-            "larger than INT_MAX, will fall back to blocking mode");
+            "larger than INT_MAX. This should not happen unless "
+            "the upper 32 bits of a Windows socket have started "
+            "being used for something... falling back to blocking "
+            "mode");
       sclose(f);
     }
     else

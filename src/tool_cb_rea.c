@@ -106,7 +106,8 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
 #else
-    warnf(per->config->global, "per->infd != 0: %d", per->infd);
+    warnf(per->config->global, "per->infd != 0: FD == %d. This behavior"
+          " is only supported on desktop Windows", per->infd);
 #endif
   }
   else {
