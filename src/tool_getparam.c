@@ -178,7 +178,7 @@ static const struct LongShort aliases[]= {
   {"http1.1",                    ARG_NONE, ' ', C_HTTP1_1},
   {"http2",                      ARG_NONE, ' ', C_HTTP2},
   {"http2-prior-knowledge",      ARG_NONE, ' ', C_HTTP2_PRIOR_KNOWLEDGE},
-  {"http3",                      ARG_NONE|ARG_TLS, ' ', C_HTTP3},
+  {"http3",                      ARG_STRG|ARG_TLS, ' ', C_HTTP3}, /* Modified to ARG_STRG */
   {"http3-only",                 ARG_NONE|ARG_TLS, ' ', C_HTTP3_ONLY},
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
   {"include",                    ARG_BOOL, ' ', C_INCLUDE},
@@ -1727,13 +1727,7 @@ static ParameterError opt_none(struct GlobalConfig *global,
       return PARAM_LIBCURL_DOESNT_SUPPORT;
     sethttpver(global, config, CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE);
     break;
-  case C_HTTP3: /* --http3: */
-    /* Try HTTP/3, allow fallback */
-    if(!feature_http3)
-      return PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      sethttpver(global, config, CURL_HTTP_VERSION_3);
-    break;
+  /* C_HTTP3 is now handled in opt_filestring */
   case C_HTTP3_ONLY: /* --http3-only */
     /* Try HTTP/3 without fallback */
     if(!feature_http3)
@@ -2181,6 +2175,23 @@ static ParameterError opt_filestring(struct GlobalConfig *global,
     nextarg = "";
 
   switch(a->cmd) {
+  case C_HTTP3: /* --http3 */
+    if(!feature_http3) {
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      break;
+    }
+    if(!nextarg || (nextarg && !strcmp(nextarg, "v1"))) {
+      sethttpver(global, config, CURL_HTTP_VERSION_3);
+    }
+    else if(nextarg && !strcmp(nextarg, "v2")) {
+      sethttpver(global, config, CURL_HTTP_VERSION_3_V2);
+    }
+    else {
+      errorf(global, "Invalid argument for --http3: %s. Use 'v1' or 'v2'.",
+             nextarg);
+      err = PARAM_BAD_USE;
+    }
+    break;
   case C_DNS_IPV4_ADDR: /* --dns-ipv4-addr */
     if(!curlinfo->ares_num) /* c-ares is needed for this */
       return PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -2964,25 +2975,71 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       return PARAM_NO_MEM;
 
     if(stillflags && ('-' == orig_opt[0])) {
-      bool passarg;
+      bool passarg = FALSE; /* Default to not use the next argument */
 
       if(!strcmp("--", orig_opt))
         /* This indicates the end of the flags and thus enables the
            following (URL) argument to start with -. */
         stillflags = FALSE;
       else {
-        const char *nextarg = NULL;
-        if(i < (argc - 1)) {
-          nextarg = convert_tchar_to_UTF8(argv[i + 1]);
-          if(!nextarg) {
-            unicodefree(orig_opt);
-            return PARAM_NO_MEM;
+        const char *nextarg_param = NULL; /* Argument for getparameter */
+        const struct LongShort *longopt_match = NULL;
+        bool is_long_opt = ('-' == orig_opt[1]);
+
+        if(is_long_opt) {
+          const char *word = orig_opt + 2;
+          if(!strncmp(word, "no-", 3))
+            word += 3;
+          else if(!strncmp(word, "expand-", 7))
+            word += 7;
+          longopt_match = findlongopt(word);
+        }
+        else if(orig_opt[1] && !orig_opt[2]) { /* Single letter short option */
+          longopt_match = findshortopt(orig_opt[1]);
+        }
+        /* For combined short options like -sS, nextarg_param remains NULL
+           unless the last option in the sequence takes an argument.
+           getparameter handles parsing these combined options. */
+
+        /* Check if the option expects an argument and if nextarg is a valid candidate */
+        if(longopt_match && (ARGTYPE(longopt_match->desc) >= ARG_STRG)) {
+          if(i < (argc - 1)) {
+            const char *potential_arg = argv[i + 1];
+            /* If it's C_HTTP3, the argument is optional.
+               It's an argument if it doesn't start with '-' or is not NULL.
+               For other options requiring arguments, it's an argument if not NULL.
+            */
+            if(longopt_match->cmd == C_HTTP3) {
+              if(potential_arg && potential_arg[0] != '-') {
+                nextarg_param = convert_tchar_to_UTF8(potential_arg);
+                if(!nextarg_param) {
+                  unicodefree(orig_opt);
+                  return PARAM_NO_MEM;
+                }
+                passarg = TRUE;
+              }
+              /* If potential_arg is NULL or starts with '-', nextarg_param remains NULL,
+                 and passarg remains FALSE, indicating --http3 is used without a value or
+                 the next token is another option. */
+            }
+            else if (potential_arg) { /* Mandatory argument expected by other options */
+                nextarg_param = convert_tchar_to_UTF8(potential_arg);
+                if(!nextarg_param) {
+                  unicodefree(orig_opt);
+                  return PARAM_NO_MEM;
+                }
+                passarg = TRUE;
+            }
           }
+          /* If i == argc - 1, nextarg_param remains NULL.
+             getparameter will handle PARAM_REQUIRES_PARAMETER for mandatory args.
+             For C_HTTP3, NULL nextarg_param is fine. */
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg, global, config);
+        result = getparameter(orig_opt, nextarg_param, &passarg, global, config);
+        if(nextarg_param) /* if allocated by convert_tchar_to_UTF8 */
+          unicodefree(CURL_UNCONST(nextarg_param));
 
-        unicodefree(nextarg);
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
