@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -33,7 +33,7 @@ add_custom_command(
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
-add_executable(test-http-clients EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE_SRC}")
+add_executable(test-http-clients EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
 add_dependencies(testdeps test-http-clients)
 target_include_directories(test-http-clients PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
