@@ -86,14 +86,6 @@ static void usage_upload_pausing(const char *msg)
   );
 }
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    return 2;                                                             \
-  } while(0)
-
-#endif /* !_MSC_VER */
-
 static int test_upload_pausing(int argc, char *argv[])
 {
 #ifndef _MSC_VER

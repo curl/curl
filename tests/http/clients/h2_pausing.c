@@ -82,12 +82,6 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   return realsize;
 }
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    return 2;                                                             \
-  } while(0)
-
 #endif /* !_MSC_VER */
 
 static int test_h2_pausing(int argc, char *argv[])

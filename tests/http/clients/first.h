@@ -54,6 +54,12 @@ struct entry_s {
 #include <unistd.h>  /* getopt() */
 #endif
 
+#define ERR()                                                             \
+  do {                                                                    \
+    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
+    return 2;                                                             \
+  } while(0)
+
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
