@@ -33,7 +33,7 @@
 #endif
 
 #ifndef _MSC_VER
-static int verbose = 1;
+static int verbose_u = 1;
 
 struct transfer {
   int idx;
@@ -67,8 +67,8 @@ static struct transfer *get_transfer_for_easy(CURL *easy)
   return NULL;
 }
 
-static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
-                          void *userdata)
+static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
+                            void *userdata)
 {
   struct transfer *t = userdata;
   size_t blen = (nitems * buflen);
@@ -128,9 +128,9 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
   return (size_t)nread;
 }
 
-static int my_progress_cb(void *userdata,
-                          curl_off_t dltotal, curl_off_t dlnow,
-                          curl_off_t ultotal, curl_off_t ulnow)
+static int my_progress_u_cb(void *userdata,
+                            curl_off_t dltotal, curl_off_t dlnow,
+                            curl_off_t ultotal, curl_off_t ulnow)
 {
   struct transfer *t = userdata;
   (void)ultotal;
@@ -156,7 +156,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
+  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_u_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
   if(use_earlydata)
     curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
@@ -175,7 +175,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer *t,
     curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, t->send_total);
 
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_cb);
+  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_u_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(forbid_reuse)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
@@ -183,7 +183,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer *t,
     curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
 
   /* please be verbose */
-  if(verbose) {
+  if(verbose_u) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
   }
