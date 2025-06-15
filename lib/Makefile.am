@@ -52,7 +52,8 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -I$(top_builddir)/lib
+              -I$(top_builddir)/lib     \
+              -I$(srcdir)
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
