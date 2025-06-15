@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <curl/curl.h>
+#include "test.h"
 
 typedef CURLcode (*entry_func_t)(char *);
 
