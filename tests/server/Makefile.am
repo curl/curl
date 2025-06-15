@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/server
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, MEMDEBUG, CURLX_SRCS, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES)
@@ -53,29 +53,14 @@ LIBS = $(BLANK_AT_MAKETIME)
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
-if ENABLE_SERVER_DEBUG
-if DEBUGBUILD
-AM_CPPFLAGS += -DDEBUGBUILD
-endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
-endif
-endif
 
 AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
 
-bundle_EXCLUDE =
-if ENABLE_SERVER_DEBUG
-if CURLDEBUG
-bundle_EXCLUDE += $(MEMDEBUG)
-endif
-endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) --test $(TESTFILES) --exclude $(bundle_EXCLUDE) > $(BUNDLE_SRC)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(CURLX_SRCS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_servers_SOURCES = $(BUNDLE_SRC)
-servers_SOURCES = $(bundle_EXCLUDE)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = $(BUNDLE_SRC)
