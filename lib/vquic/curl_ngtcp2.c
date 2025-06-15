@@ -468,7 +468,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
     s->original_version = NGTCP2_PROTO_VER_V1;
     s->available_versions = available_versions_v1;
     s->available_versionslen = sizeof(available_versions_v1) /
-                                sizeof(available_versions_v1[0]);
+                               sizeof(available_versions_v1[0]);
   }
 
   s->initial_ts = pktx->ts;
