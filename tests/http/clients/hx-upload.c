@@ -32,10 +32,6 @@
 #include <unistd.h>  /* getopt() */
 #endif
 
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl"
-#endif
-
 #ifndef _MSC_VER
 static int verbose = 1;
 

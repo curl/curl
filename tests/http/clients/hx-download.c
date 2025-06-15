@@ -36,10 +36,6 @@
 #define strdup _strdup
 #endif
 
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
-#endif
-
 #ifndef _MSC_VER
 static int verbose = 1;
 
