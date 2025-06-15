@@ -70,20 +70,20 @@ Here's an example using optional initialization and cleanup:
 
     #include "a libcurl header.h" /* from the lib dir */
 
-    static CURLcode unit_setup( void )
+    static CURLcode t9999_setup(void)
     {
       /* whatever you want done first */
       return CURLE_OK;
     }
 
-    static void unit_stop( void )
+    static void t9999_stop(void)
     {
       /* done before shutting down and exiting */
     }
 
     static CURLcode test_unit9999(char *arg)
     {
-      UNITTEST_BEGIN(unit_setup())
+      UNITTEST_BEGIN(t9999_setup())
 
       /* here you start doing things and checking that the results are good */
 
@@ -92,6 +92,6 @@ Here's an example using optional initialization and cleanup:
 
       /* you end the test code like this: */
 
-      UNITTEST_END(unit_stop())
+      UNITTEST_END(t9999_stop())
     }
 ~~~
