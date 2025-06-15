@@ -1,3 +1,7 @@
+#include <curl/curl.h>
+
+#include <stdio.h>
+
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
