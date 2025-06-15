@@ -39,7 +39,7 @@
 #ifndef _MSC_VER
 static int verbose_d = 1;
 
-struct transfer {
+struct transfer_d {
   int idx;
   CURL *easy;
   char filename[128];
@@ -55,16 +55,16 @@ struct transfer {
   CURLcode result;
 };
 
-static size_t transfer_count = 1;
-static struct transfer *transfers;
-static int forbid_reuse = 0;
+static size_t transfer_count_d = 1;
+static struct transfer_d *transfer_d;
+static int forbid_reuse_d = 0;
 
-static struct transfer *get_transfer_for_easy(CURL *easy)
+static struct transfer_d *get_transfer_for_easy_d(CURL *easy)
 {
   size_t i;
-  for(i = 0; i < transfer_count; ++i) {
-    if(easy == transfers[i].easy)
-      return &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    if(easy == transfer_d[i].easy)
+      return &transfer_d[i];
   }
   return NULL;
 }
@@ -72,7 +72,7 @@ static struct transfer *get_transfer_for_easy(CURL *easy)
 static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
                             void *userdata)
 {
-  struct transfer *t = userdata;
+  struct transfer_d *t = userdata;
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
@@ -113,7 +113,7 @@ static int my_progress_d_cb(void *userdata,
                             curl_off_t dltotal, curl_off_t dlnow,
                             curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct transfer *t = userdata;
+  struct transfer_d *t = userdata;
   (void)ultotal;
   (void)ulnow;
   (void)dltotal;
@@ -125,7 +125,7 @@ static int my_progress_d_cb(void *userdata,
   return 0;
 }
 
-static int setup_hx_download(CURL *hnd, const char *url, struct transfer *t,
+static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
                              long http_version, struct curl_slist *host,
                              CURLSH *share, int use_earlydata,
                              int fresh_connect)
@@ -144,7 +144,7 @@ static int setup_hx_download(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(use_earlydata)
     curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
-  if(forbid_reuse)
+  if(forbid_reuse_d)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
   if(host)
     curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
@@ -203,7 +203,7 @@ static int main_hx_download(int argc, char *argv[])
   size_t abort_offset = 0;
   size_t fail_offset = 0;
   int abort_paused = 0, use_earlydata = 0;
-  struct transfer *t;
+  struct transfer_d *t;
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
@@ -226,13 +226,13 @@ static int main_hx_download(int argc, char *argv[])
       use_earlydata = 1;
       break;
     case 'f':
-      forbid_reuse = 1;
+      forbid_reuse_d = 1;
       break;
     case 'm':
       max_parallel = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'n':
-      transfer_count = (size_t)strtol(optarg, NULL, 10);
+      transfer_count_d = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'x':
       fresh_connect = 1;
@@ -305,8 +305,8 @@ static int main_hx_download(int argc, char *argv[])
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfers = calloc(transfer_count, sizeof(*transfers));
-  if(!transfers) {
+  transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
+  if(!transfer_d) {
     fprintf(stderr, "error allocating transfer structs\n");
     result = 1;
     goto cleanup;
@@ -320,17 +320,17 @@ static int main_hx_download(int argc, char *argv[])
                     (long)max_host_conns);
 
   active_transfers = 0;
-  for(i = 0; i < transfer_count; ++i) {
-    t = &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    t = &transfer_d[i];
     t->idx = (int)i;
     t->abort_at = (curl_off_t)abort_offset;
     t->fail_at = (curl_off_t)fail_offset;
     t->pause_at = (curl_off_t)pause_offset;
   }
 
-  n = (max_parallel < transfer_count) ? max_parallel : transfer_count;
+  n = (max_parallel < transfer_count_d) ? max_parallel : transfer_count_d;
   for(i = 0; i < n; ++i) {
-    t = &transfers[i];
+    t = &transfer_d[i];
     t->easy = curl_easy_init();
     if(!t->easy ||
       setup_hx_download(t->easy, url, t, http_version, host, share,
@@ -364,7 +364,7 @@ static int main_hx_download(int argc, char *argv[])
         CURL *e = m->easy_handle;
         --active_transfers;
         curl_multi_remove_handle(multi_handle, e);
-        t = get_transfer_for_easy(e);
+        t = get_transfer_for_easy_d(e);
         if(t) {
           t->done = 1;
           t->result = m->data.result;
@@ -385,8 +385,8 @@ static int main_hx_download(int argc, char *argv[])
       /* nothing happening, maintenance */
       if(abort_paused) {
         /* abort paused transfers */
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->done && t->paused && t->easy) {
             curl_multi_remove_handle(multi_handle, t->easy);
             t->done = 1;
@@ -397,8 +397,8 @@ static int main_hx_download(int argc, char *argv[])
       }
       else {
         /* resume one paused transfer */
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->done && t->paused) {
             t->resumed = 1;
             t->paused = 0;
@@ -410,8 +410,8 @@ static int main_hx_download(int argc, char *argv[])
       }
 
       while(active_transfers < max_parallel) {
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->started) {
             t->easy = curl_easy_init();
             if(!t->easy ||
@@ -429,7 +429,7 @@ static int main_hx_download(int argc, char *argv[])
           }
         }
         /* all started */
-        if(i == transfer_count)
+        if(i == transfer_count_d)
           break;
       }
     } while(m);
@@ -438,8 +438,8 @@ static int main_hx_download(int argc, char *argv[])
 
   curl_multi_cleanup(multi_handle);
 
-  for(i = 0; i < transfer_count; ++i) {
-    t = &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    t = &transfer_d[i];
     if(t->out) {
       fclose(t->out);
       t->out = NULL;
@@ -451,7 +451,7 @@ static int main_hx_download(int argc, char *argv[])
     if(t->result)
       result = t->result;
   }
-  free(transfers);
+  free(transfer_d);
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
