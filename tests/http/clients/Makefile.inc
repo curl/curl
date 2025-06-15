@@ -24,12 +24,12 @@
 # Shared between CMakeLists.txt and Makefile.am
 
 check_PROGRAMS = \
-  h2-pausing \
-  h2-serverpush \
-  h2-upgrade-extreme \
-  hx-download \
-  hx-upload \
-  tls-session-reuse \
-  upload-pausing \
-  ws-data \
-  ws-pingpong
+  h2_pausing \
+  h2_serverpush \
+  h2_upgrade_extreme \
+  hx_download \
+  hx_upload \
+  tls_session_reuse \
+  upload_pausing \
+  ws_data \
+  ws_pingpong
