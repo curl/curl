@@ -38,7 +38,7 @@
 #endif
 
 #ifndef _MSC_VER
-static void usage(const char *msg)
+static void usage_h2_pausing(const char *msg)
 {
   if(msg)
     fprintf(stderr, "%s\n", msg);
@@ -97,7 +97,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 
 #endif /* !_MSC_VER */
 
-int main(int argc, char *argv[])
+static int main_h2_pausing(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   struct handle handles[2];
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
   while((ch = getopt(argc, argv, "hV:")) != -1) {
     switch(ch) {
     case 'h':
-      usage(NULL);
+      usage_h2_pausing(NULL);
       return 2;
     case 'V': {
       if(!strcmp("http/1.1", optarg))
@@ -129,13 +129,13 @@ int main(int argc, char *argv[])
       else if(!strcmp("h3", optarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
-        usage("invalid http version");
+        usage_h2_pausing("invalid http version");
         return 1;
       }
       break;
     }
     default:
-     usage("invalid option");
+     usage_h2_pausing("invalid option");
      return 1;
     }
   }

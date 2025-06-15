@@ -196,7 +196,7 @@ out:
   return r;
 }
 
-static void usage(const char *msg)
+static void usage_ws_data(const char *msg)
 {
   if(msg)
     fprintf(stderr, "%s\n", msg);
@@ -209,7 +209,7 @@ static void usage(const char *msg)
 
 #endif
 
-int main(int argc, char *argv[])
+static int main_ws_data(int argc, char *argv[])
 {
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
   CURL *curl;
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
   while((ch = getopt(argc, argv, "c:hm:M:")) != -1) {
     switch(ch) {
     case 'h':
-      usage(NULL);
+      usage_ws_data(NULL);
       res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     case 'c':
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
       plen_max = (size_t)strtol(optarg, NULL, 10);
       break;
     default:
-      usage("invalid option");
+      usage_ws_data("invalid option");
       res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     }
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
   }
 
   if(argc != 1) {
-    usage(NULL);
+    usage_ws_data(NULL);
     res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }

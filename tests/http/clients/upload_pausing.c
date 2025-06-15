@@ -79,7 +79,7 @@ static int progress_callback(void *clientp,
   return 0;
 }
 
-static void usage(const char *msg)
+static void usage_upload_pausing(const char *msg)
 {
   if(msg)
     fprintf(stderr, "%s\n", msg);
@@ -98,7 +98,7 @@ static void usage(const char *msg)
 
 #endif /* !_MSC_VER */
 
-int main(int argc, char *argv[])
+static int main_upload_pausing(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   CURL *curl;
@@ -120,13 +120,13 @@ int main(int argc, char *argv[])
       else if(!strcmp("h3", optarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
-        usage("invalid http version");
+        usage_upload_pausing("invalid http version");
         return 1;
       }
       break;
     }
     default:
-     usage("invalid option");
+     usage_upload_pausing("invalid option");
      return 1;
     }
   }
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
   argv += optind;
 
   if(argc != 1) {
-    usage("not enough arguments");
+    usage_upload_pausing("not enough arguments");
     return 2;
   }
   url = argv[0];

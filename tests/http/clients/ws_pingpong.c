@@ -124,7 +124,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 
 #endif
 
-int main(int argc, char *argv[])
+static int main_ws_pingpong(int argc, char *argv[])
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
