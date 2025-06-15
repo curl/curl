@@ -209,7 +209,7 @@ static void usage_ws_data(const char *msg)
 
 #endif
 
-static int main_ws_data(int argc, char *argv[])
+static int test_ws_data(int argc, char *argv[])
 {
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
   CURL *curl;

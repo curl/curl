@@ -97,7 +97,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 
 #endif /* !_MSC_VER */
 
-static int main_h2_pausing(int argc, char *argv[])
+static int test_h2_pausing(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   struct handle handles[2];

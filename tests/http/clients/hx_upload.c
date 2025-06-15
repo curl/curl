@@ -218,7 +218,7 @@ static void usage_hx_upload(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int main_hx_upload(int argc, char *argv[])
+static int test_hx_upload(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   CURLM *multi_handle;
