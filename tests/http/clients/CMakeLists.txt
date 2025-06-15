@@ -36,6 +36,8 @@ add_custom_command(
 add_executable(test-http-clients EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps test-http-clients)
 target_include_directories(test-http-clients PRIVATE
+  "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
 target_link_libraries(test-http-clients ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
