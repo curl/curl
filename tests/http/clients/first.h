@@ -45,6 +45,8 @@ struct entry_s {
 #define strdup _strdup
 #else
 #include <sys/time.h>  /* for usleep() */
+#endif
+#ifndef _MSC_VER
 #include <unistd.h>  /* for usleep() */
 #endif
 #ifdef __TANDEM
