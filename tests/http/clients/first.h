@@ -182,6 +182,7 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
   }
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
 /* just close the connection */
 static void websocket_close(CURL *curl)
 {
@@ -191,5 +192,6 @@ static void websocket_close(CURL *curl)
   fprintf(stderr,
           "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
 }
+#endif /* CURL_DISABLE_WEBSOCKETS */
 
 #endif /* HEADER_SERVER_FIRST_H */
