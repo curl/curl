@@ -26,10 +26,9 @@
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set(_bundle_exclude "")
-if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  # These are part of the libcurl static lib. Add them here when linking shared.
-  list(APPEND _bundle_exclude ${MEMPTR} ${CURLX_SRCS})
+set(_bundle_extra "")
+if(LIB_SELECTED STREQUAL LIB_SHARED)
+  list(APPEND _bundle_extra ${CURLX_SRCS})  # Not exported from the libcurl shared build. Build a copy.
 endif()
 
 add_custom_command(
@@ -43,14 +42,14 @@ add_custom_command(
 add_custom_command(
   OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS} ${MEMPTR} ${CURLX_SRCS} --test ${TESTFILES} "lib1521.c" --exclude ${_bundle_exclude}
+    --include ${UTILS} ${MEMPTR} ${_bundle_extra} --test ${TESTFILES} "lib1521.c"
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES} ${UTILS} ${MEMPTR} ${CURLX_SRCS} ${TESTFILES} "lib1521.c"
+    ${FIRSTFILES} ${UTILS} ${MEMPTR} ${_bundle_extra} ${TESTFILES} "lib1521.c"
   VERBATIM)
 
-add_executable(libtests EXCLUDE_FROM_ALL "${BUNDLE_SRC}" ${_bundle_exclude})
+add_executable(libtests EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
 add_dependencies(testdeps libtests)
 target_link_libraries(libtests ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(libtests PRIVATE
