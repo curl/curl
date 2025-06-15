@@ -221,34 +221,68 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-#ifdef _MSC_VER
-static char *coptarg = NULL;
-static int coptind = 1;
+#if 1
+static int coptind;
+static char *coptarg;
 
 static int cgetopt(int argc, char * const argv[], const char *optstring)
 {
-  const char *arg = argv[coptind];
-  const char *opt;
-  int opto;
+  static int optpos = 1;
+  int coptopt;
+  char *arg;
 
-  if(coptind >= argc || arg[0] != '-' || arg[0] == '\0')
-    return -1;
-
-  opto = arg[1];
-  opt = strchr(optstring, opto);
-
-  if(!opt)
-    return '?';
-
-  if(opt[1] == ':') {
-    coptind++;
-    if(coptind >= argc)
-      return '?';
-    coptarg = argv[coptind];
-    coptind++;
+  if(coptind == 0) {  /* Reset? */
+    coptind = !!argc;
+    optpos = 1;
   }
 
-  return opto;
+  arg = argv[coptind];
+  if(arg && strcmp(arg, "--") == 0) {
+    coptind++;
+    return -1;
+  }
+  else if(!arg || arg[0] != '-') {
+    return -1;
+  }
+  else {
+    const char *opt = strchr(optstring, arg[optpos]);
+    coptopt = arg[optpos];
+    if(!opt) {
+      if(!arg[++optpos]) {
+        coptind++;
+        optpos = 1;
+      }
+      return '?';
+    }
+    else if(opt[1] == ':') {
+      if(arg[optpos + 1]) {
+        coptarg = arg + optpos + 1;
+        coptind++;
+        optpos = 1;
+        return coptopt;
+      }
+      else if(argv[coptind + 1]) {
+        coptarg = argv[coptind + 1];
+        coptind += 2;
+        optpos = 1;
+        return coptopt;
+      }
+      else {
+        if(!arg[++optpos]) {
+          coptind++;
+          optpos = 1;
+        }
+        return *optstring == ':' ? ':' : '?';
+      }
+    }
+    else {
+      if(!arg[++optpos]) {
+        coptind++;
+        optpos = 1;
+      }
+      return coptopt;
+    }
+  }
 }
 #else
 #define cgetopt getopt
