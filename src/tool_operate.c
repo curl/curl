@@ -1084,7 +1084,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
     /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
-    SOCKET f = win32_stdin_read_thread(global);
+    curl_socket_t f = win32_stdin_read_thread(global);
 
     if(f == CURL_SOCKET_BAD)
       warnf(global, "win32_stdin_read_thread returned INVALID_SOCKET "

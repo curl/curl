@@ -767,7 +767,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   SOCKADDR_IN clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
-  SOCKET socket_w = accept(tdata->socket_l, (SOCKADDR*)&clientAddr,
+  curl_socket_t socket_w = accept(tdata->socket_l, (SOCKADDR*)&clientAddr,
                            &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
@@ -812,9 +812,9 @@ ThreadCleanup:
 
 /* The background thread that reads and buffers the true stdin. */
 static HANDLE stdin_thread = NULL;
-static SOCKET socket_r = CURL_SOCKET_BAD;
+static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
-SOCKET win32_stdin_read_thread(struct GlobalConfig *global)
+curl_socket_t win32_stdin_read_thread(struct GlobalConfig *global)
 {
   int result;
   bool r;
