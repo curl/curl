@@ -384,8 +384,8 @@ static int test_hx_upload(int argc, char *argv[])
     for(i = 0; i < n; ++i) {
       t = &transfer_u[i];
       t->easy = curl_easy_init();
-      if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host, share,
-                                     use_earlydata, announce_length)) {
+      if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
+                                     share, use_earlydata, announce_length)) {
         fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
         return 1;
       }
