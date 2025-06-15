@@ -27,10 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size, void *userp)
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
@@ -141,7 +139,6 @@ static int server_push_callback(CURL *parent,
 out:
   return rv;
 }
-
 
 /*
  * Download a file over HTTP/2, take care of server push.
