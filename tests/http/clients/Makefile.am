@@ -37,10 +37,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(srcdir)
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, TESTFILES variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(UTILS) $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -58,8 +58,8 @@ endif
 
 AM_CPPFLAGS += -DCURL_NO_OLDIES
 
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_clients_SOURCES = $(BUNDLE_SRC)

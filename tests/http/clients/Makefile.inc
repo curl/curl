@@ -29,9 +29,6 @@ BUNDLE_SRC = clients.c
 # Files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
-# Common files used by test programs
-UTILS = util.c
-
 # All test clients
 TESTFILES = \
   h2_pausing.c \
