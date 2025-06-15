@@ -22,14 +22,9 @@
 #
 ###########################################################################
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, MEMDEBUG, CURLX_SRCS, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-
-set(_sources_extra "")
-if(ENABLE_SERVER_DEBUG AND ENABLE_CURLDEBUG)
-  list(APPEND _sources_extra ${MEMDEBUG})
-endif()
 
 add_custom_command(
   OUTPUT "${BUNDLE_SRC}"
@@ -51,9 +46,6 @@ target_include_directories(servers PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
 )
 target_link_libraries(servers ${CURL_LIBS})
-if(ENABLE_SERVER_DEBUG)
-  set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
-endif()
 set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL" "CURL_NO_OLDIES")
 # Test servers simply are standalone programs that do not use libcurl
 # library.  For convenience and to ease portability of these servers,
