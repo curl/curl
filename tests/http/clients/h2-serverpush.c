@@ -27,10 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
-#endif
-
 static
 int my_trace(CURL *handle, curl_infotype type,
              char *data, size_t size,
