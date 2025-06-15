@@ -27,10 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#define strdup _strdup
-#endif
-
 static int verbose_d = 1;
 
 struct transfer_d {

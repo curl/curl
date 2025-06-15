@@ -42,6 +42,7 @@ struct entry_s {
 
 #ifdef _WIN32
 #include <windows.h>  /* for Sleep() */
+#define strdup _strdup
 #else
 #include <sys/time.h>  /* for usleep() */
 #include <unistd.h>  /* for usleep() */
