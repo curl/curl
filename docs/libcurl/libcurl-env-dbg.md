@@ -83,6 +83,12 @@ When built with c-ares for name resolving, setting this environment variable
 to `[IP:port]` makes libcurl use that DNS server instead of the system
 default. This is used by the curl test suite.
 
+## `CURL_FTP_PWD_STOP`
+
+When set, the first transfer - when using ftp: - returns before sending
+the `PWD` command and stop any further progress. This is used to test
+an edge case
+
 ## `CURL_GETHOSTNAME`
 
 Fake the local machine's unqualified hostname for NTLM and SMTP.
