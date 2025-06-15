@@ -49,11 +49,6 @@ struct entry_s {
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
 #define ERR()                                                             \
   do {                                                                    \
     fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
@@ -216,7 +211,6 @@ static void websocket_close(CURL *curl)
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
-#ifdef _MSC_VER
 static char *optarg = NULL;
 static int optind = 1;
 static int optopt;
@@ -245,6 +239,5 @@ static int getopt(int argc, char * const argv[], const char *optstring)
 
   return optopt;
 }
-#endif
 
 #endif /* HEADER_CLIENT_FIRST_H */
