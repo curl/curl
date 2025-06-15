@@ -144,7 +144,7 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
   } while(running_handles > 0 || start_count);
 
   fprintf(stderr, "exiting\n");
-  exitcode = EXIT_SUCCESS;
+  exitcode = 0;
 
 cleanup:
 

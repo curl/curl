@@ -207,7 +207,7 @@ static int test_tls_session_reuse(int argc, char *argv[])
   } while(ongoing || add_more);
 
   fprintf(stderr, "exiting\n");
-  exitcode = EXIT_SUCCESS;
+  exitcode = 0;
 
 cleanup:
 
