@@ -43,8 +43,8 @@ struct entry_s {
 #else
 #include <sys/time.h>  /* for usleep() */
 #endif
-#if defined(__TANDEM)
-# include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
+#ifdef __TANDEM
+#include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
 #endif
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
