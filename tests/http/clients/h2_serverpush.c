@@ -63,11 +63,9 @@ static int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#define OUTPUTFILE "download_0.data"
-
 static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
-  FILE *out = fopen(OUTPUTFILE, "wb");
+  FILE *out = fopen("download_0.data", "wb");
   if(!out)
     /* failed */
     return 1;
