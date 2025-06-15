@@ -125,9 +125,10 @@ static int my_progress_cb(void *userdata,
   return 0;
 }
 
-static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 long http_version, struct curl_slist *host,
-                 CURLSH *share, int use_earlydata, int fresh_connect)
+static int setup_hx_download(CURL *hnd, const char *url, struct transfer *t,
+                             long http_version, struct curl_slist *host,
+                             CURLSH *share, int use_earlydata,
+                             int fresh_connect)
 {
   curl_easy_setopt(hnd, CURLOPT_SHARE, share);
   curl_easy_setopt(hnd, CURLOPT_URL, url);
@@ -162,7 +163,7 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   return 0; /* all is good */
 }
 
-static void usage(const char *msg)
+static void usage_hx_download(const char *msg)
 {
   if(msg)
     fprintf(stderr, "%s\n", msg);
@@ -189,7 +190,7 @@ static void usage(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+static int main_hx_download(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   CURLM *multi_handle;
@@ -215,7 +216,7 @@ int main(int argc, char *argv[])
   while((ch = getopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
     switch(ch) {
     case 'h':
-      usage(NULL);
+      usage_hx_download(NULL);
       result = 2;
       goto cleanup;
     case 'a':
@@ -263,14 +264,14 @@ int main(int argc, char *argv[])
       else if(!strcmp("h3", optarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
-        usage("invalid http version");
+        usage_hx_download("invalid http version");
         result = 1;
         goto cleanup;
       }
       break;
     }
     default:
-      usage("invalid option");
+      usage_hx_download("invalid option");
       result = 1;
       goto cleanup;
     }
@@ -282,7 +283,7 @@ int main(int argc, char *argv[])
   curl_global_trace("ids,time,http/2,http/3");
 
   if(argc != 1) {
-    usage("not enough arguments");
+    usage_hx_download("not enough arguments");
     result = 2;
     goto cleanup;
   }
@@ -332,8 +333,8 @@ int main(int argc, char *argv[])
     t = &transfers[i];
     t->easy = curl_easy_init();
     if(!t->easy ||
-       setup(t->easy, url, t, http_version, host, share, use_earlydata,
-             fresh_connect)) {
+      setup_hx_download(t->easy, url, t, http_version, host, share,
+                        use_earlydata, fresh_connect)) {
       fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       result = 1;
       goto cleanup;
@@ -414,8 +415,8 @@ int main(int argc, char *argv[])
           if(!t->started) {
             t->easy = curl_easy_init();
             if(!t->easy ||
-               setup(t->easy, url, t, http_version, host, share,
-                     use_earlydata, fresh_connect)) {
+              setup_hx_download(t->easy, url, t, http_version, host, share,
+                                use_earlydata, fresh_connect)) {
               fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
               result = 1;
               goto cleanup;
