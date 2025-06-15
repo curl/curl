@@ -142,7 +142,7 @@ out:
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int main_h2_serverpush(int argc, char *argv[])
+static int test_h2_serverpush(int argc, char *argv[])
 {
   CURL *easy;
   CURLM *multi_handle;

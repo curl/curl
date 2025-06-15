@@ -98,7 +98,7 @@ static void usage_upload_pausing(const char *msg)
 
 #endif /* !_MSC_VER */
 
-static int main_upload_pausing(int argc, char *argv[])
+static int test_upload_pausing(int argc, char *argv[])
 {
 #ifndef _MSC_VER
   CURL *curl;
