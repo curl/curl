@@ -40,7 +40,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
-  "${PROJECT_SOURCE_DIR}/src"
+  "${PROJECT_SOURCE_DIR}/src"            # for tool headers
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h"
   "${PROJECT_SOURCE_DIR}/tests/unit"     # for "curlcheck.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"
