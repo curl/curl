@@ -23,12 +23,6 @@
  ***************************************************************************/
 /* This is based on the PoC client of issue #11769
  */
-#include <curl/curl.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
