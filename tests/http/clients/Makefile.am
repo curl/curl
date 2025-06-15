@@ -58,8 +58,8 @@ endif
 
 AM_CPPFLAGS += -DCURL_NO_OLDIES
 
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(MEMDEBUG) $(CURLX_SRCS) --test $(TESTFILES) > $(BUNDLE_SRC)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_clients_SOURCES = $(BUNDLE_SRC)
