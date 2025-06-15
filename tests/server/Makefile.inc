@@ -32,10 +32,6 @@ FIRSTFILES = first.c first.h
 # Common files used by test programs
 UTILS = getpart.c getpart.h util.c util.h
 
-MEMDEBUG = \
-  ../../lib/memdebug.c \
-  ../../lib/memdebug.h
-
 CURLX_SRCS = \
   ../../lib/curlx/base64.c \
   ../../lib/curlx/inet_pton.c \
