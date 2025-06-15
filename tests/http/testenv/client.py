@@ -44,7 +44,7 @@ class LocalClient:
                  timeout: Optional[float] = None,
                  run_env: Optional[Dict[str,str]] = None):
         self.name = name
-        self.path = os.path.join(env.build_dir, f'tests/http/clients/{name}')
+        self.path = os.path.join(env.build_dir, f'tests/http/clients/clients')
         self.env = env
         self._run_env = run_env
         self._timeout = timeout if timeout else env.test_timeout
@@ -86,7 +86,7 @@ class LocalClient:
         self._rmf(self._stderrfile)
         start = datetime.now()
         exception = None
-        myargs = [self.path]
+        myargs = [self.path, self.name]
         myargs.extend(args)
         run_env = None
         if self._run_env:
