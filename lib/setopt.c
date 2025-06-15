@@ -310,6 +310,7 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
 #ifdef USE_HTTP3
   case CURL_HTTP_VERSION_3:
   case CURL_HTTP_VERSION_3ONLY:
+  case CURL_HTTP_VERSION_3_V2:  
     /* accepted */
     break;
 #endif
