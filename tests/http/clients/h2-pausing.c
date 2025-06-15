@@ -36,8 +36,6 @@
 #endif
 
 #ifndef _MSC_VER
-#define HANDLECOUNT 2
-
 static void usage(const char *msg)
 {
   if(msg)
@@ -100,9 +98,10 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 int main(int argc, char *argv[])
 {
 #ifndef _MSC_VER
-  struct handle handles[HANDLECOUNT];
+  struct handle handles[2];
   CURLM *multi_handle;
-  int i, still_running = 1, msgs_left, numfds;
+  int still_running = 1, msgs_left, numfds;
+  size_t i;
   CURLMsg *msg;
   int rounds = 0;
   int rc = 0;
@@ -172,7 +171,7 @@ int main(int argc, char *argv[])
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
-  for(i = 0; i < HANDLECOUNT; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     handles[i].idx = i;
     handles[i].paused = 0;
     handles[i].resumed = 0;
