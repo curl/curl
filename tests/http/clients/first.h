@@ -51,6 +51,10 @@ struct entry_s {
 #include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER <= 1700)
+#pragma warning(disable:4127)  /* "conditional expression is constant" */
+#endif
+
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
 #define ERR()                                                             \
