@@ -294,8 +294,8 @@ static int test_hx_upload(int argc, char *argv[])
       break;
     }
     default:
-     usage_hx_upload("invalid option");
-     return 1;
+      usage_hx_upload("invalid option");
+      return 1;
     }
   }
   argc -= optind;

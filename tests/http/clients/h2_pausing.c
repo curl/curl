@@ -122,8 +122,8 @@ static int test_h2_pausing(int argc, char *argv[])
       break;
     }
     default:
-     usage_h2_pausing("invalid option");
-     return 1;
+      usage_h2_pausing("invalid option");
+      return 1;
     }
   }
   argc -= optind;

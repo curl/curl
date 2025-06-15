@@ -115,8 +115,8 @@ static int test_upload_pausing(int argc, char *argv[])
       break;
     }
     default:
-     usage_upload_pausing("invalid option");
-     return 1;
+      usage_upload_pausing("invalid option");
+      return 1;
     }
   }
   argc -= optind;
