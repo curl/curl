@@ -461,7 +461,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
     s->original_version = NGTCP2_PROTO_VER_V2;
     s->available_versions = available_versions_v2;
     s->available_versionslen = sizeof(available_versions_v2) /
-                                sizeof(available_versions_v2[0]);
+                               sizeof(available_versions_v2[0]);
   }
   else {
     /* Default to V1 if not V2 or if data is NULL (should not happen in practice here) */
