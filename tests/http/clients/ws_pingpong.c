@@ -27,12 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode ping(CURL *curl, const char *send_payload)
@@ -75,9 +69,6 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
   return CURLE_RECV_ERROR;
 }
 
-#if defined(__TANDEM)
-# include <cextdecs.h(PROCESS_DELAY_)>
-#endif
 static CURLcode pingpong(CURL *curl, const char *payload)
 {
   CURLcode res;

@@ -27,16 +27,25 @@
 #include "curl_config.h"  /* for CURL_DISABLE_WEBSOCKETS */
 #endif
 
-#include <curl/curl.h>
-
-#include <stdio.h>
-
 typedef int (*entry_func_t)(int, char **);
 
 struct entry_s {
   const char *name;
   entry_func_t ptr;
 };
+
+#include <curl/curl.h>
+
+#include <stdio.h>
+
+#ifdef _WIN32
+#include <windows.h>  /* for Sleep() */
+#else
+#include <sys/time.h>  /* for usleep() */
+#endif
+#if defined(__TANDEM)
+# include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
+#endif
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
