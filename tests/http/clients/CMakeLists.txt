@@ -21,6 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
 # Get BUNDLE, BUNDLE_SRC, CURLX_SRCS, FIRSTFILES, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
