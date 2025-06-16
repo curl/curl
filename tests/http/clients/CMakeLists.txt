@@ -46,7 +46,6 @@ add_dependencies(testdeps http-clients)
 target_include_directories(http-clients PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
-  "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
 target_link_libraries(http-clients ${LIB_SELECTED} ${CURL_LIBS})
