@@ -446,7 +446,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
-  res = fclose(file);
+  res = (fclose)(file);
 
   return res;
 }
