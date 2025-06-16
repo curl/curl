@@ -42,11 +42,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_SYS_FILIO_H
-#include <sys/filio.h>  /* FIONREAD on Solaris 7 */
-#endif
-
-#include <setjmp.h>
 
 #include <ctype.h>
 
