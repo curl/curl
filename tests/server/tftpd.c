@@ -71,8 +71,7 @@
 #include <netdb.h>
 #endif
 #ifdef HAVE_SYS_FILIO_H
-/* FIONREAD on Solaris 7 */
-#include <sys/filio.h>
+#include <sys/filio.h>  /* FIONREAD on Solaris 7 */
 #endif
 
 #include <setjmp.h>
@@ -1208,7 +1207,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
     if(test->writedelay) {
       logmsg("Pausing %d seconds before %d bytes", test->writedelay,
              size);
-      wait_ms(1000*test->writedelay);
+      curlx_wait_ms(1000*test->writedelay);
     }
 
 send_data:

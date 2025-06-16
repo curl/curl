@@ -114,7 +114,7 @@ static CURLcode test_lib1506(char *URL)
 
       abort_on_test_timeout();
     }
-    wait_ms(1); /* to ensure different end times */
+    curlx_wait_ms(1); /* to ensure different end times */
   }
 
 test_cleanup:

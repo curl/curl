@@ -34,17 +34,10 @@ struct entry_s {
 
 #include <curl/curl.h>
 
+#include "curlx.h"
+
 #include <stdlib.h>  /* for calloc(), free(), strtol() */
 #include <string.h>  /* for strchr(), strcmp() */
-
-#ifndef _WIN32
-#include <sys/time.h>  /* for usleep() */
-#include <unistd.h>  /* for usleep() */
-#endif
-
-#ifdef __TANDEM
-#include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
-#endif
 
 #define ERR()                                                                 \
   do {                                                                        \

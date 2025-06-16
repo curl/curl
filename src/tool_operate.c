@@ -80,7 +80,6 @@
 #include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
-#include "tool_sleep.h"
 #include "tool_ssls.h"
 #include "tool_urlglob.h"
 #include "tool_util.h"
@@ -1965,7 +1964,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
 
     returncode = post_per_transfer(global, per, result, &retry, &delay_ms);
     if(retry) {
-      tool_go_sleep(delay_ms);
+      curlx_wait_ms(delay_ms);
       continue;
     }
 
@@ -1998,7 +1997,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
                       "waits %ldms as set by --rate",
               milli, (long)(global->ms_per_transfer - milli));
         /* The transfer took less time than wanted. Wait a little. */
-        tool_go_sleep((long)(global->ms_per_transfer - milli));
+        curlx_wait_ms((long)(global->ms_per_transfer - milli));
       }
     }
   }

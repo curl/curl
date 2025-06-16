@@ -54,6 +54,7 @@
 #include "../connect.h"
 #include "../slist.h"
 #include "../select.h"
+#include "../curlx/wait.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
@@ -1004,7 +1005,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
     size_t i, i_max;
     for(i = 0, i_max = len / sizeof(struct curltime); i < i_max; ++i) {
       struct curltime tv = curlx_now();
-      Curl_wait_ms(1);
+      curlx_wait_ms(1);
       tv.tv_sec *= (time_t)i + 1;
       tv.tv_usec *= (int)i + 2;
       tv.tv_sec ^= ((curlx_now().tv_sec + (time_t)curlx_now().tv_usec) *

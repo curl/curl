@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_SLEEP_H
-#define HEADER_CURL_TOOL_SLEEP_H
+#ifndef HEADER_CURL_WAIT_H
+#define HEADER_CURL_WAIT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,8 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-void tool_go_sleep(long ms);
+#include "../curl_setup.h"
 
-#endif /* HEADER_CURL_TOOL_SLEEP_H */
+int curlx_wait_ms(timediff_t timeout_ms);
+
+#endif /* HEADER_CURL_WAIT_H */

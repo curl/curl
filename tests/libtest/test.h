@@ -49,10 +49,6 @@
 #define CURL_GNUC_DIAG
 #endif
 
-#ifdef _WIN32
-#define sleep(sec) Sleep((sec)*1000)
-#endif
-
 #define test_setopt(A,B,C)                                      \
   if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK)       \
     goto test_cleanup
@@ -73,8 +69,6 @@ extern struct timeval tv_test_start; /* for test timing */
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
-
-extern void wait_ms(int ms); /* wait this many milliseconds */
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
 

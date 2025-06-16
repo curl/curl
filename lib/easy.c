@@ -67,6 +67,7 @@
 #include "amigaos.h"
 #include "macos.h"
 #include "curlx/warnless.h"
+#include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
 #include "setopt.h"
@@ -611,7 +612,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 #endif
       pollrc = 0;
       if(ev->ms > 0)
-        Curl_wait_ms(ev->ms);
+        curlx_wait_ms(ev->ms);
     }
 
     ev->msbump = FALSE; /* reset here */

@@ -134,7 +134,7 @@ static CURLcode test_lib1515(char *URL)
     }
 
     if(i < count)
-      sleep(DNS_TIMEOUT + 1);
+      curlx_wait_ms((DNS_TIMEOUT + 1) * 1000);
   }
 
 test_cleanup:

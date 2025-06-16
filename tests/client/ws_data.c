@@ -136,18 +136,7 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
       if(rblock && sblock) {
         curl_mfprintf(stderr, "EAGAIN, sleep, try again\n");
-#ifdef _WIN32
-        Sleep(100);
-#elif defined(__TANDEM)
-        /* NonStop only defines usleep when building for a threading model */
-# if defined(_PUT_MODEL_) || defined(_KLT_MODEL_)
-        usleep(100*1000);
-# else
-        PROCESS_DELAY_(100*1000);
-# endif
-#else
-        usleep(100*1000);
-#endif
+        curlx_wait_ms(100);
       }
     }
 

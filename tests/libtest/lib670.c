@@ -202,7 +202,7 @@ static CURLcode test_lib670(char *URL)
         break;
 #ifdef _WIN32
       if(maxfd == -1)
-        Sleep(100);
+        curlx_wait_ms(100);
       else
 #endif
       rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcept, &timeout);

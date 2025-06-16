@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include <curlx.h>
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -144,7 +146,7 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   }
   if(duration_ms) {
     infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
-    Curl_wait_ms(10);
+    curlx_wait_ms(10);
   }
   Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
   return CURLE_OK;
