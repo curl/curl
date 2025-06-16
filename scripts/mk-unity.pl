@@ -31,14 +31,11 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--test <tests>] [--include <include-c-sources>] [--exclude <exclude-c-sources>] [--srcdir <srcdir>] [--embed]\n";
+    die "Usage: $0 [--test <tests>] [--include <include-c-sources>] [--srcdir <srcdir>] [--embed]\n";
 }
 
-# Specific sources to exclude or add as an extra source file
 my @src;
-my %exclude;
 my %include;
-my $in_exclude = 0;
 my $in_include = 0;
 my $srcdir = "";
 my $in_srcdir = 0;
@@ -46,15 +43,9 @@ my $any_test = 0;
 my $embed = 0;
 foreach my $src (@ARGV) {
     if($src eq "--test") {
-        $in_exclude = 0;
-        $in_include = 0;
-    }
-    elsif($src eq "--exclude") {
-        $in_exclude = 1;
         $in_include = 0;
     }
     elsif($src eq "--include") {
-        $in_exclude = 0;
         $in_include = 1;
     }
     elsif($src eq "--embed") {
@@ -66,9 +57,6 @@ foreach my $src (@ARGV) {
     elsif($in_srcdir) {
         $srcdir = $src;
         $in_srcdir = 0;
-    }
-    elsif($in_exclude) {
-        $exclude{$src} = 1;
     }
     elsif($in_include) {
         $include{$src} = 1;
@@ -88,7 +76,7 @@ if($any_test) {
 my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /([a-z0-9]+)\.c$/ && !exists $exclude{$src}) {
+    if($src =~ /([a-z0-9]+)\.c$/) {
         my $name = $1;
         if($embed) {
             my $fn = $src;

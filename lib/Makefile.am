@@ -76,19 +76,13 @@ CSOURCES += dllmain.c
 endif
 
 if USE_UNITY
-curl_EXCLUDE =
-if CURLDEBUG
-# We must compile this source separately to avoid memdebug.h redefinitions
-# applying to it.
-curl_EXCLUDE += memdebug.c
-endif
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CSOURCES) > libcurl_unity.c
 
 nodist_libcurl_la_SOURCES = libcurl_unity.c
-libcurl_la_SOURCES = $(curl_EXCLUDE)
+libcurl_la_SOURCES =
 nodist_libcurlu_la_SOURCES = libcurl_unity.c
-libcurlu_la_SOURCES = $(curl_EXCLUDE)
+libcurlu_la_SOURCES =
 CLEANFILES = libcurl_unity.c
 else
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
