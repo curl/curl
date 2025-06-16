@@ -488,9 +488,6 @@
 #    define LSEEK_ERROR                (__int64)-1
 #    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-     int curlx_win32_stat(const char *path, struct_stat *buffer);
-     int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
 #    ifndef UNDER_CE
@@ -501,11 +498,13 @@
 #      define struct_stat                struct _stat
 #      define open                       curlx_win32_open
 #      define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-       int curlx_win32_stat(const char *path, struct_stat *buffer);
-       int curlx_win32_open(const char *filename, int oflag, ...);
-       FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #    endif
 #    define LSEEK_ERROR                (long)-1
+#  endif
+#  ifndef UNDER_CE
+     int curlx_win32_stat(const char *path, struct_stat *buffer);
+     int curlx_win32_open(const char *filename, int oflag, ...);
+     FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #  endif
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
