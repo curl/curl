@@ -30,9 +30,7 @@ BUNDLE_SRC = libtests.c
 FIRSTFILES = first.c first.h
 
 # Common files used by test programs
-UTILS = testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
-
-MEMPTR = memptr.c
+UTILS = memptr.c testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
 
 CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
