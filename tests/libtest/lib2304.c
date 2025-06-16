@@ -104,7 +104,7 @@ static void t2304_websocket(CURL *curl)
       curl_mprintf("Connection closed\n");
       return;
     }
-    sleep(2);
+    curlx_wait_ms(2000);
   } while(i++ < 10);
   t2304_websocket_close(curl);
 }
