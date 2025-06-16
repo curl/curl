@@ -83,7 +83,7 @@ if CURLDEBUG
 curl_EXCLUDE += memdebug.c
 endif
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --srcdir $(srcdir) --include $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
 
 nodist_libcurl_la_SOURCES = libcurl_unity.c
 libcurl_la_SOURCES = $(curl_EXCLUDE)
