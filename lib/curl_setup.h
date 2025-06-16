@@ -470,31 +470,6 @@
 #include <curl/stdcheaders.h>
 #endif
 
-/*
- * Large file (>2Gb) support using Win32 functions.
- */
-
-#ifdef USE_WIN32_LARGE_FILES
-#  ifdef HAVE_IO_H
-#  include <io.h>
-#  endif
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
-#  undef  fstat
-#  define fstat(fdes,stp)            _fstati64(fdes, stp)
-#  undef  stat
-#  define stat(fname,stp)            curlx_win32_stat(fname, stp)
-#  define struct_stat                struct _stati64
-#  define LSEEK_ERROR                (__int64)-1
-#  define open                       curlx_win32_open
-#  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-   int curlx_win32_open(const char *filename, int oflag, ...);
-   int curlx_win32_stat(const char *path, struct_stat *buffer);
-   FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#endif
-
 #ifdef __DJGPP__
 /* Requires DJGPP 2.04 */
 #  include <unistd.h>
@@ -503,29 +478,43 @@
 #  define LSEEK_ERROR                (offset_t)-1
 #endif
 
-/*
- * Small file (<2Gb) support using Win32 functions.
- */
-
-#if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
+#ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
 #  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef UNDER_CE
+#  ifdef USE_WIN32_LARGE_FILES
+     /* Large file (>2Gb) support using Win32 functions. */
 #    undef  lseek
-#    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
-#    define fstat(fdes,stp)            _fstat(fdes, stp)
+#    define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
+#    undef  fstat
+#    define fstat(fdes,stp)            _fstati64(fdes, stp)
+#    undef  stat
 #    define stat(fname,stp)            curlx_win32_stat(fname, stp)
-#    define struct_stat                struct _stat
+#    define struct_stat                struct _stati64
+#    define LSEEK_ERROR                (__int64)-1
 #    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#  else
+     /* Small file (<2Gb) support using Win32 functions. */
+#    ifndef UNDER_CE
+#      undef  lseek
+#      define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
+#      define fstat(fdes,stp)            _fstat(fdes, stp)
+#      define stat(fname,stp)            curlx_win32_stat(fname, stp)
+#      define struct_stat                struct _stat
+#      define open                       curlx_win32_open
+#      define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
+       int curlx_win32_stat(const char *path, struct_stat *buffer);
+       int curlx_win32_open(const char *filename, int oflag, ...);
+       FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#    endif
+#    define LSEEK_ERROR                (long)-1
 #  endif
-#  define LSEEK_ERROR                (long)-1
 #endif
 
 #ifndef struct_stat
