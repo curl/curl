@@ -22,8 +22,6 @@
 #
 ###########################################################################
 
-SUBDIRS = clients
-
 TESTENV =                             \
 testenv/__init__.py                   \
 testenv/caddy.py                      \
@@ -72,10 +70,7 @@ clean-local:
 	rm -rf *.pyc __pycache__
 	rm -rf gen
 
-check: clients
+check: client
 
-clients:
-	@(cd clients; $(MAKE) check)
-
-checksrc:
-	cd clients && $(MAKE) checksrc
+client:
+	@(cd ../client; $(MAKE) check)
