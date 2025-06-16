@@ -198,9 +198,6 @@ CURL_EXTERN ALLOC_FUNC
 #ifndef fake_sclose
 #define fake_sclose(x)  Curl_nop_stmt
 #endif
-#fndef sclose
-#define sclose(x)  CURL_SCLOSE(x)
-#endif
 
 /*
  * Curl_safefree defined as a macro to allow MemoryTracking feature
