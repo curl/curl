@@ -1039,12 +1039,13 @@ void Curl_multi_getsock(struct Curl_easy *data,
   }
 
 
-  /* Waiting to receive with buffered input.
+  /* Unblocked and waiting to receive with buffered input.
    * Make transfer run again at next opportunity. */
-  if((Curl_pollset_want_read(data, ps, data->conn->sock[FIRSTSOCKET]) &&
-      Curl_conn_data_pending(data, FIRSTSOCKET)) ||
-     (Curl_pollset_want_read(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
-      Curl_conn_data_pending(data, SECONDARYSOCKET))) {
+  if(!Curl_xfer_is_blocked(data) &&
+     ((Curl_pollset_want_read(data, ps, data->conn->sock[FIRSTSOCKET]) &&
+       Curl_conn_data_pending(data, FIRSTSOCKET)) ||
+      (Curl_pollset_want_read(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
+       Curl_conn_data_pending(data, SECONDARYSOCKET)))) {
     CURL_TRC_M(data, "%s pollset[] has POLLIN, but there is still "
                "buffered input to consume -> EXPIRE_RUN_NOW", caller);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
