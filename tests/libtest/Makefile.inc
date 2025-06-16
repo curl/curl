@@ -34,13 +34,9 @@ UTILS = memptr.c testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/cu
 
 CURLX_SRCS = \
   ../../lib/curlx/warnless.c \
-  ../../lib/curlx/warnless.h \
   ../../lib/curlx/multibyte.c \
-  ../../lib/curlx/multibyte.h \
   ../../lib/curlx/timediff.c \
-  ../../lib/curlx/timediff.h \
   ../../lib/curl_threads.c \
-  ../../lib/curl_threads.h \
   ../../lib/curlx/wait.c
 
 # All libtest programs
