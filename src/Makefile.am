@@ -113,7 +113,7 @@ libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 if USE_UNITY
 libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --srcdir $(srcdir) --include $(CURL_CFILES) $(curl_CURLX) > libcurltool_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curl_CURLX) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =
