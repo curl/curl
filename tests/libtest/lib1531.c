@@ -107,8 +107,7 @@ static CURLcode test_lib1531(char *URL)
        curl_multi_fdset() doc. */
 
     if(maxfd == -1) {
-      curlx_wait_ms(100);
-      rc = 0;
+      rc = curlx_wait_ms(100);
     }
     else {
       /* Note that on some platforms 'timeout' may be modified by select().
