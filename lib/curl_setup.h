@@ -479,21 +479,21 @@
 #  ifdef USE_WIN32_LARGE_FILES
      /* Large file (>2Gb) support using Win32 functions. */
 #    undef  lseek
-#    define lseek(fdes,offset,whence)  _lseeki64(fdes, offset, whence)
+#    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #    undef  fstat
-#    define fstat(fdes,stp)            _fstati64(fdes, stp)
+#    define fstat(fdes,stp)              _fstati64(fdes, stp)
 #    undef  stat
-#    define struct_stat                struct _stati64
-#    define LSEEK_ERROR                (__int64)-1
+#    define struct_stat                  struct _stati64
+#    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
 #    ifndef UNDER_CE
 #      undef  lseek
-#      define lseek(fdes, offset,whence) _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)           _fstat(fdes, stp)
-#      define struct_stat                struct _stat
+#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#      define fstat(fdes, stp)             _fstat(fdes, stp)
+#      define struct_stat                  struct _stat
 #    endif
-#    define LSEEK_ERROR                (long)-1
+#    define LSEEK_ERROR                  (long)-1
 #  endif
 #  ifndef UNDER_CE
      int curlx_win32_stat(const char *path, struct_stat *buffer);
