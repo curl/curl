@@ -59,12 +59,6 @@ if(CURL_BUILD_TESTING)
   set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
 endif()
 
-if(ENABLE_CURLDEBUG)
-  # We must compile this source separately to avoid memdebug.h redefinitions
-  # applying to it.
-  set_source_files_properties("memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
-endif()
-
 ## Library definition
 
 if(NOT DEFINED IMPORT_LIB_SUFFIX)
