@@ -30,6 +30,7 @@ BUNDLE_SRC = clients.c
 FIRSTFILES = first.c first.h
 
 CURLX_SRCS = \
+  ../../../lib/curlx/multibyte.c \
   ../../../lib/curlx/timediff.c \
   ../../../lib/curlx/wait.c
 

@@ -23,9 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include "curl_config.h"  /* for CURL_DISABLE_WEBSOCKETS */
-#endif
+#include "curl_setup.h"
 
 typedef int (*entry_func_t)(int, char **);
 
