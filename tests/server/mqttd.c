@@ -761,11 +761,11 @@ static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
       logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
              error, sstrerror(error));
       if(maxretr) {
-        rc = wait_ms(delay);
+        rc = curlx_wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = SOCKERRNO;
-          logmsg("wait_ms() failed with error (%d) %s",
+          logmsg("curlx_wait_ms() failed with error (%d) %s",
                  error, sstrerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
