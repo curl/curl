@@ -42,6 +42,7 @@
 #include "http.h"
 #include "select.h"
 #include "curlx/warnless.h"
+#include "curlx/wait.h"
 #include "speedcheck.h"
 #include "conncache.h"
 #include "multihandle.h"
@@ -1458,7 +1459,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
          timeout */
       else if(sleep_ms < 0)
         sleep_ms = timeout_ms;
-      Curl_wait_ms(sleep_ms);
+      curlx_wait_ms(sleep_ms);
     }
   }
 

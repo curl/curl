@@ -82,7 +82,6 @@ int Curl_socket_check(curl_socket_t readfd, curl_socket_t readfd2,
   Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, x, z)
 
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
-int Curl_wait_ms(timediff_t timeout_ms);
 
 /*
    With Winsock the valid range is [0..INVALID_SOCKET-1] according to

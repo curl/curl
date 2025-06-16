@@ -65,6 +65,9 @@
 #include "timeval.h"
 #include "timediff.h"
 
+#include "wait.h"
+/* for curlx_wait_ms */
+
 #include "winapi.h"
 /* for curlx_winapi_strerror */
 
