@@ -470,14 +470,6 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#ifdef __DJGPP__
-/* Requires DJGPP 2.04 */
-#  include <unistd.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                (offset_t)-1
-#endif
-
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
@@ -515,6 +507,12 @@
 #    endif
 #    define LSEEK_ERROR                (long)-1
 #  endif
+#elif defined(__DJGPP__)
+   /* Requires DJGPP 2.04 */
+#  include <unistd.h>
+#  undef  lseek
+#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                (offset_t)-1
 #endif
 
 #ifndef struct_stat
