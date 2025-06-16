@@ -75,18 +75,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
     curl_mfprintf(stderr, "Receive pong\n");
     res = recv_pong(curl, payload);
     if(res == CURLE_AGAIN) {
-#ifdef _WIN32
-      Sleep(100);
-#elif defined(__TANDEM)
-      /* NonStop only defines usleep when building for a threading model */
-# if defined(_PUT_MODEL_) || defined(_KLT_MODEL_)
-      usleep(100*1000);
-# else
-      PROCESS_DELAY_(100*1000);
-# endif
-#else
-      usleep(100*1000);
-#endif
+      curlx_wait_ms(100);
       continue;
     }
     websocket_close(curl);
