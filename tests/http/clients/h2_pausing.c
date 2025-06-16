@@ -55,8 +55,9 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   (void)data;
   if(curl_easy_getinfo(handle->h, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                        &totalsize) == CURLE_OK)
-    fprintf(stderr, "INFO: [%d] write, Content-Length %"CURL_FORMAT_CURL_OFF_T
-            "\n", (int)handle->idx, totalsize);
+    curl_mfprintf(stderr, "INFO: [%d] write, "
+                  "Content-Length %" CURL_FORMAT_CURL_OFF_T "\n",
+                  (int)handle->idx, totalsize);
 
   if(!handle->resumed) {
     ++handle->paused;
