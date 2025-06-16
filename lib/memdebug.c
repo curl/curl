@@ -78,7 +78,11 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
+#ifdef CURL_FOPEN
+      curl_dbg_logfile = CURL_FOPEN(logname, FOPEN_WRITETEXT);
+#else
       curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
+#endif
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
