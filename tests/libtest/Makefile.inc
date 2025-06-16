@@ -40,7 +40,8 @@ CURLX_SRCS = \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timediff.h \
   ../../lib/curl_threads.c \
-  ../../lib/curl_threads.h
+  ../../lib/curl_threads.h \
+  ../../lib/curlx/wait.c
 
 # All libtest programs
 TESTFILES = \
