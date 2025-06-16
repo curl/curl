@@ -35,7 +35,7 @@ if(BUILD_CURL_EXE)
 endif()
 
 add_subdirectory(http)
-add_subdirectory(http/clients)
+add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(tunit)
