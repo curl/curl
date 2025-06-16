@@ -621,6 +621,13 @@ void Curl_pollset_check(struct Curl_easy *data,
                         bool *pwant_read, bool *pwant_write);
 
 /**
+ * Return TRUE if the pollset contains socket with CURL_POLL_IN.
+ */
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock);
+
+/**
  * Types and macros used to keep the current easy handle in filter calls,
  * allowing for nested invocations. See #10336.
  *

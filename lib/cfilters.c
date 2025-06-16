@@ -1069,3 +1069,16 @@ void Curl_pollset_check(struct Curl_easy *data,
   }
   *pwant_read = *pwant_write = FALSE;
 }
+
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock)
+{
+  unsigned int i;
+  (void)data;
+  for(i = 0; i < ps->num; ++i) {
+    if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
+      return TRUE;
+  }
+  return FALSE;
+}
