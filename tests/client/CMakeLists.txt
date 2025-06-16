@@ -41,18 +41,18 @@ add_custom_command(
     ${FIRSTFILES} ${_bundle_extra} ${TESTFILES}
   VERBATIM)
 
-add_executable(http-clients EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
-add_dependencies(testdeps http-clients)
-target_include_directories(http-clients PRIVATE
+add_executable(clients EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
+add_dependencies(testdeps clients)
+target_include_directories(clients PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
-target_link_libraries(http-clients ${LIB_SELECTED} ${CURL_LIBS})
-set_property(TARGET http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
+target_link_libraries(clients ${LIB_SELECTED} ${CURL_LIBS})
+set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
   "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
 if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
-  set_property(TARGET http-clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+  set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(http-clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
+set_target_properties(clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
