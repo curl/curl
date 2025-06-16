@@ -38,7 +38,7 @@ EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_builddir)/src is for curl's generated src/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
-# $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
+# $(srcdir) for generated sources to find included sources
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \

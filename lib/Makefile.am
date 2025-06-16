@@ -50,6 +50,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 #
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
+# $(srcdir) for the generated unity source to find included sources
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
               -I$(top_builddir)/lib     \
