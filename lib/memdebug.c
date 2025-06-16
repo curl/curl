@@ -407,7 +407,7 @@ void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 /* this is our own defined way to close sockets on *ALL* platforms */
 int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
 {
-  int res = sclose(sockfd);
+  int res = CURL_SCLOSE(sockfd);
   curl_dbg_mark_sclose(sockfd, line, source);
   return res;
 }
