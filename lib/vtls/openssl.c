@@ -2176,6 +2176,8 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
 
 out:
   cf->shutdown = (result || *done);
+  if(cf->shutdown || (connssl->io_need != CURL_SSL_IO_NEED_NONE))
+    connssl->input_pending = FALSE;
   return result;
 }
 
@@ -2187,6 +2189,7 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)data;
   DEBUGASSERT(octx);
 
+  connssl->input_pending = FALSE;
   if(octx->ssl) {
     SSL_free(octx->ssl);
     octx->ssl = NULL;
@@ -5420,6 +5423,8 @@ out:
      *   until more data arrives */
     connssl->input_pending = FALSE;
   }
+  CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %d, %zu (in_pending=%d)",
+              buffersize, result, *pnread, connssl->input_pending);
   return result;
 }
 
