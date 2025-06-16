@@ -70,7 +70,7 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
-    fclose(curl_dbg_logfile);
+    (fclose)(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
 }
@@ -80,7 +80,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-      curl_dbg_logfile = fopen(logname, FOPEN_WRITETEXT);
+      curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -309,7 +309,7 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
-  sockfd = socket(domain, type, protocol);
+  sockfd = (socket)(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
@@ -326,7 +326,7 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
-  rc = send(sockfd, buf, len, flags);
+  rc = (send)(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -340,7 +340,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
-  rc = recv(sockfd, buf, len, flags);
+  rc = (recv)(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -352,7 +352,7 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
                        curl_socket_t socket_vector[2],
                        int line, const char *source)
 {
-  int res = socketpair(domain, type, protocol, socket_vector);
+  int res = (socketpair)(domain, type, protocol, socket_vector);
 
   if(source && (0 == res))
     curl_dbg_log("FD %s:%d socketpair() = "
@@ -369,7 +369,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
-  curl_socket_t sockfd = accept(s, addr, addrlen);
+  curl_socket_t sockfd = (accept)(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
@@ -386,7 +386,7 @@ curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
-  curl_socket_t sockfd = accept4(s, addr, addrlen, flags);
+  curl_socket_t sockfd = (accept4)(s, addr, addrlen, flags);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
@@ -416,7 +416,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res = fopen(file, mode);
+  FILE *res = (fopen)(file, mode);
 
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
@@ -429,7 +429,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = (fdopen)(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -469,7 +469,7 @@ void curl_dbg_log(const char *format, ...)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0)
-    fwrite(buf, 1, (size_t)nchars, curl_dbg_logfile);
+    (fwrite)(buf, 1, (size_t)nchars, curl_dbg_logfile);
 }
 
 #endif /* CURLDEBUG */
