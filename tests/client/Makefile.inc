@@ -30,7 +30,7 @@ BUNDLE_SRC = clients.c
 FIRSTFILES = first.c first.h
 
 CURLX_SRCS = \
-  ../../../lib/curlx/multibyte.c
+  ../../lib/curlx/multibyte.c
 
 # All test clients
 TESTFILES = \
