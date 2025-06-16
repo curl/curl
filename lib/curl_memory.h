@@ -86,6 +86,7 @@
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
+#define sclose(x)  CURL_SCLOSE(x)
 #undef fopen
 #undef fdopen
 #undef fclose
