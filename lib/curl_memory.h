@@ -57,7 +57,6 @@
 #ifdef HEADER_CURL_MEMDEBUG_H
 /* cleanup after memdebug.h */
 
-#ifdef MEMDEBUG_NODEFINES
 #ifdef CURLDEBUG
 
 #undef strdup
@@ -91,7 +90,6 @@
 #undef fdopen
 #undef fclose
 
-#endif /* MEMDEBUG_NODEFINES */
 #endif /* CURLDEBUG */
 
 #undef HEADER_CURL_MEMDEBUG_H
