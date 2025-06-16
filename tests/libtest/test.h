@@ -74,8 +74,6 @@ extern struct timeval tv_test_start; /* for test timing */
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
 
-extern void wait_ms(int ms); /* wait this many milliseconds */
-
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
 extern int unitfail;

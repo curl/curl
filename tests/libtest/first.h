@@ -32,4 +32,6 @@ struct entry_s {
   entry_func_t ptr;
 };
 
+#include "curlx.h"
+
 #endif /* HEADER_LIBTEST_FIRST_H */

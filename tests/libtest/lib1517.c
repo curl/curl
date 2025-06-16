@@ -37,7 +37,7 @@ static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
   /* Wait one second before return POST data          *
    * so libcurl will wait before sending request body */
-  wait_ms(1000);
+  curlx_wait_ms(1000);
 
   if(tocopy < 1 || !pooh->sizeleft)
     return 0;

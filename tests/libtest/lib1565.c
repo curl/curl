@@ -51,7 +51,7 @@ static void *t1565_run_thread(void *ptr)
   (void)ptr;
 
   for(i = 0; i < CONN_NUM; i++) {
-    wait_ms(TIME_BETWEEN_START_SECS * 1000);
+    curlx_wait_ms(TIME_BETWEEN_START_SECS * 1000);
 
     easy_init(easy);
 
