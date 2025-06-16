@@ -32,6 +32,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 # $(top_srcdir)/src for "tool_binmode.h", "tool_xattr.h"
+# $(srcdir) for the generated bundle source to find included test sources
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
