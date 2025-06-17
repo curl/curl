@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   size_t tmp;
 
   if(argc < 2) {
-    fprintf(stderr, "Pass clientname as first argument\n");
+    curl_mfprintf(stderr, "Pass clientname as first argument\n");
     return 1;
   }
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
   }
 
   if(!entry_func) {
-    fprintf(stderr, "Test '%s' not found.\n", entry_name);
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 99;
   }
 

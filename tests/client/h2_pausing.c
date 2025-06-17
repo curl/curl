@@ -28,8 +28,8 @@
 static void usage_h2_pausing(const char *msg)
 {
   if(msg)
-    fprintf(stderr, "%s\n", msg);
-  fprintf(stderr,
+    curl_mfprintf(stderr, "%s\n", msg);
+  curl_mfprintf(stderr,
     "usage: [options] url\n"
     "  pause downloads with following options:\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
@@ -61,19 +61,19 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 
   if(!handle->resumed) {
     ++handle->paused;
-    fprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
-            (int)handle->idx, handle->paused, (long)realsize);
+    curl_mfprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
+                  (int)handle->idx, handle->paused, (long)realsize);
     assert(handle->paused == 1);
     return CURL_WRITEFUNC_PAUSE;
   }
   if(handle->fail_write) {
     ++handle->errored;
-    fprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
-            (int)handle->idx, (long)realsize, handle->errored);
+    curl_mfprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
+                  (int)handle->idx, (long)realsize, handle->errored);
     return CURL_WRITEFUNC_ERROR;
   }
-  fprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
-          (int)handle->idx, (long)realsize);
+  curl_mfprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
+                (int)handle->idx, (long)realsize);
   return realsize;
 }
 
@@ -122,7 +122,7 @@ static int test_h2_pausing(int argc, char *argv[])
   argv += coptind;
 
   if(argc != 1) {
-    fprintf(stderr, "ERROR: need URL as argument\n");
+    curl_mfprintf(stderr, "ERROR: need URL as argument\n");
     return 2;
   }
   url = argv[0];
@@ -132,19 +132,19 @@ static int test_h2_pausing(int argc, char *argv[])
 
   cu = curl_url();
   if(!cu) {
-    fprintf(stderr, "out of memory\n");
+    curl_mfprintf(stderr, "out of memory\n");
     return 1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
-    fprintf(stderr, "not a URL: '%s'\n", url);
+    curl_mfprintf(stderr, "not a URL: '%s'\n", url);
     return 1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
-    fprintf(stderr, "could not get host of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get host of '%s'\n", url);
     return 1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
-    fprintf(stderr, "could not get port of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get port of '%s'\n", url);
     return 1;
   }
   memset(&resolve, 0, sizeof(resolve));
@@ -186,36 +186,36 @@ static int test_h2_pausing(int argc, char *argv[])
   }
 
   for(rounds = 0;; rounds++) {
-    fprintf(stderr, "INFO: multi_perform round %d\n", rounds);
+    curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
     if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK)
       ERR();
 
     if(!still_running) {
       int as_expected = 1;
-      fprintf(stderr, "INFO: no more handles running\n");
+      curl_mfprintf(stderr, "INFO: no more handles running\n");
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         if(!handles[i].paused) {
-          fprintf(stderr, "ERROR: [%d] NOT PAUSED\n", (int)i);
+          curl_mfprintf(stderr, "ERROR: [%d] NOT PAUSED\n", (int)i);
           as_expected = 0;
         }
         else if(handles[i].paused != 1) {
-          fprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
-                  (int)i, handles[i].paused);
+          curl_mfprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
+                        (int)i, handles[i].paused);
           as_expected = 0;
         }
         else if(!handles[i].resumed) {
-          fprintf(stderr, "ERROR: [%d] NOT resumed!\n", (int)i);
+          curl_mfprintf(stderr, "ERROR: [%d] NOT resumed!\n", (int)i);
           as_expected = 0;
         }
         else if(handles[i].errored != 1) {
-          fprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
-                  (int)i, handles[i].errored);
+          curl_mfprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
+                        (int)i, handles[i].errored);
           as_expected = 0;
         }
       }
       if(!as_expected) {
-        fprintf(stderr, "ERROR: handles not in expected state "
-                "after %d rounds\n", rounds);
+        curl_mfprintf(stderr, "ERROR: handles not in expected state "
+                      "after %d rounds\n", rounds);
         rc = 1;
       }
       break;
@@ -230,9 +230,9 @@ static int test_h2_pausing(int argc, char *argv[])
         for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
           if(msg->easy_handle == handles[i].h) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
-              fprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
-                      "result %d - wtf?\n", (int)i, handles[i].paused,
-                      handles[i].resumed, msg->data.result);
+              curl_mfprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
+                            "result %d - wtf?\n", (int)i, handles[i].paused,
+                            handles[i].resumed, msg->data.result);
               rc = 1;
               goto out;
             }
@@ -250,7 +250,7 @@ static int test_h2_pausing(int argc, char *argv[])
       }
       all_paused = (i == CURL_ARRAYSIZE(handles));
       if(all_paused) {
-        fprintf(stderr, "INFO: all transfers paused\n");
+        curl_mfprintf(stderr, "INFO: all transfers paused\n");
         /* give transfer some rounds to mess things up */
         resume_round = rounds + 2;
       }
@@ -258,7 +258,7 @@ static int test_h2_pausing(int argc, char *argv[])
     if(resume_round > 0 && rounds == resume_round) {
       /* time to resume */
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-        fprintf(stderr, "INFO: [%d] resumed\n", (int)i);
+        curl_mfprintf(stderr, "INFO: [%d] resumed\n", (int)i);
         handles[i].resumed = 1;
         curl_easy_pause(handles[i].h, CURLPAUSE_CONT);
       }

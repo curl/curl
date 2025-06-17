@@ -63,8 +63,8 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
-  fprintf(stderr, "[t-%d] RECV %ld bytes, total=%ld, pause_at=%ld\n",
-          t->idx, (long)blen, (long)t->recv_size, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%d] RECV %ld bytes, total=%ld, pause_at=%ld\n",
+                t->idx, (long)blen, (long)t->recv_size, (long)t->pause_at);
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%u.data",
                    t->idx);
@@ -75,7 +75,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
   if(nwritten < blen) {
-    fprintf(stderr, "[t-%d] write failure\n", t->idx);
+    curl_mfprintf(stderr, "[t-%d] write failure\n", t->idx);
     return 0;
   }
   t->recv_size += (curl_off_t)nwritten;
@@ -96,13 +96,13 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
   else
     nread = blen;
 
-  fprintf(stderr, "[t-%d] SEND %ld bytes, total=%ld, pause_at=%ld\n",
-          t->idx, (long)nread, (long)t->send_total, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%d] SEND %ld bytes, total=%ld, pause_at=%ld\n",
+                t->idx, (long)nread, (long)t->send_total, (long)t->pause_at);
 
   if(!t->resumed &&
      t->send_size < t->pause_at &&
      ((t->send_size + (curl_off_t)blen) >= t->pause_at)) {
-    fprintf(stderr, "[t-%d] PAUSE\n", t->idx);
+    curl_mfprintf(stderr, "[t-%d] PAUSE\n", t->idx);
     t->paused = 1;
     return CURL_READFUNC_PAUSE;
   }
@@ -110,8 +110,8 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
   memset(buf, 'x', nread);
   t->send_size += (curl_off_t)nread;
   if(t->fail_at > 0 && t->send_size >= t->fail_at) {
-    fprintf(stderr, "[t-%d] ABORT by read callback at %ld bytes\n",
-            t->idx, (long)t->send_size);
+    curl_mfprintf(stderr, "[t-%d] ABORT by read callback at %ld bytes\n",
+                  t->idx, (long)t->send_size);
     return CURL_READFUNC_ABORT;
   }
   return (size_t)nread;
@@ -126,8 +126,8 @@ static int my_progress_u_cb(void *userdata,
   (void)dlnow;
   (void)dltotal;
   if(t->abort_at > 0 && ulnow >= t->abort_at) {
-    fprintf(stderr, "[t-%d] ABORT by progress_cb at %ld bytes sent\n",
-            t->idx, (long)ulnow);
+    curl_mfprintf(stderr, "[t-%d] ABORT by progress_cb at %ld bytes sent\n",
+                  t->idx, (long)ulnow);
     return 1;
   }
   return 0;
@@ -155,7 +155,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
   else if(!strcmp("POST", t->method))
     curl_easy_setopt(hnd, CURLOPT_POST, 1L);
   else {
-    fprintf(stderr, "unsupported method '%s'\n", t->method);
+    curl_mfprintf(stderr, "unsupported method '%s'\n", t->method);
     return 1;
   }
   curl_easy_setopt(hnd, CURLOPT_READFUNCTION, my_read_cb);
@@ -186,8 +186,8 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
 static void usage_hx_upload(const char *msg)
 {
   if(msg)
-    fprintf(stderr, "%s\n", msg);
-  fprintf(stderr,
+    curl_mfprintf(stderr, "%s\n", msg);
+  curl_mfprintf(stderr,
     "usage: [options] url\n"
     "  upload to a url with following options:\n"
     "  -a         abort paused transfer\n"
@@ -312,7 +312,7 @@ static int test_hx_upload(int argc, char *argv[])
 
   share = curl_share_init();
   if(!share) {
-    fprintf(stderr, "error allocating share\n");
+    curl_mfprintf(stderr, "error allocating share\n");
     return 1;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -324,7 +324,7 @@ static int test_hx_upload(int argc, char *argv[])
 
   transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
-    fprintf(stderr, "error allocating transfer structs\n");
+    curl_mfprintf(stderr, "error allocating transfer structs\n");
     return 1;
   }
 
@@ -343,7 +343,7 @@ static int test_hx_upload(int argc, char *argv[])
     CURL *easy = curl_easy_init();
     CURLcode rc = CURLE_OK;
     if(!easy) {
-      fprintf(stderr, "failed to init easy handle\n");
+      curl_mfprintf(stderr, "failed to init easy handle\n");
       return 1;
     }
     for(i = 0; i < transfer_count_u; ++i) {
@@ -351,13 +351,13 @@ static int test_hx_upload(int argc, char *argv[])
       t->easy = easy;
       if(setup_hx_upload(t->easy, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
-        fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
+        curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
         return 1;
       }
 
-      fprintf(stderr, "[t-%d] STARTING\n", t->idx);
+      curl_mfprintf(stderr, "[t-%d] STARTING\n", t->idx);
       rc = curl_easy_perform(easy);
-      fprintf(stderr, "[t-%d] DONE -> %d\n", t->idx, rc);
+      curl_mfprintf(stderr, "[t-%d] DONE -> %d\n", t->idx, rc);
       t->easy = NULL;
       curl_easy_reset(easy);
     }
@@ -373,13 +373,13 @@ static int test_hx_upload(int argc, char *argv[])
       t->easy = curl_easy_init();
       if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
-        fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
+        curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
         return 1;
       }
       curl_multi_add_handle(multi_handle, t->easy);
       t->started = 1;
       ++active_transfers;
-      fprintf(stderr, "[t-%d] STARTED\n", t->idx);
+      curl_mfprintf(stderr, "[t-%d] STARTED\n", t->idx);
     }
 
     do {
@@ -407,17 +407,18 @@ static int test_hx_upload(int argc, char *argv[])
             long res_status;
             curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &res_status);
             t->done = 1;
-            fprintf(stderr, "[t-%d] FINISHED, result=%d, response=%ld\n",
-                    t->idx, m->data.result, res_status);
+            curl_mfprintf(stderr, "[t-%d] FINISHED, result=%d, response=%ld\n",
+                          t->idx, m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;
               curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
-              fprintf(stderr, "[t-%d] EarlyData: %ld\n", t->idx, (long)sent);
+              curl_mfprintf(stderr, "[t-%d] EarlyData: %ld\n", t->idx,
+                            (long)sent);
             }
           }
           else {
             curl_easy_cleanup(e);
-            fprintf(stderr, "unknown FINISHED???\n");
+            curl_mfprintf(stderr, "unknown FINISHED???\n");
           }
         }
 
@@ -431,7 +432,7 @@ static int test_hx_upload(int argc, char *argv[])
               curl_multi_remove_handle(multi_handle, t->easy);
               t->done = 1;
               active_transfers--;
-              fprintf(stderr, "[t-%d] ABORTED\n", t->idx);
+              curl_mfprintf(stderr, "[t-%d] ABORTED\n", t->idx);
             }
           }
         }
@@ -443,7 +444,7 @@ static int test_hx_upload(int argc, char *argv[])
               t->resumed = 1;
               t->paused = 0;
               curl_easy_pause(t->easy, CURLPAUSE_CONT);
-              fprintf(stderr, "[t-%d] RESUMED\n", t->idx);
+              curl_mfprintf(stderr, "[t-%d] RESUMED\n", t->idx);
               break;
             }
           }
@@ -457,13 +458,13 @@ static int test_hx_upload(int argc, char *argv[])
               if(!t->easy || setup_hx_upload(t->easy, url, t, http_version,
                                              host, share, use_earlydata,
                                              announce_length)) {
-                fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
+                curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
                 return 1;
               }
               curl_multi_add_handle(multi_handle, t->easy);
               t->started = 1;
               ++active_transfers;
-              fprintf(stderr, "[t-%d] STARTED\n", t->idx);
+              curl_mfprintf(stderr, "[t-%d] STARTED\n", t->idx);
               break;
             }
           }

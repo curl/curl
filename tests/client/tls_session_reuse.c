@@ -38,7 +38,7 @@ static int add_transfer(CURLM *multi, CURLSH *share,
 
   easy = curl_easy_init();
   if(!easy) {
-    fprintf(stderr, "curl_easy_init failed\n");
+    curl_mfprintf(stderr, "curl_easy_init failed\n");
     return 1;
   }
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
@@ -59,8 +59,8 @@ static int add_transfer(CURLM *multi, CURLSH *share,
 
   mc = curl_multi_add_handle(multi, easy);
   if(mc != CURLM_OK) {
-    fprintf(stderr, "curl_multi_add_handle: %s\n",
-            curl_multi_strerror(mc));
+    curl_mfprintf(stderr, "curl_multi_add_handle: %s\n",
+                  curl_multi_strerror(mc));
     curl_easy_cleanup(easy);
     return 1;
   }
@@ -85,7 +85,7 @@ static int test_tls_session_reuse(int argc, char *argv[])
   int exitcode = 1;
 
   if(argc != 3) {
-    fprintf(stderr, "%s proto URL\n", argv[0]);
+    curl_mfprintf(stderr, "%s proto URL\n", argv[0]);
     return 2;
   }
 
@@ -97,19 +97,19 @@ static int test_tls_session_reuse(int argc, char *argv[])
   url = argv[2];
   cu = curl_url();
   if(!cu) {
-    fprintf(stderr, "out of memory\n");
+    curl_mfprintf(stderr, "out of memory\n");
     return 1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
-    fprintf(stderr, "not a URL: '%s'\n", url);
+    curl_mfprintf(stderr, "not a URL: '%s'\n", url);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
-    fprintf(stderr, "could not get host of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get host of '%s'\n", url);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
-    fprintf(stderr, "could not get port of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get port of '%s'\n", url);
     goto cleanup;
   }
 
@@ -119,13 +119,13 @@ static int test_tls_session_reuse(int argc, char *argv[])
 
   multi = curl_multi_init();
   if(!multi) {
-    fprintf(stderr, "curl_multi_init failed\n");
+    curl_mfprintf(stderr, "curl_multi_init failed\n");
     goto cleanup;
   }
 
   share = curl_share_init();
   if(!share) {
-    fprintf(stderr, "curl_share_init failed\n");
+    curl_mfprintf(stderr, "curl_share_init failed\n");
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
@@ -139,16 +139,16 @@ static int test_tls_session_reuse(int argc, char *argv[])
   do {
     mc = curl_multi_perform(multi, &running_handles);
     if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_perform: %s\n",
-              curl_multi_strerror(mc));
+      curl_mfprintf(stderr, "curl_multi_perform: %s\n",
+                    curl_multi_strerror(mc));
       goto cleanup;
     }
 
     if(running_handles) {
       mc = curl_multi_poll(multi, NULL, 0, 1000000, &numfds);
       if(mc != CURLM_OK) {
-        fprintf(stderr, "curl_multi_poll: %s\n",
-                curl_multi_strerror(mc));
+        curl_mfprintf(stderr, "curl_multi_poll: %s\n",
+                      curl_multi_strerror(mc));
         goto cleanup;
       }
     }
@@ -197,12 +197,12 @@ static int test_tls_session_reuse(int argc, char *argv[])
       }
     }
 
-    fprintf(stderr, "running_handles=%d, yet_to_start=%d\n",
-            running_handles, add_more);
+    curl_mfprintf(stderr, "running_handles=%d, yet_to_start=%d\n",
+                  running_handles, add_more);
 
   } while(ongoing || add_more);
 
-  fprintf(stderr, "exiting\n");
+  curl_mfprintf(stderr, "exiting\n");
   exitcode = 0;
 
 cleanup:

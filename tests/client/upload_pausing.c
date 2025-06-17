@@ -34,13 +34,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb,
   (void)nmemb;
   (void)userdata;
   if(total_read >= PAUSE_READ_AFTER) {
-    fprintf(stderr, "read_callback, return PAUSE\n");
+    curl_mfprintf(stderr, "read_callback, return PAUSE\n");
     return CURL_READFUNC_PAUSE;
   }
   else {
     ptr[0] = '\n';
     ++total_read;
-    fprintf(stderr, "read_callback, return 1 byte\n");
+    curl_mfprintf(stderr, "read_callback, return 1 byte\n");
     return 1;
   }
 }
@@ -70,8 +70,8 @@ static int progress_callback(void *clientp,
 static void usage_upload_pausing(const char *msg)
 {
   if(msg)
-    fprintf(stderr, "%s\n", msg);
-  fprintf(stderr,
+    curl_mfprintf(stderr, "%s\n", msg);
+  curl_mfprintf(stderr,
     "usage: [options] url\n"
     "  upload and pause, options:\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
@@ -123,19 +123,19 @@ static int test_upload_pausing(int argc, char *argv[])
 
   cu = curl_url();
   if(!cu) {
-    fprintf(stderr, "out of memory\n");
+    curl_mfprintf(stderr, "out of memory\n");
     return 1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
-    fprintf(stderr, "not a URL: '%s'\n", url);
+    curl_mfprintf(stderr, "not a URL: '%s'\n", url);
     return 1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
-    fprintf(stderr, "could not get host of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get host of '%s'\n", url);
     return 1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
-    fprintf(stderr, "could not get port of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get port of '%s'\n", url);
     return 1;
   }
   memset(&resolve, 0, sizeof(resolve));
@@ -145,7 +145,7 @@ static int test_upload_pausing(int argc, char *argv[])
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "out of memory\n");
+    curl_mfprintf(stderr, "out of memory\n");
     return 1;
   }
   /* We want to use our own read function. */
