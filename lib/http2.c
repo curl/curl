@@ -205,6 +205,9 @@ static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
   }
 }
 
+static CURLcode nw_out_flush(struct Curl_cfilter *cf,
+                             struct Curl_easy *data);
+
 static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
                                    struct Curl_easy *data);
 
@@ -449,8 +452,10 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       flush_egress = TRUE;
     }
 
-    if(flush_egress)
-      nghttp2_session_send(ctx->h2);
+    if(flush_egress) {
+      (void)nghttp2_session_send(ctx->h2);
+      (void)nw_out_flush(cf, data);
+    }
   }
 
   Curl_uint_hash_remove(&ctx->streams, data->mid);
