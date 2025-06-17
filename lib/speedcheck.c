@@ -27,6 +27,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "multiif.h"
 #include "speedcheck.h"
 
@@ -41,7 +42,7 @@ void Curl_speedinit(struct Curl_easy *data)
 CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct curltime now)
 {
-  if(data->req.keepon & KEEP_RECV_PAUSE)
+  if(Curl_xfer_recv_is_paused(data))
     /* A paused transfer is not qualified for speed checks */
     return CURLE_OK;
 

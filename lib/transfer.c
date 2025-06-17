@@ -364,6 +364,8 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     data->state.select_bits = CURL_CSELECT_IN;
     if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
       data->state.select_bits |= CURL_CSELECT_OUT;
+    if(!Curl_xfer_is_blocked(data))
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
     CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, "
                "set select_bits=%x", data->state.select_bits);
   }
@@ -410,13 +412,11 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
    * NOTE: we are only interested in PAUSE, not HOLD. */
 
   /* if there is data in a direction not paused, return false */
-  if(((select_bits & CURL_CSELECT_IN) &&
-      !(data->req.keepon & KEEP_RECV_PAUSE)) ||
-     ((select_bits & CURL_CSELECT_OUT) &&
-      !(data->req.keepon & KEEP_SEND_PAUSE)))
+  if(((select_bits & CURL_CSELECT_IN) && !Curl_xfer_recv_is_paused(data)) ||
+     ((select_bits & CURL_CSELECT_OUT) && !Curl_xfer_send_is_paused(data)))
     return FALSE;
 
-  return (data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE));
+  return Curl_xfer_recv_is_paused(data) || Curl_xfer_send_is_paused(data);
 }
 
 /*
@@ -979,9 +979,48 @@ bool Curl_xfer_is_blocked(struct Curl_easy *data)
   bool want_send = ((data)->req.keepon & KEEP_SEND);
   bool want_recv = ((data)->req.keepon & KEEP_RECV);
   if(!want_send)
-    return want_recv && Curl_cwriter_is_paused(data);
+    return want_recv && Curl_xfer_recv_is_paused(data);
   else if(!want_recv)
-    return want_send && Curl_creader_is_paused(data);
+    return want_send && Curl_xfer_send_is_paused(data);
   else
-    return Curl_creader_is_paused(data) && Curl_cwriter_is_paused(data);
+    return Curl_xfer_recv_is_paused(data) && Curl_xfer_send_is_paused(data);
+}
+
+bool Curl_xfer_send_is_paused(struct Curl_easy *data)
+{
+  return (data->req.keepon & KEEP_SEND_PAUSE);
+}
+
+bool Curl_xfer_recv_is_paused(struct Curl_easy *data)
+{
+  return (data->req.keepon & KEEP_RECV_PAUSE);
+}
+
+CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
+{
+  CURLcode result = CURLE_OK;
+  if(enable) {
+    data->req.keepon |= KEEP_SEND_PAUSE;
+  }
+  else {
+    data->req.keepon &= ~KEEP_SEND_PAUSE;
+    if(Curl_creader_is_paused(data))
+      result = Curl_creader_unpause(data);
+  }
+  return result;
+}
+
+CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
+{
+  CURLcode result = CURLE_OK;
+  if(enable) {
+    data->req.keepon |= KEEP_RECV_PAUSE;
+  }
+  else {
+    data->req.keepon &= ~KEEP_RECV_PAUSE;
+    if(Curl_cwriter_is_paused(data))
+      result = Curl_cwriter_unpause(data);
+  }
+  Curl_conn_ev_data_pause(data, enable);
+  return result;
 }

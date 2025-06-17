@@ -38,6 +38,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "content_encoding.h"
@@ -660,6 +661,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
                            size_t *pnread, bool *peos)
 {
   struct cr_in_ctx *ctx = reader->ctx;
+  CURLcode result = CURLE_OK;
   size_t nread;
 
   ctx->is_paused = FALSE;
@@ -697,7 +699,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       failf(data, "client read function EOF fail, "
             "only %"FMT_OFF_T"/%"FMT_OFF_T " of needed bytes read",
             ctx->read_len, ctx->total_len);
-      return CURLE_READ_ERROR;
+      result = CURLE_READ_ERROR;
+      break;
     }
     *pnread = 0;
     *peos = TRUE;
@@ -710,7 +713,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     *peos = FALSE;
     ctx->errored = TRUE;
     ctx->error_result = CURLE_ABORTED_BY_CALLBACK;
-    return CURLE_ABORTED_BY_CALLBACK;
+    result = CURLE_ABORTED_BY_CALLBACK;
+    break;
 
   case CURL_READFUNC_PAUSE:
     if(data->conn->handler->flags & PROTOPT_NONETWORK) {
@@ -718,14 +722,15 @@ static CURLcode cr_in_read(struct Curl_easy *data,
          actually only FILE:// just now, and it cannot pause since the transfer
          is not done using the "normal" procedure. */
       failf(data, "Read callback asked for PAUSE when not supported");
-      return CURLE_READ_ERROR;
+      result = CURLE_READ_ERROR;
+      break;
     }
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     CURL_TRC_READ(data, "cr_in_read, callback returned CURL_READFUNC_PAUSE");
     ctx->is_paused = TRUE;
-    data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
+    result = Curl_xfer_pause_send(data, TRUE);
     break; /* nothing was read */
 
   default:
@@ -736,7 +741,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
       *peos = FALSE;
       ctx->errored = TRUE;
       ctx->error_result = CURLE_READ_ERROR;
-      return CURLE_READ_ERROR;
+      result = CURLE_READ_ERROR;
+      break;
     }
     ctx->read_len += nread;
     if(ctx->total_len >= 0)
@@ -747,9 +753,9 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   }
   CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"FMT_OFF_T
                 ", read=%"FMT_OFF_T") -> %d, nread=%zu, eos=%d",
-                blen, ctx->total_len, ctx->read_len, CURLE_OK,
+                blen, ctx->total_len, ctx->read_len, result,
                 *pnread, *peos);
-  return CURLE_OK;
+  return result;
 }
 
 static bool cr_in_needs_rewind(struct Curl_easy *data,
