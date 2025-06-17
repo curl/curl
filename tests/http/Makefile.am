@@ -70,7 +70,7 @@ clean-local:
 	rm -rf *.pyc __pycache__
 	rm -rf gen
 
-check: client
+check: clients
 
-client:
+clients:
 	@(cd ../client; $(MAKE) check)
