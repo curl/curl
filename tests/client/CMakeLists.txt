@@ -50,6 +50,5 @@ target_include_directories(clients PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
 target_link_libraries(clients ${LIB_SELECTED} ${CURL_LIBS})
-set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
-  "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
+set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 set_target_properties(clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
