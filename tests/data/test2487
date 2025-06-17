@@ -29,4 +29,3 @@ Verifies the implied --http3-only behavior.
   </stderr>
 </verify>
 </testcase>
-
