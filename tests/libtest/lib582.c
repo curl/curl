@@ -272,7 +272,7 @@ static CURLcode test_lib582(char *URL)
   curl_mfprintf(stderr, "Set to upload %d bytes\n", (int)file_info.st_size);
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(res != CURLE_OK) {
     fclose(hd_src);
     return res;
   }
