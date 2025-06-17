@@ -31,8 +31,7 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _bundle_extra ${CURLX_SRCS})  # Not exported from the libcurl shared build. Build a copy.
 endif()
 
-add_custom_command(
-  OUTPUT "${BUNDLE_SRC}"
+add_custom_command(OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
     --include ${_bundle_extra} --test ${TESTFILES}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"

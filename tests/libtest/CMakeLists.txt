@@ -31,16 +31,14 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _bundle_extra ${CURLX_SRCS})  # Not exported from the libcurl shared build. Build a copy.
 endif()
 
-add_custom_command(
-  OUTPUT "lib1521.c"
+add_custom_command(OUTPUT "lib1521.c"
   COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${PROJECT_SOURCE_DIR}/include/curl/curl.h" "lib1521.c"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
     "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-add_custom_command(
-  OUTPUT "${BUNDLE_SRC}"
+add_custom_command(OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
     --include ${UTILS} ${_bundle_extra} --test ${TESTFILES} "lib1521.c"
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
