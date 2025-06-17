@@ -60,7 +60,7 @@ static void t530_removeFd(struct t530_Sockets *sockets, curl_socket_t fd,
     if(sockets->sockets[i] == fd) {
       if(i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(curl_socket_t) * (sockets->count - (i + 1)));
+                sizeof(curl_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
     }
   }
@@ -189,7 +189,7 @@ static int t530_checkForCompletion(CURLM *curl, int *success)
     }
     else {
       curl_mfprintf(stderr, "Got an unexpected message from curl: %i\n",
-                    message->msg);
+                    (int)message->msg);
       result = 1;
       *success = 0;
     }
@@ -372,6 +372,7 @@ test_cleanup:
   /* free local memory */
   free(sockets.read.sockets);
   free(sockets.write.sockets);
+
   return res;
 }
 

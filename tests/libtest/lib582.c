@@ -53,7 +53,7 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
     if(sockets->sockets[i] == fd) {
       if(i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(curl_socket_t) * (sockets->count - (i + 1)));
+                sizeof(curl_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
     }
   }
@@ -271,7 +271,7 @@ static CURLcode test_lib582(char *URL)
   curl_mfprintf(stderr, "Set to upload %d bytes\n", (int)file_info.st_size);
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(res != CURLE_OK) {
     fclose(hd_src);
     return res;
   }
