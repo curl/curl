@@ -2464,9 +2464,11 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
-static const struct alpn_spec ALPN_SPEC_H3 = {
-  { "h3", "h3-29" }, 2
-};
+  /* Declare all variables at the top for C90 compliance */
+  uint32_t chosen_quic_version = NGTCP2_PROTO_VER_V1; /* Default to v1 */
+  static const struct alpn_spec ALPN_SPEC_H3 = {
+    { "h3", "h3-29" }, 2
+  };
 
   DEBUGASSERT(ctx->initialized);
   ctx->dcid.datalen = NGTCP2_MAX_CIDLEN;
@@ -2502,11 +2504,11 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   ngtcp2_addr_init(&ctx->connected_path.remote,
                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
 
-  uint32_t chosen_quic_version = NGTCP2_PROTO_VER_V1; /* Default to v1 */
+  /* chosen_quic_version is now declared at the top. Assign value here. */
   if(data->set.quic_version == 2) {
     chosen_quic_version = NGTCP2_PROTO_VER_V2;
   }
-  /* If data->set.quic_version is 0 or 1, it will use NGTCP2_PROTO_VER_V1 */
+  /* If data->set.quic_version is 0 or 1, it will use NGTCP2_PROTO_VER_V1 (already initialized) */
 
   rc = ngtcp2_conn_client_new_versioned(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
