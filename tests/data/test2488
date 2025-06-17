@@ -26,4 +26,3 @@ Test that --quic-v2 --fail fails with QUIC_CONNECT_ERROR against a non-QUIC serv
        and the error code is the primary verification. -->
 </verify>
 </testcase>
-
