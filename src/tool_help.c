@@ -238,10 +238,8 @@ void tool_help(const char *category)
 #endif
       ;
     puts("Usage: curl [options...] <url>");
-    /* Added to fulfill subtask requirement for src/tool_help.c.
-       Ideally, new options are added to helptext[] in tool_hugehelp.c */
-    printf("    --quic-v2      Use QUIC version 2 only for HTTP/3 "
-           "connections\n");
+    /* --quic-v2 is now part of helptext[] via docs/cmdline-opts/quic-v2.md
+       and will be printed by print_category if it's in CURLHELP_IMPORTANT. */
     print_category(CURLHELP_IMPORTANT, cols);
     puts(category_note);
     get_categories_list(cols);
