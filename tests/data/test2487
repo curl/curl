@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+HTTP3
+QUIC
+TLS
+--quic-v2
+verbose
+</keywords>
+<description>
+Test that --quic-v2 attempts HTTP/3 and fails with QUIC_CONNECT_ERROR against a non-QUIC server (example.com).
+Verifies the implied --http3-only behavior.
+</description>
+</info>
+
+<client>
+  <server>nobuild</server>
+  <name>quic-v2-fail-non-quic-server</name>
+  <command option="verbose">
+  --quic-v2 https://example.com/
+  </command>
+</client>
+
+<verify>
+  <errorcode>92</errorcode> <!-- CURLE_QUIC_CONNECT_ERROR -->
+  <stderr>
+    <endsWithRightTrimmed>Trying HTTP/3 for example.com...</endsWithRightTrimmed>
+    <contains>Quic connect error</contains>
+  </stderr>
+</verify>
+</testcase>
+

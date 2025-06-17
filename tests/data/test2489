@@ -1,0 +1,36 @@
+<testcase>
+<info>
+<keywords>
+HTTP3
+QUIC
+TLS
+--http3
+regression
+</keywords>
+<description>
+Regression test for --http3 to ensure it still connects successfully (e.g., using QUIC v1 or negotiated version)
+and retrieves headers.
+</description>
+</info>
+
+<client>
+  <!-- This test requires a server that supports HTTP/3 (likely with QUIC v1).
+       The test infrastructure usually provides a variable like %HTTP3_SERVER_URL%
+       or %HOSTPORT_H3% that points to such a server. -->
+  <server>http3</server> <!-- Specify that an http3 server is needed -->
+  <name>http3-regression</name>
+  <command>
+  --http3 --include %HTTP3_SERVER_URL%/status/200
+  </command>
+</client>
+
+<verify>
+  <errorcode>0</errorcode> <!-- CURLE_OK -->
+  <stdout>
+    <contains>HTTP/3 200</contains> <!-- Check for HTTP/3 and 200 OK -->
+    <!-- It might also include "OK" or the full "HTTP/3 200 OK" depending on server details.
+         "HTTP/3 200" is a reasonably safe check. -->
+  </stdout>
+</verify>
+</testcase>
+
