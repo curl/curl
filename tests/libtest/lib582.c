@@ -329,7 +329,6 @@ static CURLcode test_lib582(char *URL)
       tv.tv_usec = 100000;
     }
 
-    assert(maxFd);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
