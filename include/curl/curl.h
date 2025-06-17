@@ -2249,6 +2249,9 @@ typedef enum {
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
+  /* long, for specific QUIC version (0 = default, 1 = v1, 2 = v2) */
+  CURLOPT(CURLOPT_QUIC_VERSION, CURLOPTTYPE_LONG, 329),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

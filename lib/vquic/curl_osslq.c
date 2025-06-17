@@ -1239,6 +1239,27 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   SSL_set_bio(ctx->tls.ossl.ssl, bio, bio);
   bio = NULL;
   SSL_set_connect_state(ctx->tls.ossl.ssl);
+
+  if(data->set.quic_version == 2) {
+    uint32_t quic_versions[] = { 0x6b3343cf }; /* QUIC v2 */
+    if(!SSL_set_quic_transport_versions(ctx->tls.ossl.ssl, quic_versions,
+                                       sizeof(quic_versions)/sizeof(quic_versions[0]))) {
+      failf(data, "Failed to set QUIC v2 transport version");
+      result = CURLE_QUIC_CONNECT_ERROR;
+      goto out;
+    }
+  }
+  else if(data->set.quic_version == 1) {
+    uint32_t quic_versions[] = { 0x00000001 }; /* QUIC v1 */
+    if(!SSL_set_quic_transport_versions(ctx->tls.ossl.ssl, quic_versions,
+                                       sizeof(quic_versions)/sizeof(quic_versions[0]))) {
+      failf(data, "Failed to set QUIC v1 transport version");
+      result = CURLE_QUIC_CONNECT_ERROR;
+      goto out;
+    }
+  }
+  /* If data->set.quic_version is 0, OpenSSL's default negotiation is used. */
+
   SSL_set_incoming_stream_policy(ctx->tls.ossl.ssl,
                                  SSL_INCOMING_STREAM_POLICY_ACCEPT, 0);
   /* setup the H3 things on top of the QUIC connection */

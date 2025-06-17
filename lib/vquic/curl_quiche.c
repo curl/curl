@@ -1319,6 +1319,19 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
     H3_STREAM_WINDOW_SIZE);
   quiche_config_set_disable_active_migration(ctx->cfg, TRUE);
 
+  if(data->set.quic_version == 2) {
+    uint32_t quic_versions[] = { 0x6b3343cf }; /* QUIC v2 */
+    quiche_config_set_versions(ctx->cfg, quic_versions,
+                               sizeof(quic_versions)/sizeof(quic_versions[0]));
+  }
+  else if(data->set.quic_version == 1) {
+    uint32_t quic_versions[] = { 0x00000001 }; /* QUIC v1 */
+    quiche_config_set_versions(ctx->cfg, quic_versions,
+                               sizeof(quic_versions)/sizeof(quic_versions[0]));
+  }
+  /* If data->set.quic_version is 0 (default), the versions set by
+     QUICHE_PROTOCOL_VERSION in quiche_config_new() are used. */
+
   quiche_config_set_max_connection_window(ctx->cfg,
     10 * QUIC_MAX_STREAMS * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_max_stream_window(ctx->cfg, 10 * H3_STREAM_WINDOW_SIZE);

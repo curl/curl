@@ -870,6 +870,21 @@ Add transfer mode to URL over proxy. See CURLOPT_PROXY_TRANSFER_MODE(3)
 
 **Deprecated option** Issue an HTTP PUT request. See CURLOPT_PUT(3)
 
+## CURLOPT_QUIC_VERSION
+
+Pass a long specifying the QUIC version to use. Set to `0` (default) to allow
+negotiation by the QUIC library, `1` to request QUIC version 1
+(`0x00000001`), or `2` to request QUIC version 2 (`0x6b3343cf`).
+
+Using `1` or `2` will instruct libcurl to attempt to use that specific QUIC
+version only and not attempt other QUIC versions or fall back to other HTTP
+versions if the specified QUIC version fails.
+
+This option is used by HTTP/3 connections. It requires a QUIC-enabled build of
+libcurl with a backend that supports the specified version. If the selected
+QUIC version is not supported by the backend or the server, the connection
+attempt may fail.
+
 ## CURLOPT_QUICK_EXIT
 
 To be set by toplevel tools like "curl" to skip lengthy cleanups when they are

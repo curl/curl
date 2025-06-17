@@ -277,6 +277,7 @@ static const struct LongShort aliases[]= {
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
   {"proxytunnel",                ARG_BOOL, 'p', C_PROXYTUNNEL},
   {"pubkey",                     ARG_STRG, ' ', C_PUBKEY},
+  {"quic-v2",                    ARG_NONE | ARG_TLS, ' ', C_QUIC_V2},
   {"quote",                      ARG_STRG, 'Q', C_QUOTE},
   {"random-file",                ARG_FILE|ARG_DEPR, ' ', C_RANDOM_FILE},
   {"range",                      ARG_STRG, 'r', C_RANGE},
@@ -1740,6 +1741,16 @@ static ParameterError opt_none(struct GlobalConfig *global,
       return PARAM_LIBCURL_DOESNT_SUPPORT;
     else
       sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
+    break;
+  case C_QUIC_V2: /* --quic-v2 */
+    if(!feature_http3) /* QUIC v2 implies HTTP/3 */
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
+    config->quic_version = 2;
+    /* QUIC v2 is specific, so it implies --http3-only behavior for versioning.
+       This means if --quic-v2 is set, we should attempt QUIC v2 and not fall
+       back to other HTTP versions like H1/H2 if QUIC v2 fails.
+       It also means we are trying for H3, so set the httpversion to 3ONLY. */
+    sethttpver(global, config, CURL_HTTP_VERSION_3ONLY);
     break;
   case C_TLSV1: /* --tlsv1 */
     config->ssl_version = CURL_SSLVERSION_TLSv1;

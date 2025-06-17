@@ -411,6 +411,18 @@ those until one succeeds - just as with all other protocols. If those IP
 addresses contain both IPv6 and IPv4, those attempts happen, delayed, in
 parallel (the actual eyeballing).
 
+## --quic-v2
+
+The `--quic-v2` option instructs curl to attempt to connect to the server using exclusively QUIC version 2.
+QUIC version 2 is identified by the protocol ID `0x6b3343cf`.
+
+If this option is used, curl will only try to establish a QUIC version 2 connection. It will not fall back to other QUIC versions (like v1) or other HTTP versions (like HTTP/2 or HTTP/1.1) if the QUIC v2 connection attempt fails or is not supported by the server. This behavior is similar to `--http3-only` but specifically targets QUIC version 2 for the QUIC layer.
+
+This option requires a QUIC backend library (e.g., ngtcp2, quiche, OpenSSL with QUIC support) that is capable of and configured to use QUIC version 2. If the backend does not support QUIC v2 or cannot be configured for it, using this flag might result in a connection failure or the flag having no specific effect on the QUIC version chosen (depending on the backend).
+
+Example:
+    % curl --quic-v2 https://example.com
+
 ## Known Bugs
 
 Check out the [list of known HTTP3 bugs](https://curl.se/docs/knownbugs.html#HTTP3).

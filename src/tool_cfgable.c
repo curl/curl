@@ -46,6 +46,7 @@ void config_init(struct OperationConfig *config)
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
   config->upload_flags = CURLULFLAG_SEEN;
+  config->quic_version = 0; /* Default to 0, flag not used */
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
 }
 

@@ -213,6 +213,7 @@ struct OperationConfig {
   long connecttimeout_ms;
   long maxredirs;
   long httpversion;
+  int quic_version;         /* 0: not set, 1: v1, 2: v2 etc. */
   unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   long req_retry;           /* number of retries */
   long retry_delay;         /* delay between retries (in seconds) */

@@ -2502,10 +2502,21 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   ngtcp2_addr_init(&ctx->connected_path.remote,
                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
 
-  rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
+  uint32_t chosen_quic_version = NGTCP2_PROTO_VER_V1; /* Default to v1 */
+  if(data->set.quic_version == 2) {
+    chosen_quic_version = NGTCP2_PROTO_VER_V2;
+  }
+  /* If data->set.quic_version is 0 or 1, it will use NGTCP2_PROTO_VER_V1 */
+
+  rc = ngtcp2_conn_client_new_versioned(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
-                              NGTCP2_PROTO_VER_V1, &ng_callbacks,
-                              &ctx->settings, &ctx->transport_params,
+                              chosen_quic_version, /* Use the chosen version */
+                              NGTCP2_CALLBACKS_VERSION,
+                              &ng_callbacks,
+                              NGTCP2_SETTINGS_VERSION,
+                              &ctx->settings,
+                              NGTCP2_TRANSPORT_PARAMS_VERSION,
+                              &ctx->transport_params,
                               NULL, cf);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;

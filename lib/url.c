@@ -478,8 +478,8 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->conn_max_idle_ms = 118 * 1000;
   set->conn_max_age_ms = 0;
   set->http09_allowed = FALSE;
-  set->httpwant = CURL_HTTP_VERSION_NONE
-    ;
+  set->httpwant = CURL_HTTP_VERSION_NONE;
+  set->quic_version = 0; /* Default, not specifically set by user */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   memset(&set->priority, 0, sizeof(set->priority));
 #endif

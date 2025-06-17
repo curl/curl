@@ -1407,6 +1407,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_QUICK_EXIT:
     data->set.quick_exit = enabled;
     break;
+  case CURLOPT_QUIC_VERSION:
+    if(arg < 0 || arg > 2) /* 0: default, 1: v1, 2: v2 */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    data->set.quic_version = (int)arg;
+    break;
   case CURLOPT_DNS_USE_GLOBAL_CACHE:
     /* deprecated */
     break;

@@ -787,6 +787,8 @@ CURLOPT_PROXYTYPE               7.10
 CURLOPT_PROXYUSERNAME           7.19.1
 CURLOPT_PROXYUSERPWD            7.1
 CURLOPT_PUT                     7.1           7.12.1
+CURLOPT_QUIC_VERSION            8.X.Y
+CURLOPT_QUICK_EXIT              7.87.0
 CURLOPT_QUOTE                   7.1
 CURLOPT_RANDOM_FILE             7.7           7.84.0
 CURLOPT_RANGE                   7.1

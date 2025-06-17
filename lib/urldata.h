@@ -1557,6 +1557,7 @@ struct UserDefined {
   unsigned char method;   /* what kind of HTTP request: Curl_HttpReq */
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
+  int quic_version; /* 0: default, 1: v1, 2: v2. For specific QUIC version. */
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
   unsigned char upload_flags; /* flags set by CURLOPT_UPLOAD_FLAGS */

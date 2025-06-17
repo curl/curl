@@ -846,6 +846,15 @@ still have `foo.example.com` do it, set `NO_PROXY` to `www.example.com`.
 
 The usage of the `-x`/`--proxy` flag overrides the environment variables.
 
+--quic-v2
+              (HTTP/3) Tells curl to attempt to connect using QUIC version 2 only.
+              This option makes curl try to connect to the target server using the
+              QUIC version 2 protocol (`0x6b3343cf`). If the server does not
+              support QUIC version 2, the connection will fail. This option does
+              not fall back to other QUIC versions or other HTTP versions.
+              This requires a QUIC backend that supports QUIC version 2.
+              (Added in 8.X.Y)
+
 ## Netrc
 
 Unix introduced the `.netrc` concept a long time ago. It is a way for a user
