@@ -876,7 +876,7 @@ Pass a long specifying the QUIC version to use. Set to `0` (default) to allow
 negotiation by the QUIC library, `1` to request QUIC version 1
 (`0x00000001`), or `2` to request QUIC version 2 (`0x6b3343cf`).
 
-Using `1` or `2` will instruct libcurl to attempt to use that specific QUIC
+Using `1` or `2` instructs libcurl to attempt to use that specific QUIC
 version only and not attempt other QUIC versions or fall back to other HTTP
 versions if the specified QUIC version fails.
 
