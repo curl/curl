@@ -373,6 +373,7 @@ test_cleanup:
   /* free local memory */
   free(sockets.read.sockets);
   free(sockets.write.sockets);
+
   return res;
 }
 
