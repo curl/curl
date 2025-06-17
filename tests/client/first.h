@@ -47,10 +47,10 @@ struct entry_s {
 #include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
 #endif
 
-#define ERR()                                                             \
-  do {                                                                    \
-    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
-    return 2;                                                             \
+#define ERR()                                                                 \
+  do {                                                                        \
+    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
+    return 2;                                                                 \
   } while(0)
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
@@ -63,7 +63,7 @@ static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
   };
   if(idsbuf && *idsbuf)
-    fprintf(log, "%s%s", idsbuf, s_infotype[type]);
+    curl_mfprintf(log, "%s%s", idsbuf, s_infotype[type]);
   else
     fputs(s_infotype[type], log);
 }
@@ -136,7 +136,7 @@ static int debug_cb(CURL *handle, curl_infotype type,
     if(!traced_data) {
       if(!newl)
         log_line_start(output, idsbuf, type);
-      fprintf(output, "[%ld bytes data]\n", (long)size);
+      curl_mfprintf(output, "[%ld bytes data]\n", (long)size);
       newl = 0;
       traced_data = 1;
     }
@@ -161,18 +161,18 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
-          text, (unsigned long)size, (unsigned long)size);
+  curl_mfprintf(stderr, "%s, %lu bytes (0x%lx)\n",
+                text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
+    curl_mfprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stderr, "%02x ", ptr[i + c]);
+          curl_mfprintf(stderr, "%02x ", ptr[i + c]);
         else
           fputs("   ", stderr);
     }
@@ -184,8 +184,8 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
         i += (c + 2 - width);
         break;
       }
-      fprintf(stderr, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
+      curl_mfprintf(stderr, "%c",
+               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -204,8 +204,8 @@ static void websocket_close(CURL *curl)
   size_t sent;
   CURLcode result =
     curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %u\n",
+                (int)result, (int)sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
