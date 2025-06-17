@@ -340,7 +340,8 @@ environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
 You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE](CURL-DISABLE.md) for the full list.
+[CURL-DISABLE](https://github.com/curl/curl/blob/master/docs/CURL-DISABLE.md)
+for the full list.
 
 If you want to set any of these defines you have the following options:
 
