@@ -29,6 +29,9 @@ BUNDLE_SRC = clients.c
 # Files referenced from the bundle source
 FIRSTFILES = first.c first.h
 
+CURLX_SRCS = \
+  ../../../lib/curlx/multibyte.c
+
 # All test clients
 TESTFILES = \
   h2_pausing.c \
