@@ -546,7 +546,7 @@ sub checksystemfeatures {
 
             $libcurl = $2;
             if($curl =~ /linux|bsd|solaris/) {
-                # system support LD_PRELOAD; may be disabled later
+                # system supports LD_PRELOAD/LD_LIBRARY_PATH; may be disabled later
                 $feature{"ld_preload"} = 1;
             }
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
