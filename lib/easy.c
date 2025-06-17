@@ -1129,13 +1129,12 @@ void curl_easy_reset(CURL *d)
  */
 CURLcode curl_easy_pause(CURL *d, int action)
 {
-  struct SingleRequest *k;
-  CURLcode result = CURLE_OK;
-  int oldstate;
-  int newstate;
+  CURLcode result = CURLE_OK, r2;
   bool recursive = FALSE;
-  bool keep_changed, unpause_read, not_all_paused;
+  bool changed = FALSE;
   struct Curl_easy *data = d;
+  bool recv_paused, recv_paused_new;
+  bool send_paused, send_paused_new;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */
@@ -1143,62 +1142,46 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   if(Curl_is_in_callback(data))
     recursive = TRUE;
-  k = &data->req;
-  oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
 
-  /* first switch off both pause bits then set the new pause bits */
-  newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
-    ((action & CURLPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
-    ((action & CURLPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
+  recv_paused = Curl_xfer_recv_is_paused(data);
+  recv_paused_new = (action & CURLPAUSE_RECV);
+  send_paused = Curl_xfer_send_is_paused(data);
+  send_paused_new = (action & CURLPAUSE_SEND);
 
-  keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
-  not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-                   (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE);
-  unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
-                  (data->mstate == MSTATE_PERFORMING ||
-                   data->mstate == MSTATE_RATELIMITING));
-  /* Unpausing writes is detected on the next run in
-   * transfer.c:Curl_sendrecv(). This is because this may result
-   * in a transfer error if the application's callbacks fail */
+  if(send_paused != send_paused_new) {
+    changed = TRUE;
+    r2 = Curl_xfer_pause_send(data, send_paused_new);
+    if(r2)
+      result = r2;
+  }
 
-  /* Set the new keepon state, so it takes effect no matter what error
-   * may happen afterwards. */
-  k->keepon = newstate;
+  if(recv_paused != recv_paused_new) {
+    changed = TRUE;
+    r2 = Curl_xfer_pause_recv(data, recv_paused_new);
+    if(r2)
+      result = r2;
+  }
 
   /* If not completely pausing both directions now, run again in any case. */
-  if(not_all_paused) {
+  if(!Curl_xfer_is_blocked(data)) {
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
     /* Simulate socket events on next run for unpaused directions */
-    if(!(newstate & KEEP_SEND_PAUSE))
+    if(!send_paused_new)
       data->state.select_bits |= CURL_CSELECT_OUT;
-    if(!(newstate & KEEP_RECV_PAUSE))
+    if(!recv_paused_new)
       data->state.select_bits |= CURL_CSELECT_IN;
     /* On changes, tell application to update its timers. */
-    if(keep_changed && data->multi) {
-      if(Curl_update_timer(data->multi)) {
+    if(changed && data->multi) {
+      if(Curl_update_timer(data->multi) && !result)
         result = CURLE_ABORTED_BY_CALLBACK;
-        goto out;
-      }
     }
   }
 
-  if(unpause_read) {
-    result = Curl_creader_unpause(data);
-    if(result)
-      goto out;
-  }
-
-  if(!(k->keepon & KEEP_RECV_PAUSE) && Curl_cwriter_is_paused(data)) {
-    Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cwriter_unpause(data);
-  }
-
-out:
-  if(!result && !data->state.done && keep_changed && data->multi)
+  if(!result && changed && !data->state.done && data->multi)
     /* pause/unpausing may result in multi event changes */
-    if(Curl_multi_ev_assess_xfer(data->multi, data))
+    if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
       result = CURLE_ABORTED_BY_CALLBACK;
 
   if(recursive)

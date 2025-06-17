@@ -435,7 +435,7 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   /* Fill our send buffer if more from client can be read. */
   if(!data->req.upload_aborted &&
      !data->req.eos_read &&
-     !(data->req.keepon & KEEP_SEND_PAUSE) &&
+     !Curl_xfer_send_is_paused(data) &&
      !Curl_bufq_is_full(&data->req.sendbuf)) {
     ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
                                    add_from_client, data, &result);

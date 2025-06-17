@@ -1056,7 +1056,8 @@ void Curl_multi_getsock(struct Curl_easy *data,
     case 0:
       CURL_TRC_M(data, "%s pollset[], timeouts=%zu, paused %d/%d (r/w)",
                  caller, Curl_llist_count(&data->state.timeoutlist),
-                 Curl_creader_is_paused(data), Curl_cwriter_is_paused(data));
+                 Curl_xfer_send_is_paused(data),
+                 Curl_xfer_recv_is_paused(data));
       break;
     case 1:
       CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",

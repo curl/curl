@@ -32,6 +32,7 @@ struct Curl_easy;
 #include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "strdup.h"
 #include "curlx/base64.h"
 
@@ -1962,6 +1963,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
                              size_t *pnread, bool *peos)
 {
   struct cr_mime_ctx *ctx = reader->ctx;
+  CURLcode result = CURLE_OK;
   size_t nread;
   char tmp[256];
 
@@ -1990,7 +1992,6 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
   if(!Curl_bufq_is_empty(&ctx->tmpbuf)) {
-    CURLcode result = CURLE_OK;
     ssize_t n = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen,
                                &result);
     if(n < 0) {
@@ -2008,7 +2009,6 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), small read, using tmp", blen);
     nread = Curl_mime_read(tmp, 1, sizeof(tmp), ctx->part);
     if(nread <= sizeof(tmp)) {
-      CURLcode result = CURLE_OK;
       ssize_t n = Curl_bufq_write(&ctx->tmpbuf, (unsigned char *)tmp, nread,
                                   &result);
       if(n < 0) {
@@ -2051,14 +2051,15 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     *peos = FALSE;
     ctx->errored = TRUE;
     ctx->error_result = CURLE_ABORTED_BY_CALLBACK;
-    return CURLE_ABORTED_BY_CALLBACK;
+    result = CURLE_ABORTED_BY_CALLBACK;
+    break;
 
   case CURL_READFUNC_PAUSE:
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), paused by callback", blen);
-    data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
+    result = Curl_xfer_pause_send(data, TRUE);
     break; /* nothing was read */
 
   case STOP_FILLING:
@@ -2068,7 +2069,8 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     *peos = FALSE;
     ctx->errored = TRUE;
     ctx->error_result = CURLE_READ_ERROR;
-    return CURLE_READ_ERROR;
+    result = CURLE_READ_ERROR;
+    break;
 
   default:
     if(nread > blen) {
@@ -2090,8 +2092,8 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" FMT_OFF_T
                 ", read=%"FMT_OFF_T") -> %d, %zu, %d",
-                blen, ctx->total_len, ctx->read_len, CURLE_OK, *pnread, *peos);
-  return CURLE_OK;
+                blen, ctx->total_len, ctx->read_len, result, *pnread, *peos);
+  return result;
 }
 
 static bool cr_mime_needs_rewind(struct Curl_easy *data,
