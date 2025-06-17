@@ -429,6 +429,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     display_file_top(pp($hstprvkeyf)) if($verbose);
+
     logmsg "generating client keys...\n" if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''" . $sshkeygenopt) {
         logmsg "Could not generate client key\n";
