@@ -30,12 +30,15 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 #
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
+# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/lib/curlx      \
               -I$(srcdir)
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, CURLX_SRCS, FIRSTFILES, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(TESTFILES)
@@ -56,8 +59,14 @@ endif
 
 AM_CPPFLAGS += -DCURL_NO_OLDIES
 
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTFILES) > $(BUNDLE_SRC)
+bundle_extra =
+if USE_CPPFLAG_CURL_STATICLIB
+else
+# These are part of the libcurl static lib. Add them here when linking shared.
+bundle_extra += $(CURLX_SRCS)
+endif
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(bundle_extra) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(bundle_extra) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_clients_SOURCES = $(BUNDLE_SRC)

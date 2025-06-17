@@ -23,9 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include "curl_config.h"  /* for CURL_DISABLE_WEBSOCKETS */
-#endif
+#include "curl_setup.h"
 
 typedef int (*entry_func_t)(int, char **);
 
@@ -40,10 +38,7 @@ struct entry_s {
 #include <stdlib.h>  /* for calloc(), free(), strtol() */
 #include <string.h>  /* for strchr(), strcmp() */
 
-#ifdef _WIN32
-#include <windows.h>  /* for Sleep() */
-#define strdup _strdup
-#else
+#ifndef _WIN32
 #include <sys/time.h>  /* for usleep() */
 #include <unistd.h>  /* for usleep() */
 #endif
@@ -51,12 +46,6 @@ struct entry_s {
 #ifdef __TANDEM
 #include <cextdecs.h(PROCESS_DELAY_)>  /* for usleep() logic */
 #endif
-
-#if defined(_MSC_VER) && (_MSC_VER <= 1700)
-#pragma warning(disable:4127)  /* "conditional expression is constant" */
-#endif
-
-#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
 #define ERR()                                                             \
   do {                                                                    \

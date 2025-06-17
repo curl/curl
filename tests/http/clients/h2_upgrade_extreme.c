@@ -118,19 +118,20 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
            * re-using a connection */
         }
         else if(msg->data.result) {
-          fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
-                  ": failed with %d\n", xfer_id, msg->data.result);
+          curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
+                        ": failed with %d\n", xfer_id, msg->data.result);
           goto cleanup;
         }
         else if(status != 206) {
-          fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
-                  ": wrong http status %ld (expected 206)\n", xfer_id, status);
+          curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
+                        ": wrong http status %ld (expected 206)\n", xfer_id,
+                        status);
           goto cleanup;
         }
         curl_multi_remove_handle(multi, msg->easy_handle);
         curl_easy_cleanup(msg->easy_handle);
-        fprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring "
-                "(%d now running)\n", xfer_id, running_handles);
+        curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T" retiring "
+                      "(%d now running)\n", xfer_id, running_handles);
       }
     }
 
