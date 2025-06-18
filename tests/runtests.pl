@@ -545,8 +545,9 @@ sub checksystemfeatures {
             $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
 
             $libcurl = $2;
-            if($curl =~ /linux|bsd|solaris/) {
-                # system support LD_PRELOAD; may be disabled later
+            if($curl =~ /linux|bsd|Darwin|darwin|solaris/) {
+                # system supports LD_PRELOAD/LD_LIBRARY_PATH or
+                # DYLD_INSERT_LIBRARIES/DYLD_LIBRARY_PATH; may be disabled later
                 $feature{"ld_preload"} = 1;
             }
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
