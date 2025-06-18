@@ -334,8 +334,8 @@ jobs:
             PATH="$PWD/bld/lib:$PATH"
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
-            # avoid libtool's curl.exe wrapper
-            mv bld/src/.libs/curl.exe bld/src/curl.exe
+            # avoid libtool's curl.exe wrapper for shared builds
+            mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
