@@ -31,8 +31,7 @@ if(LIB_SELECTED STREQUAL LIB_SHARED)
   list(APPEND _bundle_extra ${CURLX_SRCS})  # Not exported from the libcurl shared build. Build a copy.
 endif()
 
-add_custom_command(
-  OUTPUT "${BUNDLE_SRC}"
+add_custom_command(OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
     --include ${_bundle_extra} --test ${TESTFILES}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
@@ -50,6 +49,5 @@ target_include_directories(clients PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
 target_link_libraries(clients ${LIB_SELECTED} ${CURL_LIBS})
-set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES"
-  "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
+set_property(TARGET clients APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 set_target_properties(clients PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
