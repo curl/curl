@@ -733,7 +733,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
 
 /*
- * easy_perform() is the external interface that performs a blocking
+ * easy_perform() is the internal interface that performs a blocking
  * transfer as previously setup.
  *
  * CONCEPT: This function creates a multi handle, adds the easy handle to it,
