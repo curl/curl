@@ -1322,7 +1322,7 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(data->set.quic_version == 2) {
     uint32_t quic_versions[] = { 0x6b3343cf }; /* QUIC v2 */
     quiche_config_set_versions(ctx->cfg, quic_versions,
-                               sizeof(quic_versions)/sizeof(quic_versions[0]));
+                               CURL_ARRAYSIZE(quic_versions));
   }
   else if(data->set.quic_version == 1) {
     uint32_t quic_versions[] = { 0x00000001 }; /* QUIC v1 */
