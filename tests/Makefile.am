@@ -95,7 +95,7 @@ BUILD_UNIT =
 DIST_UNIT = unit tunit
 endif
 
-SUBDIRS = certs data server libtest http $(BUILD_UNIT)
+SUBDIRS = certs data server libtest client http $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
@@ -175,6 +175,7 @@ checksrc:
 	(cd unit && $(MAKE) checksrc)
 	(cd tunit && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
+	(cd client && $(MAKE) checksrc)
 	(cd http && $(MAKE) checksrc)
 
 all-local: $(MANFILES) build-certs

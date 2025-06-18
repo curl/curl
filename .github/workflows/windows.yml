@@ -353,7 +353,7 @@ jobs:
           fi
           if [ "${MATRIX_BUILD}" != 'cmake' ]; then
             # avoid libtool's .exe wrappers
-            mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
+            mv bld/tests/client/.libs/*.exe bld/tests/client
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
             mv bld/tests/server/.libs/*.exe bld/tests/server
             mv bld/tests/tunit/.libs/*.exe bld/tests/tunit || true
