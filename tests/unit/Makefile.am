@@ -50,8 +50,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-LDADD = $(top_builddir)/lib/libcurlu.la      \
-        @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
+LDADD = $(top_builddir)/lib/libcurlu.la @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS -DBUILDING_LIBCURL
 if DEBUGBUILD
