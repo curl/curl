@@ -2762,7 +2762,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
 
 static bool str_has_ctrl(const char *input)
 {
-  if (input) {
+  if(input) {
     const unsigned char *str = (const unsigned char *)input;
     while(*str) {
       if(*str < 0x20)
