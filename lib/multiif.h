@@ -173,4 +173,8 @@ struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
 /* Get the # of transfers current in process/pending. */
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 
+/* Mark a transfer as dirty, e.g. to be rerun at earliest convenience.
+ * A cheap operation, can be done many times repeatedly. */
+void Curl_multi_mark_dirty(struct Curl_easy *data);
+
 #endif /* HEADER_CURL_MULTIIF_H */

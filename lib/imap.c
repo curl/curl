@@ -1347,9 +1347,6 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
-      /* force a recv/send check of this connection, as the data might've been
-       read off the socket already */
-      data->state.select_bits = CURL_CSELECT_IN;
       Curl_xfer_setup1(data, CURL_XFER_RECV, size, FALSE);
     }
   }

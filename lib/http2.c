@@ -377,27 +377,6 @@ static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
 }
 #endif /* !NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE */
 
-/*
- * Mark this transfer to get "drained".
- */
-static void drain_stream(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
-                         struct h2_stream_ctx *stream)
-{
-  unsigned char bits;
-
-  (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(!stream->closed &&
-     (!stream->body_eos || !Curl_bufq_is_empty(&stream->sendbuf)))
-    bits |= CURL_CSELECT_OUT;
-  if(stream->closed || (data->state.select_bits != bits)) {
-    CURL_TRC_CF(data, cf, "[%d] DRAIN select_bits=%x",
-                stream->id, bits);
-    data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
-}
 
 static CURLcode http2_data_setup(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
@@ -1200,7 +1179,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(stream->status_code / 100 != 1) {
       stream->resp_hds_complete = TRUE;
     }
-    drain_stream(cf, data, stream);
+    Curl_multi_mark_dirty(data);
     break;
   case NGHTTP2_PUSH_PROMISE:
     rv = push_promise(cf, data, &frame->push_promise);
@@ -1223,12 +1202,12 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(frame->rst_stream.error_code) {
       stream->reset = TRUE;
     }
-    drain_stream(cf, data, stream);
+    Curl_multi_mark_dirty(data);
     break;
   case NGHTTP2_WINDOW_UPDATE:
     if(CURL_WANT_SEND(data) && Curl_bufq_is_empty(&stream->sendbuf)) {
       /* need more data, force processing of transfer */
-      drain_stream(cf, data, stream);
+      Curl_multi_mark_dirty(data);
     }
     else if(!Curl_bufq_is_empty(&stream->sendbuf)) {
       /* resume the potentially suspended stream */
@@ -1254,7 +1233,7 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
                                 stream->id, NGHTTP2_STREAM_CLOSED);
       stream->closed = TRUE;
     }
-    drain_stream(cf, data, stream);
+    Curl_multi_mark_dirty(data);
   }
   return CURLE_OK;
 }
@@ -1403,11 +1382,8 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
          * window and *assume* that we treat this like a WINDOW_UPDATE. Some
          * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
          * To be safe, we UNHOLD a stream in order not to stall. */
-        if(CURL_WANT_SEND(data)) {
-          struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
-          if(stream)
-            drain_stream(cf, data, stream);
-        }
+        if(CURL_WANT_SEND(data))
+          Curl_multi_mark_dirty(data);
       }
       break;
     }
@@ -1552,7 +1528,7 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
               stream_id, nghttp2_http2_strerror(error_code), error_code);
   else
     CURL_TRC_CF(data_s, cf, "[%d] CLOSED", stream_id);
-  drain_stream(cf, data_s, stream);
+  Curl_multi_mark_dirty(data_s);
 
   /* remove `data_s` from the nghttp2 stream */
   rv = nghttp2_session_set_stream_user_data(session, stream_id, 0);
@@ -1746,7 +1722,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     }
     /* if we receive data for another handle, wake that up */
     if(CF_DATA_CURRENT(cf) != data_s)
-      Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
+      Curl_multi_mark_dirty(data_s);
 
     CURL_TRC_CF(data_s, cf, "[%d] status: HTTP/2 %03d",
                 stream->id, stream->status_code);
@@ -1773,7 +1749,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   }
   /* if we receive data for another handle, wake that up */
   if(CF_DATA_CURRENT(cf) != data_s)
-    Curl_expire(data_s, 0, EXPIRE_RUN_NOW);
+    Curl_multi_mark_dirty(data_s);
 
   CURL_TRC_CF(data_s, cf, "[%d] header: %.*s: %.*s",
               stream->id, (int)namelen, name, (int)valuelen, value);
@@ -2106,7 +2082,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
        * this may leave data in underlying buffers that will not
        * be consumed. */
       if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
-        drain_stream(cf, data, stream);
+        Curl_multi_mark_dirty(data);
       break;
     }
 
@@ -2184,7 +2160,7 @@ static CURLcode cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     nghttp2_session_consume(ctx->h2, stream->id, *pnread);
     if(stream->closed) {
       CURL_TRC_CF(data, cf, "[%d] DRAIN closed stream", stream->id);
-      drain_stream(cf, data, stream);
+      Curl_multi_mark_dirty(data);
     }
   }
 
@@ -2195,7 +2171,7 @@ out:
      * monitor the socket for POLLOUT, but when not SENDING
      * any more, we force processing of the transfer. */
     if(!CURL_WANT_SEND(data))
-      drain_stream(cf, data, stream);
+      Curl_multi_mark_dirty(data);
   }
   else if(r2) {
     result = r2;
@@ -2712,8 +2688,7 @@ static CURLcode http2_data_pause(struct Curl_cfilter *cf,
        * not. We may have already buffered and exhausted the new window
        * by operating on things in flight during the handling of other
        * transfers. */
-      drain_stream(cf, data, stream);
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      Curl_multi_mark_dirty(data);
     }
     CURL_TRC_CF(data, cf, "[%d] stream now %spaused", stream->id,
                 pause ? "" : "un");

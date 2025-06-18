@@ -1256,15 +1256,9 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
      figure out a "real" bitmask */
   sshc->orig_waitfor = data->req.keepon;
 
-  /* we want to use the _sending_ function even when the socket turns
-     out readable as the underlying libssh sftp send function will deal
-     with both accordingly */
-  data->state.select_bits = CURL_CSELECT_OUT;
-
   /* since we do not really wait for anything at this point, we want the
-     state machine to move on as soon as possible so we set a very short
-     timeout here */
-  Curl_expire(data, 0, EXPIRE_RUN_NOW);
+     state machine to move on as soon as possible so we mark this as dirty */
+  Curl_multi_mark_dirty(data);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   sshc->sftp_send_state = 0;
 #endif
@@ -1429,11 +1423,6 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
   data->conn->writesockfd = data->conn->sockfd;
-
-  /* we want to use the _receiving_ function even when the socket turns
-     out writableable as the underlying libssh recv function will deal
-     with both accordingly */
-  data->state.select_bits = CURL_CSELECT_IN;
 
   sshc->sftp_recv_state = 0;
   myssh_to(data, sshc, SSH_STOP);
@@ -2258,11 +2247,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
          figure out a "real" bitmask */
       sshc->orig_waitfor = data->req.keepon;
 
-      /* we want to use the _sending_ function even when the socket turns
-         out readable as the underlying libssh scp send function will deal
-         with both accordingly */
-      data->state.select_bits = CURL_CSELECT_OUT;
-
       myssh_to(data, sshc, SSH_STOP);
 
       break;
@@ -2297,11 +2281,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
         /* not set by Curl_xfer_setup to preserve keepon bits */
         conn->writesockfd = conn->sockfd;
-
-        /* we want to use the _receiving_ function even when the socket turns
-           out writableable as the underlying libssh recv function will deal
-           with both accordingly */
-        data->state.select_bits = CURL_CSELECT_IN;
 
         myssh_to(data, sshc, SSH_STOP);
         break;

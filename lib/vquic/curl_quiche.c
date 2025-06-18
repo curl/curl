@@ -237,7 +237,7 @@ static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
   (void)user_data;
   if(stream->quic_flow_blocked) {
     stream->quic_flow_blocked = FALSE;
-    Curl_expire(sdata, 0, EXPIRE_RUN_NOW);
+    Curl_multi_mark_dirty(sdata);
     CURL_TRC_CF(sdata, cf, "[%"FMT_PRIu64"] unblock", stream->id);
   }
   return TRUE;
@@ -250,8 +250,8 @@ static bool cf_quiche_do_expire(struct Curl_cfilter *cf,
 {
   (void)stream;
   (void)user_data;
-  CURL_TRC_CF(sdata, cf, "conn closed, expire transfer");
-  Curl_expire(sdata, 0, EXPIRE_RUN_NOW);
+  CURL_TRC_CF(sdata, cf, "conn closed, mark as dirty");
+  Curl_multi_mark_dirty(sdata);
   return TRUE;
 }
 
@@ -304,23 +304,6 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
         CURL_TRC_CF(data, cf, "data_done, flush egress -> %d", result);
     }
     Curl_uint_hash_remove(&ctx->streams, data->mid);
-  }
-}
-
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  struct cf_quiche_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  unsigned char bits;
-
-  (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(stream && !stream->send_closed)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
-    data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
 
@@ -562,7 +545,7 @@ static CURLcode cf_quiche_ev_process(struct Curl_cfilter *cf,
                                      quiche_h3_event *ev)
 {
   CURLcode result = h3_process_event(cf, data, stream, ev);
-  h3_drain_stream(cf, data);
+  Curl_multi_mark_dirty(data);
   if(result)
     CURL_TRC_CF(data, cf, "error processing event %s "
                 "for [%"FMT_PRIu64"] -> %d", cf_ev_name(ev),
@@ -917,7 +900,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(*pnread) {
     if(stream->closed)
-      h3_drain_stream(cf, data);
+      Curl_multi_mark_dirty(data);
   }
   else {
     if(stream->closed) {
@@ -1230,8 +1213,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   /* There seems to exist no API in quiche to shrink/enlarge the streams
    * windows. As we do in HTTP/2. */
   if(!pause) {
-    h3_drain_stream(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Curl_multi_mark_dirty(data);
   }
   return CURLE_OK;
 }

@@ -711,31 +711,13 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
   return NULL;
 }
 
-static void h3_drain_stream(struct Curl_cfilter *cf,
-                            struct Curl_easy *data)
-{
-  struct cf_osslq_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  unsigned char bits;
-
-  (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(stream && stream->upload_left && !stream->send_closed)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
-    data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
-}
-
 static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool pause)
 {
   if(!pause) {
     /* unpaused. make it run again right away */
-    h3_drain_stream(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Curl_multi_mark_dirty(data);
   }
   return CURLE_OK;
 }
@@ -766,7 +748,7 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t stream_id,
   else {
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] CLOSED", stream->s.id);
   }
-  h3_drain_stream(cf, data);
+  Curl_multi_mark_dirty(data);
   return 0;
 }
 
@@ -831,7 +813,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
   stream->download_recvd += (curl_off_t)buflen;
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu, total=%" FMT_OFF_T,
               stream->s.id, buflen, stream->download_recvd);
-  h3_drain_stream(cf, data);
+  Curl_multi_mark_dirty(data);
   return 0;
 }
 
@@ -943,7 +925,7 @@ static int cb_h3_end_headers(nghttp3_conn *conn, int64_t sid,
   if(stream->status_code / 100 != 1) {
     stream->resp_hds_complete = TRUE;
   }
-  h3_drain_stream(cf, data);
+  Curl_multi_mark_dirty(data);
   return 0;
 }
 
@@ -1566,7 +1548,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
           if(stream) {
             nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
             stream->s.send_blocked = FALSE;
-            h3_drain_stream(cf, ctx->curl_items[idx_count]);
+            Curl_multi_mark_dirty(ctx->curl_items[idx_count]);
             CURL_TRC_CF(ctx->curl_items[idx_count], cf, "unblocked");
           }
           result_count--;
@@ -2163,7 +2145,7 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(*pnread) {
-    h3_drain_stream(cf, data);
+    Curl_multi_mark_dirty(data);
   }
   else {
     if(stream->closed) {

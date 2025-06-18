@@ -257,7 +257,7 @@ static void doh_probe_done(struct Curl_easy *data,
 
     if(!dohp->pending) {
       /* DoH completed, run the transfer picking up the results */
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      Curl_multi_mark_dirty(data);
     }
   }
 }

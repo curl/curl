@@ -98,6 +98,7 @@ struct Curl_multi {
   struct uint_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */
   struct uint_bset process; /* transfer being processed */
+  struct uint_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
   struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
   struct uint_bset msgsent; /* transfers done with message for application */
 
