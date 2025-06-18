@@ -77,6 +77,7 @@ endif
 
 if USE_UNITY
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
+	echo ">>>>|$(LINKFLAGS)|<<<<<"
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CSOURCES) > libcurl_unity.c
 
 nodist_libcurl_la_SOURCES = libcurl_unity.c
