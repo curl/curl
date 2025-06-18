@@ -1167,11 +1167,6 @@ CURLcode curl_easy_pause(CURL *d, int action)
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
-    /* Simulate socket events on next run for unpaused directions */
-    if(!send_paused_new)
-      data->state.select_bits |= CURL_CSELECT_OUT;
-    if(!recv_paused_new)
-      data->state.select_bits |= CURL_CSELECT_IN;
     /* On changes, tell application to update its timers. */
     if(changed && data->multi) {
       if(Curl_update_timer(data->multi) && !result)

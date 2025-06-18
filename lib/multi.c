@@ -235,6 +235,7 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   Curl_multi_ev_init(multi, ev_hashsize);
   Curl_uint_tbl_init(&multi->xfers, NULL);
   Curl_uint_bset_init(&multi->process);
+  Curl_uint_bset_init(&multi->dirty);
   Curl_uint_bset_init(&multi->pending);
   Curl_uint_bset_init(&multi->msgsent);
   Curl_hash_init(&multi->proto_hash, 23,
@@ -247,6 +248,7 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
 
   if(Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
+     Curl_uint_bset_resize(&multi->dirty, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->msgsent, xfer_table_size) ||
      Curl_uint_tbl_resize(&multi->xfers, xfer_table_size))
     goto error;
@@ -301,6 +303,7 @@ error:
   }
 
   Curl_uint_bset_destroy(&multi->process);
+  Curl_uint_bset_destroy(&multi->dirty);
   Curl_uint_bset_destroy(&multi->pending);
   Curl_uint_bset_destroy(&multi->msgsent);
   Curl_uint_tbl_destroy(&multi->xfers);
@@ -355,6 +358,7 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
      * to work properly when larger than the table, but not
      * the other way around. */
     if(Curl_uint_bset_resize(&multi->process, newsize) ||
+       Curl_uint_bset_resize(&multi->dirty, newsize) ||
        Curl_uint_bset_resize(&multi->pending, newsize) ||
        Curl_uint_bset_resize(&multi->msgsent, newsize) ||
        Curl_uint_tbl_resize(&multi->xfers, newsize))
@@ -401,6 +405,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
       return CURLM_ABORTED_BY_CALLBACK;
     multi->dead = FALSE;
     Curl_uint_bset_clear(&multi->process);
+    Curl_uint_bset_clear(&multi->dirty);
     Curl_uint_bset_clear(&multi->pending);
     Curl_uint_bset_clear(&multi->msgsent);
   }
@@ -795,6 +800,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   DEBUGASSERT(Curl_uint_tbl_contains(&multi->xfers, mid));
   Curl_uint_tbl_remove(&multi->xfers, mid);
   Curl_uint_bset_remove(&multi->process, mid);
+  Curl_uint_bset_remove(&multi->dirty, mid);
   Curl_uint_bset_remove(&multi->pending, mid);
   Curl_uint_bset_remove(&multi->msgsent, mid);
   data->multi = NULL;
@@ -1048,8 +1054,8 @@ void Curl_multi_getsock(struct Curl_easy *data,
       (Curl_pollset_want_read(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
        Curl_conn_data_pending(data, SECONDARYSOCKET)))) {
     CURL_TRC_M(data, "%s pollset[] has POLLIN, but there is still "
-               "buffered input to consume -> EXPIRE_RUN_NOW", caller);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+               "buffered input to consume -> mark as dirty", caller);
+    Curl_multi_mark_dirty(data);
   }
 
   switch(ps->num) {
@@ -1965,14 +1971,6 @@ static CURLMcode state_performing(struct Curl_easy *data,
       }
     }
   }
-  else if(data->state.select_bits && !Curl_xfer_is_blocked(data)) {
-    /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer does
-       not get stuck on this transfer at the expense of other concurrent
-       transfers */
-    CURL_TRC_M(data, "EXPIRE_RUN_NOW unblocked, select_bits=%x",
-               data->state.select_bits);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
   free(newurl);
   *resultp = result;
   return rc;
@@ -2296,6 +2294,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   }
 
   multi_warn_debug(multi, data);
+
+  /* transfer runs now, clear the dirty bit. This may be set
+   * again during processing, triggering a re-run later. */
+  Curl_uint_bset_remove(&multi->dirty, data->mid);
 
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
@@ -2840,6 +2842,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     }
 #endif
     Curl_uint_bset_destroy(&multi->process);
+    Curl_uint_bset_destroy(&multi->dirty);
     Curl_uint_bset_destroy(&multi->pending);
     Curl_uint_bset_destroy(&multi->msgsent);
     Curl_uint_tbl_destroy(&multi->xfers);
@@ -2963,12 +2966,11 @@ struct multi_run_ctx {
   bool run_cpool;
 };
 
-static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
+static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc)
 {
   struct Curl_multi *multi = mrc->multi;
   struct Curl_easy *data = NULL;
   struct Curl_tree *t = NULL;
-  CURLMcode result = CURLM_OK;
 
   /*
    * The loop following here will go on as long as there are expire-times left
@@ -2980,33 +2982,59 @@ static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
        extracts a matching node if there is one */
     multi->timetree = Curl_splaygetbest(mrc->now, multi->timetree, &t);
     if(!t)
-      goto out;
+      return;
 
     data = Curl_splayget(t); /* assign this for next loop */
     if(!data)
       continue;
 
     (void)add_next_timeout(mrc->now, multi, data);
-    if(data == multi->admin) {
-      mrc->run_cpool = TRUE;
-      continue;
-    }
+    Curl_multi_mark_dirty(data);
+  }
+}
 
-    mrc->run_xfers++;
-    sigpipe_apply(data, &mrc->pipe_st);
-    result = multi_runsingle(multi, &mrc->now, data);
+static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
+{
+  struct Curl_multi *multi = mrc->multi;
+  CURLMcode result = CURLM_OK;
+  unsigned int mid;
 
-    if(CURLM_OK >= result) {
-      /* reassess event handling of data */
-      result = Curl_multi_ev_assess_xfer(multi, data);
-      if(result)
-        goto out;
+  if(Curl_uint_bset_first(&multi->dirty, &mid)) {
+    do {
+      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
+      if(data) {
+        CURL_TRC_M(data, "multi_run_dirty");
+
+        if(data == multi->admin) {
+          Curl_uint_bset_remove(&multi->dirty, mid);
+          mrc->run_cpool = TRUE;
+          continue;
+        }
+
+        mrc->run_xfers++;
+        sigpipe_apply(data, &mrc->pipe_st);
+        /* runsingle() clears the dirty mid */
+        result = multi_runsingle(multi, &mrc->now, data);
+
+        if(CURLM_OK >= result) {
+          /* reassess event handling of data */
+          result = Curl_multi_ev_assess_xfer(multi, data);
+          if(result)
+            goto out;
+        }
+      }
+      else {
+        CURL_TRC_M(multi->admin, "multi_run_dirty, %u no longer found", mid);
+        Curl_uint_bset_remove(&multi->dirty, mid);
+      }
     }
+    while(Curl_uint_bset_next(&multi->dirty, mid, &mid));
   }
 
 out:
   return result;
 }
+
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
                               curl_socket_t s,
@@ -3035,7 +3063,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   }
 
   if(s != CURL_SOCKET_TIMEOUT) {
-    Curl_multi_ev_expire_xfers(multi, s, &mrc.now, &mrc.run_cpool);
+    /* Mark all transfers of that socket as dirty */
+    Curl_multi_ev_dirty_xfers(multi, s, &mrc.run_cpool);
   }
   else {
     /* Asked to run due to time-out. Clear the 'last_expire_ts' variable to
@@ -3047,7 +3076,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     mrc.run_cpool = TRUE;
   }
 
-  result = multi_run_expired(&mrc);
+  multi_mark_expired_as_dirty(&mrc);
+  result = multi_run_dirty(&mrc);
   if(result)
     goto out;
 
@@ -3058,7 +3088,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
      * Do that only once or it might be unfair to transfers on other
      * sockets. */
     mrc.now = curlx_now();
-    result = multi_run_expired(&mrc);
+    multi_mark_expired_as_dirty(&mrc);
+    result = multi_run_dirty(&mrc);
   }
 
 out:
@@ -3186,6 +3217,26 @@ CURLMcode curl_multi_socket_all(CURLM *m, int *running_handles)
   return multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
 }
 
+
+static bool multi_has_dirties(struct Curl_multi *multi)
+{
+  unsigned int mid;
+  if(Curl_uint_bset_first(&multi->dirty, &mid)) {
+    do {
+      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
+      if(data) {
+        return TRUE;
+      }
+      else {
+        CURL_TRC_M(multi->admin, "dirty transfer %u no longer found", mid);
+        Curl_uint_bset_remove(&multi->dirty, mid);
+      }
+    }
+    while(Curl_uint_bset_next(&multi->dirty, mid, &mid));
+  }
+  return FALSE;
+}
+
 static CURLMcode multi_timeout(struct Curl_multi *multi,
                                struct curltime *expire_time,
                                long *timeout_ms)
@@ -3197,7 +3248,12 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     return CURLM_OK;
   }
 
-  if(multi->timetree) {
+  if(multi_has_dirties(multi)) {
+    *expire_time = curlx_now();
+    *timeout_ms = 0;
+    return CURLM_OK;
+  }
+  else if(multi->timetree) {
     /* we have a tree of expire times */
     struct curltime now = curlx_now();
 
@@ -3789,6 +3845,12 @@ struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
 {
   return multi->xfers_alive;
+}
+
+void Curl_multi_mark_dirty(struct Curl_easy *data)
+{
+  if(data->multi && data->mid != UINT_MAX)
+    Curl_uint_bset_add(&data->multi->dirty, data->mid);
 }
 
 #ifdef DEBUGBUILD

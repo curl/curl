@@ -358,16 +358,12 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
   } while(maxloops--);
 
-  if(!rcvd_eagain || data_pending(data, rcvd_eagain)) {
+  if(!Curl_xfer_is_blocked(data) &&
+     (!rcvd_eagain || data_pending(data, rcvd_eagain))) {
     /* Did not read until EAGAIN or there is still data pending
      * in buffers. Mark as read-again via simulated SELECT results. */
-    data->state.select_bits = CURL_CSELECT_IN;
-    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-      data->state.select_bits |= CURL_CSELECT_OUT;
-    if(!Curl_xfer_is_blocked(data))
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
-    CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, "
-               "set select_bits=%x", data->state.select_bits);
+    Curl_multi_mark_dirty(data);
+    CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
@@ -403,22 +399,6 @@ static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
   return CURLE_OK;
 }
 
-static int select_bits_paused(struct Curl_easy *data, int select_bits)
-{
-  /* See issue #11982: we really need to be careful not to progress
-   * a transfer direction when that direction is paused. Not all parts
-   * of our state machine are handling PAUSED transfers correctly. So, we
-   * do not want to go there.
-   * NOTE: we are only interested in PAUSE, not HOLD. */
-
-  /* if there is data in a direction not paused, return false */
-  if(((select_bits & CURL_CSELECT_IN) && !Curl_xfer_recv_is_paused(data)) ||
-     ((select_bits & CURL_CSELECT_OUT) && !Curl_xfer_send_is_paused(data)))
-    return FALSE;
-
-  return Curl_xfer_recv_is_paused(data) || Curl_xfer_send_is_paused(data);
-}
-
 /*
  * Curl_sendrecv() is the low-level function to be called when data is to
  * be read and written to/from the connection.
@@ -430,14 +410,9 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   int didwhat = 0;
 
   DEBUGASSERT(nowp);
-  if(data->state.select_bits) {
-    if(select_bits_paused(data, data->state.select_bits)) {
-      /* leave the bits unchanged, so they'll tell us what to do when
-       * this transfer gets unpaused. */
-      result = CURLE_OK;
-      goto out;
-    }
-    data->state.select_bits = 0;
+  if(Curl_xfer_is_blocked(data)) {
+    result = CURLE_OK;
+    goto out;
   }
 
   /* We go ahead and do a read if we have a readable socket or if the stream

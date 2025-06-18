@@ -218,19 +218,10 @@ static void drain_tunnel(struct Curl_cfilter *cf,
                          struct tunnel_stream *tunnel)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  unsigned char bits;
-
   (void)cf;
-  bits = CURL_CSELECT_IN;
   if(!tunnel->closed && !tunnel->reset &&
      !Curl_bufq_is_empty(&ctx->tunnel.sendbuf))
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
-    CURL_TRC_CF(data, cf, "[%d] DRAIN select_bits=%x",
-                tunnel->stream_id, bits);
-    data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
+    Curl_multi_mark_dirty(data);
 }
 
 static ssize_t proxy_nw_in_reader(void *reader_ctx,

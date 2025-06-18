@@ -684,7 +684,7 @@ evaluate:
         /* next attempt was started */
         CURL_TRC_CF(data, cf, "%s trying next", baller->name);
         ++ongoing;
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        Curl_multi_mark_dirty(data);
       }
     }
   }

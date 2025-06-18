@@ -563,10 +563,9 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
-                                curl_socket_t s,
-                                const struct curltime *nowp,
-                                bool *run_cpool)
+void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
+                               curl_socket_t s,
+                               bool *run_cpool)
 {
   struct mev_sh_entry *entry;
 
@@ -586,9 +585,11 @@ void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
       do {
         data = Curl_multi_get_easy(multi, mid);
         if(data) {
-          /* Expire with out current now, so we will get it below when
-           * asking the splaytree for expired transfers. */
-          Curl_expire_ex(data, nowp, 0, EXPIRE_RUN_NOW);
+          Curl_multi_mark_dirty(data);
+        }
+        else {
+          CURL_TRC_M(multi->admin, "socket transfer %u no longer found", mid);
+          Curl_uint_spbset_remove(&entry->xfers, mid);
         }
       }
       while(Curl_uint_spbset_next(&entry->xfers, mid, &mid));
