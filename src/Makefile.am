@@ -110,7 +110,7 @@ if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
 libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
-libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
+libcurltool_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 if USE_UNITY
 libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curl_CURLX) > libcurltool_unity.c

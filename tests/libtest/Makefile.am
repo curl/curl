@@ -53,9 +53,6 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-# Dependencies (may need to be overridden)
-LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-
 noinst_LTLIBRARIES =
 
 if USE_CPPFLAG_CURL_STATICLIB
@@ -67,7 +64,6 @@ endif
 if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
-
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 AM_LDFLAGS =
@@ -98,7 +94,8 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(bundle_extra) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_libtests_SOURCES = $(BUNDLE_SRC)
+nodist_SOURCES = $(BUNDLE_SRC)
+LDADD = $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE_SRC) lib1521.c
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
