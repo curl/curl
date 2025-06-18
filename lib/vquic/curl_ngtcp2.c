@@ -2508,7 +2508,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(data->set.quic_version == 2) {
     chosen_quic_version = NGTCP2_PROTO_VER_V2;
   }
-  /* If data->set.quic_version is 0 or 1, it will use NGTCP2_PROTO_VER_V1 (already initialized) */
+  /* Use NGTCP2_PROTO_VER_V1 if quic_version is 0 or 1 (default init). */
 
   rc = ngtcp2_conn_client_new_versioned(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
