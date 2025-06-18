@@ -36,8 +36,6 @@ EXTRA_DIST = README.md Makefile.example CMakeLists.txt \
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
-LIBDIR = $(top_builddir)/lib
-
 # Avoid libcurl obsolete stuff
 AM_CPPFLAGS += -DCURL_NO_OLDIES
 
@@ -52,7 +50,7 @@ endif
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
