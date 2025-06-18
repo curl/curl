@@ -565,7 +565,6 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
 
 void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
                                curl_socket_t s,
-                               const struct curltime *nowp,
                                bool *run_cpool)
 {
   struct mev_sh_entry *entry;

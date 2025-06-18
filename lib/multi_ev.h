@@ -64,7 +64,6 @@ CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
 /* Mark all transfers tied to the given socket as dirty */
 void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
                                curl_socket_t s,
-                               const struct curltime *nowp,
                                bool *run_cpool);
 
 /* Socket will be closed, forget anything we know about it. */

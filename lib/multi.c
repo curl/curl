@@ -3064,7 +3064,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
   if(s != CURL_SOCKET_TIMEOUT) {
     /* Mark all transfers of that socket as dirty */
-    Curl_multi_ev_dirty_xfers(multi, s, &mrc.now, &mrc.run_cpool);
+    Curl_multi_ev_dirty_xfers(multi, s, &mrc.run_cpool);
   }
   else {
     /* Asked to run due to time-out. Clear the 'last_expire_ts' variable to
