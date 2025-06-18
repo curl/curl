@@ -1212,6 +1212,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
 {
   /* There seems to exist no API in quiche to shrink/enlarge the streams
    * windows. As we do in HTTP/2. */
+  (void)cf;
   if(!pause) {
     Curl_multi_mark_dirty(data);
   }

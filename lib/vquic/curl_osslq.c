@@ -715,6 +715,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool pause)
 {
+  (void)cf;
   if(!pause) {
     /* unpaused. make it run again right away */
     Curl_multi_mark_dirty(data);
