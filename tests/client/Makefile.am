@@ -38,7 +38,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib/curlx      \
               -I$(srcdir)
 
-# Get BUNDLE, BUNDLE_SRC, CURLX_SRCS, FIRSTFILES, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, CURLX_SRCS, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(TESTFILES)
