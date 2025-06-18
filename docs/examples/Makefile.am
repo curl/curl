@@ -49,7 +49,7 @@ AM_CPPFLAGS += -DCURL_NO_OLDIES
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+LDADD = $(top_builddir)/lib/libcurl.la
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@

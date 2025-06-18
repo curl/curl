@@ -95,7 +95,7 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_SOURCES = $(BUNDLE_SRC)
-LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+LDADD = $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE_SRC) lib1521.c
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
