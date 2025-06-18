@@ -69,10 +69,8 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(bu
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(bundle_extra) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_clients_SOURCES = $(BUNDLE_SRC)
-clients_SOURCES =
-clients_LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-clients_CFLAGS = $(AM_CFLAGS)
+nodist_SOURCES = $(BUNDLE_SRC)
+LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 CLEANFILES = $(BUNDLE_SRC)
 
 CHECKSRC = $(CS_$(V))

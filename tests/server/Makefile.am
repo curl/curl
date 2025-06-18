@@ -60,9 +60,8 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(CURLX_SRCS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_servers_SOURCES = $(BUNDLE_SRC)
-servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-servers_CFLAGS = $(AM_CFLAGS)
+nodist_SOURCES = $(BUNDLE_SRC)
+LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 CLEANFILES = $(BUNDLE_SRC)
 
 CHECKSRC = $(CS_$(V))
