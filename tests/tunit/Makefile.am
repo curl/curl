@@ -51,8 +51,6 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
-
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
@@ -68,6 +66,7 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_tunits_SOURCES = $(BUNDLE_SRC)
+LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE_SRC)
 else
 noinst_PROGRAMS =

@@ -50,8 +50,6 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-LDADD = $(top_builddir)/lib/libcurlu.la
-
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS -DBUILDING_LIBCURL
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
@@ -67,6 +65,7 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_units_SOURCES = $(BUNDLE_SRC)
+LDADD = $(top_builddir)/lib/libcurlu.la
 CLEANFILES = $(BUNDLE_SRC)
 else
 noinst_PROGRAMS =
