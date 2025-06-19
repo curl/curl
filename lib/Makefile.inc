@@ -38,6 +38,7 @@ LIB_CURLX_CFILES = \
   curlx/winapi.c
 
 LIB_CURLX_HFILES = \
+  curlx/binmode.h  \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
