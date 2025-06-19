@@ -102,8 +102,6 @@
 #endif
 
 #include <curlx.h> /* from the private lib dir */
-#include "inet_pton.h"
-#include "timediff.h"
 #include "warnless.h" /* for read() */
 
 /* include memdebug.h last */

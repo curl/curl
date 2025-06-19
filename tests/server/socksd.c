@@ -74,7 +74,6 @@
 #endif
 
 #include <curlx.h> /* from the private lib dir */
-#include "inet_pton.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
