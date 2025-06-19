@@ -28,7 +28,6 @@
 #endif
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 #if !defined(HAVE_POLL) && !defined(USE_WINSOCK) && !defined(FD_SETSIZE)

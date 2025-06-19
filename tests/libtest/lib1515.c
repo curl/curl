@@ -29,9 +29,9 @@
  */
 
 #include "test.h"
+
 #include "testtrace.h"
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 #define DNS_TIMEOUT 1L

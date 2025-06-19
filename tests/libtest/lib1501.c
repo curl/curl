@@ -26,7 +26,6 @@
 #include <fcntl.h>
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 #undef TEST_HANG_TIMEOUT

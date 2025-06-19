@@ -28,7 +28,9 @@
  */
 
 #include "test.h"
+
 #include <stdio.h>
+
 #include "memdebug.h"
 
 static size_t consumed = 0;

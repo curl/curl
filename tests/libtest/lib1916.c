@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "warnless.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1916(char *URL)

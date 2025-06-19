@@ -28,7 +28,6 @@
 #endif
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 #ifndef FD_SETSIZE

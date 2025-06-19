@@ -57,11 +57,6 @@ unsigned short curlx_uitous(unsigned int uinum);
 
 size_t curlx_sitouz(int sinum);
 
-#endif /* HEADER_CURL_WARNLESS_H */
-
-#ifndef HEADER_CURL_WARNLESS_H_REDEFS
-#define HEADER_CURL_WARNLESS_H_REDEFS
-
 #ifdef _WIN32
 #undef  read
 #define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
@@ -69,4 +64,4 @@ size_t curlx_sitouz(int sinum);
 #define write(fd, buf, count) (ssize_t)_write(fd, buf, curlx_uztoui(count))
 #endif
 
-#endif /* HEADER_CURL_WARNLESS_H_REDEFS */
+#endif /* HEADER_CURL_WARNLESS_H */

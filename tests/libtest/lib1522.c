@@ -27,7 +27,6 @@
 
 #include "testtrace.h"
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 static int sockopt_callback(void *clientp, curl_socket_t curlfd,

@@ -31,9 +31,9 @@
  */
 
 #include "test.h"
+
 #include "testutil.h"
 #include "testtrace.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1542(char *URL)

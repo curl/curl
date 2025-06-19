@@ -102,7 +102,6 @@
 #endif
 
 #include <curlx.h> /* from the private lib dir */
-#include "warnless.h" /* for read() */
 
 /* include memdebug.h last */
 #include <memdebug.h>
