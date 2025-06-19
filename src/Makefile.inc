@@ -44,6 +44,7 @@ CURLX_CFILES = \
   ../lib/curlx/warnless.c
 
 CURLX_HFILES = \
+  ../lib/curlx/binmode.h \
   ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
   ../lib/curlx/dynbuf.h \
@@ -104,7 +105,6 @@ CURL_HFILES = \
   config2setopts.h \
   slist_wc.h \
   terminal.h \
-  tool_binmode.h \
   tool_bname.h \
   tool_cb_dbg.h \
   tool_cb_hdr.h \
