@@ -114,7 +114,11 @@ if(CURL_HAS_LTO)
 endif()
 
 if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
-  target_link_libraries(${EXE_NAME} "-municode")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(${EXE_NAME} "-municode")
+  else()
+    target_link_libraries(${EXE_NAME} "-municode")
+  endif()
 endif()
 
 source_group("curlX source files" FILES ${CURLX_CFILES})
