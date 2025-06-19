@@ -60,8 +60,6 @@
  */
 int curlx_wait_ms(timediff_t timeout_ms)
 {
-  int r = 0;
-
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
@@ -83,15 +81,14 @@ int curlx_wait_ms(timediff_t timeout_ms)
      on Apple operating systems */
   {
     struct timeval pending_tv;
-    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
+    int r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
+    if(r) {
+      if((r == -1) && (SOCKERRNO == SOCKEINTR))
+        return 0;  /* make EINTR from select or poll not a "lethal" error */
+      else
+        return -1;
+    }
   }
-#endif /* _WIN32 */
-  if(r) {
-    if((r == -1) && (SOCKERRNO == SOCKEINTR))
-      /* make EINTR from select or poll not a "lethal" error */
-      r = 0;
-    else
-      r = -1;
-  }
-  return r;
+#endif /* _WIN32 && !MSDOS */
+  return 0;
 }
