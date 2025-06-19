@@ -283,7 +283,9 @@ jobs:
           fi
 
       - name: 'curl version'
-        run: bld/src/curl --disable --version
+        run: |
+          bld/src/curl --disable --version
+          file bld/src/curl || true
 
       - name: 'cmake install'
         if: ${{ matrix.build.generate }}
