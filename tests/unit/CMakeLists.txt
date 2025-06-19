@@ -35,12 +35,11 @@ add_custom_command(OUTPUT "${BUNDLE_SRC}"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE_SRC}")
 add_dependencies(testdeps ${BUNDLE})
-target_link_libraries(${BUNDLE} curltool curlu)
+target_link_libraries(${BUNDLE} curlu)
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
-  "${PROJECT_SOURCE_DIR}/src"            # for "tool_binmode.h"
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
