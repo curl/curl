@@ -102,11 +102,7 @@
 #endif
 
 #include <curlx.h> /* from the private lib dir */
-#include "inet_pton.h"
-#include "timediff.h"
 #include "warnless.h" /* for read() */
-
-#include "tool_binmode.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -1495,9 +1491,9 @@ static int test_sockfilt(int argc, char *argv[])
     return 2;
 #endif
 
-  CURL_SET_BINMODE(stdin);
-  CURL_SET_BINMODE(stdout);
-  CURL_SET_BINMODE(stderr);
+  CURLX_SET_BINMODE(stdin);
+  CURLX_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stderr);
 
   install_signal_handlers(false);
 

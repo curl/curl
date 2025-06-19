@@ -31,6 +31,9 @@
  * be.
  */
 
+#include "binmode.h"
+/* "binmode.h" provides macro CURLX_SET_BINMODE() */
+
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
