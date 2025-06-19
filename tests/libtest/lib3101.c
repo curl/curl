@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "test.h"
+
 #include "memdebug.h"
 
 static CURLcode test_lib3101(char *URL)

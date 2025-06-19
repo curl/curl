@@ -37,6 +37,7 @@
    CI machines. */
 
 #include "test.h"
+
 #include "testutil.h"
 
 #include <sys/stat.h>

@@ -45,7 +45,6 @@
 #include <fcntl.h>
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 static CURLcode test_lib526(char *URL)

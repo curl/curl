@@ -36,7 +36,6 @@
 #endif
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h" /* LAST include file */
 
 static int checkparts(CURLU *u, const char *in, const char *wanted,

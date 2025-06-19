@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "test.h"
+
 #include "testtrace.h"
 
 static CURLcode test_lib2306(char *URL)

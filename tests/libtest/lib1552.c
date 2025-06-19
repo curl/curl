@@ -24,7 +24,6 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1552(char *URL)
