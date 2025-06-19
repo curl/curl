@@ -539,6 +539,7 @@ sub checksystemfeatures {
 
         if($_ =~ /^curl ([^ ]*)/) {
             $curl = $_;
+            print "|||" . $curl . "|||";
             $CURLVERSION = $1;
             $CURLVERNUM = $CURLVERSION;
             $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
