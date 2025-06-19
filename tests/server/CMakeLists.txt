@@ -37,6 +37,7 @@ add_custom_command(OUTPUT "${BUNDLE_SRC}"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
 add_dependencies(testdeps ${BUNDLE})
+target_link_libraries(${BUNDLE} ${CURL_LIBS})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
@@ -44,7 +45,6 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
   "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
 )
-target_link_libraries(${BUNDLE} ${CURL_LIBS})
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 # Test servers simply are standalone programs that do not use libcurl

@@ -42,12 +42,12 @@ add_custom_command(OUTPUT "${BUNDLE_SRC}"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
 add_dependencies(testdeps ${BUNDLE})
+target_link_libraries(${BUNDLE} ${LIB_SELECTED} ${CURL_LIBS})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for "first.h"
 )
-target_link_libraries(${BUNDLE} ${LIB_SELECTED} ${CURL_LIBS})
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
