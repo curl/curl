@@ -55,62 +55,62 @@ enum {
   DOCNUMBER_404        = -1
 };
 
-char *data_to_hex(char *data, size_t len);
-void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
-void loghex(unsigned char *buffer, ssize_t len);
-unsigned char byteval(char *value);
+static char *data_to_hex(char *data, size_t len);
+static void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
+static void loghex(unsigned char *buffer, ssize_t len);
+static unsigned char byteval(char *value);
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 /* global variables */
-extern const char *srcpath;  /* where to find the 'data' dir */
-extern const char *pidname;
-extern const char *portname;
-extern const char *serverlogfile;  /* log file name */
-extern int serverlogslocked;
-extern const char *configfile;
-extern const char *logdir;
-extern char loglockfile[256];
+static const char *srcpath;  /* where to find the 'data' dir */
+static const char *pidname;
+static const char *portname;
+static const char *serverlogfile;  /* log file name */
+static int serverlogslocked;
+static const char *configfile;
+static const char *logdir;
+static char loglockfile[256];
 #ifdef USE_IPV6
-extern bool use_ipv6;
+static bool use_ipv6;
 #endif
-extern const char *ipv_inuse;
-extern unsigned short server_port;
-extern const char *socket_type;
-extern int socket_domain;
+static const char *ipv_inuse;
+static unsigned short server_port;
+static const char *socket_type;
+static int socket_domain;
 
 #ifdef _WIN32
-int win32_init(void);
-const char *sstrerror(int err);
+static int win32_init(void);
+static const char *sstrerror(int err);
 #else
 #define sstrerror(e) strerror(e)
 #endif
 
 /* fopens the test case file */
-FILE *test2fopen(long testno, const char *logdir);
+static FILE *test2fopen(long testno, const char *logdir);
 
 #include "timeval.h"
 
-int wait_ms(timediff_t timeout_ms);
-curl_off_t our_getpid(void);
-int write_pidfile(const char *filename);
-int write_portfile(const char *filename, int port);
-void set_advisor_read_lock(const char *filename);
-void clear_advisor_read_lock(const char *filename);
+static int wait_ms(timediff_t timeout_ms);
+static curl_off_t our_getpid(void);
+static int write_pidfile(const char *filename);
+static int write_portfile(const char *filename, int port);
+static void set_advisor_read_lock(const char *filename);
+static void clear_advisor_read_lock(const char *filename);
 
 /* global variable which if set indicates that the program should finish */
-extern volatile int got_exit_signal;
+static volatile int got_exit_signal;
 
 /* global variable which if set indicates the first signal handled */
-extern volatile int exit_signal;
+static volatile int exit_signal;
 
 #ifdef _WIN32
 /* global event which if set indicates that the program should finish */
-extern HANDLE exit_event;
+static HANDLE exit_event;
 #endif
 
-void install_signal_handlers(bool keep_sigalrm);
-void restore_signal_handlers(bool keep_sigalrm);
+static void install_signal_handlers(bool keep_sigalrm);
+static void restore_signal_handlers(bool keep_sigalrm);
 
 #include <curl/curl.h> /* for curl_socket_t */
 
@@ -118,8 +118,8 @@ void restore_signal_handlers(bool keep_sigalrm);
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif
-int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
-                     struct sockaddr_un *sau);
+static int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+                            struct sockaddr_un *sau);
 #endif /* USE_UNIX_SOCKETS */
 
 typedef union {
@@ -133,6 +133,6 @@ typedef union {
 #endif
 } srvr_sockaddr_union_t;
 
-unsigned short util_ultous(unsigned long ulnum);
+static unsigned short util_ultous(unsigned long ulnum);
 
 #endif  /* HEADER_CURL_SERVER_UTIL_H */
