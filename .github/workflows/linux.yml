@@ -172,6 +172,10 @@ jobs:
             install_packages: zlib1g-dev libkrb5-dev clang
             configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual
 
+          - name: openssl clang krb5
+            install_packages: zlib1g-dev libkrb5-dev clang
+            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
+
           - name: openssl clang krb5 LTO
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: skipall
