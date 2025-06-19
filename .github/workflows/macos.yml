@@ -283,9 +283,7 @@ jobs:
           fi
 
       - name: 'curl version'
-        run: |
-          bld/src/curl --disable --version
-          file bld/src/curl || true
+        run: bld/src/curl --disable --version
 
       - name: 'cmake install'
         if: ${{ matrix.build.generate }}
@@ -298,8 +296,6 @@ jobs:
           else
             make -C bld V=1 -C tests
           fi
-          file bld/tests/libtest/libtests || true
-          file bld/tests/libtest/libstubgss.dylib || true
 
       - name: 'install test prereqs'
         if: ${{ !matrix.build.clang-tidy }}
