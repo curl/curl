@@ -24,7 +24,6 @@
 #include "curlcheck.h"
 
 #include "splay.h"
-#include "warnless.h"
 
 static void splayprint(struct Curl_tree *t, int d, char output)
 {
