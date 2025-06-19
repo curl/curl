@@ -54,14 +54,14 @@ AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES
 
-bundle_extra =
+curlx_sources =
 if USE_CPPFLAG_CURL_STATICLIB
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-bundle_extra += $(CURLX_SRCS)
+curlx_sources += $(CURLX_SRCS)
 endif
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(bundle_extra) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(bundle_extra) --test $(TESTFILES) > $(BUNDLE_SRC)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(curlx_sources) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_sources) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_SOURCES = $(BUNDLE_SRC)
