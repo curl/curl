@@ -63,5 +63,6 @@ set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL
 
 if(HAVE_GSSAPI AND UNIX)
   add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS})
+  set_target_properties(stubgss PROPERTIES UNITY_BUILD OFF)
   add_dependencies(testdeps stubgss)
 endif()
