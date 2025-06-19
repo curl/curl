@@ -25,25 +25,22 @@
 
 #include "memdebug.h"
 
-static char testdata[]=
-  "dummy\n";
-
-struct WriteThis {
-  char *readptr;
+struct t654_WriteThis {
+  const char *readptr;
   curl_off_t sizeleft;
   int freecount;
 };
 
 static void free_callback(void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *) userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *) userp;
 
   pooh->freecount++;
 }
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;
 
   if(size*nmemb < 1)
@@ -62,15 +59,17 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib654(char *URL)
 {
+  static const char testdata[] = "dummy\n";
+
   CURL *easy = NULL;
   CURL *easy2 = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   struct curl_slist *hdrs = NULL;
   CURLcode res = TEST_ERR_FAILURE;
-  struct WriteThis pooh;
+  struct t654_WriteThis pooh;
 
   /*
    * Check proper copy/release of mime post data bound to a duplicated
@@ -110,8 +109,8 @@ CURLcode test(char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, free_callback,
-                    &pooh);
+  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_cb, NULL,
+                    free_callback, &pooh);
 
   /* Bind mime data to its easy handle. */
   test_setopt(easy, CURLOPT_MIMEPOST, mime);
@@ -152,7 +151,7 @@ CURLcode test(char *URL)
 
   if(pooh.freecount != 2) {
     curl_mfprintf(stderr, "free_callback() called %d times instead of 2\n",
-            pooh.freecount);
+                  pooh.freecount);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }

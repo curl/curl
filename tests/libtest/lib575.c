@@ -29,15 +29,13 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 /* 3x download!
  * 1. normal
  * 2. dup handle
  * 3. with multi interface
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib575(char *URL)
 {
   CURL *handle = NULL;
   CURL *duphandle = NULL;

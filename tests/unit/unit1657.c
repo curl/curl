@@ -25,31 +25,21 @@
 
 #include "vtls/x509asn1.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
-#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
-  defined(USE_MBEDTLS)
+#if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_MBEDTLS)
 
 struct test1657_spec {
-  CURLcode (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
+  CURLcode (*setbuf)(const struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
   CURLcode exp_result;
 };
 
-static CURLcode make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
+static CURLcode make1657_nested(const struct test1657_spec *spec,
+                                struct dynbuf *buf)
 {
   CURLcode r;
   size_t i;
-  unsigned char open_undef[] = { 0x32,  0x80 };
-  unsigned char close_undef[] = { 0x00,  0x00 };
+  unsigned char open_undef[] = { 0x32, 0x80 };
+  unsigned char close_undef[] = { 0x00, 0x00 };
 
   for(i = 0; i < spec->n; ++i) {
     r = curlx_dyn_addn(buf, open_undef, sizeof(open_undef));
@@ -64,14 +54,14 @@ static CURLcode make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
   return CURLE_OK;
 }
 
-static struct test1657_spec test1657_specs[] = {
+static const struct test1657_spec test1657_specs[] = {
   { make1657_nested, 3, CURLE_OK },
   { make1657_nested, 16, CURLE_OK },
   { make1657_nested, 17, CURLE_BAD_FUNCTION_ARGUMENT },
   { make1657_nested, 1024, CURLE_BAD_FUNCTION_ARGUMENT },
 };
 
-static bool do_test1657(struct test1657_spec *spec, size_t i,
+static bool do_test1657(const struct test1657_spec *spec, size_t i,
                         struct dynbuf *buf)
 {
   CURLcode result;
@@ -95,8 +85,10 @@ static bool do_test1657(struct test1657_spec *spec, size_t i,
   return TRUE;
 }
 
-UNITTEST_START
+static CURLcode test_unit1657(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
   size_t i;
   bool all_ok = TRUE;
   struct dynbuf dbuf;
@@ -116,15 +108,17 @@ UNITTEST_START
 
   curlx_dyn_free(&dbuf);
   curl_global_cleanup();
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #else
 
-UNITTEST_START
+static CURLcode test_unit1657(char *arg)
 {
-  puts("not tested since Curl_x509_getASN1Element() is not built-in");
+  UNITTEST_BEGIN_SIMPLE
+  puts("not tested since Curl_x509_getASN1Element() is not built in");
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 
 #endif

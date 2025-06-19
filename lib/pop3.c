@@ -1450,16 +1450,14 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
      bad in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to. */
 
-  if(!dead_connection && conn->bits.protoconnstart) {
+  if(!dead_connection && conn->bits.protoconnstart &&
+     !Curl_pp_needs_flush(data, &pop3c->pp)) {
     if(!pop3_perform_quit(data, conn))
       (void)pop3_block_statemach(data, conn, TRUE); /* ignore errors on QUIT */
   }
 
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
-
-  /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, pop3c->sasl.authused);
 
   /* Cleanup our connection based variables */
   Curl_safefree(pop3c->apoptimestamp);

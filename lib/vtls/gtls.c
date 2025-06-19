@@ -91,21 +91,21 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result;
 
   DEBUGASSERT(data);
-  nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
-  CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %zd, err=%d",
-              blen, nwritten, result);
+  result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
+  CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %d, %zu",
+              blen, result, nwritten);
   backend->gtls.io_result = result;
-  if(nwritten < 0) {
+  if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
-    nwritten = -1;
+    return -1;
   }
-  return nwritten;
+  return (ssize_t)nwritten;
 }
 
 static ssize_t gtls_pull(void *s, void *buf, size_t blen)
@@ -115,7 +115,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nread;
+  size_t nread;
   CURLcode result;
 
   DEBUGASSERT(data);
@@ -129,19 +129,19 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
     }
   }
 
-  nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %zd, err=%d",
-              blen, nread, result);
+  result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
+  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zd",
+              blen, result, nread);
   backend->gtls.io_result = result;
-  if(nread < 0) {
+  if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
     gnutls_transport_set_errno(backend->gtls.session,
                                (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
-    nread = -1;
+    return -1;
   }
   else if(nread == 0)
     connssl->peer_closed = TRUE;
-  return nread;
+  return (ssize_t)nread;
 }
 
 /* gtls_init()
@@ -2210,7 +2210,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* set_engine */
   NULL,                          /* set_engine_default */
   NULL,                          /* engines_list */
-  NULL,                          /* false_start */
   gtls_sha256sum,                /* sha256sum */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */

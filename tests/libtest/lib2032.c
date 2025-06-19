@@ -30,7 +30,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
 #define MAX_EASY_HANDLES 3
 
 static int ntlm_counter[MAX_EASY_HANDLES];
@@ -54,8 +53,8 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 
   if(CURLE_OK != code) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
@@ -74,7 +73,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       curl_mfprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
-              curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
+                    curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
@@ -82,21 +81,21 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-enum HandleState {
-  ReadyForNewHandle,
-  NeedSocketForNewHandle,
-  NoMoreHandles
-};
-
-CURLcode test(char *url)
+static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
 {
+  enum HandleState {
+    ReadyForNewHandle,
+    NeedSocketForNewHandle,
+    NoMoreHandles
+  };
+
   CURLcode res = CURLE_OK;
   CURLM *multi = NULL;
   int running;
   int i;
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
-  size_t urllen = strlen(url) + 4 + 1;
+  size_t urllen = strlen(URL) + 4 + 1;
   char *full_url = malloc(urllen);
 
   start_test_timing();
@@ -133,11 +132,11 @@ CURLcode test(char *url)
       easy_init(ntlm_easy[num_handles]);
 
       if(num_handles % 3 == 2) {
-        curl_msnprintf(full_url, urllen, "%s0200", url);
+        curl_msnprintf(full_url, urllen, "%s0200", URL);
         easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       }
       else {
-        curl_msnprintf(full_url, urllen, "%s0100", url);
+        curl_msnprintf(full_url, urllen, "%s0100", URL);
         easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
       easy_setopt(ntlm_easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
@@ -160,7 +159,7 @@ CURLcode test(char *url)
     multi_perform(multi, &running);
 
     curl_mfprintf(stderr, "%s:%d running %d state %d\n",
-            __FILE__, __LINE__, running, state);
+                  __FILE__, __LINE__, running, state);
 
     abort_on_test_timeout();
 

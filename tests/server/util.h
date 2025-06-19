@@ -23,13 +23,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /* adjust for old MSVC */
-#ifdef _MSC_VER
-#  if _MSC_VER < 1900
-#   define snprintf _snprintf
-#  endif
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#  define snprintf _snprintf
 #endif
 
 #ifdef _WIN32
@@ -123,6 +121,17 @@ void restore_signal_handlers(bool keep_sigalrm);
 int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                      struct sockaddr_un *sau);
 #endif /* USE_UNIX_SOCKETS */
+
+typedef union {
+  struct sockaddr      sa;
+  struct sockaddr_in   sa4;
+#ifdef USE_IPV6
+  struct sockaddr_in6  sa6;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  struct sockaddr_un   sau;
+#endif
+} srvr_sockaddr_union_t;
 
 unsigned short util_ultous(unsigned long ulnum);
 

@@ -40,7 +40,7 @@ static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
   return 0;
 }
 
-static size_t write_cb(char *d, size_t n, size_t l, void *p)
+static size_t t1523_write_cb(char *d, size_t n, size_t l, void *p)
 {
   /* take care of the data here, ignored in this example */
   (void)d;
@@ -55,7 +55,7 @@ static CURLcode run(CURL *hnd, long limit, long time)
   return curl_easy_perform(hnd);
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1523(char *URL)
 {
   CURLcode ret;
   CURL *hnd;
@@ -63,7 +63,7 @@ CURLcode test(char *URL)
   curl_global_init(CURL_GLOBAL_ALL);
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, t1523_write_cb);
   curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, buffer);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);

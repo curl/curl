@@ -51,7 +51,7 @@ static int prereq_callback(void *clientp,
   return prereq_cb->prereq_retcode;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib2082(char *URL)  /* libprereq */
 {
   PRCS prereq_cb;
   CURLcode ret = CURLE_OK;

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 typedef struct
@@ -41,7 +40,7 @@ static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return tocopy;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1948(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

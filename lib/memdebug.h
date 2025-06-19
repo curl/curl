@@ -126,8 +126,6 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* HEADER_CURL_MEMDEBUG_H_EXTERNS */
 
-#ifndef MEMDEBUG_NODEFINES
-
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
@@ -186,8 +184,6 @@ CURL_EXTERN ALLOC_FUNC
 #undef fdopen
 #define fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
 #define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
-
-#endif /* MEMDEBUG_NODEFINES */
 
 #endif /* CURLDEBUG */
 

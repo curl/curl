@@ -548,8 +548,9 @@ static CURLcode retrycheck(struct OperationConfig *config,
     *retryp = TRUE;
     per->num_retries++;
     *delayms = sleeptime;
+    result = CURLE_OK;
   }
-  return CURLE_OK;
+  return result;
 }
 
 

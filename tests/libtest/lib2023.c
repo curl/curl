@@ -42,7 +42,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
 
   curl_msnprintf(full_url, len, "%s%04d", url, seq);
   curl_mfprintf(stderr, "Sending new request %d to %s with credential %s "
-          "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
+                "(auth %ld)\n", seq, full_url, userpwd, auth_scheme);
   test_setopt(curl, CURLOPT_URL, full_url);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
@@ -82,7 +82,7 @@ static long parse_auth_name(const char *arg)
   return CURLAUTH_NONE;
 }
 
-CURLcode test(char *url)
+static CURLcode test_lib2023(char *URL)  /* libauthretry */
 {
   CURLcode res;
   CURL *curl = NULL;
@@ -110,11 +110,11 @@ CURLcode test(char *url)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = send_wrong_password(curl, url, 100, main_auth_scheme);
+  res = send_wrong_password(curl, URL, 100, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
 
-  res = send_right_password(curl, url, 200, fallback_auth_scheme);
+  res = send_right_password(curl, URL, 200, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
 
@@ -128,15 +128,15 @@ CURLcode test(char *url)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = send_wrong_password(curl, url, 300, main_auth_scheme);
+  res = send_wrong_password(curl, URL, 300, main_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
 
-  res = send_wrong_password(curl, url, 400, fallback_auth_scheme);
+  res = send_wrong_password(curl, URL, 400, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
 
-  res = send_right_password(curl, url, 500, fallback_auth_scheme);
+  res = send_right_password(curl, URL, 500, fallback_auth_scheme);
   if(res != CURLE_OK)
     goto test_cleanup;
 

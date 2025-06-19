@@ -27,10 +27,9 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
 #define WAKEUP_NUM 10
 
-CURLcode test(char *URL)
+static CURLcode test_lib1564(char *URL)
 {
   CURLM *multi = NULL;
   int numfds;

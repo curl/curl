@@ -28,13 +28,11 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 /*
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib573(char *URL)
 {
   CURL *c = NULL;
   CURLM *m = NULL;
@@ -98,7 +96,7 @@ CURLcode test(char *URL)
   curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
   if(connect_time < dbl_epsilon) {
     curl_mfprintf(stderr, "connect time %e is < epsilon %e\n",
-            connect_time, dbl_epsilon);
+                  connect_time, dbl_epsilon);
     res = TEST_ERR_MAJOR_BAD;
   }
 

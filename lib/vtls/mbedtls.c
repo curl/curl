@@ -191,28 +191,27 @@ static int mbedtls_bio_cf_write(void *bio,
 {
   struct Curl_cfilter *cf = bio;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result;
 
   DEBUGASSERT(data);
   if(!data)
     return 0;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, blen, FALSE,
-                               &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
-              blen, nwritten, result);
-  if(nwritten < 0 && CURLE_AGAIN == result) {
-    nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
-  }
-  return (int)nwritten;
+  result = Curl_conn_cf_send(cf->next, data, (const char *)buf, blen, FALSE,
+                             &nwritten);
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %d, %zu",
+              blen, result, nwritten);
+  if(CURLE_AGAIN == result)
+    return MBEDTLS_ERR_SSL_WANT_WRITE;
+  return result ? -1 : (int)nwritten;
 }
 
 static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nread;
+  size_t nread;
   CURLcode result;
 
   DEBUGASSERT(data);
@@ -222,13 +221,12 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
   if(!buf)
     return 0;
 
-  nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %zd, err=%d",
-              blen, nread, result);
-  if(nread < 0 && CURLE_AGAIN == result) {
-    nread = MBEDTLS_ERR_SSL_WANT_READ;
-  }
-  return (int)nread;
+  result = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &nread);
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %d, %zu",
+              blen, result, nread);
+  if(CURLE_AGAIN == result)
+    return MBEDTLS_ERR_SSL_WANT_READ;
+  return result ? -1 : (int)nread;
 }
 
 /*
@@ -1620,7 +1618,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   NULL,                             /* set_engine */
   NULL,                             /* set_engine_default */
   NULL,                             /* engines_list */
-  NULL,                             /* false_start */
   mbedtls_sha256sum,                /* sha256sum */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */

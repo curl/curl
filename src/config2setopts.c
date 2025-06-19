@@ -361,9 +361,6 @@ static CURLcode ssl_setopts(struct GlobalConfig *global,
   if(config->doh_verifystatus)
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1);
 
-  if(config->falsestart)
-    my_setopt_long(curl, CURLOPT_SSL_FALSESTART, 1);
-
   my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
                        config->ssl_version | config->ssl_version_max);
   if(config->proxy)
@@ -937,7 +934,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
   if(config->use_resume)
     my_setopt_offt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);
   else
-    my_setopt_offt(curl, CURLOPT_RESUME_FROM_LARGE, CURL_OFF_T_C(0));
+    my_setopt_offt(curl, CURLOPT_RESUME_FROM_LARGE, 0);
 
   my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
   my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);

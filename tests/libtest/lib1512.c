@@ -32,17 +32,15 @@
 
 #include "memdebug.h"
 
-#define NUM_HANDLES 2
-
-CURLcode test(char *URL)
+static CURLcode test_lib1512(char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {NULL, NULL};
+  CURL *curl[2] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  int i;
+  size_t i;
   char target_url[256];
   (void)URL; /* URL is setup in the code */
 
@@ -56,14 +54,14 @@ CURLcode test(char *URL)
   curl_mprintf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
                    "http://server.example.curl:%s/path/1512%04i",
-                   port, i + 1);
+                   port, (int)i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -77,8 +75,8 @@ CURLcode test(char *URL)
   /* make the first one populate the GLOBAL cache */
   easy_setopt(curl[0], CURLOPT_RESOLVE, slist);
 
-  /* run NUM_HANDLES transfers */
-  for(i = 0; (i < NUM_HANDLES) && !res; i++) {
+  /* run each transfer */
+  for(i = 0; (i < CURL_ARRAYSIZE(curl)) && !res; i++) {
     res = curl_easy_perform(curl[i]);
     if(res)
       goto test_cleanup;

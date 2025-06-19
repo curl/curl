@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SERVER_SETUP_H
-#define HEADER_CURL_SERVER_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,8 +22,30 @@
  *
  ***************************************************************************/
 
-#define CURL_NO_OLDIES
+int main(int argc, char **argv)
+{
+  entry_func_t entry_func;
+  char *entry_name;
+  size_t tmp;
 
-#include "curl_setup.h" /* portability help from the lib directory */
+  if(argc < 2) {
+    fprintf(stderr, "Pass clientname as first argument\n");
+    return 1;
+  }
 
-#endif /* HEADER_CURL_SERVER_SETUP_H */
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+      entry_func = s_entries[tmp].ptr;
+      break;
+    }
+  }
+
+  if(!entry_func) {
+    fprintf(stderr, "Test '%s' not found.\n", entry_name);
+    return 99;
+  }
+
+  return entry_func(argc - 1, argv + 1);
+}

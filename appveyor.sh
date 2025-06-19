@@ -68,7 +68,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     fi
     # shellcheck disable=SC2086
     time cmake -G "${PRJ_GEN}" ${TARGET} \
-      -DCURL_TEST_BUNDLES=ON \
       -DCURL_WERROR=ON \
       -DBUILD_SHARED_LIBS="${SHARED}" \
       -DCURL_STATIC_CRT=ON \

@@ -21,24 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * WebSockets pingpong
- * </DESC>
- */
-/* curl stuff */
-#include "curl_setup.h"
-#include <curl/curl.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <sys/time.h>
-#endif
-
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode ping(CURL *curl, const char *send_payload)
@@ -81,19 +63,6 @@ static CURLcode recv_pong(CURL *curl, const char *expected_payload)
   return CURLE_RECV_ERROR;
 }
 
-/* just close the connection */
-static void websocket_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
-}
-
-#if defined(__TANDEM)
-# include <cextdecs.h(PROCESS_DELAY_)>
-#endif
 static CURLcode pingpong(CURL *curl, const char *payload)
 {
   CURLcode res;
@@ -129,7 +98,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 
 #endif
 
-int main(int argc, char *argv[])
+static int test_ws_pingpong(int argc, char *argv[])
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;

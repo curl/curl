@@ -320,7 +320,7 @@ class TestDownload:
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -343,7 +343,7 @@ class TestDownload:
         run_env['CURL_DEBUG'] = 'multi,http/2'
         if swin_max > 0:
             run_env['CURL_H2_STREAM_WIN_MAX'] = f'{swin_max}'
-        client = LocalClient(name='hx-download', env=env, run_env=run_env)
+        client = LocalClient(name='hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -363,7 +363,7 @@ class TestDownload:
         max_parallel = 5
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -391,7 +391,7 @@ class TestDownload:
             pause_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -420,7 +420,7 @@ class TestDownload:
             abort_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -449,7 +449,7 @@ class TestDownload:
             fail_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -483,7 +483,7 @@ class TestDownload:
     # before protocol switch has happened
     def test_02_25_h2_upgrade_x(self, env: Env, httpd):
         url = f'http://localhost:{env.http_port}/data-100k'
-        client = LocalClient(name='h2-upgrade-extreme', env=env, timeout=15)
+        client = LocalClient(name='h2_upgrade_extreme', env=env, timeout=15)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])
@@ -494,7 +494,7 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx):
         url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
-        client = LocalClient(name='tls-session-reuse', env=env)
+        client = LocalClient(name='tls_session_reuse', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[proto, url])
@@ -505,7 +505,7 @@ class TestDownload:
     def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?&chunks=6&chunk_size=8000'
-        client = LocalClient(env=env, name='h2-pausing')
+        client = LocalClient(env=env, name='h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
@@ -514,7 +514,7 @@ class TestDownload:
     def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?error=502'
-        client = LocalClient(env=env, name='h2-pausing')
+        client = LocalClient(env=env, name='h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
@@ -523,7 +523,7 @@ class TestDownload:
     def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?status=200&chunks=1&chunk_size=100'
-        client = LocalClient(env=env, name='h2-pausing')
+        client = LocalClient(env=env, name='h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
@@ -560,7 +560,7 @@ class TestDownload:
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -614,7 +614,7 @@ class TestDownload:
         if proto != 'h3':
             port = env.nghttpx_https_port
         url = f'https://{env.domain1}:{port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -635,8 +635,7 @@ class TestDownload:
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
                 continue
-            m = re.match(r'\[1-1] \* SSL reusing session.*', line)
-            if m:
+            if re.match(r'\[1-1] \* SSL reusing session.*', line):
                 reused_session = True
         assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'
@@ -661,7 +660,7 @@ class TestDownload:
         url = f'https://{env.domain1}:{port}/{docname}'
         run_env = os.environ.copy()
         run_env['CURL_DEBUG'] = 'multi'
-        client = LocalClient(name='hx-download', env=env, run_env=run_env)
+        client = LocalClient(name='hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -699,7 +698,7 @@ class TestDownload:
         url = f'https://{env.domain1}:{port}/{docname}'
         run_env = os.environ.copy()
         run_env['CURL_DEBUG'] = 'multi'
-        client = LocalClient(name='hx-download', env=env, run_env=run_env)
+        client = LocalClient(name='hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -741,7 +740,7 @@ class TestDownload:
         pause_offset = 1024 * 1024
         docname = 'bomb-100m.txt.var'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

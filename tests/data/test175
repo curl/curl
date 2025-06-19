@@ -51,6 +51,7 @@ http
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 HTTP POST --digest to server not requiring any auth at all

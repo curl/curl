@@ -58,6 +58,7 @@ http
 </server>
 <features>
 crypto
+digest
 </features>
 # tool is what to use instead of 'curl'
 <tool>

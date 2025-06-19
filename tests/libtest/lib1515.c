@@ -34,8 +34,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 #define DNS_TIMEOUT 1L
 
 static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
@@ -103,7 +101,7 @@ test_cleanup:
   return res;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1515(char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;

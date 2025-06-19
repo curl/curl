@@ -22,8 +22,6 @@
 #
 ###########################################################################
 
-SUBDIRS = clients
-
 TESTENV =                             \
 testenv/__init__.py                   \
 testenv/caddy.py                      \
@@ -75,7 +73,4 @@ clean-local:
 check: clients
 
 clients:
-	@(cd clients; $(MAKE) check)
-
-checksrc:
-	cd clients && $(MAKE) checksrc
+	@(cd ../client; $(MAKE) check)

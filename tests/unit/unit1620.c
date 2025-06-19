@@ -28,19 +28,14 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static CURLcode t1620_setup(void)
 {
   CURLcode res = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
   return res;
 }
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-static void test_parse(
+static void t1620_parse(
   const char *input,
   const char *exp_username,
   const char *exp_password,
@@ -74,8 +69,10 @@ static void test_parse(
   free(options);
 }
 
-UNITTEST_START
+static CURLcode test_unit1620(char *arg)
 {
+  UNITTEST_BEGIN(t1620_setup())
+
   CURLcode rc;
   struct Curl_easy *empty;
   enum dupstring i;
@@ -106,20 +103,21 @@ UNITTEST_START
   rc = Curl_init_do(empty, empty->conn);
   fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
 
-  test_parse("hostname", "hostname", NULL, NULL);
-  test_parse("user:password", "user", "password", NULL);
-  test_parse("user:password;options", "user", "password", "options");
-  test_parse("user:password;options;more", "user", "password", "options;more");
-  test_parse("", "", NULL, NULL);
-  test_parse(":", "", "", NULL);
-  test_parse(":;", "", "", NULL);
-  test_parse(":password", "", "password", NULL);
-  test_parse(":password;", "", "password", NULL);
-  test_parse(";options", "", NULL, "options");
-  test_parse("user;options", "user", NULL, "options");
-  test_parse("user:;options", "user", "", "options");
-  test_parse("user;options:password", "user", "password", "options");
-  test_parse("user;options:", "user", "", "options");
+  t1620_parse("hostname", "hostname", NULL, NULL);
+  t1620_parse("user:password", "user", "password", NULL);
+  t1620_parse("user:password;options", "user", "password", "options");
+  t1620_parse("user:password;options;more", "user", "password",
+              "options;more");
+  t1620_parse("", "", NULL, NULL);
+  t1620_parse(":", "", "", NULL);
+  t1620_parse(":;", "", "", NULL);
+  t1620_parse(":password", "", "password", NULL);
+  t1620_parse(":password;", "", "password", NULL);
+  t1620_parse(";options", "", NULL, "options");
+  t1620_parse("user;options", "user", NULL, "options");
+  t1620_parse("user:;options", "user", "", "options");
+  t1620_parse("user;options:password", "user", "password", "options");
+  t1620_parse("user;options:", "user", "", "options");
 
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
@@ -130,5 +128,5 @@ UNITTEST_START
   rc = Curl_close(&empty);
   fail_unless(rc == CURLE_OK, "Curl_close() failed");
 
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

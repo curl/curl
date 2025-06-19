@@ -75,7 +75,7 @@ SSL
 http
 </server>
 <tool>
-libntlmconnect
+lib2032
 </tool>
 
 <name>

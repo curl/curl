@@ -28,7 +28,6 @@ interpreted as a PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine
 option is set as `pkcs11` if none was provided and the --key-type option is
 set as `ENG` or `PROV` if none was provided (depending on OpenSSL version).
 
-If curl is built against Secure Transport or Schannel then this option is
-ignored for TLS protocols (HTTPS, etc). Those backends expect the private key
-to be already present in the keychain or PKCS#12 file containing the
-certificate.
+If curl is built against Schannel then this option is ignored for TLS
+protocols (HTTPS, etc). That backend expects the private key to be already
+present in the keychain or PKCS#12 file containing the certificate.

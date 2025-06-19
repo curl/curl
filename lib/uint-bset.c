@@ -183,11 +183,11 @@ unsigned int Curl_popcount64(curl_uint64_t x)
   /* Compute the "Hamming Distance" between 'x' and 0,
    * which is the number of set bits in 'x'.
    * See: https://en.wikipedia.org/wiki/Hamming_weight */
-  const curl_uint64_t m1  = CURL_OFF_TU_C(0x5555555555555555); /* 0101+ */
-  const curl_uint64_t m2  = CURL_OFF_TU_C(0x3333333333333333); /* 00110011+ */
-  const curl_uint64_t m4  = CURL_OFF_TU_C(0x0f0f0f0f0f0f0f0f); /* 00001111+ */
+  const curl_uint64_t m1  = 0x5555555555555555LL; /* 0101+ */
+  const curl_uint64_t m2  = 0x3333333333333333LL; /* 00110011+ */
+  const curl_uint64_t m4  = 0x0f0f0f0f0f0f0f0fLL; /* 00001111+ */
    /* 1 + 256^1 + 256^2 + 256^3 + ... + 256^7 */
-  const curl_uint64_t h01 = CURL_OFF_TU_C(0x0101010101010101);
+  const curl_uint64_t h01 = 0x0101010101010101LL;
   x -= (x >> 1) & m1;             /* replace every 2 bits with bits present */
   x = (x & m2) + ((x >> 2) & m2); /* replace every nibble with bits present */
   x = (x + (x >> 4)) & m4;        /* replace every byte with bits present */
@@ -203,11 +203,11 @@ unsigned int Curl_ctz64(curl_uint64_t x)
 {
   /* count trailing zeros in a curl_uint64_t.
    * divide and conquer to find the number of lower 0 bits */
-  const curl_uint64_t ml32 = CURL_OFF_TU_C(0xFFFFFFFF); /* lower 32 bits */
-  const curl_uint64_t ml16 = CURL_OFF_TU_C(0x0000FFFF); /* lower 16 bits */
-  const curl_uint64_t ml8  = CURL_OFF_TU_C(0x000000FF); /* lower 8 bits */
-  const curl_uint64_t ml4  = CURL_OFF_TU_C(0x0000000F); /* lower 4 bits */
-  const curl_uint64_t ml2  = CURL_OFF_TU_C(0x00000003); /* lower 2 bits */
+  const curl_uint64_t ml32 = 0xFFFFFFFF; /* lower 32 bits */
+  const curl_uint64_t ml16 = 0x0000FFFF; /* lower 16 bits */
+  const curl_uint64_t ml8  = 0x000000FF; /* lower 8 bits */
+  const curl_uint64_t ml4  = 0x0000000F; /* lower 4 bits */
+  const curl_uint64_t ml2  = 0x00000003; /* lower 2 bits */
   unsigned int n;
 
   if(!x)

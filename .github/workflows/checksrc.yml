@@ -63,7 +63,7 @@ jobs:
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
             python3-typing-extensions python3-libcst python3-impacket \
             python3-websockets python3-pytest python3-filelock python3-pytest-xdist
-          python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.10.11 ruff==0.11.9
+          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9
 
       - name: spellcheck
         run: |
@@ -124,7 +124,9 @@ jobs:
         name: checkout
 
       - name: shellcheck
-        run: .github/scripts/shellcheck.sh
+        run: |
+          shellcheck --version
+          .github/scripts/shellcheck.sh
 
       - name: spacecheck
         run: .github/scripts/spacecheck.pl
@@ -135,11 +137,12 @@ jobs:
       # we allow some extra in source code
       - name: badwords
         run: |
+          # shellcheck disable=SC2046
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
-  ghacheck:
-    name: GHA analysis
+  cicheck:
+    name: CI analysis
     runs-on: macos-latest
     timeout-minutes: 1
     steps:
@@ -148,7 +151,13 @@ jobs:
           persist-credentials: false
         name: checkout
 
-      - name: zizmor
+      - name: install prereqs
+        run: brew install shellcheck zizmor
+
+      - name: zizmor GHA
+        run: zizmor --pedantic .github/workflows/*.yml
+
+      - name: shellcheck
         run: |
-          brew install zizmor
-          zizmor --pedantic .github/workflows/*.yml
+          shellcheck --version
+          .github/scripts/shellcheck-ci.sh

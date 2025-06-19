@@ -57,13 +57,13 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
+          ./configure --prefix="$HOME"/temp --without-ssl --without-libpsl
           make
           make test-ci
           make install
           popd
           # basic check of the installed files
-          bash scripts/installcheck.sh $HOME/temp
+          bash scripts/installcheck.sh "$HOME"/temp
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
@@ -105,7 +105,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
+          ../configure --without-ssl --enable-debug --prefix="$PWD"/curl-install --without-libpsl
           make
           make test-ci
           make install
@@ -174,8 +174,9 @@ jobs:
         shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
+      MATRIX_IMAGE: '${{ matrix.image }}'
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
-      old-cmake-version: 3.11.4
+      OLD_CMAKE_VERSION: 3.11.4
     strategy:
       fail-fast: false
       matrix:
@@ -194,26 +195,26 @@ jobs:
 
       - name: 'install prereqs'
         run: |
-          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
-            cd "${HOME}" || exit 1
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location 'https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-win64-x64.zip' --output bin.zip
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-win64-x64.zip" --output bin.zip
             unzip -q bin.zip
             rm -f bin.zip
-            printf '%s' "${HOME}/cmake-${{ env.old-cmake-version }}-win64-x64/bin/cmake.exe" > "${HOME}/old-cmake-path.txt"
-          elif [[ '${{ matrix.image }}' = *'ubuntu'* ]]; then
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-win64-x64/bin/cmake.exe > ~/old-cmake-path.txt
+          elif [[ "${MATRIX_IMAGE}" = *'ubuntu'* ]]; then
             sudo rm -f /var/lib/man-db/auto-update
             sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libssl-dev
-            cd "${HOME}" || exit 1
+            cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Linux-x86_64.tar.gz | tar -xzf -
-            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Linux-x86_64/bin/cmake" > "${HOME}/old-cmake-path.txt"
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Linux-x86_64.tar.gz" | tar -xz
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Linux-x86_64/bin/cmake > ~/old-cmake-path.txt
           else
             brew install libpsl openssl
-            cd "${HOME}" || exit 1
+            cd ~
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              --location https://github.com/Kitware/CMake/releases/download/v${{ env.old-cmake-version }}/cmake-${{ env.old-cmake-version }}-Darwin-x86_64.tar.gz | tar -xzf -
-            printf '%s' "$PWD/cmake-${{ env.old-cmake-version }}-Darwin-x86_64/CMake.app/Contents/bin/cmake" > "${HOME}/old-cmake-path.txt"
+              --location "https://github.com/Kitware/CMake/releases/download/v${OLD_CMAKE_VERSION}/cmake-${OLD_CMAKE_VERSION}-Darwin-x86_64.tar.gz" | tar -xz
+            printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
           fi
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -229,26 +230,26 @@ jobs:
 
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
-          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
           fi
-          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
-          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
+          ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
       - name: 'via find_package OpenSSL (old cmake)'
         run: |
-          export TEST_CMAKE_CONSUMER="$(cat "${HOME}/old-cmake-path.txt")"
-          if [[ '${{ matrix.image }}' = *'macos'* ]]; then
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
             export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
           fi
-          if [[ '${{ matrix.image }}' = *'windows'* ]]; then
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
             export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DOPENSSL_ROOT_DIR=C:/msys64/mingw64'
           fi
-          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON ${options}
+          ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON

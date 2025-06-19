@@ -29,7 +29,7 @@ ftp
 </server>
 # tool is what to use instead of 'curl'
 <tool>
-lib585
+lib500
 </tool>
 
 <name>

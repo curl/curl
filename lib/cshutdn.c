@@ -54,12 +54,6 @@ static void cshutdn_run_conn_handler(struct Curl_easy *data,
 {
   if(!conn->bits.shutdown_handler) {
 
-    /* Cleanup NTLM connection-related data */
-    Curl_http_auth_cleanup_ntlm(conn);
-
-    /* Cleanup NEGOTIATE connection-related data */
-    Curl_http_auth_cleanup_negotiate(conn);
-
     if(conn->handler && conn->handler->disconnect) {
       /* Some disconnect handlers do a blocking wait on server responses.
        * FTP/IMAP/SMTP and SFTP are among them. When using the internal

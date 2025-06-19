@@ -20,27 +20,26 @@
 #
 # SPDX-License-Identifier: curl
 #
-#***************************************************************************
+###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
-AC_DEFUN([CURL_WITH_SECURETRANSPORT], [
-AC_MSG_CHECKING([whether to enable Secure Transport])
-if test "x$OPT_SECURETRANSPORT" != xno; then
-  if test "x$OPT_SECURETRANSPORT" != "xno" &&
-     (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/Security.framework"); then
-    AC_MSG_RESULT(yes)
-    AC_DEFINE(USE_SECTRANSP, 1, [enable Secure Transport])
-    ssl_msg="Secure Transport"
-    test secure-transport != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-    SECURETRANSPORT_ENABLED=1
-    SECURETRANSPORT_LDFLAGS='-framework CoreFoundation -framework CoreServices -framework Security'
-    LDFLAGS="$LDFLAGS $SECURETRANSPORT_LDFLAGS"
-    LDFLAGSPC="$LDFLAGSPC $SECURETRANSPORT_LDFLAGS"
-  else
-    AC_MSG_RESULT(no)
-  fi
-  test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
-else
-  AC_MSG_RESULT(no)
-fi
+BUNDLE = clients
+BUNDLE_SRC = clients.c
 
-])
+# Files referenced from the bundle source
+FIRSTFILES = first.c first.h
+
+CURLX_SRCS = \
+  ../../lib/curlx/multibyte.c
+
+# All test clients
+TESTFILES = \
+  h2_pausing.c \
+  h2_serverpush.c \
+  h2_upgrade_extreme.c \
+  hx_download.c \
+  hx_upload.c \
+  tls_session_reuse.c \
+  upload_pausing.c \
+  ws_data.c \
+  ws_pingpong.c

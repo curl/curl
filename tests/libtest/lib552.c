@@ -30,14 +30,13 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct testdata {
+struct t552_testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text,
+                 FILE *stream, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
@@ -84,12 +83,11 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userp)
 {
-  struct testdata *config = (struct testdata *)userp;
+  struct t552_testdata *config = (struct t552_testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
@@ -123,12 +121,11 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t t552_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
   size_t  available = sizeof(databuf) - current_offset; /* What we have to
@@ -140,16 +137,13 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return given;
 }
 
-
-static size_t write_callback(char *ptr, size_t size, size_t nmemb,
-                             void *stream)
+static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   int amount = curlx_uztosi(size * nmemb);
   curl_mprintf("%.*s", amount, (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
-
 
 static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
@@ -164,13 +158,11 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_UNKNOWNCMD;
 }
 
-
-
-CURLcode test(char *URL)
+static CURLcode test_lib552(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct testdata config;
+  struct t552_testdata config;
   size_t i;
   static const char fill[] = "test data";
 
@@ -193,10 +185,10 @@ CURLcode test(char *URL)
 
   /* Setup read callback */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t552_read_cb);
 
   /* Write callback */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t552_write_cb);
 
   /* Ioctl function */
   test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);

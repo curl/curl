@@ -38,6 +38,10 @@
 #ifdef USE_XATTR
 int fwrite_xattr(CURL *curl, const char *url, int fd);
 
+#ifdef UNITTESTS
+UNITTEST char *stripcredentials(const char *url);
+#endif
+
 #else
 #define fwrite_xattr(a,b,c) 0
 #endif

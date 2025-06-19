@@ -24,7 +24,7 @@ Connection: close
 http
 </server>
 <tool>
-lib%TESTNUMBER
+lib1514
 </tool>
 <name>
 HTTP 1.0 POST with read callback and unknown data size

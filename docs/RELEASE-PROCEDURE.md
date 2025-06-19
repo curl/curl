@@ -14,6 +14,8 @@ in the source code repo
 
 - update `docs/THANKS`
 
+- update the "past releases" section in `docs/VERSIONS.md`
+
 - make sure all relevant changes are committed on the master branch
 
 - tag the git repo in this style: `git tag -a curl-7_34_0`. -a annotates the

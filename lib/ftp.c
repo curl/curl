@@ -60,7 +60,7 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "strerror.h"
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
@@ -765,7 +765,12 @@ static CURLcode ftp_state_user(struct Curl_easy *data,
 static CURLcode ftp_state_pwd(struct Curl_easy *data,
                               struct ftp_conn *ftpc)
 {
-  CURLcode result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
+  CURLcode result;
+#ifdef DEBUGBUILD
+  if(!data->id && getenv("CURL_FTP_PWD_STOP"))
+    return CURLE_OK;
+#endif
+  result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
   if(!result)
     ftp_state(data, ftpc, FTP_PWD);
 
@@ -1020,11 +1025,11 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     switch(sa->sa_family) {
 #ifdef USE_IPV6
     case AF_INET6:
-      r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      r = Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
     if(!r) {
@@ -1245,7 +1250,7 @@ out:
     }
     data->conn->bits.do_more = FALSE;
     Curl_pgrsTime(data, TIMER_STARTACCEPT);
-    Curl_expire(data, data->set.accepttimeout ?
+    Curl_expire(data, (data->set.accepttimeout > 0) ?
                 data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT,
                 EXPIRE_FTP_ACCEPT);
   }
@@ -4117,7 +4122,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      will try to send the QUIT command, otherwise it will just return.
   */
   ftpc->shutdown = TRUE;
-  if(dead_connection)
+  if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;
 
   /* The FTP session may or may not have been allocated/setup at this point! */

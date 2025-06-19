@@ -35,13 +35,14 @@ if(BUILD_CURL_EXE)
 endif()
 
 add_subdirectory(http)
-add_subdirectory(http/clients)
+add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(tunit)
 add_subdirectory(unit)
 add_subdirectory(certs)
 
+# Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)
   if(NOT BUILD_LIBCURL_DOCS)
     string(APPEND _test_flags " !documentation")
@@ -68,10 +69,11 @@ function(curl_add_runtests _targetname _test_flags)
   )
 endfunction()
 
+# Add a pytests target with customized flags
 function(curl_add_pytests _targetname _test_flags)
   set(_depends "")
   if(NOT _targetname STREQUAL "pytest-ci")
-    set(_depends "test-http-clients")
+    set(_depends "clients")
   endif()
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}

@@ -54,6 +54,7 @@ This IS the real page!
 <features>
 !SSPI
 NTLM
+digest
 </features>
 <server>
 http

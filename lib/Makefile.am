@@ -52,12 +52,11 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -I$(top_builddir)/lib
+              -I$(top_builddir)/lib     \
+              -I$(srcdir)
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
-
-include Makefile.soname
 
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
@@ -69,7 +68,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-# Makefile.inc provides the CSOURCES and HHEADERS defines
+# Get CSOURCES, HHEADERS variables
 include Makefile.inc
 
 if DOING_NATIVE_WINDOWS
@@ -77,21 +76,13 @@ CSOURCES += dllmain.c
 endif
 
 if USE_UNITY
-# Keep these separate to avoid duplicate definitions when linking libtests
-# in static mode.
-curl_EXCLUDE = curl_threads.c curlx/timediff.c curlx/warnless.c
-if CURLDEBUG
-# We must compile this source separately to avoid memdebug.h redefinitions
-# applying to it.
-curl_EXCLUDE += memdebug.c
-endif
 libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CSOURCES) > libcurl_unity.c
 
 nodist_libcurl_la_SOURCES = libcurl_unity.c
-libcurl_la_SOURCES = $(curl_EXCLUDE)
+libcurl_la_SOURCES =
 nodist_libcurlu_la_SOURCES = libcurl_unity.c
-libcurlu_la_SOURCES = $(curl_EXCLUDE)
+libcurlu_la_SOURCES =
 CLEANFILES = libcurl_unity.c
 else
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
@@ -103,6 +94,8 @@ libcurl_la_LDFLAGS_EXTRA =
 libcurl_la_CFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_VERSION_INFO
+# Get VERSIONCHANGE, VERSIONADD, VERSIONDEL, VERSIONINFO variables
+include Makefile.soname
 libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
 endif
 

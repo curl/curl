@@ -423,10 +423,9 @@ FAQ
   backends.
 
   curl can be built to use one of the following SSL alternatives: OpenSSL,
-  LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Secure Transport
-  (native iOS/macOS), Schannel (native Windows), BearSSL or Rustls. They all
-  have their pros and cons, and we try to maintain a comparison of them here:
-  https://curl.se/docs/ssl-compared.html
+  LibreSSL, BoringSSL, AWS-LC, GnuTLS, wolfSSL, mbedTLS, Schannel (native
+  Windows) or Rustls. They all have their pros and cons, and we try to
+  maintain a comparison of them here: https://curl.se/docs/ssl-compared.html
 
   2.3 How do I upgrade curl.exe in Windows?
 
@@ -918,8 +917,8 @@ FAQ
 
   4.9 curl cannot authenticate to a server that requires NTLM?
 
-  NTLM support requires OpenSSL, GnuTLS, mbedTLS, Secure Transport, or
-  Microsoft Windows libraries at build-time to provide this functionality.
+  NTLM support requires OpenSSL, GnuTLS, mbedTLS or Microsoft Windows
+  libraries at build-time to provide this functionality.
 
   4.10 My HTTP request using HEAD, PUT or DELETE does not work
 

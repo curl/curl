@@ -31,10 +31,10 @@
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
 
-static char testbuf[MAX_INPUT_LENGTH + 2];
-
-CURLcode test(char *URL)
+static CURLcode test_lib1911(char *URL)
 {
+  static char testbuf[MAX_INPUT_LENGTH + 2];
+
   const struct curl_easyoption *o;
   CURL *easy;
   int error = 0;

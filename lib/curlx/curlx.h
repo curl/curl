@@ -71,4 +71,7 @@
 #include "inet_pton.h"
 /* for curlx_inet_pton */
 
+#include "inet_ntop.h"
+/* for curlx_inet_ntop */
+
 #endif /* HEADER_CURL_CURLX_H */

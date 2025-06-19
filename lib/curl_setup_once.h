@@ -45,7 +45,7 @@
 #include <sys/stat.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #include <sys/time.h>
 #endif
 
@@ -96,7 +96,7 @@
 #  endif
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 
@@ -197,16 +197,18 @@ struct timeval {
  */
 
 #ifdef HAVE_CLOSESOCKET
-#  define sclose(x)  closesocket((x))
+#  define CURL_SCLOSE(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
-#  define sclose(x)  CloseSocket((x))
+#  define CURL_SCLOSE(x)  CloseSocket((x))
 #elif defined(MSDOS)  /* Watt-32 */
-#  define sclose(x)  close_s((x))
+#  define CURL_SCLOSE(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
-#  define sclose(x)  lwip_close((x))
+#  define CURL_SCLOSE(x)  lwip_close((x))
 #else
-#  define sclose(x)  close((x))
+#  define CURL_SCLOSE(x)  close((x))
 #endif
+
+#define sclose(x)  CURL_SCLOSE(x)
 
 /*
  * Stack-independent version of fcntl() on sockets:

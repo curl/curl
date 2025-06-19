@@ -66,15 +66,15 @@ This does not just mean no other thread that is using libcurl.
 
 # Names
 
-SSL backend names (case-insensitive): BearSSL, GnuTLS, mbedTLS, OpenSSL,
-Rustls, Schannel, Secure-Transport, wolfSSL
+SSL backend names (case-insensitive): GnuTLS, mbedTLS, OpenSSL, Rustls,
+Schannel, wolfSSL
 
 The name "OpenSSL" is used for all versions of OpenSSL and its associated
 forks/flavors in this function. OpenSSL, BoringSSL, LibreSSL, quictls and
-AmiSSL are all supported by libcurl, but in the eyes of
-curl_global_sslset(3) they are all just "OpenSSL". They all mostly
-provide the same API. curl_version_info(3) can return more specific info about
-the exact OpenSSL flavor and version number in use.
+AmiSSL are all supported by libcurl, but in the eyes of curl_global_sslset(3)
+they are all just "OpenSSL". They all mostly provide the same API.
+curl_version_info(3) can return more specific info about the exact OpenSSL
+flavor and version number in use.
 
 # struct
 
@@ -93,11 +93,11 @@ typedef enum {
   CURLSSLBACKEND_POLARSSL = 6, /* deprecated */
   CURLSSLBACKEND_WOLFSSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,
-  CURLSSLBACKEND_SECURETRANSPORT = 9,
+  CURLSSLBACKEND_SECURETRANSPORT = 9, /* deprecated */
   CURLSSLBACKEND_AXTLS = 10, /* deprecated */
   CURLSSLBACKEND_MBEDTLS = 11,
   CURLSSLBACKEND_MESALINK = 12, /* deprecated */
-  CURLSSLBACKEND_BEARSSL = 13,
+  CURLSSLBACKEND_BEARSSL = 13, /* deprecated */
   CURLSSLBACKEND_RUSTLS = 14
 } curl_sslbackend;
 ~~~

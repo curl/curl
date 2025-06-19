@@ -13,7 +13,6 @@ Protocol:
 TLS-backend:
   - GnuTLS
   - OpenSSL
-  - BearSSL
   - wolfSSL
   - mbedTLS
 Added-in: 8.12.0

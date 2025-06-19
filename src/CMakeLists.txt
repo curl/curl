@@ -30,8 +30,7 @@ set(_curl_definitions "")
 
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   list(APPEND _curl_definitions "USE_MANUAL")
-  add_custom_command(
-    OUTPUT "tool_hugehelp.c"
+  add_custom_command(OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable INCLUDEDUP all */" >> "tool_hugehelp.c"
@@ -54,8 +53,7 @@ endif()
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
     list(APPEND _curl_definitions "CURL_CA_EMBED")
-    add_custom_command(
-      OUTPUT "tool_ca_embed.c"
+    add_custom_command(OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
       DEPENDS
@@ -68,7 +66,7 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES' variables
+# Get CURL_CFILES, CURLX_CFILES, CURL_HFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 

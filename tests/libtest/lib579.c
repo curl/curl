@@ -25,16 +25,7 @@
 
 #include "memdebug.h"
 
-static const char * const testpost[]={
-  "one",
-  "two",
-  "three",
-  "and a final longer crap: four",
-  NULL
-};
-
-
-struct WriteThis {
+struct t579_WriteThis {
   int counter;
 };
 
@@ -46,7 +37,7 @@ static void progress_final_report(void)
 {
   FILE *moo = fopen(libtest_arg2, "ab");
   curl_mfprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
-                              last_ul, last_ul_total);
+                last_ul, last_ul_total);
   if(moo)
     fclose(moo);
   else
@@ -54,8 +45,8 @@ static void progress_final_report(void)
   started = FALSE;
 }
 
-static int progress_callback(void *clientp, double dltotal, double dlnow,
-                             double ultotal, double ulnow)
+static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
+                                  double ultotal, double ulnow)
 {
   (void)clientp; /* UNUSED */
   (void)dltotal; /* UNUSED */
@@ -70,7 +61,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   if(!started) {
     FILE *moo = fopen(libtest_arg2, "ab");
     curl_mfprintf(moo ? moo : stderr, "Progress: start UL %zu/%zu\n",
-                                last_ul, last_ul_total);
+                  last_ul, last_ul_total);
     if(moo)
       fclose(moo);
     else
@@ -82,9 +73,17 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   return 0;
 }
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct WriteThis *pooh = (struct WriteThis *)userp;
+  static const char * const testpost[] = {
+    "one",
+    "two",
+    "three",
+    "and a final longer crap: four",
+    NULL
+  };
+
+  struct t579_WriteThis *pooh = (struct t579_WriteThis *)userp;
   const char *data;
 
   if(size*nmemb < 1)
@@ -101,12 +100,12 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib579(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
   struct curl_slist *slist = NULL;
-  struct WriteThis pooh;
+  struct t579_WriteThis pooh;
   pooh.counter = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -136,7 +135,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t579_read_cb);
 
   /* pointer to pass to our read function */
   test_setopt(curl, CURLOPT_READDATA, &pooh);
@@ -155,7 +154,7 @@ CURLcode test(char *URL)
 
   /* we want to use our own progress function */
   test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t579_progress_callback);
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);

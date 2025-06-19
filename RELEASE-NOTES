@@ -1,51 +1,45 @@
-curl and libcurl 8.14.1
+curl and libcurl 8.15.0
 
- Public curl releases:         268
+ Public curl releases:         269
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3431
+ Contributors:                 3432
 
 This release includes the following changes:
 
+ o TLS: remove support for Secure Transport and BearSSL [19]
 
 This release includes the following bugfixes:
 
- o asyn-thrdd: fix cleanup when RR fails due to OOM [20]
- o autotools: recognize more Linux targets when setting `-D_GNU_SOURCE` [35]
- o BUG-BOUNTY.md. mention the medium bounty amount in 2025 [5]
- o cmake: fix missed version number for multi-pkg-config detections [14]
- o cmdline-docs: mention HTTP resumed uploads to be shaky [21]
- o curl: make -N handled correctly [34]
- o curl: upload from '.' fix [9]
- o dllmain: exclude from Cygwin builds [32]
- o docs/tests: remove mention of hyper [23]
- o docs: fix typos [12]
- o ftp: fix teardown of DATA connection in done [31]
- o http: fail early when rewind of input failed when following redirects [2]
- o license: update some copyright links to curl.se [24]
- o memanalyze.pl: fix getaddrinfo/freeaddrinfo checks [25]
- o misc: fix spelling [15]
- o misc: we write *an* IPv6 address [10]
- o multi: fix add_handle resizing [3]
- o spelling: 'a' vs 'an' [8]
- o spelling: call it null-terminate consistently [6]
- o test1510: fix expectation [19]
- o tests: await portfile to be complete [1]
- o tests: fix checks for https-mtls proto [30]
- o tests: improve server start reliability [18]
- o tests: move test docs into /docs [16]
- o tests: re-enable 1510, document heimdal memleak [22]
- o tests: test mtls also w/ clientAuth EKU only [28]
- o tests: test mtls with --insecure [29]
- o tls BIOs: handle BIO_CTRL_EOF correctly [33]
- o tool_getparam: make --no-anyauth not be accepted [13]
- o tool_getparam: refactored, simplified [4]
- o tool_getparam: remove two nextarg NULL checks [11]
- o VULN-DISCLOSURE-POLICY.md: the distros list wants <= 7 days embargo [26]
- o wolfssl: fix sending of early data [7]
- o ws: handle blocked sends better [27]
- o ws: tests and fixes [17]
+ o build: assume `sys/socket.h`, `sys/time.h` on non-Windows (as in `curl/curl.h`) [21]
+ o cmake: document OpenSSL and ngtcp2 crypto lib custom variables [29]
+ o cmake: drop never propagated C macros [22]
+ o cmake: replace `cmakelint` with `cmake-lint` from `cmakelang`, fix issues [20]
+ o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
+ o curl.h: remove the "RESERVED" error codes [2]
+ o curl_path: make SFTP handle a path like /~ properly. [11]
+ o docs/examples: add ftp-delete.c [5]
+ o INSTALL.md: cygwin details and add source code link [4]
+ o libssh: de-complex myssh_statemach_act() [18]
+ o pingpong: on disconnect, check for unflushed pingpong state [12]
+ o pytest: adapt for runs with openssl-1.1.1
+ o pytest: disable test_07_37 and test_07_36 with openssl's quic [1]
+ o RELEASE-PROCEDURE.md: update docs/VERSIONS [7]
+ o schannel: drop Windows 2000 compatibility logic [26]
+ o SCP/SFTP: avoid busy loop after EAGAIN [8]
+ o system.h: remove some macros [6]
+ o test1117: reduce write delays [9]
+ o tests/servers.pm: add more ways to figure out current user [17]
+ o tests: drop mk-bundle exceptions [25]
+ o tests: fail torture if !valgrind&threaded resolver [31]
+ o tests: torture: don't duplicate valgrind command [32]
+ o tool_getparam: fix --ftp-pasv [15]
+ o tool_operate: fix return code when --retry is used but not triggered [13]
+ o url: fix connection lifetime checks [14]
+ o urlapi: simplify and split into sub functions [16]
+ o vauth: move auth structs to conn meta data [30]
+ o windows: reduce/stop loading DLLs at runtime [27]
 
 This release includes the following known bugs:
 
@@ -59,7 +53,6 @@ Planned upcoming removals include:
 
  o Support for the msh3 HTTP/3 backend
  o Supporting curl builds using VS2008
- o The Secure Transport and BearSSL TLS backends
  o The winbuild build system
  o Windows CE support
 
@@ -68,47 +61,38 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Calvin Ruocco, Dan Fandrich, Daniel Stenberg, denandz on github,
-  Ethan Everett, Jacob Mealey, Jeremy Drake, Jeroen Ooms, John Bampton,
-  Kadambini Nema, Michael Kaufmann, Rasmus Melchior Jacobsen, Ray Satiro,
-  Samuel Henrique, Stefan Eissing, Viktor Szakats, x-xiang on github,
-  Yedaya Katsman, Yuyi Wang, z2_
-  (20 contributors)
+  Carlos Henrique Lima Melara, Christian Weisgerber, Dan Fandrich,
+  Daniel Stenberg, fjaell on github, John Haugabook, Orgad Shaneh, Ray Satiro,
+  renovate[bot], Stefan Eissing, Viktor Szakats, Yedaya Katsman
+  (12 contributors)
 
 References to bug reports and discussions on issues:
 
- [1] = https://curl.se/bug/?i=17492
- [2] = https://curl.se/bug/?i=17472
- [3] = https://curl.se/bug/?i=17473
- [4] = https://curl.se/bug/?i=17448
- [5] = https://curl.se/bug/?i=17470
- [6] = https://curl.se/bug/?i=17489
- [7] = https://curl.se/bug/?i=17481
- [8] = https://curl.se/bug/?i=17487
- [9] = https://curl.se/bug/?i=17513
- [10] = https://curl.se/bug/?i=17484
- [11] = https://curl.se/bug/?i=17483
- [12] = https://curl.se/bug/?i=17480
- [13] = https://curl.se/bug/?i=17508
- [14] = https://curl.se/bug/?i=16980
- [15] = https://curl.se/bug/?i=17478
- [16] = https://curl.se/bug/?i=17463
- [17] = https://curl.se/bug/?i=17136
- [18] = https://curl.se/bug/?i=17516
- [19] = https://curl.se/bug/?i=17515
- [20] = https://curl.se/bug/?i=17507
- [21] = https://curl.se/bug/?i=17521
- [22] = https://curl.se/bug/?i=17462
- [23] = https://curl.se/bug/?i=17500
- [24] = https://curl.se/bug/?i=17502
- [25] = https://curl.se/bug/?i=17503
- [26] = https://curl.se/bug/?i=17497
- [27] = https://curl.se/bug/?i=17496
- [28] = https://curl.se/bug/?i=17493
- [29] = https://curl.se/bug/?i=17493
- [30] = https://curl.se/bug/?i=17493
- [31] = https://curl.se/bug/?i=17482
- [32] = https://curl.se/bug/?i=17262
- [33] = https://curl.se/bug/?i=17471
- [34] = https://curl.se/bug/?i=17527
- [35] = https://curl.se/bug/?i=17512
+ [1] = https://curl.se/bug/?i=17539
+ [2] = https://curl.se/bug/?i=17563
+ [3] = https://curl.se/bug/?i=17535
+ [4] = https://curl.se/bug/?i=17485
+ [5] = https://curl.se/bug/?i=17540
+ [6] = https://curl.se/bug/?i=17498
+ [7] = https://curl.se/bug/?i=17584
+ [8] = https://curl.se/bug/?i=17533
+ [9] = https://curl.se/bug/?i=17530
+ [11] = https://curl.se/bug/?i=17534
+ [12] = https://curl.se/bug/?i=17555
+ [13] = https://curl.se/bug/?i=17554
+ [14] = https://curl.se/bug/?i=17571
+ [15] = https://curl.se/bug/?i=17545
+ [16] = https://curl.se/bug/?i=17565
+ [17] = https://curl.se/bug/?i=17544
+ [18] = https://curl.se/bug/?i=17573
+ [19] = https://curl.se/bug/?i=16677
+ [20] = https://curl.se/bug/?i=17576
+ [21] = https://curl.se/bug/?i=17522
+ [22] = https://curl.se/bug/?i=17580
+ [25] = https://curl.se/bug/?i=17468
+ [26] = https://curl.se/bug/?i=17447
+ [27] = https://curl.se/bug/?i=17413
+ [29] = https://curl.se/bug/?i=17574
+ [30] = https://curl.se/bug/?i=17557
+ [31] = https://curl.se/bug/?i=17501
+ [32] = https://curl.se/bug/?i=17501

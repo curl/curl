@@ -21,7 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# ./src/Makefile.inc
+# Shared between CMakeLists.txt and Makefile.am
+
 # Using the backslash as line continuation character might be problematic with
 # some make flavours. If we ever want to change this in a portable manner then
 # we should consider this idea :

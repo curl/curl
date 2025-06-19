@@ -127,6 +127,7 @@ struct ssl_connect_data {
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
   BIT(prefs_checked);               /* SSL preferences have been checked */
+  BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
 
@@ -175,7 +176,6 @@ struct Curl_ssl {
   CURLcode (*set_engine_default)(struct Curl_easy *data);
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
-  bool (*false_start)(void);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,

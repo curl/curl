@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib589(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -47,8 +47,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
   test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 
-#ifdef LIB584
-  {
+  if(testnum == 584) {
     curl_mime *mime = curl_mime_init(curl);
     curl_mimepart *part = curl_mime_addpart(mime);
     curl_mime_name(part, "fake");
@@ -59,7 +58,6 @@ CURLcode test(char *URL)
     if(res)
       goto test_cleanup;
   }
-#endif
 
   test_setopt(curl, CURLOPT_MIMEPOST, NULL);
 

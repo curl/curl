@@ -21,132 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * HTTP/2 server push
- * </DESC>
- */
-/* curl stuff */
-#include <curl/curl.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+static int verbose_d = 1;
 
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
-
-#ifdef _WIN32
-#define strdup _strdup
-#endif
-
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
-#endif
-
-#ifndef _MSC_VER
-static int verbose = 1;
-
-static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
-{
-  /*
-   * This is the trace look that is similar to what libcurl makes on its
-   * own.
-   */
-  static const char * const s_infotype[] = {
-    "* ", "< ", "> ", "{ ", "} ", "{ ", "} "
-  };
-  if(idsbuf && *idsbuf)
-    fprintf(log, "%s%s", idsbuf, s_infotype[type]);
-  else
-    fputs(s_infotype[type], log);
-}
-
-#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
-#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
-                                   CURL_FORMAT_CURL_OFF_T "] "
-/*
-** callback for CURLOPT_DEBUGFUNCTION
-*/
-static int debug_cb(CURL *handle, curl_infotype type,
-                    char *data, size_t size,
-                    void *userdata)
-{
-  FILE *output = stderr;
-  static int newl = 0;
-  static int traced_data = 0;
-  char idsbuf[60];
-  curl_off_t xfer_id, conn_id;
-
-  (void)handle; /* not used */
-  (void)userdata;
-
-  if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
-       conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
-                     conn_id);
-    }
-    else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
-    }
-  }
-  else
-    idsbuf[0] = 0;
-
-  switch(type) {
-  case CURLINFO_HEADER_OUT:
-    if(size > 0) {
-      size_t st = 0;
-      size_t i;
-      for(i = 0; i < size - 1; i++) {
-        if(data[i] == '\n') { /* LF */
-          if(!newl) {
-            log_line_start(output, idsbuf, type);
-          }
-          (void)fwrite(data + st, i - st + 1, 1, output);
-          st = i + 1;
-          newl = 0;
-        }
-      }
-      if(!newl)
-        log_line_start(output, idsbuf, type);
-      (void)fwrite(data + st, i - st + 1, 1, output);
-    }
-    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
-    traced_data = 0;
-    break;
-  case CURLINFO_TEXT:
-  case CURLINFO_HEADER_IN:
-    if(!newl)
-      log_line_start(output, idsbuf, type);
-    (void)fwrite(data, size, 1, output);
-    newl = (size && (data[size - 1] != '\n')) ? 1 : 0;
-    traced_data = 0;
-    break;
-  case CURLINFO_DATA_OUT:
-  case CURLINFO_DATA_IN:
-  case CURLINFO_SSL_DATA_IN:
-  case CURLINFO_SSL_DATA_OUT:
-    if(!traced_data) {
-      if(!newl)
-        log_line_start(output, idsbuf, type);
-      fprintf(output, "[%ld bytes data]\n", (long)size);
-      newl = 0;
-      traced_data = 1;
-    }
-    break;
-  default: /* nada */
-    newl = 0;
-    traced_data = 1;
-    break;
-  }
-
-  return 0;
-}
-
-struct transfer {
+struct transfer_d {
   int idx;
   CURL *easy;
   char filename[128];
@@ -162,24 +40,24 @@ struct transfer {
   CURLcode result;
 };
 
-static size_t transfer_count = 1;
-static struct transfer *transfers;
-static int forbid_reuse = 0;
+static size_t transfer_count_d = 1;
+static struct transfer_d *transfer_d;
+static int forbid_reuse_d = 0;
 
-static struct transfer *get_transfer_for_easy(CURL *easy)
+static struct transfer_d *get_transfer_for_easy_d(CURL *easy)
 {
   size_t i;
-  for(i = 0; i < transfer_count; ++i) {
-    if(easy == transfers[i].easy)
-      return &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    if(easy == transfer_d[i].easy)
+      return &transfer_d[i];
   }
   return NULL;
 }
 
-static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
-                          void *userdata)
+static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
+                            void *userdata)
 {
-  struct transfer *t = userdata;
+  struct transfer_d *t = userdata;
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
@@ -216,11 +94,11 @@ static size_t my_write_cb(char *buf, size_t nitems, size_t buflen,
   return (size_t)nwritten;
 }
 
-static int my_progress_cb(void *userdata,
-                          curl_off_t dltotal, curl_off_t dlnow,
-                          curl_off_t ultotal, curl_off_t ulnow)
+static int my_progress_d_cb(void *userdata,
+                            curl_off_t dltotal, curl_off_t dlnow,
+                            curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct transfer *t = userdata;
+  struct transfer_d *t = userdata;
   (void)ultotal;
   (void)ulnow;
   (void)dltotal;
@@ -232,9 +110,10 @@ static int my_progress_cb(void *userdata,
   return 0;
 }
 
-static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 long http_version, struct curl_slist *host,
-                 CURLSH *share, int use_earlydata, int fresh_connect)
+static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
+                             long http_version, struct curl_slist *host,
+                             CURLSH *share, int use_earlydata,
+                             int fresh_connect)
 {
   curl_easy_setopt(hnd, CURLOPT_SHARE, share);
   curl_easy_setopt(hnd, CURLOPT_URL, url);
@@ -243,14 +122,14 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
   curl_easy_setopt(hnd, CURLOPT_ACCEPT_ENCODING, "");
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
+  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_d_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_cb);
+  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_d_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(use_earlydata)
     curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
-  if(forbid_reuse)
+  if(forbid_reuse_d)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
   if(host)
     curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
@@ -258,19 +137,18 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
     curl_easy_setopt(hnd, CURLOPT_FRESH_CONNECT, 1L);
 
   /* please be verbose */
-  if(verbose) {
+  if(verbose_d) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
   }
 
-#if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
-#endif
+
   return 0; /* all is good */
 }
 
-static void usage(const char *msg)
+static void usage_hx_download(const char *msg)
 {
   if(msg)
     fprintf(stderr, "%s\n", msg);
@@ -292,14 +170,12 @@ static void usage(const char *msg)
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
-#endif /* !_MSC_VER */
 
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+static int test_hx_download(int argc, char *argv[])
 {
-#ifndef _MSC_VER
   CURLM *multi_handle;
   struct CURLMsg *m;
   CURLSH *share;
@@ -310,7 +186,7 @@ int main(int argc, char *argv[])
   size_t abort_offset = 0;
   size_t fail_offset = 0;
   int abort_paused = 0, use_earlydata = 0;
-  struct transfer *t;
+  struct transfer_d *t;
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
@@ -320,10 +196,10 @@ int main(int argc, char *argv[])
   int fresh_connect = 0;
   int result = 0;
 
-  while((ch = getopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
+  while((ch = cgetopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
     switch(ch) {
     case 'h':
-      usage(NULL);
+      usage_hx_download(NULL);
       result = 2;
       goto cleanup;
     case 'a':
@@ -333,64 +209,64 @@ int main(int argc, char *argv[])
       use_earlydata = 1;
       break;
     case 'f':
-      forbid_reuse = 1;
+      forbid_reuse_d = 1;
       break;
     case 'm':
-      max_parallel = (size_t)strtol(optarg, NULL, 10);
+      max_parallel = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'n':
-      transfer_count = (size_t)strtol(optarg, NULL, 10);
+      transfer_count_d = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'x':
       fresh_connect = 1;
       break;
     case 'A':
-      abort_offset = (size_t)strtol(optarg, NULL, 10);
+      abort_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'F':
-      fail_offset = (size_t)strtol(optarg, NULL, 10);
+      fail_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'M':
-      max_host_conns = (size_t)strtol(optarg, NULL, 10);
+      max_host_conns = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'P':
-      pause_offset = (size_t)strtol(optarg, NULL, 10);
+      pause_offset = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'r':
       free(resolve);
-      resolve = strdup(optarg);
+      resolve = strdup(coptarg);
       break;
     case 'T':
-      max_total_conns = (size_t)strtol(optarg, NULL, 10);
+      max_total_conns = (size_t)strtol(coptarg, NULL, 10);
       break;
     case 'V': {
-      if(!strcmp("http/1.1", optarg))
+      if(!strcmp("http/1.1", coptarg))
         http_version = CURL_HTTP_VERSION_1_1;
-      else if(!strcmp("h2", optarg))
+      else if(!strcmp("h2", coptarg))
         http_version = CURL_HTTP_VERSION_2_0;
-      else if(!strcmp("h3", optarg))
+      else if(!strcmp("h3", coptarg))
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
-        usage("invalid http version");
+        usage_hx_download("invalid http version");
         result = 1;
         goto cleanup;
       }
       break;
     }
     default:
-      usage("invalid option");
+      usage_hx_download("invalid option");
       result = 1;
       goto cleanup;
     }
   }
-  argc -= optind;
-  argv += optind;
+  argc -= coptind;
+  argv += coptind;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");
 
   if(argc != 1) {
-    usage("not enough arguments");
+    usage_hx_download("not enough arguments");
     result = 2;
     goto cleanup;
   }
@@ -412,8 +288,8 @@ int main(int argc, char *argv[])
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfers = calloc(transfer_count, sizeof(*transfers));
-  if(!transfers) {
+  transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
+  if(!transfer_d) {
     fprintf(stderr, "error allocating transfer structs\n");
     result = 1;
     goto cleanup;
@@ -427,21 +303,21 @@ int main(int argc, char *argv[])
                     (long)max_host_conns);
 
   active_transfers = 0;
-  for(i = 0; i < transfer_count; ++i) {
-    t = &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    t = &transfer_d[i];
     t->idx = (int)i;
     t->abort_at = (curl_off_t)abort_offset;
     t->fail_at = (curl_off_t)fail_offset;
     t->pause_at = (curl_off_t)pause_offset;
   }
 
-  n = (max_parallel < transfer_count) ? max_parallel : transfer_count;
+  n = (max_parallel < transfer_count_d) ? max_parallel : transfer_count_d;
   for(i = 0; i < n; ++i) {
-    t = &transfers[i];
+    t = &transfer_d[i];
     t->easy = curl_easy_init();
     if(!t->easy ||
-       setup(t->easy, url, t, http_version, host, share, use_earlydata,
-             fresh_connect)) {
+      setup_hx_download(t->easy, url, t, http_version, host, share,
+                        use_earlydata, fresh_connect)) {
       fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       result = 1;
       goto cleanup;
@@ -471,7 +347,7 @@ int main(int argc, char *argv[])
         CURL *e = m->easy_handle;
         --active_transfers;
         curl_multi_remove_handle(multi_handle, e);
-        t = get_transfer_for_easy(e);
+        t = get_transfer_for_easy_d(e);
         if(t) {
           t->done = 1;
           t->result = m->data.result;
@@ -492,8 +368,8 @@ int main(int argc, char *argv[])
       /* nothing happening, maintenance */
       if(abort_paused) {
         /* abort paused transfers */
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->done && t->paused && t->easy) {
             curl_multi_remove_handle(multi_handle, t->easy);
             t->done = 1;
@@ -504,8 +380,8 @@ int main(int argc, char *argv[])
       }
       else {
         /* resume one paused transfer */
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->done && t->paused) {
             t->resumed = 1;
             t->paused = 0;
@@ -517,13 +393,13 @@ int main(int argc, char *argv[])
       }
 
       while(active_transfers < max_parallel) {
-        for(i = 0; i < transfer_count; ++i) {
-          t = &transfers[i];
+        for(i = 0; i < transfer_count_d; ++i) {
+          t = &transfer_d[i];
           if(!t->started) {
             t->easy = curl_easy_init();
             if(!t->easy ||
-               setup(t->easy, url, t, http_version, host, share,
-                     use_earlydata, fresh_connect)) {
+              setup_hx_download(t->easy, url, t, http_version, host, share,
+                                use_earlydata, fresh_connect)) {
               fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
               result = 1;
               goto cleanup;
@@ -536,7 +412,7 @@ int main(int argc, char *argv[])
           }
         }
         /* all started */
-        if(i == transfer_count)
+        if(i == transfer_count_d)
           break;
       }
     } while(m);
@@ -545,8 +421,8 @@ int main(int argc, char *argv[])
 
   curl_multi_cleanup(multi_handle);
 
-  for(i = 0; i < transfer_count; ++i) {
-    t = &transfers[i];
+  for(i = 0; i < transfer_count_d; ++i) {
+    t = &transfer_d[i];
     if(t->out) {
       fclose(t->out);
       t->out = NULL;
@@ -558,7 +434,7 @@ int main(int argc, char *argv[])
     if(t->result)
       result = t->result;
   }
-  free(transfers);
+  free(transfer_d);
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
@@ -566,10 +442,4 @@ cleanup:
   free(resolve);
 
   return result;
-#else
-  (void)argc;
-  (void)argv;
-  fprintf(stderr, "Not supported with this compiler.\n");
-  return 1;
-#endif /* !_MSC_VER */
 }

@@ -22,19 +22,20 @@
  *
  ***************************************************************************/
 #include "test.h"
+
+#include "testutil.h"
 #include "memdebug.h"
 
-static const char * const HOSTHEADER = "Host: www.host.foo.com";
 #define JAR libtest_arg2
 #define THREADS 2
 
 /* struct containing data of a thread */
-struct Tdata {
+struct t506_Tdata {
   CURLSH *share;
   char *url;
 };
 
-struct userdata {
+struct t506_userdata {
   const char *text;
   int counter;
 };
@@ -42,11 +43,11 @@ struct userdata {
 static int locks[3];
 
 /* lock callback */
-static void test_lock(CURL *handle, curl_lock_data data,
-                      curl_lock_access laccess, void *useptr)
+static void t506_test_lock(CURL *handle, curl_lock_data data,
+                           curl_lock_access laccess, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t506_userdata *user = (struct t506_userdata *)useptr;
   int locknum;
 
   (void)handle;
@@ -82,10 +83,10 @@ static void test_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t506_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
-  struct userdata *user = (struct userdata *)useptr;
+  struct t506_userdata *user = (struct t506_userdata *)useptr;
   int locknum;
   (void)handle;
   switch(data) {
@@ -117,21 +118,19 @@ static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
   user->counter++;
 }
 
-
 /* build host entry */
 static struct curl_slist *sethost(struct curl_slist *headers)
 {
   (void)headers;
-  return curl_slist_append(NULL, HOSTHEADER);
+  return curl_slist_append(NULL, "Host: www.host.foo.com");
 }
 
-
 /* the dummy thread function */
-static void *test_fire(void *ptr)
+static void *t506_test_fire(void *ptr)
 {
   CURLcode code;
   struct curl_slist *headers;
-  struct Tdata *tdata = (struct Tdata*)ptr;
+  struct t506_Tdata *tdata = (struct t506_Tdata*)ptr;
   CURL *curl;
 
   curl = curl_easy_init();
@@ -153,7 +152,7 @@ static void *test_fire(void *ptr)
   if(code) {
     int i = 0;
     curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
-            tdata->url, i, (int)code);
+                  tdata->url, i, (int)code);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -163,29 +162,21 @@ static void *test_fire(void *ptr)
   return NULL;
 }
 
-
-/* build request url */
-static char *suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
-
-
 /* test function */
-CURLcode test(char *URL)
+static CURLcode test_lib506(char *URL)
 {
   CURLcode res;
   CURLSHcode scode = CURLSHE_OK;
   CURLcode code = CURLE_OK;
   char *url = NULL;
-  struct Tdata tdata;
+  struct t506_Tdata tdata;
   CURL *curl;
   CURLSH *share;
   struct curl_slist *headers = NULL;
   struct curl_slist *cookies = NULL;
   struct curl_slist *next_cookie = NULL;
   int i;
-  struct userdata user;
+  struct t506_userdata user;
 
   user.text = "Pigs in space";
   user.counter = 0;
@@ -207,11 +198,11 @@ CURLcode test(char *URL)
 
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_LOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
+    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, t506_test_lock);
   }
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_UNLOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
+    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, t506_test_unlock);
   }
   if(CURLSHE_OK == scode) {
     curl_mprintf("CURLSHOPT_USERDATA\n");
@@ -265,12 +256,12 @@ CURLcode test(char *URL)
   for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
-    tdata.url   = suburl(URL, i); /* must be curl_free()d */
+    tdata.url   = tutil_suburl(URL, i); /* must be curl_free()d */
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
     curl_mprintf("*** run %d\n",i);
-    test_fire(&tdata);
+    t506_test_fire(&tdata);
 
     curl_free(tdata.url);
   }
@@ -286,7 +277,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  url = suburl(URL, i);
+  url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);
@@ -313,7 +304,7 @@ CURLcode test(char *URL)
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-  url = suburl(URL, i);
+  url = tutil_suburl(URL, i);
   headers = sethost(NULL);
   test_setopt(curl, CURLOPT_HTTPHEADER, headers);
   test_setopt(curl, CURLOPT_URL,        url);
@@ -373,7 +364,7 @@ test_cleanup:
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
     curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
-            (int)scode);
+                  (int)scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

@@ -30,18 +30,13 @@
 #include <fcntl.h>
 #endif
 
+#include "testutil.h"
 #include "memdebug.h"
-
-/* build request url */
-static char *suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
 
 /*
  * Test the Client->Server ANNOUNCE functionality (PUT style)
  */
-CURLcode test(char *URL)
+static CURLcode test_lib568(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -69,7 +64,7 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -110,7 +105,7 @@ CURLcode test(char *URL)
   sdpf = NULL;
 
   /* Make sure we can do a normal request now */
-  stream_uri = suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -126,7 +121,7 @@ CURLcode test(char *URL)
 
   /* Now do a POST style one */
 
-  stream_uri = suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -156,7 +151,7 @@ CURLcode test(char *URL)
   custom_headers = NULL;
 
   /* Make sure we can do a normal request now */
-  stream_uri = suburl(URL, request++);
+  stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;

@@ -27,8 +27,8 @@
 
 /* Test inspired by github issue 3340 */
 
-static size_t writecb(char *buffer, size_t size, size_t nitems,
-                      void *outstream)
+static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
+                             void *outstream)
 {
   (void)buffer;
   (void)size;
@@ -37,7 +37,7 @@ static size_t writecb(char *buffer, size_t size, size_t nitems,
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1518(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -45,18 +45,15 @@ CURLcode test(char *URL)
   long curlRedirectCount;
   char *effectiveUrl = NULL;
   char *redirectUrl = NULL;
-#ifdef LIB1543
   CURLU *urlu = NULL;
-#endif
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-#ifdef LIB1543
-  /* set CURLOPT_URLU */
-  {
+  if(testnum == 1543) {
+    /* set CURLOPT_URLU */
     CURLUcode rc = CURLUE_OK;
     urlu = curl_url();
     if(urlu)
@@ -65,14 +62,13 @@ CURLcode test(char *URL)
       goto test_cleanup;
     }
     test_setopt(curl, CURLOPT_CURLU, urlu);
+    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   }
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-#else
-  test_setopt(curl, CURLOPT_URL, URL);
-  /* just to make it explicit and visible in this test: */
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
-#endif
-
+  else {
+    test_setopt(curl, CURLOPT_URL, URL);
+    /* just to make it explicit and visible in this test: */
+    test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+  }
 
   /* Perform the request, res will get the return code */
   res = curl_easy_perform(curl);
@@ -83,7 +79,7 @@ CURLcode test(char *URL)
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
   curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t1518_write_cb);
 
   curl_mprintf("res %d\n"
                "status %ld\n"
@@ -101,8 +97,6 @@ test_cleanup:
   /* always cleanup */
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-#ifdef LIB1543
   curl_url_cleanup(urlu);
-#endif
   return res;
 }

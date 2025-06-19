@@ -23,7 +23,7 @@
  ***************************************************************************/
 /*
  * This source code is used for lib1502, lib1503, lib1504 and lib1505 with
- * only #ifdefs controlling the cleanup sequence.
+ * only the testnum controlling the cleanup sequence.
  *
  * Test case 1502 converted from bug report #3575448, identifying a memory
  * leak in the CURLOPT_RESOLVE handling with the multi interface.
@@ -37,16 +37,13 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-CURLcode test(char *URL)
+static CURLcode test_lib1502(char *URL)
 {
   CURL *easy = NULL;
   CURL *dup;
   CURLM *multi = NULL;
   int still_running;
   CURLcode res = CURLE_OK;
-
   char redirect[160];
 
   /* DNS cache injection */
@@ -123,35 +120,35 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-#ifdef LIB1502
-  /* undocumented cleanup sequence - type UA */
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-#endif
-
-#ifdef LIB1503
-  /* proper cleanup sequence - type PA */
-  curl_multi_remove_handle(multi, easy);
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-#endif
-
-#ifdef LIB1504
-  /* undocumented cleanup sequence - type UB */
-  curl_easy_cleanup(easy);
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
-#endif
-
-#ifdef LIB1505
-  /* proper cleanup sequence - type PB */
-  curl_multi_remove_handle(multi, easy);
-  curl_easy_cleanup(easy);
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
-#endif
+  switch(testnum) {
+  case 1502:
+  default:
+    /* undocumented cleanup sequence - type UA */
+    curl_multi_cleanup(multi);
+    curl_easy_cleanup(easy);
+    curl_global_cleanup();
+    break;
+  case 1503:
+    /* proper cleanup sequence - type PA */
+    curl_multi_remove_handle(multi, easy);
+    curl_multi_cleanup(multi);
+    curl_easy_cleanup(easy);
+    curl_global_cleanup();
+    break;
+  case 1504:
+    /* undocumented cleanup sequence - type UB */
+    curl_easy_cleanup(easy);
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+    break;
+  case 1505:
+    /* proper cleanup sequence - type PB */
+    curl_multi_remove_handle(multi, easy);
+    curl_easy_cleanup(easy);
+    curl_multi_cleanup(multi);
+    curl_global_cleanup();
+    break;
+  }
 
   curl_slist_free_all(dns_cache_list);
 

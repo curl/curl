@@ -65,7 +65,6 @@
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
-#include "../inet_ntop.h"
 #include "../parsedate.h" /* for the week day and month names */
 #include "../sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "../multiif.h"
@@ -3291,7 +3290,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
                             size_t length, int flags, void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
-  ssize_t nread;
+  size_t nread;
   CURLcode result;
   struct connectdata *conn = data->conn;
   Curl_recv *backup = conn->recv[0];
@@ -3312,7 +3311,7 @@ static ssize_t ssh_tls_recv(libssh2_socket_t sock, void *buffer,
   else if(result)
     return -1; /* generic error */
   Curl_debug(data, CURLINFO_DATA_IN, (const char *)buffer, (size_t)nread);
-  return nread;
+  return (ssize_t)nread;
 }
 
 static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
@@ -3770,58 +3769,63 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
   return ssh_done(data, status);
 }
 
-static ssize_t scp_send(struct Curl_easy *data, int sockindex,
-                        const void *mem, size_t len, bool eos, CURLcode *err)
+static CURLcode scp_send(struct Curl_easy *data, int sockindex,
+                         const void *mem, size_t len, bool eos,
+                         size_t *pnwritten)
 {
-  ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  CURLcode result = CURLE_OK;
+  ssize_t nwritten;
+
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
   (void)eos;
+  *pnwritten = 0;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   /* libssh2_channel_write() returns int! */
-  nwrite = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
+  nwritten = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
 
-  ssh_block2waitfor(data, sshc, (nwrite == LIBSSH2_ERROR_EAGAIN));
+  ssh_block2waitfor(data, sshc, (nwritten == LIBSSH2_ERROR_EAGAIN));
 
-  if(nwrite == LIBSSH2_ERROR_EAGAIN) {
-    *err = CURLE_AGAIN;
-    nwrite = 0;
-  }
-  else if(nwrite < LIBSSH2_ERROR_NONE) {
-    *err = libssh2_session_error_to_CURLE((int)nwrite);
-    nwrite = -1;
-  }
+  if(nwritten == LIBSSH2_ERROR_EAGAIN)
+    result = CURLE_AGAIN;
+  else if(nwritten < LIBSSH2_ERROR_NONE)
+    result = libssh2_session_error_to_CURLE((int)nwritten);
+  else
+    *pnwritten = (size_t)nwritten;
 
-  return nwrite;
+  return result;
 }
 
-static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
-                        char *mem, size_t len, CURLcode *err)
+static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
+                         char *mem, size_t len, size_t *pnread)
 {
-  ssize_t nread;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  (void)sockindex; /* we only support SCP on the fixed known primary socket */
+  CURLcode result = CURLE_OK;
+  ssize_t nread;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
+  *pnread = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   /* libssh2_channel_read() returns int */
   nread = (ssize_t) libssh2_channel_read(sshc->ssh_channel, mem, len);
 
   ssh_block2waitfor(data, sshc, (nread == LIBSSH2_ERROR_EAGAIN));
-  if(nread == LIBSSH2_ERROR_EAGAIN) {
-    *err = CURLE_AGAIN;
-    nread = -1;
-  }
+  if(nread == LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+  else if(nread < LIBSSH2_ERROR_NONE)
+    result = libssh2_session_error_to_CURLE((int)nread);
+  else
+    *pnread = (size_t)nread;
 
-  return nread;
+  return result;
 }
 
 /*
@@ -3926,64 +3930,61 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 }
 
 /* return number of sent bytes */
-static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, bool eos, CURLcode *err)
+static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
+                          const void *mem, size_t len, bool eos,
+                          size_t *pnwritten)
 {
-  ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
+  ssize_t nwrite;
+
   (void)sockindex;
   (void)eos;
+  *pnwritten = 0;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   nwrite = libssh2_sftp_write(sshc->sftp_handle, mem, len);
 
   ssh_block2waitfor(data, sshc, (nwrite == LIBSSH2_ERROR_EAGAIN));
 
-  if(nwrite == LIBSSH2_ERROR_EAGAIN) {
-    *err = CURLE_AGAIN;
-    nwrite = 0;
-  }
-  else if(nwrite < LIBSSH2_ERROR_NONE) {
-    *err = libssh2_session_error_to_CURLE((int)nwrite);
-    nwrite = -1;
-  }
-
-  return nwrite;
+  if(nwrite == LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+  else if(nwrite < LIBSSH2_ERROR_NONE)
+    return libssh2_session_error_to_CURLE((int)nwrite);
+  *pnwritten = (size_t)nwrite;
+  return CURLE_OK;
 }
 
 /*
  * Return number of received (decrypted) bytes
  * or <0 on error
  */
-static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
-                         char *mem, size_t len, CURLcode *err)
+static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
+                          char *mem, size_t len, size_t *pnread)
 {
-  ssize_t nread;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  (void)sockindex;
+  ssize_t nread;
 
-  if(!sshc) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  (void)sockindex;
+  *pnread = 0;
+
+  if(!sshc)
+    return CURLE_FAILED_INIT;
+
   nread = libssh2_sftp_read(sshc->sftp_handle, mem, len);
 
   ssh_block2waitfor(data, sshc, (nread == LIBSSH2_ERROR_EAGAIN));
 
-  if(nread == LIBSSH2_ERROR_EAGAIN) {
-    *err = CURLE_AGAIN;
-    nread = -1;
+  if(nread == LIBSSH2_ERROR_EAGAIN)
+    return CURLE_AGAIN;
+  else if(nread < 0)
+    return libssh2_session_error_to_CURLE((int)nread);
 
-  }
-  else if(nread < 0) {
-    *err = libssh2_session_error_to_CURLE((int)nread);
-  }
-  return nread;
+  *pnread = (size_t)nread;
+  return CURLE_OK;
 }
 
 static const char *sftp_libssh2_strerror(unsigned long err)

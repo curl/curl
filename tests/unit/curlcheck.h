@@ -42,16 +42,16 @@
     }                                                            \
   } while(0)
 
-#define verify_memory(dynamic, check, len)                              \
-  do {                                                                  \
-    if(dynamic && memcmp(dynamic, check, len)) {                        \
-      curl_mfprintf(stderr, "%s:%d Memory buffer FAILED match size %d. " \
-                    "'%s' is not\n", __FILE__, __LINE__, len,           \
-                    hexdump((const unsigned char *)check, len));        \
+#define verify_memory(dynamic, check, len)                                  \
+  do {                                                                      \
+    if(dynamic && memcmp(dynamic, check, len)) {                            \
+      curl_mfprintf(stderr, "%s:%d Memory buffer FAILED match size %d. "    \
+                    "'%s' is not\n", __FILE__, __LINE__, len,               \
+                    hexdump((const unsigned char *)check, len));            \
       curl_mfprintf(stderr, "%s:%d the same as '%s'\n", __FILE__, __LINE__, \
-                    hexdump((const unsigned char *)dynamic, len));      \
-      unitfail++;                                                       \
-    }                                                                   \
+                    hexdump((const unsigned char *)dynamic, len));          \
+      unitfail++;                                                           \
+    }                                                                       \
   } while(0)
 
 /* fail() is for when the test case figured out by itself that a check
@@ -92,19 +92,27 @@
   } while(0)
 
 
-#define UNITTEST_START                          \
-  CURLcode test(char *arg)                      \
-  {                                             \
-    (void)arg;                                  \
-    if(unit_setup()) {                          \
-      fail("unit_setup() FAILURE");             \
-    }                                           \
-    else {
+#define UNITTEST_BEGIN_SIMPLE                   \
+  (void)arg;                                    \
+  {
 
-#define UNITTEST_STOP                           \
+#define UNITTEST_END_SIMPLE                     \
     goto unit_test_abort; /* avoid warning */   \
-unit_test_abort:                                \
-    unit_stop();                                \
   }                                             \
-  return (CURLcode)unitfail;                    \
-  }
+unit_test_abort:                                \
+  return (CURLcode)unitfail;
+
+#define UNITTEST_BEGIN(setupfunc)               \
+  (void)arg;                                    \
+  if(setupfunc) {                               \
+    fail("unit_setup() FAILURE");               \
+    return (CURLcode)unitfail;                  \
+  }                                             \
+  {
+
+#define UNITTEST_END(stopfunc)                  \
+    goto unit_test_abort; /* avoid warning */   \
+  }                                             \
+unit_test_abort:                                \
+  stopfunc;                                     \
+  return (CURLcode)unitfail;

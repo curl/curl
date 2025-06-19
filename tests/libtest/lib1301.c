@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1301(char *URL)
 {
   int rc;
   (void)URL;

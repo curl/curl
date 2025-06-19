@@ -29,8 +29,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 /*
  * Test case for below scenario:
  *   - Connect to an FTP server using CONNECT_ONLY option
@@ -40,7 +38,7 @@
  * with function curl_multi_info_read().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib597(char *URL)
 {
   CURL *easy = NULL;
   CURLM *multi = NULL;

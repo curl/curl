@@ -234,12 +234,13 @@ Finally, this is the real page!
 NTLM
 SSL
 !SSPI
+digest
 </features>
 <server>
 http
 </server>
 <tool>
-libauthretry
+lib2023
 </tool>
 
 <name>

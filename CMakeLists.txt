@@ -277,7 +277,6 @@ if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled and insecure, do not use in production.")
 endif()
 option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
-option(ENABLE_SERVER_DEBUG "Apply curl debug options to test servers" OFF)
 
 set(CURL_DEBUG_MACROS "")
 if(ENABLE_DEBUG)
@@ -287,14 +286,12 @@ if(ENABLE_CURLDEBUG)
   list(APPEND CURL_DEBUG_MACROS "CURLDEBUG")
 endif()
 
-option(CURL_TEST_BUNDLES "Build tests into single-binary bundles" OFF)
-
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   # clang-tidy is not looking into #included sources, thus not compatible with
-  # unity builds and test bundles.
+  # unity builds. Make test bundles compatible by embedding the source code.
   set(CMAKE_UNITY_BUILD OFF)
-  set(CURL_TEST_BUNDLES OFF)
+  set(CURL_MK_UNITY_OPTION "--embed")
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
@@ -520,7 +517,7 @@ if(PERL_EXECUTABLE)
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
   )
   add_custom_target(curl-ca-firefox
-    COMMENT "generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
+    COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
   )
@@ -605,10 +602,12 @@ if(WIN32)
     set(_win32_winsock "ws2_32")
   endif()
   set(_win32_crypt32 "crypt32")
+  set(_win32_secur32 "secur32")
 
   if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
     set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
     set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
+    set(_win32_secur32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_secur32}.a")
   endif()
 elseif(DOS)
   if(WATT_ROOT)
@@ -677,24 +676,18 @@ if(CURL_DEFAULT_SSL_BACKEND)
   set(_valid_default_ssl_backend FALSE)
 endif()
 
-if(APPLE)
-  cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS (Secure Transport)" OFF CURL_ENABLE_SSL OFF)
-endif()
 if(WIN32)
   cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF CURL_ENABLE_SSL OFF)
   option(CURL_WINDOWS_SSPI "Enable SSPI on Windows" ${CURL_USE_SCHANNEL})
 endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 if(WIN32 OR
-   CURL_USE_SECTRANSP OR
    CURL_USE_SCHANNEL OR
    CURL_USE_MBEDTLS OR
-   CURL_USE_BEARSSL OR
    CURL_USE_WOLFSSL OR
    CURL_USE_GNUTLS OR
    CURL_USE_RUSTLS)
@@ -712,10 +705,8 @@ option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenS
 
 curl_count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
-  CURL_USE_SECTRANSP
   CURL_USE_OPENSSL
   CURL_USE_MBEDTLS
-  CURL_USE_BEARSSL
   CURL_USE_WOLFSSL
   CURL_USE_GNUTLS
   CURL_USE_RUSTLS
@@ -737,26 +728,6 @@ if(CURL_USE_SCHANNEL)
 endif()
 if(CURL_WINDOWS_SSPI)
   set(USE_WINDOWS_SSPI ON)
-endif()
-
-if(CURL_USE_SECTRANSP)
-  set(_use_core_foundation_and_core_services ON)
-
-  find_library(SECURITY_FRAMEWORK NAMES "Security")
-  mark_as_advanced(SECURITY_FRAMEWORK)
-  if(NOT SECURITY_FRAMEWORK)
-    message(FATAL_ERROR "Security framework not found")
-  endif()
-  list(APPEND CURL_LIBS "-framework Security")
-
-  set(_ssl_enabled ON)
-  set(USE_SECTRANSP ON)
-
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
-    set(_valid_default_ssl_backend TRUE)
-  endif()
-
-  message(WARNING "Secure Transport does not support TLS 1.3.")
 endif()
 
 if(_use_core_foundation_and_core_services)
@@ -840,21 +811,6 @@ if(CURL_USE_MBEDTLS)
     set(_valid_default_ssl_backend TRUE)
   endif()
   set(_curl_ca_bundle_supported TRUE)
-endif()
-
-if(CURL_USE_BEARSSL)
-  find_package(BearSSL REQUIRED)
-  set(_ssl_enabled ON)
-  set(USE_BEARSSL ON)
-  list(APPEND CURL_LIBS ${BEARSSL_LIBRARIES})
-  include_directories(SYSTEM ${BEARSSL_INCLUDE_DIRS})
-
-  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "bearssl")
-    set(_valid_default_ssl_backend TRUE)
-  endif()
-  set(_curl_ca_bundle_supported TRUE)
-
-  message(WARNING "BearSSL does not support TLS 1.3.")
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -1651,6 +1607,23 @@ if(WIN32)
     # Windows XP is required for freeaddrinfo, getaddrinfo
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
+
+  # Pre-fill detection results based on target OS version
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600 AND  # Windows Vista or newer
+     (MINGW OR MSVC) AND
+     NOT WINCE AND NOT WINDOWS_STORE)
+    set(HAVE_IF_NAMETOINDEX 1)
+  else()
+    set(HAVE_IF_NAMETOINDEX 0)
+  endif()
+  unset(HAVE_IF_NAMETOINDEX CACHE)
+endif()
+
+if(NOT WIN32)
+  list(APPEND CURL_INCLUDES "sys/socket.h")
+endif()
+if(NOT WIN32 OR MINGW)
+  list(APPEND CURL_INCLUDES "sys/time.h")
 endif()
 
 # Detect headers
@@ -1665,10 +1638,8 @@ check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
 check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
-check_include_file_concat_curl("sys/socket.h"     HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
-check_include_file_concat_curl("sys/time.h"       HAVE_SYS_TIME_H)
 check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file_concat_curl("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
@@ -1710,10 +1681,9 @@ foreach(_variable IN ITEMS
     HAVE_STDBOOL_H
     HAVE_STROPTS_H
     HAVE_SYS_IOCTL_H
-    HAVE_SYS_SOCKET_H
     HAVE_SYS_TYPES_H
     HAVE_UNISTD_H
-    )
+)
   if(${_variable})
     string(APPEND CURL_TEST_DEFINES " -D${_variable}")
   endif()
@@ -1749,6 +1719,9 @@ endif()
 # Apply to all feature checks
 if(WIN32)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
+  if(NOT WINCE AND NOT WINDOWS_STORE)
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "iphlpapi")
+  endif()
 elseif(HAVE_LIBSOCKET)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
 elseif(DOS)
@@ -1800,12 +1773,12 @@ check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
+check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # iphlpapi.h (Windows Vista+ non-UWP), net/if.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(NOT WIN32)
-  check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # iphlpapi.h (Windows non-UWP), net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
@@ -1852,7 +1825,7 @@ if(WIN32)
   list(APPEND CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   check_type_size("ADDRESS_FAMILY" SIZEOF_ADDRESS_FAMILY)
   set(HAVE_ADDRESS_FAMILY ${HAVE_SIZEOF_ADDRESS_FAMILY})
-elseif(HAVE_SYS_SOCKET_H)
+else()
   list(APPEND CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
   set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
@@ -1875,7 +1848,7 @@ foreach(_curl_test IN ITEMS
     HAVE_BOOL_T
     STDC_HEADERS
     HAVE_ATOMIC
-    )
+)
   curl_internal_test(${_curl_test})
 endforeach()
 
@@ -1984,6 +1957,9 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
   list(APPEND CURL_LIBS "${_win32_winsock}")
+  if(NOT WINCE AND NOT WINDOWS_STORE)
+    list(APPEND CURL_LIBS "iphlpapi")
+  endif()
   if(NOT WINCE)
     list(APPEND CURL_LIBS "bcrypt")
   endif()
@@ -2003,6 +1979,9 @@ if(WIN32)
       list(APPEND CURL_LIBS "advapi32")
     endif()
     list(APPEND CURL_LIBS "${_win32_crypt32}")
+  endif()
+  if(CURL_WINDOWS_SSPI)
+    list(APPEND CURL_LIBS "${_win32_secur32}")
   endif()
 endif()
 
@@ -2031,6 +2010,7 @@ endif()
 # (= regenerate it).
 function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
+  # cmake-lint: disable=W0106
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
@@ -2102,7 +2082,6 @@ if(NOT CURL_DISABLE_NTLM AND
    (USE_OPENSSL OR
     USE_MBEDTLS OR
     USE_GNUTLS OR
-    USE_SECTRANSP OR
     USE_WIN32_CRYPTO OR
     (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
   set(_use_curl_ntlm_core ON)
@@ -2183,8 +2162,7 @@ curl_add_if("HTTP2"         USE_NGHTTP2)
 curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
 curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
-                            OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                            USE_MBEDTLS OR USE_SECTRANSP OR
+                            OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO_NEW)))
 curl_add_if("Unicode"       ENABLE_UNICODE)
 curl_add_if("threadsafe"    HAVE_ATOMIC OR
@@ -2213,9 +2191,7 @@ set(_items "")
 curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
 curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
 curl_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_GREATER_EQUAL 3.0.0)
-curl_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
 curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-curl_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
 curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
 curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
 curl_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)

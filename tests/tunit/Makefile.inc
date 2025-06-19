@@ -21,18 +21,19 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
-# these files are used in every single unit test program
+BUNDLE = tunits
+BUNDLE_SRC = tunits.c
 
-FIRSTFILES = ../libtest/first.c
+# Files referenced from the bundle source
+FIRSTFILES = ../libtest/first.c ../libtest/first.h
 
-TOOLFILES = $(FIRSTFILES)
+# Common files used by test programs
+UTILS = ../unit/curlcheck.h
 
-# These are all tool unit test programs
-TOOLPROGS = tool1394 tool1604 tool1621
-
-tool1394_SOURCES = tool1394.c $(TOOLFILES)
-
-tool1604_SOURCES = tool1604.c $(TOOLFILES)
-
-tool1621_SOURCES = tool1621.c $(TOOLFILES)
+# All tool unit test programs
+TESTFILES = \
+  tool1394.c \
+  tool1604.c \
+  tool1621.c

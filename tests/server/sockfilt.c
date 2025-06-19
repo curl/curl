@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /* Purpose
  *
@@ -104,8 +104,8 @@
 #include <curlx.h> /* from the private lib dir */
 #include "inet_pton.h"
 #include "util.h"
-#include "server_sockaddr.h"
 #include "timediff.h"
+#include "warnless.h" /* for read() */
 
 #include "tool_binmode.h"
 
@@ -1373,7 +1373,7 @@ static curl_socket_t sockfilt_sockdaemon(curl_socket_t sock,
 }
 
 
-int main(int argc, char *argv[])
+static int test_sockfilt(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

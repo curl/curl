@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /*
  * curl's test suite Real Time Streaming Protocol (RTSP) server.
@@ -51,7 +51,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -1000,7 +999,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
 }
 
 
-int main(int argc, char *argv[])
+static int test_rtspd(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;

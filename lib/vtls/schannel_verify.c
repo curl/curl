@@ -78,6 +78,28 @@
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
+struct cert_chain_engine_config_win8 {
+  DWORD cbSize;
+  HCERTSTORE hRestrictedRoot;
+  HCERTSTORE hRestrictedTrust;
+  HCERTSTORE hRestrictedOther;
+  DWORD cAdditionalStore;
+  HCERTSTORE *rghAdditionalStore;
+  DWORD dwFlags;
+  DWORD dwUrlRetrievalTimeout;
+  DWORD MaximumCachedCertificates;
+  DWORD CycleDetectionModulus;
+  HCERTSTORE hExclusiveRoot;
+  HCERTSTORE hExclusiveTrustedPeople;
+  DWORD dwExclusiveFlags;
+};
+
+/* Not defined before mingw-w64 4.0.0 */
+#ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
+#define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
+#endif
+
+/* Legacy structure to supply size to Win7 clients */
 struct cert_chain_engine_config_win7 {
   DWORD cbSize;
   HCERTSTORE hRestrictedRoot;
@@ -838,12 +860,21 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
 
     if(result == CURLE_OK) {
-      struct cert_chain_engine_config_win7 engine_config;
+      struct cert_chain_engine_config_win8 engine_config;
       BOOL create_engine_result;
 
       memset(&engine_config, 0, sizeof(engine_config));
-      engine_config.cbSize = sizeof(engine_config);
       engine_config.hExclusiveRoot = trust_store;
+
+      /* Win8/Server2012 allows us to match partial chains */
+      if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                      VERSION_GREATER_THAN_EQUAL) &&
+         !ssl_config->no_partialchain) {
+        engine_config.cbSize = sizeof(engine_config);
+        engine_config.dwExclusiveFlags = CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG;
+      }
+      else
+        engine_config.cbSize = sizeof(struct cert_chain_engine_config_win7);
 
       /* CertCreateCertificateChainEngine will check the expected size of the
        * CERT_CHAIN_ENGINE_CONFIG structure and fail if the specified size

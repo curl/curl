@@ -40,49 +40,30 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/server
 
-# Prevent LIBS from being used for all link targets
-LIBS = $(BLANK_AT_MAKETIME)
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES variables
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
+
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
 
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
-if ENABLE_SERVER_DEBUG
-if DEBUGBUILD
-AM_CPPFLAGS += -DDEBUGBUILD
-endif
-if CURLDEBUG
-AM_CPPFLAGS += -DCURLDEBUG
-endif
-endif
 
-AM_CPPFLAGS += -DWITHOUT_LIBCURL
+AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
 
-# Makefile.inc provides neat definitions
-include Makefile.inc
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(CURLX_SRCS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(CURLX_SRCS) --test $(TESTFILES) > $(BUNDLE_SRC)
 
-EXTRA_DIST = CMakeLists.txt .checksrc mk-bundle.pl $(FIRSTFILES)
-
-if USE_TEST_BUNDLES
-server_EXCLUDE =
-if ENABLE_SERVER_DEBUG
-if CURLDEBUG
-server_EXCLUDE += $(MEMDEBUG)
-endif
-endif
-server_bundle.c: $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(FIRSTFILES)
-	@PERL@ $(top_srcdir)/tests/server/mk-bundle.pl $(MEMDEBUG) $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(SERVERPROGS) --exclude $(server_EXCLUDE) > server_bundle.c
-
-noinst_PROGRAMS = servers
-nodist_servers_SOURCES = server_bundle.c
-servers_SOURCES = $(server_EXCLUDE)
+noinst_PROGRAMS = $(BUNDLE)
+nodist_servers_SOURCES = $(BUNDLE_SRC)
 servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 servers_CFLAGS = $(AM_CFLAGS)
-CLEANFILES = server_bundle.c
-else
-noinst_PROGRAMS = $(SERVERPROGS)
-endif
+CLEANFILES = $(BUNDLE_SRC)
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -92,9 +73,12 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/server_bundle.c \
+	  -W$(srcdir)/$(BUNDLE_SRC) \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI
 all-local: checksrc
 endif
+
+clean-local:
+	rm -f $(BUNDLE)

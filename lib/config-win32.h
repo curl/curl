@@ -74,19 +74,11 @@
 /* Define if you have the <sys/select.h> header file. */
 /* #define HAVE_SYS_SELECT_H 1 */
 
-/* Define if you have the <sys/socket.h> header file. */
-/* #define HAVE_SYS_SOCKET_H 1 */
-
 /* Define if you have the <sys/sockio.h> header file. */
 /* #define HAVE_SYS_SOCKIO_H 1 */
 
 /* Define if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
-
-/* Define if you have the <sys/time.h> header file. */
-#ifdef __MINGW32__
-#define HAVE_SYS_TIME_H 1
-#endif
 
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1

@@ -31,26 +31,26 @@
 #define TO "<recipient@example.com>"
 #define FROM "<sender@example.com>"
 
-static const char *payload_text[] = {
-  "From: different\r\n",
-  "To: another\r\n",
-  "\r\n",
-  "\r\n",
-  ".\r\n",
-  ".\r\n",
-  "\r\n",
-  ".\r\n",
-  "\r\n",
-  "body",
-  NULL
-};
-
 struct upload_status {
   int lines_read;
 };
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
+  static const char *payload_text[] = {
+    "From: different\r\n",
+    "To: another\r\n",
+    "\r\n",
+    "\r\n",
+    ".\r\n",
+    ".\r\n",
+    "\r\n",
+    ".\r\n",
+    "\r\n",
+    "body",
+    NULL
+  };
+
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
 
@@ -71,7 +71,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1520(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -97,7 +97,7 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t1520_read_cb);
   test_setopt(curl, CURLOPT_READDATA, &upload_ctx);
   test_setopt(curl, CURLOPT_MAIL_FROM, FROM);
   test_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);

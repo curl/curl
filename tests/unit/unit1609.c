@@ -29,32 +29,12 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-static CURLcode unit_setup(void)
+static CURLcode t1609_setup(void)
 {
   CURLcode res = CURLE_OK;
-
   global_init(CURL_GLOBAL_ALL);
-
   return res;
 }
-
-struct testcase {
-  /* host:port:address[,address]... */
-  const char *optval;
-
-  /* lowercase host and port to retrieve the addresses from hostcache */
-  const char *host;
-  int port;
-
-  /* 0 to 9 addresses expected from hostcache */
-  const char *address[10];
-};
-
 
 /* CURLOPT_RESOLVE address parsing test - to test the following defect fix:
 
@@ -88,18 +68,32 @@ Test:
  expected result: cached address has zero timestamp and new address
 */
 
-static const struct testcase tests[] = {
-  /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1",
-    "test.com", 80, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.2",
-    "test.com", 80, { "127.0.0.2", }
-  },
-};
-
-UNITTEST_START
+static CURLcode test_unit1609(char *arg)
 {
+  UNITTEST_BEGIN(t1609_setup())
+
+  struct testcase {
+    /* host:port:address[,address]... */
+    const char *optval;
+
+    /* lowercase host and port to retrieve the addresses from hostcache */
+    const char *host;
+    int port;
+
+    /* 0 to 9 addresses expected from hostcache */
+    const char *address[10];
+  };
+
+  static const struct testcase tests[] = {
+    /* spaces aren't allowed, for now */
+    { "test.com:80:127.0.0.1",
+      "test.com", 80, { "127.0.0.1", }
+    },
+    { "test.com:80:127.0.0.2",
+      "test.com", 80, { "127.0.0.2", }
+    },
+  };
+
   int i;
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
@@ -218,5 +212,6 @@ error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
+
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

@@ -26,17 +26,12 @@
 #include "doh.h"
 #include "dynbuf.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1650(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
+  UNITTEST_BEGIN_SIMPLE
 
 #ifndef CURL_DISABLE_DOH
+
 #define DNS_PREAMBLE "\x00\x00\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"
 #define LABEL_TEST "\x04\x74\x65\x73\x74"
 #define LABEL_HOST "\x04\x68\x6f\x73\x74"
@@ -49,36 +44,35 @@ static void unit_stop(void)
 #define DNS_Q1 DNS_PREAMBLE LABEL_TEST LABEL_HOST LABEL_NAME DNSA_EPILOGUE
 #define DNS_Q2 DNS_PREAMBLE LABEL_TEST LABEL_HOST LABEL_NAME DNSAAAA_EPILOGUE
 
-struct dohrequest {
-  /* input */
-  const char *name;
-  DNStype type;
+  struct dohrequest {
+    /* input */
+    const char *name;
+    DNStype type;
 
-  /* output */
-  const char *packet;
-  size_t size;
-  DOHcode rc;
-};
+    /* output */
+    const char *packet;
+    size_t size;
+    DOHcode rc;
+  };
 
+  static const struct dohrequest req[] = {
+    {"test.host.name", DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
+    {"test.host.name", DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, DOH_OK },
+    {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+     ".host.name",
+     DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }
+  };
 
-static const struct dohrequest req[] = {
-  {"test.host.name", DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
-  {"test.host.name", DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, DOH_OK },
-  {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-   ".host.name",
-   DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }
-};
+  struct dohresp {
+    /* input */
+    const char *packet;
+    size_t size;
+    DNStype type;
 
-struct dohresp {
-  /* input */
-  const char *packet;
-  size_t size;
-  DNStype type;
-
-  /* output */
-  DOHcode rc;
-  const char *out;
-};
+    /* output */
+    DOHcode rc;
+    const char *out;
+  };
 
 #define DNS_FOO_EXAMPLE_COM                                          \
   "\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x03\x66\x6f\x6f" \
@@ -86,9 +80,9 @@ struct dohresp {
   "\x01\xc0\x0c\x00\x01\x00\x01\x00\x00\x00\x37\x00\x04\x7f\x00\x00" \
   "\x01"
 
-static const char full49[] = DNS_FOO_EXAMPLE_COM;
+  static const char full49[] = DNS_FOO_EXAMPLE_COM;
 
-static const struct dohresp resp[] = {
+  static const struct dohresp resp[] = {
   {"\x00\x00", 2, DNS_TYPE_A, DOH_TOO_SMALL_BUFFER, NULL },
   {"\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01", 12,
    DNS_TYPE_A, DOH_DNS_BAD_ID, NULL },
@@ -151,10 +145,8 @@ static const struct dohresp resp[] = {
    DNS_TYPE_AAAA, DOH_OK,
    "2020:2020:0000:0000:0000:0000:0000:2020 " },
 
-};
+  };
 
-UNITTEST_START
-{
   size_t size = 0;
   unsigned char buffer[256];
   size_t i;
@@ -285,13 +277,7 @@ UNITTEST_START
     }
     fail_if(d.numcname, "bad cname counter");
   }
-}
-UNITTEST_STOP
-
-#else /* CURL_DISABLE_DOH */
-UNITTEST_START
-/* nothing to do, just succeed */
-UNITTEST_STOP
-
-
 #endif
+
+  UNITTEST_END_SIMPLE
+}

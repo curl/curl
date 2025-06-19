@@ -27,8 +27,6 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
 /*
  * Source code in here hugely as reported in bug report 651464 by
  * Christopher R. Palmer.
@@ -36,7 +34,7 @@
  * Use multi interface to get document over proxy with bad port number.
  * This caused the interface to "hang" in libcurl 7.10.2.
  */
-CURLcode test(char *URL)
+static CURLcode test_lib504(char *URL)
 {
   CURL *c = NULL;
   CURLcode res = CURLE_OK;
