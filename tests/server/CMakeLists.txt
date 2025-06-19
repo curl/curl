@@ -35,17 +35,18 @@ add_custom_command(OUTPUT "${BUNDLE_SRC}"
     ${FIRSTFILES} ${UTILS} ${CURLX_SRCS} ${TESTFILES}
   VERBATIM)
 
-add_executable(servers EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
-add_dependencies(testdeps servers)
-target_include_directories(servers PRIVATE
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
+add_dependencies(testdeps ${BUNDLE})
+target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"     # for curlx
   "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmode.h", "tool_xattr.h"
   "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
 )
-target_link_libraries(servers ${CURL_LIBS})
-set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL" "CURL_NO_OLDIES")
+target_link_libraries(${BUNDLE} ${CURL_LIBS})
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 # Test servers simply are standalone programs that do not use libcurl
 # library.  For convenience and to ease portability of these servers,
 # some source code files from the libcurl subdirectory are also used
@@ -53,6 +54,6 @@ set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL
 # files on Windows targets it is necessary to build the test servers
 # with CURL_STATICLIB defined, independently of how libcurl is built.
 if(WIN32)
-  set_property(TARGET servers APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+  set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(servers PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
+set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
