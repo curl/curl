@@ -31,8 +31,7 @@ if(LIB_SELECTED STREQUAL LIB_STATIC)
 endif()
 
 add_custom_command(OUTPUT "${BUNDLE_SRC}"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${CURLX_CFILES} --test ${TESTFILES}
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --include ${CURLX_CFILES} --test ${TESTFILES}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
