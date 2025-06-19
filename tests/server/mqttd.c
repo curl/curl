@@ -55,8 +55,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
-#include "tool_binmode.h"
-
 /* include memdebug.h last */
 #include <memdebug.h>
 

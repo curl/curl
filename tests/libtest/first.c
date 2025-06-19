@@ -27,7 +27,7 @@
 
 #include "memdebug.h"
 #include "curlx/timediff.h"
-#include "tool_binmode.h"
+#include "curlx/binmode.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)

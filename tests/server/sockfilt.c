@@ -106,8 +106,6 @@
 #include "timediff.h"
 #include "warnless.h" /* for read() */
 
-#include "tool_binmode.h"
-
 /* include memdebug.h last */
 #include <memdebug.h>
 
