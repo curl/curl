@@ -103,7 +103,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 #include "inet_pton.h"
-#include "util.h"
 #include "timediff.h"
 #include "warnless.h" /* for read() */
 

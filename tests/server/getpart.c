@@ -271,8 +271,8 @@ static int decodedata(char  **buf,   /* dest buffer */
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-int getpart(char **outbuf, size_t *outlen,
-            const char *main, const char *sub, FILE *stream)
+static int getpart(char **outbuf, size_t *outlen,
+                   const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 200
   char couter[MAX_TAG_LEN + 1]; /* current outermost section */
