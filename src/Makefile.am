@@ -78,6 +78,7 @@ if USE_UNITY
 if USE_CPPFLAG_CURL_STATICLIB
 curlx_sources =
 else
+# These are part of the libcurl static lib. Add them here when linking shared.
 curlx_sources = $(CURLX_CFILES)
 endif
 curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_sources)
