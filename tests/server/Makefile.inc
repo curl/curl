@@ -30,7 +30,7 @@ BUNDLE_SRC = servers.c
 FIRSTFILES = first.c first.h
 
 # Common files used by test programs
-UTILS = getpart.c getpart.h util.c util.h
+UTILS = getpart.c getpart.h util.c
 
 CURLX_SRCS = \
   ../../lib/curlx/base64.c \

@@ -44,8 +44,6 @@
 #include <netdb.h>
 #endif
 
-#include "util.h"
-
 /* include memdebug.h last */
 #include <memdebug.h>
 

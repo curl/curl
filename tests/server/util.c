@@ -42,9 +42,62 @@
 #endif
 
 #include <curlx.h> /* from the private lib dir */
-#include "util.h"
 
-/* need init from main() */
+/* adjust for old MSVC */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#  define snprintf _snprintf
+#endif
+
+#ifdef _WIN32
+#  define CURL_STRNICMP(p1, p2, n) _strnicmp(p1, p2, n)
+#elif defined(HAVE_STRCASECMP)
+#  ifdef HAVE_STRINGS_H
+#    include <strings.h>
+#  endif
+#  define CURL_STRNICMP(p1, p2, n) strncasecmp(p1, p2, n)
+#elif defined(HAVE_STRCMPI)
+#  define CURL_STRNICMP(p1, p2, n) strncmpi(p1, p2, n)
+#elif defined(HAVE_STRICMP)
+#  define CURL_STRNICMP(p1, p2, n) strnicmp(p1, p2, n)
+#else
+#  error "missing case insensitive comparison function"
+#endif
+
+enum {
+  DOCNUMBER_NOTHING    = -7,
+  DOCNUMBER_QUIT       = -6,
+  DOCNUMBER_BADCONNECT = -5,
+  DOCNUMBER_INTERNAL   = -4,
+  DOCNUMBER_CONNECT    = -3,
+  DOCNUMBER_WERULEZ    = -2,
+  DOCNUMBER_404        = -1
+};
+
+#define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
+
+#include "timeval.h"
+
+#include <curl/curl.h> /* for curl_socket_t */
+
+#ifdef USE_UNIX_SOCKETS
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h> /* for sockaddr_un */
+#endif
+#endif /* USE_UNIX_SOCKETS */
+
+typedef union {
+  struct sockaddr      sa;
+  struct sockaddr_in   sa4;
+#ifdef USE_IPV6
+  struct sockaddr_in6  sa6;
+#endif
+#ifdef USE_UNIX_SOCKETS
+  struct sockaddr_un   sau;
+#endif
+} srvr_sockaddr_union_t;
+
+/* global variables */
+static const char *srcpath = "."; /* pointing to the test dir */
 static const char *pidname = NULL;
 static const char *portname = NULL; /* none by default */
 static const char *serverlogfile = NULL;
@@ -229,11 +282,11 @@ static const char *sstrerror(int err)
   static char buf[512];
   return curlx_winapi_strerror(err, buf, sizeof(buf));
 }
+#else
+#define sstrerror(e) strerror(e)
 #endif  /* _WIN32 */
 
-/* set by the main code to point to where the test dir is */
-static const char *srcpath = ".";
-
+/* fopens the test case file */
 static FILE *test2fopen(long testno, const char *logdir2)
 {
   FILE *stream;
@@ -435,14 +488,15 @@ static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
 
-/* var which if set indicates that the program should finish execution */
+/* global variable which if set indicates that the program should finish */
 static volatile int got_exit_signal = 0;
 
-/* if next is set indicates the first signal handled in exit_signal_handler */
+/* global variable which if set indicates the first signal handled in
+   exit_signal_handler */
 static volatile int exit_signal = 0;
 
 #ifdef _WIN32
-/* event which if set indicates that the program should finish */
+/* global event which if set indicates that the program should finish */
 static HANDLE exit_event = NULL;
 #endif
 

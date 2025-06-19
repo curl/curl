@@ -24,7 +24,6 @@
 #include "curl_setup.h"
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
 
 /* Function
  *
