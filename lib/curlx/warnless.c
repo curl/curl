@@ -35,11 +35,6 @@
 
 #endif /* __INTEL_COMPILER && __unix__ */
 
-#ifdef _WIN32
-#undef read
-#undef write
-#endif
-
 #include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
