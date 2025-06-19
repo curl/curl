@@ -84,11 +84,11 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
-curlx_sources =
 if USE_CPPFLAG_CURL_STATICLIB
+curlx_sources =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-curlx_sources += $(CURLX_SRCS)
+curlx_sources = $(CURLX_SRCS)
 endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(curlx_sources) $(TESTFILES) lib1521.c
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(curlx_sources) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
