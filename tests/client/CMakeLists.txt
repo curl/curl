@@ -22,22 +22,21 @@
 #
 ###########################################################################
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, CURLX_SRCS, TESTFILES variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, CURLX_CFILES, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set(_bundle_extra "")
-if(LIB_SELECTED STREQUAL LIB_SHARED)
-  list(APPEND _bundle_extra ${CURLX_SRCS})  # Not exported from the libcurl shared build. Build a copy.
+if(LIB_SELECTED STREQUAL LIB_STATIC)
+  set(CURLX_CFILES "")  # Already exported from the libcurl static build. Skip them.
 endif()
 
 add_custom_command(OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${_bundle_extra} --test ${TESTFILES}
+    --include ${CURLX_CFILES} --test ${TESTFILES}
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES} ${_bundle_extra} ${TESTFILES}
+    ${FIRSTFILES} ${CURLX_CFILES} ${TESTFILES}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE_SRC}")

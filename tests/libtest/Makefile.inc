@@ -32,7 +32,7 @@ FIRSTFILES = first.c first.h
 # Common files used by test programs
 UTILS = memptr.c testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
 
-CURLX_SRCS = \
+CURLX_CFILES = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \

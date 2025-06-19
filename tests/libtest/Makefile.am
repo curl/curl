@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(srcdir)                    \
               -I$(top_srcdir)/tests/unit
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES, STUB_GSS variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES, STUB_GSS variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES) \
@@ -84,14 +84,14 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
-bundle_extra =
 if USE_CPPFLAG_CURL_STATICLIB
+curlx_src =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-bundle_extra += $(CURLX_SRCS)
+curlx_src = $(CURLX_CFILES)
 endif
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(bundle_extra) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(bundle_extra) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
+$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(curlx_src) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(curlx_src) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
 nodist_SOURCES = $(BUNDLE_SRC)
