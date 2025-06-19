@@ -40,8 +40,6 @@
 #include <dos.h>  /* delay() */
 #endif
 
-#include <curl/curl.h>
-
 #include "timediff.h"
 #include "wait.h"
 
