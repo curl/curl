@@ -95,6 +95,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   const char *creds = NULL;
   gss_ctx_id_t ctx = NULL;
 
+  fprintf(stderr, "TRC-7\n");
+
   (void)initiator_cred_handle;
   (void)mech_type;
   (void)time_req;
@@ -214,6 +216,8 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
+  fprintf(stderr, "TRC-5\n");
+
   /* Token format: creds:target:type:padding */
   /* Note: this is using the *real* snprintf() and not the curl provided
      one */
@@ -256,6 +260,8 @@ OM_uint32 gss_delete_sec_context(OM_uint32 *min,
   *context_handle = NULL;
   *min = 0;
 
+  fprintf(stderr, "TRC-4\n");
+
   return GSS_S_COMPLETE;
 }
 
@@ -270,6 +276,8 @@ OM_uint32 gss_release_buffer(OM_uint32 *min,
     buffer->length = 0;
   }
 
+  fprintf(stderr, "TRC-3\n");
+
   return GSS_S_COMPLETE;
 }
 
@@ -280,6 +288,8 @@ OM_uint32 gss_import_name(OM_uint32 *min,
 {
   char *name = NULL;
   (void)input_name_type;
+
+  fprintf(stderr, "TRC-2\n");
 
   if(!min)
     return GSS_S_FAILURE;
@@ -327,6 +337,8 @@ OM_uint32 gss_display_status(OM_uint32 *min,
 
   if(message_context)
     *message_context = 0;
+
+  fprintf(stderr, "TRC-1\n");
 
   if(status_string) {
     status_string->value = NULL;

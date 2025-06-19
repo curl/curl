@@ -61,8 +61,6 @@ ld_preload
 <setenv>
 LD_PRELOAD=libstubgss.so
 LD_LIBRARY_PATH=%PWD/libtest/.libs:%PWD/libtest
-DYLD_INSERT_LIBRARIES=libstubgss.dylib
-DYLD_LIBRARY_PATH=%PWD/libtest/.libs:%PWD/libtest
 CURL_STUB_GSS_CREDS="NTLM_Alice"
 </setenv>
 <command>
