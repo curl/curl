@@ -40,7 +40,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(srcdir)                    \
               -I$(top_srcdir)/tests/unit
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES, STUB_GSS variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES, STUB_GSS variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES) \
@@ -88,7 +88,7 @@ if USE_CPPFLAG_CURL_STATICLIB
 curlx_sources =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-curlx_sources = $(CURLX_SRCS)
+curlx_sources = $(CURLX_CFILES)
 endif
 $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(curlx_sources) $(TESTFILES) lib1521.c
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(curlx_sources) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)

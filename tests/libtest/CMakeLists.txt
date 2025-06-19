@@ -22,12 +22,12 @@
 #
 ###########################################################################
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_SRCS, TESTFILES, STUB_GSS variables
+# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES, STUB_GSS variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(LIB_SELECTED STREQUAL LIB_STATIC)
-  set(CURLX_SRCS "")  # Already exported from the libcurl static build. Skip them.
+  set(CURLX_CFILES "")  # Already exported from the libcurl static build. Skip them.
 endif()
 
 add_custom_command(OUTPUT "lib1521.c"
@@ -39,11 +39,11 @@ add_custom_command(OUTPUT "lib1521.c"
 
 add_custom_command(OUTPUT "${BUNDLE_SRC}"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS} ${CURLX_SRCS} --test ${TESTFILES} "lib1521.c"
+    --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES} "lib1521.c"
     ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES} ${UTILS} ${CURLX_SRCS} ${TESTFILES} "lib1521.c"
+    ${FIRSTFILES} ${UTILS} ${CURLX_CFILES} ${TESTFILES} "lib1521.c"
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE_SRC}")
