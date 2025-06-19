@@ -290,7 +290,3 @@ size_t curlx_sitouz(int sinum)
 #  pragma warning(pop)
 #endif
 }
-
-/* Ensure that warnless.h redefinitions continue to have an effect
-   in "unity" builds. */
-#undef HEADER_CURL_WARNLESS_H_REDEFS
