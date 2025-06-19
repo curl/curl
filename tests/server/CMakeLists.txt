@@ -45,7 +45,8 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
 )
 target_link_libraries(${BUNDLE} ${CURL_LIBS})
-set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL" "CURL_NO_OLDIES")
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES")
 # Test servers simply are standalone programs that do not use libcurl
 # library.  For convenience and to ease portability of these servers,
 # some source code files from the libcurl subdirectory are also used
