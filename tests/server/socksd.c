@@ -1043,9 +1043,9 @@ static int test_socksd(int argc, char *argv[])
     return 2;
 #endif
 
-  CURL_SET_BINMODE(stdin);
-  CURL_SET_BINMODE(stdout);
-  CURL_SET_BINMODE(stderr);
+  CURLX_SET_BINMODE(stdin);
+  CURLX_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stderr);
 
   install_signal_handlers(false);
 

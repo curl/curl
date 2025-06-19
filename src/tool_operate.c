@@ -870,7 +870,7 @@ static CURLcode etag_store(struct GlobalConfig *global,
   }
   else {
     /* always use binary mode for protocol header output */
-    CURL_SET_BINMODE(etag_save->stream);
+    CURLX_SET_BINMODE(etag_save->stream);
   }
   return CURLE_OK;
 }
@@ -884,7 +884,7 @@ static CURLcode setup_headerfile(struct GlobalConfig *global,
   if(!strcmp(config->headerfile, "%")) {
     heads->stream = stderr;
     /* use binary mode for protocol header output */
-    CURL_SET_BINMODE(heads->stream);
+    CURLX_SET_BINMODE(heads->stream);
   }
   else if(strcmp(config->headerfile, "-")) {
     FILE *newfile;
@@ -924,7 +924,7 @@ static CURLcode setup_headerfile(struct GlobalConfig *global,
   }
   else {
     /* always use binary mode for protocol header output */
-    CURL_SET_BINMODE(heads->stream);
+    CURLX_SET_BINMODE(heads->stream);
   }
   return CURLE_OK;
 }
@@ -1066,7 +1066,7 @@ static void check_stdin_upload(struct GlobalConfig *global,
   DEBUGASSERT(per->infdopen == FALSE);
   DEBUGASSERT(per->infd == STDIN_FILENO);
 
-  CURL_SET_BINMODE(stdin);
+  CURLX_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
     if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
       warnf(global,
@@ -1346,7 +1346,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
          !config->use_ascii) {
         /* We get the output to stdout and we have not got the ASCII/text
            flag, then set stdout to be binary */
-        CURL_SET_BINMODE(stdout);
+        CURLX_SET_BINMODE(stdout);
       }
 
       /* explicitly passed to stdout means okaying binary gunk */

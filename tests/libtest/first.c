@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   char *env;
   size_t tmp;
 
-  CURL_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stdout);
 
   memory_tracking_init();
 
