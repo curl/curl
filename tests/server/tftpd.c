@@ -179,9 +179,6 @@ struct bf {
 
 #define TIMEOUT      5
 
-#undef MIN
-#define MIN(x,y) ((x)<(y)?(x):(y))
-
 #define REQUEST_DUMP  "server.input"
 
 /*****************************************************************************
@@ -392,7 +389,7 @@ static void read_ahead(struct testcase *test,
   if(convert == 0) {
     /* The former file reading code did this:
        b->counter = read(fileno(file), dp->th_data, SEGSIZE); */
-    size_t copy_n = MIN(SEGSIZE, test->rcount);
+    size_t copy_n = CURLMIN(SEGSIZE, test->rcount);
     memcpy(dp->th_data, test->rptr, copy_n);
 
     /* decrease amount, advance pointer */
