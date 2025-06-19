@@ -412,7 +412,7 @@ $       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
            [.src]curl-tool_msgs.o, [.src]curl-tool_operate.o, -
            [.src]curl-tool_operhlp.o, -
            [.src]curl-tool_paramhlp.o, [.src]curl-tool_parsecfg.o, -
-           [.src]curl-tool_setopt.o, [.src]curl-tool_sleep.o, -
+           [.src]curl-tool_setopt.o, -
            [.src]curl-tool_urlglob.o, [.src]curl-tool_util.o, -
            [.src]curl-tool_vms.o, [.src]curl-tool_writeenv.o, -
            [.src]curl-tool_writeout.o, [.src]curl-tool_xattr.o, -

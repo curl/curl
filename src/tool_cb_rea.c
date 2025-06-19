@@ -34,7 +34,6 @@
 #include "tool_operate.h"
 #include "tool_util.h"
 #include "tool_msgs.h"
-#include "tool_sleep.h"
 
 #include <memdebug.h> /* keep this as LAST include */
 
@@ -155,7 +154,7 @@ int tool_readbusy_cb(void *clientp,
     }
     else
       /* sleep half a period */
-      tool_go_sleep(25);
+      curlx_wait_ms(25);
   }
 
   return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
