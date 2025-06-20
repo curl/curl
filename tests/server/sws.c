@@ -21,9 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
-/* sws.c: simple (silly?) web server
+/* simple (silly?) web server
 
    This code was originally graciously donated to the project by Juergen
    Wilke. Thanks a bunch!
@@ -49,7 +48,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
 /* include memdebug.h last */

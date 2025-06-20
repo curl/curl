@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
 /*
  * curl's test suite Real Time Streaming Protocol (RTSP) server.
@@ -48,7 +47,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
 /* include memdebug.h last */

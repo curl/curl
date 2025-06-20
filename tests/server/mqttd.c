@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -52,7 +51,6 @@
 #include <netdb.h>
 #endif
 
-#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
 /* include memdebug.h last */

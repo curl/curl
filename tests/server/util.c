@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
 #ifndef UNDER_CE
 #include <signal.h>
@@ -36,8 +35,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-
-#include <curlx.h> /* from the private lib dir */
 
 /* adjust for old MSVC */
 #if defined(_MSC_VER) && (_MSC_VER < 1900)

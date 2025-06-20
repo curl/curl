@@ -30,4 +30,7 @@ struct entry_s {
   entry_func_t ptr;
 };
 
+#include "curl_setup.h"
+#include <curlx.h>
+
 #endif /* HEADER_SERVER_FIRST_H */
