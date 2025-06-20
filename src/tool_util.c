@@ -24,7 +24,7 @@
 #include "tool_setup.h"
 
 #include "tool_util.h"
-#include <curlx.h>
+#include <curlx/curlx.h>
 #include <memdebug.h> /* keep this as LAST include */
 
 #ifdef _WIN32

@@ -37,7 +37,7 @@
 #include <fcntl.h>
 #endif
 
-#include <curlx.h>
+#include <curlx/curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"

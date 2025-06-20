@@ -30,7 +30,7 @@
 
 #include <sys/stat.h>
 
-#include <curlx.h>
+#include <curlx/curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"

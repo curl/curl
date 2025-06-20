@@ -39,7 +39,7 @@
 #include "tool_bname.h"
 #include "tool_doswin.h"
 
-#include <curlx.h>
+#include <curlx/curlx.h>
 #include <memdebug.h> /* keep this as LAST include */
 
 #ifdef _WIN32
