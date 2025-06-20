@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "timeval.h"
+#include <curlx/curlx.h>  /* for curltime */
 
 static CURLcode test_unit1323(char *arg)
 {
