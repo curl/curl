@@ -31,6 +31,6 @@ struct entry_s {
 };
 
 #include "curl_setup.h"
-#include <curlx.h>
+#include <curlx/curlx.h>
 
 #endif /* HEADER_SERVER_FIRST_H */
