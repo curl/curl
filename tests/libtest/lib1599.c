@@ -42,5 +42,5 @@ static CURLcode test_lib1599(char *URL)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return CURLE_OK;
+  return res;
 }
