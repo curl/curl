@@ -700,6 +700,8 @@ static bool out_double(void *userp,
   /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
      output characters */
 #ifdef HAVE_SNPRINTF
+  /* !checksrc! disable LONGLINE */
+  /* NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling) */
   (snprintf)(work, BUFFSIZE, formatbuf, dnum);
 #ifdef _WIN32
   /* Old versions of the Windows CRT do not terminate the snprintf output
