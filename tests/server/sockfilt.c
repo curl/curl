@@ -85,9 +85,8 @@
  * it!
  */
 
-
 /* buffer is this excessively large only to be able to support things like
-  test 1003 which tests exceedingly large server response lines */
+   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
 
 static bool verbose = FALSE;

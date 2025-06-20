@@ -50,7 +50,7 @@ extern const struct entry_s s_entries[];
 #include <netdb.h>
 #endif
 
-#include <curlx.h> /* from the private lib dir */
+#include <curlx/curlx.h> /* from the private lib dir */
 
 /* adjust for old MSVC */
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
