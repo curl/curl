@@ -80,8 +80,7 @@ endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"        # for "curl_setup.h"
-  "${PROJECT_SOURCE_DIR}/lib/curlx"  # for curlx functions
+  "${PROJECT_SOURCE_DIR}/lib"        # for "curl_setup.h", curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 

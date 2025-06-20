@@ -45,7 +45,6 @@ EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
-              -I$(top_srcdir)/lib/curlx      \
               -I$(srcdir)
 
 bin_PROGRAMS = curl
