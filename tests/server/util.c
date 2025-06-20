@@ -68,8 +68,6 @@ enum {
 
 #define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
-#include "timeval.h"
-
 #include <curl/curl.h> /* for curl_socket_t */
 
 #ifdef USE_UNIX_SOCKETS
