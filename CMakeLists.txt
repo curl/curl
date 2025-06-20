@@ -289,9 +289,8 @@ endif()
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   # clang-tidy is not looking into #included sources, thus not compatible with
-  # unity builds. Make test bundles compatible by embedding the source code.
+  # unity builds, and curl tests, which use a form of unity build.
   set(CMAKE_UNITY_BUILD OFF)
-  set(CURL_MK_UNITY_OPTION "--embed")
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
   list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
