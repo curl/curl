@@ -33,8 +33,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include <curlx.h>
-
 #include "hash.h"
 #include "hostip.h"
 

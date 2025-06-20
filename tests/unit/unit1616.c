@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include <curlx.h>
 #include <uint-hash.h>
 #include <memdebug.h> /* LAST include file */
 
