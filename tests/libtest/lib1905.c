@@ -24,7 +24,6 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "timediff.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1905(char *URL)
