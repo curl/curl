@@ -29,8 +29,6 @@
 #  include <direct.h>
 #endif
 
-#include <curlx/curlx.h>
-
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
 

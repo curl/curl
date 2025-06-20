@@ -27,8 +27,6 @@
 #include <sys/select.h>
 #endif
 
-#include <curlx/curlx.h>
-
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"

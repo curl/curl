@@ -54,8 +54,6 @@
 #include <uv.h>
 #endif
 
-#include <curlx/curlx.h>
-
 #include "tool_cfgable.h"
 #include "tool_cb_dbg.h"
 #include "tool_cb_hdr.h"
