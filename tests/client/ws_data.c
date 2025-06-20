@@ -183,7 +183,7 @@ out:
 }
 
 struct test_ws_m1_ctx {
-  CURL *curl;
+  CURL *easy;
   char *send_buf;
   char *recv_buf;
   size_t send_len, nsent;
@@ -250,24 +250,24 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     goto out;
   }
 
-  m1_ctx.curl = curl_easy_init();
-  if(!m1_ctx.curl) {
+  m1_ctx.easy = curl_easy_init();
+  if(!m1_ctx.easy) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_URL, url);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_URL, url);
   /* use the callback style */
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_USERAGENT, "ws-data");
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_USERAGENT, "ws-data");
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_VERBOSE, 1L);
   /* we want to send */
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_READFUNCTION, test_ws_data_m1_read);
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_READDATA, &m1_ctx);
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_WRITEFUNCTION, test_ws_data_m1_write);
-  curl_easy_setopt(m1_ctx.curl, CURLOPT_WRITEDATA, &m1_ctx);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_READFUNCTION, test_ws_data_m1_read);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_READDATA, &m1_ctx);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEFUNCTION, test_ws_data_m1_write);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEDATA, &m1_ctx);
 
-  curl_multi_add_handle(multi, m1_ctx.curl);
+  curl_multi_add_handle(multi, m1_ctx.easy);
 
   for(len = plen_min; len <= plen_max; ++len) {
     /* init what we want to send and expect to receive */
@@ -276,7 +276,7 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     m1_ctx.recv_len = len;
     m1_ctx.nrcvd = 0;
     memset(m1_ctx.recv_buf, 0, plen_max);
-    curl_easy_pause(m1_ctx.curl, CURLPAUSE_CONT);
+    curl_easy_pause(m1_ctx.easy, CURLPAUSE_CONT);
 
     for(i = 0; i < count; ++i) {
       while(1) {
@@ -314,8 +314,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 out:
   if(multi)
     curl_multi_cleanup(multi);
-  if(m1_ctx.curl) {
-    curl_easy_cleanup(m1_ctx.curl);
+  if(m1_ctx.easy) {
+    curl_easy_cleanup(m1_ctx.easy);
   }
   free(m1_ctx.send_buf);
   free(m1_ctx.recv_buf);
