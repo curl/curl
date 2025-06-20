@@ -94,7 +94,6 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UT
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(curlx_src) --test $(TESTFILES) lib1521.c > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_SOURCES = $(BUNDLE_SRC)
 LDADD = $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE_SRC) lib1521.c
 
