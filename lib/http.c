@@ -3293,8 +3293,8 @@ static CURLcode http_header_r(struct Curl_easy *data,
         retry_after = date - current;
     }
     else
-      /* Try it as a decimal number */
-      curlx_str_number(&v, &retry_after, CURL_OFF_T_MAX);
+      /* Try it as a decimal number, ignore errors */
+      (void)curlx_str_number(&v, &retry_after, CURL_OFF_T_MAX);
     /* limit to 6 hours max. this is not documented so that it can be changed
        in the future if necessary. */
     if(retry_after > 21600)
