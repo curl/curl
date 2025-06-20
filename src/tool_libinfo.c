@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curlx.h>
 #include "tool_libinfo.h"
 #include <memdebug.h> /* keep this as LAST include */
 

@@ -23,8 +23,9 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include <curlx/dynbuf.h>
+
 #include "urldata.h"
-#include "dynbuf.h"
 #include "dynhds.h"
 #include "curl_trc.h"
 

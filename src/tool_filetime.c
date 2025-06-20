@@ -24,7 +24,6 @@
 #include "tool_filetime.h"
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
-#include <curlx.h>
 
 #ifdef HAVE_UTIME_H
 #  include <utime.h>

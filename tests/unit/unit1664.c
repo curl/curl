@@ -30,7 +30,7 @@
 #include <netinet/in6.h>
 #endif
 
-#include "curlx/strparse.h"
+#include <curlx/strparse.h>
 
 #include "memdebug.h" /* LAST include file */
 

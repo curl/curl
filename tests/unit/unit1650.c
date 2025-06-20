@@ -23,8 +23,9 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include <curlx/dynbuf.h>
+
 #include "doh.h"
-#include "dynbuf.h"
 
 static CURLcode test_unit1650(char *arg)
 {

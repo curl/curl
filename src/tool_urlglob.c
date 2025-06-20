@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curlx.h>
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
