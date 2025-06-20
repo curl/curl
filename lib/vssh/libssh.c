@@ -960,7 +960,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
   int rc;
   if(!(data->set.ssh_auth_types & CURLSSH_AUTH_PUBLICKEY)) {
     rc = myssh_to_GSSAPI_AUTH(data, sshc);
-    return 0;
+    return rc;
   }
 
   /* Two choices, (1) private key was given on CMD,
