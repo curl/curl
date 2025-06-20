@@ -58,10 +58,9 @@ TESTFILES = \
   lib661.c                                     lib666.c lib667.c lib668.c \
   lib670.c                            lib674.c lib676.c lib677.c lib678.c \
   lib694.c lib695.c \
-  lib751.c lib753.c \
+  lib751.c          lib753.c \
   lib1156.c \
-  lib1301.c \
-  lib1308.c \
+  lib1301.c                                                   lib1308.c \
   lib1485.c \
   lib1500.c lib1501.c lib1502.c                               lib1506.c \
   lib1507.c lib1508.c lib1509.c lib1510.c lib1511.c lib1512.c lib1513.c \
@@ -80,19 +79,19 @@ TESTFILES = \
   lib1908.c           lib1910.c lib1911.c lib1912.c lib1913.c \
   lib1915.c lib1916.c           lib1918.c lib1919.c \
   lib1933.c lib1934.c lib1935.c lib1936.c lib1937.c lib1938.c lib1939.c \
-  lib1940.c \
-  lib1945.c           lib1947.c lib1948.c \
+  lib1940.c                                         lib1945.c \
+  lib1947.c lib1948.c \
   lib1955.c lib1956.c lib1957.c lib1958.c lib1959.c lib1960.c \
   lib1964.c \
   lib1970.c lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c \
   lib1978.c \
   lib2023.c lib2032.c lib2082.c \
   lib2301.c lib2302.c lib2304.c lib2306.c lib2308.c lib2309.c \
-  lib2402.c lib2404.c lib2405.c \
+  lib2402.c           lib2404.c lib2405.c \
   lib2502.c \
   lib2700.c \
   lib3010.c lib3025.c lib3026.c lib3027.c \
-  lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c lib3207.c \
-  lib3208.c
+  lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \
+  lib3207.c lib3208.c
 
 STUB_GSS = stub_gssapi.c stub_gssapi.h
