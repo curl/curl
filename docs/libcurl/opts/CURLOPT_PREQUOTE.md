@@ -38,9 +38,6 @@ previous ones. Set it to NULL to disable its use again.
 libcurl does not copy the list, it needs to be kept around until after the
 transfer has completed.
 
-These commands are not performed when a directory listing is performed, only
-for file transfers.
-
 While CURLOPT_QUOTE(3) and CURLOPT_POSTQUOTE(3) work for SFTP,
 this option does not.
 
