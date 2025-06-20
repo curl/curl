@@ -1820,8 +1820,6 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  /* error: The 1st argument to 'connect' is -1 but should be >= 0
-     NOLINTNEXTLINE(clang-analyzer-unix.StdCLibraryFunctions) */
   rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
