@@ -39,8 +39,7 @@ add_dependencies(testdeps ${BUNDLE})
 target_link_libraries(${BUNDLE} ${CURL_LIBS})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
-  "${PROJECT_SOURCE_DIR}/lib/curlx"      # for curlx
+  "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL")
