@@ -82,9 +82,8 @@ TESTFILES = \
   lib1940.c                                         lib1945.c \
   lib1947.c lib1948.c \
   lib1955.c lib1956.c lib1957.c lib1958.c lib1959.c lib1960.c \
-  lib1964.c \
-  lib1970.c lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c \
-  lib1978.c \
+  lib1964.c                                                   lib1970.c \
+  lib1971.c lib1972.c lib1973.c lib1974.c lib1975.c lib1977.c lib1978.c \
   lib2023.c lib2032.c lib2082.c \
   lib2301.c lib2302.c lib2304.c lib2306.c lib2308.c lib2309.c \
   lib2402.c           lib2404.c lib2405.c \
