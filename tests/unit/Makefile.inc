@@ -34,18 +34,16 @@ UTILS = curlcheck.h
 
 # All unit test programs
 TESTFILES = \
-  unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c unit1307.c \
-             unit1309.c unit1323.c \
-  unit1330.c            unit1395.c unit1396.c unit1397.c unit1398.c \
-  unit1399.c \
-  unit1600.c unit1601.c unit1602.c unit1603.c            unit1605.c unit1606.c unit1607.c \
-  unit1608.c unit1609.c unit1610.c unit1611.c unit1612.c unit1614.c unit1615.c unit1616.c \
-  unit1620.c \
-  unit1650.c unit1651.c unit1652.c unit1653.c unit1654.c unit1655.c unit1656.c unit1657.c \
-  unit1658.c \
-  unit1660.c unit1661.c unit1663.c unit1664.c \
+  unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c \
+  unit1307.c            unit1309.c \
+  unit1323.c unit1330.c \
+  unit1395.c unit1396.c unit1397.c unit1398.c unit1399.c \
+  unit1600.c unit1601.c unit1602.c unit1603.c            unit1605.c unit1606.c \
+  unit1607.c unit1608.c unit1609.c unit1610.c unit1611.c unit1612.c unit1614.c \
+  unit1615.c unit1616.c                                  unit1620.c \
+  unit1650.c unit1651.c unit1652.c unit1653.c unit1654.c unit1655.c unit1656.c \
+  unit1657.c unit1658.c            unit1660.c unit1661.c unit1663.c unit1664.c \
   unit1979.c unit1980.c \
   unit2600.c unit2601.c unit2602.c unit2603.c unit2604.c \
-  unit3200.c \
-  unit3205.c \
+  unit3200.c                                             unit3205.c \
   unit3211.c unit3212.c unit3213.c
