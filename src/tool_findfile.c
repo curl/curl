@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #endif
 
-#include <curlx.h>
+#include <curlx/curlx.h>
 
 #include "tool_findfile.h"
 #include "tool_cfgable.h"
