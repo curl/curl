@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 
 #ifndef CURL_DISABLE_IPFS
-#include <curlx/curlx.h>
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"

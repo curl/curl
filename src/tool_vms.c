@@ -30,7 +30,6 @@
 #include <unixlib.h>
 #endif
 
-#include <curlx/curlx.h>
 #include "curlmsg_vms.h"
 #include "tool_vms.h"
 #include <memdebug.h> /* keep this as LAST include */

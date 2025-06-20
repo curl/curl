@@ -27,8 +27,6 @@
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
-#include <curlx/curlx.h>
-
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_msgs.h"

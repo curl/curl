@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <curlx/curlx.h>
-
 #include "tool_help.h"
 #include "tool_libinfo.h"
 #include "tool_util.h"
