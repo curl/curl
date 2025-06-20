@@ -44,12 +44,9 @@ TESTFILES = \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \
   lib508.c lib509.c lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c \
   lib516.c lib517.c lib518.c lib519.c lib520.c lib521.c lib523.c lib524.c \
-  lib525.c lib526.c \
-  lib530.c \
-  lib533.c \
-  lib536.c lib537.c lib539.c lib540.c lib541.c lib542.c lib543.c lib544.c \
-  lib547.c \
-  lib549.c \
+  lib525.c lib526.c                            lib530.c \
+  lib533.c                   lib536.c lib537.c lib539.c lib540.c lib541.c \
+  lib542.c lib543.c lib544.c                   lib547.c          lib549.c \
   lib552.c lib553.c lib554.c lib555.c lib556.c lib557.c lib558.c lib559.c \
   lib560.c          lib562.c          lib564.c          lib566.c lib567.c \
   lib568.c lib569.c lib570.c lib571.c lib572.c lib573.c lib574.c lib575.c \
@@ -58,8 +55,7 @@ TESTFILES = \
   lib597.c lib598.c lib599.c \
   lib643.c \
   lib650.c lib651.c lib652.c lib653.c lib654.c lib655.c lib658.c lib659.c \
-  lib661.c \
-  lib666.c lib667.c lib668.c \
+  lib661.c                                     lib666.c lib667.c lib668.c \
   lib670.c                            lib674.c lib676.c lib677.c lib678.c \
   lib694.c lib695.c \
   lib751.c lib753.c \
