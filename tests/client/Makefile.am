@@ -64,7 +64,6 @@ $(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(cu
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_src) --test $(TESTFILES) > $(BUNDLE_SRC)
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_SOURCES = $(BUNDLE_SRC)
 LDADD = $(top_builddir)/lib/libcurl.la
 CLEANFILES = $(BUNDLE_SRC)
 
