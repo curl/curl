@@ -40,8 +40,8 @@ add_custom_command(OUTPUT "lib1521.c"
 list(APPEND TESTFILES "lib1521.c")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES}
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE}.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+    --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     ${FIRSTFILES} ${UTILS} ${CURLX_CFILES} ${TESTFILES}
