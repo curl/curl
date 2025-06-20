@@ -34,6 +34,6 @@ struct entry_s {
 
 extern const struct entry_s s_entries[];
 
-#include "curlx.h"
+#include <curlx/curlx.h>
 
 #endif /* HEADER_LIBTEST_FIRST_H */
