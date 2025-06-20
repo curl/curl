@@ -288,8 +288,8 @@ endif()
 
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
-  # clang-tidy is not looking into #included sources, thus not compatible with
-  # unity builds, and curl tests, which use a form of unity build.
+  # cmake generates unity sources with tags to disable clang-tidy for included
+  # sources. Disable unity mode as a workaround.
   set(CMAKE_UNITY_BUILD OFF)
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
