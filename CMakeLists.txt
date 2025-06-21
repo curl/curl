@@ -543,10 +543,8 @@ endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-  list(APPEND CURL_LIBS "network")
   list(APPEND CURL_LIBS_SOCKET "network")
 elseif(AMIGA)
-  list(APPEND CURL_LIBS "net" "m" "atomic")
   list(APPEND CURL_LIBS_SOCKET "net" "m" "atomic")
   list(APPEND CMAKE_REQUIRED_LIBRARIES "net" "m" "atomic")
 endif()
@@ -615,7 +613,6 @@ elseif(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
-    list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
     list(APPEND CURL_LIBS_SOCKET "${WATT_ROOT}/lib/libwatt.a")
     include_directories(SYSTEM "${WATT_ROOT}/inc")
     list(APPEND CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
@@ -636,7 +633,6 @@ elseif(AMIGA)
 elseif(NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_LIBS "socket" ${CURL_LIBS})
     set(CURL_LIBS_SOCKET "socket" ${CURL_LIBS})
   endif()
 endif()
@@ -1959,7 +1955,6 @@ include(CMake/OtherTests.cmake)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
-  list(APPEND CURL_LIBS "${_win32_winsock}")
   list(APPEND CURL_LIBS_SOCKET "${_win32_winsock}")
   if(NOT WINCE AND NOT WINDOWS_STORE)
     list(APPEND CURL_LIBS "iphlpapi")
@@ -1988,6 +1983,8 @@ if(WIN32)
     list(APPEND CURL_LIBS "${_win32_secur32}")
   endif()
 endif()
+
+list(APPEND CURL_LIBS ${CURL_LIBS_SOCKET})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
