@@ -22,18 +22,18 @@
 #
 ###########################################################################
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
+# Get BUNDLE, FIRSTFILES, UTILS, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-add_custom_command(OUTPUT "${BUNDLE_SRC}"
+add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --test ${TESTFILES}
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE_SRC}"
+    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
-add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE_SRC}")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE}.c")
 add_dependencies(testdeps ${BUNDLE})
 target_link_libraries(${BUNDLE} curltool curlu)
 target_include_directories(${BUNDLE} PRIVATE

@@ -24,7 +24,6 @@
 # Shared between CMakeLists.txt and Makefile.am
 
 BUNDLE = units
-BUNDLE_SRC = units.c
 
 # Files referenced from the bundle source
 FIRSTFILES = ../libtest/first.c ../libtest/first.h
