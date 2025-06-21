@@ -30,7 +30,7 @@
  * that this test will assume to be present!
  */
 
-#include "test.h"
+#include "first.h"
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
 #endif

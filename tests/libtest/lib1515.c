@@ -28,7 +28,7 @@
  * (test1515) nor a dead connection is detected (test1616).
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "testtrace.h"
 #include "testutil.h"

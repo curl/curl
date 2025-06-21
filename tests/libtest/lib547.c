@@ -26,7 +26,7 @@
  * argv3 = proxyuser:password
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

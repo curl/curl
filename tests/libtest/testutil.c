@@ -21,9 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-#include <curl/curl.h>
 #include "testutil.h"
+
 #include "memdebug.h"
 
 #ifdef _WIN32

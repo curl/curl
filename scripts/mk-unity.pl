@@ -97,6 +97,6 @@ foreach my $src (@src) {
 }
 
 if($any_test) {
-    print "\nstatic const struct entry_s s_entries[] = {\n$tlist};\n";
+    print "\nconst struct entry_s s_entries[] = {\n$tlist  {NULL, NULL}\n};\n";
     print "\n#include \"first.c\"\n";
 }

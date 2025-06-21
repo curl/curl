@@ -29,7 +29,7 @@
  * leak in the CURLOPT_RESOLVE handling with the multi interface.
  */
 
-#include "test.h"
+#include "first.h"
 
 #include <limits.h>
 

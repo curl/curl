@@ -21,6 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
 
 int main(int argc, char **argv)
 {
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
 
   entry_name = argv[1];
   entry_func = NULL;
-  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+  for(tmp = 0; s_entries[tmp].ptr; ++tmp) {
     if(strcmp(entry_name, s_entries[tmp].name) == 0) {
       entry_func = s_entries[tmp].ptr;
       break;

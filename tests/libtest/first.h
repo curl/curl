@@ -32,6 +32,8 @@ struct entry_s {
   entry_func_t ptr;
 };
 
+extern const struct entry_s s_entries[];
+
 #include "curlx.h"
 
 #endif /* HEADER_LIBTEST_FIRST_H */

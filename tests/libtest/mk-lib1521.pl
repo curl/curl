@@ -203,7 +203,7 @@ print $fh <<HEADER
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 #include "memdebug.h"
 #include <limits.h>
 

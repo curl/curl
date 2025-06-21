@@ -26,7 +26,7 @@
  * argv3 = non-zero means ASCII transfer
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

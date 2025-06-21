@@ -28,7 +28,7 @@
  * of 42 (CURLE_ABORTED_BY_CALLBACK).
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

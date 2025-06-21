@@ -21,9 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-#include "testutil.h"
 #include "testtrace.h"
+#include "testutil.h"
+
 #include "memdebug.h"
 
 struct libtest_trace_cfg libtest_debug_config;

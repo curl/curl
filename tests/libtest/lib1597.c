@@ -24,7 +24,7 @@
 
 /* Testing CURLOPT_PROTOCOLS_STR */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

@@ -21,11 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-
-#include "getpart.h"
-#include <curlx.h> /* from the private lib dir */
-#include "curl_memory.h"
+#include "first.h"
 
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 
@@ -42,6 +38,8 @@
 #else
 #define system_strdup strdup
 #endif
+
+#include "curl_memory.h"
 
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(push)
@@ -268,8 +266,8 @@ static int decodedata(char  **buf,   /* dest buffer */
  *   GPE_OUT_OF_MEMORY
  *   GPE_OK
  */
-static int getpart(char **outbuf, size_t *outlen,
-                   const char *main, const char *sub, FILE *stream)
+int getpart(char **outbuf, size_t *outlen,
+            const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 200
   char couter[MAX_TAG_LEN + 1]; /* current outermost section */

@@ -21,102 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "first.h"
 
-#ifndef UNDER_CE
-#include <signal.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
-#endif
-#ifdef _XOPEN_SOURCE_EXTENDED
-/* This define is "almost" required to build on HP-UX 11 */
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
-#include <curlx.h> /* from the private lib dir */
-
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#  define snprintf _snprintf
-#endif
-
-#ifdef _WIN32
-#  define CURL_STRNICMP(p1, p2, n) _strnicmp(p1, p2, n)
-#elif defined(HAVE_STRCASECMP)
-#  ifdef HAVE_STRINGS_H
-#    include <strings.h>
-#  endif
-#  define CURL_STRNICMP(p1, p2, n) strncasecmp(p1, p2, n)
-#elif defined(HAVE_STRCMPI)
-#  define CURL_STRNICMP(p1, p2, n) strncmpi(p1, p2, n)
-#elif defined(HAVE_STRICMP)
-#  define CURL_STRNICMP(p1, p2, n) strnicmp(p1, p2, n)
-#else
-#  error "missing case insensitive comparison function"
-#endif
-
-enum {
-  DOCNUMBER_NOTHING    = -7,
-  DOCNUMBER_QUIT       = -6,
-  DOCNUMBER_BADCONNECT = -5,
-  DOCNUMBER_INTERNAL   = -4,
-  DOCNUMBER_CONNECT    = -3,
-  DOCNUMBER_WERULEZ    = -2,
-  DOCNUMBER_404        = -1
-};
-
-#define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
-
-#include "timeval.h"
-
-#include <curl/curl.h> /* for curl_socket_t */
-
-#ifdef USE_UNIX_SOCKETS
-#ifdef HAVE_SYS_UN_H
-#include <sys/un.h> /* for sockaddr_un */
-#endif
-#endif /* USE_UNIX_SOCKETS */
-
-typedef union {
-  struct sockaddr      sa;
-  struct sockaddr_in   sa4;
-#ifdef USE_IPV6
-  struct sockaddr_in6  sa6;
-#endif
-#ifdef USE_UNIX_SOCKETS
-  struct sockaddr_un   sau;
-#endif
-} srvr_sockaddr_union_t;
-
-/* global variables */
-static const char *srcpath = "."; /* pointing to the test dir */
-static const char *pidname = NULL;
-static const char *portname = NULL; /* none by default */
-static const char *serverlogfile = NULL;
-static int serverlogslocked;
-static const char *configfile = NULL;
-static const char *logdir = "log";
-static char loglockfile[256];
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
-static unsigned short server_port = 0;
-static const char *socket_type = "IPv4";
-static int socket_domain = AF_INET;
 
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
  * whatever.
  */
-static char *data_to_hex(char *data, size_t len)
+char *data_to_hex(char *data, size_t len)
 {
   static char buf[256*3];
   size_t i;
@@ -139,7 +54,26 @@ static char *data_to_hex(char *data, size_t len)
   return buf;
 }
 
-static void logmsg(const char *msg, ...)
+void loghex(unsigned char *buffer, ssize_t len)
+{
+  char data[12000];
+  ssize_t i;
+  unsigned char *ptr = buffer;
+  char *optr = data;
+  ssize_t width = 0;
+  int left = sizeof(data);
+
+  for(i = 0; i < len && (left >= 0); i++) {
+    snprintf(optr, left, "%02x", ptr[i]);
+    width += 2;
+    optr += 2;
+    left -= 2;
+  }
+  if(width)
+    logmsg("'%s'", data);
+}
+
+void logmsg(const char *msg, ...)
 {
   va_list ap;
   char buffer[2048 + 1];
@@ -197,26 +131,7 @@ static void logmsg(const char *msg, ...)
   }
 }
 
-static void loghex(unsigned char *buffer, ssize_t len)
-{
-  char data[12000];
-  ssize_t i;
-  unsigned char *ptr = buffer;
-  char *optr = data;
-  ssize_t width = 0;
-  int left = sizeof(data);
-
-  for(i = 0; i < len && (left >= 0); i++) {
-    snprintf(optr, left, "%02x", ptr[i]);
-    width += 2;
-    optr += 2;
-    left -= 2;
-  }
-  if(width)
-    logmsg("'%s'", data);
-}
-
-static unsigned char byteval(char *value)
+unsigned char byteval(char *value)
 {
   unsigned long num = strtoul(value, NULL, 10);
   return num & 0xff;
@@ -244,7 +159,7 @@ static void win32_cleanup(void)
   _flushall();
 }
 
-static int win32_init(void)
+int win32_init(void)
 {
   curlx_now_init();
 #ifdef USE_WINSOCK
@@ -276,7 +191,7 @@ static int win32_init(void)
 }
 
 /* socket-safe strerror (works on Winsock errors, too) */
-static const char *sstrerror(int err)
+const char *sstrerror(int err)
 {
   static char buf[512];
   return curlx_winapi_strerror(err, buf, sizeof(buf));
@@ -286,7 +201,7 @@ static const char *sstrerror(int err)
 #endif  /* _WIN32 */
 
 /* fopens the test case file */
-static FILE *test2fopen(long testno, const char *logdir2)
+FILE *test2fopen(long testno, const char *logdir2)
 {
   FILE *stream;
   char filename[256];
@@ -309,7 +224,7 @@ static FILE *test2fopen(long testno, const char *logdir2)
 #define t_getpid() getpid()
 #endif
 
-static curl_off_t our_getpid(void)
+curl_off_t our_getpid(void)
 {
   curl_off_t pid = (curl_off_t)t_getpid();
 #ifdef _WIN32
@@ -326,7 +241,7 @@ static curl_off_t our_getpid(void)
   return pid;
 }
 
-static int write_pidfile(const char *filename)
+int write_pidfile(const char *filename)
 {
   FILE *pidfile;
   curl_off_t pid;
@@ -344,7 +259,7 @@ static int write_pidfile(const char *filename)
 }
 
 /* store the used port number in a file */
-static int write_portfile(const char *filename, int port)
+int write_portfile(const char *filename, int port)
 {
   FILE *portfile = fopen(filename, "wb");
   if(!portfile) {
@@ -357,7 +272,7 @@ static int write_portfile(const char *filename, int port)
   return 1; /* success */
 }
 
-static void set_advisor_read_lock(const char *filename)
+void set_advisor_read_lock(const char *filename)
 {
   FILE *lockfile;
   int error = 0;
@@ -379,7 +294,7 @@ static void set_advisor_read_lock(const char *filename)
            filename, errno, strerror(errno));
 }
 
-static void clear_advisor_read_lock(const char *filename)
+void clear_advisor_read_lock(const char *filename)
 {
   int error = 0;
   int res;
@@ -438,18 +353,6 @@ static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 static unsigned int thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
-#endif
-
-/* global variable which if set indicates that the program should finish */
-static volatile int got_exit_signal = 0;
-
-/* global variable which if set indicates the first signal handled in
-   exit_signal_handler */
-static volatile int exit_signal = 0;
-
-#ifdef _WIN32
-/* global event which if set indicates that the program should finish */
-static HANDLE exit_event = NULL;
 #endif
 
 /* signal handler that will be triggered to indicate that the program
@@ -665,7 +568,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 }
 #endif
 
-static void install_signal_handlers(bool keep_sigalrm)
+void install_signal_handlers(bool keep_sigalrm)
 {
 #ifdef _WIN32
   /* setup Windows exit event before any signal can trigger */
@@ -733,7 +636,7 @@ static void install_signal_handlers(bool keep_sigalrm)
 #endif
 }
 
-static void restore_signal_handlers(bool keep_sigalrm)
+void restore_signal_handlers(bool keep_sigalrm)
 {
 #ifdef SIGHUP
   if(SIG_ERR != old_sighup_handler)
@@ -789,8 +692,8 @@ static void restore_signal_handlers(bool keep_sigalrm)
 
 #ifdef USE_UNIX_SOCKETS
 
-static int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
-                            struct sockaddr_un *sau)
+int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+                     struct sockaddr_un *sau)
 {
   int error;
   int rc;
@@ -860,7 +763,7 @@ static int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
 #define CURL_MASK_USHORT  ((unsigned short)~0)
 #define CURL_MASK_SSHORT  (CURL_MASK_USHORT >> 1)
 
-static unsigned short util_ultous(unsigned long ulnum)
+unsigned short util_ultous(unsigned long ulnum)
 {
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
