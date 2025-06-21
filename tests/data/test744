@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 --netrc-file
+netrc
 </keywords>
 </info>
 
