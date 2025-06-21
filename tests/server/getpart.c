@@ -27,9 +27,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "curl_memory.h"
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 #define EAT_SPACE(p) while(*(p) && ISSPACE(*(p))) (p)++
 
 #define EAT_WORD(p)  while(*(p) && !ISSPACE(*(p)) && ('>' != *(p))) (p)++

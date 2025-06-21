@@ -44,9 +44,6 @@
 #include <netdb.h>
 #endif
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 static int test_resolve(int argc, char *argv[])
 {
   int arg = 1;

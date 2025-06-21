@@ -48,9 +48,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;
 

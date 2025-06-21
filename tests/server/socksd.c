@@ -75,9 +75,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
