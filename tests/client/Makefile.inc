@@ -24,7 +24,6 @@
 # Shared between CMakeLists.txt and Makefile.am
 
 BUNDLE = clients
-BUNDLE_SRC = clients.c
 
 # Files referenced from the bundle source
 FIRSTFILES = first.c first.h

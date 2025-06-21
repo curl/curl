@@ -42,7 +42,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(srcdir)
 
-# Get BUNDLE, BUNDLE_SRC, FIRSTFILES, UTILS, TESTFILES variables
+# Get BUNDLE, FIRSTFILES, UTILS, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
@@ -62,13 +62,12 @@ endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 if BUILD_UNITTESTS
-$(BUNDLE_SRC): $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > $(BUNDLE_SRC)
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_tunits_SOURCES = $(BUNDLE_SRC)
 LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la
-CLEANFILES = $(BUNDLE_SRC)
+CLEANFILES = ${BUNDLE}.c
 else
 noinst_PROGRAMS =
 endif
@@ -81,7 +80,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/$(BUNDLE_SRC) \
+	  -W$(srcdir)/${BUNDLE}.c \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI
