@@ -26,6 +26,9 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
+include Makefile.inc
+
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
   curl.rc Makefile.inc CMakeLists.txt .checksrc
 
@@ -64,9 +67,6 @@ AM_LDFLAGS =
 if USE_UNICODE
 UNICODEFLAG = -municode
 endif
-
-# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
-include Makefile.inc
 
 curl_cfiles_gen =
 curl_hfiles_gen =
