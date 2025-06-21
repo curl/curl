@@ -4,7 +4,7 @@ curl and libcurl 8.15.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3437
+ Contributors:                 3442
 
 This release includes the following changes:
 
@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o cmake: drop redundant macro from test clients [51]
  o cmake: make docs depend on support files [80]
  o cmake: move `OUTPUT` argument in the `add_custom_command()` line [50]
+ o cmake: omit clang-tidy on internal libs curlu and curltool [64]
  o cmake: replace `cmakelint` with `cmake-lint` from `cmakelang`, fix issues [20]
  o cmake: simplify handling generated `lib1521.c` in libtests [24]
  o cmake: sync `target_link_libraries()` order in tests more [44]
@@ -36,11 +37,19 @@ This release includes the following bugfixes:
  o connection: eliminate member `remote_addr` [10]
  o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
  o curl.h: remove the "RESERVED" error codes [2]
+ o curl: implement non-blocking STDIN read on Windows [28]
  o curl_path: make SFTP handle a path like /~ properly. [11]
  o digest: fix build with disabled digest auth [72]
  o docs/examples: add ftp-delete.c [5]
+ o docs: fix broken link in CODE_REVIEW.md [67]
+ o docs: fix broken link in INSTALL.md [68]
+ o docs: fix docs for CURLOPT_PREQUOTE after #17616 [70]
+ o docs: fix documentation of connect_only 2 [78]
  o easy: fix comment-documentation [36]
+ o ftp: fix prequotes for a directory in URL [83]
+ o ftplistparser: split parse_unix into sub functions [77]
  o http2: do not delay RST send on aborted transfer [57]
+ o http: explicitly ignore parsing errors for Retry-After [98]
  o http_ntlm: protect against null deref [95]
  o http_ntlm: remove unreachable code [88]
  o INSTALL.md: cygwin details and add source code link [4]
@@ -77,7 +86,9 @@ This release includes the following bugfixes:
  o tests/servers.pm: add more ways to figure out current user [17]
  o tests: always make bundles, adapt build and tests [81]
  o tests: bundle http clients, de-dupe, enable for MSVC [61]
+ o tests: drop `BUNDLE_SRC` variable [59]
  o tests: drop mk-bundle exceptions [25]
+ o tests: drop useless "nodist_SOURCES" assignments [93]
  o tests: fail torture if !valgrind&threaded resolver [31]
  o tests: make sshserver less verbose [55]
  o tests: torture: don't duplicate valgrind command [32]
@@ -85,13 +96,17 @@ This release includes the following bugfixes:
  o tls: remove Curl_ssl false_start [86]
  o tool_getparam: fix --ftp-pasv [15]
  o tool_operate: fix return code when --retry is used but not triggered [13]
+ o top-complexity: lower max allowed complexity threshold to 90 [33]
  o url: fix connection lifetime checks [14]
+ o url: fix NULL deref with bad password when no user is provided [87]
  o urlapi: simplify and split into sub functions [16]
  o vauth: move auth structs to conn meta data [30]
+ o vtls: change send/recv signatures of tls backends [65]
  o warnless: drop parts of the `read`/`write` preprocessor hack (Windows) [37]
  o warnless: replace `read()`/`write()` wrapper functions with macros (Windows) [75]
  o windows: fixup `fopen()` in `CURLDEBUG` builds [62]
  o windows: reduce/stop loading DLLs at runtime [27]
+ o xfer: manage pause bits [97]
 
 This release includes the following known bugs:
 
@@ -113,13 +128,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  4lan.m, Bernhard M. Wiedemann, Brad Harder, Brian Harris, Calvin Ruocco,
-  Carlos Henrique Lima Melara, Christian Weisgerber, Dan Fandrich,
-  Daniel McCarney, Daniel Stenberg, Edwin Török, fjaell on github,
-  hiimmat on github, John Haugabook, Michael Kaufmann, Orgad Shaneh,
-  Ray Satiro, renovate[bot], Rod Widdowson, Stefan Eissing, Theodore A. Roth,
-  Tristan Perrault, Viktor Szakats, Yedaya Katsman
-  (24 contributors)
+  4lan.m, Bartosz Ruszczak, Bernhard M. Wiedemann, Brad Harder, Brian Harris,
+  Calvin Ruocco, Carlos Henrique Lima Melara, Christian Weisgerber,
+  Dan Fandrich, Daniel McCarney, Daniel Stenberg, DoI, Edwin Török,
+  Ethan Alker, Fabrício Canedo, fjaell on github, hiimmat on github,
+  Joel Depooter, John Haugabook, Kirill Obukhov, Michael Kaufmann,
+  Orgad Shaneh, Ray Satiro, renovate[bot], Rod Widdowson, Stefan Eissing,
+  Theodore A. Roth, Tristan Perrault, Viktor Szakats, Yedaya Katsman, z2_
+  (31 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -150,10 +166,12 @@ References to bug reports and discussions on issues:
  [25] = https://curl.se/bug/?i=17468
  [26] = https://curl.se/bug/?i=17447
  [27] = https://curl.se/bug/?i=17413
+ [28] = https://curl.se/bug/?i=17451
  [29] = https://curl.se/bug/?i=17574
  [30] = https://curl.se/bug/?i=17557
  [31] = https://curl.se/bug/?i=17501
  [32] = https://curl.se/bug/?i=17501
+ [33] = https://curl.se/bug/?i=17689
  [34] = https://curl.se/bug/?i=17653
  [35] = https://curl.se/bug/?i=17665
  [36] = https://curl.se/bug/?i=17664
@@ -178,27 +196,40 @@ References to bug reports and discussions on issues:
  [56] = https://curl.se/bug/?i=17639
  [57] = https://curl.se/bug/?i=17611
  [58] = https://curl.se/bug/?i=17642
+ [59] = https://curl.se/bug/?i=17692
  [60] = https://curl.se/bug/?i=17636
  [61] = https://curl.se/bug/?i=17627
  [62] = https://curl.se/bug/?i=16747
  [63] = https://curl.se/bug/?i=16746
+ [64] = https://curl.se/bug/?i=17693
+ [65] = https://curl.se/bug/?i=17593
  [66] = https://curl.se/bug/?i=17632
+ [67] = https://curl.se/bug/?i=17656
+ [68] = https://github.com/curl/curl-www/issues/427
  [69] = https://curl.se/bug/?i=17581
+ [70] = https://curl.se/bug/?i=17690
  [72] = https://curl.se/bug/?i=17612
  [73] = https://curl.se/bug/?i=17578
  [74] = https://curl.se/bug/?i=17617
  [75] = https://curl.se/bug/?i=17619
+ [77] = https://curl.se/bug/?i=17608
+ [78] = https://curl.se/bug/?i=17621
  [79] = https://curl.se/bug/?i=17418
  [80] = https://curl.se/bug/?i=17620
  [81] = https://curl.se/bug/?i=17590
  [82] = https://curl.se/bug/?i=17601
+ [83] = https://curl.se/bug/?i=8602
  [84] = https://curl.se/bug/?i=17602
  [86] = https://curl.se/bug/?i=17595
+ [87] = https://curl.se/bug/?i=17659
  [88] = https://curl.se/bug/?i=17587
  [89] = https://curl.se/bug/?i=17598
  [90] = https://curl.se/bug/?i=17591
  [91] = https://curl.se/bug/?i=17548
  [92] = https://curl.se/bug/?i=17546
+ [93] = https://curl.se/bug/?i=17688
  [94] = https://curl.se/bug/?i=17471
  [95] = https://curl.se/bug/?i=17585
  [96] = https://curl.se/bug/?i=17575
+ [97] = https://curl.se/bug/?i=17650
+ [98] = https://curl.se/bug/?i=17682
