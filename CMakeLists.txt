@@ -1805,7 +1805,7 @@ if(WIN32)
   endif()
 endif()
 
-# Hack to add some libraries to end of the library list to make binutils ld
+# Hack to add some libraries to the end of the library list to make binutils ld
 # for GCC happy when linking statically. Necessary for libs detected via
 # CMake's built-in find modules and which CMake adds to the beginning of
 # the lib list on linker command-line for some reason. This makes them appear
