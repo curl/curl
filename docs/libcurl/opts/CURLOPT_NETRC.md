@@ -46,6 +46,9 @@ the options controlled by this parameter.
 Only machine name, username and password are taken into account (init macros
 and similar things are not supported).
 
+The netrc file provides credentials for a hostname independent of which
+protocol and port number that are used.
+
 libcurl does not verify that the file has the correct properties set (as the
 standard Unix ftp client does). It should only be readable by user.
 
