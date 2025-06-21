@@ -1252,9 +1252,9 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   }
   else if(data->set.quic_version == 1) {
     uint32_t quic_versions[] = { 0x00000001 }; /* QUIC v1 */
-    size_t num_versions = sizeof(quic_versions) / sizeof(quic_versions[0]);
-    if(!SSL_set_quic_transport_versions(ctx->tls.ossl.ssl, quic_versions,
-                                       num_versions)) {
+    if(!SSL_set_quic_transport_versions(ctx->tls.ossl.ssl,
+                                        CURL_ARRAYSIZE(quic_versions),
+                                        num_versions)) {
       failf(data, "Failed to set QUIC v1 transport version");
       result = CURLE_QUIC_CONNECT_ERROR;
       goto out;
