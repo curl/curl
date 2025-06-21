@@ -643,6 +643,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   struct websocket *ws;
   CURLcode result;
 
+  CURL_TRC_WRITE(data, "ws_cw_write(len=%zu, type=%d)", nbytes, type);
   if(!(type & CLIENTWRITE_BODY) || data->set.ws_raw_mode)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
@@ -884,6 +885,114 @@ static ssize_t ws_enc_write_payload(struct ws_encoder *enc,
 }
 
 
+
+struct cr_ws_ctx {
+  struct Curl_creader super;
+  struct ws_encoder enc;  /* decode of we frames */
+  struct bufq buf;
+  BIT(read_eos);  /* we read an EOS from the next reader */
+  BIT(eos);       /* we have returned an EOS */
+};
+
+static CURLcode cr_ws_init(struct Curl_easy *data, struct Curl_creader *reader)
+{
+  struct cr_ws_ctx *ctx = reader->ctx;
+  (void)data;
+  ws_enc_init(&ctx->enc);
+  Curl_bufq_init2(&ctx->buf, (16 * 1024), 1, BUFQ_OPT_SOFT_LIMIT);
+  return CURLE_OK;
+}
+
+static void cr_ws_close(struct Curl_easy *data, struct Curl_creader *reader)
+{
+  struct cr_ws_ctx *ctx = reader->ctx;
+  (void)data;
+  Curl_bufq_free(&ctx->buf);
+}
+
+static CURLcode cr_ws_read(struct Curl_easy *data,
+                           struct Curl_creader *reader,
+                           char *buf, size_t blen,
+                           size_t *pnread, bool *peos)
+{
+  struct cr_ws_ctx *ctx = reader->ctx;
+  CURLcode result = CURLE_OK;
+  size_t nread;
+  ssize_t n;
+  bool eos;
+
+  if(ctx->eos) {
+    *pnread = 0;
+    *peos = TRUE;
+    return CURLE_OK;
+  }
+
+  if(Curl_bufq_is_empty(&ctx->buf)) {
+    if(ctx->read_eos) {
+      ctx->eos = TRUE;
+      *pnread = 0;
+      *peos = TRUE;
+      return CURLE_OK;
+    }
+    /* Still getting data form the next reader, ctx->buf is empty */
+    result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    if(result)
+      return result;
+    ctx->read_eos = eos;
+
+    if(!nread) {
+      /* nothing to convert, return this right away */
+      if(ctx->read_eos)
+        ctx->eos = TRUE;
+      *pnread = nread;
+      *peos = ctx->eos;
+      goto out;
+    }
+
+    /* encode the data as websocket BINARY frame */
+    n = ws_enc_write_head(data, &ctx->enc, CURLWS_BINARY, nread,
+                          &ctx->buf, &result);
+    if(n < 0)
+      goto out;
+
+    n = ws_enc_write_payload(&ctx->enc, data, (unsigned char *)buf,
+                             nread, &ctx->buf, &result);
+    if(n < 0)
+      goto out;
+    CURL_TRC_READ(data, "cr_ws_read, buffered BINARY frame, len=%zu", nread);
+  }
+
+  DEBUGASSERT(!Curl_bufq_is_empty(&ctx->buf));
+  *peos = FALSE;
+  result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
+  if(!result && ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
+    /* no more data, read all, done. */
+    ctx->eos = TRUE;
+    *peos = TRUE;
+  }
+
+out:
+  CURL_TRC_READ(data, "cr_ws_read(len=%zu) -> %d, nread=%zu, eos=%d",
+                blen, result, *pnread, *peos);
+  return result;
+}
+
+static const struct Curl_crtype ws_cr_encode = {
+  "ws-encode",
+  cr_ws_init,
+  cr_ws_read,
+  cr_ws_close,
+  Curl_creader_def_needs_rewind,
+  Curl_creader_def_total_length,
+  Curl_creader_def_resume_from,
+  Curl_creader_def_rewind,
+  Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
+  Curl_creader_def_done,
+  sizeof(struct cr_ws_ctx)
+};
+
+
 struct wsfield {
   const char *name;
   const char *val;
@@ -969,7 +1078,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 {
   struct SingleRequest *k = &data->req;
   struct websocket *ws;
-  struct Curl_cwriter *ws_dec_writer;
+  struct Curl_cwriter *ws_dec_writer = NULL;
+  struct Curl_creader *ws_enc_reader = NULL;
   CURLcode result;
 
   DEBUGASSERT(data->conn);
@@ -1045,13 +1155,11 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   result = Curl_cwriter_create(&ws_dec_writer, data, &ws_cw_decode,
                                CURL_CW_CONTENT_DECODE);
   if(result)
-    return result;
-
+    goto out;
   result = Curl_cwriter_add(data, ws_dec_writer);
-  if(result) {
-    Curl_cwriter_free(data, ws_dec_writer);
-    return result;
-  }
+  if(result)
+    goto out;
+  ws_dec_writer = NULL; /* owned by transfer now */
 
   if(data->set.connect_only) {
     ssize_t nwritten;
@@ -1061,17 +1169,53 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     nwritten = Curl_bufq_write(&ws->recvbuf, (const unsigned char *)mem,
                                nread, &result);
     if(nwritten < 0)
-      return result;
-    CURL_TRC_WS(data, "%zu bytes payload", nread);
+      goto out;
+
+    k->keepon &= ~KEEP_RECV; /* read no more content */
   }
   else { /* !connect_only */
+    if(data->set.method == HTTPREQ_PUT) {
+      CURL_TRC_WS(data, "UPLOAD set, add ws-encode reader");
+      result = Curl_creader_set_fread(data, -1);
+      if(result)
+        goto out;
+
+      /* Add our client readerr encoding WS BINARY frames */
+      result = Curl_creader_create(&ws_enc_reader, data, &ws_cr_encode,
+                                   CURL_CR_CONTENT_ENCODE);
+      if(result)
+        goto out;
+      result = Curl_creader_add(data, ws_enc_reader);
+      if(result)
+        goto out;
+      ws_enc_reader = NULL; /* owned by transfer now */
+
+      /* start over with sending */
+      data->req.eos_read = FALSE;
+      k->keepon |= KEEP_SEND;
+    }
+
     /* And pass any additional data to the writers */
     if(nread) {
       result = Curl_client_write(data, CLIENTWRITE_BODY, mem, nread);
+      if(result)
+        goto out;
     }
   }
-  k->upgr101 = UPGR101_RECEIVED;
 
+  k->upgr101 = UPGR101_RECEIVED;
+  k->header = FALSE; /* we will not get more responses */
+
+out:
+  if(ws_dec_writer)
+    Curl_cwriter_free(data, ws_dec_writer);
+  if(ws_enc_reader)
+    Curl_creader_free(data, ws_enc_reader);
+  if(result)
+    CURL_TRC_WS(data, "Curl_ws_accept() failed -> %d", result);
+  else
+    CURL_TRC_WS(data, "websocket established, %s mode",
+                data->set.connect_only ? "connect-only" : "callback");
   return result;
 }
 

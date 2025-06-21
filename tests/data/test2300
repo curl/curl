@@ -37,7 +37,7 @@ http
 WebSockets upgrade only
 </name>
 <command>
-ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-T . ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
