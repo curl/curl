@@ -85,9 +85,6 @@
  * it!
  */
 
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
 
 /* buffer is this excessively large only to be able to support things like
   test 1003 which tests exceedingly large server response lines */

@@ -107,8 +107,8 @@ typedef union {
 #define GPE_OK               0
 #define GPE_END_OF_FILE      1
 
-static int getpart(char **outbuf, size_t *outlen,
-                   const char *main, const char *sub, FILE *stream);
+int getpart(char **outbuf, size_t *outlen,
+            const char *main, const char *sub, FILE *stream);
 
 /* global variables */
 static const char *srcpath = "."; /* pointing to the test dir */
@@ -126,5 +126,39 @@ static const char *ipv_inuse = "IPv4";
 static unsigned short server_port = 0;
 static const char *socket_type = "IPv4";
 static int socket_domain = AF_INET;
+
+/* utility functions */
+char *data_to_hex(char *data, size_t len);
+void logmsg(const char *msg, ...);
+void loghex(unsigned char *buffer, ssize_t len);
+unsigned char byteval(char *value);
+/* static void win32_perror(const char *msg)                                     */
+/* static void win32_cleanup(void)                                               */
+/* static int win32_init(void)                                                   */
+const char *sstrerror(int err);
+FILE *test2fopen(long testno, const char *logdir2);
+curl_off_t our_getpid(void);
+int write_pidfile(const char *filename);
+int write_portfile(const char *filename, int port);
+void set_advisor_read_lock(const char *filename);
+void clear_advisor_read_lock(const char *filename);
+/* static unsigned int thread_main_id = 0;                                       */
+/* static HANDLE thread_main_window = NULL;                                      */
+/* static HWND hidden_main_window = NULL;                                        */
+static volatile int got_exit_signal = 0;
+static volatile int exit_signal = 0;
+#ifdef _WIN32
+static HANDLE exit_event = NULL;
+#endif
+/* static void exit_signal_handler(int signum)                                   */
+/* static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)                       */
+/* static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,                */
+/* static unsigned int WINAPI main_window_loop(void *lpParameter)                */
+/* static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,              */
+void install_signal_handlers(bool keep_sigalrm);
+void restore_signal_handlers(bool keep_sigalrm);
+int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+                     struct sockaddr_un *sau);
+unsigned short util_ultous(unsigned long ulnum);
 
 #endif /* HEADER_SERVER_FIRST_H */

@@ -57,9 +57,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>  /* FIONREAD on Solaris 7 */
 #endif

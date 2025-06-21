@@ -29,11 +29,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-
-#include <ctype.h>
 
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;
