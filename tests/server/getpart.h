@@ -23,8 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-
 #include "strdup.h"
 
 #define GPE_NO_BUFFER_SPACE -2

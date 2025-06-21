@@ -22,8 +22,6 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -45,7 +43,6 @@
 
 #include <ctype.h>
 
-#include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
 /* include memdebug.h last */

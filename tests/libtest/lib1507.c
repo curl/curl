@@ -24,7 +24,6 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "timediff.h"
 #include "memdebug.h"
 
 /*

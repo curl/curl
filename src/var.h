@@ -25,7 +25,6 @@
  ***************************************************************************/
 
 #include "tool_getparam.h"
-#include <curlx.h>
 
 struct tool_var {
   struct tool_var *next;

@@ -40,7 +40,6 @@
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 
-#include <curlx.h>
 #include <memdebug.h> /* keep this as LAST include */
 
 #ifdef _WIN32

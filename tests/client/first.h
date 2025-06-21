@@ -34,7 +34,7 @@ struct entry_s {
 
 #include <curl/curl.h>
 
-#include "curlx.h"
+#include <curlx/curlx.h>
 
 #include <stdlib.h>  /* for calloc(), free(), strtol() */
 #include <string.h>  /* for strchr(), strcmp() */
