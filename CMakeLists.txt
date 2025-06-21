@@ -633,7 +633,7 @@ elseif(AMIGA)
 elseif(NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_LIBS})
+    set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_NETWORK_AND_TIME_LIBS})
   endif()
 endif()
 
