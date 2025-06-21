@@ -69,7 +69,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-# Get CSOURCES, HHEADERS variables
+# Get CSOURCES, HHEADERS, LIB_RCFILES variables
 include Makefile.inc
 
 if DOING_NATIVE_WINDOWS
