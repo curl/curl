@@ -29,6 +29,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_NETINET_IN6_H
+#include <netinet/in6.h>
+#endif
 #ifdef _XOPEN_SOURCE_EXTENDED
 /* This define is "almost" required to build on HP-UX 11 */
 #include <arpa/inet.h>
