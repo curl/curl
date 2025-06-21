@@ -21,32 +21,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include "curl_setup.h"
+#include "first.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifndef UNDER_CE
-#include <signal.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
 
 #include <ctype.h>
-
-#include <curlx.h> /* from the private lib dir */
-#include "getpart.h"
 
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;

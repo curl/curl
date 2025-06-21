@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
+
 #include <stdio.h>
 #include <string.h>
 

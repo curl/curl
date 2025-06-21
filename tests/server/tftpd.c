@@ -49,26 +49,16 @@
  *
  * SPDX-License-Identifier: BSD-4-Clause-UC
  */
-
-#include "curl_setup.h"
+#include "first.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-#ifndef UNDER_CE
-#include <signal.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
 #endif
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>  /* FIONREAD on Solaris 7 */
@@ -81,9 +71,6 @@
 #endif
 
 #include <ctype.h>
-
-#include <curlx.h> /* from the private lib dir */
-#include "getpart.h"
 
 /*****************************************************************************
 *  This is a rewrite/clone of the arpa/tftp.h file for systems without it.   *
@@ -119,7 +106,6 @@ struct tftphdr {
 #define TFTP_EBADID    5
 #define TFTP_EEXISTS   6
 #define TFTP_ENOUSER   7
-/****************************************************************************/
 
 /*****************************************************************************
 *                      STRUCT DECLARATIONS AND DEFINES                       *
