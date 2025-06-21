@@ -174,7 +174,7 @@ int tool_readbusy_cb(void *clientp,
       select(per->infd + 1, &bits, NULL, NULL, &timeout);
 #else
       /* sleep */
-      tool_go_sleep(1);
+      curlx_wait_ms(1);
 #endif
     }
 
