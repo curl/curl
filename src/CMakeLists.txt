@@ -96,6 +96,7 @@ add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
+set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
