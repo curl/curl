@@ -117,6 +117,7 @@
 --list-only (-l)                     4.0
 --local-port                         7.15.2
 --location (-L)                      4.9
+--location-mode                      8.14.0
 --location-trusted                   7.10.4
 --login-options                      7.34.0
 --mail-auth                          7.25.0
