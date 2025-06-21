@@ -30,7 +30,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 include Makefile.inc
 
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
-  curl.rc Makefile.inc CMakeLists.txt .checksrc
+  $(CURL_RCFILES) Makefile.inc CMakeLists.txt .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
