@@ -30,12 +30,9 @@
 #include <fcntl.h>
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-CURLcode test(char *URL)
+static CURLcode test_lib591(char *URL)
 {
   CURL *easy = NULL;
   CURLM *multi = NULL;
@@ -50,7 +47,7 @@ CURLcode test(char *URL)
   upload = fopen(libtest_arg3, "rb");
   if(!upload) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
-            errno, strerror(errno));
+                  errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg3);
     return TEST_ERR_FOPEN;
   }

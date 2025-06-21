@@ -29,85 +29,79 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static void unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-static CURLcode unit_setup(void)
+static CURLcode t1607_setup(void)
 {
   CURLcode res = CURLE_OK;
-
   global_init(CURL_GLOBAL_ALL);
-
   return res;
 }
 
-struct testcase {
-  /* host:port:address[,address]... */
-  const char *optval;
-
-  /* lowercase host and port to retrieve the addresses from hostcache */
-  const char *host;
-  int port;
-
-  /* whether we expect a permanent or non-permanent cache entry */
-  bool permanent;
-
-  /* 0 to 9 addresses expected from hostcache */
-  const char *address[10];
-};
-
-
-/* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
-   addresses, so we have to do that as well. */
-static const char skip = 0;
+static CURLcode test_unit1607(char *arg)
+{
+  /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
+     addresses, so we have to do that as well. */
+  static const char skip = 0;
 #ifdef USE_IPV6
 #define IPV6ONLY(x) x
 #else
 #define IPV6ONLY(x) &skip
 #endif
 
-/* CURLOPT_RESOLVE address parsing tests */
-static const struct testcase tests[] = {
-  /* spaces aren't allowed, for now */
-  { "test.com:80:127.0.0.1, 127.0.0.2",
-    "test.com", 80, TRUE, { NULL, }
-  },
-  { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
-    "test.com", 80, TRUE, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
-  },
-  { "test.com:80:::1,127.0.0.1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:[::1],127.0.0.1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
-  },
-  { "test.com:80:::1",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
-  },
-  { "test.com:80:[::1]",
-    "test.com", 80, TRUE, { IPV6ONLY("::1"), }
-  },
-  { "test.com:80:127.0.0.1",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:80:,127.0.0.1",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:80:127.0.0.1,",
-    "test.com", 80, TRUE, { "127.0.0.1", }
-  },
-  { "test.com:0:127.0.0.1",
-    "test.com", 0, TRUE, { "127.0.0.1", }
-  },
-  { "+test.com:80:127.0.0.1,",
-    "test.com", 80, FALSE, { "127.0.0.1", }
-  },
-};
+  UNITTEST_BEGIN(t1607_setup())
 
-UNITTEST_START
-{
+  struct testcase {
+    /* host:port:address[,address]... */
+    const char *optval;
+
+    /* lowercase host and port to retrieve the addresses from hostcache */
+    const char *host;
+    int port;
+
+    /* whether we expect a permanent or non-permanent cache entry */
+    bool permanent;
+
+    /* 0 to 9 addresses expected from hostcache */
+    const char *address[10];
+  };
+
+  /* CURLOPT_RESOLVE address parsing tests */
+  static const struct testcase tests[] = {
+    /* spaces aren't allowed, for now */
+    { "test.com:80:127.0.0.1, 127.0.0.2",
+      "test.com", 80, TRUE, { NULL, }
+    },
+    { "TEST.com:80:,,127.0.0.1,,,127.0.0.2,,,,::1,,,",
+      "test.com", 80, TRUE, { "127.0.0.1", "127.0.0.2", IPV6ONLY("::1"), }
+    },
+    { "test.com:80:::1,127.0.0.1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
+    },
+    { "test.com:80:[::1],127.0.0.1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), "127.0.0.1", }
+    },
+    { "test.com:80:::1",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), }
+    },
+    { "test.com:80:[::1]",
+      "test.com", 80, TRUE, { IPV6ONLY("::1"), }
+    },
+    { "test.com:80:127.0.0.1",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:80:,127.0.0.1",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:80:127.0.0.1,",
+      "test.com", 80, TRUE, { "127.0.0.1", }
+    },
+    { "test.com:0:127.0.0.1",
+      "test.com", 0, TRUE, { "127.0.0.1", }
+    },
+    { "+test.com:80:127.0.0.1,",
+      "test.com", 80, FALSE, { "127.0.0.1", }
+    },
+  };
+
   int i;
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
@@ -235,5 +229,6 @@ error:
   curl_easy_cleanup(easy);
   curl_multi_cleanup(multi);
   curl_slist_free_all(list);
+
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP

@@ -21,81 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* <DESC>
- * HTTP/2 server push
- * </DESC>
- */
-/* curl stuff */
-#include <curl/curl.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifndef CURLPIPE_MULTIPLEX
-#error "too old libcurl, cannot do HTTP/2 server push!"
-#endif
-
-static
-void dump(const char *text, unsigned char *ptr, size_t size,
-          char nohex)
-{
-  size_t i;
-  size_t c;
-
-  unsigned int width = 0x10;
-
-  if(nohex)
-    /* without the hex output, we can fit more on screen */
-    width = 0x40;
-
-  fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
-          text, (unsigned long)size, (unsigned long)size);
-
-  for(i = 0; i < size; i += width) {
-
-    fprintf(stderr, "%4.4lx: ", (unsigned long)i);
-
-    if(!nohex) {
-      /* hex not disabled, show it */
-      for(c = 0; c < width; c++)
-        if(i + c < size)
-          fprintf(stderr, "%02x ", ptr[i + c]);
-        else
-          fputs("   ", stderr);
-    }
-
-    for(c = 0; (c < width) && (i + c < size); c++) {
-      /* check for 0D0A; if found, skip past and start a new line of output */
-      if(nohex && (i + c + 1 < size) && ptr[i + c] == 0x0D &&
-         ptr[i + c + 1] == 0x0A) {
-        i += (c + 2 - width);
-        break;
-      }
-      fprintf(stderr, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
-      if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
-         ptr[i + c + 2] == 0x0A) {
-        i += (c + 3 - width);
-        break;
-      }
-    }
-    fputc('\n', stderr); /* newline */
-  }
-}
-
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size, void *userp)
 {
   const char *text;
   (void)handle; /* prevent compiler warning */
   (void)userp;
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", data);
+    curl_mfprintf(stderr, "== Info: %s", data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
@@ -123,11 +58,9 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#define OUTPUTFILE "download_0.data"
-
-static int setup(CURL *hnd, const char *url)
+static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
-  FILE *out = fopen(OUTPUTFILE, "wb");
+  FILE *out = fopen("download_0.data", "wb");
   if(!out)
     /* failed */
     return 1;
@@ -143,10 +76,9 @@ static int setup(CURL *hnd, const char *url)
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
 
-#if (CURLPIPE_MULTIPLEX > 0)
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
-#endif
+
   return 0; /* all is good */
 }
 
@@ -172,7 +104,7 @@ static int server_push_callback(CURL *parent,
   out = fopen(filename, "wb");
   if(!out) {
     /* if we cannot save it, deny it */
-    fprintf(stderr, "Failed to create output file for push\n");
+    curl_mfprintf(stderr, "Failed to create output file for push\n");
     rv = CURL_PUSH_DENY;
     goto out;
   }
@@ -180,17 +112,18 @@ static int server_push_callback(CURL *parent,
   /* write to this file */
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
 
-  fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
-          count, (unsigned long)num_headers);
+  curl_mfprintf(stderr, "**** push callback approves stream %u, "
+                "got %lu headers!\n", count, (unsigned long)num_headers);
 
   for(i = 0; i < num_headers; i++) {
     headp = curl_pushheader_bynum(headers, i);
-    fprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
+    curl_mfprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
   }
 
   headp = curl_pushheader_byname(headers, ":path");
   if(headp) {
-    fprintf(stderr, "**** The PATH is %s\n", headp /* skip :path + colon */);
+    curl_mfprintf(stderr, "**** The PATH is %s\n",
+                  headp /* skip :path + colon */);
   }
 
   (*transfers)++; /* one more */
@@ -200,11 +133,10 @@ out:
   return rv;
 }
 
-
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-int main(int argc, char *argv[])
+static int test_h2_serverpush(int argc, char *argv[])
 {
   CURL *easy;
   CURLM *multi_handle;
@@ -213,7 +145,7 @@ int main(int argc, char *argv[])
   const char *url;
 
   if(argc != 2) {
-    fprintf(stderr, "need URL as argument\n");
+    curl_mfprintf(stderr, "need URL as argument\n");
     return 2;
   }
   url = argv[1];
@@ -224,8 +156,8 @@ int main(int argc, char *argv[])
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-  if(setup(easy, url)) {
-    fprintf(stderr, "failed\n");
+  if(setup_h2_serverpush(easy, url)) {
+    curl_mfprintf(stderr, "failed\n");
     return 1;
   }
 

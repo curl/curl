@@ -428,13 +428,13 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         logmsg "Could not generate host key\n";
         exit 1;
     }
-    display_file_top(pp($hstprvkeyf));
+    display_file_top(pp($hstprvkeyf)) if($verbose);
     logmsg "generating client keys...\n" if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''" . $sshkeygenopt) {
         logmsg "Could not generate client key\n";
         exit 1;
     }
-    display_file_top(pp($cliprvkeyf));
+    display_file_top(pp($cliprvkeyf)) if($verbose);
     # Make sure that permissions are restricted so openssh doesn't complain
     chmod 0600, pp($hstprvkeyf);
     chmod 0600, pp($cliprvkeyf);

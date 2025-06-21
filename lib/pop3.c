@@ -1459,9 +1459,6 @@ static CURLcode pop3_disconnect(struct Curl_easy *data,
   /* Disconnect from the server */
   Curl_pp_disconnect(&pop3c->pp);
 
-  /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, pop3c->sasl.authused);
-
   /* Cleanup our connection based variables */
   Curl_safefree(pop3c->apoptimestamp);
 

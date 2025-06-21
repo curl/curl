@@ -24,7 +24,7 @@ successful transfer, prefix them with a dash '-'.
 
 (FTP only) To make commands be sent after curl has changed the working
 directory, just before the file transfer command(s), prefix the command with a
-'+'. This is not performed when a directory listing is performed.
+'+'.
 
 You may specify any number of commands.
 

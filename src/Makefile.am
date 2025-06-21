@@ -26,8 +26,11 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
+include Makefile.inc
+
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
- curl.rc Makefile.inc CMakeLists.txt .checksrc
+  $(CURL_RCFILES) Makefile.inc CMakeLists.txt .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -36,16 +39,14 @@ EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
 #
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_builddir)/src is for curl's generated src/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
-# $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
+# $(srcdir) for generated sources to find included sources
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
-              -I$(top_builddir)/src          \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/lib/curlx      \
-              -I$(top_srcdir)/src
+              -I$(srcdir)
 
 bin_PROGRAMS = curl
 
@@ -67,26 +68,24 @@ if USE_UNICODE
 UNICODEFLAG = -municode
 endif
 
-include Makefile.inc
-
 curl_cfiles_gen =
 curl_hfiles_gen =
 CLEANFILES =
 
 if USE_UNITY
 if USE_CPPFLAG_CURL_STATICLIB
-curl_CURLX =
+curlx_src =
 else
-curl_CURLX = $(CURLX_CFILES)
+# These are part of the libcurl static lib. Add them here when linking shared.
+curlx_src = $(CURLX_CFILES)
 endif
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --srcdir $(srcdir) --include $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-# CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
 endif
 if HAVE_WINDRES
@@ -109,10 +108,10 @@ if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
 libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
-libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
+libcurltool_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_CURLX) > libcurltool_unity.c
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curlx_src)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curlx_src) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =

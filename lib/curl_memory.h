@@ -57,7 +57,6 @@
 #ifdef HEADER_CURL_MEMDEBUG_H
 /* cleanup after memdebug.h */
 
-#ifdef MEMDEBUG_NODEFINES
 #ifdef CURLDEBUG
 
 #undef strdup
@@ -86,11 +85,14 @@
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
+#define sclose(x)  CURL_SCLOSE(x)
 #undef fopen
+#ifdef CURL_FOPEN
+#define fopen(fname, mode)  CURL_FOPEN(fname, mode)
+#endif
 #undef fdopen
 #undef fclose
 
-#endif /* MEMDEBUG_NODEFINES */
 #endif /* CURLDEBUG */
 
 #undef HEADER_CURL_MEMDEBUG_H

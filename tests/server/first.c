@@ -23,37 +23,31 @@
  ***************************************************************************/
 #include <stdio.h>
 #include <string.h>
-#include "first.h"
 
 int main(int argc, char **argv)
 {
-  main_func_t main_func;
-  char *main_name;
+  entry_func_t entry_func;
+  char *entry_name;
+  size_t tmp;
 
   if(argc < 2) {
     fprintf(stderr, "Pass servername as first argument\n");
     return 1;
   }
 
-  main_name = argv[1];
-  main_func = NULL;
-  {
-    size_t tmp;
-    for(tmp = 0; s_mains[tmp].ptr; ++tmp) {
-      if(strcmp(main_name, s_mains[tmp].name) == 0) {
-        main_func = s_mains[tmp].ptr;
-        break;
-      }
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+      entry_func = s_entries[tmp].ptr;
+      break;
     }
   }
 
-  if(!main_func) {
-    fprintf(stderr, "Test '%s' not found.\n", main_name);
+  if(!entry_func) {
+    fprintf(stderr, "Test '%s' not found.\n", entry_name);
     return 99;
   }
 
-  --argc;
-  ++argv;
-
-  return main_func(argc, argv);
+  return entry_func(argc - 1, argv + 1);
 }

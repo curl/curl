@@ -21,10 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
 
 /* Function
  *
@@ -55,9 +54,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
-#include "server_sockaddr.h"
-
-#include "tool_binmode.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -763,11 +759,11 @@ static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
       logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
              error, sstrerror(error));
       if(maxretr) {
-        rc = wait_ms(delay);
+        rc = curlx_wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = SOCKERRNO;
-          logmsg("wait_ms() failed with error (%d) %s",
+          logmsg("curlx_wait_ms() failed with error (%d) %s",
                  error, sstrerror(error));
           sclose(sock);
           return CURL_SOCKET_BAD;
@@ -882,7 +878,7 @@ static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
 }
 
 
-int main(int argc, char *argv[])
+static int test_mqttd(int argc, char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
@@ -987,9 +983,9 @@ int main(int argc, char *argv[])
     return 2;
 #endif
 
-  CURL_SET_BINMODE(stdin);
-  CURL_SET_BINMODE(stdout);
-  CURL_SET_BINMODE(stderr);
+  CURLX_SET_BINMODE(stdin);
+  CURLX_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stderr);
 
   install_signal_handlers(FALSE);
 

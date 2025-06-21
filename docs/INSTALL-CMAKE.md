@@ -235,7 +235,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
-                                            `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
+                                            `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `schannel`, `rustls`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external). Default: `ON`
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
@@ -244,12 +244,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`) (requires UCRT, static libcurl or no curl executable). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
-- `CURL_TEST_BUNDLES`:                      Build tests into single-binary bundles. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
-- `ENABLE_SERVER_DEBUG`:                    Apply curl debug options to test servers. Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp` for MSVC-like toolchains, otherwise empty.
 - `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
@@ -354,7 +352,6 @@ Details via CMake
 ## Dependencies
 
 - `CURL_BROTLI`:                            Use brotli (`ON`, `OFF` or `AUTO`). Default: `AUTO`
-- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
@@ -367,7 +364,6 @@ Details via CMake
 - `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
-- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
 - `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
@@ -386,6 +382,9 @@ Details via CMake
 ## Dependency options (via CMake)
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
+- `OPENSSL_INCLUDE_DIR`:                    The OpenSSL include directory.
+- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
+- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
@@ -401,8 +400,6 @@ Details via CMake
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
 - `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
-- `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory.
-- `BEARSSL_LIBRARY`:                        Path to `bearssl` library.
 - `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library.
@@ -440,6 +437,11 @@ Details via CMake
 - `NGHTTP3_LIBRARY`:                        Path to `nghttp3` library.
 - `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory.
 - `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library.
+- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Path to `ngtcp2_crypto_boringssl` library.
+- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Path to `ngtcp2_crypto_gnutls` library.
+- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Path to `ngtcp2_crypto_ossl` library.
+- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Path to `ngtcp2_crypto_quictls` library.
+- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Path to `ngtcp2_crypto_wolfssl` library.
 - `NETTLE_INCLUDE_DIR`:                     The nettle include directory.
 - `NETTLE_LIBRARY`:                         Path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Path to `pthread` library. (for Rustls)

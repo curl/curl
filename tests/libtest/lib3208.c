@@ -24,12 +24,9 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-CURLcode test(char *URL)
+static CURLcode test_lib3208(char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;

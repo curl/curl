@@ -154,9 +154,10 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <tool>
-libauthretry
+lib2023
 </tool>
 
 <name>

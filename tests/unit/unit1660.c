@@ -26,34 +26,38 @@
 #include "urldata.h"
 #include "hsts.h"
 
-static CURLcode
-unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void
-unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
-UNITTEST_START
+static CURLcode test_unit1660(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
   puts("nothing to do when HTTP or HSTS are disabled");
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP
 #else
 
-struct testit {
-  const char *host;
-  const char *chost; /* if non-NULL, use to lookup with */
-  const char *hdr; /* if NULL, just do the lookup */
-  const CURLcode result; /* parse result */
-};
+static void showsts(struct stsentry *e, const char *chost)
+{
+  if(!e)
+    printf("'%s' is not HSTS\n", chost);
+  else {
+    curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
+                 chost, e->host, e->expires,
+                 e->includeSubDomains ? " includeSubDomains" : "");
+  }
+}
 
-static const struct testit headers[] = {
+static CURLcode test_unit1660(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
+  struct testit {
+    const char *host;
+    const char *chost; /* if non-NULL, use to lookup with */
+    const char *hdr; /* if NULL, just do the lookup */
+    const CURLcode result; /* parse result */
+  };
+
+  static const struct testit headers[] = {
   /* two entries read from disk cache, verify first */
   { "-", "readfrom.example", NULL, CURLE_OK},
   { "-", "old.example", NULL, CURLE_OK},
@@ -104,21 +108,8 @@ static const struct testit headers[] = {
   /* make this live for 7 seconds */
   { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
   { NULL, NULL, NULL, CURLE_OK }
-};
+  };
 
-static void showsts(struct stsentry *e, const char *chost)
-{
-  if(!e)
-    printf("'%s' is not HSTS\n", chost);
-  else {
-    curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
-                 chost, e->host, e->expires,
-                 e->includeSubDomains ? " includeSubDomains" : "");
-  }
-}
-
-UNITTEST_START
-{
   CURLcode result;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
@@ -175,6 +166,7 @@ UNITTEST_START
   Curl_hsts_cleanup(&h);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
+
+  UNITTEST_END(curl_global_cleanup())
 }
-UNITTEST_STOP
 #endif

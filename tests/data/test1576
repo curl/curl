@@ -69,7 +69,7 @@ lib%TESTNUMBER
 CURLFOLLOW_OBEYCODE with custom PUT method, 302 => custom
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER 1576
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

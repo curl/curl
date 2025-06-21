@@ -36,14 +36,7 @@
 #endif
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h" /* LAST include file */
-
-struct part {
-  CURLUPart part;
-  const char *name;
-};
-
 
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
@@ -53,6 +46,12 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
   char buf[256];
   char *bufp = &buf[0];
   size_t len = sizeof(buf);
+
+  struct part {
+    CURLUPart part;
+    const char *name;
+  };
+
   struct part parts[] = {
     {CURLUPART_SCHEME, "scheme"},
     {CURLUPART_USER, "user"},
@@ -1839,7 +1838,7 @@ static int get_nothing(void)
     rc = curl_url_get(u, CURLUPART_ZONEID, &p, 0);
     if(rc != CURLUE_NO_ZONEID)
       curl_mfprintf(stderr, "unexpected return code %u on line %u\n", (int)rc,
-              __LINE__);
+                    __LINE__);
 
     curl_url_cleanup(u);
   }
@@ -1906,7 +1905,7 @@ static int huge(void)
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;
-  CURLUPart part[]= {
+  CURLUPart part[] = {
     CURLUPART_SCHEME,
     CURLUPART_USER,
     CURLUPART_PASSWORD,
@@ -2018,7 +2017,7 @@ err:
   return 1;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1560(char *URL)
 {
   (void)URL; /* not used */
 

@@ -102,18 +102,18 @@ typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
 typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
                                        const struct Curl_easy *data);
 
-typedef ssize_t  Curl_cft_send(struct Curl_cfilter *cf,
+typedef CURLcode Curl_cft_send(struct Curl_cfilter *cf,
                                struct Curl_easy *data, /* transfer */
                                const void *buf,        /* data to write */
                                size_t len,             /* amount to write */
                                bool eos,               /* last chunk */
-                               CURLcode *err);         /* error to return */
+                               size_t *pnwritten);     /* how much sent */
 
-typedef ssize_t  Curl_cft_recv(struct Curl_cfilter *cf,
+typedef CURLcode Curl_cft_recv(struct Curl_cfilter *cf,
                                struct Curl_easy *data, /* transfer */
                                char *buf,              /* store data here */
                                size_t len,             /* amount to read */
-                               CURLcode *err);         /* error to return */
+                               size_t *pnread);        /* how much received */
 
 typedef bool     Curl_cft_conn_is_alive(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
@@ -177,6 +177,9 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
 #define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   -  */
+/* pass in a `const struct Curl_sockaddr_ex **` as `pres2`. Gets set
+ * to NULL when not connected. */
+#define CF_QUERY_REMOTE_ADDR       10  /* -          `Curl_sockaddr_ex *` */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -249,11 +252,11 @@ void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                     struct easy_pollset *ps);
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data);
-ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+CURLcode Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, bool eos,
-                          CURLcode *err);
-ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          char *buf, size_t len, CURLcode *err);
+                          size_t *pnwritten);
+CURLcode Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, size_t *pnread);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            int event, int arg1, void *arg2);
@@ -326,11 +329,11 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
-ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
-                          CURLcode *err);
-ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          char *buf, size_t len, CURLcode *err);
+CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           const void *buf, size_t len, bool eos,
+                           size_t *pnwritten);
+CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           char *buf, size_t len, size_t *pnread);
 CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             bool ignore_result,
@@ -444,6 +447,10 @@ CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
  */
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
 
+/* Return a pointer to the connected socket address or NULL. */
+const struct Curl_sockaddr_ex *
+Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex);
+
 /**
  * Tell filters to forget about the socket at sockindex.
  */
@@ -475,20 +482,19 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
 /**
  * Receive data through the filter chain at `sockindex` for connection
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
- * actual number of bytes copied or a negative value on error.
- * The error code is placed into `*code`.
+ * actual number of bytes copied in `*pnread`or an error.
  */
-ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
-                     size_t len, CURLcode *code);
+CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
+                      size_t len, size_t *pnread);
 
 /**
  * Send `len` bytes of data from `buf` through the filter chain `sockindex`
  * at connection `data->conn`. Return the actual number of bytes written
- * or a negative value on error.
- * The error code is placed into `*code`.
+ * in `*pnwritten` or on error.
  */
-ssize_t Curl_cf_send(struct Curl_easy *data, int sockindex,
-                     const void *buf, size_t len, bool eos, CURLcode *code);
+CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
+                      const void *buf, size_t len, bool eos,
+                      size_t *pnwritten);
 
 /**
  * Notify connection filters that they need to setup data for
@@ -567,7 +573,7 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
  */
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
                         char *buf, size_t buffersize,
-                        ssize_t *pnread);
+                        size_t *pnread);
 
 /*
  * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
@@ -620,6 +626,13 @@ void Curl_pollset_add_socks(struct Curl_easy *data,
 void Curl_pollset_check(struct Curl_easy *data,
                         struct easy_pollset *ps, curl_socket_t sock,
                         bool *pwant_read, bool *pwant_write);
+
+/**
+ * Return TRUE if the pollset contains socket with CURL_POLL_IN.
+ */
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock);
 
 /**
  * Types and macros used to keep the current easy handle in filter calls,

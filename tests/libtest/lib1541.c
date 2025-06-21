@@ -24,10 +24,9 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-struct transfer_status {
+struct t1541_transfer_status {
   CURL *easy;
   int hd_count;
   int bd_count;
@@ -36,7 +35,7 @@ struct transfer_status {
 
 #define KN(a)   a, #a
 
-static int geterr(const char *name, CURLcode val, int lineno)
+static int t1541_geterr(const char *name, CURLcode val, int lineno)
 {
   curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
                name, val, curl_easy_strerror(val), lineno);
@@ -59,7 +58,7 @@ static void check_time(CURL *easy, int key, const char *name,
   curl_off_t tval;
   CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
   if(res) {
-    geterr(name, res, __LINE__);
+    t1541_geterr(name, res, __LINE__);
   }
   else
     report_time(name, where, tval, tval > 0);
@@ -71,16 +70,16 @@ static void check_time0(CURL *easy, int key, const char *name,
   curl_off_t tval;
   CURLcode res = curl_easy_getinfo(easy, (CURLINFO)key, &tval);
   if(res) {
-    geterr(name, res, __LINE__);
+    t1541_geterr(name, res, __LINE__);
   }
   else
     report_time(name, where, tval, !tval);
 }
 
-static size_t header_callback(char *ptr, size_t size, size_t nmemb,
-                              void *userp)
+static size_t t1541_header_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
   size_t len = size * nmemb;
 
   (void)ptr;
@@ -100,9 +99,9 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
   return len;
 }
 
-static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct transfer_status *st = (struct transfer_status *)userp;
+  struct t1541_transfer_status *st = (struct t1541_transfer_status *)userp;
 
   (void)ptr;
   (void)st;
@@ -110,11 +109,11 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1541(char *URL)
 {
   CURL *curls = NULL;
   CURLcode res = CURLE_OK;
-  struct transfer_status st;
+  struct t1541_transfer_status st;
 
   start_test_timing();
 
@@ -126,9 +125,9 @@ CURLcode test(char *URL)
   st.easy = curls; /* to allow callbacks access */
 
   easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
+  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1541_write_cb);
   easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
+  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1541_header_callback);
   easy_setopt(curls, CURLOPT_HEADERDATA, &st);
 
   easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);

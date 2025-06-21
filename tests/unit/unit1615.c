@@ -26,17 +26,9 @@
 
 #include "curl_sha512_256.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1615(char *arg)
 {
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
-
-UNITTEST_START
+  UNITTEST_BEGIN_SIMPLE
 
 #ifdef CURL_HAVE_SHA512_256
 
@@ -155,5 +147,5 @@ UNITTEST_START
 
 #endif /* CURL_HAVE_SHA512_256 */
 
-
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

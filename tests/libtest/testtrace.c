@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 #include "testutil.h"
 #include "testtrace.h"
@@ -32,9 +31,9 @@ struct libtest_trace_cfg libtest_debug_config;
 static time_t epoch_offset; /* for test time tracing */
 static int    known_offset; /* for test time tracing */
 
-static
-void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
-                        const unsigned char *ptr, size_t size, int nohex)
+static void libtest_debug_dump(const char *timebuf, const char *text,
+                               FILE *stream, const unsigned char *ptr,
+                               size_t size, int nohex)
 {
   size_t i;
   size_t c;

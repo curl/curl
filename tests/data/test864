@@ -32,6 +32,7 @@ pop3
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 POP3 APOP authentication

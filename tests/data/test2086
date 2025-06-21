@@ -32,7 +32,7 @@ http-ipv6
 Pre-request callback for HTTP IPv6
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>

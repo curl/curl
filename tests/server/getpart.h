@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 #include "strdup.h"
 
@@ -32,7 +32,7 @@
 #define GPE_OK               0
 #define GPE_END_OF_FILE      1
 
-int getpart(char **outbuf, size_t *outlen,
-            const char *main, const char *sub, FILE *stream);
+static int getpart(char **outbuf, size_t *outlen,
+                   const char *main, const char *sub, FILE *stream);
 
 #endif /* HEADER_CURL_SERVER_GETPART_H */

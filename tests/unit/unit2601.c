@@ -27,16 +27,6 @@
 #include "bufq.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  CURLcode res = CURLE_OK;
-  return res;
-}
-
-static void unit_stop(void)
-{
-}
-
 static const char *tail_err(struct bufq *q)
 {
   struct buf_chunk *chunk;
@@ -86,12 +76,12 @@ static void dump_bufq(struct bufq *q, const char *msg)
   curl_mfprintf(stderr, "- spares: %zu\n", n);
 }
 
-static unsigned char test_data[32*1024];
-
 static void check_bufq(size_t pool_spares,
                        size_t chunk_size, size_t max_chunks,
                        size_t wsize, size_t rsize, int opts)
 {
+  static unsigned char test_data[32*1024];
+
   struct bufq q;
   struct bufc_pool pool;
   size_t max_len = chunk_size * max_chunks;
@@ -250,7 +240,10 @@ static void check_bufq(size_t pool_spares,
     Curl_bufcp_free(&pool);
 }
 
-UNITTEST_START
+static CURLcode test_unit2601(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
   struct bufq q;
   ssize_t n;
   CURLcode result;
@@ -278,4 +271,5 @@ UNITTEST_START
   check_bufq(8, 8000, 10, 1234, 1234, BUFQ_OPT_NONE);
   check_bufq(8, 1024, 4, 129, 127, BUFQ_OPT_NO_SPARES);
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

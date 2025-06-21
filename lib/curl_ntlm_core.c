@@ -40,9 +40,8 @@
    3. USE_GNUTLS
    4. -
    5. USE_MBEDTLS
-   6. USE_SECTRANSP
-   7. USE_OS400CRYPTO
-   8. USE_WIN32_CRYPTO
+   6. USE_OS400CRYPTO
+   7. USE_WIN32_CRYPTO
 
    This ensures that:
    - the same SSL branch gets activated throughout this source
@@ -106,11 +105,6 @@
 #elif defined(USE_MBEDTLS)
 
 #  include <mbedtls/des.h>
-
-#elif defined(USE_SECTRANSP)
-
-#  include <CommonCrypto/CommonCryptor.h>
-#  include <CommonCrypto/CommonDigest.h>
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
@@ -207,29 +201,6 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   mbedtls_des_init(&ctx);
   mbedtls_des_setkey_enc(&ctx, (unsigned char *) key);
   return mbedtls_des_crypt_ecb(&ctx, in, out) == 0;
-}
-
-#elif defined(USE_SECTRANSP)
-
-static bool encrypt_des(const unsigned char *in, unsigned char *out,
-                        const unsigned char *key_56)
-{
-  char key[8];
-  size_t out_len;
-  CCCryptorStatus err;
-
-  /* Expand the 56-bit key to 64 bits */
-  extend_key_56_to_64(key_56, key);
-
-  /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
-
-  /* Perform the encryption */
-  err = CCCrypt(kCCEncrypt, kCCAlgorithmDES, kCCOptionECBMode, key,
-                kCCKeySizeDES, NULL, in, 8 /* inbuflen */, out,
-                8 /* outbuflen */, &out_len);
-
-  return err == kCCSuccess;
 }
 
 #elif defined(USE_OS400CRYPTO)
@@ -339,8 +310,8 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   des_encrypt(&des, 8, results + 8, plaintext);
   setup_des_key(keys + 14, &des);
   des_encrypt(&des, 8, results + 16, plaintext);
-#elif defined(USE_MBEDTLS) || defined(USE_SECTRANSP)            \
-  || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
+#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+  defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
   encrypt_des(plaintext, results + 16, keys + 14);
@@ -387,8 +358,8 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     des_encrypt(&des, 8, lmbuffer, magic);
     setup_des_key(pw + 7, &des);
     des_encrypt(&des, 8, lmbuffer + 8, magic);
-#elif defined(USE_MBEDTLS) || defined(USE_SECTRANSP)            \
-  || defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO)
+#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+  defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
 #endif

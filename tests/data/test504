@@ -37,10 +37,10 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER %HOSTIP:%NOLISTENPORT
 </client>
 
 # Verify data after the test has been "shot"
-# TEST_ERR_SUCCESS is errorcode 120
+# TEST_ERR_SUCCESS is errorcode 41
 <verify>
 <errorcode>
-120
+41
 </errorcode>
 </verify>
 </testcase>

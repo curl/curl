@@ -43,7 +43,7 @@ http
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib%TESTNUMBER
+lib500
 </tool>
 
 <name>

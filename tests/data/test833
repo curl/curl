@@ -39,6 +39,7 @@ imap
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 IMAP CRAM-MD5 authentication with SASL downgrade

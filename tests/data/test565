@@ -60,10 +60,11 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 # tool is what to use instead of 'curl'
 <tool>
-lib%TESTNUMBER
+lib510
 </tool>
 
 <name>

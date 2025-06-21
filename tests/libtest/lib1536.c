@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_SCHEME */
 
-CURLcode test(char *URL)
+static CURLcode test_lib1536(char *URL)
 {
   CURL *curl, *dupe = NULL;
   char *scheme;
@@ -108,7 +108,6 @@ CURLcode test(char *URL)
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
-
 
   /* Test that a scheme is properly initialized on curl_easy_reset.
   */

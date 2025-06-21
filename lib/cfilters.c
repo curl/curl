@@ -97,21 +97,23 @@ bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
     cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
-ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+CURLcode Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, bool eos,
-                          CURLcode *err)
+                          size_t *pnwritten)
 {
-  return cf->next ?
-    cf->next->cft->do_send(cf->next, data, buf, len, eos, err) :
-    CURLE_RECV_ERROR;
+  if(cf->next)
+    return cf->next->cft->do_send(cf->next, data, buf, len, eos, pnwritten);
+  *pnwritten = 0;
+  return CURLE_RECV_ERROR;
 }
 
-ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          char *buf, size_t len, CURLcode *err)
+CURLcode Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          char *buf, size_t len, size_t *pnread)
 {
-  return cf->next ?
-    cf->next->cft->do_recv(cf->next, data, buf, len, err) :
-    CURLE_SEND_ERROR;
+  if(cf->next)
+    return cf->next->cft->do_recv(cf->next, data, buf, len, pnread);
+  *pnread = 0;
+  return CURLE_SEND_ERROR;
 }
 
 bool Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
@@ -234,52 +236,42 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   return result;
 }
 
-ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
-                     size_t len, CURLcode *code)
+CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
+                      size_t len, size_t *pnread)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  *code = CURLE_OK;
   cf = data->conn->cfilter[num];
-  while(cf && !cf->connected) {
+  while(cf && !cf->connected)
     cf = cf->next;
-  }
-  if(cf) {
-    ssize_t nread = cf->cft->do_recv(cf, data, buf, len, code);
-    DEBUGASSERT(nread >= 0 || *code);
-    DEBUGASSERT(nread < 0 || !*code);
-    return nread;
-  }
+  if(cf)
+    return cf->cft->do_recv(cf, data, buf, len, pnread);
   failf(data, "recv: no filter connected");
-  *code = CURLE_FAILED_INIT;
-  return -1;
+  DEBUGASSERT(0);
+  *pnread = 0;
+  return CURLE_FAILED_INIT;
 }
 
-ssize_t Curl_cf_send(struct Curl_easy *data, int num,
-                     const void *mem, size_t len, bool eos,
-                     CURLcode *code)
+CURLcode Curl_cf_send(struct Curl_easy *data, int num,
+                      const void *mem, size_t len, bool eos,
+                      size_t *pnwritten)
 {
   struct Curl_cfilter *cf;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  *code = CURLE_OK;
   cf = data->conn->cfilter[num];
-  while(cf && !cf->connected) {
+  while(cf && !cf->connected)
     cf = cf->next;
-  }
   if(cf) {
-    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, eos, code);
-    DEBUGASSERT(nwritten >= 0 || *code);
-    DEBUGASSERT(nwritten < 0 || !*code || !len);
-    return nwritten;
+    return cf->cft->do_send(cf, data, mem, len, eos, pnwritten);
   }
   failf(data, "send: no filter connected");
   DEBUGASSERT(0);
-  *code = CURLE_FAILED_INIT;
-  return -1;
+  *pnwritten = 0;
+  return CURLE_FAILED_INIT;
 }
 
 CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
@@ -381,23 +373,23 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->cft->do_close(cf, data);
 }
 
-ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
-                          CURLcode *err)
+CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           const void *buf, size_t len, bool eos,
+                           size_t *pnwritten)
 {
   if(cf)
-    return cf->cft->do_send(cf, data, buf, len, eos, err);
-  *err = CURLE_SEND_ERROR;
-  return -1;
+    return cf->cft->do_send(cf, data, buf, len, eos, pnwritten);
+  *pnwritten = 0;
+  return CURLE_SEND_ERROR;
 }
 
-ssize_t Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          char *buf, size_t len, CURLcode *err)
+CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           char *buf, size_t len, size_t *pnread)
 {
   if(cf)
-    return cf->cft->do_recv(cf, data, buf, len, err);
-  *err = CURLE_RECV_ERROR;
-  return -1;
+    return cf->cft->do_recv(cf, data, buf, len, pnread);
+  *pnread = 0;
+  return CURLE_RECV_ERROR;
 }
 
 CURLcode Curl_conn_connect(struct Curl_easy *data,
@@ -738,6 +730,17 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   return CURL_SOCKET_BAD;
 }
 
+static const struct Curl_sockaddr_ex *
+cf_get_remote_addr(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  const struct Curl_sockaddr_ex *remote_addr = NULL;
+  if(cf &&
+     !cf->cft->query(cf, data, CF_QUERY_REMOTE_ADDR, NULL,
+                     CURL_UNCONST(&remote_addr)))
+    return remote_addr;
+  return NULL;
+}
+
 CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   int *is_ipv6, struct ip_quadruple *ipquad)
@@ -758,6 +761,13 @@ curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
   if(cf && !cf->connected)
     return Curl_conn_cf_get_socket(cf, data);
   return data->conn ? data->conn->sock[sockindex] : CURL_SOCKET_BAD;
+}
+
+const struct Curl_sockaddr_ex *
+Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
+{
+  struct Curl_cfilter *cf = data->conn ? data->conn->cfilter[sockindex] : NULL;
+  return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
@@ -912,17 +922,14 @@ int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd)
 }
 
 CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
-                        char *buf, size_t blen, ssize_t *n)
+                        char *buf, size_t blen, size_t *pnread)
 {
-  CURLcode result = CURLE_OK;
-  ssize_t nread;
-
+  DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  nread = data->conn->recv[sockindex](data, sockindex, buf, blen, &result);
-  DEBUGASSERT(nread >= 0 || result);
-  DEBUGASSERT(nread < 0 || !result);
-  *n = (nread >= 0) ? (size_t)nread : 0;
-  return result;
+  if(data && data->conn && data->conn->recv[sockindex])
+    return data->conn->recv[sockindex](data, sockindex, buf, blen, pnread);
+  *pnread = 0;
+  return CURLE_FAILED_INIT;
 }
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
@@ -930,15 +937,10 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         size_t *pnwritten)
 {
   size_t write_len = blen;
-  ssize_t nwritten;
-  CURLcode result = CURLE_OK;
-  struct connectdata *conn;
 
-  DEBUGASSERT(sockindex >= 0 && sockindex < 2);
-  DEBUGASSERT(pnwritten);
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  conn = data->conn;
+  DEBUGASSERT(sockindex >= 0 && sockindex < 2);
 #ifdef DEBUGBUILD
   if(write_len) {
     /* Allow debug builds to override this logic to force short sends
@@ -953,11 +955,11 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
 #endif
   if(write_len != blen)
     eos = FALSE;
-  nwritten = conn->send[sockindex](data, sockindex, buf, write_len, eos,
-                                   &result);
-  DEBUGASSERT((nwritten >= 0) || result);
-  *pnwritten = (nwritten < 0) ? 0 : (size_t)nwritten;
-  return result;
+  if(data && data->conn && data->conn->send[sockindex])
+    return data->conn->send[sockindex](data, sockindex, buf, write_len, eos,
+                                       pnwritten);
+  *pnwritten = 0;
+  return CURLE_FAILED_INIT;
 }
 
 void Curl_pollset_reset(struct Curl_easy *data,
@@ -1084,4 +1086,17 @@ void Curl_pollset_check(struct Curl_easy *data,
     }
   }
   *pwant_read = *pwant_write = FALSE;
+}
+
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock)
+{
+  unsigned int i;
+  (void)data;
+  for(i = 0; i < ps->num; ++i) {
+    if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
+      return TRUE;
+  }
+  return FALSE;
 }

@@ -941,7 +941,6 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
       ldap_unbind_ext(li->ld, NULL, NULL);
       li->ld = NULL;
     }
-    Curl_sasl_cleanup(conn, li->sasl.authused);
   }
   return CURLE_OK;
 }
@@ -1048,8 +1047,8 @@ static CURLcode client_write(struct Curl_easy *data,
   return result;
 }
 
-static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
-                          size_t len, CURLcode *err)
+static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
+                           size_t len, size_t *pnread)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
@@ -1067,10 +1066,9 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   (void)len;
   (void)buf;
   (void)sockindex;
-  if(!li || !lr) {
-    *err = CURLE_FAILED_INIT;
-    return -1;
-  }
+  *pnread = 0;
+  if(!li || !lr)
+    return CURLE_FAILED_INIT;
 
   rc = ldap_result(li->ld, lr->msgid, LDAP_MSG_ONE, &tv, &msg);
   if(rc < 0) {
@@ -1078,11 +1076,9 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     result = CURLE_RECV_ERROR;
   }
 
-  *err = result;
-
   /* error or timed out */
   if(!msg)
-    return -1;
+    return result;
 
   result = CURLE_OK;
 
@@ -1210,8 +1206,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   }
 
   ldap_msgfree(msg);
-  *err = result;
-  return result ? -1 : 0;
+  return result;
 }
 
 #ifdef USE_SSL
@@ -1258,15 +1253,17 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
       CURLcode err = CURLE_RECV_ERROR;
+      size_t nread;
 
       if(!li) {
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      ret = (li->recv)(data, FIRSTSOCKET, buf, len, &err);
-      if(ret < 0 && err == CURLE_AGAIN) {
+      err = (li->recv)(data, FIRSTSOCKET, buf, len, &nread);
+      if(err == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
+      ret = err ? -1 : (ber_slen_t)nread;
     }
   }
   return ret;
@@ -1281,15 +1278,17 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
       CURLcode err = CURLE_SEND_ERROR;
+      size_t nwritten;
 
       if(!li) {
         SET_SOCKERRNO(SOCKEINVAL);
         return -1;
       }
-      ret = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &err);
-      if(ret < 0 && err == CURLE_AGAIN) {
+      err = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &nwritten);
+      if(err == CURLE_AGAIN) {
         SET_SOCKERRNO(SOCKEWOULDBLOCK);
       }
+      ret = err ? -1 : (ber_slen_t)nwritten;
     }
   }
   return ret;

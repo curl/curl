@@ -25,7 +25,7 @@ Connection: close
 http
 </server>
 <tool>
-lib%TESTNUMBER
+lib556
 </tool>
 <name>
 CONNECT_ONLY and doing a second curl_easy_perform

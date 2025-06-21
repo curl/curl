@@ -32,7 +32,7 @@ last line
 ftp
 </server>
 <tool>
-lib585
+lib500
 </tool>
 <name>
 FTP and open/close socket callbacks

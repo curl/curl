@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode send_ping(CURL *curl, const char *send_payload)
+static CURLcode t2304_send_ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
   CURLcode result =
@@ -38,7 +37,7 @@ static CURLcode send_ping(CURL *curl, const char *send_payload)
   return result;
 }
 
-static CURLcode recv_pong(CURL *curl, const char *expected_payload)
+static CURLcode t2304_recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
   const struct curl_ws_frame *meta;
@@ -82,7 +81,7 @@ static CURLcode recv_any(CURL *curl)
 }
 
 /* just close the connection */
-static void websocket_close(CURL *curl)
+static void t2304_websocket_close(CURL *curl)
 {
   size_t sent;
   CURLcode result =
@@ -91,27 +90,29 @@ static void websocket_close(CURL *curl)
                 "ws: curl_ws_send returned %d, sent %u\n", result, (int)sent);
 }
 
-static void websocket(CURL *curl)
+static void t2304_websocket(CURL *curl)
 {
   int i = 0;
   curl_mfprintf(stderr, "ws: websocket() starts\n");
   do {
     recv_any(curl);
     curl_mfprintf(stderr, "Send ping\n");
-    if(send_ping(curl, "foobar"))
+    if(t2304_send_ping(curl, "foobar"))
       return;
     curl_mfprintf(stderr, "Receive pong\n");
-    if(recv_pong(curl, "foobar")) {
+    if(t2304_recv_pong(curl, "foobar")) {
       curl_mprintf("Connection closed\n");
       return;
     }
-    sleep(2);
+    curlx_wait_ms(2000);
   } while(i++ < 10);
-  websocket_close(curl);
+  t2304_websocket_close(curl);
 }
+#endif
 
-CURLcode test(char *URL)
+static CURLcode test_lib2304(char *URL)
 {
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
 
@@ -128,15 +129,14 @@ CURLcode test(char *URL)
     res = curl_easy_perform(curl);
     curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
     if(res == CURLE_OK)
-      websocket(curl);
+      t2304_websocket(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
   return res;
-}
-
 #else
-NO_SUPPORT_BUILT_IN
+  NO_SUPPORT_BUILT_IN
 #endif
+}

@@ -361,9 +361,6 @@ static CURLcode ssl_setopts(struct GlobalConfig *global,
   if(config->doh_verifystatus)
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1);
 
-  if(config->falsestart)
-    my_setopt_long(curl, CURLOPT_SSL_FALSESTART, 1);
-
   my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
                        config->ssl_version | config->ssl_version_max);
   if(config->proxy)

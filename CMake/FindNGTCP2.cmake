@@ -34,23 +34,28 @@
 #
 # Input variables:
 #
-# - `NGTCP2_INCLUDE_DIR`:   The ngtcp2 include directory.
-# - `NGTCP2_LIBRARY`:       Path to `ngtcp2` library.
+# - `NGTCP2_INCLUDE_DIR`:               The ngtcp2 include directory.
+# - `NGTCP2_LIBRARY`:                   Path to `ngtcp2` library.
+# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Path to `ngtcp2_crypto_boringssl` library.
+# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Path to `ngtcp2_crypto_gnutls` library.
+# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Path to `ngtcp2_crypto_ossl` library.
+# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Path to `ngtcp2_crypto_quictls` library.
+# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Path to `ngtcp2_crypto_wolfssl` library.
 #
 # Result variables:
 #
-# - `NGTCP2_FOUND`:         System has ngtcp2.
-# - `NGTCP2_INCLUDE_DIRS`:  The ngtcp2 include directories.
-# - `NGTCP2_LIBRARIES`:     The ngtcp2 library names.
-# - `NGTCP2_LIBRARY_DIRS`:  The ngtcp2 library directories.
-# - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
-# - `NGTCP2_CFLAGS`:        Required compiler flags.
-# - `NGTCP2_VERSION`:       Version of ngtcp2.
+# - `NGTCP2_FOUND`:                     System has ngtcp2.
+# - `NGTCP2_INCLUDE_DIRS`:              The ngtcp2 include directories.
+# - `NGTCP2_LIBRARIES`:                 The ngtcp2 library names.
+# - `NGTCP2_LIBRARY_DIRS`:              The ngtcp2 library directories.
+# - `NGTCP2_PC_REQUIRES`:               The ngtcp2 pkg-config packages.
+# - `NGTCP2_CFLAGS`:                    Required compiler flags.
+# - `NGTCP2_VERSION`:                   Version of ngtcp2.
 
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")
   foreach(_component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(_component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS|ossl)")
+    if(_component MATCHES "^(BoringSSL|GnuTLS|ossl|quictls|wolfSSL)")
       if(_ngtcp2_crypto_backend)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()

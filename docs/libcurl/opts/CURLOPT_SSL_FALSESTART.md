@@ -9,7 +9,7 @@ See-also:
 Protocol:
   - TLS
 TLS-backend:
-  - Secure Transport
+  - none
 Added-in: 7.42.0
 ---
 
@@ -53,6 +53,10 @@ int main(void)
   }
 }
 ~~~
+
+# DEPRECATED
+
+Deprecated since 8.15.0.
 
 # %AVAILABILITY%
 

@@ -60,17 +60,18 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
                                                 header */
 {
   /* point to the correct struct with this */
-  struct ntlmdata *ntlm;
   curlntlm *state;
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
 
-  ntlm = proxy ? &conn->proxyntlm : &conn->ntlm;
   state = proxy ? &conn->proxy_ntlm_state : &conn->http_ntlm_state;
 
   if(checkprefix("NTLM", header)) {
-    header += strlen("NTLM");
+    struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, proxy);
+    if(!ntlm)
+      return CURLE_FAILED_INIT;
 
+    header += strlen("NTLM");
     curlx_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;
@@ -93,11 +94,11 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
     else {
       if(*state == NTLMSTATE_LAST) {
         infof(data, "NTLM auth restarted");
-        Curl_http_auth_cleanup_ntlm(conn);
+        Curl_auth_ntlm_remove(conn, proxy);
       }
       else if(*state == NTLMSTATE_TYPE3) {
         infof(data, "NTLM handshake rejected");
-        Curl_http_auth_cleanup_ntlm(conn);
+        Curl_auth_ntlm_remove(conn, proxy);
         *state = NTLMSTATE_NONE;
         return CURLE_REMOTE_ACCESS_DENIED;
       }
@@ -150,7 +151,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
       data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
-    ntlm = &conn->proxyntlm;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
 #else
@@ -164,10 +164,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     service = data->set.str[STRING_SERVICE_NAME] ?
       data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
-    ntlm = &conn->ntlm;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
   }
+  ntlm = Curl_auth_ntlm_get(conn, proxy);
+  if(!ntlm)
+    return CURLE_OUT_OF_MEMORY;
   authp->done = FALSE;
 
   /* not set means empty */
@@ -178,10 +180,10 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
-  if(!Curl_hSecDll) {
+  if(!Curl_pSecFn) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
-    if(!Curl_hSecDll)
+    if(!Curl_pSecFn)
       return err;
   }
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
@@ -200,9 +202,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     /* Create a type-1 message */
-    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp,
-                                                 service, hostname,
-                                                 ntlm, &ntlmmsg);
+    result = Curl_auth_create_ntlm_type1_message(data, userp, passwdp, service,
+                                                 hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
       result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
@@ -256,12 +257,6 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
   Curl_bufref_free(&ntlmmsg);
 
   return result;
-}
-
-void Curl_http_auth_cleanup_ntlm(struct connectdata *conn)
-{
-  Curl_auth_cleanup_ntlm(&conn->ntlm);
-  Curl_auth_cleanup_ntlm(&conn->proxyntlm);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_NTLM */

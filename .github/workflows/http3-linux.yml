@@ -468,10 +468,10 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
           fi

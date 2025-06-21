@@ -26,17 +26,17 @@
 #include <fcntl.h>
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
+#undef TEST_HANG_TIMEOUT
 #define TEST_HANG_TIMEOUT 30 * 1000
 
-/* 500 milliseconds allowed. An extreme number but lets be really conservative
-   to allow old and slow machines to run this test too */
-#define MAX_BLOCKED_TIME_MS 500
-
-CURLcode test(char *URL)
+static CURLcode test_lib1501(char *URL)
 {
+  /* 500 milliseconds allowed. An extreme number but lets be really
+     conservative to allow old and slow machines to run this test too */
+  static const int MAX_BLOCKED_TIME_MS = 500;
+
   CURL *handle = NULL;
   CURLM *mhandle = NULL;
   CURLcode res = CURLE_OK;

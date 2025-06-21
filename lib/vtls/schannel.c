@@ -897,7 +897,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 static CURLcode
 schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  ssize_t written = -1;
+  size_t written = 0;
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
@@ -1128,18 +1128,18 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                "sending %lu bytes.", outbuf.cbBuffer));
 
   /* send initial handshake data which is now stored in output buffer */
-  written = Curl_conn_cf_send(cf->next, data,
-                              outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
-                              &result);
+  result = Curl_conn_cf_send(cf->next, data,
+                             outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
+                             &written);
   Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
+  if((result != CURLE_OK) || (outbuf.cbBuffer != written)) {
     failf(data, "schannel: failed to send initial handshake data: "
-          "sent %zd of %lu bytes", written, outbuf.cbBuffer);
+          "sent %zu of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   DEBUGF(infof(data, "schannel: sent initial handshake data: "
-               "sent %zd bytes", written));
+               "sent %zu bytes", written));
 
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = FALSE;
@@ -1161,7 +1161,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct schannel_ssl_backend_data *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   int i;
-  ssize_t nread = -1, written = -1;
+  size_t nread = 0, written = 0;
   unsigned char *reallocated_buffer;
   SecBuffer outbuf[3];
   SecBufferDesc outbuf_desc;
@@ -1229,12 +1229,12 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   for(;;) {
     if(doread) {
       /* read encrypted handshake data from socket */
-      nread = Curl_conn_cf_recv(cf->next, data,
-                               (char *) (backend->encdata_buffer +
-                                         backend->encdata_offset),
-                               backend->encdata_length -
-                               backend->encdata_offset,
-                               &result);
+      result = Curl_conn_cf_recv(cf->next, data,
+                                 (char *) (backend->encdata_buffer +
+                                           backend->encdata_offset),
+                                 backend->encdata_length -
+                                 backend->encdata_offset,
+                                 &nread);
       if(result == CURLE_AGAIN) {
         connssl->io_need = CURL_SSL_IO_NEED_RECV;
         DEBUGF(infof(data, "schannel: failed to receive handshake, "
@@ -1250,7 +1250,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
       backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
     }
 
     SCH_DEV(infof(data,
@@ -1317,13 +1317,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                        "sending %lu bytes.", outbuf[i].cbBuffer));
 
           /* send handshake token to server */
-          written = Curl_conn_cf_send(cf->next, data,
-                                      outbuf[i].pvBuffer, outbuf[i].cbBuffer,
-                                      FALSE, &result);
+          result = Curl_conn_cf_send(cf->next, data,
+                                     outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                     FALSE, &written);
           if((result != CURLE_OK) ||
-             (outbuf[i].cbBuffer != (size_t) written)) {
+             (outbuf[i].cbBuffer != written)) {
             failf(data, "schannel: failed to send next handshake data: "
-                  "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
+                  "sent %zu of %lu bytes", written, outbuf[i].cbBuffer);
             return CURLE_SSL_CONNECT_ERROR;
           }
         }
@@ -1714,22 +1714,22 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static ssize_t
+static CURLcode
 schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-              const void *buf, size_t len, CURLcode *err)
+              const void *buf, size_t len, size_t *pnwritten)
 {
-  ssize_t written = -1;
   size_t data_len = 0;
   unsigned char *ptr = NULL;
   struct ssl_connect_data *connssl = cf->ctx;
   SecBuffer outbuf[4];
   SecBufferDesc outbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
 
   DEBUGASSERT(backend);
+  *pnwritten = 0;
 
   /* check if the maximum stream sizes were queried */
   if(backend->stream_sizes.cbMaximumMessage == 0) {
@@ -1738,8 +1738,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       SECPKG_ATTR_STREAM_SIZES,
       &backend->stream_sizes);
     if(sspi_status != SEC_E_OK) {
-      *err = CURLE_SEND_ERROR;
-      return -1;
+      return CURLE_SEND_ERROR;
     }
   }
 
@@ -1753,8 +1752,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     backend->stream_sizes.cbTrailer;
   ptr = (unsigned char *) malloc(data_len);
   if(!ptr) {
-    *err = CURLE_OUT_OF_MEMORY;
-    return -1;
+    return CURLE_OUT_OF_MEMORY;
   }
 
   /* setup output buffers (header, data, trailer, empty) */
@@ -1777,7 +1775,6 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* check if the message was encrypted */
   if(sspi_status == SEC_E_OK) {
-    written = 0;
 
     /* send the encrypted message including header, data and trailer */
     len = outbuf[0].cbBuffer + outbuf[1].cbBuffer + outbuf[2].cbBuffer;
@@ -1799,16 +1796,15 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     */
 
     /* send entire message or fail */
-    while(len > (size_t)written) {
-      ssize_t this_write = 0;
+    while(len > *pnwritten) {
+      size_t this_write = 0;
       int what;
       timediff_t timeout_ms = Curl_timeleft(data, NULL, FALSE);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zd)", written);
-        *err = CURLE_OPERATION_TIMEDOUT;
-        written = -1;
+              "(bytes sent: %zu)", *pnwritten);
+        result = CURLE_OPERATION_TIMEDOUT;
         break;
       }
       else if(!timeout_ms)
@@ -1817,56 +1813,52 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
-        *err = CURLE_SEND_ERROR;
-        written = -1;
+        result = CURLE_SEND_ERROR;
         break;
       }
       else if(0 == what) {
         failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zd)", written);
-        *err = CURLE_OPERATION_TIMEDOUT;
-        written = -1;
+              "(bytes sent: %zu)", *pnwritten);
+        result = CURLE_OPERATION_TIMEDOUT;
         break;
       }
       /* socket is writable */
 
-       this_write = Curl_conn_cf_send(cf->next, data,
-                                      ptr + written, len - written,
-                                      FALSE, &result);
+       result = Curl_conn_cf_send(cf->next, data,
+                                  ptr + *pnwritten, len - *pnwritten,
+                                  FALSE, &this_write);
       if(result == CURLE_AGAIN)
         continue;
       else if(result != CURLE_OK) {
-        *err = result;
-        written = -1;
         break;
       }
 
-      written += this_write;
+      *pnwritten += this_write;
     }
   }
   else if(sspi_status == SEC_E_INSUFFICIENT_MEMORY) {
-    *err = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
   }
   else{
-    *err = CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
   }
 
   Curl_safefree(ptr);
 
-  if(len == (size_t)written)
+  if(len == *pnwritten)
     /* Encrypted message including header, data and trailer entirely sent.
        The return value is the number of unencrypted bytes that were sent. */
-    written = outbuf[1].cbBuffer;
+    *pnwritten = outbuf[1].cbBuffer;
 
-  return written;
+  return result;
 }
 
-static ssize_t
+static CURLcode
 schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-              char *buf, size_t len, CURLcode *err)
+              char *buf, size_t len, size_t *pnread)
 {
   size_t size = 0;
-  ssize_t nread = -1;
+  size_t nread = 0;
   struct ssl_connect_data *connssl = cf->ctx;
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
@@ -1879,8 +1871,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t min_encdata_length = len + CURL_SCHANNEL_BUFFER_FREE_SIZE;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
+  CURLcode result = CURLE_OK;
 
   DEBUGASSERT(backend);
+  *pnread = 0;
 
   /****************************************************************************
    * Do not return or set backend->recv_unrecoverable_err unless in the
@@ -1899,7 +1893,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
    */
 
   SCH_DEV(infof(data, "schannel: client wants to read %zu bytes", len));
-  *err = CURLE_OK;
 
   if(len && len <= backend->decdata_offset) {
     SCH_DEV(infof(data,
@@ -1907,7 +1900,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto cleanup;
   }
   else if(backend->recv_unrecoverable_err) {
-    *err = backend->recv_unrecoverable_err;
+    result = backend->recv_unrecoverable_err;
     infof(data, "schannel: an unrecoverable error occurred in a prior call");
     goto cleanup;
   }
@@ -1933,7 +1926,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       reallocated_buffer = realloc(backend->encdata_buffer,
                                    reallocated_length);
       if(!reallocated_buffer) {
-        *err = CURLE_OUT_OF_MEMORY;
+        result = CURLE_OUT_OF_MEMORY;
         failf(data, "schannel: unable to re-allocate memory");
         goto cleanup;
       }
@@ -1950,26 +1943,26 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                   backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
-    nread = Curl_conn_cf_recv(cf->next, data,
-                              (char *)(backend->encdata_buffer +
-                                    backend->encdata_offset),
-                              size, err);
-    if(*err) {
-      if(*err == CURLE_AGAIN)
+    result = Curl_conn_cf_recv(cf->next, data,
+                             (char *)(backend->encdata_buffer +
+                                      backend->encdata_offset),
+                             size, &nread);
+    if(result) {
+      if(result == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
-      else if(*err == CURLE_RECV_ERROR)
+      else if(result == CURLE_RECV_ERROR)
         infof(data, "schannel: recv returned CURLE_RECV_ERROR");
       else
-        infof(data, "schannel: recv returned error %d", *err);
+        infof(data, "schannel: recv returned error %d", result);
     }
     else if(nread == 0) {
       backend->recv_connection_closed = TRUE;
       DEBUGF(infof(data, "schannel: server closed the connection"));
     }
-    else if(nread > 0) {
-      backend->encdata_offset += (size_t)nread;
+    else {
+      backend->encdata_offset += nread;
       backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
     }
   }
 
@@ -2019,7 +2012,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           reallocated_buffer = realloc(backend->decdata_buffer,
                                        reallocated_length);
           if(!reallocated_buffer) {
-            *err = CURLE_OUT_OF_MEMORY;
+            result = CURLE_OUT_OF_MEMORY;
             failf(data, "schannel: unable to re-allocate memory");
             goto cleanup;
           }
@@ -2070,7 +2063,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* check if server wants to renegotiate the connection context */
       if(sspi_status == SEC_I_RENEGOTIATE) {
         infof(data, "schannel: remote party requests renegotiation");
-        if(*err && *err != CURLE_AGAIN) {
+        if(result && result != CURLE_AGAIN) {
           infof(data, "schannel: cannot renegotiate, an error is pending");
           goto cleanup;
         }
@@ -2081,9 +2074,9 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         connssl->connecting_state = ssl_connect_2;
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = TRUE;
-        *err = schannel_connect(cf, data, &done);
+        result = schannel_connect(cf, data, &done);
         backend->recv_renegotiating = FALSE;
-        if(*err) {
+        if(result) {
           infof(data, "schannel: renegotiation failed");
           goto cleanup;
         }
@@ -2102,8 +2095,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         /* We received the close notify just fine, any error we got
          * from the lower filters afterwards (e.g. the socket), is not
          * an error on the TLS data stream. That one ended here. */
-        if(*err == CURLE_RECV_ERROR)
-          *err = CURLE_OK;
+        if(result == CURLE_RECV_ERROR)
+          result = CURLE_OK;
         infof(data,
               "schannel: server close notification received (close_notify)");
         goto cleanup;
@@ -2111,8 +2104,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
       backend->encdata_is_incomplete = TRUE;
-      if(!*err)
-        *err = CURLE_AGAIN;
+      if(!result)
+        result = CURLE_AGAIN;
       SCH_DEV(infof(data, "schannel: failed to decrypt data, need more data"));
       goto cleanup;
     }
@@ -2122,7 +2115,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       failf(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
 #endif
-      *err = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
       goto cleanup;
     }
   }
@@ -2142,28 +2135,16 @@ cleanup:
      The behavior here is a matter of debate. We do not want to be vulnerable
      to a truncation attack however there is some browser precedent for
      ignoring the close_notify for compatibility reasons.
-
-     Additionally, Windows 2000 (v5.0) is a special case since it seems it
-     does not return close_notify. In that case if the connection was closed we
-     assume it was graceful (close_notify) since there does not seem to be a
-     way to tell.
   */
   if(len && !backend->decdata_offset && backend->recv_connection_closed &&
      !backend->recv_sspi_close_notify) {
-    bool isWin2k = curlx_verify_windows_version(5, 0, 0, PLATFORM_WINNT,
-                                                VERSION_EQUAL);
-
-    if(isWin2k && sspi_status == SEC_E_OK)
-      backend->recv_sspi_close_notify = TRUE;
-    else {
-      *err = CURLE_RECV_ERROR;
-      failf(data, "schannel: server closed abruptly (missing close_notify)");
-    }
+    result = CURLE_RECV_ERROR;
+    failf(data, "schannel: server closed abruptly (missing close_notify)");
   }
 
   /* Any error other than CURLE_AGAIN is an unrecoverable error. */
-  if(*err && *err != CURLE_AGAIN)
-    backend->recv_unrecoverable_err = *err;
+  if(result && result != CURLE_AGAIN)
+    backend->recv_unrecoverable_err = result;
 
   size = len < backend->decdata_offset ? len : backend->decdata_offset;
   if(size) {
@@ -2175,21 +2156,21 @@ cleanup:
     SCH_DEV(infof(data,
                   "schannel: decrypted data buffer: offset %zu length %zu",
                   backend->decdata_offset, backend->decdata_length));
-    *err = CURLE_OK;
-    return (ssize_t)size;
+    *pnread = size;
+    return CURLE_OK;
   }
 
-  if(!*err && !backend->recv_connection_closed)
-    *err = CURLE_AGAIN;
+  if(!result && !backend->recv_connection_closed)
+    result = CURLE_AGAIN;
 
   /* it is debatable what to return when !len. We could return whatever error
      we got from decryption but instead we override here so the return is
      consistent.
   */
   if(!len)
-    *err = CURLE_OK;
+    return CURLE_OK;
 
-  return *err ? -1 : 0;
+  return result;
 }
 
 static bool schannel_data_pending(struct Curl_cfilter *cf,
@@ -2291,14 +2272,16 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
-      ssize_t written = Curl_conn_cf_send(cf->next, data,
-                                          outbuf.pvBuffer, outbuf.cbBuffer,
-                                          FALSE, &result);
+      size_t written;
+
+      result = Curl_conn_cf_send(cf->next, data,
+                                 outbuf.pvBuffer, outbuf.cbBuffer,
+                                 FALSE, &written);
       Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
-        if(written < (ssize_t)outbuf.cbBuffer) {
+        if(written < outbuf.cbBuffer) {
           failf(data, "schannel: failed to send close msg: %s"
-                " (bytes written: %zd)", curl_easy_strerror(result), written);
+                " (bytes written: %zu)", curl_easy_strerror(result), written);
           result = CURLE_SEND_ERROR;
           goto out;
         }
@@ -2329,23 +2312,23 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
   if(backend->cred && backend->ctxt &&
      !backend->recv_sspi_close_notify && !backend->recv_connection_closed) {
     char buffer[1024];
-    ssize_t nread;
+    size_t nread;
 
-    nread = schannel_recv(cf, data, buffer, sizeof(buffer), &result);
-    if(nread > 0) {
-      /* still data coming in? */
+    result = schannel_recv(cf, data, buffer, sizeof(buffer), &nread);
+    if(result == CURLE_AGAIN) {
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+    }
+    else if(result) {
+      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
+      result = CURLE_RECV_ERROR;
     }
     else if(nread == 0) {
       /* We got the close notify alert and are done. */
       backend->recv_connection_closed = TRUE;
       *done = TRUE;
     }
-    else if(nread < 0 && result == CURLE_AGAIN) {
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
-    }
     else {
-      CURL_TRC_CF(data, cf, "SSL shutdown, error %d", result);
-      result = CURLE_RECV_ERROR;
+      /* still data coming in? */
     }
   }
 
@@ -2770,7 +2753,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   NULL,                              /* set_engine */
   NULL,                              /* set_engine_default */
   NULL,                              /* engines_list */
-  NULL,                              /* false_start */
   schannel_sha256sum,                /* sha256sum */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */

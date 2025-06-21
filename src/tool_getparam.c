@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 
 #include <curlx.h>
-#include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_filetime.h"
@@ -625,7 +624,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      CURL_SET_BINMODE(stdin);
+      CURLX_SET_BINMODE(stdin);
     }
     else {
       file = fopen(p, "rb");
@@ -901,7 +900,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        CURL_SET_BINMODE(stdin);
+        CURLX_SET_BINMODE(stdin);
     }
     else {
       file = fopen(nextarg, "rb");
@@ -1999,7 +1998,7 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     config->doh_verifystatus = toggle;
     break;
   case C_FALSE_START: /* --false-start */
-    config->falsestart = toggle;
+    opt_depr(global, a);
     break;
   case C_SSL_NO_REVOKE: /* --ssl-no-revoke */
     config->ssl_no_revoke = toggle;

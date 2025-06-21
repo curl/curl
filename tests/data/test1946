@@ -44,7 +44,7 @@ http
 curl_easy_header with redirect but get headers from first request
 </name>
 <tool>
-lib%TESTNUMBER
+lib1940
 </tool>
 
 <command>

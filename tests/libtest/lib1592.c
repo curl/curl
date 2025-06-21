@@ -32,16 +32,17 @@
 /* We're willing to wait a very generous two seconds for the removal.  This is
    as low as we can go while still easily supporting SIGALRM timing for the
    non-threaded blocking resolver.  It doesn't matter that much because when
-   the test passes, we never wait this long. We set it much higher to avoid
-   issues when running on overloaded CI machines. */
-#define TEST_HANG_TIMEOUT 60 * 1000
+   the test passes, we never wait this long. We set it much higher via
+   the default TEST_HANG_TIMEOUT to avoid issues when running on overloaded
+   CI machines. */
 
 #include "test.h"
+
 #include "testutil.h"
 
 #include <sys/stat.h>
 
-CURLcode test(char *URL)
+static CURLcode test_lib1592(char *URL)
 {
   int stillRunning;
   CURLM *multiHandle = NULL;

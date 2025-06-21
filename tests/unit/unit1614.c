@@ -25,34 +25,20 @@
 
 #include "noproxy.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1614(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-
-}
-
-struct check {
-  const char *a;
-  const char *n;
-  unsigned int bits;
-  bool match;
-};
-
-struct noproxy {
-  const char *a;
-  const char *n;
-  bool match;
-};
-
-UNITTEST_START
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_PROXY)
-{
   int i;
   int err = 0;
+
+  struct check {
+  const char *a;
+    const char *n;
+    unsigned int bits;
+    bool match;
+  };
   struct check list4[]= {
     { "192.160.0.1", "192.160.0.1", 33, FALSE},
     { "192.160.0.1", "192.160.0.1", 32, TRUE},
@@ -78,6 +64,11 @@ UNITTEST_START
     { NULL, NULL, 0, FALSE} /* end marker */
   };
 #endif
+  struct noproxy {
+    const char *a;
+    const char *n;
+    bool match;
+  };
   struct noproxy list[]= {
     { "www.example.com", "localhost .example.com .example.de", FALSE},
     { "www.example.com", "localhost,.example.com,.example.de", TRUE},
@@ -161,6 +152,7 @@ UNITTEST_START
     }
   }
   fail_if(err, "errors");
-}
 #endif
-UNITTEST_STOP
+
+  UNITTEST_END_SIMPLE
+}

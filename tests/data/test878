@@ -31,6 +31,7 @@ pop3
 !SSPI
 Debug
 crypto
+digest
 </features>
 <name>
 POP3 DIGEST-MD5 graceful cancellation

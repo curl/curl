@@ -422,6 +422,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
+  free(data->state.async.hostname);
   data->state.async.hostname = strdup(hostname);
   if(!data->state.async.hostname)
     goto err_exit;

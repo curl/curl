@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "curl_setup.h"
 
 /* sws.c: simple (silly?) web server
 
@@ -51,9 +51,6 @@
 
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
-#include "inet_pton.h"
-#include "util.h"
-#include "server_sockaddr.h"
 
 /* include memdebug.h last */
 #include <memdebug.h>
@@ -1135,7 +1132,7 @@ retry:
     written = swrite(sock, buffer, num);
     if(written < 0) {
       if((SOCKEWOULDBLOCK == SOCKERRNO) || (EAGAIN == SOCKERRNO)) {
-        wait_ms(10);
+        curlx_wait_ms(10);
         goto retry;
       }
       sendfailure = TRUE;
@@ -1159,7 +1156,7 @@ retry:
         int sleep_time = msecs_left > MAX_SLEEP_TIME_MS ?
           MAX_SLEEP_TIME_MS : msecs_left;
         intervals--;
-        wait_ms(sleep_time);
+        curlx_wait_ms(sleep_time);
         msecs_left -= sleep_time;
       }
     }
@@ -1203,11 +1200,11 @@ retry:
           quarters = num * 4;
           while((quarters > 0) && !got_exit_signal) {
             quarters--;
-            res = wait_ms(250);
+            res = curlx_wait_ms(250);
             if(res) {
               /* should not happen */
               error = SOCKERRNO;
-              logmsg("wait_ms() failed with error (%d) %s",
+              logmsg("curlx_wait_ms() failed with error (%d) %s",
                      error, sstrerror(error));
               break;
             }
@@ -1430,7 +1427,7 @@ static void http_connect(curl_socket_t *infdp,
      'end of headers' separate from the server data that follows.
      This is done to prevent triggering libcurl known bug #39. */
   for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
-    wait_ms(250);
+    curlx_wait_ms(250);
   if(got_exit_signal)
     goto http_connect_cleanup;
 
@@ -1595,7 +1592,7 @@ static void http_connect(curl_socket_t *infdp,
             if(!err && req2->connect_request) {
               /* sleep to prevent triggering libcurl known bug #39. */
               for(loop = 2; (loop > 0) && !got_exit_signal; loop--)
-                wait_ms(250);
+                curlx_wait_ms(250);
               if(!got_exit_signal) {
                 /* connect to the server */
                 serverfd[SWS_DATA] = connect_to(ipaddr, req2->connect_port);
@@ -1749,7 +1746,7 @@ static void http_connect(curl_socket_t *infdp,
 
       if(tcp_fin_wr)
         /* allow kernel to place FIN bit packet on the wire */
-        wait_ms(250);
+        curlx_wait_ms(250);
 
       /* socket clearing */
       for(i = 0; i <= max_tunnel_idx; i++) {
@@ -1989,7 +1986,7 @@ static int service_connection(curl_socket_t msgsock,
   return -1;
 }
 
-int main(int argc, char *argv[])
+static int test_sws(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
   curl_socket_t sock = CURL_SOCKET_BAD;
@@ -2393,7 +2390,7 @@ int main(int argc, char *argv[])
         if(CURL_SOCKET_BAD == msgsock)
           goto sws_cleanup;
         if(req->delay)
-          wait_ms(req->delay);
+          curlx_wait_ms(req->delay);
       } while(msgsock > 0);
       active--;
     }
@@ -2425,7 +2422,7 @@ int main(int argc, char *argv[])
                  wait a very small amount of time before doing so. If this
                  is not done client might get an ECONNRESET before reading
                  a single byte of server-reply. */
-              wait_ms(50);
+              curlx_wait_ms(50);
 
             if(all_sockets[socket_idx] != CURL_SOCKET_BAD) {
               sclose(all_sockets[socket_idx]);

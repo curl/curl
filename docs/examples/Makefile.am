@@ -36,28 +36,25 @@ EXTRA_DIST = README.md Makefile.example CMakeLists.txt \
 
 AM_CPPFLAGS = -I$(top_srcdir)/include
 
-LIBDIR = $(top_builddir)/lib
-
-# Avoid libcurl obsolete stuff
-AM_CPPFLAGS += -DCURL_NO_OLDIES
-
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DWIN32_LEAN_AND_MEAN
 endif
+# Avoid libcurl obsolete stuff
+AM_CPPFLAGS += -DCURL_NO_OLDIES
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+LDADD = $(top_builddir)/lib/libcurl.la
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-# Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
+# Get check_PROGRAMS variable
 include Makefile.inc
 
 all: $(check_PROGRAMS)

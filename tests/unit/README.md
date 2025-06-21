@@ -45,23 +45,13 @@ and the `tests/FILEFORMAT.md` documentation.
 
 For the actual C file, here's a simple example:
 ~~~c
-
     #include "curlcheck.h"
 
     #include "a libcurl header.h" /* from the lib dir */
 
-    static CURLcode unit_setup( void )
+    static CURLcode test_unit9998(char *arg)
     {
-      /* whatever you want done first */
-      return CURLE_OK;
-    }
-
-    static void unit_stop( void )
-    {
-      /* done before shutting down and exiting */
-    }
-
-    UNITTEST_START
+      UNITTEST_BEGIN_SIMPLE
 
       /* here you start doing things and checking that the results are good */
 
@@ -70,4 +60,38 @@ For the actual C file, here's a simple example:
 
       /* you end the test code like this: */
 
-    UNITTEST_STOP
+      UNITTEST_END_SIMPLE
+    }
+~~~
+
+Here's an example using optional initialization and cleanup:
+~~~c
+    #include "curlcheck.h"
+
+    #include "a libcurl header.h" /* from the lib dir */
+
+    static CURLcode t9999_setup(void)
+    {
+      /* whatever you want done first */
+      return CURLE_OK;
+    }
+
+    static void t9999_stop(void)
+    {
+      /* done before shutting down and exiting */
+    }
+
+    static CURLcode test_unit9999(char *arg)
+    {
+      UNITTEST_BEGIN(t9999_setup())
+
+      /* here you start doing things and checking that the results are good */
+
+      fail_unless( size == 0 , "initial size should be zero" );
+      fail_if( head == NULL , "head should not be initiated to NULL" );
+
+      /* you end the test code like this: */
+
+      UNITTEST_END(t9999_stop())
+    }
+~~~

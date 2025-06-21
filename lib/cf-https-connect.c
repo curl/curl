@@ -117,8 +117,8 @@ struct cf_hc_ctx {
   CURLcode result;          /* overall result */
   struct cf_hc_baller ballers[2];
   size_t baller_count;
-  unsigned int soft_eyeballs_timeout_ms;
-  unsigned int hard_eyeballs_timeout_ms;
+  timediff_t soft_eyeballs_timeout_ms;
+  timediff_t hard_eyeballs_timeout_ms;
 };
 
 static void cf_hc_baller_assign(struct cf_hc_baller *b,
@@ -268,15 +268,16 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
   }
   elapsed_ms = curlx_timediff(now, ctx->started);
   if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
-    CURL_TRC_CF(data, cf, "hard timeout of %dms reached, starting %s",
+    CURL_TRC_CF(data, cf, "hard timeout of %" FMT_TIMEDIFF_T "ms reached, "
+                "starting %s",
                 ctx->hard_eyeballs_timeout_ms, ctx->ballers[idx].name);
     return TRUE;
   }
 
   if((idx > 0) && (elapsed_ms >= ctx->soft_eyeballs_timeout_ms)) {
     if(cf_hc_baller_reply_ms(&ctx->ballers[idx - 1], data) < 0) {
-      CURL_TRC_CF(data, cf, "soft timeout of %dms reached, %s has not "
-                  "seen any data, starting %s",
+      CURL_TRC_CF(data, cf, "soft timeout of %" FMT_TIMEDIFF_T "ms reached, "
+                  "%s has not seen any data, starting %s",
                   ctx->soft_eyeballs_timeout_ms,
                   ctx->ballers[idx - 1].name, ctx->ballers[idx].name);
       return TRUE;
@@ -314,8 +315,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     cf_hc_baller_init(&ctx->ballers[0], cf, data, cf->conn->transport);
     if(ctx->baller_count > 1) {
       Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
-      CURL_TRC_CF(data, cf, "set next attempt to start in %ums",
-                  ctx->soft_eyeballs_timeout_ms);
+      CURL_TRC_CF(data, cf, "set next attempt to start in %" FMT_TIMEDIFF_T
+                  "ms", ctx->soft_eyeballs_timeout_ms);
     }
     ctx->state = CF_HC_CONNECT;
     FALLTHROUGH();

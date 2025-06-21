@@ -66,12 +66,12 @@ else()
   endif()
 
   include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(Libgsasl
-    REQUIRED_VARS
-      LIBGSASL_INCLUDE_DIR
-      LIBGSASL_LIBRARY
-    VERSION_VAR
-      LIBGSASL_VERSION
+  find_package_handle_standard_args(Libgsasl
+  REQUIRED_VARS
+    LIBGSASL_INCLUDE_DIR
+    LIBGSASL_LIBRARY
+  VERSION_VAR
+    LIBGSASL_VERSION
   )
 
   if(LIBGSASL_FOUND)

@@ -25,27 +25,20 @@
 #include "vssh/curl_path.h"
 #include "memdebug.h"
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit2604(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-}
-
-
-struct set {
-  const char *cp;
-  const char *expect; /* the returned content */
-  const char *next;   /* what cp points to after the call */
-  const char *home;
-  CURLcode result;
-};
-
-UNITTEST_START
 #ifdef USE_SSH
-{
+
+  struct set {
+    const char *cp;
+    const char *expect; /* the returned content */
+    const char *next;   /* what cp points to after the call */
+    const char *home;
+    CURLcode result;
+  };
+
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
@@ -79,7 +72,7 @@ UNITTEST_START
   };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic warning "-Woverlength-strings"
+#pragma GCC diagnostic pop
 #endif
 
   list[0].cp = calloc(1, too_long + 1);
@@ -113,11 +106,8 @@ UNITTEST_START
   }
 
   free(CURL_UNCONST(list[0].cp));
+
+#endif
+
+  UNITTEST_END_SIMPLE
 }
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
-
-#endif
-
-UNITTEST_STOP

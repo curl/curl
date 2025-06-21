@@ -30,8 +30,7 @@ set(_curl_definitions "")
 
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   list(APPEND _curl_definitions "USE_MANUAL")
-  add_custom_command(
-    OUTPUT "tool_hugehelp.c"
+  add_custom_command(OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable INCLUDEDUP all */" >> "tool_hugehelp.c"
@@ -54,8 +53,7 @@ endif()
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
     list(APPEND _curl_definitions "CURL_CA_EMBED")
-    add_custom_command(
-      OUTPUT "tool_ca_embed.c"
+    add_custom_command(OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
       DEPENDS
@@ -68,12 +66,12 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES' variables
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(WIN32)
-  list(APPEND CURL_CFILES "curl.rc")
+  list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
 
 if(BUILD_STATIC_CURL)
@@ -81,42 +79,35 @@ if(BUILD_STATIC_CURL)
 endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
-  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
+  "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"        # for "curl_setup.h"
   "${PROJECT_SOURCE_DIR}/lib/curlx"  # for curlx functions
-  # This is needed as tool_hugehelp.c is generated in the binary dir
-  "${PROJECT_SOURCE_DIR}/src"  # for "tool_hugehelp.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
-add_executable(
-  ${EXE_NAME}
-  ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen}
-)
+add_executable(${EXE_NAME} ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
-add_executable(
-  curlinfo
-  EXCLUDE_FROM_ALL
-  curlinfo.c
-)
+add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 
-add_library(
-  curltool  # special libcurltool library just for unittests
-  STATIC
-  EXCLUDE_FROM_ALL
-  ${CURL_CFILES} ${CURL_HFILES}
-)
+# special libcurltool library just for unittests
+add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
+set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
-  target_link_libraries(${EXE_NAME} "-municode")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(${EXE_NAME} PRIVATE "-municode")
+  else()
+    target_link_libraries(${EXE_NAME} PRIVATE "-municode")
+  endif()
 endif()
 
 source_group("curlX source files" FILES ${CURLX_CFILES})

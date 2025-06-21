@@ -28,27 +28,7 @@
 #include "http1.h"
 #include "curl_trc.h"
 
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-}
-
 #ifndef CURL_DISABLE_HTTP
-struct tcase {
-  const char **input;
-  const char *default_scheme;
-  const char *method;
-  const char *scheme;
-  const char *authority;
-  const char *path;
-  size_t header_count;
-  size_t input_remain;
-};
-
 static void check_eq(const char *s, const char *exp_s, const char *name)
 {
   if(s && exp_s) {
@@ -68,7 +48,18 @@ static void check_eq(const char *s, const char *exp_s, const char *name)
   }
 }
 
-static void parse_success(struct tcase *t)
+struct tcase {
+  const char **input;
+  const char *default_scheme;
+  const char *method;
+  const char *scheme;
+  const char *authority;
+  const char *path;
+  size_t header_count;
+  size_t input_remain;
+};
+
+static void parse_success(const struct tcase *t)
 {
   struct h1_req_parser p;
   const char *buf;
@@ -119,70 +110,72 @@ static void parse_success(struct tcase *t)
 
   Curl_h1_req_parse_free(&p);
 }
-
-static const char *T1_INPUT[] = {
-  "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
-  NULL,
-};
-static struct tcase TEST1a = {
-  T1_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 0
-};
-static struct tcase TEST1b = {
-  T1_INPUT, "https", "GET", "https", NULL, "/path", 1, 0
-};
-
-static const char *T2_INPUT[] = {
-  "GET /path HTT",
-  "P/1.1\r\nHost: te",
-  "st.curl.se\r\n\r",
-  "\n12345678",
-  NULL,
-};
-static struct tcase TEST2 = {
-  T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8
-};
-
-static const char *T3_INPUT[] = {
-  "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
-  "\nUser-Agent: xxx\r\n\r\n",
-  NULL,
-};
-static struct tcase TEST3a = {
-  T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
-};
-
-static const char *T4_INPUT[] = {
-  "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
-  "User-Agent: xxx\r\n",
-  "nothing:  \r\n\r\n\n\n",
-  NULL,
-};
-static struct tcase TEST4a = {
-  T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
-};
-
-static const char *T5_INPUT[] = {
-  "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
-  "\n\tzzzzzz\r\n\r\n",
-  "123",
-  NULL,
-};
-static struct tcase TEST5a = {
-  T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
-};
-
-static const char *T6_INPUT[] = {
-  "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
-  NULL,
-};
-static struct tcase TEST6a = {
-  T6_INPUT, NULL, "PUT", NULL, NULL, "/path", 1, 3
-};
 #endif
 
-UNITTEST_START
+static CURLcode test_unit2603(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
 #ifndef CURL_DISABLE_HTTP
+  static const char *T1_INPUT[] = {
+    "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
+    NULL,
+  };
+  static const struct tcase TEST1a = {
+    T1_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 0
+  };
+  static const struct tcase TEST1b = {
+    T1_INPUT, "https", "GET", "https", NULL, "/path", 1, 0
+  };
+
+  static const char *T2_INPUT[] = {
+    "GET /path HTT",
+    "P/1.1\r\nHost: te",
+    "st.curl.se\r\n\r",
+    "\n12345678",
+    NULL,
+  };
+  static const struct tcase TEST2 = {
+    T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8
+  };
+
+  static const char *T3_INPUT[] = {
+    "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
+    "\nUser-Agent: xxx\r\n\r\n",
+    NULL,
+  };
+  static const struct tcase TEST3a = {
+    T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
+  };
+
+  static const char *T4_INPUT[] = {
+    "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
+    "User-Agent: xxx\r\n",
+    "nothing:  \r\n\r\n\n\n",
+    NULL,
+  };
+  static const struct tcase TEST4a = {
+    T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
+  };
+
+  static const char *T5_INPUT[] = {
+    "OPTIONS * HTTP/1.1\r\nContent-Length: 0\r\nBlabla: xxx.yyy\r",
+    "\n\tzzzzzz\r\n\r\n",
+    "123",
+    NULL,
+  };
+  static const struct tcase TEST5a = {
+    T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
+  };
+
+  static const char *T6_INPUT[] = {
+    "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
+    NULL,
+  };
+  static const struct tcase TEST6a = {
+    T6_INPUT, NULL, "PUT", NULL, NULL, "/path", 1, 3
+  };
+
   parse_success(&TEST1a);
   parse_success(&TEST1b);
   parse_success(&TEST2);
@@ -192,4 +185,5 @@ UNITTEST_START
   parse_success(&TEST6a);
 #endif
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

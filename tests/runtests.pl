@@ -546,7 +546,7 @@ sub checksystemfeatures {
 
             $libcurl = $2;
             if($curl =~ /linux|bsd|solaris/) {
-                # system support LD_PRELOAD; may be disabled later
+                # system supports LD_PRELOAD/LD_LIBRARY_PATH; may be disabled later
                 $feature{"ld_preload"} = 1;
             }
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
@@ -572,13 +572,6 @@ sub checksystemfeatures {
             }
             elsif ($libcurl =~ /\swolfssl\b/i) {
                 $feature{"wolfssl"} = 1;
-                $feature{"SSLpinning"} = 1;
-            }
-            elsif ($libcurl =~ /\sbearssl\b/i) {
-                $feature{"bearssl"} = 1;
-            }
-            elsif ($libcurl =~ /\ssecuretransport\b/i) {
-                $feature{"sectransp"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
             elsif ($libcurl =~ /\s(BoringSSL|AWS-LC)\b/i) {
@@ -834,9 +827,16 @@ sub checksystemfeatures {
     chomp $has_shared;
     $has_shared = $has_shared eq "yes";
 
-    if(!$feature{"TrackMemory"} && $torture) {
-        die "can't run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
+
+    if($torture) {
+        if(!$feature{"TrackMemory"}) {
+            die "can't run torture tests since curl was built without ".
+                "TrackMemory feature (--enable-curldebug)";
+        }
+        if ($feature{"threaded-resolver"} && !$valgrind) {
+            die "can't run torture tests since curl was built with the ".
+                "threaded resolver, and we aren't running with valgrind";
+        }
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -871,23 +871,20 @@ sub checksystemfeatures {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
     }
+    # Disable memory tracking when using threaded resolver
     if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
         logmsg("*\n",
                "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
                "*\n");
+        $feature{"TrackMemory"} = 0;
     }
 
     logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
                    $run_duphandle?"test-duphandle ":"",
                    $run_event_based?"event-based ":"",
-                   $bundle?"bundle ":"",
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
-
-    # Disable memory tracking when using threaded resolver
-    $feature{"TrackMemory"} = $feature{"TrackMemory"} && !$feature{"threaded-resolver"};
-
 }
 
 #######################################################################
@@ -2503,15 +2500,6 @@ EOHELP
         exit;
     }
     shift @ARGV;
-}
-
-# Detect a test bundle build.
-# Do not look for 'tunits' and 'units' because not all configurations build them.
-if(-e $LIBDIR . "libtests" . exe_ext('TOOL') &&
-   -e $SRVDIR . "servers" . exe_ext('SRV')) {
-    # use test bundles
-    $bundle=1;
-    $ENV{'CURL_TEST_BUNDLES'} = 1;
 }
 
 delete $ENV{'DEBUGINFOD_URLS'} if($ENV{'DEBUGINFOD_URLS'} && $no_debuginfod);

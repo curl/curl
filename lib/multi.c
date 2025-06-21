@@ -42,6 +42,7 @@
 #include "http.h"
 #include "select.h"
 #include "curlx/warnless.h"
+#include "curlx/wait.h"
 #include "speedcheck.h"
 #include "conncache.h"
 #include "multihandle.h"
@@ -1038,11 +1039,25 @@ void Curl_multi_getsock(struct Curl_easy *data,
     break;
   }
 
+
+  /* Unblocked and waiting to receive with buffered input.
+   * Make transfer run again at next opportunity. */
+  if(!Curl_xfer_is_blocked(data) &&
+     ((Curl_pollset_want_read(data, ps, data->conn->sock[FIRSTSOCKET]) &&
+       Curl_conn_data_pending(data, FIRSTSOCKET)) ||
+      (Curl_pollset_want_read(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
+       Curl_conn_data_pending(data, SECONDARYSOCKET)))) {
+    CURL_TRC_M(data, "%s pollset[] has POLLIN, but there is still "
+               "buffered input to consume -> EXPIRE_RUN_NOW", caller);
+    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  }
+
   switch(ps->num) {
     case 0:
       CURL_TRC_M(data, "%s pollset[], timeouts=%zu, paused %d/%d (r/w)",
                  caller, Curl_llist_count(&data->state.timeoutlist),
-                 Curl_creader_is_paused(data), Curl_cwriter_is_paused(data));
+                 Curl_xfer_send_is_paused(data),
+                 Curl_xfer_recv_is_paused(data));
       break;
     case 1:
       CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",
@@ -1218,6 +1233,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct curl_pollfds cpfds;
   unsigned int curl_nfds = 0; /* how many pfds are for curl transfers */
+  struct Curl_easy *data = NULL;
   CURLMcode result = CURLM_OK;
   unsigned int mid;
 
@@ -1243,8 +1259,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   /* Add the curl handles to our pollfds first */
   if(Curl_uint_bset_first(&multi->process, &mid)) {
     do {
-      struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       struct easy_pollset ps;
+      data = Curl_multi_get_easy(multi, mid);
       if(!data) {
         DEBUGASSERT(0);
         Curl_uint_bset_remove(&multi->process, mid);
@@ -1320,6 +1336,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
+  if(data)
+    CURL_TRC_M(data, "multi_wait(fds=%d, timeout=%d) tinternal=%ld",
+               cpfds.n, timeout_ms, timeout_internal);
 #if defined(ENABLE_WAKEUP) && defined(USE_WINSOCK)
   if(cpfds.n || use_wakeup) {
 #else
@@ -1441,7 +1460,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
          timeout */
       else if(sleep_ms < 0)
         sleep_ms = timeout_ms;
-      Curl_wait_ms(sleep_ms);
+      curlx_wait_ms(sleep_ms);
     }
   }
 
@@ -1950,6 +1969,8 @@ static CURLMcode state_performing(struct Curl_easy *data,
     /* This avoids CURLM_CALL_MULTI_PERFORM so that a very fast transfer does
        not get stuck on this transfer at the expense of other concurrent
        transfers */
+    CURL_TRC_M(data, "EXPIRE_RUN_NOW unblocked, select_bits=%x",
+               data->state.select_bits);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
   free(newurl);
@@ -3197,6 +3218,10 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
       *timeout_ms = (long)diff;
     }
     else {
+      if(multi->timetree) {
+        struct Curl_easy *data = Curl_splayget(multi->timetree);
+        CURL_TRC_M(data, "multi_timeout() says this has expired");
+      }
       /* 0 means immediately */
       *timeout_ms = 0;
     }
@@ -3420,6 +3445,9 @@ void Curl_expire_ex(struct Curl_easy *data,
   Curl_splayset(&data->state.timenode, data);
   multi->timetree = Curl_splayinsert(*curr_expire, multi->timetree,
                                      &data->state.timenode);
+  if(data->id >= 0)
+    CURL_TRC_M(data, "set expire[%d] in %" FMT_TIMEDIFF_T "ns",
+               id, curlx_timediff_us(set, *nowp));
 }
 
 /*

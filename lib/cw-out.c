@@ -31,6 +31,7 @@
 #include "headers.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "cw-out.h"
 #include "cw-pause.h"
 
@@ -234,11 +235,9 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
         failf(data, "Write callback asked for PAUSE when not supported");
         return CURLE_WRITE_ERROR;
       }
-      /* mark the connection as RECV paused */
-      data->req.keepon |= KEEP_RECV_PAUSE;
       ctx->paused = TRUE;
       CURL_TRC_WRITE(data, "[OUT] PAUSE requested by client");
-      break;
+      return Curl_xfer_pause_recv(data, TRUE);
     }
     else if(CURL_WRITEFUNC_ERROR == nwritten) {
       failf(data, "client returned ERROR on write of %zu bytes", wlen);

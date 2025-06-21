@@ -25,27 +25,7 @@
 
 #include "testtrace.h"
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
-
-struct entry {
-  const char *name;
-  const char *exp;
-};
-
-static const struct entry preload_hosts[] = {
-#if (SIZEOF_TIME_T < 5)
-  { "1.example.com", "20370320 01:02:03" },
-  { "2.example.com", "20370320 03:02:01" },
-  { "3.example.com", "20370319 01:02:03" },
-#else
-  { "1.example.com", "25250320 01:02:03" },
-  { "2.example.com", "25250320 03:02:01" },
-  { "3.example.com", "25250319 01:02:03" },
-#endif
-  { "4.example.com", "" },
-  { NULL, NULL } /* end of list marker */
-};
 
 struct state {
   int index;
@@ -55,6 +35,25 @@ struct state {
 static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
                             void *userp)
 {
+  struct entry {
+    const char *name;
+    const char *exp;
+  };
+
+  static const struct entry preload_hosts[] = {
+#if (SIZEOF_TIME_T < 5)
+    { "1.example.com", "20370320 01:02:03" },
+    { "2.example.com", "20370320 03:02:01" },
+    { "3.example.com", "20370319 01:02:03" },
+#else
+    { "1.example.com", "25250320 01:02:03" },
+    { "2.example.com", "25250320 03:02:01" },
+    { "3.example.com", "25250319 01:02:03" },
+#endif
+    { "4.example.com", "" },
+    { NULL, NULL } /* end of list marker */
+  };
+
   const char *host;
   const char *expire;
   struct state *s = (struct state *)userp;
@@ -97,7 +96,7 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
  * Read/write HSTS cache entries via callback.
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib1915(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd;

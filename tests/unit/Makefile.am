@@ -31,48 +31,42 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
+# $(srcdir) for the generated bundle source to find included test sources
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/lib/curlx      \
-              -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
-              -I$(top_srcdir)/tests/unit
+              -I$(srcdir)
 
-EXTRA_DIST = CMakeLists.txt README.md
+# Get BUNDLE, FIRSTFILES, UTILS, TESTFILES variables
+include Makefile.inc
+
+EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-LDADD = $(top_builddir)/lib/libcurlu.la      \
-        @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
-
-AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS -DBUILDING_LIBCURL
+AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 if DEBUGBUILD
 AM_CPPFLAGS += -DDEBUGBUILD
 endif
 if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
-
-BUNDLE=units
+AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
+AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
-if USE_TEST_BUNDLES
-unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl Makefile.inc
-	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)
-nodist_units_SOURCES = unit_bundle.c
-CLEANFILES = unit_bundle.c
-else
-# Makefile.inc provides neat definitions
-include Makefile.inc
-noinst_PROGRAMS = $(UNITPROGS)
-endif
+LDADD = $(top_builddir)/lib/libcurlu.la
+CLEANFILES = ${BUNDLE}.c
 else
 noinst_PROGRAMS =
 endif
@@ -85,7 +79,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/unit_bundle.c \
+	  -W$(srcdir)/${BUNDLE}.c \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

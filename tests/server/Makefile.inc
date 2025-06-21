@@ -21,92 +21,36 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
-SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd mqttd dnsd
+BUNDLE = servers
 
-MEMDEBUG = \
-  ../../lib/memdebug.c \
-  ../../lib/memdebug.h
+# Files referenced from the bundle source
+FIRSTFILES = first.c first.h
 
-CURLX_SRCS = \
+# Common files used by test programs
+UTILS = getpart.c getpart.h util.c
+
+CURLX_CFILES = \
   ../../lib/curlx/base64.c \
+  ../../lib/curlx/inet_pton.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/nonblock.c \
   ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/version_win32.c \
+  ../../lib/curlx/wait.c \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
-CURLX_HDRS = \
-  ../../lib/curlx/base64.h \
-  ../../lib/curlx/curlx.h \
-  ../../lib/curlx/multibyte.h \
-  ../../lib/curlx/nonblock.h \
-  ../../lib/curlx/timediff.h \
-  ../../lib/curlx/timeval.h \
-  ../../lib/curlx/version_win32.h \
-  ../../lib/curlx/warnless.h \
-  ../../lib/curlx/winapi.h
-
-UTIL = \
-  getpart.c \
-  getpart.h \
-  util.c \
-  util.h \
-  server_setup.h
-
-FIRSTFILES = \
-  first.c \
-  first.h
-
-INET_PTON = \
-  ../../lib/curlx/inet_pton.c
-
-resolve_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  resolve.c
-resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-resolve_CFLAGS = $(AM_CFLAGS)
-
-rtspd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  rtspd.c
-rtspd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-rtspd_CFLAGS = $(AM_CFLAGS)
-
-sockfilt_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  sockfilt.c
-sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-sockfilt_CFLAGS = $(AM_CFLAGS)
-
-socksd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  socksd.c
-socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-socksd_CFLAGS = $(AM_CFLAGS)
-
-mqttd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  mqttd.c
-mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-mqttd_CFLAGS = $(AM_CFLAGS)
-
-sws_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) $(INET_PTON) \
-  server_sockaddr.h \
-  sws.c
-sws_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-sws_CFLAGS = $(AM_CFLAGS)
-
-tftpd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  server_sockaddr.h \
-  tftpd.c \
-  tftp.h
-tftpd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-tftpd_CFLAGS = $(AM_CFLAGS)
-
-dnsd_SOURCES = $(MEMDEBUG) $(CURLX_SRCS) $(CURLX_HDRS) $(UTIL) \
-  dnsd.c
-dnsd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-dnsd_CFLAGS = $(AM_CFLAGS)
+# All test servers
+TESTFILES = \
+  dnsd.c \
+  mqttd.c \
+  resolve.c \
+  rtspd.c \
+  sockfilt.c \
+  socksd.c \
+  sws.c \
+  tftpd.c

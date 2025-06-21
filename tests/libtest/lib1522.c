@@ -27,10 +27,7 @@
 
 #include "testtrace.h"
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
-
-static char g_Data[40 * 1024]; /* POST 40KB */
 
 static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                             curlsocktype purpose)
@@ -49,8 +46,10 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_OK;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1522(char *URL)
 {
+  static char g_Data[40 * 1024]; /* POST 40KB */
+
   CURLcode code = TEST_ERR_MAJOR_BAD;
   CURLcode res;
   struct curl_slist *pHeaderList = NULL;

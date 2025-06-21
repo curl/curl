@@ -62,7 +62,6 @@
 
  4. FTP
  4.1 HOST
- 4.4 Support CURLOPT_PREQUOTE for directories listings
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -554,13 +553,6 @@
  servers named-based virtual hosting:
 
  https://datatracker.ietf.org/doc/html/rfc7151
-
-4.4 Support CURLOPT_PREQUOTE for directions listings
-
- The lack of support is mostly an oversight and requires the FTP state machine
- to get updated to get fixed.
-
- https://github.com/curl/curl/issues/8602
 
 4.6 GSSAPI via Windows SSPI
 

@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SECTRANSP_H
-#define HEADER_CURL_SECTRANSP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Nick Zitzmann, <nickzman@gmail.com>.
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -24,11 +21,31 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "../curl_setup.h"
 
-#ifdef USE_SECTRANSP
+int main(int argc, char **argv)
+{
+  entry_func_t entry_func;
+  char *entry_name;
+  size_t tmp;
 
-extern const struct Curl_ssl Curl_ssl_sectransp;
+  if(argc < 2) {
+    curl_mfprintf(stderr, "Pass clientname as first argument\n");
+    return 1;
+  }
 
-#endif /* USE_SECTRANSP */
-#endif /* HEADER_CURL_SECTRANSP_H */
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; tmp < CURL_ARRAYSIZE(s_entries); ++tmp) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+      entry_func = s_entries[tmp].ptr;
+      break;
+    }
+  }
+
+  if(!entry_func) {
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
+    return 99;
+  }
+
+  return entry_func(argc - 1, argv + 1);
+}

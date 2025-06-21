@@ -106,7 +106,7 @@ Finally, this is the real page!
 http
 </server>
 <tool>
-libauthretry
+lib2023
 </tool>
 
 <name>

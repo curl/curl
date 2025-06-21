@@ -25,10 +25,9 @@
 
 #include "testutil.h"
 #include "timediff.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1905(char *URL)
 {
   CURLSH *sh = NULL;
   CURL *ch = NULL;

@@ -1631,8 +1631,6 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
       (void)smtp_block_statemach(data, smtpc, TRUE); /* ignore on QUIT */
   }
 
-  /* Cleanup the SASL module */
-  Curl_sasl_cleanup(conn, smtpc->sasl.authused);
   CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
   return CURLE_OK;
 }

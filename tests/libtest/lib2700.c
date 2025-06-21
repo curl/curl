@@ -21,8 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
+
 #include "testtrace.h"
 #include "memdebug.h"
 
@@ -207,9 +207,11 @@ static CURLcode recv_frame(CURL *curl, bool *stop)
 
   return res;
 }
+#endif
 
-CURLcode test(char *URL)
+static CURLcode test_lib2700(char *URL)
 {
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURLcode res = CURLE_OK;
   bool stop = false;
   CURL *curl;
@@ -247,8 +249,7 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
   return res;
-}
-
 #else
-NO_SUPPORT_BUILT_IN
+  NO_SUPPORT_BUILT_IN
 #endif
+}

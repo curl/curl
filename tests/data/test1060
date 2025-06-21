@@ -870,6 +870,7 @@ http
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP proxy CONNECT auth Digest, large headers and data

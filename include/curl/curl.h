@@ -158,11 +158,11 @@ typedef enum {
   CURLSSLBACKEND_POLARSSL               CURL_DEPRECATED(7.69.0, "") = 6,
   CURLSSLBACKEND_WOLFSSL = 7,
   CURLSSLBACKEND_SCHANNEL = 8,
-  CURLSSLBACKEND_SECURETRANSPORT = 9,
+  CURLSSLBACKEND_SECURETRANSPORT        CURL_DEPRECATED(8.15.0, "") = 9,
   CURLSSLBACKEND_AXTLS                  CURL_DEPRECATED(7.61.0, "") = 10,
   CURLSSLBACKEND_MBEDTLS = 11,
   CURLSSLBACKEND_MESALINK               CURL_DEPRECATED(7.82.0, "") = 12,
-  CURLSSLBACKEND_BEARSSL = 13,
+  CURLSSLBACKEND_BEARSSL                CURL_DEPRECATED(8.15.0, "") = 13,
   CURLSSLBACKEND_RUSTLS = 14
 } curl_sslbackend;
 
@@ -645,20 +645,7 @@ typedef enum {
   CURLE_UNRECOVERABLE_POLL,      /* 99 - poll/select returned fatal error */
   CURLE_TOO_LARGE,               /* 100 - a value/data met its maximum */
   CURLE_ECH_REQUIRED,            /* 101 - ECH tried but failed */
-  CURL_LAST, /* never use! */
-
-  CURLE_RESERVED115 = 115,       /* 115-126 - used in tests */
-  CURLE_RESERVED116 = 116,
-  CURLE_RESERVED117 = 117,
-  CURLE_RESERVED118 = 118,
-  CURLE_RESERVED119 = 119,
-  CURLE_RESERVED120 = 120,
-  CURLE_RESERVED121 = 121,
-  CURLE_RESERVED122 = 122,
-  CURLE_RESERVED123 = 123,
-  CURLE_RESERVED124 = 124,
-  CURLE_RESERVED125 = 125,
-  CURLE_RESERVED126 = 126
+  CURL_LAST /* never use! */
 } CURLcode;
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
@@ -1967,7 +1954,8 @@ typedef enum {
   CURLOPT(CURLOPT_SSL_VERIFYSTATUS, CURLOPTTYPE_LONG, 232),
 
   /* Set if we should enable TLS false start. */
-  CURLOPT(CURLOPT_SSL_FALSESTART, CURLOPTTYPE_LONG, 233),
+  CURLOPTDEPRECATED(CURLOPT_SSL_FALSESTART, CURLOPTTYPE_LONG, 233,
+                    8.15.0, "Has no function"),
 
   /* Do not squash dot-dot sequences */
   CURLOPT(CURLOPT_PATH_AS_IS, CURLOPTTYPE_LONG, 234),

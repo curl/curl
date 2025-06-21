@@ -73,7 +73,7 @@ http
 </server>
 # tool to use
 <tool>
-lib%TESTNUMBER
+lib547
 </tool>
 <features>
 NTLM

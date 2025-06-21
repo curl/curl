@@ -37,9 +37,6 @@ curl_includes_arpa_inet="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#  include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
 #endif
@@ -49,10 +46,12 @@ curl_includes_arpa_inet="\
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#else
+#include <sys/socket.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h netinet/in.h arpa/inet.h,
+    sys/types.h netinet/in.h arpa/inet.h,
     [], [], [$curl_includes_arpa_inet])
 ])
 
@@ -92,7 +91,7 @@ curl_includes_ifaddrs="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -103,7 +102,7 @@ curl_includes_ifaddrs="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h netinet/in.h ifaddrs.h,
+    sys/types.h netinet/in.h ifaddrs.h,
     [], [], [$curl_includes_ifaddrs])
 ])
 
@@ -243,7 +242,7 @@ curl_includes_stropts="\
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -254,7 +253,7 @@ curl_includes_stropts="\
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h unistd.h sys/socket.h sys/ioctl.h stropts.h,
+    sys/types.h unistd.h sys/ioctl.h stropts.h,
     [], [], [$curl_includes_stropts])
 ])
 
@@ -270,12 +269,12 @@ curl_includes_sys_socket="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/socket.h,
+    sys/types.h,
     [], [], [$curl_includes_sys_socket])
 ])
 
@@ -329,13 +328,13 @@ curl_includes_time="\
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #  include <sys/time.h>
 #endif
 #include <time.h>
 /* includes end */"
   AC_CHECK_HEADERS(
-    sys/types.h sys/time.h,
+    sys/types.h,
     [], [], [$curl_includes_time])
 ])
 

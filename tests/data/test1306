@@ -22,9 +22,6 @@ internal hash create/add/destroy testing
 <tool>
 unit1305
 </tool>
-<command>
-%TESTNUMBER
-</command>
 </client>
 
 </testcase>

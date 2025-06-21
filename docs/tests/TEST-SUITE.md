@@ -312,11 +312,9 @@ SPDX-License-Identifier: curl
 
 ### test bundles
 
-  The `--enable-test-bundles` (autotools) and `-DCURL_TEST_BUNDLES=ON` (cmake)
-  build options allow to build tests bundled into single executables, one for
-  libtests, one for unit tests and one for servers.
-  The executables' first argument is the name of libtest, unit test or server
-  respectively.
+  Individual tests are bundled into single executables, one for libtests, one
+  for unit tests and one for servers. The executables' first argument is
+  the name of libtest, unit test or server respectively.
   In these executables, the build process automatically renames the entry point
   to a unique symbol. `test` becomes `test_<tool>`, e.g. `test_lib1598` or
   `test_unit1305`. For servers `main` becomes `main_sws` for the `sws` server,

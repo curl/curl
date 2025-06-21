@@ -29,7 +29,7 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
-# Get 'CSOURCES', 'HHEADERS' variables
+# Get CSOURCES, HHEADERS, LIB_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -46,23 +46,13 @@ if(USE_ARES)
 endif()
 
 if(CURL_BUILD_TESTING)
-  add_library(
-    curlu  # special libcurlu library just for unittests
-    STATIC
-    EXCLUDE_FROM_ALL
-    ${HHEADERS} ${CSOURCES}
-  )
+  # special libcurlu library just for unittests
+  add_library(curlu STATIC EXCLUDE_FROM_ALL ${HHEADERS} ${CSOURCES})
   target_compile_definitions(curlu PUBLIC "CURL_STATICLIB" "UNITTESTS")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
   # There is plenty of parallelism when building the testdeps target.
   # Override the curlu batch size with the maximum to optimize performance.
-  set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
-endif()
-
-if(ENABLE_CURLDEBUG)
-  # We must compile this source separately to avoid memdebug.h redefinitions
-  # applying to it.
-  set_source_files_properties("memdebug.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0 C_CLANG_TIDY "")
 endif()
 
 ## Library definition
@@ -181,7 +171,7 @@ if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "libcurl.rc")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES ${LIB_RCFILES})
     if(CURL_HIDES_PRIVATE_SYMBOLS)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${PROJECT_SOURCE_DIR}/lib/libcurl.def")
     endif()
@@ -231,7 +221,7 @@ if(BUILD_SHARED_LIBS)
   option(CURL_LIBCURL_VERSIONED_SYMBOLS "Enable libcurl versioned symbols" OFF)
 
   if(CURL_LIBCURL_SOVERSION OR CURL_LIBCURL_VERSIONED_SYMBOLS)
-    # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
+    # Get VERSIONCHANGE, VERSIONADD, VERSIONDEL, VERSIONINFO variables
     curl_transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
     include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
 
@@ -255,8 +245,6 @@ if(BUILD_SHARED_LIBS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "OPENSSL_")
       elseif(CURL_USE_MBEDTLS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "MBEDTLS_")
-      elseif(CURL_USE_BEARSSL)
-        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "BEARSSL_")
       elseif(CURL_USE_WOLFSSL)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "WOLFSSL_")
       elseif(CURL_USE_GNUTLS)

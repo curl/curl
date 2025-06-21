@@ -31,6 +31,9 @@
  * be.
  */
 
+#include "binmode.h"
+/* "binmode.h" provides macro CURLX_SET_BINMODE() */
+
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
@@ -64,6 +67,9 @@
 #include "base64.h"
 #include "timeval.h"
 #include "timediff.h"
+
+#include "wait.h"
+/* for curlx_wait_ms */
 
 #include "winapi.h"
 /* for curlx_winapi_strerror */

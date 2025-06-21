@@ -215,7 +215,7 @@ class TestCaddy:
         count = 2
         docname = 'data10k.data'
         url = f'https://{env.domain1}:{caddy.port}/{docname}'
-        client = LocalClient(name='hx-download', env=env)
+        client = LocalClient(name='hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

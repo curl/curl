@@ -25,20 +25,15 @@
 
 #include "testtrace.h"
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-#define NUM_HANDLES 4
-
-CURLcode test(char *URL)
+static CURLcode test_lib2502(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {0};
   int running;
   CURLM *m = NULL;
-  int i;
+  size_t i;
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
@@ -64,14 +59,14 @@ CURLcode test(char *URL)
 
   multi_setopt(m, CURLMOPT_MAXCONNECTS, 1L);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
                    "https://localhost:%s/path/2502%04i",
-                   port, i + 1);
+                   port, (int)i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */
@@ -94,7 +89,7 @@ CURLcode test(char *URL)
 
   curl_mfprintf(stderr, "Start at URL 0\n");
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* add handle to multi */
     multi_add_handle(m, curl[i]);
 
@@ -125,14 +120,14 @@ CURLcode test(char *URL)
 
       abort_on_test_timeout();
     }
-    wait_ms(1); /* to ensure different end times */
+    curlx_wait_ms(1); /* to ensure different end times */
   }
 
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }

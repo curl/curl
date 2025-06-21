@@ -873,90 +873,89 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   return nread;
 }
 
-static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              char *buf, size_t len, CURLcode *err)
+static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                               char *buf, size_t len, size_t *pnread)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nread = -1;
-  CURLcode result;
+  CURLcode result = CURLE_OK, r2;
 
+  *pnread = 0;
   vquic_ctx_update_time(&ctx->q);
 
-  if(!stream) {
-    *err = CURLE_RECV_ERROR;
-    return -1;
-  }
+  if(!stream)
+    return CURLE_RECV_ERROR;
+
 
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
-                           (unsigned char *)buf, len, err);
+                           (unsigned char *)buf, len, &result);
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] read recvbuf(len=%zu) "
-                "-> %zd, %d", stream->id, len, nread, *err);
+                "-> %zd, %d", stream->id, len, nread, result);
     if(nread < 0)
       goto out;
+    *pnread = (size_t)nread;
   }
 
   if(cf_process_ingress(cf, data)) {
     CURL_TRC_CF(data, cf, "cf_recv, error on ingress");
-    *err = CURLE_RECV_ERROR;
-    nread = -1;
+    result = CURLE_RECV_ERROR;
     goto out;
   }
 
   /* recvbuf had nothing before, maybe after progressing ingress? */
   if(nread < 0 && !Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
-                           (unsigned char *)buf, len, err);
+                           (unsigned char *)buf, len, &result);
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] read recvbuf(len=%zu) "
-                "-> %zd, %d", stream->id, len, nread, *err);
+                "-> %zd, %d", stream->id, len, nread, result);
     if(nread < 0)
       goto out;
+    *pnread = (size_t)nread;
   }
 
-  if(nread > 0) {
+  if(*pnread) {
     if(stream->closed)
       h3_drain_stream(cf, data);
   }
   else {
     if(stream->closed) {
-      nread = recv_closed_stream(cf, data, err);
+      nread = recv_closed_stream(cf, data, &result);
       goto out;
     }
     else if(quiche_conn_is_draining(ctx->qconn)) {
       failf(data, "QUIC connection is draining");
-      *err = CURLE_HTTP3;
-      nread = -1;
+      result = CURLE_HTTP3;
       goto out;
     }
-    *err = CURLE_AGAIN;
-    nread = -1;
+    result = CURLE_AGAIN;
   }
 
 out:
-  result = cf_flush_egress(cf, data);
-  if(result) {
+  r2 = cf_flush_egress(cf, data);
+  if(r2) {
     CURL_TRC_CF(data, cf, "cf_recv, flush egress failed");
-    *err = result;
-    nread = -1;
+    result = r2;
   }
-  if(nread > 0)
+  if(*pnread > 0)
     ctx->data_recvd += nread;
   CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] cf_recv(total=%"
-              FMT_OFF_T ") -> %zd, %d",
-              stream->id, ctx->data_recvd, nread, *err);
-  return nread;
+              FMT_OFF_T ") -> %d, %zu",
+              stream->id, ctx->data_recvd, result, *pnread);
+  return result;
 }
 
-static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct h3_stream_ctx *stream,
-                                   const void *buf, size_t len, bool eos,
-                                   CURLcode *err)
+static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct h3_stream_ctx *stream,
+                                    const void *buf, size_t len, bool eos,
+                                    size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   ssize_t nwritten;
 
+  *pnwritten = 0;
   nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
                                  (uint8_t *)CURL_UNCONST(buf), len, eos);
   if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
@@ -967,26 +966,22 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
                   "-> window exhausted", stream->id, len);
       stream->quic_flow_blocked = TRUE;
     }
-    *err = CURLE_AGAIN;
-    return -1;
+    return CURLE_AGAIN;
   }
   else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> invalid stream state", stream->id, len);
-    *err = CURLE_HTTP3;
-    return -1;
+    return CURLE_HTTP3;
   }
   else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> exceeds size", stream->id, len);
-    *err = CURLE_SEND_ERROR;
-    return -1;
+    return CURLE_SEND_ERROR;
   }
   else if(nwritten < 0) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> quiche err %zd", stream->id, len, nwritten);
-    *err = CURLE_SEND_ERROR;
-    return -1;
+    return CURLE_SEND_ERROR;
   }
   else {
     if(eos && (len == (size_t)nwritten))
@@ -994,8 +989,8 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send body(len=%zu, "
                 "eos=%d) -> %zd",
                 stream->id, len, stream->send_closed, nwritten);
-    *err = CURLE_OK;
-    return nwritten;
+    *pnwritten = (size_t)nwritten;
+    return CURLE_OK;
   }
 }
 
@@ -1003,10 +998,10 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
    field list. */
 #define AUTHORITY_DST_IDX 3
 
-static ssize_t h3_open_stream(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const char *buf, size_t len, bool eos,
-                              CURLcode *err)
+static CURLcode h3_open_stream(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               const char *buf, size_t blen, bool eos,
+                               size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1014,13 +1009,14 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   curl_int64_t stream3_id;
   struct dynhds h2_headers;
   quiche_h3_header *nva = NULL;
+  CURLcode result = CURLE_OK;
   ssize_t nwritten;
 
+  *pnwritten = 0;
   if(!stream) {
-    *err = h3_data_setup(cf, data);
-    if(*err) {
-      return -1;
-    }
+    result = h3_data_setup(cf, data);
+    if(result)
+      return result;
     stream = H3_STREAM_CTX(ctx, data);
     DEBUGASSERT(stream);
   }
@@ -1028,7 +1024,7 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   DEBUGASSERT(stream);
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, blen, NULL, 0, &result);
   if(nwritten < 0)
     goto out;
   if(!stream->h1.done) {
@@ -1037,19 +1033,17 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
-  if(*err) {
-    nwritten = -1;
+  result = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
+  if(result)
     goto out;
-  }
+
   /* no longer needed */
   Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(quiche_h3_header) * nheader);
   if(!nva) {
-    *err = CURLE_OUT_OF_MEMORY;
-    nwritten = -1;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -1061,7 +1055,11 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     nva[i].value_len = e->valuelen;
   }
 
-  if(eos && ((size_t)nwritten == len))
+  *pnwritten = (size_t)nwritten;
+  buf += *pnwritten;
+  blen -= *pnwritten;
+
+  if(eos && !blen)
     stream->send_closed = TRUE;
 
   stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
@@ -1072,21 +1070,18 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
        * exhausted. Which happens frequently and intermittent. */
       CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] blocked", stream->id);
       stream->quic_flow_blocked = TRUE;
-      *err = CURLE_AGAIN;
-      nwritten = -1;
+      result = CURLE_AGAIN;
       goto out;
     }
     else {
       CURL_TRC_CF(data, cf, "send_request(%s) -> %" FMT_PRIu64,
                   data->state.url, stream3_id);
     }
-    *err = CURLE_SEND_ERROR;
-    nwritten = -1;
+    result = CURLE_SEND_ERROR;
     goto out;
   }
 
   DEBUGASSERT(!stream->opened);
-  *err = CURLE_OK;
   stream->id = stream3_id;
   stream->opened = TRUE;
   stream->closed = FALSE;
@@ -1102,48 +1097,43 @@ static ssize_t h3_open_stream(struct Curl_cfilter *cf,
     }
   }
 
-  if(nwritten > 0 && ((size_t)nwritten < len)) {
-    /* after the headers, there was request BODY data */
-    size_t hds_len = (size_t)nwritten;
-    ssize_t bwritten;
+  if(blen) {  /* after the headers, there was request BODY data */
+    size_t bwritten;
+    CURLcode r2 = CURLE_OK;
 
-    bwritten = cf_quiche_send_body(cf, data, stream,
-                                   buf + hds_len, len - hds_len, eos, err);
-    if((bwritten < 0) && (CURLE_AGAIN != *err)) {
-      /* real error, fail */
-      nwritten = -1;
+    r2 = cf_quiche_send_body(cf, data, stream, buf, blen, eos, &bwritten);
+    if(r2 && (CURLE_AGAIN != r2)) {  /* real error, fail */
+      result = r2;
     }
     else if(bwritten > 0) {
-      nwritten += bwritten;
+      *pnwritten += (size_t)bwritten;
     }
   }
 
 out:
   free(nva);
   Curl_dynhds_free(&h2_headers);
-  return nwritten;
+  return result;
 }
 
-static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, bool eos,
-                              CURLcode *err)
+static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                               const void *buf, size_t len, bool eos,
+                               size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  CURLcode result;
-  ssize_t nwritten;
+  CURLcode result, r2;
 
+  *pnwritten = 0;
   vquic_ctx_update_time(&ctx->q);
 
-  *err = cf_process_ingress(cf, data);
-  if(*err) {
-    nwritten = -1;
+  result = cf_process_ingress(cf, data);
+  if(result)
     goto out;
-  }
 
   if(!stream || !stream->opened) {
-    nwritten = h3_open_stream(cf, data, buf, len, eos, err);
-    if(nwritten < 0)
+    result = h3_open_stream(cf, data, buf, len, eos, pnwritten);
+    if(result)
       goto out;
     stream = H3_STREAM_CTX(ctx, data);
   }
@@ -1159,29 +1149,28 @@ static ssize_t cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
        * it would see the response and stop/discard sending on its own- */
       CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] discarding data"
                   "on closed stream with response", stream->id);
-      *err = CURLE_OK;
-      nwritten = (ssize_t)len;
+      result = CURLE_OK;
+      *pnwritten = len;
       goto out;
     }
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> stream closed", stream->id, len);
-    *err = CURLE_HTTP3;
-    nwritten = -1;
+    result = CURLE_HTTP3;
     goto out;
   }
   else {
-    nwritten = cf_quiche_send_body(cf, data, stream, buf, len, eos, err);
+    result = cf_quiche_send_body(cf, data, stream, buf, len, eos, pnwritten);
   }
 
 out:
-  result = cf_flush_egress(cf, data);
-  if(result) {
-    *err = result;
-    nwritten = -1;
-  }
-  CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_send(len=%zu) -> %zd, %d",
-              stream ? stream->id : (curl_uint64_t)~0, len, nwritten, *err);
-  return nwritten;
+  r2 = cf_flush_egress(cf, data);
+  if(r2)
+    result = r2;
+
+  CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_send(len=%zu) -> %d, %zu",
+              stream ? stream->id : (curl_uint64_t)~0, len,
+              result, *pnwritten);
+  return result;
 }
 
 static bool stream_is_writeable(struct Curl_cfilter *cf,
@@ -1269,13 +1258,13 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     if(stream && !stream->send_closed) {
       unsigned char body[1];
-      ssize_t sent;
+      size_t sent;
 
       stream->send_closed = TRUE;
       body[0] = 'X';
-      sent = cf_quiche_send(cf, data, body, 0, TRUE, &result);
-      CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] DONE_SEND -> %zd, %d",
-                  stream->id, sent, result);
+      result = cf_quiche_send(cf, data, body, 0, TRUE, &sent);
+      CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] DONE_SEND -> %d, %zu",
+                  stream->id, result, sent);
     }
     break;
   }

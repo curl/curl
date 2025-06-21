@@ -586,17 +586,11 @@
 /* Define to 1 if you have the <sys/select.h> header file. */
 #cmakedefine HAVE_SYS_SELECT_H 1
 
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#cmakedefine HAVE_SYS_SOCKET_H 1
-
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #cmakedefine HAVE_SYS_SOCKIO_H 1
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #cmakedefine HAVE_SYS_STAT_H 1
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#cmakedefine HAVE_SYS_TIME_H 1
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #cmakedefine HAVE_SYS_TYPES_H 1
@@ -685,17 +679,11 @@ ${SIZEOF_TIME_T_CODE}
 /* if GnuTLS is enabled */
 #cmakedefine USE_GNUTLS 1
 
-/* if Secure Transport is enabled */
-#cmakedefine USE_SECTRANSP 1
-
 /* if SSL session export support is available */
 #cmakedefine USE_SSLS_EXPORT 1
 
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
-
-/* if BearSSL is enabled */
-#cmakedefine USE_BEARSSL 1
 
 /* if Rustls is enabled */
 #cmakedefine USE_RUSTLS 1
@@ -799,18 +787,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}
-
-/* Define for large files, on AIX-style hosts. */
-#cmakedefine _LARGE_FILES ${_LARGE_FILES}
-
-/* define this if you need it to compile thread-safe code */
-#cmakedefine _THREAD_SAFE ${_THREAD_SAFE}
-
-/* Define to empty if `const' does not conform to ANSI C. */
-#cmakedefine const ${const}
-
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#cmakedefine size_t ${size_t}
 
 /* the signed version of size_t */
 #cmakedefine ssize_t ${ssize_t}

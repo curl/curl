@@ -36,74 +36,18 @@
 #include <unistd.h>
 #endif
 
-#ifdef MSDOS
-#include <dos.h>  /* delay() */
-#endif
-
 #include <curl/curl.h>
 
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
 #include "curlx/timediff.h"
+#include "curlx/wait.h"
 #include "curlx/warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-/*
- * Internal function used for waiting a specific amount of ms in
- * Curl_socket_check() and Curl_poll() when no file descriptor is provided to
- * wait on, just being used to delay execution. Winsock select() and poll()
- * timeout mechanisms need a valid socket descriptor in a not null file
- * descriptor set to work. Waiting indefinitely with this function is not
- * allowed, a zero or negative timeout value will return immediately. Timeout
- * resolution, accuracy, as well as maximum supported value is system
- * dependent, neither factor is a critical issue for the intended use of this
- * function in the library.
- *
- * Return values:
- *   -1 = system call error, or invalid timeout value
- *    0 = specified timeout has elapsed, or interrupted
- */
-int Curl_wait_ms(timediff_t timeout_ms)
-{
-  int r = 0;
-
-  if(!timeout_ms)
-    return 0;
-  if(timeout_ms < 0) {
-    SET_SOCKERRNO(SOCKEINVAL);
-    return -1;
-  }
-#if defined(MSDOS)
-  delay((unsigned int)timeout_ms);
-#elif defined(_WIN32)
-  /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
-#if TIMEDIFF_T_MAX >= ULONG_MAX
-  if(timeout_ms >= ULONG_MAX)
-    timeout_ms = ULONG_MAX-1;
-    /* do not use ULONG_MAX, because that is equal to INFINITE */
-#endif
-  Sleep((DWORD)timeout_ms);
-#else
-  /* avoid using poll() for this since it behaves incorrectly with no sockets
-     on Apple operating systems */
-  {
-    struct timeval pending_tv;
-    r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
-  }
-#endif /* _WIN32 */
-  if(r) {
-    if((r == -1) && (SOCKERRNO == SOCKEINTR))
-      /* make EINTR from select or poll not a "lethal" error */
-      r = 0;
-    else
-      r = -1;
-  }
-  return r;
-}
 
 #ifndef HAVE_POLL
 /*
@@ -132,7 +76,7 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
      (!fds_write || fds_write->fd_count == 0) &&
      (!fds_err || fds_err->fd_count == 0)) {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return curlx_wait_ms(timeout_ms);
   }
 #endif
 
@@ -194,7 +138,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
   if((readfd0 == CURL_SOCKET_BAD) && (readfd1 == CURL_SOCKET_BAD) &&
      (writefd == CURL_SOCKET_BAD)) {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return curlx_wait_ms(timeout_ms);
   }
 
   /* Avoid initial timestamp, avoid curlx_now() call, when elapsed
@@ -289,7 +233,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   }
   if(fds_none) {
     /* no sockets, just wait */
-    return Curl_wait_ms(timeout_ms);
+    return curlx_wait_ms(timeout_ms);
   }
 
   /* Avoid initial timestamp, avoid curlx_now() call, when elapsed

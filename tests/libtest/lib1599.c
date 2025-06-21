@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_BEARSSL_H
-#define HEADER_CURL_BEARSSL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Michael Forney, <mforney@mforney.org>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -23,12 +21,26 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "test.h"
 
-#include "../curl_setup.h"
+#include "testtrace.h"
 
-#ifdef USE_BEARSSL
+static CURLcode test_lib1599(char *URL)
+{
+  CURL *curl;
+  CURLcode res = CURLE_OK;
 
-extern const struct Curl_ssl Curl_ssl_bearssl;
+  global_init(CURL_GLOBAL_ALL);
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_NETRC, (long)CURL_NETRC_REQUIRED);
+    curl_easy_setopt(curl, CURLOPT_NETRC_FILE, libtest_arg2);
 
-#endif /* USE_BEARSSL */
-#endif /* HEADER_CURL_BEARSSL_H */
+    res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  return res;
+}

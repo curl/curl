@@ -79,10 +79,10 @@ my %whitelist = (
     );
 
 # functions with complexity above this level causes the function to return error
-my $cutoff = 100;
+my $cutoff = 90;
 
 # functions above this complexity level are shown
-my $show = 70;
+my $show = 65;
 
 my $error = 0;
 my %where;

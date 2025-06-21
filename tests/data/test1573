@@ -69,7 +69,7 @@ lib1571
 CURLFOLLOW_OBEYCODE with custom GET method, 301 => custom
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER 1573
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

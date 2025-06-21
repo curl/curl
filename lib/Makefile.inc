@@ -21,6 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
 
 LIB_CURLX_CFILES = \
   curlx/base64.c   \
@@ -33,10 +34,12 @@ LIB_CURLX_CFILES = \
   curlx/timediff.c \
   curlx/timeval.c  \
   curlx/version_win32.c \
+  curlx/wait.c     \
   curlx/warnless.c \
   curlx/winapi.c
 
 LIB_CURLX_HFILES = \
+  curlx/binmode.h  \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
@@ -48,6 +51,7 @@ LIB_CURLX_HFILES = \
   curlx/timediff.h \
   curlx/timeval.h  \
   curlx/version_win32.h \
+  curlx/wait.h     \
   curlx/warnless.h \
   curlx/winapi.h
 
@@ -71,7 +75,6 @@ LIB_VAUTH_HFILES =      \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
-  vtls/bearssl.c            \
   vtls/cipher_suite.c       \
   vtls/gtls.c               \
   vtls/hostcheck.c          \
@@ -82,7 +85,6 @@ LIB_VTLS_CFILES =           \
   vtls/rustls.c             \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
-  vtls/sectransp.c          \
   vtls/vtls.c               \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
@@ -90,7 +92,6 @@ LIB_VTLS_CFILES =           \
   vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
-  vtls/bearssl.h            \
   vtls/cipher_suite.h       \
   vtls/gtls.h               \
   vtls/hostcheck.h          \
@@ -101,7 +102,6 @@ LIB_VTLS_HFILES =           \
   vtls/rustls.h             \
   vtls/schannel.h           \
   vtls/schannel_int.h       \
-  vtls/sectransp.h          \
   vtls/vtls.h               \
   vtls/vtls_int.h           \
   vtls/vtls_scache.h        \

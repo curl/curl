@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "test.h"
 
 #include "memdebug.h"
 
-static void showem(CURL *easy, unsigned int type)
+static void t1945_showem(CURL *easy, unsigned int type)
 {
   struct curl_header *header = NULL;
   struct curl_header *prev = NULL;
@@ -39,14 +38,15 @@ static void showem(CURL *easy, unsigned int type)
   }
 }
 
-static size_t write_cb(char *data, size_t n, size_t l, void *userp)
+static size_t t1945_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
   return n*l;
 }
-CURLcode test(char *URL)
+
+static CURLcode test_lib1945(char *URL)
 {
   CURL *easy;
   CURLcode res = CURLE_OK;
@@ -58,7 +58,7 @@ CURLcode test(char *URL)
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, t1945_write_cb);
 
   /* if there's a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
@@ -69,7 +69,7 @@ CURLcode test(char *URL)
   if(res) {
     curl_mprintf("badness: %d\n", res);
   }
-  showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
+  t1945_showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
 
 test_cleanup:
   curl_easy_cleanup(easy);

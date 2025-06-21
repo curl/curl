@@ -64,6 +64,7 @@ http
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 HTTP GET --digest increasing nonce-count

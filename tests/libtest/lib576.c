@@ -31,8 +31,7 @@ struct chunk_data {
   int print_content;
 };
 
-static
-long chunk_bgn(const void *f, void *ptr, int remains)
+static long chunk_bgn(const void *f, void *ptr, int remains)
 {
   const struct curl_fileinfo *finfo = f;
   struct chunk_data *ch_d = ptr;
@@ -74,7 +73,8 @@ long chunk_bgn(const void *f, void *ptr, int remains)
   if(finfo->filetype == CURLFILETYPE_FILE) {
     ch_d->print_content = 1;
     curl_mprintf("Content:\n"
-      "-------------------------------------------------------------\n");
+                 "-------------------------------------------"
+                 "------------------\n");
   }
   if(strcmp(finfo->filename, "someothertext.txt") == 0) {
     curl_mprintf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");
@@ -83,8 +83,7 @@ long chunk_bgn(const void *f, void *ptr, int remains)
   return CURL_CHUNK_BGN_FUNC_OK;
 }
 
-static
-long chunk_end(void *ptr)
+static long chunk_end(void *ptr)
 {
   struct chunk_data *ch_d = ptr;
   if(ch_d->print_content) {
@@ -98,7 +97,7 @@ long chunk_end(void *ptr)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib576(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;

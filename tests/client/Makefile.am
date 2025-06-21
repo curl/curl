@@ -21,10 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
 AUTOMAKE_OPTIONS = foreign nostdinc
-
-EXTRA_DIST = CMakeLists.txt
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -32,45 +29,58 @@ EXTRA_DIST = CMakeLists.txt
 # might possibly already be installed in the system.
 #
 # $(top_srcdir)/include is for libcurl's external include files
+# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
+# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
+# $(srcdir) for the generated bundle source to find included test sources
 
-AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -I$(top_builddir)/lib     \
-              -I$(top_srcdir)/lib
+AM_CPPFLAGS = -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/lib/curlx      \
+              -I$(srcdir)
 
-LIBDIR = $(top_builddir)/lib
+# Get BUNDLE, FIRSTFILES, CURLX_CFILES, TESTFILES variables
+include Makefile.inc
 
-# Avoid libcurl obsolete stuff
-AM_CPPFLAGS += -DCURL_NO_OLDIES
+EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(TESTFILES)
 
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
-if DOING_NATIVE_WINDOWS
-AM_CPPFLAGS += -DWIN32_LEAN_AND_MEAN
-endif
+CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-# Dependencies
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
+endif
+AM_CPPFLAGS += -DCURL_NO_OLDIES
 
-# This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@
+if USE_CPPFLAG_CURL_STATICLIB
+curlx_src =
+else
+# These are part of the libcurl static lib. Add them here when linking shared.
+curlx_src = $(CURLX_CFILES)
+endif
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(curlx_src) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_src) --test $(TESTFILES) > ${BUNDLE}.c
 
-# Makefile.inc provides the check_PROGRAMS define
-include Makefile.inc
-
-all: $(check_PROGRAMS)
+noinst_PROGRAMS = $(BUNDLE)
+LDADD = $(top_builddir)/lib/libcurl.la
+CLEANFILES = ${BUNDLE}.c
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
 CS_1 =
 CS_ = $(CS_0)
 
+# ignore generated C files since they play by slightly different rules!
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) $(srcdir)/*.c)
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
+	  -W$(srcdir)/${BUNDLE}.c \
+	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI
 all-local: checksrc
 endif
+
+clean-local:
+	rm -f $(BUNDLE)

@@ -68,6 +68,7 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
 Downgraded HTTP PUT to HTTP 1.0 with authorization

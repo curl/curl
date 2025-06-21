@@ -21,6 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
+
 CERTCONFIG_CA = \
   test-ca.cnf \
   test-ca.prm

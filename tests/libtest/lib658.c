@@ -24,14 +24,13 @@
 #include "test.h"
 
 #include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 /*
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib658(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;
@@ -51,7 +50,7 @@ CURLcode test(char *URL)
   uc = curl_url_set(urlp, CURLUPART_URL, URL, 0);
   if(uc) {
     curl_mfprintf(stderr, "problem setting CURLUPART_URL: %s.",
-            curl_url_strerror(uc));
+                  curl_url_strerror(uc));
     goto test_cleanup;
   }
 

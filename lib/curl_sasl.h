@@ -135,10 +135,6 @@ struct SASL {
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
-/* This is used to cleanup any libraries or curl modules used by the sasl
-   functions */
-void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused);
-
 /* Convert a mechanism name to a token */
 unsigned short Curl_sasl_decode_mech(const char *ptr,
                                      size_t maxlen, size_t *len);

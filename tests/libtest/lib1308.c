@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include <curl/curl.h>
-
 static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
 {
   fwrite(buf, len, 1, stdout);
@@ -32,7 +30,7 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
   return len;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1308(char *URL)
 {
   CURLFORMcode rc;
   int res;

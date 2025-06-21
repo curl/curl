@@ -89,6 +89,7 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
 HTTP GET with --anyauth with two URLs (picking Digest)

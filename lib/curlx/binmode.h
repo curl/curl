@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SERVER_SETUP_H
-#define HEADER_CURL_SERVER_SETUP_H
+#ifndef HEADER_CURL_TOOL_BINMODE_H
+#define HEADER_CURL_TOOL_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,9 +23,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "../curl_setup.h"
 
-#define CURL_NO_OLDIES
+#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
+/* Requires io.h and/or fcntl.h when available */
+#ifdef HAVE__SETMODE
+#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
+#else
+#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
+#endif
+#else
+#  define CURLX_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
+#endif
 
-#include "curl_setup.h" /* portability help from the lib directory */
-
-#endif /* HEADER_CURL_SERVER_SETUP_H */
+#endif /* HEADER_CURL_TOOL_BINMODE_H */

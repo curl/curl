@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib3104(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLSH *share;

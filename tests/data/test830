@@ -28,6 +28,7 @@ imap
 </server>
 <features>
 crypto
+digest
 </features>
 <name>
 IMAP CRAM-MD5 graceful cancellation

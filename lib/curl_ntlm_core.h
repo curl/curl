@@ -28,6 +28,10 @@
 
 #if defined(USE_CURL_NTLM_CORE)
 
+#include "vauth/vauth.h"
+
+struct ntlmdata;
+
 /* Helpers to generate function byte arguments in little endian order */
 #define SHORTPAIR(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff))
 #define LONGQUARTET(x) ((int)((x) & 0xff)), ((int)(((x) >> 8) & 0xff)), \

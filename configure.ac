@@ -144,7 +144,7 @@ AC_SUBST(VERSIONNUM)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
+    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
     curl_ssh_msg="no      (--with-{libssh,libssh2})"
    curl_zlib_msg="no      (--with-zlib)"
  curl_brotli_msg="no      (--with-brotli)"
@@ -213,13 +213,6 @@ AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
   OPT_SCHANNEL=$withval
   TLSCHOICE="schannel")
 
-OPT_SECURETRANSPORT=no
-AC_ARG_WITH(secure-transport,dnl
-AS_HELP_STRING([--with-secure-transport],[enable Apple OS native SSL/TLS]),[
-  OPT_SECURETRANSPORT=$withval
-  TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Secure-Transport"
-])
-
 OPT_AMISSL=no
 AC_ARG_WITH(amissl,dnl
 AS_HELP_STRING([--with-amissl],[enable Amiga native SSL/TLS (AmiSSL)]),[
@@ -274,15 +267,6 @@ AS_HELP_STRING([--with-wolfssl=PATH],[where to look for wolfSSL, PATH points to 
   OPT_WOLFSSL=$withval
   if test X"$withval" != Xno; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL"
-  fi
-])
-
-OPT_BEARSSL=no
-AC_ARG_WITH(bearssl,dnl
-AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to the installation root]),[
-  OPT_BEARSSL=$withval
-  if test X"$withval" != Xno; then
-    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }BearSSL"
   fi
 ])
 
@@ -414,13 +398,11 @@ if test -z "$TLSCHOICE"; then
 Select from these:
 
   --with-amissl
-  --with-bearssl
   --with-gnutls
   --with-mbedtls
   --with-openssl (also works for BoringSSL and LibreSSL)
   --with-rustls
   --with-schannel
-  --with-secure-transport
   --with-wolfssl
 ])
   fi
@@ -597,25 +579,6 @@ case $host_os in
     ;;
 esac
 
-dnl Apply curl debug options to test servers
-OPT_SERVER_DEBUG="default"
-AC_ARG_ENABLE(server-debug,
-AS_HELP_STRING([--enable-server-debug],[Enable debug options for test servers])
-AS_HELP_STRING([--disable-server-debug],[Disable debug options for test servers]),
-OPT_SERVER_DEBUG=$enableval)
-case "$OPT_SERVER_DEBUG" in
-  no)
-    dnl --disable-server-debug option used
-    want_server_debug="no"
-    ;;
-  *)
-    dnl --enable-server-debug option used or not specified
-    want_server_debug="no"
-    ;;
-esac
-AC_MSG_RESULT([$want_server_debug])
-AM_CONDITIONAL(ENABLE_SERVER_DEBUG, test x$want_server_debug = xyes)
-
 dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
@@ -668,29 +631,6 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
 )
 
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
-
-dnl -----------------------
-dnl whether to bundle tests
-dnl -----------------------
-
-want_test_bundles='no'
-AC_MSG_CHECKING([whether to build tests into single-binary bundles])
-AC_ARG_ENABLE(test-bundles,
-AS_HELP_STRING([--enable-test-bundles],[Enable test bundles])
-AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
-[ case "$enableval" in
-  yes)
-    want_test_bundles='yes'
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
-  esac ],
-    AC_MSG_RESULT([no])
-)
-
-AM_CONDITIONAL([USE_TEST_BUNDLES], [test "$want_test_bundles" = 'yes'])
 
 dnl ************************************************************
 dnl switch off particular protocols
@@ -1230,6 +1170,9 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
   if test "$curl_cv_native_windows" = "yes"; then
     dnl This is for Winsock systems
     winsock_LIB="-lws2_32"
+    if test "$curl_cv_winuwp" != "yes"; then
+      winsock_LIB="$winsock_LIB -liphlpapi"
+    fi
     if test ! -z "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
@@ -2118,13 +2061,11 @@ case "$DEFAULT_SSL_BACKEND" in
 esac
 
 CURL_WITH_SCHANNEL
-CURL_WITH_SECURETRANSPORT
 CURL_WITH_AMISSL
 CURL_WITH_OPENSSL
 CURL_WITH_GNUTLS
 CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
-CURL_WITH_BEARSSL
 CURL_WITH_RUSTLS
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
@@ -2140,10 +2081,10 @@ if test "x$curl_cv_native_windows" = "xyes" -a "$curl_cv_wince" = 'no'; then
   LIBS="-lbcrypt $LIBS"
 fi
 
-case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED" in
+case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in
   x)
     AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
-Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
+Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl or --with-rustls to address this.])
     ;;
   x1)
     # one SSL backend is enabled
@@ -2155,7 +2096,7 @@ Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schann
     ;;
   xD*)
     AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
-(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
+(e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-amissl, --with-rustls).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
     ;;
   *)
@@ -2651,8 +2592,6 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         versioned_symbols_flavour="OPENSSL_"
       elif test "x$MBEDTLS_ENABLED" = "x1"; then
         versioned_symbols_flavour="MBEDTLS_"
-      elif test "x$BEARSSL_ENABLED" = "x1"; then
-        versioned_symbols_flavour="BEARSSL_"
       elif test "x$WOLFSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="WOLFSSL_"
       elif test "x$GNUTLS_ENABLED" = "x1"; then
@@ -3960,9 +3899,7 @@ dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
   sys/types.h \
-  sys/time.h \
   sys/select.h \
-  sys/socket.h \
   sys/ioctl.h \
   unistd.h \
   arpa/inet.h \
@@ -4003,7 +3940,7 @@ dnl default includes
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_SELECT_H
@@ -4011,7 +3948,7 @@ dnl default includes
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
@@ -4091,14 +4028,13 @@ AC_CHECK_TYPE(sa_family_t,
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <winsock2.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
+#else
 #include <sys/socket.h>
 #endif
     ])
   ],
 [
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 ])
@@ -4111,7 +4047,7 @@ AC_CHECK_TYPE([suseconds_t],[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_TIME_H
+#ifndef _WIN32
 #include <sys/time.h>
 #endif
 ])
@@ -4196,6 +4132,7 @@ AC_CHECK_FUNCS([\
   getpwuid_r \
   getrlimit \
   gettimeofday \
+  if_nametoindex \
   mach_absolute_time \
   pipe \
   pipe2 \
@@ -4211,7 +4148,6 @@ AC_CHECK_FUNCS([\
 
 if test "$curl_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([\
-    if_nametoindex \
     realpath \
     sched_yield \
   ])
@@ -4416,6 +4352,10 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
       AC_MSG_RESULT(no)
     fi
 )
+
+if test "x$USE_WINDOWS_SSPI" = "x1"; then
+  LIBS="-lsecur32 $LIBS"
+fi
 
 dnl ************************************************************
 dnl disable basic authentication
@@ -5215,7 +5155,6 @@ use_curl_ntlm_core=no
 if test "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
-      -o "x$SECURETRANSPORT_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
       -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1"; then
     use_curl_ntlm_core=yes
@@ -5253,9 +5192,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$https_proxy" != "xno"; then
     if test "x$OPENSSL_ENABLED" = "x1" \
         -o "x$GNUTLS_ENABLED" = "x1" \
-        -o "x$SECURETRANSPORT_ENABLED" = "x1" \
         -o "x$RUSTLS_ENABLED" = "x1" \
-        -o "x$BEARSSL_ENABLED" = "x1" \
         -o "x$SCHANNEL_ENABLED" = "x1" \
         -o "x$GNUTLS_ENABLED" = "x1" \
         -o "x$MBEDTLS_ENABLED" = "x1"; then
@@ -5492,9 +5429,9 @@ AC_CONFIG_FILES([\
   tests/libtest/Makefile \
   tests/unit/Makefile \
   tests/tunit/Makefile \
+  tests/client/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
-  tests/http/clients/Makefile \
   packages/Makefile \
   packages/vms/Makefile \
   curl-config \
@@ -5558,14 +5495,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}
 ])
-
-# grep -o would simplify this, but is nonportable
-[non13=`echo "$TLSCHOICE" | $AWK '{split("bearssl secure-transport", a); for (i in a) if(match(tolower($0), a[i])) print a[i];}'`]
-if test -n "$non13"; then
-  for a in $non13; do
-    AC_MSG_WARN([$a is enabled for TLS but it does not support TLS 1.3])
-  done
-fi
 
 if test -n "$experimental"; then
   for a in $experimental; do

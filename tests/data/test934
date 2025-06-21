@@ -30,6 +30,7 @@ smtp
 !SSPI
 Debug
 crypto
+digest
 </features>
 <name>
 SMTP DIGEST-MD5 graceful cancellation
