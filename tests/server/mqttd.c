@@ -55,9 +55,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
 #define MQTT_MSG_PUBLISH    0x30

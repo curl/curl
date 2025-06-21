@@ -51,9 +51,6 @@
 #include <curlx.h> /* from the private lib dir */
 #include "getpart.h"
 
-/* include memdebug.h last */
-#include <memdebug.h>
-
 #undef REQBUFSIZ
 #define REQBUFSIZ 150000
 
