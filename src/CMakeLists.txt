@@ -71,7 +71,7 @@ curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(WIN32)
-  list(APPEND CURL_CFILES "curl.rc")
+  list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
 
 if(BUILD_STATIC_CURL)
