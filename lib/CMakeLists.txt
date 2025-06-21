@@ -29,7 +29,7 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
-# Get CSOURCES, HHEADERS variables
+# Get CSOURCES, HHEADERS, LIB_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -171,7 +171,7 @@ if(BUILD_SHARED_LIBS)
   add_library(${PROJECT_NAME}::${LIB_SHARED} ALIAS ${LIB_SHARED})
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "libcurl.rc")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES ${LIB_RCFILES})
     if(CURL_HIDES_PRIVATE_SYMBOLS)
       set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${PROJECT_SOURCE_DIR}/lib/libcurl.def")
     endif()

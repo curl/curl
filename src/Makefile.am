@@ -26,8 +26,11 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
+include Makefile.inc
+
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
- curl.rc Makefile.inc CMakeLists.txt .checksrc
+  $(CURL_RCFILES) Makefile.inc CMakeLists.txt .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -65,9 +68,6 @@ if USE_UNICODE
 UNICODEFLAG = -municode
 endif
 
-# Get CURL_CFILES, CURLX_CFILES, CURL_HFILES variables
-include Makefile.inc
-
 curl_cfiles_gen =
 curl_hfiles_gen =
 CLEANFILES =
@@ -86,7 +86,6 @@ nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-# CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
 endif
 if HAVE_WINDRES

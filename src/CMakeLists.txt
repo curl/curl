@@ -66,12 +66,12 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get CURL_CFILES, CURLX_CFILES, CURL_HFILES variables
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(WIN32)
-  list(APPEND CURL_CFILES "curl.rc")
+  list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
 
 if(BUILD_STATIC_CURL)
