@@ -155,7 +155,7 @@ static void win32_cleanup(void)
   _flushall();
 }
 
-static int win32_init(void)
+int win32_init(void)
 {
   curlx_now_init();
 #ifdef USE_WINSOCK
