@@ -66,7 +66,7 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get CURL_CFILES, CURLX_CFILES, CURL_HFILES variables
+# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
