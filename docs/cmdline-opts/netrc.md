@@ -25,6 +25,9 @@ file format. curl does not complain if that file does not have the right
 permissions (it should be neither world- nor group-readable). The environment
 variable "HOME" is used to find the home directory.
 
+The netrc file provides credentials for a hostname independent of which
+protocol and port number that are used.
+
 On Windows two filenames in the home directory are checked: *.netrc* and
 *_netrc*, preferring the former. Older versions on Windows checked for *_netrc*
 only.
