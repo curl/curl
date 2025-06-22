@@ -61,7 +61,7 @@ extern const struct entry_s s_entries[];
 #  define CURL_STRNICMP(p1, p2, n) _strnicmp(p1, p2, n)
 #elif defined(HAVE_STRCASECMP)
 #  ifdef HAVE_STRINGS_H
-#    include <strings.h>
+#  include <strings.h>
 #  endif
 #  define CURL_STRNICMP(p1, p2, n) strncasecmp(p1, p2, n)
 #elif defined(HAVE_STRCMPI)
