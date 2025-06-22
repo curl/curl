@@ -99,10 +99,15 @@ endmacro()
 # Create a clang-tidy target for test targets
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
+
     # Collect header directories applying to the target
     get_directory_property(_includes_d INCLUDE_DIRECTORIES)
-    get_target_property(_includes ${_target} INCLUDE_DIRECTORIES)
-    string(REPLACE ";" ";-I" _includes ";${_includes_d};${_includes}")
+    get_target_property(_includes_t ${_target} INCLUDE_DIRECTORIES)
+
+    set(_includes "${_includes_d};${_includes_t}")
+    list(REMOVE_ITEM _includes "")
+    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    list(REMOVE_ITEM _includes "")
 
     # Collect macro definitions applying to the target
     set(_definitions_l "")  # from curl lib dependencies
@@ -114,13 +119,15 @@ macro(curl_clang_tidy_tests _target)
       endif()
     endforeach()
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
-    get_target_property(_definitions ${_target} COMPILE_DEFINITIONS)
-    set(_definitions "${_definitions};${_definitions_l};${_definitions_d}")
+    get_target_property(_definitions_t ${_target} COMPILE_DEFINITIONS)
+
+    set(_definitions "${_definitions_l};${_definitions_d};${_definitions_t}")
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
     list(REMOVE_ITEM _definitions "")
     list(SORT _definitions)  # Sort like CMake does
 
+    # Assemble source list
     set(_sources "")
     foreach(_source IN ITEMS ${ARGN})
       if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")  # if not in source tree
@@ -136,9 +143,11 @@ macro(curl_clang_tidy_tests _target)
     add_dependencies(tests-clang-tidy "${_target}-clang-tidy")
 
     unset(_includes_d)
+    unset(_includes_t)
     unset(_includes)
     unset(_definitions_l)
     unset(_definitions_d)
+    unset(_definitions_t)
     unset(_definitions)
     unset(_sources)
   endif()
