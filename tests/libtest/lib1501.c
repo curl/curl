@@ -70,11 +70,9 @@ static CURLcode test_lib1501(char *URL)
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
 
-    /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
-    /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
     multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
