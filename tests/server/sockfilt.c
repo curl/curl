@@ -1125,7 +1125,7 @@ static bool juggle(curl_socket_t *sockfdp,
         return FALSE;
 
       if(buffer_len < 0)
-         return FALSE;
+        return FALSE;
 
       if(*mode == PASSIVE_LISTEN) {
         logmsg("*** We are disconnected!");
