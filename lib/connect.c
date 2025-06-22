@@ -1295,7 +1295,7 @@ connect_sub_chain:
   /* sub-chain connected, do we need to add more? */
 #ifndef CURL_DISABLE_PROXY
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
-    /* Where to we need the SOCKS to connect to? */
+    /* Where do we need the SOCKS to connect to? */
     if(cf->conn->bits.httpproxy) {
       result = Curl_cf_socks_proxy_insert_after(
         cf, data, cf->conn->socks_proxy.proxytype, "HTTP proxy",
