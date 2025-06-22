@@ -367,16 +367,6 @@ jobs:
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          if [[ "$(uname -a)" = *' 3.5'* ]]; then
-            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
-          fi
-
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
@@ -558,16 +548,6 @@ jobs:
         run: |
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          if [[ "$(uname -a)" = *' 3.5'* ]]; then
-            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
-          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1005,16 +985,6 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          fi
-
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          if [[ "$(uname -a)" = *' 3.5'* ]]; then
-            exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
           fi
 
       - name: 'run tests'
