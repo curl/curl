@@ -95,3 +95,25 @@ macro(curl_prefill_type_size _type _size)
   set(SIZEOF_${_type} ${_size})
   set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
 endmacro()
+
+# Create a clang-tidy target for test targets
+macro(curl_clang_tidy_tests _target)
+  if(CURL_CLANG_TIDY)
+    get_directory_property(_includes_d INCLUDE_DIRECTORIES)
+    get_target_property(_includes ${_target} INCLUDE_DIRECTORIES)
+    string(REPLACE ";" ";-I" _includes ";${_includes_d};${_includes}")
+    get_directory_property(_definitions_d COMPILE_DEFINITIONS)
+    get_target_property(_definitions ${_target} COMPILE_DEFINITIONS)
+    string(REPLACE ";" ";-D" _definitions ";${_definitions_d};${_definitions}")
+    set(_sources ${ARGN})
+    add_custom_target("${_target}-clang-tidy" USES_TERMINAL
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
+      DEPENDS ${_sources})
+    add_dependencies(tests-clang-tidy "${_target}-clang-tidy")
+    unset(_includes_d)
+    unset(_includes)
+    unset(_definitions_d)
+    unset(_definitions)
+  endif()
+endmacro()
