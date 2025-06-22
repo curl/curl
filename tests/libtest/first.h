@@ -32,7 +32,7 @@ struct entry_s {
   entry_func_t ptr;
 };
 
-const struct entry_s s_entries[];
+extern const struct entry_s s_entries[];
 
 #include "curlx.h"
 
