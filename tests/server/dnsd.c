@@ -212,6 +212,8 @@ static unsigned char ipv4_pref[4];
 static unsigned char ipv6_pref[16];
 static unsigned char alpn_pref[MAX_ALPN];
 static int alpn_count;
+static unsigned char ancount_a = 1;
+static unsigned char ancount_aaaa = 1;
 
 /* this is an answer to a question */
 static int send_response(curl_socket_t sock,
@@ -222,8 +224,6 @@ static int send_response(curl_socket_t sock,
   ssize_t rc;
   size_t i;
   int a;
-  unsigned char ancount_a = 1;
-  unsigned char ancount_aaaa = 1;
   char addrbuf[128]; /* IP address buffer */
   unsigned char bytes[256] = {
     0x80, 0xea, /* ID, overwrite */
@@ -321,6 +321,7 @@ static void read_instructions(void)
         *p = 0;
         if(!strncmp("A: ", buf, 3)) {
           rc = curlx_inet_pton(AF_INET, &buf[3], ipv4_pref);
+          ancount_a = (rc == 1);
         }
         else if(!strncmp("AAAA: ", buf, 6)) {
           char *p6 = &buf[6];
@@ -331,6 +332,7 @@ static void read_instructions(void)
             p6++;
           }
           rc = curlx_inet_pton(AF_INET6, p6, ipv6_pref);
+          ancount_aaaa = (rc == 1);
         }
         else if(!strncmp("ALPN: ", buf, 6)) {
           char *ap = &buf[6];
