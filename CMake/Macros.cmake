@@ -124,7 +124,6 @@ macro(curl_clang_tidy_tests _target)
     set(_includes "${_includes_l};${_includes_d};${_includes_t}")
     list(REMOVE_ITEM _includes "")
     string(REPLACE ";" ";-I" _includes ";${_includes}")
-    list(REMOVE_ITEM _includes "")
 
     # Collect macro definitions applying to the target
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
@@ -133,7 +132,6 @@ macro(curl_clang_tidy_tests _target)
     set(_definitions "${_definitions_l};${_definitions_d};${_definitions_t}")
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
-    list(REMOVE_ITEM _definitions "")
     list(SORT _definitions)  # Sort like CMake does
 
     # Assemble source list
