@@ -29,7 +29,7 @@ curl_easy_escape
 # time/date of the file
 <verify>
 <stdout>
-%9C%26K%3DI%04%A1%01%E0%D8%7C%20%B7%EFS%29%FA%1DW%E1
+%9c%26K%3dI%04%a1%01%e0%d8%7c%20%b7%efS%29%fa%1dW%e1
 IN: '' OUT: ''
 IN: ' 12' OUT: '%2012'
 </stdout>

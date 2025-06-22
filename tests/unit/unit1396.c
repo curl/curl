@@ -69,15 +69,15 @@ static CURLcode test_unit1396(char *arg)
   /* escape, this => that */
   const struct test list2[] = {
     {"a", 1, "a", 1},
-    {"/", 1, "%2F", 3},
-    {"a=b", 3, "a%3Db", 5},
-    {"a=b", 0, "a%3Db", 5},
+    {"/", 1, "%2f", 3},
+    {"a=b", 3, "a%3db", 5},
+    {"a=b", 0, "a%3db", 5},
     {"a=b", 1, "a", 1},
-    {"a=b", 2, "a%3D", 4},
-    {"1/./0", 5, "1%2F.%2F0", 9},
+    {"a=b", 2, "a%3d", 4},
+    {"1/./0", 5, "1%2f.%2f0", 9},
     {"-._~!#%&", 0, "-._~%21%23%25%26", 16},
     {"a", 2, "a%00", 4},
-    {"a\xff\x01g", 4, "a%FF%01g", 8},
+    {"a\xff\x01g", 4, "a%ff%01g", 8},
     {NULL, 0, NULL, 0} /* end of list marker */
   };
   int i;

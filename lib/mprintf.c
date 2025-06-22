@@ -66,8 +66,7 @@
 /* Lower-case digits.  */
 const unsigned char Curl_ldigits[] = "0123456789abcdef";
 
-/* Upper-case digits.  */
-const unsigned char Curl_udigits[] = "0123456789ABCDEF";
+static const unsigned char Curl_udigits[] = "0123456789ABCDEF";
 
 #define OUTCHAR(x)                                       \
   do {                                                   \

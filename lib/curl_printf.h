@@ -33,9 +33,6 @@
 /* Lower-case digits.  */
 extern const unsigned char Curl_ldigits[];
 
-/* Upper-case digits.  */
-extern const unsigned char Curl_udigits[];
-
 #ifdef BUILDING_LIBCURL
 
 /*

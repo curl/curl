@@ -655,7 +655,7 @@ static const struct urltestcase get_url_list[] = {
   {"https://%41%0d", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://%25", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"https://_%c0_", "https://_\xC0_/", 0, 0, CURLUE_OK},
-  {"https://_%c0_", "https://_%C0_/", 0, CURLU_URLENCODE, CURLUE_OK},
+  {"https://_%c0_", "https://_%c0_/", 0, CURLU_URLENCODE, CURLUE_OK},
 
   /* IPv4 trickeries */
   {"https://16843009", "https://1.1.1.1/", 0, 0, CURLUE_OK},
@@ -668,7 +668,7 @@ static const struct urltestcase get_url_list[] = {
   {"https://1.0xffffff", "https://1.255.255.255/", 0, 0, CURLUE_OK},
   /* IPv4 numerical overflows or syntax errors will not normalize */
   {"https://a127.0.0.1", "https://a127.0.0.1/", 0, 0, CURLUE_OK},
-  {"https://\xff.127.0.0.1", "https://%FF.127.0.0.1/", 0, CURLU_URLENCODE,
+  {"https://\xff.127.0.0.1", "https://%ff.127.0.0.1/", 0, CURLU_URLENCODE,
    CURLUE_OK},
   {"https://127.-0.0.1", "https://127.-0.0.1/", 0, 0, CURLUE_OK},
   {"https://127.0. 1", "https://127.0.0.1/", 0, 0, CURLUE_MALFORMED_INPUT},

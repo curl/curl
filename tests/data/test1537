@@ -31,8 +31,8 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-%2F%3A%3B%3C%3D%3E%3F%91%A2%B3%C4%D5%E6%F7
-%2F%3A%3B%3C%3D%3E%3F%91%A2%B3%C4%D5%E6%F7
+%2f%3a%3b%3c%3d%3e%3f%91%a2%b3%c4%d5%e6%f7
+%2f%3a%3b%3c%3d%3e%3f%91%a2%b3%c4%d5%e6%f7
 outlen == 14
 unescape == original? YES
 [old] outlen == 14
