@@ -459,6 +459,9 @@ extern int unitfail;
 #define abort_on_test_timeout() \
   chk_test_timedout(TEST_HANG_TIMEOUT, (__FILE__), (__LINE__))
 
+#define abort_on_test_timeout_custom(T) \
+  chk_test_timedout((T), (__FILE__), (__LINE__))
+
 /* ---------------------------------------------------------------- */
 
 #define exe_global_init(A,Y,Z) do {                           \
