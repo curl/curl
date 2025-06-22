@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
+
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */
 #endif
