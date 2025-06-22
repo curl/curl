@@ -28,14 +28,13 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#undef TEST_HANG_TIMEOUT
-#define TEST_HANG_TIMEOUT 30 * 1000
-
 static CURLcode test_lib1501(char *URL)
 {
   /* 500 milliseconds allowed. An extreme number but lets be really
      conservative to allow old and slow machines to run this test too */
   static const int MAX_BLOCKED_TIME_MS = 500;
+
+  static const int HANG_TIMEOUT = 30 * 1000;
 
   CURL *handle = NULL;
   CURLM *mhandle = NULL;
@@ -57,7 +56,7 @@ static CURLcode test_lib1501(char *URL)
 
   multi_perform(mhandle, &still_running);
 
-  abort_on_test_timeout();
+  abort_on_test_timeout_custom(HANG_TIMEOUT);
 
   while(still_running) {
     struct timeval timeout;
@@ -82,14 +81,14 @@ static CURLcode test_lib1501(char *URL)
 
     select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    abort_on_test_timeout();
+    abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     curl_mfprintf(stderr, "ping\n");
     before = tutil_tvnow();
 
     multi_perform(mhandle, &still_running);
 
-    abort_on_test_timeout();
+    abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     after = tutil_tvnow();
     e = tutil_tvdiff(after, before);
