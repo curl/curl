@@ -82,8 +82,6 @@ enum {
   DOCNUMBER_404        = -1
 };
 
-#define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
-
 #include <curl/curl.h> /* for curl_socket_t */
 
 #ifdef USE_UNIX_SOCKETS
@@ -112,23 +110,6 @@ typedef union {
 extern int getpart(char **outbuf, size_t *outlen,
                    const char *main, const char *sub, FILE *stream);
 
-/* global variables */
-static const char *srcpath = "."; /* pointing to the test dir */
-static const char *pidname = NULL;
-static const char *portname = NULL; /* none by default */
-static const char *serverlogfile = NULL;
-static int serverlogslocked;
-static const char *configfile = NULL;
-static const char *logdir = "log";
-static char loglockfile[256];
-#ifdef USE_IPV6
-static bool use_ipv6 = FALSE;
-#endif
-static const char *ipv_inuse = "IPv4";
-static unsigned short server_port = 0;
-static const char *socket_type = "IPv4";
-static int socket_domain = AF_INET;
-
 /* utility functions */
 extern char *data_to_hex(char *data, size_t len);
 extern void logmsg(const char *msg, ...);
@@ -152,5 +133,24 @@ extern void restore_signal_handlers(bool keep_sigalrm);
 extern int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                             struct sockaddr_un *sau);
 extern unsigned short util_ultous(unsigned long ulnum);
+
+/* global variables */
+static const char *srcpath = "."; /* pointing to the test dir */
+static const char *pidname = NULL;
+static const char *portname = NULL; /* none by default */
+static const char *serverlogfile = NULL;
+static int serverlogslocked;
+static const char *configfile = NULL;
+static const char *logdir = "log";
+static char loglockfile[256];
+#ifdef USE_IPV6
+static bool use_ipv6 = FALSE;
+#endif
+static const char *ipv_inuse = "IPv4";
+static unsigned short server_port = 0;
+static const char *socket_type = "IPv4";
+static int socket_domain = AF_INET;
+
+#define SERVERLOGS_LOCKDIR "lock"  /* within logdir */
 
 #endif /* HEADER_SERVER_FIRST_H */
