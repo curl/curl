@@ -23,6 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "test.h"
 
 struct libtest_trace_cfg {
   int tracetime;  /* 0 represents FALSE, anything else TRUE */
