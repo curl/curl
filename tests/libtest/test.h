@@ -452,6 +452,9 @@ extern int unitfail;
 #define res_test_timedout() \
   exe_test_timedout(TEST_HANG_TIMEOUT, (__FILE__), (__LINE__))
 
+#define res_test_timedout_custom(T) \
+  exe_test_timedout((T), (__FILE__), (__LINE__))
+
 #define chk_test_timedout(T, Y, Z) do { \
     exe_test_timedout(T, Y, Z);         \
     if(res)                             \
