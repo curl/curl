@@ -654,11 +654,9 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
     wsaevents.lNetworkEvents = 0;
     handles[nfd] = 0;
 
-    /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
     FD_ZERO(&readsock);
     FD_ZERO(&writesock);
     FD_ZERO(&exceptsock);
-    /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
     if(FD_ISSET(wsasock, readfds)) {
       FD_SET(wsasock, &readsock);
@@ -963,11 +961,9 @@ static bool juggle(curl_socket_t *sockfdp,
   timeout.tv_sec = 120;
   timeout.tv_usec = 0;
 
-  /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
-  /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
