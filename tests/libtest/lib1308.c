@@ -40,7 +40,7 @@ static CURLcode test_lib1308(char *URL)
   char buffer[] = "test buffer";
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
-                      CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
+                    CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
   fail_unless(rc == 0, "curl_formadd returned error");
 
   /* after the first curl_formadd when there's a single entry, both pointers
