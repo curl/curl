@@ -100,24 +100,29 @@ endmacro()
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
 
+    # Collect header directories and macro definitions from lib dependencies
+    set(_includes_l "")
+    set(_definitions_l "")
+    get_target_property(_libs ${_target} LINK_LIBRARIES)
+    foreach(_lib IN LISTS _libs)
+      if(TARGET "${_lib}")
+        get_target_property(_val ${_lib} INCLUDE_DIRECTORIES)
+        list(APPEND _includes_l ${_val})
+        get_target_property(_val ${_lib} COMPILE_DEFINITIONS)
+        list(APPEND _definitions_l ${_val})
+      endif()
+    endforeach()
+
     # Collect header directories applying to the target
     get_directory_property(_includes_d INCLUDE_DIRECTORIES)
     get_target_property(_includes_t ${_target} INCLUDE_DIRECTORIES)
 
-    set(_includes "${_includes_d};${_includes_t}")
+    set(_includes "${_includes_l};${_includes_d};${_includes_t}")
     list(REMOVE_ITEM _includes "")
     string(REPLACE ";" ";-I" _includes ";${_includes}")
     list(REMOVE_ITEM _includes "")
 
     # Collect macro definitions applying to the target
-    set(_definitions_l "")  # from curl lib dependencies
-    get_target_property(_libs ${_target} LINK_LIBRARIES)
-    foreach(_lib IN LISTS _libs)
-      if(_lib MATCHES "curl")  # ignore dependencies
-        get_target_property(_defs ${_lib} COMPILE_DEFINITIONS)
-        list(APPEND _definitions_l ${_defs})
-      endif()
-    endforeach()
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
     get_target_property(_definitions_t ${_target} COMPILE_DEFINITIONS)
 
@@ -150,5 +155,9 @@ macro(curl_clang_tidy_tests _target)
     unset(_definitions_t)
     unset(_definitions)
     unset(_sources)
+    unset(_source)
+    unset(_libs)
+    unset(_lib)
+    unset(_val)
   endif()
 endmacro()
