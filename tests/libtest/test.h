@@ -437,9 +437,9 @@ extern int unitfail;
   tv_test_start = tutil_tvnow(); \
 } while(0)
 
-#define exe_test_timedout(Y,Z) do {                                     \
+#define exe_test_timedout(T,Y,Z) do {                                   \
   long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);           \
-  if(timediff > (TEST_HANG_TIMEOUT)) {                                  \
+  if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \
                   (Y), (Z), timediff, (long) (TEST_HANG_TIMEOUT));      \
@@ -448,12 +448,12 @@ extern int unitfail;
 } while(0)
 
 #define res_test_timedout() \
-  exe_test_timedout((__FILE__), (__LINE__))
+  exe_test_timedout(TEST_HANG_TIMEOUT, (__FILE__), (__LINE__))
 
-#define chk_test_timedout(Y, Z) do { \
-    exe_test_timedout(Y, Z);         \
-    if(res)                          \
-      goto test_cleanup;             \
+#define chk_test_timedout(Y, Z) do {            \
+    exe_test_timedout(TEST_HANG_TIMEOUT, Y, Z); \
+    if(res)                                     \
+      goto test_cleanup;                        \
   } while(0)
 
 #define abort_on_test_timeout() \
