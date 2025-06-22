@@ -59,19 +59,20 @@ static int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
+static FILE *out_download;
+
 static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
-  FILE *out = fopen("download_0.data", "wb");
-  if(!out)
-    /* failed */
-    return 1;
+  out_download = fopen("download_0.data", "wb");
+  if(!out_download)
+    return 1;  /* failed */
 
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out_download);
 
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
@@ -82,6 +83,8 @@ static int setup_h2_serverpush(CURL *hnd, const char *url)
 
   return 0; /* all is good */
 }
+
+static FILE *out_push;
 
 /* called when there's an incoming push */
 static int server_push_callback(CURL *parent,
@@ -94,16 +97,15 @@ static int server_push_callback(CURL *parent,
   size_t i;
   int *transfers = (int *)userp;
   char filename[128];
-  FILE *out;
   static unsigned int count = 0;
   int rv;
 
   (void)parent; /* we have no use for this */
-  curl_msnprintf(filename, sizeof(filename)-1, "push%u", count++);
+  curl_msnprintf(filename, sizeof(filename) - 1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
-  out = fopen(filename, "wb");
-  if(!out) {
+  out_push = fopen(filename, "wb");
+  if(!out_push) {
     /* if we cannot save it, deny it */
     curl_mfprintf(stderr, "Failed to create output file for push\n");
     rv = CURL_PUSH_DENY;
@@ -111,7 +113,7 @@ static int server_push_callback(CURL *parent,
   }
 
   /* write to this file */
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, out);
+  curl_easy_setopt(easy, CURLOPT_WRITEDATA, out_push);
 
   curl_mfprintf(stderr, "**** push callback approves stream %u, "
                 "got %lu headers!\n", count, (unsigned long)num_headers);
@@ -158,6 +160,7 @@ static int test_h2_serverpush(int argc, char *argv[])
 
   easy = curl_easy_init();
   if(setup_h2_serverpush(easy, url)) {
+    fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
     return 1;
   }
@@ -193,6 +196,10 @@ static int test_h2_serverpush(int argc, char *argv[])
   } while(transfers); /* as long as we have transfers going */
 
   curl_multi_cleanup(multi_handle);
+
+  fclose(out_download);
+  if(out_push)
+    fclose(out_push);
 
   return 0;
 }
