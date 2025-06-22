@@ -30,7 +30,8 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
     --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE}.c")
