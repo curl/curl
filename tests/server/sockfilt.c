@@ -372,8 +372,6 @@ static void lograw(unsigned char *buffer, ssize_t len)
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
                             ssize_t *buffer_len)
 {
-  *buffer_len = 0;
-
   if(!read_stdin(buffer, 5))
     return FALSE;
 
