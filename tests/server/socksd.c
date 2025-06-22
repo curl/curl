@@ -807,7 +807,7 @@ static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
 #endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
     case AF_UNIX:
-    rc = bind_unix_socket(sock, unix_socket, &listener.sau);
+      rc = bind_unix_socket(sock, unix_socket, &listener.sau);
 #endif
   }
 
