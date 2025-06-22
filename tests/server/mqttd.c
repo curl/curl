@@ -480,7 +480,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         logmsg("Protocol preamble mismatch");
         goto end;
       }
-      if(remaining_length < 12) {
+      if(remaining_length <= 11) {
         logmsg("Protocol preamble too small (%d)", (int)remaining_length);
         goto end;
       }
