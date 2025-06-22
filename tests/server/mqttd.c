@@ -438,6 +438,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     logmsg("Out of memory, unable to allocate buffer");
     goto end;
   }
+  memset(buffer, 0, buff_size);
 
   do {
     unsigned char usr_flag = 0x80;
@@ -478,10 +479,6 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       if(memcmp(protocol, buffer, sizeof(protocol))) {
         logmsg("Protocol preamble mismatch");
-        goto end;
-      }
-      if(remaining_length <= 11) {
-        logmsg("Protocol preamble too small (%d)", (int)remaining_length);
         goto end;
       }
       /* ignore the connect flag byte and two keepalive bytes */
@@ -603,10 +600,6 @@ static curl_socket_t mqttit(curl_socket_t fd)
       logprotocol(FROM_CLIENT, "PUBLISH", remaining_length,
                   dump, buffer, rc);
 
-      if(remaining_length <= (2 + bytes)) {
-        logmsg("Incoming PUBLISH too small (%d)", (int)remaining_length);
-        goto end;
-      }
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
 
