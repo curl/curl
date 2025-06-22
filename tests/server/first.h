@@ -130,8 +130,10 @@ static HANDLE exit_event = NULL;
 #endif
 extern void install_signal_handlers(bool keep_sigalrm);
 extern void restore_signal_handlers(bool keep_sigalrm);
+#ifdef USE_UNIX_SOCKETS
 extern int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                             struct sockaddr_un *sau);
+#endif
 extern unsigned short util_ultous(unsigned long ulnum);
 
 /* global variables */
