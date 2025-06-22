@@ -24,7 +24,7 @@
 #include "first.h"
 
 #ifdef HAVE_FCNTL_H
-#include <fcntl.h>  /* for open modes */
+#include <fcntl.h>
 #endif
 
 /* This function returns a pointer to STATIC memory. It converts the given
