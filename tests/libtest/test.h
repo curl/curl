@@ -437,7 +437,7 @@ extern int unitfail;
   tv_test_start = tutil_tvnow(); \
 } while(0)
 
-#define TEST_HANG_TIMEOUT 60 * 1000  /* Set default */
+#define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
   long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);           \
@@ -501,8 +501,7 @@ extern int unitfail;
     return CURLE_UNSUPPORTED_PROTOCOL;          \
   }
 
-/* global default */
-#define NUM_HANDLES 4
+#define NUM_HANDLES 4  /* global default */
 
 /* ---------------------------------------------------------------- */
 
