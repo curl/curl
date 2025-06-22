@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
+
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode ping(CURL *curl, const char *send_payload)

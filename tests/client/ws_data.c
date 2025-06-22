@@ -21,6 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
+
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,
