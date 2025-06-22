@@ -830,8 +830,10 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           timeout.tv_sec = 1; /* 1000 ms */
 
           logmsg("Got EAGAIN from sread");
+          /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
           FD_ZERO(&input);
           FD_ZERO(&output);
+          /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
           got = 0;
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
@@ -1308,7 +1310,9 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       struct timeval timeout = {0};
       timeout.tv_sec = 1; /* 1000 ms */
 
+      /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
       FD_ZERO(&output);
+      /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 #if defined(__DJGPP__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
@@ -1431,8 +1435,10 @@ static void http_connect(curl_socket_t *infdp,
     struct timeval timeout = {0};
     timeout.tv_sec = 1; /* 1000 ms */
 
+    /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
     FD_ZERO(&input);
     FD_ZERO(&output);
+    /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
     if((clientfd[SWS_DATA] == CURL_SOCKET_BAD) &&
        (serverfd[SWS_DATA] == CURL_SOCKET_BAD) &&
@@ -2319,8 +2325,10 @@ static int test_sws(int argc, char *argv[])
       goto sws_cleanup;
 
     /* Set up for select */
+    /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
     FD_ZERO(&input);
     FD_ZERO(&output);
+    /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
     for(socket_idx = 0; socket_idx < num_sockets; ++socket_idx) {
       /* Listen on all sockets */

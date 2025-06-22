@@ -624,9 +624,11 @@ static bool socksd_incoming(curl_socket_t listenfd)
     curl_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
 
+    /* NOLINTBEGIN(clang-analyzer-security.insecureAPI.bzero) */
     FD_ZERO(&fds_read);
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
+    /* NOLINTEND(clang-analyzer-security.insecureAPI.bzero) */
 
     /* there's always a socket to wait for */
 #if defined(__DJGPP__)
