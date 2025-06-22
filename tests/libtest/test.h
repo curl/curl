@@ -450,14 +450,14 @@ extern int unitfail;
 #define res_test_timedout() \
   exe_test_timedout(TEST_HANG_TIMEOUT, (__FILE__), (__LINE__))
 
-#define chk_test_timedout(Y, Z) do {            \
-    exe_test_timedout(TEST_HANG_TIMEOUT, Y, Z); \
-    if(res)                                     \
-      goto test_cleanup;                        \
+#define chk_test_timedout(T, Y, Z) do { \
+    exe_test_timedout(T, Y, Z);         \
+    if(res)                             \
+      goto test_cleanup;                \
   } while(0)
 
 #define abort_on_test_timeout() \
-  chk_test_timedout((__FILE__), (__LINE__))
+  chk_test_timedout(TEST_HANG_TIMEOUT, (__FILE__), (__LINE__))
 
 /* ---------------------------------------------------------------- */
 
