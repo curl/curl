@@ -36,7 +36,7 @@
    the default TEST_HANG_TIMEOUT to avoid issues when running on overloaded
    CI machines. */
 
-#include "test.h"
+#include "first.h"
 
 #include "testutil.h"
 

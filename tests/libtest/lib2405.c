@@ -37,7 +37,7 @@
  *  successfully.
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "testutil.h"
 #include "memdebug.h"

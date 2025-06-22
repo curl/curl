@@ -23,7 +23,7 @@
  ***************************************************************************/
 /* Based on Alex Fishman's bug report on September 30, 2007 */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

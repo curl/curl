@@ -25,7 +25,7 @@
  * Verify that some API functions are locked from being called inside callback
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

@@ -24,7 +24,7 @@
 
 /* Test suppressing the If-Modified-Since header */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

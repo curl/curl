@@ -26,7 +26,7 @@
  * bug report #1871269, fixed on Jan 14 2008 before the 7.18.0 release.
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

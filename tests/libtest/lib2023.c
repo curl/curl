@@ -26,7 +26,7 @@
  * argv3 = second auth type
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 

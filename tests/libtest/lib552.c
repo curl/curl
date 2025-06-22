@@ -25,7 +25,7 @@
  * argv2 = proxy with embedded user+password
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
