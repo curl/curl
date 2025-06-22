@@ -41,10 +41,6 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${PROJECT_BINARY_DIR}/lib"        # for "curl_config.h"
 )
 
-if(USE_ARES)
-  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
-endif()
-
 if(CURL_BUILD_TESTING)
   # special libcurlu library just for unittests
   add_library(curlu STATIC EXCLUDE_FROM_ALL ${HHEADERS} ${CSOURCES})
