@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+netrc
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+netrc with NETRC pointing out the file
+</name>
+<file name="%LOGDIR/netrc%TESTNUMBER">
+machine foo.host login foo password alone-in-the-dark
+</file>
+<setenv>
+NETRC=%LOGDIR/netrc%TESTNUMBER
+</setenv>
+<command>
+http://foo.host/%TESTNUMBER --proxy %HOSTIP:%HTTPPORT -A "" --netrc
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET http://foo.host/%TESTNUMBER HTTP/1.1
+Host: foo.host
+Authorization: Basic %b64[foo:alone-in-the-dark]b64%
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>
