@@ -437,6 +437,8 @@ extern int unitfail;
   tv_test_start = tutil_tvnow(); \
 } while(0)
 
+#define TEST_HANG_TIMEOUT 60 * 1000  /* Set default */
+
 #define exe_test_timedout(T,Y,Z) do {                                   \
   long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);           \
   if(timediff > (T)) {                                                  \
@@ -502,7 +504,3 @@ extern int unitfail;
 /* ---------------------------------------------------------------- */
 
 #endif /* HEADER_CURL_TEST_H */
-
-/* Set default that each test may override */
-#undef TEST_HANG_TIMEOUT
-#define TEST_HANG_TIMEOUT 60 * 1000
