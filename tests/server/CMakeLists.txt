@@ -27,8 +27,8 @@ curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
-  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES}
-    ${CURL_MK_UNITY_OPTION} --srcdir "${CMAKE_CURRENT_SOURCE_DIR}" > "${BUNDLE}.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+    --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     ${FIRSTFILES} ${UTILS} ${CURLX_CFILES} ${TESTFILES}
@@ -54,4 +54,6 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIE
 if(WIN32)
   set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
 endif()
-set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF)
+set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
+
+curl_clang_tidy_tests(${BUNDLE} ${FIRSTFILES} ${UTILS} ${TESTFILES})

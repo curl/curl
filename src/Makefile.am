@@ -80,7 +80,7 @@ else
 curlx_src = $(CURLX_CFILES)
 endif
 curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --srcdir $(srcdir) --include $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src) > curltool_unity.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
@@ -205,7 +205,7 @@ endif
 endif
 
 # disable the tests that are mostly causing false positives
-TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.bzero,-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
 if CURL_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif

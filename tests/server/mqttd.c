@@ -438,6 +438,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     logmsg("Out of memory, unable to allocate buffer");
     goto end;
   }
+  memset(buffer, 0, buff_size);
 
   do {
     unsigned char usr_flag = 0x80;

@@ -34,6 +34,11 @@ if(BUILD_CURL_EXE)
   add_dependencies(testdeps curlinfo)
 endif()
 
+if(CURL_CLANG_TIDY)
+  add_custom_target(tests-clang-tidy)
+  add_dependencies(testdeps tests-clang-tidy)
+endif()
+
 add_subdirectory(http)
 add_subdirectory(client)
 add_subdirectory(server)

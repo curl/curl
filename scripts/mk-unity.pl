@@ -31,32 +31,19 @@ use strict;
 use warnings;
 
 if(!@ARGV) {
-    die "Usage: $0 [--test <tests>] [--include <include-c-sources>] [--srcdir <srcdir>] [--embed]\n";
+    die "Usage: $0 [--test <tests>] [--include <include-c-sources>]\n";
 }
 
 my @src;
 my %include;
 my $in_include = 0;
-my $srcdir = "";
-my $in_srcdir = 0;
 my $any_test = 0;
-my $embed = 0;
 foreach my $src (@ARGV) {
     if($src eq "--test") {
         $in_include = 0;
     }
     elsif($src eq "--include") {
         $in_include = 1;
-    }
-    elsif($src eq "--embed") {
-        $embed = 1;
-    }
-    elsif($src eq "--srcdir") {
-        $in_srcdir = 1;
-    }
-    elsif($in_srcdir) {
-        $srcdir = $src;
-        $in_srcdir = 0;
     }
     elsif($in_include) {
         $include{$src} = 1;
@@ -78,18 +65,7 @@ my $tlist = "";
 foreach my $src (@src) {
     if($src =~ /([a-z0-9_]+)\.c$/) {
         my $name = $1;
-        if($embed) {
-            my $fn = $src;
-            if($srcdir ne "" && -e "$srcdir/$fn") {
-                $fn = $srcdir . "/" . $fn;
-            }
-            print "/* Embedding: \"$src\" */\n";
-            my $content = do { local $/; open my $fh, '<', $fn or die $!; <$fh> };
-            print $content;
-        }
-        else {
-            print "#include \"$src\"\n";
-        }
+        print "#include \"$src\"\n";
         if(not exists $include{$src}) {  # register test entry function
             $tlist .= "  {\"$name\", test_$name},\n";
         }
