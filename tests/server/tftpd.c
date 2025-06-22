@@ -55,7 +55,7 @@
 #include <sys/ioctl.h>  /* for ioctl() */
 #endif
 #ifdef HAVE_FCNTL_H
-#include <fcntl.h>
+#include <fcntl.h>  /* for open modes */
 #endif
 #ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>  /* FIONREAD on Solaris 7 */

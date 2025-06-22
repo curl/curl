@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 static int dnsd_wrotepidfile = 0;
 static int dnsd_wroteportfile = 0;
 
