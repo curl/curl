@@ -202,7 +202,7 @@ static void add_answer(unsigned char *bytes, size_t *w,
 #define SENDTO3 size_t
 #endif
 
-#define INSTRUCTIONS "log/dnsd.cmd"
+#define INSTRUCTIONS "dnsd.cmd"
 
 #define MAX_ALPN 5
 
@@ -303,7 +303,10 @@ static int send_response(curl_socket_t sock,
 
 static void read_instructions(void)
 {
-  FILE *f = fopen(INSTRUCTIONS, FOPEN_READTEXT);
+  char file[256];
+  FILE *f;
+  snprintf(file, sizeof(file), "%s/" INSTRUCTIONS, logdir);
+  f = fopen(file, FOPEN_READTEXT);
   if(f) {
     char buf[256];
     ancount_aaaa = ancount_a = 0;
@@ -349,14 +352,14 @@ static void read_instructions(void)
           rc = 0;
         }
         if(rc != 1) {
-          logmsg("Bad line in %s: '%s'\n", INSTRUCTIONS, buf);
+          logmsg("Bad line in %s: '%s'\n", file, buf);
         }
       }
     }
     fclose(f);
   }
   else
-    logmsg("Error opening file '%s'", INSTRUCTIONS);
+    logmsg("Error opening file '%s'", file);
 }
 
 static int test_dnsd(int argc, char **argv)
