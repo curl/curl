@@ -480,6 +480,10 @@ static curl_socket_t mqttit(curl_socket_t fd)
         logmsg("Protocol preamble mismatch");
         goto end;
       }
+      if(remaining_length < 12) {
+        logmsg("Protocol preamble too small (%d)", (int)remaining_length);
+        goto end;
+      }
       /* ignore the connect flag byte and two keepalive bytes */
       payload_len = (size_t)(buffer[10] << 8) | buffer[11];
       /* first part of the payload is the client ID */
