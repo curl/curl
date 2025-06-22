@@ -28,12 +28,13 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --test ${TESTFILES} > "${BUNDLE}.c"
+    --include ${UTILS} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
-    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${FIRSTFILES} ${TESTFILES}
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    ${FIRSTFILES} ${UTILS} ${TESTFILES}
   VERBATIM)
 
-add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE}.c")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(testdeps ${BUNDLE})
 target_link_libraries(${BUNDLE} curlu)
 target_include_directories(${BUNDLE} PRIVATE
@@ -49,4 +50,4 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIE
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
-curl_clang_tidy_tests(${BUNDLE} ${FIRSTFILES} ${TESTFILES})
+curl_clang_tidy_tests(${BUNDLE} ${FIRSTFILES} ${UTILS} ${TESTFILES})
