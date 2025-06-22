@@ -99,21 +99,47 @@ endmacro()
 # Create a clang-tidy target for test targets
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
+    # Collect header directories applying to the target
     get_directory_property(_includes_d INCLUDE_DIRECTORIES)
     get_target_property(_includes ${_target} INCLUDE_DIRECTORIES)
     string(REPLACE ";" ";-I" _includes ";${_includes_d};${_includes}")
+
+    # Collect macro definitions applying to the target
+    set(_definitions_l "")  # from curl lib dependencies
+    get_target_property(_libs ${_target} LINK_LIBRARIES)
+    foreach(_lib IN LISTS _libs)
+      if(_lib MATCHES "curl")  # ignore dependencies
+        get_target_property(_defs ${_lib} COMPILE_DEFINITIONS)
+        list(APPEND _definitions_l ${_defs})
+      endif()
+    endforeach()
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
     get_target_property(_definitions ${_target} COMPILE_DEFINITIONS)
-    string(REPLACE ";" ";-D" _definitions ";${_definitions_d};${_definitions}")
-    set(_sources ${ARGN})
+    set(_definitions "${_definitions};${_definitions_l};${_definitions_d}")
+    list(REMOVE_ITEM _definitions "")
+    string(REPLACE ";" ";-D" _definitions ";${_definitions}")
+    list(REMOVE_ITEM _definitions "")
+    list(SORT _definitions)  # Sort like CMake does
+
+    set(_sources "")
+    foreach(_source IN ITEMS ${ARGN})
+      if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_source}")  # if not in source tree
+        set(_source "${CMAKE_CURRENT_BINARY_DIR}/${_source}")  # look in the build tree, for generated files, e.g. lib1521.c
+      endif()
+      list(APPEND _sources "${_source}")
+    endforeach()
+
     add_custom_target("${_target}-clang-tidy" USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
       DEPENDS ${_sources})
     add_dependencies(tests-clang-tidy "${_target}-clang-tidy")
+
     unset(_includes_d)
     unset(_includes)
+    unset(_definitions_l)
     unset(_definitions_d)
     unset(_definitions)
+    unset(_sources)
   endif()
 endmacro()

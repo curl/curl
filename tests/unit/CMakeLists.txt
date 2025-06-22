@@ -43,7 +43,6 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
-set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "UNITTESTS")  # for clang-tidy
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 # unit tests are small pretend-libcurl-programs
