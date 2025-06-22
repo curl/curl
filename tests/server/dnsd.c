@@ -206,14 +206,12 @@ static void add_answer(unsigned char *bytes, size_t *w,
 
 #define MAX_ALPN 5
 
-static bool ipv4_set; /* if set in the config file */
-static bool ipv6_set;
 static unsigned char ipv4_pref[4];
 static unsigned char ipv6_pref[16];
 static unsigned char alpn_pref[MAX_ALPN];
 static int alpn_count;
-static unsigned char ancount_a = 1;
-static unsigned char ancount_aaaa = 1;
+static unsigned char ancount_a;
+static unsigned char ancount_aaaa;
 
 /* this is an answer to a question */
 static int send_response(curl_socket_t sock,
@@ -249,10 +247,6 @@ static int send_response(curl_socket_t sock,
     0x0, 0x0, /* NSCOUNT */
     0x0, 0x0  /* ARCOUNT */
   };
-  static const unsigned char ipv4_localhost[] = { 127, 0, 0, 1 };
-  static const unsigned char ipv6_localhost[] = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
-  };
 
   bytes[0] = (unsigned char)(id >> 8);
   bytes[1] = (unsigned char)(id & 0xff);
@@ -269,8 +263,8 @@ static int send_response(curl_socket_t sock,
   case QTYPE_A:
     bytes[7] = ancount_a;
     for(a = 0; a < ancount_a; a++) {
-      const unsigned char *store = ipv4_set ? ipv4_pref : ipv4_localhost;
-      add_answer(bytes, &i, store, sizeof(ipv4_localhost), QTYPE_A);
+      const unsigned char *store = ipv4_pref;
+      add_answer(bytes, &i, store, sizeof(ipv4_pref), QTYPE_A);
       logmsg("Sending back A (%x) '%s'", QTYPE_A,
              curlx_inet_ntop(AF_INET, store, addrbuf, sizeof(addrbuf)));
     }
@@ -278,8 +272,8 @@ static int send_response(curl_socket_t sock,
   case QTYPE_AAAA:
     bytes[7] = ancount_aaaa;
     for(a = 0; a < ancount_aaaa; a++) {
-      const unsigned char *store = ipv6_set ? ipv6_pref : ipv6_localhost;
-      add_answer(bytes, &i, store, sizeof(ipv6_localhost), QTYPE_AAAA);
+      const unsigned char *store = ipv6_pref;
+      add_answer(bytes, &i, store, sizeof(ipv6_pref), QTYPE_AAAA);
       logmsg("Sending back AAAA (%x) '%s'", QTYPE_AAAA,
              curlx_inet_ntop(AF_INET6, store, addrbuf, sizeof(addrbuf)));
     }
@@ -312,7 +306,7 @@ static void read_instructions(void)
   FILE *f = fopen(INSTRUCTIONS, FOPEN_READTEXT);
   if(f) {
     char buf[256];
-    ipv4_set = ipv6_set = FALSE;
+    ancount_aaaa = ancount_a = 0;
     alpn_count = 0;
     while(fgets(buf, sizeof(buf), f)) {
       char *p = strchr(buf, '\n');
