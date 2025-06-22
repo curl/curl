@@ -34,7 +34,7 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
     ${FIRSTFILES} ${TESTFILES}
   VERBATIM)
 
-add_executable(${BUNDLE} EXCLUDE_FROM_ALL ${UTILS} "${BUNDLE}.c")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(testdeps ${BUNDLE})
 target_link_libraries(${BUNDLE} curltool curlu)
 target_include_directories(${BUNDLE} PRIVATE
