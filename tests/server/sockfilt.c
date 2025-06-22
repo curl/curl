@@ -370,8 +370,10 @@ static void lograw(unsigned char *buffer, ssize_t len)
  * *buffer_len is the amount of data in the buffer (output)
  */
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
-    ssize_t *buffer_len)
+                            ssize_t *buffer_len)
 {
+  *buffer_len = 0;
+
   if(!read_stdin(buffer, 5))
     return FALSE;
 
@@ -1121,6 +1123,9 @@ static bool juggle(curl_socket_t *sockfdp,
       /* data IN => data OUT */
       if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
         return FALSE;
+
+      if(buffer_len < 0)
+         return FALSE;
 
       if(*mode == PASSIVE_LISTEN) {
         logmsg("*** We are disconnected!");
