@@ -34,7 +34,7 @@ static CURLcode test_lib1501(char *URL)
      conservative to allow old and slow machines to run this test too */
   static const int MAX_BLOCKED_TIME_MS = 500;
 
-  static const int HANG_TIMEOUT = 30 * 1000;
+  static const long HANG_TIMEOUT = 30 * 1000;
 
   CURL *handle = NULL;
   CURLM *mhandle = NULL;
