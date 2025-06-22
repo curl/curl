@@ -855,7 +855,7 @@ init_config_builder_client_auth(struct Curl_easy *data,
   }
   else if(!conn_config->clientcert && ssl_config->key) {
     failf(data, "rustls: must provide certificate with key '%s'",
-          conn_config->clientcert);
+          ssl_config->key);
     return CURLE_SSL_CERTPROBLEM;
   }
 
