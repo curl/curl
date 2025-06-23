@@ -445,7 +445,7 @@ extern int unitfail;
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \
-                  (Y), (Z), timediff, (long) (TEST_HANG_TIMEOUT));      \
+                  (Y), (Z), (long)timediff, (long)(TEST_HANG_TIMEOUT)); \
     res = TEST_ERR_RUNS_FOREVER;                                        \
   }                                                                     \
 } while(0)
