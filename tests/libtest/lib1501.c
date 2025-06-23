@@ -65,7 +65,7 @@ static CURLcode test_lib1501(char *URL)
     int maxfd = -99;
     struct timeval before;
     struct timeval after;
-    long e;
+    timediff_t e;
 
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */

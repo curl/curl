@@ -440,7 +440,7 @@ extern int unitfail;
 #define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
-  long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);           \
+  timediff_t timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);     \
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \
