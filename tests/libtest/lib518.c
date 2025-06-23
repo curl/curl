@@ -477,7 +477,7 @@ static CURLcode test_lib518(char *URL)
 {
   (void)URL;
   curl_mprintf("system lacks necessary system function(s)");
-  return 1; /* skip test */
+  return TEST_ERR_MAJOR_BAD; /* skip test */
 }
 
 #endif /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
