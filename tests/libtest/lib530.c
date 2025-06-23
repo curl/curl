@@ -405,19 +405,19 @@ static CURLcode test_lib530(char *URL)
   if(rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 1, 0); /* fail 2nd call to timer callback */
+  rc = testone(URL, 1, 0); /* fail 1st call to timer callback */
   if(!rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 2, 0); /* fail 3rd call to timer callback */
+  rc = testone(URL, 2, 0); /* fail 2nd call to timer callback */
   if(!rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 0, 1); /* fail 2nd call to socket callback */
+  rc = testone(URL, 0, 1); /* fail 1st call to socket callback */
   if(!rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 0, 2); /* fail 3rd call to socket callback */
+  rc = testone(URL, 0, 2); /* fail 2nd call to socket callback */
   if(!rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
