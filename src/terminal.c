@@ -28,7 +28,7 @@
 #endif
 
 #include "terminal.h"
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>

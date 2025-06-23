@@ -32,7 +32,7 @@
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
 #  define mkdir(x,y) (mkdir)((x))

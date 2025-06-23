@@ -27,7 +27,7 @@
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #define GLOBERROR(string, column, code) \
   glob->error = string, glob->pos = column, code

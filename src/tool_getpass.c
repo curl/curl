@@ -55,7 +55,7 @@
 #endif
 #include "tool_getpass.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef __VMS
 /* VMS implementation */
