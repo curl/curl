@@ -135,8 +135,8 @@ static CURLcode test_unit1302(char *arg)
 
     /* first encode */
     rc = curlx_base64_encode(e->input, e->ilen, &out, &olen);
-    fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
-    fail_unless(olen == e->olen, "wrong output size");
+    abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+    abort_unless(olen == e->olen, "wrong output size");
     if(memcmp(out, e->output, e->olen)) {
       fprintf(stderr, "Test %u encoded badly\n", i);
       unitfail++;
@@ -168,7 +168,7 @@ static CURLcode test_unit1302(char *arg)
     char *out;
     size_t olen;
     rc = curlx_base64url_encode(e->input, e->ilen, &out, &olen);
-    fail_unless(rc == CURLE_OK, "return code should be CURLE_OK");
+    abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     if(olen != e->olen) {
       fprintf(stderr, "Test %u URL encoded output length %d instead of %d\n",
               i, (int)olen, (int)e->olen);
