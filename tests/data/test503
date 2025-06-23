@@ -73,7 +73,7 @@ moo
 <proxy>
 CONNECT machine.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: machine.%TESTNUMBER:%HTTPPORT
-Proxy-Authorization: Basic %b64[test%20:ing%41]b64%
+Proxy-Authorization: Basic %b64[test%2520:ing%2541]b64%
 Proxy-Connection: Keep-Alive
 
 [DISCONNECT]
