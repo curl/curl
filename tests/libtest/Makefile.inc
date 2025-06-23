@@ -36,6 +36,7 @@ CURLX_CFILES = \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curl_threads.c \
+  ../../lib/curlx/version_win32.c \
   ../../lib/curlx/wait.c
 
 # All libtest programs
