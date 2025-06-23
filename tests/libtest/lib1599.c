@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testtrace.h"
-
 static CURLcode test_lib1599(char *URL)
 {
   CURL *curl;
