@@ -122,7 +122,7 @@ static CURLcode test_lib1507(char *URL)
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(curlx_timedifff(curlx_now(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(curlx_timediff(curlx_now(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       curl_mfprintf(stderr, "ABORTING TEST, since it seems "
                     "that it would have run forever.\n");
       break;

@@ -90,7 +90,7 @@ static CURLcode test_lib1501(char *URL)
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     after = curlx_now();
-    e = curlx_timedifff(after, before);
+    e = curlx_timediff(after, before);
     curl_mfprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
