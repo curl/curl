@@ -801,7 +801,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
     attempt++;
     flag = 1;
     rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-         (void *)&flag, sizeof(flag));
+                    (void *)&flag, sizeof(flag));
     if(rc) {
       error = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
