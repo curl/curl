@@ -1442,9 +1442,17 @@ if test X"$OPT_BROTLI" != Xno; then
         LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
         CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
         version=`$PKGCONFIG --modversion libbrotlidec`
-        DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
       fi
 
+      CURL_CHECK_PKGCONFIG(libbrotlicommon)
+
+      if test "$PKGCONFIG" != "no"; then
+        LIB_BROTLI="$LIB_BROTLI `$PKGCONFIG --libs-only-l libbrotlicommon`"
+        LD_BROTLI="$LD_BROTLI `$PKGCONFIG --libs-only-L libbrotlicommon`"
+        CPP_BROTLI="$CPP_BROTLI `$PKGCONFIG --cflags-only-I libbrotlicommon`"
+      fi
+
+      DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
       ;;
     off)
       dnl no --with-brotli option given, just check default places
@@ -1457,7 +1465,7 @@ if test X"$OPT_BROTLI" != Xno; then
 
   dnl if given with a prefix, we set -L and -I based on that
   if test -n "$PREFIX_BROTLI"; then
-    LIB_BROTLI="-lbrotlidec"
+    LIB_BROTLI="-lbrotlidec -lbrotlicommon"
     LD_BROTLI=-L${PREFIX_BROTLI}/lib$libsuff
     CPP_BROTLI=-I${PREFIX_BROTLI}/include
     DIR_BROTLI=${PREFIX_BROTLI}/lib$libsuff
