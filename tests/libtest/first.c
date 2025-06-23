@@ -59,7 +59,7 @@ int test_argc;
 char **test_argv;
 int testnum;
 
-struct timeval tv_test_start; /* for test timing */
+struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
 

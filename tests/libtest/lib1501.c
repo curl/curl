@@ -25,7 +25,6 @@
 
 #include <fcntl.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1501(char *URL)
@@ -63,9 +62,9 @@ static CURLcode test_lib1501(char *URL)
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -99;
-    struct timeval before;
-    struct timeval after;
-    long e;
+    struct curltime before;
+    struct curltime after;
+    timediff_t e;
 
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
@@ -83,15 +82,15 @@ static CURLcode test_lib1501(char *URL)
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     curl_mfprintf(stderr, "ping\n");
-    before = tutil_tvnow();
+    before = curlx_now();
 
     multi_perform(mhandle, &still_running);
 
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
-    after = tutil_tvnow();
-    e = tutil_tvdiff(after, before);
-    curl_mfprintf(stderr, "pong = %ld\n", e);
+    after = curlx_now();
+    e = curlx_timediff(after, before);
+    curl_mfprintf(stderr, "pong = %ld\n", (long)e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
       res = CURLE_TOO_LARGE;

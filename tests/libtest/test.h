@@ -32,6 +32,7 @@
 #include "curl_setup.h"
 
 #include <curl/curl.h>
+#include <curlx/timeval.h>
 
 #ifdef HAVE_SYS_SELECT_H
 /* since so many tests use select(), we can just as well include it here */
@@ -65,7 +66,7 @@ extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 extern int test_argc;
 extern char **test_argv;
 extern int testnum;
-extern struct timeval tv_test_start; /* for test timing */
+extern struct curltime tv_test_start; /* for test timing */
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
@@ -434,17 +435,17 @@ extern int unitfail;
 /* ---------------------------------------------------------------- */
 
 #define start_test_timing() do { \
-  tv_test_start = tutil_tvnow(); \
+  tv_test_start = curlx_now(); \
 } while(0)
 
 #define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
-  long timediff = tutil_tvdiff(tutil_tvnow(), tv_test_start);           \
+  timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);     \
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \
-                  (Y), (Z), timediff, (long) (TEST_HANG_TIMEOUT));      \
+                  (Y), (Z), (long)timediff, (long)(TEST_HANG_TIMEOUT)); \
     res = TEST_ERR_RUNS_FOREVER;                                        \
   }                                                                     \
 } while(0)
