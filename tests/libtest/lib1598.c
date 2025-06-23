@@ -29,8 +29,6 @@
 
 #include "first.h"
 
-#include <stdio.h>
-
 #include "memdebug.h"
 
 /*
