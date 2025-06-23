@@ -191,7 +191,7 @@ static int t537_test_rlimit(int keep_open)
    * avoid a low memory condition once the file descriptors are
    * open. System conditions that could make the test fail should
    * be addressed in the precheck phase. This chunk of memory shall
-   * be always free()ed before exiting the test_rlimit() function so
+   * be always free()ed before exiting the t537_test_rlimit() function so
    * that it becomes available to the test.
    */
 
