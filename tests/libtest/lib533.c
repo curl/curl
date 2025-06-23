@@ -27,7 +27,6 @@
 
 #include <fcntl.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 static CURLcode test_lib533(char *URL)

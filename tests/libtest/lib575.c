@@ -25,7 +25,6 @@
 
 #include <fcntl.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 /* 3x download!

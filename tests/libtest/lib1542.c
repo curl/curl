@@ -32,7 +32,6 @@
 
 #include "first.h"
 
-#include "testutil.h"
 #include "testtrace.h"
 #include "memdebug.h"
 

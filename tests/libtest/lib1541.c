@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
 #include "memdebug.h"
 
 struct t1541_transfer_status {

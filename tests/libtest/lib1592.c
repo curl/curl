@@ -38,8 +38,6 @@
 
 #include "first.h"
 
-#include "testutil.h"
-
 #include <sys/stat.h>
 
 static CURLcode test_lib1592(char *URL)

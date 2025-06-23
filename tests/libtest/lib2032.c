@@ -26,7 +26,6 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 #define MAX_EASY_HANDLES 3

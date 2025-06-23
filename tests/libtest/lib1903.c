@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
 #include "timediff.h"
 #include "memdebug.h"
 

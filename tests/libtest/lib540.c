@@ -34,7 +34,6 @@
 
 #include <limits.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 #define PROXY libtest_arg2

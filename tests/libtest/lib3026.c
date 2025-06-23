@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-
 #define NUM_THREADS 100
 
 #ifdef _WIN32
