@@ -84,7 +84,7 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
-add_executable(${EXE_NAME} ${CURL_CFILES} ${CURLX_CFILES} ${_curl_cfiles_gen} ${CURL_HFILES} ${_curl_hfiles_gen})
+add_executable(${EXE_NAME} ${CURL_CFILES} ${CURLX_CFILES} ${_curl_cfiles_gen} ${CURL_HFILES} ${CURLX_HFILES} ${_curl_hfiles_gen})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
