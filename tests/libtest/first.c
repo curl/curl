@@ -112,6 +112,9 @@ int main(int argc, char **argv)
   CURLX_SET_BINMODE(stdout);
 
   memory_tracking_init();
+#ifdef _WIN32
+  curlx_now_init();
+#endif
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
