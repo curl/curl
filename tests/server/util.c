@@ -878,7 +878,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
 
   if(!*listenport
 #ifdef USE_UNIX_SOCKETS
-          && !unix_socket
+     && !unix_socket
 #endif
     ) {
     /* The system was supposed to choose a port number, figure out which
