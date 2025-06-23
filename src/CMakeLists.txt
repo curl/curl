@@ -92,7 +92,7 @@ add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 
 # special libcurltool library just for unittests
-add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES})
+add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES} ${CURLX_HFILES})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
