@@ -38,9 +38,6 @@ extern const struct entry_s s_entries[];
 
 #include "curlx.h"
 
-#include <stdlib.h>  /* for calloc(), free(), strtol() */
-#include <string.h>  /* for strchr(), strcmp() */
-
 #define ERR()                                                                 \
   do {                                                                        \
     curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
