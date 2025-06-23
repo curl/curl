@@ -32,7 +32,6 @@
 
 #include "first.h"
 
-#include "testutil.h"
 #include "memdebug.h"
 
 static const char uploadthis[] = "this is the blurb we want to upload\n";

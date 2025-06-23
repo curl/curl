@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <limits.h>
-
-#include "testutil.h"
 #include "memdebug.h"
 
 /*

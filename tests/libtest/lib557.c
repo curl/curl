@@ -29,8 +29,6 @@
 
 #include "first.h"
 
-#include <limits.h>
-
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */
 #endif

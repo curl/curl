@@ -39,7 +39,6 @@
 
 #include "first.h"
 
-#include "testutil.h"
 #include "memdebug.h"
 
 /* ---------------------------------------------------------------- */

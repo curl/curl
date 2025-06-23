@@ -31,9 +31,6 @@
 
 #include "first.h"
 
-#include <limits.h>
-
-#include "testutil.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1502(char *URL)

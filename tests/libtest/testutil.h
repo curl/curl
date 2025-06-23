@@ -29,10 +29,8 @@
 char *tutil_suburl(const char *base, int i);
 
 #ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
+#include <sys/resource.h>  /* for getrlimit() */
 #endif
-
-#include <limits.h>
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 void tutil_rlim2str(char *buf, size_t len, rlim_t val);

@@ -25,8 +25,6 @@
  */
 #include "first.h"
 
-#include <assert.h>
-
 static void usage_h2_pausing(const char *msg)
 {
   if(msg)

@@ -24,12 +24,10 @@
 #include "first.h"
 
 #ifdef HAVE_LOCALE_H
-#  include <locale.h> /* for setlocale() */
+#include <locale.h> /* for setlocale() */
 #endif
 
 #include "memdebug.h"
-#include "curlx/timediff.h"
-#include "curlx/binmode.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)

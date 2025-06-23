@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
 #include "memdebug.h"
 
 static CURLcode test_lib2402(char *URL)

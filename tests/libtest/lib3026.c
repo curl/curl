@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "testutil.h"
-
 #define NUM_THREADS 100
 
 #ifdef _WIN32
@@ -101,7 +99,6 @@ cleanup:
 
 #elif defined(HAVE_PTHREAD_H)
 #include <pthread.h>
-#include <unistd.h>
 
 static void *t3026_run_thread(void *ptr)
 {

@@ -37,8 +37,6 @@
 #ifdef HAVE_SYS_SELECT_H
 /* since so many tests use select(), we can just as well include it here */
 #include <sys/select.h>
-#elif defined(HAVE_UNISTD_H)
-#include <unistd.h>
 #endif
 
 #include "curl_printf.h"

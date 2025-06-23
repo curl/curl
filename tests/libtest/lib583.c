@@ -28,8 +28,6 @@
 
 #include "first.h"
 
-#include <sys/stat.h>
-
 #include "memdebug.h"
 
 static CURLcode test_lib583(char *URL)
