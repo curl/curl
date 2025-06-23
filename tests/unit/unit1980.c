@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include <curlx/dynbuf.h>
+
 #include "http_aws_sigv4.h"
 
 static CURLcode test_unit1980(char *arg)
