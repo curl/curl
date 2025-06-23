@@ -32,7 +32,7 @@
 #include "tool_util.h"
 #include "tool_version.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 struct getout *new_getout(struct OperationConfig *config)
 {

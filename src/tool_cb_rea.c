@@ -33,7 +33,7 @@
 #include "tool_util.h"
 #include "tool_msgs.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /*
 ** callback for CURLOPT_READFUNCTION

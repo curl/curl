@@ -28,7 +28,7 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_ipfs.h"
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /* ensure input ends in slash */
 static CURLcode ensure_trailing_slash(char **input)

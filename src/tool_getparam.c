@@ -38,7 +38,7 @@
 #include "tool_help.h"
 #include "var.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK FALSE

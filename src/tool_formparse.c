@@ -29,7 +29,7 @@
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,

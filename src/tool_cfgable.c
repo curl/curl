@@ -27,7 +27,7 @@
 #include "tool_formparse.h"
 #include "tool_paramhlp.h"
 #include "tool_main.h"
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 void config_init(struct OperationConfig *config)
 {

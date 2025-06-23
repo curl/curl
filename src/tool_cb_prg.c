@@ -29,7 +29,7 @@
 #include "tool_operate.h"
 #include "terminal.h"
 
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_BARLENGTH 400
 #define MIN_BARLENGTH 20

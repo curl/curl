@@ -51,7 +51,7 @@
  * the library level code from this client-side is ugly, but we do this
  * anyway for convenience.
  */
-#include <memdebug.h> /* keep this as LAST include */
+#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef __VMS
 /*
