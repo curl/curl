@@ -22,7 +22,8 @@
  *
  ***************************************************************************/
 #include "testtrace.h"
-#include "testutil.h"
+
+#include <curlx/timeval.h>
 
 #include "memdebug.h"
 
@@ -99,9 +100,9 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 
   if(trace_cfg->tracetime) {
     struct tm *now;
-    struct timeval tv;
+    struct curltime tv;
     time_t secs;
-    tv = tutil_tvnow();
+    tv = curlx_now();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
       known_offset = 1;
