@@ -25,8 +25,6 @@
 
 /* lib591 is used for test cases 591, 592, 593 and 594 */
 
-#include <limits.h>
-
 #include <fcntl.h>
 
 #include "memdebug.h"
