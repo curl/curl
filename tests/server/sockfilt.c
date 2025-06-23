@@ -1375,6 +1375,8 @@ static int test_sockfilt(int argc, char *argv[])
         rc = connect(sock, &me.sa, sizeof(me.sa6));
         break;
 #endif /* USE_IPV6 */
+      default:
+        rc = 1;
     }
     if(rc) {
       error = SOCKERRNO;
