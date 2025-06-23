@@ -32,7 +32,6 @@
 
 #include <fcntl.h>
 
-#include "testutil.h"
 #include "memdebug.h"
 
 struct t530_Sockets {
