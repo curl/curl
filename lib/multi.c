@@ -1187,6 +1187,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
       if(!data) {
         DEBUGASSERT(0);
         Curl_uint_bset_remove(&multi->process, mid);
+        Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
       Curl_multi_getsock(data, &ps, "curl_multi_waitfds");
@@ -1270,6 +1271,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       if(!data) {
         DEBUGASSERT(0);
         Curl_uint_bset_remove(&multi->process, mid);
+        Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
       Curl_multi_getsock(data, &ps, "multi_wait");
@@ -2234,6 +2236,7 @@ static CURLMcode state_connect(struct Curl_multi *multi,
     multistate(data, MSTATE_PENDING);
     /* move from process to pending set */
     Curl_uint_bset_remove(&multi->process, data->mid);
+    Curl_uint_bset_remove(&multi->dirty, data->mid);
     Curl_uint_bset_add(&multi->pending, data->mid);
     *resultp = CURLE_OK;
     return rc;
@@ -2665,6 +2668,7 @@ statemachine_end:
 
       /* remove from the other sets, add to msgsent */
       Curl_uint_bset_remove(&multi->process, data->mid);
+      Curl_uint_bset_remove(&multi->dirty, data->mid);
       Curl_uint_bset_remove(&multi->pending, data->mid);
       Curl_uint_bset_add(&multi->msgsent, data->mid);
       --multi->xfers_alive;
@@ -2702,6 +2706,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       if(!data) {
         DEBUGASSERT(0);
         Curl_uint_bset_remove(&multi->process, mid);
+        Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
       if(data != multi->admin) {
@@ -3010,6 +3015,11 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
           mrc->run_cpool = TRUE;
           continue;
         }
+        else if(!Curl_uint_bset_contains(&multi->process, mid)) {
+          /* We are no longer proecessing this transfer */
+          Curl_uint_bset_remove(&multi->dirty, mid);
+          continue;
+        }
 
         mrc->run_xfers++;
         sigpipe_apply(data, &mrc->pipe_st);
@@ -3225,7 +3235,10 @@ static bool multi_has_dirties(struct Curl_multi *multi)
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
-        return TRUE;
+        if(Curl_uint_bset_contains(&multi->process, mid))
+          return TRUE;
+        /* We are no longer proecessing this transfer */
+        Curl_uint_bset_remove(&multi->dirty, mid);
       }
       else {
         CURL_TRC_M(multi->admin, "dirty transfer %u no longer found", mid);

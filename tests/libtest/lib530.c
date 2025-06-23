@@ -34,6 +34,30 @@
 
 #include "memdebug.h"
 
+
+static struct t530_ctx {
+  int socket_calls;
+  int max_socket_calls;
+  int timer_calls;
+  int max_timer_calls;
+  char buf[1024];
+} t530_ctx;
+
+static const char *t530_tag(void)
+{
+  curl_msnprintf(t530_ctx.buf, sizeof(t530_ctx.buf),
+                "[T530-%d-%d] [%d/%d]",
+                t530_ctx.max_socket_calls, t530_ctx.max_timer_calls,
+                t530_ctx.socket_calls, t530_ctx.timer_calls);
+  return t530_ctx.buf;
+}
+
+static void t530_msg(const char *msg)
+{
+  curl_mfprintf(stderr, "%s %s\n", t530_tag(), msg);
+}
+
+
 struct t530_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
@@ -53,7 +77,7 @@ static void t530_removeFd(struct t530_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "Remove socket fd %d\n", (int) fd);
+    curl_mfprintf(stderr, "%s remove socket fd %d\n", t530_tag(), (int)fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -76,7 +100,8 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
+  curl_mfprintf(stderr, "%s add socket fd %d for %s\n",
+                t530_tag(), (int)fd, what);
   t530_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
@@ -104,9 +129,6 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
   return 0;
 }
 
-static int max_socket_calls;
-static int socket_calls = 0;
-
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
@@ -118,10 +140,10 @@ static int t530_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
   (void)easy; /* unused */
   (void)socketp; /* unused */
 
-  curl_mfprintf(stderr, "CURLMOPT_SOCKETFUNCTION called: %u\n",
-                socket_calls++);
-  if(socket_calls == max_socket_calls) {
-    curl_mfprintf(stderr, "curlSocketCallback returns error\n");
+  t530_ctx.socket_calls++;
+  t530_msg("-> CURLMOPT_SOCKETFUNCTION");
+  if(t530_ctx.socket_calls == t530_ctx.max_socket_calls) {
+    t530_msg("<- CURLMOPT_SOCKETFUNCTION returns error");
     return -1;
   }
 
@@ -141,9 +163,6 @@ static int t530_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
   return 0;
 }
 
-static int max_timer_calls;
-static int timer_calls = 0;
-
 /**
  * Callback invoked by curl to set a timeout.
  */
@@ -152,9 +171,10 @@ static int t530_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
   struct curltime *timeout = userp;
 
   (void)multi; /* unused */
-  curl_mfprintf(stderr, "CURLMOPT_TIMERFUNCTION called: %u\n", timer_calls++);
-  if(timer_calls == max_timer_calls) {
-    curl_mfprintf(stderr, "curlTimerCallback returns error\n");
+  t530_ctx.timer_calls++;
+  t530_msg("-> CURLMOPT_TIMERFUNCTION");
+  if(t530_ctx.timer_calls == t530_ctx.max_timer_calls) {
+    t530_msg("<- CURLMOPT_TIMERFUNCTION returns error");
     return -1;
   }
   if(timeout_ms != -1) {
@@ -187,8 +207,8 @@ static int t530_checkForCompletion(CURLM *curl, int *success)
         *success = 0;
     }
     else {
-      curl_mfprintf(stderr, "Got an unexpected message from curl: %i\n",
-                    (int)message->msg);
+      curl_mfprintf(stderr, "%s got an unexpected message from curl: %i\n",
+                    t530_tag(), (int)message->msg);
       result = 1;
       *success = 0;
     }
@@ -237,8 +257,8 @@ static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
   if(result != CURLM_OK) {
-    curl_mfprintf(stderr, "Curl error on %s (%i) %s\n",
-                  info, result, curl_multi_strerror(result));
+    curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
+                  t530_tag(), info, result, curl_multi_strerror(result));
   }
   return (int)result;
 }
@@ -261,7 +281,7 @@ static int t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
   return result;
 }
 
-static CURLcode testone(char *URL, int timercb, int socketcb)
+static CURLcode testone(char *URL, int timer_fail_at, int socket_fail_at)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;  CURLM *m = NULL;
@@ -271,12 +291,11 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
   timeout.tv_sec = (time_t)-1;
 
   /* set the limits */
-  max_timer_calls = timercb;
-  max_socket_calls = socketcb;
-  timer_calls = 0; /* reset the globals */
-  socket_calls = 0;
+  memset(&t530_ctx, 0, sizeof(t530_ctx));
+  t530_ctx.max_timer_calls = timer_fail_at;
+  t530_ctx.max_socket_calls = socket_fail_at;
 
-  curl_mfprintf(stderr, "start test: %d %d\n", timercb, socketcb);
+  t530_msg("start");
   start_test_timing();
 
   res_global_init(CURL_GLOBAL_ALL);
@@ -355,14 +374,14 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
   }
 
   if(!success) {
-    curl_mfprintf(stderr, "Error getting file.\n");
+    t530_msg("Error getting file.");
     res = TEST_ERR_MAJOR_BAD;
   }
 
 test_cleanup:
 
   /* proper cleanup sequence */
-  curl_mfprintf(stderr, "cleanup: %d %d\n", timercb, socketcb);
+  t530_msg("cleanup");
   curl_multi_remove_handle(m, curl);
   curl_easy_cleanup(curl);
   curl_multi_cleanup(m);
@@ -371,6 +390,7 @@ test_cleanup:
   /* free local memory */
   free(sockets.read.sockets);
   free(sockets.write.sockets);
+  t530_msg("done");
 
   return res;
 }
@@ -380,25 +400,25 @@ static CURLcode test_lib530(char *URL)
   CURLcode rc;
   /* rerun the same transfer multiple times and make it fail in different
      callback calls */
-  rc = testone(URL, 0, 0);
+  rc = testone(URL, 0, 0); /* no callback fails */
   if(rc)
-    curl_mfprintf(stderr, "test 0/0 failed: %d\n", rc);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 1, 0);
+  rc = testone(URL, 1, 0); /* fail 1st call to timer callback */
   if(!rc)
-    curl_mfprintf(stderr, "test 1/0 failed: %d\n", rc);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 2, 0);
+  rc = testone(URL, 2, 0); /* fail 2nd call to timer callback */
   if(!rc)
-    curl_mfprintf(stderr, "test 2/0 failed: %d\n", rc);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 0, 1);
+  rc = testone(URL, 0, 1); /* fail 1st call to socket callback */
   if(!rc)
-    curl_mfprintf(stderr, "test 0/1 failed: %d\n", rc);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
-  rc = testone(URL, 0, 2);
+  rc = testone(URL, 0, 2); /* fail 2nd call to socket callback */
   if(!rc)
-    curl_mfprintf(stderr, "test 0/2 failed: %d\n", rc);
+    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
   return CURLE_OK;
 }
