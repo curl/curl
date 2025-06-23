@@ -46,7 +46,7 @@ HTTP POST with auth and contents but with content-length set to 0
 <protocol nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic ZmFrZTotdXNlcg==
+Authorization: Basic %b64[fake:-user]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 37

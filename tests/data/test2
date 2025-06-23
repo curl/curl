@@ -39,7 +39,7 @@ HTTP GET with user and password
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic ZmFrZTp1c2Vy
+Authorization: Basic %b64[fake:user]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

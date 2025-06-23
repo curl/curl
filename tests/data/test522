@@ -46,7 +46,7 @@ http://%HOSTIP/%TESTNUMBER %HTTPPORT
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic eHh4Onl5eQ==
+Authorization: Basic %b64[xxx:yyy]b64%
 Accept: */*
 
 </protocol>

@@ -71,7 +71,7 @@ Proxy-Connection: Keep-Alive
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: foo.host:%HTTPPORT
-Authorization: Basic Zm9vOmJhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYXI=
+Authorization: Basic %b64[foo:baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar]b64%
 Accept: */*
 
 </protocol>

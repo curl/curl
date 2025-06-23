@@ -51,7 +51,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic ZmFrZTp1c2Vy
+Authorization: Basic %b64[fake:user]b64%
 User-Agent: MyUA
 Accept: */*
 Cookie: chocolate=chip

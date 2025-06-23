@@ -61,14 +61,14 @@ http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%
 <protocol>
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Basic Zm9vOmJhcg==
+Proxy-Authorization: Basic %b64[foo:bar]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Proxy-Authorization: Basic Zm9vOmJhcg==
+Proxy-Authorization: Basic %b64[foo:bar]b64%
 Authorization: Digest username="digest", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="13c7c02a252cbe1c46d8669898a3be26"
 User-Agent: curl/%VERSION
 Accept: */*

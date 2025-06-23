@@ -36,7 +36,7 @@ HTTP URL with semicolon in password
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjpwYXNzO3dvcmQ=
+Authorization: Basic %b64[user:pass]b64%O3dvcmQ=
 User-Agent: curl/%VERSION
 Accept: */*
 

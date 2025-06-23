@@ -45,7 +45,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 <protocol>
 GET /gimme/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjpzZWNyZXQ=
+Authorization: Basic %b64[user:secret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

@@ -65,7 +65,7 @@ QUIT
 <protocol>
 GET http://somwhere.example/%TESTNUMBER HTTP/1.1
 Host: somwhere.example
-Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
+Authorization: Basic %b64[alberto:einstein]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

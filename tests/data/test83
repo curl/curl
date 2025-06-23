@@ -70,7 +70,7 @@ Proxy-Connection: Keep-Alive
 <protocol>
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-Authorization: Basic aWFtOm15OjtzZWxm
+Authorization: Basic %b64[iam:my:;self]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

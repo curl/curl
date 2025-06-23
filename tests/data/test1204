@@ -69,7 +69,7 @@ Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

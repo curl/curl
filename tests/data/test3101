@@ -79,7 +79,7 @@ Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjpwYXNzd29yZA==
+Authorization: Basic %b64[user:pass]b64%d29yZA==
 Accept: */*
 
 </protocol>

@@ -47,8 +47,8 @@ proxy
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Proxy-Authorization: Basic dGVzdGluZzp0aGlz
-Authorization: Basic aWFtOm15c2VsZg==
+Proxy-Authorization: Basic %b64[testing:this]b64%
+Authorization: Basic %b64[iam:myself]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

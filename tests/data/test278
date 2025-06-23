@@ -40,7 +40,7 @@ proxy
 <protocol>
 GET http://we.want.that.site.com/%TESTNUMBER HTTP/1.1
 Host: we.want.that.site.com
-Proxy-Authorization: Basic ZmFrZTo=
+Proxy-Authorization: Basic %b64[fake:]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
