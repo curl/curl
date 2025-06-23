@@ -116,19 +116,6 @@ long tutil_tvdiff(struct timeval newer, struct timeval older)
     (long)(newer.tv_usec-older.tv_usec)/1000;
 }
 
-/*
- * Same as tutil_tvdiff but with full usec resolution.
- *
- * Returns: the time difference in seconds with subsecond resolution.
- */
-double tutil_tvdiff_secs(struct timeval newer, struct timeval older)
-{
-  if(newer.tv_sec != older.tv_sec)
-    return (double)(newer.tv_sec-older.tv_sec)+
-      (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-  return (double)(newer.tv_usec-older.tv_usec)/1000000.0;
-}
-
 /* build request url */
 char *tutil_suburl(const char *base, int i)
 {

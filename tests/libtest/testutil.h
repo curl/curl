@@ -35,13 +35,6 @@ struct timeval tutil_tvnow(void);
  */
 long tutil_tvdiff(struct timeval t1, struct timeval t2);
 
-/*
- * Same as tutil_tvdiff but with full usec resolution.
- *
- * Returns: the time difference in seconds with subsecond resolution.
- */
-double tutil_tvdiff_secs(struct timeval t1, struct timeval t2);
-
 /* build request url */
 char *tutil_suburl(const char *base, int i);
 
