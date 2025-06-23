@@ -434,13 +434,13 @@ extern int unitfail;
 /* ---------------------------------------------------------------- */
 
 #define start_test_timing() do { \
-  tv_test_start = tutil_tvnow(); \
+  tv_test_start = curlx_now(); \
 } while(0)
 
 #define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
-  timediff_t timediff = curlx_timedifff(tutil_tvnow(), tv_test_start);     \
+  timediff_t timediff = curlx_timedifff(curlx_now(), tv_test_start);    \
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \

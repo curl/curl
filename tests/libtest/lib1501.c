@@ -83,13 +83,13 @@ static CURLcode test_lib1501(char *URL)
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     curl_mfprintf(stderr, "ping\n");
-    before = tutil_tvnow();
+    before = curlx_now();
 
     multi_perform(mhandle, &still_running);
 
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
-    after = tutil_tvnow();
+    after = curlx_now();
     e = curlx_timedifff(after, before);
     curl_mfprintf(stderr, "pong = %ld\n", e);
 
