@@ -52,7 +52,7 @@ static CURLcode test_lib1507(char *URL)
    CURL *curl = NULL;
    CURLM *mcurl = NULL;
    int still_running = 1;
-   struct timeval mp_start;
+   struct curltime mp_start;
    struct curl_slist *rcpt_list = NULL;
 
    curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -122,7 +122,7 @@ static CURLcode test_lib1507(char *URL)
 
     rc = select(maxfd + 1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    if(tutil_tvdiff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
+    if(curlx_timedifff(tutil_tvnow(), mp_start) > MULTI_PERFORM_HANG_TIMEOUT) {
       curl_mfprintf(stderr, "ABORTING TEST, since it seems "
                     "that it would have run forever.\n");
       break;

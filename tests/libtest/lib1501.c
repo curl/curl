@@ -63,8 +63,8 @@ static CURLcode test_lib1501(char *URL)
     fd_set fdwrite;
     fd_set fdexcep;
     int maxfd = -99;
-    struct timeval before;
-    struct timeval after;
+    struct curltime before;
+    struct curltime after;
     timediff_t e;
 
     timeout.tv_sec = 0;
@@ -90,7 +90,7 @@ static CURLcode test_lib1501(char *URL)
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
     after = tutil_tvnow();
-    e = tutil_tvdiff(after, before);
+    e = curlx_timedifff(after, before);
     curl_mfprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {

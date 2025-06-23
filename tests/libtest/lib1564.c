@@ -34,7 +34,7 @@ static CURLcode test_lib1564(char *URL)
   int numfds;
   int i;
   CURLcode res = CURLE_OK;
-  struct timeval time_before_wait, time_after_wait;
+  struct curltime time_before_wait, time_after_wait;
 
   (void)URL;
 
@@ -50,7 +50,7 @@ static CURLcode test_lib1564(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timedifff(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -67,7 +67,7 @@ static CURLcode test_lib1564(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timedifff(time_after_wait, time_before_wait) > 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -82,7 +82,7 @@ static CURLcode test_lib1564(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timedifff(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -100,7 +100,7 @@ static CURLcode test_lib1564(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timedifff(time_after_wait, time_before_wait) > 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -115,7 +115,7 @@ static CURLcode test_lib1564(char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = tutil_tvnow();
 
-  if(tutil_tvdiff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timedifff(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
