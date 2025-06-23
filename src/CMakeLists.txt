@@ -109,7 +109,7 @@ if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
   endif()
 endif()
 
-source_group("curlX source files" FILES ${CURLX_CFILES})
+source_group("curlx source files" FILES ${CURLX_CFILES})
 source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
 source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
 
