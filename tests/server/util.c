@@ -856,7 +856,10 @@ curl_socket_t sockdaemon(curl_socket_t sock,
 #ifdef USE_UNIX_SOCKETS
     case AF_UNIX:
       rc = bind_unix_socket(sock, unix_socket, &listener.sau);
+      break;
 #endif
+    default:
+      rc = 1;
   }
 
   if(rc) {
