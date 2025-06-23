@@ -41,9 +41,7 @@
 #include <sys/types.h>
 #endif
 
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 
 #if !defined(_WIN32) || defined(__MINGW32__)
 #include <sys/time.h>
