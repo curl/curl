@@ -24,7 +24,7 @@
 #include "first.h"
 
 #ifdef HAVE_LOCALE_H
-#  include <locale.h> /* for setlocale() */
+#include <locale.h> /* for setlocale() */
 #endif
 
 #include "memdebug.h"
