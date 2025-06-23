@@ -707,7 +707,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   }
   strcpy(sau->sun_path, unix_socket);
   rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
-  if(0 != rc && SOCKERRNO == SOCKEADDRINUSE) {
+  if(rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -720,7 +720,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = connect(unixfd, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
     error = SOCKERRNO;
     sclose(unixfd);
-    if(0 != rc && SOCKECONNREFUSED != error) {
+    if(rc && error != SOCKECONNREFUSED) {
       logmsg("Failed to connect to %s (%d) %s",
              unix_socket, error, sstrerror(error));
       return rc;
@@ -732,7 +732,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
 #else
     rc = lstat(unix_socket, &statbuf);
 #endif
-    if(0 != rc) {
+    if(rc) {
       logmsg("Error binding socket, failed to stat %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
@@ -745,7 +745,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
 #endif
     /* dead socket, cleanup and retry bind */
     rc = unlink(unix_socket);
-    if(0 != rc) {
+    if(rc) {
       logmsg("Error binding socket, failed to unlink %s (%d) %s",
              unix_socket, errno, strerror(errno));
       return rc;
@@ -930,7 +930,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
 
   /* start accepting connections */
   rc = listen(sock, 5);
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
     logmsg("listen(%ld, 5) failed with error (%d) %s",
            (long)sock, error, sstrerror(error));

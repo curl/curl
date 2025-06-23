@@ -1127,7 +1127,7 @@ static int test_rtspd(int argc, char *argv[])
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
 #endif /* USE_IPV6 */
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu (%d) %s",
            port, error, sstrerror(error));
@@ -1181,7 +1181,7 @@ static int test_rtspd(int argc, char *argv[])
 
   /* start accepting connections */
   rc = listen(sock, 5);
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
            error, sstrerror(error));

@@ -504,7 +504,7 @@ static int test_dnsd(int argc, char **argv)
     rc = bind(sock, &me.sa, sizeof(me.sa6));
   }
 #endif /* USE_IPV6 */
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
     logmsg("Error binding socket on port %hu (%d) %s", port, error,
            sstrerror(error));
