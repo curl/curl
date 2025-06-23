@@ -52,7 +52,7 @@ proxy
 <protocol>
 GET http://www.example.com:19999/%TESTNUMBER HTTP/1.1
 Host: www.example.com:19999
-Authorization: Basic eHh4Onl5eQ==
+Authorization: Basic %b64[xxx:yyy]b64%
 Accept: */*
 Proxy-Connection: Keep-Alive
 

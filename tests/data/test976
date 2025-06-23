@@ -75,14 +75,14 @@ HTTP with auth redirected to HTTP on a diff port --location-trusted
 <protocol>
 GET http://firsthost.com/ HTTP/1.1
 Host: firsthost.com
-Authorization: Basic am9lOnNlY3JldA==
+Authorization: Basic %b64[joe:secret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://firsthost.com:9999/a/path/%TESTNUMBER0002 HTTP/1.1
 Host: firsthost.com:9999
-Authorization: Basic am9lOnNlY3JldA==
+Authorization: Basic %b64[joe:secret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

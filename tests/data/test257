@@ -88,14 +88,14 @@ machine anotherone.com login user2 password passwd2
 <protocol>
 GET http://supersite.com/want/%TESTNUMBER HTTP/1.1
 Host: supersite.com
-Authorization: Basic dXNlcjE6cGFzc3dkMQ==
+Authorization: Basic %b64[user1:passwd1]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://anotherone.com/%TESTNUMBER0002 HTTP/1.1
 Host: anotherone.com
-Authorization: Basic dXNlcjI6cGFzc3dkMg==
+Authorization: Basic %b64[user2:passwd2]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

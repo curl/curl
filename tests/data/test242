@@ -43,7 +43,7 @@ HTTP-IPv6 GET with username+password in URL
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-Authorization: Basic Zm9vYmFyOmJhcmZvbw==
+Authorization: Basic %b64[foobar:barfoo]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

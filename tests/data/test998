@@ -75,14 +75,14 @@ QUIT
 <protocol>
 GET http://somwhere.example/998 HTTP/1.1
 Host: somwhere.example
-Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
+Authorization: Basic %b64[alberto:einstein]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://somewhere.else.example/a/path/9980002 HTTP/1.1
 Host: somewhere.else.example
-Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
+Authorization: Basic %b64[alberto:einstein]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

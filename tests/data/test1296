@@ -44,7 +44,7 @@ http://user%0aname:password@%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcgpuYW1lOnBhc3N3b3Jk
+Authorization: Basic %b64[user%0aname:password]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

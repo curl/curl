@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic aGVqOnlvdQ==
+Authorization: Basic %b64[hej:you]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
