@@ -109,8 +109,8 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_FILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_FILES) > libcurltool_unity.c
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curlx_src)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curlx_src) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =
