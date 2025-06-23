@@ -769,16 +769,16 @@ static int test_mqttd(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
+      socket_domain = AF_INET6;
       ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
 #ifdef USE_IPV6
+      socket_domain = AF_INET;
       ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
 #endif
       arg++;
     }
@@ -826,14 +826,7 @@ static int test_mqttd(int argc, char *argv[])
 
   install_signal_handlers(FALSE);
 
-#ifdef USE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef USE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
+  sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
