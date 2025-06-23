@@ -26,7 +26,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
-# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
+# Get CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
 include Makefile.inc
 
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
@@ -71,21 +71,24 @@ curl_cfiles_gen =
 curl_hfiles_gen =
 CLEANFILES =
 
-if USE_UNITY
 if USE_CPPFLAG_CURL_STATICLIB
-curlx_src =
+curlx_csrc =
+curlx_hsrc =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-curlx_src = $(CURLX_CFILES)
+curlx_csrc = $(CURLX_CFILES)
+curlx_hsrc = $(CURLX_HFILES)
 endif
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src) > curltool_unity.c
+
+if USE_UNITY
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
+curl_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
@@ -109,14 +112,14 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curlx_src)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curlx_src) > libcurltool_unity.c
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =
 CLEANFILES += libcurltool_unity.c
 else
-libcurltool_la_SOURCES = $(CURL_FILES)
+libcurltool_la_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc)
 endif
 endif
 

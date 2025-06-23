@@ -36,7 +36,7 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
 add_dependencies(testdeps ${BUNDLE})
-target_link_libraries(${BUNDLE} curltool curlu)
+target_link_libraries(${BUNDLE} curltool ${LIB_SELECTED})
 target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx

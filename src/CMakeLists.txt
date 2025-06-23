@@ -66,16 +66,29 @@ if(CURL_CA_EMBED_SET)
   endif()
 endif()
 
-# Get CURL_FILES, CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
+# Get CURL_CFILES, CURL_HFILES, CURLX_CFILES, CURLX_HFILES, CURL_RCFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+
+source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
+source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
+source_group("curlx source files" FILES ${CURLX_CFILES})
+source_group("curlx header files" FILES ${CURLX_HFILES})
 
 if(WIN32)
   list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
 
+set(_curlx_cfiles_lib ${CURLX_CFILES})
+set(_curlx_hfiles_lib ${CURLX_HFILES})
+if(LIB_SELECTED STREQUAL LIB_STATIC)
+  set(_curlx_cfiles_lib "")
+  set(_curlx_hfiles_lib "")
+endif()
+
 if(BUILD_STATIC_CURL)
   set(CURLX_CFILES "")
+  set(CURLX_HFILES "")
 endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
@@ -84,15 +97,17 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
-add_executable(${EXE_NAME} ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen})
+# Build curl executable
+add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_curl_hfiles_gen} ${CURLX_CFILES} ${CURLX_HFILES})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
+target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 
 # special libcurltool library just for unittests
-add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES})
+add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES} ${_curlx_cfiles_lib} ${_curlx_hfiles_lib})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
@@ -108,13 +123,6 @@ if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
     target_link_libraries(${EXE_NAME} PRIVATE "-municode")
   endif()
 endif()
-
-source_group("curlX source files" FILES ${CURLX_CFILES})
-source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
-source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
-
-# Build curl executable
-target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 ################################################################################
 
