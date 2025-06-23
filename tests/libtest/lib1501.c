@@ -91,7 +91,7 @@ static CURLcode test_lib1501(char *URL)
 
     after = curlx_now();
     e = curlx_timediff(after, before);
-    curl_mfprintf(stderr, "pong = %ld\n", e);
+    curl_mfprintf(stderr, "pong = %ld\n", (long)e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
       res = CURLE_TOO_LARGE;
