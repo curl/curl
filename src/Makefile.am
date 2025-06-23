@@ -71,13 +71,14 @@ curl_cfiles_gen =
 curl_hfiles_gen =
 CLEANFILES =
 
-if USE_UNITY
 if USE_CPPFLAG_CURL_STATICLIB
 curlx_src =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_src = $(CURLX_CFILES)
 endif
+
+if USE_UNITY
 curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(curl_cfiles_gen) $(curlx_src) > curltool_unity.c
 
@@ -116,7 +117,7 @@ nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =
 CLEANFILES += libcurltool_unity.c
 else
-libcurltool_la_SOURCES = $(CURL_FILES)
+libcurltool_la_SOURCES = $(CURL_CFILES) $(curlx_src)
 endif
 endif
 
