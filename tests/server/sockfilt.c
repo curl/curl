@@ -555,6 +555,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
 
   return 0;
 }
+
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
   typedef uintptr_t curl_win_thread_handle_t;
@@ -579,6 +580,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
   }
   return NULL;
 }
+
 struct select_ws_data {
   int fd;                /* provided file descriptor  (indexed by nfd) */
   long wsastate;         /* internal pre-select state (indexed by nfd) */
@@ -587,6 +589,7 @@ struct select_ws_data {
   HANDLE signal;         /* internal thread signal    (indexed by nth) */
   HANDLE thread;         /* internal thread handle    (indexed by nth) */
 };
+
 static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
                      fd_set *exceptfds, struct timeval *tv)
 {
