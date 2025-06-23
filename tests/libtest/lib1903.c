@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "timediff.h"
 #include "memdebug.h"
 
 static CURLcode test_lib1903(char *URL)
