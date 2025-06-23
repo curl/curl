@@ -25,16 +25,6 @@
  ***************************************************************************/
 #include "test.h"
 
-struct timeval tutil_tvnow(void);
-
-/*
- * Make sure that the first argument (t1) is the more recent time and t2 is
- * the older time, as otherwise you get a weird negative time-diff back...
- *
- * Returns: the time difference in number of milliseconds.
- */
-long tutil_tvdiff(struct timeval t1, struct timeval t2);
-
 /* build request url */
 char *tutil_suburl(const char *base, int i);
 
