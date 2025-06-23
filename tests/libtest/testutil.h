@@ -29,7 +29,7 @@
 char *tutil_suburl(const char *base, int i);
 
 #ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
+#include <sys/resource.h>  /* for getrlimit() */
 #endif
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
