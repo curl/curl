@@ -27,7 +27,6 @@
 
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
-#include <unistd.h>
 
 #define CONN_NUM 3
 #define TIME_BETWEEN_START_SECS 2
