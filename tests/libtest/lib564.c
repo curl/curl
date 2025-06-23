@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <fcntl.h>
-
 #include "memdebug.h"
 
 static CURLcode test_lib564(char *URL)

@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 #include "testutil.h"
 #include "memdebug.h"
 

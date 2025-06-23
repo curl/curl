@@ -30,8 +30,6 @@
 
 #include "first.h"
 
-#include <fcntl.h>
-
 #include "memdebug.h"
 
 

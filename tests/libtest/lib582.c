@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <fcntl.h>
-
 #include "memdebug.h"
 
 struct t582_Sockets {
