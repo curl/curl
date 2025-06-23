@@ -77,9 +77,6 @@
 /* Define if you have the <sys/sockio.h> header file. */
 /* #define HAVE_SYS_SOCKIO_H 1 */
 
-/* Define if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
-
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 

@@ -3912,7 +3912,6 @@ AC_CHECK_HEADERS(
   netinet/udp.h \
   netdb.h \
   sys/sockio.h \
-  sys/stat.h \
   sys/param.h \
   termios.h \
   termio.h \

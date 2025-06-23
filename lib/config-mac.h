@@ -50,7 +50,6 @@
 #define HAVE_SYS_TYPES_H        1
 #define HAVE_GETTIMEOFDAY       1
 #define HAVE_FCNTL_H            1
-#define HAVE_SYS_STAT_H         1
 #define HAVE_UTIME_H            1
 #define HAVE_SYS_UTIME_H        1
 #define HAVE_SYS_IOCTL_H        1
