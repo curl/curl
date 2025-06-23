@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <sys/stat.h>
-
 #if defined(_WIN32) && !defined(UNDER_CE)
 #  include <direct.h>
 #endif

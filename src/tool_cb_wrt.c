@@ -28,8 +28,6 @@
 #include <fcntl.h>
 #endif
 
-#include <sys/stat.h>
-
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"

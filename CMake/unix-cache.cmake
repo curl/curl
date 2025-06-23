@@ -286,7 +286,6 @@ if(CYGWIN OR
 else()
   set(HAVE_SYS_SOCKIO_H 1)
 endif()
-set(HAVE_SYS_STAT_H 1)
 set(HAVE_SYS_TYPES_H 1)
 set(HAVE_SYS_UN_H 1)
 if(CYGWIN)

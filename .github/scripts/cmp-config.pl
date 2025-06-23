@@ -73,6 +73,7 @@ my %remove = (
     '#define HAVE_STDIO_H 1' => 1,
     '#define HAVE_STDLIB_H 1' => 1,
     '#define HAVE_STRING_H 1' => 1,
+    '#define HAVE_SYS_STAT_H 1' => 1,
     '#define HAVE_SYS_XATTR_H 1' => 1,
     '#define HAVE_UNICODE_UIDNA_H 1' => 1,
     '#define HAVE_WOLFSSH_SSH_H 1' => 1,

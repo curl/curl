@@ -161,9 +161,6 @@
 /* Define if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H
 
-/* Define if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H
-
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H
 
