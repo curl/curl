@@ -451,8 +451,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
   data->state.async.done = TRUE;
-  if(entry)
-    *entry = data->state.async.dns;
+  *entry = data->state.async.dns;
 
   if(result)
     ares_cancel(ares->channel);
