@@ -1260,16 +1260,16 @@ static int test_sockfilt(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
+      socket_domain = AF_INET6;
       ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
 #ifdef USE_IPV6
+      socket_domain = AF_INET;
       ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
 #endif
       arg++;
     }
@@ -1339,14 +1339,7 @@ static int test_sockfilt(int argc, char *argv[])
 
   install_signal_handlers(false);
 
-#ifdef USE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef USE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
+  sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
@@ -1358,31 +1351,31 @@ static int test_sockfilt(int argc, char *argv[])
   if(server_connectport) {
     /* Active mode, we should connect to the given port number */
     mode = ACTIVE;
-#ifdef USE_IPV6
-    if(!use_ipv6) {
-#endif
-      memset(&me.sa4, 0, sizeof(me.sa4));
-      me.sa4.sin_family = AF_INET;
-      me.sa4.sin_port = htons(server_connectport);
-      me.sa4.sin_addr.s_addr = INADDR_ANY;
-      if(!addr)
-        addr = "127.0.0.1";
-      curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+    switch(socket_domain) {
+      case AF_INET:
+        memset(&me.sa4, 0, sizeof(me.sa4));
+        me.sa4.sin_family = AF_INET;
+        me.sa4.sin_port = htons(server_connectport);
+        me.sa4.sin_addr.s_addr = INADDR_ANY;
+        if(!addr)
+          addr = "127.0.0.1";
+        curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
-      rc = connect(sock, &me.sa, sizeof(me.sa4));
+        rc = connect(sock, &me.sa, sizeof(me.sa4));
+        break;
 #ifdef USE_IPV6
-    }
-    else {
-      memset(&me.sa6, 0, sizeof(me.sa6));
-      me.sa6.sin6_family = AF_INET6;
-      me.sa6.sin6_port = htons(server_connectport);
-      if(!addr)
-        addr = "::1";
-      curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+      case AF_INET6:
+        memset(&me.sa6, 0, sizeof(me.sa6));
+        me.sa6.sin6_family = AF_INET6;
+        me.sa6.sin6_port = htons(server_connectport);
+        if(!addr)
+          addr = "::1";
+        curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
-      rc = connect(sock, &me.sa, sizeof(me.sa6));
-    }
+        rc = connect(sock, &me.sa, sizeof(me.sa6));
+        break;
 #endif /* USE_IPV6 */
+    }
     if(rc) {
       error = SOCKERRNO;
       logmsg("Error connecting to port %hu (%d) %s",
