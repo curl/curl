@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
+#include <curlx/curlx.h>  /* for timediff */
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
