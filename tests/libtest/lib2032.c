@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <assert.h>
-
 #include "memdebug.h"
 
 #define MAX_EASY_HANDLES 3
