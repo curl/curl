@@ -25,9 +25,6 @@
 
 #include "tool_getparam.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "memdebug.h" /* LAST include file */
 
 static CURLcode test_tool1394(char *arg)
