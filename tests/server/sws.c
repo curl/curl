@@ -2200,7 +2200,7 @@ static int test_sws(int argc, char *argv[])
     rc = bind_unix_socket(sock, unix_socket, &me.sau);
 #endif /* USE_UNIX_SOCKETS */
   }
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
@@ -2266,7 +2266,7 @@ static int test_sws(int argc, char *argv[])
 
   /* start accepting connections */
   rc = listen(sock, 50);
-  if(0 != rc) {
+  if(rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s", error, sstrerror(error));
     goto sws_cleanup;

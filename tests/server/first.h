@@ -135,6 +135,10 @@ extern int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                             struct sockaddr_un *sau);
 #endif
 extern unsigned short util_ultous(unsigned long ulnum);
+extern curl_socket_t sockdaemon(curl_socket_t sock,
+                                unsigned short *listenport,
+                                const char *unix_socket,
+                                bool bind_only);
 
 /* global variables */
 static const char *srcpath = "."; /* pointing to the test dir */
