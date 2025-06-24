@@ -242,15 +242,15 @@ static size_t readcb(char *buffer,
 
 static void errlongzero(const char *name, CURLcode code, int lineno)
 {
-  printf("%s set to 0 returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+  curl_mprintf("%s set to 0 returned %d, \\"%s\\" on line %d\\n",
+               name, code, curl_easy_strerror(code), lineno);
 }
 
 static void errlong(const char *name, CURLcode code, int lineno)
 {
 $allowednumerrors
-  printf("%s set to non-zero returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+  curl_mprintf("%s set to non-zero returned %d, \\"%s\\" on line %d\\n",
+               name, code, curl_easy_strerror(code), lineno);
 }
 
 static void errstring(const char *name, CURLcode code, int lineno)
@@ -258,26 +258,26 @@ static void errstring(const char *name, CURLcode code, int lineno)
   /* allow this set of options to return CURLE_BAD_FUNCTION_ARGUMENT
      when given a strange string input */
 $allowedstringerrors
-  printf("%s set to a string returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+  curl_mprintf("%s set to a string returned %d, \\"%s\\" on line %d\\n",
+               name, code, curl_easy_strerror(code), lineno);
 }
 
 static void err(const char *name, CURLcode val, int lineno)
 {
-  printf("%s returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+  curl_mprintf("%s returned %d, \\"%s\\" on line %d\\n",
+               name, val, curl_easy_strerror(val), lineno);
 }
 
 static void errnull(const char *name, CURLcode val, int lineno)
 {
-  printf("%s set to NULL returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+  curl_mprintf("%s set to NULL returned %d, \\"%s\\" on line %d\\n",
+               name, val, curl_easy_strerror(val), lineno);
 }
 
 static void t1521_geterr(const char *name, CURLcode val, int lineno)
 {
-  printf("CURLINFO_%s returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+  curl_mprintf("CURLINFO_%s returned %d, \\"%s\\" on line %d\\n",
+               name, val, curl_easy_strerror(val), lineno);
 }
 
 static curl_progress_callback progresscb;
