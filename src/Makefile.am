@@ -86,7 +86,7 @@ nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
+curl_SOURCES = $(CURL_CFILES) $(curlx_src) $(curl_cfiles_gen) $(curl_hfiles_gen)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
