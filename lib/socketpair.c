@@ -84,6 +84,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
 
 #ifndef CURL_DISABLE_SOCKETPAIR
 #ifdef HAVE_SOCKETPAIR
+#ifdef USE_SOCKETPAIR
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2], bool nonblocking)
 {
@@ -104,6 +105,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 #endif
   return 0;
 }
+#endif /* USE_SOCKETPAIR */
 #else /* !HAVE_SOCKETPAIR */
 #ifdef _WIN32
 /*

@@ -282,7 +282,6 @@ HTTP/3:
               .github/workflows/ngtcp2*,\
               .github/workflows/quiche*,\
               .github/workflows/osslq*,\
-              CMake/FindMSH3.cmake,\
               CMake/FindNGHTTP3.cmake,\
               CMake/FindNGTCP2.cmake,\
               docs/HTTP3.md,\

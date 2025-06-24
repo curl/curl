@@ -80,7 +80,6 @@ where `<options>` is one or many of:
                                    Defaults to sibling directory: `../deps`
  - `WITH_SSL=<dll/static>`       - Enable OpenSSL support, DLL or static
  - `WITH_NGHTTP2=<dll/static>`   - Enable HTTP/2 support, DLL or static
- - `WITH_MSH3=<dll/static>`      - Enable (experimental) HTTP/3 support, DLL or static
  - `WITH_MBEDTLS=<dll/static>`   - Enable mbedTLS support, DLL or static
  - `WITH_WOLFSSL=<dll/static>`   - Enable wolfSSL support, DLL or static
  - `WITH_CARES=<dll/static>`     - Enable c-ares support, DLL or static
@@ -106,7 +105,6 @@ where `<options>` is one or many of:
  - `MBEDTLS_PATH=<path>`         - Custom path for mbedTLS
  - `WOLFSSL_PATH=<path>`         - Custom path for wolfSSL
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
- - `MSH3_PATH=<path>`            - Custom path for msh3
  - `SSH_PATH=<path>`             - Custom path for libssh
  - `SSH2_PATH=<path>`            - Custom path for libssh2
  - `SSL_PATH=<path>`             - Custom path for OpenSSL

@@ -219,8 +219,8 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
-#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
-       !defined(OPENSSL_QUIC_API2)) || defined(USE_MSH3)
+#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3) &&   \
+       !defined(OPENSSL_QUIC_API2))
 #define OSSL_PACKAGE "quictls"
 #else
 #define OSSL_PACKAGE "OpenSSL"
