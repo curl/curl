@@ -45,8 +45,6 @@ include Makefile.inc
 EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES) \
   test307.pl test610.pl test613.pl test1013.pl test1022.pl mk-lib1521.pl
 
-CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
-
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
