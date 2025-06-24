@@ -25,8 +25,6 @@
 
 #include "curl_memory.h"
 
-#ifndef CURL_STATICLIB
-
 #ifdef UNDER_CE
 #define system_strdup _strdup
 #else
@@ -50,5 +48,3 @@ curl_wcsdup_callback Curl_cwcsdup = NULL; /* not used in test code */
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(pop)
 #endif
-
-#endif /* !CURL_STATICLIB */
