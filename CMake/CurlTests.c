@@ -209,9 +209,6 @@ int main(void)
 #ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 #endif
-#ifdef HAVE_STROPTS_H
-#  include <stropts.h>
-#endif
 int main(void)
 {
   int flags = 0;
@@ -235,9 +232,6 @@ int main(void)
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
-#endif
-#ifdef HAVE_STROPTS_H
-#  include <stropts.h>
 #endif
 #include <net/if.h>
 int main(void)

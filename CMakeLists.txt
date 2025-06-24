@@ -1662,7 +1662,6 @@ check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
 check_include_file("stdbool.h"        HAVE_STDBOOL_H)
 check_include_file("stdint.h"         HAVE_STDINT_H)
 check_include_file("strings.h"        HAVE_STRINGS_H)
-check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
 check_include_file("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat_curl("unistd.h"         HAVE_UNISTD_H)
@@ -1677,7 +1676,6 @@ endif()
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
     HAVE_STDBOOL_H
-    HAVE_STROPTS_H
     HAVE_SYS_IOCTL_H
     HAVE_SYS_TYPES_H
     HAVE_UNISTD_H

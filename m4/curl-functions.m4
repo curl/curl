@@ -228,36 +228,6 @@ curl_includes_string="\
 ])
 
 
-dnl CURL_INCLUDES_STROPTS
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when stropts.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_STROPTS], [
-curl_includes_stropts="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-#ifndef _WIN32
-#  include <sys/socket.h>
-#endif
-#ifdef HAVE_SYS_IOCTL_H
-#  include <sys/ioctl.h>
-#endif
-#ifdef HAVE_STROPTS_H
-#  include <stropts.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h unistd.h sys/ioctl.h stropts.h,
-    [], [], [$curl_includes_stropts])
-])
-
-
 dnl CURL_INCLUDES_SYS_SOCKET
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be

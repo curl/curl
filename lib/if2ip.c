@@ -45,9 +45,6 @@
 #ifdef HAVE_IFADDRS_H
 #  include <ifaddrs.h>
 #endif
-#ifdef HAVE_STROPTS_H
-#  include <stropts.h>
-#endif
 #ifdef __VMS
 #  include <inet.h>
 #endif
