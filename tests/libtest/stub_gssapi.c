@@ -320,7 +320,7 @@ OM_uint32 gss_display_status(OM_uint32 *min,
                              OM_uint32 *message_context,
                              gss_buffer_t status_string)
 {
-  const char maj_str[] = "Stub GSS error";
+  static const char maj_str[] = "Stub GSS error";
   (void)mech_type;
   if(min)
     *min = 0;
