@@ -31,7 +31,7 @@ static CURLcode test_tool1394(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  const char *values[] = {
+  static const char *values[] = {
     /* -E parameter */        /* exp. cert name */  /* exp. passphrase */
     "foo:bar:baz",            "foo",                "bar:baz",
     "foo\\:bar:baz",          "foo:bar",            "baz",
