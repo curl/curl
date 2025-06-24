@@ -1900,7 +1900,7 @@ static char bigpart[120000];
  */
 static int huge(void)
 {
-  const char *smallpart = "c";
+  static const char *smallpart = "c";
   int i;
   CURLU *urlp = curl_url();
   CURLUcode rc;
@@ -1954,7 +1954,7 @@ static int huge(void)
 
 static int urldup(void)
 {
-  const char *url[] = {
+  static const char *url[] = {
     "http://"
     "user:pwd@"
     "[2a04:4e42:e00::347%25eth0]"
