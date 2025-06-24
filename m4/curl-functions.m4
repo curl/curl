@@ -228,6 +228,33 @@ curl_includes_string="\
 ])
 
 
+dnl CURL_INCLUDES_IOCTL
+dnl -------------------------------------------------
+dnl Set up variable with list of headers that must be
+dnl included for ioctl().
+
+AC_DEFUN([CURL_INCLUDES_IOCTL], [
+curl_includes_ioctl="\
+/* includes start */
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+#ifndef _WIN32
+#  include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
+/* includes end */"
+  AC_CHECK_HEADERS(
+    sys/types.h unistd.h sys/ioctl.h,
+    [], [], [$curl_includes_ioctl])
+])
+
+
 dnl CURL_INCLUDES_SYS_SOCKET
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -2498,7 +2525,7 @@ dnl shell variable curl_disallow_ioctl, then
 dnl curl_cv_func_ioctl is set to "yes".
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
-  AC_REQUIRE([CURL_INCLUDES_STROPTS])dnl
+  AC_REQUIRE([CURL_INCLUDES_IOCTL])dnl
   #
   tst_links_ioctl="unknown"
   tst_proto_ioctl="unknown"
@@ -2519,7 +2546,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
   if test "$tst_links_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl is prototyped])
     AC_EGREP_CPP([ioctl],[
-      $curl_includes_stropts
+      $curl_includes_ioctl
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_ioctl="yes"
@@ -2533,7 +2560,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
     AC_MSG_CHECKING([if ioctl is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_stropts
+        $curl_includes_ioctl
       ]],[[
         if(0 != ioctl(0, 0, 0))
           return 1;
@@ -2590,7 +2617,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
     AC_MSG_CHECKING([if ioctl FIONBIO is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_stropts
+        $curl_includes_ioctl
       ]],[[
         int flags = 0;
         if(0 != ioctl(0, FIONBIO, &flags))
@@ -2646,7 +2673,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
     AC_MSG_CHECKING([if ioctl SIOCGIFADDR is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-        $curl_includes_stropts
+        $curl_includes_ioctl
         #include <net/if.h>
       ]],[[
         struct ifreq ifr;
