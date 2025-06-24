@@ -68,7 +68,7 @@ CURLcode Curl_uint_tbl_resize(struct uint_tbl *tbl, unsigned int nrows)
 {
   /* we use `tbl->nrows + 1` during iteration, want that to work */
   DEBUGASSERT(tbl->init == CURL_UINT_TBL_MAGIC);
-  if(!nrows || (nrows == UINT_MAX))
+  if(!nrows)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(nrows != tbl->nrows) {
     void **rows = calloc(nrows, sizeof(void *));
@@ -130,7 +130,7 @@ bool Curl_uint_tbl_add(struct uint_tbl *tbl, void *entry, unsigned int *pkey)
   DEBUGASSERT(tbl->init == CURL_UINT_TBL_MAGIC);
   if(!entry || !pkey)
     return FALSE;
-  *pkey = UINT_MAX; /* always invalid */
+  *pkey = UINT_MAX;
   if(tbl->nentries == tbl->nrows)  /* full */
     return FALSE;
 

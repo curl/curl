@@ -339,35 +339,58 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 static CURLMcode multi_xfers_add(struct Curl_multi *multi,
                                  struct Curl_easy *data)
 {
-  /* We want `multi->xfers` to have "sufficient" free rows, so that we do
-   * have to reuse the `mid` from a just removed easy right away.
-   * Since uint_tbl and uint_bset is quite memory efficient,
-   * regard less than 25% free as insufficient.
-   * (for low capacities, e.g. multi_easy, 4 or less). */
   unsigned int capacity = Curl_uint_tbl_capacity(&multi->xfers);
-  unsigned int unused = capacity - Curl_uint_tbl_count(&multi->xfers);
-  unsigned int min_unused = CURLMAX(capacity >> 2, 4);
+  unsigned int new_size = 0;
+  /* Prepare to make this into a CURLMOPT_MAX_TRANSFERS, because some
+   * applications may want to prevent a run-away of their memory use. */
+  /* UINT_MAX is our "invalid" id, do not let the table grow up to that. */
+  const unsigned int max_capacity = UINT_MAX - 1;
 
-  if(unused <= min_unused) {
-     /* make it a 64 multiple, since our bitsets frow by that and
-      * small (easy_multi) grows to at least 64 on first resize. */
-    unsigned int newsize = (((capacity + min_unused) + 63) / 64) * 64;
-    DEBUGASSERT(newsize > capacity);
+  if(capacity < max_capacity) {
+    /* We want `multi->xfers` to have "sufficient" free rows, so that we do
+     * have to reuse the `mid` from a just removed easy right away.
+     * Since uint_tbl and uint_bset are quite memory efficient,
+     * regard less than 25% free as insufficient.
+     * (for low capacities, e.g. multi_easy, 4 or less). */
+    unsigned int used = Curl_uint_tbl_count(&multi->xfers);
+    unsigned int unused = capacity - used;
+    unsigned int min_unused = CURLMAX(capacity >> 2, 4);
+    if(unused <= min_unused) {
+      /* Make sure the uint arithmetic here works on the corner
+       * cases where we are close to max_capacity or UINT_MAX */
+      if((min_unused >= max_capacity) ||
+         ((max_capacity - min_unused) <= capacity) ||
+         ((UINT_MAX - min_unused - 63) <= capacity)) {
+        new_size = max_capacity; /* can not be larger than this */
+      }
+      else {
+         /* make it a 64 multiple, since our bitsets frow by that and
+          * small (easy_multi) grows to at least 64 on first resize. */
+        new_size = CURLMIN((((used + min_unused) + 63) / 64) * 64,
+                           max_capacity);
+      }
+    }
+  }
+
+  if(new_size > capacity) {
     /* Grow the bitsets first. Should one fail, we do not need
      * to downsize the already resized ones. The sets continue
      * to work properly when larger than the table, but not
      * the other way around. */
-    if(Curl_uint_bset_resize(&multi->process, newsize) ||
-       Curl_uint_bset_resize(&multi->dirty, newsize) ||
-       Curl_uint_bset_resize(&multi->pending, newsize) ||
-       Curl_uint_bset_resize(&multi->msgsent, newsize) ||
-       Curl_uint_tbl_resize(&multi->xfers, newsize))
+    CURL_TRC_M(data, "increasing xfer table size to %u", new_size);
+    if(Curl_uint_bset_resize(&multi->process, new_size) ||
+       Curl_uint_bset_resize(&multi->dirty, new_size) ||
+       Curl_uint_bset_resize(&multi->pending, new_size) ||
+       Curl_uint_bset_resize(&multi->msgsent, new_size) ||
+       Curl_uint_tbl_resize(&multi->xfers, new_size))
       return CURLM_OUT_OF_MEMORY;
-    CURL_TRC_M(data, "increased xfer table size to %u", newsize);
   }
-  /* Insert the easy into the table now that MUST have room for it */
+
+  /* Insert the easy into the table now */
   if(!Curl_uint_tbl_add(&multi->xfers, data, &data->mid)) {
-    DEBUGASSERT(0);
+    /* MUST only happen when table is full */
+    DEBUGASSERT(Curl_uint_tbl_capacity(&multi->xfers) <=
+                Curl_uint_tbl_count(&multi->xfers));
     return CURLM_OUT_OF_MEMORY;
   }
   return CURLM_OK;

@@ -42,6 +42,7 @@
 struct uint_bset {
   curl_uint64_t *slots;
   unsigned int nslots;
+  unsigned int first_slot_used;
 #ifdef DEBUGBUILD
   int init;
 #endif
