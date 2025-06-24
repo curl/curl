@@ -84,7 +84,7 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
-add_executable(${EXE_NAME} ${CURL_CFILES} ${CURLX_CFILES} ${_curl_cfiles_gen} ${CURL_HFILES} ${CURLX_HFILES} ${_curl_hfiles_gen})
+add_executable(${EXE_NAME} ${CURL_CFILES} ${CURLX_CFILES} ${_curl_cfiles_gen})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
@@ -92,7 +92,7 @@ add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
 
 # special libcurltool library just for unittests
-add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURLX_CFILES} ${CURL_HFILES} ${CURLX_HFILES})
+add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURLX_CFILES})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
 set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
