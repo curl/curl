@@ -135,9 +135,9 @@ static CURLcode test_unit1655(char *arg)
     const size_t buflen = sizeof(buffer);
     const size_t magic1 = 9765;
     size_t olen1 = magic1;
-    const char *sunshine1 = "a.com";
-    const char *dotshine1 = "a.com.";
-    const char *sunshine2 = "aa.com";
+    static const char *sunshine1 = "a.com";
+    static const char *dotshine1 = "a.com.";
+    static const char *sunshine2 = "aa.com";
     size_t olen2;
     DOHcode ret2;
     size_t olen;

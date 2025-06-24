@@ -31,7 +31,7 @@ static CURLcode test_tool1394(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  const char *values[] = {
+  static const char *values[] = {
     /* -E parameter */        /* exp. cert name */  /* exp. passphrase */
     "foo:bar:baz",            "foo",                "bar:baz",
     "foo\\:bar:baz",          "foo:bar",            "baz",
@@ -74,20 +74,20 @@ static CURLcode test_tool1394(char *arg)
       if(certname) {
         if(strcmp(p[1], certname)) {
           printf("expected certname '%s' but got '%s' "
-              "for -E param '%s'\n", p[1], certname, p[0]);
+                 "for -E param '%s'\n", p[1], certname, p[0]);
           fail("assertion failure");
         }
       }
       else {
         printf("expected certname '%s' but got NULL "
-            "for -E param '%s'\n", p[1], p[0]);
+               "for -E param '%s'\n", p[1], p[0]);
         fail("assertion failure");
       }
     }
     else {
       if(certname) {
         printf("expected certname NULL but got '%s' "
-            "for -E param '%s'\n", certname, p[0]);
+               "for -E param '%s'\n", certname, p[0]);
         fail("assertion failure");
       }
     }
@@ -95,20 +95,20 @@ static CURLcode test_tool1394(char *arg)
       if(passphrase) {
         if(strcmp(p[2], passphrase)) {
           printf("expected passphrase '%s' but got '%s'"
-              "for -E param '%s'\n", p[2], passphrase, p[0]);
+                 "for -E param '%s'\n", p[2], passphrase, p[0]);
           fail("assertion failure");
         }
       }
       else {
         printf("expected passphrase '%s' but got NULL "
-            "for -E param '%s'\n", p[2], p[0]);
+               "for -E param '%s'\n", p[2], p[0]);
         fail("assertion failure");
       }
     }
     else {
       if(passphrase) {
         printf("expected passphrase NULL but got '%s' "
-            "for -E param '%s'\n", passphrase, p[0]);
+               "for -E param '%s'\n", passphrase, p[0]);
         fail("assertion failure");
       }
     }

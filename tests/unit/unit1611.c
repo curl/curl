@@ -30,8 +30,8 @@ static CURLcode test_unit1611(char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #ifdef USE_CURL_NTLM_CORE
-  const char string1[] = "1";
-  const char string2[] = "hello-you-fool";
+  static const char string1[] = "1";
+  static const char string2[] = "hello-you-fool";
   unsigned char output[MD4_DIGEST_LENGTH];
   unsigned char *testp = output;
 

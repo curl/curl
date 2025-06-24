@@ -39,8 +39,8 @@ static CURLcode test_unit1610(char *arg)
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
     || defined(USE_LIBSSH2)
 
-  const char string1[] = "1";
-  const char string2[] = "hello-you-fool";
+  static const char string1[] = "1";
+  static const char string2[] = "hello-you-fool";
   unsigned char output[CURL_SHA256_DIGEST_LENGTH];
   unsigned char *testp = output;
 

@@ -53,7 +53,7 @@ again:
 
   if(!res) {
     /* we are connected, now get an HTTP document the raw way */
-    const char *request =
+    static const char *request =
       "GET /556 HTTP/1.1\r\n"
       "Host: ninja\r\n\r\n";
     const char *sbuf = request;
