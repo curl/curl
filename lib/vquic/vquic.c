@@ -35,7 +35,6 @@
 #include "../curlx/dynbuf.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
-#include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_osslq.h"
 #include "curl_quiche.h"
@@ -76,8 +75,6 @@ void Curl_quic_ver(char *p, size_t len)
   Curl_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
-#elif defined(USE_MSH3)
-  Curl_msh3_ver(p, len);
 #endif
 }
 
@@ -691,8 +688,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   return Curl_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
-#elif defined(USE_MSH3)
-  return Curl_cf_msh3_create(pcf, data, conn, ai);
 #else
   *pcf = NULL;
   (void)data;

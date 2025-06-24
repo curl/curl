@@ -114,8 +114,6 @@ class TestDownload:
     def test_02_05_download_many_sequential(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 shaky here")
         if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
            sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
@@ -220,8 +218,6 @@ class TestDownload:
     def test_02_11_10MB_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
@@ -258,8 +254,6 @@ class TestDownload:
     def test_02_14_not_found(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)
@@ -274,8 +268,6 @@ class TestDownload:
     def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)

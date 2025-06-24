@@ -49,8 +49,6 @@ env:
   WOLFSSH_VERSION: 1.4.19
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 3.6.4
-  # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
-  MSH3_VERSION: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.55.0
   # handled in renovate.json
@@ -127,19 +125,7 @@ jobs:
             install_steps: skipall
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
-          - name: 'msh3'
-            install_packages: zlib1g-dev
-            install_steps: quictls msh3
-            LDFLAGS: -Wl,-rpath,/home/runner/msh3/lib -Wl,-rpath,/home/runner/quictls/lib
-            configure: --with-msh3=/home/runner/msh3 --with-openssl=/home/runner/quictls --enable-debug
-
-          - name: 'msh3'
-            install_packages: zlib1g-dev
-            install_steps: quictls msh3 skipall
-            PKG_CONFIG_PATH: /home/runner/msh3/lib/pkgconfig  # Broken as of v0.6.0
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=/home/runner/msh3/include -DMSH3_LIBRARY=/home/runner/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
-
-          - name: 'awslc'
+          - name: awslc
             install_packages: zlib1g-dev
             install_steps: awslc pytest
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
@@ -499,25 +485,6 @@ jobs:
           ./config --prefix=/home/runner/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
-
-      - name: 'cache msh3'
-        if: ${{ contains(matrix.build.install_steps, 'msh3') }}
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-msh3
-        env:
-          cache-name: cache-msh3
-        with:
-          path: ~/msh3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MSH3_VERSION }}
-
-      - name: 'build msh3'
-        if: ${{ contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true' }}
-        run: |
-          git clone --quiet --depth=1 -b "v${MSH3_VERSION}" --recursive https://github.com/nibanks/msh3
-          cd msh3
-          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=/home/runner/msh3
-          cmake --build .
-          cmake --install .
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') }}
