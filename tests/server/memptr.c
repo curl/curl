@@ -33,8 +33,6 @@
 #define system_strdup strdup
 #endif
 
-#include "curl_memory.h"
-
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(push)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
