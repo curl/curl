@@ -74,14 +74,13 @@ void Curl_uint_bset_destroy(struct uint_bset *bset)
   memset(bset, 0, sizeof(*bset));
 }
 
-
-unsigned int Curl_uint_bset_capacity(struct uint_bset *bset)
+#ifdef UNITTESTS
+UNITTEST unsigned int Curl_uint_bset_capacity(struct uint_bset *bset)
 {
   return bset->nslots * 64;
 }
 
-
-unsigned int Curl_uint_bset_count(struct uint_bset *bset)
+UNITTEST unsigned int Curl_uint_bset_count(struct uint_bset *bset)
 {
   unsigned int i;
   unsigned int n = 0;
@@ -91,7 +90,7 @@ unsigned int Curl_uint_bset_count(struct uint_bset *bset)
   }
   return n;
 }
-
+#endif
 
 bool Curl_uint_bset_empty(struct uint_bset *bset)
 {

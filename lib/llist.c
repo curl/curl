@@ -181,7 +181,8 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
 /*
  * @unittest: 1300
  */
-void
+UNITTEST void Curl_node_uremove(struct Curl_llist_node *, void *);
+UNITTEST void
 Curl_node_uremove(struct Curl_llist_node *e, void *user)
 {
   struct Curl_llist *list;

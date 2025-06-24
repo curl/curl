@@ -34,6 +34,9 @@
 #define CURL_UINT_TBL_MAGIC  0x62757473
 #endif
 
+/* Clear the table, making it empty. */
+UNITTEST void Curl_uint_tbl_clear(struct uint_tbl *tbl);
+
 void Curl_uint_tbl_init(struct uint_tbl *tbl,
                         Curl_uint_tbl_entry_dtor *entry_dtor)
 {
@@ -95,8 +98,7 @@ void Curl_uint_tbl_destroy(struct uint_tbl *tbl)
   memset(tbl, 0, sizeof(*tbl));
 }
 
-
-void Curl_uint_tbl_clear(struct uint_tbl *tbl)
+UNITTEST void Curl_uint_tbl_clear(struct uint_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT_TBL_MAGIC);
   uint_tbl_clear_rows(tbl, 0, tbl->nrows);

@@ -64,9 +64,6 @@ unsigned int Curl_uint_spbset_count(struct uint_spbset *bset);
 /* TRUE of bitset is empty */
 bool Curl_uint_spbset_empty(struct uint_spbset *bset);
 
-/* Clear the bitset, making it empty. */
-void Curl_uint_spbset_clear(struct uint_spbset *bset);
-
 /* Add the number `i` to the bitset.
  * Numbers can be added more than once, without making a difference.
  * Returns FALSE if allocations failed. */
