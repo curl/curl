@@ -45,7 +45,8 @@ void Curl_uint_bset_init(struct uint_bset *bset)
 
 CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
 {
-  unsigned int nslots = (nmax + 63) / 64;
+  unsigned int nslots = (nmax < (UINT_MAX-63)) ?
+                        ((nmax + 63) / 64) : (UINT_MAX / 64);
 
   DEBUGASSERT(bset->init == CURL_UINT_BSET_MAGIC);
   if(nslots != bset->nslots) {
@@ -60,6 +61,7 @@ CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
     }
     bset->slots = slots;
     bset->nslots = nslots;
+    bset->first_slot_used = 0;
   }
   return CURLE_OK;
 }
@@ -94,7 +96,7 @@ unsigned int Curl_uint_bset_count(struct uint_bset *bset)
 bool Curl_uint_bset_empty(struct uint_bset *bset)
 {
   unsigned int i;
-  for(i = 0; i < bset->nslots; ++i) {
+  for(i = bset->first_slot_used; i < bset->nslots; ++i) {
     if(bset->slots[i])
       return FALSE;
   }
@@ -104,8 +106,10 @@ bool Curl_uint_bset_empty(struct uint_bset *bset)
 
 void Curl_uint_bset_clear(struct uint_bset *bset)
 {
-  if(bset->nslots)
+  if(bset->nslots) {
     memset(bset->slots, 0, bset->nslots * sizeof(curl_uint64_t));
+    bset->first_slot_used = UINT_MAX;
+  }
 }
 
 
@@ -115,6 +119,8 @@ bool Curl_uint_bset_add(struct uint_bset *bset, unsigned int i)
   if(islot >= bset->nslots)
     return FALSE;
   bset->slots[islot] |= ((curl_uint64_t)1 << (i % 64));
+  if(islot < bset->first_slot_used)
+    bset->first_slot_used = islot;
   return TRUE;
 }
 
@@ -139,13 +145,14 @@ bool Curl_uint_bset_contains(struct uint_bset *bset, unsigned int i)
 bool Curl_uint_bset_first(struct uint_bset *bset, unsigned int *pfirst)
 {
   unsigned int i;
-  for(i = 0; i < bset->nslots; ++i) {
+  for(i = bset->first_slot_used; i < bset->nslots; ++i) {
     if(bset->slots[i]) {
       *pfirst = (i * 64) + CURL_CTZ64(bset->slots[i]);
+      bset->first_slot_used = i;
       return TRUE;
     }
   }
-  *pfirst = UINT_MAX; /* a value we cannot store */
+  bset->first_slot_used = *pfirst = UINT_MAX;
   return FALSE;
 }
 

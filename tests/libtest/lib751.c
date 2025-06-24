@@ -63,7 +63,7 @@ static CURLcode test_lib751(char *URL)
 
     mres = curl_multi_add_handle(m, e);
     if(mres != CURLM_OK) {
-      printf("MULTI ERROR: %s\n", curl_multi_strerror(mres));
+      curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mres));
       res = CURLE_FAILED_INIT;
       goto test_cleanup;
     }
@@ -72,7 +72,7 @@ static CURLcode test_lib751(char *URL)
 test_cleanup:
 
   if(res)
-    printf("ERROR: %s\n", curl_easy_strerror(res));
+    curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
 
   for(i = 0; i < 1000; i++) {
     if(easies[i]) {
