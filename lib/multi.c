@@ -384,7 +384,6 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
        Curl_uint_bset_resize(&multi->msgsent, new_size) ||
        Curl_uint_tbl_resize(&multi->xfers, new_size))
       return CURLM_OUT_OF_MEMORY;
-    capacity =  Curl_uint_tbl_capacity(&multi->xfers);
   }
 
   /* Insert the easy into the table now */
