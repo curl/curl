@@ -29,7 +29,7 @@ BUNDLE = servers
 FIRSTFILES = first.c first.h
 
 # Common files used by test programs
-UTILS = getpart.c util.c
+UTILS = memptr.c getpart.c util.c
 
 CURLX_CFILES = \
   ../../lib/curlx/base64.c \
