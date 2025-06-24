@@ -34,7 +34,7 @@ static CURLcode test_unit1398(char *arg)
 
   int rc;
   char buf[3] = {'b', 'u', 'g'};
-  const char *str = "bug";
+  static const char *str = "bug";
   int width = 3;
   char output[130];
 
