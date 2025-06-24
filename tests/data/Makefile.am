@@ -21,6 +21,25 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
+AM_LDFLAGS =
+AM_CFLAGS =
+
+# Build a stub gssapi implementation for testing
+if BUILD_STUB_GSS
+noinst_LTLIBRARIES += libstubgss.la
+
+libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
+libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
+if CURL_LT_SHLIB_USE_NO_UNDEFINED
+libstubgss_la_LDFLAGS += -no-undefined
+endif
+libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
+libstubgss_la_SOURCES = $(STUB_GSS)
+libstubgss_la_LIBADD =
+libstubgss_la_DEPENDENCIES =
+endif
+
 all:
 install:
 test:
@@ -283,4 +302,4 @@ test3209 test3210 test3211 test3212 test3213 \
 \
 test4000 test4001
 
-EXTRA_DIST = $(TESTCASES) DISABLED
+EXTRA_DIST = $(TESTCASES) DISABLED Makefile.inc
