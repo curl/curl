@@ -27,6 +27,8 @@
 #include "uint-table.h"
 #include "curl_trc.h"
 
+UNITTEST void Curl_uint_tbl_clear(struct uint_tbl *tbl);
+
 #define TBL_SIZE    100
 
 static CURLcode t3212_setup(struct uint_tbl *tbl)

@@ -206,10 +206,12 @@ static void uint_hash_clear(struct uint_hash *h)
   }
 }
 
-void Curl_uint_hash_clear(struct uint_hash *h)
+#ifdef UNITTESTS
+UNITTEST void Curl_uint_hash_clear(struct uint_hash *h)
 {
   uint_hash_clear(h);
 }
+#endif
 
 void Curl_uint_hash_destroy(struct uint_hash *h)
 {

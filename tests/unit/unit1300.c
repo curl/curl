@@ -25,6 +25,8 @@
 
 #include "llist.h"
 
+UNITTEST void Curl_node_uremove(struct Curl_llist_node *, void *);
+
 static void test_Curl_llist_dtor(void *key, void *value)
 {
   /* used by the llist API, does nothing here */

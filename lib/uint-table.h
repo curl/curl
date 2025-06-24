@@ -60,9 +60,6 @@ unsigned int Curl_uint_tbl_capacity(struct uint_tbl *tbl);
 /* Get the number of entries in the table. */
 unsigned int Curl_uint_tbl_count(struct uint_tbl *tbl);
 
-/* Clear the table, making it empty. */
-void Curl_uint_tbl_clear(struct uint_tbl *tbl);
-
 /* Get the entry for key or NULL if not present */
 void *Curl_uint_tbl_get(struct uint_tbl *tbl, unsigned int key);
 
