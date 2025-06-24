@@ -133,7 +133,7 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/quictls -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             install_steps: pytest
@@ -143,7 +143,7 @@ jobs:
             generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'OpenSSL torture !FTP'
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: -t --shallow=25 !FTP

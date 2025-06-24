@@ -279,7 +279,7 @@ jobs:
           - name: 'Slackware openssl gssapi gcc'
             # These are essentially the same flags used to build the curl Slackware package
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
@@ -652,9 +652,9 @@ jobs:
             fi
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
-            fi
-            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
-              TFLAGS+=' ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
+              if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
+                TFLAGS+=' ~2056 ~2057 ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
+              fi
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate

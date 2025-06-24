@@ -93,7 +93,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
@@ -111,6 +110,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   if(!nego->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -267,7 +268,8 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 
   /* Free our security context */
   if(nego->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &nego->context,
+                                GSS_C_NO_BUFFER);
     nego->context = GSS_C_NO_CONTEXT;
   }
 
@@ -276,7 +278,6 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
-
   }
 
   /* Free the SPN */
