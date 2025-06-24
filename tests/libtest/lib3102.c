@@ -46,8 +46,8 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
 
     /* Find the certificate issuer and subject by enumerating each field */
     for(; slist && (!issuer || !subject); slist = slist->next) {
-      const char issuer_prefix[] = "Issuer:";
-      const char subject_prefix[] = "Subject:";
+      static const char issuer_prefix[] = "Issuer:";
+      static const char subject_prefix[] = "Subject:";
 
       if(!strncmp(slist->data, issuer_prefix, sizeof(issuer_prefix)-1)) {
         issuer = slist->data + sizeof(issuer_prefix)-1;
