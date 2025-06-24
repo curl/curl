@@ -42,8 +42,9 @@ static CURLcode test_lib505(char *URL)
   struct curl_slist *hl;
 
   struct curl_slist *headerlist = NULL;
-  const char *buf_1 = "RNFR 505";
-  const char *buf_2 = "RNTO 505-forreal";
+
+  static const char *buf_1 = "RNFR 505";
+  static const char *buf_2 = "RNTO 505-forreal";
 
   if(!libtest_arg2) {
     curl_mfprintf(stderr, "Usage: <url> <file-to-upload>\n");
