@@ -71,11 +71,11 @@ if BUILD_STUB_GSS
 noinst_LTLIBRARIES += libstubgss.la
 
 libstubgss_la_CPPFLAGS =
-libstubgss_la_LDFLAGS = -avoid-version -rpath /nowhere
+libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libstubgss_la_LDFLAGS += -no-undefined
 endif
-libstubgss_la_CFLAGS = -g
+libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
 libstubgss_la_SOURCES = $(STUB_GSS)
 libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
