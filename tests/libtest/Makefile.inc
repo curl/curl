@@ -31,7 +31,7 @@ FIRST_H = first.h
 
 # Common files used by test programs
 UTILS_C = memptr.c testutil.c testtrace.c
-UTILS_H = test.h testutil.h testtrace.h ../unit/curlcheck.h
+UTILS_H = test.h testutil.h testtrace.h
 
 CURLX_C = \
   ../../lib/curlx/warnless.c \
