@@ -41,7 +41,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(srcdir)
 
-# Get BUNDLE, FIRSTFILES_C, FIRSTFILES_H, UTILS_H, TESTFILES variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_H, TESTFILES variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt README.md $(UTILS_H) $(TESTFILES)
@@ -61,7 +61,7 @@ endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 if BUILD_UNITTESTS
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES_C) $(FIRSTFILES_H) $(UTILS_H) $(TESTFILES)
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(FIRST_H) $(UTILS_H) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_H) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)

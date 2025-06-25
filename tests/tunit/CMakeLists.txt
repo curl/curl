@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get BUNDLE, FIRSTFILES_C, FIRSTFILES_H, UTILS_H, TESTFILES variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_H, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -31,7 +31,7 @@ add_custom_command(OUTPUT "${BUNDLE}.c"
     --include ${UTILS_H} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES_C} ${FIRSTFILES_H} ${UTILS_H} ${TESTFILES}
+    ${FIRST_C} ${FIRST_H} ${UTILS_H} ${TESTFILES}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
@@ -49,4 +49,4 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
-curl_clang_tidy_tests(${BUNDLE} ${FIRSTFILES_C} ${FIRSTFILES_H} ${UTILS_H} ${TESTFILES})
+curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${FIRST_H} ${UTILS_H} ${TESTFILES})

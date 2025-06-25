@@ -26,8 +26,8 @@
 BUNDLE = libtests
 
 # Files referenced from the bundle source
-FIRSTFILES_C = first.c
-FIRSTFILES_H = first.h
+FIRST_C = first.c
+FIRST_H = first.h
 
 # Common files used by test programs
 UTILS_C = memptr.c testutil.c testtrace.c
