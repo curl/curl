@@ -95,7 +95,7 @@ BUILD_UNIT =
 DIST_UNIT = tunit unit
 endif
 
-SUBDIRS = certs client data http libtest server $(BUILD_UNIT)
+SUBDIRS = http certs client data libtest server $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
