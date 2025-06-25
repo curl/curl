@@ -33,7 +33,7 @@ FIRST_H = ../libtest/first.h
 UTILS_H = ../unit/curlcheck.h
 
 # All tool unit test programs
-TESTFILES = \
+TESTS_C = \
   tool1394.c \
   tool1604.c \
   tool1621.c

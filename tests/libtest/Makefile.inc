@@ -43,7 +43,7 @@ CURLX_C = \
   ../../lib/curlx/wait.c
 
 # All libtest programs
-TESTFILES = \
+TESTS_C = \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \
   lib508.c lib509.c lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c \
   lib516.c lib517.c lib518.c lib519.c lib520.c lib521.c lib523.c lib524.c \

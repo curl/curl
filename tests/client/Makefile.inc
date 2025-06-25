@@ -35,7 +35,7 @@ CURLX_C = \
   ../../lib/curlx/wait.c
 
 # All test clients
-TESTFILES = \
+TESTS_C = \
   h2_pausing.c \
   h2_serverpush.c \
   h2_upgrade_extreme.c \

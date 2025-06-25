@@ -47,7 +47,7 @@ CURLX_C = \
   ../../lib/curlx/winapi.c
 
 # All test servers
-TESTFILES = \
+TESTS_C = \
   dnsd.c \
   mqttd.c \
   resolve.c \
