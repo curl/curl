@@ -39,10 +39,11 @@ if(CURL_CLANG_TIDY)
   add_dependencies(testdeps tests-clang-tidy)
 endif()
 
+add_subdirectory(http)
+
 add_subdirectory(certs)
 add_subdirectory(client)
 add_subdirectory(data)
-add_subdirectory(http)
 add_subdirectory(libtest)
 add_subdirectory(server)
 add_subdirectory(tunit)
