@@ -39,13 +39,14 @@ if(CURL_CLANG_TIDY)
   add_dependencies(testdeps tests-clang-tidy)
 endif()
 
-add_subdirectory(http)
+add_subdirectory(certs)
 add_subdirectory(client)
-add_subdirectory(server)
+add_subdirectory(data)
+add_subdirectory(http)
 add_subdirectory(libtest)
+add_subdirectory(server)
 add_subdirectory(tunit)
 add_subdirectory(unit)
-add_subdirectory(certs)
 
 # Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)
