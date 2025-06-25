@@ -613,21 +613,22 @@ dnl ----------------------------------------
 dnl whether use "unity" mode for lib and src
 dnl ----------------------------------------
 
-want_unity='no'
+want_unity='yes'
 AC_MSG_CHECKING([whether to build libcurl and curl in "unity" mode])
 AC_ARG_ENABLE(unity,
-AS_HELP_STRING([--enable-unity],[Enable unity mode])
-AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
+AS_HELP_STRING([--enable-unity],[Enable unity mode (default)])
+AS_HELP_STRING([--disable-unity],[Disable unity]),
 [ case "$enableval" in
-  yes)
+  no)
+    want_unity='no'
+    AC_MSG_RESULT([no])
+    ;;
+  *)
     want_unity='yes'
     AC_MSG_RESULT([yes])
     ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
   esac ],
-    AC_MSG_RESULT([no])
+    AC_MSG_RESULT([yes])
 )
 
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
