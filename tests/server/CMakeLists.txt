@@ -22,16 +22,16 @@
 #
 ###########################################################################
 
-# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, CURLX_CFILES, TESTFILES variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, CURLX_C, TESTFILES variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS_C} ${CURLX_CFILES} --test ${TESTFILES} > "${BUNDLE}.c"
+    --include ${UTILS_C} ${CURLX_C} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRST_C} ${FIRST_H} ${UTILS_C} ${CURLX_CFILES} ${TESTFILES}
+    ${FIRST_C} ${FIRST_H} ${UTILS_C} ${CURLX_C} ${TESTFILES}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")

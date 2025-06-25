@@ -29,7 +29,7 @@ BUNDLE = clients
 FIRST_C = first.c
 FIRST_H = first.h
 
-CURLX_CFILES = \
+CURLX_C = \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/wait.c

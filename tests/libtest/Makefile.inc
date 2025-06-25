@@ -33,7 +33,7 @@ FIRST_H = first.h
 UTILS_C = memptr.c testutil.c testtrace.c
 UTILS_H = testutil.h testtrace.h test.h ../unit/curlcheck.h
 
-CURLX_CFILES = \
+CURLX_C = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \
