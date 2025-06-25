@@ -70,6 +70,10 @@ endif()
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+source_group("curlx source files" FILES ${CURLX_CFILES})
+source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
+source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
+
 if(WIN32)
   list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
@@ -118,10 +122,6 @@ if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
     target_link_libraries(${EXE_NAME} PRIVATE "-municode")
   endif()
 endif()
-
-source_group("curlx source files" FILES ${CURLX_CFILES})
-source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
-source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
 
 ################################################################################
 
