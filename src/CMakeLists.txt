@@ -92,8 +92,10 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
+# Build curl executable
 add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_curl_hfiles_gen} ${CURLX_CFILES} ${CURLX_HFILES})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
+target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
@@ -120,9 +122,6 @@ endif()
 source_group("curlx source files" FILES ${CURLX_CFILES})
 source_group("curl source files" FILES ${CURL_CFILES} ${_curl_cfiles_gen})
 source_group("curl header files" FILES ${CURL_HFILES} ${_curl_hfiles_gen})
-
-# Build curl executable
-target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 
 ################################################################################
 
