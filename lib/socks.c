@@ -1105,8 +1105,6 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
      * but ignore the "connect to port" (use the secondary port)
      */
     sxstate(sx, data, CONNECT_SOCKS_INIT);
-    DEBUGASSERT(sx->hostname);
-    DEBUGASSERT(sx->remote_port > 0);
   }
 
   result = connect_SOCKS(cf, sx, data);
@@ -1223,16 +1221,17 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
   if(!sx)
     return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, NULL);
+  result = Curl_cf_create(&cf, &Curl_cft_socks_proxy, sx);
   if(!result) {
     Curl_conn_cf_insert_after(cf_at, cf);
     sx->proxy_type = proxy_type;
     sx->remote_type = remote_type;
     sx->hostname = remote_host;
     sx->remote_port = remote_port;
+    DEBUGASSERT(sx->hostname);
+    DEBUGASSERT(sx->remote_port > 0);
     sx->proxy_user = proxy_user;
     sx->proxy_password = proxy_password;
-    cf->ctx = sx;
     sx = NULL;
   }
   free(sx);

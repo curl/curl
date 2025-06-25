@@ -1297,6 +1297,8 @@ connect_sub_chain:
   if(ctx->state < CF_SETUP_CNNCT_SOCKS && cf->conn->bits.socksproxy) {
     /* Where do we need the SOCKS to connect to? */
     if(cf->conn->bits.httpproxy) {
+      DEBUGASSERT(cf->conn->http_proxy.host.name);
+      DEBUGASSERT(cf->conn->http_proxy.port > 0);
       result = Curl_cf_socks_proxy_insert_after(
         cf, data, cf->conn->socks_proxy.proxytype, "HTTP proxy",
         cf->conn->http_proxy.host.name, (int)cf->conn->http_proxy.port,
@@ -1313,6 +1315,8 @@ connect_sub_chain:
         cf->conn->bits.conn_to_port ? cf->conn->conn_to_port :
         cf->conn->remote_port;
 
+      DEBUGASSERT(sx_hostname);
+      DEBUGASSERT(sx_remote_port > 0);
       result = Curl_cf_socks_proxy_insert_after(
         cf, data, cf->conn->socks_proxy.proxytype, NULL,
         sx_hostname, sx_remote_port,
