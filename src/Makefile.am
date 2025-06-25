@@ -73,20 +73,22 @@ CLEANFILES =
 
 if USE_CPPFLAG_CURL_STATICLIB
 curlx_csrc =
+curlx_hsrc =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_csrc = $(CURLX_CFILES)
+curlx_hsrc = $(CURLX_HFILES)
 endif
 
 if USE_UNITY
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curl_cfiles_gen) $(curl_hfiles_gen) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-curl_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
+curl_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
@@ -110,14 +112,14 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LIBCURL_PC_LIBS_PRIVATE)
 if USE_UNITY
-libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) > libcurltool_unity.c
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) > libcurltool_unity.c
 
 nodist_libcurltool_la_SOURCES = libcurltool_unity.c
 libcurltool_la_SOURCES =
 CLEANFILES += libcurltool_unity.c
 else
-libcurltool_la_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc)
+libcurltool_la_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc)
 endif
 endif
 
