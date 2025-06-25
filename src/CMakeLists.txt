@@ -74,13 +74,14 @@ if(WIN32)
   list(APPEND CURL_CFILES ${CURL_RCFILES})
 endif()
 
-set(_curlx_cfiles_exe ${CURLX_CFILES})
-if(BUILD_STATIC_CURL)
-  set(_curlx_cfiles_exe "")
-endif()
 set(_curlx_cfiles_lib ${CURLX_CFILES})
 if(LIB_SELECTED STREQUAL LIB_STATIC)
   set(_curlx_cfiles_lib "")
+endif()
+
+if(BUILD_STATIC_CURL)
+  set(CURLX_CFILES "")
+  set(CURLX_HFILES "")
 endif()
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
@@ -89,7 +90,7 @@ set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES
   "${CMAKE_CURRENT_SOURCE_DIR}"      # for "tool_hugehelp.c"
 )
 
-add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_curl_hfiles_gen} ${_curlx_cfiles_exe})
+add_executable(${EXE_NAME} ${CURL_CFILES} ${CURL_HFILES} ${_curl_cfiles_gen} ${_curl_hfiles_gen} ${CURLX_CFILES} ${CURLX_HFILES})
 target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
