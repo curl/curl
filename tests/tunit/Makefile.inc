@@ -28,9 +28,6 @@ BUNDLE = tunits
 # Files referenced from the bundle source
 FIRST_C = ../libtest/first.c
 
-# Common files used by test programs
-UTILS_H =
-
 # All tool unit test programs
 TESTS_C = \
   tool1394.c \
