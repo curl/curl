@@ -41,10 +41,10 @@ list(APPEND TESTFILES "lib1521.c")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS_C} ${UTILS_H} ${CURLX_C} --test ${TESTFILES} > "${BUNDLE}.c"
+    --include ${UTILS_C} ${CURLX_C} --test ${TESTFILES} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRST_C} ${FIRST_H} ${UTILS_C} ${UTILS_H} ${CURLX_C} ${TESTFILES}
+    ${FIRST_C} ${UTILS_C} ${CURLX_C} ${TESTFILES}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
@@ -60,7 +60,7 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
-curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${FIRST_H} ${UTILS_C} ${UTILS_H} ${TESTFILES})
+curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTFILES})
 
 if(HAVE_GSSAPI AND UNIX)
   add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS})

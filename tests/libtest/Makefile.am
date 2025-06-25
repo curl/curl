@@ -87,8 +87,8 @@ else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_src = $(CURLX_C)
 endif
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(curlx_src) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(UTILS_H) $(curlx_src) --test $(TESTFILES) lib1521.c > $(BUNDLE).c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_src) $(TESTFILES) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_src) --test $(TESTFILES) lib1521.c > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurl.la

@@ -59,7 +59,7 @@ else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_src = $(CURLX_C)
 endif
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(FIRST_H) $(curlx_src) $(TESTFILES)
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(curlx_src) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_src) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)
