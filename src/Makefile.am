@@ -81,14 +81,14 @@ curlx_hsrc = $(CURLX_HFILES)
 endif
 
 if USE_UNITY
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
 CLEANFILES += curltool_unity.c
 else
-curl_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curlx_csrc) $(curlx_hsrc) $(curl_cfiles_gen) $(curl_hfiles_gen)
+curl_SOURCES = $(CURL_CFILES) $(CURL_HFILES) $(curl_cfiles_gen) $(curl_hfiles_gen) $(curlx_csrc) $(curlx_hsrc)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
