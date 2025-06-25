@@ -97,4 +97,5 @@ TESTFILES = \
   lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \
   lib3207.c lib3208.c
 
-STUB_GSS = stub_gssapi.c stub_gssapi.h
+STUB_GSS_C = stub_gssapi.c
+STUB_GSS_H = stub_gssapi.h
