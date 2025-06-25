@@ -1216,6 +1216,9 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
   struct socks_state *sx;
   CURLcode result;
 
+  if(!remote_host)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   (void)data;
   sx = calloc(1, sizeof(*sx));
   if(!sx)
@@ -1228,8 +1231,6 @@ CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
     sx->remote_type = remote_type;
     sx->hostname = remote_host;
     sx->remote_port = remote_port;
-    DEBUGASSERT(sx->hostname);
-    DEBUGASSERT(sx->remote_port > 0);
     sx->proxy_user = proxy_user;
     sx->proxy_password = proxy_password;
     sx = NULL;
