@@ -39,7 +39,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest  \
               -I$(srcdir)
 
-# Get BUNDLE, FIRST_C, FIRST_H, UTILS_H, TESTS_C variables
+# Get BUNDLE, FIRST_C, UTILS_H, TESTS_C variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt README.md $(UTILS_H) $(TESTS_C)

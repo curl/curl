@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get BUNDLE, FIRST_C, FIRST_H, UTILS_H, TESTS_C variables
+# Get BUNDLE, FIRST_C, UTILS_H, TESTS_C variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
