@@ -50,7 +50,7 @@ aws-sigv4 with query
 <protocol crlf="yes">
 GET /472/a=%e3%81%82 HTTP/1.1
 Host: fake.fake.fake:8000
-Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=d2f4797c813fc51d729ac555a23ac682be908fdbfae2042ba98d214c9298201b
+Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=b8783c8387a5249b084642126fe1f8e07e12a2847820fd5b6cd64b2047149da4
 X-Amz-Date: 19700101T000000Z
 User-Agent: curl/%VERSION
 Accept: */*
