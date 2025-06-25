@@ -79,8 +79,8 @@ curlx_src = $(CURLX_CFILES)
 endif
 
 if USE_UNITY
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_src) $(curl_cfiles_gen)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_src) $(curl_cfiles_gen) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURL_HFILES) $(curlx_src) $(curl_cfiles_gen) $(curl_hfiles_gen)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(CURL_CFILES) $(CURL_HFILES) $(curlx_src) $(curl_cfiles_gen) $(curl_hfiles_gen) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES =
