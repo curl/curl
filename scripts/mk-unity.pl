@@ -63,7 +63,10 @@ if($any_test) {
 my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /([a-z0-9_]+)\.c$/) {
+    if($src =~ /([a-z0-9_]+)\.h$/) {
+        print "#include \"$src\"\n";
+    }
+    elsif($src =~ /([a-z0-9_]+)\.c$/) {
         my $name = $1;
         print "#include \"$src\"\n";
         if(not exists $include{$src}) {  # register test entry function
