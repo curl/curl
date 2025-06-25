@@ -22,12 +22,12 @@
 #
 ###########################################################################
 
-# Get BUNDLE, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES, STUB_GSS variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C, STUB_GSS_C, STUB_GSS_H variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(LIB_SELECTED STREQUAL LIB_STATIC)
-  set(CURLX_CFILES "")  # Already exported from the libcurl static build. Skip them.
+  set(CURLX_C "")  # Already exported from the libcurl static build. Skip them.
 endif()
 
 add_custom_command(OUTPUT "lib1521.c"
@@ -37,14 +37,14 @@ add_custom_command(OUTPUT "lib1521.c"
     "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-list(APPEND TESTFILES "lib1521.c")
+list(APPEND TESTS_C "lib1521.c")
 
 add_custom_command(OUTPUT "${BUNDLE}.c"
   COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
-    --include ${UTILS} ${CURLX_CFILES} --test ${TESTFILES} > "${BUNDLE}.c"
+    --include ${UTILS_C} ${CURLX_C} --test ${TESTS_C} > "${BUNDLE}.c"
   DEPENDS
     "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    ${FIRSTFILES} ${UTILS} ${CURLX_CFILES} ${TESTFILES}
+    ${FIRST_C} ${UTILS_C} ${CURLX_C} ${TESTS_C}
   VERBATIM)
 
 add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
@@ -60,10 +60,10 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
-curl_clang_tidy_tests(${BUNDLE} ${FIRSTFILES} ${UTILS} ${TESTFILES})
+curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
 
 if(HAVE_GSSAPI AND UNIX)
-  add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS})
+  add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS_C})
   set_target_properties(stubgss PROPERTIES UNITY_BUILD OFF)
   add_dependencies(testdeps stubgss)
 endif()

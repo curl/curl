@@ -39,10 +39,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(srcdir)                    \
               -I$(top_srcdir)/tests/unit
 
-# Get BUNDLE, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES, STUB_GSS variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C, STUB_GSS_C, STUB_GSS_H variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES) \
+EXTRA_DIST = CMakeLists.txt .checksrc $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
   test307.pl test610.pl test613.pl test1013.pl test1022.pl mk-lib1521.pl
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
@@ -76,19 +76,19 @@ if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libstubgss_la_LDFLAGS += -no-undefined
 endif
 libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-libstubgss_la_SOURCES = $(STUB_GSS)
+libstubgss_la_SOURCES = $(STUB_GSS_C) $(STUB_GSS_H)
 libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB
-curlx_src =
+curlx_c_lib =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-curlx_src = $(CURLX_CFILES)
+curlx_c_lib = $(CURLX_C)
 endif
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(curlx_src) $(TESTFILES) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(curlx_src) --test $(TESTFILES) lib1521.c > $(BUNDLE).c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TESTS_C) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurl.la

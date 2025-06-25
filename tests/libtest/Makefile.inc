@@ -26,12 +26,14 @@
 BUNDLE = libtests
 
 # Files referenced from the bundle source
-FIRSTFILES = first.c first.h
+FIRST_C = first.c
+FIRST_H = first.h
 
 # Common files used by test programs
-UTILS = memptr.c testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
+UTILS_C = memptr.c testutil.c testtrace.c
+UTILS_H = test.h testutil.h testtrace.h
 
-CURLX_CFILES = \
+CURLX_C = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \
@@ -41,7 +43,7 @@ CURLX_CFILES = \
   ../../lib/curlx/wait.c
 
 # All libtest programs
-TESTFILES = \
+TESTS_C = \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \
   lib508.c lib509.c lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c \
   lib516.c lib517.c lib518.c lib519.c lib520.c lib521.c lib523.c lib524.c \
@@ -95,4 +97,5 @@ TESTFILES = \
   lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \
   lib3207.c lib3208.c
 
-STUB_GSS = stub_gssapi.c stub_gssapi.h
+STUB_GSS_C = stub_gssapi.c
+STUB_GSS_H = stub_gssapi.h
