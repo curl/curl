@@ -25,7 +25,7 @@
 # Get STUB_GSS variable
 include Makefile.inc
 
-EXTRA_DIST = $(TESTCASES) DISABLED Makefile.inc CMakeLists.txt
+EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
 
 AM_LDFLAGS =
 AM_CFLAGS =
@@ -45,9 +45,18 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
-all:
-install:
-test:
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
+
+checksrc:
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
+	  $(srcdir)/*.[ch])
+
+if NOT_CURL_CI
+all-local: checksrc
+endif
 
 # this list is in numerical order
 TESTCASES = test1 test2 test3 test4 test5 test6 test7 test8 test9       \
