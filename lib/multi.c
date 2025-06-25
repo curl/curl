@@ -3237,12 +3237,10 @@ CURLMcode curl_multi_setopt(CURLM *m,
     break;
   case CURLMOPT_NETWORK_CHANGED: {
       long val = va_arg(param, long);
-      if(val >= 2) {
-        /* clear DNS cache */
+      if(val & CURLM_NWCOPT_CLEAR_DNS) {
         Curl_dnscache_clear(multi->admin);
       }
-      if(val >= 1) {
-        /* do not reuse existing connections */
+      if(val & CURLM_NWCOPT_CLEAR_CONNS) {
         Curl_cpool_nw_changed(multi->admin);
       }
     break;

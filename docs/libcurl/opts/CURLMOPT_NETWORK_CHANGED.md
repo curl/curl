@@ -27,24 +27,30 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NETWORK_CHANGED,
 
 # DESCRIPTION
 
-Pass a long for **value**. The set number determines how the multi
-handle should adapt to a change in the network.
+Pass a long with a bitmask to tell libcurl how the multi
+handle should react. The following values in the mask are
+defined. All bits not mentioned are reserved for future
+extensions.
 
-`1`: do not reuse any existing connection in the multi handle's
+This option can be set at any time and repeatedly. Any connection created or
+DNS information cached afterwards is considered fresh again. The call affects
+only the connection and DNS cache of the multi handle itself and not the
+ones owned by SHARE handles.
+
+
+## CURLM_NWCOPT_CLEAR_CONNS
+
+No longer reuse any existing connection in the multi handle's
 connection cache. This closes all connections that are not in use.
 Ongoing transfers continue on the connections they operate on.
 
-`2`: in addition to `1` also clear the multi handle's DNS cache.
+## CURLM_NWCOPT_CLEAR_DNS
 
-This option can be set at any time and repeatedly. Any connection created or
-DNS information cached afterwards is considered fresh again.
-
-This affects only the connection and DNS cache of the multi handle and
-not the ones owned by SHARE handles.
+Clear the multi handle's DNS cache.
 
 # DEFAULT
 
-0, which means that there was no change.
+0, which has no effect.
 
 # %PROTOCOLS%
 
@@ -56,7 +62,7 @@ int main(void)
   CURLM *m = curl_multi_init();
   /* do transfers on the multi handle */
   /* do not reuse existing connections */
-  curl_multi_setopt(m, CURLMOPT_NETWORK_CHANGED, 1L);
+  curl_multi_setopt(m, CURLMOPT_NETWORK_CHANGED, CURLM_NWCOPT_CLEAR_CONNS);
 }
 ~~~
 
