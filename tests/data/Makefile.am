@@ -22,6 +22,11 @@
 #
 ###########################################################################
 
+# Get STUB_GSS variable
+include Makefile.inc
+
+EXTRA_DIST = $(TESTCASES) DISABLED Makefile.inc CMakeLists.txt
+
 AM_LDFLAGS =
 AM_CFLAGS =
 
@@ -29,7 +34,7 @@ AM_CFLAGS =
 if BUILD_STUB_GSS
 noinst_LTLIBRARIES += libstubgss.la
 
-libstubgss_la_CPPFLAGS = $(AM_CPPFLAGS)
+libstubgss_la_CPPFLAGS =
 libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libstubgss_la_LDFLAGS += -no-undefined
@@ -301,5 +306,3 @@ test3200 test3201 test3202 test3203 test3204 test3205 test3207 test3208 \
 test3209 test3210 test3211 test3212 test3213 \
 \
 test4000 test4001
-
-EXTRA_DIST = $(TESTCASES) DISABLED Makefile.inc
