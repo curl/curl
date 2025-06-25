@@ -26,10 +26,11 @@
 BUNDLE = tunits
 
 # Files referenced from the bundle source
-FIRSTFILES = ../libtest/first.c ../libtest/first.h
+FIRSTFILES_C = ../libtest/first.c
+FIRSTFILES_H = ../libtest/first.h
 
 # Common files used by test programs
-UTILS = ../unit/curlcheck.h
+UTILS_H = ../unit/curlcheck.h
 
 # All tool unit test programs
 TESTFILES = \

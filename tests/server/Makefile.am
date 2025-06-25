@@ -38,10 +38,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(srcdir)
 
-# Get BUNDLE, FIRSTFILES, UTILS, CURLX_CFILES, TESTFILES variables
+# Get BUNDLE, FIRSTFILES_C, FIRSTFILES_H, UTILS_C, CURLX_CFILES, TESTFILES variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES) $(UTILS) $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt .checksrc $(FIRSTFILES_C) $(FIRSTFILES_H) $(UTILS_C) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -54,8 +54,8 @@ if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(CURLX_CFILES) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) $(CURLX_CFILES) --test $(TESTFILES) > ${BUNDLE}.c
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES_C) $(FIRSTFILES_H) $(UTILS_C) $(CURLX_CFILES) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_CFILES) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = @CURL_NETWORK_AND_TIME_LIBS@

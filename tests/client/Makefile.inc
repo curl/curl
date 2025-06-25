@@ -26,7 +26,8 @@
 BUNDLE = clients
 
 # Files referenced from the bundle source
-FIRSTFILES = first.c first.h
+FIRSTFILES_C = first.c
+FIRSTFILES_H = first.h
 
 CURLX_CFILES = \
   ../../lib/curlx/multibyte.c \

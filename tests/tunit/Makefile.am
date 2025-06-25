@@ -41,10 +41,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/unit     \
               -I$(srcdir)
 
-# Get BUNDLE, FIRSTFILES, UTILS, TESTFILES variables
+# Get BUNDLE, FIRSTFILES_C, FIRSTFILES_H, UTILS_H, TESTFILES variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt README.md $(UTILS) $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt README.md $(UTILS_H) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -61,8 +61,8 @@ endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 
 if BUILD_UNITTESTS
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(UTILS) $(TESTFILES)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS) --test $(TESTFILES) > ${BUNDLE}.c
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES_C) $(FIRSTFILES_H) $(UTILS_H) $(TESTFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_H) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/src/libcurltool.la $(top_builddir)/lib/libcurl.la

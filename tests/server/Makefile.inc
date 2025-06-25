@@ -26,10 +26,11 @@
 BUNDLE = servers
 
 # Files referenced from the bundle source
-FIRSTFILES = first.c first.h
+FIRSTFILES_C = first.c
+FIRSTFILES_H = first.h
 
 # Common files used by test programs
-UTILS = memptr.c getpart.c util.c
+UTILS_C = memptr.c getpart.c util.c
 
 CURLX_CFILES = \
   ../../lib/curlx/base64.c \

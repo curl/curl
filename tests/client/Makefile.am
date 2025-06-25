@@ -38,10 +38,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(srcdir)
 
-# Get BUNDLE, FIRSTFILES, CURLX_CFILES, TESTFILES variables
+# Get BUNDLE, FIRSTFILES_C, FIRSTFILES_H, CURLX_CFILES, TESTFILES variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt $(FIRSTFILES) $(TESTFILES)
+EXTRA_DIST = CMakeLists.txt $(FIRSTFILES_C) $(FIRSTFILES_H) $(TESTFILES)
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -59,7 +59,7 @@ else
 # These are part of the libcurl static lib. Add them here when linking shared.
 curlx_src = $(CURLX_CFILES)
 endif
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES) $(curlx_src) $(TESTFILES)
+${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRSTFILES_C) $(FIRSTFILES_H) $(curlx_src) $(TESTFILES)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_src) --test $(TESTFILES) > ${BUNDLE}.c
 
 noinst_PROGRAMS = $(BUNDLE)

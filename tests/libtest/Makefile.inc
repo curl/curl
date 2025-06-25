@@ -26,10 +26,12 @@
 BUNDLE = libtests
 
 # Files referenced from the bundle source
-FIRSTFILES = first.c first.h
+FIRSTFILES_C = first.c
+FIRSTFILES_H = first.h
 
 # Common files used by test programs
-UTILS = memptr.c testutil.c testutil.h testtrace.c testtrace.h test.h ../unit/curlcheck.h
+UTILS_C = memptr.c testutil.c testtrace.c
+UTILS_H = testutil.h testtrace.h test.h ../unit/curlcheck.h
 
 CURLX_CFILES = \
   ../../lib/curlx/warnless.c \
