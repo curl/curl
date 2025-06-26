@@ -224,24 +224,6 @@ static void drain_tunnel(struct Curl_cfilter *cf,
     Curl_multi_mark_dirty(data);
 }
 
-static CURLcode proxy_nw_in_reader(void *reader_ctx,
-                                   unsigned char *buf, size_t buflen,
-                                   size_t *pnread)
-{
-  struct Curl_cfilter *cf = reader_ctx;
-
-  *pnread = 0;
-  if(cf) {
-    struct Curl_easy *data = CF_DATA_CURRENT(cf);
-    CURLcode result;
-    result = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, pnread);
-    CURL_TRC_CF(data, cf, "[0] nw_in_reader(len=%zu) -> %d, %zu",
-                buflen, result, *pnread);
-    return result;
-  }
-  return CURLE_FAILED_INIT;
-}
-
 static CURLcode proxy_h2_nw_out_writer(void *writer_ctx,
                                        const unsigned char *buf, size_t buflen,
                                        size_t *pnwritten)
@@ -484,7 +466,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
         Curl_bufq_is_empty(&ctx->inbufq) && /* and we consumed our input */
         !Curl_bufq_is_full(&ctx->tunnel.recvbuf)) {
 
-    result = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &nread);
+    result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     CURL_TRC_CF(data, cf, "[0] read %zu bytes nw data -> %d, %zu",
                 Curl_bufq_len(&ctx->inbufq), result, nread);
     if(result) {
@@ -1508,7 +1490,7 @@ static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
     size_t nread;
 
     *input_pending = FALSE;
-    result = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &nread);
+    result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(!result) {
       if(proxy_h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */

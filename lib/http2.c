@@ -464,33 +464,6 @@ static int h2_client_new(struct Curl_cfilter *cf,
   return rc;
 }
 
-static CURLcode nw_in_reader(void *reader_ctx,
-                             unsigned char *buf, size_t buflen,
-                             size_t *pnread)
-{
-  struct Curl_cfilter *cf = reader_ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  return Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, pnread);
-}
-
-static CURLcode nw_out_writer(void *writer_ctx,
-                             const unsigned char *buf, size_t buflen,
-                             size_t *pnwritten)
-{
-  struct Curl_cfilter *cf = writer_ctx;
-  struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  CURLcode result;
-
-  *pnwritten = 0;
-  if(!data)
-    return CURLE_OK;
-
-  result = Curl_conn_cf_send(cf->next, data, (const char *)buf,
-                             buflen, FALSE, pnwritten);
-  CURL_TRC_CF(data, cf, "[0] egress write -> %d, %zu", result, *pnwritten);
-  return result;
-}
-
 static ssize_t send_callback(nghttp2_session *h2,
                              const uint8_t *mem, size_t length, int flags,
                              void *userp);
@@ -714,7 +687,7 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     size_t nread;
 
     *input_pending = FALSE;
-    result = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &nread);
+    result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(!result) {
       CURL_TRC_CF(data, cf, "%zu bytes stray data read before trying "
                   "h2 connection", nread);
@@ -776,7 +749,8 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
-  result = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &nwritten);
+  result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, NULL, 0,
+                             &nwritten);
   if(result) {
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
@@ -810,8 +784,9 @@ static ssize_t send_callback(nghttp2_session *h2,
   if(!cf->connected)
     result = Curl_bufq_write(&ctx->outbufq, buf, blen, &nwritten);
   else
-    result = Curl_bufq_write_pass(&ctx->outbufq, buf, blen,
-                                  nw_out_writer, cf, &nwritten);
+    result = Curl_cf_send_bufq(cf->next, data, &ctx->outbufq, buf, blen,
+                               &nwritten);
+
   if(result) {
     if(result == CURLE_AGAIN) {
       ctx->nw_out_blocked = 1;
@@ -2086,7 +2061,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
-    result = Curl_bufq_sipn(&ctx->inbufq, 0, nw_in_reader, cf, &nread);
+    result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(result) {
       if(result != CURLE_AGAIN) {
         failf(data, "Failed receiving HTTP2 data: %d(%s)", result,
