@@ -21,44 +21,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-
-# Get STUB_GSS_C, STUB_GSS_H variable
-include Makefile.inc
-
-EXTRA_DIST = CMakeLists.txt DISABLED $(TESTCASES)
-
-noinst_LTLIBRARIES =
-
-AM_LDFLAGS =
-AM_CFLAGS =
-
-# Build a stub gssapi implementation for testing
-if BUILD_STUB_GSS
-noinst_LTLIBRARIES += libstubgss.la
-
-libstubgss_la_CPPFLAGS =
-libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libstubgss_la_LDFLAGS += -no-undefined
-endif
-libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-libstubgss_la_SOURCES = $(STUB_GSS_C) $(STUB_GSS_H)
-libstubgss_la_LIBADD =
-libstubgss_la_DEPENDENCIES =
-endif
-
-CHECKSRC = $(CS_$(V))
-CS_0 = @echo "  RUN     " $@;
-CS_1 =
-CS_ = $(CS_0)
-
-checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  $(srcdir)/*.[ch])
-
-if NOT_CURL_CI
-all-local: checksrc
-endif
+all:
+install:
+test:
 
 # this list is in numerical order
 TESTCASES = test1 test2 test3 test4 test5 test6 test7 test8 test9       \
@@ -317,3 +282,5 @@ test3200 test3201 test3202 test3203 test3204 test3205 test3207 test3208 \
 test3209 test3210 test3211 test3212 test3213 \
 \
 test4000 test4001
+
+EXTRA_DIST = $(TESTCASES) DISABLED
