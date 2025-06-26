@@ -2343,6 +2343,12 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
   set(LIBCURL_PC_CFLAGS_PRIVATE "-DCURL_STATICLIB")
 
+  if(BUILD_STATIC_CURL)
+    set(BUILD_SHARED_CURL   "no")
+  else()
+    set(BUILD_SHARED_CURL   "yes")
+  endif()
+
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED       "yes")
@@ -2363,10 +2369,11 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Generate a "curl-config" matching this config.
   # Consumed variables:
+  #   BUILD_SHARED_CURL
   #   CC
   #   CONFIGURE_OPTIONS
-  #   CURLVERSION
   #   CURL_CA_BUNDLE
+  #   CURLVERSION
   #   ENABLE_SHARED
   #   ENABLE_STATIC
   #   exec_prefix

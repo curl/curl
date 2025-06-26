@@ -40,6 +40,7 @@ Usage: curl-config [OPTION]
 Available values for OPTION include:
 
   --built-shared        says 'yes' if libcurl was built shared
+  --built-shared-tool   says 'yes' if curl tool was built shared
   --ca                  CA bundle install path
   --cc                  compiler
   --cflags              preprocessor and compiler flags
@@ -67,6 +68,10 @@ while test "$#" -gt 0; do
   case "$1" in
   --built-shared)
     echo '@ENABLE_SHARED@'
+    ;;
+
+  --built-shared-tool)
+    echo '@BUILD_SHARED_CURL@'
     ;;
 
   --ca)

@@ -5064,6 +5064,8 @@ AC_SUBST(BLANK_AT_MAKETIME)
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
 dnl yes or no
+BUILD_SHARED_CURL="$enable_shared"
+AC_SUBST(BUILD_SHARED_CURL)
 ENABLE_SHARED="$enable_shared"
 AC_SUBST(ENABLE_SHARED)
 
