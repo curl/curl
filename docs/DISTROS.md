@@ -188,8 +188,7 @@ unless it is specific to Homebrew's way of packaging software.
 
 ## NixOS
 
-- curl: https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/networking/curl/default.nix
-  (TODO: page has moved)
+- curl: https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/by-name/cu/curlMinimal/package.nix
 - curl issues: https://github.com/NixOS/nixpkgs
 
 nixpkgs is the package repository used by the NixOS Linux distribution, but
