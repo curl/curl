@@ -60,12 +60,12 @@ AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > ${BUNDLE}.c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurlu.la
-CLEANFILES = ${BUNDLE}.c
+CLEANFILES = $(BUNDLE).c
 else
 noinst_PROGRAMS =
 endif
@@ -78,7 +78,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/${BUNDLE}.c \
+	  -W$(srcdir)/$(BUNDLE).c \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI

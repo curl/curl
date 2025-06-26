@@ -54,12 +54,12 @@ if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
-${BUNDLE}.c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(CURLX_C) $(TESTS_C)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) --test $(TESTS_C) > ${BUNDLE}.c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(CURLX_C) $(TESTS_C)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = @CURL_NETWORK_AND_TIME_LIBS@
-CLEANFILES = ${BUNDLE}.c
+CLEANFILES = $(BUNDLE).c
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
@@ -69,7 +69,7 @@ CS_ = $(CS_0)
 # ignore generated C files since they play by slightly different rules!
 checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
-	  -W$(srcdir)/${BUNDLE}.c \
+	  -W$(srcdir)/$(BUNDLE).c \
 	  $(srcdir)/*.[ch])
 
 if NOT_CURL_CI
