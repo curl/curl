@@ -39,7 +39,7 @@ Usage: curl-config [OPTION]
 
 Available values for OPTION include:
 
-  --built-shared says 'yes' if libcurl was built shared
+  --built-shared        says 'yes' if libcurl was built shared
   --ca                  CA bundle install path
   --cc                  compiler
   --cflags              preprocessor and compiler flags
