@@ -27,6 +27,8 @@ include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt DISABLED $(TESTCASES)
 
+noinst_LTLIBRARIES =
+
 AM_LDFLAGS =
 AM_CFLAGS =
 
