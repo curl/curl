@@ -261,6 +261,66 @@ CURLcode Curl_cf_send(struct Curl_easy *data, int num,
   return CURLE_FAILED_INIT;
 }
 
+struct cf_io_ctx {
+  struct Curl_easy *data;
+  struct Curl_cfilter *cf;
+};
+
+static CURLcode cf_bufq_reader(void *writer_ctx,
+                               unsigned char *buf, size_t blen,
+                               size_t *pnread)
+{
+  struct cf_io_ctx *io = writer_ctx;
+  return Curl_conn_cf_recv(io->cf, io->data, (char *)buf, blen, pnread);
+}
+
+CURLcode Curl_cf_recv_bufq(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           struct bufq *bufq,
+                           size_t maxlen,
+                           size_t *pnread)
+{
+  struct cf_io_ctx io;
+
+  if(!cf || !data) {
+    *pnread = 0;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  io.data = data;
+  io.cf = cf;
+  return Curl_bufq_sipn(bufq, maxlen, cf_bufq_reader, &io, pnread);
+}
+
+static CURLcode cf_bufq_writer(void *writer_ctx,
+                               const unsigned char *buf, size_t buflen,
+                               size_t *pnwritten)
+{
+  struct cf_io_ctx *io = writer_ctx;
+  return Curl_conn_cf_send(io->cf, io->data, (const char *)buf,
+                           buflen, FALSE, pnwritten);
+}
+
+CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           struct bufq *bufq,
+                           const unsigned char *buf, size_t blen,
+                           size_t *pnwritten)
+{
+  struct cf_io_ctx io;
+
+  if(!cf || !data) {
+    *pnwritten = 0;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  io.data = data;
+  io.cf = cf;
+  if(buf && blen)
+    return Curl_bufq_write_pass(bufq, buf, blen, cf_bufq_writer, &io,
+                                pnwritten);
+  else
+    return Curl_bufq_pass(bufq, cf_bufq_writer, &io, pnwritten);
+}
+
 CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
                         const struct Curl_cftype *cft,
                         void *ctx)
