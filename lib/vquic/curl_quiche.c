@@ -839,10 +839,7 @@ static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
           "HTTP/3 stream %" FMT_PRIu64 " was closed cleanly, but before "
           "getting all response header fields, treated as error",
           stream->id);
-    /* *err = CURLE_PARTIAL_FILE; */
     result = CURLE_HTTP3;
-    CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_recv, closed incomplete"
-                " -> %d", stream->id, result);
   }
   return result;
 }
@@ -852,7 +849,6 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t nread = -1;
   CURLcode result = CURLE_OK, r2;
 
   *pnread = 0;
@@ -890,16 +886,14 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       Curl_multi_mark_dirty(data);
   }
   else {
-    if(stream->closed) {
+    if(stream->closed)
       result = recv_closed_stream(cf, data, pnread);
-      goto out;
-    }
     else if(quiche_conn_is_draining(ctx->qconn)) {
       failf(data, "QUIC connection is draining");
       result = CURLE_HTTP3;
-      goto out;
     }
-    result = CURLE_AGAIN;
+    else
+      result = CURLE_AGAIN;
   }
 
 out:
@@ -909,7 +903,7 @@ out:
     result = r2;
   }
   if(*pnread > 0)
-    ctx->data_recvd += nread;
+    ctx->data_recvd += *pnread;
   CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] cf_recv(total=%"
               FMT_OFF_T ") -> %d, %zu",
               stream->id, ctx->data_recvd, result, *pnread);

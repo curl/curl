@@ -552,7 +552,6 @@ static CURLcode cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t nread = -1;
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
@@ -571,7 +570,6 @@ static CURLcode cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
-    size_t n;
     result = Curl_bufq_cread(&stream->recvbuf, buf, len, pnread);
     CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %d, %zu",
                 len, result, *pnread);
