@@ -3310,8 +3310,14 @@ static CURLcode http_header_r(struct Curl_easy *data,
 static CURLcode http_header_s(struct Curl_easy *data,
                               const char *hd, size_t hdlen)
 {
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_HSTS)
   struct connectdata *conn = data->conn;
   const char *v;
+#else
+  (void)data;
+  (void)hd;
+  (void)hdlen;
+#endif
 
 #if !defined(CURL_DISABLE_COOKIES)
   v = (data->cookies && data->state.cookie_engine) ?
