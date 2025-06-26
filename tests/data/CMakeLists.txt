@@ -22,12 +22,12 @@
 #
 ###########################################################################
 
-# Get STUB_GSS variable
+# Get STUB_GSS_C, STUB_GSS_H variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(HAVE_GSSAPI AND UNIX)
-  add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS})
+  add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS_C})
   set_target_properties(stubgss PROPERTIES UNITY_BUILD OFF)
   add_dependencies(testdeps stubgss)
 endif()

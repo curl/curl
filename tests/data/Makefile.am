@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get STUB_GSS variable
+# Get STUB_GSS_C, STUB_GSS_H variable
 include Makefile.inc
 
 EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
@@ -40,7 +40,7 @@ if CURL_LT_SHLIB_USE_NO_UNDEFINED
 libstubgss_la_LDFLAGS += -no-undefined
 endif
 libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-libstubgss_la_SOURCES = $(STUB_GSS)
+libstubgss_la_SOURCES = $(STUB_GSS_C) $(STUB_GSS_H)
 libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
