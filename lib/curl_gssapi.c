@@ -68,20 +68,18 @@ enum min_err_code {
   GSS_LAST
 };
 
-struct stub_gss_ctx_id_t_desc_struct {
+typedef struct stub_gss_ctx_id_t_desc_struct {
   enum { STUB_GSS_NONE, STUB_GSS_KRB5, STUB_GSS_NTLM1, STUB_GSS_NTLM3 } sent;
   int have_krb5;
   int have_ntlm;
   OM_uint32 flags;
   char creds[MAX_CREDS_LENGTH];
-};
+} *stub_gss_ctx_id_t;
 
 typedef struct stub_gss_buffer_desc_struct {
   size_t length;
   void *value;
 } stub_gss_buffer_desc, *stub_gss_buffer_t;
-
-typedef struct stub_gss_ctx_id_t_desc_struct *stub_gss_ctx_id_t;
 
 typedef struct stub_gss_OID_desc_struct {
   OM_uint32 length;
