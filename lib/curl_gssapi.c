@@ -83,9 +83,6 @@ typedef struct stub_gss_buffer_desc_struct {
   void *value;
 } stub_gss_buffer_desc, *stub_gss_buffer_t;
 
-struct gss_cred_id_t_desc_struct;
-typedef const struct gss_cred_id_t_desc_struct *stub_gss_const_cred_id_t;
-
 typedef struct stub_gss_ctx_id_t_desc_struct *stub_gss_ctx_id_t;
 
 typedef struct stub_gss_OID_desc_struct {
@@ -102,7 +99,7 @@ typedef struct stub_gss_channel_bindings_struct {
 } *stub_gss_channel_bindings_t;
 
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
-    stub_gss_const_cred_id_t initiator_cred_handle,
+    gss_cred_id_t initiator_cred_handle,
     stub_gss_ctx_id_t *context_handle,
     gss_name_t target_name,
     const stub_gss_OID mech_type,
@@ -296,7 +293,7 @@ OM_uint32 Curl_gss_init_sec_context(
 #ifdef DEBUGBUILD
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
-      (stub_gss_const_cred_id_t)GSS_C_NO_CREDENTIAL, /* cred_handle */
+      GSS_C_NO_CREDENTIAL, /* cred_handle */
       (stub_gss_ctx_id_t *)context,
       target_name,
       (const stub_gss_OID)mech_type,
