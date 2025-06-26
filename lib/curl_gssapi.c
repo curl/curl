@@ -92,7 +92,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec)
 {
-  struct stub_gss_ctx_id_t_desc * ctx = NULL;
+  struct stub_gss_ctx_id_t_desc *ctx = NULL;
 
   /* The token will be encoded in base64 */
   size_t length = sizeof(ctx->creds) * 3 / 4;
