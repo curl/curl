@@ -297,20 +297,22 @@ OM_uint32 Curl_gss_init_sec_context(
     req_flags |= GSS_C_DELEG_FLAG;
 
 #ifdef DEBUGBUILD
-  return stub_gss_init_sec_context(minor_status,
-    (stub_gss_const_cred_id_t)GSS_C_NO_CREDENTIAL, /* cred_handle */
-    (stub_gss_ctx_id_t *)context,
-    (stub_gss_const_name_t)target_name,
-    (const stub_gss_OID)mech_type,
-    req_flags,
-    0, /* time_req */
-    (const stub_gss_channel_bindings_t)input_chan_bindings,
-    (const stub_gss_buffer_t)input_token,
-    NULL, /* actual_mech_type */
-    (stub_gss_buffer_t)output_token,
-    ret_flags,
-    NULL /* time_rec */);
-#else
+  if(getenv("CURL_STUB_GSS_CREDS"))
+    return stub_gss_init_sec_context(minor_status,
+      (stub_gss_const_cred_id_t)GSS_C_NO_CREDENTIAL, /* cred_handle */
+      (stub_gss_ctx_id_t *)context,
+      (stub_gss_const_name_t)target_name,
+      (const stub_gss_OID)mech_type,
+      req_flags,
+      0, /* time_req */
+      (const stub_gss_channel_bindings_t)input_chan_bindings,
+      (const stub_gss_buffer_t)input_token,
+      NULL, /* actual_mech_type */
+      (stub_gss_buffer_t)output_token,
+      ret_flags,
+      NULL /* time_rec */);
+#endif
+
   return gss_init_sec_context(minor_status,
                               GSS_C_NO_CREDENTIAL, /* cred_handle */
                               context,
@@ -324,7 +326,6 @@ OM_uint32 Curl_gss_init_sec_context(
                               output_token,
                               ret_flags,
                               NULL /* time_rec */);
-#endif
 }
 
 #define GSS_LOG_BUFFER_LEN 1024
