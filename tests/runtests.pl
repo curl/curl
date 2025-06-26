@@ -546,7 +546,7 @@ sub checksystemfeatures {
 
             $libcurl = $2;
             if($curl =~ /linux|bsd|solaris/i) {
-                # system supports LD_PRELOAD/LD_LIBRARY_PATH; may be disabled later
+                # system supports LD_PRELOAD/LD_LIBRARY_PATH
                 $feature{"ld_preload"} = 1;
             }
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
@@ -766,9 +766,6 @@ sub checksystemfeatures {
         }
         close($conf);
     }
-
-    # allow this feature only if debug mode is disabled
-    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"Debug"};
 
     if($feature{"IPv6"}) {
         # client has IPv6 support
