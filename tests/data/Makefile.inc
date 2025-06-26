@@ -23,4 +23,5 @@
 ###########################################################################
 # Shared between CMakeLists.txt and Makefile.am
 
-STUB_GSS = stub_gssapi.c stub_gssapi.h
+STUB_GSS_C = stub_gssapi.c
+STUB_GSS_H = stub_gssapi.h
