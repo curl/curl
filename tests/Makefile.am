@@ -88,14 +88,14 @@ EXTRA_DIST =        \
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
-BUILD_UNIT = tunit unit
+BUILD_UNIT = unit tunit
 DIST_UNIT =
 else
 BUILD_UNIT =
-DIST_UNIT = tunit unit
+DIST_UNIT = unit tunit
 endif
 
-SUBDIRS = http certs client data libtest server $(BUILD_UNIT)
+SUBDIRS = certs data server libtest client http $(BUILD_UNIT)
 DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 
 PERLFLAGS = -I$(srcdir)
