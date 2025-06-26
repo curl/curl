@@ -62,7 +62,7 @@ set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL
 
 curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
 
-if(HAVE_GSSAPI AND UNIX)
+if(HAVE_GSSAPI AND UNIX AND NOT BUILD_STATIC_CURL)
   add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS_C})
   set_target_properties(stubgss PROPERTIES UNITY_BUILD OFF)
   add_dependencies(testdeps stubgss)
