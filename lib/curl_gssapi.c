@@ -52,6 +52,221 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
   9, CURL_UNCONST("\x2a\x86\x48\x86\xf7\x12\x01\x02\x02")
 };
 
+#ifdef DEBUGBUILD
+
+#define MAX_CREDS_LENGTH 250
+#define APPROX_TOKEN_LEN 250
+
+enum min_err_code {
+  GSS_OK = 0,
+  GSS_NO_MEMORY,
+  GSS_INVALID_ARGS,
+  GSS_INVALID_CREDS,
+  GSS_INVALID_CTX,
+  GSS_SERVER_ERR,
+  GSS_NO_MECH,
+  GSS_LAST
+};
+
+typedef uint32_t OM_uint32;
+
+struct stub_gss_ctx_id_t_desc_struct {
+  enum { STUB_GSS_NONE, STUB_GSS_KRB5, STUB_GSS_NTLM1, STUB_GSS_NTLM3 } sent;
+  int have_krb5;
+  int have_ntlm;
+  OM_uint32 flags;
+  char creds[MAX_CREDS_LENGTH];
+};
+
+typedef struct stub_gss_buffer_desc_struct {
+  size_t length;
+  void *value;
+} stub_gss_buffer_desc, *stub_gss_buffer_t;
+
+struct gss_cred_id_t_desc_struct;
+typedef const struct gss_cred_id_t_desc_struct *stub_gss_const_cred_id_t;
+
+typedef struct stub_gss_ctx_id_t_desc_struct *stub_gss_ctx_id_t;
+
+struct gss_name_t_desc_struct;
+typedef const struct gss_name_t_desc_struct *stub_gss_const_name_t;
+
+typedef struct stub_gss_OID_desc_struct {
+  OM_uint32 length;
+  void      *elements;
+} *stub_gss_OID;
+
+typedef struct stub_gss_channel_bindings_struct {
+  OM_uint32 initiator_addrtype;
+  stub_gss_buffer_desc initiator_address;
+  OM_uint32 acceptor_addrtype;
+  stub_gss_buffer_desc acceptor_address;
+  stub_gss_buffer_desc application_data;
+} *stub_gss_channel_bindings_t;
+
+static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
+    stub_gss_const_cred_id_t initiator_cred_handle,
+    stub_gss_ctx_id_t *context_handle,
+    stub_gss_const_name_t target_name,
+    const stub_gss_OID mech_type,
+    OM_uint32 req_flags,
+    OM_uint32 time_req,
+    const stub_gss_channel_bindings_t input_chan_bindings,
+    const stub_gss_buffer_t input_token,
+    stub_gss_OID *actual_mech_type,
+    stub_gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec)
+{
+  /* The token will be encoded in base64 */
+  size_t length = APPROX_TOKEN_LEN * 3 / 4;
+  size_t used = 0;
+  char *token = NULL;
+  const char *creds = NULL;
+  stub_gss_ctx_id_t ctx = NULL;
+
+  (void)initiator_cred_handle;
+  (void)mech_type;
+  (void)time_req;
+  (void)input_chan_bindings;
+  (void)actual_mech_type;
+
+  if(!min)
+    return GSS_S_FAILURE;
+
+  *min = 0;
+
+  if(!context_handle || !target_name || !output_token) {
+    *min = GSS_INVALID_ARGS;
+    return GSS_S_FAILURE;
+  }
+
+  creds = getenv("CURL_STUB_GSS_CREDS");
+  if(!creds || strlen(creds) >= MAX_CREDS_LENGTH) {
+    *min = GSS_INVALID_CREDS;
+    return GSS_S_FAILURE;
+  }
+
+  ctx = *context_handle;
+  if(ctx && strcmp(ctx->creds, creds)) {
+    *min = GSS_INVALID_CREDS;
+    return GSS_S_FAILURE;
+  }
+
+  output_token->length = 0;
+  output_token->value = NULL;
+
+  if(input_token && input_token->length) {
+    if(!ctx) {
+      *min = GSS_INVALID_CTX;
+      return GSS_S_FAILURE;
+    }
+
+    /* Server response, either D (RA==) or C (Qw==) */
+    if(((char *) input_token->value)[0] == 'D') {
+      /* Done */
+      switch(ctx->sent) {
+      case STUB_GSS_KRB5:
+      case STUB_GSS_NTLM3:
+        if(ret_flags)
+          *ret_flags = ctx->flags;
+        if(time_rec)
+          *time_rec = GSS_C_INDEFINITE;
+        return GSS_S_COMPLETE;
+      default:
+        *min = GSS_SERVER_ERR;
+        return GSS_S_FAILURE;
+      }
+    }
+
+    if(((char *) input_token->value)[0] != 'C') {
+      /* We only support Done or Continue */
+      *min = GSS_SERVER_ERR;
+      return GSS_S_FAILURE;
+    }
+
+    /* Continue */
+    switch(ctx->sent) {
+    case STUB_GSS_KRB5:
+      /* We sent KRB5 and it failed, let's try NTLM */
+      if(ctx->have_ntlm) {
+        ctx->sent = STUB_GSS_NTLM1;
+        break;
+      }
+      else {
+        *min = GSS_SERVER_ERR;
+        return GSS_S_FAILURE;
+      }
+    case STUB_GSS_NTLM1:
+      ctx->sent = STUB_GSS_NTLM3;
+      break;
+    default:
+      *min = GSS_SERVER_ERR;
+      return GSS_S_FAILURE;
+    }
+  }
+  else {
+    if(ctx) {
+      *min = GSS_INVALID_CTX;
+      return GSS_S_FAILURE;
+    }
+
+    ctx = (stub_gss_ctx_id_t) calloc(1, sizeof(*ctx));
+    if(!ctx) {
+      *min = GSS_NO_MEMORY;
+      return GSS_S_FAILURE;
+    }
+
+    if(strstr(creds, "KRB5"))
+      ctx->have_krb5 = 1;
+
+    if(strstr(creds, "NTLM"))
+      ctx->have_ntlm = 1;
+
+    if(ctx->have_krb5)
+      ctx->sent = STUB_GSS_KRB5;
+    else if(ctx->have_ntlm)
+      ctx->sent = STUB_GSS_NTLM1;
+    else {
+      free(ctx);
+      *min = GSS_NO_MECH;
+      return GSS_S_FAILURE;
+    }
+
+    strcpy(ctx->creds, creds);
+    ctx->flags = req_flags;
+  }
+
+  token = malloc(length);
+  if(!token) {
+    free(ctx);
+    *min = GSS_NO_MEMORY;
+    return GSS_S_FAILURE;
+  }
+
+  /* Token format: creds:target:type:padding */
+  used = (size_t)msnprintf(token, length, "%s:%s:%d:", creds,
+                           (const char *)target_name, ctx->sent);
+
+  if(used >= length) {
+    free(token);
+    free(ctx);
+    *min = GSS_NO_MEMORY;
+    return GSS_S_FAILURE;
+  }
+
+  /* Overwrite null-terminator */
+  memset(token + used, 'A', length - used);
+
+  *context_handle = ctx;
+
+  output_token->value = token;
+  output_token->length = length;
+
+  return GSS_S_CONTINUE_NEEDED;
+}
+#endif /* DEBUGBUILD */
+
 OM_uint32 Curl_gss_init_sec_context(
     struct Curl_easy *data,
     OM_uint32 *minor_status,
@@ -74,13 +289,28 @@ OM_uint32 Curl_gss_init_sec_context(
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
     infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
-        "compiled in");
+          "compiled in");
 #endif
   }
 
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
+#ifdef DEBUGBUILD
+  return stub_gss_init_sec_context(minor_status,
+    (stub_gss_const_cred_id_t)GSS_C_NO_CREDENTIAL, /* cred_handle */
+    (stub_gss_ctx_id_t *)context,
+    (stub_gss_const_name_t)target_name,
+    (const stub_gss_OID)mech_type,
+    req_flags,
+    0, /* time_req */
+    (const stub_gss_channel_bindings_t)input_chan_bindings,
+    (const stub_gss_buffer_t)input_token,
+    NULL, /* actual_mech_type */
+    (stub_gss_buffer_t)output_token,
+    ret_flags,
+    NULL /* time_rec */);
+#else
   return gss_init_sec_context(minor_status,
                               GSS_C_NO_CREDENTIAL, /* cred_handle */
                               context,
@@ -94,6 +324,7 @@ OM_uint32 Curl_gss_init_sec_context(
                               output_token,
                               ret_flags,
                               NULL /* time_rec */);
+#endif
 }
 
 #define GSS_LOG_BUFFER_LEN 1024
