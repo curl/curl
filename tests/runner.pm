@@ -676,8 +676,8 @@ sub singletest_setenv {
                         logmsg "Skipping LD_PRELOAD due to lack of OS support\n" if($verbose);
                         next;
                     }
-                    if($feature{"Debug"} || !$has_shared) {
-                        logmsg "Skipping LD_PRELOAD due to no release shared build\n" if($verbose);
+                    if(!$has_shared) {
+                        logmsg "Skipping LD_PRELOAD due to no shared build\n" if($verbose);
                         next;
                     }
                 }
