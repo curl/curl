@@ -54,9 +54,6 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
 
 #ifdef DEBUGBUILD
 
-#define MAX_CREDS_LENGTH 250
-#define APPROX_TOKEN_LEN 250
-
 enum min_err_code {
   GSS_OK = 0,
   GSS_NO_MEMORY,
@@ -73,7 +70,7 @@ typedef struct stub_gss_ctx_id_t_desc_struct {
   int have_krb5;
   int have_ntlm;
   OM_uint32 flags;
-  char creds[MAX_CREDS_LENGTH];
+  char creds[250];
 } *stub_gss_ctx_id_t;
 
 typedef struct stub_gss_buffer_desc_struct {
@@ -95,12 +92,13 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec)
 {
+  stub_gss_ctx_id_t ctx = NULL;
+
   /* The token will be encoded in base64 */
-  size_t length = APPROX_TOKEN_LEN * 3 / 4;
+  size_t length = sizeof(ctx->creds) * 3 / 4;
   size_t used = 0;
   char *token = NULL;
   const char *creds = NULL;
-  stub_gss_ctx_id_t ctx = NULL;
 
   (void)initiator_cred_handle;
   (void)mech_type;
@@ -119,7 +117,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
   }
 
   creds = getenv("CURL_STUB_GSS_CREDS");
-  if(!creds || strlen(creds) >= MAX_CREDS_LENGTH) {
+  if(!creds || strlen(creds) >= sizeof(ctx->creds)) {
     *min = GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
   }
