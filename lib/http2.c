@@ -464,35 +464,31 @@ static int h2_client_new(struct Curl_cfilter *cf,
   return rc;
 }
 
-static ssize_t nw_in_reader(void *reader_ctx,
-                              unsigned char *buf, size_t buflen,
-                              CURLcode *err)
+static CURLcode nw_in_reader(void *reader_ctx,
+                             unsigned char *buf, size_t buflen,
+                             size_t *pnread)
 {
   struct Curl_cfilter *cf = reader_ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  size_t nread;
-
-  *err = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, &nread);
-  return *err ? -1 : (ssize_t)nread;
+  return Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, pnread);
 }
 
-static ssize_t nw_out_writer(void *writer_ctx,
+static CURLcode nw_out_writer(void *writer_ctx,
                              const unsigned char *buf, size_t buflen,
-                             CURLcode *err)
+                             size_t *pnwritten)
 {
   struct Curl_cfilter *cf = writer_ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  size_t nwritten;
+  CURLcode result;
 
-  if(!data) {
-    *err = CURLE_OK;
-    return 0;
-  }
+  *pnwritten = 0;
+  if(!data)
+    return CURLE_OK;
 
-  *err = Curl_conn_cf_send(cf->next, data, (const char *)buf,
-                           buflen, FALSE, &nwritten);
-  CURL_TRC_CF(data, cf, "[0] egress write -> %d, %zu", *err, nwritten);
-  return *err ? -1 : (ssize_t)nwritten;
+  result = Curl_conn_cf_send(cf->next, data, (const char *)buf,
+                             buflen, FALSE, pnwritten);
+  CURL_TRC_CF(data, cf, "[0] egress write -> %d, %zu", result, *pnwritten);
+  return result;
 }
 
 static ssize_t send_callback(nghttp2_session *h2,
@@ -715,12 +711,12 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
        not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
     CURLcode result;
-    ssize_t nread = -1;
+    size_t nread;
 
     *input_pending = FALSE;
-    nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
-    if(nread != -1) {
-      CURL_TRC_CF(data, cf, "%zd bytes stray data read before trying "
+    result = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &nread);
+    if(!result) {
+      CURL_TRC_CF(data, cf, "%zu bytes stray data read before trying "
                   "h2 connection", nread);
       if(h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */
@@ -773,15 +769,15 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result;
 
   (void)data;
   if(Curl_bufq_is_empty(&ctx->outbufq))
     return CURLE_OK;
 
-  nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
-  if(nwritten < 0) {
+  result = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &nwritten);
+  if(result) {
     if(result == CURLE_AGAIN) {
       CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
                   Curl_bufq_len(&ctx->outbufq));
@@ -804,7 +800,7 @@ static ssize_t send_callback(nghttp2_session *h2,
   struct Curl_cfilter *cf = userp;
   struct cf_h2_ctx *ctx = cf->ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result = CURLE_OK;
 
   (void)h2;
@@ -812,11 +808,11 @@ static ssize_t send_callback(nghttp2_session *h2,
   DEBUGASSERT(data);
 
   if(!cf->connected)
-    nwritten = Curl_bufq_write(&ctx->outbufq, buf, blen, &result);
+    result = Curl_bufq_write(&ctx->outbufq, buf, blen, &nwritten);
   else
-    nwritten = Curl_bufq_write_pass(&ctx->outbufq, buf, blen,
-                                    nw_out_writer, cf, &result);
-  if(nwritten < 0) {
+    result = Curl_bufq_write_pass(&ctx->outbufq, buf, blen,
+                                  nw_out_writer, cf, &nwritten);
+  if(result) {
     if(result == CURLE_AGAIN) {
       ctx->nw_out_blocked = 1;
       return NGHTTP2_ERR_WOULDBLOCK;
@@ -829,7 +825,8 @@ static ssize_t send_callback(nghttp2_session *h2,
     ctx->nw_out_blocked = 1;
     return NGHTTP2_ERR_WOULDBLOCK;
   }
-  return nwritten;
+  return (nwritten  > SSIZE_T_MAX) ?
+    NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nwritten;
 }
 
 
@@ -1770,6 +1767,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   struct h2_stream_ctx *stream = NULL;
   CURLcode result;
   ssize_t nread;
+  size_t n;
   (void)source;
 
   (void)cf;
@@ -1788,12 +1786,14 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
 
-  nread = Curl_bufq_read(&stream->sendbuf, buf, length, &result);
-  if(nread < 0) {
+  result = Curl_bufq_read(&stream->sendbuf, buf, length, &n);
+  if(result) {
     if(result != CURLE_AGAIN)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     nread = 0;
   }
+  else
+    nread = (ssize_t)n;
 
   CURL_TRC_CF(data_s, cf, "[%d] req_body_read(len=%zu) eos=%d -> %zd, %d",
               stream_id, length, stream->body_eos, nread, result);
@@ -2056,7 +2056,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  size_t nread;
 
   if(should_close_session(ctx)) {
     CURL_TRC_CF(data, cf, "progress ingress, session is closed");
@@ -2086,8 +2086,8 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
-    nread = Curl_bufq_sipn(&ctx->inbufq, 0, nw_in_reader, cf, &result);
-    if(nread < 0) {
+    result = Curl_bufq_sipn(&ctx->inbufq, 0, nw_in_reader, cf, &nread);
+    if(result) {
       if(result != CURLE_AGAIN) {
         failf(data, "Failed receiving HTTP2 data: %d(%s)", result,
               curl_easy_strerror(result));
@@ -2101,9 +2101,8 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
     else {
-      CURL_TRC_CF(data, cf, "[0] ingress: read %zd bytes", nread);
-      data_max_bytes = (data_max_bytes > (size_t)nread) ?
-        (data_max_bytes - (size_t)nread) : 0;
+      CURL_TRC_CF(data, cf, "[0] ingress: read %zu bytes", nread);
+      data_max_bytes = (data_max_bytes > nread) ? (data_max_bytes - nread) : 0;
     }
 
     if(h2_process_pending_input(cf, data, &result))
@@ -2197,7 +2196,7 @@ static ssize_t cf_h2_body_send(struct Curl_cfilter *cf,
                                CURLcode *err)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(stream->closed) {
     if(stream->resp_hds_complete) {
@@ -2219,11 +2218,11 @@ static ssize_t cf_h2_body_send(struct Curl_cfilter *cf,
     return -1;
   }
 
-  nwritten = Curl_bufq_write(&stream->sendbuf, buf, blen, err);
-  if(nwritten < 0)
+  *err = Curl_bufq_write(&stream->sendbuf, buf, blen, &nwritten);
+  if(*err)
     return -1;
 
-  if(eos && (blen == (size_t)nwritten))
+  if(eos && (blen == nwritten))
     stream->body_eos = TRUE;
 
   if(eos || !Curl_bufq_is_empty(&stream->sendbuf)) {
@@ -2234,7 +2233,7 @@ static ssize_t cf_h2_body_send(struct Curl_cfilter *cf,
       return -1;
     }
   }
-  return nwritten;
+  return (ssize_t)nwritten;
 }
 
 static CURLcode h2_submit(struct h2_stream_ctx **pstream,
@@ -2971,17 +2970,17 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
     /* Remaining data from the protocol switch reply is already using
      * the switched protocol, ie. HTTP/2. We add that to the network
      * inbufq. */
-    ssize_t copied;
+    size_t copied;
 
-    copied = Curl_bufq_write(&ctx->inbufq,
-                             (const unsigned char *)mem, nread, &result);
-    if(copied < 0) {
+    result = Curl_bufq_write(&ctx->inbufq,
+                             (const unsigned char *)mem, nread, &copied);
+    if(result) {
       failf(data, "error on copying HTTP Upgrade response: %d", result);
       return CURLE_RECV_ERROR;
     }
-    if((size_t)copied < nread) {
+    if(copied < nread) {
       failf(data, "connection buffer size could not take all data "
-            "from HTTP Upgrade response header: copied=%zd, datalen=%zu",
+            "from HTTP Upgrade response header: copied=%zu, datalen=%zu",
             copied, nread);
       return CURLE_HTTP2;
     }

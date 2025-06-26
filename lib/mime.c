@@ -1992,14 +1992,12 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
   if(!Curl_bufq_is_empty(&ctx->tmpbuf)) {
-    ssize_t n = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen,
-                               &result);
-    if(n < 0) {
+    result = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen, &nread);
+    if(result) {
       ctx->errored = TRUE;
       ctx->error_result = result;
       return result;
     }
-    nread = (size_t)n;
   }
   else if(blen <= 4) {
     /* Curl_mime_read() may go into an infinite loop when reading
@@ -2009,21 +2007,20 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), small read, using tmp", blen);
     nread = Curl_mime_read(tmp, 1, sizeof(tmp), ctx->part);
     if(nread <= sizeof(tmp)) {
-      ssize_t n = Curl_bufq_write(&ctx->tmpbuf, (unsigned char *)tmp, nread,
-                                  &result);
-      if(n < 0) {
+      size_t n;
+      result = Curl_bufq_write(&ctx->tmpbuf, (unsigned char *)tmp, nread, &n);
+      if(result) {
         ctx->errored = TRUE;
         ctx->error_result = result;
         return result;
       }
       /* stored it, read again */
-      n = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen, &result);
-      if(n < 0) {
+      result = Curl_bufq_cread(&ctx->tmpbuf, buf, blen, &nread);
+      if(result) {
         ctx->errored = TRUE;
         ctx->error_result = result;
         return result;
       }
-      nread = (size_t)n;
     }
   }
   else
