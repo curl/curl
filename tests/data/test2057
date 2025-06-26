@@ -58,6 +58,7 @@ GSS-API
 ld_preload
 </features>
 <setenv>
+LD_DEBUG=all
 LD_PRELOAD=libstubgss.so
 LD_LIBRARY_PATH=%PWD/libtest/.libs:%PWD/libtest
 CURL_STUB_GSS_CREDS="NTLM_Alice"
