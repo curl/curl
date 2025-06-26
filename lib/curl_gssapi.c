@@ -90,14 +90,6 @@ typedef struct stub_gss_OID_desc_struct {
   void      *elements;
 } *stub_gss_OID;
 
-typedef struct stub_gss_channel_bindings_struct {
-  OM_uint32 initiator_addrtype;
-  stub_gss_buffer_desc initiator_address;
-  OM_uint32 acceptor_addrtype;
-  stub_gss_buffer_desc acceptor_address;
-  stub_gss_buffer_desc application_data;
-} *stub_gss_channel_bindings_t;
-
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     gss_cred_id_t initiator_cred_handle,
     stub_gss_ctx_id_t *context_handle,
@@ -105,7 +97,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     const stub_gss_OID mech_type,
     OM_uint32 req_flags,
     OM_uint32 time_req,
-    const stub_gss_channel_bindings_t input_chan_bindings,
+    const gss_channel_bindings_t input_chan_bindings,
     const stub_gss_buffer_t input_token,
     stub_gss_OID *actual_mech_type,
     stub_gss_buffer_t output_token,
@@ -299,7 +291,7 @@ OM_uint32 Curl_gss_init_sec_context(
       (const stub_gss_OID)mech_type,
       req_flags,
       0, /* time_req */
-      (const stub_gss_channel_bindings_t)input_chan_bindings,
+      input_chan_bindings,
       (const stub_gss_buffer_t)input_token,
       NULL, /* actual_mech_type */
       (stub_gss_buffer_t)output_token,
