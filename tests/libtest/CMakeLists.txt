@@ -65,6 +65,6 @@ curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
 if(HAVE_GSSAPI AND NOT BUILD_STATIC_CURL AND
    (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR BSD OR CMAKE_SYSTEM_NAME STREQUAL "SunOS"))
   add_library(stubgss SHARED EXCLUDE_FROM_ALL ${STUB_GSS_C})
-  set_target_properties(stubgss PROPERTIES UNITY_BUILD OFF)
+  set_target_properties(stubgss PROPERTIES DEBUG_POSTFIX "" UNITY_BUILD OFF)
   add_dependencies(testdeps stubgss)
 endif()
