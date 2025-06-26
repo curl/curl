@@ -40,7 +40,6 @@ HTTP Negotiate authentication (stub krb5)
 <features>
 GSS-API
 ld_preload
-!Debug
 </features>
 <setenv>
 LD_PRELOAD=libstubgss.so
