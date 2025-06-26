@@ -68,8 +68,6 @@ enum min_err_code {
   GSS_LAST
 };
 
-typedef uint32_t OM_uint32;
-
 struct stub_gss_ctx_id_t_desc_struct {
   enum { STUB_GSS_NONE, STUB_GSS_KRB5, STUB_GSS_NTLM1, STUB_GSS_NTLM3 } sent;
   int have_krb5;
