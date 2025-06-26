@@ -25,7 +25,7 @@
 # Get STUB_GSS_C, STUB_GSS_H variable
 include Makefile.inc
 
-EXTRA_DIST = $(TESTCASES) DISABLED CMakeLists.txt
+EXTRA_DIST = CMakeLists.txt DISABLED $(TESTCASES)
 
 AM_LDFLAGS =
 AM_CFLAGS =
