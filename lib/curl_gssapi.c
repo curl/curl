@@ -81,21 +81,16 @@ typedef struct stub_gss_buffer_desc_struct {
   void *value;
 } stub_gss_buffer_desc, *stub_gss_buffer_t;
 
-typedef struct stub_gss_OID_desc_struct {
-  OM_uint32 length;
-  void      *elements;
-} *stub_gss_OID;
-
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     gss_cred_id_t initiator_cred_handle,
     stub_gss_ctx_id_t *context_handle,
     gss_name_t target_name,
-    const stub_gss_OID mech_type,
+    const gss_OID mech_type,
     OM_uint32 req_flags,
     OM_uint32 time_req,
     const gss_channel_bindings_t input_chan_bindings,
     const stub_gss_buffer_t input_token,
-    stub_gss_OID *actual_mech_type,
+    gss_OID *actual_mech_type,
     stub_gss_buffer_t output_token,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec)
@@ -284,7 +279,7 @@ OM_uint32 Curl_gss_init_sec_context(
                                      GSS_C_NO_CREDENTIAL, /* cred_handle */
                                      (stub_gss_ctx_id_t *)context,
                                      target_name,
-                                     (const stub_gss_OID)mech_type,
+                                     mech_type,
                                      req_flags,
                                      0, /* time_req */
                                      input_chan_bindings,
