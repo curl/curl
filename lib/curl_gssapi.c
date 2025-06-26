@@ -219,9 +219,26 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  /* Token format: creds:target:type:padding */
-  used = (size_t)msnprintf(token, length, "%s:%s:%d:", creds,
-                           (const char *)target_name, ctx->sent);
+  {
+    gss_buffer_desc target_desc;
+    gss_OID name_type = GSS_C_NO_OID;
+    OM_uint32 minor_status;
+    OM_uint32 major_status;
+    major_status = gss_display_name(&minor_status, target_name,
+                                    &target_desc, &name_type);
+    if(GSS_ERROR(major_status)) {
+      free(token);
+      free(ctx);
+      *min = GSS_NO_MEMORY;
+      return GSS_S_FAILURE;
+    }
+
+    /* Token format: creds:target:type:padding */
+    used = (size_t)msnprintf(token, length, "%s:%s:%d:", creds,
+                             (const char *)target_desc.value, ctx->sent);
+
+    gss_release_buffer(&minor_status, &target_desc);
+  }
 
   if(used >= length) {
     free(token);
