@@ -82,13 +82,13 @@ libstubgss_la_DEPENDENCIES =
 endif
 
 if USE_CPPFLAG_CURL_STATICLIB
-curlx_csrc =
+curlx_c_lib =
 else
 # These are part of the libcurl static lib. Add them here when linking shared.
-curlx_csrc = $(CURLX_C)
+curlx_c_lib = $(CURLX_C)
 endif
-$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_csrc) $(TESTS_C) lib1521.c
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_csrc) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
+$(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(curlx_c_lib) $(TESTS_C) lib1521.c
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(curlx_c_lib) --test $(TESTS_C) lib1521.c > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
 LDADD = $(top_builddir)/lib/libcurl.la
