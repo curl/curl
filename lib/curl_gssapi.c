@@ -73,10 +73,10 @@ typedef struct stub_gss_ctx_id_t_desc_struct {
   char creds[250];
 } *stub_gss_ctx_id_t;
 
-typedef struct stub_gss_buffer_desc_struct {
+struct stub_gss_buffer_desc_struct {
   size_t length;
   void *value;
-} *stub_gss_buffer_t;
+};
 
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     gss_cred_id_t initiator_cred_handle,
@@ -86,9 +86,9 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     OM_uint32 req_flags,
     OM_uint32 time_req,
     const gss_channel_bindings_t input_chan_bindings,
-    const stub_gss_buffer_t input_token,
+    const struct stub_gss_buffer_desc_struct *input_token,
     gss_OID *actual_mech_type,
-    stub_gss_buffer_t output_token,
+    struct stub_gss_buffer_desc_struct *output_token,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec)
 {
@@ -281,9 +281,9 @@ OM_uint32 Curl_gss_init_sec_context(
                                      req_flags,
                                      0, /* time_req */
                                      input_chan_bindings,
-                                     (const stub_gss_buffer_t)input_token,
+                                     (const struct stub_gss_buffer_desc_struct *)input_token,
                                      NULL, /* actual_mech_type */
-                                     (stub_gss_buffer_t)output_token,
+                                     (struct stub_gss_buffer_desc_struct *)output_token,
                                      ret_flags,
                                      NULL /* time_rec */);
 #endif
