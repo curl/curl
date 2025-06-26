@@ -285,18 +285,18 @@ OM_uint32 Curl_gss_init_sec_context(
 #ifdef DEBUGBUILD
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
-      GSS_C_NO_CREDENTIAL, /* cred_handle */
-      (stub_gss_ctx_id_t *)context,
-      target_name,
-      (const stub_gss_OID)mech_type,
-      req_flags,
-      0, /* time_req */
-      input_chan_bindings,
-      (const stub_gss_buffer_t)input_token,
-      NULL, /* actual_mech_type */
-      (stub_gss_buffer_t)output_token,
-      ret_flags,
-      NULL /* time_rec */);
+                                     GSS_C_NO_CREDENTIAL, /* cred_handle */
+                                     (stub_gss_ctx_id_t *)context,
+                                     target_name,
+                                     (const stub_gss_OID)mech_type,
+                                     req_flags,
+                                     0, /* time_req */
+                                     input_chan_bindings,
+                                     (const stub_gss_buffer_t)input_token,
+                                     NULL, /* actual_mech_type */
+                                     (stub_gss_buffer_t)output_token,
+                                     ret_flags,
+                                     NULL /* time_rec */);
 #endif
 
   return gss_init_sec_context(minor_status,
