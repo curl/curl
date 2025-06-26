@@ -65,13 +65,13 @@ enum min_err_code {
   GSS_LAST
 };
 
-typedef struct stub_gss_ctx_id_t_desc_struct {
+struct stub_gss_ctx_id_t_desc_struct {
   enum { STUB_GSS_NONE, STUB_GSS_KRB5, STUB_GSS_NTLM1, STUB_GSS_NTLM3 } sent;
   int have_krb5;
   int have_ntlm;
   OM_uint32 flags;
   char creds[250];
-} *stub_gss_ctx_id_t;
+};
 
 struct stub_gss_buffer_desc_struct {
   size_t length;
@@ -80,7 +80,7 @@ struct stub_gss_buffer_desc_struct {
 
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     gss_cred_id_t initiator_cred_handle,
-    stub_gss_ctx_id_t *context_handle,
+    struct stub_gss_ctx_id_t_desc_struct **context_handle,
     gss_name_t target_name,
     const gss_OID mech_type,
     OM_uint32 req_flags,
@@ -92,7 +92,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec)
 {
-  stub_gss_ctx_id_t ctx = NULL;
+  struct stub_gss_ctx_id_t_desc_struct * ctx = NULL;
 
   /* The token will be encoded in base64 */
   size_t length = sizeof(ctx->creds) * 3 / 4;
@@ -186,7 +186,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = (stub_gss_ctx_id_t) calloc(1, sizeof(*ctx));
+    ctx = (struct stub_gss_ctx_id_t_desc *) calloc(1, sizeof(*ctx));
     if(!ctx) {
       *min = GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -275,7 +275,7 @@ OM_uint32 Curl_gss_init_sec_context(
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
                                      GSS_C_NO_CREDENTIAL, /* cred_handle */
-                                     (stub_gss_ctx_id_t *)context,
+                                     (struct stub_gss_ctx_id_t_desc **)context,
                                      target_name,
                                      mech_type,
                                      req_flags,
