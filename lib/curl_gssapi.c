@@ -76,7 +76,7 @@ typedef struct stub_gss_ctx_id_t_desc_struct {
 typedef struct stub_gss_buffer_desc_struct {
   size_t length;
   void *value;
-} stub_gss_buffer_desc, *stub_gss_buffer_t;
+} *stub_gss_buffer_t;
 
 static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     gss_cred_id_t initiator_cred_handle,
