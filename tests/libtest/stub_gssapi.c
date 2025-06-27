@@ -135,36 +135,6 @@ OM_uint32 gss_inquire_context(OM_uint32 * /* minor_status */,
                               int * /* locally_initiated */,
                               int * /* open_context */);
 
-OM_uint32 gss_wrap(OM_uint32 * /* minor_status */,
-                   gss_const_ctx_id_t /* context_handle */,
-                   int /* conf_req_flag */,
-                   gss_qop_t /* qop_req */,
-                   const gss_buffer_t /* input_message_buffer */,
-                   int * /* conf_state */,
-                   gss_buffer_t /* output_message_buffer */);
-
-OM_uint32 gss_unwrap(OM_uint32 * /* minor_status */,
-                     gss_const_ctx_id_t /* context_handle */,
-                     const gss_buffer_t /* input_message_buffer */,
-                     gss_buffer_t /* output_message_buffer */,
-                     int * /* conf_state */,
-                     gss_qop_t * /* qop_state */);
-
-OM_uint32 gss_seal(OM_uint32 * /* minor_status */,
-                   gss_ctx_id_t /* context_handle n */,
-                   int /* conf_req_flag */,
-                   int /* qop_req */,
-                   gss_buffer_t /* input_message_buffer */,
-                   int * /* conf_state */,
-                   gss_buffer_t /* output_message_buffer */);
-
-OM_uint32 gss_unseal(OM_uint32 * /* minor_status */,
-                     gss_ctx_id_t /* context_handle */,
-                     gss_buffer_t /* input_message_buffer */,
-                     gss_buffer_t /* output_message_buffer */,
-                     int * /* conf_state */,
-                     int * /* qop_state */);
-
 OM_uint32 gss_import_name(OM_uint32 * /* minor_status */,
                           const gss_buffer_t /* input_name_buffer */,
                           const gss_OID /* input_name_type */,
@@ -543,73 +513,5 @@ OM_uint32 gss_inquire_context(OM_uint32 *min,
   (void)ctx_flags;
   (void)locally_initiated;
   (void)open_context;
-  return GSS_S_FAILURE;
-}
-
-OM_uint32 gss_wrap(OM_uint32 *min,
-                   gss_const_ctx_id_t context_handle,
-                   int conf_req_flag,
-                   gss_qop_t qop_req,
-                   const gss_buffer_t input_message_buffer,
-                   int *conf_state,
-                   gss_buffer_t output_message_buffer)
-{
-  (void)min;
-  (void)context_handle;
-  (void)conf_req_flag;
-  (void)qop_req;
-  (void)input_message_buffer;
-  (void)conf_state;
-  (void)output_message_buffer;
-  return GSS_S_FAILURE;
-}
-
-OM_uint32 gss_unwrap(OM_uint32 *min,
-                     gss_const_ctx_id_t context_handle,
-                     const gss_buffer_t input_message_buffer,
-                     gss_buffer_t output_message_buffer,
-                     int *conf_state,
-                     gss_qop_t *qop_state)
-{
-  (void)min;
-  (void)context_handle;
-  (void)input_message_buffer;
-  (void)output_message_buffer;
-  (void)conf_state;
-  (void)qop_state;
-  return GSS_S_FAILURE;
-}
-
-OM_uint32 gss_seal(OM_uint32 *min,
-                   gss_ctx_id_t context_handle,
-                   int conf_req_flag,
-                   int qop_req,
-                   gss_buffer_t input_message_buffer,
-                   int *conf_state,
-                   gss_buffer_t output_message_buffer)
-{
-  (void)min;
-  (void)context_handle;
-  (void)conf_req_flag;
-  (void)qop_req;
-  (void)input_message_buffer;
-  (void)conf_state;
-  (void)output_message_buffer;
-  return GSS_S_FAILURE;
-}
-
-OM_uint32 gss_unseal(OM_uint32 *min,
-                     gss_ctx_id_t context_handle,
-                     gss_buffer_t input_message_buffer,
-                     gss_buffer_t output_message_buffer,
-                     int *conf_state,
-                     int *qop_state)
-{
-  (void)min;
-  (void)context_handle;
-  (void)input_message_buffer;
-  (void)output_message_buffer;
-  (void)conf_state;
-  (void)qop_state;
   return GSS_S_FAILURE;
 }
