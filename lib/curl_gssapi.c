@@ -233,11 +233,23 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
+    if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
+      free(token);
+      free(ctx);
+      *min = GSS_NO_MEMORY;
+      return GSS_S_FAILURE;
+    }
+
     /* Token format: creds:target:type:padding */
-    used = (size_t) snprintf(token, length, "%s:%.*s:%d:", creds,
-                             (int)target_desc.length,
-                             (const char *)target_desc.value,
-                             ctx->sent);
+    memcpy(token + used, creds, strlen(creds));
+    used += strlen(creds);
+    token[used++] = ':';
+    memcpy(token + used, (const char *)target_desc.value, target_desc.length);
+    used += target_desc.length;
+    token[used++] = ':';
+    token[used++] = (char)((int)ctx->sent + '0');
+    token[used++] = ':';
+    token[used] = '\0';
 
     gss_release_buffer(&minor_status, &target_desc);
   }
