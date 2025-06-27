@@ -70,6 +70,12 @@ enum min_err_code {
   STUB_GSS_LAST
 };
 
+/* libcurl is also passing this struct to these functions, which are not yet
+ * stubbed:
+ *   gss_inquire_context()
+ *   gss_unwrap()
+ *   gss_wrap()
+ */
 struct stub_gss_ctx_id_t_desc {
   enum { STUB_GSS_NONE, STUB_GSS_KRB5, STUB_GSS_NTLM1, STUB_GSS_NTLM3 } sent;
   int have_krb5;
