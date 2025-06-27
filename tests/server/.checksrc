@@ -1,1 +1,1 @@
-banfunc strncpy
+allowfunc strtoul

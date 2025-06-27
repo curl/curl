@@ -26,6 +26,8 @@
 
 /* Roughly based on Heimdal's gssapi.h */
 
+/* !checksrc! disable TYPEDEFSTRUCT all */
+
 #include <stdint.h>
 #include <stddef.h>
 
