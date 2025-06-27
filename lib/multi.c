@@ -271,20 +271,22 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
 
   Curl_cpool_init(&multi->cpool, multi->admin, NULL, chashsize);
 
+#ifdef USE_SSL
   if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
     goto error;
+#else
+  (void)sesssize;
+#endif
 
 #ifdef USE_WINSOCK
   multi->wsa_event = WSACreateEvent();
   if(multi->wsa_event == WSA_INVALID_EVENT)
     goto error;
-#else
-#ifdef ENABLE_WAKEUP
+#elif defined(ENABLE_WAKEUP)
   if(wakeup_create(multi->wakeup_pair, TRUE) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
   }
-#endif
 #endif
 
   return multi;
@@ -296,7 +298,9 @@ error:
   Curl_dnscache_destroy(&multi->dnscache);
   Curl_cpool_destroy(&multi->cpool);
   Curl_cshutdn_destroy(&multi->cshutdn, multi->admin);
+#ifdef USE_SSL
   Curl_ssl_scache_destroy(multi->ssl_scache);
+#endif
   if(multi->admin) {
     multi->admin->multi = NULL;
     Curl_close(&multi->admin);
@@ -2849,7 +2853,9 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_hash_destroy(&multi->proto_hash);
     Curl_dnscache_destroy(&multi->dnscache);
     Curl_psl_destroy(&multi->psl);
+#ifdef USE_SSL
     Curl_ssl_scache_destroy(multi->ssl_scache);
+#endif
 
 #ifdef USE_WINSOCK
     WSACloseEvent(multi->wsa_event);
