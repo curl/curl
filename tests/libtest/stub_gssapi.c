@@ -306,8 +306,10 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
     /* Token format: creds:target:type:padding */
     /* Note: this is using the *real* snprintf() and not the curl provided
        one */
-    used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
-                             (const char *)target_desc.value, ctx->sent);
+    used = (size_t) snprintf(token, length, "%s:%.*s:%d:", creds,
+                             (int)target_desc.length,
+                             (const char *)target_desc.value,
+                             ctx->sent);
 
     gss_release_buffer(&minor_status, &target_desc);
   }
