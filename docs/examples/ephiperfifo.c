@@ -160,7 +160,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
     its.it_value.tv_nsec = 1;
   }
   else {
-    memset(&its, 0, sizeof(struct itimerspec));
+    memset(&its, 0, sizeof(its));
   }
 
   timerfd_settime(g->tfd, /* flags= */0, &its, NULL);
@@ -209,7 +209,7 @@ static void event_cb(struct GlobalInfo *g, int fd, int revents)
   check_multi_info(g);
   if(g->still_running <= 0) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
-    memset(&its, 0, sizeof(struct itimerspec));
+    memset(&its, 0, sizeof(its));
     timerfd_settime(g->tfd, 0, &its, NULL);
   }
 }
@@ -485,7 +485,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  memset(&its, 0, sizeof(struct itimerspec));
+  memset(&its, 0, sizeof(its));
   its.it_interval.tv_sec = 0;
   its.it_value.tv_sec = 1;
   timerfd_settime(g.tfd, 0, &its, NULL);
