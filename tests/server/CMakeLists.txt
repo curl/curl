@@ -49,8 +49,7 @@ target_compile_definitions(TARGET ${BUNDLE} PRIVATE "WITHOUT_LIBCURL" "CURL_NO_O
   # to build the servers.  In order to achieve proper linkage of these
   # files on Windows targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
-  "$<$<BOOL:WIN32>:CURL_STATICLIB>"
-)
+  "$<$<BOOL:WIN32>:CURL_STATICLIB>")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
 curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
