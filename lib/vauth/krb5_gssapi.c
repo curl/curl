@@ -96,7 +96,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
 
@@ -104,6 +103,8 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   (void) passwdp;
 
   if(!krb5->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -116,16 +117,13 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     /* Import the SPN */
     major_status = gss_import_name(&minor_status, &spn_token,
                                    GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
+    free(spn);
+
     if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
-
-      free(spn);
-
       return CURLE_AUTH_ERROR;
     }
-
-    free(spn);
   }
 
   if(chlg) {
