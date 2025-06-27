@@ -253,6 +253,9 @@ Vulnerabilities in features which are off by default (in the build) and
 documented as experimental, or exist only in debug mode, are not eligible for a
 reward and we do not consider them security problems.
 
+The same applies to scripts and software which are not installed by default by
+the make install rule.
+
 ## URL inconsistencies
 
 URL parser inconsistencies between browsers and curl are expected and are not
