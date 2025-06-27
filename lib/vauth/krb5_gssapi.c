@@ -117,13 +117,16 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     /* Import the SPN */
     major_status = gss_import_name(&minor_status, &spn_token,
                                    GSS_C_NT_HOSTBASED_SERVICE, &krb5->spn);
-    free(spn);
-
     if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
+
+      free(spn);
+
       return CURLE_AUTH_ERROR;
     }
+
+    free(spn);
   }
 
   if(chlg) {
