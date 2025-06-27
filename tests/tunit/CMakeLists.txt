@@ -44,10 +44,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h", "unitcheck.h"
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
-set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS
-  ${CURL_DEBUG_MACROS}
-  "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION"
-)
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_DEBUG_MACROS} "CURL_NO_OLDIES" "CURL_DISABLE_DEPRECATION")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
 curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
