@@ -4,4 +4,3 @@ banfunc snprintf
 banfunc vsnprint
 banfunc strtoul
 banfunc strtol
-banfunc strtok_r
