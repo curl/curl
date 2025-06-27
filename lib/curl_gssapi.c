@@ -365,12 +365,13 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
                                       gss_buffer_t output_token)
 {
 #ifdef CURL_USE_STUB_GSS_DEBUGBUILD
-  return stub_gss_delete_sec_context(min,
+  if(getenv("CURL_STUB_GSS_CREDS"))
+    return stub_gss_delete_sec_context(min,
                                      (struct stub_gss_ctx_id_t_desc **)context,
                                      output_token);
-#else
-  return gss_delete_sec_context(min, context, output_token);
 #endif /* CURL_USE_STUB_GSS_DEBUGBUILD */
+
+  return gss_delete_sec_context(min, context, output_token);
 }
 
 #define GSS_LOG_BUFFER_LEN 1024
