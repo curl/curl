@@ -41,7 +41,6 @@ BEGIN {
         $CURLVERSION
         $CURLVERNUM
         $DATE
-        $has_shared
         $LIBDIR
         $UNITDIR
         $TUNITDIR
@@ -141,6 +140,5 @@ our $DNSCMD="dnsd.cmd";         # write DNS instructions here
 our @protocols;   # array of lowercase supported protocol servers
 our %feature;     # hash of enabled features
 our %keywords;    # hash of keywords from the test spec
-our $has_shared;  # built as a shared library
 
 1;
