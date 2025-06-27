@@ -317,7 +317,7 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
     memcpy(token + used, (const char *)target_desc.value, target_desc.length);
     used += target_desc.length;
     token[used++] = ':';
-    token[used++] = (unsigned char)ctx->sent + '0';
+    token[used++] = (char)((int)ctx->sent + '0');
     token[used++] = ':';
     token[used] = '\0';
 
