@@ -816,11 +816,6 @@ sub checksystemfeatures {
     }
     # 'socks' was once here but is now removed
 
-    $has_shared = `sh $CURLCONFIG --built-shared`;
-    chomp $has_shared;
-    $has_shared = $has_shared eq "yes";
-
-
     if($torture) {
         if(!$feature{"TrackMemory"}) {
             die "can't run torture tests since curl was built without ".
