@@ -1,0 +1,8 @@
+banfunc strerror
+banfunc strncpy
+banfunc sscanf
+banfunc snprintf
+banfunc vsnprint
+banfunc strtoul
+banfunc strtol
+banfunc strtok_r
