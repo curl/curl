@@ -87,12 +87,11 @@
 
 #define SYNCTIME_UA "synctime/1.0"
 
-typedef struct
-{
+struct conf {
   char http_proxy[MAX_STRING1];
   char proxy_user[MAX_STRING1];
   char timeserver[MAX_STRING1];
-} conf_t;
+};
 
 static const char DefaultTimeServer[3][MAX_STRING1] =
 {
@@ -229,7 +228,7 @@ static void showUsage(void)
   return;
 }
 
-static int conf_init(conf_t *conf)
+static int conf_init(struct conf *conf)
 {
   int i;
 
@@ -242,9 +241,9 @@ static int conf_init(conf_t *conf)
 
 int main(int argc, char *argv[])
 {
-  CURL    *curl;
-  conf_t  conf[1];
-  int     RetValue;
+  CURL *curl;
+  struct conf conf[1];
+  int RetValue;
 
   ShowAllHeader   = 0;    /* Do not show HTTP Header */
   AutoSyncTime    = 0;    /* Do not synchronise computer clock */
