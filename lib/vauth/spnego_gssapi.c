@@ -275,7 +275,6 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
-
   }
 
   /* Free the SPN */
