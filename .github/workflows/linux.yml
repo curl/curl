@@ -652,9 +652,9 @@ jobs:
             fi
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
-            fi
-            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
-              TFLAGS+=' ~2056 ~2057 ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
+              if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
+                TFLAGS+=' ~2056 ~2057 ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
+              fi
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
