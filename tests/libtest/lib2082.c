@@ -23,10 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-typedef struct prcs {
+struct prcs {
   int prereq_retcode;
   int ipv6;
-} PRCS;
+};
 
 static int prereq_callback(void *clientp,
                            char *conn_primary_ip,
@@ -34,7 +34,7 @@ static int prereq_callback(void *clientp,
                            int conn_primary_port,
                            int conn_local_port)
 {
-  PRCS *prereq_cb = (PRCS *)clientp;
+  struct prcs *prereq_cb = (struct prcs *)clientp;
 
   if(prereq_cb->ipv6) {
     curl_mprintf("Connected to [%s]\n", conn_primary_ip);
@@ -53,7 +53,7 @@ static int prereq_callback(void *clientp,
 
 static CURLcode test_lib2082(char *URL)  /* libprereq */
 {
-  PRCS prereq_cb;
+  struct prcs prereq_cb;
   CURLcode ret = CURLE_OK;
   CURL *curl = NULL;
 
