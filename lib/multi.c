@@ -278,13 +278,11 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->wsa_event = WSACreateEvent();
   if(multi->wsa_event == WSA_INVALID_EVENT)
     goto error;
-#else
-#ifdef ENABLE_WAKEUP
+#elif defined(ENABLE_WAKEUP)
   if(wakeup_create(multi->wakeup_pair, TRUE) < 0) {
     multi->wakeup_pair[0] = CURL_SOCKET_BAD;
     multi->wakeup_pair[1] = CURL_SOCKET_BAD;
   }
-#endif
 #endif
 
   return multi;
