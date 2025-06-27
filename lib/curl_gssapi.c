@@ -355,14 +355,15 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
 }
 
 OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
-                                      gss_ctx_id_t *context_handle,
+                                      gss_ctx_id_t *context,
                                       gss_buffer_t output_token)
 {
 #ifdef CURL_DEBUGBUILD_STUB_GSS
   return stub_gss_delete_sec_context(min,
-    (struct stub_gss_ctx_id_t_desc **)context_handle, output_token);
+                                     (struct stub_gss_ctx_id_t_desc **)context,
+                                     output_token);
 #else
-  return gss_delete_sec_context(min, context_handle, output_token);
+  return gss_delete_sec_context(min, context, output_token);
 #endif /* CURL_DEBUGBUILD_STUB_GSS */
 }
 
