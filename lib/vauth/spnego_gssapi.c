@@ -93,7 +93,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
@@ -111,6 +110,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   if(!nego->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -124,16 +125,13 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     major_status = gss_import_name(&minor_status, &spn_token,
                                    GSS_C_NT_HOSTBASED_SERVICE,
                                    &nego->spn);
+    free(spn);
+
     if(GSS_ERROR(major_status)) {
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
-
-      free(spn);
-
       return CURLE_AUTH_ERROR;
     }
-
-    free(spn);
   }
 
   if(chlg64 && *chlg64) {
