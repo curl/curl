@@ -2,5 +2,4 @@ banfunc strerror
 banfunc sscanf
 banfunc snprintf
 banfunc vsnprint
-banfunc strtoul
 banfunc strtol
