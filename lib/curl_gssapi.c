@@ -55,14 +55,14 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
 #ifdef DEBUGBUILD
 
 enum min_err_code {
-  GSS_OK = 0,
-  GSS_NO_MEMORY,
-  GSS_INVALID_ARGS,
-  GSS_INVALID_CREDS,
-  GSS_INVALID_CTX,
-  GSS_SERVER_ERR,
-  GSS_NO_MECH,
-  GSS_LAST
+  STUB_GSS_OK = 0,
+  STUB_GSS_NO_MEMORY,
+  STUB_GSS_INVALID_ARGS,
+  STUB_GSS_INVALID_CREDS,
+  STUB_GSS_INVALID_CTX,
+  STUB_GSS_SERVER_ERR,
+  STUB_GSS_NO_MECH,
+  STUB_GSS_LAST
 };
 
 struct stub_gss_ctx_id_t_desc {
@@ -107,19 +107,19 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
   *min = 0;
 
   if(!context_handle || !target_name || !output_token) {
-    *min = GSS_INVALID_ARGS;
+    *min = STUB_GSS_INVALID_ARGS;
     return GSS_S_FAILURE;
   }
 
   creds = getenv("CURL_STUB_GSS_CREDS");
   if(!creds || strlen(creds) >= sizeof(ctx->creds)) {
-    *min = GSS_INVALID_CREDS;
+    *min = STUB_GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
   }
 
   ctx = *context_handle;
   if(ctx && strcmp(ctx->creds, creds)) {
-    *min = GSS_INVALID_CREDS;
+    *min = STUB_GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
   }
 
@@ -128,7 +128,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
 
   if(input_token && input_token->length) {
     if(!ctx) {
-      *min = GSS_INVALID_CTX;
+      *min = STUB_GSS_INVALID_CTX;
       return GSS_S_FAILURE;
     }
 
@@ -144,14 +144,14 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
           *time_rec = GSS_C_INDEFINITE;
         return GSS_S_COMPLETE;
       default:
-        *min = GSS_SERVER_ERR;
+        *min = STUB_GSS_SERVER_ERR;
         return GSS_S_FAILURE;
       }
     }
 
     if(((char *) input_token->value)[0] != 'C') {
       /* We only support Done or Continue */
-      *min = GSS_SERVER_ERR;
+      *min = STUB_GSS_SERVER_ERR;
       return GSS_S_FAILURE;
     }
 
@@ -164,26 +164,26 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
         break;
       }
       else {
-        *min = GSS_SERVER_ERR;
+        *min = STUB_GSS_SERVER_ERR;
         return GSS_S_FAILURE;
       }
     case STUB_GSS_NTLM1:
       ctx->sent = STUB_GSS_NTLM3;
       break;
     default:
-      *min = GSS_SERVER_ERR;
+      *min = STUB_GSS_SERVER_ERR;
       return GSS_S_FAILURE;
     }
   }
   else {
     if(ctx) {
-      *min = GSS_INVALID_CTX;
+      *min = STUB_GSS_INVALID_CTX;
       return GSS_S_FAILURE;
     }
 
     ctx = (struct stub_gss_ctx_id_t_desc *)(calloc)(1, sizeof(*ctx));
     if(!ctx) {
-      *min = GSS_NO_MEMORY;
+      *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
@@ -199,7 +199,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
       ctx->sent = STUB_GSS_NTLM1;
     else {
       free(ctx);
-      *min = GSS_NO_MECH;
+      *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
 
@@ -210,7 +210,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
   token = (malloc)(length);
   if(!token) {
     free(ctx);
-    *min = GSS_NO_MEMORY;
+    *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
 
@@ -224,14 +224,14 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     if(GSS_ERROR(major_status)) {
       free(token);
       free(ctx);
-      *min = GSS_NO_MEMORY;
+      *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
       free(token);
       free(ctx);
-      *min = GSS_NO_MEMORY;
+      *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
@@ -252,7 +252,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
   if(used >= length) {
     free(token);
     free(ctx);
-    *min = GSS_NO_MEMORY;
+    *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
 
@@ -276,11 +276,11 @@ static OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
 
   if(!context_handle) {
-    *min = GSS_INVALID_CTX;
+    *min = STUB_GSS_INVALID_CTX;
     return GSS_S_FAILURE;
   }
   if(!*context_handle) {
-    *min = GSS_INVALID_CTX;
+    *min = STUB_GSS_INVALID_CTX;
     return GSS_S_FAILURE;
   }
 
