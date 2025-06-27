@@ -171,17 +171,6 @@ struct gss_ctx_id_t_desc_struct {
   char creds[MAX_CREDS_LENGTH];
 };
 
-/* simple implementation of strndup(), which isn't portable */
-static char *my_strndup(const char *ptr, size_t len)
-{
-  char *copy = malloc(len + 1);
-  if(!copy)
-    return NULL;
-  memcpy(copy, ptr, len);
-  copy[len] = '\0';
-  return copy;
-}
-
 OM_uint32 gss_init_sec_context(OM_uint32 *min,
             gss_const_cred_id_t initiator_cred_handle,
             gss_ctx_id_t *context_handle,
