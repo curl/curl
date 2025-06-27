@@ -315,7 +315,8 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
 
   /* Free our security context */
   if(krb5->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &krb5->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &krb5->context,
+                                GSS_C_NO_BUFFER);
     krb5->context = GSS_C_NO_CONTEXT;
   }
 

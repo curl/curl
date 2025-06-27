@@ -267,7 +267,8 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 
   /* Free our security context */
   if(nego->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &nego->context,
+                                GSS_C_NO_BUFFER);
     nego->context = GSS_C_NO_CONTEXT;
   }
 
