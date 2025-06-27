@@ -42,9 +42,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
-set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS
-  "WITHOUT_LIBCURL"
-  "CURL_NO_OLDIES"
+set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "WITHOUT_LIBCURL" "CURL_NO_OLDIES"
   # Test servers simply are standalone programs that do not use libcurl
   # library.  For convenience and to ease portability of these servers,
   # some source code files from the libcurl subdirectory are also used
