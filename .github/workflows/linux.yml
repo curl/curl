@@ -76,12 +76,12 @@ jobs:
           - name: 'libressl heimdal'
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl heimdal valgrind'
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
             install_steps: libressl
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DCMAKE_C_FLAGS=-DCURL_USE_STUB_GSS -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
             install_packages: zlib1g-dev clang
@@ -170,7 +170,7 @@ jobs:
 
           - name: 'openssl clang krb5'
             install_packages: zlib1g-dev libkrb5-dev clang
-            configure: CC=clang --with-openssl --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-debug --disable-docs --disable-manual
+            configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual
 
           - name: 'openssl clang krb5 LTO'
             install_packages: zlib1g-dev libkrb5-dev clang
@@ -279,16 +279,16 @@ jobs:
           - name: 'Slackware openssl gssapi gcc'
             # These are essentially the same flags used to build the curl Slackware package
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: 'Alpine MUSL https-rr'
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
             container: 'alpine:3.20'
 
           - name: 'Alpine MUSL c-ares https-rr'
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
             container: 'alpine:3.20'
 
     steps:
