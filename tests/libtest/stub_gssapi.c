@@ -104,30 +104,30 @@ typedef struct gss_channel_bindings_struct {
   gss_buffer_desc application_data;
 } *gss_channel_bindings_t;
 
-OM_uint32 gss_init_sec_context(OM_uint32 * /* minor_status */,
-            gss_const_cred_id_t /* initiator_cred_handle */,
-            gss_ctx_id_t * /* context_handle */,
-            gss_const_name_t /* target_name */,
-            const gss_OID /* mech_type */,
-            OM_uint32 /* req_flags */,
-            OM_uint32 /* time_req */,
-            const gss_channel_bindings_t /* input_chan_bindings */,
-            const gss_buffer_t /* input_token */,
-            gss_OID * /* actual_mech_type */,
-            gss_buffer_t /* output_token */,
-            OM_uint32 * /* ret_flags */,
-            OM_uint32 * /* time_rec */);
+OM_uint32 gss_init_sec_context(OM_uint32 *minor_status,
+            gss_const_cred_id_t initiator_cred_handle,
+            gss_ctx_id_t *context_handle,
+            gss_const_name_t target_name,
+            const gss_OID mech_type,
+            OM_uint32 req_flags,
+            OM_uint32 time_req,
+            const gss_channel_bindings_t input_chan_bindings,
+            const gss_buffer_t input_token,
+            gss_OID *actual_mech_type,
+            gss_buffer_t output_token,
+            OM_uint32 *ret_flags,
+            OM_uint32 *time_rec);
 
-OM_uint32 gss_delete_sec_context(OM_uint32 * /* minor_status */,
-                                 gss_ctx_id_t * /* context_handle */,
-                                 gss_buffer_t /* output_token */);
+OM_uint32 gss_delete_sec_context(OM_uint32 *minor_status,
+                                 gss_ctx_id_t *context_handle,
+                                 gss_buffer_t output_token);
 
-OM_uint32 gss_display_status(OM_uint32 * /* minor_status */,
-                             OM_uint32 /* status_value */,
-                             int /* status_type */,
-                             const gss_OID /* mech_type */,
-                             OM_uint32 * /* message_context */,
-                             gss_buffer_t /* status_string */);
+OM_uint32 gss_display_status(OM_uint32 *minor_status,
+                             OM_uint32 status_value,
+                             int status_type,
+                             const gss_OID mech_type,
+                             OM_uint32 *message_context,
+                             gss_buffer_t status_string);
 
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
