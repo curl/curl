@@ -99,7 +99,8 @@ jobs:
           mkdir bld-cares
           cd bld-cares
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
+            -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCMAKE_C_FLAGS=-DCURL_USE_STUB_GSS \
+            -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
       - name: 'cmake curl_config.h'
@@ -130,7 +131,7 @@ jobs:
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
-            --prefix="$PWD"/../curl-install-am
+            --prefix="$PWD"/../curl-install-am CPPFLAGS=-DCURL_USE_STUB_GSS
 
       - name: 'autotools curl_config.h'
         run: |

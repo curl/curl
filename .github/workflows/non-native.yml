@@ -68,7 +68,7 @@ jobs:
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
               -DCURL_USE_OPENSSL=ON \
-              -DCURL_USE_GSSAPI=ON \
+              -DCURL_USE_GSSAPI=ON -DCMAKE_C_FLAGS=-DCURL_USE_STUB_GSS \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
@@ -179,7 +179,7 @@ jobs:
                 -DCURL_WERROR=ON \
                 -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
                 -DCURL_USE_OPENSSL=ON \
-                -DCURL_USE_GSSAPI=ON \
+                -DCURL_USE_GSSAPI=ON -DCMAKE_C_FLAGS=-DCURL_USE_STUB_GSS \
                 ${MATRIX_OPTIONS} \
                 || { cat bld/CMakeFiles/CMake*.yaml; false; }
             else
@@ -191,7 +191,8 @@ jobs:
               time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
                 --prefix="$HOME"/curl-install \
                 --with-openssl \
-                --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
+                --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 \
+                --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS \
                 --disable-dependency-tracking \
                 ${options} \
                 ${MATRIX_OPTIONS} \
