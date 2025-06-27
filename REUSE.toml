@@ -43,6 +43,7 @@ path = [
   # checksrc control files
   "docs/examples/.checksrc",
   "lib/.checksrc",
+  "lib/curlx/.checksrc",
   "lib/vauth/.checksrc",
   "lib/vquic/.checksrc",
   "lib/vssh/.checksrc",
