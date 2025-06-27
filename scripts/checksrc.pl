@@ -56,6 +56,7 @@ my %banfunc = (
     "vsprintf" => 1,
     "strcat" => 1,
     "strncat" => 1,
+    "strncpy" => 1,
     "_mbscat" => 1,
     "_mbsncat" => 1,
     "_tcscat" => 1,
