@@ -279,7 +279,7 @@ jobs:
           - name: 'Slackware openssl gssapi gcc'
             # These are essentially the same flags used to build the curl Slackware package
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --with-openssl --with-libssh2 --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi CPPFLAGS=-DCURL_USE_STUB_GSS --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
