@@ -268,8 +268,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
 }
 
 static OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
-   struct stub_gss_ctx_id_t_desc **context_handle,
-   gss_buffer_t output_token)
+    struct stub_gss_ctx_id_t_desc **context_handle, gss_buffer_t output_token)
 {
   (void)output_token;
 
