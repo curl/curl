@@ -205,7 +205,7 @@ static const char *disabled[]={
 #endif
   ,
   "stub-gss: "
-#if defined(HAVE_GSSAPI) && defined(CURL_USE_STUB_GSS)
+#if defined(HAVE_GSSAPI) && defined(DEBUGBUILD) && defined(CURL_USE_STUB_GSS)
   "ON"
 #else
   "OFF"
