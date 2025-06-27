@@ -1,2 +1,1 @@
-disable TYPEDEFSTRUCT
 allowfunc localtime
