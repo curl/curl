@@ -129,6 +129,15 @@ OM_uint32 gss_display_status(OM_uint32 *minor_status,
                              OM_uint32 *message_context,
                              gss_buffer_t status_string);
 
+/* upstream prototypes */
+OM_uint32 gss_release_buffer(OM_uint32 * /* minor_status */,
+                             gss_buffer_t /* buffer */);
+
+OM_uint32 gss_display_name(OM_uint32 * /* minor_status */,
+                           gss_const_name_t /* input_name */,
+                           gss_buffer_t /* output_name_buffer */,
+                           gss_OID * /* output_name_type */);
+
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
 
