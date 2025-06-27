@@ -52,7 +52,7 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
   9, CURL_UNCONST("\x2a\x86\x48\x86\xf7\x12\x01\x02\x02")
 };
 
-#if defined(DEBUGBUILD) && defined(CURL_USE_STUB_GSS)
+#ifdef DEBUGBUILD
 #define CURL_USE_STUB_GSS_DEBUGBUILD
 #else
 #undef CURL_USE_STUB_GSS_DEBUGBUILD

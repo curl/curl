@@ -39,7 +39,7 @@ HTTP Negotiate authentication (stub krb5)
 </name>
 <features>
 GSS-API
-stub-gss
+Debug
 </features>
 <setenv>
 CURL_STUB_GSS_CREDS="KRB5_Alice"

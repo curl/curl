@@ -55,7 +55,7 @@ HTTP Negotiate authentication (stub NTLM)
 </name>
 <features>
 GSS-API
-stub-gss
+Debug
 </features>
 <setenv>
 CURL_STUB_GSS_CREDS="NTLM_Alice"
