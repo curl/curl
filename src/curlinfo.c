@@ -204,6 +204,13 @@ static const char *disabled[]={
   "ON"
 #endif
   ,
+  "stub-gss: "
+#if defined(HAVE_GSSAPI) && defined(CURL_USE_STUB_GSS)
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
 
   "win32-ca-searchpath: "
 #if !defined(_WIN32) ||                                                 \
