@@ -271,6 +271,27 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
 
   return GSS_S_CONTINUE_NEEDED;
 }
+
+OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
+                                      gss_ctx_id_t *context_handle,
+                                      gss_buffer_t output_token)
+{
+  (void)output_token;
+
+  if(!min)
+    return GSS_S_FAILURE;
+
+  if(!context_handle) {
+    *min = GSS_INVALID_CTX;
+    return GSS_S_FAILURE;
+  }
+
+  free(*context_handle);
+  *context_handle = NULL;
+  *min = 0;
+
+  return GSS_S_COMPLETE;
+}
 #endif /* DEBUGBUILD */
 
 OM_uint32 Curl_gss_init_sec_context(
