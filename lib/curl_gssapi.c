@@ -53,12 +53,6 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
 };
 
 #ifdef DEBUGBUILD
-#define CURL_USE_STUB_GSS_DEBUGBUILD
-#else
-#undef CURL_USE_STUB_GSS_DEBUGBUILD
-#endif
-
-#ifdef CURL_USE_STUB_GSS_DEBUGBUILD
 enum min_err_code {
   STUB_GSS_OK = 0,
   STUB_GSS_NO_MEMORY,
@@ -298,7 +292,7 @@ stub_gss_delete_sec_context(OM_uint32 *min,
 
   return GSS_S_COMPLETE;
 }
-#endif /* CURL_USE_STUB_GSS_DEBUGBUILD */
+#endif /* DEBUGBUILD */
 
 OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                     OM_uint32 *minor_status,
@@ -328,7 +322,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
-#ifdef CURL_USE_STUB_GSS_DEBUGBUILD
+#ifdef DEBUGBUILD
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
                                      GSS_C_NO_CREDENTIAL, /* cred_handle */
@@ -343,7 +337,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                      output_token,
                                      ret_flags,
                                      NULL /* time_rec */);
-#endif /* CURL_USE_STUB_GSS_DEBUGBUILD */
+#endif /* DEBUGBUILD */
 
   return gss_init_sec_context(minor_status,
                               GSS_C_NO_CREDENTIAL, /* cred_handle */
@@ -364,12 +358,12 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
                                       gss_ctx_id_t *context,
                                       gss_buffer_t output_token)
 {
-#ifdef CURL_USE_STUB_GSS_DEBUGBUILD
+#ifdef DEBUGBUILD
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_delete_sec_context(min,
                                      (struct stub_gss_ctx_id_t_desc **)context,
                                      output_token);
-#endif /* CURL_USE_STUB_GSS_DEBUGBUILD */
+#endif /* DEBUGBUILD */
 
   return gss_delete_sec_context(min, context, output_token);
 }
