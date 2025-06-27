@@ -86,7 +86,7 @@ static CURL *make_handle(const char *url)
   curl_easy_setopt(handle, CURLOPT_URL, url);
 
   /* buffer body */
-  mem = malloc(sizeof(struct memory));
+  mem = malloc(sizeof(*mem));
   mem->size = 0;
   mem->buf = malloc(1);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, grow_buffer);
