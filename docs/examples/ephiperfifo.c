@@ -90,22 +90,22 @@ struct GlobalInfo {
 
 
 /* Information associated with a specific easy handle */
-typedef struct _ConnInfo {
+struct ConnInfo {
   CURL *easy;
   char *url;
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
-} ConnInfo;
+};
 
 
 /* Information associated with a specific socket */
-typedef struct _SockInfo {
+struct SockInfo {
   curl_socket_t sockfd;
   CURL *easy;
   int action;
   long timeout;
   struct GlobalInfo *global;
-} SockInfo;
+};
 
 #define mycase(code) \
   case code: s = __STRING(code)
@@ -174,7 +174,7 @@ static void check_multi_info(struct GlobalInfo *g)
   char *eff_url;
   CURLMsg *msg;
   int msgs_left;
-  ConnInfo *conn;
+  struct ConnInfo *conn;
   CURL *easy;
   CURLcode res;
 
@@ -247,7 +247,7 @@ static void timer_cb(struct GlobalInfo *g, int revents)
 
 
 /* Clean up the SockInfo structure */
-static void remsock(SockInfo *f, struct GlobalInfo *g)
+static void remsock(struct SockInfo *f, struct GlobalInfo *g)
 {
   if(f) {
     if(f->sockfd) {
@@ -262,7 +262,7 @@ static void remsock(SockInfo *f, struct GlobalInfo *g)
 
 
 /* Assign information to a SockInfo structure */
-static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
+static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
 {
   struct epoll_event ev;
@@ -292,7 +292,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 static void addsock(curl_socket_t s, CURL *easy, int action,
                     struct GlobalInfo *g)
 {
-  SockInfo *fdp = (SockInfo*)calloc(1, sizeof(SockInfo));
+  struct SockInfo *fdp = (struct SockInfo*)calloc(1, sizeof(struct SockInfo));
 
   fdp->global = g;
   setsock(fdp, s, easy, action, g);
@@ -303,7 +303,7 @@ static void addsock(curl_socket_t s, CURL *easy, int action,
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo*) cbp;
-  SockInfo *fdp = (SockInfo*) sockp;
+  struct SockInfo *fdp = (struct SockInfo*) sockp;
   const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   fprintf(MSG_OUT,
@@ -342,7 +342,7 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 static int prog_cb(void *p, double dltotal, double dlnow, double ult,
                    double uln)
 {
-  ConnInfo *conn = (ConnInfo *)p;
+  struct ConnInfo *conn = (struct ConnInfo *)p;
   (void)ult;
   (void)uln;
 
@@ -354,10 +354,10 @@ static int prog_cb(void *p, double dltotal, double dlnow, double ult,
 /* Create a new easy handle, and add it to the global curl_multi */
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
-  ConnInfo *conn;
+  struct ConnInfo *conn;
   CURLMcode rc;
 
-  conn = (ConnInfo*)calloc(1, sizeof(ConnInfo));
+  conn = (struct ConnInfo*)calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
 
   conn->easy = curl_easy_init();
