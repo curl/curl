@@ -38,7 +38,6 @@ path = [
   "renovate.json",
   "tests/certs/**",
   "tests/data/test**",
-  "tests/stunnel.pem",
   "tests/valgrind.supp",
   # checksrc control files
   "docs/examples/.checksrc",
