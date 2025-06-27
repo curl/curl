@@ -242,15 +242,9 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Token format: creds:target:type:padding */
-    memcpy(token + used, creds, strlen(creds));
-    used += strlen(creds);
-    token[used++] = ':';
-    memcpy(token + used, target_desc.value, target_desc.length);
-    used += target_desc.length;
-    token[used++] = ':';
-    token[used++] = (char)((int)ctx->sent + '0');
-    token[used++] = ':';
-    token[used] = '\0';
+    used = msnprintf(token, length, "%s:%.*s:%d:", creds,
+                     (int)target_desc.length, (const char *)target_desc.value,
+                     ctx->sent);
 
     gss_release_buffer(&minor_status, &target_desc);
   }
