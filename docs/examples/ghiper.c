@@ -70,17 +70,17 @@
 #define SHOW_PROGRESS 0   /* Set to non-zero to enable progress callback */
 
 /* Global information, common to all connections */
-typedef struct _GlobalInfo {
+struct GlobalInfo {
   CURLM *multi;
   guint timer_event;
   int still_running;
-} GlobalInfo;
+};
 
 /* Information associated with a specific easy handle */
 typedef struct _ConnInfo {
   CURL *easy;
   char *url;
-  GlobalInfo *global;
+  struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
 } ConnInfo;
 
@@ -92,7 +92,7 @@ typedef struct _SockInfo {
   long timeout;
   GIOChannel *ch;
   guint ev;
-  GlobalInfo *global;
+  struct GlobalInfo *global;
 } SockInfo;
 
 /* Die if we get a bad CURLMcode somewhere */
@@ -116,7 +116,7 @@ static void mcode_or_die(const char *where, CURLMcode code)
 }
 
 /* Check for completed transfers, and remove their easy handles */
-static void check_multi_info(GlobalInfo *g)
+static void check_multi_info(struct GlobalInfo *g)
 {
   CURLMsg *msg;
   int msgs_left;
@@ -142,7 +142,7 @@ static void check_multi_info(GlobalInfo *g)
 /* Called by glib when our timeout expires */
 static gboolean timer_cb(gpointer data)
 {
-  GlobalInfo *g = (GlobalInfo *)data;
+  struct GlobalInfo *g = (struct GlobalInfo *)data;
   CURLMcode rc;
 
   rc = curl_multi_socket_action(g->multi,
@@ -156,7 +156,7 @@ static gboolean timer_cb(gpointer data)
 static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 {
   struct timeval timeout;
-  GlobalInfo *g = (GlobalInfo *)userp;
+  struct GlobalInfo *g = (struct GlobalInfo *)userp;
   timeout.tv_sec = timeout_ms/1000;
   timeout.tv_usec = (timeout_ms%1000)*1000;
 
@@ -177,7 +177,7 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 /* Called by glib when we get action on a multi socket */
 static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
-  GlobalInfo *g = (GlobalInfo*) data;
+  struct GlobalInfo *g = (struct GlobalInfo*) data;
   CURLMcode rc;
   int fd = g_io_channel_unix_get_fd(ch);
 
@@ -215,7 +215,7 @@ static void remsock(SockInfo *f)
 
 /* Assign information to a SockInfo structure */
 static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
-                    GlobalInfo *g)
+                    struct GlobalInfo *g)
 {
   GIOCondition kind =
     ((act & CURL_POLL_IN) ? G_IO_IN : 0) |
@@ -231,7 +231,8 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
 }
 
 /* Initialize a new SockInfo structure */
-static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
+static void addsock(curl_socket_t s, CURL *easy, int action,
+                    struct GlobalInfo *g)
 {
   SockInfo *fdp = g_malloc0(sizeof(SockInfo));
 
@@ -244,7 +245,7 @@ static void addsock(curl_socket_t s, CURL *easy, int action, GlobalInfo *g)
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  GlobalInfo *g = (GlobalInfo*) cbp;
+  struct GlobalInfo *g = (struct GlobalInfo*) cbp;
   SockInfo *fdp = (SockInfo*) sockp;
   static const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
 
@@ -293,7 +294,7 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 }
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(const char *url, GlobalInfo *g)
+static void new_conn(const char *url, struct GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;
@@ -344,7 +345,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
       if(tp) {
         buf[tp]='\0';
       }
-      new_conn(buf, (GlobalInfo*)data);
+      new_conn(buf, (struct GlobalInfo*)data);
       g_free(buf);
     }
     else {
@@ -368,7 +369,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
         }
       }
       if(all) {
-        new_conn(all, (GlobalInfo*)data);
+        new_conn(all, (struct GlobalInfo*)data);
         g_free(all);
       }
       g_free(buf);
@@ -415,7 +416,7 @@ int init_fifo(void)
 
 int main(void)
 {
-  GlobalInfo *g = g_malloc0(sizeof(GlobalInfo));
+  struct GlobalInfo *g = g_malloc0(sizeof(struct GlobalInfo));
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;
