@@ -104,9 +104,6 @@ typedef struct gss_channel_bindings_struct {
   gss_buffer_desc application_data;
 } *gss_channel_bindings_t;
 
-OM_uint32 gss_release_buffer(OM_uint32 * /* minor_status */,
-                             gss_buffer_t /* buffer */);
-
 OM_uint32 gss_init_sec_context(OM_uint32 * /* minor_status */,
             gss_const_cred_id_t /* initiator_cred_handle */,
             gss_ctx_id_t * /* context_handle */,
@@ -124,29 +121,6 @@ OM_uint32 gss_init_sec_context(OM_uint32 * /* minor_status */,
 OM_uint32 gss_delete_sec_context(OM_uint32 * /* minor_status */,
                                  gss_ctx_id_t * /* context_handle */,
                                  gss_buffer_t /* output_token */);
-
-OM_uint32 gss_inquire_context(OM_uint32 * /* minor_status */,
-                              gss_const_ctx_id_t /* context_handle */,
-                              gss_name_t * /* src_name */,
-                              gss_name_t * /* targ_name */,
-                              OM_uint32 * /* lifetime_rec */,
-                              gss_OID * /* mech_type */,
-                              OM_uint32 * /* ctx_flags */,
-                              int * /* locally_initiated */,
-                              int * /* open_context */);
-
-OM_uint32 gss_import_name(OM_uint32 * /* minor_status */,
-                          const gss_buffer_t /* input_name_buffer */,
-                          const gss_OID /* input_name_type */,
-                          gss_name_t * /* output_name */);
-
-OM_uint32 gss_release_name(OM_uint32 * /* minor_status */,
-                           gss_name_t * /* input_name */);
-
-OM_uint32 gss_display_name(OM_uint32 * /* minor_status */,
-                           gss_const_name_t /* input_name */,
-                           gss_buffer_t /* output_name_buffer */,
-                           gss_OID * /* output_name_type */);
 
 OM_uint32 gss_display_status(OM_uint32 * /* minor_status */,
                              OM_uint32 /* status_value */,
@@ -339,11 +313,28 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  /* Token format: creds:target:type:padding */
-  /* Note: this is using the *real* snprintf() and not the curl provided
-     one */
-  used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
-                           (const char *)target_name, ctx->sent);
+  {
+    gss_buffer_desc target_desc;
+    gss_OID name_type = GSS_C_NO_OID;
+    OM_uint32 minor_status;
+    OM_uint32 major_status;
+    major_status = gss_display_name(&minor_status, target_name,
+                                    &target_desc, &name_type);
+    if(GSS_ERROR(major_status)) {
+      free(token);
+      free(ctx);
+      *min = GSS_NO_MEMORY;
+      return GSS_S_FAILURE;
+    }
+
+    /* Token format: creds:target:type:padding */
+    /* Note: this is using the *real* snprintf() and not the curl provided
+       one */
+    used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
+                             (const char *)target_desc.value, ctx->sent);
+
+    gss_release_buffer(&minor_status, &target_desc);
+  }
 
   if(used >= length) {
     free(token);
@@ -380,60 +371,6 @@ OM_uint32 gss_delete_sec_context(OM_uint32 *min,
   free(*context_handle);
   *context_handle = NULL;
   *min = 0;
-
-  return GSS_S_COMPLETE;
-}
-
-OM_uint32 gss_release_buffer(OM_uint32 *min,
-                             gss_buffer_t buffer)
-{
-  if(min)
-    *min = 0;
-
-  if(buffer && buffer->length) {
-    free(buffer->value);
-    buffer->length = 0;
-  }
-
-  return GSS_S_COMPLETE;
-}
-
-OM_uint32 gss_import_name(OM_uint32 *min,
-                          const gss_buffer_t input_name_buffer,
-                          const gss_OID input_name_type,
-                          gss_name_t *output_name)
-{
-  char *name = NULL;
-  (void)input_name_type;
-
-  if(!min)
-    return GSS_S_FAILURE;
-
-  if(!input_name_buffer || !output_name) {
-    *min = GSS_INVALID_ARGS;
-    return GSS_S_FAILURE;
-  }
-
-  name = my_strndup(input_name_buffer->value, input_name_buffer->length);
-  if(!name) {
-    *min = GSS_NO_MEMORY;
-    return GSS_S_FAILURE;
-  }
-
-  *output_name = (gss_name_t) name;
-  *min = 0;
-
-  return GSS_S_COMPLETE;
-}
-
-OM_uint32 gss_release_name(OM_uint32 *min,
-                           gss_name_t *input_name)
-{
-  if(min)
-    *min = 0;
-
-  if(input_name)
-    free(*input_name);
 
   return GSS_S_COMPLETE;
 }
@@ -478,40 +415,4 @@ OM_uint32 gss_display_status(OM_uint32 *min,
   }
 
   return GSS_S_COMPLETE;
-}
-
-/* Stubs returning error */
-
-OM_uint32 gss_display_name(OM_uint32 *min,
-                           gss_const_name_t input_name,
-                           gss_buffer_t output_name_buffer,
-                           gss_OID *output_name_type)
-{
-  (void)min;
-  (void)input_name;
-  (void)output_name_buffer;
-  (void)output_name_type;
-  return GSS_S_FAILURE;
-}
-
-OM_uint32 gss_inquire_context(OM_uint32 *min,
-                              gss_const_ctx_id_t context_handle,
-                              gss_name_t *src_name,
-                              gss_name_t *targ_name,
-                              OM_uint32 *lifetime_rec,
-                              gss_OID *mech_type,
-                              OM_uint32 *ctx_flags,
-                              int *locally_initiated,
-                              int *open_context)
-{
-  (void)min;
-  (void)context_handle;
-  (void)src_name;
-  (void)targ_name;
-  (void)lifetime_rec;
-  (void)mech_type;
-  (void)ctx_flags;
-  (void)locally_initiated;
-  (void)open_context;
-  return GSS_S_FAILURE;
 }
