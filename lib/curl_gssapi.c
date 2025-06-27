@@ -355,6 +355,17 @@ OM_uint32 Curl_gss_init_sec_context(
                               NULL /* time_rec */);
 }
 
+OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
+                                      gss_ctx_id_t *context_handle,
+                                      gss_buffer_t output_token)
+{
+#ifdef DEBUGBUILD
+  return stub_gss_delete_sec_context(min, context_handle, output_token);
+#else
+  return gss_delete_sec_context(min, context_handle, output_token);
+#endif
+}
+
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
                                 char *buf, size_t len) {
