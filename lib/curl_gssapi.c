@@ -181,7 +181,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = (struct stub_gss_ctx_id_t_desc *) calloc(1, sizeof(*ctx));
+    ctx = (struct stub_gss_ctx_id_t_desc *)(calloc)(1, sizeof(*ctx));
     if(!ctx) {
       *min = GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -207,7 +207,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
     ctx->flags = req_flags;
   }
 
-  token = malloc(length);
+  token = (malloc)(length);
   if(!token) {
     free(ctx);
     *min = GSS_NO_MEMORY;
@@ -288,7 +288,7 @@ static OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
   }
   fprintf(stderr, "HELLOHELLO-2a\n");
 
-  free(*context_handle);
+  (free)(*context_handle);
   fprintf(stderr, "HELLOHELLO-3\n");
   *context_handle = NULL;
   *min = 0;
