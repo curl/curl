@@ -514,6 +514,7 @@ int main(int argc, char **argv)
     int err = epoll_wait(g.epfd, events,
                          sizeof(events)/sizeof(struct epoll_event), 10000);
     if(err == -1) {
+      /* !checksrc! disable ERRNOVAR 1 */
       if(errno == EINTR) {
         fprintf(MSG_OUT, "note: wait interrupted\n");
         continue;
