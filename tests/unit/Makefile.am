@@ -56,7 +56,7 @@ endif
 if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
-AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
+# unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
 AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
