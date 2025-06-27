@@ -98,4 +98,3 @@ TESTS_C = \
   lib3207.c lib3208.c
 
 STUB_GSS_C = stub_gssapi.c
-STUB_GSS_H = stub_gssapi.h
