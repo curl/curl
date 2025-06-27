@@ -274,7 +274,7 @@ static OM_uint32 stub_gss_init_sec_context(OM_uint32 *min,
 
 static OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
    struct stub_gss_ctx_id_t_desc **context_handle,
-   struct stub_gss_buffer_desc *output_token)
+   gss_buffer_t output_token)
 {
   (void)output_token;
   fprintf(stderr, "HELLOHELLO\n");
@@ -287,6 +287,11 @@ static OM_uint32 stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
   fprintf(stderr, "HELLOHELLO-2\n");
+  if(!*context_handle) {
+    *min = GSS_INVALID_CTX;
+    return GSS_S_FAILURE;
+  }
+  fprintf(stderr, "HELLOHELLO-2a\n");
 
   free(*context_handle);
   fprintf(stderr, "HELLOHELLO-3\n");
@@ -366,7 +371,7 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
 #ifdef DEBUGBUILD
   return stub_gss_delete_sec_context(min,
                                      (struct stub_gss_ctx_id_t_desc **)context_handle,
-                                     (struct stub_gss_buffer_desc *)output_token);
+                                     output_token);
 #else
   return gss_delete_sec_context(min, context_handle, output_token);
 #endif
