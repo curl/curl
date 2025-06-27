@@ -87,7 +87,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
                           OM_uint32 req_flags,
                           OM_uint32 time_req,
                           const gss_channel_bindings_t input_chan_bindings,
-                          const gss_buffer_desc *input_token,
+                          gss_buffer_desc *input_token,
                           gss_OID *actual_mech_type,
                           gss_buffer_desc *output_token,
                           OM_uint32 *ret_flags,
@@ -339,9 +339,9 @@ OM_uint32 Curl_gss_init_sec_context(
                                      req_flags,
                                      0, /* time_req */
                                      input_chan_bindings,
-                                     (const gss_buffer_desc *)input_token,
+                                     input_token,
                                      NULL, /* actual_mech_type */
-                                     (gss_buffer_desc *)output_token,
+                                     output_token,
                                      ret_flags,
                                      NULL /* time_rec */);
 #endif /* CURL_DEBUGBUILD_STUB_GSS */
