@@ -359,8 +359,7 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
 {
 #ifdef DEBUGBUILD
   return stub_gss_delete_sec_context(min,
-                                     (struct stub_gss_ctx_id_t_desc **)context_handle,
-                                     output_token);
+    (struct stub_gss_ctx_id_t_desc **)context_handle, output_token);
 #else
   return gss_delete_sec_context(min, context_handle, output_token);
 #endif
