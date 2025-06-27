@@ -480,7 +480,8 @@ CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
 
 /**
  * Receive bytes from connection filter `cf` into `bufq`.
- * Convenience wrappter around `Curl_bufq_sipn()`.
+ * Convenience wrappter around `Curl_bufq_sipn()`,
+ * so users do not have to implement a callback.
  */
 CURLcode Curl_cf_recv_bufq(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
@@ -490,7 +491,8 @@ CURLcode Curl_cf_recv_bufq(struct Curl_cfilter *cf,
 
 /**
  * Send bytes in `bufq` using connection filter `cf`.
- * A convenience wrapper around `Curl_bufq_write_pass()`.
+ * A convenience wrapper around `Curl_bufq_write_pass()`,
+ * so users do not have to implement a callback.
  */
 CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
