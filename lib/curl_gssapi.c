@@ -187,7 +187,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = (struct stub_gss_ctx_id_t_desc *)(calloc)(1, sizeof(*ctx));
+    ctx = (calloc)(1, sizeof(*ctx));
     if(!ctx) {
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
