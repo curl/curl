@@ -30,10 +30,10 @@
  * to build the servers.  In order to achieve proper linkage of these
  * files on Windows targets it is necessary to build the test servers
  * with CURL_STATICLIB defined, independently of how libcurl is built.
+ * For other platforms, this macro is a no-op and safe to set.
  */
-#ifdef _WIN32
 #define CURL_STATICLIB
-#endif
+
 #define WITHOUT_LIBCURL
 #define CURL_NO_OLDIES
 
