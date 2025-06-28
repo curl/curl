@@ -232,7 +232,7 @@ int curlx_str_newline(const char **linep)
   return STRE_NEWLINE;
 }
 
-#ifndef WITHOUT_LIBCURL
+#ifdef BUILDING_LIBCURL
 /* case insensitive compare that the parsed string matches the given string.
    Returns non-zero on match. */
 int curlx_str_casecompare(struct Curl_str *str, const char *check)
