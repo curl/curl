@@ -58,6 +58,7 @@ env:
 
 jobs:
   build-cache:
+    name: 'Build caches'
     runs-on: ubuntu-latest
 
     steps:
@@ -125,7 +126,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
-        if: |
+        if: >-
           ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
               steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-gnutls.outputs.cache-hit != 'true' ||

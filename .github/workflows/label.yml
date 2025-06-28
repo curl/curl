@@ -16,6 +16,7 @@ permissions: {}
 
 jobs:
   label:
+    name: 'Labeler'
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -43,6 +43,7 @@ env:
 
 jobs:
   linux-glibc-gcc:
+    name: 'linux-glibc-gcc'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -71,6 +72,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   linux-musl-llvm:
+    name: 'linux-musl-llvm'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -97,6 +99,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   mac-clang:
+    name: 'mac-clang'
     runs-on: macos-latest
     timeout-minutes: 30
     env:
@@ -116,6 +119,7 @@ jobs:
           sh -c ./_ci-mac-homebrew.sh
 
   win-llvm:
+    name: 'win-llvm'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -141,6 +145,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   win-gcc-libssh-zlibold-x86:
+    name: 'win-gcc-libssh-zlibold-x86'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
