@@ -99,6 +99,7 @@ endmacro()
 # Create a clang-tidy target for test targets
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
+
     # Collect header directories and macro definitions from lib dependencies
     set(_includes "")
     set(_definitions "")
