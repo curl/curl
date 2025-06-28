@@ -34,8 +34,8 @@
 #ifdef _WIN32
 #define CURL_STATICLIB
 #endif
-
 #define WITHOUT_LIBCURL
+#define CURL_NO_OLDIES
 
 #include "curl_setup.h"
 
