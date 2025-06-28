@@ -56,7 +56,6 @@
 #include "transfer.h"
 #include "curl_krb5.h"
 #include "curlx/warnless.h"
-#include "strcase.h"
 #include "strdup.h"
 
 /* The last 3 #include files should be in this order */

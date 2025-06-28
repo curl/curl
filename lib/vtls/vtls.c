@@ -207,12 +207,12 @@ match_ssl_primary_config(struct Curl_easy *data,
      !Curl_timestrcmp(c1->username, c2->username) &&
      !Curl_timestrcmp(c1->password, c2->password) &&
 #endif
-     strcasecompare(c1->cipher_list, c2->cipher_list) &&
-     strcasecompare(c1->cipher_list13, c2->cipher_list13) &&
-     strcasecompare(c1->curves, c2->curves) &&
-     strcasecompare(c1->signature_algorithms, c2->signature_algorithms) &&
-     strcasecompare(c1->CRLfile, c2->CRLfile) &&
-     strcasecompare(c1->pinned_key, c2->pinned_key))
+     curl_strequal(c1->cipher_list, c2->cipher_list) &&
+     curl_strequal(c1->cipher_list13, c2->cipher_list13) &&
+     curl_strequal(c1->curves, c2->curves) &&
+     curl_strequal(c1->signature_algorithms, c2->signature_algorithms) &&
+     curl_strequal(c1->CRLfile, c2->CRLfile) &&
+     curl_strequal(c1->pinned_key, c2->pinned_key))
     return TRUE;
 
   return FALSE;
@@ -1073,7 +1073,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
   env = curl_getenv("CURL_SSL_BACKEND");
   if(env) {
     for(i = 0; available_backends[i]; i++) {
-      if(strcasecompare(env, available_backends[i]->info.name)) {
+      if(curl_strequal(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
         free(env);
         return 0;
@@ -1083,8 +1083,8 @@ static int multissl_setup(const struct Curl_ssl *backend)
 
 #ifdef CURL_DEFAULT_SSL_BACKEND
   for(i = 0; available_backends[i]; i++) {
-    if(strcasecompare(CURL_DEFAULT_SSL_BACKEND,
-                      available_backends[i]->info.name)) {
+    if(curl_strequal(CURL_DEFAULT_SSL_BACKEND,
+                     available_backends[i]->info.name)) {
       Curl_ssl = available_backends[i];
       free(env);
       return 0;
@@ -1110,7 +1110,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
   if(Curl_ssl != &Curl_ssl_multi)
     return id == Curl_ssl->info.id ||
-           (name && strcasecompare(name, Curl_ssl->info.name)) ?
+           (name && curl_strequal(name, Curl_ssl->info.name)) ?
            CURLSSLSET_OK :
 #if defined(CURL_WITH_MULTI_SSL)
            CURLSSLSET_TOO_LATE;
@@ -1120,7 +1120,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
   for(i = 0; available_backends[i]; i++) {
     if(available_backends[i]->info.id == id ||
-       (name && strcasecompare(available_backends[i]->info.name, name))) {
+       (name && curl_strequal(available_backends[i]->info.name, name))) {
       multissl_setup(available_backends[i]);
       return CURLSSLSET_OK;
     }

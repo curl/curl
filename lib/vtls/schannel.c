@@ -42,7 +42,6 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "../strcase.h"
 #include "../sendf.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../strerror.h"
@@ -598,7 +597,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
 
     if((fInCert || blob) && (data->set.ssl.cert_type) &&
-       (!strcasecompare(data->set.ssl.cert_type, "P12"))) {
+       (!curl_strequal(data->set.ssl.cert_type, "P12"))) {
       failf(data, "schannel: certificate format compatibility error "
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);

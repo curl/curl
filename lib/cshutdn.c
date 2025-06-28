@@ -40,7 +40,6 @@
 #include "sigpipe.h"
 #include "connect.h"
 #include "select.h"
-#include "strcase.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

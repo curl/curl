@@ -270,7 +270,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 
       /* Extract a value=content pair */
       if(Curl_auth_digest_get_pair(chlg, value, content, &chlg)) {
-        if(strcasecompare(value, "realm")) {
+        if(curl_strequal(value, "realm")) {
 
           /* Setup identity's domain and length */
           domain.tchar_ptr = curlx_convert_UTF8_to_tchar(content);
@@ -345,8 +345,8 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
       if(!Curl_auth_digest_get_pair(p, value, content, &p))
         break;
 
-      if(strcasecompare(value, "stale") &&
-         strcasecompare(content, "true")) {
+      if(curl_strequal(value, "stale") &&
+         curl_strequal(content, "true")) {
         stale = TRUE;
         break;
       }

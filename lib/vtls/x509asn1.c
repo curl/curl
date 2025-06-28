@@ -39,7 +39,6 @@
 
 #include <curl/curl.h>
 #include "../urldata.h"
-#include "../strcase.h"
 #include "../curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls.h"
@@ -262,7 +261,7 @@ static const struct Curl_OID *searchOID(const char *oid)
 {
   const struct Curl_OID *op;
   for(op = OIDtable; op->numoid; op++)
-    if(!strcmp(op->numoid, oid) || strcasecompare(op->textoid, oid))
+    if(!strcmp(op->numoid, oid) || curl_strequal(op->textoid, oid))
       return op;
 
   return NULL;
@@ -989,7 +988,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
 
   /* Generate all information records for the public key. */
 
-  if(strcasecompare(algo, "ecPublicKey")) {
+  if(curl_strequal(algo, "ecPublicKey")) {
     /*
      * ECC public key is all the data, a value of type BIT STRING mapped to
      * OCTET STRING and should not be parsed as an ASN.1 value.
@@ -1011,7 +1010,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
   if(!getASN1Element(&pk, pubkey->beg + 1, pubkey->end))
     return 1;
 
-  if(strcasecompare(algo, "rsaEncryption")) {
+  if(curl_strequal(algo, "rsaEncryption")) {
     const char *q;
     size_t len;
 
@@ -1046,7 +1045,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     if(do_pubkey_field(data, certnum, "rsa(e)", &elem))
       return 1;
   }
-  else if(strcasecompare(algo, "dsa")) {
+  else if(curl_strequal(algo, "dsa")) {
     p = getASN1Element(&elem, param->beg, param->end);
     if(p) {
       if(do_pubkey_field(data, certnum, "dsa(p)", &elem))
@@ -1064,7 +1063,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       }
     }
   }
-  else if(strcasecompare(algo, "dhpublicnumber")) {
+  else if(curl_strequal(algo, "dhpublicnumber")) {
     p = getASN1Element(&elem, param->beg, param->end);
     if(p) {
       if(do_pubkey_field(data, certnum, "dh(p)", &elem))

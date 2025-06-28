@@ -36,7 +36,6 @@
 #endif
 #include "../curl_memrchr.h"
 #include "hostcheck.h"
-#include "../strcase.h"
 #include "../hostip.h"
 
 #include "../curl_memory.h"
@@ -50,7 +49,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
 {
   if(hostlen != patternlen)
     return FALSE;
-  return strncasecompare(hostname, pattern, hostlen);
+  return curl_strnequal(hostname, pattern, hostlen);
 }
 
 /*

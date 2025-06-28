@@ -2989,7 +2989,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
 
         /* Check for special servers here. */
-        if(strcasecompare(os, "OS/400")) {
+        if(curl_strequal(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
           if(result) {

@@ -643,7 +643,7 @@ proxy_info_matches(const struct proxy_info *data,
 {
   if((data->proxytype == needle->proxytype) &&
      (data->port == needle->port) &&
-     strcasecompare(data->host.name, needle->host.name))
+     curl_strequal(data->host.name, needle->host.name))
     return TRUE;
 
   return FALSE;
@@ -1128,7 +1128,7 @@ static bool url_match_destination(struct connectdata *conn,
      || !m->needle->bits.httpproxy || m->needle->bits.tunnel_proxy
 #endif
     ) {
-    if(!strcasecompare(m->needle->handler->scheme, conn->handler->scheme)) {
+    if(!curl_strequal(m->needle->handler->scheme, conn->handler->scheme)) {
       /* `needle` and `conn` do not have the same scheme... */
       if(get_protocol_family(conn->handler) != m->needle->handler->protocol) {
         /* and `conn`s protocol family is not the protocol `needle` wants.
@@ -1145,14 +1145,14 @@ static bool url_match_destination(struct connectdata *conn,
     }
 
     /* If needle has "conn_to_*" set, conn must match this */
-    if((m->needle->bits.conn_to_host && !strcasecompare(
+    if((m->needle->bits.conn_to_host && !curl_strequal(
         m->needle->conn_to_host.name, conn->conn_to_host.name)) ||
        (m->needle->bits.conn_to_port &&
          m->needle->conn_to_port != conn->conn_to_port))
       return FALSE;
 
     /* hostname and port must match */
-    if(!strcasecompare(m->needle->host.name, conn->host.name) ||
+    if(!curl_strequal(m->needle->host.name, conn->host.name) ||
        m->needle->remote_port != conn->remote_port)
       return FALSE;
   }
@@ -1714,7 +1714,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
     }
 
     h = protocols[c % 67];
-    if(h && strncasecompare(scheme, h->scheme, len) && !h->scheme[len])
+    if(h && curl_strnequal(scheme, h->scheme, len) && !h->scheme[len])
       return h;
   }
   return NULL;
@@ -1888,7 +1888,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   uc = curl_url_get(uh, CURLUPART_HOST, &data->state.up.hostname, 0);
   if(uc) {
-    if(!strcasecompare("file", data->state.up.scheme))
+    if(!curl_strequal("file", data->state.up.scheme))
       return CURLE_OUT_OF_MEMORY;
   }
   else if(strlen(data->state.up.hostname) > MAX_URL_LEN) {
@@ -1925,7 +1925,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_HSTS
   /* HSTS upgrade */
-  if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
+  if(data->hsts && curl_strequal("http", data->state.up.scheme)) {
     /* This MUST use the IDN decoded name */
     if(Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE)) {
       char *url;
@@ -2019,7 +2019,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   uc = curl_url_get(uh, CURLUPART_PORT, &data->state.up.port,
                     CURLU_DEFAULT_PORT);
   if(uc) {
-    if(!strcasecompare("file", data->state.up.scheme))
+    if(!curl_strequal("file", data->state.up.scheme))
       return CURLE_OUT_OF_MEMORY;
   }
   else {
@@ -2198,7 +2198,7 @@ static char *detect_proxy(struct Curl_easy *data,
    * This can cause 'internal' http/ftp requests to be
    * arbitrarily redirected by any external attacker.
    */
-  if(!proxy && !strcasecompare("http_proxy", proxy_env)) {
+  if(!proxy && !curl_strequal("http_proxy", proxy_env)) {
     /* There was no lowercase variable, try the uppercase version: */
     Curl_strntoupper(proxy_env, proxy_env, sizeof(proxy_env));
     proxy = curl_getenv(proxy_env);
@@ -2207,10 +2207,10 @@ static char *detect_proxy(struct Curl_easy *data,
   if(!proxy) {
 #ifndef CURL_DISABLE_WEBSOCKETS
     /* websocket proxy fallbacks */
-    if(strcasecompare("ws_proxy", proxy_env)) {
+    if(curl_strequal("ws_proxy", proxy_env)) {
       proxy = curl_getenv("http_proxy");
     }
-    else if(strcasecompare("wss_proxy", proxy_env)) {
+    else if(curl_strequal("wss_proxy", proxy_env)) {
       proxy = curl_getenv("https_proxy");
       if(!proxy)
         proxy = curl_getenv("HTTPS_PROXY");
@@ -2277,22 +2277,22 @@ static CURLcode parse_proxy(struct Curl_easy *data,
       goto error;
     }
 
-    if(strcasecompare("https", scheme)) {
+    if(curl_strequal("https", scheme)) {
       if(proxytype != CURLPROXY_HTTPS2)
         proxytype = CURLPROXY_HTTPS;
       else
         proxytype = CURLPROXY_HTTPS2;
     }
-    else if(strcasecompare("socks5h", scheme))
+    else if(curl_strequal("socks5h", scheme))
       proxytype = CURLPROXY_SOCKS5_HOSTNAME;
-    else if(strcasecompare("socks5", scheme))
+    else if(curl_strequal("socks5", scheme))
       proxytype = CURLPROXY_SOCKS5;
-    else if(strcasecompare("socks4a", scheme))
+    else if(curl_strequal("socks4a", scheme))
       proxytype = CURLPROXY_SOCKS4A;
-    else if(strcasecompare("socks4", scheme) ||
-            strcasecompare("socks", scheme))
+    else if(curl_strequal("socks4", scheme) ||
+            curl_strequal("socks", scheme))
       proxytype = CURLPROXY_SOCKS4;
-    else if(strcasecompare("http", scheme))
+    else if(curl_strequal("http", scheme))
       ; /* leave it as HTTP or HTTP/1.0 */
     else {
       /* Any other xxx:// reject! */
@@ -2393,7 +2393,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     goto error;
   }
 #ifdef USE_UNIX_SOCKETS
-  if(sockstype && strcasecompare(UNIX_SOCKET_PREFIX, host)) {
+  if(sockstype && curl_strequal(UNIX_SOCKET_PREFIX, host)) {
     uc = curl_url_get(uhp, CURLUPART_PATH, &path, CURLU_URLDECODE);
     if(uc) {
       result = CURLE_OUT_OF_MEMORY;
@@ -3067,8 +3067,8 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
-    host_match = strncasecompare(ptr, hostname_to_match,
-                                 hostname_to_match_len);
+    host_match = curl_strnequal(ptr, hostname_to_match,
+                                hostname_to_match_len);
     free(hostname_to_match);
     ptr += hostname_to_match_len;
 
@@ -3601,7 +3601,7 @@ static CURLcode create_conn(struct Curl_easy *data,
    * Do this after the hostnames have been IDN-converted.
    *************************************************************/
   if(conn->bits.conn_to_host &&
-     strcasecompare(conn->conn_to_host.name, conn->host.name)) {
+     curl_strequal(conn->conn_to_host.name, conn->host.name)) {
     conn->bits.conn_to_host = FALSE;
   }
 

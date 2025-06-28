@@ -38,7 +38,6 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
@@ -53,7 +52,7 @@
 static bool hd_name_eq(const char *n1, size_t n1len,
                        const char *n2, size_t n2len)
 {
-  return (n1len == n2len) ? strncasecompare(n1, n2, n1len) : FALSE;
+  return (n1len == n2len) ? curl_strnequal(n1, n2, n1len) : FALSE;
 }
 
 static CURLcode dynhds_add_custom(struct Curl_easy *data,

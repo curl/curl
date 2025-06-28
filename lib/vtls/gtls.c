@@ -53,7 +53,6 @@
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
 #include "../select.h"
-#include "../strcase.h"
 #include "../strdup.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
@@ -303,9 +302,9 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
-  if(strcasecompare(type, "PEM"))
+  if(curl_strequal(type, "PEM"))
     return GNUTLS_X509_FMT_PEM;
-  if(strcasecompare(type, "DER"))
+  if(curl_strequal(type, "DER"))
     return GNUTLS_X509_FMT_DER;
   return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
@@ -982,7 +981,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
       if(result)
         return result;
     }
-    if(ssl_config->cert_type && strcasecompare(ssl_config->cert_type, "P12")) {
+    if(ssl_config->cert_type && curl_strequal(ssl_config->cert_type, "P12")) {
       rc = gnutls_certificate_set_x509_simple_pkcs12_file(
         gtls->shared_creds->creds, config->clientcert, GNUTLS_X509_FMT_DER,
         ssl_config->key_passwd ? ssl_config->key_passwd : "");

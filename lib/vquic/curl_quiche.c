@@ -36,7 +36,6 @@
 #include "../sendf.h"
 #include "../strdup.h"
 #include "../rand.h"
-#include "../strcase.h"
 #include "../multiif.h"
 #include "../connect.h"
 #include "../progress.h"

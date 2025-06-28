@@ -37,7 +37,6 @@
 #include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
-#include "../strcase.h"
 #include "../cfilters.h"
 #include "../cf-socket.h"
 #include "../connect.h"

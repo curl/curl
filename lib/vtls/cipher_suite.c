@@ -26,7 +26,6 @@
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
 #include "../curl_printf.h"
-#include "../strcase.h"
 #include <string.h>
 
 /*
@@ -561,7 +560,7 @@ static int cs_str_to_zip(const char *cs_str, size_t cs_len,
   size_t len;
 
   /* split the cipher string by '-' or '_' */
-  if(strncasecompare(cs_str, "TLS", 3))
+  if(curl_strnequal(cs_str, "TLS", 3))
     separator = '_';
 
   do {
@@ -576,7 +575,7 @@ static int cs_str_to_zip(const char *cs_str, size_t cs_len,
     /* lookup index for the part (skip empty string at 0) */
     for(idx = 1, entry = cs_txt + 1; idx < CS_TXT_LEN; idx++) {
       size_t elen = strlen(entry);
-      if(elen == len && strncasecompare(entry, cur, len))
+      if(elen == len && curl_strnequal(entry, cur, len))
         break;
       entry += elen + 1;
     }
