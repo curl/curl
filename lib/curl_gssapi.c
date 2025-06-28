@@ -213,8 +213,8 @@ stub_gss_init_sec_context(OM_uint32 *min,
     ctx->flags = req_flags;
   }
 
-  /* To avoid memdebug macro replacement, wrap the name in parentheses
-     to call the original version. It is freed via GSS API. */
+  /* To avoid memdebug macro replacement, wrap the name in parentheses to call
+     the original version. It is freed via the GSS API gss_release_buffer(). */
   token = (malloc)(length);
   if(!token) {
     free(ctx);
