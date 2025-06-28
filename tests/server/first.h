@@ -35,6 +35,8 @@
 #define CURL_STATICLIB
 #endif
 
+#define WITHOUT_LIBCURL
+
 #include "curl_setup.h"
 
 typedef int (*entry_func_t)(int, char **);
