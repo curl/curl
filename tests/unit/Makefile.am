@@ -57,7 +57,7 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 # unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
-AM_CPPFLAGS += -DCURL_DISABLE_DEPRECATION -DBUILDING_LIBCURL
+AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if BUILD_UNITTESTS
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(TESTS_C)
