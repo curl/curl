@@ -3068,7 +3068,7 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
     host_match = curl_strnequal(ptr, hostname_to_match,
-                                 hostname_to_match_len);
+                                hostname_to_match_len);
     free(hostname_to_match);
     ptr += hostname_to_match_len;
 

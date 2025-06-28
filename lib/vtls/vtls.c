@@ -1084,7 +1084,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
 #ifdef CURL_DEFAULT_SSL_BACKEND
   for(i = 0; available_backends[i]; i++) {
     if(curl_strequal(CURL_DEFAULT_SSL_BACKEND,
-                      available_backends[i]->info.name)) {
+                     available_backends[i]->info.name)) {
       Curl_ssl = available_backends[i];
       free(env);
       return 0;

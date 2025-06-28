@@ -136,8 +136,8 @@ static bool cookie_tailmatch(const char *cookie_domain,
     return FALSE;
 
   if(!curl_strnequal(cookie_domain,
-                      hostname + hostname_len-cookie_domain_len,
-                      cookie_domain_len))
+                     hostname + hostname_len-cookie_domain_len,
+                     cookie_domain_len))
     return FALSE;
 
   /*
