@@ -95,7 +95,7 @@ jobs:
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
 
   complexity:
-    name: 'REUSE'
+    name: 'Cyclomatic complexity'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -115,7 +115,7 @@ jobs:
         run: ./scripts/top-complexity
 
   miscchecks:
-    name: 'cyclomatic complexity'
+    name: 'Misc checks'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
