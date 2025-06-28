@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_NO_OLDIES
+
 /* Now include the curl_setup.h file from libcurl's private libdir (the source
    version, but that might include "curl_config.h" from the build dir so we
    need both of them in the include path), so that we get good in-depth
