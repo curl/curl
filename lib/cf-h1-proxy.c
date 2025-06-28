@@ -683,8 +683,8 @@ out:
 }
 
 static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct easy_pollset *ps)
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
 
