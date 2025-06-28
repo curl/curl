@@ -81,7 +81,7 @@ struct tunnel_stream {
 };
 
 static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
-                                    struct tunnel_stream *ts)
+                                   struct tunnel_stream *ts)
 {
   const char *hostname;
   int port;
