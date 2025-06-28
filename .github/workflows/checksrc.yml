@@ -4,7 +4,7 @@
 
 # This workflow contains checks at the source code level only.
 
-name: Source
+name: 'Source'
 
 'on':
   push:

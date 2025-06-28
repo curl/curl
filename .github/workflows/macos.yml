@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: macOS
+name: 'macOS'
 
 'on':
   push:

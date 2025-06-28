@@ -9,7 +9,7 @@
 # file with configuration.  For more information, see:
 # https://github.com/actions/labeler
 
-name: Labeler
+name: 'Labeler'
 'on': [pull_request_target]  # zizmor: ignore[dangerous-triggers]
 
 permissions: {}

@@ -16,7 +16,7 @@
 # httrack is one of the smallest downloaders, needed to bootstrap ELTS,
 # and won't conflict with the curl we're building.
 
-name: Old Linux
+name: 'Old Linux'
 
 'on':
   push:
@@ -52,7 +52,7 @@ env:
 
 jobs:
   cmake:
-    name: linux (cmake & autoconf)
+    name: 'linux (cmake & autoconf)'
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 

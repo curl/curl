@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: dist
+name: 'dist'
 
 'on':
   push:

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Hacktoberfest
+name: 'Hacktoberfest'
 
 'on':
   # this must not ever run on any other branch than master
@@ -32,7 +32,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 100
 
-      - name: Check whether repo participates in Hacktoberfest
+      - name: 'Check whether repo participates in Hacktoberfest'
         id: check
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
@@ -40,7 +40,7 @@ jobs:
           gh config set prompt disabled && echo "label=$(
             gh repo view --json repositoryTopics --jq '.repositoryTopics[].name' | grep '^hacktoberfest$')" >> "$GITHUB_OUTPUT"
 
-      - name: Search relevant commit message lines starting with Closes/Merges
+      - name: 'Search relevant commit message lines starting with Closes/Merges'
         if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GITHUB_EVENT_BEFORE: '${{ github.event.before }}'
@@ -49,7 +49,7 @@ jobs:
           git log --format=email "${GITHUB_EVENT_BEFORE}..${GITHUB_EVENT_AFTER}" | \
             grep -Ei '^Close[sd]? ' | sort | uniq | tee log
 
-      - name: Search for Number-based PR references
+      - name: 'Search for Number-based PR references'
         if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
@@ -60,7 +60,7 @@ jobs:
             grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
               gh pr edit {} --add-label 'hacktoberfest-accepted'
 
-      - name: Search for URL-based PR references
+      - name: 'Search for URL-based PR references'
         if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'

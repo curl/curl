@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 ---
-name: curl-for-win
+name: 'curl-for-win'
 
 'on':
   push:
