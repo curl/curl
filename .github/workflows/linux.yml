@@ -651,7 +651,7 @@ jobs:
               TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
             fi
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
-              TFLAGS+=' -j6'
+              TFLAGS+=' -j10'
             fi
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # valgrind reporting memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
