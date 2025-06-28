@@ -5,7 +5,7 @@
 # This workflow contains tests that operate on documentation files only. Some
 # checks modify the source so they cannot be combined into a single job.
 
-name: Docs
+name: 'Docs'
 
 'on':
   push:
@@ -36,14 +36,14 @@ permissions: {}
 
 jobs:
   #  proselint:
+  #    name: 'proselint'
   #    runs-on: ubuntu-latest
   #    steps:
   #      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
   #        with:
   #          persist-credentials: false
-  #        name: checkout
   #
-  #      - name: install prereqs
+  #      - name: 'install prereqs'
   #        run: |
   #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
   #          sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -51,7 +51,7 @@ jobs:
   #          sudo apt-get -o Dpkg::Use-Pty=0 install python3-proselint
   #
   #      # config file help: https://github.com/amperser/proselint/
-  #      - name: create proselint config
+  #      - name: 'create proselint config'
   #        run: |
   #          cat <<JSON > ~/.proselintrc.json
   #          {
@@ -65,14 +65,14 @@ jobs:
   #          }
   #          JSON
   #
-  #      - name: trim headers off all *.md files
+  #      - name: 'trim headers off all *.md files'
   #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
   #
-  #      - name: check prose
+  #      - name: 'check prose'
   #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC.md|DISTROS.md|curl_mprintf.md|CURLOPT_INTERFACE.md|interface.md' | xargs -0 proselint README
   #
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
-  #      - name: create second proselint config
+  #      - name: 'create second proselint config'
   #        run: |
   #          cat <<JSON > ~/.proselintrc.json
   #          {
@@ -86,76 +86,76 @@ jobs:
   #          }
   #          JSON
   #
-  #      - name: check special prose
+  #      - name: 'check special prose'
   #        run: proselint docs/internals/CHECKSRC.md docs/libcurl/curl_mprintf.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
   linkcheck:
+    name: 'linkcheck'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: Run mdlinkcheck
+      - name: 'mdlinkcheck'
         run: ./scripts/mdlinkcheck
 
   spellcheck:
+    name: 'spellcheck'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: trim all *.md files in docs/
+      - name: 'trim all *.md files in docs/'
         run: |
           # shellcheck disable=SC2046
           .github/scripts/cleancmd.pl $(find docs -name '*.md')
 
-      - name: setup the custom wordlist
+      - name: 'setup the custom wordlist'
         run: grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
 
-      - name: Check Spelling
+      - name: 'check Spelling'
         uses: rojopolis/spellcheck-github-actions@35a02bae020e6999c5c37fabaf447f2eb8822ca7 # v0
         with:
           config_path: .github/scripts/spellcheck.yaml
 
   badwords-synopsis:
+    name: 'badwords, synopsis'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: badwords
+      - name: 'badwords'
         run: |
           # shellcheck disable=SC2046
           .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
 
-      - name: verify-synopsis
+      - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
 
   man-examples:
+    name: 'man-examples'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: verify examples
+      - name: 'verify examples'
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.md docs/libcurl/opts/*.md
 
   miscchecks:
+    name: 'spacecheck'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: spacecheck
+      - name: 'spacecheck'
         run: .github/scripts/spacecheck.pl

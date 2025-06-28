@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: configure-vs-cmake
+name: 'configure-vs-cmake'
 'on':
   push:
     branches:
@@ -34,6 +34,7 @@ permissions: {}
 
 jobs:
   check-linux:
+    name: 'Linux'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -72,6 +73,7 @@ jobs:
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-macos:
+    name: 'macOS'
     runs-on: macos-latest
     steps:
       - name: 'install packages'
@@ -121,6 +123,7 @@ jobs:
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-windows:
+    name: 'Windows'
     runs-on: ubuntu-latest
     env:
       TRIPLET: 'x86_64-w64-mingw32'

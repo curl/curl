@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: dist
+name: 'dist'
 
 'on':
   push:
@@ -24,6 +24,7 @@ env:
 
 jobs:
   maketgz-and-verify-in-tree:
+    name: 'AM in-tree & maketgz'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -52,7 +53,7 @@ jobs:
           path: 'curl-99.98.97.tar.gz'
           retention-days: 1
 
-      - name: 'verify in-tree configure build including install'
+      - name: 'configure build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
@@ -67,6 +68,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
+    name: 'AM out-of-tree docs'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -75,7 +77,7 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree configure build including docs'
+      - name: 'configure build & docs'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
@@ -90,6 +92,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-autotools-debug:
+    name: 'AM out-of-tree (debug)'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -98,14 +101,14 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree autotools debug build'
+      - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --without-ssl --enable-debug --prefix="$PWD"/curl-install --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --without-ssl --enable-debug --without-libpsl
           make
           make test-ci
           make install
@@ -113,6 +116,7 @@ jobs:
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
+    name: 'CM out-of-tree'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -121,15 +125,17 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree cmake build'
+      - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
-          make -C build
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+          cmake --build build
+          cmake --install build
 
   missing-files:
+    name: 'missing files'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
@@ -146,6 +152,7 @@ jobs:
         run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
 
   reproducible-releases:
+    name: 'reproducible releases'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -166,7 +173,7 @@ jobs:
           ../scripts/verify-release curl-9.10.11.tar.gz
 
   cmake-integration:
-    name: 'cmake-integration-on-${{ matrix.image }}'
+    name: 'CM integration ${{ matrix.image }}'
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     defaults:
