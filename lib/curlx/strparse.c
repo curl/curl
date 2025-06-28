@@ -23,7 +23,10 @@
  ***************************************************************************/
 
 #include "strparse.h"
-#include "../strcase.h"
+
+#ifndef WITHOUT_LIBCURL
+#include <curl/curl.h>  /* for curl_strnequal() */
+#endif
 
 void curlx_str_init(struct Curl_str *out)
 {
