@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_PROXY
 
 #include "curlx/inet_pton.h"
-#include "strcase.h"
 #include "noproxy.h"
 #include "curlx/strparse.h"
 

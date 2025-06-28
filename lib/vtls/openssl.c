@@ -60,7 +60,6 @@
 #include "vtls_scache.h"
 #include "../vauth/vauth.h"
 #include "keylog.h"
-#include "../strcase.h"
 #include "hostcheck.h"
 #include "../multiif.h"
 #include "../curlx/strparse.h"

@@ -66,7 +66,6 @@
 #include "socks.h"
 #include "pingpong.h"
 #include "pop3.h"
-#include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"

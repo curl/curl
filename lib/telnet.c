@@ -57,7 +57,6 @@
 #include "system_win32.h"
 #include "arpa_telnet.h"
 #include "select.h"
-#include "strcase.h"
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 

@@ -60,7 +60,6 @@
 #include "progress.h"
 #include "dict.h"
 #include "curl_printf.h"
-#include "strcase.h"
 #include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"

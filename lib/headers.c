@@ -26,7 +26,6 @@
 
 #include "urldata.h"
 #include "strdup.h"
-#include "strcase.h"
 #include "sendf.h"
 #include "headers.h"
 #include "curlx/strparse.h"

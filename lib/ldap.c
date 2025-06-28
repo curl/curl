@@ -88,7 +88,6 @@
 #include "escape.h"
 #include "progress.h"
 #include "transfer.h"
-#include "strcase.h"
 #include "curlx/strparse.h"
 #include "curl_ldap.h"
 #include "curlx/multibyte.h"

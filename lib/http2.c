@@ -36,7 +36,6 @@
 #include "sendf.h"
 #include "select.h"
 #include "curlx/base64.h"
-#include "strcase.h"
 #include "multiif.h"
 #include "url.h"
 #include "urlapi-int.h"

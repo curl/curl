@@ -42,7 +42,6 @@
 #include "../vtls/vtls.h"
 #include "../curlx/warnless.h"
 #include "../curlx/strparse.h"
-#include "../strcase.h"
 #include "../curl_printf.h"
 #include "../rand.h"
 

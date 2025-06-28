@@ -78,7 +78,6 @@
 #include "vquic/vquic.h" /* for quic cfilters */
 #include "http_proxy.h"
 #include "socks.h"
-#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

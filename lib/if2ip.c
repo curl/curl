@@ -53,7 +53,6 @@
 #endif
 
 #include "curlx/inet_ntop.h"
-#include "strcase.h"
 #include "if2ip.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

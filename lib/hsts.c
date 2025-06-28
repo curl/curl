@@ -33,7 +33,6 @@
 #include "llist.h"
 #include "hsts.h"
 #include "curl_get_line.h"
-#include "strcase.h"
 #include "sendf.h"
 #include "parsedate.h"
 #include "fopen.h"

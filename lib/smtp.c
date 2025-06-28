@@ -68,7 +68,6 @@
 #include "mime.h"
 #include "socks.h"
 #include "smtp.h"
-#include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"

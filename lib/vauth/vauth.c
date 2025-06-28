@@ -28,7 +28,6 @@
 
 #include "vauth.h"
 #include "../urldata.h"
-#include "../strcase.h"
 #include "../curlx/multibyte.h"
 #include "../curl_printf.h"
 #include "../url.h"

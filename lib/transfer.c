@@ -79,7 +79,6 @@
 #include "connect.h"
 #include "http2.h"
 #include "mime.h"
-#include "strcase.h"
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"

@@ -61,7 +61,6 @@
 #include "../speedcheck.h"
 #include "../getinfo.h"
 #include "../strdup.h"
-#include "../strcase.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"

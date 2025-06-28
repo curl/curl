@@ -46,7 +46,6 @@ struct Curl_easy;
 
 #include "rand.h"
 #include "slist.h"
-#include "strcase.h"
 #include "curlx/dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

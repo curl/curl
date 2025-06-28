@@ -32,7 +32,6 @@
 #include "urldata.h"
 #include "altsvc.h"
 #include "curl_get_line.h"
-#include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
 #include "curlx/warnless.h"

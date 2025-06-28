@@ -42,7 +42,6 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "../strcase.h"
 #include "../sendf.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../strerror.h"

@@ -39,7 +39,6 @@
 
 #include <curl/curl.h>
 #include "../urldata.h"
-#include "../strcase.h"
 #include "../curl_ctype.h"
 #include "hostcheck.h"
 #include "vtls.h"

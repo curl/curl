@@ -36,7 +36,6 @@
 #endif
 #include "../curl_memrchr.h"
 #include "hostcheck.h"
-#include "../strcase.h"
 #include "../hostip.h"
 
 #include "../curl_memory.h"

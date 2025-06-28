@@ -57,7 +57,6 @@
 #endif /* MBEDTLS_VERSION_MAJOR >= 2 */
 
 #include "cipher_suite.h"
-#include "../strcase.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "../curlx/inet_pton.h"

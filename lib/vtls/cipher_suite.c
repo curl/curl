@@ -26,7 +26,6 @@
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
 #include "../curl_printf.h"
-#include "../strcase.h"
 #include <string.h>
 
 /*

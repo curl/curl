@@ -38,7 +38,6 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
