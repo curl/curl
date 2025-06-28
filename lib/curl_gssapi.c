@@ -81,7 +81,7 @@ struct stub_gss_ctx_id_t_desc {
 static OM_uint32
 stub_gss_init_sec_context(OM_uint32 *min,
                           gss_cred_id_t initiator_cred_handle,
-                          struct stub_gss_ctx_id_t_desc **context_handle,
+                          struct stub_gss_ctx_id_t_desc **context,
                           gss_name_t target_name,
                           const gss_OID mech_type,
                           OM_uint32 req_flags,
@@ -112,7 +112,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
   *min = 0;
 
-  if(!context_handle || !target_name || !output_token) {
+  if(!context || !target_name || !output_token) {
     *min = STUB_GSS_INVALID_ARGS;
     return GSS_S_FAILURE;
   }
@@ -123,7 +123,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  ctx = *context_handle;
+  ctx = *context;
   if(ctx && strcmp(ctx->creds, creds)) {
     *min = STUB_GSS_INVALID_CREDS;
     return GSS_S_FAILURE;
@@ -259,7 +259,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
   /* Overwrite null-terminator */
   memset(token + used, 'A', length - used);
 
-  *context_handle = ctx;
+  *context = ctx;
 
   output_token->value = token;
   output_token->length = length;
@@ -269,7 +269,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
 static OM_uint32
 stub_gss_delete_sec_context(OM_uint32 *min,
-                            struct stub_gss_ctx_id_t_desc **context_handle,
+                            struct stub_gss_ctx_id_t_desc **context,
                             gss_buffer_t output_token)
 {
   (void)output_token;
@@ -277,17 +277,17 @@ stub_gss_delete_sec_context(OM_uint32 *min,
   if(!min)
     return GSS_S_FAILURE;
 
-  if(!context_handle) {
+  if(!context) {
     *min = STUB_GSS_INVALID_CTX;
     return GSS_S_FAILURE;
   }
-  if(!*context_handle) {
+  if(!*context) {
     *min = STUB_GSS_INVALID_CTX;
     return GSS_S_FAILURE;
   }
 
-  (free)(*context_handle);
-  *context_handle = NULL;
+  (free)(*context);
+  *context = NULL;
   *min = 0;
 
   return GSS_S_COMPLETE;
