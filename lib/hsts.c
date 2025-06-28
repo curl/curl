@@ -155,7 +155,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
 
   do {
     curlx_str_passblanks(&p);
-    if(strncasecompare("max-age", p, 7)) {
+    if(curl_strnequal("max-age", p, 7)) {
       bool quoted = FALSE;
       int rc;
 
@@ -185,7 +185,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
       }
       gotma = TRUE;
     }
-    else if(strncasecompare("includesubdomains", p, 17)) {
+    else if(curl_strnequal("includesubdomains", p, 17)) {
       if(gotinc)
         return CURLE_BAD_FUNCTION_ARGUMENT;
       subdomains = TRUE;
@@ -272,15 +272,15 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
       if((subdomain && sts->includeSubDomains) && (ntail < hlen)) {
         size_t offs = hlen - ntail;
         if((hostname[offs-1] == '.') &&
-           strncasecompare(&hostname[offs], sts->host, ntail) &&
+           curl_strnequal(&hostname[offs], sts->host, ntail) &&
            (ntail > blen)) {
           /* save the tail match with the longest tail */
           bestsub = sts;
           blen = ntail;
         }
       }
-      /* avoid strcasecompare because the host name is not null-terminated */
-      if((hlen == ntail) && strncasecompare(hostname, sts->host, hlen))
+      /* avoid curl_strequal because the host name is not null-terminated */
+      if((hlen == ntail) && curl_strnequal(hostname, sts->host, hlen))
         return sts;
     }
   }

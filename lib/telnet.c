@@ -839,7 +839,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       switch(olen) {
       case 5:
         /* Terminal type */
-        if(strncasecompare(option, "TTYPE", 5)) {
+        if(curl_strnequal(option, "TTYPE", 5)) {
           tn->subopt_ttype = arg;
           tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
           break;
@@ -849,7 +849,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 8:
         /* Display variable */
-        if(strncasecompare(option, "XDISPLOC", 8)) {
+        if(curl_strnequal(option, "XDISPLOC", 8)) {
           tn->subopt_xdisploc = arg;
           tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
           break;
@@ -859,7 +859,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 7:
         /* Environment variable */
-        if(strncasecompare(option, "NEW_ENV", 7)) {
+        if(curl_strnequal(option, "NEW_ENV", 7)) {
           beg = curl_slist_append(tn->telnet_vars, arg);
           if(!beg) {
             result = CURLE_OUT_OF_MEMORY;
@@ -874,7 +874,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 2:
         /* Window Size */
-        if(strncasecompare(option, "WS", 2)) {
+        if(curl_strnequal(option, "WS", 2)) {
           const char *p = arg;
           curl_off_t x = 0;
           curl_off_t y = 0;
@@ -896,7 +896,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 6:
         /* To take care or not of the 8th bit in data exchange */
-        if(strncasecompare(option, "BINARY", 6)) {
+        if(curl_strnequal(option, "BINARY", 6)) {
           int binary_option = atoi(arg);
           if(binary_option != 1) {
             tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;

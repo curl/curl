@@ -238,7 +238,7 @@ int curlx_str_newline(const char **linep)
 int curlx_str_casecompare(struct Curl_str *str, const char *check)
 {
   size_t clen = check ? strlen(check) : 0;
-  return ((str->len == clen) && strncasecompare(str->str, check, clen));
+  return ((str->len == clen) && curl_strnequal(str->str, check, clen));
 }
 #endif
 

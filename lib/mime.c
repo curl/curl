@@ -336,7 +336,7 @@ static char *match_header(struct curl_slist *hdr, const char *lbl, size_t len)
 {
   char *value = NULL;
 
-  if(strncasecompare(hdr->data, lbl, len) && hdr->data[len] == ':')
+  if(curl_strnequal(hdr->data, lbl, len) && hdr->data[len] == ':')
     for(value = hdr->data + len + 1; *value == ' '; value++)
       ;
   return value;
@@ -1479,7 +1479,7 @@ CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
     return CURLE_OK;    /* Removing current encoder. */
 
   for(mep = encoders; mep->name; mep++)
-    if(strcasecompare(encoding, mep->name)) {
+    if(curl_strequal(encoding, mep->name)) {
       part->encoder = mep;
       result = CURLE_OK;
     }
@@ -1743,7 +1743,7 @@ const char *Curl_mime_contenttype(const char *filename)
     for(i = 0; i < CURL_ARRAYSIZE(ctts); i++) {
       size_t len2 = strlen(ctts[i].extension);
 
-      if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))
+      if(len1 >= len2 && curl_strequal(nameend - len2, ctts[i].extension))
         return ctts[i].type;
     }
   }
@@ -1753,7 +1753,7 @@ const char *Curl_mime_contenttype(const char *filename)
 static bool content_type_match(const char *contenttype,
                                const char *target, size_t len)
 {
-  if(contenttype && strncasecompare(contenttype, target, len))
+  if(contenttype && curl_strnequal(contenttype, target, len))
     switch(contenttype[len]) {
     case '\0':
     case '\t':
@@ -1826,7 +1826,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
     if(!disposition)
       if(part->filename || part->name ||
-        (contenttype && !strncasecompare(contenttype, "multipart/", 10)))
+        (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
           disposition = DISPOSITION_DEFAULT;
     if(disposition && curl_strequal(disposition, "attachment") &&
      !part->name && !part->filename)

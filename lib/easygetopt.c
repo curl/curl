@@ -37,7 +37,7 @@ static const struct curl_easyoption *lookup(const char *name, CURLoption id)
     const struct curl_easyoption *o = &Curl_easyopts[0];
     do {
       if(name) {
-        if(strcasecompare(o->name, name))
+        if(curl_strequal(o->name, name))
           return o;
       }
       else {

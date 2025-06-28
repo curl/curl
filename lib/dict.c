@@ -198,9 +198,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-     strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-     strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(curl_strnequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
+     curl_strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
+     curl_strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -245,9 +245,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
     }
     Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE); /* no upload */
   }
-  else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-          strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-          strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(curl_strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
+          curl_strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
+          curl_strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
 
     word = strchr(path, ':');
     if(word) {

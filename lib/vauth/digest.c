@@ -510,31 +510,31 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
     /* Extract a value=content pair */
     if(Curl_auth_digest_get_pair(chlg, value, content, &chlg)) {
-      if(strcasecompare(value, "nonce")) {
+      if(curl_strequal(value, "nonce")) {
         free(digest->nonce);
         digest->nonce = strdup(content);
         if(!digest->nonce)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(strcasecompare(value, "stale")) {
-        if(strcasecompare(content, "true")) {
+      else if(curl_strequal(value, "stale")) {
+        if(curl_strequal(content, "true")) {
           digest->stale = TRUE;
           digest->nc = 1; /* we make a new nonce now */
         }
       }
-      else if(strcasecompare(value, "realm")) {
+      else if(curl_strequal(value, "realm")) {
         free(digest->realm);
         digest->realm = strdup(content);
         if(!digest->realm)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(strcasecompare(value, "opaque")) {
+      else if(curl_strequal(value, "opaque")) {
         free(digest->opaque);
         digest->opaque = strdup(content);
         if(!digest->opaque)
           return CURLE_OUT_OF_MEMORY;
       }
-      else if(strcasecompare(value, "qop")) {
+      else if(curl_strequal(value, "qop")) {
         const char *token = content;
         struct Curl_str out;
         bool foundAuth = FALSE;
@@ -568,28 +568,28 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
             return CURLE_OUT_OF_MEMORY;
         }
       }
-      else if(strcasecompare(value, "algorithm")) {
+      else if(curl_strequal(value, "algorithm")) {
         free(digest->algorithm);
         digest->algorithm = strdup(content);
         if(!digest->algorithm)
           return CURLE_OUT_OF_MEMORY;
 
-        if(strcasecompare(content, "MD5-sess"))
+        if(curl_strequal(content, "MD5-sess"))
           digest->algo = ALGO_MD5SESS;
-        else if(strcasecompare(content, "MD5"))
+        else if(curl_strequal(content, "MD5"))
           digest->algo = ALGO_MD5;
-        else if(strcasecompare(content, "SHA-256"))
+        else if(curl_strequal(content, "SHA-256"))
           digest->algo = ALGO_SHA256;
-        else if(strcasecompare(content, "SHA-256-SESS"))
+        else if(curl_strequal(content, "SHA-256-SESS"))
           digest->algo = ALGO_SHA256SESS;
-        else if(strcasecompare(content, "SHA-512-256")) {
+        else if(curl_strequal(content, "SHA-512-256")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256;
 #else  /* ! CURL_HAVE_SHA512_256 */
           return CURLE_NOT_BUILT_IN;
 #endif /* ! CURL_HAVE_SHA512_256 */
         }
-        else if(strcasecompare(content, "SHA-512-256-SESS")) {
+        else if(curl_strequal(content, "SHA-512-256-SESS")) {
 #ifdef CURL_HAVE_SHA512_256
           digest->algo = ALGO_SHA512_256SESS;
 #else  /* ! CURL_HAVE_SHA512_256 */
@@ -599,8 +599,8 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
         else
           return CURLE_BAD_CONTENT_ENCODING;
       }
-      else if(strcasecompare(value, "userhash")) {
-        if(strcasecompare(content, "true")) {
+      else if(curl_strequal(value, "userhash")) {
+        if(curl_strequal(content, "true")) {
           digest->userhash = TRUE;
         }
       }
@@ -771,7 +771,7 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  if(digest->qop && strcasecompare(digest->qop, "auth-int")) {
+  if(digest->qop && curl_strequal(digest->qop, "auth-int")) {
     /* We do not support auth-int for PUT or POST */
     char hashed[65];
     char *hashthis2;

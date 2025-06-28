@@ -695,7 +695,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
 
     /* This does NOT verify the length of 'pubkey_md5' separately, which will
        make the comparison below fail unless it is exactly 32 characters */
-    if(!fingerprint || !strcasecompare(md5buffer, pubkey_md5)) {
+    if(!fingerprint || !curl_strequal(md5buffer, pubkey_md5)) {
       if(fingerprint) {
         failf(data,
               "Denied establishing ssh session: mismatch md5 fingerprint. "
@@ -919,7 +919,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     sshc->acceptfail = TRUE;
   }
 
-  if(strcasecompare("pwd", cmd)) {
+  if(curl_strequal("pwd", cmd)) {
     /* output debug output if that is requested */
     char *tmp = aprintf("257 \"%s\" is current directory.\n", sshp->path);
     if(!tmp)

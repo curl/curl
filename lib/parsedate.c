@@ -224,7 +224,7 @@ static int checkday(const char *check, size_t len)
   for(i = 0; i < 7; i++) {
     size_t ilen = strlen(what[0]);
     if((ilen == len) &&
-       strncasecompare(check, what[0], len))
+       curl_strnequal(check, what[0], len))
       return i;
     what++;
   }
@@ -239,7 +239,7 @@ static int checkmonth(const char *check, size_t len)
     return -1; /* not a month */
 
   for(i = 0; i < 12; i++) {
-    if(strncasecompare(check, what[0], 3))
+    if(curl_strnequal(check, what[0], 3))
       return i;
     what++;
   }
@@ -259,7 +259,7 @@ static int checktz(const char *check, size_t len)
   for(i = 0; i < CURL_ARRAYSIZE(tz); i++) {
     size_t ilen = strlen(what->name);
     if((ilen == len) &&
-       strncasecompare(check, what->name, len))
+       curl_strnequal(check, what->name, len))
       return what->offset*60;
     what++;
   }

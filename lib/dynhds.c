@@ -150,7 +150,7 @@ struct dynhds_entry *Curl_dynhds_get(struct dynhds *dynhds, const char *name,
   size_t i;
   for(i = 0; i < dynhds->hds_len; ++i) {
     if(dynhds->hds[i]->namelen == namelen &&
-       strncasecompare(dynhds->hds[i]->name, name, namelen)) {
+       curl_strnequal(dynhds->hds[i]->name, name, namelen)) {
       return dynhds->hds[i];
     }
   }
@@ -297,7 +297,7 @@ size_t Curl_dynhds_count_name(struct dynhds *dynhds,
     size_t i;
     for(i = 0; i < dynhds->hds_len; ++i) {
       if((namelen == dynhds->hds[i]->namelen) &&
-         strncasecompare(name, dynhds->hds[i]->name, namelen))
+         curl_strnequal(name, dynhds->hds[i]->name, namelen))
         ++n;
     }
   }
@@ -325,7 +325,7 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
     size_t i, len;
     for(i = 0; i < dynhds->hds_len; ++i) {
       if((namelen == dynhds->hds[i]->namelen) &&
-         strncasecompare(name, dynhds->hds[i]->name, namelen)) {
+         curl_strnequal(name, dynhds->hds[i]->name, namelen)) {
         ++n;
         --dynhds->hds_len;
         dynhds->strs_len -= (dynhds->hds[i]->namelen +
