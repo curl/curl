@@ -128,6 +128,9 @@ macro(curl_clang_tidy_tests _target)
     # Collect macro definitions applying to the target
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
     get_target_property(_definitions_t ${_target} COMPILE_DEFINITIONS)
+    if(NOT _definitions_t)
+      unset(_definitions_t)
+    endif()
 
     set(_definitions "${_definitions_l};${_definitions_d};${_definitions_t}")
     list(REMOVE_ITEM _definitions "")
