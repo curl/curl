@@ -28,8 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: 'checkout'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
@@ -140,8 +139,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - name: 'checkout'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
@@ -156,8 +154,7 @@ jobs:
     name: 'Reproducible releases'
     runs-on: ubuntu-latest
     steps:
-      - name: 'checkout'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
@@ -191,8 +188,7 @@ jobs:
       matrix:
         image: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - name: 'install MSYS2'
-        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
+      - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         if: ${{ contains(matrix.image, 'windows') }}
         with:
           msystem: mingw64
@@ -227,8 +223,7 @@ jobs:
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
           fi
 
-      - name: 'checkout'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
