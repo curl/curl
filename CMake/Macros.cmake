@@ -96,7 +96,13 @@ macro(curl_prefill_type_size _type _size)
   set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
 endmacro()
 
-# Create a clang-tidy target for test targets
+# Prepend string to all non-empty elements of a list.
+macro(curl_list_prepend _list _prefix)
+  list(REMOVE_ITEM "${_list}" "")
+  string(REPLACE ";" ";${_prefix}" "${_list}" ";${${_list}}")
+endmacro()
+
+# Create a clang-tidy target for test targets.
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
 
@@ -122,8 +128,7 @@ macro(curl_clang_tidy_tests _target)
     get_target_property(_includes_t ${_target} INCLUDE_DIRECTORIES)
 
     set(_includes "${_includes};${_includes_d};${_includes_t}")
-    list(REMOVE_ITEM _includes "")
-    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    curl_list_prepend(_includes "-I")
 
     # Collect macro definitions applying to the target
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
@@ -133,8 +138,7 @@ macro(curl_clang_tidy_tests _target)
     endif()
 
     set(_definitions "${_definitions};${_definitions_d};${_definitions_t}")
-    list(REMOVE_ITEM _definitions "")
-    string(REPLACE ";" ";-D" _definitions ";${_definitions}")
+    curl_list_prepend(_definitions "-D")
     list(SORT _definitions)  # Sort like CMake does
 
     # Assemble source list
