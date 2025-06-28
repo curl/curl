@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_NO_OLDIES
+
 #include "curl_setup.h"
 
 typedef int (*entry_func_t)(int, char **);
