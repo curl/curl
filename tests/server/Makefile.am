@@ -48,10 +48,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES
-if DOING_NATIVE_WINDOWS
-AM_CPPFLAGS += -DCURL_STATICLIB
-endif
+AM_CPPFLAGS += -DWITHOUT_LIBCURL -DCURL_NO_OLDIES -DCURL_STATICLIB
 
 $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(UTILS_C) $(CURLX_C) $(TESTS_C)
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(UTILS_C) $(CURLX_C) --test $(TESTS_C) > $(BUNDLE).c
