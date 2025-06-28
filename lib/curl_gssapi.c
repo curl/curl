@@ -204,7 +204,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     else if(ctx->have_ntlm)
       ctx->sent = STUB_GSS_NTLM1;
     else {
-      free(ctx);
+      (free)(ctx);
       *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
@@ -215,7 +215,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
   token = (malloc)(length);
   if(!token) {
-    free(ctx);
+    (free)(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -228,15 +228,15 @@ stub_gss_init_sec_context(OM_uint32 *min,
     major_status = gss_display_name(&minor_status, target_name,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
-      free(token);
-      free(ctx);
+      (free)(token);
+      (free)(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
-      free(token);
-      free(ctx);
+      (free)(token);
+      (free)(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
@@ -250,8 +250,8 @@ stub_gss_init_sec_context(OM_uint32 *min,
   }
 
   if(used >= length) {
-    free(token);
-    free(ctx);
+    (free)(token);
+    (free)(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
