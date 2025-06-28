@@ -187,7 +187,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = (calloc)(1, sizeof(*ctx));
+    ctx = calloc(1, sizeof(*ctx));
     if(!ctx) {
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -204,7 +204,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     else if(ctx->have_ntlm)
       ctx->sent = STUB_GSS_NTLM1;
     else {
-      (free)(ctx);
+      free(ctx);
       *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
@@ -213,9 +213,11 @@ stub_gss_init_sec_context(OM_uint32 *min,
     ctx->flags = req_flags;
   }
 
+  /* To avoid memdebug macro replacement, wrap the name in parentheses
+     to call the original version. It is freed via GSS API. */
   token = (malloc)(length);
   if(!token) {
-    (free)(ctx);
+    free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -229,14 +231,14 @@ stub_gss_init_sec_context(OM_uint32 *min,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
       (free)(token);
-      (free)(ctx);
+      free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
       (free)(token);
-      (free)(ctx);
+      free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
@@ -251,7 +253,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
   if(used >= length) {
     (free)(token);
-    (free)(ctx);
+    free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -286,7 +288,7 @@ stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  (free)(*context);
+  free(*context);
   *context = NULL;
   *min = 0;
 
