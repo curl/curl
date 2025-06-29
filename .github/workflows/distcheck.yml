@@ -116,7 +116,7 @@ jobs:
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
-    name: 'verify out-of-tree with CMake'
+    name: 'verify out-of-tree with cmake'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
