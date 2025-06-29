@@ -166,7 +166,7 @@ lists.
 
 Every pull request submitted is automatically tested in several different
 ways. [See the CI document for more
-information](https://github.com/curl/curl/blob/master/tests/CI.md).
+information](https://github.com/curl/curl/blob/master/docs/tests/CI.md).
 
 Sometimes the tests fail due to a dependency service temporarily being offline
 or otherwise unavailable, e.g. package downloads. In this case you can just
