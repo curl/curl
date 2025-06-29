@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   split:
-    name: 'AppVeyor Status Report'
+    name: 'split'
     runs-on: ubuntu-latest
     if: ${{ github.event.sender.login == 'appveyor[bot]' }}
     permissions:
