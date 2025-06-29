@@ -108,7 +108,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --without-ssl --enable-debug --prefix="$PWD"/curl-install --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --without-ssl --enable-debug --without-libpsl
           make
           make test-ci
           make install
@@ -130,7 +130,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
           cmake --build build
           cmake --install build
 
