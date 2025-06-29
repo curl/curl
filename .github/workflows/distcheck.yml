@@ -24,7 +24,7 @@ env:
 
 jobs:
   maketgz-and-verify-in-tree:
-    name: 'Verify in-tree & maketgz'
+    name: 'verify in-tree & maketgz'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -68,7 +68,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
-    name: 'Verify out-of-tree docs'
+    name: 'verify out-of-tree docs'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -92,7 +92,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-autotools-debug:
-    name: 'Verify out-of-tree with autotools (debug)'
+    name: 'verify out-of-tree with autotools (debug)'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -116,7 +116,7 @@ jobs:
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
-    name: 'Verify out-of-tree with CMake'
+    name: 'verify out-of-tree with CMake'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -134,7 +134,7 @@ jobs:
           make -C build
 
   missing-files:
-    name: 'Missing files'
+    name: 'missing files'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
@@ -151,7 +151,7 @@ jobs:
         run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
 
   reproducible-releases:
-    name: 'Reproducible releases'
+    name: 'reproducible releases'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
