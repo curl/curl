@@ -44,7 +44,7 @@ jobs:
         run: scripts/checksrc-all.sh
 
   codespell-cmakelint-pytype-ruff:
-    name: 'codespell & cmakelint & pytype & ruff'
+    name: 'codespell, cmakelint, pytype, ruff'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -84,18 +84,18 @@ jobs:
         run: scripts/pythonlint.sh
 
   reuse:
-    name: 'REUSE compliance'
+    name: 'REUSE'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
-      - name: 'REUSE Compliance Check'
+      - name: 'check'
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
 
   complexity:
-    name: 'Cyclomatic complexity'
+    name: 'complexity'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -111,11 +111,11 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
-      - name: 'check complexity scores'
+      - name: 'check scores'
         run: ./scripts/top-complexity
 
   miscchecks:
-    name: 'Misc checks'
+    name: 'misc'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -156,7 +156,7 @@ jobs:
       - name: 'zizmor GHA'
         run: zizmor --pedantic .github/workflows/*.yml
 
-      - name: 'shellcheck'
+      - name: 'shellcheck GHA'
         run: |
           shellcheck --version
           .github/scripts/shellcheck-ci.sh
