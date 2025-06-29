@@ -134,7 +134,7 @@ jobs:
           # shellcheck disable=SC2046
           .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
 
-      - name: 'verify-synopsis'
+      - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
 
   man-examples:
