@@ -134,12 +134,15 @@ somewhat over time and a list somewhere only risks getting outdated.
 6. On security advisory release day, push the changes on the curl-www
    repository's remote master branch.
 
-## HackerOne
+## Disclose the report
 
 Request the issue to be disclosed. If there are sensitive details present in
 the report and discussion, those should be redacted from the disclosure. The
 default policy is to disclose as much as possible as soon as the vulnerability
 has been published.
+
+*All* reports submitted to the project, valid or not, should be disclosed and
+made public.
 
 ## Bug Bounty
 
