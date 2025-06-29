@@ -131,7 +131,8 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
-          make -C build
+          cmake --build build
+          cmake --install build
 
   missing-files:
     name: 'missing files'
