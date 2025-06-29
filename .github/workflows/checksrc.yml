@@ -115,7 +115,7 @@ jobs:
         run: ./scripts/top-complexity
 
   miscchecks:
-    name: 'misc'
+    name: 'misc checks'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
