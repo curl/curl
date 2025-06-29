@@ -185,7 +185,8 @@ class ScoreRunner:
                  verbose: int,
                  curl_verbose: int,
                  download_parallel: int = 0,
-                 server_addr: Optional[str] = None):
+                 server_addr: Optional[str] = None,
+                 with_dtrace: bool = False):
         self.verbose = verbose
         self.env = env
         self.protocol = protocol
@@ -194,11 +195,17 @@ class ScoreRunner:
         self.server_port = server_port
         self._silent_curl = not curl_verbose
         self._download_parallel = download_parallel
+        self._with_dtrace = with_dtrace
 
     def info(self, msg):
         if self.verbose > 0:
             sys.stderr.write(msg)
             sys.stderr.flush()
+
+    def mk_curl_client(self):
+        return CurlClient(env=self.env, silent=self._silent_curl,
+                          server_addr=self.server_addr,
+                          with_dtrace=self._with_dtrace)
 
     def handshakes(self) -> Dict[str, Any]:
         props = {}
@@ -215,8 +222,7 @@ class ScoreRunner:
                 hs_samples = []
                 errors = []
                 for _ in range(sample_size):
-                    curl = CurlClient(env=self.env, silent=self._silent_curl,
-                                      server_addr=self.server_addr)
+                    curl = self.mk_curl_client()
                     args = [
                         '--http3-only' if self.protocol == 'h3' else '--http2',
                         f'--{ipv}', f'https://{authority}/'
@@ -274,8 +280,7 @@ class ScoreRunner:
         profiles = []
         self.info('single...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True, with_headers=False,
                                    with_profile=True)
@@ -295,8 +300,7 @@ class ScoreRunner:
         url = f'{url}?[0-{count - 1}]'
         self.info('serial...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
                                    with_headers=False, with_profile=True)
@@ -317,8 +321,7 @@ class ScoreRunner:
         url = f'{url}?[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
                                    with_headers=False,
@@ -387,8 +390,7 @@ class ScoreRunner:
         profiles = []
         self.info('single...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
             err = self._check_uploads(r, 1)
@@ -407,8 +409,7 @@ class ScoreRunner:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('serial...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
             err = self._check_uploads(r, count)
@@ -428,8 +429,7 @@ class ScoreRunner:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
                               extra_args=[
@@ -494,8 +494,7 @@ class ScoreRunner:
             ])
         self.info(f'{max_parallel}...')
         for _ in range(nsamples):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
-                              server_addr=self.server_addr)
+            curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol, no_save=True,
                                    with_headers=False, with_profile=True,
                                    with_stats=False, extra_args=extra_args)
@@ -517,7 +516,9 @@ class ScoreRunner:
         fsize = 10*1024
         cols = ['size', 'total']
         rows = []
-        cols.extend([f'{mp} max' for mp in [1, 6, 25, 50, 100, 300]])
+        # max_parallels = [1, 6, 25, 50, 100, 300]
+        max_parallels = [100]
+        cols.extend([f'{mp} max' for mp in max_parallels])
         row = [{
             'val': fsize,
             'sval': Card.fmt_size(fsize)
@@ -528,7 +529,7 @@ class ScoreRunner:
         self.info('requests, max parallel...')
         row.extend([self.do_requests(url=url, count=count,
                                      max_parallel=mp, nsamples=meta["samples"])
-                    for mp in [1, 6, 25, 50, 100, 300]])
+                    for mp in max_parallels])
         rows.append(row)
         self.info('done.\n')
         return {
@@ -663,7 +664,8 @@ def run_score(args, protocol):
                                server_port=remote_port,
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
-                               download_parallel=args.download_parallel)
+                               download_parallel=args.download_parallel,
+                               with_dtrace=args.dtrace)
             cards.append(card)
 
         if test_httpd:
@@ -687,7 +689,8 @@ def run_score(args, protocol):
                                server_descr=server_descr,
                                server_port=server_port,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
-                               download_parallel=args.download_parallel)
+                               download_parallel=args.download_parallel,
+                               with_dtrace=args.dtrace)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -711,7 +714,8 @@ def run_score(args, protocol):
                                server_descr=server_descr,
                                server_port=server_port,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
-                               download_parallel=args.download_parallel)
+                               download_parallel=args.download_parallel,
+                               with_dtrace=args.dtrace)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -782,6 +786,8 @@ def main():
     parser.add_argument("--download-count", action='store', type=int,
                         metavar='number',
                         default=50, help="perform that many downloads")
+    parser.add_argument("--dtrace", action='store_true',
+                        default=False, help="produce dtrace of curl")
     parser.add_argument("--samples", action='store', type=int, metavar='number',
                         default=1, help="how many sample runs to make")
     parser.add_argument("--download-parallel", action='store', type=int,

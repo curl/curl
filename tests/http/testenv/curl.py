@@ -108,6 +108,28 @@ class RunProfile:
                f'stats={self.stats}]'
 
 
+class DTraceProfile:
+
+    def __init__(self, pid: int, run_dir):
+        self._pid = pid
+        self._run_dir = run_dir
+        self._proc = None
+
+    def start(self):
+        args = [
+            'sudo', 'dtrace',
+            '-x', 'ustackframes=100',
+            '-n', f'profile-97 /pid == {self._pid}/ {{ @[ustack()] = count(); }} tick-60s {{ exit(0); }}',
+            '-o', f'{self._run_dir}/curl.user_stacks'
+        ]
+        self._proc = subprocess.Popen(args, text=True, cwd=self._run_dir, shell=False)
+        assert self._proc
+
+    def finish(self):
+        if self._proc:
+            self._proc.terminate()
+
+
 class RunTcpDump:
 
     def __init__(self, env, run_dir):
@@ -467,7 +489,8 @@ class CurlClient:
                  timeout: Optional[float] = None,
                  silent: bool = False,
                  run_env: Optional[Dict[str, str]] = None,
-                 server_addr: Optional[str] = None):
+                 server_addr: Optional[str] = None,
+                 with_dtrace: bool = False):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
@@ -476,6 +499,7 @@ class CurlClient:
         self._stderrfile = f'{self._run_dir}/curl.stderr'
         self._headerfile = f'{self._run_dir}/curl.headers'
         self._log_path = f'{self._run_dir}/curl.log'
+        self._with_dtrace = with_dtrace
         self._silent = silent
         self._run_env = run_env
         self._server_addr = server_addr if server_addr else '127.0.0.1'
@@ -784,6 +808,9 @@ class CurlClient:
                     profile = RunProfile(p.pid, started_at, self._run_dir)
                     if intext is not None and False:
                         p.communicate(input=intext.encode(), timeout=1)
+                    if self._with_dtrace:
+                        dtrace = DTraceProfile(p.pid, self._run_dir)
+                        dtrace.start()
                     ptimeout = 0.0
                     while True:
                         try:
@@ -797,6 +824,8 @@ class CurlClient:
                             ptimeout = 0.01
                     exitcode = p.returncode
                     profile.finish()
+                    if self._with_dtrace:
+                        dtrace.finish()
                     log.info(f'done: exit={exitcode}, profile={profile}')
                 else:
                     p = subprocess.run(args, stderr=cerr, stdout=cout,
