@@ -73,114 +73,114 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: libressl heimdal
+          - name: 'libressl heimdal'
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
-          - name: libressl heimdal valgrind
+          - name: 'libressl heimdal valgrind'
             install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
             install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
-          - name: libressl clang
+          - name: 'libressl clang'
             install_packages: zlib1g-dev clang
             install_steps: libressl
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
-          - name: wolfssl-all
+          - name: 'wolfssl-all'
             install_packages: zlib1g-dev
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
-          - name: wolfssl-opensslextra valgrind
+          - name: 'wolfssl-opensslextra valgrind'
             install_packages: zlib1g-dev valgrind
             install_steps: wolfssl-opensslextra wolfssh
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --enable-ech --enable-debug
 
-          - name: mbedtls valgrind
+          - name: 'mbedtls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: mbedtls
             configure: LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
 
-          - name: mbedtls clang
+          - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
 
-          - name: mbedtls
+          - name: 'mbedtls'
             install_packages: libnghttp2-dev
             install_steps: mbedtls
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
-          - name: mbedtls-pkg
+          - name: 'mbedtls-pkg'
             install_packages: libnghttp2-dev libmbedtls-dev
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
 
-          - name: mbedtls-pkg !pc
+          - name: 'mbedtls-pkg !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: skipall
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
-          - name: msh3
+          - name: 'msh3'
             install_packages: zlib1g-dev
             install_steps: quictls msh3
             LDFLAGS: -Wl,-rpath,/home/runner/msh3/lib -Wl,-rpath,/home/runner/quictls/lib
             configure: --with-msh3=/home/runner/msh3 --with-openssl=/home/runner/quictls --enable-debug
 
-          - name: msh3
+          - name: 'msh3'
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
             PKG_CONFIG_PATH: /home/runner/msh3/lib/pkgconfig  # Broken as of v0.6.0
             generate: -DOPENSSL_ROOT_DIR=/home/runner/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=/home/runner/msh3/include -DMSH3_LIBRARY=/home/runner/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
-          - name: awslc
+          - name: 'awslc'
             install_packages: zlib1g-dev
             install_steps: awslc pytest
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
-          - name: awslc
+          - name: 'awslc'
             install_packages: zlib1g-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
-          - name: openssl default
+          - name: 'openssl default'
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
-          - name: openssl libssh2 sync-resolver valgrind
+          - name: 'openssl libssh2 sync-resolver valgrind'
             install_packages: zlib1g-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
-          - name: openssl
+          - name: 'openssl'
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl arm
+          - name: 'openssl arm'
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
             image: 'ubuntu-24.04-arm'
 
-          - name: openssl -O3 libssh valgrind
+          - name: 'openssl -O3 libssh valgrind'
             install_packages: zlib1g-dev libssh-dev valgrind
             configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
 
-          - name: openssl clang krb5
+          - name: 'openssl clang krb5'
             install_packages: zlib1g-dev libkrb5-dev clang
             configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual
 
-          - name: openssl clang krb5 LTO
+          - name: 'openssl clang krb5 LTO'
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: skipall
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
-          - name: openssl !ipv6 !--libcurl !--digest-auth
+          - name: 'openssl !ipv6 !--libcurl !--digest-auth'
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
-          - name: openssl https-only
+          - name: 'openssl https-only'
             configure: >-
               --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
@@ -189,19 +189,19 @@ jobs:
               --without-libssh2 --without-libssh --without-wolfssh
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
-          - name: openssl torture !FTP
+          - name: 'openssl torture !FTP'
             install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=25 !FTP
             torture: true
 
-          - name: openssl torture FTP
+          - name: 'openssl torture FTP'
             install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=20 FTP
             torture: true
 
-          - name: openssl i686
+          - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-0-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             configure: >-
               PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
@@ -214,13 +214,13 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
-          - name: clang-tidy
+          - name: 'clang-tidy'
             install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
             install_steps: skipall wolfssl-opensslextra wolfssh
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
 
-          - name: scanbuild
+          - name: 'scanbuild'
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
             install_steps: skipall
             configure: --with-openssl --enable-debug --with-libssh2 --disable-unity
@@ -228,7 +228,7 @@ jobs:
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
 
-          - name: address-sanitizer
+          - name: 'address-sanitizer'
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
@@ -236,14 +236,14 @@ jobs:
             LIBS: -ldl -lubsan
             configure: CC=clang --with-openssl --enable-debug
 
-          - name: thread-sanitizer
+          - name: 'thread-sanitizer'
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssl-tsan
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread -Wl,-rpath,/home/runner/openssl/lib
             configure: CC=clang --with-openssl=/home/runner/openssl --enable-debug
 
-          - name: memory-sanitizer
+          - name: 'memory-sanitizer'
             install_packages: clang
             install_steps: randcurl
             CFLAGS: -fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g
@@ -251,43 +251,43 @@ jobs:
             LIBS: -ldl
             configure: CC=clang --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
 
-          - name: event-based
+          - name: 'event-based'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n --test-event '!TLS-SRP'
 
-          - name: duphandle
+          - name: 'duphandle'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n --test-duphandle '!TLS-SRP'
 
-          - name: rustls valgrind
+          - name: 'rustls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
             configure: --with-rustls --enable-ech --enable-debug
 
-          - name: rustls
+          - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls skipall pytest
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
-          - name: IntelC openssl
+          - name: 'IntelC openssl'
             install_packages: zlib1g-dev libssl-dev
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
 
-          - name: Slackware openssl gssapi gcc
+          - name: 'Slackware openssl gssapi gcc'
             # These are essentially the same flags used to build the curl Slackware package
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
             configure: --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
-          - name: Alpine MUSL https-rr
+          - name: 'Alpine MUSL https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
             container: 'alpine:3.20'
 
-          - name: Alpine MUSL c-ares https-rr
+          - name: 'Alpine MUSL c-ares https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
             container: 'alpine:3.20'
 
