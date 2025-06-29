@@ -130,7 +130,8 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol)) {
+    if(!fn_match($filename, @space_at_eol) &&
+       $content =~ /[ \t]\n/) {
         my $line;
         for my $l (split(/\n/, $content)) {
             $line++;
