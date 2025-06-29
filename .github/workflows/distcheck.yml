@@ -24,7 +24,7 @@ env:
 
 jobs:
   maketgz-and-verify-in-tree:
-    name: 'in-tree & maketgz'
+    name: 'AM in-tree & maketgz'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -68,7 +68,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
-    name: 'out-of-tree docs'
+    name: 'AM out-of-tree docs'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -92,7 +92,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-autotools-debug:
-    name: 'out-of-tree with autotools (debug)'
+    name: 'AM out-of-tree (debug)'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -116,7 +116,7 @@ jobs:
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
-    name: 'out-of-tree with cmake'
+    name: 'CM out-of-tree'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -173,7 +173,7 @@ jobs:
           ../scripts/verify-release curl-9.10.11.tar.gz
 
   cmake-integration:
-    name: 'cmake integration ${{ matrix.image }}'
+    name: 'CM integration ${{ matrix.image }}'
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     defaults:
