@@ -502,7 +502,7 @@ class Env:
             with FileLock(lock_file):
                 self._ca = TestCA.create_root(name=self.CONFIG.tld,
                                               store_dir=ca_dir,
-                                              key_type="rsa2048")
+                                              key_type="rsa2048") # CodeQL [SM04458] Suppressing Elliptical Curve CodeQL Bug to resolve in S360 portal as this requires deep analysis to change crypto key
                 self._ca.issue_certs(self.CONFIG.cert_specs)
 
     def setup(self):
