@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Windows
+name: 'Windows'
 
 'on':
   push:

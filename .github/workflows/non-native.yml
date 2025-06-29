@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: non-native
+name: 'non-native'
 
 'on':
   push:
