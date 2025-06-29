@@ -26,7 +26,7 @@ reject comments, commits, code, wiki edits, issues, and other contributions
 that are not aligned to this Code of Conduct. Project maintainers who do not
 follow the Code of Conduct may be removed from the project team.
 
-This code of conduct applies both within project spaces and in public spaces
+This Code of Conduct applies both within project spaces and in public spaces
 when an individual is representing the project or its community.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
