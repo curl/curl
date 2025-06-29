@@ -4,7 +4,7 @@ curl and libcurl 8.15.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3442
+ Contributors:                 3447
 
 This release includes the following changes:
 
@@ -12,23 +12,38 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o asyn-ares: remove redundant NULL check [152]
  o asyn-thrdd: free the previous name before strdup'ing the new [84]
+ o autotools: detect and link `brotlicommon` library for brotli [130]
  o autotools: drop `$top_builddir/src` from src header path [23]
+ o autotools: drop headers from src mk-unity rules (fixup) [136]
  o autotools: drop no longer necessary `--srcdir` unity options [66]
+ o autotools: drop redundant `Makefile.inc` from `EXTRA_DIST` in src [127]
  o autotools: simplify configuration in tests, examples [47]
+ o bufq: change read/write signatures [120]
+ o bufq: remove the unused Curl_bufq_unwrite function [143]
  o build: assume `sys/socket.h`, `sys/time.h` on non-Windows (as in `curl/curl.h`) [21]
  o build: drop `HAVE_SYS_SOCKET_H` and `HAVE_SYS_TIME_H` macros [69]
+ o build: drop explicit curlx from hdr paths, refer headers with `curlx/` prefix [150]
  o build: drop unused variables in tests
+ o build: fix libcurltool with cmake and tunits, related tidy-ups [138]
+ o build: split `.c` and `.h` file lists in tests [128]
+ o build: stop checking for `sys/stat.h` [146]
+ o build: stubgss tidy-ups (in tests) [137]
  o build: sync build scripts between client/libtest [49]
  o build: tidy up `Makefile.inc` use in lib and src [116]
  o build: tidy up header paths, use srcdir where possible [42]
+ o checksrc: reduce exceptions, apply again to curlx [114]
  o cmake: build `stubgss` library for libtests to match autotools [34]
+ o cmake: check USE_WINDOWS_SSPI when adding secur32 to CURL_LIBS [144]
  o cmake: configure c-ares header directory in project root (was: lib) [106]
  o cmake: document OpenSSL and ngtcp2 crypto lib custom variables [29]
  o cmake: drop never propagated C macros [22]
  o cmake: drop passing redundant `CURL_STATICLIB` in examples and clients [52]
  o cmake: drop redundant macro from test clients [51]
  o cmake: drop reference to future variable
+ o cmake: enable soversion by default for OpenHarmony OS [131]
+ o cmake: fix generator expression in docs/examples [109]
  o cmake: make docs depend on support files [80]
  o cmake: move `OUTPUT` argument in the `add_custom_command()` line [50]
  o cmake: omit clang-tidy on internal libs curlu and curltool [64]
@@ -40,39 +55,50 @@ This release includes the following bugfixes:
  o cmake: sync tests scripts with each other and autotools (more) [100]
  o cmake: use `target_link_options()` when available [43]
  o connection: eliminate member `remote_addr` [10]
+ o curl-config: fix whitespace in usage text [122]
  o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
  o curl.h: remove the "RESERVED" error codes [2]
  o curl: implement non-blocking STDIN read on Windows [28]
+ o curl: improve non-blocking STDIN performance [129]
  o curl_get_line: make sure lines end with newline [110]
  o curl_path: make SFTP handle a path like /~ properly. [11]
  o digest: fix build with disabled digest auth [72]
+ o DISTROS: update NixOS link
  o docs/examples: add ftp-delete.c [5]
  o docs: fix broken link in CODE_REVIEW.md [67]
  o docs: fix broken link in INSTALL.md [68]
  o docs: fix docs for CURLOPT_PREQUOTE after #17616 [70]
  o docs: fix documentation of connect_only 2 [78]
  o docs: mention that the netrc file works without port numbers [112]
+ o docs: reflect that delimiter-separated capath is only OpenSSL [135]
  o easy: fix comment-documentation [36]
+ o firefox-db2pem: avoid use of eval in script [103]
  o ftp: fix prequotes for a directory in URL [83]
  o ftplistparser: split parse_unix into sub functions [77]
  o h2_serverpush: fix file handle leaks reported by clang-tidy [105]
  o http2: do not delay RST send on aborted transfer [57]
  o http: explicitly ignore parsing errors for Retry-After [98]
+ o http: fix build with cookies and HSTS disabled [124]
  o http_ntlm: protect against null deref [95]
  o http_ntlm: remove unreachable code [88]
  o INSTALL.md: cygwin details and add source code link [4]
+ o lib2082: drop `typedef struct` [118]
+ o lib: address singleuse issues [132]
  o lib: avoid reusing unclean connection [73]
  o lib: make `CURLX_SET_BINMODE()` and use it [39]
  o lib: make `curlx_wait_ms()` and use it [40]
+ o lib: replace scache no-op macros with `#ifdef` [117]
  o lib: unify recv/send function signatures [92]
  o libcurl-env.md: drop LOGNAME, USER and NTLMUSER [99]
  o libssh: de-complex myssh_statemach_act() [18]
  o libtests: make test 1503,1504,1505 use the 1502 binary [90]
  o libtests: stop building the sames source multiple times [89]
  o memdebug: include in unity batch [63]
+ o mk-lib1521: replace `printf` with `curl_mprintf` [141]
  o multi: add dirty bitset [115]
  o multi: do no expire a blocked transfer [56]
  o multi: fix polling with pending input [60]
+ o multi: xfer table/bitset, handle limits [142]
  o openssl: enable readahead [91]
  o openssl: error on SSL_ERROR_SYSCALL [94]
  o openssl: fix handling of buffered data [82]
@@ -82,6 +108,8 @@ This release includes the following bugfixes:
  o pytest: adapt for runs with openssl-1.1.1
  o pytest: disable test_07_37 and test_07_36 with openssl's quic [1]
  o RELEASE-PROCEDURE.md: update docs/VERSIONS [7]
+ o runtests.pl: fix sprintf() using one too many %s [134]
+ o runtests: fix `LD_PRELOAD` detection for cmake-built curl binaries [123]
  o rustls: don't try printing the not provided file [104]
  o schannel: allow partial chains for manual peer verification [79]
  o schannel: drop Windows 2000 compatibility logic [26]
@@ -96,30 +124,43 @@ This release includes the following bugfixes:
  o tests/http/clients: move to tests/client [53]
  o tests/libtest: call `curlx_now_init()` for unit 1399, 2600 (Windows) [76]
  o tests/libtest: drop `TEST_HANG_TIMEOUT` redefinition hack [108]
+ o tests/libtest: drop a checksrc exception [119]
  o tests/libtest: use `curltime` from curlx [71]
  o tests/server/util.c: include netinet/in6.h [113]
+ o tests/server: de-dupe/merge three `sockdaemon()` clones into one [149]
  o tests/server: drop `memdebug.h` [111]
  o tests/server: make all global vars/funcs static [41]
+ o tests/server: move memory init to `memptr.c` [140]
  o tests/servers.pm: add more ways to figure out current user [17]
  o tests: always make bundles, adapt build and tests [81]
  o tests: bundle http clients, de-dupe, enable for MSVC [61]
+ o tests: constify, make consts static [139]
  o tests: drop `BUNDLE_SRC` variable [59]
  o tests: drop mk-bundle exceptions [25]
+ o tests: drop unused or redundant includes [153]
  o tests: drop useless "nodist_SOURCES" assignments [93]
  o tests: fail torture if !valgrind&threaded resolver [31]
+ o tests: fix `BUNDLE` variable references in `Makefile.am` [125]
  o tests: make individual test sources compile cleanly [107]
  o tests: make sshserver less verbose [55]
  o tests: torture: don't duplicate valgrind command [32]
+ o tests: use %b64[] to base64 data [151]
+ o tests: use %b64[] to base64 data in 2056, 2057 [126]
  o tftpd: use `CURLMIN()` macro [38]
+ o tidy-up: replace `<memdebug.h>` with `"memdebug.h"` (src, units) [147]
  o tls: remove Curl_ssl false_start [86]
  o tool_getparam: fix --ftp-pasv [15]
  o tool_operate: fix return code when --retry is used but not triggered [13]
  o top-complexity: lower max allowed complexity threshold to 90 [33]
+ o unit1302: expand the base64 encode/decode tests [148]
  o url: fix connection lifetime checks [14]
  o url: fix NULL deref with bad password when no user is provided [87]
  o urlapi: simplify and split into sub functions [16]
+ o urlapi: use uppercase hex encoding [133]
  o vauth: move auth structs to conn meta data [30]
  o vtls: change send/recv signatures of tls backends [65]
+ o VULN-DISCLOSURE-POLICY: all reports should be disclosed [102]
+ o VULN-DISCLOSURE-POLICY: exclude not installed software [121]
  o warnless: drop parts of the `read`/`write` preprocessor hack (Windows) [37]
  o warnless: replace `read()`/`write()` wrapper functions with macros (Windows) [75]
  o windows: fixup `fopen()` in `CURLDEBUG` builds [62]
@@ -146,15 +187,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  4lan.m, Bartosz Ruszczak, Bernhard M. Wiedemann, Brad Harder, Brian Harris,
-  Calvin Ruocco, Carlos Henrique Lima Melara, Christian Weisgerber,
-  Dan Fandrich, Daniel McCarney, Daniel Stenberg, DoI, Edwin Török,
-  Ethan Alker, Fabrício Canedo, fjaell on github, hiimmat on github,
-  Joel Depooter, John Haugabook, Kirill Obukhov, Michael Kaufmann,
-  Orgad Shaneh, Randall S. Becker, Ray Satiro, renovate[bot], Rod Widdowson,
+  4lan.m, Bartosz Ruszczak, behindtheblackwall on hackerone,
+  Bernhard M. Wiedemann, Brad Harder, Brian Harris, Calvin Ruocco,
+  Carlos Henrique Lima Melara, Christian Weisgerber, Christopher Boyd,
+  Dan Fandrich, Daniel Gustafsson, Daniel McCarney, Daniel Stenberg, DoI,
+  Edwin Török, Ethan Alker, Fabrício Canedo, fjaell on github,
+  hiimmat on github, Jeroen Ooms, Joel Depooter, John Haugabook, Keno Fischer,
+  Kirill Obukhov, Marcel Raad, Michael Kaufmann, NINIKA, Orgad Shaneh,
+  Randall S. Becker, Ray Satiro, renovate[bot], Rod Widdowson, SC404,
   Stefan Eissing, Theodore A. Roth, Tristan Perrault, Viktor Szakats,
   Yedaya Katsman, z2_
-  (32 contributors)
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -258,14 +301,54 @@ References to bug reports and discussions on issues:
  [99] = https://curl.se/bug/?i=17713
  [100] = https://curl.se/bug/?i=17711
  [101] = https://curl.se/bug/?i=17705
+ [102] = https://curl.se/bug/?i=17778
+ [103] = https://curl.se/bug/?i=17766
  [104] = https://curl.se/bug/?i=17704
  [105] = https://curl.se/bug/?i=17706
  [106] = https://curl.se/bug/?i=17707
  [107] = https://curl.se/bug/?i=17703
  [108] = https://curl.se/bug/?i=17702
+ [109] = https://curl.se/bug/?i=17767
  [110] = https://curl.se/bug/?i=17697
  [111] = https://curl.se/bug/?i=17700
  [112] = https://curl.se/bug/?i=17698
  [113] = https://curl.se/mail/lib-2025-06/0016.html
+ [114] = https://curl.se/bug/?i=17764
  [115] = https://curl.se/bug/?i=17662
  [116] = https://curl.se/bug/?i=17694
+ [117] = https://curl.se/bug/?i=17754
+ [118] = https://curl.se/bug/?i=17763
+ [119] = https://curl.se/bug/?i=17762
+ [120] = https://curl.se/bug/?i=17396
+ [121] = https://curl.se/bug/?i=17761
+ [122] = https://curl.se/bug/?i=17758
+ [123] = https://curl.se/bug/?i=17756
+ [124] = https://curl.se/bug/?i=17753
+ [125] = https://curl.se/bug/?i=17750
+ [126] = https://curl.se/bug/?i=17748
+ [127] = https://curl.se/bug/?i=17747
+ [128] = https://curl.se/bug/?i=17745
+ [129] = https://curl.se/bug/?i=17566
+ [130] = https://curl.se/bug/?i=17678
+ [131] = https://curl.se/bug/?i=17743
+ [132] = https://curl.se/bug/?i=17734
+ [133] = https://curl.se/bug/?i=17685
+ [134] = https://curl.se/bug/?i=17740
+ [135] = https://curl.se/bug/?i=17737
+ [136] = https://curl.se/bug/?i=17742
+ [137] = https://curl.se/bug/?i=17738
+ [138] = https://curl.se/bug/?i=17727
+ [139] = https://curl.se/bug/?i=17736
+ [140] = https://curl.se/bug/?i=17735
+ [141] = https://curl.se/bug/?i=17732
+ [142] = https://curl.se/bug/?i=17731
+ [143] = https://curl.se/bug/?i=17730
+ [144] = https://curl.se/bug/?i=17728
+ [146] = https://curl.se/bug/?i=17724
+ [147] = https://curl.se/bug/?i=17722
+ [148] = https://curl.se/bug/?i=17726
+ [149] = https://curl.se/bug/?i=17719
+ [150] = https://curl.se/bug/?i=17680
+ [151] = https://curl.se/bug/?i=17721
+ [152] = https://curl.se/bug/?i=17720
+ [153] = https://curl.se/bug/?i=17717
