@@ -25,10 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_MSH3) && !defined(_WIN32)
-#include <pthread.h>
-#endif
-
 #include "bufq.h"
 #include "dynhds.h"
 #include "ws.h"
