@@ -64,7 +64,7 @@ jobs:
       matrix:
         compiler: [clang, llvm@15, gcc-12]
         build:
-          # automake
+          # autotools
           - name: '!ssl !debug brotli zstd'
             compiler: clang
             install: brotli zstd
