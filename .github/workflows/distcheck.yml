@@ -24,7 +24,7 @@ env:
 
 jobs:
   maketgz-and-verify-in-tree:
-    name: 'Verify in-tree and maketgz'
+    name: 'Verify in-tree & maketgz'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -53,7 +53,7 @@ jobs:
           path: 'curl-99.98.97.tar.gz'
           retention-days: 1
 
-      - name: 'verify in-tree configure build including install'
+      - name: 'configure build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
@@ -77,7 +77,7 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree configure build including docs'
+      - name: 'verify out-of-tree configure build & docs'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz

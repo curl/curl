@@ -49,7 +49,7 @@ jobs:
           git log --format=email "${GITHUB_EVENT_BEFORE}..${GITHUB_EVENT_AFTER}" | \
             grep -Ei '^Close[sd]? ' | sort | uniq | tee log
 
-      - name: 'Search for Number-based PR references'
+      - name: 'Search for number-based PR references'
         if: ${{ steps.check.outputs.label == 'hacktoberfest' }}
         env:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
