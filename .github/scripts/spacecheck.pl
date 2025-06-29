@@ -131,8 +131,14 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if(!fn_match($filename, @space_at_eol) &&
-        $content =~ /[ \t]\n/) {
-        push @err, "content: has line-ending whitespace";
+       $content =~ /[ \t]\n/) {
+        my $line;
+        for my $l (split(/\n/, $content)) {
+            $line++;
+            if($l =~ /[ \t]$/) {
+                push @err, "line $line: trailing whitespace";
+            }
+        }
     }
 
     if($content ne "" &&
