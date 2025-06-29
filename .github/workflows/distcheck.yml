@@ -24,7 +24,7 @@ env:
 
 jobs:
   maketgz-and-verify-in-tree:
-    name: 'verify in-tree & maketgz'
+    name: 'in-tree & maketgz'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -68,7 +68,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-docs:
-    name: 'verify out-of-tree docs'
+    name: 'out-of-tree docs'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -77,7 +77,7 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree configure build & docs'
+      - name: 'configure build & docs'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
@@ -92,7 +92,7 @@ jobs:
           rm -rf curl-99.98.97
 
   verify-out-of-tree-autotools-debug:
-    name: 'verify out-of-tree with autotools (debug)'
+    name: 'out-of-tree with autotools (debug)'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -101,7 +101,7 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree autotools debug build'
+      - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
@@ -116,7 +116,7 @@ jobs:
           scripts/checksrc-all.sh
 
   verify-out-of-tree-cmake:
-    name: 'verify out-of-tree with cmake'
+    name: 'out-of-tree with cmake'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
@@ -125,7 +125,7 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'verify out-of-tree cmake build'
+      - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
