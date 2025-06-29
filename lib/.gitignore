@@ -7,3 +7,4 @@ curl_config.h
 curl_config.h.in
 libcurl.vers
 libcurl_unity.c
+unitprotos.h
