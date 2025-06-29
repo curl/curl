@@ -51,8 +51,8 @@ env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
-  cmake:
-    name: 'linux (cmake & autoconf)'
+  cmake-autotools:
+    name: 'cmake & autotools'
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 
@@ -132,18 +132,18 @@ jobs:
             --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
-      - name: 'autoconf curl_config.h'
+      - name: 'autotools curl_config.h'
         run: |
           echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
-      - name: 'autoconf build'
+      - name: 'autotools build'
         run: |
           make -C bld-am
           bld-am/src/curl --disable --version
 
-      - name: 'autoconf install'
+      - name: 'autotools install'
         run: make -C bld-am install
 
-      - name: 'autoconf build tests'
+      - name: 'autotools build tests'
         run: make -C bld-am/tests all
