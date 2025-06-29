@@ -96,23 +96,29 @@ macro(curl_prefill_type_size _type _size)
   set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
 endmacro()
 
-# Create a clang-tidy target for test targets
+# Prepend string to all non-empty elements of a list.
+macro(curl_list_prepend _list _prefix)
+  list(REMOVE_ITEM "${_list}" "")
+  string(REPLACE ";" ";${_prefix}" "${_list}" ";${${_list}}")
+endmacro()
+
+# Create a clang-tidy target for test targets.
 macro(curl_clang_tidy_tests _target)
   if(CURL_CLANG_TIDY)
 
     # Collect header directories and macro definitions from lib dependencies
-    set(_includes_l "")
-    set(_definitions_l "")
+    set(_includes "")
+    set(_definitions "")
     get_target_property(_libs ${_target} LINK_LIBRARIES)
     foreach(_lib IN LISTS _libs)
       if(TARGET "${_lib}")
         get_target_property(_val ${_lib} INCLUDE_DIRECTORIES)
         if(_val)
-          list(APPEND _includes_l ${_val})
+          list(APPEND _includes ${_val})
         endif()
         get_target_property(_val ${_lib} COMPILE_DEFINITIONS)
         if(_val)
-          list(APPEND _definitions_l ${_val})
+          list(APPEND _definitions ${_val})
         endif()
       endif()
     endforeach()
@@ -121,17 +127,18 @@ macro(curl_clang_tidy_tests _target)
     get_directory_property(_includes_d INCLUDE_DIRECTORIES)
     get_target_property(_includes_t ${_target} INCLUDE_DIRECTORIES)
 
-    set(_includes "${_includes_l};${_includes_d};${_includes_t}")
-    list(REMOVE_ITEM _includes "")
-    string(REPLACE ";" ";-I" _includes ";${_includes}")
+    set(_includes "${_includes};${_includes_d};${_includes_t}")
+    curl_list_prepend(_includes "-I")
 
     # Collect macro definitions applying to the target
     get_directory_property(_definitions_d COMPILE_DEFINITIONS)
     get_target_property(_definitions_t ${_target} COMPILE_DEFINITIONS)
+    if(NOT _definitions_t)
+      unset(_definitions_t)
+    endif()
 
-    set(_definitions "${_definitions_l};${_definitions_d};${_definitions_t}")
-    list(REMOVE_ITEM _definitions "")
-    string(REPLACE ";" ";-D" _definitions ";${_definitions}")
+    set(_definitions "${_definitions};${_definitions_d};${_definitions_t}")
+    curl_list_prepend(_definitions "-D")
     list(SORT _definitions)  # Sort like CMake does
 
     # Assemble source list
@@ -152,7 +159,6 @@ macro(curl_clang_tidy_tests _target)
     unset(_includes_d)
     unset(_includes_t)
     unset(_includes)
-    unset(_definitions_l)
     unset(_definitions_d)
     unset(_definitions_t)
     unset(_definitions)
