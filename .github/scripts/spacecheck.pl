@@ -130,9 +130,14 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol) &&
-        $content =~ /[ \t]\n/) {
-        push @err, "content: has line-ending whitespace";
+    if(!fn_match($filename, @space_at_eol)) {
+        my $line;
+        for my $l (split(/\n/, $content)) {
+            $line++;
+            if($l =~ /[ \t]$/) {
+                push @err, "line $line: traling whitespace";
+            }
+        }
     }
 
     if($content ne "" &&
