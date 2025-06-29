@@ -172,7 +172,7 @@ jobs:
           ../scripts/verify-release curl-9.10.11.tar.gz
 
   cmake-integration:
-    name: 'cmake-integration-on-${{ matrix.image }}'
+    name: 'cmake integration on ${{ matrix.image }}'
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     defaults:

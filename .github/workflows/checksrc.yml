@@ -142,7 +142,7 @@ jobs:
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
   cicheck:
-    name: 'CI analysis'
+    name: 'CI'
     runs-on: macos-latest
     timeout-minutes: 1
     steps:
