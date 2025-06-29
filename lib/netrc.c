@@ -229,12 +229,12 @@ static NETRCcode parsenetrc(struct store_netrc *store,
 
       switch(state) {
       case NOTHING:
-        if(strcasecompare("macdef", tok))
+        if(curl_strequal("macdef", tok))
           /* Define a macro. A macro is defined with the specified name; its
              contents begin with the next .netrc line and continue until a
              null line (consecutive new-line characters) is encountered. */
           state = MACDEF;
-        else if(strcasecompare("machine", tok)) {
+        else if(curl_strequal("machine", tok)) {
           /* the next tok is the machine name, this is in itself the delimiter
              that starts the stuff entered for this machine, after this we
              need to search for 'login' and 'password'. */
@@ -246,7 +246,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           if(!specific_login)
             Curl_safefree(login);
         }
-        else if(strcasecompare("default", tok)) {
+        else if(curl_strequal("default", tok)) {
           state = HOSTVALID;
           retcode = NETRC_OK; /* we did find our host */
         }
@@ -256,7 +256,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           state = NOTHING;
         break;
       case HOSTFOUND:
-        if(strcasecompare(host, tok)) {
+        if(curl_strequal(host, tok)) {
           /* and yes, this is our host! */
           state = HOSTVALID;
           retcode = NETRC_OK; /* we did find our host */
@@ -293,11 +293,11 @@ static NETRCcode parsenetrc(struct store_netrc *store,
             found |= FOUND_PASSWORD;
           keyword = NONE;
         }
-        else if(strcasecompare("login", tok))
+        else if(curl_strequal("login", tok))
           keyword = LOGIN;
-        else if(strcasecompare("password", tok))
+        else if(curl_strequal("password", tok))
           keyword = PASSWORD;
-        else if(strcasecompare("machine", tok)) {
+        else if(curl_strequal("machine", tok)) {
           /* a new machine here */
           if(found & FOUND_PASSWORD) {
             done = TRUE;
@@ -310,7 +310,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           if(!specific_login)
             Curl_safefree(login);
         }
-        else if(strcasecompare("default", tok)) {
+        else if(curl_strequal("default", tok)) {
           state = HOSTVALID;
           retcode = NETRC_OK; /* we did find our host */
           Curl_safefree(password);

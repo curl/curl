@@ -66,7 +66,6 @@
 #include "socks.h"
 #include "pingpong.h"
 #include "pop3.h"
-#include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -285,7 +284,7 @@ static bool pop3_is_multiline(const char *cmdline)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(pop3cmds); ++i) {
-    if(strncasecompare(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
+    if(curl_strnequal(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
       if(!cmdline[pop3cmds[i].nlen])
         return pop3cmds[i].multiline;
       else if(cmdline[pop3cmds[i].nlen] == ' ')
@@ -1591,11 +1590,11 @@ static CURLcode pop3_parse_url_options(struct connectdata *conn)
     while(*ptr && *ptr != ';')
       ptr++;
 
-    if(strncasecompare(key, "AUTH=", 5)) {
+    if(curl_strnequal(key, "AUTH=", 5)) {
       result = Curl_sasl_parse_url_auth_option(&pop3c->sasl,
                                                value, ptr - value);
 
-      if(result && strncasecompare(value, "+APOP", ptr - value)) {
+      if(result && curl_strnequal(value, "+APOP", ptr - value)) {
         pop3c->preftype = POP3_TYPE_APOP;
         pop3c->sasl.prefmech = SASL_AUTH_NONE;
         result = CURLE_OK;

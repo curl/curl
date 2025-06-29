@@ -88,7 +88,6 @@
 #include "escape.h"
 #include "progress.h"
 #include "transfer.h"
-#include "strcase.h"
 #include "curlx/strparse.h"
 #include "curl_ldap.h"
 #include "curlx/multibyte.h"
@@ -393,7 +392,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
       if((data->set.ssl.cert_type) &&
-         (!strcasecompare(data->set.ssl.cert_type, "PEM"))) {
+         (!curl_strequal(data->set.ssl.cert_type, "PEM"))) {
         failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
@@ -748,15 +747,15 @@ static void _ldap_trace(const char *fmt, ...)
  */
 static int str2scope(const char *p)
 {
-  if(strcasecompare(p, "one"))
+  if(curl_strequal(p, "one"))
     return LDAP_SCOPE_ONELEVEL;
-  if(strcasecompare(p, "onetree"))
+  if(curl_strequal(p, "onetree"))
     return LDAP_SCOPE_ONELEVEL;
-  if(strcasecompare(p, "base"))
+  if(curl_strequal(p, "base"))
     return LDAP_SCOPE_BASE;
-  if(strcasecompare(p, "sub"))
+  if(curl_strequal(p, "sub"))
     return LDAP_SCOPE_SUBTREE;
-  if(strcasecompare(p, "subtree"))
+  if(curl_strequal(p, "subtree"))
     return LDAP_SCOPE_SUBTREE;
   return -1;
 }
@@ -801,7 +800,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
   if(!data ||
      !data->state.up.path ||
      data->state.up.path[0] != '/' ||
-     !strncasecompare("LDAP", data->state.up.scheme, 4))
+     !curl_strnequal("LDAP", data->state.up.scheme, 4))
     return LDAP_INVALID_SYNTAX;
 
   ludp->lud_scope = LDAP_SCOPE_BASE;

@@ -78,7 +78,6 @@
 #include "vquic/vquic.h" /* for quic cfilters */
 #include "http_proxy.h"
 #include "socks.h"
-#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -90,15 +89,15 @@
 enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
 {
   if(len == 2) {
-    if(strncasecompare(name, "h1", 2))
+    if(curl_strnequal(name, "h1", 2))
       return ALPN_h1;
-    if(strncasecompare(name, "h2", 2))
+    if(curl_strnequal(name, "h2", 2))
       return ALPN_h2;
-    if(strncasecompare(name, "h3", 2))
+    if(curl_strnequal(name, "h3", 2))
       return ALPN_h3;
   }
   else if(len == 8) {
-    if(strncasecompare(name, "http/1.1", 8))
+    if(curl_strnequal(name, "http/1.1", 8))
       return ALPN_h1;
   }
   return ALPN_none; /* unknown, probably rubbish input */

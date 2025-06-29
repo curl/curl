@@ -57,7 +57,6 @@
 #endif /* MBEDTLS_VERSION_MAJOR >= 2 */
 
 #include "cipher_suite.h"
-#include "../strcase.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "../curlx/inet_pton.h"
@@ -382,7 +381,7 @@ mbed_cipher_suite_walk_str(const char **str, const char **end)
   size_t len = *end - *str;
 
   if(!id) {
-    if(strncasecompare("TLS_ECJPAKE_WITH_AES_128_CCM_8", *str, len))
+    if(curl_strnequal("TLS_ECJPAKE_WITH_AES_128_CCM_8", *str, len))
       id = MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8;
   }
   return id;

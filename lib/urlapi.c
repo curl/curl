@@ -1427,7 +1427,7 @@ static CURLUcode urlget_url(const CURLU *u, char **part, unsigned int flags)
   bool depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
   bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   char portbuf[7];
-  if(u->scheme && strcasecompare("file", u->scheme)) {
+  if(u->scheme && curl_strequal("file", u->scheme)) {
     url = aprintf("file://%s%s%s%s%s",
                   u->path,
                   show_query ? "?": "",

@@ -31,7 +31,6 @@
 #include "easyif.h"
 #include "cfilters.h"
 #include "multiif.h"
-#include "strcase.h"
 
 #include "cf-socket.h"
 #include "connect.h"

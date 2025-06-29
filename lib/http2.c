@@ -36,7 +36,6 @@
 #include "sendf.h"
 #include "select.h"
 #include "curlx/base64.h"
-#include "strcase.h"
 #include "multiif.h"
 #include "url.h"
 #include "urlapi-int.h"
@@ -1598,9 +1597,9 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       if(!check)
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
-      if(!strcasecompare(check, (const char *)value) &&
+      if(!curl_strequal(check, (const char *)value) &&
          ((cf->conn->remote_port != cf->conn->given->defport) ||
-          !strcasecompare(cf->conn->host.name, (const char *)value))) {
+          !curl_strequal(cf->conn->host.name, (const char *)value))) {
         /* This is push is not for the same authority that was asked for in
          * the URL. RFC 7540 section 8.2 says: "A client MUST treat a
          * PUSH_PROMISE for which the server is not authoritative as a stream

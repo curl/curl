@@ -42,7 +42,6 @@
 #include "sigpipe.h"
 #include "connect.h"
 #include "select.h"
-#include "strcase.h"
 #include "curlx/strparse.h"
 #include "uint-table.h"
 

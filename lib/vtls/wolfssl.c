@@ -67,7 +67,6 @@
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
 #include "../select.h"
-#include "../strcase.h"
 #include "../strdup.h"
 #include "x509asn1.h"
 #include "../curl_printf.h"
@@ -227,9 +226,9 @@ static int wssl_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return WOLFSSL_FILETYPE_PEM;
-  if(strcasecompare(type, "PEM"))
+  if(curl_strequal(type, "PEM"))
     return WOLFSSL_FILETYPE_PEM;
-  if(strcasecompare(type, "DER"))
+  if(curl_strequal(type, "DER"))
     return WOLFSSL_FILETYPE_ASN1;
   return -1;
 }

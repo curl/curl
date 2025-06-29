@@ -28,7 +28,6 @@
 
 #include "vauth.h"
 #include "../urldata.h"
-#include "../strcase.h"
 #include "../curlx/multibyte.h"
 #include "../curl_printf.h"
 #include "../url.h"
@@ -157,7 +156,7 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
   return !data->state.this_is_a_follow ||
          data->set.allow_auth_to_other_hosts ||
          (data->state.first_host &&
-          strcasecompare(data->state.first_host, conn->host.name) &&
+          curl_strequal(data->state.first_host, conn->host.name) &&
           (data->state.first_remote_port == conn->remote_port) &&
           (data->state.first_remote_protocol == conn->handler->protocol));
 }

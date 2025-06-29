@@ -730,7 +730,7 @@ static bool tailmatch(const char *full, size_t flen,
 {
   if(plen > flen)
     return FALSE;
-  return strncasecompare(part, &full[flen - plen], plen);
+  return curl_strnequal(part, &full[flen - plen], plen);
 }
 
 static struct Curl_addrinfo *
@@ -872,8 +872,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     goto error;
 
   if(!is_ipaddr &&
-     (strcasecompare(hostname, "localhost") ||
-      strcasecompare(hostname, "localhost.") ||
+     (curl_strequal(hostname, "localhost") ||
+      curl_strequal(hostname, "localhost.") ||
       tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
       tailmatch(hostname, hostname_len, STRCONST(".localhost.")))) {
     addr = get_localhost(port, hostname);

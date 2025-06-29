@@ -646,7 +646,7 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
   /* check for entries with known peer_key */
   for(i = 0; scache && i < scache->peer_count; i++) {
     if(scache->peers[i].ssl_peer_key &&
-       strcasecompare(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
+       curl_strequal(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
        cf_ssl_scache_match_auth(&scache->peers[i], conn_config)) {
       /* yes, we have a cached session for this! */
       *ppeer = &scache->peers[i];

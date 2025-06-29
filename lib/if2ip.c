@@ -53,7 +53,6 @@
 #endif
 
 #include "curlx/inet_ntop.h"
-#include "strcase.h"
 #include "if2ip.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -117,7 +116,7 @@ if2ip_result_t Curl_if2ip(int af,
     for(iface = head; iface != NULL; iface = iface->ifa_next) {
       if(iface->ifa_addr) {
         if(iface->ifa_addr->sa_family == af) {
-          if(strcasecompare(iface->ifa_name, interf)) {
+          if(curl_strequal(iface->ifa_name, interf)) {
             void *addr;
             const char *ip;
             char scope[12] = "";
@@ -168,7 +167,7 @@ if2ip_result_t Curl_if2ip(int af,
           }
         }
         else if((res == IF2IP_NOT_FOUND) &&
-                strcasecompare(iface->ifa_name, interf)) {
+                curl_strequal(iface->ifa_name, interf)) {
           res = IF2IP_AF_NOT_SUPPORTED;
         }
       }

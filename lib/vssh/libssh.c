@@ -58,7 +58,6 @@
 #include "../speedcheck.h"
 #include "../getinfo.h"
 #include "../strdup.h"
-#include "../strcase.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
@@ -363,7 +362,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
 
     infof(data, "SSH MD5 fingerprint: %s", md5buffer);
 
-    if(!strcasecompare(md5buffer, pubkey_md5)) {
+    if(!curl_strequal(md5buffer, pubkey_md5)) {
       failf(data,
             "Denied establishing ssh session: mismatch md5 fingerprint. "
             "Remote %s is not equal to %s", md5buffer, pubkey_md5);
@@ -1584,7 +1583,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
     sshc->acceptfail = TRUE;
   }
 
-  if(strcasecompare("pwd", cmd)) {
+  if(curl_strequal("pwd", cmd)) {
     /* output debug output if that is requested */
     char *tmp = aprintf("257 \"%s\" is current directory.\n", sshp->path);
     if(!tmp) {

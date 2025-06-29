@@ -26,18 +26,6 @@
 
 #include <curl/curl.h>
 
-/*
- * Only "raw" case insensitive strings. This is meant to be locale independent
- * and only compare strings we know are safe for this.
- *
- * The function is capable of comparing a-z case insensitively.
- *
- * Result is 1 if text matches and 0 if not.
- */
-
-#define strcasecompare(a,b) curl_strequal(a,b)
-#define strncasecompare(a,b,c) curl_strnequal(a,b,c)
-
 char Curl_raw_toupper(char in);
 char Curl_raw_tolower(char in);
 

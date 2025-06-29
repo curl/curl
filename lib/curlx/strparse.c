@@ -23,7 +23,10 @@
  ***************************************************************************/
 
 #include "strparse.h"
-#include "../strcase.h"
+
+#ifndef WITHOUT_LIBCURL
+#include <curl/curl.h>  /* for curl_strnequal() */
+#endif
 
 void curlx_str_init(struct Curl_str *out)
 {
@@ -238,7 +241,7 @@ int curlx_str_newline(const char **linep)
 int curlx_str_casecompare(struct Curl_str *str, const char *check)
 {
   size_t clen = check ? strlen(check) : 0;
-  return ((str->len == clen) && strncasecompare(str->str, check, clen));
+  return ((str->len == clen) && curl_strnequal(str->str, check, clen));
 }
 #endif
 

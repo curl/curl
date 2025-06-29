@@ -65,6 +65,15 @@ static int ncasecompare(const char *first, const char *second, size_t max)
   return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);
 }
 
+/*
+ * Only "raw" case insensitive strings. This is meant to be locale independent
+ * and only compare strings we know are safe for this.
+ *
+ * The function is capable of comparing a-z case insensitively.
+ *
+ * Result is 1 if text matches and 0 if not.
+ */
+
 /* --- public function --- */
 int curl_strequal(const char *first, const char *second)
 {

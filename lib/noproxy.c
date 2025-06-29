@@ -26,8 +26,8 @@
 
 #ifndef CURL_DISABLE_PROXY
 
+#include <curl/curl.h>  /* for curl_strnequal() */
 #include "curlx/inet_pton.h"
-#include "strcase.h"
 #include "noproxy.h"
 #include "curlx/strparse.h"
 
@@ -205,12 +205,12 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           */
           if(tokenlen == namelen)
             /* case A, exact match */
-            match = strncasecompare(token, name, namelen);
+            match = curl_strnequal(token, name, namelen);
           else if(tokenlen < namelen) {
             /* case B, tailmatch domain */
             match = (name[namelen - tokenlen - 1] == '.') &&
-              strncasecompare(token, name + (namelen - tokenlen),
-                              tokenlen);
+              curl_strnequal(token, name + (namelen - tokenlen),
+                             tokenlen);
           }
           /* case C passes through, not a match */
           break;
