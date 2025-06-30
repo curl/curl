@@ -670,17 +670,6 @@ sub singletest_setenv {
             if($content =~ /^=(.*)/) {
                 # assign it
                 $content = $1;
-
-                if($var =~ /^LD_PRELOAD/) {
-                    if(exe_ext('TOOL') && (exe_ext('TOOL') eq '.exe')) {
-                        logmsg "Skipping LD_PRELOAD due to lack of OS support\n" if($verbose);
-                        next;
-                    }
-                    if($feature{"Debug"} || !$has_shared) {
-                        logmsg "Skipping LD_PRELOAD due to no release shared build\n" if($verbose);
-                        next;
-                    }
-                }
                 $ENV{$var} = "$content";
                 logmsg "setenv $var = $content\n" if($verbose);
             }
@@ -688,7 +677,6 @@ sub singletest_setenv {
                 # remove it
                 delete $ENV{$var} if($ENV{$var});
             }
-
         }
     }
     if($proxy_address) {

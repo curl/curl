@@ -545,10 +545,6 @@ sub checksystemfeatures {
             $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
 
             $libcurl = $2;
-            if($curl =~ /linux|bsd|solaris/i) {
-                # system supports LD_PRELOAD/LD_LIBRARY_PATH; may be disabled later
-                $feature{"ld_preload"} = 1;
-            }
             if($curl =~ /win32|Windows|windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Windows-style path.
@@ -767,9 +763,6 @@ sub checksystemfeatures {
         close($conf);
     }
 
-    # allow this feature only if debug mode is disabled
-    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"Debug"};
-
     if($feature{"IPv6"}) {
         # client has IPv6 support
 
@@ -822,11 +815,6 @@ sub checksystemfeatures {
         $feature{$p} = 1;
     }
     # 'socks' was once here but is now removed
-
-    $has_shared = `sh $CURLCONFIG --built-shared`;
-    chomp $has_shared;
-    $has_shared = $has_shared eq "yes";
-
 
     if($torture) {
         if(!$feature{"TrackMemory"}) {

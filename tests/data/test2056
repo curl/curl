@@ -39,12 +39,9 @@ HTTP Negotiate authentication (stub krb5)
 </name>
 <features>
 GSS-API
-ld_preload
-!Debug
+Debug
 </features>
 <setenv>
-LD_PRELOAD=libstubgss.so
-LD_LIBRARY_PATH=%PWD/libtest/.libs:%PWD/libtest
 CURL_STUB_GSS_CREDS="KRB5_Alice"
 </setenv>
 <command>

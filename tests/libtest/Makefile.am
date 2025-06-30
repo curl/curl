@@ -39,7 +39,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(srcdir)                    \
               -I$(top_srcdir)/tests/unit
 
-# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C, STUB_GSS_C, STUB_GSS_H variables
+# Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C variables
 include Makefile.inc
 
 EXTRA_DIST = CMakeLists.txt $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
@@ -49,8 +49,6 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
-
-noinst_LTLIBRARIES =
 
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
@@ -62,24 +60,6 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 AM_CPPFLAGS += -DCURL_NO_OLDIES -DCURL_DISABLE_DEPRECATION
-
-AM_LDFLAGS =
-AM_CFLAGS =
-
-# Build a stub gssapi implementation for testing
-if BUILD_STUB_GSS
-noinst_LTLIBRARIES += libstubgss.la
-
-libstubgss_la_CPPFLAGS =
-libstubgss_la_LDFLAGS = $(AM_LDFLAGS) -avoid-version -rpath /nowhere
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libstubgss_la_LDFLAGS += -no-undefined
-endif
-libstubgss_la_CFLAGS = $(AM_CFLAGS) -g
-libstubgss_la_SOURCES = $(STUB_GSS_C) $(STUB_GSS_H)
-libstubgss_la_LIBADD =
-libstubgss_la_DEPENDENCIES =
-endif
 
 if USE_CPPFLAG_CURL_STATICLIB
 curlx_c_lib =
