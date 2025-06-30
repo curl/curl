@@ -2803,6 +2803,9 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   return err;
 }
 
+/* the longest command line option, excluding the leading -- */
+#define MAX_OPTION_LEN 26
+
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             const char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
@@ -2816,6 +2819,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
   bool nextalloc = FALSE; /* if nextarg is allocated */
+  bool consumearg = TRUE; /* the argument comes separate */
   const struct LongShort *a = NULL;
   struct GlobalConfig *global = config->global;
   verbose_nopts = 0; /* options processed in `flag`*/
@@ -2827,6 +2831,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     bool noflagged = FALSE;
     bool expand = FALSE;
+    const char *p;
+    struct Curl_str out;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
@@ -2840,7 +2846,21 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       expand = TRUE;
     }
 
-    a = findlongopt(word);
+    p = word;
+    /* is there an '=' ? */
+    if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
+       !curlx_str_single(&p, '=') ) {
+      /* there's an equal sign */
+      char tempword[MAX_OPTION_LEN + 1];
+      memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
+      tempword[curlx_strlen(&out)] = 0;
+      a = findlongopt(tempword);
+      nextarg = p;
+      consumearg = FALSE; /* it is not separate */
+    }
+    else
+      a = findlongopt(word);
+
     if(a) {
       longopt = TRUE;
     }
@@ -2910,7 +2930,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       else {
-        *usedarg = TRUE; /* mark it as used */
+        *usedarg = consumearg; /* mark it as used */
       }
       if(a->desc & ARG_DEPR) {
         opt_depr(global, a);
