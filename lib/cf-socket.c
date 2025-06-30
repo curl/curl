@@ -1404,17 +1404,6 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
   }
 }
 
-static bool cf_socket_data_pending(struct Curl_cfilter *cf,
-                                   const struct Curl_easy *data)
-{
-  struct cf_socket_ctx *ctx = cf->ctx;
-  int readable;
-
-  (void)data;
-  readable = SOCKET_READABLE(ctx->sock, 0);
-  return readable > 0 && (readable & CURL_CSELECT_IN);
-}
-
 #ifdef USE_WINSOCK
 
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
@@ -1750,7 +1739,7 @@ struct Curl_cftype Curl_cft_tcp = {
   cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
+  Curl_cf_def_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -1904,7 +1893,7 @@ struct Curl_cftype Curl_cft_udp = {
   cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
+  Curl_cf_def_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -1958,7 +1947,7 @@ struct Curl_cftype Curl_cft_unix = {
   cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
+  Curl_cf_def_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
@@ -2178,7 +2167,7 @@ struct Curl_cftype Curl_cft_tcp_accept = {
   cf_socket_close,
   cf_socket_shutdown,
   cf_socket_adjust_pollset,
-  cf_socket_data_pending,
+  Curl_cf_def_data_pending,
   cf_socket_send,
   cf_socket_recv,
   cf_socket_cntrl,
