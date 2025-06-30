@@ -374,9 +374,6 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   error = SELECT_OK;
   *done = FALSE;
 
-  if(!Curl_conn_data_pending(data, cf->sockindex))
-    return CURLE_OK;
-
   while(ts->keepon) {
     size_t nread;
     char byte;
