@@ -70,7 +70,7 @@ static const char *disabled[]={
   "ON"
 #endif
   ,
-  "digest-auth: "
+  "digest: "
 #ifdef CURL_DISABLE_DIGEST_AUTH
   "OFF"
 #else

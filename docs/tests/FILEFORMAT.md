@@ -456,6 +456,7 @@ Features testable here are:
 - `cookies`
 - `crypto`
 - `Debug`
+- `digest`
 - `DoH`
 - `getrlimit`
 - `GnuTLS`
