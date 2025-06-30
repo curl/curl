@@ -47,6 +47,7 @@
 #endif
 
 #include "../urldata.h"
+#include "../url.h"
 #include "../uint-hash.h"
 #include "../sendf.h"
 #include "../strdup.h"
@@ -1325,15 +1326,11 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = CURLE_AGAIN;
 
 out:
-  if(cf_progress_egress(cf, data, &pktx)) {
-    result = CURLE_SEND_ERROR;
-  }
-  else {
-    CURLcode r2 = check_and_set_expiry(cf, data, &pktx);
-    if(r2)
-      result = r2;
-  }
+  result = Curl_1st_err(result, cf_progress_egress(cf, data, &pktx));
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
+
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %dm, %zu",
+
               stream ? stream->id : -1, blen, result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -1581,7 +1578,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   struct pkt_io_ctx pktx;
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -1595,10 +1592,9 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     return ctx->tls_vrfy_result;
 
   (void)eos; /* use for stream EOF and block handling */
-  r2 = cf_progress_ingress(cf, data, &pktx);
-  if(r2) {
-    result = r2;
-  }
+  result = cf_progress_ingress(cf, data, &pktx);
+  if(result)
+    goto out;
 
   if(!stream || stream->id < 0) {
     if(ctx->shutdown_started) {
@@ -1655,14 +1651,11 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(*pnwritten > 0 && !ctx->tls_handshake_complete && ctx->use_earlydata)
     ctx->earlydata_skip += *pnwritten;
 
-  r2 = cf_progress_egress(cf, data, &pktx);
-  if(r2)
-    result = r2;
+  DEBUGASSERT(!result);
+  result = cf_progress_egress(cf, data, &pktx);
 
 out:
-  r2 = check_and_set_expiry(cf, data, &pktx);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);

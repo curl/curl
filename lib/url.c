@@ -4101,3 +4101,17 @@ void *Curl_conn_meta_get(struct connectdata *conn, const char *key)
 {
   return Curl_hash_pick(&conn->meta_hash, CURL_UNCONST(key), strlen(key) + 1);
 }
+
+CURLcode Curl_1st_err(CURLcode r1, CURLcode r2)
+{
+  return r1 ? r1 : r2;
+}
+
+CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2)
+{
+  if(r1 && (r1 != CURLE_AGAIN))
+    return r1;
+  if(r2 && (r2 != CURLE_AGAIN))
+    return r2;
+  return r1;
+}
