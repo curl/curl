@@ -35,7 +35,7 @@ CURLSHOPT_SHARE(3) multiple times with different data arguments to have
 the share object share multiple types of data. Unset a type again by setting
 CURLSHOPT_UNSHARE(3).
 
-If any of the data will be shared in multiple threads then mutex callbacks
+If any of the data is to be shared in multiple threads then mutex callbacks
 must be set as well. See CURLSHOPT_LOCKFUNC(3) and CURLSHOPT_UNLOCKFUNC(3).
 
 ## CURL_LOCK_DATA_COOKIE
