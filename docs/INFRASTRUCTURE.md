@@ -34,7 +34,7 @@ A [Test Clutch](https://github.com/dfandrich/testclutch) instance generates
 regular reports on curl CI test results at https://testclutch.curl.se/ as well
 as writing comments on curl pull requests whose tests have failed. The jobs
 are hosted on a Virtuozzo Application Platform PaaS instance and is managed by
-Dan Fandrich. The configuration code is is available and managed at
+Dan Fandrich. The configuration code is available and managed at
 https://github.com/dfandrich/testclutch-curl-web
 
 ## Autobuilds
