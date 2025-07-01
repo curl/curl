@@ -1042,5 +1042,3 @@ class CurlClient:
             rc = p.returncode
             if rc != 0:
                 raise Exception(f'{fg_gen_flame} returned error {rc}')
-
-

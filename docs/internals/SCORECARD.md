@@ -7,13 +7,13 @@ SPDX-License-Identifier: curl
 # scorecard.py
 
 This is an internal script in `tests/http/scorecard.py` used for testing
-curl's peformance in a set of cases. These are for excercising parts of
+curl's performance in a set of cases. These are for exercising parts of
 curl/libcurl in a reproducible fashion to judge improvements or detect
-degradations. They are not intended to represent real world scenarios
+regressions. They are not intended to represent real world scenarios
 as such.
 
-This script is not part of any official interface and we may (and probably
-will) change it in the future according to the project's needs.
+This script is not part of any official interface and we may
+change it in the future according to the project's needs.
 
 ## setup
 
@@ -29,7 +29,7 @@ A typical invocation for measuring performance of HTTP/2 downloads would be:
 curl> python3 tests/http/scorecard.py -d h2
 ```
 
-and this will print a table with the results. The last argument is the protocol to test and
+and this prints a table with the results. The last argument is the protocol to test and
 it can be `h1`, `h2` or `h3`. You can add `--json` to get results in JSON instead of text.
 
 Help for all command line options are available via:
@@ -54,9 +54,9 @@ Similar options are available for uploads and requests scenarios.
 
 ## dtrace
 
-With the `--dtrace` option, scorecard will produce a dtrace sample of the user stacks in `tests/http/gen/curl/curl.user_stacks`. On many platforms, `dtrace` will **need special permissions**. It is therefore invoked via `sudo` and you should make sure that sudo works for the run without prompting for a password.
+With the `--dtrace` option, scorecard produces a dtrace sample of the user stacks in `tests/http/gen/curl/curl.user_stacks`. On many platforms, `dtrace` requires **special permissions**. It is therefore invoked via `sudo` and you should make sure that sudo works for the run without prompting for a password.
 
-Note: you'll find the trace of the last curl invocation by scorecard. Use the parameters to narrow down the runs to the particular case you are interested in.
+Note: the file is the trace of the last curl invocation by scorecard. Use the parameters to narrow down the runs to the particular case you are interested in.
 
 ## flame graphs
 
@@ -68,4 +68,4 @@ curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py 
 ```
 and you'll have the SVG of the run in `tests/http/gen/curl/curl.flamegraph.svg`. You can open that in Firefox and zoom in/out of stacks of interest.
 
-Note: as with `dtrace`, the flame graph will be for the last invocation of curl done by scorecard.
+Note: as with `dtrace`, the flame graph is for the last invocation of curl done by scorecard.
