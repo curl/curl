@@ -75,7 +75,7 @@ struct test_case {
   int id;
   const char *url;
   const char *resolve_info;
-  unsigned char ip_version;
+  long ip_version;
   timediff_t connect_timeout_ms;
   timediff_t he_timeout_ms;
   timediff_t cf4_fail_delay_ms;
@@ -312,7 +312,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
   list = curl_slist_append(NULL, tc->resolve_info);
   fail_unless(list, "error allocating resolve list entry");
   curl_easy_setopt(easy, CURLOPT_RESOLVE, list);
-  curl_easy_setopt(easy, CURLOPT_IPRESOLVE, (long)tc->ip_version);
+  curl_easy_setopt(easy, CURLOPT_IPRESOLVE, tc->ip_version);
   curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT_MS,
                    (long)tc->connect_timeout_ms);
   curl_easy_setopt(easy, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
