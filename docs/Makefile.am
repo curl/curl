@@ -65,6 +65,7 @@ INTERNALDOCS =                                  \
  internals/NEW-PROTOCOL.md                      \
  internals/PORTING.md                           \
  internals/README.md                            \
+ internals/SCORECARD.md                         \
  internals/SPLAY.md                             \
  internals/STRPARSE.md                          \
  internals/TLS-SESSIONS.md                      \

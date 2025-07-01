@@ -186,7 +186,8 @@ class ScoreRunner:
                  curl_verbose: int,
                  download_parallel: int = 0,
                  server_addr: Optional[str] = None,
-                 with_dtrace: bool = False):
+                 with_dtrace: bool = False,
+                 with_flame: bool = False):
         self.verbose = verbose
         self.env = env
         self.protocol = protocol
@@ -196,6 +197,7 @@ class ScoreRunner:
         self._silent_curl = not curl_verbose
         self._download_parallel = download_parallel
         self._with_dtrace = with_dtrace
+        self._with_flame = with_flame
 
     def info(self, msg):
         if self.verbose > 0:
@@ -205,7 +207,8 @@ class ScoreRunner:
     def mk_curl_client(self):
         return CurlClient(env=self.env, silent=self._silent_curl,
                           server_addr=self.server_addr,
-                          with_dtrace=self._with_dtrace)
+                          with_dtrace=self._with_dtrace,
+                          with_flame=self._with_flame)
 
     def handshakes(self) -> Dict[str, Any]:
         props = {}
@@ -679,7 +682,8 @@ def run_score(args, protocol):
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
-                               with_dtrace=args.dtrace)
+                               with_dtrace=args.dtrace,
+                               with_flame=args.flame)
             cards.append(card)
 
         if test_httpd:
@@ -704,7 +708,8 @@ def run_score(args, protocol):
                                server_port=server_port,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
-                               with_dtrace=args.dtrace)
+                               with_dtrace=args.dtrace,
+                               with_flame=args.flame)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -808,7 +813,9 @@ def main():
     parser.add_argument("--remote", action='store', type=str,
                         default=None, help="score against the remote server at <ip>:<port>")
     parser.add_argument("--dtrace", action='store_true',
-                        default = False, help = "produce dtrace of curl")
+                        default = False, help="produce dtrace of curl")
+    parser.add_argument("--flame", action='store_true',
+                        default = False, help="produce a flame graph on curl, implies --dtrace")
 
     parser.add_argument("-H", "--handshakes", action='store_true',
                         default=False, help="evaluate handshakes only")
