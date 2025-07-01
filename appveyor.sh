@@ -87,13 +87,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
-    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-      find . -name BuildLog.htm -exec dos2unix '{}' +
-      find . -name BuildLog.htm -exec cat '{}' +
-    fi
-    false
-  fi
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
