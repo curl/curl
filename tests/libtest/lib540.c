@@ -61,7 +61,7 @@ static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+  res_easy_setopt(testeh[num], CURLOPT_PROXYAUTH, CURLAUTH_ANY);
   if(res)
     goto init_failed;
 
