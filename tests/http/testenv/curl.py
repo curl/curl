@@ -806,10 +806,10 @@ class CurlClient:
         profile = None
         tcpdump = None
         dtrace = None
-        started_at = datetime.now()
         if with_tcpdump:
             tcpdump = RunTcpDump(self.env, self._run_dir)
             tcpdump.start()
+        started_at = datetime.now()
         try:
             with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
                 if with_profile:
@@ -853,6 +853,7 @@ class CurlClient:
                         f'(configured {self._timeout}s): {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
+        ended_at = datetime.now()
         if tcpdump:
             tcpdump.finish()
         if dtrace:
@@ -863,7 +864,7 @@ class CurlClient:
         cerrput = open(self._stderrfile).readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
-                          duration=datetime.now() - started_at,
+                          duration=ended_at - started_at,
                           with_stats=with_stats,
                           profile=profile, tcpdump=tcpdump)
 
