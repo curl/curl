@@ -62,7 +62,7 @@ SPDX-License-Identifier: curl
  - what URL you were working with (if possible), at least which protocol
 
  and anything and everything else you think matters. Tell us what you expected
- to happen, tell use what did happen, tell us how you could make it work
+ to happen, tell us what did happen, tell us how you could make it work
  another way. Dig around, try out, test. Then include all the tiny bits and
  pieces in your report. You benefit from this yourself, as it enables us to
  help you quicker and more accurately.
