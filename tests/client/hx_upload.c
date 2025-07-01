@@ -149,7 +149,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_u_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
   if(use_earlydata)
-    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
+    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
 
   if(!t->method || !strcmp("PUT", t->method))
     curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
