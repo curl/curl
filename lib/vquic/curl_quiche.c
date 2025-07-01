@@ -848,7 +848,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   *pnread = 0;
   vquic_ctx_update_time(&ctx->q);
@@ -1081,7 +1081,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  CURLcode result, r2;
+  CURLcode result;
 
   *pnwritten = 0;
   vquic_ctx_update_time(&ctx->q);
