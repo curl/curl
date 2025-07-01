@@ -66,6 +66,6 @@ With the excellent [Flame Graph](https://github.com/brendangregg/FlameGraph) by 
 curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py \
    -r --request-count=50000 --request-parallels=100 --samples=1 --flame h2
 ```
-and you'll have the SVG of the run in `tests/http/gen/curl/curl.flamegraph.svg`. You can open that in Firefox and zoom in/out of stacks of interest.
+and the SVG of the run is in `tests/http/gen/curl/curl.flamegraph.svg`. You can open that in Firefox and zoom in/out of stacks of interest.
 
 Note: as with `dtrace`, the flame graph is for the last invocation of curl done by scorecard.

@@ -999,7 +999,7 @@ class CurlClient:
         if not os.path.exists(dtrace.file):
             raise Exception(f'dtrace output file does not exist: {dtrace.file}')
         if 'FLAMEGRAPH' not in os.environ:
-            raise Exception(f'Env variable FLAMEGRAPH not set')
+            raise Exception('Env variable FLAMEGRAPH not set')
         fg_dir = os.environ['FLAMEGRAPH']
         if not os.path.exists(fg_dir):
             raise Exception(f'FlameGraph directory not found: {fg_dir}')
