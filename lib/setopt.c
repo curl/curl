@@ -900,7 +900,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     if((arg < CURLFTPAUTH_DEFAULT) || (arg >= CURLFTPAUTH_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ftpsslauth = (unsigned char)(curl_ftpauth)arg;
+    data->set.ftpsslauth = (unsigned char)arg;
     break;
   case CURLOPT_ACCEPTTIMEOUT_MS:
     /*
