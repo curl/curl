@@ -49,7 +49,7 @@ static CURLcode test_lib3100(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, URL);
 
-  test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
   test_setopt(curl, CURLOPT_USERNAME, "user");
   test_setopt(curl, CURLOPT_PASSWORD, "password");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);

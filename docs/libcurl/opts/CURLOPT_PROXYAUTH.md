@@ -58,7 +58,7 @@ int main(void)
     /* use this proxy */
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://local.example.com:1080");
     /* allow whatever auth the proxy speaks */
-    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
     /* set the proxy credentials */
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, "james:007");
     ret = curl_easy_perform(curl);

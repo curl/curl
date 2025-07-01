@@ -46,7 +46,7 @@ static CURLcode test_lib3101(char *URL)
   test_setopt(curl, CURLOPT_WRITEDATA, stdout);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
   test_setopt(curl, CURLOPT_USERNAME, "user");
   test_setopt(curl, CURLOPT_PASSWORD, "password");
   test_setopt(curl, CURLOPT_REDIR_PROTOCOLS_STR, "https");

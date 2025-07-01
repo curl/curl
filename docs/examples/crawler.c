@@ -111,9 +111,9 @@ static CURL *make_handle(const char *url)
   curl_easy_setopt(handle, CURLOPT_COOKIEFILE, "");
   curl_easy_setopt(handle, CURLOPT_FILETIME, 1L);
   curl_easy_setopt(handle, CURLOPT_USERAGENT, "mini crawler");
-  curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+  curl_easy_setopt(handle, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
   curl_easy_setopt(handle, CURLOPT_UNRESTRICTED_AUTH, 1L);
-  curl_easy_setopt(handle, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+  curl_easy_setopt(handle, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
   curl_easy_setopt(handle, CURLOPT_EXPECT_100_TIMEOUT_MS, 0L);
   return handle;
 }
