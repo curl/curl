@@ -653,7 +653,7 @@ static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 
   /* new in curl 7.16.1 */
   if(config->ftp_ssl_ccc)
-    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, (long)config->ftp_ssl_ccc_mode);
+    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
   my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 

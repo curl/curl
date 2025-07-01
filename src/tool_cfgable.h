@@ -226,7 +226,7 @@ struct OperationConfig {
   unsigned long timecond;
   HttpReq httpreq;
   long proxyver;             /* set to CURLPROXY_HTTP* define */
-  int ftp_ssl_ccc_mode;
+  long ftp_ssl_ccc_mode;
   int ftp_filemethod;
   enum {
     CLOBBER_DEFAULT, /* Provides compatibility with previous versions of curl,
