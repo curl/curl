@@ -987,11 +987,12 @@ typedef enum {
 } curl_ftpccc;
 
 /* parameter for the CURLOPT_FTPSSLAUTH option */
+#define CURLFTPAUTH_DEFAULT 0L /* let libcurl decide */
+#define CURLFTPAUTH_SSL     1L /* use "AUTH SSL" */
+#define CURLFTPAUTH_TLS     2L /* use "AUTH TLS" */
+
 typedef enum {
-  CURLFTPAUTH_DEFAULT, /* let libcurl decide */
-  CURLFTPAUTH_SSL,     /* use "AUTH SSL" */
-  CURLFTPAUTH_TLS,     /* use "AUTH TLS" */
-  CURLFTPAUTH_LAST /* not an option, never use */
+  CURLFTPAUTH_LAST = 3 /* not an option, never use */
 } curl_ftpauth;
 
 /* parameter for the CURLOPT_FTP_CREATE_MISSING_DIRS option */
