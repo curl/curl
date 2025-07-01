@@ -21,11 +21,9 @@ CURLOPT_FTP_CREATE_MISSING_DIRS - create missing directories for FTP and SFTP
 ~~~c
 #include <curl/curl.h>
 
-typedef enum {
-  CURLFTP_CREATE_DIR_NONE,
-  CURLFTP_CREATE_DIR,
-  CURLFTP_CREATE_DIR_RETRY
-} curl_ftpcreatedir;
+#define CURLFTP_CREATE_DIR_NONE  0L
+#define CURLFTP_CREATE_DIR       1L
+#define CURLFTP_CREATE_DIR_RETRY 2L
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_CREATE_MISSING_DIRS,
                           long create);

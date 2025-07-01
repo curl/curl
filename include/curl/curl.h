@@ -979,39 +979,44 @@ typedef enum {
 #endif /* !CURL_NO_OLDIES */
 
 /* parameter for the CURLOPT_FTP_SSL_CCC option */
+#define CURLFTPSSL_CCC_NONE    0L /* do not send CCC */
+#define CURLFTPSSL_CCC_PASSIVE 1L /* Let the server initiate the shutdown */
+#define CURLFTPSSL_CCC_ACTIVE  2L /* Initiate the shutdown */
+
 typedef enum {
-  CURLFTPSSL_CCC_NONE,    /* do not send CCC */
-  CURLFTPSSL_CCC_PASSIVE, /* Let the server initiate the shutdown */
-  CURLFTPSSL_CCC_ACTIVE,  /* Initiate the shutdown */
-  CURLFTPSSL_CCC_LAST     /* not an option, never use */
+  CURLFTPSSL_CCC_LAST = 3 /* not an option, never use */
 } curl_ftpccc;
 
 /* parameter for the CURLOPT_FTPSSLAUTH option */
+#define CURLFTPAUTH_DEFAULT 0L /* let libcurl decide */
+#define CURLFTPAUTH_SSL     1L /* use "AUTH SSL" */
+#define CURLFTPAUTH_TLS     2L /* use "AUTH TLS" */
+
 typedef enum {
-  CURLFTPAUTH_DEFAULT, /* let libcurl decide */
-  CURLFTPAUTH_SSL,     /* use "AUTH SSL" */
-  CURLFTPAUTH_TLS,     /* use "AUTH TLS" */
-  CURLFTPAUTH_LAST /* not an option, never use */
+  CURLFTPAUTH_LAST = 3 /* not an option, never use */
 } curl_ftpauth;
 
 /* parameter for the CURLOPT_FTP_CREATE_MISSING_DIRS option */
+#define CURLFTP_CREATE_DIR_NONE  0L /* do NOT create missing dirs! */
+#define CURLFTP_CREATE_DIR       1L /* (FTP/SFTP) if CWD fails, try MKD and
+                                       then CWD again if MKD succeeded, for
+                                       SFTP this does similar magic */
+#define CURLFTP_CREATE_DIR_RETRY 2L /* (FTP only) if CWD fails, try MKD and
+                                       then CWD again even if MKD failed! */
+
 typedef enum {
-  CURLFTP_CREATE_DIR_NONE,  /* do NOT create missing dirs! */
-  CURLFTP_CREATE_DIR,       /* (FTP/SFTP) if CWD fails, try MKD and then CWD
-                               again if MKD succeeded, for SFTP this does
-                               similar magic */
-  CURLFTP_CREATE_DIR_RETRY, /* (FTP only) if CWD fails, try MKD and then CWD
-                               again even if MKD failed! */
-  CURLFTP_CREATE_DIR_LAST   /* not an option, never use */
+  CURLFTP_CREATE_DIR_LAST = 3 /* not an option, never use */
 } curl_ftpcreatedir;
 
 /* parameter for the CURLOPT_FTP_FILEMETHOD option */
+#define CURLFTPMETHOD_DEFAULT   0L /* let libcurl pick */
+#define CURLFTPMETHOD_MULTICWD  1L /* single CWD operation for each path
+                                      part */
+#define CURLFTPMETHOD_NOCWD     2L /* no CWD at all */
+#define CURLFTPMETHOD_SINGLECWD 3L /* one CWD to full dir, then work on file */
+
 typedef enum {
-  CURLFTPMETHOD_DEFAULT,   /* let libcurl pick */
-  CURLFTPMETHOD_MULTICWD,  /* single CWD operation for each path part */
-  CURLFTPMETHOD_NOCWD,     /* no CWD at all */
-  CURLFTPMETHOD_SINGLECWD, /* one CWD to full dir, then work on file */
-  CURLFTPMETHOD_LAST       /* not an option, never use */
+  CURLFTPMETHOD_LAST = 4 /* not an option, never use */
 } curl_ftpmethod;
 
 /* bitmask defines for CURLOPT_HEADEROPT */

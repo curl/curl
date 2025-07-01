@@ -2749,7 +2749,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
            requested. Try an FTPS connection now */
 
         ftpc->count3 = 0;
-        switch(data->set.ftpsslauth) {
+        switch((long)data->set.ftpsslauth) {
         case CURLFTPAUTH_DEFAULT:
         case CURLFTPAUTH_SSL:
           ftpc->count2 = 1; /* add one to get next */
@@ -2868,7 +2868,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
          * server, but we do not send one. Let's hope other servers do
          * the same... */
         result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
-          (data->set.ftp_ccc == CURLFTPSSL_CCC_ACTIVE));
+          (data->set.ftp_ccc == (unsigned char)CURLFTPSSL_CCC_ACTIVE));
 
         if(result)
           failf(data, "Failed to clear the command channel (CCC)");
