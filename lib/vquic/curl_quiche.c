@@ -896,11 +896,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  r2 = cf_flush_egress(cf, data);
-  if(r2) {
-    CURL_TRC_CF(data, cf, "cf_recv, flush egress failed");
-    result = r2;
-  }
+  result = Curl_1st_err(result, cf_flush_egress(cf, data));
   if(*pnread > 0)
     ctx->data_recvd += *pnread;
   CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] cf_recv(total=%"
@@ -1126,9 +1122,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  r2 = cf_flush_egress(cf, data);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, cf_flush_egress(cf, data));
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : (curl_uint64_t)~0, len,

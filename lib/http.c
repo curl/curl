@@ -3962,9 +3962,8 @@ static CURLcode http_on_response(struct Curl_easy *data,
 out:
   if(last_hd) {
     /* if not written yet, write it now */
-    CURLcode r2 = http_write_header(data, last_hd, last_hd_len);
-    if(!result)
-      result = r2;
+    result = Curl_1st_err(
+      result, http_write_header(data, last_hd, last_hd_len));
   }
   return result;
 }

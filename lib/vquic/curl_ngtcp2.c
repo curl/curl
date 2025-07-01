@@ -47,6 +47,7 @@
 #endif
 
 #include "../urldata.h"
+#include "../url.h"
 #include "../uint-hash.h"
 #include "../sendf.h"
 #include "../strdup.h"
@@ -1282,7 +1283,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   struct pkt_io_ctx pktx;
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   (void)ctx;
   (void)buf;
@@ -1325,13 +1326,9 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = CURLE_AGAIN;
 
 out:
-  /* do not replace `result` unless we have an error here */
-  r2 = cf_progress_egress(cf, data, &pktx);
-  if(r2)
-    result = r2;
-  r2 = check_and_set_expiry(cf, data, &pktx);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, cf_progress_egress(cf, data, &pktx));
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
+
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %dm, %zu",
 
               stream ? stream->id : -1, blen, result, *pnread);
@@ -1581,7 +1578,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   struct pkt_io_ctx pktx;
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -1658,10 +1655,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = cf_progress_egress(cf, data, &pktx);
 
 out:
-  /* do not overwrite `result` unless there is an error */
-  r2 = check_and_set_expiry(cf, data, &pktx);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);

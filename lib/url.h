@@ -101,6 +101,19 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct connectdata *conn,
                           struct curltime *now);
 
+/**
+ * Always eval all arguments, return the first result != CURLE_OK.
+ * A non-short-circuit evaluation.
+ */
+CURLcode Curl_1st_err(CURLcode r1, CURLcode r2);
+
+/**
+ * Always eval all arguments, return the first
+ * result != (CURLE_OK|CURLE_AGAIN) or `r1`.
+ * A non-short-circuit evaluation.
+ */
+CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
+
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
 void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else

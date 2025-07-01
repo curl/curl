@@ -1129,7 +1129,7 @@ void curl_easy_reset(CURL *d)
  */
 CURLcode curl_easy_pause(CURL *d, int action)
 {
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
   bool recursive = FALSE;
   bool changed = FALSE;
   struct Curl_easy *data = d;
@@ -1150,16 +1150,12 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   if(send_paused != send_paused_new) {
     changed = TRUE;
-    r2 = Curl_xfer_pause_send(data, send_paused_new);
-    if(r2)
-      result = r2;
+    result = Curl_1st_err(result, Curl_xfer_pause_send(data, send_paused_new));
   }
 
   if(recv_paused != recv_paused_new) {
     changed = TRUE;
-    r2 = Curl_xfer_pause_recv(data, recv_paused_new);
-    if(r2)
-      result = r2;
+    result = Curl_1st_err(result, Curl_xfer_pause_recv(data, recv_paused_new));
   }
 
   /* If not completely pausing both directions now, run again in any case. */
