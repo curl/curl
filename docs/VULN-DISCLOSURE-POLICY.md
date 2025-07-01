@@ -168,7 +168,7 @@ severity levels is hard enough for us.
 When deciding severity level on a particular issue, we take all the factors
 into account: attack vector, attack complexity, required privileges, necessary
 build configuration, protocols involved, platform specifics and also what
-effects a possible exploit or trigger of the issue can lead do, including
+effects a possible exploit or trigger of the issue can lead to, including
 confidentiality, integrity or availability problems.
 
 ## Low
@@ -256,7 +256,7 @@ Vulnerabilities in features which are off by default (in the build) and
 documented as experimental, or exist only in debug mode, are not eligible for a
 reward and we do not consider them security problems.
 
-The same applies to scripts and software which are not installed by default by
+The same applies to scripts and software which are not installed by default through
 the make install rule.
 
 ## URL inconsistencies
@@ -272,7 +272,7 @@ Obvious parser bugs can still be vulnerabilities of course.
 
 The curl command blanks the contents of a number of command line arguments to
 prevent them from appearing in process listings. It does not blank all
-arguments even if some of them that are not blanked might contain sensitive
+arguments, even though some that are not blanked might contain sensitive
 data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
