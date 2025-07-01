@@ -181,16 +181,16 @@ example](https://curl.se/docs/CVE-2022-43552.html)
 ## Medium
 
 This is a security problem that is less hard than **Low** to exploit or
-trigger. Less strict timing, wider platforms availability or involving more
+trigger. Less strict timing, wider platform availability or involving more
 widely used options or protocols. A problem that usually needs something else
 to also happen to become serious. [Past
 example](https://curl.se/docs/CVE-2022-32206.html)
 
 ## High
 
-This issue in itself a serious problem with real world impact. Flaws that can
-easily compromise the confidentiality, integrity or availability of resources.
-Exploiting or triggering this problem is not hard. [Past
+This issue is in itself a serious problem with real world impact. Flaws that
+can easily compromise the confidentiality, integrity or availability of
+resources. Exploiting or triggering this problem is not hard. [Past
 example](https://curl.se/docs/CVE-2019-3822.html)
 
 ## Critical
@@ -209,7 +209,7 @@ This is an incomplete list of issues that are not considered vulnerabilities.
 
 We do not consider a small memory leak a security problem; even if the amount
 of allocated memory grows by a small amount every now and then. Long-living
-applications and services already need to have counter-measures and deal with
+applications and services already need to have countermeasures and deal with
 growing memory usage, be it leaks or just increased use. A small memory or
 resource leak is then expected to *not* cause a security problem.
 
