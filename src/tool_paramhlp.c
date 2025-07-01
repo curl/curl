@@ -620,7 +620,7 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
   return PARAM_OK;
 }
 
-int ftpfilemethod(struct OperationConfig *config, const char *str)
+long ftpfilemethod(struct OperationConfig *config, const char *str)
 {
   if(curl_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
