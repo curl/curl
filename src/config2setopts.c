@@ -751,7 +751,7 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
 
   /* new in libcurl 7.10.6 */
   if(config->proxyanyauth)
-    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
   else if(config->proxynegotiate)
     my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
   else if(config->proxyntlm)

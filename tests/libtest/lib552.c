@@ -198,7 +198,7 @@ static CURLcode test_lib552(char *URL)
 
   /* Accept any auth. But for this bug configure proxy with DIGEST, basic
      might work too, not NTLM */
-  test_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+  test_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 
   res = curl_easy_perform(curl);
 
