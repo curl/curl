@@ -52,7 +52,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://user:pass@myproxy.com");
 
     /* enable username/password authentication only */
-    curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, (long)CURLAUTH_BASIC);
+    curl_easy_setopt(curl, CURLOPT_SOCKS5_AUTH, CURLAUTH_BASIC);
 
     /* Perform the request */
     curl_easy_perform(curl);
