@@ -635,7 +635,7 @@ int ftpfilemethod(struct OperationConfig *config, const char *str)
   return CURLFTPMETHOD_MULTICWD;
 }
 
-int ftpcccmethod(struct OperationConfig *config, const char *str)
+long ftpcccmethod(struct OperationConfig *config, const char *str)
 {
   if(curl_strequal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;

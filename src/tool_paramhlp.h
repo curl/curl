@@ -60,7 +60,7 @@ ParameterError add2list(struct curl_slist **list, const char *ptr);
 
 int ftpfilemethod(struct OperationConfig *config, const char *str);
 
-int ftpcccmethod(struct OperationConfig *config, const char *str);
+long ftpcccmethod(struct OperationConfig *config, const char *str);
 
 long delegation(struct OperationConfig *config, const char *str);
 
