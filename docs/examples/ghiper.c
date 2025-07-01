@@ -66,7 +66,7 @@
 #include <curl/curl.h>
 
 #define MSG_OUT g_print   /* Change to "g_error" to write to stderr */
-#define SHOW_VERBOSE 0    /* Set to non-zero for libcurl messages */
+#define SHOW_VERBOSE 0L   /* Set to non-zero for libcurl messages */
 #define SHOW_PROGRESS 0   /* Set to non-zero to enable progress callback */
 
 /* Global information, common to all connections */
@@ -311,7 +311,7 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, &conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, (long)SHOW_VERBOSE);
+  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, SHOW_VERBOSE);
   curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
   curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
   curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, SHOW_PROGRESS ? 0L : 1L);

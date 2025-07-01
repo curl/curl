@@ -99,7 +99,7 @@ static CURLcode test_lib555(char *URL)
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   easy_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
   easy_setopt(curl, CURLOPT_PROXYAUTH,
-                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
+              CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
 
   multi_init(m);
 
