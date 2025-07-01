@@ -110,7 +110,7 @@ static CURLcode test_lib510(char *URL)
   test_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
   if(testnum == 565) {
-    test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+    test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
     test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
   }
 
