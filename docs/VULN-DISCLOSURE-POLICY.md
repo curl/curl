@@ -256,8 +256,8 @@ Vulnerabilities in features which are off by default (in the build) and
 documented as experimental, or exist only in debug mode, are not eligible for a
 reward and we do not consider them security problems.
 
-The same applies to scripts and software which are not installed by default through
-the make install rule.
+The same applies to scripts and software which are not installed by default
+through the make install rule.
 
 ## URL inconsistencies
 
