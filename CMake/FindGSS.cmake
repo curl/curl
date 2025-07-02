@@ -97,7 +97,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       # Should also work in an odd case when multiple directories are given
       string(STRIP "${_GSS_CFLAGS}" _GSS_CFLAGS)
       string(REGEX REPLACE " +-I" ";" _GSS_CFLAGS "${_GSS_CFLAGS}")
-      string(REGEX REPLACE " +--isystem" ";" _GSS_CFLAGS "${_GSS_CFLAGS}")
+      string(REGEX REPLACE " +-isystem" ";" _GSS_CFLAGS "${_GSS_CFLAGS}")
       string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _GSS_CFLAGS "${_GSS_CFLAGS}")
 
       foreach(_flag IN LISTS _GSS_CFLAGS)
