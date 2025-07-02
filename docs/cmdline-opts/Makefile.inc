@@ -181,6 +181,7 @@ DPAGES = \
   ntlm.md \
   oauth2-bearer.md \
   output-dir.md \
+  out-null.md \
   output.md \
   parallel-immediate.md \
   parallel-max.md \
