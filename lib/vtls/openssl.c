@@ -1384,7 +1384,7 @@ int cert_stuff(struct Curl_easy *data,
     {
       /* Implicitly use pkcs11 provider if none was provided and the
        * cert_file is a PKCS#11 URI */
-      if(!data->state.provider) {
+      if(!data->state.provider_loaded) {
         if(is_pkcs11_uri(cert_file)) {
           if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
             return 0;
@@ -1392,7 +1392,7 @@ int cert_stuff(struct Curl_easy *data,
         }
       }
 
-      if(data->state.provider) {
+      if(data->state.provider_loaded) {
         /* Load the certificate from the provider */
         OSSL_STORE_INFO *info = NULL;
         X509 *cert = NULL;
@@ -1637,7 +1637,7 @@ fail:
     {
       /* Implicitly use pkcs11 provider if none was provided and the
        * key_file is a PKCS#11 URI */
-      if(!data->state.provider) {
+      if(!data->state.provider_loaded) {
         if(is_pkcs11_uri(key_file)) {
           if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
             return 0;
@@ -1645,7 +1645,7 @@ fail:
         }
       }
 
-      if(data->state.provider) {
+      if(data->state.provider_loaded) {
         /* Load the private key from the provider */
         EVP_PKEY *priv_key = NULL;
         OSSL_STORE_CTX *store = NULL;
@@ -2030,6 +2030,14 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *iname)
     }
     data->state.libctx = libctx;
   }
+
+#ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
+  /* load the configuration file into the library context before checking the
+   * provider availability */
+  if(!OSSL_LIB_CTX_load_config(data->state.libctx, NULL)) {
+    infof(data, "Failed to load default openssl config. Proceeding.");
+  }
+#endif
 
   if(OSSL_PROVIDER_available(data->state.libctx, name)) {
     /* already loaded through the configuration - no action needed */
