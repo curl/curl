@@ -141,10 +141,10 @@ The module adds 2 "handlers" to the Apache server (right now). Handler are piece
   * `s`: seconds (the default)
   * `ms`: milliseconds
 
-As you can see, `mod_curltest`'s tweak handler allow to simulate many kinds of
-responses. An example of its use is `test_03_01` where responses are delayed
-using `chunk_delay`. This gives the response a defined duration and the test
-uses that to reload `httpd` in the middle of the first request. A graceful
+As you can see, `mod_curltest`'s tweak handler allows Apache to simulate many
+kinds of responses. An example of its use is `test_03_01` where responses are
+delayed using `chunk_delay`. This gives the response a defined duration and the
+test uses that to reload `httpd` in the middle of the first request. A graceful
 reload in httpd lets ongoing requests finish, but closes the connection
-afterwards and tears down the serving process. The following request then
-needs to open a new connection. This is verified by the test case.
+afterwards and tears down the serving process. The following request then needs
+to open a new connection. This is verified by the test case.
