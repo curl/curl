@@ -442,6 +442,9 @@ const struct helptxt helptext[] = {
    "OAuth 2 Bearer Token",
    CURLHELP_AUTH | CURLHELP_IMAP | CURLHELP_POP3 | CURLHELP_SMTP |
    CURLHELP_LDAP},
+  {"    --out-null",
+   "Discard response data into the void",
+   CURLHELP_OUTPUT},
   {"-o, --output <file>",
    "Write to file instead of stdout",
    CURLHELP_IMPORTANT | CURLHELP_OUTPUT},
