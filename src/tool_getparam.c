@@ -224,6 +224,7 @@ static const struct LongShort aliases[]= {
   {"ntlm",                       ARG_BOOL, ' ', C_NTLM},
   {"ntlm-wb",                    ARG_BOOL|ARG_DEPR, ' ', C_NTLM_WB},
   {"oauth2-bearer",              ARG_STRG|ARG_CLEAR, ' ', C_OAUTH2_BEARER},
+  {"out-null",                   ARG_BOOL, ' ', C_OUT_NULL},
   {"output",                     ARG_FILE, 'o', C_OUTPUT},
   {"output-dir",                 ARG_STRG, ' ', C_OUTPUT_DIR},
   {"parallel",                   ARG_BOOL, 'Z', C_PARALLEL},
@@ -1319,6 +1320,7 @@ static ParameterError parse_output(struct OperationConfig *config,
   err = getstr(&url->outfile, nextarg, DENY_BLANK);
   url->useremote = FALSE; /* switch off */
   url->outset = TRUE;
+  config->out_null = FALSE; /* switch off --out-null */
   return err;
 }
 
@@ -1828,6 +1830,9 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     if(!feature_ntlm && toggle)
       return PARAM_LIBCURL_DOESNT_SUPPORT;
     togglebit(toggle, &config->authtype, CURLAUTH_NTLM);
+    break;
+  case C_OUT_NULL: /* --out-null */
+    config->out_null = toggle;
     break;
   case C_BASIC: /* --basic */
     togglebit(toggle, &config->authtype, CURLAUTH_BASIC);

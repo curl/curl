@@ -572,7 +572,7 @@ class CurlClient:
             extra_args = []
         if no_save:
             extra_args.extend([
-                '-o', '/dev/null',
+                '--out-null',
             ])
         else:
             extra_args.extend([
@@ -621,7 +621,7 @@ class CurlClient:
         if extra_args is None:
             extra_args = []
         extra_args.extend([
-            '-X', 'DELETE', '-o', '/dev/null',
+            '-X', 'DELETE', '--out-null',
         ])
         if with_stats:
             extra_args.extend([
@@ -687,7 +687,7 @@ class CurlClient:
             extra_args = []
         if no_save:
             extra_args.extend([
-                '-o', '/dev/null',
+                '--out-null',
             ])
         else:
             extra_args.extend([
