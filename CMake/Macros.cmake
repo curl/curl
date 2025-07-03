@@ -97,7 +97,7 @@ macro(curl_prefill_type_size _type _size)
 endmacro()
 
 # Create a clang-tidy target for test targets
-macro(curl_clang_tidy_tests _target_clang_tidy _target)
+macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
     # Collect header directories and macro definitions from lib dependencies
