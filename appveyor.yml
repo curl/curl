@@ -224,6 +224,7 @@ skip_commits:
   files:
     - '.circleci/*'
     - '.github/**/*'
+    - 'Dockerfile'
     - 'packages/**/*'
     - 'plan9/**/*'
 
