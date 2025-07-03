@@ -95,18 +95,18 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     execute_process(
       COMMAND ${_gss_configure_script} "--cflags" "gssapi"
-      OUTPUT_VARIABLE _gss_c_flags
+      OUTPUT_VARIABLE _gss_cflags_raw
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "FindGSS krb5-config --cflags: ${_gss_c_flags}")
+    message(STATUS "FindGSS krb5-config --cflags: ${_gss_cflags_raw}")
     if(NOT _gss_configure_failed)  # 0 means success
       # Should also work in an odd case when multiple directories are given.
-      string(STRIP "${_gss_c_flags}" _gss_c_flags)
-      string(REGEX REPLACE " +-(I)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
-      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
+      string(STRIP "${_gss_cflags_raw}" _gss_cflags_raw)
+      string(REGEX REPLACE " +-(I)" ";-\\1" _gss_cflags_raw "${_gss_cflags_raw}")
+      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _gss_cflags_raw "${_gss_cflags_raw}")
 
-      foreach(_flag IN LISTS _gss_c_flags)
+      foreach(_flag IN LISTS _gss_cflags_raw)
         if(_flag MATCHES "^-I")
           string(REGEX REPLACE "^-I" "" _val "${_flag}")
           list(APPEND _GSS_INCLUDE_DIRS "${_val}")
