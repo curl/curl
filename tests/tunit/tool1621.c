@@ -23,9 +23,6 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#include "urldata.h"
-#include "url.h"
-
 #include "tool_xattr.h"
 
 #include "memdebug.h" /* LAST include file */
