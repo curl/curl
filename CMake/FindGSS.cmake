@@ -52,6 +52,9 @@ set(_gss_root_hints
   "$ENV{GSS_ROOT_DIR}"
 )
 
+set(_GSS_CFLAGS "")
+set(_GSS_LIBRARY_DIRS "")
+
 # Try to find library using system pkg-config if user did not specify root dir
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
   if(CURL_USE_PKGCONFIG)
@@ -64,9 +67,6 @@ if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
     list(APPEND _gss_root_hints "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos;InstallDir]")
   endif()
 endif()
-
-set(_GSS_CFLAGS "")
-set(_GSS_LIBRARY_DIRS "")
 
 if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional approach.
   find_file(_gss_configure_script
