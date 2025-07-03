@@ -101,7 +101,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     )
     message(STATUS "FindGSS krb5-config --cflags: ${_gss_c_flags}")
     if(NOT _gss_configure_failed)  # 0 means success
-      # Should also work in an odd case when multiple directories are given
+      # Should also work in an odd case when multiple directories are given.
       string(STRIP "${_gss_c_flags}" _gss_c_flags)
       string(REGEX REPLACE " +-(I)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
       string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
@@ -125,7 +125,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     message(STATUS "FindGSS krb5-config --libs: ${_gss_lib_flags}")
 
     if(NOT _gss_configure_failed)  # 0 means success
-      # This script gives us libraries and link directories. Blah. We have to deal with it.
+      # This script gives us libraries and link directories.
       string(STRIP "${_gss_lib_flags}" _gss_lib_flags)
       string(REGEX REPLACE " +-(L|l)" ";-\\1" _gss_lib_flags "${_gss_lib_flags}")
       string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1" _gss_lib_flags "${_gss_lib_flags}")
