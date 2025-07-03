@@ -197,4 +197,28 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 }
 
 
+bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
+                                 bool give_ssl_ctx,
+                                 struct curl_tlssessioninfo *info)
+{
+#ifdef USE_OPENSSL
+  info->backend = CURLSSLBACKEND_OPENSSL;
+  info->internals = give_ssl_ctx ?
+                    (void *)ctx->ossl.ssl_ctx : (void *)ctx->ossl.ssl;
+  return TRUE;
+#elif defined(USE_GNUTLS)
+  (void)give_ssl_ctx; /* gnutls always returns its session */
+  info->backend = CURLSSLBACKEND_OPENSSL;
+  info->internals = ctx->gtls.session;
+  return TRUE;
+#elif defined(USE_WOLFSSL)
+  info->backend = CURLSSLBACKEND_WOLFSSL;
+  info->internals = give_ssl_ctx ?
+                    (void *)ctx->wssl.ssl_ctx : (void *)ctx->wssl.ssl;
+  return TRUE;
+#else
+  return FALSE;
+#endif
+}
+
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */

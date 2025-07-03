@@ -580,6 +580,19 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex)
   return conn ? Curl_conn_cf_is_ssl(conn->cfilter[sockindex]) : FALSE;
 }
 
+bool Curl_conn_get_ssl_info(struct Curl_easy *data,
+                            struct connectdata *conn, int sockindex,
+                            struct curl_tlssessioninfo *info)
+{
+  if(Curl_conn_is_ssl(conn, sockindex)) {
+    struct Curl_cfilter *cf = conn->cfilter[sockindex];
+    CURLcode result = cf ? cf->cft->query(cf, data, CF_QUERY_SSL_INFO,
+                               NULL, (void *)info) : CURLE_UNKNOWN_OPTION;
+    return !result;
+  }
+  return FALSE;
+}
+
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
 {
   struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;

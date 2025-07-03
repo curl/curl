@@ -37,6 +37,7 @@
 
 struct ssl_peer;
 struct Curl_ssl_session;
+struct curl_tlssessioninfo;
 
 struct curl_tls_ctx {
 #ifdef USE_OPENSSL
@@ -105,6 +106,10 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer);
+
+bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
+                                 bool give_ssl_ctx,
+                                 struct curl_tlssessioninfo *info);
 
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
 
