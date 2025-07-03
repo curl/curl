@@ -50,4 +50,7 @@ set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_OLDIE
 set_property(TARGET ${BUNDLE} APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
-curl_clang_tidy_tests(${BUNDLE} ${FIRST_C} ${TESTS_C})
+curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
+if(TARGET "${BUNDLE}-clang-tidy")
+  add_dependencies("${BUNDLE}-clang-tidy" curlu-unitprotos)
+endif()

@@ -97,7 +97,7 @@ macro(curl_prefill_type_size _type _size)
 endmacro()
 
 # Create a clang-tidy target for test targets
-macro(curl_clang_tidy_tests _target)
+macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
     # Collect header directories and macro definitions from lib dependencies
@@ -143,11 +143,11 @@ macro(curl_clang_tidy_tests _target)
       list(APPEND _sources "${_source}")
     endforeach()
 
-    add_custom_target("${_target}-clang-tidy" USES_TERMINAL
+    add_custom_target(${_target_clang_tidy} USES_TERMINAL
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       COMMAND ${CMAKE_C_CLANG_TIDY} ${_sources} -- ${_includes} ${_definitions}
       DEPENDS ${_sources})
-    add_dependencies(tests-clang-tidy "${_target}-clang-tidy")
+    add_dependencies(tests-clang-tidy ${_target_clang_tidy})
 
     unset(_includes_d)
     unset(_includes_t)
