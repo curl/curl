@@ -52,6 +52,9 @@ set(_gss_root_hints
   "$ENV{GSS_ROOT_DIR}"
 )
 
+set(_GSS_CFLAGS "")
+set(_GSS_LIBRARY_DIRS "")
+
 # Try to find library using system pkg-config if user did not specify root dir
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
   if(CURL_USE_PKGCONFIG)
@@ -86,6 +89,10 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
   )
 
   if(_gss_configure_script)
+
+    set(_GSS_INCLUDE_DIRS "")
+    set(_GSS_LIBRARIES "")
+
     execute_process(
       COMMAND ${_gss_configure_script} "--cflags" "gssapi"
       OUTPUT_VARIABLE _gss_cflags_raw
