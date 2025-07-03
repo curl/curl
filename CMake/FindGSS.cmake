@@ -103,7 +103,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     if(NOT _gss_configure_failed)  # 0 means success
       # Should also work in an odd case when multiple directories are given
       string(STRIP "${_gss_c_flags}" _gss_c_flags)
-      string(REGEX REPLACE " +-I" ";" _gss_c_flags "${_gss_c_flags}")
+      string(REGEX REPLACE " +-(I)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
       string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _gss_c_flags "${_gss_c_flags}")
 
       foreach(_flag IN LISTS _gss_c_flags)
