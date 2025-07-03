@@ -88,21 +88,21 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
   if(_gss_configure_script)
     execute_process(
       COMMAND ${_gss_configure_script} "--cflags" "gssapi"
-      OUTPUT_VARIABLE _GSS_CFLAGS
+      OUTPUT_VARIABLE _gss_cflags_raw
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "FindGSS krb5-config --cflags: ${_GSS_CFLAGS}")
+    message(STATUS "FindGSS krb5-config --cflags: ${_gss_cflags_raw}")
     if(NOT _gss_configure_failed)  # 0 means success
-      # Should also work in an odd case when multiple directories are given
-      string(STRIP "${_GSS_CFLAGS}" _GSS_CFLAGS)
-      string(REGEX REPLACE " +-I" ";" _GSS_CFLAGS "${_GSS_CFLAGS}")
-      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _GSS_CFLAGS "${_GSS_CFLAGS}")
+      # Should also work in an odd case when multiple directories are given.
+      string(STRIP "${_gss_cflags_raw}" _gss_cflags_raw)
+      string(REGEX REPLACE " +-(I)" ";-\\1" _gss_cflags_raw "${_gss_cflags_raw}")
+      string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _gss_cflags_raw "${_gss_cflags_raw}")
 
-      foreach(_flag IN LISTS _GSS_CFLAGS)
+      foreach(_flag IN LISTS _gss_cflags_raw)
         if(_flag MATCHES "^-I")
-          string(REGEX REPLACE "^-I" "" _val "${_flag}")
-          list(APPEND _GSS_INCLUDE_DIRS "${_val}")
+          string(REGEX REPLACE "^-I" "" _flag "${_flag}")
+          list(APPEND _GSS_INCLUDE_DIRS "${_flag}")
         else()
           list(APPEND _GSS_CFLAGS "${_flag}")
         endif()
@@ -118,18 +118,18 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     message(STATUS "FindGSS krb5-config --libs: ${_gss_lib_flags}")
 
     if(NOT _gss_configure_failed)  # 0 means success
-      # This script gives us libraries and link directories. Blah. We have to deal with it.
+      # This script gives us libraries and link directories.
       string(STRIP "${_gss_lib_flags}" _gss_lib_flags)
       string(REGEX REPLACE " +-(L|l)" ";-\\1" _gss_lib_flags "${_gss_lib_flags}")
       string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1" _gss_lib_flags "${_gss_lib_flags}")
 
       foreach(_flag IN LISTS _gss_lib_flags)
         if(_flag MATCHES "^-l")
-          string(REGEX REPLACE "^-l" "" _val "${_flag}")
-          list(APPEND _GSS_LIBRARIES "${_val}")
+          string(REGEX REPLACE "^-l" "" _flag "${_flag}")
+          list(APPEND _GSS_LIBRARIES "${_flag}")
         elseif(_flag MATCHES "^-L")
-          string(REGEX REPLACE "^-L" "" _val "${_flag}")
-          list(APPEND _GSS_LIBRARY_DIRS "${_val}")
+          string(REGEX REPLACE "^-L" "" _flag "${_flag}")
+          list(APPEND _GSS_LIBRARY_DIRS "${_flag}")
         endif()
       endforeach()
     endif()
