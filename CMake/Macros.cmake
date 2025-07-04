@@ -149,8 +149,8 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
 
     list(REMOVE_ITEM _definitions "")
     string(REPLACE ";" ";-D" _definitions ";${_definitions}")
-    list(SORT _definitions)  # Sort like CMake does
     list(REMOVE_DUPLICATES _definitions)
+    list(SORT _definitions)  # Sort like CMake does
 
     # Assemble source list
     set(_sources "")
