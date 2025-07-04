@@ -2760,6 +2760,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_NETRC
 static bool str_has_ctrl(const char *input)
 {
   if(input) {
@@ -2772,6 +2773,7 @@ static bool str_has_ctrl(const char *input)
   }
   return FALSE;
 }
+#endif
 
 /*
  * Override the login details from the URL with that in the CURLOPT_USERPWD

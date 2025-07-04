@@ -505,6 +505,8 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
       return NULL;
     }
   }
+#else
+  (void)data;
 #endif
   if(!hostlen)
     hostlen = strlen(hostname);
