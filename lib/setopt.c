@@ -240,7 +240,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
   return CURLE_OK;
 }
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static CURLcode httpauth(struct Curl_easy *data, bool proxy,
                          unsigned long auth)
 {
@@ -285,7 +285,7 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
     data->set.httpauth = auth;
   return CURLE_OK;
 }
-#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_HTTP
 static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
