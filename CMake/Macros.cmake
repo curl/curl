@@ -127,15 +127,19 @@ endmacro()
 macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
   if(CURL_CLANG_TIDY)
 
+    set(_includes "")
+    set(_definitions "")
+
     # Collect header directories and macro definitions applying to the directory
-    get_directory_property(_includes INCLUDE_DIRECTORIES)
-    if(NOT _includes)
-      set(_includes "")
+    get_directory_property(_val INCLUDE_DIRECTORIES)
+    if(_val)
+      list(APPEND _includes ${_val})
     endif()
-    get_directory_property(_definitions COMPILE_DEFINITIONS)
-    if(NOT _definitions)
-      set(_definitions "")
+    get_directory_property(_val COMPILE_DEFINITIONS)
+    if(_val)
+      list(APPEND _definitions ${_val})
     endif()
+    unset(_val)
 
     # Collect header directories and macro definitions from lib dependencies
     curl_collect_target_options(${_target})
