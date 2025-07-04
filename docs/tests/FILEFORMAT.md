@@ -699,6 +699,14 @@ test.
 
 `loadfile="filename"` makes loading the data from an external file.
 
+### `<limit>`
+
+When this test runs and curl was built with debug enabled, runtests make sure
+that the set limits are not exceeded. Supported limits:
+
+    Allocations: [number of allocation calls]
+    Maximum allocated: [maximum concurrent memory allocated]
+
 ### `<file name="%LOGDIR/filename" [mode="text"]>`
 The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have

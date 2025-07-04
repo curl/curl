@@ -49,5 +49,9 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
+<limits>
+Allocations: 126
+Maximum allocated: 135329
+</limits>
 </verify>
 </testcase>

@@ -1698,6 +1698,55 @@ sub singletest_check {
             else {
                 $ok .= "m";
             }
+            my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
+            my $allocs;
+            my $max;
+            for(@more) {
+                if(/^Allocations: (\d+)/) {
+                    $allocs = $1;
+                }
+                elsif(/^Maximum allocated: (\d+)/) {
+                    $max = $1;
+                }
+            }
+            if(!$allocs || !$max) {
+                logmsg "\n** MEMORY LOGGING PROBLEM\n";
+                logmsg @more;
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time();
+                return -1;
+            }
+            my @limits = getpart("verify", "limits");
+            my $lim_allocs;
+            my $lim_max;
+            for(@limits) {
+                if(/^Allocations: (\d+)/) {
+                    $lim_allocs = $1;
+                }
+                elsif(/^Maximum allocated: (\d+)/) {
+                    $lim_max = $1;
+                }
+            }
+            logmsg "did $allocs allocations, $lim_allocs allowed\n"
+                if($verbose);
+
+            logmsg "allocated $max maximum, $lim_max allowed\n"
+                if($verbose);
+
+            if($lim_allocs && ($allocs > $lim_allocs)) {
+                logmsg "\n** TOO MANY ALLOCS\n";
+                logmsg "$lim_allocs allocations allowed, did $allocs\n";
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time();
+                return -1;
+            }
+            if($lim_max && ($max > $lim_max)) {
+                logmsg "\n** TOO MUCH TOTAL ALLOCATION\n";
+                logmsg "$lim_max maximum allocation allowed, did $max\n";
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time();
+                return -1;
+            }
         }
     }
     else {
