@@ -52,5 +52,8 @@ Accept: */*
 <errorcode>
 56
 </errorcode>
+<limits>
+Allocations: 1900
+</limits>
 </verify>
 </testcase>
