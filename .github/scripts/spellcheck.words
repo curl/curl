@@ -205,6 +205,7 @@ DoT
 doxygen
 drftpd
 dsa
+dtrace
 Dudka
 Dymond
 dynbuf
@@ -823,12 +824,14 @@ subdirectory
 submitters
 substring
 substrings
+sudo
 SunOS
 SunSSH
 superset
 svc
 svcb
 SVCB
+SVG
 Svyatoslav
 Swisscom
 sws
