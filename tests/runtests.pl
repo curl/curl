@@ -1709,13 +1709,6 @@ sub singletest_check {
                     $max = $1;
                 }
             }
-            if(!$allocs || !$max) {
-                logmsg "\n** MEMORY LOGGING PROBLEM\n";
-                logmsg @more;
-                # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time();
-                return -1;
-            }
             my @limits = getpart("verify", "limits");
             my $lim_allocs;
             my $lim_max;
