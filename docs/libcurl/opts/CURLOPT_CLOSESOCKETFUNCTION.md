@@ -42,6 +42,11 @@ The *clientp* pointer is set with
 CURLOPT_CLOSESOCKETDATA(3). *item* is the socket libcurl wants to be
 closed.
 
+Note that when using multi/share handles, your callback may get invoked even
+after the easy handle has been cleaned up. The callback and data is
+inherited by a new connection and that connection may live longer
+than the transfer itself in the multi/share handle's connection cache.
+
 # DEFAULT
 
 Use the standard socket close function.
