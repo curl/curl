@@ -28,6 +28,7 @@
 
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
+#include "url.h"
 #include "cfilters.h"
 #include "connect.h"
 #include "curl_trc.h"
@@ -1315,7 +1316,7 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  CURLcode result, r2;
+  CURLcode result;
 
   *pnread = 0;
   CF_DATA_SAVE(save, cf, data);
@@ -1339,9 +1340,7 @@ static CURLcode cf_h2_proxy_recv(struct Curl_cfilter *cf,
     nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, *pnread);
   }
 
-  r2 = proxy_h2_progress_egress(cf, data);
-  if(r2 && (r2 != CURLE_AGAIN))
-    result = r2;
+  result = Curl_1st_fatal(result, proxy_h2_progress_egress(cf, data));
 
 out:
   if(!Curl_bufq_is_empty(&ctx->tunnel.recvbuf) &&
@@ -1364,7 +1363,7 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   int rv;
-  CURLcode result, r2;
+  CURLcode result;
 
   (void)eos;
   *pnwritten = 0;
@@ -1394,19 +1393,8 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
     }
   }
 
-  r2 = proxy_h2_progress_ingress(cf, data);
-  if(r2 && (r2 != CURLE_AGAIN)) {
-    result = r2;
-    goto out;
-  }
-
-  /* Call the nghttp2 send loop and flush to write ALL buffered data,
-   * headers and/or request body completely out to the network */
-  r2 = proxy_h2_progress_egress(cf, data);
-  if(r2 && (r2 != CURLE_AGAIN)) {
-    result = r2;
-    goto out;
-  }
+  result = Curl_1st_fatal(result, proxy_h2_progress_ingress(cf, data));
+  result = Curl_1st_fatal(result, proxy_h2_progress_egress(cf, data));
 
   if(!result && proxy_h2_should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been

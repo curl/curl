@@ -1995,7 +1995,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   ssize_t nwritten;
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   (void)eos; /* use to end stream */
   CF_DATA_SAVE(save, cf, data);
@@ -2049,14 +2049,11 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     (void)nghttp3_conn_resume_stream(ctx->h3.conn, stream->s.id);
   }
 
-  r2 = cf_progress_egress(cf, data);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, cf_progress_egress(cf, data));
 
 out:
-  r2 = check_and_set_expiry(cf, data);
-  if(r2)
-    result = r2;
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data));
+
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
               stream ? stream->s.id : -1, len, result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
@@ -2093,7 +2090,7 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
-  CURLcode result = CURLE_OK, r2;
+  CURLcode result = CURLE_OK;
 
   (void)ctx;
   CF_DATA_SAVE(save, cf, data);
@@ -2117,11 +2114,9 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  r2 = cf_progress_ingress(cf, data);
-  if(r2) {
-    result = r2;
+  result = Curl_1st_err(result, cf_progress_ingress(cf, data));
+  if(result)
     goto out;
-  }
 
   /* recvbuf had nothing before, maybe after progressing ingress? */
   if(!*pnread && !Curl_bufq_is_empty(&stream->recvbuf)) {
@@ -2145,14 +2140,9 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  if(cf_progress_egress(cf, data)) {
-    result = CURLE_SEND_ERROR;
-  }
-  else {
-    r2 = check_and_set_expiry(cf, data);
-    if(r2)
-      result = r2;
-  }
+  result = Curl_1st_err(result, cf_progress_egress(cf, data));
+  result = Curl_1st_err(result, check_and_set_expiry(cf, data));
+
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(len=%zu) -> %d, %zu",
               stream ? stream->s.id : -1, len, result, *pnread);
   CF_DATA_RESTORE(cf, save);
