@@ -96,16 +96,17 @@ macro(curl_prefill_type_size _type _size)
   set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
 endmacro()
 
-# Create a clang-tidy target for test targets
-macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
-  if(CURL_CLANG_TIDY)
-
-    # Collect header directories and macro definitions from lib dependencies
-    set(_includes_l "")
-    set(_definitions_l "")
-    get_target_property(_libs ${_target} LINK_LIBRARIES)
+# Internal: Recurse into target libraries and collect their include directories
+# and macro definitions.
+macro(curl_collect_target_options _target)
+  get_target_property(_libs ${_target} LINK_LIBRARIES)
+  if(_libs)
     foreach(_lib IN LISTS _libs)
       if(TARGET "${_lib}")
+        get_target_property(_val ${_lib} INTERFACE_INCLUDE_DIRECTORIES)
+        if(_val)
+          list(APPEND _includes_l ${_val})
+        endif()
         get_target_property(_val ${_lib} INCLUDE_DIRECTORIES)
         if(_val)
           list(APPEND _includes_l ${_val})
@@ -114,8 +115,20 @@ macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
         if(_val)
           list(APPEND _definitions_l ${_val})
         endif()
+        curl_collect_target_options(${_lib})
       endif()
     endforeach()
+  endif()
+endmacro()
+
+# Create a clang-tidy target for test targets
+macro(curl_add_clang_tidy_test_target _target_clang_tidy _target)
+  if(CURL_CLANG_TIDY)
+
+    # Collect header directories and macro definitions from lib dependencies
+    set(_includes_l "")
+    set(_definitions_l "")
+    curl_collect_target_options(${_target})
 
     # Collect header directories applying to the target
     get_directory_property(_includes_d INCLUDE_DIRECTORIES)
