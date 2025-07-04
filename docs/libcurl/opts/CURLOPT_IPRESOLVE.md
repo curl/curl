@@ -66,7 +66,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
     /* of all addresses example.com resolves to, only IPv6 ones are used */
-    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V6);
+    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
     res = curl_easy_perform(curl);
 

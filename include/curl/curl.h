@@ -2289,10 +2289,10 @@ typedef enum {
   /* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
      name resolves addresses using more than one IP protocol version, this
      option might be handy to force libcurl to use a specific IP version. */
-#define CURL_IPRESOLVE_WHATEVER 0 /* default, uses addresses to all IP
+#define CURL_IPRESOLVE_WHATEVER 0L /* default, uses addresses to all IP
                                      versions that your system allows */
-#define CURL_IPRESOLVE_V4       1 /* uses only IPv4 addresses/connections */
-#define CURL_IPRESOLVE_V6       2 /* uses only IPv6 addresses/connections */
+#define CURL_IPRESOLVE_V4       1L /* uses only IPv4 addresses/connections */
+#define CURL_IPRESOLVE_V6       2L /* uses only IPv6 addresses/connections */
 
   /* Convenient "aliases" */
 #define CURLOPT_RTSPHEADER CURLOPT_HTTPHEADER
