@@ -57,5 +57,8 @@ Refuse tunneling protocols through HTTP proxy
 <errorcode>
 56
 </errorcode>
+<limits>
+Allocations: 1700
+</limits>
 </verify>
 </testcase>
