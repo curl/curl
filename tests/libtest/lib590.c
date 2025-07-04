@@ -59,7 +59,7 @@ static CURLcode test_lib590(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_PROXYAUTH,
-              (long) (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
+              (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
 
   /* set the name + password twice to test that the API is fine with it */

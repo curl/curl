@@ -103,7 +103,7 @@ static CURLcode test_lib547(char *URL)
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   test_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
   test_setopt(curl, CURLOPT_PROXYAUTH,
-                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
+              (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
 
   res = curl_easy_perform(curl);
 

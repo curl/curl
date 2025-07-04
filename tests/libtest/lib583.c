@@ -54,7 +54,7 @@ static CURLcode test_lib583(char *URL)
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_INFILESIZE, (long)5);
+  easy_setopt(curl, CURLOPT_INFILESIZE, 5L);
 
   multi_add_handle(multiHandle, curl);
 
