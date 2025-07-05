@@ -116,9 +116,9 @@ static void memory_tracking_init(void)
   env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as filename */
-    char fname[CURL_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
-      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    char fname[512];
+    if(strlen(env) >= sizeof(fname))
+      env[sizeof(fname)-1] = '\0';
     strcpy(fname, env);
     curl_free(env);
     curl_dbg_memdebug(fname);
