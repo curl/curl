@@ -1199,12 +1199,12 @@ sub singletest_count {
     }
 
     # At this point we've committed to run this test
-    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("%d: ", $testnum) if(!$automakestyle);
 
     # name of the test
     my $testname= (getpart("client", "name"))[0];
     chomp $testname;
-    logmsg "[$testname]\n" if(!$short);
+    logmsg "$testname\n" if(!$short);
 
     if($listonly) {
         timestampskippedevents($testnum);
@@ -1798,7 +1798,7 @@ sub singletest_success {
     my $duration = sprintf("duration: %02d:%02d",
                            $sofar/60, $sofar%60);
     if(!$automakestyle) {
-        logmsg sprintf("OK (%-3d out of %-3d, %s, took %.3fs, %s)\n",
+        logmsg sprintf("%d/%d, %s, took %.3fs, %s\n",
                        $count, $total, $timeleft, $took, $duration);
     }
     else {
