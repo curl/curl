@@ -395,9 +395,23 @@ typedef enum {
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
 
+  /* network has changed, adjust caches/connection reuse */
+  CURLOPT(CURLMOPT_NETWORK_CHANGED, CURLOPTTYPE_LONG, 17),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
+/* Definition of bits for the CURLMOPT_NETWORK_CHANGED argument: */
+
+/* - CURLM_NWCOPT_CLEAR_CONNS tells libcurl to prevent further reuse
+     of existing connections. Connections that are idle will be closed.
+     Ongoing transfers will continue with the connection they have. */
+#define CURLM_NWCOPT_CLEAR_CONNS (1L<<0)
+
+/* - CURLM_NWCOPT_CLEAR_DNS tells libcurl to prevent further reuse
+     of existing connections. Connections that are idle will be closed.
+     Ongoing transfers will continue with the connection they have. */
+#define CURLM_NWCOPT_CLEAR_DNS (1L<<0)
 
 /*
  * Name:    curl_multi_setopt()
