@@ -1144,9 +1144,9 @@ static CURLcode nw_in_recv(void *reader_ctx,
   return curl_easy_recv(data, buf, buflen, pnread);
 }
 
-CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
-                                  size_t buflen, size_t *nread,
-                                  const struct curl_ws_frame **metap)
+CURLcode curl_ws_recv(CURL *d, void *buffer,
+                      size_t buflen, size_t *nread,
+                      const struct curl_ws_frame **metap)
 {
   struct Curl_easy *data = d;
   struct connectdata *conn = data->conn;
@@ -1367,10 +1367,10 @@ static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
   return result;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
-                                  size_t buflen, size_t *sent,
-                                  curl_off_t fragsize,
-                                  unsigned int flags)
+CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
+                      size_t buflen, size_t *sent,
+                      curl_off_t fragsize,
+                      unsigned int flags)
 {
   struct websocket *ws;
   const unsigned char *buffer = buffer_arg;
@@ -1521,7 +1521,7 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
 }
 
 
-CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *d)
+const struct curl_ws_frame *curl_ws_meta(CURL *d)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
@@ -1594,9 +1594,9 @@ const struct Curl_handler Curl_handler_wss = {
 
 #else
 
-CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
-                                  size_t *nread,
-                                  const struct curl_ws_frame **metap)
+CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
+                      size_t *nread,
+                      const struct curl_ws_frame **metap)
 {
   (void)curl;
   (void)buffer;
@@ -1606,10 +1606,10 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
-                                  size_t buflen, size_t *sent,
-                                  curl_off_t fragsize,
-                                  unsigned int flags)
+CURLcode curl_ws_send(CURL *curl, const void *buffer,
+                      size_t buflen, size_t *sent,
+                      curl_off_t fragsize,
+                      unsigned int flags)
 {
   (void)curl;
   (void)buffer;
@@ -1620,7 +1620,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *data)
+const struct curl_ws_frame *curl_ws_meta(CURL *data)
 {
   (void)data;
   return NULL;
