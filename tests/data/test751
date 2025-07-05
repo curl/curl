@@ -27,7 +27,11 @@ multi - add many easy handles
 </file>
 </client>
 
-# Verify data after the test has been "shot"
+# 1000 easy handles needs memory
 <verify>
+<limits>
+Maximum allocated: 6000000
+Allocations: 7000
+</limits>
 </verify>
 </testcase>

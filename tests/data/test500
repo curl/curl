@@ -54,5 +54,9 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<limits>
+Allocations: 80
+Maximum allocated: 33400
+</limits>
 </verify>
 </testcase>
