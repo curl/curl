@@ -186,18 +186,4 @@ CURL_EXTERN ALLOC_FUNC
 #define fake_sclose(x) Curl_nop_stmt
 
 #endif /* CURLDEBUG */
-
-/*
-** Following section applies even when CURLDEBUG is not defined.
-*/
-
-/*
- * Curl_safefree defined as a macro to allow MemoryTracking feature
- * to log free() calls at same location where Curl_safefree is used.
- * This macro also assigns NULL to given pointer when free'd.
- */
-
-#define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
-
 #endif /* HEADER_CURL_MEMDEBUG_H */

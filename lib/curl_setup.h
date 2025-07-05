@@ -981,6 +981,14 @@ extern curl_realloc_callback Curl_crealloc;
 extern curl_strdup_callback Curl_cstrdup;
 extern curl_calloc_callback Curl_ccalloc;
 
+/*
+ * Curl_safefree defined as a macro to allow MemoryTracking feature
+ * to log free() calls at same location where Curl_safefree is used.
+ * This macro also assigns NULL to given pointer when free'd.
+ */
+#define Curl_safefree(ptr) \
+  do { free((ptr)); (ptr) = NULL;} while(0)
+
 #ifdef CURLDEBUG
 #define CURL_GETADDRINFO(host,serv,hint,res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
