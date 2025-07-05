@@ -1710,13 +1710,13 @@ sub singletest_check {
                 }
             }
             my @limits = getpart("verify", "limits");
-            my $lim_allocs;
-            my $lim_max;
+            my $lim_allocs = 1000; # high default values
+            my $lim_max = 1000000;
             for(@limits) {
-                if(/^Allocations: (\d+)/) {
+                if(/^Allocations: (\d+)/i) {
                     $lim_allocs = $1;
                 }
-                elsif(/^Maximum allocated: (\d+)/) {
+                elsif(/^Maximum allocated: (\d+)/i) {
                     $lim_max = $1;
                 }
             }
@@ -1726,14 +1726,14 @@ sub singletest_check {
             logmsg "allocated $max maximum, $lim_max allowed\n"
                 if($verbose);
 
-            if($lim_allocs && ($allocs > $lim_allocs)) {
+            if($allocs > $lim_allocs) {
                 logmsg "\n** TOO MANY ALLOCS\n";
                 logmsg "$lim_allocs allocations allowed, did $allocs\n";
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time();
                 return -1;
             }
-            if($lim_max && ($max > $lim_max)) {
+            if($max > $lim_max) {
                 logmsg "\n** TOO MUCH TOTAL ALLOCATION\n";
                 logmsg "$lim_max maximum allocation allowed, did $max\n";
                 # timestamp test result verification end
