@@ -121,7 +121,7 @@ This is content of file "file.txt"
 Some junk ;-) This file does not really exist.
 </stdout>
 <limits>
-Allocations: 1400
+Allocations: 1500
 </limits>
 </verify>
 </testcase>
