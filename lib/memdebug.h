@@ -33,29 +33,6 @@
 #include <curl/curl.h>
 #include "functypes.h"
 
-#ifdef __clang__
-#  define ALLOC_FUNC         __attribute__((__malloc__))
-#  if __clang_major__ >= 4
-#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
-#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
-#  else
-#  define ALLOC_SIZE(s)
-#  define ALLOC_SIZE2(n, s)
-#  endif
-#elif defined(__GNUC__) && __GNUC__ >= 3
-#  define ALLOC_FUNC         __attribute__((__malloc__))
-#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
-#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
-#elif defined(_MSC_VER)
-#  define ALLOC_FUNC         __declspec(restrict)
-#  define ALLOC_SIZE(s)
-#  define ALLOC_SIZE2(n, s)
-#else
-#  define ALLOC_FUNC
-#  define ALLOC_SIZE(s)
-#  define ALLOC_SIZE2(n, s)
-#endif
-
 /* Avoid redundant redeclaration warnings with modern compilers, when including
    this header multiple times. */
 #ifndef HEADER_CURL_MEMDEBUG_H_EXTERNS

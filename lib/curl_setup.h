@@ -990,6 +990,29 @@ extern curl_calloc_callback Curl_ccalloc;
   do { free((ptr)); (ptr) = NULL;} while(0)
 
 #ifdef CURLDEBUG
+#ifdef __clang__
+#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  if __clang_major__ >= 4
+#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
+#  else
+#  define ALLOC_SIZE(s)
+#  define ALLOC_SIZE2(n, s)
+#  endif
+#elif defined(__GNUC__) && __GNUC__ >= 3
+#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
+#elif defined(_MSC_VER)
+#  define ALLOC_FUNC         __declspec(restrict)
+#  define ALLOC_SIZE(s)
+#  define ALLOC_SIZE2(n, s)
+#else
+#  define ALLOC_FUNC
+#  define ALLOC_SIZE(s)
+#  define ALLOC_SIZE2(n, s)
+#endif
+
 #define CURL_GETADDRINFO(host,serv,hint,res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
