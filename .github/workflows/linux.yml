@@ -275,11 +275,11 @@ jobs:
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: 'Alpine MUSL https-rr'
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-threaded-resolver --enable-ares --enable-httpsrr
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --enable-threaded-resolver
             container: 'alpine:3.20'
 
-          - name: 'Alpine MUSL c-ares https-rr'
-            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
+          - name: 'Alpine MUSL https-rr c-ares'
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --enable-httpsrr --enable-ares --disable-threaded-resolver
             container: 'alpine:3.20'
 
     steps:
