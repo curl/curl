@@ -38,5 +38,8 @@ XXXXXXXx
 <errorcode>
 1
 </errorcode>
+<limits>
+Allocations: 3100
+</limits>
 </verify>
 </testcase>

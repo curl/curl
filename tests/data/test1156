@@ -67,5 +67,8 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 <stdout>
 0
 </stdout>
+<limits>
+Allocations: 1300
+</limits>
 </verify>
 </testcase>

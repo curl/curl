@@ -18,5 +18,8 @@ unittest
 <name>
 bufq unit tests
 </name>
+<limits>
+Allocations: 6300
+</limits>
 </client>
 </testcase>
