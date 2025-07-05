@@ -26,7 +26,6 @@
 pytest
 cryptography
 filelock
-multipart
 websockets
 psutil
 pytest-xdist
