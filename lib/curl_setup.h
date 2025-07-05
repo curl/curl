@@ -1013,6 +1013,70 @@ extern curl_calloc_callback Curl_ccalloc;
 #  define ALLOC_SIZE2(n, s)
 #endif
 
+#include <curl/curl.h> /* for CURL_EXTERN */
+
+extern FILE *curl_dbg_logfile;
+
+/* memory functions */
+CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1)
+  void *curl_dbg_malloc(size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2)
+  void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_SIZE(2)
+  void *curl_dbg_realloc(void *ptr, size_t size, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  char *curl_dbg_strdup(const char *str, int line, const char *src);
+#if defined(_WIN32) && defined(UNICODE)
+CURL_EXTERN ALLOC_FUNC
+  wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source);
+#endif
+
+CURL_EXTERN void curl_dbg_memdebug(const char *logname);
+CURL_EXTERN void curl_dbg_memlimit(long limit);
+CURL_EXTERN void curl_dbg_log(const char *format, ...) CURL_PRINTF(1, 2);
+
+/* file descriptor manipulators */
+CURL_EXTERN curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
+                                          int line, const char *source);
+CURL_EXTERN void curl_dbg_mark_sclose(curl_socket_t sockfd,
+                                      int line, const char *source);
+CURL_EXTERN int curl_dbg_sclose(curl_socket_t sockfd,
+                                int line, const char *source);
+CURL_EXTERN curl_socket_t curl_dbg_accept(curl_socket_t s, void *a, void *alen,
+                                          int line, const char *source);
+#ifdef HAVE_ACCEPT4
+CURL_EXTERN curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr,
+                                           void *saddrlen, int flags,
+                                           int line, const char *source);
+#endif
+#ifdef HAVE_SOCKETPAIR
+CURL_EXTERN int curl_dbg_socketpair(int domain, int type, int protocol,
+                                    curl_socket_t socket_vector[2],
+                                    int line, const char *source);
+#endif
+
+/* send/receive sockets */
+CURL_EXTERN SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
+                                         SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                                         SEND_TYPE_ARG3 len,
+                                         SEND_TYPE_ARG4 flags, int line,
+                                         const char *source);
+CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
+                                         RECV_TYPE_ARG2 buf,
+                                         RECV_TYPE_ARG3 len,
+                                         RECV_TYPE_ARG4 flags, int line,
+                                         const char *source);
+
+/* FILE functions */
+CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_fopen(const char *file, const char *mode,
+                       int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                        int line, const char *source);
+
 #define CURL_GETADDRINFO(host,serv,hint,res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
