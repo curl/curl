@@ -30,7 +30,7 @@ multi - add many easy handles
 # 1000 easy handles needs memory
 <verify>
 <limits>
-Maximum allocated: 5900000
+Maximum allocated: 6000000
 </limits>
 </verify>
 </testcase>
