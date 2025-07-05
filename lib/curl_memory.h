@@ -54,47 +54,6 @@
  *
  */
 
-#ifdef HEADER_CURL_MEMDEBUG_H
-/* cleanup after memdebug.h */
-
-#ifdef CURLDEBUG
-
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#undef send
-#undef recv
-
-#ifdef _WIN32
-#undef _tcsdup
-#endif
-
-#undef socket
-#undef accept
-#ifdef HAVE_ACCEPT4
-#undef accept4
-#endif
-#ifdef HAVE_SOCKETPAIR
-#undef socketpair
-#endif
-
-/* sclose is probably already defined, redefine it! */
-#undef sclose
-#define sclose(x)  CURL_SCLOSE(x)
-#undef fopen
-#ifdef CURL_FOPEN
-#define fopen(fname, mode)  CURL_FOPEN(fname, mode)
-#endif
-#undef fdopen
-#undef fclose
-
-#endif /* CURLDEBUG */
-
-#undef HEADER_CURL_MEMDEBUG_H
-#endif /* HEADER_CURL_MEMDEBUG_H */
-
 /*
 ** Following section applies even when CURLDEBUG is not defined.
 */
