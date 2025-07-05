@@ -29,7 +29,7 @@ proxy
 http
 </server>
 <name>
-Access a non-proxied host with using the combination of --proxy option and --noproxy option
+Non-proxied host plus --proxy option and --noproxy option
 </name>
 <command>
 http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://dummy:%NOLISTENPORT/ --noproxy %HOSTIP --max-time 5

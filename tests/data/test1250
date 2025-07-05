@@ -27,7 +27,7 @@ foo
 http
 </server>
 <name>
-Access a non-proxied host with using the combination of http_proxy env var and --noproxy option
+Non-proxied host plus http_proxy env var and --noproxy option
 </name>
 <setenv>
 http_proxy=http://dummy:%PROXYPORT/

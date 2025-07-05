@@ -32,7 +32,7 @@ local-http
 https test-localhost-san-first.pem
 </server>
 <name>
-HTTPS GET to localhost, first subject alt name matches, CN does not match
+HTTPS localhost, first subaltname matches, CN does not match
 </name>
 <command>
 -4 --cacert %CERTDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER

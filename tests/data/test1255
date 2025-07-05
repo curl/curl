@@ -28,7 +28,7 @@ foo
 http
 </server>
 <name>
-Under condition using http_proxy, override NO_PROXY by --noproxy and access target URL directly
+http_proxy, override NO_PROXY by --noproxy and access target URL directly
 </name>
 <setenv>
 http_proxy=http://%HOSTIP:%HTTPPORT

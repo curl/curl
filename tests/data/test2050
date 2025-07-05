@@ -47,7 +47,7 @@ http
 http-proxy
 </server>
 <name>
-Connect to specific host via HTTP proxy (switch to tunnel mode automatically)
+--connect-to via HTTP proxy (tunnel mode automatically)
 </name>
 
 <command>
