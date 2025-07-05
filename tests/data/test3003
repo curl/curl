@@ -17,7 +17,7 @@ SMTP
 smtp
 </server>
 <name>
-SMTP with multiple and invalid (last) --mail-rcpt and --mail-rcpt-allowfails
+SMTP multiple and invalid (last) --mail-rcpt and --mail-rcpt-allowfails
 </name>
 <stdin>
 From: different

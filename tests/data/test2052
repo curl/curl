@@ -28,7 +28,7 @@ OK
 http
 </server>
 <name>
-Connect to specific host: Do not mix connections with and without a "connect to host"
+--connect-to: do not mix connections with and without a "connect to host"
 </name>
 
 <command>

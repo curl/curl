@@ -49,7 +49,7 @@ http-proxy
 socks5
 </server>
 <name>
-Connect to specific host via SOCKS proxy and HTTP proxy (switch to tunnel mode automatically)
+--connect-to via SOCKS proxy and HTTP proxy (tunnel mode automatically)
 </name>
 <features>
 proxy

@@ -25,7 +25,7 @@ REPLY CWD 250-AAAAAAAAAAAAAAAAAAAAAAAAA\r\n250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 ftp
 </server>
 <name>
-FTP with excessively large number of server command response lines (boundary condition)
+FTP with large number of command response lines (boundary condition)
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER

@@ -28,7 +28,7 @@ http
 proxy
 </features>
 <name>
-HTTP GET request with proxy and --proxy-header "Proxy-Connection: Keep-Alive"
+HTTP GET request with proxy and "Proxy-Connection: Keep-Alive"
 </name>
 <command>
 --proxy http://%HOSTIP:%HTTPPORT --proxy-header "Proxy-Connection: Keep-Alive" http://%HOSTIP:%HTTPPORT/%TESTNUMBER

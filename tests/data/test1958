@@ -44,7 +44,7 @@ CURL_FORCEHOST=1
 </setenv>
 
 <name>
-HTTP AWS_SIGV4 with X-Xxx-Content-Sha256 of arbitrary payload with whitespace
+HTTP AWS_SIGV4 with X-Xxx-Content-Sha256 with whitespace
 </name>
 <tool>
 lib%TESTNUMBER
