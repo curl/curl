@@ -25,15 +25,14 @@
 #
 # Input variables:
 #
-# - `WOLFSSH_INCLUDE_DIR`:   The wolfSSH include directory.
-# - `WOLFSSH_LIBRARY`:       Path to `wolfssh` library.
+# - `WOLFSSH_INCLUDE_DIR`:  The wolfSSH include directory.
+# - `WOLFSSH_LIBRARY`:      Path to `wolfssh` library.
 #
-# Result variables:
+# Defines:
 #
-# - `WOLFSSH_FOUND`:         System has wolfSSH.
-# - `WOLFSSH_INCLUDE_DIRS`:  The wolfSSH include directories.
-# - `WOLFSSH_LIBRARIES`:     The wolfSSH library names.
-# - `WOLFSSH_VERSION`:       Version of wolfSSH.
+# - `WOLFSSH_FOUND`:        System has wolfSSH.
+# - `WOLFSSH_VERSION`:      Version of wolfSSH.
+# - `CURL::wolfssh`:        wolfSSH library target.
 
 find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")
@@ -58,8 +57,24 @@ find_package_handle_standard_args(WolfSSH
 )
 
 if(WOLFSSH_FOUND)
-  set(WOLFSSH_INCLUDE_DIRS ${WOLFSSH_INCLUDE_DIR})
-  set(WOLFSSH_LIBRARIES    ${WOLFSSH_LIBRARY})
+  set(_wolfssh_INCLUDE_DIRS ${WOLFSSH_INCLUDE_DIR})
+  set(_wolfssh_LIBRARIES    ${WOLFSSH_LIBRARY})
 endif()
 
 mark_as_advanced(WOLFSSH_INCLUDE_DIR WOLFSSH_LIBRARY)
+
+if(WOLFSSH_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_wolfssh_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::wolfssh)
+    add_library(CURL::wolfssh INTERFACE IMPORTED)
+    set_target_properties(CURL::wolfssh PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_wolfssh_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_wolfssh_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_wolfssh_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_wolfssh_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_wolfssh_LIBRARIES}")
+  endif()
+endif()
