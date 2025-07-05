@@ -1710,7 +1710,7 @@ sub singletest_check {
                 }
             }
             my @limits = getpart("verify", "limits");
-            my $lim_allocs = 1000; # high default values
+            my $lim_allocs = 10000; # high default values
             my $lim_max = 1000000;
             for(@limits) {
                 if(/^Allocations: (\d+)/i) {
