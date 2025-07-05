@@ -40,7 +40,7 @@ aws
 </features>
 
 <name>
-HTTP AWS_SIGV4 with one provider and auth cred via URL, but X-Xxx-Date header set manually
+HTTP AWS_SIGV4 with X-Xxx-Date header set manually
 </name>
 <tool>
 lib%TESTNUMBER
