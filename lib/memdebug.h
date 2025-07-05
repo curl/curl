@@ -170,6 +170,7 @@ CURL_EXTERN ALLOC_FUNC
 #undef sclose
 #define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
 
+#undef fake_sclose
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
 
 #undef fopen
@@ -179,15 +180,16 @@ CURL_EXTERN ALLOC_FUNC
 #undef fclose
 #define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
+#else
+
+#undef fake_sclose
+#define fake_sclose(x) Curl_nop_stmt
+
 #endif /* CURLDEBUG */
 
 /*
 ** Following section applies even when CURLDEBUG is not defined.
 */
-
-#ifndef fake_sclose
-#define fake_sclose(x)  Curl_nop_stmt
-#endif
 
 /*
  * Curl_safefree defined as a macro to allow MemoryTracking feature

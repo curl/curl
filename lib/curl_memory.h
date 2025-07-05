@@ -99,8 +99,6 @@
 ** Following section applies even when CURLDEBUG is not defined.
 */
 
-#undef fake_sclose
-
 #ifndef CURLDEBUG
 
 /*
