@@ -1558,6 +1558,18 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
       *when = connssl->handshake_done;
     return CURLE_OK;
   }
+  case CF_QUERY_SSL_INFO:
+  case CF_QUERY_SSL_CTX_INFO: {
+    struct curl_tlssessioninfo *info = pres2;
+    struct cf_call_data save;
+    CF_DATA_SAVE(save, cf, data);
+    info->backend = Curl_ssl_backend();
+    info->internals = connssl->ssl_impl->get_internals(
+      cf->ctx, (query == CF_QUERY_SSL_INFO) ?
+      CURLINFO_TLS_SSL_PTR : CURLINFO_TLS_SESSION);
+    CF_DATA_RESTORE(cf, save);
+    return CURLE_OK;
+  }
   default:
     break;
   }
@@ -1725,40 +1737,6 @@ bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
   (void)data;
   return (Curl_ssl->supports & ssl_option);
-}
-
-static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
-{
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_ssl)
-      return cf;
-#ifndef CURL_DISABLE_PROXY
-    if(cf->cft == &Curl_cft_ssl_proxy)
-      return cf;
-#endif
-  }
-  return NULL;
-}
-
-
-void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
-                             CURLINFO info, int n)
-{
-  void *result = NULL;
-  (void)n;
-  if(data->conn) {
-    struct Curl_cfilter *cf;
-    /* get first SSL filter in chain, if any is present */
-    cf = get_ssl_filter(data->conn->cfilter[sockindex]);
-    if(cf) {
-      struct ssl_connect_data *connssl = cf->ctx;
-      struct cf_call_data save;
-      CF_DATA_SAVE(save, cf, data);
-      result = connssl->ssl_impl->get_internals(cf->ctx, info);
-      CF_DATA_RESTORE(cf, save);
-    }
-  }
-  return result;
 }
 
 static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,

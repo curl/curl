@@ -1494,6 +1494,8 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
                            global->parallel_connect ? 0L : 1L);
     (void)curl_easy_setopt(per->curl, CURLOPT_PRIVATE, per);
+    /* curl does not use signals, switching this on saves some system calls */
+    (void)curl_easy_setopt(per->curl, CURLOPT_NOSIGNAL, 1L);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_NOPROGRESS, 0L);

@@ -41,10 +41,6 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai);
 
-bool Curl_conn_is_quiche(const struct Curl_easy *data,
-                         const struct connectdata *conn,
-                         int sockindex);
-
 #endif
 
 #endif /* HEADER_CURL_VQUIC_CURL_QUICHE_H */
