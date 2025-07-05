@@ -56,8 +56,6 @@
 #  define ALLOC_SIZE2(n, s)
 #endif
 
-#define CURL_MT_LOGFNAME_BUFSIZE 512
-
 /* Avoid redundant redeclaration warnings with modern compilers, when including
    this header multiple times. */
 #ifndef HEADER_CURL_MEMDEBUG_H_EXTERNS
