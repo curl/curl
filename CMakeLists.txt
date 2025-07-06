@@ -360,7 +360,8 @@ else()
 endif()
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
 
-# Initialize variable collecting dependency libs.
+# Initialize variables collecting dependency libs.
+set(CURL_NETWORK_AND_TIME_LIBS "")
 set(CURL_LIBS "")
 
 if(ENABLE_ARES)
@@ -533,9 +534,9 @@ endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
-  list(APPEND CURL_LIBS "network")
+  list(APPEND CURL_NETWORK_AND_TIME_LIBS "network")
 elseif(AMIGA)
-  list(APPEND CURL_LIBS "net" "m" "atomic")
+  list(APPEND CURL_NETWORK_AND_TIME_LIBS "net" "m" "atomic")
   list(APPEND CMAKE_REQUIRED_LIBRARIES "net" "m" "atomic")
 endif()
 
@@ -580,7 +581,7 @@ if(ENABLE_THREADED_RESOLVER)
     find_package(Threads REQUIRED)
     set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
     set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
-    list(APPEND CURL_LIBS ${CMAKE_THREAD_LIBS_INIT})
+    list(APPEND CURL_NETWORK_AND_TIME_LIBS ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endif()
 
@@ -603,7 +604,7 @@ elseif(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
-    list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
+    list(APPEND CURL_NETWORK_AND_TIME_LIBS "${WATT_ROOT}/lib/libwatt.a")
     include_directories(SYSTEM "${WATT_ROOT}/inc")
     list(APPEND CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
   else()
@@ -623,7 +624,7 @@ elseif(AMIGA)
 elseif(NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_LIBS "socket" ${CURL_LIBS})
+    set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_NETWORK_AND_TIME_LIBS})
   endif()
 endif()
 
@@ -1773,9 +1774,9 @@ include(CMake/OtherTests.cmake)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
-  list(APPEND CURL_LIBS "${_win32_winsock}")
+  list(APPEND CURL_NETWORK_AND_TIME_LIBS "${_win32_winsock}")
   if(NOT WINCE AND NOT WINDOWS_STORE)
-    list(APPEND CURL_LIBS "iphlpapi")
+    list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")
   endif()
   if(NOT WINCE)
     list(APPEND CURL_LIBS "bcrypt")
@@ -1824,6 +1825,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     list(APPEND CURL_LIBS CURL::win32_winsock)
   endif()
 endif()
+
+list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
