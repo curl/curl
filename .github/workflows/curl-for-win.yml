@@ -58,7 +58,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-a64-x64-gcc'
+          export CW_CONFIG='-main-werror-unitybatch-linux-a64-x64-gcc'
           export CW_REVISION="${GITHUB_SHA}"
           DOCKER_IMAGE='debian:bookworm-slim'
           export CW_CCSUFFIX='-15'
@@ -87,7 +87,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-musl-r64-x64'
+          export CW_CONFIG='-main-werror-unitybatch-linux-musl-r64-x64'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
@@ -116,7 +116,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-mac-x64'
+          export CW_CONFIG='-main-werror-unitybatch-mac-x64'
           export CW_REVISION="${GITHUB_SHA}"
           sh -c ./_ci-mac-homebrew.sh
 
@@ -133,7 +133,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-win-x64'
+          export CW_CONFIG='-main-werror-unitybatch-win-x64'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
@@ -159,7 +159,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-win-x86-gcc-libssh1-zlibng'
+          export CW_CONFIG='-main-werror-unitybatch-win-x86-gcc-libssh1-zlibng'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
