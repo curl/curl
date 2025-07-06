@@ -89,10 +89,5 @@
 #undef fclose
 #define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
-#else
-
-#undef fake_sclose
-#define fake_sclose(x) Curl_nop_stmt
-
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */

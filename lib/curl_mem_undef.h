@@ -55,5 +55,8 @@
 #undef fdopen
 #undef fclose
 
+#undef fake_sclose
+#define fake_sclose(x)  Curl_nop_stmt
+
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H
