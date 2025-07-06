@@ -79,6 +79,9 @@
 
 #undef socket
 #undef accept
+#ifdef HAVE_ACCEPT4
+#undef accept4
+#endif
 #ifdef HAVE_SOCKETPAIR
 #undef socketpair
 #endif
