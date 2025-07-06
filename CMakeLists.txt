@@ -1803,6 +1803,8 @@ if(WIN32)
   endif()
 endif()
 
+list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS})
+
 # Hack to add some libraries to the end of the library list to make binutils ld
 # for GCC happy when linking statically. Necessary for libs detected via
 # CMake's built-in find modules and which CMake adds to the beginning of
@@ -1819,9 +1821,12 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
       list(APPEND CURL_LIBS ${_lib})
     endif()
   endforeach()
+  if(WIN32)
+    add_library(CURL::win32_winsock INTERFACE IMPORTED)
+    set_target_properties(CURL::win32_winsock PROPERTIES INTERFACE_LINK_LIBRARIES "${_win32_winsock}")
+    list(APPEND CURL_LIBS CURL::win32_winsock)
+  endif()
 endif()
-
-list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
