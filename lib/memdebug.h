@@ -1,6 +1,5 @@
 #ifndef HEADER_CURL_MEMDEBUG_H
 #define HEADER_CURL_MEMDEBUG_H
-#ifdef CURLDEBUG
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -30,8 +29,7 @@
  * as well as the library. Do not mix with library internals!
  */
 
-#include <curl/curl.h>
-#include "functypes.h"
+#ifdef CURLDEBUG
 
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
