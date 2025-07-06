@@ -28,6 +28,9 @@ The first argument that is exactly two dashes (`--`), marks the end of
 options; any argument after the end of options is interpreted as a URL
 argument even if it starts with a dash.
 
+curl does little to no verification of the contents of command line arguments.
+Passing in "creative octets" like newlines might trigger unexpected results.
+
 The following options are global: `%GLOBALS`.
 
 # ALL OPTIONS
