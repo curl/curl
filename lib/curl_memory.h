@@ -54,10 +54,6 @@
  *
  */
 
-/*
-** Following section applies even when CURLDEBUG is not defined.
-*/
-
 #ifndef CURLDEBUG
 
 /*
