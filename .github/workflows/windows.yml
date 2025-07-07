@@ -703,8 +703,8 @@ jobs:
         timeout-minutes: 5
         run: |
           cd ~
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
-            --location "https://downloads.sourceforge.net/cegcc/cegcc/${TOOLCHAIN_VERSION}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2" | tar -x
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "https://downloads.sourceforge.net/cegcc/cegcc/${TOOLCHAIN_VERSION}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2" | tar -x
           ls -l
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
