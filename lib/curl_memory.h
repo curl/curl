@@ -68,11 +68,7 @@
 #undef recv
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef _tcsdup
-#  else
-#    undef _tcsdup
-#  endif
+#undef _tcsdup
 #endif
 
 #undef socket
@@ -152,14 +148,13 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #define free(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cwcsdup(ptr)
-#  else
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cstrdup(ptr)
-#  endif
+#undef _tcsdup
+#ifdef UNICODE
+#define _tcsdup(ptr) Curl_cwcsdup(ptr)
+#else
+#define _tcsdup(ptr) Curl_cstrdup(ptr)
 #endif
+#endif /* _WIN32 */
 
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMORY_H */
