@@ -1079,6 +1079,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
+
 #define CURL_GETADDRINFO(host,serv,hint,res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
@@ -1088,6 +1089,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #define sclose(x) CURL_SCLOSE(x)
 #define fake_sclose(x) Curl_nop_stmt
+
 #define CURL_GETADDRINFO getaddrinfo
 #define CURL_FREEADDRINFO freeaddrinfo
 
