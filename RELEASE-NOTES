@@ -4,7 +4,7 @@ curl and libcurl 8.15.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3451
+ Contributors:                 3452
 
 This release includes the following changes:
 
@@ -37,6 +37,7 @@ This release includes the following bugfixes:
  o checksrc: reduce exceptions, apply again to curlx [114]
  o cmake/FindGSS: fix processing C header path options [160]
  o cmake/FindGSS: initialize result variables [159]
+ o cmake: `curl_add_clang_tidy_test_target` tidy-ups [185]
  o cmake: build `stubgss` library for libtests to match autotools [34]
  o cmake: check USE_WINDOWS_SSPI when adding secur32 to CURL_LIBS [144]
  o cmake: configure c-ares header directory in project root (was: lib) [106]
@@ -66,11 +67,13 @@ This release includes the following bugfixes:
  o curl: implement non-blocking STDIN read on Windows [28]
  o curl: improve non-blocking STDIN performance [129]
  o curl_get_line: make sure lines end with newline [110]
+ o curl_memory.h: fix to undefine `accept4` [180]
  o curl_path: make SFTP handle a path like /~ properly. [11]
  o curlinfo: provide the 'digest' feature [168]
  o CURLSHOPT_SHARE.md: mention multi-threading requires callbacks [161]
  o digest: fix build with disabled digest auth [72]
  o DISTROS: update NixOS link
+ o docs,tests: fix english grammar "allow to" -> "allow <something> to" [158]
  o docs/CONTRIBUTE: fix broken link [173]
  o docs/examples: add ftp-delete.c [5]
  o docs: fix broken link in CODE_REVIEW.md [67]
@@ -97,6 +100,7 @@ This release includes the following bugfixes:
  o lib: address singleuse issues [132]
  o lib: avoid reusing unclean connection [73]
  o lib: drop two interim macros in favor of native libcurl API calls [172]
+ o lib: fix unused parameter/function compiler warnings [186]
  o lib: make `CURLX_SET_BINMODE()` and use it [39]
  o lib: make `curlx_wait_ms()` and use it [40]
  o lib: replace scache no-op macros with `#ifdef` [117]
@@ -105,6 +109,8 @@ This release includes the following bugfixes:
  o libssh: de-complex myssh_statemach_act() [18]
  o libtests: make test 1503,1504,1505 use the 1502 binary [90]
  o libtests: stop building the sames source multiple times [89]
+ o memdebug.h: #undef `fclose` before defining it
+ o memdebug.h: eliminate global macro `CURL_MT_LOGFNAME_BUFSIZE` [178]
  o memdebug: include in unity batch [63]
  o mk-lib1521: replace `printf` with `curl_mprintf` [141]
  o multi: add dirty bitset [115]
@@ -112,21 +118,26 @@ This release includes the following bugfixes:
  o multi: fix polling with pending input [60]
  o multi: remove careful bounds check as coverity says it is not needed [174]
  o multi: xfer table/bitset, handle limits [142]
+ o ngtcp2: fix coverity warning about result handling [166]
  o openssl: enable readahead [91]
  o openssl: error on SSL_ERROR_SYSCALL [94]
  o openssl: fix handling of buffered data [82]
  o openssl: fix openssl engine use [74]
  o openssl: fix pkcs11 provider available check [154]
+ o os400: upgrade ILE/RPG bindings with latest definitions. [184]
  o pingpong: on disconnect, check for unflushed pingpong state [12]
  o pytest test_07_70, weaken early data check [96]
  o pytest: adapt for runs with openssl-1.1.1
  o pytest: disable test_07_37 and test_07_36 with openssl's quic [1]
+ o quic: implement CURLINFO_TLS_SSL_PTR [176]
  o RELEASE-PROCEDURE.md: update docs/VERSIONS [7]
  o runtests.pl: fix sprintf() using one too many %s [134]
  o runtests: fix `LD_PRELOAD` detection for cmake-built curl binaries [123]
+ o rustls: apply memory function overrides, fixing an ECH buffer free [181]
  o rustls: don't try printing the not provided file [104]
  o schannel: allow partial chains for manual peer verification [79]
  o schannel: drop Windows 2000 compatibility logic [26]
+ o scorecard: flame graphs and documentation [165]
  o SCP/SFTP: avoid busy loop after EAGAIN [8]
  o system.h: remove some macros [6]
  o test1117: reduce write delays [9]
@@ -137,6 +148,7 @@ This release includes the following bugfixes:
  o tests/dnsd: read config from file [85]
  o tests/http/clients: drop hack and use `curl_setup.h` again [58]
  o tests/http/clients: move to tests/client [53]
+ o tests/http/requirements: remove multipart [183]
  o tests/libtest: call `curlx_now_init()` for unit 1399, 2600 (Windows) [76]
  o tests/libtest: drop `TEST_HANG_TIMEOUT` redefinition hack [108]
  o tests/libtest: drop a checksrc exception [119]
@@ -156,6 +168,7 @@ This release includes the following bugfixes:
  o tests: drop useless "nodist_SOURCES" assignments [93]
  o tests: fail torture if !valgrind&threaded resolver [31]
  o tests: fix `BUNDLE` variable references in `Makefile.am` [125]
+ o tests: make all names < 75 characters long [182]
  o tests: make individual test sources compile cleanly [107]
  o tests: make sshserver less verbose [55]
  o tests: move GSS-API dynamic stub into debug-mode libcurl [169]
@@ -185,6 +198,7 @@ This release includes the following bugfixes:
  o warnless: replace `read()`/`write()` wrapper functions with macros (Windows) [75]
  o windows: fixup `fopen()` in `CURLDEBUG` builds [62]
  o windows: reduce/stop loading DLLs at runtime [27]
+ o ws: drop redundant `CURL_EXTERN` from function definitions [179]
  o xfer: manage pause bits [97]
 
 This release includes the following known bugs:
@@ -211,14 +225,14 @@ advice from friends like these:
   behindtheblackwall on hackerone, Bernhard M. Wiedemann, Brad Harder,
   Brian Harris, Calvin Ruocco, Carlos Henrique Lima Melara,
   Christian Weisgerber, Christopher Boyd, Dan Fandrich, Daniel Gustafsson,
-  Daniel McCarney, Daniel Stenberg, DoI, Edwin Török, Ethan Alker,
+  Daniel McCarney, Daniel Stenberg, defnull, DoI, Edwin Török, Ethan Alker,
   Fabrício Canedo, fjaell on github, hiimmat on github, Jeroen Ooms,
-  Joel Depooter, John Haugabook, Keno Fischer, Kirill Obukhov, Marcel Lang,
-  Marcel Raad, Michael Kaufmann, NINIKA, Orgad Shaneh, Piotr Nakraszewicz,
-  Randall S. Becker, Ray Satiro, renovate[bot], Rod Widdowson, SC404,
-  Stefan Eissing, Theodore A. Roth, Tristan Perrault, Viktor Szakats,
-  Yedaya Katsman, z2_
-  (44 contributors)
+  Joel Depooter, John Haugabook, Keno Fischer, Kirill Obukhov, Larry Campbell,
+  Marcel Lang, Marcel Raad, Michael Kaufmann, NINIKA, Orgad Shaneh,
+  Patrick Monnerat, Piotr Nakraszewicz, Randall S. Becker, Ray Satiro,
+  renovate[bot], Rod Widdowson, SC404, Stefan Eissing, Theodore A. Roth,
+  Tristan Perrault, Viktor Szakats, Yedaya Katsman, z2_
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -379,12 +393,15 @@ References to bug reports and discussions on issues:
  [155] = https://curl.se/bug/?i=17813
  [156] = https://curl.se/bug/?i=17812
  [157] = https://curl.se/bug/?i=17811
+ [158] = https://curl.se/bug/?i=17787
  [159] = https://curl.se/bug/?i=17806
  [160] = https://curl.se/bug/?i=17805
  [161] = https://curl.se/bug/?i=17774
  [162] = https://curl.se/bug/?i=17799
  [163] = https://curl.se/bug/?i=17795
  [164] = https://curl.se/bug/?i=17796
+ [165] = https://curl.se/bug/?i=17792
+ [166] = https://curl.se/bug/?i=17783
  [167] = https://curl.se/bug/?i=17793
  [168] = https://curl.se/bug/?i=17786
  [169] = https://curl.se/bug/?i=17752
@@ -393,3 +410,13 @@ References to bug reports and discussions on issues:
  [173] = https://curl.se/bug/?i=17780
  [174] = https://curl.se/bug/?i=17784
  [175] = https://curl.se/bug/?i=17785
+ [176] = https://curl.se/bug/?i=17801
+ [178] = https://curl.se/bug/?i=17833
+ [179] = https://curl.se/bug/?i=17832
+ [180] = https://curl.se/bug/?i=17831
+ [181] = https://curl.se/bug/?i=17830
+ [182] = https://curl.se/bug/?i=17824
+ [183] = https://curl.se/bug/?i=17825
+ [184] = https://curl.se/bug/?i=17822
+ [185] = https://curl.se/bug/?i=17814
+ [186] = https://curl.se/bug/?i=17818
