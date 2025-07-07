@@ -73,13 +73,6 @@
                       __LINE__, __FILE__)
 #endif
 
-/* sclose is probably already defined, redefine it! */
-#undef sclose
-#define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
-
-#undef fake_sclose
-#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
-
 #undef fopen
 #define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #undef fdopen

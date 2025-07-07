@@ -1077,14 +1077,21 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
+#define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
+#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
 #define CURL_GETADDRINFO(host,serv,hint,res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#else
+
+#else /* !CURLDEBUG */
+
+#define sclose(x) CURL_SCLOSE(x)
+#define fake_sclose(x) Curl_nop_stmt
 #define CURL_GETADDRINFO getaddrinfo
 #define CURL_FREEADDRINFO freeaddrinfo
-#endif
+
+#endif /* CURLDEBUG */
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \

@@ -45,18 +45,12 @@
 #undef socketpair
 #endif
 
-/* sclose is probably already defined, redefine it! */
-#undef sclose
-#define sclose(x)  CURL_SCLOSE(x)
 #undef fopen
 #ifdef CURL_FOPEN
 #define fopen(fname, mode)  CURL_FOPEN(fname, mode)
 #endif
 #undef fdopen
 #undef fclose
-
-#undef fake_sclose
-#define fake_sclose(x)  Curl_nop_stmt
 
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H
