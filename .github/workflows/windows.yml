@@ -479,7 +479,8 @@ jobs:
           cd /d
           mkdir my-cache
           cd my-cache
-          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https "${MATRIX_URL}"
+          curl --fail --silent --show-error --retry 3 --retry-connrefused \
+            --location --proto-redir =https "${MATRIX_URL}" --output pack.bin
           pwd
           7z x -y pack.bin >/dev/null
           rm -r -f pack.bin
