@@ -191,6 +191,7 @@ struct ssh_conn {
   const char *readdir_filename; /* points within readdir_attrs */
   const char *readdir_longentry;
   char *readdir_tmp;
+  BIT(initialised);
 #elif defined(USE_LIBSSH2)
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
@@ -214,8 +215,8 @@ struct ssh_conn {
   word32 handleSz;
   byte handle[WOLFSSH_MAX_HANDLE];
   curl_off_t offset;
-#endif /* USE_LIBSSH */
   BIT(initialised);
+#endif /* USE_LIBSSH */
   BIT(authed);                /* the connection has been authenticated fine */
   BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */
