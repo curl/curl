@@ -142,10 +142,6 @@ CURL_EXTERN ALLOC_FUNC
 
 #ifdef _WIN32
 #  ifdef UNICODE
-#    undef wcsdup
-#    define wcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#    undef _wcsdup
-#    define _wcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #    undef _tcsdup
 #    define _tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #  else
