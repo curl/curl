@@ -26,7 +26,7 @@ jobs:
   maketgz-and-verify-in-tree:
     name: 'AM in-tree & maketgz'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -70,7 +70,7 @@ jobs:
   verify-out-of-tree-docs:
     name: 'AM out-of-tree docs'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -94,7 +94,7 @@ jobs:
   verify-out-of-tree-autotools-debug:
     name: 'AM out-of-tree (debug)'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -118,7 +118,7 @@ jobs:
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -154,6 +154,7 @@ jobs:
   reproducible-releases:
     name: 'reproducible releases'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
