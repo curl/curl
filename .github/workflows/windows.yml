@@ -479,7 +479,8 @@ jobs:
           cd /d
           mkdir my-cache
           cd my-cache
-          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https "${MATRIX_URL}"
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "${MATRIX_URL}" --output pack.bin
           pwd
           7z x -y pack.bin >/dev/null
           rm -r -f pack.bin
@@ -702,8 +703,8 @@ jobs:
         timeout-minutes: 5
         run: |
           cd ~
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
-            --location "https://downloads.sourceforge.net/cegcc/cegcc/${TOOLCHAIN_VERSION}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2" | tar -x
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "https://downloads.sourceforge.net/cegcc/cegcc/${TOOLCHAIN_VERSION}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2" | tar -x
           ls -l
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -979,7 +980,7 @@ jobs:
             fi
           else  # OpenSSH-Windows
             cd /c  # no D: drive on windows-11-arm runners
-            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
             unzip bin.zip
             rm -f bin.zip
