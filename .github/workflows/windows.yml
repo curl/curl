@@ -479,7 +479,7 @@ jobs:
           cd /d
           mkdir my-cache
           cd my-cache
-          curl --disable --fail --silent --show-error --retry 3 --retry-connrefused \
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
             --location --proto-redir =https "${MATRIX_URL}" --output pack.bin
           pwd
           7z x -y pack.bin >/dev/null
