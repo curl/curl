@@ -63,7 +63,7 @@
         "^.github/workflows/.*\\.yml$"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?-version:\\s*(?<currentValue>.*)\\s"
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION:\\s*(?<currentValue>.*)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
