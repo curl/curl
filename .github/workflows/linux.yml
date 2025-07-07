@@ -347,7 +347,7 @@ jobs:
       - name: 'build libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           ./configure --disable-dependency-tracking --prefix=/home/runner/libressl
@@ -366,7 +366,7 @@ jobs:
       - name: 'build wolfssl (all)'  # does not support `OPENSSL_COEXIST`
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
@@ -387,7 +387,7 @@ jobs:
       - name: 'build wolfssl (opensslextra)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssl/archive/v${WOLFSSL_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssl-${WOLFSSL_VERSION}-stable"
           ./autogen.sh
@@ -408,7 +408,7 @@ jobs:
       - name: 'build wolfssh'
         if: ${{ contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/wolfSSL/wolfssh/archive/v${WOLFSSH_VERSION}-stable.tar.gz" | tar -xz
           cd "wolfssh-${WOLFSSH_VERSION}-stable"
           ./autogen.sh
@@ -429,7 +429,7 @@ jobs:
       - name: 'build mbedtls'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
           cd "mbedtls-${MBEDTLS_VERSION}"
           ./scripts/config.py set MBEDTLS_THREADING_C
@@ -509,7 +509,7 @@ jobs:
       - name: 'build awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true' }}
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
             "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
           mkdir "aws-lc-${AWSLC_VERSION}-build"
           cd "aws-lc-${AWSLC_VERSION}-build"
