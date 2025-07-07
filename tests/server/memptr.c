@@ -41,9 +41,6 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = NULL; /* not used in test code */
-#endif
 
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(pop)

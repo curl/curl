@@ -129,9 +129,6 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
-#endif
 
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(pop)
@@ -157,9 +154,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_crealloc = (curl_realloc_callback)realloc;
     Curl_cstrdup = (curl_strdup_callback)system_strdup;
     Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(_WIN32) && defined(UNICODE)
-    Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
-#endif
   }
 
   if(Curl_trc_init()) {
