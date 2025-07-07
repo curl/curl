@@ -47,7 +47,7 @@ jobs:
   linux-glibc-gcc:
     name: 'Linux gcc glibc'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -76,7 +76,7 @@ jobs:
   linux-musl-llvm:
     name: 'Linux llvm MUSL'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -103,7 +103,7 @@ jobs:
   mac-clang:
     name: 'macOS clang'
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
       CW_JOBS: '4'
     steps:
@@ -123,6 +123,7 @@ jobs:
   win-llvm:
     name: 'Windows llvm'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -149,6 +150,7 @@ jobs:
   win-gcc-libssh-zlibold-x86:
     name: 'Windows gcc libssh zlib-classic x86'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
