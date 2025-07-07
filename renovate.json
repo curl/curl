@@ -48,8 +48,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        ".circleci/config.yml"
+      "managerFilePatterns": [
+        "/.circleci/config.yml/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VER=(?<currentValue>.*)\\s"
@@ -59,8 +59,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/.*\\.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION:\\s*(?<currentValue>.*)\\s"
@@ -70,9 +70,9 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/linux.yml$",
-        "^.github/workflows/http3-linux.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/",
+        "/^.github/workflows/http3-linux.yml$/"
       ],
       "matchStrings": [
         "OPENSSL_VERSION: (?<currentValue>.*)\\s"
@@ -84,9 +84,9 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/linux.yml$",
-        "^.github/workflows/http3-linux.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/",
+        "/^.github/workflows/http3-linux.yml$/"
       ],
       "matchStrings": [
         "QUICTLS_VERSION: (?<currentValue>.*)\\s"
