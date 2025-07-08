@@ -45,4 +45,6 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #  pragma warning(pop)
 #endif
 
+#include "memdebug.h"
+
 #endif /* !CURL_STATICLIB */
