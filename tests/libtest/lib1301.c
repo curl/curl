@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "first.h"
 
 static CURLcode test_lib1301(char *URL)
 {
@@ -29,25 +29,25 @@ static CURLcode test_lib1301(char *URL)
   (void)URL;
 
   rc = curl_strequal("iii", "III");
-  fail_unless(rc != 0, "return code should be non-zero");
+  libtest_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strequal("iiia", "III");
-  fail_unless(rc == 0, "return code should be zero");
+  libtest_fail_unless(rc == 0, "return code should be zero");
 
   rc = curl_strequal("iii", "IIIa");
-  fail_unless(rc == 0, "return code should be zero");
+  libtest_fail_unless(rc == 0, "return code should be zero");
 
   rc = curl_strequal("iiiA", "IIIa");
-  fail_unless(rc != 0, "return code should be non-zero");
+  libtest_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("iii", "III", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  libtest_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("iiiABC", "IIIcba", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  libtest_fail_unless(rc != 0, "return code should be non-zero");
 
   rc = curl_strnequal("ii", "II", 3);
-  fail_unless(rc != 0, "return code should be non-zero");
+  libtest_fail_unless(rc != 0, "return code should be non-zero");
 
   return CURLE_OK;
 }
