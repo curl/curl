@@ -41,6 +41,7 @@
 #include "../progress.h"
 #include "../strerror.h"
 #include "../http1.h"
+#include "../url.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vquic-tls.h"
