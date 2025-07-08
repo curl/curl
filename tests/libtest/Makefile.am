@@ -36,8 +36,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
-              -I$(srcdir)                    \
-              -I$(top_srcdir)/tests/unit
+              -I$(srcdir)
 
 # Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C variables
 include Makefile.inc
