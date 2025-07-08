@@ -648,7 +648,7 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
     myssh_to(data, sshc, SSH_SFTP_READDIR_DONE);
   }
   else {
-    failf(data, "Could not open remote file for reading: %s",
+    failf(data, "Could not open remote directory for reading: %s",
           ssh_get_error(sshc->ssh_session));
     return myssh_to_SFTP_CLOSE(data, sshc);
   }
