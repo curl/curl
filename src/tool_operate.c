@@ -1321,7 +1321,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
         }
       }
 
-      if((urlnode->useremote ||
+      outs->out_null = urlnode->out_null;
+      if(!outs->out_null && (urlnode->useremote ||
           (per->outfile && strcmp("-", per->outfile)))) {
         result = setup_outfile(config, per, outs, skipped);
         if(result)

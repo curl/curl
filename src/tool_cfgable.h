@@ -340,7 +340,6 @@ struct OperationConfig {
   BIT(rm_partial);                /* on error, remove partially written output
                                      files */
   BIT(skip_existing);
-  BIT(out_null);                  /* WRITEFUNCTION into the void */
 };
 
 struct GlobalConfig {

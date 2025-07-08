@@ -5,7 +5,7 @@ Long: out-null
 Help: Discard response data into the void
 Category: output
 Added: 8.16.0
-Multi: boolean
+Multi: per-URL
 See-also:
   - output
   - remote-name

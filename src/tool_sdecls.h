@@ -74,6 +74,7 @@ struct OutStruct {
   BIT(is_cd_filename);
   BIT(s_isreg);
   BIT(fopened);
+  BIT(out_null);
 };
 
 /*
@@ -95,6 +96,7 @@ struct getout {
   BIT(useremote); /* use remote filename locally */
   BIT(noupload);  /* if set, -T "" has been used */
   BIT(noglob);    /* disable globbing for this URL */
+  BIT(out_null);  /* discard output for this URL */
 };
 /*
  * 'trace' enumeration represents curl's output look'n feel possibilities.
