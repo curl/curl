@@ -661,12 +661,8 @@
 #    define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
 #    include <tcp.h>
-#    ifdef word
-#      undef word
-#    endif
-#    ifdef byte
-#      undef byte
-#    endif
+#    undef word
+#    undef byte
 
 #  endif /* MSDOS */
 
