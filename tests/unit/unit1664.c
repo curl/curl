@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -29,8 +29,6 @@
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
-
-#include <curlx/strparse.h>
 
 #include "memdebug.h" /* LAST include file */
 

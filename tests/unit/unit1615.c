@@ -22,7 +22,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "curl_sha512_256.h"
 

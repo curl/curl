@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
-
-#include <curlx/curlx.h>
+#include "unitcheck.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

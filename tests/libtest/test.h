@@ -71,8 +71,6 @@ extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
-extern int unitfail;
-
 /*
 ** TEST_ERR_* values must within the CURLcode range to not cause compiler
 ** errors.

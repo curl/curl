@@ -21,11 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "url.h" /* for Curl_safefree */
-#include <curlx/base64.h>
 #include "memdebug.h" /* LAST include file */
 
 struct etest {

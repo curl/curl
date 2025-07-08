@@ -38,7 +38,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest  \
-              -I$(top_srcdir)/tests/unit     \
               -I$(srcdir)
 
 # Get BUNDLE, FIRST_C, TESTS_C variables

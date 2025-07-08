@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
-
-#include <curlx/timeval.h>
+#include "unitcheck.h"
 
 static CURLcode test_unit1323(char *arg)
 {

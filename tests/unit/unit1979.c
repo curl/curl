@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
-
-#include <curlx/dynbuf.h>
+#include "unitcheck.h"
 
 #include "http_aws_sigv4.h"
 
