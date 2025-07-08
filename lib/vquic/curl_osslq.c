@@ -44,6 +44,7 @@
 #include "../strerror.h"
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
+#include "../url.h"
 #include "../select.h"
 #include "../curlx/inet_pton.h"
 #include "../uint-hash.h"
