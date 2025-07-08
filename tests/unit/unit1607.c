@@ -27,8 +27,6 @@
 #include "connect.h"
 #include "share.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1607_setup(void)
 {
   CURLcode res = CURLE_OK;
