@@ -66,7 +66,7 @@ static void voutf(struct GlobalConfig *global,
         while(!ISBLANK(ptr[cut]) && cut) {
           cut--;
         }
-        if(0 == cut)
+        if(cut == 0)
           /* not a single cutting position was found, just cut it at the
              max text width then! */
           cut = width-1;

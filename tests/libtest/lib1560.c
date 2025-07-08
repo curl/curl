@@ -1194,7 +1194,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
       memset(value, 0, sizeof(value)); /* Avoid valgrind false positive. */
       memcpy(buf, p, n);
       buf[n] = 0;
-      if(2 == sscanf(buf, "%79[^=]=%79[^,]", part, value)) {
+      if(sscanf(buf, "%79[^=]=%79[^,]", part, value) == 2) {
         CURLUPart what = part2id(part);
 #if 0
         /* for debugging this */
@@ -1888,8 +1888,8 @@ static int clear_url(void)
         curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
 
       rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
-      if(rc != clear_url_list[i].ucode || (clear_url_list[i].out &&
-         0 != strcmp(p, clear_url_list[i].out))) {
+      if(rc != clear_url_list[i].ucode ||
+         (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
 
         curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
         error++;

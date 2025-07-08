@@ -1009,7 +1009,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
        of the file as it is now and open it for append instead */
     struct_stat fileinfo;
     /* VMS -- Danger, the filesize is only valid for stream files */
-    if(0 == stat(per->outfile, &fileinfo))
+    if(stat(per->outfile, &fileinfo) == 0)
       /* set offset to current file size: */
       config->resume_from = fileinfo.st_size;
     else

@@ -167,13 +167,13 @@ static bool pathmatch(const char *cookie_path, const char *uri_path)
 
   /* cookie_path must not have last '/' separator. ex: /sample */
   cookie_path_len = strlen(cookie_path);
-  if(1 == cookie_path_len) {
+  if(cookie_path_len == 1) {
     /* cookie_path must be '/' */
     return TRUE;
   }
 
   /* #-fragments are already cut off! */
-  if(0 == strlen(uri_path) || uri_path[0] != '/')
+  if(strlen(uri_path) == 0 || uri_path[0] != '/')
     uri_path = "/";
 
   /*
@@ -872,7 +872,7 @@ parse_netscape(struct Cookie *co,
       break;
     }
   }
-  if(6 == fields) {
+  if(fields == 6) {
     /* we got a cookie with blank contents, fix it */
     co->value = strdup("");
     if(!co->value)
@@ -881,7 +881,7 @@ parse_netscape(struct Cookie *co,
       fields++;
   }
 
-  if(7 != fields)
+  if(fields != 7)
     /* we did not find the sufficient number of fields */
     return CERR_FIELDS;
 

@@ -379,7 +379,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
 {
   const char *startCur = ciphers;
   int algCount = 0;
-  while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
+  while(startCur && *startCur && (algCount < NUM_CIPHERS)) {
     curl_off_t alg;
     if(curlx_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
@@ -1816,7 +1816,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         result = CURLE_SEND_ERROR;
         break;
       }
-      else if(0 == what) {
+      else if(what == 0) {
         failf(data, "schannel: timed out sending data "
               "(bytes sent: %zu)", *pnwritten);
         result = CURLE_OPERATION_TIMEDOUT;

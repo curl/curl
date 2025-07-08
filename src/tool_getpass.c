@@ -179,7 +179,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   ssize_t nread;
   bool disabled;
   int fd = open("/dev/tty", O_RDONLY);
-  if(-1 == fd)
+  if(fd == -1)
     fd = STDIN_FILENO; /* use stdin if the tty could not be used */
 
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */

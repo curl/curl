@@ -515,7 +515,7 @@ static bool cpool_foreach(struct Curl_easy *data,
       struct connectdata *conn = Curl_node_elem(curr);
       curr = Curl_node_next(curr);
 
-      if(1 == func(data, conn, param)) {
+      if(func(data, conn, param) == 1) {
         return TRUE;
       }
     }

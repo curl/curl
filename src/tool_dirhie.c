@@ -126,7 +126,7 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 
     /* Create directory. Ignore access denied error to allow traversal. */
     /* !checksrc! disable ERRNOVAR 1 */
-    if(!skip && (-1 == mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750)) &&
+    if(!skip && (mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
        (errno != EACCES) && (errno != EEXIST)) {
       show_dir_errno(global, curlx_dyn_ptr(&dirbuf));
       result = CURLE_WRITE_ERROR;

@@ -159,7 +159,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       }
       else {
         const char *p;
-        if(0 == ch->hexindex) {
+        if(ch->hexindex == 0) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
           failf(data, "chunk hex-length char not a hex digit: 0x%x", *buf);
@@ -184,7 +184,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       /* waiting for the LF after a chunk size */
       if(*buf == 0x0a) {
         /* we are now expecting data to come, unless size was zero! */
-        if(0 == ch->datasize) {
+        if(ch->datasize == 0) {
           ch->state = CHUNK_TRAILER; /* now check for trailers */
         }
         else {
@@ -229,7 +229,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
                      FMT_OFF_T " bytes in chunk remain",
                      piece, ch->datasize);
 
-      if(0 == ch->datasize)
+      if(ch->datasize == 0)
         /* end of data this round, we now expect a trailing CRLF */
         ch->state = CHUNK_POSTLF;
       break;

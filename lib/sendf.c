@@ -281,7 +281,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
    * This gives deterministic BODY writes on varying buffer receive
    * lengths. */
   nwrite = nbytes;
-  if(-1 != data->req.maxdownload) {
+  if(data->req.maxdownload != -1) {
     size_t wmax = get_max_body_write_len(data, data->req.maxdownload);
     if(nwrite > wmax) {
       excess_len = nbytes - wmax;
@@ -879,7 +879,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
       int err = fseek(data->state.in, 0, SEEK_SET);
       CURL_TRC_READ(data, "cr_in, rewind via fseek -> %d(%d)",
                     (int)err, (int)errno);
-      if(-1 != err)
+      if(err != -1)
         /* successful rewind */
         return CURLE_OK;
     }

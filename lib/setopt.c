@@ -443,7 +443,7 @@ static void set_ssl_options(struct ssl_config_data *ssl,
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
-  bool enabled = (0 != arg);
+  bool enabled = !!arg;
   unsigned long uarg = (unsigned long)arg;
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
