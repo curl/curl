@@ -39,7 +39,7 @@
 
 static CURLcode ping(CURL *curl, const char *send_payload)
 {
-  CURLcode res;
+  CURLcode res = CURLE_OK;
   const char *buf = send_payload;
   size_t sent, blen = strlen(send_payload);
 
