@@ -36,8 +36,6 @@
 #include "hash.h"
 #include "hostip.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;

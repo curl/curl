@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "netrc.h"
-#include "memdebug.h" /* LAST include file */
 
 #ifndef CURL_DISABLE_NETRC
 
