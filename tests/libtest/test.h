@@ -493,6 +493,15 @@ extern int unitfail;
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
 
+#define libtest_fail_unless(expr, msg)                           \
+  do {                                                           \
+    if(!(expr)) {                                                \
+      curl_mfprintf(stderr, "%s:%d Assertion '%s' FAILED: %s\n", \
+                    __FILE__, __LINE__, #expr, msg);             \
+      return TEST_ERR_FAILURE;                                   \
+    }                                                            \
+  } while(0)
+
 #define NO_SUPPORT_BUILT_IN                     \
   {                                             \
     (void)URL;                                  \
