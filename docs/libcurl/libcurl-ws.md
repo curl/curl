@@ -97,14 +97,17 @@ Because of the many different ways WebSocket can be used, which is much more
 flexible than limited to plain downloads or uploads, libcurl offers two
 different API models to use it:
 
-1. CURLOPT_WRITEFUNCTION model:
+1. CURLOPT_WRITEFUNCTION/CURLOPT_READFUNCTION model:
 Using a write callback with CURLOPT_WRITEFUNCTION(3) much like other
 downloads for when the traffic is download oriented.
+
+Using a read callback with CURLOPT_READFUNCTION(3) much like other
+uploads for sending WebSocket frames to the server.
 
 2. CURLOPT_CONNECT_ONLY model:
 Using curl_ws_recv(3) and curl_ws_send(3) functions.
 
-## CURLOPT_WRITEFUNCTION MODEL
+## CURLOPT_WRITEFUNCTION/CURLOPT_READFUNCTION MODEL
 
 CURLOPT_CONNECT_ONLY(3) must be unset or **0L** for this model to take effect.
 
@@ -113,6 +116,21 @@ then blocks for the whole duration of the connection. libcurl calls the
 callback configured in CURLOPT_WRITEFUNCTION(3), whenever an incoming chunk
 of WebSocket data is received. The callback is handed a pointer to the payload
 data as an argument and can call curl_ws_meta(3) to get relevant metadata.
+
+With libcurl 8.16.0 or later, sending of WebSocket frames via a
+CURLOPT_READFUNCTION(3) is supported. To use that on such a connection,
+register a callback via CURLOPT_READFUNCTION(3) and set CURLOPT_UPLOAD(3)
+as well. Once, the WebSocket connection is established, your callback is
+invoked to get data to send. That data is sent in a *CURLWS_BINARY* frame with
+length of exactly the data returned.
+
+To send other frame types or longer frames, use curl_ws_start_frame(3)
+in the read callback. See the *websocket-updown* example.
+
+When using curl_multi_perform(3) to drive transfers, more possibilities
+exist. The CURLOPT_READFUNCTION(3) may return *CURL_READFUNC_PAUSE* when
+it has no more data to send. Calling curl_easy_pause(3) afterwards
+resumes the upload and the read callback is invoked again.
 
 ## CURLOPT_CONNECT_ONLY MODEL
 
