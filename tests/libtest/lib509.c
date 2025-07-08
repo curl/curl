@@ -29,9 +29,8 @@
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *
- * Do not include memdebug.h in this source file, and do not use directly
- * memory related functions in this file except those used inside custom
- * memory callbacks which should be calling 'the real thing'.
+ * Make calls in parenthesis as '(malloc)' to avoid memdebug.h redefinitions
+ * applying to them. The callbacks need to be calling 'the real thing'.
  */
 
 static int seen;
