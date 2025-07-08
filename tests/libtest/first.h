@@ -34,6 +34,8 @@ struct entry_s {
 
 extern const struct entry_s s_entries[];
 
+extern int unitfail; /* for unittests */
+
 #include <curlx/curlx.h>
 
 #endif /* HEADER_LIBTEST_FIRST_H */

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 /* The fail macros mark the current test step as failed, and continue */
 #define fail_if(expr, msg)                                             \
