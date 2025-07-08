@@ -366,7 +366,7 @@ sub loadarray {
     my ($filename)=@_;
     my @array;
 
-    if (open(my $temp, "<", "$filename")) {
+    if(open(my $temp, "<", "$filename")) {
         while(<$temp>) {
             push @array, $_;
         }

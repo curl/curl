@@ -342,7 +342,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
 }
 
 static void gzip_do_close(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+                          struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
@@ -463,7 +463,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
 }
 
 static void brotli_do_close(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+                            struct Curl_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
   (void) data;
@@ -566,7 +566,7 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
 }
 
 static void zstd_do_close(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+                          struct Curl_cwriter *writer)
 {
   struct zstd_writer *zp = (struct zstd_writer *) writer;
   (void)data;
@@ -687,7 +687,7 @@ static CURLcode error_do_write(struct Curl_easy *data,
 }
 
 static void error_do_close(struct Curl_easy *data,
-                               struct Curl_cwriter *writer)
+                           struct Curl_cwriter *writer)
 {
   (void) data;
   (void) writer;

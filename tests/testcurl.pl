@@ -261,9 +261,9 @@ if($name && $email && $desc) {
     $infixed=4;
     $fixed=4;
 }
-elsif (open(my $f, "<", "$setupfile")) {
-    while (<$f>) {
-        if (/(\w+)=(.*)/) {
+elsif(open(my $f, "<", "$setupfile")) {
+    while(<$f>) {
+        if(/(\w+)=(.*)/) {
             eval "\$$1=$2;";
         }
     }
@@ -296,7 +296,7 @@ if(!$desc) {
 }
 
 if(!$confopts) {
-    if ($infixed < 4) {
+    if($infixed < 4) {
         print "please enter your additional arguments to configure\n";
         print "examples: --with-openssl --enable-debug --enable-ipv6\n";
         $confopts = <>;
@@ -372,7 +372,7 @@ if(-d $CURLDIR) {
         unlink "$CURLDIR/src/tool_hugehelp.c";
         # find out if curl source dir has an in-tree c-ares repo
         $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
-    } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
+    } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
         # find out if curl source dir has an in-tree c-ares extracted tarball
         $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");
@@ -499,7 +499,7 @@ if($git) {
 # Set timestamp to the one in curlver.h if this isn't a git test build.
 if((-f "include/curl/curlver.h") &&
     (open(my $f, "<", "include/curl/curlver.h"))) {
-    while (<$f>) {
+    while(<$f>) {
         chomp;
         if($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
             my $stampstring = $1;
@@ -516,8 +516,8 @@ if((-f "include/curl/curlver.h") &&
 # Show timestamp we are using for this test build.
 logit "timestamp = $timestamp";
 
-if ($configurebuild) {
-    if (-f "configure") {
+if($configurebuild) {
+    if(-f "configure") {
         logit "configure created (at least it exists)";
     } else {
         mydie "no configure created/found";
@@ -620,7 +620,7 @@ if(($have_embedded_ares) &&
     $confheader =~ s/curl/ares/;
     logit_spaced "display ares/$confheader";
     if(open($f, "<", "ares/$confheader")) {
-        while (<$f>) {
+        while(<$f>) {
             print if /^ *#/;
         }
         close($f);
@@ -657,27 +657,27 @@ if(($have_embedded_ares) &&
 my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
 logit "$mkcmd";
 open(my $f, "-|", "$mkcmd 2>&1") or die;
-while (<$f>) {
+while(<$f>) {
     s/$pwd//g;
     print;
 }
 close($f);
 
-if (-f "lib/libcurl$libext") {
+if(-f "lib/libcurl$libext") {
     logit "libcurl was created fine (libcurl$libext)";
 }
 else {
     mydie "libcurl was not created (libcurl$libext)";
 }
 
-if (-f "src/curl$binext") {
+if(-f "src/curl$binext") {
     logit "curl was created fine (curl$binext)";
 }
 else {
     mydie "curl was not created (curl$binext)";
 }
 
-if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
+if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     logit "display curl${binext} --version output";
     my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
     open($f, "<", $cmd);
@@ -700,7 +700,7 @@ if($configurebuild && !$crosscompile) {
         logit_spaced "build examples";
         open($f, "-|", "$make -i 2>&1") or die;
         open(my $log, ">", "$buildlog") or die;
-        while (<$f>) {
+        while(<$f>) {
             s/$pwd//g;
             print;
             print $log $_;
@@ -747,7 +747,7 @@ else {
             logit_spaced "build examples";
             open($f, "-|", "$make -i 2>&1") or die;
             open(my $log, ">", "$buildlog") or die;
-            while (<$f>) {
+            while(<$f>) {
                 s/$pwd//g;
                 print;
                 print $log $_;
@@ -762,7 +762,7 @@ else {
             logit_spaced "build test harness";
             open(my $f, "-|", "$make -i 2>&1") or die;
             open(my $log, ">", "$buildlog") or die;
-            while (<$f>) {
+            while(<$f>) {
                 s/$pwd//g;
                 print;
                 print $log $_;

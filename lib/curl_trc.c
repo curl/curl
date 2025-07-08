@@ -205,7 +205,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
                       const char *opt_id, int opt_id_idx,
-                      const char * const fmt, va_list ap)  CURL_PRINTF(5, 0);
+                      const char * const fmt, va_list ap) CURL_PRINTF(5, 0);
 
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,

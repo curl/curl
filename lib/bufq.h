@@ -170,8 +170,8 @@ CURLcode Curl_bufq_write(struct bufq *q,
                          size_t *pnwritten);
 
 CURLcode Curl_bufq_cwrite(struct bufq *q,
-                         const char *buf, size_t len,
-                         size_t *pnwritten);
+                          const char *buf, size_t len,
+                          size_t *pnwritten);
 
 /**
  * Read buf from the start of the buffer queue. The buf is copied
@@ -206,8 +206,8 @@ bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
 void Curl_bufq_skip(struct bufq *q, size_t amount);
 
 typedef CURLcode Curl_bufq_writer(void *writer_ctx,
-                                 const unsigned char *buf, size_t len,
-                                 size_t *pwritten);
+                                  const unsigned char *buf, size_t len,
+                                  size_t *pwritten);
 /**
  * Passes the chunks in the buffer queue to the writer and returns
  * the amount of buf written. A writer may return -1 and CURLE_AGAIN

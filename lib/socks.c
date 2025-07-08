@@ -1146,8 +1146,8 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 }
 
 static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
 

@@ -81,7 +81,7 @@ struct tunnel_stream {
 };
 
 static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
-                                    struct tunnel_stream *ts)
+                                   struct tunnel_stream *ts)
 {
   const char *hostname;
   int port;
@@ -268,8 +268,8 @@ static int proxy_h2_client_new(struct Curl_cfilter *cf,
 }
 
 static ssize_t on_session_send(nghttp2_session *h2,
-                              const uint8_t *buf, size_t blen,
-                              int flags, void *userp);
+                               const uint8_t *buf, size_t blen,
+                               int flags, void *userp);
 static int proxy_h2_on_frame_recv(nghttp2_session *session,
                                   const nghttp2_frame *frame,
                                   void *userp);

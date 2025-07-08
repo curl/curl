@@ -78,7 +78,7 @@ sub portable_sleep {
     if($Time::HiRes::VERSION) {
         Time::HiRes::sleep($seconds);
     }
-    elsif (os_is_win()) {
+    elsif(os_is_win()) {
         Win32::Sleep($seconds*1000);
     }
     else {
@@ -138,7 +138,7 @@ sub pidexists {
     if($pid > 0) {
         # verify if currently existing Windows process
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
@@ -169,7 +169,7 @@ sub pidterm {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
@@ -194,7 +194,7 @@ sub pidkill {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
@@ -219,7 +219,7 @@ sub pidwait {
 
     $pid = winpid_to_pid($pid);
     # check if the process exists
-    if ($pid > 4194304 && os_is_win()) {
+    if($pid > 4194304 && os_is_win()) {
         if($flags == &WNOHANG) {
             return pidexists($pid)?0:$pid;
         }

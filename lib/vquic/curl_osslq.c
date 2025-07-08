@@ -560,7 +560,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_osslq_verify_peer(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+                                     struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
 
@@ -1242,8 +1242,8 @@ struct h3_quic_recv_ctx {
 };
 
 static CURLcode h3_quic_recv(void *reader_ctx,
-                            unsigned char *buf, size_t len,
-                            size_t *pnread)
+                             unsigned char *buf, size_t len,
+                             size_t *pnread)
 {
   struct h3_quic_recv_ctx *x = reader_ctx;
   int rv;

@@ -83,16 +83,16 @@
 static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
                                           void *IfContext);
 static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
-                                          void *IfContext);
+                                                  void *IfContext);
 static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
-                                          void *IfContext,
-                                          MSH3_REQUEST *Request);
+                                            void *IfContext,
+                                            MSH3_REQUEST *Request);
 static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
                                            void *IfContext,
                                            const MSH3_HEADER *Header);
 static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
-                                        void *IfContext, uint32_t *Length,
-                                        const uint8_t *Data);
+                                         void *IfContext, uint32_t *Length,
+                                         const uint8_t *Data);
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
                                     bool Aborted, uint64_t AbortError);
 static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
@@ -278,7 +278,7 @@ static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
 }
 
 static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
-                                          void *IfContext)
+                                                  void *IfContext)
 {
   struct Curl_cfilter *cf = IfContext;
   struct cf_msh3_ctx *ctx = cf->ctx;
@@ -291,8 +291,8 @@ static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
 }
 
 static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
-                                          void *IfContext,
-                                          MSH3_REQUEST *Request)
+                                            void *IfContext,
+                                            MSH3_REQUEST *Request)
 {
   (void)Connection;
   (void)IfContext;

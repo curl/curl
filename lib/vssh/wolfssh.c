@@ -1107,7 +1107,7 @@ static void wssh_sshc_cleanup(struct ssh_conn *sshc)
 
 #if 0
 static CURLcode wscp_done(struct Curl_easy *data,
-                         CURLcode code, bool premature)
+                          CURLcode code, bool premature)
 {
   CURLcode result = CURLE_OK;
   (void)conn;
@@ -1118,7 +1118,7 @@ static CURLcode wscp_done(struct Curl_easy *data,
 }
 
 static CURLcode wscp_doing(struct Curl_easy *data,
-                          bool *dophase_done)
+                           bool *dophase_done)
 {
   CURLcode result = CURLE_OK;
   (void)conn;
@@ -1140,7 +1140,7 @@ static CURLcode wscp_disconnect(struct Curl_easy *data,
 #endif
 
 static CURLcode wsftp_done(struct Curl_easy *data,
-                          CURLcode code, bool premature)
+                           CURLcode code, bool premature)
 {
   struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
   (void)premature;
@@ -1153,7 +1153,7 @@ static CURLcode wsftp_done(struct Curl_easy *data,
 }
 
 static CURLcode wsftp_doing(struct Curl_easy *data,
-                           bool *dophase_done)
+                            bool *dophase_done)
 {
   CURLcode result = wssh_multi_statemach(data, dophase_done);
 

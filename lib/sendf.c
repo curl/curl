@@ -177,8 +177,8 @@ void Curl_creader_set_rewind(struct Curl_easy *data, bool enable)
 
 /* Write data using an unencoding writer stack. */
 CURLcode Curl_cwriter_write(struct Curl_easy *data,
-                             struct Curl_cwriter *writer, int type,
-                             const char *buf, size_t nbytes)
+                            struct Curl_cwriter *writer, int type,
+                            const char *buf, size_t nbytes)
 {
   if(!writer)
     return CURLE_WRITE_ERROR;
@@ -377,9 +377,9 @@ static const struct Curl_cwtype cw_raw = {
 
 /* Create an unencoding writer stage using the given handler. */
 CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
-                                   struct Curl_easy *data,
-                                   const struct Curl_cwtype *cwt,
-                                   Curl_cwriter_phase phase)
+                             struct Curl_easy *data,
+                             const struct Curl_cwtype *cwt,
+                             Curl_cwriter_phase phase)
 {
   struct Curl_cwriter *writer = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
@@ -404,7 +404,7 @@ out:
 }
 
 void Curl_cwriter_free(struct Curl_easy *data,
-                             struct Curl_cwriter *writer)
+                       struct Curl_cwriter *writer)
 {
   if(writer) {
     writer->cwt->do_close(data, writer);
@@ -1368,7 +1368,7 @@ static const struct Curl_crtype cr_buf = {
 };
 
 CURLcode Curl_creader_set_buf(struct Curl_easy *data,
-                               const char *buf, size_t blen)
+                              const char *buf, size_t blen)
 {
   CURLcode result;
   struct Curl_creader *r;

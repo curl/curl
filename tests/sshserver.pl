@@ -482,7 +482,7 @@ my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
 my $sshdconfig_abs;
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
@@ -490,7 +490,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
     $sshdconfig_abs = pathhelp::sys_native_abs_path($sshdconfig);
 }
-elsif (pathhelp::os_is_win()) {
+elsif(pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::build_sys_abs_path(pp($hstprvkeyf));
@@ -599,10 +599,10 @@ push @cfgarr, '#';
 
 # AllowUsers and DenyUsers options should use lowercase on Windows
 # and do not support quotes around values for some unknown reason.
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
     push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
-    if (exists $ENV{USERDOMAIN}) {
+    if(exists $ENV{USERDOMAIN}) {
         my $userdomain_lc = lc $ENV{USERDOMAIN};
         $username_lc = "$userdomain_lc\\$username_lc";
         $username_lc =~ s/ /\?/g; # replace space with ?
@@ -617,7 +617,7 @@ if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 590)) {
     push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
 }
 push @cfgarr, "HostKey $hstprvkeyf_config";
-if ($sshdid !~ /OpenSSH-Windows/) {
+if($sshdid !~ /OpenSSH-Windows/) {
     push @cfgarr, "PidFile $pidfile_config";
     push @cfgarr, '#';
 }
@@ -884,12 +884,12 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
 #
 my $identity_config;
 my $knownhosts_config;
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $identity_config = pathhelp::sys_native_abs_path(pp($identity));
     $knownhosts_config = pathhelp::sys_native_abs_path(pp($knownhosts));
 }
-elsif (pathhelp::os_is_win()) {
+elsif(pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $identity_config = pathhelp::build_sys_abs_path(pp($identity));
     $knownhosts_config = pathhelp::build_sys_abs_path(pp($knownhosts));
@@ -994,7 +994,7 @@ push @cfgarr, 'Protocol 2';
 push @cfgarr, '#';
 
 # BindAddress option is not supported by OpenSSH for Windows
-if (!($sshdid =~ /OpenSSH-Windows/)) {
+if(!($sshdid =~ /OpenSSH-Windows/)) {
     push @cfgarr, "BindAddress $listenaddr";
 }
 
@@ -1021,7 +1021,7 @@ push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
 
 # RSA authentication options are deprecated by newer OpenSSH
-if (!($sshid =~ /OpenSSH/) || ($sshvernum <= 730)) {
+if(!($sshid =~ /OpenSSH/) || ($sshvernum <= 730)) {
     push @cfgarr, 'RhostsRSAAuthentication no';
     push @cfgarr, 'RSAAuthentication no';
 }
@@ -1195,7 +1195,7 @@ logmsg "RUN: $cmd\n" if($verbose);
 #***************************************************************************
 # Start the ssh server daemon on Windows without forking it
 #
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Fake pidfile for ssh server on Windows.
     if(open(my $out, ">", "$pidfile")) {
         print $out $$ . "\n";

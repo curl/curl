@@ -68,8 +68,8 @@ static void conn_report_connect_stats(struct Curl_easy *data,
                                       struct connectdata *conn);
 
 void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+                                struct Curl_easy *data,
+                                struct easy_pollset *ps)
 {
   /* NOP */
   (void)cf;
@@ -757,8 +757,8 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
 }
 
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                int event, int arg1, void *arg2)
+                           struct Curl_easy *data,
+                           int event, int arg1, void *arg2)
 {
   (void)cf;
   (void)data;
@@ -952,8 +952,8 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
 }
 
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     int sockindex)
+                                    struct connectdata *conn,
+                                    int sockindex)
 {
   CURLcode result;
   int n = 0;
@@ -1040,8 +1040,8 @@ void Curl_pollset_reset(struct Curl_easy *data,
  *
  */
 void Curl_pollset_change(struct Curl_easy *data,
-                       struct easy_pollset *ps, curl_socket_t sock,
-                       int add_flags, int remove_flags)
+                         struct easy_pollset *ps, curl_socket_t sock,
+                         int add_flags, int remove_flags)
 {
   unsigned int i;
 

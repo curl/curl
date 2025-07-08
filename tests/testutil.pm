@@ -247,7 +247,7 @@ sub subsha256base64file {
     my ($thing) = @_;
 
     # SHA-256 base64
-    while ($$thing =~ s/%sha256b64file\[(.*?)\]sha256b64file%/%%SHA256B64FILE%%/i) {
+    while($$thing =~ s/%sha256b64file\[(.*?)\]sha256b64file%/%%SHA256B64FILE%%/i) {
         my $file_path = $1;
         $file_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         my $hash_b64 = get_sha256_base64($file_path);
@@ -268,7 +268,7 @@ sub substrippemfile {
     my ($thing) = @_;
 
     # File content substitution
-    while ($$thing =~ s/%strippemfile\[(.*?)\]strippemfile%/%%FILE%%/i) {
+    while($$thing =~ s/%strippemfile\[(.*?)\]strippemfile%/%%FILE%%/i) {
         my $file_path = $1;
         $file_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
         my $file_content = get_file_content($file_path);

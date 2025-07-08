@@ -55,17 +55,17 @@ int curlx_str_word(const char **linep, struct Curl_str *out, const size_t max);
 /* Get a word until the first DELIM or end of string
    return non-zero on error */
 int curlx_str_until(const char **linep, struct Curl_str *out, const size_t max,
-                   char delim);
+                    char delim);
 
 /* Get a word until a newline byte or end of string. At least one byte long.
    return non-zero on error */
 int curlx_str_untilnl(const char **linep, struct Curl_str *out,
-                     const size_t max);
+                      const size_t max);
 
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
-                        const size_t max);
+                         const size_t max);
 
 /* Advance over a single character.
    return non-zero on error */

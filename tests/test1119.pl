@@ -43,7 +43,7 @@ my $rc = eval {
 };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
-if (!$rc) {
+if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 
@@ -67,8 +67,8 @@ my %rem;
 sub scanenum {
     my ($file) = @_;
     open my $h_in, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
-    while ( <$h_in> ) {
-        if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
+    while( <$h_in> ) {
+        if( /enum\s+(\S+\s+)?{/ .. /}/ ) {
             s/^\s+//;
             next unless /^CURL/;
             chomp;
@@ -83,7 +83,7 @@ sub scanheader {
     my ($f)=@_;
     open my $h, "<", "$f";
     while(<$h>) {
-        if (/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
+        if(/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
             push @syms, $1;
         }
     }

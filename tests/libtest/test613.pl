@@ -25,8 +25,7 @@
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;
 
-if ( $#ARGV < 1 )
-{
+if($#ARGV < 1) {
     print "Usage: $0 prepare|postprocess dir [logfile]\n";
     exit 1;
 }
@@ -37,7 +36,7 @@ sub errout {
     exit 1;
 }
 
-if ($ARGV[0] eq "prepare")
+if($ARGV[0] eq "prepare")
 {
     my $dirname = $ARGV[1];
     mkdir $dirname || errout "$!";
@@ -72,7 +71,7 @@ if ($ARGV[0] eq "prepare")
 
     exit 0;
 }
-elsif ($ARGV[0] eq "postprocess")
+elsif($ARGV[0] eq "postprocess")
 {
     my $dirname = $ARGV[1];
     my $logfile = $ARGV[2];
@@ -88,7 +87,7 @@ elsif ($ARGV[0] eq "postprocess")
 
     rmdir $dirname || die "$!";
 
-    if ($logfile && -s $logfile) {
+    if($logfile && -s $logfile) {
         # Process the directory file to remove all information that
         # could be inconsistent from one test run to the next (e.g.
         # file date) or may be unsupported on some platforms (e.g.
@@ -105,18 +104,18 @@ elsif ($ARGV[0] eq "postprocess")
 
         my @canondir;
         open(IN, "<$logfile") || die "$!";
-        while (<IN>) {
+        while(<IN>) {
             /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
-            if ($1 eq "d") {
+            if($1 eq "d") {
                 # Skip current and parent directory listing, because some SSH
                 # servers (eg. OpenSSH for Windows) are not listing those
-                if ($8 eq "." || $8 eq "..") {
+                if($8 eq "." || $8 eq "..") {
                     next;
                 }
                 # Erase all directory metadata except for the name, as it is not
                 # consistent for across all test systems and filesystems
                 push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
-            } elsif ($1 eq "-") {
+            } elsif($1 eq "-") {
                 # Ignore group and other permissions, because these may vary on
                 # some systems (e.g. on Windows)
                 # Erase user and group names, as they are not consistent across

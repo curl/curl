@@ -1951,7 +1951,7 @@ static void h2_pri_spec(struct cf_h2_ctx *ctx,
  * Flush any out data pending in the network buffer.
  */
 static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data)
+                                   struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);

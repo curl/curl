@@ -67,12 +67,12 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
 
 /* Encoders. */
 static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
+                               curl_mimepart *part);
 static curl_off_t encoder_nop_size(curl_mimepart *part);
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part);
 static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
+                                  curl_mimepart *part);
 static curl_off_t encoder_base64_size(curl_mimepart *part);
 static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
                               curl_mimepart *part);
@@ -433,7 +433,7 @@ static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
 
 /* Base64 content encoder. */
 static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part)
+                                  curl_mimepart *part)
 {
   struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;

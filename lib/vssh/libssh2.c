@@ -1797,7 +1797,7 @@ static CURLcode ssh_state_auth_host_init(struct Curl_easy *data,
 }
 
 static CURLcode ssh_state_auth_agent_init(struct Curl_easy *data,
-                                     struct ssh_conn *sshc)
+                                          struct ssh_conn *sshc)
 {
   int rc = 0;
   if((data->set.ssh_auth_types & CURLSSH_AUTH_AGENT)
@@ -1906,7 +1906,7 @@ static CURLcode ssh_state_auth_key_init(struct Curl_easy *data,
 }
 
 static CURLcode ssh_state_auth_key(struct Curl_easy *data,
-                              struct ssh_conn *sshc)
+                                   struct ssh_conn *sshc)
 {
   /* Authentication failed. Continue with keyboard-interactive now. */
   struct connectdata *conn = data->conn;
@@ -2262,7 +2262,7 @@ static CURLcode ssh_state_sftp_quote_unlink(struct Curl_easy *data,
 }
 
 static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
-                                        struct ssh_conn *sshc)
+                                             struct ssh_conn *sshc)
 {
   LIBSSH2_SFTP_STATVFS statvfs;
   int rc = libssh2_sftp_statvfs(sshc->sftp_session, sshc->quote_path1,
@@ -2507,7 +2507,7 @@ static CURLcode ssh_state_sftp_close(struct Curl_easy *data,
 }
 
 static CURLcode ssh_state_sftp_shutdown(struct Curl_easy *data,
-                                   struct ssh_conn *sshc)
+                                        struct ssh_conn *sshc)
 {
   /* during times we get here due to a broken transfer and then the
      sftp_handle might not have been taken down so make sure that is done
@@ -3886,7 +3886,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
 }
 
 static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
-                               bool premature)
+                          bool premature)
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);

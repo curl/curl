@@ -94,8 +94,8 @@ CURLcode Curl_auth_create_oauth_bearer_message(const char *user,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
-                                               const char *bearer,
-                                               struct bufref *out)
+                                                const char *bearer,
+                                                struct bufref *out)
 {
   /* Generate the message */
   char *xoauth = aprintf("user=%s\1auth=Bearer %s\1\1", user, bearer);

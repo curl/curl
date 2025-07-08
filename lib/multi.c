@@ -2809,7 +2809,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #ifdef DEBUGBUILD
         if(mid != data->mid) {
           CURL_TRC_M(data, "multi_cleanup: still present with mid=%u, "
-                  "but unexpected data->mid=%u\n", mid, data->mid);
+                     "but unexpected data->mid=%u\n", mid, data->mid);
           DEBUGASSERT(0);
         }
 #endif
@@ -3894,7 +3894,7 @@ void Curl_multi_mark_dirty(struct Curl_easy *data)
 
 #ifdef DEBUGBUILD
 static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
-                             void *entry)
+                            void *entry)
 {
   struct Curl_easy *data = entry;
 

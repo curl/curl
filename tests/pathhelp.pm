@@ -170,14 +170,14 @@ sub build_sys_abs_path {
 #
 sub exe_ext {
     my ($component, @arr) = @_;
-    if ($ENV{'CURL_TEST_EXE_EXT'}) {
+    if($ENV{'CURL_TEST_EXE_EXT'}) {
         return $ENV{'CURL_TEST_EXE_EXT'};
     }
-    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
+    if($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
         return $ENV{'CURL_TEST_EXE_EXT_'.$component};
     }
-    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
-        $^O eq 'dos' || $^O eq 'os2') {
+    if($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
+       $^O eq 'dos' || $^O eq 'os2') {
         return '.exe';
     }
     return '';

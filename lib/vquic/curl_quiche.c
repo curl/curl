@@ -818,8 +818,8 @@ out:
 }
 
 static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  size_t *pnread)
+                                   struct Curl_easy *data,
+                                   size_t *pnread)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);

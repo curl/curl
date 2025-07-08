@@ -103,8 +103,8 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 #if !defined(USE_SSL)
 /* ---- possibly non-cryptographic version following ---- */
 static CURLcode weak_random(struct Curl_easy *data,
-                          unsigned char *entropy,
-                          size_t length) /* always 4, size of int */
+                            unsigned char *entropy,
+                            size_t length) /* always 4, size of int */
 {
   unsigned int r;
   DEBUGASSERT(length == sizeof(int));
