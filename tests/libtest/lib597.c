@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Test case for below scenario:
  *   - Connect to an FTP server using CONNECT_ONLY option

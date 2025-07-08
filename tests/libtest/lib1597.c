@@ -21,12 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* Testing CURLOPT_PROTOCOLS_STR */
-
 #include "first.h"
 
-#include "memdebug.h"
+/* Testing CURLOPT_PROTOCOLS_STR */
 
 struct pair {
   const char *in;

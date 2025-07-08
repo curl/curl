@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* write callback that does nothing */
 static size_t write_it(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
