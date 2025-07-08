@@ -28,9 +28,6 @@ BUNDLE = units
 # Files referenced from the bundle source
 FIRST_C = ../libtest/first.c
 
-# Common files used by test programs
-UTILS_H = curlcheck.h
-
 # All unit test programs
 TESTS_C = \
   unit1300.c            unit1302.c unit1303.c unit1304.c unit1305.c \
