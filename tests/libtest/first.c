@@ -27,8 +27,6 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#include "memdebug.h"
-
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
