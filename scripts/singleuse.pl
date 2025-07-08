@@ -155,6 +155,7 @@ my %api = (
     'curl_ws_meta' => 'API',
     'curl_ws_recv' => 'API',
     'curl_ws_send' => 'API',
+    'curl_ws_start_frame' => 'API',
 
     # the following functions are provided globally in debug builds
     'curl_easy_perform_ev' => 'debug-build',

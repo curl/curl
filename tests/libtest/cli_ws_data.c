@@ -28,8 +28,10 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode check_recv(const struct curl_ws_frame *frame,
-                           size_t r_offset, size_t nread, size_t exp_len)
+static CURLcode
+test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
+                           size_t r_offset, size_t nread,
+                           size_t exp_len)
 {
   if(!frame)
     return CURLE_OK;
@@ -67,9 +69,13 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
   return CURLE_OK;
 }
 
-static CURLcode data_echo(CURL *curl, size_t count,
-                          size_t plen_min, size_t plen_max)
+/* WebSocket Mode 2: CONNECT_ONLY 2, curl_ws_send()/curl_ws_recv() */
+static CURLcode test_ws_data_m2_echo(const char *url,
+                                     size_t count,
+                                     size_t plen_min,
+                                     size_t plen_max)
 {
+  CURL *curl = NULL;
   CURLcode r = CURLE_OK;
   const struct curl_ws_frame *frame;
   size_t len;
@@ -83,10 +89,26 @@ static CURLcode data_echo(CURL *curl, size_t count,
     r = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-
   for(i = 0; i < plen_max; ++i) {
     send_buf[i] = (char)('0' + ((int)i % 10));
   }
+
+  curl = curl_easy_init();
+  if(!curl) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+
+  /* use the callback style */
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-data");
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
+  r = curl_easy_perform(curl);
+  curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", (int)r);
+  if(r != CURLE_OK)
+    goto out;
 
   for(len = plen_min; len <= plen_max; ++len) {
     size_t nwritten, nread, slen = len, rlen = len;
@@ -123,7 +145,7 @@ static CURLcode data_echo(CURL *curl, size_t count,
           curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu) "
                         "\n", rlen, r, nread, (long)(len - rlen), len);
           if(!r) {
-            r = check_recv(frame, len - rlen, nread, len);
+            r = test_ws_data_m2_check_recv(frame, len - rlen, nread, len);
             if(r)
               goto out;
           }
@@ -141,7 +163,7 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
       if(rblock && sblock) {
         curl_mfprintf(stderr, "EAGAIN, sleep, try again\n");
-        curlx_wait_ms(100);
+        curlx_wait_ms(1);
       }
     }
 
@@ -157,14 +179,158 @@ static CURLcode data_echo(CURL *curl, size_t count,
   }
 
 out:
-  if(!r)
-    ws_close(curl);
+  if(curl) {
+    if(!r)
+      ws_close(curl);
+    curl_easy_cleanup(curl);
+  }
   free(send_buf);
   free(recv_buf);
   return r;
 }
 
-static void usage_ws_data(const char *msg)
+struct test_ws_m1_ctx {
+  CURL *easy;
+  char *send_buf;
+  char *recv_buf;
+  size_t send_len, nsent;
+  size_t recv_len, nrcvd;
+};
+
+static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
+                                   void *userdata)
+{
+  struct test_ws_m1_ctx *ctx = userdata;
+  size_t len = nitems * buflen;
+  size_t left = ctx->send_len - ctx->nsent;
+
+  curl_mfprintf(stderr, "m1_read(len=%zu, left=%zu)\n", len, left);
+  if(left) {
+    if(left > len)
+      left = len;
+    memcpy(buf, ctx->send_buf + ctx->nsent, left);
+    ctx->nsent += left;
+    return left;
+  }
+  return CURL_READFUNC_PAUSE;
+}
+
+static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
+                                    void *userdata)
+{
+  struct test_ws_m1_ctx *ctx = userdata;
+  size_t len = nitems * buflen;
+
+  curl_mfprintf(stderr, "m1_write(len=%zu)\n", len);
+  if(len > (ctx->recv_len - ctx->nrcvd))
+    return CURL_WRITEFUNC_ERROR;
+  memcpy(ctx->recv_buf + ctx->nrcvd, buf, len);
+  ctx->nrcvd += len;
+  return len;
+}
+
+/* WebSocket Mode 1: multi handle, READ/WRITEFUNCTION use */
+static CURLcode test_ws_data_m1_echo(const char *url,
+                                     size_t count,
+                                     size_t plen_min,
+                                     size_t plen_max)
+{
+  CURLM *multi = NULL;
+  CURLcode r = CURLE_OK;
+  struct test_ws_m1_ctx m1_ctx;
+  size_t i, len;
+
+  memset(&m1_ctx, 0, sizeof(m1_ctx));
+  m1_ctx.send_buf = calloc(1, plen_max + 1);
+  m1_ctx.recv_buf = calloc(1, plen_max + 1);
+  if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  for(i = 0; i < plen_max; ++i) {
+    m1_ctx.send_buf[i] = (char)('0' + ((int)i % 10));
+  }
+
+  multi = curl_multi_init();
+  if(!multi) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  m1_ctx.easy = curl_easy_init();
+  if(!m1_ctx.easy) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_URL, url);
+  /* use the callback style */
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_USERAGENT, "ws-data");
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_VERBOSE, 1L);
+  /* we want to send */
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_READFUNCTION, test_ws_data_m1_read);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_READDATA, &m1_ctx);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEFUNCTION, test_ws_data_m1_write);
+  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEDATA, &m1_ctx);
+
+  curl_multi_add_handle(multi, m1_ctx.easy);
+
+  for(len = plen_min; len <= plen_max; ++len) {
+    /* init what we want to send and expect to receive */
+    m1_ctx.send_len = len;
+    m1_ctx.nsent = 0;
+    m1_ctx.recv_len = len;
+    m1_ctx.nrcvd = 0;
+    memset(m1_ctx.recv_buf, 0, plen_max);
+    curl_easy_pause(m1_ctx.easy, CURLPAUSE_CONT);
+
+    for(i = 0; i < count; ++i) {
+      while(1) {
+        int still_running; /* keep number of running handles */
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
+
+        if(!still_running || (m1_ctx.nrcvd == m1_ctx.recv_len)) {
+          /* got the full echo back or failed */
+          break;
+        }
+
+        if(!mc && still_running) {
+          mc = curl_multi_poll(multi, NULL, 0, 1, NULL);
+        }
+        if(mc) {
+          r = CURLE_RECV_ERROR;
+          goto out;
+        }
+
+      }
+
+      if(memcmp(m1_ctx.send_buf, m1_ctx.recv_buf, m1_ctx.send_len)) {
+        curl_mfprintf(stderr, "recv_data: data differs\n");
+        debug_dump("", "expected:", stderr,
+                   (unsigned char *)m1_ctx.send_buf, m1_ctx.send_len, 0);
+        debug_dump("", "received:", stderr,
+                   (unsigned char *)m1_ctx.recv_buf, m1_ctx.nrcvd, 0);
+        r = CURLE_RECV_ERROR;
+        goto out;
+      }
+
+    }
+  }
+
+out:
+  if(multi)
+    curl_multi_cleanup(multi);
+  if(m1_ctx.easy) {
+    curl_easy_cleanup(m1_ctx.easy);
+  }
+  free(m1_ctx.send_buf);
+  free(m1_ctx.recv_buf);
+  return r;
+}
+
+
+static void test_ws_data_usage(const char *msg)
 {
   if(msg)
     curl_mfprintf(stderr, "%s\n", msg);
@@ -180,18 +346,23 @@ static void usage_ws_data(const char *msg)
 static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;
   size_t plen_min = 0, plen_max = 0, count = 1;
-  int ch;
+  int ch, model = 2;
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "c:hm:M:")) != -1) {
+  while((ch = cgetopt(test_argc, test_argv, "12c:hm:M:")) != -1) {
     switch(ch) {
+    case '1':
+      model = 1;
+      break;
+    case '2':
+      model = 2;
+      break;
     case 'h':
-      usage_ws_data(NULL);
+      test_ws_data_usage(NULL);
       res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     case 'c':
@@ -204,7 +375,7 @@ static CURLcode test_cli_ws_data(const char *URL)
       plen_max = (size_t)strtol(coptarg, NULL, 10);
       break;
     default:
-      usage_ws_data("invalid option");
+      test_ws_data_usage("invalid option");
       res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     }
@@ -223,7 +394,7 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(test_argc != 1) {
-    usage_ws_data(NULL);
+    test_ws_data_usage(NULL);
     res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
@@ -231,22 +402,10 @@ static CURLcode test_cli_ws_data(const char *URL)
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url);
-
-    /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-data");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-    res = curl_easy_perform(curl);
-    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", res);
-    if(res == CURLE_OK)
-      res = data_echo(curl, count, plen_min, plen_max);
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-  }
+  if(model == 1)
+    res = test_ws_data_m1_echo(url, count, plen_min, plen_max);
+  else
+    res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
 cleanup:
   curl_global_cleanup();

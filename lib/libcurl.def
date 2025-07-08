@@ -96,3 +96,4 @@ curl_version_info
 curl_ws_meta
 curl_ws_recv
 curl_ws_send
+curl_ws_start_frame

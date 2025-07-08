@@ -112,6 +112,7 @@ man_MANS = \
  curl_ws_meta.3 \
  curl_ws_recv.3 \
  curl_ws_send.3 \
+ curl_ws_start_frame.3 \
  libcurl-easy.3 \
  libcurl-env-dbg.3 \
  libcurl-env.3 \

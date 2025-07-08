@@ -136,7 +136,8 @@ check_PROGRAMS = \
   url2file \
   urlapi \
   websocket \
-  websocket-cb
+  websocket-cb \
+  websocket-updown
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so do not bother attempting to compile them here.

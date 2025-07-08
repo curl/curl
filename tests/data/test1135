@@ -124,6 +124,7 @@ curl_url_set
 curl_url_strerror
 curl_ws_recv
 curl_ws_send
+curl_ws_start_frame
 curl_ws_meta
 </stdout>
 </verify>
