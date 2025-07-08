@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include <curlx/dynbuf.h>
-
 #include "doh.h"
 
 static CURLcode test_unit1650(char *arg)

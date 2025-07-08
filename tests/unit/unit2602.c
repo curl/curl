@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include <curlx/dynbuf.h>
-
 #include "urldata.h"
 #include "dynhds.h"
 #include "curl_trc.h"

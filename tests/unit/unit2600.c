@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include <curlx/curlx.h>
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

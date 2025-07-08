@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include <curlx/timeval.h>
-
 static CURLcode test_unit1323(char *arg)
 {
   UNITTEST_BEGIN_SIMPLE

@@ -25,7 +25,6 @@
 
 #include "urldata.h"
 #include "url.h" /* for Curl_safefree */
-#include <curlx/base64.h>
 #include "memdebug.h" /* LAST include file */
 
 struct etest {
