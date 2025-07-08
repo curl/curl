@@ -663,7 +663,7 @@ static int myssh_in_SFTP_READDIR_LINK(struct Curl_easy *data,
 
   sshc->readdir_link_attrs = sftp_lstat(sshc->sftp_session,
                                         sshc->readdir_linkPath);
-  if(sshc->readdir_link_attrs == 0) {
+  if(!sshc->readdir_link_attrs) {
     failf(data, "Could not read symlink for reading: %s",
           ssh_get_error(sshc->ssh_session));
     return myssh_to_SFTP_CLOSE(data, sshc);
