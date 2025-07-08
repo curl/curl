@@ -31,11 +31,10 @@
  */
 
 #include "first.h"
+
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 #define USE_IDN
 #endif
-
-#include "memdebug.h" /* LAST include file */
 
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
