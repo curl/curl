@@ -374,9 +374,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #ifndef AI_NUMERICHOST
-#ifdef USE_IPV6
 #undef USE_IPV6
-#endif
 #endif
 #endif
 
