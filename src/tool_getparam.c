@@ -1317,10 +1317,13 @@ static ParameterError parse_output(struct OperationConfig *config,
     return PARAM_NO_MEM;
 
   /* fill in the outfile */
-  err = getstr(&url->outfile, nextarg, DENY_BLANK);
+  if(nextarg)
+    err = getstr(&url->outfile, nextarg, DENY_BLANK);
+  else
+    url->outfile = NULL;
   url->useremote = FALSE; /* switch off */
   url->outset = TRUE;
-  config->out_null = FALSE; /* switch off --out-null */
+  url->out_null = !nextarg;
   return err;
 }
 
@@ -1359,6 +1362,7 @@ static ParameterError parse_remote_name(struct OperationConfig *config,
   url->outfile = NULL; /* leave it */
   url->useremote = toggle;
   url->outset = TRUE;
+  url->out_null = FALSE;
   return PARAM_OK;
 }
 
@@ -1832,8 +1836,7 @@ static ParameterError opt_bool(struct GlobalConfig *global,
     togglebit(toggle, &config->authtype, CURLAUTH_NTLM);
     break;
   case C_OUT_NULL: /* --out-null */
-    config->out_null = toggle;
-    break;
+    return parse_output(config, NULL);
   case C_BASIC: /* --basic */
     togglebit(toggle, &config->authtype, CURLAUTH_BASIC);
     break;

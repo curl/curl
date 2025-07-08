@@ -1328,7 +1328,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
       }
 
-      if((urlnode->useremote ||
+      outs->out_null = urlnode->out_null;
+      if(!outs->out_null && (urlnode->useremote ||
           (per->outfile && strcmp("-", per->outfile)))) {
         result = setup_outfile(global, config, per, outs, skipped);
         if(result)
