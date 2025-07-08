@@ -30,8 +30,18 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
   return len;
 }
 
+#define t1308_fail_unless(expr, msg)                             \
+  do {                                                           \
+    if(!(expr)) {                                                \
+      curl_mfprintf(stderr, "%s:%d Assertion '%s' FAILED: %s\n", \
+                    __FILE__, __LINE__, #expr, msg);             \
+      errorcount++;                                              \
+    }                                                            \
+  } while(0)
+
 static CURLcode test_lib1308(char *URL)
 {
+  int errorcount = 0;
   CURLFORMcode rc;
   int res;
   struct curl_httppost *post = NULL;
@@ -41,25 +51,25 @@ static CURLcode test_lib1308(char *URL)
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
                     CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
-  libtest_fail_unless(rc == 0, "curl_formadd returned error");
+  t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
   /* after the first curl_formadd when there's a single entry, both pointers
      should point to the same struct */
-  libtest_fail_unless(post == last, "post and last weren't the same");
+  t1308_fail_unless(post == last, "post and last weren't the same");
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "htmlcode",
                     CURLFORM_COPYCONTENTS, "<HTML></HTML>",
                     CURLFORM_CONTENTTYPE, "text/html", CURLFORM_END);
-  libtest_fail_unless(rc == 0, "curl_formadd returned error");
+  t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name_for_ptrcontent",
                     CURLFORM_PTRCONTENTS, buffer, CURLFORM_END);
-  libtest_fail_unless(rc == 0, "curl_formadd returned error");
+  t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
   res = curl_formget(post, &total_size, print_httppost_callback);
-  libtest_fail_unless(res == 0, "curl_formget returned error");
+  t1308_fail_unless(res == 0, "curl_formget returned error");
 
-  libtest_fail_unless(total_size == 518, "curl_formget got wrong size back");
+  t1308_fail_unless(total_size == 518, "curl_formget got wrong size back");
 
   curl_formfree(post);
 
@@ -71,14 +81,14 @@ static CURLcode test_lib1308(char *URL)
                     CURLFORM_FILE, URL,
                     CURLFORM_FILENAME, "custom named file",
                     CURLFORM_END);
-  libtest_fail_unless(rc == 0, "curl_formadd returned error");
+  t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
   res = curl_formget(post, &total_size, print_httppost_callback);
 
-  libtest_fail_unless(res == 0, "curl_formget returned error");
-  libtest_fail_unless(total_size == 899, "curl_formget got wrong size back");
+  t1308_fail_unless(res == 0, "curl_formget returned error");
+  t1308_fail_unless(total_size == 899, "curl_formget got wrong size back");
 
   curl_formfree(post);
 
-  return CURLE_OK;
+  return errorcount ? TEST_ERR_FAILURE : CURLE_OK;
 }
