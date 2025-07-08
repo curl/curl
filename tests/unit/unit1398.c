@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push

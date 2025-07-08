@@ -45,7 +45,7 @@ and the `tests/FILEFORMAT.md` documentation.
 
 For the actual C file, here's a simple example:
 ~~~c
-    #include "curlcheck.h"
+    #include "unitcheck.h"
 
     #include "a libcurl header.h" /* from the lib dir */
 
@@ -66,7 +66,7 @@ For the actual C file, here's a simple example:
 
 Here's an example using optional initialization and cleanup:
 ~~~c
-    #include "curlcheck.h"
+    #include "unitcheck.h"
 
     #include "a libcurl header.h" /* from the lib dir */
 
