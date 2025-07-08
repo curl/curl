@@ -81,12 +81,19 @@ retry:
         if(!memcmp(expected_payload, buffer, rlen))
           same = 1;
       }
-      fprintf(stderr, "ws: got PONG with %s payload back\n",
+      fprintf(stderr, "ws: received PONG with %s payload back\n",
               same ? "same" : "different");
+    }
+    else if(meta->flags & CURLWS_TEXT) {
+      fprintf(stderr, "ws: received TEXT frame '%.*s'\n", (int)rlen,
+              buffer);
+    }
+    else if(meta->flags & CURLWS_BINARY) {
+      fprintf(stderr, "ws: received BINARY frame of %u bytes\n", (int)rlen);
     }
     else {
       /* some other frame arrived. */
-      fprintf(stderr, "recv_pong: got %u bytes rflags %x\n", (int)rlen,
+      fprintf(stderr, "ws: received frame of %u bytes rflags %x\n", (int)rlen,
               meta->flags);
       goto retry;
     }
@@ -103,19 +110,6 @@ retry:
   return res;
 }
 
-static CURLcode recv_any(CURL *curl)
-{
-  size_t rlen;
-  const struct curl_ws_frame *meta;
-  char buffer[256];
-  CURLcode res;
-
-  res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(res == CURLE_AGAIN)  /* nothing to receive, this is fine */
-    res = CURLE_OK;
-  return res;
-}
-
 /* close the connection */
 static void websocket_close(CURL *curl)
 {
@@ -128,9 +122,6 @@ static CURLcode websocket(CURL *curl)
   CURLcode res;
   int i = 0;
   do {
-    res = recv_any(curl);
-    if(res)
-      break;
     res = ping(curl, "foobar");
     if(res)
       break;
