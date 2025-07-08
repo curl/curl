@@ -46,6 +46,7 @@
 #include "vquic-tls.h"
 #include "curl_quiche.h"
 #include "../transfer.h"
+#include "../url.h"
 #include "../curlx/inet_pton.h"
 #include "../vtls/openssl.h"
 #include "../vtls/keylog.h"
