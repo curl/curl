@@ -2741,6 +2741,19 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 static void sshc_cleanup(struct ssh_conn *sshc)
 {
   if(sshc->initialised) {
+
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+    if(sshc->sftp_send_aio) {
+      sftp_aio_free(sshc->sftp_send_aio);
+      sshc->sftp_send_aio = NULL;
+    }
+
+    if(sshc->sftp_recv_aio) {
+      sftp_aio_free(sshc->sftp_recv_aio);
+      sshc->sftp_recv_aio = NULL;
+    }
+#endif
+
     if(sshc->sftp_file) {
       sftp_close(sshc->sftp_file);
       sshc->sftp_file = NULL;
