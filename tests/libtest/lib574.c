@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static int new_fnmatch(void *ptr,
                        const char *pattern, const char *string)
 {

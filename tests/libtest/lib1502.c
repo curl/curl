@@ -31,8 +31,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1502(char *URL)
 {
   CURL *easy = NULL;

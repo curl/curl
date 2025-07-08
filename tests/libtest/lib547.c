@@ -28,8 +28,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 #define UPLOADTHIS "this is the blurb we want to upload\n"
 
 static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)

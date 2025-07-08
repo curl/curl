@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #ifdef USE_THREADS_POSIX
 #include <pthread.h>
 #endif

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t643_WriteThis {
   const char *readptr;
   curl_off_t sizeleft;

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1538(char *URL)
 {
   CURLcode res = CURLE_OK;

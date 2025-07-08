@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream);
 size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
 

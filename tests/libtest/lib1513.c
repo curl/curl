@@ -30,8 +30,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static int progressKiller(void *arg,
                           double dltotal,
                           double dlnow,

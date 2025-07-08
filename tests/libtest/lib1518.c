@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test inspired by github issue 3340 */
 
 static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define print_err(name, exp)                                            \
   curl_mfprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", \
                 name, exp)

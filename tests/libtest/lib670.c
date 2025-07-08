@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define PAUSE_TIME      5
 
 struct t670_ReadThis {

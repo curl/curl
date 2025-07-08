@@ -27,8 +27,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t552_testdata {
   char trace_ascii; /* 1 or 0 */
 };

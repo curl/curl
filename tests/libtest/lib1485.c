@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t1485_transfer_status {
   CURL *easy;
   curl_off_t out_len;

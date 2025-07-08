@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 

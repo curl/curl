@@ -25,8 +25,6 @@
 
 /* test case and code based on https://github.com/curl/curl/issues/3927 */
 
-#include "memdebug.h"
-
 static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
                              curl_off_t d, curl_off_t e)
 {

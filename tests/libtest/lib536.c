@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define WITH_PROXY     "http://usingproxy.com/"
 #define WITHOUT_PROXY  libtest_arg2
 

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * This example shows an FTP upload, with a rename of the file just after
  * a successful upload.
