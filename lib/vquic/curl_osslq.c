@@ -44,7 +44,6 @@
 #include "../strerror.h"
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
-#include "../url.h"
 #include "../select.h"
 #include "../curlx/inet_pton.h"
 #include "../uint-hash.h"
@@ -55,6 +54,7 @@
 #include "../vtls/vtls.h"
 #include "../vtls/openssl.h"
 #include "curl_osslq.h"
+#include "../url.h"
 #include "../curlx/warnless.h"
 
 /* The last 3 #include files should be in this order */
