@@ -68,6 +68,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  10. Connection
  10.1 --interface with link-scoped IPv6 address
+ 10.2 Does not acknowledge getaddrinfo sorting policy
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -450,6 +451,13 @@ problems may have been fixed or changed somewhat since this was written.
  input to somehow make curl make a better choice for this.
 
  https://github.com/curl/curl/issues/14782
+
+10.2 Does not acknowledge getaddrinfo sorting policy
+
+ Even if a user edits /etc/gai.conf to prefer IPv4, curl still prefers and
+ tries IPv6 adresses first.
+
+ https://github.com/curl/curl/issues/16718
 
 11. Internals
 
