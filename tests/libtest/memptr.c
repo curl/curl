@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "curl_memory.h"
-
 #ifndef CURL_STATICLIB
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -44,7 +42,5 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(pop)
 #endif
-
-#include "memdebug.h"
 
 #endif /* !CURL_STATICLIB */

@@ -51,6 +51,7 @@ extern int unitfail; /* for unittests */
 
 #include "curl_printf.h"
 
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and
