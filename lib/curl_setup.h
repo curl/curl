@@ -566,7 +566,7 @@
 #    endif
 #  endif
 #  ifndef SIZEOF_OFF_T
-#    define SIZEOF_OFF_T 4
+#  define SIZEOF_OFF_T 4
 #  endif
 #endif
 
