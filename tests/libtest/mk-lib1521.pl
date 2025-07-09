@@ -365,6 +365,8 @@ static CURLcode test_lib1521(char *URL)
 HEADER
     ;
 
+my $infomode = 0;
+
 while(<STDIN>) {
     s/^\s*(.*?)\s*$/$1/;      # Trim.
     # Remove multi-line comment trail.
