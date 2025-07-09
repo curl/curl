@@ -39,7 +39,7 @@
 # Output all deviances to stderr.
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # we may get the dir roots pointed out
 my $root=$ARGV[0] || ".";
