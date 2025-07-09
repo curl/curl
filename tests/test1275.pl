@@ -23,6 +23,9 @@
 #
 ###########################################################################
 
+use strict;
+use warnings 'FATAL' => 'all';
+
 my $root=$ARGV[0] || "..";
 
 my @m = `git ls-files -- $root`;
@@ -45,7 +48,7 @@ sub checkfile {
     }
     open(my $fh, "<", "$f");
     my $l;
-    my $prevl;
+    my $prevl = '';
     my $ignore = 0;
     my $metadata = 0;
     while(<$fh>) {
