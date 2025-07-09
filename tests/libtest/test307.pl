@@ -22,6 +22,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+use strict;
+use warnings;
+
 # Determine if the given curl executable supports the 'openssl' SSL engine
 if($#ARGV != 0) {
     print "Usage: $0 curl-executable\n";
