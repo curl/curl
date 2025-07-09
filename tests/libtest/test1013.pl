@@ -44,7 +44,7 @@ close CURL;
 
 $curl_protocols =~ s/\r//;
 $curl_protocols =~ /\w+: (.*)$/;
-@curl = split / /,$1;
+my @curl = split / /,$1;
 
 # Read the output of curl-config
 my @curl_config;
