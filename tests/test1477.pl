@@ -69,8 +69,10 @@ sub scanmanpage {
         $line++;
         if($_ =~ /^\.IP \"(CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
             my ($name)=($1);
-            push @mnames, $name;
-            $manfrom{$name}="$file:$line";
+            if($name !~ /(CURLM_CALL_MULTI_SOCKET)/) {
+                push @mnames, $name;
+                $manfrom{$name}="$file:$line";
+            }
         }
     }
     close(H);

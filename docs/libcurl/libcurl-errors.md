@@ -505,6 +505,12 @@ between. Before version 7.20.0 (released on February 9 2010) this could be retur
 curl_multi_perform(3), but in later versions this return code is never
 used.
 
+## CURLM_CALL_MULTI_SOCKET (-1)
+
+An alias for *CURLM_CALL_MULTI_PERFORM*. Never returned by modern libcurl
+versions.
+(Added in 7.15.5)
+
 ## CURLM_OK (0)
 
 Things are fine.
