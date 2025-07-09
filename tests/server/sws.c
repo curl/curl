@@ -183,7 +183,7 @@ static int parse_cmdfile(struct sws_httprequest *req)
     int testnum = DOCNUMBER_NOTHING;
     char buf[256];
     while(fgets(buf, sizeof(buf), f)) {
-      if(1 == sscanf(buf, "Testnum %d", &testnum)) {
+      if(sscanf(buf, "Testnum %d", &testnum) == 1) {
         logmsg("[%s] cmdfile says testnum %d", cmdfile, testnum);
         req->testno = testnum;
       }
@@ -255,7 +255,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
         logmsg("swsclose: close this connection after response");
         req->close = TRUE;
       }
-      else if(1 == sscanf(cmd, "skip: %d", &num)) {
+      else if(sscanf(cmd, "skip: %d", &num) == 1) {
         logmsg("instructed to skip this number of bytes %d", num);
         req->skip = num;
       }
@@ -263,11 +263,11 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
         logmsg("instructed to reject Expect: 100-continue");
         req->noexpect = TRUE;
       }
-      else if(1 == sscanf(cmd, "delay: %d", &num)) {
+      else if(sscanf(cmd, "delay: %d", &num) == 1) {
         logmsg("instructed to delay %d msecs after connect", num);
         req->delay = num;
       }
-      else if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+      else if(sscanf(cmd, "writedelay: %d", &num) == 1) {
         logmsg("instructed to delay %d msecs between packets", num);
         req->writedelay = num;
       }

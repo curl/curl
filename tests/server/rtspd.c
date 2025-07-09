@@ -269,7 +269,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               logmsg("instructed to stream");
               req->rcmd = RCMD_STREAM;
             }
-            else if(1 == sscanf(ptr, "pipe: %d", &num)) {
+            else if(sscanf(ptr, "pipe: %d", &num) == 1) {
               logmsg("instructed to allow a pipe size of %d", num);
               if(num < 0)
                 logmsg("negative pipe size ignored");
@@ -277,7 +277,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
                 req->pipe = num-1; /* decrease by one since we don't count the
                                       first request in this number */
             }
-            else if(1 == sscanf(ptr, "skip: %d", &num)) {
+            else if(sscanf(ptr, "skip: %d", &num) == 1) {
               logmsg("instructed to skip this number of bytes %d", num);
               req->skip = num;
             }
