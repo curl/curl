@@ -1790,7 +1790,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
         result = CURLE_RECV_ERROR;
         goto out;
       }
-      else if(0 == what) {
+      else if(what == 0) {
         /* timeout */
         failf(data, "SSL shutdown timeout");
         result = CURLE_OPERATION_TIMEDOUT;

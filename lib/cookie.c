@@ -173,7 +173,7 @@ static bool pathmatch(const char *cookie_path, const char *uri_path)
   }
 
   /* #-fragments are already cut off! */
-  if(0 == strlen(uri_path) || uri_path[0] != '/')
+  if(strlen(uri_path) == 0 || uri_path[0] != '/')
     uri_path = "/";
 
   /*

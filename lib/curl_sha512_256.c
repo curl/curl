@@ -317,7 +317,7 @@ static CURL_FORCEINLINE curl_uint64_t Curl_rotr64(curl_uint64_t value,
                                                   unsigned int bits)
 {
   bits %= 64;
-  if(0 == bits)
+  if(bits == 0)
     return value;
   /* Defined in a form which modern compiler could optimize. */
   return (value >> bits) | (value << (64 - bits));
@@ -621,7 +621,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 
   DEBUGASSERT((data != NULL) || (length == 0));
 
-  if(0 == length)
+  if(length == 0)
     return CURLE_OK; /* Shortcut, do nothing */
 
   /* Note: (count & (CURL_SHA512_256_BLOCK_SIZE-1))

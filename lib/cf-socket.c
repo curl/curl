@@ -860,7 +860,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     err = 0;
   }
 #endif
-  if((0 == err) || (SOCKEISCONN == err))
+  if((err == 0) || (SOCKEISCONN == err))
     /* we are connected, awesome! */
     rc = TRUE;
   else
@@ -2111,7 +2111,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(0 == getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
+  if(!getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
     size = sizeof(add);
 #ifdef HAVE_ACCEPT4
     s_accepted = accept4(ctx->sock, (struct sockaddr *) &add, &size,

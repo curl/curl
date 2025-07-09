@@ -356,7 +356,7 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 {
   int res = (socketpair)(domain, type, protocol, socket_vector);
 
-  if(source && (0 == res))
+  if(source && (res == 0))
     curl_dbg_log("FD %s:%d socketpair() = "
                  "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
                  source, line, socket_vector[0], socket_vector[1]);
