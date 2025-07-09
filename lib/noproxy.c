@@ -163,7 +163,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     else {
       unsigned int address;
       namelen = strlen(name);
-      if(1 == curlx_inet_pton(AF_INET, name, &address))
+      if(curlx_inet_pton(AF_INET, name, &address) == 1)
         type = TYPE_IPV4;
       else {
         /* ignore trailing dots in the hostname */
