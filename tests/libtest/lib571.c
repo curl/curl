@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "curl_mem_undef.h" /* include BEFORE system headers */
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -34,6 +36,8 @@
 #endif
 
 #include "testutil.h"
+
+#include "curl_memory.h"
 #include "memdebug.h"
 
 #define RTP_PKT_CHANNEL(p)   ((int)((unsigned char)((p)[1])))

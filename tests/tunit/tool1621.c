@@ -23,8 +23,8 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#include "curl_mem_undef.h" /* include BEFORE system headers */
 #include "tool_xattr.h"
-
 #include "memdebug.h" /* LAST include file */
 
 static CURLcode test_tool1621(char *arg)
