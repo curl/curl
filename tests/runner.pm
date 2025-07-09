@@ -35,7 +35,7 @@
 package runner;
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 use 5.006;
 
 use File::Basename;
