@@ -4,7 +4,7 @@ curl and libcurl 8.15.0
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3452
+ Contributors:                 3457
 
 This release includes the following changes:
 
@@ -62,6 +62,7 @@ This release includes the following bugfixes:
  o cmake: use `target_link_options()` when available [43]
  o connection: eliminate member `remote_addr` [10]
  o curl-config: fix whitespace in usage text [122]
+ o curl.h: make CURL_IPRESOLVE_* symbols defined as longs [206]
  o curl.h: make CURLSSLOPT_* symbols defined as longs [3]
  o curl.h: remove the "RESERVED" error codes [2]
  o curl: implement non-blocking STDIN read on Windows [28]
@@ -76,6 +77,7 @@ This release includes the following bugfixes:
  o docs,tests: fix english grammar "allow to" -> "allow <something> to" [158]
  o docs/CONTRIBUTE: fix broken link [173]
  o docs/examples: add ftp-delete.c [5]
+ o docs: beef up examples/websocket.c [189]
  o docs: fix broken link in CODE_REVIEW.md [67]
  o docs: fix broken link in INSTALL.md [68]
  o docs: fix docs for CURLOPT_PREQUOTE after #17616 [70]
@@ -106,12 +108,16 @@ This release includes the following bugfixes:
  o lib: replace scache no-op macros with `#ifdef` [117]
  o lib: unify recv/send function signatures [92]
  o libcurl-env.md: drop LOGNAME, USER and NTLMUSER [99]
+ o libssh2: remove use of 'initialised' for cleanup [208]
  o libssh: de-complex myssh_statemach_act() [18]
+ o libssh: fix readdir issues [191]
  o libtests: make test 1503,1504,1505 use the 1502 binary [90]
  o libtests: stop building the sames source multiple times [89]
  o memdebug.h: #undef `fclose` before defining it
  o memdebug.h: eliminate global macro `CURL_MT_LOGFNAME_BUFSIZE` [178]
  o memdebug: include in unity batch [63]
+ o memory: stop overriding unused `wcsdup()`/`_wcsdup()` system functions [204]
+ o memory: tidy up `_tcsdup()` override [202]
  o mk-lib1521: replace `printf` with `curl_mprintf` [141]
  o multi: add dirty bitset [115]
  o multi: do no expire a blocked transfer [56]
@@ -133,6 +139,7 @@ This release includes the following bugfixes:
  o RELEASE-PROCEDURE.md: update docs/VERSIONS [7]
  o runtests.pl: fix sprintf() using one too many %s [134]
  o runtests: fix `LD_PRELOAD` detection for cmake-built curl binaries [123]
+ o runtests: support memory-limits per test [193]
  o rustls: apply memory function overrides, fixing an ECH buffer free [181]
  o rustls: don't try printing the not provided file [104]
  o schannel: allow partial chains for manual peer verification [79]
@@ -167,10 +174,12 @@ This release includes the following bugfixes:
  o tests: drop unused or redundant includes [153]
  o tests: drop useless "nodist_SOURCES" assignments [93]
  o tests: fail torture if !valgrind&threaded resolver [31]
+ o tests: fix 1301, 1308 to fail on error [177]
  o tests: fix `BUNDLE` variable references in `Makefile.am` [125]
  o tests: make all names < 75 characters long [182]
  o tests: make individual test sources compile cleanly [107]
  o tests: make sshserver less verbose [55]
+ o tests: move `curlcheck.h` to libtest as `unitcheck.h` [171]
  o tests: move GSS-API dynamic stub into debug-mode libcurl [169]
  o tests: torture: don't duplicate valgrind command [32]
  o tests: use %b64[] to base64 data [151]
@@ -196,6 +205,7 @@ This release includes the following bugfixes:
  o VULN-DISCLOSURE-POLICY: minor language polish [162]
  o warnless: drop parts of the `read`/`write` preprocessor hack (Windows) [37]
  o warnless: replace `read()`/`write()` wrapper functions with macros (Windows) [75]
+ o windows: drop redundant `curl_wcsdup_callback` callback [188]
  o windows: fixup `fopen()` in `CURLDEBUG` builds [62]
  o windows: reduce/stop loading DLLs at runtime [27]
  o ws: drop redundant `CURL_EXTERN` from function definitions [179]
@@ -221,18 +231,20 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  4lan.m, afengsoft on github, Ameda Amahru, Bartosz Ruszczak,
-  behindtheblackwall on hackerone, Bernhard M. Wiedemann, Brad Harder,
-  Brian Harris, Calvin Ruocco, Carlos Henrique Lima Melara,
-  Christian Weisgerber, Christopher Boyd, Dan Fandrich, Daniel Gustafsson,
-  Daniel McCarney, Daniel Stenberg, defnull, DoI, Edwin Török, Ethan Alker,
-  Fabrício Canedo, fjaell on github, hiimmat on github, Jeroen Ooms,
-  Joel Depooter, John Haugabook, Keno Fischer, Kirill Obukhov, Larry Campbell,
-  Marcel Lang, Marcel Raad, Michael Kaufmann, NINIKA, Orgad Shaneh,
-  Patrick Monnerat, Piotr Nakraszewicz, Randall S. Becker, Ray Satiro,
-  renovate[bot], Rod Widdowson, SC404, Stefan Eissing, Theodore A. Roth,
-  Tristan Perrault, Viktor Szakats, Yedaya Katsman, z2_
-  (47 contributors)
+  4lan.m, afengsoft on github, albrechtd on github, Ameda Amahru,
+  Bartosz Ruszczak, behindtheblackwall on hackerone, Bernhard M. Wiedemann,
+  Brad Harder, Brian Harris, Calvin Ruocco, Carlos Henrique Lima Melara,
+  Christian Hesse, Christian Weisgerber, Christopher Boyd, Dan Fandrich,
+  Daniel Gustafsson, Daniel McCarney, Daniel Stenberg, defnull, DoI,
+  Edwin Török, Eshan Kelkar, Ethan Alker, Fabrício Canedo, fjaell on github,
+  hiimmat on github, Jeroen Ooms, Joel Depooter, John Haugabook,
+  Karthik Dasari, Keno Fischer, Kirill Obukhov, Larry Campbell,
+  Luca Kellermann, Marcel Lang, Marcel Raad, Markus Unterwaditzer,
+  Michael Kaufmann, NINIKA, Orgad Shaneh, Patrick Monnerat, Piotr Nakraszewicz,
+  Randall S. Becker, Ray Satiro, renovate[bot], Rod Widdowson, SC404,
+  Stefan Eissing, Theodore A. Roth, Tristan Perrault, Viktor Szakats,
+  Yedaya Katsman, z2_
+  (53 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -406,11 +418,13 @@ References to bug reports and discussions on issues:
  [168] = https://curl.se/bug/?i=17786
  [169] = https://curl.se/bug/?i=17752
  [170] = https://curl.se/bug/?i=17750
+ [171] = https://curl.se/bug/?i=17868
  [172] = https://curl.se/bug/?i=17772
  [173] = https://curl.se/bug/?i=17780
  [174] = https://curl.se/bug/?i=17784
  [175] = https://curl.se/bug/?i=17785
  [176] = https://curl.se/bug/?i=17801
+ [177] = https://curl.se/bug/?i=17867
  [178] = https://curl.se/bug/?i=17833
  [179] = https://curl.se/bug/?i=17832
  [180] = https://curl.se/bug/?i=17831
@@ -420,3 +434,11 @@ References to bug reports and discussions on issues:
  [184] = https://curl.se/bug/?i=17822
  [185] = https://curl.se/bug/?i=17814
  [186] = https://curl.se/bug/?i=17818
+ [188] = https://curl.se/bug/?i=17843
+ [189] = https://curl.se/bug/?i=13288
+ [191] = https://curl.se/bug/?i=17856
+ [193] = https://curl.se/bug/?i=17821
+ [202] = https://curl.se/bug/?i=17845
+ [204] = https://curl.se/bug/?i=17840
+ [206] = https://curl.se/bug/?i=17790
+ [208] = https://curl.se/bug/?i=17819
