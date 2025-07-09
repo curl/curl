@@ -60,7 +60,8 @@ my $versions = $ARGV[2];
 my @syms;
 my %manpage;
 my %symadded;
-my %pastversion;
+
+our %pastversion;
 
 sub checkmanpage {
     my ($m) = @_;

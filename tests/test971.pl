@@ -100,7 +100,7 @@ sub versioncheck {
     close($fh);
 }
 
-my %pastversion;
+our %pastversion;
 
 # get all the past versions
 allversions($versions);
