@@ -589,7 +589,7 @@ CURLcode Curl_x509_GTime2str(struct dynbuf *store,
  * Return error code.
  */
 static CURLcode UTime2str(struct dynbuf *store,
-                             const char *beg, const char *end)
+                          const char *beg, const char *end)
 {
   const char *tzp;
   size_t tzl;

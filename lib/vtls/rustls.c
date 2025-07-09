@@ -201,7 +201,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
  */
 static CURLcode
 cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-            char *plainbuf, size_t plainlen, size_t *pnread)
+        char *plainbuf, size_t plainlen, size_t *pnread)
 {
   const struct ssl_connect_data *const connssl = cf->ctx;
   struct rustls_ssl_backend_data *const backend =

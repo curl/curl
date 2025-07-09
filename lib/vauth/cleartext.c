@@ -127,7 +127,7 @@ void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  * Returns void.
  */
 void Curl_auth_create_external_message(const char *user,
-                                           struct bufref *out)
+                                       struct bufref *out)
 {
   /* This is the same formatting as the login message */
   Curl_auth_create_login_message(user, out);

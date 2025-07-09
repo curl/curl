@@ -308,7 +308,7 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
 }
 
 CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx, size_t gsolen)
+                    struct cf_quic_ctx *qctx, size_t gsolen)
 {
   qctx->gsolen = gsolen;
   return vquic_flush(cf, data, qctx);

@@ -486,7 +486,7 @@ static void cf_ctx_free(struct ssl_connect_data *ctx)
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
-                                       struct dynbuf *binding)
+                                      struct dynbuf *binding)
 {
   if(Curl_ssl->get_channel_binding)
     return Curl_ssl->get_channel_binding(data, sockindex, binding);
@@ -500,7 +500,7 @@ void Curl_ssl_close_all(struct Curl_easy *data)
 }
 
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              struct easy_pollset *ps)
+                             struct easy_pollset *ps)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
@@ -891,8 +891,8 @@ static CURLcode multissl_connect(struct Curl_cfilter *cf,
 }
 
 static void multissl_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   if(multissl_setup(NULL))
     return;

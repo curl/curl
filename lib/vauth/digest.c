@@ -152,7 +152,7 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
 static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
-                                     unsigned char *dest) /* 65 bytes */
+                                        unsigned char *dest) /* 65 bytes */
 {
   int i;
   for(i = 0; i < 32; i++)

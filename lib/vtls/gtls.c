@@ -783,9 +783,9 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
 }
 
 static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct gtls_ctx *gtls,
-                                 const char *priority)
+                                  struct Curl_easy *data,
+                                  struct gtls_ctx *gtls,
+                                  const char *priority)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct dynbuf buf;
