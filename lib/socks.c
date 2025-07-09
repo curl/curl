@@ -876,7 +876,7 @@ CONNECT_RESOLVE_REMOTE:
 #ifdef USE_IPV6
       if(conn->bits.ipv6_ip) {
         char ip6[16];
-        if(1 != curlx_inet_pton(AF_INET6, sx->hostname, ip6))
+        if(curlx_inet_pton(AF_INET6, sx->hostname, ip6) != 1)
           return CURLPX_BAD_ADDRESS_TYPE;
         socksreq[len++] = 4;
         memcpy(&socksreq[len], ip6, sizeof(ip6));
