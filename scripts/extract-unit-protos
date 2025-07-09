@@ -23,6 +23,12 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
+my @proto;
+my %inc;
+
 sub scanfile {
     my ($file) = @_;
     open(F, "<$file") || die "$file failed";
