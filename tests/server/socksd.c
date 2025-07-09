@@ -122,7 +122,7 @@ static void socksd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[260];
-      if(2 == sscanf(buffer, "%31s %259s", key, value)) {
+      if(sscanf(buffer, "%31s %259s", key, value) == 2) {
         if(!strcmp(key, "version")) {
           s_config.version = byteval(value);
           logmsg("version [%d] set", s_config.version);

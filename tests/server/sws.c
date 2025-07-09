@@ -1171,7 +1171,7 @@ retry:
     int num;
     ptr = cmd;
     do {
-      if(2 == sscanf(ptr, "%31s %d", command, &num)) {
+      if(sscanf(ptr, "%31s %d", command, &num) == 2) {
         if(!strcmp("wait", command)) {
           logmsg("Told to sleep for %d seconds", num);
           quarters = num * 4;
