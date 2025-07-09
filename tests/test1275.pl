@@ -30,7 +30,7 @@ my $root=$ARGV[0] || "..";
 
 my @m = `git ls-files -- $root`;
 
-my $errors;
+my $errors = 0;
 
 my %accepted=('curl' => 1,
               'libcurl' => 1,
