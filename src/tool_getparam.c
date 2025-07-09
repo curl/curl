@@ -1585,7 +1585,7 @@ static ParameterError parse_time_cond(struct OperationConfig *config,
     break;
   }
   config->condtime = (curl_off_t)curl_getdate(nextarg, NULL);
-  if(-1 == config->condtime) {
+  if(config->condtime == -1) {
     curl_off_t value;
     /* now let's see if it is a filename to get the time from instead! */
     int rc = getfiletime(nextarg, config->global, &value);
