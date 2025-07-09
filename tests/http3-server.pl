@@ -23,6 +23,9 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings 'FATAL' => 'all';
+
 # This script invokes nghttpx properly to have it serve HTTP/3 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 
@@ -30,9 +33,6 @@ use Cwd;
 use Cwd 'abs_path';
 use File::Basename;
 use File::Spec;
-
-use strict;
-use warnings 'FATAL' => 'all';
 
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
