@@ -29,17 +29,22 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
+use strict;
+use warnings 'FATAL' => 'all';
+
 my $mallocs=0;
 my $callocs=0;
 my $reallocs=0;
 my $strdups=0;
 my $wcsdups=0;
-my $showlimit;
+my $showlimit=0;
 my $sends=0;
 my $recvs=0;
 my $sockets=0;
+my $verbose=0;
+my $trace=0;
 
-while(1) {
+while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
         shift @ARGV;
@@ -70,7 +75,7 @@ sub newtotal {
     }
 }
 
-my $file = $ARGV[0];
+my $file = $ARGV[0] || '';
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
@@ -94,11 +99,36 @@ if($showlimit) {
     exit;
 }
 
+my %sizeataddr;
+my %getmem;
 
-my $lnum=0;
+my $totalmem = 0;
+my $frees = 0;
+
+my $dup;
+my $size;
+my $addr;
+
+my %filedes;
+my %getfile;
+
+my %fopen;
+my %fopenfile;
+my $openfile = 0;
+my $fopens = 0;
+
+my %addrinfo;
+my %addrinfofile;
+my $addrinfos = 0;
+
+my $source;
+my $linenum;
+my $function;
+
+my $lnum = 0;
 while(<$fileh>) {
     chomp $_;
-    $line = $_;
+    my $line = $_;
     $lnum++;
     if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
@@ -169,8 +199,8 @@ while(<$fileh>) {
             $size = $1*$2;
             $addr = $3;
 
-            $arg1 = $1;
-            $arg2 = $2;
+            my $arg1 = $1;
+            my $arg2 = $2;
 
             if($sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
