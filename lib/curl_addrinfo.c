@@ -552,7 +552,7 @@ curl_dbg_getaddrinfo(const char *hostname,
 #else
   int res = getaddrinfo(hostname, service, hints, result);
 #endif
-  if(0 == res)
+  if(res == 0)
     /* success */
     curl_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
                  source, line, (void *)*result);

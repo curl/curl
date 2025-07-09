@@ -481,7 +481,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if(0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS)))
+  if((k->keepon & (KEEP_RECVBITS|KEEP_SENDBITS)) == 0)
     data->req.done = TRUE;
 
 out:

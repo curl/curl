@@ -1816,7 +1816,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
         result = CURLE_SEND_ERROR;
         break;
       }
-      else if(0 == what) {
+      else if(what == 0) {
         failf(data, "schannel: timed out sending data "
               "(bytes sent: %zu)", *pnwritten);
         result = CURLE_OPERATION_TIMEDOUT;

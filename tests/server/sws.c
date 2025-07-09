@@ -1326,7 +1326,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
           if(getsockopt(serverfd, SOL_SOCKET, SO_ERROR,
                         (void *)&error, &errSize))
             error = SOCKERRNO;
-          if((0 == error) || (SOCKEISCONN == error))
+          if((error == 0) || (SOCKEISCONN == error))
             goto success;
           else if((error != SOCKEINPROGRESS) && (error != SOCKEWOULDBLOCK))
             goto error;
