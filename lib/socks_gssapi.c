@@ -212,7 +212,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
       code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4,
                                FALSE, &nwritten);
-      if(code || (4 != nwritten)) {
+      if(code || (nwritten != 4)) {
         failf(data, "Failed to send GSS-API authentication request.");
         gss_release_name(&gss_status, &server);
         gss_release_buffer(&gss_status, &gss_recv_token);
@@ -420,7 +420,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
                            &nwritten);
-  if(code || (4 != nwritten)) {
+  if(code || (nwritten != 4)) {
     failf(data, "Failed to send GSS-API encryption request.");
     gss_release_buffer(&gss_status, &gss_w_token);
     Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
