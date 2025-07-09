@@ -107,8 +107,8 @@ static void uint_hash_entry_unlink(struct uint_hash *h,
 }
 
 static void uint_hash_elem_link(struct uint_hash *h,
-                                 struct uint_hash_entry **he_anchor,
-                                 struct uint_hash_entry *he)
+                                struct uint_hash_entry **he_anchor,
+                                struct uint_hash_entry *he)
 {
   he->next = *he_anchor;
   *he_anchor = he;

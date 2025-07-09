@@ -304,7 +304,7 @@ void curl_dbg_free(void *ptr, int line, const char *source)
 }
 
 curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
-                             int line, const char *source)
+                              int line, const char *source)
 {
   curl_socket_t sockfd;
 
@@ -351,8 +351,8 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
 
 #ifdef HAVE_SOCKETPAIR
 int curl_dbg_socketpair(int domain, int type, int protocol,
-                       curl_socket_t socket_vector[2],
-                       int line, const char *source)
+                        curl_socket_t socket_vector[2],
+                        int line, const char *source)
 {
   int res = (socketpair)(domain, type, protocol, socket_vector);
 
@@ -366,7 +366,7 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 #endif
 
 curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
-                             int line, const char *source)
+                              int line, const char *source)
 {
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;

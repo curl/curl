@@ -240,7 +240,7 @@ static int mqtt_encode_len(char *buf, size_t len)
 
 /* add the passwd to the CONNECT packet */
 static int add_passwd(const char *passwd, const size_t plen,
-                       char *pkt, const size_t start, int remain_pos)
+                      char *pkt, const size_t start, int remain_pos)
 {
   /* magic number that need to be set properly */
   const size_t conn_flags_pos = remain_pos + 8;

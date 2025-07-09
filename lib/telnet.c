@@ -170,7 +170,7 @@ static void sendsuboption(struct Curl_easy *data,
 
 static CURLcode telnet_do(struct Curl_easy *data, bool *done);
 static CURLcode telnet_done(struct Curl_easy *data,
-                                 CURLcode, bool premature);
+                            CURLcode, bool premature);
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  struct TELNET *tn,
                                  char *buffer, ssize_t nread);

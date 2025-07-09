@@ -394,10 +394,10 @@ static CURLcode socket_open(struct Curl_easy *data,
  *
  */
 CURLcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            curl_socket_t *sockfd)
+                          const struct Curl_addrinfo *ai,
+                          struct Curl_sockaddr_ex *addr,
+                          int transport,
+                          curl_socket_t *sockfd)
 {
   struct Curl_sockaddr_ex dummy;
   CURLcode result;
@@ -1092,7 +1092,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_socket_open(struct Curl_cfilter *cf,
-                              struct Curl_easy *data)
+                               struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int error = 0;
@@ -1376,8 +1376,8 @@ out:
 }
 
 static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      struct easy_pollset *ps)
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
 
@@ -1992,7 +1992,7 @@ out:
 }
 
 static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data)
+                                         struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;

@@ -456,7 +456,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
 }
 
 static void baller_close(struct eyeballer *baller,
-                          struct Curl_easy *data)
+                         struct Curl_easy *data)
 {
   if(baller && baller->cf) {
     Curl_conn_cf_discard_chain(&baller->cf, data);
@@ -464,7 +464,7 @@ static void baller_close(struct eyeballer *baller,
 }
 
 static void baller_free(struct eyeballer *baller,
-                         struct Curl_easy *data)
+                        struct Curl_easy *data)
 {
   if(baller) {
     baller_close(baller, data);
@@ -933,8 +933,8 @@ static CURLcode cf_he_shutdown(struct Curl_cfilter *cf,
 }
 
 static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct easy_pollset *ps)
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
@@ -1047,8 +1047,8 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
 }
 
 static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          int query)
+                                           struct Curl_easy *data,
+                                           int query)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   struct curltime t, tmax;
