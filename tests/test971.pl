@@ -30,11 +30,18 @@
 #   $cmddir
 #
 
+use strict;
+use warnings 'FATAL' => 'all';
+
 use allversions;
 
 my $opts = $ARGV[0];
 my $cmddir = $ARGV[1];
 my $versions = $ARGV[2];
+
+my %file;
+my %oiv;
+my $error = 0;
 
 sub cmdfiles {
     my ($dir)=@_;
@@ -93,6 +100,8 @@ sub versioncheck {
     }
     close($fh);
 }
+
+my %pastversion;
 
 # get all the past versions
 allversions($versions);
