@@ -30,6 +30,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use File::Spec;
 
+use strict;
 use warnings 'FATAL' => 'all';
 
 my $logdir = "log";
