@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "curl_mem_undef.h" /* include BEFORE system headers */
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif

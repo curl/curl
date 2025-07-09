@@ -25,8 +25,6 @@
 
 #ifdef HAVE_INET_PTON
 
-#include "curl_mem_undef.h" /* include BEFORE system headers */
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -34,7 +32,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include "curl_memory.h"
 #include "memdebug.h"
 
 /* to prevent libcurl from closing our socket */
