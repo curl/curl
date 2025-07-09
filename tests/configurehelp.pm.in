@@ -25,7 +25,7 @@
 package configurehelp;
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 use Exporter;
 
 use vars qw(
