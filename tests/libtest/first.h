@@ -51,6 +51,7 @@ extern int unitfail; /* for unittests */
 
 #include "curl_printf.h"
 
+/* The last 2 #include files should be in this order */
 #ifndef UNITTESTS
 #include "curl_memory.h"
 #endif
