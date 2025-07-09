@@ -68,10 +68,10 @@ CURLcode Curl_parse_interface(const char *input,
  *
  */
 CURLcode Curl_socket_open(struct Curl_easy *data,
-                            const struct Curl_addrinfo *ai,
-                            struct Curl_sockaddr_ex *addr,
-                            int transport,
-                            curl_socket_t *sockfd);
+                          const struct Curl_addrinfo *ai,
+                          struct Curl_sockaddr_ex *addr,
+                          int transport,
+                          curl_socket_t *sockfd);
 
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
