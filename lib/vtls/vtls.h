@@ -207,7 +207,7 @@ bool Curl_ssl_cert_status_request(void);
  * returned.
  */
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
-                                       struct dynbuf *binding);
+                                      struct dynbuf *binding);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 

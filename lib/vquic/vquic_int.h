@@ -68,7 +68,7 @@ CURLcode vquic_send_blocked_pkts(struct Curl_cfilter *cf,
                                  struct cf_quic_ctx *qctx);
 
 CURLcode vquic_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        struct cf_quic_ctx *qctx, size_t gsolen);
+                    struct cf_quic_ctx *qctx, size_t gsolen);
 
 CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
                                struct cf_quic_ctx *qctx, size_t gsolen,
