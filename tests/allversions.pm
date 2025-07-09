@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# populate the has %pastversion hash table with the version number as key and
+# populate the %pastversion hash table with the version number as key and
 # release date as value
 
 sub allversions {
