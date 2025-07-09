@@ -50,7 +50,7 @@ my $PREFIX;
 
 my $CAPREFIX = shift @ARGV;
 if(!$CAPREFIX) {
-    print 'Usage: genserv.pl <caprefix> [<prefix> ...]\n';
+    print "Usage: genserv.pl <caprefix> [<prefix> ...]\n";
     exit 1;
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
