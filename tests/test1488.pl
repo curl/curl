@@ -27,6 +27,7 @@
 # a late evening in the #curl IRC channel.
 #
 
+use strict;
 use warnings;
 use vars qw($Cpreprocessor);
 use allversions;
@@ -59,6 +60,7 @@ my $versions = $ARGV[2];
 my @syms;
 my %manpage;
 my %symadded;
+my %pastversion;
 
 sub checkmanpage {
     my ($m) = @_;
