@@ -424,8 +424,8 @@ static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
 }
 
 static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct easy_pollset *ps)
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   if(!cf->connected) {
     struct cf_hc_ctx *ctx = cf->ctx;

@@ -588,7 +588,7 @@ static void doh_store_a(const unsigned char *doh, int index,
 }
 
 static void doh_store_aaaa(const unsigned char *doh, int index,
-                              struct dohentry *d)
+                           struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {

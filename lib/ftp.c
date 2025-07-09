@@ -3155,8 +3155,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
 /* called repeatedly until done from multi.c */
 static CURLcode ftp_statemach(struct Curl_easy *data,
-                               struct ftp_conn *ftpc,
-                               bool *done)
+                              struct ftp_conn *ftpc,
+                              bool *done)
 {
   CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE, FALSE);
 

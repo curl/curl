@@ -114,8 +114,8 @@ static void cshutdn_run_once(struct Curl_easy *data,
 }
 
 void Curl_cshutdn_run_once(struct Curl_easy *data,
-                      struct connectdata *conn,
-                      bool *done)
+                           struct connectdata *conn,
+                           bool *done)
 {
   DEBUGASSERT(!data->conn);
   Curl_attach_connection(data, conn);
