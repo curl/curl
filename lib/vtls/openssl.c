@@ -958,7 +958,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
 static int passwd_callback(char *buf, int num, int encrypting,
                            void *password)
 {
-  DEBUGASSERT(0 == encrypting);
+  DEBUGASSERT(encrypting == 0);
 
   if(!encrypting && num >= 0 && password) {
     int klen = curlx_uztosi(strlen((char *)password));
