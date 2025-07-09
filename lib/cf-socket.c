@@ -844,7 +844,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
 #endif
 
-  if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
+  if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
 #ifdef UNDER_CE
   /* Old Windows CE versions do not support SO_ERROR */

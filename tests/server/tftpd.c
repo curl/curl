@@ -662,8 +662,8 @@ static int test_tftpd(int argc, char **argv)
   }
 
   flag = 1;
-  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
@@ -1118,7 +1118,7 @@ static int validate_access(struct testcase *test,
 
     stream = test2fopen(testno, logdir);
 
-    if(0 != partno)
+    if(partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
     if(!stream) {

@@ -784,7 +784,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   else {
     FILE *stream = test2fopen(req->testno, logdir);
     char partbuf[80]="data";
-    if(0 != req->partno)
+    if(req->partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
     if(!stream) {
       error = errno;
@@ -1099,8 +1099,8 @@ static int test_rtspd(int argc, char *argv[])
   }
 
   flag = 1;
-  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
