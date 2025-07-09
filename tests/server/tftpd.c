@@ -1029,7 +1029,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
     cmd = orgcmd;
     while(cmd && cmdsize) {
       char *check;
-      if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
         logmsg("instructed to delay %d secs between packets", num);
         req->writedelay = num;
       }
