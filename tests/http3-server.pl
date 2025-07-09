@@ -31,6 +31,8 @@ use Cwd 'abs_path';
 use File::Basename;
 use File::Spec;
 
+use warnings;
+
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
 my $logfile = "$logdir/http3.log";
