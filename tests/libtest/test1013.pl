@@ -22,6 +22,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+use strict;
+use warnings;
+
 # Determine if curl-config --protocols/--features matches the
 # curl --version protocols/features
 if($#ARGV != 2) {
