@@ -379,7 +379,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
 {
   const char *startCur = ciphers;
   int algCount = 0;
-  while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
+  while(startCur && *startCur && (algCount < NUM_CIPHERS)) {
     curl_off_t alg;
     if(curlx_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
