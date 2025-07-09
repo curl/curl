@@ -40,7 +40,7 @@ static CURLcode test_lib1593(char *URL)
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
+  easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
   /* Some TIMEVALUE; it doesn't matter. */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);
 
