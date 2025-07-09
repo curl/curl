@@ -28,7 +28,7 @@
 # string options.
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $root=$ARGV[0] || ".";
 my $incdir = "$root/include/curl";
