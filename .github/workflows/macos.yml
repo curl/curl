@@ -52,7 +52,7 @@ env:
 jobs:
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.build.name }}"
-    runs-on: 'macos-latest'
+    runs-on: 'macos-15'
     timeout-minutes: 45
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
@@ -64,7 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, llvm@15, gcc-12]
+        compiler: [clang, llvm@18, gcc-12]
         build:
           # autotools
           - name: '!ssl !debug brotli zstd'
@@ -85,7 +85,7 @@ jobs:
             install: libssh
             configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares
           - name: 'OpenSSL libssh'
-            compiler: llvm@15
+            compiler: llvm@18
             install: libssh libnghttp3
             configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --with-openssl-quic
           - name: '!ssl c-ares'
@@ -155,18 +155,18 @@ jobs:
             tflags: -t --shallow=20 FTP
             torture: true
         exclude:
-          - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
-          - { compiler: llvm@15, build: { torture: true } }
+          - { compiler: llvm@18, build: { macos-version-min: '10.15' } }
+          - { compiler: llvm@18, build: { torture: true } }
           - { compiler: gcc-12, build: { torture: true } }
-          - { compiler: llvm@15, build: { clang-tidy: true } }
+          - { compiler: llvm@18, build: { clang-tidy: true } }
           - { compiler: gcc-12, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
-          - { compiler: llvm@15, build: { compiler: 'clang' } }
-          - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
+          - { compiler: llvm@18, build: { compiler: 'clang' } }
+          - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
           - { compiler: gcc-12, build: { compiler: 'clang' } }
-          - { compiler: gcc-12, build: { compiler: 'llvm@15' } }
+          - { compiler: gcc-12, build: { compiler: 'llvm@18' } }
           - { compiler: clang, build: { compiler: 'gcc-12' } }
-          - { compiler: clang, build: { compiler: 'llvm@15' } }
+          - { compiler: clang, build: { compiler: 'llvm@18' } }
 
     steps:
       - name: 'brew install'
