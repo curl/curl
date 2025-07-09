@@ -52,7 +52,7 @@ http
 HTTP chunked encoding and chunked trailer, twice
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D log/heads%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
 

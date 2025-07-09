@@ -25,12 +25,12 @@ ftp
 FTP with netrc using no user but control code in password
 </name>
 <command>
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER log/netrc%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/netrc%TESTNUMBER
 </command>
 <tool>
 lib%TESTNUMBER
 </tool>
-<file name="log/netrc%TESTNUMBER" nonewline="yes">
+<file name="%LOGDIR/netrc%TESTNUMBER" nonewline="yes">
 default   passwor?dlogin anonymou\ ' password login anonymous       passwor?d.'macdef
 </file>
 </client>
