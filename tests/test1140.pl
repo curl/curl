@@ -26,7 +26,10 @@
 # scan manpages to find basic syntactic problems such as unbalanced \f
 # codes or references to non-existing curl manpages.
 
-my $docsroot = $ARGV[0];
+use strict;
+use warnings 'FATAL' => 'all';
+
+my $docsroot = $ARGV[0] || '.';
 
 if(!$docsroot || ($docsroot eq "-g")) {
     print "Usage: test1140.pl <docs root dir> [manpages]\n";
@@ -39,6 +42,8 @@ shift @ARGV;
 my @f = @ARGV;
 
 my %manp;
+
+my $errors = 0;
 
 sub manpresent {
     my ($man) = @_;
