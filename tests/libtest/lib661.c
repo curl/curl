@@ -50,7 +50,7 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_URL, newURL);
    test_setopt(curl, CURLOPT_VERBOSE, 1L);
    test_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
    res = curl_easy_perform(curl);
    if(res != CURLE_REMOTE_FILE_NOT_FOUND)
      goto test_cleanup;
@@ -77,7 +77,7 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_URL, newURL);
    test_setopt(curl, CURLOPT_VERBOSE, 1L);
    test_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, 1L);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
    res = curl_easy_perform(curl);
    if(res != CURLE_REMOTE_FILE_NOT_FOUND)
      goto test_cleanup;
@@ -86,7 +86,7 @@ static CURLcode test_lib661(char *URL)
    curl_free(newURL);
    newURL = curl_maprintf("%s/folderB/661", URL);
    test_setopt(curl, CURLOPT_URL, newURL);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
    res = curl_easy_perform(curl);
    if(res != CURLE_REMOTE_FILE_NOT_FOUND)
      goto test_cleanup;
@@ -94,7 +94,7 @@ static CURLcode test_lib661(char *URL)
    curl_free(newURL);
    newURL = curl_maprintf("%s/folderA/661", URL);
    test_setopt(curl, CURLOPT_URL, newURL);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
    res = curl_easy_perform(curl);
    if(res != CURLE_REMOTE_FILE_NOT_FOUND)
      goto test_cleanup;
@@ -119,7 +119,7 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_URL, URL);
    test_setopt(curl, CURLOPT_VERBOSE, 1L);
    test_setopt(curl, CURLOPT_NOBODY, 1L);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
    test_setopt(curl, CURLOPT_QUOTE, slist);
    res = curl_easy_perform(curl);
    if(res)
@@ -138,7 +138,7 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_URL, URL);
    test_setopt(curl, CURLOPT_VERBOSE, 1L);
    test_setopt(curl, CURLOPT_NOBODY, 1L);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
    test_setopt(curl, CURLOPT_QUOTE, slist);
    res = curl_easy_perform(curl);
    if(res)
@@ -151,7 +151,7 @@ static CURLcode test_lib661(char *URL)
    test_setopt(curl, CURLOPT_URL, URL);
    test_setopt(curl, CURLOPT_VERBOSE, 1L);
    test_setopt(curl, CURLOPT_NOBODY, 1L);
-   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
    test_setopt(curl, CURLOPT_QUOTE, slist);
    res = curl_easy_perform(curl);
 
