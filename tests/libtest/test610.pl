@@ -22,6 +22,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+use strict;
+use warnings;
+
 # Perform simple file and directory manipulation in a portable way
 if($#ARGV <= 0) {
     print "Usage: $0 mkdir|rmdir|rm|move|gone path1 [path2] [more commands...]\n";

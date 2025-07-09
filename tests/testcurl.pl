@@ -61,6 +61,7 @@
 #
 
 use strict;
+use warnings;
 
 use Cwd;
 use File::Spec;
@@ -75,6 +76,9 @@ use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
 use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $extvercmd $nogitpull $nobuildconf $crosscompile
             $timestamp $notes);
+
+$notes='';
+$runtestopts='';
 
 # version of this script
 $version='2024-11-28';
@@ -338,20 +342,20 @@ logit "DESC = $desc";
 logit "NOTES = $notes";
 logit "CONFOPTS = $confopts";
 logit "RUNTESTOPTS = ".$runtestopts;
-logit "CPPFLAGS = ".$ENV{CPPFLAGS};
-logit "CFLAGS = ".$ENV{CFLAGS};
-logit "LDFLAGS = ".$ENV{LDFLAGS};
-logit "LIBS = ".$ENV{LIBS};
-logit "CC = ".$ENV{CC};
-logit "TMPDIR = ".$ENV{TMPDIR};
-logit "MAKEFLAGS = ".$ENV{MAKEFLAGS};
-logit "ACLOCAL_FLAGS = ".$ENV{ACLOCAL_FLAGS};
-logit "PKG_CONFIG_PATH = ".$ENV{PKG_CONFIG_PATH};
-logit "DYLD_LIBRARY_PATH = ".$ENV{DYLD_LIBRARY_PATH};
-logit "LD_LIBRARY_PATH = ".$ENV{LD_LIBRARY_PATH};
-logit "LIBRARY_PATH = ".$ENV{LIBRARY_PATH};
-logit "SHLIB_PATH = ".$ENV{SHLIB_PATH};
-logit "LIBPATH = ".$ENV{LIBPATH};
+logit "CPPFLAGS = ".($ENV{CPPFLAGS} || '');
+logit "CFLAGS = ".($ENV{CFLAGS} || '');
+logit "LDFLAGS = ".($ENV{LDFLAGS} || '');
+logit "LIBS = ".($ENV{LIBS} || '');
+logit "CC = ".($ENV{CC} || '');
+logit "TMPDIR = ".($ENV{TMPDIR} || '');
+logit "MAKEFLAGS = ".($ENV{MAKEFLAGS} || '');
+logit "ACLOCAL_FLAGS = ".($ENV{ACLOCAL_FLAGS} || '');
+logit "PKG_CONFIG_PATH = ".($ENV{PKG_CONFIG_PATH} || '');
+logit "DYLD_LIBRARY_PATH = ".($ENV{DYLD_LIBRARY_PATH} || '');
+logit "LD_LIBRARY_PATH = ".($ENV{LD_LIBRARY_PATH} || '');
+logit "LIBRARY_PATH = ".($ENV{LIBRARY_PATH} || '');
+logit "SHLIB_PATH = ".($ENV{SHLIB_PATH} || '');
+logit "LIBPATH = ".($ENV{LIBPATH} || '');
 logit "target = ".$targetos;
 logit "version = $version"; # script version
 logit "date = $timestamp";  # When the test build starts
