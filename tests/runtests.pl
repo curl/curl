@@ -1700,7 +1700,7 @@ sub singletest_check {
             }
             my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
             my $allocs;
-            my $max;
+            my $max = 0;
             for(@more) {
                 if(/^Allocations: (\d+)/) {
                     $allocs = $1;
