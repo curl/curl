@@ -845,8 +845,8 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   }
   if((arg > 1) || (arg < 0))
     /* reserve other values for future use */
-    infof(data, "boolean setopt(%d) got undocumented argument %ld, treated as %d",
-          option, arg, enabled);
+    infof(data, "boolean setopt(%d) got undocumented argument %ld,"
+          " treated as %d", option, arg, enabled);
 
   *set = TRUE;
   return CURLE_OK;
