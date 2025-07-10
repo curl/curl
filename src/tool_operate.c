@@ -270,9 +270,10 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
-  struct OperationConfig *config = global->current;
 #ifdef CURL_DISABLE_LIBCURL_OPTION
   (void)global; /* otherwise used in the my_setopt macros */
+#else
+  struct OperationConfig *config = global->current;
 #endif
 
   if(per->uploadfile && !stdin_upload(per->uploadfile)) {
