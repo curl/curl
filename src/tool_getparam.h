@@ -374,7 +374,7 @@ void parse_cert_parameter(const char *cert_parameter,
                           char **passphrase);
 #endif
 
-ParameterError parse_args(struct GlobalConfig *config, int argc,
+ParameterError parse_args(struct GlobalConfig *global, int argc,
                           argv_item_t argv[]);
 
 #if defined(UNICODE) && defined(_WIN32) && !defined(UNDER_CE)

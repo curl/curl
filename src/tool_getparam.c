@@ -2989,14 +2989,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
           if(config->url_list && config->url_list->url) {
             /* Allocate the next config */
-            config->next = malloc(sizeof(struct OperationConfig));
+            config->next = config_alloc(global);
             if(config->next) {
-              /* Initialise the newly created config */
-              config_init(config->next);
-
-              /* Set the global config pointer */
-              config->next->global = global;
-
               /* Update the last config pointer */
               global->last = config->next;
 
