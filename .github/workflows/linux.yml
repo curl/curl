@@ -59,6 +59,7 @@ env:
   QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.0
+  OPENLDAP_VERSION: 2.6.10
 
 jobs:
   linux:
@@ -293,6 +294,10 @@ jobs:
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
             container: 'alpine:3.20'
 
+          - name: 'openldap-static'
+            install_steps: openldap-static
+            configure: --disable-shared --without-ssl --enable-static --with-ldap=/home/runner/openldap --with-ldap-lib=ldap --with-lber-lib=lber
+
     steps:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
@@ -438,6 +443,26 @@ jobs:
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
+
+      - name: 'cache openldap-static'
+        if: ${{ contains(matrix.build.install_steps, 'openldap-static') }}
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        id: cache-openldap-static
+        env:
+          cache-name: cache-openldap-static
+        with:
+          path: ~/openldap-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENLDAP_VERSION }}
+
+      - name: 'build openldap (static)'
+        if: ${{ contains(matrix.build.install_steps, 'openldap-static') && steps.cache-openldap-static.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" | tar -xz
+          cd "openldap-${OPENLDAP_VERSION}"
+          ./configure --enable-static --disable-shared --prefix=/home/runner/openldap
+          make
+          make install
 
       - name: 'cache openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') }}
