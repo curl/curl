@@ -2713,15 +2713,16 @@ static bool cf_h2_is_alive(struct Curl_cfilter *cf,
                            bool *input_pending)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  CURLcode result;
+  bool alive;
   struct cf_call_data save;
 
+  *input_pending = FALSE;
   CF_DATA_SAVE(save, cf, data);
-  result = (ctx && ctx->h2 && http2_connisalive(cf, data, input_pending));
+  alive = (ctx && ctx->h2 && http2_connisalive(cf, data, input_pending));
   CURL_TRC_CF(data, cf, "conn alive -> %d, input_pending=%d",
-              result, *input_pending);
+              alive, *input_pending);
   CF_DATA_RESTORE(cf, save);
-  return result;
+  return alive;
 }
 
 static CURLcode cf_h2_keep_alive(struct Curl_cfilter *cf,
