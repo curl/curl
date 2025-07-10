@@ -203,13 +203,7 @@ err_exit:
  * For builds without ARES, but with USE_IPV6, create a resolver thread
  * and wait on it.
  */
-static
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-DWORD
-#else
-unsigned int
-#endif
-CURL_STDCALL getaddrinfo_thread(void *arg)
+static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
   char service[12];
@@ -263,13 +257,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
 /*
  * gethostbyname_thread() resolves a name and then exits.
  */
-static
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-DWORD
-#else
-unsigned int
-#endif
-CURL_STDCALL gethostbyname_thread(void *arg)
+static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
   bool all_gone;
