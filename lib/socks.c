@@ -1193,13 +1193,15 @@ static CURLcode socks_cf_query(struct Curl_cfilter *cf,
 {
   struct socks_state *sx = cf->ctx;
 
-  switch(query) {
-  case CF_QUERY_HOST_PORT:
-    *pres1 = sx->remote_port;
-    *((const char **)pres2) = sx->hostname;
-    return CURLE_OK;
-  default:
-    break;
+  if(sx) {
+    switch(query) {
+    case CF_QUERY_HOST_PORT:
+      *pres1 = sx->remote_port;
+      *((const char **)pres2) = sx->hostname;
+      return CURLE_OK;
+    default:
+      break;
+    }
   }
   return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
