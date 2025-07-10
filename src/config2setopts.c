@@ -520,7 +520,6 @@ static CURLcode http_setopts(struct OperationConfig *config,
 static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result = CURLE_OK;
-  struct GlobalConfig *global = config->global;
   if(config->cookies) {
     struct dynbuf cookies;
     struct curl_slist *cl;
@@ -535,7 +534,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
         result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
       if(result) {
-        warnf(global,
+        warnf(config->global,
               "skipped provided cookie, the cookie header "
               "would go over %u bytes", MAX_COOKIE_LINE);
         return result;
@@ -629,8 +628,7 @@ static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 
 static void gen_trace_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
-  if(global->tracetype != TRACE_NONE) {
+  if(config->global->tracetype != TRACE_NONE) {
     my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(curl, CURLOPT_DEBUGDATA, config);
     my_setopt_long(curl, CURLOPT_VERBOSE, 1L);
@@ -680,12 +678,11 @@ static void gen_cb_setopts(struct OperationConfig *config,
 
 static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
   if(config->proxy) {
     CURLcode result = my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
 
     if(result) {
-      errorf(global, "proxy support is disabled in this libcurl");
+      errorf(config->global, "proxy support is disabled in this libcurl");
       config->synthetic_error = TRUE;
       return CURLE_NOT_BUILT_IN;
     }
