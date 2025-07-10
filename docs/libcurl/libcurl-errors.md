@@ -507,7 +507,8 @@ used.
 
 ## CURLM_CALL_MULTI_SOCKET (-1)
 
-Synonym for *CURLM_CALL_MULTI_PERFORM*.
+An alias for \fICURLM_CALL_MULTI_PERFORM\fP. Never returned by modern libcurl
+versions.
 (Added in 7.15.5)
 
 ## CURLM_OK (0)
