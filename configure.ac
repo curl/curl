@@ -1602,189 +1602,6 @@ if test X"$OPT_ZSTD" != Xno; then
 fi
 
 dnl **********************************************************************
-dnl Check for LDAP
-dnl **********************************************************************
-
-LDAPLIBNAME=""
-AC_ARG_WITH(ldap-lib,
-AS_HELP_STRING([--with-ldap-lib=libname],[Specify name of ldap lib file]),
-  [LDAPLIBNAME="$withval"])
-
-LBERLIBNAME=""
-AC_ARG_WITH(lber-lib,
-AS_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
-  [LBERLIBNAME="$withval"])
-
-dnl Handle argument to --with-ldap.
-clean_LDAP_CPPFLAGS=$CPPFLAGS
-clean_LDAP_LDFLAGS=$LDFLAGS
-clean_LDAP_LIBS=$LIBS
-OPT_LDAP=off
-AC_ARG_WITH(ldap,
-AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--without-ldap], [disable LDAP]),
-  OPT_LDAP=$withval)
-
-case "$OPT_LDAP" in
-  no)
-    dnl --without-ldap option used
-    want_ldap="no"
-    ;;
-  yes)
-    dnl --with-ldap option used without path
-    want_ldap="yes"
-    ;;
-  off)
-    dnl no --with-ldap option given, don't change anything
-    want_ldap="default"
-    ;;
-  *)
-    dnl --with-ldap option used with path
-    want_ldap="yes"
-    if test -d "$OPT_LDAP/lib$libsuff"; then
-      LDFLAGS="$LDFLAGS -L$OPT_LDAP/lib$libsuff"
-      DIR_LDAP="$OPT_LDAP/lib$libsuff"
-    elif test -d "$OPT_LDAP/lib"; then
-      LDFLAGS="$LDFLAGS -L$OPT_LDAP/lib"
-      DIR_LDAP="$OPT_LDAP/lib"
-    fi
-    if test -d "$OPT_LDAP/include"; then
-      CPPFLAGS="$CPPFLAGS -I$OPT_LDAP/include"
-    fi
-    ldap_askedfor="yes"
-    ;;
-esac
-
-if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
-
-  CURL_CHECK_HEADER_LBER
-  CURL_CHECK_HEADER_LDAP
-  CURL_CHECK_HEADER_LDAP_SSL
-
-  if test -z "$LDAPLIBNAME"; then
-    if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
-      dnl Windows uses a single and unique LDAP library name
-      LDAPLIBNAME="wldap32"
-      LBERLIBNAME="no"
-    fi
-  fi
-
-  if test "$LDAPLIBNAME"; then
-    dnl If we have both LDAP and LBER library names, check if we need both
-    if test "$LBERLIBNAME" -a "$LBERLIBNAME" != "no"; then
-      dnl Try LDAP first, then with LBER if needed
-      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes], [ldap_lib_ok=no])
-      if test "$ldap_lib_ok" = "no"; then
-        dnl LDAP alone failed, try with LBER using a different function
-        AC_CHECK_LIB("$LDAPLIBNAME", ldap_unbind, [ldap_lib_ok=yes], [ldap_lib_ok=no], [-l$LBERLIBNAME])
-        if test "$ldap_lib_ok" = "yes"; then
-          dnl We need both libraries
-          LIBS="-l$LDAPLIBNAME -l$LBERLIBNAME $LIBS"
-        fi
-      else
-        dnl LDAP alone is sufficient
-        LIBS="-l$LDAPLIBNAME $LIBS"
-      fi
-    else
-      dnl Only check LDAP library
-      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes; LIBS="-l$LDAPLIBNAME $LIBS"], [ldap_lib_ok=no])
-    fi
-
-    if test "$ldap_lib_ok" = "no"; then
-      if test -n "$ldap_askedfor"; then
-        AC_MSG_ERROR([couldn't detect the LDAP libraries])
-      fi
-      AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
-      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      CURL_DISABLE_LDAP=1
-      AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      CURL_DISABLE_LDAPS=1
-      dnl restore original flags
-      CPPFLAGS=$clean_LDAP_CPPFLAGS
-      LDFLAGS=$clean_LDAP_LDFLAGS
-      LIBS=$clean_LDAP_LIBS
-    fi
-  else
-    dnl Try to find the right ldap libraries for this system
-    CURL_CHECK_LIBS_LDAP
-    case X-"$curl_cv_ldap_LIBS" in
-      X-unknown)
-        if test -n "$ldap_askedfor"; then
-          AC_MSG_ERROR([couldn't detect the LDAP libraries])
-        fi
-        AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
-        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        CURL_DISABLE_LDAP=1
-        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        CURL_DISABLE_LDAPS=1
-        dnl restore original flags
-        CPPFLAGS=$clean_LDAP_CPPFLAGS
-        LDFLAGS=$clean_LDAP_LDFLAGS
-        LIBS=$clean_LDAP_LIBS
-        ;;
-    esac
-  fi
-fi
-
-if test x$CURL_DISABLE_LDAP != x1; then
-  dnl Add to library path if needed
-  if test -n "$DIR_LDAP"; then
-    dnl when the ldap shared lib were found in a path that the run-time
-    dnl linker doesn't search through, we need to add it to
-    dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
-    dnl this
-
-    if test "x$cross_compiling" != "xyes"; then
-      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_LDAP"
-      export CURL_LIBRARY_PATH
-      AC_MSG_NOTICE([Added $DIR_LDAP to CURL_LIBRARY_PATH])
-    fi
-  fi
-
-  if test "$LBERLIBNAME"; then
-    dnl If name is "no" then don't define this library at all
-    dnl (it's only needed if libldap.so's dependencies are broken).
-    dnl Skip this check if we already determined we need both libraries above
-    if test "$LBERLIBNAME" != "no" -a "$ldap_lib_ok" != "yes"; then
-      AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
-        AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
-        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        CURL_DISABLE_LDAP=1
-        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        CURL_DISABLE_LDAPS=1
-        dnl restore original flags
-        CPPFLAGS=$clean_LDAP_CPPFLAGS
-        LDFLAGS=$clean_LDAP_LDFLAGS
-        LIBS=$clean_LDAP_LIBS
-        ]
-      )
-    fi
-  fi
-fi
-
-if test x$CURL_DISABLE_LDAP != x1; then
-  AC_CHECK_FUNCS([ldap_url_parse \
-                  ldap_init_fd])
-
-  if test "$LDAPLIBNAME" = "wldap32"; then
-    curl_ldap_msg="enabled (winldap)"
-    AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
-  else
-    if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
-      curl_ldap_msg="enabled (OpenLDAP)"
-      AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
-      USE_OPENLDAP=1
-    else
-      curl_ldap_msg="enabled (ancient OpenLDAP)"
-    fi
-  fi
-fi
-
-if test x$CURL_DISABLE_LDAPS != x1; then
-  curl_ldaps_msg="enabled"
-fi
-
-dnl **********************************************************************
 dnl Checks for IPv6
 dnl **********************************************************************
 
@@ -2572,6 +2389,189 @@ elif test X"$OPT_WOLFSSH" != Xno; then
     AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
     USE_WOLFSSH=1
   )
+fi
+
+dnl **********************************************************************
+dnl Check for LDAP (after the SSL libraries)
+dnl **********************************************************************
+
+LDAPLIBNAME=""
+AC_ARG_WITH(ldap-lib,
+AS_HELP_STRING([--with-ldap-lib=libname],[Specify name of ldap lib file]),
+  [LDAPLIBNAME="$withval"])
+
+LBERLIBNAME=""
+AC_ARG_WITH(lber-lib,
+AS_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
+  [LBERLIBNAME="$withval"])
+
+dnl Handle argument to --with-ldap.
+clean_LDAP_CPPFLAGS=$CPPFLAGS
+clean_LDAP_LDFLAGS=$LDFLAGS
+clean_LDAP_LIBS=$LIBS
+OPT_LDAP=off
+AC_ARG_WITH(ldap,
+AS_HELP_STRING([--with-ldap=PATH],[Where to look for LDAP, PATH points to the LDAP installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-ldap], [disable LDAP]),
+  OPT_LDAP=$withval)
+
+case "$OPT_LDAP" in
+  no)
+    dnl --without-ldap option used
+    want_ldap="no"
+    ;;
+  yes)
+    dnl --with-ldap option used without path
+    want_ldap="yes"
+    ;;
+  off)
+    dnl no --with-ldap option given, don't change anything
+    want_ldap="default"
+    ;;
+  *)
+    dnl --with-ldap option used with path
+    want_ldap="yes"
+    if test -d "$OPT_LDAP/lib$libsuff"; then
+      LDFLAGS="$LDFLAGS -L$OPT_LDAP/lib$libsuff"
+      DIR_LDAP="$OPT_LDAP/lib$libsuff"
+    elif test -d "$OPT_LDAP/lib"; then
+      LDFLAGS="$LDFLAGS -L$OPT_LDAP/lib"
+      DIR_LDAP="$OPT_LDAP/lib"
+    fi
+    if test -d "$OPT_LDAP/include"; then
+      CPPFLAGS="$CPPFLAGS -I$OPT_LDAP/include"
+    fi
+    ldap_askedfor="yes"
+    ;;
+esac
+
+if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
+
+  CURL_CHECK_HEADER_LBER
+  CURL_CHECK_HEADER_LDAP
+  CURL_CHECK_HEADER_LDAP_SSL
+
+  if test -z "$LDAPLIBNAME"; then
+    if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
+      dnl Windows uses a single and unique LDAP library name
+      LDAPLIBNAME="wldap32"
+      LBERLIBNAME="no"
+    fi
+  fi
+
+  if test "$LDAPLIBNAME"; then
+    dnl If we have both LDAP and LBER library names, check if we need both
+    if test "$LBERLIBNAME" -a "$LBERLIBNAME" != "no"; then
+      dnl Try LDAP first, then with LBER if needed
+      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes], [ldap_lib_ok=no])
+      if test "$ldap_lib_ok" = "no"; then
+        dnl LDAP alone failed, try with LBER using a different function
+        AC_CHECK_LIB("$LDAPLIBNAME", ldap_unbind, [ldap_lib_ok=yes], [ldap_lib_ok=no], [-l$LBERLIBNAME])
+        if test "$ldap_lib_ok" = "yes"; then
+          dnl We need both libraries
+          LIBS="-l$LDAPLIBNAME -l$LBERLIBNAME $LIBS"
+        fi
+      else
+        dnl LDAP alone is sufficient
+        LIBS="-l$LDAPLIBNAME $LIBS"
+      fi
+    else
+      dnl Only check LDAP library
+      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes; LIBS="-l$LDAPLIBNAME $LIBS"], [ldap_lib_ok=no])
+    fi
+
+    if test "$ldap_lib_ok" = "no"; then
+      if test -n "$ldap_askedfor"; then
+        AC_MSG_ERROR([couldn't detect the LDAP libraries])
+      fi
+      AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
+      AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+      CURL_DISABLE_LDAP=1
+      AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+      CURL_DISABLE_LDAPS=1
+      dnl restore original flags
+      CPPFLAGS=$clean_LDAP_CPPFLAGS
+      LDFLAGS=$clean_LDAP_LDFLAGS
+      LIBS=$clean_LDAP_LIBS
+    fi
+  else
+    dnl Try to find the right ldap libraries for this system
+    CURL_CHECK_LIBS_LDAP
+    case X-"$curl_cv_ldap_LIBS" in
+      X-unknown)
+        if test -n "$ldap_askedfor"; then
+          AC_MSG_ERROR([couldn't detect the LDAP libraries])
+        fi
+        AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
+        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+        CURL_DISABLE_LDAP=1
+        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+        CURL_DISABLE_LDAPS=1
+        dnl restore original flags
+        CPPFLAGS=$clean_LDAP_CPPFLAGS
+        LDFLAGS=$clean_LDAP_LDFLAGS
+        LIBS=$clean_LDAP_LIBS
+        ;;
+    esac
+  fi
+fi
+
+if test x$CURL_DISABLE_LDAP != x1; then
+  dnl Add to library path if needed
+  if test -n "$DIR_LDAP"; then
+    dnl when the ldap shared lib were found in a path that the run-time
+    dnl linker doesn't search through, we need to add it to
+    dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
+    dnl this
+
+    if test "x$cross_compiling" != "xyes"; then
+      CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_LDAP"
+      export CURL_LIBRARY_PATH
+      AC_MSG_NOTICE([Added $DIR_LDAP to CURL_LIBRARY_PATH])
+    fi
+  fi
+
+  if test "$LBERLIBNAME"; then
+    dnl If name is "no" then don't define this library at all
+    dnl (it's only needed if libldap.so's dependencies are broken).
+    dnl Skip this check if we already determined we need both libraries above
+    if test "$LBERLIBNAME" != "no" -a "$ldap_lib_ok" != "yes"; then
+      AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
+        AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
+        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
+        CURL_DISABLE_LDAP=1
+        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+        CURL_DISABLE_LDAPS=1
+        dnl restore original flags
+        CPPFLAGS=$clean_LDAP_CPPFLAGS
+        LDFLAGS=$clean_LDAP_LDFLAGS
+        LIBS=$clean_LDAP_LIBS
+        ]
+      )
+    fi
+  fi
+fi
+
+if test x$CURL_DISABLE_LDAP != x1; then
+  AC_CHECK_FUNCS([ldap_url_parse \
+                  ldap_init_fd])
+
+  if test "$LDAPLIBNAME" = "wldap32"; then
+    curl_ldap_msg="enabled (winldap)"
+    AC_DEFINE(USE_WIN32_LDAP, 1, [Use Windows LDAP implementation])
+  else
+    if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
+      curl_ldap_msg="enabled (OpenLDAP)"
+      AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
+      USE_OPENLDAP=1
+    else
+      curl_ldap_msg="enabled (ancient OpenLDAP)"
+    fi
+  fi
+fi
+
+if test x$CURL_DISABLE_LDAPS != x1; then
+  curl_ldaps_msg="enabled"
 fi
 
 dnl **********************************************************************
