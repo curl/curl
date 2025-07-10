@@ -507,7 +507,7 @@ used.
 
 ## CURLM_CALL_MULTI_SOCKET (-1)
 
-An alias for \fICURLM_CALL_MULTI_PERFORM\fP. Never returned by modern libcurl
+An alias for *CURLM_CALL_MULTI_PERFORM*. Never returned by modern libcurl
 versions.
 (Added in 7.15.5)
 
