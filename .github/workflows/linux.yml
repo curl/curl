@@ -296,7 +296,8 @@ jobs:
 
           - name: 'openldap-static'
             install_steps: openldap-static
-            configure: --disable-shared --without-ssl --enable-static --with-ldap=/home/runner/openldap --with-ldap-lib=ldap --with-lber-lib=lber
+            install_packages: libssl-dev
+            configure: --disable-shared --with-openssl --enable-static --with-ldap=/home/runner/openldap --with-ldap-lib=ldap --with-lber-lib=lber
 
     steps:
       - name: 'install prereqs'
