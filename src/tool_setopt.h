@@ -75,22 +75,22 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
 /* Intercept setopt calls for --libcurl */
 
-CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *global,
                           const char *name, CURLoption tag,
                           const struct NameValue *nv, long lval);
-CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *global,
                                 const char *name, CURLoption tag,
                                 long lval);
-CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *global,
                            const char *name, CURLoption tag,
                            const struct NameValue *nv, long lval);
-CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *global,
                              const char *name, CURLoption tag,
                              const struct NameValueUnsigned *nv, long lval);
-CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *global,
                               const char *name, CURLoption tag,
                               curl_mime *mimepost);
-CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *global,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
 CURLcode tool_setopt_long(CURL *curl, struct GlobalConfig *global,

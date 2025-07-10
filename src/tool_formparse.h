@@ -55,7 +55,7 @@ struct tool_mime {
   curl_off_t origin;            /* Stdin read origin offset. */
   curl_off_t size;              /* Stdin data size. */
   curl_off_t curpos;            /* Stdin current read position. */
-  struct GlobalConfig *config;  /* For access from callback. */
+  struct GlobalConfig *global;  /* For access from callback. */
 };
 
 size_t tool_mime_stdin_read(char *buffer,

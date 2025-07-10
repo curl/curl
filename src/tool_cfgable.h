@@ -73,8 +73,7 @@ struct State {
   char *uploadfile;
   curl_off_t infilenum; /* number of files to upload */
   curl_off_t up;        /* upload file counter within a single upload glob */
-  curl_off_t urlnum;    /* how many iterations this single URL has with ranges
-                           etc */
+  curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
   curl_off_t li;
 };
 
@@ -377,7 +376,7 @@ struct GlobalConfig {
   BIT(isatty);                    /* Updated internally if output is a tty */
 };
 
-void config_init(struct OperationConfig *config);
+struct OperationConfig *config_alloc(struct GlobalConfig *global);
 void config_free(struct OperationConfig *config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
