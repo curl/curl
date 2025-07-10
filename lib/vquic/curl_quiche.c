@@ -1516,7 +1516,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
     curl_uint64_t max_streams = CONN_ATTACHED(cf->conn);
-    if(!ctx->goaway) {
+    if(!ctx->goaway && ctx->qconn) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;

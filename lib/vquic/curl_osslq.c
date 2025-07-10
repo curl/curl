@@ -2304,8 +2304,9 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
   case CF_QUERY_MAX_CONCURRENT: {
 #ifdef SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL
     /* Added in OpenSSL v3.3.x */
-    uint64_t v;
-    if(!SSL_get_value_uint(ctx->tls.ossl.ssl, SSL_VALUE_CLASS_GENERIC,
+    uint64_t v = 0;
+    if(ctx->tls.ossl.ssl &&
+       !SSL_get_value_uint(ctx->tls.ossl.ssl, SSL_VALUE_CLASS_GENERIC,
                            SSL_VALUE_QUIC_STREAM_BIDI_LOCAL_AVAIL, &v)) {
       CURL_TRC_CF(data, cf, "error getting available local bidi streams");
       return CURLE_HTTP3;
