@@ -956,12 +956,15 @@ size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                      int sockindex)
 {
   CURLcode result;
-  int n = 0;
+  int n = -1;
 
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   result = cf ? cf->cft->query(cf, data, CF_QUERY_MAX_CONCURRENT,
                                &n, NULL) : CURLE_UNKNOWN_OPTION;
-  return (result || n <= 0) ? 1 : (size_t)n;
+  /* If no filter answered the query, the default is a non-multiplexed
+   * connection with limit 1. Otherwise, the the query may return 0
+   * for connections that are in shutdown, e.g. server HTTP/2 GOAWAY. */
+  return (result || n < 0) ? 1 : (size_t)n;
 }
 
 int Curl_conn_get_stream_error(struct Curl_easy *data,
