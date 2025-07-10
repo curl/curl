@@ -540,11 +540,20 @@ static void multi_done_locked(struct connectdata *conn,
 {
   struct multi_done_ctx *mdctx = userdata;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *host = NULL;
-  int port = 0;
-
-  if(Curl_trc_is_verbose(data))
-    Curl_conn_get_current_host(data, FIRSTSOCKET, &host, &port);
+  const char *host =
+#ifndef CURL_DISABLE_PROXY
+        conn->bits.socksproxy ?
+        conn->socks_proxy.host.dispname :
+        conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+#endif
+        conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+        conn->host.dispname;
+  int port =
+#ifndef CURL_DISABLE_PROXY
+        conn->bits.httpproxy ? conn->http_proxy.port :
+#endif
+        conn->bits.conn_to_port ? conn->conn_to_port :
+        conn->remote_port;
 #endif
 
   Curl_detach_connection(data);
