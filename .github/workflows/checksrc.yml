@@ -43,7 +43,7 @@ jobs:
           persist-credentials: false
 
       - name: 'check'
-        run: scripts/checksrc-all.sh
+        run: scripts/checksrc-all.pl
 
   codespell-cmakelint-pytype-ruff:
     name: 'codespell, cmakelint, pytype, ruff'

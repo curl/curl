@@ -113,7 +113,7 @@ jobs:
           make test-ci
           make install
           popd
-          scripts/checksrc-all.sh
+          scripts/checksrc-all.pl
 
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree'
