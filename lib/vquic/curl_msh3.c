@@ -742,7 +742,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
 {
   if(!pause) {
     h3_drain_stream(cf, data);
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    Curl_multi_mark_dirty(data);
   }
   return CURLE_OK;
 }

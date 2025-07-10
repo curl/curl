@@ -465,22 +465,6 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
      is called. */
   data->multi = multi;
 
-  /* Set the timeout for this handle to expire really soon so that it will
-     be taken care of even when this handle is added in the midst of operation
-     when only the curl_multi_socket() API is used. During that flow, only
-     sockets that time-out or have actions will be dealt with. Since this
-     handle has no action yet, we make sure it times out to get things to
-     happen. */
-  Curl_expire(data, 0, EXPIRE_RUN_NOW);
-
-  rc = Curl_update_timer(multi);
-  if(rc) {
-    data->multi = NULL; /* not anymore */
-    Curl_uint_tbl_remove(&multi->xfers, data->mid);
-    data->mid = UINT_MAX;
-    return rc;
-  }
-
   /* set the easy handle */
   multistate(data, MSTATE_INIT);
 
@@ -498,6 +482,18 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 
   Curl_cpool_xfer_init(data);
   multi_warn_debug(multi, data);
+
+  /* Make sure the new handle will run */
+  Curl_multi_mark_dirty(data);
+  /* Necessary in event based processing, where dirty handles trigger
+   * a timeout callback invocation. */
+  rc = Curl_update_timer(multi);
+  if(rc) {
+    data->multi = NULL; /* not anymore */
+    Curl_uint_tbl_remove(&multi->xfers, data->mid);
+    data->mid = UINT_MAX;
+    return rc;
+  }
 
   /* The admin handle only ever has default timeouts set. To improve the
      state somewhat we clone the timeouts from each added handle so that the
@@ -3631,9 +3627,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   Curl_uint_bset_add(&multi->process, data->mid);
 
   multistate(data, MSTATE_CONNECT);
-
-  /* Make sure that the handle will be processed soonish. */
-  Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  Curl_multi_mark_dirty(data); /* make it run */
 }
 
 /* process_pending_handles() moves a handle from PENDING back into the process
