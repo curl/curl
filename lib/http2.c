@@ -2749,7 +2749,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     DEBUGASSERT(pres1);
 
     CF_DATA_SAVE(save, cf, data);
-    if(nghttp2_session_check_request_allowed(ctx->h2) == 0) {
+    if(!ctx->h2 || !nghttp2_session_check_request_allowed(ctx->h2)) {
       /* the limit is what we have in use right now */
       effective_max = CONN_ATTACHED(cf->conn);
     }
