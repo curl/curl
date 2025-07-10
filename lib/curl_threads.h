@@ -48,6 +48,8 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
+#else
+#  define CURL_STDCALL
 #endif
 
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
