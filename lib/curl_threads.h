@@ -61,8 +61,7 @@
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
-                                   (CURL_STDCALL *func) (void *),
-                                 void *arg);
+                                 (CURL_STDCALL *func) (void *), void *arg);
 
 void Curl_thread_destroy(curl_thread_t *hnd);
 

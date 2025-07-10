@@ -60,8 +60,7 @@ static void *curl_thread_create_thunk(void *arg)
 }
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
-                                   (CURL_STDCALL *func) (void *),
-                                 void *arg)
+                                 (CURL_STDCALL *func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
@@ -104,8 +103,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 #elif defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
-                                   (CURL_STDCALL *func) (void *),
-                                 void *arg)
+                                 (CURL_STDCALL *func) (void *), void *arg)
 {
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
   typedef HANDLE curl_win_thread_handle_t;
