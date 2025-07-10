@@ -34,11 +34,11 @@
 #define MAX_SSLS_LINE (64 * 1024)
 
 
-static CURLcode tool_ssls_easy(struct GlobalConfig *global,
-                               struct OperationConfig *config,
+static CURLcode tool_ssls_easy(struct OperationConfig *config,
                                CURLSH *share, CURL **peasy)
 {
   CURLcode result = CURLE_OK;
+  struct GlobalConfig *global = config->global;
 
   *peasy = curl_easy_init();
   if(!*peasy)
@@ -53,8 +53,7 @@ static CURLcode tool_ssls_easy(struct GlobalConfig *global,
   return result;
 }
 
-CURLcode tool_ssls_load(struct GlobalConfig *global,
-                        struct OperationConfig *config,
+CURLcode tool_ssls_load(struct OperationConfig *config,
                         CURLSH *share, const char *filename)
 {
   FILE *fp;
@@ -66,6 +65,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
   CURLcode r = CURLE_OK;
   int i, imported;
   bool error = FALSE;
+  struct GlobalConfig *global = config->global;
 
   curlx_dyn_init(&buf, MAX_SSLS_LINE);
   fp = fopen(filename, FOPEN_READTEXT);
@@ -74,7 +74,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     goto out;
   }
 
-  r = tool_ssls_easy(global, config, share, &easy);
+  r = tool_ssls_easy(config, share, &easy);
   if(r)
     goto out;
 
@@ -187,23 +187,23 @@ out:
   return r;
 }
 
-CURLcode tool_ssls_save(struct GlobalConfig *global,
-                        struct OperationConfig *config,
+CURLcode tool_ssls_save(struct OperationConfig *config,
                         CURLSH *share, const char *filename)
 {
   struct tool_ssls_ctx ctx;
   CURL *easy = NULL;
   CURLcode r = CURLE_OK;
 
-  ctx.global = global;
+  ctx.global = config->global;
   ctx.exported = 0;
   ctx.fp = fopen(filename, FOPEN_WRITETEXT);
   if(!ctx.fp) {
-    warnf(global, "Warning: Failed to create SSL session file %s", filename);
+    warnf(config->global, "Warning: Failed to create SSL session file %s",
+          filename);
     goto out;
   }
 
-  r = tool_ssls_easy(global, config, share, &easy);
+  r = tool_ssls_easy(config, share, &easy);
   if(r)
     goto out;
 

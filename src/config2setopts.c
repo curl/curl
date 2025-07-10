@@ -171,10 +171,9 @@ static CURLcode url_proto_and_rewrite(char **url,
   return result;
 }
 
-static CURLcode ssh_setopts(struct GlobalConfig *global,
-                            struct OperationConfig *config,
-                            CURL *curl)
+static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
+  struct GlobalConfig *global = config->global;
   CURLcode result;
 
   /* SSH and SSL private key uses same command-line option */
@@ -231,10 +230,9 @@ extern const unsigned char curl_ca_embed[];
 #endif
 
 /* only called if libcurl supports TLS */
-static CURLcode ssl_setopts(struct GlobalConfig *global,
-                            struct OperationConfig *config,
-                            CURL *curl)
+static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 {
+  struct GlobalConfig *global = config->global;
   CURLcode result = CURLE_OK;
 
   if(config->cacert)
@@ -461,12 +459,10 @@ static CURLcode ssl_setopts(struct GlobalConfig *global,
 }
 
 /* only called for HTTP transfers */
-static CURLcode http_setopts(struct GlobalConfig *global,
-                             struct OperationConfig *config,
+static CURLcode http_setopts(struct OperationConfig *config,
                              CURL *curl)
 {
   long postRedir = 0;
-  (void) global; /* for builds without --libcurl */
 
   my_setopt_long(curl, CURLOPT_FOLLOWLOCATION,
                  config->followlocation);
@@ -521,11 +517,10 @@ static CURLcode http_setopts(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static CURLcode cookie_setopts(struct GlobalConfig *global,
-                               struct OperationConfig *config,
-                               CURL *curl)
+static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result = CURLE_OK;
+  struct GlobalConfig *global = config->global;
   if(config->cookies) {
     struct dynbuf cookies;
     struct curl_slist *cl;
@@ -568,11 +563,9 @@ static CURLcode cookie_setopts(struct GlobalConfig *global,
   return result;
 }
 
-static CURLcode tcp_setopts(struct GlobalConfig *global,
-                            struct OperationConfig *config,
+static CURLcode tcp_setopts(struct OperationConfig *config,
                             CURL *curl)
 {
-  (void) global; /* for builds without --libcurl */
   if(!config->tcp_nodelay)
     my_setopt_long(curl, CURLOPT_TCP_NODELAY, 0);
 
@@ -597,11 +590,8 @@ static CURLcode tcp_setopts(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static CURLcode ftp_setopts(struct GlobalConfig *global,
-                            struct OperationConfig *config,
-                            CURL *curl)
+static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 {
-  (void) global; /* for builds without --libcurl */
   my_setopt_str(curl, CURLOPT_FTPPORT, config->ftpport);
 
   /* new in libcurl 7.9.2: */
@@ -637,10 +627,9 @@ static CURLcode ftp_setopts(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static void gen_trace_setopts(struct GlobalConfig *global,
-                              struct OperationConfig *config,
-                              CURL *curl)
+static void gen_trace_setopts(struct OperationConfig *config, CURL *curl)
 {
+  struct GlobalConfig *global = config->global;
   if(global->tracetype != TRACE_NONE) {
     my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(curl, CURLOPT_DEBUGDATA, config);
@@ -648,12 +637,11 @@ static void gen_trace_setopts(struct GlobalConfig *global,
   }
 }
 
-static void gen_cb_setopts(struct GlobalConfig *global,
-                           struct OperationConfig *config,
+static void gen_cb_setopts(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURL *curl)
 {
-  (void) global; /* for builds without --libcurl */
+  struct GlobalConfig *global = config->global;
   (void) config;
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
@@ -690,12 +678,9 @@ static void gen_cb_setopts(struct GlobalConfig *global,
   my_setopt(curl, CURLOPT_HEADERDATA, per);
 }
 
-static CURLcode proxy_setopts(struct GlobalConfig *global,
-                              struct OperationConfig *config,
-                              CURL *curl)
+static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
 {
-  (void) global; /* for builds without --libcurl */
-
+  struct GlobalConfig *global = config->global;
   if(config->proxy) {
     CURLcode result = my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
 
@@ -753,11 +738,8 @@ static CURLcode proxy_setopts(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static void tls_srp_setopts(struct GlobalConfig *global,
-                            struct OperationConfig *config,
-                            CURL *curl)
+static void tls_srp_setopts(struct OperationConfig *config, CURL *curl)
 {
-  (void) global; /* for builds without --libcurl */
   if(config->tls_username)
     my_setopt_str(curl, CURLOPT_TLSAUTH_USERNAME, config->tls_username);
   if(config->tls_password)
@@ -775,12 +757,12 @@ static void tls_srp_setopts(struct GlobalConfig *global,
                   config->proxy_tls_authtype);
 }
 
-CURLcode config2setopts(struct GlobalConfig *global,
-                        struct OperationConfig *config,
+CURLcode config2setopts(struct OperationConfig *config,
                         struct per_transfer *per,
                         CURL *curl,
                         CURLSH *share)
 {
+  struct GlobalConfig *global = config->global;
   const char *use_proto;
   CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
@@ -801,7 +783,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
     return result;
 #endif
 
-  gen_trace_setopts(global, config, curl);
+  gen_trace_setopts(config, curl);
 
   {
 #ifdef DEBUGBUILD
@@ -825,7 +807,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt_long(curl, CURLOPT_NOPROGRESS,
                  global->noprogress || global->silent);
   /* call after the line above. It may override CURLOPT_NOPROGRESS */
-  gen_cb_setopts(global, config, per, curl);
+  gen_cb_setopts(config, per, curl);
 
   if(config->no_body)
     my_setopt_long(curl, CURLOPT_NOBODY, 1);
@@ -833,7 +815,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
   if(config->oauth_bearer)
     my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
-  result = proxy_setopts(global, config, curl);
+  result = proxy_setopts(config, curl);
   if(result)
     return result;
 
@@ -913,15 +895,15 @@ CURLcode config2setopts(struct GlobalConfig *global,
   }
 
   if(use_proto == proto_http || use_proto == proto_https) {
-    result = http_setopts(global, config, curl);
+    result = http_setopts(config, curl);
     if(!result)
-      result = cookie_setopts(global, config, curl);
+      result = cookie_setopts(config, curl);
     if(result)
       return result;
   }
 
   if(use_proto == proto_ftp || use_proto == proto_ftps) {
-    result = ftp_setopts(global, config, curl);
+    result = ftp_setopts(config, curl);
     if(result)
       return result;
   }
@@ -940,13 +922,13 @@ CURLcode config2setopts(struct GlobalConfig *global,
   my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
   if(use_proto == proto_scp || use_proto == proto_sftp) {
-    result = ssh_setopts(global, config, curl);
+    result = ssh_setopts(config, curl);
     if(result)
       return result;
   }
 
   if(feature_ssl) {
-    result = ssl_setopts(global, config, curl);
+    result = ssl_setopts(config, curl);
     if(result)
       return result;
   }
@@ -1036,7 +1018,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
     my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0);
   }
 
-  result = tcp_setopts(global, config, curl);
+  result = tcp_setopts(config, curl);
   if(result)
     return result;
 
@@ -1072,7 +1054,7 @@ CURLcode config2setopts(struct GlobalConfig *global,
 
   /* new in 7.21.4 */
   if(feature_tls_srp)
-    tls_srp_setopts(global, config, curl);
+    tls_srp_setopts(config, curl);
 
   /* new in 7.22.0 */
   if(config->gssapi_delegation)

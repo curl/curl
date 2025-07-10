@@ -110,8 +110,7 @@ extern const unsigned char curl_ca_embed[];
   "this situation and\nhow to fix it, please visit the webpage mentioned " \
   "above.\n"
 
-static CURLcode single_transfer(struct GlobalConfig *global,
-                                struct OperationConfig *config,
+static CURLcode single_transfer(struct OperationConfig *config,
                                 CURLSH *share,
                                 bool *added,
                                 bool *skipped);
@@ -271,6 +270,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
+  struct OperationConfig *config = global->current;
 #ifdef CURL_DISABLE_LIBCURL_OPTION
   (void)global; /* otherwise used in the my_setopt macros */
 #endif
@@ -772,8 +772,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
   return CURLE_OK;
 }
 
-static CURLcode append2query(struct GlobalConfig *global,
-                             struct OperationConfig *config,
+static CURLcode append2query(struct OperationConfig *config,
                              struct per_transfer *per,
                              const char *q)
 {
@@ -785,7 +784,7 @@ static CURLcode append2query(struct GlobalConfig *global,
                         CURLU_GUESS_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      errorf(global, "(%d) Could not parse the URL, "
+      errorf(config->global, "(%d) Could not parse the URL, "
              "failed to set query", result);
       config->synthetic_error = TRUE;
     }
@@ -807,8 +806,7 @@ static CURLcode append2query(struct GlobalConfig *global,
   return result;
 }
 
-static CURLcode etag_compare(struct GlobalConfig *global,
-                             struct OperationConfig *config)
+static CURLcode etag_compare(struct OperationConfig *config)
 {
   CURLcode result = CURLE_OK;
   char *etag_from_file = NULL;
@@ -818,7 +816,7 @@ static CURLcode etag_compare(struct GlobalConfig *global,
   /* open file for reading: */
   FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
   if(!file)
-    warnf(global, "Failed to open %s: %s", config->etag_compare_file,
+    warnf(config->global, "Failed to open %s: %s", config->etag_compare_file,
           strerror(errno));
 
   if((PARAM_OK == file2string(&etag_from_file, file)) &&
@@ -832,7 +830,7 @@ static CURLcode etag_compare(struct GlobalConfig *global,
   if(!header) {
     if(file)
       fclose(file);
-    errorf(global,
+    errorf(config->global,
            "Failed to allocate memory for custom etag header");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -848,13 +846,13 @@ static CURLcode etag_compare(struct GlobalConfig *global,
   return result;
 }
 
-static CURLcode etag_store(struct GlobalConfig *global,
-                           struct OperationConfig *config,
+static CURLcode etag_store(struct OperationConfig *config,
                            struct OutStruct *etag_save,
                            bool *skip)
 {
   if(config->create_dirs) {
-    CURLcode result = create_dir_hierarchy(config->etag_save_file, global);
+    CURLcode result = create_dir_hierarchy(config->etag_save_file,
+                                           config->global);
     if(result)
       return result;
   }
@@ -864,7 +862,7 @@ static CURLcode etag_store(struct GlobalConfig *global,
     FILE *newfile = fopen(config->etag_save_file, "ab");
     if(!newfile) {
       struct State *state = &config->state;
-      warnf(global, "Failed creating file for saving etags: \"%s\". "
+      warnf(config->global, "Failed creating file for saving etags: \"%s\". "
             "Skip this transfer", config->etag_save_file);
       tool_safefree(state->outfiles);
       glob_cleanup(&state->urls);
@@ -885,8 +883,7 @@ static CURLcode etag_store(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static CURLcode setup_headerfile(struct GlobalConfig *global,
-                                 struct OperationConfig *config,
+static CURLcode setup_headerfile(struct OperationConfig *config,
                                  struct per_transfer *per,
                                  struct OutStruct *heads)
 {
@@ -909,7 +906,8 @@ static CURLcode setup_headerfile(struct GlobalConfig *global,
      * that it does not need to be opened/closed for every transfer.
      */
     if(config->create_dirs) {
-      CURLcode result = create_dir_hierarchy(config->headerfile, global);
+      CURLcode result = create_dir_hierarchy(config->headerfile,
+                                             config->global);
       /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
       if(result)
         return result;
@@ -922,7 +920,7 @@ static CURLcode setup_headerfile(struct GlobalConfig *global,
     newfile = fopen(config->headerfile, "ab");
 
     if(!newfile) {
-      errorf(global, "Failed to open %s", config->headerfile);
+      errorf(config->global, "Failed to open %s", config->headerfile);
       return CURLE_WRITE_ERROR;
     }
     else {
@@ -939,8 +937,7 @@ static CURLcode setup_headerfile(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static CURLcode setup_outfile(struct GlobalConfig *global,
-                              struct OperationConfig *config,
+static CURLcode setup_outfile(struct OperationConfig *config,
                               struct per_transfer *per,
                               struct OutStruct *outs,
                               bool *skipped)
@@ -950,6 +947,7 @@ static CURLcode setup_outfile(struct GlobalConfig *global,
    * decided we want to use the remote filename.
    */
   struct State *state = &config->state;
+  struct GlobalConfig *global = config->global;
 
   if(!per->outfile) {
     /* extract the filename from the URL */
@@ -1044,10 +1042,10 @@ static CURLcode setup_outfile(struct GlobalConfig *global,
   return CURLE_OK;
 }
 
-static void check_stdin_upload(struct GlobalConfig *global,
-                               struct OperationConfig *config,
+static void check_stdin_upload(struct OperationConfig *config,
                                struct per_transfer *per)
 {
+  struct GlobalConfig *global = config->global;
   /* count to see if there are more than one auth bit set
      in the authtype field */
   int authbits = 0;
@@ -1105,14 +1103,14 @@ static void check_stdin_upload(struct GlobalConfig *global,
 }
 
 /* create the next (singular) transfer */
-static CURLcode single_transfer(struct GlobalConfig *global,
-                                struct OperationConfig *config,
+static CURLcode single_transfer(struct OperationConfig *config,
                                 CURLSH *share,
                                 bool *added,
                                 bool *skipped)
 {
   CURLcode result = CURLE_OK;
   struct getout *urlnode;
+  struct GlobalConfig *global = config->global;
   bool orig_noprogress = global->noprogress;
   bool orig_isatty = global->isatty;
   struct State *state = &config->state;
@@ -1239,14 +1237,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
       /* --etag-compare */
       if(config->etag_compare_file) {
-        result = etag_compare(global, config);
+        result = etag_compare(config);
         if(result)
           break;
       }
 
       if(config->etag_save_file) {
         bool badetag = FALSE;
-        result = etag_store(global, config, etag_save, &badetag);
+        result = etag_store(config, etag_save, &badetag);
         if(result || badetag)
           break;
       }
@@ -1288,7 +1286,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
       /* Single header file for all URLs */
       if(config->headerfile) {
-        result = setup_headerfile(global, config, per, heads);
+        result = setup_headerfile(config, per, heads);
         if(result)
           break;
       }
@@ -1330,7 +1328,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
       if((urlnode->useremote ||
           (per->outfile && strcmp("-", per->outfile)))) {
-        result = setup_outfile(global, config, per, outs, skipped);
+        result = setup_outfile(config, per, outs, skipped);
         if(result)
           break;
       }
@@ -1338,7 +1336,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       if(per->uploadfile) {
 
         if(stdin_upload(per->uploadfile))
-          check_stdin_upload(global, config, per);
+          check_stdin_upload(config, per);
         else {
           /*
            * We have specified a file to upload and it is not "-".
@@ -1366,7 +1364,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       }
 
       if(httpgetfields || config->query) {
-        result = append2query(global, config, per,
+        result = append2query(config, per,
                               httpgetfields ? httpgetfields : config->query);
         if(result)
           break;
@@ -1394,7 +1392,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       hdrcbdata->global = global;
       hdrcbdata->config = config;
 
-      result = config2setopts(global, config, per, curl, share);
+      result = config2setopts(config, per, curl, share);
       if(result)
         break;
 
@@ -1847,7 +1845,8 @@ static CURLcode check_finished(struct parastate *s)
     }
     if(checkmore) {
       /* one or more transfers completed, add more! */
-      CURLcode tres = add_parallel_transfers(global, s->multi, s->share,
+      CURLcode tres = add_parallel_transfers(global,
+                                             s->multi, s->share,
                                              &s->more_transfers,
                                              &s->added_transfers);
       if(tres)
@@ -2132,8 +2131,7 @@ fail:
 }
 
 /* setup a transfer for the given config */
-static CURLcode transfer_per_config(struct GlobalConfig *global,
-                                    struct OperationConfig *config,
+static CURLcode transfer_per_config(struct OperationConfig *config,
                                     CURLSH *share,
                                     bool *added,
                                     bool *skipped)
@@ -2173,7 +2171,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   }
 
   if(!result)
-    result = single_transfer(global, config, share, added, skipped);
+    result = single_transfer(config, share, added, skipped);
 
   return result;
 }
@@ -2190,8 +2188,7 @@ static CURLcode create_transfer(struct GlobalConfig *global,
   CURLcode result = CURLE_OK;
   *added = FALSE;
   while(global->current) {
-    result = transfer_per_config(global, global->current, share, added,
-                                 skipped);
+    result = transfer_per_config(global->current, share, added, skipped);
     if(!result && !*added) {
       /* when one set is drained, continue to next */
       global->current = global->current->next;
@@ -2341,7 +2338,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
           if(global->ssl_sessions && feature_ssls_export)
-            result = tool_ssls_load(global, global->first, share,
+            result = tool_ssls_load(global->first, share,
                                     global->ssl_sessions);
 
           if(!result) {
@@ -2359,7 +2356,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
             result = run_all_transfers(global, share, result);
 
             if(global->ssl_sessions && feature_ssls_export) {
-              CURLcode r2 = tool_ssls_save(global, global->first, share,
+              CURLcode r2 = tool_ssls_save(global->first, share,
                                            global->ssl_sessions);
               if(r2 && !result)
                 result = r2;
