@@ -17,7 +17,7 @@ Verify deprecation statuses and versions
 </name>
 
 <command type="perl">
-%SRCDIR/test1222.pl %SRCDIR/..
+%SRCDIR/test1222.pl %SRCDIR/.. %PWD/..
 </command>
 </client>
 
