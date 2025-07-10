@@ -535,6 +535,22 @@ static void multi_done_locked(struct connectdata *conn,
                               void *userdata)
 {
   struct multi_done_ctx *mdctx = userdata;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  const char *host =
+#ifndef CURL_DISABLE_PROXY
+        conn->bits.socksproxy ?
+        conn->socks_proxy.host.dispname :
+        conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+#endif
+        conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+        conn->host.dispname;
+  int port =
+#ifndef CURL_DISABLE_PROXY
+        conn->bits.httpproxy ? conn->http_proxy.port :
+#endif
+        conn->bits.conn_to_port ? conn->conn_to_port :
+        conn->remote_port;
+#endif
 
   Curl_detach_connection(data);
 
@@ -580,30 +596,27 @@ static void multi_done_locked(struct connectdata *conn,
 #endif
      ) || conn->bits.close
        || (mdctx->premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    CURL_TRC_M(data, "multi_done, not reusing connection=%"
-                     FMT_OFF_T ", forbid=%d"
-                     ", close=%d, premature=%d, conn_multiplex=%d",
-                     conn->connection_id, data->set.reuse_forbid,
-                     conn->bits.close, mdctx->premature,
-                     Curl_conn_is_multiplex(conn, FIRSTSOCKET));
+    CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%d, "
+               "forbid=%d, close=%d, premature=%d, conn_multiplex=%d",
+               conn->connection_id, host, port, data->set.reuse_forbid,
+               conn->bits.close, mdctx->premature,
+               Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn, "disconnecting");
+    Curl_conn_terminate(data, conn, mdctx->premature);
+  }
+  else if(!Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
+    CURL_TRC_M(data, "multi_done, conn #%" FMT_OFF_T " to %s:%d was shutdown"
+               " by server, not reusing", conn->connection_id, host, port);
+    connclose(conn, "server shutdown");
     Curl_conn_terminate(data, conn, mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
     if(Curl_cpool_conn_now_idle(data, conn)) {
       /* connection kept in the cpool */
-      const char *host =
-#ifndef CURL_DISABLE_PROXY
-        conn->bits.socksproxy ?
-        conn->socks_proxy.host.dispname :
-        conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-#endif
-        conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-        conn->host.dispname;
       data->state.lastconnect_id = conn->connection_id;
-      infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
-            conn->connection_id, host);
+      infof(data, "Connection #%" FMT_OFF_T " to host %s:%d left intact",
+            conn->connection_id, host, port);
     }
     else {
       /* connection was removed from the cpool and destroyed. */
