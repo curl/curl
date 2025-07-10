@@ -49,7 +49,7 @@ sub scanheader {
         $line++;
         if($_ =~ /^  (CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
             my ($name)=($1);
-            if(($name !~ /(OBSOLETE|CURLE_RESERVED)/) && ($name !~ /_LAST\z/)) {
+            if(($name !~ /(OBSOLETE|CURLE_RESERVED|CURLM_CALL_MULTI_SOCKET)/) && ($name !~ /_LAST\z/)) {
                 push @hnames, $name;
                 if($wherefrom{$name}) {
                     print STDERR "double: $name\n";
