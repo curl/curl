@@ -1161,13 +1161,15 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   /* If not completely pausing both directions now, run again in any case. */
   if(!Curl_xfer_is_blocked(data)) {
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
-    /* On changes, tell application to update its timers. */
-    if(changed && data->multi) {
-      if(Curl_update_timer(data->multi) && !result)
-        result = CURLE_ABORTED_BY_CALLBACK;
+    if(data->multi) {
+      Curl_multi_mark_dirty(data); /* make it run */
+      /* On changes, tell application to update its timers. */
+      if(changed) {
+        if(Curl_update_timer(data->multi) && !result)
+          result = CURLE_ABORTED_BY_CALLBACK;
+      }
     }
   }
 
