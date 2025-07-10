@@ -1681,10 +1681,13 @@ if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
           dnl We need both libraries
           LIBS="-l$LDAPLIBNAME -l$LBERLIBNAME $LIBS"
         fi
+      else
+        dnl LDAP alone is sufficient
+        LIBS="-l$LDAPLIBNAME $LIBS"
       fi
     else
       dnl Only check LDAP library
-      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes], [ldap_lib_ok=no])
+      AC_CHECK_LIB("$LDAPLIBNAME", ldap_init, [ldap_lib_ok=yes; LIBS="-l$LDAPLIBNAME $LIBS"], [ldap_lib_ok=no])
     fi
 
     if test "$ldap_lib_ok" = "no"; then
