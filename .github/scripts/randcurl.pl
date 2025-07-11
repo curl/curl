@@ -31,6 +31,14 @@ if(!$seconds) {
 }
 print "Run $curl for $seconds seconds\n";
 
+my @opt;
+my %arg;
+my %uniq;
+my %allrc;
+
+my $totalargs = 0;
+my $totalcmds = 0;
+
 my $counter = 0xabcdef + time();
 sub getnum {
     my ($max) = @_;
