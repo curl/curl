@@ -543,7 +543,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     ws_dec_info(dec, data, "passing");
     if(result)
       return result;
-    /* paylod parsing done */
+    /* payload parsing done */
     dec->state = WS_DEC_INIT;
     break;
   default:

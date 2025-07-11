@@ -108,7 +108,7 @@ syntax:
 
 ~~~
     # NAME
-    a page - this is a page descriving something
+    a page - this is a page describing something
 
     # SYNOPSIS
     ~~~c

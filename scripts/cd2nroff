@@ -401,7 +401,7 @@ sub single {
                 push @desc, ".fi\n";
                 next;
             }
-            # convert single backslahes to doubles
+            # convert single backslashes to doubles
             $d =~ s/\\/\\\\/g;
             # lines starting with a period needs it escaped
             $d =~ s/^\./\\&./;

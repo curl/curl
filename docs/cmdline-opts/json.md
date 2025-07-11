@@ -13,8 +13,8 @@ See-also:
   - data-binary
   - data-raw
 Example:
-  - --json '{ "drink": "coffe" }' $URL
-  - --json '{ "drink":' --json ' "coffe" }' $URL
+  - --json '{ "drink": "coffee" }' $URL
+  - --json '{ "drink":' --json ' "coffee" }' $URL
   - --json @prepared $URL
   - --json @- $URL < json.txt
 ---

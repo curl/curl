@@ -106,14 +106,14 @@ static void check_set(const char *name, unsigned int capacity,
     fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly lost");
 
   fail_unless(!Curl_uint_bset_resize(&bset, capacity/2), "resize half failed");
-  /* halfed the size, what numbers remain in set? */
+  /* halved the size, what numbers remain in set? */
   c = Curl_uint_bset_capacity(&bset);
   n = 0;
   for(i = 0; i < slen; ++i) {
     if(s[i] < c)
       ++n;
   }
-  fail_unless(n == Curl_uint_bset_count(&bset), "set count(halfed) wrong");
+  fail_unless(n == Curl_uint_bset_count(&bset), "set count(halved) wrong");
   for(i = 0; i < n; i++)  /* still present after resize half */
     fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly lost");
 

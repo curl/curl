@@ -457,7 +457,7 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex);
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
 
 /**
- * Adjust the pollset for the filter chain startgin at `cf`.
+ * Adjust the pollset for the filter chain starting at `cf`.
  */
 void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,

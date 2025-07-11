@@ -917,7 +917,7 @@ is_public_suffix(struct Curl_easy *data,
         Curl_psl_release(data);
       }
       else
-        infof(data, "libpsl problem, rejecting cookie for satety");
+        infof(data, "libpsl problem, rejecting cookie for safety");
     }
 
     if(!acceptable) {

@@ -59,7 +59,7 @@ struct pingpong {
   struct dynbuf recvbuf;
   size_t overflow; /* number of bytes left after a final response line */
   size_t nfinal;   /* number of bytes in the final response line, which
-                      after a match is first in the receice buffer */
+                      after a match is first in the receive buffer */
 
   /* Function pointers the protocols MUST implement and provide for the
      pingpong layer to function */

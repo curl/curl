@@ -826,7 +826,7 @@ sub single {
             print ".nf\n";
             foreach my $e (@examples) {
                 $e =~ s!\$URL!https://example.com!g;
-                # convert single backslahes to doubles
+                # convert single backslashes to doubles
                 $e =~ s/\\/\\\\/g;
                 print "curl $e\n";
             }

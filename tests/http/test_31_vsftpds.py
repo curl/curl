@@ -242,7 +242,7 @@ class TestVsFTPD:
         assert os.path.exists(dstfile)
         destdata = open(dstfile).readlines()
         expdata = [indata] if len(indata) else []
-        assert expdata == destdata, f'exected: {expdata}, got: {destdata}'
+        assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

@@ -455,7 +455,7 @@ problems may have been fixed or changed somewhat since this was written.
 10.2 Does not acknowledge getaddrinfo sorting policy
 
  Even if a user edits /etc/gai.conf to prefer IPv4, curl still prefers and
- tries IPv6 adresses first.
+ tries IPv6 addresses first.
 
  https://github.com/curl/curl/issues/16718
 

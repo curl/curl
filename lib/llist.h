@@ -75,7 +75,7 @@ size_t Curl_llist_count(struct Curl_llist *list);
 void *Curl_node_elem(struct Curl_llist_node *n);
 
 /* Remove the node from the list and return the custom data
- * from a Curl_llist_node. Will NOT incoke a registered `dtor`. */
+ * from a Curl_llist_node. Will NOT invoke a registered `dtor`. */
 void *Curl_node_take_elem(struct Curl_llist_node *);
 
 /* Curl_node_next() returns the next element in a list from a given

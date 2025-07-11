@@ -2005,7 +2005,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
           eob = &SMTP_EOB[2];
           break;
         case 3:
-          /* ended with '\r\n.', we should escpe the last '.' */
+          /* ended with '\r\n.', we should escape the last '.' */
           eob = "." SMTP_EOB;
           break;
         default:
