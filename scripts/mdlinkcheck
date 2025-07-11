@@ -23,6 +23,9 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
 my %whitelist = (
     'https://curl.se/' => 1,
     'https://curl.se/changes.html' => 1,
@@ -69,6 +72,9 @@ my %whitelist = (
     'https://github.com/curl/curl/pulls' => 1,
 
     );
+
+my %url;
+my %flink;
 
 # list all .md files in the repo
 my @files=`git ls-files '**.md'`;
@@ -146,7 +152,7 @@ for my $u (sort keys %url) {
     my $r = checkurl($u);
 
     if($r) {
-        for my $f (split(/ /, $url{$l})) {
+        for my $f (split(/ /, $url{$u})) {
             printf "%s ERROR links to missing URL %s\n", $f, $u;
             $error++;
         }
