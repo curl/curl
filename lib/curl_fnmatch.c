@@ -75,7 +75,7 @@ static int parsekeyword(const unsigned char **pattern, unsigned char *charset)
 {
   parsekey_state state = CURLFNM_PKW_INIT;
   char keyword[10] = { 0 };
-  int i;
+  size_t i;
   const unsigned char *p = *pattern;
   bool found = FALSE;
   for(i = 0; !found; i++) {
