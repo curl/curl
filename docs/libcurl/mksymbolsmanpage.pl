@@ -35,7 +35,7 @@ my $year = strftime "%Y", @ts;
 
 print <<HEADER
 ---
-c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: libcurl-symbols
 Section: 3

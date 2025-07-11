@@ -78,7 +78,7 @@ sub single {
 
             print <<HEAD
 ---
-c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: $title
 Section: $section
