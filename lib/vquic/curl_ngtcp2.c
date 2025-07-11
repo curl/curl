@@ -155,7 +155,7 @@ struct cf_ngtcp2_ctx {
   BIT(initialized);
   BIT(tls_handshake_complete);       /* TLS handshake is done */
   BIT(use_earlydata);                /* Using 0RTT data */
-  BIT(earlydata_accepted);           /* 0RTT was acceptd by server */
+  BIT(earlydata_accepted);           /* 0RTT was accepted by server */
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
