@@ -1122,7 +1122,6 @@ sub listglobals {
         }
         close(F);
     }
-    return $ret if($ret);
     for my $e (0 .. $#globalopts) {
         $globals .= sprintf "%s--%s",  $e?($globalopts[$e+1] ? ", " : " and "):"",
             $globalopts[$e],;
