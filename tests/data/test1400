@@ -34,7 +34,7 @@ http
 SSL_CERT_FILE=
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --tls-max 1.3 --tlsv1.1
 </command>
 </client>
 
@@ -55,6 +55,7 @@ s/(USERAGENT, \")[^\"]+/${1}stripped/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
+$_ = '' if /CURLOPT_SSLVERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 </stripfile>
