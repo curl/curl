@@ -255,7 +255,7 @@ while(<$fh>) {
 close($fh);
 
 if(!glob("$libdocdir/*.3")) {
-    print("curl likely built without the libcurl manual. Skipping test 1222.\n");
+    print("curl built without the libcurl manual. Skipping test 1222.\n");
     exit 0;
 }
 
