@@ -151,7 +151,7 @@ Makes it the equivalent of --socks5-hostname
 </file4>
 
 <command type="perl">
-%SRCDIR/../scripts/managen -d %LOGDIR ascii option1.md option2.md
+%SRCDIR/../scripts/managen -I %SRCDIR/../include -d %LOGDIR ascii option1.md option2.md
 </command>
 </client>
 
