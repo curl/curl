@@ -343,7 +343,6 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
       failf(data, "QUIC needs at least TLS version 1.3");
       return CURLE_SSL_CONNECT_ERROR;
      }
-    ssl_version = CURL_SSLVERSION_MAX_TLSv1_3; /* raise minimum */
     *prioritylist = QUIC_PRIORITY;
     return CURLE_OK;
   }
