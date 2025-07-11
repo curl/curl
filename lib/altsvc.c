@@ -665,4 +665,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   return FALSE;
 }
 
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
+#undef time
+#endif
+
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
