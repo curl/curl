@@ -75,7 +75,8 @@ jobs:
             --skip src/tool_hugehelp.c \
             --skip scripts/wcurl \
             --ignore-words .github/scripts/codespell-ignore.txt \
-            CMake include m4 scripts src lib
+            --skip '*/test*,THANKS' \
+            .github CMake docs include lib m4 packages plan9 projects scripts src tests
 
       - name: 'cmakelint'
         run: scripts/cmakelint.sh
