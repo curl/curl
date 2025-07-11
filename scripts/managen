@@ -39,6 +39,9 @@ Unfortunately it seems some perls like msysgit cannot handle a global input-only
 =end comment
 =cut
 
+use strict;
+use warnings;
+
 my %optshort;
 my %optlong;
 my %helplong;
@@ -284,7 +287,8 @@ sub render {
     my $quote;
     my $level;
     my $finalblank;
-    $start = 0;
+    my $blankline = 0;
+    my $start = 0;
 
     while(<$fh>) {
         my $d = $_;
@@ -575,7 +579,7 @@ sub single {
             $protocols=$1;
         }
         elsif(/^See-also: +(.+)/i) {
-            if($seealso) {
+            if(@seealso) {
                 print STDERR "ERROR: duplicated See-also in $f\n";
                 return 1;
             }
@@ -876,13 +880,13 @@ sub single {
     push @foot, seealso($standalone, $mstr);
 
     print "\n";
-    my $f = join("", @foot);
+    my $ft = join("", @foot);
     if($manpage) {
-        $f =~ s/ +\z//; # remove trailing space
-        print "$f\n";
+        $ft =~ s/ +\z//; # remove trailing space
+        print "$ft\n";
     }
     else {
-        printdesc($manpage, 2, "[1]$f");
+        printdesc($manpage, 2, "[1]$ft");
     }
     return 0;
 }
@@ -950,8 +954,8 @@ sub getshortlong {
 
 sub indexoptions {
     my ($dir, @files) = @_;
-    foreach my $f (@files) {
-        getshortlong($dir, $f);
+    foreach my $file (@files) {
+        getshortlong($dir, $file);
     }
 }
 
