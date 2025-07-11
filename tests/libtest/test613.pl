@@ -109,7 +109,7 @@ elsif($ARGV[0] eq "postprocess")
             if($1 eq "d") {
                 # Skip current and parent directory listing, because some SSH
                 # servers (eg. OpenSSH for Windows) are not listing those
-                if ($8 eq "." || $8 eq "..") {
+                if($8 eq "." || $8 eq "..") {
                     next;
                 }
                 # Erase all directory metadata except for the name, as it is not

@@ -157,7 +157,7 @@ our $stunnel;        # path to stunnel command
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
     my @paths;
-    if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
+    if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
         @paths=(split(';', $ENV{'PATH'}), @extrapaths);
     }
@@ -207,17 +207,17 @@ sub initserverconfig {
 
     # get the name of the current user
     $USER = $ENV{USER};          # Linux
-    if (!$USER) {
+    if(!$USER) {
         $USER = $ENV{USERNAME};     # Windows
     }
-    if (!$USER) {
+    if(!$USER) {
         $USER = $ENV{LOGNAME};  # Some Unix (I think)
     }
-    if (!$USER) {
+    if(!$USER) {
         $USER = `whoami`;
         chomp $USER;
     }
-    if (!$USER) {
+    if(!$USER) {
         $USER = `id -un`;
         chomp $USER;
     }
@@ -370,7 +370,7 @@ sub startnew {
     }
 
     # Ugly hack but ssh client and gnutls-serv don't support pid files
-    if ($fakepidfile) {
+    if($fakepidfile) {
         if(open(my $out, ">", "$pidfile")) {
             print $out $child . "\n";
             close($out) || die "Failure writing pidfile";
@@ -381,7 +381,7 @@ sub startnew {
         }
         # could/should do a while connect fails sleep a bit and loop
         portable_sleep($timeout);
-        if (checkdied($child)) {
+        if(checkdied($child)) {
             logmsg "startnew: child process has failed to start\n" if($verbose);
             return (-1,-1);
         }
@@ -397,7 +397,7 @@ sub startnew {
             # similar!
             last;
         }
-        if (checkdied($child)) {
+        if(checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
                 if($verbose);
             # We can't just abort waiting for the server with a
@@ -1111,7 +1111,7 @@ sub runhttpserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1190,7 +1190,7 @@ sub runhttp2server {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0, 0);
     }
 
@@ -1251,7 +1251,7 @@ sub runhttp3server {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1317,7 +1317,7 @@ sub runhttpsserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1398,7 +1398,7 @@ sub runhttptlsserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1461,7 +1461,7 @@ sub runpingpongserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
 
@@ -1532,7 +1532,7 @@ sub runsecureserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1603,7 +1603,7 @@ sub runtftpserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1674,7 +1674,7 @@ sub rundnsserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1747,7 +1747,7 @@ sub runrtspserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1817,7 +1817,7 @@ sub runsshserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1935,7 +1935,7 @@ sub runmqttserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
 
@@ -1997,7 +1997,7 @@ sub runsocksserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2080,7 +2080,7 @@ sub rundictserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2141,7 +2141,7 @@ sub runsmbserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2202,7 +2202,7 @@ sub runnegtelnetserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2387,7 +2387,7 @@ sub responsive_httptls_server {
     my $ip = "$HOSTIP";
     my $idnum = 1;
 
-    if ($ipvnum == 6) {
+    if($ipvnum == 6) {
         $port = protoport("httptls6");
         $ip = "$HOST6IP";
     }
@@ -3173,7 +3173,7 @@ sub subvariables {
     # this only works after the SSH server has been started
     # TODO: call sshversioninfo early and store $sshdid so this substitution
     # always works
-    if ($sshdid && $sshdid =~ /OpenSSH-Windows/) {
+    if($sshdid && $sshdid =~ /OpenSSH-Windows/) {
         $ssh_pwd = $file_pwd;
     }
 

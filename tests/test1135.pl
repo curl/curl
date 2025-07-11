@@ -88,7 +88,7 @@ foreach my $f (@incs) {
             $first = $decl;
         }
         elsif($first) {
-            if (/^ *(.*)\(/) {
+            if(/^ *(.*)\(/) {
                 my $decl = $1;
                 $decl =~ s/\r$//;
                 $first .= $decl;

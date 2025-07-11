@@ -607,7 +607,7 @@ sub singletest_startservers {
 
     my $why;
     my $error;
-    if (!$listonly) {
+    if(!$listonly) {
         my @what = getpart("client", "server");
         if(!$what[0]) {
             warn "Test case $testnum has no server(s) specified";
@@ -779,7 +779,7 @@ sub singletest_prepare {
                     mkdir $d; # 0777
                 }
             }
-            if (open(my $outfile, ">", "$filename")) {
+            if(open(my $outfile, ">", "$filename")) {
                 binmode $outfile; # for crapage systems, use binary
                 if($fileattr{'nonewline'}) {
                     # cut off the final newline
@@ -820,7 +820,7 @@ sub singletest_run {
     my %cmdhash = getpartattr("client", "command");
     if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-output/)) {
         #We may slap on --output!
-        if (!partexists("verify", "stdout") ||
+        if(!partexists("verify", "stdout") ||
                 ($cmdhash{'option'} && $cmdhash{'option'} =~ /force-output/)) {
             $out=" --output $CURLOUT ";
         }
@@ -887,7 +887,7 @@ sub singletest_run {
             }
         }
         $cmdargs .= $cmd;
-        if ($proxy_address) {
+        if($proxy_address) {
             $cmdargs .= " --proxy $proxy_address ";
         }
     }
@@ -1015,7 +1015,7 @@ sub singletest_run {
     $$testtimings{"timetoolini"} = Time::HiRes::time();
 
     # run the command line we built
-    if ($torture) {
+    if($torture) {
         $cmdres = torture($CMDLINE,
                           $testnum,
                           "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
@@ -1197,7 +1197,7 @@ sub runner_test_preprocess {
 
         ###############################################################
         # Check that the test environment is fine to run this test case
-        if (!$listonly) {
+        if(!$listonly) {
             $why = singletest_precheck($testnum);
             $error = -1;
         }

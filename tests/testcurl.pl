@@ -263,7 +263,7 @@ if($name && $email && $desc) {
 }
 elsif(open(my $f, "<", "$setupfile")) {
     while (<$f>) {
-        if (/(\w+)=(.*)/) {
+        if(/(\w+)=(.*)/) {
             eval "\$$1=$2;";
         }
     }
@@ -296,7 +296,7 @@ if(!$desc) {
 }
 
 if(!$confopts) {
-    if ($infixed < 4) {
+    if($infixed < 4) {
         print "please enter your additional arguments to configure\n";
         print "examples: --with-openssl --enable-debug --enable-ipv6\n";
         $confopts = <>;
@@ -517,7 +517,7 @@ if((-f "include/curl/curlver.h") &&
 logit "timestamp = $timestamp";
 
 if ($configurebuild) {
-    if (-f "configure") {
+    if(-f "configure") {
         logit "configure created (at least it exists)";
     } else {
         mydie "no configure created/found";

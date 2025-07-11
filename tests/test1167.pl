@@ -91,10 +91,10 @@ sub scanenums {
         if($skipit) {
             next;
         }
-        if (/^#/) {
+        if(/^#/) {
             next;
         }
-        if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
+        if( /enum\s+(\S+\s+)?{/ .. /}/ ) {
             s/^\s+//;
             chomp;
             s/[,\s].*//;
@@ -122,7 +122,7 @@ sub scanheader {
     open H, "<$f";
     while(<H>) {
         my ($line, $linenum) = ($_, $.);
-        if (/^ *# *define +([^ \n]*)/) {
+        if(/^ *# *define +([^ \n]*)/) {
             if($verbose) {
                 print "Source: $f\n";
                 print "Symbol: $1\n";

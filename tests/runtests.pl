@@ -202,7 +202,7 @@ sub logmsg {
         if(!$line) {
             next;
         }
-        if ($is_wsl) {
+        if($is_wsl) {
             # use \r\n for WSL shell
             $line =~ s/\r?\n$/\r\n/g;
         }
@@ -600,16 +600,16 @@ sub checksystemfeatures {
             if($libcurl =~ /AppleIDN/) {
                 $feature{"AppleIDN"} = 1;
             }
-            if ($libcurl =~ /WinIDN/) {
+            if($libcurl =~ /WinIDN/) {
                 $feature{"WinIDN"} = 1;
             }
-            if ($libcurl =~ /libidn2/) {
+            if($libcurl =~ /libidn2/) {
                 $feature{"libidn2"} = 1;
             }
-            if ($libcurl =~ /libssh2/i) {
+            if($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }
-            if ($libcurl =~ /libssh\/([0-9.]*)\//i) {
+            if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
                 if($1 =~ /(\d+)\.(\d+).(\d+)/) {
                     my $v = $1 * 100 + $2 * 10 + $3;
@@ -619,7 +619,7 @@ sub checksystemfeatures {
                     }
                 }
             }
-            if ($libcurl =~ /wolfssh/i) {
+            if($libcurl =~ /wolfssh/i) {
                 $feature{"wolfssh"} = 1;
             }
         }
@@ -821,7 +821,7 @@ sub checksystemfeatures {
             die "can't run torture tests since curl was built without ".
                 "TrackMemory feature (--enable-curldebug)";
         }
-        if ($feature{"threaded-resolver"} && !$valgrind) {
+        if($feature{"threaded-resolver"} && !$valgrind) {
             die "can't run torture tests since curl was built with the ".
                 "threaded resolver, and we aren't running with valgrind";
         }
@@ -1121,8 +1121,8 @@ sub singletest_shouldrun {
             my $match;
             for my $k (@info_keywords) {
                 chomp $k;
-                if ($disabled_keywords{lc($k)}) {
-                    if ($k =~ /^feat:/) {
+                if($disabled_keywords{lc($k)}) {
+                    if($k =~ /^feat:/) {
                         $why = "disabled by feature";
                     }
                     else {
@@ -1139,7 +1139,7 @@ sub singletest_shouldrun {
             }
 
             if(!$why && !$match && %enabled_keywords) {
-                if (grep { /^feat:/ } keys %enabled_keywords) {
+                if(grep { /^feat:/ } keys %enabled_keywords) {
                     $why = "disabled by missing feature";
                 }
                 else {
@@ -1149,24 +1149,24 @@ sub singletest_shouldrun {
         }
     }
 
-    if (!$why && defined $custom_skip_reasons{test}{$testnum}) {
+    if(!$why && defined $custom_skip_reasons{test}{$testnum}) {
         $why = $custom_skip_reasons{test}{$testnum};
     }
 
-    if (!$why && defined $custom_skip_reasons{tool}) {
+    if(!$why && defined $custom_skip_reasons{tool}) {
         foreach my $tool (getpart("client", "tool")) {
             foreach my $tool_skip_pattern (keys %{$custom_skip_reasons{tool}}) {
-                if ($tool =~ /$tool_skip_pattern/i) {
+                if($tool =~ /$tool_skip_pattern/i) {
                     $why = $custom_skip_reasons{tool}{$tool_skip_pattern};
                 }
             }
         }
     }
 
-    if (!$why && defined $custom_skip_reasons{keyword}) {
+    if(!$why && defined $custom_skip_reasons{keyword}) {
         foreach my $keyword (@info_keywords) {
             foreach my $keyword_skip_pattern (keys %{$custom_skip_reasons{keyword}}) {
-                if ($keyword =~ /$keyword_skip_pattern/i) {
+                if($keyword =~ /$keyword_skip_pattern/i) {
                     $why = $custom_skip_reasons{keyword}{$keyword_skip_pattern};
                 }
             }
@@ -1225,7 +1225,7 @@ sub singletest_check {
     my ($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
 
     # Skip all the verification on torture tests
-    if ($torture) {
+    if($torture) {
         # timestamp test result verification end
         $timevrfyend{$testnum} = Time::HiRes::time();
         return -2;
@@ -1247,7 +1247,7 @@ sub singletest_check {
     my %hash = getpartattr("verify", "stdout");
 
     my $loadfile = $hash{'loadfile'};
-    if ($loadfile) {
+    if($loadfile) {
         open(my $tmp, "<", "$loadfile") || die "Cannot open file $loadfile: $!";
         @validstdout = <$tmp>;
         close($tmp);
@@ -1256,7 +1256,7 @@ sub singletest_check {
         s/\r\n/\n/g for @validstdout;
     }
 
-    if (@validstdout) {
+    if(@validstdout) {
         # verify redirected stdout
         my @actual = loadarray(stdoutfilename($logdir, $testnum));
 
@@ -1302,7 +1302,7 @@ sub singletest_check {
     }
 
     my @validstderr = getpart("verify", "stderr");
-    if (@validstderr) {
+    if(@validstderr) {
         # verify redirected stderr
         my @actual = loadarray(stderrfilename($logdir, $testnum));
 
@@ -1412,7 +1412,7 @@ sub singletest_check {
 
     my %replyattr = getpartattr("reply", "data");
     my @reply;
-    if (partexists("reply", "datacheck")) {
+    if(partexists("reply", "datacheck")) {
         for my $partsuffix (('', '1', '2', '3', '4')) {
             my @replycheckpart = getpart("reply", "datacheck".$partsuffix);
             if(@replycheckpart) {
@@ -1463,7 +1463,7 @@ sub singletest_check {
             normalize_text(\@out);
         }
         $res = compare($runnerid, $testnum, $testname, "data", \@out, \@reply);
-        if ($res) {
+        if($res) {
             return -1;
         }
         $ok .= "d";
@@ -1504,7 +1504,7 @@ sub singletest_check {
         }
 
         $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
-        if ($res) {
+        if($res) {
             return -1;
         }
         $ok .= "u";
@@ -1568,7 +1568,7 @@ sub singletest_check {
             if(!$filename) {
                 logmsg " $testnum: IGNORED: section verify=>file$partsuffix ".
                        "has no name attribute\n";
-                if (runnerac_stopservers($runnerid)) {
+                if(runnerac_stopservers($runnerid)) {
                     logmsg "ERROR: runner $runnerid seems to have died\n";
                 } else {
 
@@ -1753,7 +1753,7 @@ sub singletest_check {
         while (@notexists) {
             my $fname = shift @notexists;
             chomp $fname;
-            if (-e $fname) {
+            if(-e $fname) {
                 logmsg "Found '$fname' when not supposed to exist.\n";
                 $err++;
             }
@@ -2248,7 +2248,7 @@ my $number=0;
 my $fromnum=-1;
 my @testthis;
 while(@ARGV) {
-    if ($ARGV[0] eq "-v") {
+    if($ARGV[0] eq "-v") {
         # verbose output
         $verbose=1;
     }
@@ -2377,7 +2377,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-o") {
         shift @ARGV;
-        if ($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
+        if($ARGV[0] =~ /^(\w+)=([\w.:\/\[\]-]+)$/) {
             my ($variable, $value) = ($1, $2);
             eval "\$$variable='$value'" or die "Failed to set \$$variable to $value: $@";
         } else {
@@ -2570,7 +2570,7 @@ if($valgrind) {
         # (this happened in 2003, so we could probably don't need to care about
         # that old version any longer and just delete this check)
         runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
-        if (($? >> 8)) {
+        if(($? >> 8)) {
             $valgrind_tool="";
         }
         open(my $curlh, "<", "$CURL");
@@ -2742,7 +2742,7 @@ if ( $TESTCASES eq "all") {
 else {
     my $verified="";
     for(split(" ", $TESTCASES)) {
-        if (-e "$TESTDIR/test$_") {
+        if(-e "$TESTDIR/test$_") {
             $verified.="$_ ";
         }
     }
@@ -2792,7 +2792,7 @@ sub displaylogcontent {
             $string =~ tr/\n//;
             for my $line (split(m/\n/, $string)) {
                 $line =~ s/\s*\!$//;
-                if ($truncate) {
+                if($truncate) {
                     push @tail, " $line\n";
                 } else {
                     logmsg " $line\n";
