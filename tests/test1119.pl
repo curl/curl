@@ -67,7 +67,7 @@ my %rem;
 sub scanenum {
     my ($file) = @_;
     open my $h_in, "-|", "$Cpreprocessor $i$file" || die "Cannot preprocess $file";
-    while( <$h_in> ) {
+    while(<$h_in>) {
         if(/enum\s+(\S+\s+)?{/ .. /}/) {
             s/^\s+//;
             next unless /^CURL/;
