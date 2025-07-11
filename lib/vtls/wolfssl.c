@@ -517,7 +517,7 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
 #endif
 
   if(!connssl->earlydata_max) {
-    /* Seems to be GnuTLS way to signal no EarlyData in session */
+    /* Seems to be no WolfSSL way to signal no EarlyData in session */
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
   else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {
