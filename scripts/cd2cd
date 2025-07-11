@@ -36,13 +36,16 @@ Example: cd2cd [--in-place] <file.md> > <file.md>
 =end comment
 =cut
 
+use strict;
+use warnings;
+
 my $cd2cd = "0.1"; # to keep check
 my $dir;
 my $extension;
 my $inplace = 0;
 
 while(1) {
-    if($ARGV[0] eq "--in-place") {
+    if(@ARGV && $ARGV[0] eq "--in-place") {
         shift @ARGV;
         $inplace = 1;
     }
@@ -84,6 +87,9 @@ sub single {
     my $start = 0;
     my $d;
     my $line = 0;
+    my $salist = 0;
+    my $copyright;
+    my $spdx;
     open(F, "<:crlf", "$f") ||
         return 1;
     while(<F>) {
@@ -221,6 +227,6 @@ if($inplace) {
         single($a);
     }
 }
-else {
+elsif(@ARGV) {
     exit single($ARGV[0]);
 }
