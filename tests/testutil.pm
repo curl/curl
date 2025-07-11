@@ -28,7 +28,7 @@
 package testutil;
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 BEGIN {
     use base qw(Exporter);

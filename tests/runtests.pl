@@ -57,7 +57,7 @@
 # given, this won't be a problem.
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 use 5.006;
 use POSIX qw(strftime);
 

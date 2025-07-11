@@ -28,7 +28,7 @@
 # files, manpages and symbols-in-versions are in sync.
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 use File::Basename;
 

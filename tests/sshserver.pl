@@ -27,7 +27,7 @@
 # Also creates the ssh configuration files needed for these tests.
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 use Cwd;
 use Cwd 'abs_path';
 use Digest::MD5;

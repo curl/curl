@@ -50,7 +50,7 @@
 package pathhelp;
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 use File::Spec;
 
 BEGIN {
