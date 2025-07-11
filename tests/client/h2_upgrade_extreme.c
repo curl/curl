@@ -116,7 +116,7 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
         if(msg->data.result == CURLE_SEND_ERROR ||
             msg->data.result == CURLE_RECV_ERROR) {
           /* We get these if the server had a GOAWAY in transit on
-           * re-using a connection */
+           * reusing a connection */
         }
         else if(msg->data.result) {
           curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
