@@ -390,7 +390,6 @@ struct eyeballer {
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
-  BIT(rewinded);                     /* if we rewinded the addr list */
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
@@ -474,7 +473,6 @@ static void baller_free(struct eyeballer *baller,
 
 static void baller_rewind(struct eyeballer *baller)
 {
-  baller->rewinded = TRUE;
   baller->addr = baller->first;
   baller->inconclusive = FALSE;
 }
