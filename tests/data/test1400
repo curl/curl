@@ -34,7 +34,7 @@ http
 SSL_CERT_FILE=
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --tls-max 1.3 --tlsv1.1
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>
 
