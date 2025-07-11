@@ -1079,7 +1079,7 @@ static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
   connssl->earlydata_max =
     gnutls_record_get_max_early_data_size(backend->gtls.session);
   if((!connssl->earlydata_max || connssl->earlydata_max == 0xFFFFFFFFUL)) {
-    /* Seems to be GnuTLS way to signal no EarlyData in session */
+    /* Seems to be no GnuTLS way to signal no EarlyData in session */
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
   else if(!Curl_alpn_contains_proto(alpns, scs->alpn)) {
