@@ -1256,7 +1256,7 @@ sub getargs {
 
 my $dir = ".";
 my $include = "../../include";
-my $cmd = shift @ARGV;
+my $cmd = shift @ARGV || '';
 
  check:
 if($cmd eq "-d") {
