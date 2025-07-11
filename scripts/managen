@@ -179,9 +179,11 @@ sub printdesc {
     }
     else {
         my $p = -1;
+        my $pnum;
         my $para = '';
         for my $l (@desc) {
             my $lvl = 0;
+            my $lvlnum;
             if($l !~ /^[\n\r]+/) {
                 # get the indent level off the string
                 $l =~ s/^\[([0-9q]*)\]//;
@@ -191,15 +193,19 @@ sub printdesc {
                 # the previous was quoted, this is not
                 print "\n";
             }
-            if($lvl != $p) {
-                outputpara($baselvl + $p, $para);
+            if($lvl ne $p) {
+                $pnum = $p;
+                $pnum =~ s/q$//;
+                outputpara($baselvl + $pnum, $para);
                 $para = "";
             }
             if($lvl =~ /q/) {
                 # quoted, do not right-justify
                 chomp $l;
-                lastline($baselvl + $lvl + 1, $l);
-                my $w = ($baselvl + $lvl + 1) * $indent + length($l);
+                $lvlnum = $lvl;
+                $lvlnum =~ s/q$//;
+                lastline($baselvl + $lvlnum + 1, $l);
+                my $w = ($baselvl + $lvlnum + 1) * $indent + length($l);
                 if($w > $colwidth) {
                     print STDERR "ERROR: $w columns is too long\n";
                     print STDERR "$l\n";
@@ -212,7 +218,9 @@ sub printdesc {
 
             $p = $lvl;
         }
-        outputpara($baselvl + $p, $para);
+        $pnum = $p;
+        $pnum =~ s/q$//;
+        outputpara($baselvl + $pnum, $para);
     }
 }
 
