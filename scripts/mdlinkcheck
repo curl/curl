@@ -132,6 +132,7 @@ sub checkurl {
     }
 
     print "check $url\n";
+    $url =~ s/([^A-Za-z0-9_.~-])/sprintf("%%%02X", ord($1))/ge;
     my $curlcmd="curl -ILfsm10 --retry 2 --retry-delay 5 -A \"Mozilla/curl.se link-probe\"";
     my @content = `$curlcmd \"$url\"`;
     if(!$content[0]) {
