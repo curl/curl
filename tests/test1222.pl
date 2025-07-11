@@ -254,6 +254,11 @@ while(<$fh>) {
 }
 close($fh);
 
+if(!glob("$libdocdir/*.3")) {
+    print("curl likely built without the libcurl manual. Skipping test 1222.\n");
+    exit 0;
+}
+
 # Get header file names,
 opendir(my $dh, $incdir) || die "Can't opendir $incdir";
 my @hfiles = grep { /\.h$/ } readdir($dh);
