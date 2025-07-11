@@ -36,8 +36,7 @@ sub errout {
     exit 1;
 }
 
-if($ARGV[0] eq "prepare")
-{
+if($ARGV[0] eq "prepare") {
     my $dirname = $ARGV[1];
     mkdir $dirname || errout "$!";
     chdir $dirname;
@@ -71,8 +70,7 @@ if($ARGV[0] eq "prepare")
 
     exit 0;
 }
-elsif($ARGV[0] eq "postprocess")
-{
+elsif($ARGV[0] eq "postprocess") {
     my $dirname = $ARGV[1];
     my $logfile = $ARGV[2];
 
