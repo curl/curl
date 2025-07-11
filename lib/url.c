@@ -3717,7 +3717,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     *in_connect = conn;
 
 #ifndef CURL_DISABLE_PROXY
-    infof(data, "Re-using existing %s: connection%s with %s %s",
+    infof(data, "Reusing existing %s: connection%s with %s %s",
           conn->given->scheme,
           tls_upgraded ? " (upgraded to SSL)" : "",
           conn->bits.proxy ? "proxy" : "host",
@@ -3725,7 +3725,7 @@ static CURLcode create_conn(struct Curl_easy *data,
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);
 #else
-    infof(data, "Re-using existing %s: connection%s with host %s",
+    infof(data, "Reusing existing %s: connection%s with host %s",
           conn->given->scheme,
           tls_upgraded ? " (upgraded to SSL)" : "",
           conn->host.dispname);
