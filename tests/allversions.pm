@@ -25,6 +25,11 @@
 # populate the %pastversion hash table with the version number as key and
 # release date as value
 
+use strict;
+use warnings;
+
+our %pastversion;
+
 sub allversions {
     my ($file) = @_;
     open(A, "<$file") ||
