@@ -36,6 +36,9 @@ for code.
 =end comment
 =cut
 
+use strict;
+use warnings;
+
 my $nroff2cd = "0.1"; # to keep check
 
 sub single {
@@ -78,7 +81,7 @@ sub single {
 
             print <<HEAD
 ---
-c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel\@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: $title
 Section: $section
@@ -189,4 +192,6 @@ HEAD
     return !$header;
 }
 
-exit single($ARGV[0]);
+if(@ARGV) {
+  exit single($ARGV[0]);
+}

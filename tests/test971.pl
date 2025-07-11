@@ -23,18 +23,24 @@
 #
 ###########################################################################
 #
-#
 # - Get all options mentioned in the $cmddir.
 # - Make sure they're all mentioned in the $opts document
 # - Make sure that the version in $opts matches the version in the file in
 #   $cmddir
 #
 
+use strict;
+use warnings;
+
 use allversions;
 
 my $opts = $ARGV[0];
 my $cmddir = $ARGV[1];
 my $versions = $ARGV[2];
+
+my %file;
+my %oiv;
+my $error = 0;
 
 sub cmdfiles {
     my ($dir)=@_;
@@ -93,6 +99,8 @@ sub versioncheck {
     }
     close($fh);
 }
+
+our %pastversion;
 
 # get all the past versions
 allversions($versions);

@@ -23,6 +23,9 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 # This script invokes nghttpx properly to have it serve HTTP/2 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 use Cwd;

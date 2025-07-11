@@ -1699,8 +1699,8 @@ sub singletest_check {
                 $ok .= "m";
             }
             my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
-            my $allocs;
-            my $max;
+            my $allocs = 0;
+            my $max = 0;
             for(@more) {
                 if(/^Allocations: (\d+)/) {
                     $allocs = $1;

@@ -13,7 +13,15 @@
 #
 # ---(accepted word)
 #
-my $w;
+
+use strict;
+use warnings;
+
+my @whitelist;
+my %alt;
+my %exactcase;
+
+my @w;
 while(<STDIN>) {
     chomp;
     if($_ =~ /^#/) {

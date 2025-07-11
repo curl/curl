@@ -22,6 +22,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+use strict;
+use warnings;
 
 # Usage:
 #   perl mk-lib1521.pl < ../../include/curl/curl.h lib1521.c
@@ -362,6 +364,8 @@ static CURLcode test_lib1521(char *URL)
 
 HEADER
     ;
+
+my $infomode = 0;
 
 while(<STDIN>) {
     s/^\s*(.*?)\s*$/$1/;      # Trim.
