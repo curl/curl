@@ -670,10 +670,6 @@ sub single {
 
     my @desc = render($manpage, $fh, $f, $line);
     close($fh);
-    if($tablemode) {
-        # end of table
-        push @desc, ".RE\n.IP\n";
-    }
     my $opt;
 
     if(defined($short) && $long) {
