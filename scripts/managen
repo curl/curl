@@ -130,8 +130,10 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
+    my $l = 0;
     $line[0] =~ s/^( +)//;
-    prefixline($lvl * $indent + length($1));
+    $l = length($1) if($1);
+    prefixline($lvl * $indent + $l);
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
@@ -179,7 +181,7 @@ sub printdesc {
         my $p = -1;
         my $para = '';
         for my $l (@desc) {
-            my $lvl = '';
+            my $lvl = 0;
             if($l !~ /^[\n\r]+/) {
                 # get the indent level off the string
                 $l =~ s/^\[([0-9q]*)\]//;
