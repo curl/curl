@@ -551,53 +551,53 @@ sub checksystemfeatures {
                 $pwd = sys_native_current_path();
                 $feature{"win32"} = 1;
             }
-            if ($libcurl =~ /\sschannel\b/i) {
+            if($libcurl =~ /\sschannel\b/i) {
                 $feature{"Schannel"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sopenssl\b/i) {
+            elsif($libcurl =~ /\sopenssl\b/i) {
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sgnutls\b/i) {
+            elsif($libcurl =~ /\sgnutls\b/i) {
                 $feature{"GnuTLS"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\srustls-ffi\b/i) {
+            elsif($libcurl =~ /\srustls-ffi\b/i) {
                 $feature{"rustls"} = 1;
             }
-            elsif ($libcurl =~ /\swolfssl\b/i) {
+            elsif($libcurl =~ /\swolfssl\b/i) {
                 $feature{"wolfssl"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\s(BoringSSL|AWS-LC)\b/i) {
+            elsif($libcurl =~ /\s(BoringSSL|AWS-LC)\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\slibressl\b/i) {
+            elsif($libcurl =~ /\slibressl\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\squictls\b/i) {
+            elsif($libcurl =~ /\squictls\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\smbedTLS\b/i) {
+            elsif($libcurl =~ /\smbedTLS\b/i) {
                 $feature{"mbedtls"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            if ($libcurl =~ /ares/i) {
+            if($libcurl =~ /ares/i) {
                 $feature{"c-ares"} = 1;
                 $resolver="c-ares";
             }
-            if ($libcurl =~ /nghttp2/i) {
+            if($libcurl =~ /nghttp2/i) {
                 # nghttp2 supports h2c
                 $feature{"h2c"} = 1;
             }
-            if ($libcurl =~ /AppleIDN/) {
+            if($libcurl =~ /AppleIDN/) {
                 $feature{"AppleIDN"} = 1;
             }
             if ($libcurl =~ /WinIDN/) {
@@ -734,11 +734,11 @@ sub checksystemfeatures {
         logmsg "unable to get curl's version, further details are:\n";
         logmsg "issued command: \n";
         logmsg "$versioncmd \n";
-        if ($versretval == -1) {
+        if($versretval == -1) {
             logmsg "command failed with: \n";
             logmsg "$versnoexec \n";
         }
-        elsif ($versretval & 127) {
+        elsif($versretval & 127) {
             logmsg sprintf("command died with signal %d, and %s coredump.\n",
                            ($versretval & 127), ($versretval & 128)?"a":"no");
         }
@@ -1129,10 +1129,10 @@ sub singletest_shouldrun {
                         $why = "disabled by keyword";
                     }
                 }
-                elsif ($enabled_keywords{lc($k)}) {
+                elsif($enabled_keywords{lc($k)}) {
                     $match = 1;
                 }
-                if ($ignored_keywords{lc($k)}) {
+                if($ignored_keywords{lc($k)}) {
                     logmsg "Warning: test$testnum result is ignored due to $k\n";
                     $errorreturncode = 2;
                 }
@@ -2252,12 +2252,12 @@ while(@ARGV) {
         # verbose output
         $verbose=1;
     }
-    elsif ($ARGV[0] eq "-c") {
+    elsif($ARGV[0] eq "-c") {
         # use this path to curl instead of default
         $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
-    elsif ($ARGV[0] eq "-vc") {
+    elsif($ARGV[0] eq "-vc") {
         # use this path to a curl used to verify servers
 
         # Particularly useful when you introduce a crashing bug somewhere in
@@ -2267,12 +2267,12 @@ while(@ARGV) {
         $VCURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
-    elsif ($ARGV[0] eq "-ac") {
+    elsif($ARGV[0] eq "-ac") {
         # use this curl only to talk to APIs (currently only CI test APIs)
         $ACURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
-    elsif ($ARGV[0] eq "-d") {
+    elsif($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
     }
@@ -2310,15 +2310,15 @@ while(@ARGV) {
         }
         close($fd);
     }
-    elsif ($ARGV[0] eq "-g") {
+    elsif($ARGV[0] eq "-g") {
         # run this test with gdb
         $gdbthis=1;
     }
-    elsif ($ARGV[0] eq "-gl") {
+    elsif($ARGV[0] eq "-gl") {
         # run this test with lldb
         $gdbthis=2;
     }
-    elsif ($ARGV[0] eq "-gw") {
+    elsif($ARGV[0] eq "-gw") {
         # run this test with windowed gdb
         $gdbthis=1;
         $gdbxwin=1;
@@ -2340,7 +2340,7 @@ while(@ARGV) {
         # disable the valgrind debuginfod functionality
         $no_debuginfod = 1;
     }
-    elsif ($ARGV[0] eq "-R") {
+    elsif($ARGV[0] eq "-R") {
         # execute in scrambled order
         $scrambleorder=1;
     }

@@ -78,7 +78,7 @@ sub portable_sleep {
     if($Time::HiRes::VERSION) {
         Time::HiRes::sleep($seconds);
     }
-    elsif (os_is_win()) {
+    elsif(os_is_win()) {
         Win32::Sleep($seconds*1000);
     }
     else {

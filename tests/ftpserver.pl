@@ -925,10 +925,10 @@ sub RCPT_smtp {
 sub DATA_smtp {
     my ($args) = @_;
 
-    if ($args) {
+    if($args) {
         sendcontrol "501 Unrecognized parameter\r\n";
     }
-    elsif ($smtp_client !~ /^(\d*)$/) {
+    elsif($smtp_client !~ /^(\d*)$/) {
         sendcontrol "501 Invalid arguments\r\n";
     }
     else {
@@ -1358,7 +1358,7 @@ sub STORE_imap {
     if ($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (($uid eq "") || ($what ne "+Flags") || ($value eq "")) {
+    elsif(($uid eq "") || ($what ne "+Flags") || ($value eq "")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
@@ -1383,7 +1383,7 @@ sub LIST_imap {
     if ($reference eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
-    elsif ($reference eq "verifiedserver") {
+    elsif($reference eq "verifiedserver") {
         # this is the secret command that verifies that this actually is
         # the curl test server
         sendcontrol "* LIST () \"/\" \"WE ROOLZ: $$\"\r\n";
@@ -1460,7 +1460,7 @@ sub STATUS_imap {
 
     logmsg "STATUS_imap got $args\n";
 
-    if ($mailbox eq "") {
+    if($mailbox eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
@@ -1482,10 +1482,10 @@ sub SEARCH_imap {
 
     logmsg "SEARCH_imap got $what\n";
 
-    if ($selected eq "") {
+    if($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif ($what eq "") {
+    elsif($what eq "") {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
@@ -1562,10 +1562,10 @@ sub CHECK_imap {
 }
 
 sub CLOSE_imap {
-    if ($selected eq "") {
+    if($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (!@deleted) {
+    elsif(!@deleted) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
@@ -1633,17 +1633,17 @@ sub UID_imap {
 
     logmsg "UID_imap got $args\n";
 
-    if ($selected eq "") {
+    if($selected eq "") {
         sendcontrol "$cmdid BAD Command received in Invalid state\r\n";
     }
-    elsif (substr($command, 0, 5) eq "FETCH"){
+    elsif(substr($command, 0, 5) eq "FETCH"){
         my $func = $commandfunc{"FETCH"};
         if($func) {
             &$func($args, $command);
         }
     }
-    elsif (($command ne "COPY") &&
-           ($command ne "STORE") && ($command ne "SEARCH")) {
+    elsif(($command ne "COPY") &&
+          ($command ne "STORE") && ($command ne "SEARCH")) {
         sendcontrol "$cmdid BAD Command Argument\r\n";
     }
     else {
@@ -1750,10 +1750,10 @@ sub APOP_pop3 {
     my ($args) = @_;
     my ($user, $secret) = split(/ /, $args, 2);
 
-    if (!grep /^APOP$/, @capabilities) {
+    if(!grep /^APOP$/, @capabilities) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
-    elsif (($user eq "") || ($secret eq "")) {
+    elsif(($user eq "") || ($secret eq "")) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {
@@ -1952,10 +1952,10 @@ sub TOP_pop3 {
 
     logmsg "TOP_pop3 got $args\n";
 
-    if (!grep /^TOP$/, @capabilities) {
+    if(!grep /^TOP$/, @capabilities) {
         sendcontrol "-ERR Unrecognized command\r\n";
     }
-    elsif (($msgid eq "") || ($lines eq "")) {
+    elsif(($msgid eq "") || ($lines eq "")) {
         sendcontrol "-ERR Protocol error\r\n";
     }
     else {

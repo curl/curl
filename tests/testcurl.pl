@@ -261,7 +261,7 @@ if($name && $email && $desc) {
     $infixed=4;
     $fixed=4;
 }
-elsif (open(my $f, "<", "$setupfile")) {
+elsif(open(my $f, "<", "$setupfile")) {
     while (<$f>) {
         if (/(\w+)=(.*)/) {
             eval "\$$1=$2;";
@@ -372,7 +372,7 @@ if(-d $CURLDIR) {
         unlink "$CURLDIR/src/tool_hugehelp.c";
         # find out if curl source dir has an in-tree c-ares repo
         $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
-    } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
+    } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
         # find out if curl source dir has an in-tree c-ares extracted tarball
         $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");

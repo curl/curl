@@ -24,8 +24,7 @@
 ###########################################################################
 # Determine if curl-config --protocols/--features matches the
 # curl --version protocols/features
-if ( $#ARGV != 2 )
-{
+if($#ARGV != 2) {
     print "Usage: $0 curl-config-script curl-version-output-file features|protocols\n";
     exit 3;
 }
@@ -35,8 +34,7 @@ my $what=$ARGV[2];
 # Read the output of curl --version
 my $curl_protocols="";
 open(CURL, "$ARGV[1]") || die "Can't get curl $what list\n";
-while( <CURL> )
-{
+while(<CURL>) {
     $curl_protocols = $_ if ( /$what:/i );
 }
 close CURL;
@@ -48,8 +46,7 @@ $curl_protocols =~ /\w+: (.*)$/;
 # Read the output of curl-config
 my @curl_config;
 open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what list\n";
-while( <CURLCONFIG> )
-{
+while(<CURLCONFIG>) {
     chomp;
     $_ = lc($_) if($what eq "protocols");  # accept uppercase protocols in curl-config
     push @curl_config, $_;
@@ -66,7 +63,7 @@ my $curlproto = join ' ', @curl;
 my $curlconfigproto = join ' ', @curl_config;
 
 my $different = $curlproto ne $curlconfigproto;
-if ($different) {
+if($different) {
     print "Mismatch in $what lists:\n";
     print "curl:        $curlproto\n";
     print "curl-config: $curlconfigproto\n";

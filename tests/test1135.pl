@@ -75,13 +75,13 @@ foreach my $f (@incs) {
     while(<H>) {
         s/CURL_DEPRECATED\(.*"\)//;
         s/  */ /g;
-        if (/^(^CURL_EXTERN .*?)\(/) {
+        if(/^(^CURL_EXTERN .*?)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
             $decl =~ /([a-z_]+)$/;
             push(@out, "$1");
         }
-        elsif (/^(^CURL_EXTERN .*)/) {
+        elsif(/^(^CURL_EXTERN .*)/) {
             # handle two-line declarations
             my $decl = $1;
             $decl =~ s/\r$//;

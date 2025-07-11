@@ -490,7 +490,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
     $sshdconfig_abs = pathhelp::sys_native_abs_path($sshdconfig);
 }
-elsif (pathhelp::os_is_win()) {
+elsif(pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::build_sys_abs_path(pp($hstprvkeyf));
@@ -884,12 +884,12 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
 #
 my $identity_config;
 my $knownhosts_config;
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $identity_config = pathhelp::sys_native_abs_path(pp($identity));
     $knownhosts_config = pathhelp::sys_native_abs_path(pp($knownhosts));
 }
-elsif (pathhelp::os_is_win()) {
+elsif(pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
     $identity_config = pathhelp::build_sys_abs_path(pp($identity));
     $knownhosts_config = pathhelp::build_sys_abs_path(pp($knownhosts));
