@@ -33,9 +33,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#undef REQBUFSIZ
-#define REQBUFSIZ 150000
-
 static long rtspd_prevtestno = -1;    /* previous test number we served */
 static long rtspd_prevpartno = -1;    /* previous part number we served */
 static bool rtspd_prevbounce = FALSE; /* instructs the server to override the
@@ -59,7 +56,7 @@ typedef enum {
                               ((p)[3] = (char)((l) & 0xFF)))
 
 struct rtspd_httprequest {
-  char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
+  char reqbuf[150000]; /* buffer area for the incoming request */
   size_t checkindex; /* where to start checking of the request */
   size_t offset;     /* size of the incoming request */
   long testno;       /* test number found in the request */
@@ -621,7 +618,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
 
   /*** end of httprequest init ***/
 
-  while(!done_processing && (req->offset < REQBUFSIZ-1)) {
+  while(!done_processing && (req->offset < sizeof(req->reqbuf)-1)) {
     if(pipereq_length && pipereq) {
       memmove(reqbuf, pipereq, pipereq_length);
       got = curlx_uztosz(pipereq_length);
@@ -634,7 +631,8 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
            client wants to send! */
         got = sread(sock, reqbuf + req->offset, req->cl);
       else
-        got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
+        got = sread(sock, reqbuf + req->offset,
+                    sizeof(req->reqbuf)-1 - req->offset);
     }
     if(got_exit_signal)
       return 1;
@@ -669,16 +667,16 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     }
   }
 
-  if((req->offset == REQBUFSIZ-1) && (got > 0)) {
+  if((req->offset == sizeof(req->reqbuf)-1) && (got > 0)) {
     logmsg("Request would overflow buffer, closing connection");
     /* dump request received so far to external file anyway */
-    reqbuf[REQBUFSIZ-1] = '\0';
+    reqbuf[sizeof(req->reqbuf)-1] = '\0';
     fail = 1;
   }
-  else if(req->offset > REQBUFSIZ-1) {
+  else if(req->offset > sizeof(req->reqbuf)-1) {
     logmsg("Request buffer overflow, closing connection");
     /* dump request received so far to external file anyway */
-    reqbuf[REQBUFSIZ-1] = '\0';
+    reqbuf[sizeof(req->reqbuf)-1] = '\0';
     fail = 1;
   }
   else

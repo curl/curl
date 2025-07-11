@@ -37,9 +37,6 @@
 static bool use_gopher = FALSE;
 static bool is_proxy = FALSE;
 
-#undef REQBUFSIZ
-#define REQBUFSIZ (2*1024*1024)
-
 #define MAX_SLEEP_TIME_MS 250
 
 static long sws_prevtestno = -1;    /* previous test number we served */
@@ -54,7 +51,7 @@ static bool sws_prevbounce = FALSE; /* instructs the server to override the
 #define RCMD_STREAM    2 /* told to stream */
 
 struct sws_httprequest {
-  char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
+  char reqbuf[2*1024*1024]; /* buffer area for the incoming request */
   bool connect_request; /* if a CONNECT */
   unsigned short connect_port; /* the port number CONNECT used */
   size_t checkindex; /* where to start checking of the request */
@@ -815,7 +812,8 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     if(req->open) {
       logmsg("wait for websocket traffic");
       do {
-        got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
+        got = sread(sock, reqbuf + req->offset,
+                    sizeof(req->reqbuf) - req->offset);
         if(got > 0) {
           req->offset += got;
           logmsg("Got %zu bytes from client", got);
@@ -866,7 +864,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
     return -1;
   }
 
-  if(req->offset >= REQBUFSIZ-1) {
+  if(req->offset >= sizeof(req->reqbuf)-1) {
     /* buffer is already full; do nothing */
     overflow = 1;
   }
@@ -877,7 +875,8 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
          client wants to send! */
       got = sread(sock, reqbuf + req->offset, req->cl);
     else
-      got = sread(sock, reqbuf + req->offset, REQBUFSIZ-1 - req->offset);
+      got = sread(sock, reqbuf + req->offset,
+                  sizeof(req->reqbuf)-1 - req->offset);
 
     if(got_exit_signal)
       return -1;
@@ -911,16 +910,16 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
       return -1;
   }
 
-  if(overflow || (req->offset == REQBUFSIZ-1 && got > 0)) {
+  if(overflow || (req->offset == sizeof(req->reqbuf)-1 && got > 0)) {
     logmsg("Request would overflow buffer, closing connection");
     /* dump request received so far to external file anyway */
-    reqbuf[REQBUFSIZ-1] = '\0';
+    reqbuf[sizeof(req->reqbuf)-1] = '\0';
     fail = 1;
   }
-  else if(req->offset > REQBUFSIZ-1) {
+  else if(req->offset > sizeof(req->reqbuf)-1) {
     logmsg("Request buffer overflow, closing connection");
     /* dump request received so far to external file anyway */
-    reqbuf[REQBUFSIZ-1] = '\0';
+    reqbuf[sizeof(req->reqbuf)-1] = '\0';
     fail = 1;
   }
   else
