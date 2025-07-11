@@ -242,7 +242,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
 #endif
       /* DNS has been resolved, signal client task */
       if(wakeup_write(addr_ctx->sock_pair[1], buf, sizeof(buf)) < 0) {
-        /* update sock_erro to errno */
+        /* update sock_error to errno */
         addr_ctx->sock_error = SOCKERRNO;
       }
     }
