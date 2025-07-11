@@ -802,7 +802,7 @@ sub single {
         my @m=split(/ /, $mutexed);
         my $mstr;
         my $num = scalar(@m);
-        my $count;
+        my $count = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
