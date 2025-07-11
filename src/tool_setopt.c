@@ -101,7 +101,7 @@ const struct NameValue setopt_nv_CURL_SSLVERSION[] = {
 };
 
 const struct NameValue setopt_nv_CURL_SSLVERSION_MAX[] = {
-  NV(CURL_SSLVERSION_MAX_NONE),
+  {"", CURL_SSLVERSION_MAX_NONE},
   NV(CURL_SSLVERSION_MAX_DEFAULT),
   NV(CURL_SSLVERSION_MAX_TLSv1_0),
   NV(CURL_SSLVERSION_MAX_TLSv1_1),
@@ -293,9 +293,16 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
                          name, lval);
     }
     else {
-      ret = easysrc_addf(&easysrc_code,
-                         "curl_easy_setopt(hnd, %s, (long)(%s | %s));",
-                         name, nv->name, nv2->name);
+      if(nv2->name && *nv2->name)
+        /* if max is set */
+        ret = easysrc_addf(&easysrc_code,
+                           "curl_easy_setopt(hnd, %s, (long)(%s | %s));",
+                           name, nv->name, nv2->name);
+      else
+        /* without a max */
+        ret = easysrc_addf(&easysrc_code,
+                           "curl_easy_setopt(hnd, %s, (long)%s);",
+                           name, nv->name);
     }
   }
 

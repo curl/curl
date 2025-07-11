@@ -458,6 +458,14 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 #endif
   }
 
+  /* set default minimum TLS version */
+#ifdef USE_SSL
+  Curl_setopt_SSLVERSION(data, CURLOPT_SSLVERSION, CURL_SSLVERSION_DEFAULT);
+#ifndef CURL_DISABLE_PROXY
+  Curl_setopt_SSLVERSION(data, CURLOPT_PROXY_SSLVERSION,
+                         CURL_SSLVERSION_DEFAULT);
+#endif
+#endif
 #ifndef CURL_DISABLE_FTP
   set->wildcard_enabled = FALSE;
   set->chunk_bgn      = ZERO_NULL;

@@ -24,6 +24,13 @@
  *
  ***************************************************************************/
 
+#ifdef USE_SSL
+CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
+                                long arg);
+#else
+#define Curl_setopt_SSLVERSION(a,b,c) CURLE_NOT_BUILT_IN
+#endif
+
 CURLcode Curl_setstropt(char **charp, const char *s) WARN_UNUSED_RESULT;
 CURLcode Curl_setblobopt(struct curl_blob **blobp,
                          const struct curl_blob *blob) WARN_UNUSED_RESULT;
