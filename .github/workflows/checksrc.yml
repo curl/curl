@@ -69,6 +69,7 @@ jobs:
 
       - name: 'spellcheck'
         run: |
+          codespell --version
           codespell \
             --skip scripts/mk-ca-bundle.pl \
             --skip src/tool_hugehelp.c \
