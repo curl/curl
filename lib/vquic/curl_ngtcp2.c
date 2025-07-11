@@ -1851,7 +1851,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
     return curlcode;
   }
 
-  /* In UDP, there is a maximum theoretical packet paload length and
+  /* In UDP, there is a maximum theoretical packet payload length and
    * a minimum payload length that is "guaranteed" to work.
    * To detect if this minimum payload can be increased, ngtcp2 sends
    * now and then a packet payload larger than the minimum. It that

@@ -859,7 +859,7 @@ int Curl_parseX509(struct Curl_X509certificate *cert,
   if(!getASN1Element(&cert->subjectPublicKey, ccp,
                      cert->subjectPublicKeyInfo.end))
     return -1;
-  /* Get optional issuerUiqueID, subjectUniqueID and extensions. */
+  /* Get optional issuerUniqueID, subjectUniqueID and extensions. */
   cert->issuerUniqueID.tag = cert->subjectUniqueID.tag = 0;
   cert->extensions.tag = elem.tag = 0;
   cert->issuerUniqueID.header = cert->subjectUniqueID.header = NULL;

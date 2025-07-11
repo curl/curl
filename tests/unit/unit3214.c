@@ -65,7 +65,7 @@ static CURLcode test_unit3214(char *arg)
   checksize("Curl_multi", sizeof(struct Curl_multi), MAX_CURL_MULTI);
 
   /* public structs MUST NOT change (unless controlled), but exact sizes
-     depend on architecure */
+     depend on architecture */
   checksize("curl_httppost", sizeof(struct curl_httppost), MAX_CURL_HTTPPOST);
   checksize("curl_slist", sizeof(struct curl_slist), MAX_CURL_SLIST);
   checksize("curl_khkey", sizeof(struct curl_khkey), MAX_CURL_KHKEY);

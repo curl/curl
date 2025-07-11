@@ -106,7 +106,7 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * Find a connection in the pool matching `destination`.
  * All callbacks are invoked while the pool's lock is held.
  * @param data        current transfer
- * @param destination match agaonst `conn->destination` in pool
+ * @param destination match against `conn->destination` in pool
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
  * @return combined result of last conn_db and result_cb or FALSE if no

@@ -3042,7 +3042,7 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
           continue;
         }
         else if(!Curl_uint_bset_contains(&multi->process, mid)) {
-          /* We are no longer proecessing this transfer */
+          /* We are no longer processing this transfer */
           Curl_uint_bset_remove(&multi->dirty, mid);
           continue;
         }
@@ -3263,7 +3263,7 @@ static bool multi_has_dirties(struct Curl_multi *multi)
       if(data) {
         if(Curl_uint_bset_contains(&multi->process, mid))
           return TRUE;
-        /* We are no longer proecessing this transfer */
+        /* We are no longer processing this transfer */
         Curl_uint_bset_remove(&multi->dirty, mid);
       }
       else {
