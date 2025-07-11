@@ -535,7 +535,7 @@ sub findinpath {
     my @pa = split($s, $p);
     for $c (@_) {
         for $e (@pa) {
-            if( -x "$e/$c$x") {
+            if(-x "$e/$c$x") {
                 return $c;
             }
         }

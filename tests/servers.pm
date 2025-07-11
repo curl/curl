@@ -166,7 +166,7 @@ sub checkcmd {
                 "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     }
     for(@paths) {
-        if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
+        if(-x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
             return "$_/$cmd";
         }
