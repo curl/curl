@@ -38,6 +38,8 @@ use strict;
 use warnings;
 use 5.006;
 
+use File::Basename;
+
 BEGIN {
     use base qw(Exporter);
 
@@ -765,9 +767,7 @@ sub singletest_prepare {
             my $fileContent = join('', @inputfile);
 
             # make directories if needed
-            my $path = $filename;
-            # cut off the file name part
-            $path =~ s/^(.*)\/[^\/]*/$1/;
+            my $path = dirname($filename);
             my @ldparts = split(/\//, $LOGDIR);
             my $nparts = @ldparts;
             my @parts = split(/\//, $path);
