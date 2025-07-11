@@ -1750,7 +1750,7 @@ sub singletest_check {
     if(@notexists) {
         # a list of directory entries that must not exist
         my $err;
-        while (@notexists) {
+        while(@notexists) {
             my $fname = shift @notexists;
             chomp $fname;
             if(-e $fname) {
@@ -2944,7 +2944,7 @@ else {
     $retry_left = $retry;
 }
 
-while () {
+while() {
     # check the abort flag
     if($globalabort) {
         logmsg singletest_dumplogs();

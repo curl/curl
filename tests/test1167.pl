@@ -74,7 +74,7 @@ sub scanenums {
 
     open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
         die "Cannot preprocess $file";
-    while ( <H_IN> ) {
+    while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
         if( /^#(line|) (\d+) \"(.*)\"/) {
             # if the included file isn't in our incdir, then we skip this section

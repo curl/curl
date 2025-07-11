@@ -675,7 +675,7 @@ sub disc_handshake {
     print DWRITE "DISC\n";
     my $line;
     my $nr;
-    while (5 == ($nr = sysread DREAD, $line, 5)) {
+    while(5 == ($nr = sysread DREAD, $line, 5)) {
         if($line eq "DATA\n") {
             # Must read the data bytes to stay in sync
             my $i;
@@ -946,7 +946,7 @@ sub DATA_smtp {
         my $ulsize=0;
         my $disc=0;
         my $raw;
-        while (5 == (sysread \*SFREAD, $line, 5)) {
+        while(5 == (sysread \*SFREAD, $line, 5)) {
             if($line eq "DATA\n") {
                 my $i;
                 my $eob;
@@ -2404,7 +2404,7 @@ sub STOR_ftp {
     my $line;
     my $ulsize=0;
     my $disc=0;
-    while (5 == (sysread DREAD, $line, 5)) {
+    while(5 == (sysread DREAD, $line, 5)) {
         if($line eq "DATA\n") {
             my $i;
             sysread DREAD, $i, 5;

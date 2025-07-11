@@ -262,7 +262,7 @@ if($name && $email && $desc) {
     $fixed=4;
 }
 elsif(open(my $f, "<", "$setupfile")) {
-    while (<$f>) {
+    while(<$f>) {
         if(/(\w+)=(.*)/) {
             eval "\$$1=$2;";
         }
@@ -499,7 +499,7 @@ if($git) {
 # Set timestamp to the one in curlver.h if this isn't a git test build.
 if((-f "include/curl/curlver.h") &&
     (open(my $f, "<", "include/curl/curlver.h"))) {
-    while (<$f>) {
+    while(<$f>) {
         chomp;
         if($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
             my $stampstring = $1;
@@ -620,7 +620,7 @@ if(($have_embedded_ares) &&
     $confheader =~ s/curl/ares/;
     logit_spaced "display ares/$confheader";
     if(open($f, "<", "ares/$confheader")) {
-        while (<$f>) {
+        while(<$f>) {
             print if /^ *#/;
         }
         close($f);
@@ -657,7 +657,7 @@ if(($have_embedded_ares) &&
 my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
 logit "$mkcmd";
 open(my $f, "-|", "$mkcmd 2>&1") or die;
-while (<$f>) {
+while(<$f>) {
     s/$pwd//g;
     print;
 }
@@ -700,7 +700,7 @@ if($configurebuild && !$crosscompile) {
         logit_spaced "build examples";
         open($f, "-|", "$make -i 2>&1") or die;
         open(my $log, ">", "$buildlog") or die;
-        while (<$f>) {
+        while(<$f>) {
             s/$pwd//g;
             print;
             print $log $_;
@@ -747,7 +747,7 @@ else {
             logit_spaced "build examples";
             open($f, "-|", "$make -i 2>&1") or die;
             open(my $log, ">", "$buildlog") or die;
-            while (<$f>) {
+            while(<$f>) {
                 s/$pwd//g;
                 print;
                 print $log $_;
@@ -762,7 +762,7 @@ else {
             logit_spaced "build test harness";
             open(my $f, "-|", "$make -i 2>&1") or die;
             open(my $log, ">", "$buildlog") or die;
-            while (<$f>) {
+            while(<$f>) {
                 s/$pwd//g;
                 print;
                 print $log $_;
