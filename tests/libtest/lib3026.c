@@ -50,7 +50,7 @@ static CURLcode test_lib3026(char *URL)
   typedef uintptr_t curl_win_thread_handle_t;
 #endif
   CURLcode results[NUM_THREADS];
-  curl_win_thread_handle_t ths[NUM_THREADS];
+  curl_win_thread_handle_t thread_handles[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
@@ -79,13 +79,13 @@ static CURLcode test_lib3026(char *URL)
       test_failure = TEST_ERR_MAJOR_BAD;
       goto cleanup;
     }
-    ths[i] = th;
+    thread_handles[i] = th;
   }
 
 cleanup:
   for(i = 0; i < tid_count; i++) {
-    WaitForSingleObject((HANDLE)ths[i], INFINITE);
-    CloseHandle((HANDLE)ths[i]);
+    WaitForSingleObject((HANDLE)thread_handles[i], INFINITE);
+    CloseHandle((HANDLE)thread_handles[i]);
     if(results[i] != CURLE_OK) {
       curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
                     "with code %d (%s)\n", __FILE__, __LINE__,

@@ -49,7 +49,7 @@ http
 HTTP with --json + --next
 </name>
 <command>
---json '{ "drink": "coffe" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
+--json '{ "drink": "coffee" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 </command>
 </client>
 
@@ -62,9 +62,9 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Content-Type: application/json
 Accept: application/json
-Content-Length: 20
+Content-Length: 21
 
-{ "drink": "coffe" }GET /%TESTNUMBER0002 HTTP/1.1
+{ "drink": "coffee" }GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

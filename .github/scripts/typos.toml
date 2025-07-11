@@ -1,0 +1,29 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+[default]
+extend-ignore-identifiers-re = [
+  "^(ba|pn|PN|UE)$",
+  "^(CNA|ser)$",
+  "^(ECT0|ECT1|HELO|htpt|PASE)$",
+  "^[A-Za-z0-9_-]*(EDE|GOST)[A-Z0-9_-]*$",  # ciphers
+  "^0x[0-9a-fA-F]+FUL$",  # unsigned long hex literals ending with 'F'
+  "^[0-9a-zA-Z+]{64,}$",  # possibly base64
+  "^(Januar|eyeballers|HELO_smtp|kno22|MkTypLibCompatible|optin|passin|perfec|__SecURE|SMTP_HELO|v_alue)$",
+  "^(clen|req_clen|smtp_perform_helo|smtp_state_helo_resp|_stati64)$",
+]
+
+extend-ignore-re = [
+  ".*spellchecker:disable-line",
+]
+
+[files]
+extend-exclude = [
+  ".github/scripts/codespell-ignore.txt",
+  ".github/scripts/spellcheck.words",
+  "docs/THANKS",
+  "packages/*",
+  "scripts/wcurl",
+  "winbuild/*",
+]

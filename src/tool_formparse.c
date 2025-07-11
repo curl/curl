@@ -345,7 +345,7 @@ CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime)
 
 /*
  * helper function to get a word from form param
- * after call get_parm_word, str either point to string end
+ * after call get_param_word, str either point to string end
  * or point to any of end chars.
  */
 static char *get_param_word(struct OperationConfig *config, char **str,

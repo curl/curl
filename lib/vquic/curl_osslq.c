@@ -159,11 +159,11 @@ static char *osslq_strerror(unsigned long error, char *buf, size_t size)
 static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
                               const struct Curl_sockaddr_ex *addr)
 {
-  BIO_ADDR *ba;
+  BIO_ADDR *bio_addr;
   CURLcode result = CURLE_FAILED_INIT;
 
-  ba = BIO_ADDR_new();
-  if(!ba) {
+  bio_addr = BIO_ADDR_new();
+  if(!bio_addr) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
@@ -172,7 +172,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
   case AF_INET: {
     struct sockaddr_in * const sin =
       (struct sockaddr_in * const)CURL_UNCONST(&addr->curl_sa_addr);
-    if(!BIO_ADDR_rawmake(ba, AF_INET, &sin->sin_addr,
+    if(!BIO_ADDR_rawmake(bio_addr, AF_INET, &sin->sin_addr,
                          sizeof(sin->sin_addr), sin->sin_port)) {
       goto out;
     }
@@ -183,7 +183,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
   case AF_INET6: {
     struct sockaddr_in6 * const sin =
       (struct sockaddr_in6 * const)CURL_UNCONST(&addr->curl_sa_addr);
-    if(!BIO_ADDR_rawmake(ba, AF_INET6, &sin->sin6_addr,
+    if(!BIO_ADDR_rawmake(bio_addr, AF_INET6, &sin->sin6_addr,
                          sizeof(sin->sin6_addr), sin->sin6_port)) {
     }
     result = CURLE_OK;
@@ -197,11 +197,11 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
   }
 
 out:
-  if(result && ba) {
-    BIO_ADDR_free(ba);
-    ba = NULL;
+  if(result && bio_addr) {
+    BIO_ADDR_free(bio_addr);
+    bio_addr = NULL;
   }
-  *pbio_addr = ba;
+  *pbio_addr = bio_addr;
   return result;
 }
 

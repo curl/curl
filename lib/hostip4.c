@@ -145,7 +145,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     return NULL; /* major failure */
   /*
    * The clearing of the buffer is a workaround for a gethostbyname_r bug in
-   * qnx nto and it is also _required_ for some of these functions on some
+   * QNX Neutrino and it is also _required_ for some of these functions on some
    * platforms.
    */
 

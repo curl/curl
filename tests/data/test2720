@@ -33,9 +33,9 @@ upgrade
 </servercmd>
 
 # Full list of frames: see <verify.stdout> below
-#   1st a message with an emtpy fragment at the beginning
-#   2nd a message with an emtpy fragment in the middle
-#   3rd a message with an emtpy fragment at the end
+#   1st a message with an empty fragment at the beginning
+#   2nd a message with an empty fragment in the middle
+#   3rd a message with an empty fragment at the end
 #   4th a message with only empty fragments
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets

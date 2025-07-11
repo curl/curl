@@ -172,7 +172,7 @@ struct curltime curlx_now(void)
     (void) mach_timebase_info(&timebase);
 
   usecs = mach_absolute_time();
-  usecs *= timebase.numer;
+  usecs *= timebase.numer; /* spellchecker:disable-line */
   usecs /= timebase.denom;
   usecs /= 1000;
 

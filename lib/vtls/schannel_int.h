@@ -83,7 +83,7 @@ typedef struct _CRYPTO_SETTINGS {
   eTlsAlgorithmUsage  eAlgorithmUsage;
   UNICODE_STRING      strCngAlgId;
   DWORD               cChainingModes;
-  PUNICODE_STRING     rgstrChainingModes;
+  PUNICODE_STRING     rgstrChainingModes; /* spellchecker:disable-line */
   DWORD               dwMinBitLength;
   DWORD               dwMaxBitLength;
 } CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
@@ -91,7 +91,7 @@ typedef struct _CRYPTO_SETTINGS {
 /* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TLS_PARAMETERS {
   DWORD               cAlpnIds;
-  PUNICODE_STRING     rgstrAlpnIds;
+  PUNICODE_STRING     rgstrAlpnIds; /* spellchecker:disable-line */
   DWORD               grbitDisabledProtocols;
   DWORD               cDisabledCrypto;
   PCRYPTO_SETTINGS    pDisabledCrypto;
