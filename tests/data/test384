@@ -35,7 +35,7 @@ http
 HTTP with --json from stdin
 </name>
 <stdin>
-{ "drink": "coffe" }
+{ "drink": "coffee" }
 </stdin>
 <command>
 --json @- http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Accept: foobar/*"
@@ -53,7 +53,7 @@ Accept: foobar/*
 Content-Type: application/json
 Content-Length: 21
 
-{ "drink": "coffe" }
+{ "drink": "coffee" }
 </protocol>
 </verify>
 </testcase>
