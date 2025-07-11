@@ -54,7 +54,10 @@
 #
 ################################################
 
-my $cleanup = ($ARGV[0] eq "cleanup");
+use strict;
+use warnings;
+
+my $cleanup = (@ARGV && $ARGV[0] eq "cleanup");
 my @gitlog=`git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);
 my @releasenotes=`cat RELEASE-NOTES`;
 
@@ -107,6 +110,12 @@ sub extract {
     # false alarm, not a valid line
 }
 
+my @fixes;
+my @closes;
+my @bug;
+my @line;
+my %moreinfo;
+
 my $short;
 my $first;
 for my $l (@gitlog) {
@@ -154,7 +163,7 @@ if($first) {
 # call at the end of a parsed commit
 sub onecommit {
     my ($short)=@_;
-    my $ref;
+    my $ref = '';
 
     if($bug[0]) {
         $ref = $bug[0];
