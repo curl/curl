@@ -35,7 +35,7 @@ http
 HTTP with --json
 </name>
 <command>
---json '{ "drink": "coffe" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--json '{ "drink": "coffee" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -50,7 +50,7 @@ Content-Type: application/json
 Accept: application/json
 Content-Length: 20
 
-{ "drink": "coffe" }
+{ "drink": "coffee" }
 </protocol>
 </verify>
 </testcase>
