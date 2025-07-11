@@ -580,4 +580,8 @@ void Curl_hsts_loadfiles(struct Curl_easy *data)
   }
 }
 
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
+#undef time
+#endif
+
 #endif /* CURL_DISABLE_HTTP || CURL_DISABLE_HSTS */
