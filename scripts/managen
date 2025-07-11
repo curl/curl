@@ -68,7 +68,7 @@ my $indent = 4;
 sub manpageify {
     my ($k)=@_;
     my $l;
-    my $trail;
+    my $trail = '';
     # the matching pattern might include a trailing dot that cannot be part of
     # the option name
     if($k =~ s/\.$//) {
@@ -284,7 +284,7 @@ sub render {
     my $header = 0;
     # if $top is TRUE, it means a top-level page and not a command line option
     my $top = ($line == 1);
-    my $quote;
+    my $quote = 0;
     my $level;
     my $finalblank;
     my $blankline = 0;
