@@ -42,7 +42,7 @@ Use one of the available defines for this purpose. The available options are:
 ## CURL_SSLVERSION_DEFAULT
 
 The default acceptable version range. The minimum acceptable version is by
-default TLS v1.0 since 7.39.0 (unless the TLS library has a stricter rule).
+default TLS v1.2 since 8.16.0 (unless the TLS library has a stricter rule).
 
 ## CURL_SSLVERSION_TLSv1
 

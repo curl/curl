@@ -99,6 +99,7 @@ $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 # CURL_DOES_CONVERSION generates an extra comment.
 $_ = '' if /\/\* "value" \*\//
 </stripfile>

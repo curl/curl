@@ -55,6 +55,7 @@ s/(USERAGENT, \")[^\"]+/${1}stripped/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
+$_ = '' if /CURLOPT_SSLVERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 </stripfile>

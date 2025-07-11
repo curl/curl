@@ -196,8 +196,6 @@ struct OperationConfig {
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
 
-  long ssl_version;
-  long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
   long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
@@ -241,6 +239,8 @@ struct OperationConfig {
   } file_clobber_mode;
   unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
+  unsigned char ssl_version;     /* 0 - 4, 0 being default */
+  unsigned char ssl_version_max; /* 0 - 4, 0 being default */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
