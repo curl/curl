@@ -74,7 +74,7 @@ jobs:
             --skip scripts/mk-ca-bundle.pl \
             --skip src/tool_hugehelp.c \
             --skip scripts/wcurl \
-            -I .github/scripts/codespell-ignore.txt \
+            --ignore-words .github/scripts/codespell-ignore.txt \
             CMake include m4 scripts src lib
 
       - name: 'cmakelint'
