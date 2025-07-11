@@ -305,7 +305,7 @@ delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 # set by the caller
 if(open(my $fd, "<", "config")) {
     while(my $line = <$fd>) {
-        next if ($line =~ /^#/);
+        next if($line =~ /^#/);
         chomp $line;
         my ($name, $val) = split(/\s*:\s*/, $line, 2);
         $ENV{$name} = $val if(!$ENV{$name});
@@ -941,7 +941,7 @@ sub timestampskippedevents {
 sub citest_starttestrun {
     if(azure_check_environment()) {
         $AZURE_RUN_ID = azure_create_test_run($ACURL);
-        logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
+        logmsg "Azure Run ID: $AZURE_RUN_ID\n" if($verbose);
     }
     # Appveyor doesn't require anything here
 }
@@ -2294,7 +2294,7 @@ while(@ARGV) {
         my $exclude_file = $ARGV[0];
         open(my $fd, "<", $exclude_file) or die "Couldn't open '$exclude_file': $!";
         while(my $line = <$fd>) {
-            next if ($line =~ /^#/);
+            next if($line =~ /^#/);
             chomp $line;
             my ($type, $patterns, $skip_reason) = split(/\s*:\s*/, $line, 3);
 
@@ -2697,7 +2697,7 @@ sub disabledtests {
                     # fail hard to make user notice
                     exit 1;
                 }
-                logmsg "DISABLED: test $n\n" if ($verbose);
+                logmsg "DISABLED: test $n\n" if($verbose);
             }
             else {
                 print STDERR "$file: rubbish content: $t\n";

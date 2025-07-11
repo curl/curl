@@ -35,7 +35,7 @@ my $what=$ARGV[2];
 my $curl_protocols="";
 open(CURL, "$ARGV[1]") || die "Can't get curl $what list\n";
 while(<CURL>) {
-    $curl_protocols = $_ if ( /$what:/i );
+    $curl_protocols = $_ if(/$what:/i);
 }
 close CURL;
 

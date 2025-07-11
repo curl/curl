@@ -177,8 +177,8 @@ if(($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
   $confheader = 'config-win32.h';
 }
 
-$ENV{LC_ALL}="C" if (($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
-$ENV{LC_CTYPE}="C" if (($ENV{LC_CTYPE}) && ($ENV{LC_CTYPE} !~ /^C$/));
+$ENV{LC_ALL}="C" if(($ENV{LC_ALL}) && ($ENV{LC_ALL} !~ /^C$/));
+$ENV{LC_CTYPE}="C" if(($ENV{LC_CTYPE}) && ($ENV{LC_CTYPE} !~ /^C$/));
 $ENV{LANG}="C";
 
 sub rmtree($) {
@@ -371,11 +371,11 @@ if(-d $CURLDIR) {
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
         # find out if curl source dir has an in-tree c-ares repo
-        $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
+        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/GIT-INFO");
     } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
         # find out if curl source dir has an in-tree c-ares extracted tarball
-        $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");
+        $have_embedded_ares = 1 if(-f "$CURLDIR/ares/ares_build.h");
     } else {
         mydie "$CURLDIR is not a daily source dir or checked out from git!"
     }
@@ -419,10 +419,10 @@ if($git) {
         logit "run git pull in curl";
         system("git pull 2>&1");
         $gitstat += $?;
-        logit "failed to update from curl git ($?), continue anyway" if ($?);
+        logit "failed to update from curl git ($?), continue anyway" if($?);
 
         # Set timestamp to the UTC the git update took place.
-        $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
+        $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
     }
 
     # get the last 5 commits for show (even if no pull was made)
@@ -442,10 +442,10 @@ if($git) {
             logit "run git pull in ares";
             system("git pull 2>&1");
             $gitstat += $?;
-            logit "failed to update from ares git ($?), continue anyway" if ($?);
+            logit "failed to update from ares git ($?), continue anyway" if($?);
 
             # Set timestamp to the UTC the git update took place.
-            $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
+            $timestamp = scalar(gmtime)." UTC" if(!$gitstat);
         }
 
         # get the last 5 commits for show (even if no pull was made)
@@ -547,7 +547,7 @@ if(!$make) {
     mydie "Couldn't find make in the PATH";
 }
 # force to 'nmake' for VC builds
-$make = "nmake" if ($targetos =~ /vc/);
+$make = "nmake" if($targetos =~ /vc/);
 logit "going with $make as make";
 
 # change to build dir
@@ -683,7 +683,7 @@ if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     open($f, "<", $cmd);
     while(<$f>) {
         # strip CR from output on non-Windows platforms (WINE on Linux)
-        s/\r// if ($^O ne 'MSWin32');
+        s/\r// if($^O ne 'MSWin32');
         print;
     }
     close($f);

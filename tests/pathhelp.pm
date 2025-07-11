@@ -121,7 +121,7 @@ sub sys_native_abs_path {
     return File::Spec->rel2abs($path) if !os_is_win();
 
     # Do not process empty path.
-    return $path if ($path eq '');
+    return $path if($path eq '');
 
     my $res;
     if($^O eq 'msys' || $^O eq 'cygwin') {
