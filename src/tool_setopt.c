@@ -293,7 +293,7 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
                          name, lval);
     }
     else {
-      if(*nv2->name)
+      if(nv2->name && *nv2->name)
         /* if max is set */
         ret = easysrc_addf(&easysrc_code,
                            "curl_easy_setopt(hnd, %s, (long)(%s | %s));",
