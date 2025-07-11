@@ -120,7 +120,7 @@ $   i = 0
 $   line_out = ""
 $sub_loop:
 $       ! Replace between pairs of @ by alternating the elements.
-$       ! If mis-matched pairs, do not substitute anything.
+$       ! If mismatched pairs, do not substitute anything.
 $       section1 = f$element(i, "@", line_in)
 $       if section1 .eqs. "@"
 $       then
