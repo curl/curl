@@ -268,7 +268,7 @@ sub oldhash {
     return $hash;
 }
 
-if( $opt_p !~ m/:/ ) {
+if($opt_p !~ m/:/) {
     print "Error: Mozilla trust identifier list must include both purposes and levels\n";
     HELP_MESSAGE();
 }
@@ -285,7 +285,7 @@ sub should_output_cert(%) {
     foreach my $level (@included_mozilla_trust_levels) {
         # for each level we want to output, see if any of our desired purposes are
         # included
-        return 1 if( defined( List::Util::first { is_in_list( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ) );
+        return 1 if(defined( List::Util::first { is_in_list( $_, @included_mozilla_trust_purposes ) } @{$trust_purposes_by_level{$level}} ));
     }
 
     return 0;
@@ -656,8 +656,8 @@ unless($stdout) {
             $bk++;
         }
         rename $crt, "$crt.~${bk}~" or die "Failed to create backup $crt.~$bk}~: $!\n";
-    } elsif( -e $crt ) {
-        unlink( $crt ) or die "Failed to remove $crt: $!\n";
+    } elsif(-e $crt) {
+        unlink($crt) or die "Failed to remove $crt: $!\n";
     }
     rename "$crt.~", $crt or die "Failed to rename $crt.~ to $crt: $!\n";
 }
