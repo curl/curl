@@ -1731,19 +1731,19 @@ static ParameterError opt_none(struct OperationConfig *config,
       sethttpver(config, CURL_HTTP_VERSION_3ONLY);
     break;
   case C_TLSV1: /* --tlsv1 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1;
+    config->ssl_version = 0;
     break;
   case C_TLSV1_0: /* --tlsv1.0 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+    config->ssl_version = 0;
     break;
   case C_TLSV1_1: /* --tlsv1.1 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+    config->ssl_version = 1;
     break;
   case C_TLSV1_2: /* --tlsv1.2 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+    config->ssl_version = 2;
     break;
   case C_TLSV1_3: /* --tlsv1.3 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+    config->ssl_version = 3;
     break;
   case C_IPV4: /* --ipv4 */
     config->ip_version = CURL_IPRESOLVE_V4;
