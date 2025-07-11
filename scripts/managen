@@ -177,9 +177,9 @@ sub printdesc {
     }
     else {
         my $p = -1;
-        my $para;
+        my $para = '';
         for my $l (@desc) {
-            my $lvl;
+            my $lvl = '';
             if($l !~ /^[\n\r]+/) {
                 # get the indent level off the string
                 $l =~ s/^\[([0-9q]*)\]//;
@@ -285,7 +285,7 @@ sub render {
     # if $top is TRUE, it means a top-level page and not a command line option
     my $top = ($line == 1);
     my $quote = 0;
-    my $level;
+    my $level = 0;
     my $finalblank;
     my $blankline = 0;
     my $start = 0;
