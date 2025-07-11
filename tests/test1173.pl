@@ -28,7 +28,7 @@
 # Output all deviances to stderr.
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 use File::Basename;
 
 # get the file name first

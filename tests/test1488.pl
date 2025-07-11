@@ -28,7 +28,7 @@
 #
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 use vars qw($Cpreprocessor);
 use allversions;
 

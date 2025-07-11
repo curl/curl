@@ -28,7 +28,7 @@
 #
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 my $manpage=$ARGV[0];
 my $header=$ARGV[1];

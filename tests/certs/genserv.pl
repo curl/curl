@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 use File::Basename;
 use File::Spec;
