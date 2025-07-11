@@ -43,7 +43,7 @@ my $rc = eval {
 };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
-if (!$rc) {
+if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 

@@ -303,7 +303,7 @@ delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
 
 # provide defaults from our config file for ENV vars not explicitly
 # set by the caller
-if (open(my $fd, "<", "config")) {
+if(open(my $fd, "<", "config")) {
     while(my $line = <$fd>) {
         next if ($line =~ /^#/);
         chomp $line;
@@ -315,10 +315,10 @@ if (open(my $fd, "<", "config")) {
 
 # Check if we have nghttpx available and if it talks http/3
 my $nghttpx_h3 = 0;
-if (!$ENV{"NGHTTPX"}) {
+if(!$ENV{"NGHTTPX"}) {
     $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
 }
-if ($ENV{"NGHTTPX"}) {
+if($ENV{"NGHTTPX"}) {
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
     my $nghttpx_version=join(' ', `$cmd`);
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
@@ -2597,7 +2597,7 @@ if($valgrind) {
     }
 }
 
-if ($gdbthis) {
+if($gdbthis) {
     # open the executable curl and read the first 4 bytes of it
     open(my $check, "<", "$CURL");
     my $c;
@@ -2715,7 +2715,7 @@ sub disabledtests {
 # If 'all' tests are requested, find out all test numbers
 #
 
-if ( $TESTCASES eq "all") {
+if($TESTCASES eq "all") {
     # Get all commands and find out their test numbers
     opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);

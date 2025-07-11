@@ -482,7 +482,7 @@ my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
 my $sshdconfig_abs;
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
@@ -994,7 +994,7 @@ push @cfgarr, 'Protocol 2';
 push @cfgarr, '#';
 
 # BindAddress option is not supported by OpenSSH for Windows
-if (!($sshdid =~ /OpenSSH-Windows/)) {
+if(!($sshdid =~ /OpenSSH-Windows/)) {
     push @cfgarr, "BindAddress $listenaddr";
 }
 
@@ -1021,7 +1021,7 @@ push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
 
 # RSA authentication options are deprecated by newer OpenSSH
-if (!($sshid =~ /OpenSSH/) || ($sshvernum <= 730)) {
+if(!($sshid =~ /OpenSSH/) || ($sshvernum <= 730)) {
     push @cfgarr, 'RhostsRSAAuthentication no';
     push @cfgarr, 'RSAAuthentication no';
 }
@@ -1195,7 +1195,7 @@ logmsg "RUN: $cmd\n" if($verbose);
 #***************************************************************************
 # Start the ssh server daemon on Windows without forking it
 #
-if ($sshdid =~ /OpenSSH-Windows/) {
+if($sshdid =~ /OpenSSH-Windows/) {
     # Fake pidfile for ssh server on Windows.
     if(open(my $out, ">", "$pidfile")) {
         print $out $$ . "\n";

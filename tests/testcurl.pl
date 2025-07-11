@@ -516,7 +516,7 @@ if((-f "include/curl/curlver.h") &&
 # Show timestamp we are using for this test build.
 logit "timestamp = $timestamp";
 
-if ($configurebuild) {
+if($configurebuild) {
     if(-f "configure") {
         logit "configure created (at least it exists)";
     } else {
@@ -663,21 +663,21 @@ while(<$f>) {
 }
 close($f);
 
-if (-f "lib/libcurl$libext") {
+if(-f "lib/libcurl$libext") {
     logit "libcurl was created fine (libcurl$libext)";
 }
 else {
     mydie "libcurl was not created (libcurl$libext)";
 }
 
-if (-f "src/curl$binext") {
+if(-f "src/curl$binext") {
     logit "curl was created fine (curl$binext)";
 }
 else {
     mydie "curl was not created (curl$binext)";
 }
 
-if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
+if(!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
     logit "display curl${binext} --version output";
     my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
     open($f, "<", $cmd);
