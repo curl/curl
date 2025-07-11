@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 # the DISABLE options that can be set by configure
 my %disable;

@@ -24,7 +24,7 @@
 #***************************************************************************
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 BEGIN {
     push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});

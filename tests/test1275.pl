@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 my $root=$ARGV[0] || "..";
 

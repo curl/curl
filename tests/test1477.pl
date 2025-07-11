@@ -27,7 +27,7 @@
 # error codes.
 
 use strict;
-use warnings 'FATAL' => 'all';
+use warnings;
 
 # we may get the dir roots pointed out
 my $root=$ARGV[0] || ".";
