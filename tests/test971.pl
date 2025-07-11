@@ -23,7 +23,6 @@
 #
 ###########################################################################
 #
-#
 # - Get all options mentioned in the $cmddir.
 # - Make sure they're all mentioned in the $opts document
 # - Make sure that the version in $opts matches the version in the file in

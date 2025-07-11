@@ -40,13 +40,13 @@ Pod::Usage::pod2usage() if $help;
 
 my @opts = parse_main_opts($opts_dir);
 
-if ($shell eq 'fish') {
+if($shell eq 'fish') {
     print "# curl fish completion\n\n";
     print "# Complete file paths after @\n";
     print q(complete -c curl -n 'string match -qr "^@" -- (commandline -ct)' -k -xa "(printf '%s\n' -- @(__fish_complete_suffix --complete=(commandline -ct | string replace -r '^@' '') ''))");
     print "\n\n";
     print qq{$_ \n} foreach (@opts);
-} elsif ($shell eq 'zsh') {
+} elsif($shell eq 'zsh') {
     my $opts_str;
 
     $opts_str .= qq{  $_ \\\n} foreach (@opts);
@@ -99,10 +99,10 @@ sub parse_main_opts {
         $file_content = $1;
         my ($short, $long, $arg, $desc);
 
-        if ($file_content =~ /^Short:\s+(.*)\s*$/im) {$short = "-$1";}
-        if ($file_content =~ /^Long:\s+(.*)\s*$/im) {$long = "--$1";}
-        if ($file_content =~ /^Arg:\s+(.*)\s*$/im) {$arg = $1;}
-        if ($file_content =~ /^Help:\s+(.*)\s*$/im) {$desc = $1;}
+        if($file_content =~ /^Short:\s+(.*)\s*$/im) {$short = "-$1";}
+        if($file_content =~ /^Long:\s+(.*)\s*$/im) {$long = "--$1";}
+        if($file_content =~ /^Arg:\s+(.*)\s*$/im) {$arg = $1;}
+        if($file_content =~ /^Help:\s+(.*)\s*$/im) {$desc = $1;}
 
         $arg =~ s/\:/\\\:/g if defined $arg;
         $desc =~ s/'/'\\''/g if defined $desc;
@@ -112,7 +112,7 @@ sub parse_main_opts {
 
         my $option = '';
 
-        if ($shell eq 'fish') {
+        if($shell eq 'fish') {
             $option .= "complete --command curl";
             $option .= " --short-option '" . strip_dash(trim($short)) . "'"
                 if defined $short;
@@ -120,23 +120,23 @@ sub parse_main_opts {
                 if defined $long;
             $option .= " --description '" . strip_dash(trim($desc)) . "'"
                 if defined $desc;
-        } elsif ($shell eq 'zsh') {
+        } elsif($shell eq 'zsh') {
             $option .= '{' . trim($short) . ',' if defined $short;
             $option .= trim($long)  if defined $long;
             $option .= '}' if defined $short;
             $option .= '\'[' . trim($desc) . ']\'' if defined $desc;
 
-            if (defined $arg) {
+            if(defined $arg) {
                 $option .= ":'$arg'";
-                if ($arg =~ /<file ?(name)?>|<path>/) {
+                if($arg =~ /<file ?(name)?>|<path>/) {
                     $option .= ':_files';
-                } elsif ($arg =~ /<dir>/) {
+                } elsif($arg =~ /<dir>/) {
                     $option .= ":'_path_files -/'";
-                } elsif ($arg =~ /<url>/i) {
+                } elsif($arg =~ /<url>/i) {
                     $option .= ':_urls';
-                } elsif ($long =~ /ftp/ && $arg =~ /<method>/) {
+                } elsif($long =~ /ftp/ && $arg =~ /<method>/) {
                     $option .= ":'(multicwd nocwd singlecwd)'";
-                } elsif ($arg =~ /<method>/) {
+                } elsif($arg =~ /<method>/) {
                     $option .= ":'(DELETE GET HEAD POST PUT)'";
                 }
             }

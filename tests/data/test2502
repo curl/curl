@@ -97,7 +97,7 @@ Via: 3 nghttpx
 == Info: Connection #0 to host localhost left intact
 </file>
 <stripfile>
-$_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>

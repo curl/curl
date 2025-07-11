@@ -65,7 +65,7 @@ sub appveyor_create_test_result {
         }
     ' \\
     '$appveyor_baseurl/api/tests'`;
-    print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
+    print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     $APPVEYOR_TEST_NAMES{$testnum}=$testname;
 }
 
@@ -111,7 +111,7 @@ sub appveyor_update_test_result {
         }
     ' \\
     '$appveyor_baseurl/api/tests'`;
-    print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
+    print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     if($appveyor_category eq 'Error') {
         $appveyor_result=`$curl --silent --noproxy '*' \\
         --header 'Content-Type: application/json' \\
@@ -123,7 +123,7 @@ sub appveyor_update_test_result {
             }
         ' \\
         '$appveyor_baseurl/api/build/messages'`;
-        print "AppVeyor API result: $appveyor_result\n" if ($appveyor_result);
+        print "AppVeyor API result: $appveyor_result\n" if($appveyor_result);
     }
 }
 

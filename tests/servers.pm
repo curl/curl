@@ -166,7 +166,7 @@ sub checkcmd {
                 "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     }
     for(@paths) {
-        if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
+        if(-x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
             return "$_/$cmd";
         }
@@ -345,7 +345,7 @@ sub serverfortest {
 sub startnew {
     my ($cmd, $pidfile, $timeout, $fakepidfile)=@_;
 
-    logmsg "startnew: $cmd\n" if ($verbose);
+    logmsg "startnew: $cmd\n" if($verbose);
 
     my $child = fork();
 
@@ -504,7 +504,7 @@ sub stopserver {
         foreach my $lockfile (@lockfiles) {
             if(-f $lockfile) {
                 unlink($lockfile);
-                logmsg "RUN: kill $server, cleaned up $lockfile\n" if ($verbose);
+                logmsg "RUN: kill $server, cleaned up $lockfile\n" if($verbose);
             }
         }
     }
@@ -3029,7 +3029,7 @@ sub startservers {
             }
         }
         elsif($what eq "none") {
-            logmsg "* starts no server\n" if ($verbose);
+            logmsg "* starts no server\n" if($verbose);
         }
         else {
             warn "we don't support a server for $what";

@@ -169,17 +169,17 @@ sub readlocalfile {
         $i++;
 
         # Lines starting with '#' are considered comments
-        if (/^\s*(#.*)/) {
+        if(/^\s*(#.*)/) {
             next;
         }
-        elsif (/^enable ([A-Z]+)$/) {
+        elsif(/^enable ([A-Z]+)$/) {
             if(!defined($warnings_extended{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
             }
             $warnings{$1} = $warnings_extended{$1};
         }
-        elsif (/^disable ([A-Z]+)$/) {
+        elsif(/^disable ([A-Z]+)$/) {
             if(!defined($warnings{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
@@ -187,10 +187,10 @@ sub readlocalfile {
             # Accept-list
             push @alist, $1;
         }
-        elsif (/^banfunc ([^ ]*)/) {
+        elsif(/^banfunc ([^ ]*)/) {
             $banfunc{$1} = $1;
         }
-        elsif (/^allowfunc ([^ ]*)/) {
+        elsif(/^allowfunc ([^ ]*)/) {
             undef $banfunc{$1};
         }
         else {
@@ -344,7 +344,7 @@ readlocalfile($file);
 do {
     if("$wlist" !~ / $file /) {
         my $fullname = $file;
-        $fullname = "$dir/$file" if ($fullname !~ '^\.?\.?/');
+        $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
         scanfile($fullname);
     }
     $file = shift @ARGV;

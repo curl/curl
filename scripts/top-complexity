@@ -32,7 +32,7 @@ use warnings;
 sub checkcmd {
     my ($cmd)=@_;
     my @paths;
-    if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
+    if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
         @paths=(split(';', $ENV{'PATH'}));
     }
@@ -41,7 +41,7 @@ sub checkcmd {
                 "/sbin", "/usr/bin", "/usr/local/bin");
     }
     for(@paths) {
-        if( -x "$_/$cmd" && ! -d "$_/$cmd" ) {
+        if(-x "$_/$cmd" && ! -d "$_/$cmd") {
             # executable bit but not a directory!
             return "$_/$cmd";
         }

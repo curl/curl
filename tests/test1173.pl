@@ -107,7 +107,7 @@ sub checkref {
         return;
     }
     foreach my $d (keys %docsdirs) {
-        if( -f "$d/$f.$sec") {
+        if(-f "$d/$f.$sec") {
             $present = 1;
             $ref{"$f.$sec"}=1;
             last;

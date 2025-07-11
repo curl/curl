@@ -127,14 +127,12 @@ close $s;
 
 my $ignored=0;
 for my $e (sort @syms) {
-    if( $manpage{$e} ) {
-
-        if( $manpage{$e} ne $symadded{$e} ) {
+    if($manpage{$e}) {
+        if($manpage{$e} ne $symadded{$e}) {
             printf "%s.md says version %s, but SIV says %s\n",
                 $e, $manpage{$e}, $symadded{$e};
             $error++;
         }
-
     }
 }
 print "OK\n" if(!$error);

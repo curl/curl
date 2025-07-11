@@ -76,7 +76,7 @@ sub scanenums {
         die "Cannot preprocess $file";
     while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
-        if( /^#(line|) (\d+) \"(.*)\"/) {
+        if(/^#(line|) (\d+) \"(.*)\"/) {
             # if the included file isn't in our incdir, then we skip this section
             # until next #line
             #
@@ -94,7 +94,7 @@ sub scanenums {
         if(/^#/) {
             next;
         }
-        if( /enum\s+(\S+\s+)?{/ .. /}/ ) {
+        if(/enum\s+(\S+\s+)?{/ .. /}/) {
             s/^\s+//;
             chomp;
             s/[,\s].*//;
