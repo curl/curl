@@ -2750,7 +2750,7 @@ CURL_EXTERN CURLcode curl_global_init(long flags);
  * for each application that uses libcurl. This function can be used to
  * initialize libcurl and set user defined memory management callback
  * functions. Users can implement memory management routines to check for
- * memory leaks, check for mis-use of the curl library etc. User registered
+ * memory leaks, check for misuse of the curl library etc. User registered
  * callback routines will be invoked by this library instead of the system
  * memory management routines like malloc, free etc.
  */
