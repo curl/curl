@@ -68,7 +68,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   return realsize;
 }
 
-static CURL_THREAD_RESULT_T CURL_STDCALL test_thread(void *ptr)
+static CURL_THREAD_RETURN_T CURL_STDCALL test_thread(void *ptr)
 {
   struct Ctx *ctx = (struct Ctx *)ptr;
   CURLcode res = CURLE_OK;

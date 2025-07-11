@@ -53,14 +53,14 @@
 #endif
 
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-#define CURL_THREAD_RESULT_T DWORD
+#define CURL_THREAD_RETURN_T DWORD
 #else
-#define CURL_THREAD_RESULT_T unsigned int
+#define CURL_THREAD_RETURN_T unsigned int
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg);
 
 void Curl_thread_destroy(curl_thread_t *hnd);

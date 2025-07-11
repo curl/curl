@@ -59,7 +59,7 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
@@ -102,7 +102,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(CURL_THREAD_RESULT_T
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
