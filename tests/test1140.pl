@@ -116,4 +116,4 @@ foreach my $f (@f) {
 
 print "OK\n" if(!$errors);
 
-exit $errors?1:0;
+exit ($errors ? 1 : 0);
