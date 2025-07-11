@@ -34,7 +34,7 @@ push @out, "     / __| | | | |_) | |\n";
 push @out, "    | (__| |_| |  _ <| |___\n";
 push @out, "     \\___|\\___/|_| \\_\\_____|\n";
 
-while (<STDIN>) {
+while(<STDIN>) {
     my $line = $_;
     push @out, $line;
 }
@@ -58,7 +58,7 @@ if($c) {
       IO::Compress::Gzip->import();
       1;
     };
-    print STDERR "Warning: compression requested but Gzip is not available\n" if (!$c)
+    print STDERR "Warning: compression requested but Gzip is not available\n" if(!$c)
 }
 
 if($c)

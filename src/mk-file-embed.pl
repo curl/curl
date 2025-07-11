@@ -44,7 +44,7 @@ const unsigned char ${varname}[] = {
 HEAD
     ;
 
-while (<STDIN>) {
+while(<STDIN>) {
     my $line = $_;
     foreach my $n (split //, $line) {
         my $ord = ord($n);

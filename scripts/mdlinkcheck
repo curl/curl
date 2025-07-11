@@ -162,4 +162,4 @@ for my $l (sort keys %flink) {
     }
 }
 
-exit 1 if ($error);
+exit 1 if($error);

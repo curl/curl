@@ -25,7 +25,7 @@
 
 use POSIX qw(strftime);
 my @ts;
-if (defined($ENV{SOURCE_DATE_EPOCH})) {
+if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = localtime($ENV{SOURCE_DATE_EPOCH});
 } else {
     @ts = localtime;

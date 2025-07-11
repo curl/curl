@@ -49,7 +49,7 @@ my %catlong;
 
 use POSIX qw(strftime);
 my @ts;
-if (defined($ENV{SOURCE_DATE_EPOCH})) {
+if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = gmtime($ENV{SOURCE_DATE_EPOCH});
 } else {
     @ts = localtime;
@@ -195,7 +195,7 @@ sub printdesc {
                 chomp $l;
                 lastline($baselvl + $lvl + 1, $l);
                 my $w = ($baselvl + $lvl + 1) * $indent + length($l);
-                if ($w > $colwidth) {
+                if($w > $colwidth) {
                     print STDERR "ERROR: $w columns is too long\n";
                     print STDERR "$l\n";
                     $error++;
@@ -1176,7 +1176,7 @@ sub mainpage {
 .\\"
 .TH curl 1 "$date" "curl $version" "curl Manual"
 HEADER
-        if ($manpage);
+        if($manpage);
 
     while(<$fh>) {
         my $f = $_;
