@@ -66,7 +66,7 @@ digest
 HTTP with proxy-requiring-Digest to site-requiring-Digest
 </name>
 <command>
-http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
+http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:a-lot
 </command>
 </client>
 
@@ -89,7 +89,7 @@ Proxy-Connection: Keep-Alive
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="fb8608e00ad9239a3dedb14bc8575976"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="ca87f2d768a231e2d637a55698d5c416"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="bfecb43898f3db12543650d45493313b"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

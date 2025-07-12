@@ -68,7 +68,7 @@ digest
 HTTP with proxy Digest and site Digest with creds in URLs
 </name>
 <command>
-http://digest:alot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
+http://digest:a-lot@data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://foo:bar@%HOSTIP:%HTTPPORT --proxy-digest --digest
 </command>
 </client>
 
@@ -91,7 +91,7 @@ Proxy-Connection: Keep-Alive
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Digest username="foo", realm="weirdorealm", nonce="12345", uri="/%TESTNUMBER", response="f61609cd8f5bb205ef4e169b2c5626cb"
-Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="08a2e2e684047f4219a38ddc189ac00c"
+Authorization: Digest username="digest", realm="realmweirdo", nonce="123456", uri="/%TESTNUMBER", response="ea0f4cb7a119a1a6f6c6c6c2e4190860"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
