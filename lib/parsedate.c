@@ -150,7 +150,7 @@ static const struct tzinfo tz[]= {
   {"HDT", 600 tDAYZONE},   /* Hawaii Daylight */
   {"CAT", 600},            /* Central Alaska */
   {"AHST", 600},           /* Alaska-Hawaii Standard */
-  {"NT",  660},            /* Nome */
+  {"NT",  660},            /* Nome */ /* spellchecker:disable-line */
   {"IDLW", 720},           /* International Date Line West */
   {"CET", -60},            /* Central European */
   {"MET", -60},            /* Middle European */
