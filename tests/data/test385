@@ -48,7 +48,7 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Content-Type: drinks/hot
 Accept: application/json
-Content-Length: 40
+Content-Length: 41
 
 { "drink": "coffee", "crunch": "cookie" }
 </protocol>
