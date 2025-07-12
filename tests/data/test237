@@ -8,7 +8,7 @@ FTP
 # Server-side
 <reply>
 <servercmd>
-REPLY PASV 227 Entering Passiv Mode (1216,256,2,127,127,127)
+REPLY PASV 227 Entering Passive Mode (1216,256,2,127,127,127)
 </servercmd>
 </reply>
 
