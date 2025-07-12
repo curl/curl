@@ -1146,7 +1146,7 @@ static int test_string_formatting(void)
   errors += string_check(buf, "09foo");
 
   curl_msnprintf(buf, sizeof(buf), "%*.*s", 5, 2, "foo");
-  errors += string_check(buf, "   fo"); /* codespell:ignore */
+  errors += string_check(buf, "   fo"); /* spellchecker: disable */
 
   curl_msnprintf(buf, sizeof(buf), "%*.*s", 2, 5, "foo");
   errors += string_check(buf, "foo");
