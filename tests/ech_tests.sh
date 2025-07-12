@@ -337,7 +337,7 @@ echo "curl: have $have_curl, cURL command: |$CURL ${CURL_PARAMS[*]}|"
 echo "ossl: have: $have_ossl, using: $using_ossl"
 echo "wolf: have: $have_wolf, using: $using_wolf"
 echo "bssl: have: $have_bssl, using: $using_bssl"
-echo "dig: $have_dig, kdig: $have_kdig, HTTPS res format: $have_presout"
+echo "dig: $have_dig, kdig: $have_kdig, HTTPS presentation format: $have_presout"
 echo "dig command: |$digcmd|"
 echo "ports != 443 blocked: $have_portsblocked"
 
