@@ -144,7 +144,7 @@ jobs:
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
 
   cicheck:
-    name: 'CI'
+    name: 'CI checks'
     runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
