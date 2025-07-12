@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
-static size_t write_h2ue_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
+static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
+                                      void *opaque)
 {
   (void)ptr;
   (void)opaque;
@@ -69,7 +70,7 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
       curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
       curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
       curl_easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-      curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_h2ue_cb);
+      curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_h2_upg_extreme_cb);
       curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
       curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
       curl_msnprintf(range, sizeof(range),
