@@ -1368,13 +1368,13 @@ sub runnerar {
 # Called by controller
 sub runnerar_ready {
     my ($blocking) = @_;
-    my $rin = "";
+    my $r_in = "";
     my %idbyfileno;
     my $maxfileno=0;
     my @ready_runners = ();
     foreach my $p (keys(%controllerr)) {
         my $fd = fileno($controllerr{$p});
-        vec($rin, $fd, 1) = 1;
+        vec($r_in, $fd, 1) = 1;
         $idbyfileno{$fd} = $p;  # save the runner ID for each pipe fd
         if($fd > $maxfileno) {
             $maxfileno = $fd;
@@ -1386,14 +1386,14 @@ sub runnerar_ready {
     # This may be interrupted and return EINTR, but this is ignored and the
     # caller will need to later call this function again.
     # TODO: this is relatively slow with hundreds of fds
-    my $ein = $rin;
-    if(select(my $rout=$rin, undef, my $eout=$ein, $blocking) >= 1) {
+    my $e_in = $r_in;
+    if(select(my $r_out=$r_in, undef, my $e_out=$e_in, $blocking) >= 1) {
         for my $fd (0..$maxfileno) {
             # Return an error condition first in case it's both
-            if(vec($eout, $fd, 1)) {
+            if(vec($e_out, $fd, 1)) {
                 return (undef, $idbyfileno{$fd});
             }
-            if(vec($rout, $fd, 1)) {
+            if(vec($r_out, $fd, 1)) {
                 push(@ready_runners, $idbyfileno{$fd});
             }
         }
