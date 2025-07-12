@@ -71,6 +71,7 @@ jobs:
       - name: 'codespell'
         run: |
           codespell --version
+          # shellcheck disable=SC2046
           codespell \
             --skip scripts/mk-ca-bundle.pl \
             --skip src/tool_hugehelp.c \
