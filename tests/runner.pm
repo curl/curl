@@ -458,18 +458,18 @@ sub torture {
         return 0;
     }
 
-    my @ttests = (1 .. $count);
+    my @torture_tests = (1 .. $count);
     if($shallow && ($shallow < $count)) {
-        my $discard = scalar(@ttests) - $shallow;
-        my $percent = sprintf("%.2f%%", $shallow * 100 / scalar(@ttests));
+        my $discard = scalar(@torture_tests) - $shallow;
+        my $percent = sprintf("%.2f%%", $shallow * 100 / scalar(@torture_tests));
         logmsg " $count functions found, but only fail $shallow ($percent)\n";
         while($discard) {
             my $rm;
             do {
                 # find a test to discard
-                $rm = rand(scalar(@ttests));
-            } while(!$ttests[$rm]);
-            $ttests[$rm] = undef;
+                $rm = rand(scalar(@torture_tests));
+            } while(!$torture_tests[$rm]);
+            $torture_tests[$rm] = undef;
             $discard--;
         }
     }
@@ -477,7 +477,7 @@ sub torture {
         logmsg " $count functions to make fail\n";
     }
 
-    for (@ttests) {
+    for (@torture_tests) {
         my $limit = $_;
         my $fail;
         my $dumped_core;
