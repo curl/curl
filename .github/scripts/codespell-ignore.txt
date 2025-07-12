@@ -15,7 +15,6 @@ nome
 numer
 PASE
 perfec
-pres
 seh
 ser
 strat
