@@ -20,5 +20,4 @@ ser
 strat
 te
 wast
-wit
 wont
