@@ -7,7 +7,7 @@ ba
 bu
 clen
 CNA
-ede
+# drop when deleting winbuild
 fo
 htpt
 inout
