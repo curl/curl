@@ -11,13 +11,13 @@ cd "$(dirname "${0}")"/../..
 codespell \
   --skip '*/spellcheck.words' \
   --skip '*/typos.toml' \
-  --skip '*/THANKS' \
-  --skip '*/mk-ca-bundle.pl' \
-  --skip '*/wcurl' \
-  --skip '*/tool_hugehelp.c' \
+  --skip 'docs/THANKS' \
+  --skip 'scripts/mk-ca-bundle.pl' \
+  --skip 'scripts/wcurl' \
+  --skip 'src/tool_hugehelp.c' \
   --skip 'packages/*' \
   --skip 'winbuild/*' \
-  --skip '*/test*' \
+  --skip 'tests/data/test*' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.txt' \
   $(git ls-files)
