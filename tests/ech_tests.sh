@@ -415,15 +415,15 @@ then
         fi
         if [[ "$host" == "cloudflare-ech.com" ]]
         then
-            echo "Skipping $host as they've blocked PN override"
+            echo "Skipping $host as they've blocked public name override"
             continue
         fi
         path=${ech_targets[$targ]}
         turl="https://$host:$port/$path"
-        echo "PN override check for $turl"
+        echo "Public name override check for $turl"
         {
             echo ""
-            echo "PN override check for $turl"
+            echo "Public name override check for $turl"
         } >> "$logfile"
         timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" --ech pn:override --ech hard "$turl" >> "$logfile" 2>&1
         eres=$?
@@ -439,8 +439,8 @@ then
         if [[ "$eres" != "0" ]]
         then
             allgood="no"
-            echo "PN override Error ($eres) for $turl" >> "$logfile"
-            echo -e "\tPN override Error ($eres) for $turl"
+            echo "Public name override Error ($eres) for $turl" >> "$logfile"
+            echo -e "\tPublic name override Error ($eres) for $turl"
         fi
         echo "" >> "$logfile"
     done
