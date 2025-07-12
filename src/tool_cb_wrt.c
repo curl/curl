@@ -141,6 +141,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   intptr_t fhnd;
 #endif
 
+  if(outs->out_null)
+    return bytes;
+
 #ifdef DEBUGBUILD
   {
     char *tty = curl_getenv("CURL_ISATTY");
