@@ -286,7 +286,7 @@ static const struct algo algs[]= {
 #ifdef CALG_TEK
   CIPHEROPTION(CALG_TEK),
 #endif
-  CIPHEROPTION(CALG_CYLINK_MEK),
+  CIPHEROPTION(CALG_CYLINK_MEK), /* spellchecker:disable-line */
   CIPHEROPTION(CALG_SSL3_SHAMD5),
 #ifdef CALG_SSL3_MASTER
   CIPHEROPTION(CALG_SSL3_MASTER),
