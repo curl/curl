@@ -7,9 +7,8 @@ set -eu
 
 cd "$(dirname "${0}")"/../..
 
-git ls-files \
-| grep -v -E '(codespell-ignore\.txt|spellcheck\.words|/wcurl|/THANKS)' \
-| typos \
-    --isolated \
-    --config '.github/scripts/typos.toml' \
-    --file-list -
+git ls-files | typos \
+  --isolated \
+  --force-exclude \
+  --config '.github/scripts/typos.toml' \
+  --file-list -
