@@ -77,7 +77,7 @@ jobs:
             --skip src/tool_hugehelp.c \
             --skip scripts/wcurl \
             --ignore-words .github/scripts/codespell-ignore.txt \
-            --skip '*/test*,*/THANKS,*/spellcheck.words,packages/*' \
+            --skip '*/test*,*/THANKS,*/spellcheck.words,packages/*,*/typos.toml' \
             $(git ls-files)
 
       - name: 'typos'
