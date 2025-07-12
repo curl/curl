@@ -7,8 +7,6 @@ ba
 bu
 clen
 CNA
-# drop when deleting winbuild
-fo
 htpt
 inout
 nome
