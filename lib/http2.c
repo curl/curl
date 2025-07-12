@@ -2348,7 +2348,7 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     DEBUGASSERT(stream);
   }
   else if(stream->body_eos) {
-    /* We already wrote this, but CURLE_AGAINed the call due to not
+    /* We already wrote this, but CURLE_AGAIN-ed the call due to not
      * being able to flush stream->sendbuf. Make a 0-length write
      * to trigger flushing again.
      * If this works, we report to have written `len` bytes. */
