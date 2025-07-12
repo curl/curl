@@ -710,22 +710,16 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
       return CURLE_OUT_OF_MEMORY;
   }
 
-  /* Check we have a password for the given host user */
-  if(config->userpwd && !config->oauth_bearer) {
+  /* Check if we have a password for the given host user */
+  if(config->userpwd && !config->oauth_bearer)
     result = checkpasswd("host", i, last, &config->userpwd);
-    if(result)
-      return result;
-  }
 
-  /* Check we have a password for the given proxy user */
-  if(config->proxyuserpwd) {
+  /* Check if we have a password for the given proxy user */
+  if(!result && config->proxyuserpwd)
     result = checkpasswd("proxy", i, last, &config->proxyuserpwd);
-    if(result)
-      return result;
-  }
 
-  /* Check we have a user agent */
-  if(!config->useragent) {
+  /* Check if we have a user agent */
+  if(!result && !config->useragent) {
     config->useragent = my_useragent();
     if(!config->useragent) {
       errorf(config->global, "out of memory");
