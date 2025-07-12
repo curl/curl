@@ -10,5 +10,6 @@ cd "$(dirname "${0}")"/../..
 git ls-files \
 | grep -v -E '(codespell-ignore\.txt|spellcheck\.words|/wcurl|/THANKS)' \
 | typos \
+    --isolated \
     --config '.github/scripts/typos.toml' \
     --file-list -

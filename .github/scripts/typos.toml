@@ -4,5 +4,9 @@
 
 [default]
 extend-ignore-identifiers-re = [
-  "(GOST)",
+  "(ba|BA|fo|Fo|FU|Iy|ND|OT|pn|PN|ue|UE)",
+  "(anc|bck|ben|CNA|ECT|EDE|edn|ein|Jod|kno|MEK|Nam|Ned|noo|nin|nto|ser|ths|Typ|typ|URE|wrk)",
+  "(admi|alue|CLEA|clen|dout|GOST|HELO|helo|htpt|inex|PARM|parm|PASE)",
+  "(HEADE|numer|optin|parms|stati|ttests)",
+  "(Januar|passin|Passiv|perfec|PUNICODE|TEMPLAT|varius)",
 ]
