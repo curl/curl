@@ -145,7 +145,7 @@ jobs:
 
   cicheck:
     name: 'CI'
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -153,12 +153,15 @@ jobs:
           persist-credentials: false
 
       - name: 'install prereqs'
-        run: brew install shellcheck zizmor
+        run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
 
       - name: 'zizmor GHA'
-        run: zizmor --pedantic .github/workflows/*.yml
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --pedantic .github/workflows/*.yml
 
       - name: 'shellcheck GHA'
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck-ci.sh
