@@ -4,6 +4,7 @@
 admi
 anull
 ba
+beng
 bu
 clen
 CNA
