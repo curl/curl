@@ -59,6 +59,7 @@ env:
   QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   RUSTLS_VERSION: 0.15.0
+  # handled in renovate.json
   OPENLDAP_VERSION: 2.6.10
 
 jobs:
@@ -297,7 +298,7 @@ jobs:
           - name: 'openldap-static'
             install_steps: openldap-static
             install_packages: libssl-dev
-            configure: --disable-shared --with-openssl --enable-static --with-ldap=/home/runner/openldap --with-ldap-lib=ldap --with-lber-lib=lber
+            configure: --disable-shared --with-openssl --enable-static --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
     steps:
       - name: 'install prereqs'
@@ -461,7 +462,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" | tar -xz
           cd "openldap-${OPENLDAP_VERSION}"
-          ./configure --enable-static --disable-shared --prefix=/home/runner/openldap
+          ./configure --enable-static --disable-shared --prefix=/home/runner/openldap-static
           make
           make install
 
