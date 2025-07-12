@@ -292,11 +292,11 @@ then
     digcmd="kdig @$DOHSERVER +https +short"
 fi
 # see if our dig version knows HTTPS
-dout=$($digcmd https defo.ie)
-if [[ $dout != "1 . "* ]]
+digout=$($digcmd https defo.ie)
+if [[ $digout != "1 . "* ]]
 then
-    dout=$($digcmd -t TYPE65 defo.ie)
-    if [[ $dout == "1 . "* ]]
+    digout=$($digcmd -t TYPE65 defo.ie)
+    if [[ $digout == "1 . "* ]]
     then
         # we're good
         have_presout="yes"
