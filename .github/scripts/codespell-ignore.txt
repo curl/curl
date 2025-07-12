@@ -8,6 +8,7 @@ beng
 bu
 clen
 CNA
+hel
 htpt
 inout
 nome
