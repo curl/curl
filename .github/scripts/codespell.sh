@@ -16,6 +16,7 @@ codespell \
   --skip '*/wcurl' \
   --skip '*/tool_hugehelp.c' \
   --skip 'packages/*' \
+  --skip 'winbuild/*' \
   --skip '*/test*' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.txt' \
