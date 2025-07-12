@@ -20,5 +20,4 @@ ser
 strat
 te
 ue
-wast
 wont
