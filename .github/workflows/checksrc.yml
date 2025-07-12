@@ -69,16 +69,7 @@ jobs:
           cargo install typos-cli
 
       - name: 'codespell'
-        run: |
-          codespell --version
-          # shellcheck disable=SC2046
-          codespell \
-            --skip scripts/mk-ca-bundle.pl \
-            --skip src/tool_hugehelp.c \
-            --skip scripts/wcurl \
-            --ignore-words .github/scripts/codespell-ignore.txt \
-            --skip '*/test*,*/THANKS,*/spellcheck.words,packages/*,*/typos.toml' \
-            $(git ls-files)
+        run: .github/scripts/codespell.sh
 
       - name: 'typos'
         run: |
