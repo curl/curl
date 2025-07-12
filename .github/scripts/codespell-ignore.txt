@@ -24,7 +24,6 @@ ser
 strat
 te
 ths
-ttests
 varius
 wast
 wit
