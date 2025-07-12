@@ -69,7 +69,9 @@ jobs:
           cargo install typos-cli
 
       - name: 'codespell'
-        run: .github/scripts/codespell.sh
+        run: |
+          codespell --version
+          .github/scripts/codespell.sh
 
       - name: 'typos'
         run: .github/scripts/typos.sh
