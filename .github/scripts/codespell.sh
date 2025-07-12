@@ -17,6 +17,6 @@ codespell \
   --skip '*/tool_hugehelp.c' \
   --skip 'packages/*' \
   --skip '*/test*' \
-  --ignore-regex '.*spellchecker:disable' \
+  --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.txt' \
   $(git ls-files)

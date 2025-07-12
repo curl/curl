@@ -12,7 +12,7 @@ extend-ignore-identifiers-re = [
 ]
 
 extend-ignore-re = [
-  ".*spellchecker:disable",
+  ".*spellchecker:disable-line",
 ]
 
 [files]
