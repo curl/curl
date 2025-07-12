@@ -95,6 +95,19 @@
       "depNameTemplate": "quictls/openssl",
       "versioningTemplate": "semver",
       "extractVersionTemplate": "^openssl-(?<version>.*)-quic1$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/"
+      ],
+      "matchStrings": [
+        "OPENLDAP_VERSION: (?<currentValue>.*)\\s"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "openldap/openldap",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^OPENLDAP_REL_ENG_(?<major>\\d+)_(?<minor>\\d+)_(?<patch>\\d+)$"
     }
   ]
 }
