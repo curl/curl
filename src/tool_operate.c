@@ -940,8 +940,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
 
 static CURLcode setup_outfile(struct OperationConfig *config,
                               struct per_transfer *per,
-                              struct OutStruct *outs,
-                              bool *skipped)
+                              struct OutStruct *outs)
 {
   /*
    * We have specified a filename to store the result in, or we have
@@ -997,10 +996,9 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     struct_stat fileinfo;
     if(!stat(per->outfile, &fileinfo)) {
       /* file is present */
-      notef(global, "skips transfer, \"%s\" exists locally",
-            per->outfile);
+      notef(global, "skips transfer, \"%s\" exists locally", per->outfile);
       per->skip = TRUE;
-      *skipped = TRUE;
+      return CURLE_OK;
     }
   }
 
@@ -1103,6 +1101,203 @@ static void check_stdin_upload(struct OperationConfig *config,
   }
 }
 
+
+static CURLcode setup_easy(struct OperationConfig *config,
+                           CURLSH *share,
+                           struct getout *urlnode,
+                           bool orig_noprogress,
+                           bool orig_isatty,
+                           bool *skipped)
+{
+  struct per_transfer *per = NULL;
+  struct OutStruct *outs;
+  struct OutStruct *heads;
+  struct OutStruct *etag_save;
+  struct HdrCbData *hdrcbdata = NULL;
+  struct OutStruct etag_first;
+  struct State *state = &config->state;
+  struct GlobalConfig *global = config->global;
+  const char *httpgetfields = state->httpgetfields;
+  CURL *curl;
+  CURLcode result = CURLE_OK;
+
+  /* --etag-save */
+  memset(&etag_first, 0, sizeof(etag_first));
+  etag_save = &etag_first;
+  etag_save->stream = stdout;
+
+  /* --etag-compare */
+  if(config->etag_compare_file) {
+    result = etag_compare(config);
+    if(result)
+      return result;
+  }
+
+  if(config->etag_save_file) {
+    result = etag_store(config, etag_save, skipped);
+    if(result || *skipped)
+      return result;
+  }
+
+  curl = curl_easy_init();
+  if(curl)
+    result = add_per_transfer(&per);
+  else
+    result = CURLE_OUT_OF_MEMORY;
+  if(result) {
+    curl_easy_cleanup(curl);
+    if(etag_save->fopened)
+      fclose(etag_save->stream);
+    return result;
+  }
+  per->etag_save = etag_first; /* copy the whole struct */
+  if(state->uploadfile) {
+    per->uploadfile = strdup(state->uploadfile);
+    if(!per->uploadfile) {
+      curl_easy_cleanup(curl);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
+      tool_safefree(per->uploadfile);
+      curl_easy_cleanup(curl);
+      return CURLE_FAILED_INIT;
+    }
+  }
+  per->config = config;
+  per->curl = curl;
+  per->urlnum = (unsigned int)urlnode->num;
+
+  /* default headers output stream is stdout */
+  heads = &per->heads;
+  heads->stream = stdout;
+
+  /* Single header file for all URLs */
+  if(config->headerfile) {
+    result = setup_headerfile(config, per, heads);
+    if(result)
+      return result;
+  }
+  hdrcbdata = &per->hdrcbdata;
+
+  outs = &per->outs;
+
+  per->outfile = NULL;
+  per->infdopen = FALSE;
+  per->infd = STDIN_FILENO;
+
+  /* default output stream is stdout */
+  outs->stream = stdout;
+
+  if(state->urls) {
+    result = glob_next_url(&per->url, state->urls);
+    if(result)
+      return result;
+  }
+  else if(!state->li) {
+    per->url = strdup(urlnode->url);
+    if(!per->url) {
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  else
+    per->url = NULL;
+  if(!per->url)
+    return result;
+
+  if(state->outfiles) {
+    per->outfile = strdup(state->outfiles);
+    if(!per->outfile) {
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+
+  if((urlnode->useremote || (per->outfile && strcmp("-", per->outfile)))) {
+    result = setup_outfile(config, per, outs);
+    if(result || per->skip)
+      return result;
+  }
+
+  if(per->uploadfile) {
+    if(stdin_upload(per->uploadfile))
+      check_stdin_upload(config, per);
+    else {
+      /*
+       * We have specified a file to upload and it is not "-".
+       */
+      result = add_file_name_to_url(per->curl, &per->url,
+                                    per->uploadfile);
+      if(result)
+        return result;
+    }
+  }
+
+  if(per->uploadfile && config->resume_from_current)
+    config->resume_from = -1; /* -1 will then force get-it-yourself */
+
+  if(output_expected(per->url, per->uploadfile) && outs->stream &&
+     isatty(fileno(outs->stream)))
+    /* we send the output to a tty, therefore we switch off the progress
+       meter */
+    per->noprogress = global->noprogress = global->isatty = TRUE;
+  else {
+    /* progress meter is per download, so restore config
+       values */
+    per->noprogress = global->noprogress = orig_noprogress;
+    global->isatty = orig_isatty;
+  }
+
+  if(httpgetfields || config->query) {
+    result = append2query(config, per,
+                          httpgetfields ? httpgetfields : config->query);
+    if(result)
+      return result;
+  }
+
+  if((!per->outfile || !strcmp(per->outfile, "-")) &&
+     !config->use_ascii) {
+    /* We get the output to stdout and we have not got the ASCII/text
+       flag, then set stdout to be binary */
+    CURLX_SET_BINMODE(stdout);
+  }
+
+  /* explicitly passed to stdout means okaying binary gunk */
+  config->terminal_binary_ok =
+    (per->outfile && !strcmp(per->outfile, "-"));
+
+  if(config->content_disposition && urlnode->useremote)
+    hdrcbdata->honor_cd_filename = TRUE;
+  else
+    hdrcbdata->honor_cd_filename = FALSE;
+
+  hdrcbdata->outs = outs;
+  hdrcbdata->heads = heads;
+  hdrcbdata->etag_save = etag_save;
+  hdrcbdata->global = global;
+  hdrcbdata->config = config;
+
+  result = config2setopts(config, per, curl, share);
+  if(result)
+    return result;
+
+  /* initialize retry vars for loop below */
+  per->retry_sleep_default = (config->retry_delay) ?
+    config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
+  per->retry_remaining = config->req_retry;
+  per->retry_sleep = per->retry_sleep_default; /* ms */
+  per->retrystart = curlx_now();
+
+  state->li++;
+  /* Here's looping around each globbed URL */
+  if(state->li >= state->urlnum) {
+    state->li = 0;
+    state->urlnum = 0; /* forced reglob of URLs */
+    glob_cleanup(&state->urls);
+    state->up++;
+    tool_safefree(state->uploadfile); /* clear it to get the next */
+  }
+  return result;
+}
+
 /* create the next (singular) transfer */
 static CURLcode single_transfer(struct OperationConfig *config,
                                 CURLSH *share,
@@ -1150,7 +1345,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
 
   for(; state->urlnode; state->urlnode = urlnode->next) {
     static bool warn_more_options = FALSE;
-    curl_off_t urlnum;
 
     urlnode = state->urlnode;
     /* urlnode->url is the full URL or NULL */
@@ -1214,205 +1408,16 @@ static CURLcode single_transfer(struct OperationConfig *config,
                           tool_stderr : NULL);
         if(result)
           break;
-        urlnum = state->urlnum;
       }
       else
-        urlnum = 1; /* without globbing, this is a single URL */
+        state->urlnum = 1; /* without globbing, this is a single URL */
     }
-    else
-      urlnum = state->urlnum;
 
     if(state->up < state->infilenum) {
-      struct per_transfer *per = NULL;
-      struct OutStruct *outs;
-      struct OutStruct *heads;
-      struct OutStruct *etag_save;
-      struct HdrCbData *hdrcbdata = NULL;
-      struct OutStruct etag_first;
-      CURL *curl;
-
-      /* --etag-save */
-      memset(&etag_first, 0, sizeof(etag_first));
-      etag_save = &etag_first;
-      etag_save->stream = stdout;
-
-      /* --etag-compare */
-      if(config->etag_compare_file) {
-        result = etag_compare(config);
-        if(result)
-          break;
-      }
-
-      if(config->etag_save_file) {
-        bool badetag = FALSE;
-        result = etag_store(config, etag_save, &badetag);
-        if(result || badetag)
-          break;
-      }
-
-      curl = curl_easy_init();
-      if(curl)
-        result = add_per_transfer(&per);
-      else
-        result = CURLE_OUT_OF_MEMORY;
-      if(result) {
-        curl_easy_cleanup(curl);
-        if(etag_save->fopened)
-          fclose(etag_save->stream);
-        break;
-      }
-      per->etag_save = etag_first; /* copy the whole struct */
-      if(state->uploadfile) {
-        per->uploadfile = strdup(state->uploadfile);
-        if(!per->uploadfile) {
-          curl_easy_cleanup(curl);
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
-        if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
-          tool_safefree(per->uploadfile);
-          curl_easy_cleanup(curl);
-          result = CURLE_FAILED_INIT;
-          break;
-        }
-      }
-      *added = TRUE;
-      per->config = config;
-      per->curl = curl;
-      per->urlnum = (unsigned int)urlnode->num;
-
-      /* default headers output stream is stdout */
-      heads = &per->heads;
-      heads->stream = stdout;
-
-      /* Single header file for all URLs */
-      if(config->headerfile) {
-        result = setup_headerfile(config, per, heads);
-        if(result)
-          break;
-      }
-      hdrcbdata = &per->hdrcbdata;
-
-      outs = &per->outs;
-
-      per->outfile = NULL;
-      per->infdopen = FALSE;
-      per->infd = STDIN_FILENO;
-
-      /* default output stream is stdout */
-      outs->stream = stdout;
-
-      if(state->urls) {
-        result = glob_next_url(&per->url, state->urls);
-        if(result)
-          break;
-      }
-      else if(!state->li) {
-        per->url = strdup(urlnode->url);
-        if(!per->url) {
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
-      }
-      else
-        per->url = NULL;
-      if(!per->url)
-        break;
-
-      if(state->outfiles) {
-        per->outfile = strdup(state->outfiles);
-        if(!per->outfile) {
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
-      }
-
-      if((urlnode->useremote ||
-          (per->outfile && strcmp("-", per->outfile)))) {
-        result = setup_outfile(config, per, outs, skipped);
-        if(result)
-          break;
-      }
-
-      if(per->uploadfile) {
-
-        if(stdin_upload(per->uploadfile))
-          check_stdin_upload(config, per);
-        else {
-          /*
-           * We have specified a file to upload and it is not "-".
-           */
-          result = add_file_name_to_url(per->curl, &per->url,
-                                        per->uploadfile);
-          if(result)
-            break;
-        }
-      }
-
-      if(per->uploadfile && config->resume_from_current)
-        config->resume_from = -1; /* -1 will then force get-it-yourself */
-
-      if(output_expected(per->url, per->uploadfile) && outs->stream &&
-         isatty(fileno(outs->stream)))
-        /* we send the output to a tty, therefore we switch off the progress
-           meter */
-        per->noprogress = global->noprogress = global->isatty = TRUE;
-      else {
-        /* progress meter is per download, so restore config
-           values */
-        per->noprogress = global->noprogress = orig_noprogress;
-        global->isatty = orig_isatty;
-      }
-
-      if(httpgetfields || config->query) {
-        result = append2query(config, per,
-                              httpgetfields ? httpgetfields : config->query);
-        if(result)
-          break;
-      }
-
-      if((!per->outfile || !strcmp(per->outfile, "-")) &&
-         !config->use_ascii) {
-        /* We get the output to stdout and we have not got the ASCII/text
-           flag, then set stdout to be binary */
-        CURLX_SET_BINMODE(stdout);
-      }
-
-      /* explicitly passed to stdout means okaying binary gunk */
-      config->terminal_binary_ok =
-        (per->outfile && !strcmp(per->outfile, "-"));
-
-      if(config->content_disposition && urlnode->useremote)
-        hdrcbdata->honor_cd_filename = TRUE;
-      else
-        hdrcbdata->honor_cd_filename = FALSE;
-
-      hdrcbdata->outs = outs;
-      hdrcbdata->heads = heads;
-      hdrcbdata->etag_save = etag_save;
-      hdrcbdata->global = global;
-      hdrcbdata->config = config;
-
-      result = config2setopts(config, per, curl, share);
-      if(result)
-        break;
-
-      /* initialize retry vars for loop below */
-      per->retry_sleep_default = (config->retry_delay) ?
-        config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
-      per->retry_remaining = config->req_retry;
-      per->retry_sleep = per->retry_sleep_default; /* ms */
-      per->retrystart = curlx_now();
-
-      state->li++;
-      /* Here's looping around each globbed URL */
-      if(state->li >= urlnum) {
-        state->li = 0;
-        state->urlnum = 0; /* forced reglob of URLs */
-        glob_cleanup(&state->urls);
-        state->up++;
-        tool_safefree(state->uploadfile); /* clear it to get the next */
-      }
+      result = setup_easy(config, share, urlnode, orig_noprogress,
+                          orig_isatty, skipped);
+      if(!result && !*skipped)
+        *added = TRUE;
     }
     else {
       /* Free this URL node data without destroying the
@@ -1433,10 +1438,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
   }
   tool_safefree(state->outfiles);
 fail:
-  if(!*added || result) {
-    *added = FALSE;
+  if(result)
     single_transfer_cleanup(config);
-  }
   return result;
 }
 
