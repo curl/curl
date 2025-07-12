@@ -10,7 +10,6 @@ CNA
 hel
 htpt
 inout
-nome
 numer
 PASE
 passwor
