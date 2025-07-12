@@ -12,7 +12,6 @@ dout
 ede
 fo
 htpt
-indx
 inout
 nome
 numer
