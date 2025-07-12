@@ -41,7 +41,7 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
 
@@ -93,8 +93,9 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   int i;
   STACK_OF(X509_INFO) *inf;
-  (void)curl;
-  (void)parm;
+
+  (void)curl; /* avoid warnings */
+  (void)pointer; /* avoid warnings */
 
   if(!cts || !cbio) {
     return rv;
