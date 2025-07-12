@@ -161,7 +161,8 @@ static const struct tzinfo tz[]= {
   {"FWT", -60},            /* French Winter */
   {"FST", -60 tDAYZONE},   /* French Summer */
   {"EET", -120},           /* Eastern Europe, USSR Zone 1 */
-  {"WAST", -420},          /* West Australian Standard */
+  {"WAST", -420}, /* spellchecker:disable-line */
+                           /* West Australian Standard */
   {"WADT", -420 tDAYZONE}, /* West Australian Daylight */
   {"CCT", -480},           /* China Coast, USSR Zone 7 */
   {"JST", -540},           /* Japan Standard, USSR Zone 8 */
