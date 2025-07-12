@@ -21,7 +21,6 @@ pres
 rin
 seh
 ser
-statics
 strat
 te
 ths
