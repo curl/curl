@@ -134,7 +134,7 @@ sub scanmanpage {
     my ($file) = @_;
     my $reqex = 0;
     my $inseealso = 0;
-    my $inex = 0;
+    my $inexample = 0;
     my $insynop = 0;
     my $exsize = 0;
     my $synopsize = 0;
@@ -166,18 +166,18 @@ sub scanmanpage {
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
             # this is for libcurl manpage SYNOPSIS checks
             $insynop = 1;
-            $inex = 0;
+            $inexample = 0;
         }
         elsif($_ =~ /^\.SH EXAMPLE/i) {
             $insynop = 0;
-            $inex = 1;
+            $inexample = 1;
         }
         elsif($_ =~ /^\.SH \"SEE ALSO\"/i) {
             $inseealso = 1;
         }
         elsif($_ =~ /^\.SH/i) {
             $insynop = 0;
-            $inex = 0;
+            $inexample = 0;
         }
         elsif($inseealso) {
             if($_ =~ /^\.BR (.*)/i) {
@@ -206,7 +206,7 @@ sub scanmanpage {
                 }
             }
         }
-        elsif($inex) {
+        elsif($inexample) {
             $exsize++;
             if($_ =~ /[^\\]\\n/) {
                 print STDERR "$file:$line '\\n' need to be '\\\\n'!\n";
