@@ -1,0 +1,10 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+[default]
+extend-ignore-identifiers-re = [
+  "(Fo|fo|FU|ba|BA|pn|OT|ND|PN|HELO|helo|UE|inex|parms|clen|couter|unexpect|admi|optin|ttests|ein|ths)",
+  "(dout|ser|Jod|Iy|ben|URE|Typ|typ|wrk|bck|PASE|htpt|CNA|ECT|anc|parm|Nam|stati|Ned|EDE|edn|nin|ue|alue)",
+  "(Januar|perfec|varius|PUNICODE|passin|CLEA|Passiv|HEADE|TEMPLAT|MEK|PARM|numer|nto|noo|kno)",
+]
