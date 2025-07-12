@@ -5,7 +5,7 @@
 [default]
 extend-ignore-identifiers-re = [
   "[A-Za-z]{2,3}",
-  "(admi|alue|CLEA|clen|dout|inex|HELO|helo|htpt|PARM|parm|PASE)",
+  "(admi|alue|CLEA|clen|dout|HELO|helo|htpt|PARM|parm|PASE)",
   "(HEADE|numer|optin|parms|stati|ttests)",
   "(Januar|passin|Passiv|perfec|PUNICODE|TEMPLAT|varius)",
 ]
