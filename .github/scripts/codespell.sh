@@ -9,8 +9,8 @@ cd "$(dirname "${0}")"/../..
 
 # shellcheck disable=SC2046
 codespell \
-  --skip '*/spellcheck.words' \
-  --skip '*/typos.toml' \
+  --skip '.github/scripts/spellcheck.words' \
+  --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
   --skip 'scripts/mk-ca-bundle.pl' \
   --skip 'scripts/wcurl' \
