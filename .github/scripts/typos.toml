@@ -7,7 +7,7 @@ extend-ignore-identifiers-re = [
   "(ba|BA|FU|Iy|ND|OT|pn|PN|UE)",
   "(CNA|ECT|EDE|Jod|kno|ser|Typ|URE)",
   "(admi|alue|CLEA|clen|GOST|HELO|helo|htpt|PASE)",
-  "(HEADE|numer|optin|stati)",
+  "(numer|optin|stati)",
   "(Januar|passin|perfec|PUNICODE|TEMPLAT)",
 ]
 
