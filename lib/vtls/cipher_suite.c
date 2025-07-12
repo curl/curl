@@ -70,7 +70,7 @@ static const char *cs_txt =
   "ECDH" "\0"
   "ECDHE" "\0"
   "ECDSA" "\0"
-  "EDE" "\0" /* spellchecker: disable */
+  "EDE" "\0" /* codespell:ignore */
   "GCM" "\0"
   "MD5" "\0"
   "NULL" "\0"
