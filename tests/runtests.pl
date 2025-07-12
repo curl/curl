@@ -3127,8 +3127,8 @@ foreach my $runnerid (values %runnerids) {
 # Wait for servers to stop
 my $unexpected;
 foreach my $runnerid (values %runnerids) {
-    my ($rid, $unexpected_per_runner, $logs) = runnerar($runnerid);
-    $unexpected ||= $unexpected_per_runner;
+    my ($rid, $unexpected_for_runner, $logs) = runnerar($runnerid);
+    $unexpected ||= $unexpected_for_runner;
     logmsg $logs;
 }
 
