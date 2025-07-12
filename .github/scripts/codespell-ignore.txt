@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 admi
+anonymou
 anull
 ba
 beng
@@ -14,6 +15,7 @@ inout
 nome
 numer
 PASE
+passwor
 perfec
 proxys
 seh
