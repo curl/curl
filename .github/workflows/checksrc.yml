@@ -74,7 +74,9 @@ jobs:
           .github/scripts/codespell.sh
 
       - name: 'typos'
-        run: .github/scripts/typos.sh
+        run: |
+          typos --version
+          .github/scripts/typos.sh
 
       - name: 'cmakelint'
         run: scripts/cmakelint.sh
