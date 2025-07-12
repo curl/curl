@@ -12,6 +12,7 @@ inout
 nome
 numer
 PASE
+Passiv
 perfec
 proxys
 seh
