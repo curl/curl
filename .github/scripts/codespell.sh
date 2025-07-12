@@ -12,10 +12,8 @@ codespell \
   --skip '.github/scripts/spellcheck.words' \
   --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
-  --skip 'scripts/mk-ca-bundle.pl' \
-  --skip 'scripts/wcurl' \
-  --skip 'src/tool_hugehelp.c' \
   --skip 'packages/*' \
+  --skip 'scripts/wcurl' \
   --skip 'winbuild/*' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.txt' \
