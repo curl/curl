@@ -13,9 +13,11 @@ nome
 numer
 PASE
 perfec
+proxys
 seh
 ser
 strat
 te
+ue
 wast
 wont
