@@ -46,7 +46,6 @@
 #include "multiif.h"
 #include "select.h"
 #include "curl_trc.h"
-#include "memdebug.h"
 
 static CURLcode t2600_setup(CURL **easy)
 {

@@ -25,8 +25,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib591(char *URL)
 {
   CURL *easy = NULL;

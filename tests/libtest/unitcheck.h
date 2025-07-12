@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "memdebug.h"
+
 /* The fail macros mark the current test step as failed, and continue */
 #define fail_if(expr, msg)                                             \
   do {                                                                 \

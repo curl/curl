@@ -31,8 +31,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 struct cb_data {
   CURL *easy_handle;
   int response_received;
