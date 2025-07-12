@@ -1244,7 +1244,7 @@ static const struct redircase set_url_list[] = {
    "file:///basic?hello#frag", 0, 0, CURLUE_OK},
   {"file:///basic?hello", "?q",
    "file:///basic?q", 0, 0, CURLUE_OK},
-  {"http://example.org#withs/ash", "/moo#frag",
+  {"http://example.org#without/ash", "/moo#frag",
    "http://example.org/moo#frag",
    0, 0, CURLUE_OK},
   {"http://example.org/", "../path/././../././../moo",
