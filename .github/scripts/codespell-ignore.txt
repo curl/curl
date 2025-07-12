@@ -13,7 +13,6 @@ htpt
 inout
 nome
 numer
-Nam
 PASE
 perfec
 pres
