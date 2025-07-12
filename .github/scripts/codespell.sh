@@ -7,7 +7,6 @@ set -eu
 
 cd "$(dirname "${0}")"/../..
 
-codespell --version
 # shellcheck disable=SC2046
 codespell \
   --skip '*/spellcheck.words' \
