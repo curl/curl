@@ -121,12 +121,27 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: 'install prereqs'
+        run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
+      - name: 'zizmor GHA'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --pedantic .github/workflows/*.yml
+
+      - name: 'shellcheck GHA'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          shellcheck --version
+          .github/scripts/shellcheck-ci.sh
+
       - name: 'shellcheck'
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
           .github/scripts/shellcheck.sh
 
@@ -142,23 +157,3 @@ jobs:
           # shellcheck disable=SC2046
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)
-
-  cicheck:
-    name: 'CI'
-    runs-on: macos-latest
-    timeout-minutes: 1
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-
-      - name: 'install prereqs'
-        run: brew install shellcheck zizmor
-
-      - name: 'zizmor GHA'
-        run: zizmor --pedantic .github/workflows/*.yml
-
-      - name: 'shellcheck GHA'
-        run: |
-          shellcheck --version
-          .github/scripts/shellcheck-ci.sh
