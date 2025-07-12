@@ -10,3 +10,11 @@ extend-ignore-identifiers-re = [
   "(HEADE|numer|optin|parms|stati|ttests)",
   "(Januar|passin|Passiv|perfec|PUNICODE|TEMPLAT|varius)",
 ]
+
+[files]
+extend-exclude = [
+  ".github/scripts/codespell-ignore.txt",
+  ".github/scripts/spellcheck.words",
+  "docs/THANKS",
+  "scripts/wcurl",
+]
