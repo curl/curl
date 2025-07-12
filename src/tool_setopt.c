@@ -498,7 +498,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
                          mimeno, slistno);
       if(!ret)
         ret = easysrc_addf(&easysrc_code,
-                           "slist%d = NULL;", slistno); /* Prevent CLEANing. */
+                           "slist%d = NULL;", slistno); /* Prevent CLEAN */
     }
   }
 
