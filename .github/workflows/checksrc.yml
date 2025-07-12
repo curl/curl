@@ -66,8 +66,9 @@ jobs:
             python3-typing-extensions python3-libcst python3-impacket \
             python3-websockets python3-pytest python3-filelock python3-pytest-xdist
           python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9 codespell==2.4.1
+          cargo install typos-cli
 
-      - name: 'spellcheck'
+      - name: 'codespell'
         run: |
           codespell --version
           codespell \
@@ -77,6 +78,13 @@ jobs:
             --ignore-words .github/scripts/codespell-ignore.txt \
             --skip '*/test*,*/THANKS,*/spellcheck.words,packages/*' \
             $(git ls-files)
+
+      - name: 'typos'
+        run: |
+          typos --version
+          git ls-files | \
+            grep -v -E '(codespell-ignore\.txt|spellcheck\.words|/wcurl|CIPHERS-TLS12\.md|/THANKS)' | \
+            typos --file-list - --config .github/scripts/typos.toml
 
       - name: 'cmakelint'
         run: scripts/cmakelint.sh
