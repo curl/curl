@@ -8,7 +8,6 @@ ba
 bu
 clen
 CNA
-dout
 ede
 fo
 htpt
