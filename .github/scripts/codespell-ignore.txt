@@ -21,7 +21,6 @@ seh
 ser
 strat
 te
-ths
 wast
 wit
 wont
