@@ -8,7 +8,7 @@ extend-ignore-identifiers-re = [
   "(ben|CNA|ECT|EDE|Jod|kno|MEK|Ned|noo|nto|ser|Typ|URE)",
   "(admi|alue|CLEA|clen|GOST|HELO|helo|htpt|PASE)",
   "(HEADE|numer|optin|stati)",
-  "(Januar|passin|Passiv|perfec|PUNICODE|TEMPLAT)",
+  "(Januar|passin|perfec|PUNICODE|TEMPLAT)",
 ]
 
 extend-ignore-re = [
