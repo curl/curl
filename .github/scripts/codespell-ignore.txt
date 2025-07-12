@@ -8,7 +8,6 @@ ba
 bu
 clen
 CNA
-couter
 dout
 ede
 fo
