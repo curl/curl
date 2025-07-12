@@ -4,8 +4,5 @@
 
 [default]
 extend-ignore-identifiers-re = [
-  "(admi|alue|CLEA|clen|dout|GOST|HELO|helo|htpt|PARM|parm|PASE)",
-  "(HEADE|numer|optin|parms|stati|ttests)",
-  "(Januar|passin|Passiv|perfec|PUNICODE|TEMPLAT|varius)",
+  "(GOST)",
 ]
-#  "^[A-Za-z]{2,3}$",
