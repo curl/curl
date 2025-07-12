@@ -82,7 +82,7 @@ jobs:
         run: scripts/cmakelint.sh
 
       - name: 'pytype'
-        run: find . -name '*.py' -exec pytype -j auto -k {} +
+        run: pytype -j auto -k $(find . -name '*.py')
 
       - name: 'ruff'
         run: scripts/pythonlint.sh
