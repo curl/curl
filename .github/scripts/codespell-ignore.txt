@@ -30,7 +30,6 @@ strat
 te
 ths
 ttests
-unexpect
 varius
 wast
 wit
