@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 admi
 anonymou
-anull
+aNULL
 ba
 bu
 clen
