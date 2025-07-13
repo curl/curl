@@ -38,8 +38,13 @@
 # If such a file is ever added, then this can be portably fixed by switching to
 # "xargs -I{}" and appending {} to the end of the xargs arguments (which will
 # call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
+
+set -eu
+
+cd "$(dirname "$0")"/..
+
 {
-  if [ -n "$1" ]; then
+  if [ -n "${1:-}" ]; then
     for A in "$@"; do printf "%s\n" "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git ls-files
