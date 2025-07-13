@@ -60,5 +60,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<limits>
+Maximum allocated: 3200000
+</limits>
 </verify>
 </testcase>
