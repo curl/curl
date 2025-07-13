@@ -277,7 +277,7 @@ jobs:
 
   ios:
     name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
-    runs-on: 'macos-latest'
+    runs-on: macos-latest
     timeout-minutes: 10
     env:
       MAKEFLAGS: -j 4
@@ -431,7 +431,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
       MAKEFLAGS: -j 5
@@ -522,7 +522,7 @@ jobs:
 
   msdos:
     name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp openssl i586"
-    runs-on: 'ubuntu-latest'
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
       MAKEFLAGS: -j 5
