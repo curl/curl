@@ -300,26 +300,26 @@
 
 /* Define some minimum and default build targets for Visual Studio */
 #ifdef _MSC_VER
-#  define VS2008_MIN_TARGET 0x0501
+#  define VS2008_MIN_TARGET 0x0501  /* XP */
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
 #  ifdef _USING_V110_SDK71_
-#    define VS2012_MIN_TARGET 0x0501
+#    define VS2012_MIN_TARGET 0x0501  /* XP */
 #  else
-#    define VS2012_MIN_TARGET 0x0600
+#    define VS2012_MIN_TARGET 0x0600  /* Vista */
 #  endif
 
    /* VS2008 default build target is Windows Vista. We override default target
       to be Windows XP. */
-#  define VS2008_DEF_TARGET 0x0501
+#  define VS2008_DEF_TARGET 0x0501  /* XP */
 
    /* VS2012 default build target is Windows 8 unless Update 1 is installed
       and the v110_xp toolset is chosen. */
 #  ifdef _USING_V110_SDK71_
-#    define VS2012_DEF_TARGET 0x0501
+#    define VS2012_DEF_TARGET 0x0501  /* XP */
 #  else
-#    define VS2012_DEF_TARGET 0x0602
+#    define VS2012_DEF_TARGET 0x0602  /* 8 */
 #  endif
 #endif
 
