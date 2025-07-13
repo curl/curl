@@ -486,8 +486,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   DEBUGASSERT(asi);
 
   /* initial check for "clear" */
-  if(!curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, ';') &&
-     !curlx_str_single(&p, ';')) {
+  if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
