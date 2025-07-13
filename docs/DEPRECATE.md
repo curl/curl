@@ -26,17 +26,6 @@ Support" ended on October 10, 2023.
 
 curl drops all support in November 2025.
 
-## VS2008
-
-curl drops support for getting built with Microsoft Visual Studio 2008 in
-November 2025.
-
-The only reason we kept support for this version is for Windows CE - and we
-intend to remove support for that Operating System in this time frame as well.
-Bumping the minimum to VS2010. VS2008 is a pain to support.
-
-Previous discussion and details: https://github.com/curl/curl/discussions/15972
-
 ## Windows XP
 
 In January 2026, curl drops support for Windows XP and Server 2003. Their
@@ -61,3 +50,4 @@ Making the new minimum target Windows version Vista / Server 2008.
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
+ - Support for Visual Studio 2008 (removed in 8.17.0)
