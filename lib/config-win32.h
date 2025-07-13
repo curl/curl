@@ -56,22 +56,21 @@
 #        error VS2012 does not support build targets prior to Windows Vista
 #      endif
 #    endif
-   /* Default target settings and minimum build target check for
-      VS2008 and VS2010 */
+   /* VS2010 default target settings and minimum build target check. */
 #  else
-#    define VS2008_MIN_TARGET 0x0501  /* XP */
-     /* VS2008 default build target is Windows Vista (0x0600).
+     /* VS2010 default build target is Windows 7 (0x0601).
         We override default target to be Windows XP. */
-#    define VS2008_DEF_TARGET 0x0501  /* XP */
+#    define VS2010_MIN_TARGET 0x0501  /* XP */
+#    define VS2010_DEF_TARGET 0x0501  /* XP */
 
 #    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2008_DEF_TARGET
+#    define _WIN32_WINNT VS2010_DEF_TARGET
 #    endif
 #    ifndef WINVER
-#    define WINVER VS2008_DEF_TARGET
+#    define WINVER VS2010_DEF_TARGET
 #    endif
-#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#      error VS2008 does not support build targets prior to Windows XP
+#    if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
+#      error VS2010 does not support build targets prior to Windows XP
 #    endif
 #  endif
 #endif /* _MSC_VER */
@@ -104,7 +103,7 @@
 #endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_STDINT_H 1
 #endif
 

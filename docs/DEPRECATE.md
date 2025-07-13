@@ -12,17 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## VS2008
-
-curl drops support for getting built with Microsoft Visual Studio 2008 in
-November 2025.
-
-The only reason we kept support for this version is for Windows CE - and we
-intend to remove support for that Operating System in this time frame as well.
-Bumping the minimum to VS2010. VS2008 is a pain to support.
-
-Previous discussion and details: https://github.com/curl/curl/discussions/15972
-
 ## Windows XP
 
 In January 2026, curl drops support for Windows XP and Server 2003. Their
@@ -94,3 +83,4 @@ Support for RTMP in libcurl gets removed in April 2026.
  - msh3 (removed in 8.16.0)
  - winbuild build system (removed in 8.17.0)
  - Windows CE (removed in 8.18.0)
+ - Support for Visual Studio 2008 (removed in 8.18.0)
