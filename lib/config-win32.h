@@ -301,8 +301,8 @@
 /* Define some minimum and default build targets for Visual Studio */
 #ifdef _MSC_VER
 #  define VS2008_MIN_TARGET 0x0501  /* XP */
-   /* VS2008 default build target is Windows Vista. We override default target
-      to be Windows XP. */
+   /* VS2008 default build target is Windows Vista (0x0600).
+      We override default target to be Windows XP. */
 #  define VS2008_DEF_TARGET 0x0501  /* XP */
 
    /* The minimum and default build targets for VS2012 are Vista and 8,
