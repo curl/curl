@@ -41,8 +41,8 @@
 # values.  Other useful defines are LIBCURL_FEATURE_xxx where xxx are
 # the various features supported by libcurl, and LIBCURL_PROTOCOL_yyy
 # where yyy are the various protocols supported by libcurl.  Both xxx
-# and yyy are capitalized.  See the list of AH_TEMPLATEs at the top of
-# the macro for the complete list of possible defines.  Shell
+# and yyy are capitalized.  See the list of AH_TEMPLATE macros at the top
+# of the macro for the complete list of possible defines.  Shell
 # variables $libcurl_feature_xxx and $libcurl_protocol_yyy are also
 # defined to 'yes' for those features and protocols that were found.
 # Note that xxx and yyy keep the same capitalization as in the
