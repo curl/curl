@@ -673,7 +673,7 @@ jobs:
 
   wince:
     name: "mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} 4.4.0-arm schannel"
-    runs-on: macos-latest
+    runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
       MAKEFLAGS: -j 4
