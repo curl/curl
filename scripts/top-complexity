@@ -87,12 +87,14 @@ my $show = 65;
 my $error = 0;
 my %where;
 my %perm;
+my $allscore = 0;
+my $alllines = 0;
 # each line starts with the complexity score
 # 142     417     809     1677    1305    src/tool_getparam.c(1677): getparameter
 for my $l (@output) {
     chomp $l;
-    if($l =~/^(\d+)\t\d+\t\d+\t\d+\t\d+\t([^\(]+).*: ([^ ]*)/) {
-        my ($score, $path, $func)=($1, $2, $3);
+    if($l =~/^(\d+)\t\d+\t\d+\t\d+\t(\d+)\t([^\(]+).*: ([^ ]*)/) {
+        my ($score, $len, $path, $func)=($1, $2, $3, $4);
 
         if($score > $show) {
             my $allow = 0;
@@ -106,6 +108,8 @@ for my $l (@output) {
                 $error++;
             }
         }
+        $alllines += $len;
+        $allscore += ($len * $score);
     }
 
 }
@@ -120,5 +124,7 @@ for my $e (sort {$where{$b} <=> $where{$a}} keys %where) {
     printf "%-5d %s%s\n", $where{$e}, $e,
         $perm{$e} ? " [ALLOWED]": "";
 }
+
+printf "\nAverage complexity: %.2f\n", $allscore / $alllines;
 
 exit $error;
