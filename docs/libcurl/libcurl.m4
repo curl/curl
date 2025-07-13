@@ -119,8 +119,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           else
             libcurl_cv_lib_version_ok=no
           fi
-          ]
-        )
+          ])
       fi
 
       if test $_libcurl_wanted -eq 0 || test x$libcurl_cv_lib_version_ok = xyes; then
@@ -186,8 +185,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         LIBS=$_libcurl_save_libs
         unset _libcurl_save_cppflags
         unset _libcurl_save_libs
-        ]
-      )
+        ])
 
       if test $libcurl_cv_lib_curl_usable = yes; then
 
@@ -202,8 +200,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         AC_CHECK_DECL([curl_free],[],
           [AC_DEFINE([curl_free],[free],
             [Define curl_free() as free() if our version of curl lacks curl_free.])],
-          [[#include <curl/curl.h>]]
-        )
+          [[#include <curl/curl.h>]])
 
         CPPFLAGS=$_libcurl_save_cppflags
         LIBS=$_libcurl_save_libs
