@@ -80,9 +80,9 @@
 #error "Building curl requires mingw-w64 3.0 or later"
 #endif
 
-/* Visual Studio 2008 is the minimum Visual Studio version we support.
+/* Visual Studio 2010 is the minimum Visual Studio version we support.
    Workarounds for older versions of Visual Studio have been removed. */
-#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 #error "Ancient versions of Visual Studio are no longer supported due to bugs."
 #endif
 
