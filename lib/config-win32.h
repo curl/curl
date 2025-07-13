@@ -300,13 +300,7 @@
 
 /* Define some minimum and default build targets for Visual Studio */
 #ifdef _MSC_VER
-   /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
-      2000 as a supported build target. VS2008 default installations provides
-      an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
-      valid build target for VS2008. Popular belief is that binaries built with
-      VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
-      are functional. */
-#  define VS2008_MIN_TARGET 0x0500
+#  define VS2008_MIN_TARGET 0x0501
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
