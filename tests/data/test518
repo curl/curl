@@ -63,5 +63,8 @@ Accept: */*
 <valgrind>
 disable
 </valgrind>
+<limits>
+Maximum allocated: 1100000
+</limits>
 </verify>
 </testcase>
