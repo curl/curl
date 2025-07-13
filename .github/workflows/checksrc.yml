@@ -133,7 +133,7 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           zizmor --pedantic .github/workflows/*.yml
 
-      - name: 'shellcheck GHA'
+      - name: 'shellcheck CI'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           shellcheck --version
