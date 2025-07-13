@@ -320,12 +320,12 @@
       to be Windows XP. */
 #  define VS2008_DEF_TARGET 0x0501
 
-   /* VS2012 default build target is Windows Vista unless Update 1 is installed
+   /* VS2012 default build target is Windows 8 unless Update 1 is installed
       and the v110_xp toolset is chosen. */
 #  ifdef _USING_V110_SDK71_
 #    define VS2012_DEF_TARGET 0x0501
 #  else
-#    define VS2012_DEF_TARGET 0x0600
+#    define VS2012_DEF_TARGET 0x0602
 #  endif
 #endif
 
