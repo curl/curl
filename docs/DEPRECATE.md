@@ -64,3 +64,4 @@ Previous discussion and details: https://github.com/curl/curl/discussions/15972
  - Support for Visual Studio 2005 and older (removed in 8.13.0)
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
+ - Windows CE (removed in 8.16.0)
