@@ -37,7 +37,7 @@ versions of libs and build tools.
  - MIT Kerberos 1.2.4
  - Heimdal      ?
  - nghttp2      1.15.0
- - Winsock      2.2 (on Windows 95+ and Windows CE .NET 4.1+)
+ - Winsock      2.2 (on Windows)
 
 ## Build tools
 
