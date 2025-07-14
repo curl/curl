@@ -2097,7 +2097,6 @@ void Curl_wssl_report_handshake(struct Curl_easy *data,
 #else
     infof(data, "SSL connected");
 #endif
-
 }
 
 static CURLcode wssl_connect(struct Curl_cfilter *cf,

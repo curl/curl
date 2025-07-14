@@ -1311,16 +1311,18 @@ void Curl_gtls_report_handshake(struct Curl_easy *data,
                                 struct gtls_ctx *gctx)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *ptr;
-  gnutls_protocol_t version = gnutls_protocol_get_version(gctx->session);
+  if(Curl_trc_is_verbose(data)) {
+    const char *ptr;
+    gnutls_protocol_t version = gnutls_protocol_get_version(gctx->session);
 
-  /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
-  ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(gctx->session),
-                                     gnutls_cipher_get(gctx->session),
-                                     gnutls_mac_get(gctx->session));
+    /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
+    ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(gctx->session),
+                                       gnutls_cipher_get(gctx->session),
+                                       gnutls_mac_get(gctx->session));
 
-  infof(data, "SSL connection using %s / %s",
-        gnutls_protocol_get_name(version), ptr);
+    infof(data, "SSL connection using %s / %s",
+          gnutls_protocol_get_name(version), ptr);
+  }
 #else
   (void)data;
   (void)gctx;

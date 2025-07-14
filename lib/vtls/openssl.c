@@ -4337,6 +4337,8 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
 void Curl_ossl_report_handshake(struct Curl_easy *data,
                                 struct ossl_ctx *octx)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(Curl_trc_is_verbose(data)) {
     int psigtype_nid = NID_undef;
     const char *negotiated_group_name = NULL;
 
@@ -4356,68 +4358,12 @@ void Curl_ossl_report_handshake(struct Curl_easy *data,
           SSL_get_cipher(octx->ssl),
           negotiated_group_name ? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
+  }
+#else
+  (void)data;
+  (void)octx;
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
 
-#ifdef USE_ECH_OPENSSL
-# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
-    if(ECH_ENABLED(data)) {
-      char *inner = NULL, *outer = NULL;
-      const char *status = NULL;
-      int rv;
-
-      rv = SSL_ech_get1_status(octx->ssl, &inner, &outer);
-      switch(rv) {
-      case SSL_ECH_STATUS_SUCCESS:
-        status = "succeeded";
-        break;
-      case SSL_ECH_STATUS_GREASE_ECH:
-        status = "sent GREASE, got retry-configs";
-        break;
-      case SSL_ECH_STATUS_GREASE:
-        status = "sent GREASE";
-        break;
-      case SSL_ECH_STATUS_NOT_TRIED:
-        status = "not attempted";
-        break;
-      case SSL_ECH_STATUS_NOT_CONFIGURED:
-        status = "not configured";
-        break;
-      case SSL_ECH_STATUS_BACKEND:
-        status = "backend (unexpected)";
-        break;
-      case SSL_ECH_STATUS_FAILED:
-        status = "failed";
-        break;
-      case SSL_ECH_STATUS_BAD_CALL:
-        status = "bad call (unexpected)";
-        break;
-      case SSL_ECH_STATUS_BAD_NAME:
-        status = "bad name (unexpected)";
-        break;
-      default:
-        status = "unexpected status";
-        infof(data, "ECH: unexpected status %d",rv);
-      }
-      infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
-            (status ? status : "NULL"),
-            (inner ? inner : "NULL"),
-            (outer ? outer : "NULL"));
-      OPENSSL_free(inner);
-      OPENSSL_free(outer);
-      if(rv == SSL_ECH_STATUS_GREASE_ECH) {
-        /* trace retry_configs if we got some */
-        ossl_trace_ech_retry_configs(data, octx->ssl, 0);
-      }
-      if(rv != SSL_ECH_STATUS_SUCCESS
-         && data->set.tls_ech & CURLECH_HARD) {
-        infof(data, "ECH: ech-hard failed");
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-   }
-   else {
-      infof(data, "ECH: result: status is not attempted");
-   }
-# endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-#endif  /* USE_ECH_OPENSSL */
 }
 
 static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
@@ -4688,6 +4634,68 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     /* we connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
     Curl_ossl_report_handshake(data, octx);
+
+#ifdef USE_ECH_OPENSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+    if(ECH_ENABLED(data)) {
+      char *inner = NULL, *outer = NULL;
+      const char *status = NULL;
+      int rv;
+
+      rv = SSL_ech_get1_status(octx->ssl, &inner, &outer);
+      switch(rv) {
+      case SSL_ECH_STATUS_SUCCESS:
+        status = "succeeded";
+        break;
+      case SSL_ECH_STATUS_GREASE_ECH:
+        status = "sent GREASE, got retry-configs";
+        break;
+      case SSL_ECH_STATUS_GREASE:
+        status = "sent GREASE";
+        break;
+      case SSL_ECH_STATUS_NOT_TRIED:
+        status = "not attempted";
+        break;
+      case SSL_ECH_STATUS_NOT_CONFIGURED:
+        status = "not configured";
+        break;
+      case SSL_ECH_STATUS_BACKEND:
+        status = "backend (unexpected)";
+        break;
+      case SSL_ECH_STATUS_FAILED:
+        status = "failed";
+        break;
+      case SSL_ECH_STATUS_BAD_CALL:
+        status = "bad call (unexpected)";
+        break;
+      case SSL_ECH_STATUS_BAD_NAME:
+        status = "bad name (unexpected)";
+        break;
+      default:
+        status = "unexpected status";
+        infof(data, "ECH: unexpected status %d",rv);
+      }
+      infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
+            (status ? status : "NULL"),
+            (inner ? inner : "NULL"),
+            (outer ? outer : "NULL"));
+      OPENSSL_free(inner);
+      OPENSSL_free(outer);
+      if(rv == SSL_ECH_STATUS_GREASE_ECH) {
+        /* trace retry_configs if we got some */
+        ossl_trace_ech_retry_configs(data, octx->ssl, 0);
+      }
+      if(rv != SSL_ECH_STATUS_SUCCESS
+         && data->set.tls_ech & CURLECH_HARD) {
+        infof(data, "ECH: ech-hard failed");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    else {
+      infof(data, "ECH: result: status is not attempted");
+    }
+# endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
+#endif  /* USE_ECH_OPENSSL */
 
 #ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
