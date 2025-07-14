@@ -103,12 +103,7 @@ int main(int argc, char **argv)
   if(!fp)
     return 2;
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  stat(file, &file_info);
-#else
   fstat(fileno(fp), &file_info);
-#endif
 
   /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
