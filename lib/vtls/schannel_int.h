@@ -78,6 +78,7 @@ typedef enum _eTlsAlgorithmUsage {
   TlsParametersCngAlgUsageCertSig
 } eTlsAlgorithmUsage;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _CRYPTO_SETTINGS {
   eTlsAlgorithmUsage  eAlgorithmUsage;
   UNICODE_STRING      strCngAlgId;
@@ -87,6 +88,7 @@ typedef struct _CRYPTO_SETTINGS {
   DWORD               dwMaxBitLength;
 } CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _TLS_PARAMETERS {
   DWORD               cAlpnIds;
   PUNICODE_STRING     rgstrAlpnIds;
@@ -96,6 +98,7 @@ typedef struct _TLS_PARAMETERS {
   DWORD               dwFlags;
 } TLS_PARAMETERS, * PTLS_PARAMETERS;
 
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
 typedef struct _SCH_CREDENTIALS {
   DWORD               dwVersion;
   DWORD               dwCredFormat;
