@@ -101,7 +101,7 @@ enum sockmode {
   ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /*
  * read-wrapper to support reading from stdin on Windows.
  */
@@ -170,8 +170,6 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 #define SOCKFILT_read  read
 #define SOCKFILT_write write
 #endif
-
-#ifndef UNDER_CE
 
 /* On Windows, we sometimes get this for a broken pipe, seemingly
  * when the client just closed stdin? */
@@ -294,7 +292,6 @@ static bool read_stdin(void *buffer, size_t nbytes)
   }
   return TRUE;
 }
-#endif
 
 /*
  * write_stdout tries to write to stdio nbytes from the given buffer. This is a
@@ -306,12 +303,7 @@ static bool read_stdin(void *buffer, size_t nbytes)
 static bool write_stdout(const void *buffer, size_t nbytes)
 {
   ssize_t nwrite;
-#ifdef UNDER_CE
-  puts(buffer);
-  nwrite = nbytes;
-#else
   nwrite = fullwrite(fileno(stdout), buffer, nbytes);
-#endif
   if(nwrite != (ssize_t)nbytes) {
     logmsg("exiting...");
     return FALSE;
@@ -319,7 +311,6 @@ static bool write_stdout(const void *buffer, size_t nbytes)
   return TRUE;
 }
 
-#ifndef UNDER_CE
 static void lograw(unsigned char *buffer, ssize_t len)
 {
   char data[120];
@@ -391,10 +382,8 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   return TRUE;
 }
-#endif
 
-
-#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
 /*
  * Winsock select() does not support standard file descriptors,
  * it can only check SOCKETs. The following function is an attempt
@@ -858,8 +847,6 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 #define SOCKFILT_select(a,b,c,d,e) select(a,b,c,d,e)
 #endif  /* USE_WINSOCK */
 
-
-#ifndef UNDER_CE
 /* Perform the disconnect handshake with sockfilt
  * This involves waiting for the disconnect acknowledgment after the DISC
  * command, while throwing away anything else that might come in before
@@ -914,7 +901,6 @@ static bool disc_handshake(void)
   } while(TRUE);
   return TRUE;
 }
-#endif
 
 /*
   sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
@@ -926,12 +912,6 @@ static bool juggle(curl_socket_t *sockfdp,
                    curl_socket_t listenfd,
                    enum sockmode *mode)
 {
-#ifdef UNDER_CE
-  (void)sockfdp;
-  (void)listenfd;
-  (void)mode;
-  return FALSE;
-#else
   struct timeval timeout;
   fd_set fds_read;
   fd_set fds_write;
@@ -1206,7 +1186,6 @@ static bool juggle(curl_socket_t *sockfdp,
   }
 
   return TRUE;
-#endif
 }
 
 static int test_sockfilt(int argc, char *argv[])
