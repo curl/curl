@@ -29,7 +29,7 @@
  * filter IP addresses.
  */
 
-#if defined(__AMIGA__) || defined(UNDER_CE)
+#ifdef __AMIGA__
 #include <stdio.h>
 int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
