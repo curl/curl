@@ -54,3 +54,4 @@ Making the new minimum target Windows version Vista / Server 2008.
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
+ - Windows CE (removed in 8.17.0)
