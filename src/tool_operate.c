@@ -620,7 +620,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 
   if(per->uploadfile) {
     if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
       sclose(per->infd);
 #else
       warnf("Closing per->infd != 0: FD == "
@@ -1117,7 +1117,7 @@ static void check_stdin_upload(struct OperationConfig *config,
 
   CURLX_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
@@ -2095,8 +2095,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
         goto fail;
       }
     }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
-  !defined(CURL_DISABLE_CA_SEARCH)
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       goto fail;
@@ -2229,11 +2228,8 @@ CURLcode operate(int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
   const char *first_arg;
-#ifdef UNDER_CE
-  first_arg = argc > 1 ? strdup(argv[1]) : NULL;
-#else
+
   first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
-#endif
 
 #ifdef HAVE_SETLOCALE
   /* Override locale for number parsing (only) */
