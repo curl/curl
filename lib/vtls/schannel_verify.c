@@ -96,7 +96,6 @@ struct cert_chain_engine_config_win7 {
   HCERTSTORE hExclusiveTrustedPeople;
 };
 
-#ifndef UNDER_CE
 static int is_cr_or_lf(char c)
 {
   return c == '\r' || c == '\n';
@@ -518,7 +517,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
   result = TRUE;
   return result;
 }
-#endif /* !UNDER_CE */
 
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
