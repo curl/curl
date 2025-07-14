@@ -47,7 +47,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 #endif
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 
 #include "multibyte.h"
 
@@ -321,4 +321,4 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-#endif /* _WIN32 && !UNDER_CE */
+#endif /* _WIN32 */
