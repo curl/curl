@@ -807,7 +807,7 @@ unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
   int transport = 0;
   if(cf && !cf->cft->query(cf, data, CF_QUERY_TRANSPORT, &transport, NULL))
     return (unsigned char)transport;
-  return data->conn ? data->conn->transport_wanted : 0;
+  return data->conn ? data->conn->transport_wanted : (unsigned char)0;
 }
 
 static const struct Curl_sockaddr_ex *
