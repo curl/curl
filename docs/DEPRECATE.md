@@ -93,3 +93,4 @@ Support for RTMP in libcurl gets removed in April 2026.
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
  - winbuild build system (removed in 8.17.0)
+ - Windows CE (removed in 8.18.0)
