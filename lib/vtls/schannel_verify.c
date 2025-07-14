@@ -686,10 +686,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
-#ifndef UNDER_CE
   HCERTSTORE trust_store = NULL;
   HCERTSTORE own_trust_store = NULL;
-#endif /* !UNDER_CE */
 
   DEBUGASSERT(BACKEND);
 
@@ -705,7 +703,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
-#ifndef UNDER_CE
   if(result == CURLE_OK &&
      (conn_config->CAfile || conn_config->ca_info_blob) &&
      BACKEND->use_manual_cred_validation) {
@@ -799,7 +796,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       }
     }
   }
-#endif /* !UNDER_CE */
 
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
