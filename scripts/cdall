@@ -25,6 +25,9 @@
 
 # provide all dir names to scan on the cmdline
 
+use strict;
+use warnings;
+
 sub convert {
     my ($dir)=@_;
     opendir(my $dh, $dir) || die "could not open $dir";
