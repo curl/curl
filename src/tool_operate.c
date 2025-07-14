@@ -568,8 +568,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         notef("Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
               outs->bytes);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__) && \
-  !defined(__MINGW32CE__)
+#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
