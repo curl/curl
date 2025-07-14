@@ -46,7 +46,7 @@
 #  include iodef
 #endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 #  include <conio.h>
 #endif
 
@@ -122,7 +122,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* _WIN32 && !UNDER_CE */
+#endif /* _WIN32 */
 
 #ifndef DONE /* not previously provided */
 
