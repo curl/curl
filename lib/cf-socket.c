@@ -1683,6 +1683,10 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     DEBUGASSERT(pres2);
     *((curl_socket_t *)pres2) = ctx->sock;
     return CURLE_OK;
+  case CF_QUERY_TRANSPORT:
+    DEBUGASSERT(pres1);
+    *pres1 = ctx->transport;
+    return CURLE_OK;
   case CF_QUERY_REMOTE_ADDR:
     DEBUGASSERT(pres2);
     *((const struct Curl_sockaddr_ex **)pres2) = cf->connected ?
@@ -2193,7 +2197,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->transport = conn->transport;
+  ctx->transport = TRNSPRT_TCP;
   ctx->sock = *s;
   ctx->listening = TRUE;
   ctx->accepted = FALSE;

@@ -964,6 +964,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   size_t idx = 0;
 #endif
   CURLcode result = CURLE_FAILED_INIT;
+  unsigned char transport;
 
   DEBUGASSERT(!wctx->ssl_ctx);
   DEBUGASSERT(!wctx->ssl);
@@ -973,6 +974,8 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     goto out;
   }
   Curl_alpn_copy(&alpns, alpns_requested);
+  DEBUGASSERT(cf->next);
+  transport = Curl_conn_cf_get_transport(cf->next, data);
 
 #if LIBWOLFSSL_VERSION_HEX < 0x04002000 /* 4.2.0 (2019) */
   req_method = wolfSSLv23_client_method();
@@ -1103,7 +1106,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #endif
 
   curves = conn_config->curves;
-  if(!curves && cf->conn->transport == TRNSPRT_QUIC)
+  if(!curves && (transport == TRNSPRT_QUIC))
     curves = (char *)CURL_UNCONST(QUIC_GROUPS);
 
   if(curves) {
@@ -1244,8 +1247,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 #endif
 
-  if(ssl_config->primary.cache_session &&
-     cf->conn->transport != TRNSPRT_QUIC) {
+  if(ssl_config->primary.cache_session && (transport != TRNSPRT_QUIC)) {
     /* Register to get notified when a new session is received */
     wolfSSL_CTX_sess_set_new_cb(wctx->ssl_ctx, wssl_vtls_new_session_cb);
   }
@@ -1291,7 +1293,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 
   wolfSSL_set_app_data(wctx->ssl, ssl_user_data);
 #ifdef WOLFSSL_QUIC
-  if(cf->conn->transport == TRNSPRT_QUIC)
+  if(transport == TRNSPRT_QUIC)
     wolfSSL_set_quic_use_legacy_codepoint(wctx->ssl, 0);
 #endif
 
