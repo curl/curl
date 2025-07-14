@@ -193,7 +193,7 @@ if(MINGW OR MSVC)
   curl_prefill_type_size("CURL_OFF_T" 8)
   curl_prefill_type_size("CURL_SOCKET_T" ${CMAKE_SIZEOF_VOID_P})
   curl_prefill_type_size("SIZE_T" ${CMAKE_SIZEOF_VOID_P})
-  # TIME_T: 8 for _WIN64 or UCRT or MSVC and not Windows CE, 4 otherwise
+  # TIME_T: 8 for _WIN64 or UCRT or MSVC, 4 otherwise
   #   Also 4 for non-UCRT 32-bit when _USE_32BIT_TIME_T is set.
   #   mingw-w64 sets _USE_32BIT_TIME_T unless __MINGW_USE_VC2005_COMPAT is explicit defined.
   if(MSVC)
