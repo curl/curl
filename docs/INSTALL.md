@@ -633,7 +633,7 @@ and runs on, that is not listed, please let us know.
     RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, software,
     Solaris, Sortix, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
     ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS,
-    WebOS, Wii system Wii U, Windows CE, Windows, Xbox System, Xenix, z/OS,
+    WebOS, Wii system Wii U, Windows, Xbox System, Xenix, z/OS,
     z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
