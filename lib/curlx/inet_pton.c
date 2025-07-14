@@ -82,7 +82,7 @@ curlx_inet_pton(int af, const char *src, void *dst)
   case AF_INET6:
     return inet_pton6(src, (unsigned char *)dst);
   default:
-    CURL_SETERRNO(SOCKEAFNOSUPPORT);
+    errno = SOCKEAFNOSUPPORT;
     return -1;
   }
   /* NOTREACHED */

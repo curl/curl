@@ -1315,13 +1315,8 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   if test "$curl_cv_native_windows" = 'yes'; then
     AC_MSG_CHECKING([whether build target supports Win32 large files])
-    if test "$curl_cv_wince" = 'yes'; then
-      dnl Windows CE does not support large files
-      curl_win32_has_largefile='no'
-    else
-      dnl All mingw-w64 versions support large files
-      curl_win32_has_largefile='yes'
-    fi
+    dnl All mingw-w64 versions support large files
+    curl_win32_has_largefile='yes'
     case "$curl_win32_has_largefile" in
       yes)
         if test x"$enable_largefile" = 'xno'; then
@@ -1477,9 +1472,6 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   esac
   if test "$curl_cv_native_windows" = 'yes'; then
     curl_pflags="${curl_pflags} WIN32"
-  fi
-  if test "$curl_cv_wince" = 'yes'; then
-    curl_pflags="${curl_pflags} WINCE"
   fi
   if test "$curl_cv_winuwp" = 'yes'; then
     curl_pflags="${curl_pflags} UWP"

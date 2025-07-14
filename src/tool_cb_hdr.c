@@ -156,7 +156,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           /*
            * Truncate the etag save stream, it can have an existing etag value.
            */
-#if defined(HAVE_FTRUNCATE) && !defined(__MINGW32CE__)
+#ifdef HAVE_FTRUNCATE
           if(ftruncate(fileno(etag_save->stream), 0)) {
             return CURL_WRITEFUNC_ERROR;
           }

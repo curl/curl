@@ -853,24 +853,11 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *
    *    Someone got to verify this on Win-NT 4.0, 2000."
    */
-
-#ifdef UNDER_CE
-  Sleep(0);
-#else
   SleepEx(0, FALSE);
-#endif
-
 #endif
 
   if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
-#ifdef UNDER_CE
-  /* Old Windows CE versions do not support SO_ERROR */
-  if(WSAENOPROTOOPT == err) {
-    SET_SOCKERRNO(0);
-    err = 0;
-  }
-#endif
 #if defined(EBADIOCTL) && defined(__minix)
   /* Minix 3.1.x does not support getsockopt on UDP sockets */
   if(EBADIOCTL == err) {

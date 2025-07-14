@@ -214,11 +214,7 @@ static void my_sha256_update(void *in,
                              unsigned int length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-#ifdef __MINGW32CE__
-  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data), length, 0);
-#else
   CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
-#endif
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)

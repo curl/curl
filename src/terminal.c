@@ -64,7 +64,7 @@ unsigned int get_terminal_columns(void)
     struct winsize ts;
     if(!ioctl(STDIN_FILENO, TIOCGWINSZ, &ts))
       cols = (int)ts.ws_col;
-#elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     {
       HANDLE stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
       CONSOLE_SCREEN_BUFFER_INFO console_info;

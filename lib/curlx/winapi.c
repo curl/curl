@@ -61,8 +61,7 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 
   /* We return the local codepage version of the error string because if it is
      output to the user's terminal it will likely be with functions which
-     expect the local codepage (eg fprintf, failf, infof).
-     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+     expect the local codepage (eg fprintf, failf, infof). */
   if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                     LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
@@ -118,7 +117,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);

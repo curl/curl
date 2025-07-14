@@ -240,11 +240,7 @@ static void my_md5_update(void *in,
                           unsigned int inputLen)
 {
   my_md5_ctx *ctx = in;
-#ifdef __MINGW32CE__
-  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(input), inputLen, 0);
-#else
   CryptHashData(ctx->hHash, (const BYTE *)input, inputLen, 0);
-#endif
 }
 
 static void my_md5_final(unsigned char *digest, void *in)

@@ -572,7 +572,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
-#if defined(__AMIGA__) || defined(__MINGW32CE__)
+#ifdef __AMIGA__
       if(data->state.resume_from !=
           lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else

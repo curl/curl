@@ -3311,10 +3311,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
   /* shut down the socket to inform the server we are done */
 
-#ifdef UNDER_CE
-  shutdown(conn->sock[SECONDARYSOCKET], 2);  /* SD_BOTH */
-#endif
-
   if(Curl_conn_is_setup(conn, SECONDARYSOCKET)) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
       /* partial download completed */
