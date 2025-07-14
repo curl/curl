@@ -895,9 +895,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-#ifndef UNDER_CE
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -2363,7 +2361,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-#if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
+#ifdef HAS_ALPN_SCHANNEL
   bool wine = FALSE;
   bool wine_has_alpn = FALSE;
 
@@ -2389,7 +2387,7 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
-#endif /* HAS_ALPN_SCHANNEL && !UNDER_CE */
+#endif /* HAS_ALPN_SCHANNEL */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
