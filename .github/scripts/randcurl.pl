@@ -18,6 +18,9 @@
 # directory where it runs.
 #
 
+use strict;
+use warnings;
+
 my $curl = "../src/curl";
 my $url = "localhost:7777"; # not listening to this
 
@@ -172,6 +175,7 @@ sub runconfig {
         my $o = getnum($nopts);
         my $option = $opt[$o];
         my $ar = "";
+        $uniq{$option} = 0 if(!exists $uniq{$option});
         $uniq{$option}++;
         if($arg{$option}) {
             $ar = " ".randarg();
