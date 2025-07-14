@@ -787,13 +787,10 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifdef _WIN32
-#ifndef UNDER_CE
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
     curl_msnprintf(buf, buflen, "%s", sys_errlist[err]);
-  else
-#endif
-  {
+  else {
     if(
 #ifdef USE_WINSOCK
       !get_winsock_error(err, buf, buflen) &&
