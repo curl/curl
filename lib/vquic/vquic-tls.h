@@ -111,6 +111,10 @@ bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
                                  bool give_ssl_ctx,
                                  struct curl_tlssessioninfo *info);
 
+void Curl_vquic_report_handshake(struct curl_tls_ctx *ctx,
+                                 struct Curl_cfilter *cf,
+                                 struct Curl_easy *data);
+
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
 
 #endif /* HEADER_CURL_VQUIC_TLS_H */

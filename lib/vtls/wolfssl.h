@@ -88,6 +88,8 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl);
 
+void Curl_wssl_report_handshake(struct Curl_easy *data,
+                                struct wssl_ctx *wssl);
 
 #endif /* USE_WOLFSSL */
 #endif /* HEADER_CURL_WOLFSSL_H */

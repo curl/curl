@@ -1307,6 +1307,26 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   return result;
 }
 
+void Curl_gtls_report_handshake(struct Curl_easy *data,
+                                struct gtls_ctx *gctx)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  const char *ptr;
+  gnutls_protocol_t version = gnutls_protocol_get_version(gctx->session);
+
+  /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
+  ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(gctx->session),
+                                     gnutls_cipher_get(gctx->session),
+                                     gnutls_mac_get(gctx->session));
+
+  infof(data, "SSL connection using %s / %s",
+        gnutls_protocol_get_name(version), ptr);
+#else
+  (void)data;
+  (void)gctx;
+#endif
+}
+
 CURLcode
 Curl_gtls_verifyserver(struct Curl_easy *data,
                        gnutls_session_t session,
@@ -1327,22 +1347,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   int rc;
   CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  const char *ptr;
   int algo;
   unsigned int bits;
-  gnutls_protocol_t version = gnutls_protocol_get_version(session);
 #endif
   long * const certverifyresult = &ssl_config->certverifyresult;
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  /* the name of the cipher suite used, e.g. ECDHE_RSA_AES_256_GCM_SHA384. */
-  ptr = gnutls_cipher_suite_get_name(gnutls_kx_get(session),
-                                     gnutls_cipher_get(session),
-                                     gnutls_mac_get(session));
-
-  infof(data, "SSL connection using %s / %s",
-        gnutls_protocol_get_name(version), ptr);
-#endif
 
   /* This function will return the peer's raw certificate (chain) as sent by
      the peer. These certificates are in raw format (DER encoded for
@@ -1876,6 +1884,9 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
   if(connssl->connecting_state == ssl_connect_3) {
     gnutls_datum_t proto;
     int rc;
+
+    Curl_gtls_report_handshake(data, &backend->gtls);
+
     result = gtls_verifyserver(cf, data, backend->gtls.session);
     if(result)
       goto out;

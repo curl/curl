@@ -2087,6 +2087,19 @@ static bool wssl_data_pending(struct Curl_cfilter *cf,
     return FALSE;
 }
 
+void Curl_wssl_report_handshake(struct Curl_easy *data,
+                                struct wssl_ctx *wssl)
+{
+#if (LIBWOLFSSL_VERSION_HEX >= 0x03009010)
+    infof(data, "SSL connection using %s / %s",
+          wolfSSL_get_version(wssl->ssl),
+          wolfSSL_get_cipher_name(wssl->ssl));
+#else
+    infof(data, "SSL connected");
+#endif
+
+}
+
 static CURLcode wssl_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              bool *done)
@@ -2160,16 +2173,9 @@ static CURLcode wssl_connect(struct Curl_cfilter *cf,
     }
 #endif /* HAVE_ALPN */
 
-#if (LIBWOLFSSL_VERSION_HEX >= 0x03009010)
-    infof(data, "SSL connection using %s / %s",
-          wolfSSL_get_version(wssl->ssl),
-          wolfSSL_get_cipher_name(wssl->ssl));
-#else
-    infof(data, "SSL connected");
-#endif
-
     connssl->connecting_state = ssl_connect_done;
     connssl->state = ssl_connection_complete;
+    Curl_wssl_report_handshake(data, wssl);
 
 #ifdef WOLFSSL_EARLY_DATA
     if(connssl->earlydata_state > ssl_earlydata_none) {
