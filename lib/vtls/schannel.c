@@ -928,15 +928,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->use_alpn = FALSE;
 #endif
 
-#ifdef UNDER_CE
-#ifdef HAS_MANUAL_VERIFY_API
-  /* certificate validation on Windows CE does not seem to work right; we will
-   * do it following a more manual process. */
-  backend->use_manual_cred_validation = TRUE;
-#else
-#error "compiler too old to support Windows CE requisite manual cert verify"
-#endif
-#else
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
@@ -956,7 +947,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "schannel: CA cert support not built in");
     return CURLE_NOT_BUILT_IN;
   }
-#endif
 #endif
 
   backend->cred = NULL;
