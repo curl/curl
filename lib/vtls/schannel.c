@@ -902,11 +902,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->use_alpn = FALSE;
 #endif
 
-#ifdef UNDER_CE
-  /* certificate validation on Windows CE does not seem to work right; we will
-   * do it following a more manual process. */
-  backend->use_manual_cred_validation = TRUE;
-#else
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
@@ -920,7 +915,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   else
     backend->use_manual_cred_validation = FALSE;
-#endif
 
   backend->cred = NULL;
 
