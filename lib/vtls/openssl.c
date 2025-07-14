@@ -2868,8 +2868,8 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   long curl_ssl_version_max;
 
   /* convert curl min SSL version option to OpenSSL constant */
-#if (defined(OPENSSL_IS_BORINGSSL)  || \
-     defined(OPENSSL_IS_AWSLC)      || \
+#if (defined(OPENSSL_IS_BORINGSSL) || \
+     defined(OPENSSL_IS_AWSLC) || \
      defined(LIBRESSL_VERSION_NUMBER))
   uint16_t ossl_ssl_version_min = 0;
   uint16_t ossl_ssl_version_max = 0;
