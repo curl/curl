@@ -555,16 +555,12 @@ static CURLcode retrycheck(struct OperationConfig *config,
     }
 
     if(truncate && outs->bytes && outs->filename && outs->stream) {
-#ifndef __MINGW32CE__
       struct_stat fileinfo;
 
       /* The output can be a named pipe or a character device etc that
          cannot be truncated. Only truncate regular files. */
       if(!fstat(fileno(outs->stream), &fileinfo) &&
          S_ISREG(fileinfo.st_mode))
-#else
-        /* Windows CE's fileno() is bad so just skip the check */
-#endif
       {
         int rc;
         /* We have written data to an output file, we truncate file */
