@@ -751,7 +751,7 @@ ParameterError str2tls_max(unsigned char *val, const char *str)
     const char *tls_max_str;
     unsigned char tls_max;
   } const tls_max_array[] = {
-    { "default", 0 }, /* let's the library decide */
+    { "default", 0 }, /* lets the library decide */
     { "1.0",     1 },
     { "1.1",     2 },
     { "1.2",     3 },
