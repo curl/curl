@@ -489,12 +489,10 @@
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
-#    ifndef UNDER_CE
-#      undef  lseek
-#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)             _fstat(fdes, stp)
-#      define struct_stat                  struct _stat
-#    endif
+#    undef  lseek
+#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes, stp)             _fstat(fdes, stp)
+#    define struct_stat                  struct _stat
 #    define LSEEK_ERROR                  (long)-1
 #  endif
 #elif defined(__DJGPP__)
@@ -809,26 +807,7 @@
 #include "curl_setup_once.h"
 #endif
 
-#ifdef UNDER_CE
-#define getenv curl_getenv  /* Windows CE does not support getenv() */
-#define raise(s) ((void)(s))
-/* Terrible workarounds to make Windows CE compile */
-#define errno 0
-#define CURL_SETERRNO(x) ((void)(x))
-#define EINTR  4
-#define EAGAIN 11
-#define ENOMEM 12
-#define EACCES 13
-#define EEXIST 17
-#define EISDIR 21
-#define EINVAL 22
-#define ENOSPC 28
-#define strerror(x) "?"
-#undef STDIN_FILENO
-#define STDIN_FILENO 0
-#else
 #define CURL_SETERRNO(x) (errno = (x))
-#endif
 
 /*
  * Definition of our NOP statement Object-like macro
