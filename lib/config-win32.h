@@ -341,7 +341,7 @@
 #    define WINVER VS2008_DEF_TARGET
 #    endif
 #    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#      error VS2008 does not support build targets prior to Windows 2000
+#      error VS2008 does not support build targets prior to Windows XP
 #    endif
 #  endif
 #endif /* _MSC_VER */
