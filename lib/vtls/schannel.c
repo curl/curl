@@ -119,12 +119,6 @@
 #define CALG_SHA_256 0x0000800c
 #endif
 
-/* Work around typo in CeGCC (as of 0.59.1) w32api headers */
-#if defined(__MINGW32CE__) && \
-  !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
-#define ALG_CLASS_DHASH ALG_CLASS_HASH
-#endif
-
 /* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
@@ -2716,12 +2710,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-#ifdef __MINGW32CE__
-    /* workaround for CeGCC, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
-#else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
-#endif
       break; /* failed */
 
     /* get hash size */
