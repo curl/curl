@@ -865,18 +865,18 @@ sub checksystemfeatures {
     }
 
     # display summary information about curl and the test host
-    logmsg ("********* System characteristics ******** \n",
-            "* $curl\n",
-            "* $libcurl\n",
-            "* Protocols: $proto\n",
-            "* Features: $feat\n",
-            "* Disabled: $dis\n",
-            "* Host: $hostname\n",
-            "* System: $hosttype\n",
-            "* OS: $hostos\n",
-            "* Perl: $^V ($^X)\n",
-            "* diff: $havediff\n",
-            "* Args: $args\n");
+    logmsg("********* System characteristics ******** \n",
+           "* $curl\n",
+           "* $libcurl\n",
+           "* Protocols: $proto\n",
+           "* Features: $feat\n",
+           "* Disabled: $dis\n",
+           "* Host: $hostname\n",
+           "* System: $hosttype\n",
+           "* OS: $hostos\n",
+           "* Perl: $^V ($^X)\n",
+           "* diff: $havediff\n",
+           "* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -895,7 +895,7 @@ sub checksystemfeatures {
                    $run_event_based?"event-based ":"",
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
-    logmsg ("* Seed: $randseed\n");
+    logmsg "* Seed: $randseed\n";
 }
 
 #######################################################################

@@ -222,7 +222,7 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
     infof(data, "SASL %p state change from %s to %s",
           (void *)sasl, names[sasl->state], names[newstate]);
 #else
-  (void) data;
+  (void)data;
 #endif
 
   sasl->state = newstate;
@@ -615,8 +615,8 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   struct bufref resp;
   const char *hostname;
   int port;
-#if defined(USE_KERBEROS5) || defined(USE_NTLM) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if defined(USE_KERBEROS5) || defined(USE_NTLM) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH)
   const char *service = data->set.str[STRING_SERVICE_NAME] ?
     data->set.str[STRING_SERVICE_NAME] :
     sasl->params->service;

@@ -104,8 +104,7 @@ struct mbed_ssl_backend_data {
 };
 
 /* apply threading? */
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) ||  \
-  defined(_WIN32)
+#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || defined(_WIN32)
 #define HAS_THREADING_SUPPORT
 #endif
 
@@ -171,9 +170,9 @@ static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
   struct Curl_easy *data = (struct Curl_easy *)context;
-  (void) level;
-  (void) line_nb;
-  (void) f_name;
+  (void)level;
+  (void)line_nb;
+  (void)f_name;
 
   if(data) {
     size_t len = strlen(line);
@@ -412,7 +411,7 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
 #ifndef HAS_TLS13_SUPPORT
-  (void) ciphers13, (void) j;
+  (void)ciphers13, (void)j;
 #else
   if(!ciphers13) {
     /* Add default TLSv1.3 ciphers to selection */
@@ -501,8 +500,8 @@ static void
 mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 {
 #if defined(CURL_DISABLE_VERBOSE_STRINGS) || \
-    (MBEDTLS_VERSION_NUMBER >= 0x03000000 && defined(MBEDTLS_X509_REMOVE_INFO))
-  (void) data, (void) crt;
+  (MBEDTLS_VERSION_NUMBER >= 0x03000000 && defined(MBEDTLS_X509_REMOVE_INFO))
+  (void)data, (void)crt;
 #else
   const size_t bufsize = 16384;
   char *p, *buffer = malloc(bufsize);

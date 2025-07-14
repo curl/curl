@@ -98,8 +98,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
   struct gss_channel_bindings_struct chan;
 
-  (void) user;
-  (void) password;
+  (void)user;
+  (void)password;
 
   if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server

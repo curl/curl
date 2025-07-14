@@ -1940,7 +1940,7 @@ static CURLcode ossl_set_engine_default(struct Curl_easy *data)
     }
   }
 #else
-  (void) data;
+  (void)data;
 #endif
   return CURLE_OK;
 }
@@ -1963,7 +1963,7 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
     list = beg;
   }
 #endif
-  (void) data;
+  (void)data;
   return list;
 }
 
@@ -2819,7 +2819,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
              CURLINFO_SSL_DATA_IN, (const char *)buf, len);
-  (void) ssl;
+  (void)ssl;
 }
 #endif
 
@@ -2941,7 +2941,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
 
-  (void) data; /* In case it is unused. */
+  (void)data; /* In case it is unused. */
 
   switch(ssl_version) {
   case CURL_SSLVERSION_TLSv1_3:
@@ -5598,7 +5598,7 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
 {
   EVP_MD_CTX *mdctx;
   unsigned int len = 0;
-  (void) unused;
+  (void)unused;
 
   mdctx = EVP_MD_CTX_create();
   if(!mdctx)

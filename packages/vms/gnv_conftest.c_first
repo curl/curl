@@ -35,7 +35,7 @@ char RAND_status(void) {return 0;}
 /* char RAND_screen(void) {return 0;} In headers, but not present */
 char CRYPTO_cleanup_all_ex_data(void) {return 0;}
 char SSL_get_shutdown(void) {return 0;}
-char ENGINE_load_builtin_engines (void) {return 0;}
+char ENGINE_load_builtin_engines(void) {return 0;}
 
 /* And these are to pass the test that uses headers. */
 /* Because the HP OpenSSL transfer vectors are currently in Upper case only */

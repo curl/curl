@@ -1271,13 +1271,13 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
   AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-  #define __USE_INLINE__
-  #include <proto/bsdsocket.h>
-  #ifdef __amigaos4__
-  struct SocketIFace *ISocket = NULL;
-  #else
-  struct Library *SocketBase = NULL;
-  #endif
+      #define __USE_INLINE__
+      #include <proto/bsdsocket.h>
+      #ifdef __amigaos4__
+      struct SocketIFace *ISocket = NULL;
+      #else
+      struct Library *SocketBase = NULL;
+      #endif
     ]],[[
       unsigned char host[] = "localhost";
       gethostbyname(host);

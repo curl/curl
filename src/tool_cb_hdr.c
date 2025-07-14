@@ -56,7 +56,7 @@ static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef LINK
 static void write_linked_location(CURL *curl, const char *location,
-    size_t loclen, FILE *stream);
+                                  size_t loclen, FILE *stream);
 #endif
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
@@ -81,7 +81,6 @@ fail:
 /*
 ** callback for CURLOPT_HEADERFUNCTION
 */
-
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct per_transfer *per = userdata;
@@ -402,9 +401,9 @@ static char *parse_filename(const char *ptr, size_t len)
  * should not be needed but the real world returns plenty of relative
  * URLs here.
  */
-static
-void write_linked_location(CURL *curl, const char *location, size_t loclen,
-                           FILE *stream) {
+static void write_linked_location(CURL *curl, const char *location,
+                                  size_t loclen, FILE *stream)
+{
   /* This would so simple if CURLINFO_REDIRECT_URL were available here */
   CURLU *u = NULL;
   char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;

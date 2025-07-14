@@ -96,7 +96,7 @@ struct zlib_writer {
 static voidpf
 zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
 {
-  (void) opaque;
+  (void)opaque;
   /* not a typo, keep it calloc() */
   return (voidpf) calloc(items, size);
 }
@@ -104,7 +104,7 @@ zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
 static void
 zfree_cb(voidpf opaque, voidpf ptr)
 {
-  (void) opaque;
+  (void)opaque;
   free(ptr);
 }
 
@@ -411,7 +411,7 @@ static CURLcode brotli_do_init(struct Curl_easy *data,
                                struct Curl_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
-  (void) data;
+  (void)data;
 
   bp->br = BrotliDecoderCreateInstance(NULL, NULL, NULL);
   return bp->br ? CURLE_OK : CURLE_OUT_OF_MEMORY;
@@ -466,7 +466,7 @@ static void brotli_do_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
-  (void) data;
+  (void)data;
 
   if(bp->br) {
     BrotliDecoderDestroyInstance(bp->br);
@@ -671,9 +671,9 @@ static CURLcode error_do_write(struct Curl_easy *data,
                                struct Curl_cwriter *writer, int type,
                                const char *buf, size_t nbytes)
 {
-  (void) writer;
-  (void) buf;
-  (void) nbytes;
+  (void)writer;
+  (void)buf;
+  (void)nbytes;
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
@@ -689,8 +689,8 @@ static CURLcode error_do_write(struct Curl_easy *data,
 static void error_do_close(struct Curl_easy *data,
                            struct Curl_cwriter *writer)
 {
-  (void) data;
-  (void) writer;
+  (void)data;
+  (void)writer;
 }
 
 static const struct Curl_cwtype error_writer = {
@@ -843,9 +843,9 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer)
 {
-  (void) data;
-  (void) enclist;
-  (void) is_transfer;
+  (void)data;
+  (void)enclist;
+  (void)is_transfer;
   return CURLE_NOT_BUILT_IN;
 }
 

@@ -223,7 +223,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
     mbedtls_md4(ctx->data, ctx->size, result);
 #else
-    (void) mbedtls_md4_ret(ctx->data, ctx->size, result);
+    (void)mbedtls_md4_ret(ctx->data, ctx->size, result);
 #endif
 
     Curl_safefree(ctx->data);

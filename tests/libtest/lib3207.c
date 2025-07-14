@@ -161,7 +161,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 static void execute(CURLSH *share, struct Ctx *ctx)
 {
   size_t i;
-  (void) share;
+  (void)share;
   for(i = 0; i < THREAD_SIZE; i++) {
     test_thread((void *)&ctx[i]);
   }

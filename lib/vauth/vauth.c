@@ -79,7 +79,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   TCHAR *tchar_spn = NULL;
   TCHAR *dupe_tchar_spn = NULL;
 
-  (void) realm;
+  (void)realm;
 
   /* Note: We could use DsMakeSPN() or DsClientMakeSpnForTargetServer() rather
      than doing this ourselves but the first is only available in Windows XP

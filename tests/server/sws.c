@@ -143,17 +143,17 @@ static const char *docquit_sws =
 
 /* send back this on 404 file not found */
 static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
-    "Server: " SWSVERSION "\r\n"
-    "Connection: close\r\n"
-    "Content-Type: text/html"
-    END_OF_HEADERS
-    "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
-    "<HTML><HEAD>\n"
-    "<TITLE>404 Not Found</TITLE>\n"
-    "</HEAD><BODY>\n"
-    "<H1>Not Found</H1>\n"
-    "The requested URL was not found on this server.\n"
-    "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
+  "Server: " SWSVERSION "\r\n"
+  "Connection: close\r\n"
+  "Content-Type: text/html"
+  END_OF_HEADERS
+  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
+  "<HTML><HEAD>\n"
+  "<TITLE>404 Not Found</TITLE>\n"
+  "</HEAD><BODY>\n"
+  "<H1>Not Found</H1>\n"
+  "The requested URL was not found on this server.\n"
+  "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
@@ -405,7 +405,6 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
           logmsg("No test number in path");
           req->testno = DOCNUMBER_NOTHING;
         }
-
       }
 
       if(req->testno == DOCNUMBER_NOTHING) {

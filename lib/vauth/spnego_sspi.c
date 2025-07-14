@@ -108,7 +108,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+  (void)data;
 #endif
 
   if(nego->context && nego->status == SEC_E_OK) {

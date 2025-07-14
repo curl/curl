@@ -3695,7 +3695,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  (void) dead_connection;
+  (void)dead_connection;
 
   if(sshc && sshc->ssh_session && sshp) {
     /* only if there is a session still around to use! */
@@ -3867,7 +3867,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  (void) dead_connection;
+  (void)dead_connection;
 
   DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 

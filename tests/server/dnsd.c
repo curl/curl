@@ -619,7 +619,6 @@ static int test_dnsd(int argc, char **argv)
     }
 
     logmsg("end of one transfer");
-
   }
 
 dnsd_cleanup:

@@ -98,13 +98,13 @@ HEAD
 #define BUF_SIZE 0x10000
 static voidpf zalloc_func(voidpf opaque, unsigned int items, unsigned int size)
 {
-  (void) opaque;
+  (void)opaque;
   /* not a typo, keep it calloc() */
   return (voidpf) calloc(items, size);
 }
 static void zfree_func(voidpf opaque, voidpf ptr)
 {
-  (void) opaque;
+  (void)opaque;
   free(ptr);
 }
 

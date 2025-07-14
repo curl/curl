@@ -71,12 +71,12 @@ static const struct testparams testparams[] = {
                                                                    CURLE_OK }
 };
 
-static int      hasbody;
+static int hasbody;
 
 static size_t writedata(char *data, size_t size, size_t nmemb, void *userdata)
 {
-  (void) data;
-  (void) userdata;
+  (void)data;
+  (void)userdata;
 
   if(size && nmemb)
     hasbody = 1;

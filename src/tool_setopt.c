@@ -217,7 +217,7 @@ static char *c_escape(const char *str, curl_off_t len)
     result = curlx_dyn_addn(&escaped, str, s - str);
 
   if(!result)
-    (void) !curlx_dyn_addn(&escaped, "...", cutoff);
+    (void)!curlx_dyn_addn(&escaped, "...", cutoff);
 
   return curlx_dyn_ptr(&escaped);
 }

@@ -28,8 +28,8 @@
 /* write callback that does nothing */
 static size_t write_it(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-  (void) ptr;
-  (void) userdata;
+  (void)ptr;
+  (void)userdata;
   return size * nmemb;
 }
 

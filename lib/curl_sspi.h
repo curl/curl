@@ -289,13 +289,13 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #endif
 #endif /* __MINGW32CE__ */
 #ifndef SEC_E_INVALID_PARAMETER
-# define SEC_E_INVALID_PARAMETER              ((HRESULT)0x8009035DL)
+#define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
 #ifndef SEC_E_DELEGATION_POLICY
-# define SEC_E_DELEGATION_POLICY              ((HRESULT)0x8009035EL)
+#define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
 #ifndef SEC_E_POLICY_NLTM_ONLY
-# define SEC_E_POLICY_NLTM_ONLY               ((HRESULT)0x8009035FL)
+#define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
 
 #ifdef __MINGW32CE__
