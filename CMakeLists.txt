@@ -71,37 +71,6 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce build
-  if(NOT MINGW32CE_LIBRARY_DIR)
-    message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
-  endif()
-
-  set(MINGW 1)
-  set(MINGW32CE 1)
-
-  # Build implib with libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
-  set(CMAKE_C_CREATE_SHARED_LIBRARY "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS>")
-  string(APPEND CMAKE_C_CREATE_SHARED_LIBRARY " <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB>")
-  string(APPEND CMAKE_C_CREATE_SHARED_LIBRARY " ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
-
-  # Build resources. Copied from CMake's 'Modules/Platform/Windows-windres.cmake'.
-  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-  enable_language(RC)
-
-  # To compile long long integer literals
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-std=gnu99")
-  string(APPEND CMAKE_REQUIRED_FLAGS " -std=gnu99")
-
-  set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
-
-  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
-  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
-  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
-  set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
-  set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
-  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
 elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
@@ -129,9 +98,6 @@ if(ANDROID)
 endif()
 if(WIN32)
   string(APPEND _target_flags " WIN32")
-endif()
-if(WINCE)
-  string(APPEND _target_flags " WINCE")
 endif()
 if(WINDOWS_STORE)
   string(APPEND _target_flags " UWP")
@@ -213,12 +179,12 @@ option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
-  if(WINDOWS_STORE OR WINCE)
+  if(WINDOWS_STORE)
     set(ENABLE_UNICODE ON)
   endif()
   if(ENABLE_UNICODE)
     set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "UNICODE" "_UNICODE")
-    if(MINGW AND NOT MINGW32CE)
+    if(MINGW)
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-municode")
     endif()
   endif()
@@ -538,7 +504,7 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_TFTP ON)
 endif()
 
-if(WINDOWS_STORE OR WINCE)
+if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
@@ -625,19 +591,9 @@ endif()
 
 # Check for all needed libraries
 if(WIN32)
-  if(WINCE)
-    set(_win32_winsock "ws2")
-  else()
-    set(_win32_winsock "ws2_32")
-  endif()
+  set(_win32_winsock "ws2_32")
   set(_win32_crypt32 "crypt32")
   set(_win32_secur32 "secur32")
-
-  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
-    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
-    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
-    set(_win32_secur32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_secur32}.a")
-  endif()
 elseif(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
@@ -694,7 +650,7 @@ if(ENABLE_IPV6)
     endif()
   endif()
 endif()
-if(ENABLE_IPV6 AND NOT WINCE)
+if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
@@ -1035,7 +991,7 @@ macro(curl_openssl_check_exists)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
     endif()
-    if(WIN32 AND NOT WINCE)
+    if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   endif()
@@ -1262,7 +1218,7 @@ if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
-  if(WIN32 AND NOT WINDOWS_STORE AND NOT WINCE)
+  if(WIN32 AND NOT WINDOWS_STORE)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
       list(APPEND CURL_LIBS "wldap32")
@@ -1501,7 +1457,7 @@ if(USE_LIBRTMP)
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
-if(ENABLE_UNIX_SOCKETS AND NOT WINCE)
+if(ENABLE_UNIX_SOCKETS)
   if(WIN32 OR DOS)
     set(USE_UNIX_SOCKETS 1)
   else()
@@ -1618,7 +1574,7 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501)
     # Windows XP is required for freeaddrinfo, getaddrinfo
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
@@ -1626,7 +1582,7 @@ if(WIN32)
   # Pre-fill detection results based on target OS version
   if(_CURL_PREFILL)
     if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-       WINCE OR WINDOWS_STORE)
+       WINDOWS_STORE)
       set(HAVE_IF_NAMETOINDEX 0)
       unset(HAVE_IF_NAMETOINDEX CACHE)
     elseif(MSVC OR MINGW)
@@ -1735,7 +1691,7 @@ endif()
 # Apply to all feature checks
 if(WIN32)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
-  if(NOT WINCE AND NOT WINDOWS_STORE)
+  if(NOT WINDOWS_STORE)
     list(APPEND CMAKE_REQUIRED_LIBRARIES "iphlpapi")
   endif()
 elseif(HAVE_LIBSOCKET)
@@ -1805,11 +1761,9 @@ else()
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 endif()
 
-if(NOT MINGW32CE)  # Avoid false detections
-  check_function_exists("setmode" HAVE_SETMODE)
-  if(WIN32 OR CYGWIN)
-    check_function_exists("_setmode" HAVE__SETMODE)
-  endif()
+check_function_exists("setmode" HAVE_SETMODE)
+if(WIN32 OR CYGWIN)
+  check_function_exists("_setmode" HAVE__SETMODE)
 endif()
 
 if(AMIGA)
@@ -1972,16 +1926,12 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
   list(APPEND CURL_NETWORK_AND_TIME_LIBS "${_win32_winsock}")
-  if(NOT WINCE AND NOT WINDOWS_STORE)
+  if(NOT WINDOWS_STORE)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")
   endif()
-  if(NOT WINCE)
-    list(APPEND CURL_LIBS "bcrypt")
-  endif()
+  list(APPEND CURL_LIBS "bcrypt")
 
-  if(NOT WINCE)
-    set(USE_WIN32_LARGE_FILES ON)
-  endif()
+  set(USE_WIN32_LARGE_FILES ON)
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
@@ -1990,9 +1940,7 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    if(NOT WINCE)
-      list(APPEND CURL_LIBS "advapi32")
-    endif()
+    list(APPEND CURL_LIBS "advapi32")
     list(APPEND CURL_LIBS "${_win32_crypt32}")
   endif()
   if(USE_WINDOWS_SSPI)
