@@ -521,12 +521,8 @@ dnl **********************************************************************
 CURL_CHECK_COMPILER
 CURL_CHECK_NATIVE_WINDOWS
 
-curl_cv_wince='no'
 curl_cv_winuwp='no'
 if test "$curl_cv_native_windows" = "yes"; then
-  case $host_os in
-    mingw32ce*) curl_cv_wince='yes';;
-  esac
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
@@ -885,7 +881,7 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
-if test "$curl_cv_winuwp" = 'yes' -o "$curl_cv_wince" = 'yes'; then
+if test "$curl_cv_winuwp" = 'yes'; then
   AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
   CURL_DISABLE_TELNET=1
 fi
@@ -1161,37 +1157,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
     AC_MSG_RESULT([no])
     LIBS=$my_ac_save_LIBS
   ])
-fi
-
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
-  if test "$curl_cv_wince" = 'yes'; then
-    dnl This is for Windows CE systems
-    winsock_LIB="-lws2"
-    if test ! -z "$winsock_LIB"; then
-      my_ac_save_LIBS=$LIBS
-      LIBS="$winsock_LIB $LIBS"
-      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-          #ifdef _WIN32
-          #ifndef WIN32_LEAN_AND_MEAN
-          #define WIN32_LEAN_AND_MEAN
-          #endif
-          #include <winsock2.h>
-          #endif
-        ]],[[
-          gethostbyname("localhost");
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        HAVE_GETHOSTBYNAME="1"
-      ],[
-        AC_MSG_RESULT([no])
-        winsock_LIB=""
-        LIBS=$my_ac_save_LIBS
-      ])
-    fi
-  fi
 fi
 
 # In UWP mode gethostbyname gets detected via the core libs, but some
@@ -1679,10 +1644,6 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
   )
 )
 
-if test "$curl_cv_wince" = 'yes'; then
-  ipv6=no
-fi
-
 if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
   AC_DEFINE(USE_IPV6, 1, [Define if you want to enable IPv6 support])
@@ -2010,14 +1971,11 @@ CURL_WITH_RUSTLS
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
-  LIBS="-lcrypt32 $LIBS"
-  if test "$curl_cv_wince" = 'no'; then
-    LIBS="-ladvapi32 $LIBS"
-  fi
+  LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes" -a "$curl_cv_wince" = 'no'; then
+if test "x$curl_cv_native_windows" = "xyes"; then
   LIBS="-lbcrypt $LIBS"
 fi
 
@@ -2743,11 +2701,7 @@ dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
 
-if test "$curl_cv_wince" = 'yes'; then
-  want_winuni="yes"
-else
-  want_winuni="no"
-fi
+want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
   if test "$curl_cv_winuwp" = 'yes'; then
     want_winuni="yes"
@@ -4299,11 +4253,9 @@ else
   CURL_CHECK_FUNC_STRICMP
 fi
 
-if test "$curl_cv_wince" = 'no'; then
-  AC_CHECK_FUNCS([setmode])
-  if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
-    AC_CHECK_FUNCS([_setmode])
-  fi
+AC_CHECK_FUNCS([setmode])
+if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+  AC_CHECK_FUNCS([_setmode])
 fi
 
 if test -z "$ssl_backends"; then
@@ -4682,7 +4634,7 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
     want_unix_sockets=auto
     ]
 )
-if test "x$want_unix_sockets" != "xno" -a "$curl_cv_wince" = 'no'; then
+if test "x$want_unix_sockets" != "xno"; then
   if test "x$curl_cv_native_windows" = "xyes"; then
     USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])

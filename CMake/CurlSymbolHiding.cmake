@@ -29,7 +29,7 @@ if(WIN32 AND (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
   # e.g. curl_easy_perform_ev() or curl_dbg_*(),
   # so disable symbol hiding for debug builds and for memory tracking.
   set(CURL_HIDDEN_SYMBOLS OFF)
-elseif(DOS OR AMIGA OR MINGW32CE)
+elseif(DOS OR AMIGA)
   set(CURL_HIDDEN_SYMBOLS OFF)
 endif()
 
