@@ -221,4 +221,22 @@ bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
 #endif
 }
 
+void Curl_vquic_report_handshake(struct curl_tls_ctx *ctx,
+                                 struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
+{
+  (void)cf;
+#ifdef USE_OPENSSL
+  (void)cf;
+  Curl_ossl_report_handshake(data, &ctx->ossl);
+#elif defined(USE_GNUTLS)
+  Curl_gtls_report_handshake(data, &ctx->gtls);
+#elif defined(USE_WOLFSSL)
+  Curl_wssl_report_handshake(data, &ctx->wssl);
+#else
+  (void)data;
+  (void)ctx;
+#endif
+}
+
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */

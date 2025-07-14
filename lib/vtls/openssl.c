@@ -4334,6 +4334,38 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
+void Curl_ossl_report_handshake(struct Curl_easy *data,
+                                struct ossl_ctx *octx)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(Curl_trc_is_verbose(data)) {
+    int psigtype_nid = NID_undef;
+    const char *negotiated_group_name = NULL;
+
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    SSL_get_peer_signature_type_nid(octx->ssl, &psigtype_nid);
+#if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
+    negotiated_group_name = SSL_get0_group_name(octx->ssl);
+#else
+    negotiated_group_name =
+      OBJ_nid2sn(SSL_get_negotiated_group(octx->ssl) & 0x0000FFFF);
+#endif
+#endif
+
+    /* Informational message */
+    infof(data, "SSL connection using %s / %s / %s / %s",
+          SSL_get_version(octx->ssl),
+          SSL_get_cipher(octx->ssl),
+          negotiated_group_name ? negotiated_group_name : "[blank]",
+          OBJ_nid2sn(psigtype_nid));
+  }
+#else
+  (void)data;
+  (void)octx;
+#endif /* CURL_DISABLE_VERBOSE_STRINGS */
+
+}
+
 static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
@@ -4599,28 +4631,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
   }
   else {
-    int psigtype_nid = NID_undef;
-    const char *negotiated_group_name = NULL;
-
     /* we connected fine, we are not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
-
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
-    SSL_get_peer_signature_type_nid(octx->ssl, &psigtype_nid);
-#if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
-    negotiated_group_name = SSL_get0_group_name(octx->ssl);
-#else
-    negotiated_group_name =
-      OBJ_nid2sn(SSL_get_negotiated_group(octx->ssl) & 0x0000FFFF);
-#endif
-#endif
-
-    /* Informational message */
-    infof(data, "SSL connection using %s / %s / %s / %s",
-          SSL_get_version(octx->ssl),
-          SSL_get_cipher(octx->ssl),
-          negotiated_group_name ? negotiated_group_name : "[blank]",
-          OBJ_nid2sn(psigtype_nid));
+    Curl_ossl_report_handshake(data, octx);
 
 #ifdef USE_ECH_OPENSSL
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
@@ -4677,10 +4690,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         infof(data, "ECH: ech-hard failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
-   }
-   else {
+    }
+    else {
       infof(data, "ECH: result: status is not attempted");
-   }
+    }
 # endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
 #endif  /* USE_ECH_OPENSSL */
 
