@@ -12,13 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Windows CE
-
-Windows CE "mainstream support" ended on October 9, 2018, and "Extended
-Support" ended on October 10, 2023.
-
-curl drops all support in November 2025.
-
 ## VS2008
 
 curl drops support for getting built with Microsoft Visual Studio 2008 in
