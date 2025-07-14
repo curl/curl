@@ -24,8 +24,8 @@
 
 #include "curl_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
+    !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
 #include <curl/curl.h>

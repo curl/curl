@@ -30,13 +30,13 @@
 
 #include "vtls.h"
 
-#if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) \
-  && !defined(CURL_WINDOWS_UWP)
+#if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) && \
+  !defined(CURL_WINDOWS_UWP)
 #define HAS_MANUAL_VERIFY_API
 #endif
 
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX)   \
-  && !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && \
+  !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 
