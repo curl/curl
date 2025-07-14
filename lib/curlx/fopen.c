@@ -32,7 +32,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 
 #include "fopen.h"
 #include "multibyte.h"
@@ -307,4 +307,4 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-#endif /* _WIN32 && !UNDER_CE */
+#endif /* _WIN32 */
