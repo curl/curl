@@ -77,6 +77,9 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $extvercmd $nogitpull $nobuildconf $crosscompile
             $timestamp $notes);
 
+$notes='';
+$runtestopts='';
+
 # version of this script
 $version='2024-11-28';
 $fixed=0;
