@@ -525,58 +525,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   struct ssl_connect_data *connssl = cf->ctx;
   CERT_CONTEXT *pCertContextServer = NULL;
-#ifdef UNDER_CE
-  TCHAR cert_hostname_buff[256];
-  DWORD len;
-
-  /* This code does not support certificates with multiple alternative names.
-   * Right now we are only asking for the first preferred alternative name.
-   * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
-   * (If Windows CE supports that?) and run this section in a loop for each.
-   * https://learn.microsoft.com/windows/win32/api/wincrypt/nf-wincrypt-certgetnamestringa
-   * curl: (51) schannel: CertGetNameString() certificate hostname
-   * (.google.com) did not match connection (google.com)
-   */
-  len = CertGetNameString(pCertContextServer,
-                          CERT_NAME_DNS_TYPE,
-                          CERT_NAME_DISABLE_IE4_UTF8_FLAG,
-                          NULL,
-                          cert_hostname_buff,
-                          256);
-  if(len > 0) {
-    /* Comparing the cert name and the connection hostname encoded as UTF-8
-     * is acceptable since both values are assumed to use ASCII
-     * (or some equivalent) encoding
-     */
-    char *cert_hostname = curlx_convert_tchar_to_UTF8(cert_hostname_buff);
-    if(!cert_hostname) {
-      result = CURLE_OUT_OF_MEMORY;
-    }
-    else{
-      const char *conn_hostname = connssl->peer.hostname;
-      if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
-                             conn_hostname, strlen(conn_hostname))) {
-        infof(data,
-              "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)",
-              conn_hostname, cert_hostname);
-        result = CURLE_OK;
-      }
-      else{
-        failf(data,
-              "schannel: connection hostname (%s) "
-              "does not match certificate name (%s)",
-              conn_hostname, cert_hostname);
-      }
-      Curl_safefree(cert_hostname);
-    }
-  }
-  else {
-    failf(data,
-          "schannel: CertGetNameString did not provide any "
-          "certificate name information");
-  }
-#else
   SECURITY_STATUS sspi_status;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
@@ -722,7 +670,6 @@ cleanup:
 
   if(pCertContextServer)
     CertFreeCertificateContext(pCertContextServer);
-#endif /* !UNDER_CE */
 
   return result;
 }
