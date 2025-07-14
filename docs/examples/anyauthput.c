@@ -103,12 +103,7 @@ int main(int argc, char **argv)
   if(!fp)
     return 2;
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(file, &file_info) != 0) {
-#else
   if(fstat(fileno(fp), &file_info) != 0) {
-#endif
     fclose(fp);
     return 1; /* cannot continue */
   }
