@@ -31,7 +31,7 @@ static CURLcode test_unit1612(char *arg)
   UNITTEST_BEGIN_SIMPLE
 
 #if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
-    !defined(CURL_DISABLE_DIGEST_AUTH)
+  !defined(CURL_DISABLE_DIGEST_AUTH)
 
   static const char password[] = "Pa55worD";
   static const char string1[] = "1";
