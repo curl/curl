@@ -84,7 +84,7 @@ announcement.
   [distros@openwall](https://oss-security.openwall.org/wiki/mailing-lists/distros)
   to prepare them about the upcoming public security vulnerability
   announcement - attach the advisory draft for information with CVE and
-  current patch. 'distros' does not accept an embargo longer than 14 days and
+  current patch. 'distros' does not accept an embargo longer than 7 days and
   they do not care for Windows-specific flaws.
 
 - No more than 48 hours before the release, the private branch is merged into
