@@ -831,7 +831,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     addr1 = addr_first_match(dns->addr, ai_family1);
     /* no ip address families, probably AF_UNIX or something, use the
      * address family given to us */
-    if(!addr1  && !addr0 && dns->addr) {
+    if(!addr1 && !addr0 && dns->addr) {
       ai_family0 = dns->addr->ai_family;
       addr0 = addr_first_match(dns->addr, ai_family0);
     }

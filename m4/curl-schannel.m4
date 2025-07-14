@@ -26,7 +26,7 @@ AC_DEFUN([CURL_WITH_SCHANNEL], [
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS])
 if test "x$OPT_SCHANNEL" != xno; then
   ssl_msg=
-  if test "x$OPT_SCHANNEL" != "xno"  &&
+  if test "x$OPT_SCHANNEL" != "xno" &&
      test "x$curl_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
