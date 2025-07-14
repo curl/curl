@@ -941,7 +941,7 @@ static ParameterError set_data(cmdline_t cmd,
 
   if(curlx_dyn_len(&config->postdata)) {
     /* skip separator append for --json */
-    if(!err && (cmd != C_JSON)  &&
+    if(!err && (cmd != C_JSON) &&
        curlx_dyn_addn(&config->postdata, "&", 1))
       err = PARAM_NO_MEM;
   }

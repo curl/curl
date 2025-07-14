@@ -68,53 +68,51 @@
 #endif
 
 #ifndef SCH_CREDENTIALS_VERSION
-
 #define SCH_CREDENTIALS_VERSION  0x00000005
 
-typedef enum _eTlsAlgorithmUsage
-{
-    TlsParametersCngAlgUsageKeyExchange,
-    TlsParametersCngAlgUsageSignature,
-    TlsParametersCngAlgUsageCipher,
-    TlsParametersCngAlgUsageDigest,
-    TlsParametersCngAlgUsageCertSig
+typedef enum _eTlsAlgorithmUsage {
+  TlsParametersCngAlgUsageKeyExchange,
+  TlsParametersCngAlgUsageSignature,
+  TlsParametersCngAlgUsageCipher,
+  TlsParametersCngAlgUsageDigest,
+  TlsParametersCngAlgUsageCertSig
 } eTlsAlgorithmUsage;
 
-typedef struct _CRYPTO_SETTINGS
-{
-    eTlsAlgorithmUsage  eAlgorithmUsage;
-    UNICODE_STRING      strCngAlgId;
-    DWORD               cChainingModes;
-    PUNICODE_STRING     rgstrChainingModes;
-    DWORD               dwMinBitLength;
-    DWORD               dwMaxBitLength;
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct _CRYPTO_SETTINGS {
+  eTlsAlgorithmUsage  eAlgorithmUsage;
+  UNICODE_STRING      strCngAlgId;
+  DWORD               cChainingModes;
+  PUNICODE_STRING     rgstrChainingModes;
+  DWORD               dwMinBitLength;
+  DWORD               dwMaxBitLength;
 } CRYPTO_SETTINGS, * PCRYPTO_SETTINGS;
 
-typedef struct _TLS_PARAMETERS
-{
-    DWORD               cAlpnIds;
-    PUNICODE_STRING     rgstrAlpnIds;
-    DWORD               grbitDisabledProtocols;
-    DWORD               cDisabledCrypto;
-    PCRYPTO_SETTINGS    pDisabledCrypto;
-    DWORD               dwFlags;
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct _TLS_PARAMETERS {
+  DWORD               cAlpnIds;
+  PUNICODE_STRING     rgstrAlpnIds;
+  DWORD               grbitDisabledProtocols;
+  DWORD               cDisabledCrypto;
+  PCRYPTO_SETTINGS    pDisabledCrypto;
+  DWORD               dwFlags;
 } TLS_PARAMETERS, * PTLS_PARAMETERS;
 
-typedef struct _SCH_CREDENTIALS
-{
-    DWORD               dwVersion;
-    DWORD               dwCredFormat;
-    DWORD               cCreds;
-    PCCERT_CONTEXT* paCred;
-    HCERTSTORE          hRootStore;
+/* !checksrc! disable TYPEDEFSTRUCT 1 */
+typedef struct _SCH_CREDENTIALS {
+  DWORD               dwVersion;
+  DWORD               dwCredFormat;
+  DWORD               cCreds;
+  PCCERT_CONTEXT* paCred;
+  HCERTSTORE          hRootStore;
 
-    DWORD               cMappers;
-    struct _HMAPPER **aphMappers;
+  DWORD               cMappers;
+  struct _HMAPPER **aphMappers;
 
-    DWORD               dwSessionLifespan;
-    DWORD               dwFlags;
-    DWORD               cTlsParameters;
-    PTLS_PARAMETERS     pTlsParameters;
+  DWORD               dwSessionLifespan;
+  DWORD               dwFlags;
+  DWORD               cTlsParameters;
+  PTLS_PARAMETERS     pTlsParameters;
 } SCH_CREDENTIALS, * PSCH_CREDENTIALS;
 
 #define SCH_CRED_MAX_SUPPORTED_PARAMETERS 16
