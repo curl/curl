@@ -99,7 +99,6 @@ struct cert_chain_engine_config_win7 {
   HCERTSTORE hExclusiveTrustedPeople;
 };
 
-#ifndef UNDER_CE
 static int is_cr_or_lf(char c)
 {
   return c == '\r' || c == '\n';
@@ -354,11 +353,9 @@ cleanup:
 
   return result;
 }
-#endif
 
 #endif /* HAS_MANUAL_VERIFY_API */
 
-#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -540,7 +537,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
 #endif
   return result;
 }
-#endif /* !UNDER_CE */
 
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
