@@ -111,12 +111,6 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
-#elif defined(UNDER_CE)
-  (void)majorVersion;
-  (void)minorVersion;
-  (void)buildVersion;
-  (void)platform;
-  (void)condition;
 #else
   ULONGLONG cm = 0;
   struct OUR_OSVERSIONINFOEXW osver;
