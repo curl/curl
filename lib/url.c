@@ -1464,7 +1464,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
-  conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
+  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Initialize the attached xfers bitset */
   Curl_uint_spbset_init(&conn->xfers_attached);
@@ -3235,7 +3235,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
           neg->wanted = neg->allowed = CURL_HTTP_V2x;
           break;
         case ALPN_h3:
-          conn->transport = TRNSPRT_QUIC;
+          conn->transport_wanted = TRNSPRT_QUIC;
           neg->wanted = neg->allowed = CURL_HTTP_V3x;
           break;
         default: /* should not be possible */
@@ -3312,7 +3312,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 
     if(unix_path) {
       /* This only works if previous transport is TRNSPRT_TCP. Check it? */
-      conn->transport = TRNSPRT_UNIX;
+      conn->transport_wanted = TRNSPRT_UNIX;
       return resolve_unix(data, conn, unix_path, pdns);
     }
   }

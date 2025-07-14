@@ -1515,7 +1515,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
-    result = cf_setup_add(data, conn, sockindex, conn->transport, ssl_mode);
+    result = cf_setup_add(data, conn, sockindex,
+                          conn->transport_wanted, ssl_mode);
     if(result)
       goto out;
   }

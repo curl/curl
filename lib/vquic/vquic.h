@@ -54,6 +54,7 @@ extern struct Curl_cftype Curl_cft_http3;
 #endif /* !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn);
+                             const struct connectdata *conn,
+                             unsigned char transport);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

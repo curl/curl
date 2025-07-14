@@ -44,6 +44,7 @@
 #endif
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
@@ -104,7 +105,8 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
+  hints.ai_socktype =
+    (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
 #ifndef USE_RESOLVE_ON_IPS

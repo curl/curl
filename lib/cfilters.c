@@ -606,6 +606,13 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   return FALSE;
 }
 
+unsigned char Curl_conn_get_transport(struct Curl_easy *data,
+                                      struct connectdata *conn)
+{
+  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
+  return Curl_conn_cf_get_transport(cf, data);
+}
+
 unsigned char Curl_conn_http_version(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
@@ -792,6 +799,15 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   if(cf && !cf->cft->query(cf, data, CF_QUERY_SOCKET, NULL, &sock))
     return sock;
   return CURL_SOCKET_BAD;
+}
+
+unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data)
+{
+  int transport = 0;
+  if(cf && !cf->cft->query(cf, data, CF_QUERY_TRANSPORT, &transport, NULL))
+    return (unsigned char)transport;
+  return data->conn ? data->conn->transport_wanted : 0;
 }
 
 static const struct Curl_sockaddr_ex *

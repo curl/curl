@@ -1369,7 +1369,7 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
 {
   char *type;
 
-  conn->transport = TRNSPRT_UDP;
+  conn->transport_wanted = TRNSPRT_UDP;
 
   /* TFTP URLs support an extension like ";mode=<typecode>" that
    * we will try to get now! */

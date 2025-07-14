@@ -785,7 +785,10 @@ struct connectdata {
 #ifndef CURL_DISABLE_PROXY
   unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
 #endif
-  unsigned char transport; /* one of the TRNSPRT_* defines */
+  unsigned char transport_wanted; /* one of the TRNSPRT_* defines. Not
+   necessarily the transport the connection ends using due to Alt-Svc
+   and happy eyeballing. Use `Curl_conn_get_transport() for actual value
+   once the connection is set up. */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
   /* HTTP version last responded with by the server.
    * 0 at start, then one of 09, 10, 11, etc. */
