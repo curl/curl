@@ -863,7 +863,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
   }
 
-#ifndef UNDER_CE
   if(cert_chain_engine) {
     CertFreeCertificateChainEngine(cert_chain_engine);
   }
@@ -871,7 +870,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   if(own_trust_store) {
     CertCloseStore(own_trust_store, 0);
   }
-#endif /* !UNDER_CE */
 
   if(pChainContext)
     CertFreeCertificateChain(pChainContext);
