@@ -280,7 +280,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 
   addr[0] = '\0';
   *port = 0;
-  CURL_SETERRNO(SOCKEAFNOSUPPORT);
+  errno = SOCKEAFNOSUPPORT;
   return FALSE;
 }
 
