@@ -685,6 +685,7 @@ jobs:
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          export LC_ALL=C
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
           else
