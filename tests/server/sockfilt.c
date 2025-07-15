@@ -128,7 +128,7 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
     return rcount;
   }
 
-  CURL_SETERRNO((int)GetLastError());
+  errno = (int)GetLastError();
   return -1;
 }
 
@@ -161,7 +161,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
     return wcount;
   }
 
-  CURL_SETERRNO((int)GetLastError());
+  errno = (int)GetLastError();
   return -1;
 }
 #define SOCKFILT_read  read_wincon
