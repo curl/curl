@@ -560,8 +560,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       /* The output can be a named pipe or a character device etc that
          cannot be truncated. Only truncate regular files. */
       if(!fstat(fileno(outs->stream), &fileinfo) &&
-         S_ISREG(fileinfo.st_mode))
-      {
+         S_ISREG(fileinfo.st_mode)) {
         int rc;
         /* We have written data to an output file, we truncate file */
         fflush(outs->stream);
