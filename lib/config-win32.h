@@ -84,10 +84,10 @@
 /* #define HAVE_ARPA_INET_H 1 */
 
 /* Define if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1  /* exists on __MINGW32CE__ */
+#define HAVE_FCNTL_H 1
 
 /* Define if you have the <io.h> header file. */
-#define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
+#define HAVE_IO_H 1
 
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
@@ -100,7 +100,7 @@
 
 /* Define to 1 if you have the <stdbool.h> header file. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STDBOOL_H 1  /* exists on __MINGW32CE__ */
+#define HAVE_STDBOOL_H 1
 #endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
@@ -150,7 +150,7 @@
 
 /* Define to 1 if bool is an available type. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_BOOL_T 1  /* exists on __MINGW32CE__ */
+#define HAVE_BOOL_T 1
 #endif
 
 /* ---------------------------------------------------------------- */
