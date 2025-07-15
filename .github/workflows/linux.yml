@@ -79,7 +79,7 @@ jobs:
         build:
           - name: 'libressl heimdal'
             install_packages: zlib1g-dev libidn2-dev libnghttp2-dev libldap-dev heimdal-dev
-            install_steps: libressl pytest
+            install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl heimdal valgrind'
@@ -685,7 +685,7 @@ jobs:
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
-          export LC_ALL=C
+          [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]] && export LC_ALL=C
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
           else
