@@ -801,8 +801,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
 #ifndef UNDER_CE
   if(result == CURLE_OK &&
-      (conn_config->CAfile || conn_config->ca_info_blob) &&
-      BACKEND->use_manual_cred_validation) {
+     (conn_config->CAfile || conn_config->ca_info_blob) &&
+     BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
      * trusted certificates. This is only supported on Windows 7+.
