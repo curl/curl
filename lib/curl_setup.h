@@ -814,8 +814,6 @@
 #include "curl_setup_once.h"
 #endif
 
-#define CURL_SETERRNO(x) (errno = (x))
-
 /*
  * Definition of our NOP statement Object-like macro
  */
