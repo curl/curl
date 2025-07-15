@@ -296,10 +296,11 @@ jobs:
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-          - name: 'mbedTLS !ldap brotli zstd MultiSSL'
+          - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
             compiler: llvm@18
             install: brotli mbedtls zstd
-            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON
+            install_steps: codeset-test
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
@@ -479,6 +480,10 @@ jobs:
         run: |
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            export LC_CTYPE=C
+            export LC_NUMERIC=fr_FR.UTF-8
+          fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"

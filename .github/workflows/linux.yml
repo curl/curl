@@ -78,8 +78,8 @@ jobs:
       matrix:
         build:
           - name: 'libressl heimdal'
-            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev
-            install_steps: libressl pytest
+            install_packages: zlib1g-dev libidn2-dev libnghttp2-dev libldap-dev heimdal-dev
+            install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl heimdal valgrind'
@@ -103,7 +103,7 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --enable-ech --enable-debug
 
           - name: 'mbedtls valgrind'
-            install_packages: libnghttp2-dev libldap-dev valgrind
+            install_packages: libnghttp2-dev libidn2-dev libldap-dev valgrind
             install_steps: mbedtls
             configure: LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
 
@@ -145,7 +145,7 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: 'awslc'
-            install_packages: zlib1g-dev
+            install_packages: zlib1g-dev libidn2-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
@@ -154,7 +154,7 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind'
-            install_packages: zlib1g-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
+            install_packages: zlib1g-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
           - name: 'openssl'
@@ -174,7 +174,7 @@ jobs:
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
-            install_packages: zlib1g-dev libkrb5-dev clang libssl-dev
+            install_packages: zlib1g-dev libidn2-dev libkrb5-dev clang libssl-dev
             configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
@@ -207,7 +207,7 @@ jobs:
             torture: true
 
           - name: 'openssl i686'
-            install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-0-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
+            install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
             configure: >-
               PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
               CC=i686-linux-gnu-gcc-14
@@ -685,6 +685,7 @@ jobs:
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]] && export LC_ALL=C
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
           else
