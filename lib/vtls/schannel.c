@@ -2370,9 +2370,8 @@ static int schannel_init(void)
   /* GetModuleHandle() not available for UWP.
      Assume no WINE because WINE has no UWP support. */
   WINE_GET_VERSION_FN p_wine_get_version =
-    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandleA("ntdll"),
-                                        "wine_get_version")));
+    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN, (
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version")));
   wine = !!p_wine_get_version;
   if(wine) {
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
