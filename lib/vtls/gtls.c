@@ -334,30 +334,18 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
   if((ssl_version == CURL_SSLVERSION_DEFAULT) ||
      (ssl_version == CURL_SSLVERSION_TLSv1))
     ssl_version = CURL_SSLVERSION_TLSv1_0;
-  if(ssl_version_max == CURL_SSLVERSION_MAX_NONE)
-    ssl_version_max = CURL_SSLVERSION_MAX_DEFAULT;
+  if((ssl_version_max == CURL_SSLVERSION_MAX_NONE) ||
+     (ssl_version_max == CURL_SSLVERSION_MAX_DEFAULT))
+    ssl_version_max = tls13support ?
+      CURL_SSLVERSION_MAX_TLSv1_3 : CURL_SSLVERSION_MAX_TLSv1_2;
 
   if(peer->transport == TRNSPRT_QUIC) {
-    if((ssl_version_max != CURL_SSLVERSION_MAX_DEFAULT) &&
-       (ssl_version_max < CURL_SSLVERSION_MAX_TLSv1_3)) {
+    if(ssl_version_max < CURL_SSLVERSION_MAX_TLSv1_3) {
       failf(data, "QUIC needs at least TLS version 1.3");
       return CURLE_SSL_CONNECT_ERROR;
      }
     *prioritylist = QUIC_PRIORITY;
     return CURLE_OK;
-  }
-
-  if(!tls13support) {
-    /* If the running GnuTLS does not support TLS 1.3, we must not specify a
-       prioritylist involving that since it will make GnuTLS return an en
-       error back at us */
-    if((ssl_version_max == CURL_SSLVERSION_MAX_TLSv1_3) ||
-       (ssl_version_max == CURL_SSLVERSION_MAX_DEFAULT)) {
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
-    }
-  }
-  else if(ssl_version_max == CURL_SSLVERSION_MAX_DEFAULT) {
-    ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
   }
 
   switch(ssl_version | ssl_version_max) {
@@ -910,11 +898,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
 
 #if defined(GNUTLS_NO_TICKETS_TLS12)
     init_flags |= GNUTLS_NO_TICKETS_TLS12;
-#elif defined(GNUTLS_NO_TICKETS)
-  /* Disable TLS session tickets for non 1.3 connections */
-  if((config->version != CURL_SSLVERSION_TLSv1_3) &&
-     (config->version != CURL_SSLVERSION_DEFAULT))
-    init_flags |= GNUTLS_NO_TICKETS;
 #endif
 
 #if defined(GNUTLS_NO_STATUS_REQUEST)
@@ -1144,9 +1127,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
               scs->alpn ? scs->alpn : "-");
-        if(ssl_config->earlydata && scs->alpn &&
-           !cf->conn->connect_only &&
-           (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3)) {
+        if(ssl_config->earlydata && scs->alpn && !cf->conn->connect_only) {
           bool do_early_data = FALSE;
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
