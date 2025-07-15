@@ -133,7 +133,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
     pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo"));
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo"));
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif
