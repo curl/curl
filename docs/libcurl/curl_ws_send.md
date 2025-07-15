@@ -9,6 +9,7 @@ See-also:
   - curl_easy_perform (3)
   - curl_easy_setopt (3)
   - curl_ws_recv (3)
+  - curl_ws_start_frame (3)
   - libcurl-ws (3)
 Protocol:
   - WS
