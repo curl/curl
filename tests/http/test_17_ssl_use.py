@@ -298,8 +298,8 @@ class TestSSLUse:
         return [
             [server_tls, min_arg, max_arg]
             for server_tls in TLSDefs.TLS_VERSIONS
-            for min_arg in TLSDefs.CURL_ARG_MIN_VERSION_ID.keys()
-            for max_arg in TLSDefs.CURL_ARG_MAX_VERSION_ID.keys()
+            for min_arg in TLSDefs.CURL_ARG_MIN_VERSION_ID
+            for max_arg in TLSDefs.CURL_ARG_MAX_VERSION_ID
         ]
 
     @pytest.mark.parametrize("server_tls, min_arg, max_arg", gen_test_17_09_list())
