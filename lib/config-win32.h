@@ -28,6 +28,58 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
+#ifndef UNDER_CE
+
+/* Define some minimum and default build targets for Visual Studio */
+#ifdef _MSC_VER
+   /* VS2012 default target settings and minimum build target check. */
+#  if _MSC_VER >= 1700
+     /* The minimum and default build targets for VS2012 are Vista and 8,
+        respectively, unless Update 1 is installed and the v110_xp toolset
+        is chosen. */
+#    ifdef _USING_V110_SDK71_
+#      define VS2012_MIN_TARGET 0x0501  /* XP */
+#      define VS2012_DEF_TARGET 0x0501  /* XP */
+#    else
+#      define VS2012_MIN_TARGET 0x0600  /* Vista */
+#      define VS2012_DEF_TARGET 0x0602  /* 8 */
+#    endif
+
+#    ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2012_DEF_TARGET
+#    endif
+#    ifndef WINVER
+#    define WINVER VS2012_DEF_TARGET
+#    endif
+#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
+#      ifdef _USING_V110_SDK71_
+#        error VS2012 does not support build targets prior to Windows XP
+#      else
+#        error VS2012 does not support build targets prior to Windows Vista
+#      endif
+#    endif
+   /* Default target settings and minimum build target check for
+      VS2008 and VS2010 */
+#  else
+#    define VS2008_MIN_TARGET 0x0501  /* XP */
+     /* VS2008 default build target is Windows Vista (0x0600).
+        We override default target to be Windows XP. */
+#    define VS2008_DEF_TARGET 0x0501  /* XP */
+
+#    ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2008_DEF_TARGET
+#    endif
+#    ifndef WINVER
+#    define WINVER VS2008_DEF_TARGET
+#    endif
+#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
+#      error VS2008 does not support build targets prior to Windows XP
+#    endif
+#  endif
+#endif /* _MSC_VER */
+
+#endif /* UNDER_CE */
+
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
@@ -295,58 +347,6 @@
 #    define SIZEOF_TIME_T 4
 #  endif
 #endif
-
-#ifndef UNDER_CE
-
-/* Define some minimum and default build targets for Visual Studio */
-#ifdef _MSC_VER
-   /* VS2012 default target settings and minimum build target check. */
-#  if _MSC_VER >= 1700
-     /* The minimum and default build targets for VS2012 are Vista and 8,
-        respectively, unless Update 1 is installed and the v110_xp toolset
-        is chosen. */
-#    ifdef _USING_V110_SDK71_
-#      define VS2012_MIN_TARGET 0x0501  /* XP */
-#      define VS2012_DEF_TARGET 0x0501  /* XP */
-#    else
-#      define VS2012_MIN_TARGET 0x0600  /* Vista */
-#      define VS2012_DEF_TARGET 0x0602  /* 8 */
-#    endif
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2012_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#      ifdef _USING_V110_SDK71_
-#        error VS2012 does not support build targets prior to Windows XP
-#      else
-#        error VS2012 does not support build targets prior to Windows Vista
-#      endif
-#    endif
-   /* Default target settings and minimum build target check for
-      VS2008 and VS2010 */
-#  else
-#    define VS2008_MIN_TARGET 0x0501  /* XP */
-     /* VS2008 default build target is Windows Vista (0x0600).
-        We override default target to be Windows XP. */
-#    define VS2008_DEF_TARGET 0x0501  /* XP */
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2008_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2008_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#      error VS2008 does not support build targets prior to Windows XP
-#    endif
-#  endif
-#endif /* _MSC_VER */
-
-#endif /* UNDER_CE */
 
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
 #ifndef UNDER_CE
