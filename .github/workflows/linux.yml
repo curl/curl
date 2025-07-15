@@ -172,9 +172,10 @@ jobs:
             install_packages: zlib1g-dev libssh-dev valgrind
             configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
 
-          - name: 'openssl clang krb5'
-            install_packages: zlib1g-dev libkrb5-dev clang
-            configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual
+          - name: 'openssl clang krb5 openldap static'
+            install_steps: openldap-static
+            install_packages: zlib1g-dev libkrb5-dev clang libssl-dev
+            configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
             install_packages: zlib1g-dev libkrb5-dev clang
@@ -294,11 +295,6 @@ jobs:
           - name: 'Alpine MUSL c-ares https-rr'
             configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl --disable-threaded-resolver --enable-ares --enable-httpsrr --disable-unity
             container: 'alpine:3.20'
-
-          - name: 'openldap-static'
-            install_steps: openldap-static
-            install_packages: libssl-dev
-            configure: --disable-shared --with-openssl --enable-static --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
     steps:
       - name: 'install prereqs'
