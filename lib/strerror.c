@@ -846,7 +846,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     *p = '\0';
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
 #ifdef _WIN32
   if(old_win_err != GetLastError())
@@ -994,7 +994,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
 #ifdef _WIN32
   if(old_win_err != GetLastError())
