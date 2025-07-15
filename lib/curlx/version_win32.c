@@ -128,8 +128,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   static bool onetime = TRUE; /* safe because first call is during init */
 
   if(onetime) {
-    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN, (
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo")));
     onetime = FALSE;
   }
 
