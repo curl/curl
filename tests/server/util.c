@@ -386,7 +386,7 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  CURL_SETERRNO(old_errno);
+  errno = old_errno;
 }
 
 #ifdef _WIN32

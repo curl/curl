@@ -117,7 +117,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);

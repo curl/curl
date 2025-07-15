@@ -126,7 +126,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     rc = CURL_RECV(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
-        CURL_SETERRNO(0);
+        errno = 0;
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;
       }
@@ -142,7 +142,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     rc = read(per->infd, buffer, sz*nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
-        CURL_SETERRNO(0);
+        errno = 0;
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;
       }
