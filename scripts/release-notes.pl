@@ -61,15 +61,28 @@ my @releasenotes=`cat RELEASE-NOTES`;
 my @o; # the entire new RELEASE-NOTES
 my @refused; # [num] = [2 bits of use info]
 my @refs; # [number] = [URL]
+my %dupe;
 for my $l (@releasenotes) {
     if($l =~ /^ o .*\[(\d+)\]/) {
         # referenced, set bit 0
         $refused[$1]=1;
+        my $m = $l;
+        chomp $m;
+        $m =~ s/^ o //;
+        $m =~ s/ \[\d+\]$//;
+        $dupe{$m} = 1; # mark this as present
     }
     elsif($l =~ /^ \[(\d+)\] = (.*)/) {
         # listed in a reference, set bit 1
         $refused[$1] |= 2;
         $refs[$1] = $2;
+    }
+    # mention without reference
+    elsif($l =~ /^ o (.*)/) {
+        my $m = $l;
+        chomp $m;
+        $m =~ s/^ o //;
+        $dupe{$m} = 1; # mark this as present
     }
 }
 
@@ -156,6 +169,11 @@ sub onecommit {
     my ($short)=@_;
     my $ref;
 
+    if($dupe{$short}) {
+        # this git commit message was found in the file
+        return;
+    }
+
     if($bug[0]) {
         $ref = $bug[0];
     }
@@ -185,6 +203,11 @@ for my $l (@releasenotes) {
         push @o, $l;
         push @o, "\n";
         for my $f (@line) {
+            if($dupe{$f}) {
+                # this item is already listed
+                next;
+            }
+
             push @o, sprintf " o %s%s\n", $f,
                 $moreinfo{$f}? sprintf(" [%d]", $moreinfo{$f}): "";
             $refused[$moreinfo{$f}]=3;
