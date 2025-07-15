@@ -2316,8 +2316,7 @@ static int schannel_init(void)
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandleA("ntdll"),
-                                        "wine_get_version")));
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version"));
   if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
