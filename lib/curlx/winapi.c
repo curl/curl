@@ -61,11 +61,12 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 
   /* We return the local codepage version of the error string because if it is
      output to the user's terminal it will likely be with functions which
-     expect the local codepage (eg fprintf, failf, infof). */
-  if(FormatMessage((FORMAT_MESSAGE_FROM_SYSTEM |
-                    FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                   LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
-    size_t written = tcstombs(buf, wbuf, buflen - 1);
+     expect the local codepage (eg fprintf, failf, infof).
+     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                    LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
+    size_t written = wcstombs(buf, wbuf, buflen - 1);
     if(written != (size_t)-1)
       buf[written] = '\0';
     else
