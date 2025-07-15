@@ -68,5 +68,6 @@ Previous discussion and details: https://github.com/curl/curl/discussions/15972
  - NTLM_WB (removed in 8.8.0)
  - space-separated `NOPROXY` patterns (removed in 8.9.0)
  - hyper (removed in 8.12.0)
- - Secure Transport (8.15.0)
- - BearSSL (8.15.0)
+ - Support for Visual Studio 2005 and older (removed in 8.13.0)
+ - Secure Transport (removed in 8.15.0)
+ - BearSSL (removed in 8.15.0)
