@@ -60,3 +60,4 @@ curl drops all support in November 2025.
  - Support for Visual Studio 2005 and older (removed in 8.13.0)
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
+ - Support for Visual Studio 2008 (removed in 8.16.0)
