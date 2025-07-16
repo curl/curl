@@ -9,7 +9,6 @@ CNA
 hel
 htpt
 inout
-numer
 PASE
 passwor
 perfec
