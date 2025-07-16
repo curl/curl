@@ -58,7 +58,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "pop3://example.com/");
-    curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, "1ab9cb22ba269a7");
+    curl_easy_setopt(curl, CURLOPT_XOAUTH2_BEARER, "1ab9cb22bf269a7");
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
