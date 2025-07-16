@@ -17,5 +17,5 @@ seh
 ser
 strat
 te
-ue
-wont
+UE
+WONT
