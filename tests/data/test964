@@ -24,8 +24,7 @@ IDN
 codeset-utf8
 </features>
 <setenv>
-LC_ALL=en_US.UTF-8
-LC_CTYPE=en_US.UTF-8
+LC_ALL=C.UTF-8
 </setenv>
 <name>
 SMTP external VRFY without SMTPUTF8 (IDN) - UTF-8 recipient (host part)
