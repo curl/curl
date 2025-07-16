@@ -2242,28 +2242,6 @@ static void ossl_close_all(struct Curl_easy *data)
 
 /* ====================================================== */
 
-/*
- * Match subjectAltName against the hostname.
- */
-static bool subj_alt_hostcheck(struct Curl_easy *data,
-                               const char *match_pattern,
-                               size_t matchlen,
-                               const char *hostname,
-                               size_t hostlen,
-                               const char *dispname)
-{
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void)dispname;
-  (void)data;
-#endif
-  if(Curl_cert_hostcheck(match_pattern, matchlen, hostname, hostlen)) {
-    infof(data, " subjectAltName: host \"%s\" matched cert's \"%s\"",
-          dispname, match_pattern);
-    return TRUE;
-  }
-  return FALSE;
-}
-
 /* Quote from RFC2818 section 3.1 "Server Identity"
 
    If a subjectAltName extension of type dNSName is present, that MUST
@@ -2288,7 +2266,8 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
 */
 static CURLcode ossl_verifyhost(struct Curl_easy *data,
                                 struct connectdata *conn,
-                                struct ssl_peer *peer, X509 *server_cert)
+                                struct ssl_peer *peer,
+                                X509 *server_cert)
 {
   bool matched = FALSE;
   int target; /* target type, GEN_DNS or GEN_IPADD */
@@ -2302,10 +2281,9 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   bool dNSName = FALSE; /* if a dNSName field exists in the cert */
   bool iPAddress = FALSE; /* if an iPAddress field exists in the cert */
-  size_t hostlen;
+  size_t hostlen = strlen(peer->hostname);
 
   (void)conn;
-  hostlen = strlen(peer->hostname);
   switch(peer->type) {
   case CURL_SSL_PEER_IPV4:
     if(!curlx_inet_pton(AF_INET, peer->hostname, &addr))
@@ -2341,15 +2319,13 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     int numalts;
     int i;
 #endif
-    bool dnsmatched = FALSE;
-    bool ipmatched = FALSE;
 
     /* get amount of alternatives, RFC2459 claims there MUST be at least
        one, but we do not depend on it... */
     numalts = sk_GENERAL_NAME_num(altnames);
 
     /* loop through all alternatives - until a dnsmatch */
-    for(i = 0; (i < numalts) && !dnsmatched; i++) {
+    for(i = 0; (i < numalts) && !matched; i++) {
       /* get a handle to alternative name number i */
       const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
 
@@ -2378,10 +2354,10 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           if((altlen == strlen(altptr)) &&
              /* if this is not true, there was an embedded zero in the name
                 string and we cannot match it. */
-             subj_alt_hostcheck(data, altptr, altlen,
-                                peer->hostname, hostlen,
-                                peer->dispname)) {
-            dnsmatched = TRUE;
+             Curl_cert_hostcheck(altptr, altlen, peer->hostname, hostlen)) {
+            matched = TRUE;
+            infof(data, " subjectAltName: host \"%s\" matched cert's \"%.*s\"",
+                  peer->dispname, (int)altlen, altptr);
           }
           break;
 
@@ -2389,7 +2365,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen)) {
-            ipmatched = TRUE;
+            matched = TRUE;
             infof(data,
                   " subjectAltName: host \"%s\" matched cert's IP address!",
                   peer->dispname);
@@ -2399,9 +2375,6 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       }
     }
     GENERAL_NAMES_free(altnames);
-
-    if(dnsmatched || ipmatched)
-      matched = TRUE;
   }
 
   if(matched)
@@ -4843,10 +4816,10 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 
 #define MAX_CERT_NAME_LENGTH 2048
 
-CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ossl_ctx *octx,
-                                  struct ssl_peer *peer)
+CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ossl_ctx *octx,
+                                   struct ssl_peer *peer)
 {
   struct connectdata *conn = cf->conn;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -5078,7 +5051,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
    * operations.
    */
 
-  result = Curl_oss_check_peer_cert(cf, data, octx, &connssl->peer);
+  result = Curl_ossl_check_peer_cert(cf, data, octx, &connssl->peer);
   if(result)
     /* on error, remove sessions we might have in the pool */
     Curl_ssl_scache_remove_all(cf, data, connssl->peer.scache_key);
