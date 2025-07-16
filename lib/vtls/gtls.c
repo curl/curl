@@ -1329,6 +1329,190 @@ void Curl_gtls_report_handshake(struct Curl_easy *data,
 #endif
 }
 
+static void gtls_msg_verify_result(struct Curl_easy *data,
+                                   struct ssl_peer *peer,
+                                   gnutls_x509_crt_t x509_cert,
+                                   bool was_verified,
+                                   bool needs_verified)
+{
+  char certname[65] = ""; /* limited to 64 chars by ASN.1 */
+  size_t size = sizeof(certname);
+  int rc;
+
+  rc = gnutls_x509_crt_get_dn_by_oid(x509_cert, GNUTLS_OID_X520_COMMON_NAME,
+                                     0, /* the first and only one */
+                                     FALSE, certname, &size);
+  if(rc) {
+    infof(data, "error fetching CN from cert:%s", gnutls_strerror(rc));
+    certname[0] = 0;
+  }
+
+  if(!was_verified) {
+    if(needs_verified) {
+      failf(data, "SSL: certificate subject name (%s) does not match "
+            "target hostname '%s'", certname, peer->dispname);
+    }
+    else
+      infof(data, "  common name: %s (does not match '%s')",
+            certname, peer->dispname);
+  }
+  else
+    infof(data, "  common name: %s (matched)", certname);
+}
+
+static void gtls_infof_cert(struct Curl_easy *data,
+                            gnutls_x509_crt_t x509_cert)
+{
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+  if(Curl_trc_is_verbose(data)) {
+    gnutls_datum_t certfields;
+    int rc, algo;
+    time_t tstamp;
+    unsigned int bits;
+
+    /* public key algorithm's parameters */
+    algo = gnutls_x509_crt_get_pk_algorithm(x509_cert, &bits);
+    infof(data, "  certificate public key: %s",
+          gnutls_pk_algorithm_get_name((gnutls_pk_algorithm_t)algo));
+
+    /* version of the X.509 certificate. */
+    infof(data, "  certificate version: #%d",
+          gnutls_x509_crt_get_version(x509_cert));
+
+    rc = gnutls_x509_crt_get_dn2(x509_cert, &certfields);
+    if(rc)
+      infof(data, "Failed to get certificate name");
+    else {
+      infof(data, "  subject: %s", certfields.data);
+
+      tstamp = gnutls_x509_crt_get_activation_time(x509_cert);
+      showtime(data, "start date", tstamp);
+
+      tstamp = gnutls_x509_crt_get_expiration_time(x509_cert);
+      showtime(data, "expire date", tstamp);
+
+      gnutls_free(certfields.data);
+    }
+
+    rc = gnutls_x509_crt_get_issuer_dn2(x509_cert, &certfields);
+    if(rc)
+      infof(data, "Failed to get certificate issuer");
+    else {
+      infof(data, "  issuer: %s", certfields.data);
+
+      gnutls_free(certfields.data);
+    }
+  }
+#else
+  (void)data;
+  (void)x509_cert;
+#endif
+}
+
+static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
+                                        gnutls_session_t session)
+{
+  gnutls_ocsp_resp_t ocsp_resp = NULL;
+  gnutls_datum_t status_request;
+  gnutls_ocsp_cert_status_t status;
+  gnutls_x509_crl_reason_t reason;
+  CURLcode result = CURLE_OK;
+  int rc;
+
+  rc = gnutls_ocsp_status_request_get(session, &status_request);
+
+  if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
+    failf(data, "No OCSP response received");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+  else if(rc < 0) {
+    failf(data, "Invalid OCSP response received");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  gnutls_ocsp_resp_init(&ocsp_resp);
+
+  rc = gnutls_ocsp_resp_import(ocsp_resp, &status_request);
+  if(rc < 0) {
+    failf(data, "Invalid OCSP response received");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
+
+  (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
+                                    &status, NULL, NULL, NULL, &reason);
+
+  switch(status) {
+  case GNUTLS_OCSP_CERT_GOOD:
+    break;
+
+  case GNUTLS_OCSP_CERT_REVOKED: {
+    const char *crl_reason;
+
+    switch(reason) {
+    default:
+    case GNUTLS_X509_CRLREASON_UNSPECIFIED:
+      crl_reason = "unspecified reason";
+      break;
+
+    case GNUTLS_X509_CRLREASON_KEYCOMPROMISE:
+      crl_reason = "private key compromised";
+      break;
+
+    case GNUTLS_X509_CRLREASON_CACOMPROMISE:
+      crl_reason = "CA compromised";
+      break;
+
+    case GNUTLS_X509_CRLREASON_AFFILIATIONCHANGED:
+      crl_reason = "affiliation has changed";
+      break;
+
+    case GNUTLS_X509_CRLREASON_SUPERSEDED:
+      crl_reason = "certificate superseded";
+      break;
+
+    case GNUTLS_X509_CRLREASON_CESSATIONOFOPERATION:
+      crl_reason = "operation has ceased";
+      break;
+
+    case GNUTLS_X509_CRLREASON_CERTIFICATEHOLD:
+      crl_reason = "certificate is on hold";
+      break;
+
+    case GNUTLS_X509_CRLREASON_REMOVEFROMCRL:
+      crl_reason = "will be removed from delta CRL";
+      break;
+
+    case GNUTLS_X509_CRLREASON_PRIVILEGEWITHDRAWN:
+      crl_reason = "privilege withdrawn";
+      break;
+
+    case GNUTLS_X509_CRLREASON_AACOMPROMISE:
+      crl_reason = "AA compromised";
+      break;
+    }
+
+    failf(data, "Server certificate was revoked: %s", crl_reason);
+    break;
+  }
+
+  default:
+  case GNUTLS_OCSP_CERT_UNKNOWN:
+    failf(data, "Server certificate status is unknown");
+    break;
+  }
+
+  result = (status != GNUTLS_OCSP_CERT_GOOD) ?
+           CURLE_SSL_INVALIDCERTSTATUS : CURLE_OK;
+
+out:
+  if(ocsp_resp)
+    gnutls_ocsp_resp_deinit(ocsp_resp);
+  return result;
+}
+
 CURLcode
 Curl_gtls_verifyserver(struct Curl_easy *data,
                        gnutls_session_t session,
@@ -1340,18 +1524,10 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   unsigned int cert_list_size;
   const gnutls_datum_t *chainp;
   unsigned int verify_status = 0;
-  gnutls_x509_crt_t x509_cert, x509_issuer;
-  gnutls_datum_t issuerp;
-  gnutls_datum_t certfields;
-  char certname[65] = ""; /* limited to 64 chars by ASN.1 */
-  size_t size;
+  gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
   time_t certclock;
   int rc;
   CURLcode result = CURLE_OK;
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  int algo;
-  unsigned int bits;
-#endif
   long * const certverifyresult = &ssl_config->certverifyresult;
 
   /* This function will return the peer's raw certificate (chain) as sent by
@@ -1375,7 +1551,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 #endif
         failf(data, "failed to get server cert");
         *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
-        return CURLE_PEER_FAILED_VERIFICATION;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
 #ifdef USE_GNUTLS_SRP
       }
 #endif
@@ -1388,7 +1565,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 
     result = Curl_ssl_init_certinfo(data, (int)cert_list_size);
     if(result)
-      return result;
+      goto out;
 
     for(i = 0; i < cert_list_size; i++) {
       const char *beg = (const char *) chainp[i].data;
@@ -1396,7 +1573,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
 
       result = Curl_extract_certinfo(data, (int)i, beg, end);
       if(result)
-        return result;
+        goto out;
     }
   }
 
@@ -1412,7 +1589,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     if(rc < 0) {
       failf(data, "server cert verify failed: %d", rc);
       *certverifyresult = rc;
-      return CURLE_SSL_CONNECT_ERROR;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
     }
 
     *certverifyresult = verify_status;
@@ -1434,7 +1612,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
               config->CAfile ? config->CAfile : "none",
               ssl_config->primary.CRLfile ?
               ssl_config->primary.CRLfile : "none");
-        return CURLE_PEER_FAILED_VERIFICATION;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
       }
       else
         infof(data, "  server certificate verification FAILED");
@@ -1446,97 +1625,9 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     infof(data, "  server certificate verification SKIPPED");
 
   if(config->verifystatus) {
-    gnutls_datum_t status_request;
-    gnutls_ocsp_resp_t ocsp_resp;
-    gnutls_ocsp_cert_status_t status;
-    gnutls_x509_crl_reason_t reason;
-
-    rc = gnutls_ocsp_status_request_get(session, &status_request);
-
-    if(rc == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE) {
-      failf(data, "No OCSP response received");
-      return CURLE_SSL_INVALIDCERTSTATUS;
-    }
-
-    if(rc < 0) {
-      failf(data, "Invalid OCSP response received");
-      return CURLE_SSL_INVALIDCERTSTATUS;
-    }
-
-    gnutls_ocsp_resp_init(&ocsp_resp);
-
-    rc = gnutls_ocsp_resp_import(ocsp_resp, &status_request);
-    if(rc < 0) {
-      failf(data, "Invalid OCSP response received");
-      return CURLE_SSL_INVALIDCERTSTATUS;
-    }
-
-    (void)gnutls_ocsp_resp_get_single(ocsp_resp, 0, NULL, NULL, NULL, NULL,
-                                      &status, NULL, NULL, NULL, &reason);
-
-    switch(status) {
-    case GNUTLS_OCSP_CERT_GOOD:
-      break;
-
-    case GNUTLS_OCSP_CERT_REVOKED: {
-      const char *crl_reason;
-
-      switch(reason) {
-      default:
-      case GNUTLS_X509_CRLREASON_UNSPECIFIED:
-        crl_reason = "unspecified reason";
-        break;
-
-      case GNUTLS_X509_CRLREASON_KEYCOMPROMISE:
-        crl_reason = "private key compromised";
-        break;
-
-      case GNUTLS_X509_CRLREASON_CACOMPROMISE:
-        crl_reason = "CA compromised";
-        break;
-
-      case GNUTLS_X509_CRLREASON_AFFILIATIONCHANGED:
-        crl_reason = "affiliation has changed";
-        break;
-
-      case GNUTLS_X509_CRLREASON_SUPERSEDED:
-        crl_reason = "certificate superseded";
-        break;
-
-      case GNUTLS_X509_CRLREASON_CESSATIONOFOPERATION:
-        crl_reason = "operation has ceased";
-        break;
-
-      case GNUTLS_X509_CRLREASON_CERTIFICATEHOLD:
-        crl_reason = "certificate is on hold";
-        break;
-
-      case GNUTLS_X509_CRLREASON_REMOVEFROMCRL:
-        crl_reason = "will be removed from delta CRL";
-        break;
-
-      case GNUTLS_X509_CRLREASON_PRIVILEGEWITHDRAWN:
-        crl_reason = "privilege withdrawn";
-        break;
-
-      case GNUTLS_X509_CRLREASON_AACOMPROMISE:
-        crl_reason = "AA compromised";
-        break;
-      }
-
-      failf(data, "Server certificate was revoked: %s", crl_reason);
-      break;
-    }
-
-    default:
-    case GNUTLS_OCSP_CERT_UNKNOWN:
-      failf(data, "Server certificate status is unknown");
-      break;
-    }
-
-    gnutls_ocsp_resp_deinit(ocsp_resp);
-    if(status != GNUTLS_OCSP_CERT_GOOD)
-      return CURLE_SSL_INVALIDCERTSTATUS;
+    result = gtls_verify_ocsp_status(data, session);
+    if(result)
+      goto out;
   }
   else
     infof(data, "  server certificate status verification SKIPPED");
@@ -1550,31 +1641,20 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
 
   if(config->issuercert) {
+    gnutls_datum_t issuerp;
     gnutls_x509_crt_init(&x509_issuer);
     issuerp = load_file(config->issuercert);
     gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
     rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
-    gnutls_x509_crt_deinit(x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
             config->issuercert ? config->issuercert : "none");
-      gnutls_x509_crt_deinit(x509_cert);
-      return CURLE_SSL_ISSUER_ERROR;
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
     }
     infof(data, "  server certificate issuer check OK (Issuer Cert: %s)",
           config->issuercert ? config->issuercert : "none");
-  }
-
-  size = sizeof(certname);
-  rc = gnutls_x509_crt_get_dn_by_oid(x509_cert, GNUTLS_OID_X520_COMMON_NAME,
-                                     0, /* the first and only one */
-                                     FALSE,
-                                     certname,
-                                     &size);
-  if(rc) {
-    infof(data, "error fetching CN from cert:%s",
-          gnutls_strerror(rc));
   }
 
   /* This function will check if the given certificate's subject matches the
@@ -1631,19 +1711,12 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     }
   }
 #endif
-  if(!rc) {
-    if(config->verifyhost) {
-      failf(data, "SSL: certificate subject name (%s) does not match "
-            "target hostname '%s'", certname, peer->dispname);
-      gnutls_x509_crt_deinit(x509_cert);
-      return CURLE_PEER_FAILED_VERIFICATION;
-    }
-    else
-      infof(data, "  common name: %s (does not match '%s')",
-            certname, peer->dispname);
-  }
-  else
-    infof(data, "  common name: %s (matched)", certname);
+
+  result = (!rc && config->verifyhost) ?
+           CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
+  gtls_msg_verify_result(data, peer, x509_cert, rc, config->verifyhost);
+  if(result)
+    goto out;
 
   /* Check for time-based validity */
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
@@ -1652,8 +1725,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     if(config->verifypeer) {
       failf(data, "server cert expiration date verify failed");
       *certverifyresult = GNUTLS_CERT_EXPIRED;
-      gnutls_x509_crt_deinit(x509_cert);
-      return CURLE_SSL_CONNECT_ERROR;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
     }
     else
       infof(data, "  server certificate expiration date verify FAILED");
@@ -1663,8 +1736,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       if(config->verifypeer) {
         failf(data, "server certificate expiration date has passed.");
         *certverifyresult = GNUTLS_CERT_EXPIRED;
-        gnutls_x509_crt_deinit(x509_cert);
-        return CURLE_PEER_FAILED_VERIFICATION;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
       }
       else
         infof(data, "  server certificate expiration date FAILED");
@@ -1679,8 +1752,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     if(config->verifypeer) {
       failf(data, "server cert activation date verify failed");
       *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
-      gnutls_x509_crt_deinit(x509_cert);
-      return CURLE_SSL_CONNECT_ERROR;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
     }
     else
       infof(data, "  server certificate activation date verify FAILED");
@@ -1690,8 +1763,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       if(config->verifypeer) {
         failf(data, "server certificate not activated yet.");
         *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
-        gnutls_x509_crt_deinit(x509_cert);
-        return CURLE_PEER_FAILED_VERIFICATION;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
       }
       else
         infof(data, "  server certificate activation date FAILED");
@@ -1704,59 +1777,17 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     result = pkp_pin_peer_pubkey(data, x509_cert, pinned_key);
     if(result != CURLE_OK) {
       failf(data, "SSL: public key does not match pinned public key");
-      gnutls_x509_crt_deinit(x509_cert);
-      return result;
+      goto out;
     }
   }
 
-  /* Show:
+  gtls_infof_cert(data, x509_cert);
 
-  - subject
-  - start date
-  - expire date
-  - common name
-  - issuer
-
-  */
-
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-  /* public key algorithm's parameters */
-  algo = gnutls_x509_crt_get_pk_algorithm(x509_cert, &bits);
-  infof(data, "  certificate public key: %s",
-        gnutls_pk_algorithm_get_name((gnutls_pk_algorithm_t)algo));
-
-  /* version of the X.509 certificate. */
-  infof(data, "  certificate version: #%d",
-        gnutls_x509_crt_get_version(x509_cert));
-
-
-  rc = gnutls_x509_crt_get_dn2(x509_cert, &certfields);
-  if(rc)
-    infof(data, "Failed to get certificate name");
-  else {
-    infof(data, "  subject: %s", certfields.data);
-
-    certclock = gnutls_x509_crt_get_activation_time(x509_cert);
-    showtime(data, "start date", certclock);
-
-    certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
-    showtime(data, "expire date", certclock);
-
-    gnutls_free(certfields.data);
-  }
-
-  rc = gnutls_x509_crt_get_issuer_dn2(x509_cert, &certfields);
-  if(rc)
-    infof(data, "Failed to get certificate issuer");
-  else {
-    infof(data, "  issuer: %s", certfields.data);
-
-    gnutls_free(certfields.data);
-  }
-#endif
-
-  gnutls_x509_crt_deinit(x509_cert);
-
+out:
+  if(x509_issuer)
+    gnutls_x509_crt_deinit(x509_issuer);
+  if(x509_cert)
+    gnutls_x509_crt_deinit(x509_cert);
   return result;
 }
 
