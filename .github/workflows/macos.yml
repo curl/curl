@@ -296,7 +296,8 @@ jobs:
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
           - name: 'mbedTLS openldap brotli zstd'
             install: brotli mbedtls zstd openldap
-            generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
+            install_steps: codeset-test
+            generate: -DCURL_USE_MBEDTLS=ON -DUSE_APPLE_IDN=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
@@ -469,6 +470,10 @@ jobs:
         run: |
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            export LC_CTYPE=C
+            export LC_NUMERIC=fr_FR.UTF-8
+          fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
