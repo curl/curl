@@ -4,15 +4,13 @@
 
 [default]
 extend-ignore-identifiers-re = [
-  "ND",  # in test652
-  "OT",  # in test652
-  "ba",
-  "BA",
-  "(FU|Iy|pn|PN|UE)",
-  "(CNA|ECT|EDE|Jod|kno|ser|Typ|URE)",
-  "(admi|alue|clen|GOST|HELO|helo|htpt|PASE)",
-  "(numer|optin|stati)",
-  "(Januar|eyeballers|passin|perfec)",
+  "^(ba|pn|PN|UE)$",
+  "^(CNA|ECT|EDE|FUL|Jod|kno|ser|Typ|URE|ECT0|ECT1)$",
+  "^(admi|clen|GOST|HELO|helo|htpt|PASE)$",
+  "^(numer|optin|_stati64)$",
+  "^0x[0-9a-fA-F]+FUL$",
+  "^(Januar|eyeballers|HELO_smtp|kno22|MTA4MzIy|passin|perfec|req_clen|__SecURE|SMTP_HELO|v_alue)$",
+  "^(smtp_perform_helo|smtp_state_helo_resp)$",
 ]
 
 extend-ignore-re = [
@@ -23,10 +21,12 @@ extend-ignore-re = [
 extend-exclude = [
   ".github/scripts/codespell-ignore.txt",
   ".github/scripts/spellcheck.words",
+  "docs/CIPHERS-TLS12.md",
   "docs/THANKS",
   "docs/examples/cacertinmem.c",
   "docs/examples/usercertinmem.c",
   "packages/*",
+  "projects/Windows/*",
   "scripts/wcurl",
   "tests/data/test652",
   "winbuild/*",
