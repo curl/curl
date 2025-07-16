@@ -71,7 +71,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
 
     /* require use of SSL for this, or fail */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
     /* Perform the request */
     curl_easy_perform(curl);

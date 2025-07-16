@@ -129,7 +129,7 @@ static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_d_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(use_earlydata)
-    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
+    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
   if(forbid_reuse_d)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
   if(host)

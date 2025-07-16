@@ -149,7 +149,7 @@ static CURLcode test_lib579(char *URL)
   /* enforce chunked transfer by setting the header */
   test_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
-  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+  test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
 
   /* we want to use our own progress function */
