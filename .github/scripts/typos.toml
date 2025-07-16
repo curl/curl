@@ -5,7 +5,7 @@
 [default]
 extend-ignore-identifiers-re = [
   "^(ba|pn|PN|UE)$",
-  "^(CNA|ECT|ser)$",
+  "^(CNA|ser)$",
   "^(ECT0|ECT1|GOST|HELO|htpt|PASE)$",
   "^0x[0-9a-fA-F]+FUL$",
   "^(Januar|eyeballers|HELO_smtp|kno22|MTA4MzIy|optin|passin|perfec|__SecURE|SMTP_HELO|v_alue)$",
