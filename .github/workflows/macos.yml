@@ -470,7 +470,6 @@ jobs:
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
           rm -f ~/.curlrc
-          export LC_ALL=C
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
           else
