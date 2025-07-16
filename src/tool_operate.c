@@ -351,7 +351,7 @@ void single_transfer_cleanup(struct OperationConfig *config)
     struct State *state = &config->state;
     /* Free list of remaining URLs */
     glob_cleanup(&state->urls);
-    tool_safefree(state->outfiles);
+    state->outfiles = NULL;
     tool_safefree(state->uploadfile);
     /* Free list of globbed upload files */
     glob_cleanup(&state->inglob);
@@ -865,7 +865,7 @@ static CURLcode etag_store(struct OperationConfig *config,
       struct State *state = &config->state;
       warnf(config->global, "Failed creating file for saving etags: \"%s\". "
             "Skip this transfer", config->etag_save_file);
-      tool_safefree(state->outfiles);
+      state->outfiles = NULL;
       glob_cleanup(&state->urls);
       *skip = TRUE;
       return CURLE_OK;
@@ -1169,14 +1169,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
     /* save outfile pattern before expansion */
-    if(urlnode->outfile && !state->outfiles) {
-      state->outfiles = strdup(urlnode->outfile);
-      if(!state->outfiles) {
-        errorf(global, "out of memory");
-        result = CURLE_OUT_OF_MEMORY;
-        break;
-      }
-    }
+    if(urlnode->outfile && !state->outfiles)
+      state->outfiles = urlnode->outfile;
 
     if(!config->globoff && urlnode->infile && !state->inglob) {
       /* Unless explicitly shut off */
@@ -1422,7 +1416,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       glob_cleanup(&state->urls);
       state->urlnum = 0;
 
-      tool_safefree(state->outfiles);
+      state->outfiles = NULL;
       tool_safefree(state->uploadfile);
       /* Free list of globbed upload files */
       glob_cleanup(&state->inglob);
@@ -1431,7 +1425,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
     break;
   }
-  tool_safefree(state->outfiles);
+  state->outfiles = NULL;
 fail:
   if(!*added || result) {
     *added = FALSE;
