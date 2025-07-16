@@ -25,8 +25,6 @@
 
 #include "hash.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static void t1602_mydtor(void *p)
 {
   int *ptr = (int *)p;

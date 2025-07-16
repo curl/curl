@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1947_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* ignore the data */

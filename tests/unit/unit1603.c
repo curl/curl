@@ -25,8 +25,6 @@
 
 #include "hash.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static const size_t slots = 3;
 
 static void t1603_mydtor(void *p)

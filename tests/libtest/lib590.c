@@ -36,8 +36,6 @@
   - Start the request
 */
 
-#include "memdebug.h"
-
 static CURLcode test_lib590(char *URL)
 {
   CURLcode res;

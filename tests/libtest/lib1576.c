@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static char t1576_testdata[] = "request indicates that the client, which made";
 
 static size_t t1576_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
