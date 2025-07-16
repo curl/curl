@@ -591,20 +591,23 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
       allow_gssapi = TRUE;
 #endif
 
-    idx = 0;
-    socksreq[idx++] = 5;   /* version */
-    idx++;                 /* number of authentication methods */
-    socksreq[idx++] = 0;   /* no authentication */
-    if(allow_gssapi)
-      socksreq[idx++] = 1; /* GSS-API */
-    if(sx->proxy_user)
-      socksreq[idx++] = 2; /* username/password */
-    /* write the number of authentication methods */
-    socksreq[1] = (unsigned char) (idx - 2);
+    if(!sx->outstanding) {
+      idx = 0;
+      socksreq[idx++] = 5;   /* version */
+      idx++;                 /* number of authentication methods */
+      socksreq[idx++] = 0;   /* no authentication */
+      if(allow_gssapi)
+        socksreq[idx++] = 1; /* GSS-API */
+      if(sx->proxy_user)
+        socksreq[idx++] = 2; /* username/password */
+      /* write the number of authentication methods */
+      socksreq[1] = (unsigned char) (idx - 2);
 
-    sx->outp = socksreq;
-    DEBUGASSERT(idx <= sizeof(sx->buffer));
-    sx->outstanding = idx;
+      sx->outp = socksreq;
+      DEBUGASSERT(idx <= sizeof(sx->buffer));
+      sx->outstanding = idx;
+    }
+
     presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
                                "initial SOCKS5 request");
     if(CURLPX_OK != presult)
