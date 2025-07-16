@@ -7,7 +7,7 @@ extend-ignore-identifiers-re = [
   "^(ba|pn|PN|UE)$",
   "^(CNA|ser)$",
   "^(ECT0|ECT1|HELO|htpt|PASE)$",
-  "^[A-Za-z0-9_-]*(GOST|EDE)[A-Z0-9_-]*$",  # ciphers
+  "^[A-Za-z0-9_-]*(EDE|GOST)[A-Z0-9_-]*$",  # ciphers
   "^0x[0-9a-fA-F]+FUL$",  # unsigned long hex literals ending with 'F'
   "^[0-9a-zA-Z+]{64,}$",  # possibly base64
   "^(Januar|eyeballers|HELO_smtp|kno22|MkTypLibCompatible|optin|passin|perfec|__SecURE|SMTP_HELO|v_alue)$",
