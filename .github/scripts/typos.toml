@@ -24,7 +24,10 @@ extend-exclude = [
   ".github/scripts/codespell-ignore.txt",
   ".github/scripts/spellcheck.words",
   "docs/THANKS",
+  "docs/examples/cacertinmem.c",
+  "docs/examples/usercertinmem.c",
   "packages/*",
   "scripts/wcurl",
+  "tests/data/test652",
   "winbuild/*",
 ]
