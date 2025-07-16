@@ -111,7 +111,7 @@ enum {
   CS_TXT_IDX_ECDH,
   CS_TXT_IDX_ECDHE,
   CS_TXT_IDX_ECDSA,
-  CS_TXT_IDX_EDE,
+  CS_TXT_IDX_EDE, /* spellchecker:disable-line */
   CS_TXT_IDX_GCM,
   CS_TXT_IDX_MD5,
   CS_TXT_IDX_NULL,
