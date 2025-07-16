@@ -80,7 +80,7 @@ static CURLcode test_unit1304(char *arg)
    * Test a non existent login (substring of an existing one) in our
    * netrc file.
    */
-  login = (char *)CURL_UNCONST("admi");
+  login = (char *)CURL_UNCONST("admi"); /* spellchecker:disable-line */
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "example.com", &login, &password, arg);
