@@ -17,7 +17,7 @@ RFC7628
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
-REPLY AUTH + %b64[{"status":"invalid_token","scope":"example_scope","openid-configuration":"https://example.com/.well-known/openid-configuration]b64%
+REPLY AUTH + %b64[{"status":"invalid_token","scope":"example_scope","openid-configuration":"https://example.com/.well-known/openid-configuration"}]b64%
 REPLY AQ== -ERR Authentication failed
 </servercmd>
 </reply>
