@@ -62,7 +62,10 @@ This release includes the following bugfixes:
  o cmake: sync tests scripts by using the variable `BUNDLE` [46]
  o cmake: sync tests scripts with each other and autotools (more) [100]
  o cmake: use `target_link_options()` when available [43]
+ o config-win32: fix default targets, shorten macro logic [227]
+ o configure: order LDAP after the SSL libraries
  o connect: drop unused struct member [209]
+ o connection: clarify `transport` [197]
  o connection: eliminate member `remote_addr` [10]
  o curl-config: fix whitespace in usage text [122]
  o curl.h: make CURL_IPRESOLVE_* symbols defined as longs [206]
@@ -77,6 +80,7 @@ This release includes the following bugfixes:
  o curl_path: make SFTP handle a path like /~ properly. [11]
  o curlinfo: provide the 'digest' feature [168]
  o CURLSHOPT_SHARE.md: mention multi-threading requires callbacks [161]
+ o DEPRECATE.md: add VS2005 removal to the list [214]
  o digest: fix build with disabled digest auth [72]
  o DISTROS: update NixOS link
  o docs,tests: fix english grammar "allow to" -> "allow <something> to" [158]
@@ -101,6 +105,7 @@ This release includes the following bugfixes:
  o ftplistparser: split parse_unix into sub functions [77]
  o h2_serverpush: fix file handle leaks reported by clang-tidy [105]
  o h3: fix query of concurrent streams [220]
+ o http/3: report handshake with version and cipher as for TCP connections [212]
  o http2: do not delay RST send on aborted transfer [57]
  o http2: fix var types in is_alive() implementations [222]
  o http: explicitly ignore parsing errors for Retry-After [98]
@@ -108,6 +113,9 @@ This release includes the following bugfixes:
  o http_ntlm: protect against null deref [95]
  o http_ntlm: remove unreachable code [88]
  o INSTALL.md: cygwin details and add source code link [4]
+ o ldap: avoid automake caching issues with LDAP library names
+ o ldap: if ldap-lib is sufficient, add it to LIBS.
+ o ldap: initial support for --with-ldap option
  o lib2082: drop `typedef struct` [118]
  o lib: address singleuse issues [132]
  o lib: avoid reusing unclean connection [73]
@@ -170,6 +178,7 @@ This release includes the following bugfixes:
  o test1499, 1599: use `%LOGDIR` [226]
  o test1499: verify two chunked responses on reused connection [145]
  o test1596: let test pass after year 2036 [35]
+ o test1706: pass include directory to `managen` for out-of-tree builds [187]
  o tests/client: drop autotools logic no longer necessary [45]
  o tests/client: use `curl_mfprintf()` [48]
  o tests/dnsd: read config from file [85]
@@ -266,11 +275,11 @@ advice from friends like these:
   hiimmat on github, Jeroen Ooms, Joel Depooter, John Haugabook,
   Karthik Dasari, Keno Fischer, Kirill Obukhov, Larry Campbell,
   Luca Kellermann, Luke Wilde, Marcel Lang, Marcel Raad, Markus Unterwaditzer,
-  Michael Kaufmann, NINIKA, Orgad Shaneh, Patrick Monnerat, Patrick Stoeckle,
-  Piotr Nakraszewicz, Randall S. Becker, Ray Satiro, renovate[bot],
-  Rod Widdowson, Ryan Hooper, SC404, Stefan Eissing, Theodore A. Roth,
-  Tristan Perrault, Viktor Szakats, Yedaya Katsman, z2_
-  (56 contributors)
+  Max Dymond, Michael Kaufmann, NINIKA, Orgad Shaneh, Patrick Monnerat,
+  Patrick Stoeckle, Piotr Nakraszewicz, Randall S. Becker, Ray Satiro,
+  renovate[bot], Rod Widdowson, Ryan Hooper, SC404, Stefan Eissing,
+  Theodore A. Roth, Tristan Perrault, Viktor Szakats, Yedaya Katsman, z2_
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -460,6 +469,7 @@ References to bug reports and discussions on issues:
  [184] = https://curl.se/bug/?i=17822
  [185] = https://curl.se/bug/?i=17814
  [186] = https://curl.se/bug/?i=17818
+ [187] = https://curl.se/bug/?i=17926
  [188] = https://curl.se/bug/?i=17843
  [189] = https://curl.se/bug/?i=13288
  [190] = https://curl.se/bug/?i=17917
@@ -468,6 +478,7 @@ References to bug reports and discussions on issues:
  [194] = https://curl.se/bug/?i=17913
  [195] = https://curl.se/bug/?i=17902
  [196] = https://curl.se/bug/?i=17895
+ [197] = https://curl.se/bug/?i=17923
  [198] = https://curl.se/bug/?i=17909
  [199] = https://curl.se/bug/?i=17909
  [200] = https://curl.se/bug/?i=17907
@@ -482,6 +493,8 @@ References to bug reports and discussions on issues:
  [209] = https://curl.se/bug/?i=17908
  [210] = https://curl.se/bug/?i=17903
  [211] = https://curl.se/bug/?i=17897
+ [212] = https://curl.se/bug/?i=17922
+ [214] = https://curl.se/bug/?i=17934
  [215] = https://curl.se/bug/?i=17892
  [216] = https://curl.se/bug/?i=17880
  [217] = https://curl.se/bug/?i=17882
@@ -494,3 +507,4 @@ References to bug reports and discussions on issues:
  [224] = https://curl.se/bug/?i=17875
  [225] = https://curl.se/bug/?i=17829
  [226] = https://curl.se/bug/?i=17871
+ [227] = https://curl.se/bug/?i=17916
