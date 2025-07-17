@@ -1428,7 +1428,7 @@ static int set_url(void)
    2. Set one or more parts
    3. Extract and compare all parts - not the URL
 */
-static int setget_parts(void)
+static int setget_parts(int has_utf8)
 {
   int i;
   int error = 0;
@@ -1439,6 +1439,10 @@ static int setget_parts(void)
     if(!urlp) {
       error++;
       break;
+    }
+    if((setget_parts_list[i].getflags == CURLU_PUNYCODE ||
+        setget_parts_list[i].getflags == CURLU_PUNY2IDN) && !has_utf8) {
+      continue;
     }
     if(setget_parts_list[i].in)
       rc = curl_url_set(urlp, CURLUPART_URL, setget_parts_list[i].in,
@@ -1525,7 +1529,7 @@ static int set_parts(void)
   return error;
 }
 
-static int get_url(void)
+static int get_url(int has_utf8)
 {
   int i;
   int error = 0;
@@ -1535,6 +1539,10 @@ static int get_url(void)
     if(!urlp) {
       error++;
       break;
+    }
+    if((get_url_list[i].getflags == CURLU_PUNYCODE ||
+        get_url_list[i].getflags == CURLU_PUNY2IDN) && !has_utf8) {
+      continue;
     }
     rc = curl_url_set(urlp, CURLUPART_URL, get_url_list[i].in,
                       get_url_list[i].urlflags);
@@ -1565,7 +1573,7 @@ static int get_url(void)
   return error;
 }
 
-static int get_parts(void)
+static int get_parts(int has_utf8)
 {
   int i;
   int error = 0;
@@ -1575,6 +1583,10 @@ static int get_parts(void)
     if(!urlp) {
       error++;
       break;
+    }
+    if((get_parts_list[i].getflags == CURLU_PUNYCODE ||
+        get_parts_list[i].getflags == CURLU_PUNY2IDN) && !has_utf8) {
+      continue;
     }
     rc = curl_url_set(urlp, CURLUPART_URL,
                       get_parts_list[i].in,
@@ -2018,15 +2030,17 @@ err:
 
 static CURLcode test_lib1560(char *URL)
 {
+  int has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
+
   (void)URL; /* not used */
 
   if(urldup())
     return (CURLcode)11;
 
-  if(setget_parts())
+  if(setget_parts(has_utf8))
     return (CURLcode)10;
 
-  if(get_url())
+  if(get_url(has_utf8))
     return (CURLcode)3;
 
   if(huge())
@@ -2047,7 +2061,7 @@ static CURLcode test_lib1560(char *URL)
   if(set_parts())
     return (CURLcode)2;
 
-  if(get_parts())
+  if(get_parts(has_utf8))
     return (CURLcode)4;
 
   if(clear_url())
