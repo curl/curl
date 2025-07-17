@@ -141,12 +141,6 @@
 #define CALG_SHA_256 0x0000800c
 #endif
 
-/* Work around typo in CeGCC (as of 0.59.1) w32api headers */
-#if defined(__MINGW32CE__) && \
-  !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
-#define ALG_CLASS_DHASH ALG_CLASS_HASH
-#endif
-
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
@@ -901,9 +895,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-#ifndef UNDER_CE
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -934,15 +926,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->use_alpn = FALSE;
 #endif
 
-#ifdef UNDER_CE
-#ifdef HAS_MANUAL_VERIFY_API
-  /* certificate validation on Windows CE does not seem to work right; we will
-   * do it following a more manual process. */
-  backend->use_manual_cred_validation = TRUE;
-#else
-#error "compiler too old to support Windows CE requisite manual cert verify"
-#endif
-#else
 #ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
@@ -962,7 +945,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "schannel: CA cert support not built in");
     return CURLE_NOT_BUILT_IN;
   }
-#endif
 #endif
 
   backend->cred = NULL;
@@ -2379,7 +2361,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-#if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
+#ifdef HAS_ALPN_SCHANNEL
   bool wine = FALSE;
   bool wine_has_alpn = FALSE;
 
@@ -2388,9 +2370,8 @@ static int schannel_init(void)
   /* GetModuleHandle() not available for UWP.
      Assume no WINE because WINE has no UWP support. */
   WINE_GET_VERSION_FN p_wine_get_version =
-    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandleA("ntdll"),
-                                        "wine_get_version")));
+    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN, (
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version")));
   wine = !!p_wine_get_version;
   if(wine) {
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
@@ -2405,7 +2386,7 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
-#endif /* HAS_ALPN_SCHANNEL && !UNDER_CE */
+#endif /* HAS_ALPN_SCHANNEL */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
@@ -2530,12 +2511,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-#ifdef __MINGW32CE__
-    /* workaround for CeGCC, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
-#else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
-#endif
       break; /* failed */
 
     /* get hash size */

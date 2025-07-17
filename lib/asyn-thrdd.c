@@ -204,7 +204,7 @@ err_exit:
  * and wait on it.
  */
 static
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
 DWORD
 #else
 unsigned int
@@ -264,7 +264,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
  * gethostbyname_thread() resolves a name and then exits.
  */
 static
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
 DWORD
 #else
 unsigned int
@@ -462,7 +462,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
 err_exit:
   CURL_TRC_DNS(data, "resolve thread failed init: %d", err);
   async_thrdd_destroy(data);
-  CURL_SETERRNO(err);
+  errno = err;
   return FALSE;
 }
 

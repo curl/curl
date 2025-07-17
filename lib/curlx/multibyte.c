@@ -84,8 +84,6 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
   return str_utf8;
 }
 
-#ifndef UNDER_CE
-
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
   (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -270,7 +268,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
@@ -301,7 +299,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
   curlx_unicodefree(filename_w);
   curlx_unicodefree(mode_w);
 #else
@@ -338,7 +336,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
 #else
   if(fix_excessive_path(path, &fixed))
     target = fixed;
@@ -354,7 +352,5 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   (free)(fixed);
   return result;
 }
-
-#endif /* UNDER_CE */
 
 #endif /* _WIN32 */

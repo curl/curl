@@ -105,13 +105,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *fh = fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
-  if(
-#ifdef UNDER_CE
-     stat(filename, &sb) == -1
-#else
-     fstat(fileno(*fh), &sb) == -1
-#endif
-     || !S_ISREG(sb.st_mode)) {
+  if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
   fclose(*fh);

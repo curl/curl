@@ -349,7 +349,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 static unsigned int thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
@@ -360,7 +360,6 @@ static HWND hidden_main_window = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
-#ifndef UNDER_CE
 /*
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
@@ -403,11 +402,10 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  CURL_SETERRNO(old_errno);
+  errno = old_errno;
 }
-#endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -455,7 +453,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -536,7 +534,6 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
-#ifndef UNDER_CE
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
                                bool restartable)
 {
@@ -566,7 +563,6 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   return oldhdlr;
 #endif
 }
-#endif
 
 void install_signal_handlers(bool keep_sigalrm)
 {
@@ -617,12 +613,10 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
-#endif
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   {
     typedef uintptr_t curl_win_thread_handle_t;
     curl_win_thread_handle_t thread;
@@ -667,10 +661,8 @@ void restore_signal_handlers(bool keep_sigalrm)
     (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#endif
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

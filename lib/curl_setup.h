@@ -117,14 +117,6 @@
 #  endif
 #endif
 
-/* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
-   C99 (-std=gnu99) mode */
-#if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
-  (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
-  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
-#define CURL_NO_FMT_CHECKS
-#endif
-
 /* Compatibility */
 #ifdef ENABLE_IPV6
 #define USE_IPV6 1
@@ -487,23 +479,19 @@
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
-#    ifndef UNDER_CE
-#      undef  lseek
-#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)             _fstat(fdes, stp)
-#      define struct_stat                  struct _stat
-#    endif
+#    undef  lseek
+#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes, stp)             _fstat(fdes, stp)
+#    define struct_stat                  struct _stat
 #    define LSEEK_ERROR                  (long)-1
 #  endif
-#  ifndef UNDER_CE
-     int curlx_win32_stat(const char *path, struct_stat *buffer);
-     int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#    define stat(fname, stp)           curlx_win32_stat(fname, stp)
-#    define open                       curlx_win32_open
-#    define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
-#    define fopen(fname, mode)         CURL_FOPEN(fname, mode)
-#  endif
+   int curlx_win32_stat(const char *path, struct_stat *buffer);
+   int curlx_win32_open(const char *filename, int oflag, ...);
+   FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#  define stat(fname, stp)           curlx_win32_stat(fname, stp)
+#  define open                       curlx_win32_open
+#  define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
+#  define fopen(fname, mode)         CURL_FOPEN(fname, mode)
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
@@ -821,27 +809,6 @@
 
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
-#endif
-
-#ifdef UNDER_CE
-#define getenv curl_getenv  /* Windows CE does not support getenv() */
-#define raise(s) ((void)(s))
-/* Terrible workarounds to make Windows CE compile */
-#define errno 0
-#define CURL_SETERRNO(x) ((void)(x))
-#define EINTR  4
-#define EAGAIN 11
-#define ENOMEM 12
-#define EACCES 13
-#define EEXIST 17
-#define EISDIR 21
-#define EINVAL 22
-#define ENOSPC 28
-#define strerror(x) "?"
-#undef STDIN_FILENO
-#define STDIN_FILENO 0
-#else
-#define CURL_SETERRNO(x) (errno = (x))
 #endif
 
 /*
