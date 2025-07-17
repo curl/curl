@@ -158,6 +158,10 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  * - CF_QUERY_SSL_CTX_INFO: same as CF_QUERY_SSL_INFO, but give the SSL_CTX
  *                      when available, or the same internal pointer
  *                      when the TLS stack does not differentiate.
+ * - CF_QUERY_ALPN_NEGOTIATED: The ALPN selected by the server as
+                        null-terminated string or NULL if none
+                        selected/handshake not done. Implemented by filter
+                        types CF_TYPE_SSL or CF_TYPE_IP_CONNECT.
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
@@ -176,6 +180,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SSL_INFO          12  /* -    struct curl_tlssessioninfo * */
 #define CF_QUERY_SSL_CTX_INFO      13  /* -    struct curl_tlssessioninfo * */
 #define CF_QUERY_TRANSPORT         14  /* TRNSPRT_*  - * */
+#define CF_QUERY_ALPN_NEGOTIATED   15  /* -          const char * */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -332,12 +337,6 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
                             int event, int arg1, void *arg2);
 
 /**
- * Determine if the connection filter chain is using SSL to the remote host
- * (or will be once connected).
- */
-bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf);
-
-/**
  * Get the socket used by the filter chain starting at `cf`.
  * Returns CURL_SOCKET_BAD if not available.
  */
@@ -353,6 +352,9 @@ bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
 
 unsigned char Curl_conn_cf_get_transport(struct Curl_cfilter *cf,
                                          struct Curl_easy *data);
+
+const char *Curl_conn_cf_get_alpn_negotiated(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data);
 
 #define CURL_CF_SSL_DEFAULT  -1
 #define CURL_CF_SSL_DISABLE  0
@@ -417,6 +419,10 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
 /* Get the TRNSPRT_* the connection is using */
 unsigned char Curl_conn_get_transport(struct Curl_easy *data,
                                       struct connectdata *conn);
+
+/* Get the negotiated ALPN protocol or NULL if none in play */
+const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
+                                          struct connectdata *conn);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.

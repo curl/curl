@@ -226,24 +226,22 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   cf->next = winner->cf;
   winner->cf = NULL;
 
-  switch(cf->conn->alpn) {
-  case CURL_HTTP_VERSION_3:
-    break;
-  case CURL_HTTP_VERSION_2:
 #ifdef USE_NGHTTP2
+  {
     /* Using nghttp2, we add the filter "below" us, so when the conn
      * closes, we tear it down for a fresh reconnect */
-    result = Curl_http2_switch_at(cf, data);
-    if(result) {
-      ctx->state = CF_HC_FAILURE;
-      ctx->result = result;
-      return result;
+    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    if(alpn && !strcmp("h2", alpn)) {
+      result = Curl_http2_switch_at(cf, data);
+      if(result) {
+        ctx->state = CF_HC_FAILURE;
+        ctx->result = result;
+        return result;
+      }
     }
-#endif
-    break;
-  default:
-    break;
   }
+#endif
+
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
   return result;

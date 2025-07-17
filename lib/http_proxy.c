@@ -325,36 +325,42 @@ connect_sub:
   if(!ctx->cf_protocol) {
     struct Curl_cfilter *cf_protocol = NULL;
     int httpversion = 0;
-    int alpn = Curl_conn_cf_is_ssl(cf->next) ?
-      cf->conn->proxy_alpn : CURL_HTTP_VERSION_1_1;
+    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
 
-    /* First time call after the subchain connected */
-    switch(alpn) {
-    case CURL_HTTP_VERSION_NONE:
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
-      infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
-            (alpn == CURL_HTTP_VERSION_1_0) ? 0 : 1);
+    if(alpn)
+      infof(data, "CONNECT: '%s' negotiated", alpn);
+    else
+      infof(data, "CONNECT: no ALPN negotiated");
+
+    if(alpn && !strcmp(alpn, "http/1.0")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;
       cf_protocol = cf->next;
-      httpversion = (alpn == CURL_HTTP_VERSION_1_0) ? 10 : 11;
-      break;
+      httpversion = 10;
+    }
+    else if(!alpn || !strcmp(alpn, "http/1.1")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
+      result = Curl_cf_h1_proxy_insert_after(cf, data);
+      if(result)
+        goto out;
+      cf_protocol = cf->next;
+      /* Assume that without an ALPN, we are talking to an ancient one */
+      httpversion = 11;
+    }
 #ifdef USE_NGHTTP2
-    case CURL_HTTP_VERSION_2:
+    else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      infof(data, "CONNECT tunnel: HTTP/2 negotiated");
       result = Curl_cf_h2_proxy_insert_after(cf, data);
       if(result)
         goto out;
       cf_protocol = cf->next;
       httpversion = 20;
-      break;
+    }
 #endif
-    default:
-      infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
+    else {
+      failf(data, "CONNECT: negotiated ALPN '%s' not supported", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
@@ -391,6 +397,12 @@ CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
     *pres1 = (int)cf->conn->http_proxy.port;
     *((const char **)pres2) = cf->conn->http_proxy.host.name;
     return CURLE_OK;
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = NULL;
+    return CURLE_OK;
+  }
   default:
     break;
   }

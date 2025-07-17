@@ -54,7 +54,7 @@ class TestProxy:
 
     def get_tunnel_proto_used(self, r: ExecResult):
         for line in r.trace_lines:
-            m = re.match(r'.* CONNECT tunnel: (\S+) negotiated$', line)
+            m = re.match(r'.* CONNECT: \'(\S+)\' negotiated$', line)
             if m:
                 return m.group(1)
         assert False, f'tunnel protocol not found in:\n{"".join(r.trace_lines)}'
@@ -161,8 +161,7 @@ class TestProxy:
                                extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
         srcfile = os.path.join(httpd.docs_dir, 'data.json')
         dfile = curl.download_file(0)
         assert filecmp.cmp(srcfile, dfile, shallow=False)
@@ -193,8 +192,7 @@ class TestProxy:
                                extra_args=xargs)
         r.check_response(count=count, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
         srcfile = os.path.join(httpd.docs_dir, fname)
         for i in range(count):
             dfile = curl.download_file(i)
@@ -226,8 +224,7 @@ class TestProxy:
         xargs = curl.get_proxy_args(tunnel=True, proto=tunnel)
         r = curl.http_upload(urls=[url], data=f'@{srcfile}', alpn_proto=proto,
                              extra_args=xargs)
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
         r.check_response(count=count, http_status=200)
         indata = open(srcfile).readlines()
         for i in range(count):
@@ -249,8 +246,7 @@ class TestProxy:
         r = curl.http_download(urls=[url1, url2], alpn_proto='http/1.1', with_stats=True,
                                extra_args=xargs)
         r.check_response(count=2, http_status=200)
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
         if tunnel == 'h2':
             # TODO: we would like to reuse the first connection for the
             # second URL, but this is currently not possible
@@ -276,8 +272,7 @@ class TestProxy:
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                 extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
-        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r1) == tunnel
         # get the args, duplicate separated with '--next'
         x2_args = r1.args[1:]
         x2_args.append('--next')
@@ -302,8 +297,7 @@ class TestProxy:
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                 extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
-        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r1) == tunnel
         # get the args, duplicate separated with '--next'
         x2_args = r1.args[1:]
         x2_args.append('--next')
@@ -329,8 +323,7 @@ class TestProxy:
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                 extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
-        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r1) == tunnel
         # get the args, duplicate separated with '--next'
         x2_args = r1.args[1:]
         x2_args.append('--next')
@@ -356,8 +349,7 @@ class TestProxy:
         r1 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                 extra_args=proxy_args)
         r1.check_response(count=1, http_status=200)
-        assert self.get_tunnel_proto_used(r1) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r1) == tunnel
         # get the args, duplicate separated with '--next'
         x2_args = r1.args[1:]
         x2_args.append('--next')
