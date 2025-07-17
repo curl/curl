@@ -153,7 +153,7 @@ static void win32_cleanup(void)
 {
 #ifdef USE_WINSOCK
   WSACleanup();
-#endif  /* USE_WINSOCK */
+#endif
 
   /* flush buffers of all streams regardless of their mode */
   _flushall();

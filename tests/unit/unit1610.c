@@ -36,8 +36,8 @@ static CURLcode test_unit1610(char *arg)
 {
   UNITTEST_BEGIN(t1610_setup())
 
-#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
-    || defined(USE_LIBSSH2)
+#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
+  defined(USE_LIBSSH2)
 
   static const char string1[] = "1";
   static const char string2[] = "hello-you-fool";
