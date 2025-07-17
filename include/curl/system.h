@@ -336,7 +336,7 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    if __GNUC__ >= 3
+#    if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
 #      define CURL_POPCOUNT64(x)       __builtin_popcountll(x)
 #      define CURL_CTZ64(x)            __builtin_ctzll(x)
 #    endif
@@ -350,7 +350,7 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
 #    define CURL_SUFFIX_CURL_OFF_T     L
 #    define CURL_SUFFIX_CURL_OFF_TU    UL
-#    if __GNUC__ >= 3
+#    if (__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 4))
 #      define CURL_POPCOUNT64(x)       __builtin_popcountl(x)
 #      define CURL_CTZ64(x)            __builtin_ctzl(x)
 #    endif
