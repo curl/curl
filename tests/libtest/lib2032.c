@@ -142,7 +142,7 @@ static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
                   "testuser:testpass");
       easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEFUNCTION, callback);
       easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEDATA,
-                  ntlm_easy + num_handles);
+                  ntlm_easy[num_handles]);
       easy_setopt(ntlm_easy[num_handles], CURLOPT_HEADER, 1L);
 
       multi_add_handle(multi, ntlm_easy[num_handles]);
