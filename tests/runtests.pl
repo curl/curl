@@ -809,6 +809,9 @@ sub checksystemfeatures {
     $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
+    if($feature{"codeset-utf8"}) {
+        $ENV{'CURL_TEST_HAVE_CODESET_UTF8'} = 1;
+    }
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
