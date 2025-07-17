@@ -780,11 +780,6 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
-                         value */
-#ifndef CURL_DISABLE_PROXY
-  unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
-#endif
   unsigned char transport_wanted; /* one of the TRNSPRT_* defines. Not
    necessarily the transport the connection ends using due to Alt-Svc
    and happy eyeballing. Use `Curl_conn_get_transport() for actual value

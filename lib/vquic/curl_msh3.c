@@ -884,7 +884,6 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
       cf->connected = TRUE;
-      cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
       connkeep(cf->conn, "HTTP/3 default");
       Curl_pgrsTime(data, TIMER_APPCONNECT);
