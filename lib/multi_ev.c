@@ -64,6 +64,8 @@ struct mev_sh_entry {
                          * libcurl application to watch out for */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
+  BIT(announced);       /* this socket has been passed to the socket
+                           callback at least once */
 };
 
 static size_t mev_sh_entry_hash(void *key, size_t key_length, size_t slots_num)
@@ -205,13 +207,14 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
     return CURLM_OK;
 
   /* We managed this socket before, tell the socket callback to forget it. */
-  if(multi->socket_cb) {
+  if(entry->announced && multi->socket_cb) {
     CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)",
                cause, s);
     mev_in_callback(multi, TRUE);
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                           multi->socket_userp, entry->user_data);
     mev_in_callback(multi, FALSE);
+    entry->announced = FALSE;
   }
 
   mev_sh_entry_kill(multi, s);
@@ -281,8 +284,8 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   mev_in_callback(multi, TRUE);
   rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
                         entry->user_data);
-
   mev_in_callback(multi, FALSE);
+  entry->announced = TRUE;
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
