@@ -36,17 +36,6 @@
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
-#ifdef _MSC_VER
-#if _MSC_VER >= 1600
-#include <stdint.h>
-#else
-typedef unsigned char uint8_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int32 uint32_t;
-typedef unsigned __int64 uint64_t;
-#endif
-#endif /* _MSC_VER */
-
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
 #endif
