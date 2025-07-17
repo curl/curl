@@ -1796,7 +1796,6 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
       cf->connected = TRUE;
-      cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
       connkeep(cf->conn, "HTTP/3 default");
     }
@@ -2350,6 +2349,12 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
                                    (query == CF_QUERY_SSL_INFO), info))
       return CURLE_OK;
     break;
+  }
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = cf->connected ? "h3" : NULL;
+    return CURLE_OK;
   }
   default:
     break;

@@ -1591,19 +1591,18 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     if(alpn_result.ProtoNegoStatus ==
        SecApplicationProtocolNegotiationStatus_Success) {
-      unsigned char prev_alpn = cf->conn->alpn;
-
+      if(backend->recv_renegotiating &&
+         connssl->negotiated.alpn &&
+         strncmp(connssl->negotiated.alpn,
+                 (const char *)alpn_result.ProtocolId,
+                 alpn_result.ProtocolIdSize)) {
+        /* Renegotiation selected a different protocol now, we cannot
+         * deal with this */
+        failf(data, "schannel: server selected an ALPN protocol too late");
+        return CURLE_SSL_CONNECT_ERROR;
+      }
       Curl_alpn_set_negotiated(cf, data, connssl, alpn_result.ProtocolId,
                                alpn_result.ProtocolIdSize);
-      if(backend->recv_renegotiating) {
-        if(prev_alpn != cf->conn->alpn &&
-           prev_alpn != CURL_HTTP_VERSION_NONE) {
-          /* Renegotiation selected a different protocol now, we cannot
-           * deal with this */
-          failf(data, "schannel: server selected an ALPN protocol too late");
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-      }
     }
     else {
       if(!backend->recv_renegotiating)
