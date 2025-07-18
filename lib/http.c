@@ -1077,7 +1077,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   }
   return result;
 #else
-  (void) proxy;
+  (void)data;
+  (void)proxy;
+  (void)auth;
   /* nothing to do when disabled */
   return CURLE_OK;
 #endif
