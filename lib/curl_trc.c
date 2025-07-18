@@ -580,7 +580,7 @@ CURLcode Curl_trc_init(void)
 #endif
 }
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
 
 CURLcode Curl_trc_init(void)
 {
@@ -646,4 +646,4 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */

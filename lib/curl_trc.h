@@ -203,7 +203,7 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
              (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        (FALSE)
@@ -211,6 +211,6 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
 #define Curl_trc_ft_is_verbose(x,y)   (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */
