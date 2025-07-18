@@ -357,7 +357,7 @@ static void smtp_state(struct Curl_easy *data,
                        struct smtp_conn *smtpc,
                        smtpstate newstate)
 {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -379,6 +379,8 @@ static void smtp_state(struct Curl_easy *data,
   if(smtpc->state != newstate)
     CURL_TRC_SMTP(data, "state change from %s to %s",
                   names[smtpc->state], names[newstate]);
+#else
+  (void)data;
 #endif
 
   smtpc->state = newstate;
