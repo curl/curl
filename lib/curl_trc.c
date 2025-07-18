@@ -201,7 +201,6 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
                       const char *opt_id, int opt_id_idx,
@@ -639,11 +638,12 @@ void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 #endif
-
+#ifdef USE_SSL
 void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data;
   (void)fmt;
 }
+#endif
 
 #endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
