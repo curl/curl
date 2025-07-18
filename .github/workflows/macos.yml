@@ -280,40 +280,47 @@ jobs:
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
+            install_steps: clang-tidy
             generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
-            clang-tidy: true
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/quictls -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-          - name: 'LibreSSL !ldap heimdal c-ares +examples'
-            install: libressl heimdal
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON
+          - name: 'LibreSSL openldap heimdal c-ares +examples'
+            install: libressl heimdal openldap
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-          - name: 'mbedTLS openldap brotli zstd'
-            install: brotli mbedtls zstd openldap
-            generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
+          - name: 'mbedTLS !ldap brotli zstd'
+            compiler: llvm@18
+            install: brotli mbedtls zstd
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'aws-lc'
+            compiler: gcc-12
+            install: aws-lc
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'Rustls'
+            compiler: clang
+            install: rustls-ffi
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
           - name: 'OpenSSL torture !FTP'
+            compiler: clang
+            install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: -t --shallow=25 !FTP
-            torture: true
           - name: 'OpenSSL torture FTP'
+            compiler: clang
+            install_steps: torture
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: -t --shallow=20 FTP
-            torture: true
         exclude:
-          - { compiler: llvm@18, build: { macos-version-min: '10.15' } }
-          - { compiler: llvm@18, build: { torture: true } }
-          - { compiler: gcc-12, build: { torture: true } }
-          - { compiler: llvm@18, build: { clang-tidy: true } }
-          - { compiler: gcc-12, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
           - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
@@ -330,7 +337,7 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
-            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'clang-tidy') && 'nghttp2 stunnel' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
 
         run: |
@@ -339,7 +346,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
@@ -454,17 +461,17 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !matrix.build.clang-tidy }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
         run: |
           python3 -m venv ~/venv
           source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ !matrix.build.clang-tidy }}
-        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
+        timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
         env:
-          TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+          TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
@@ -477,13 +484,13 @@ jobs:
           fi
 
       - name: 'install pytest prereqs'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
         run: |
           source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
         env:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
