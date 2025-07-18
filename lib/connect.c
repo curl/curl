@@ -405,12 +405,12 @@ typedef enum {
 } cf_connect_state;
 
 struct cf_he_ctx {
-  int transport;
   cf_ip_connect_create *cf_create;
   cf_connect_state state;
   struct eyeballer *baller[2];
   struct eyeballer *winner;
   struct curltime started;
+  int transport;
 };
 
 /* when there are more than one IP address left to use, this macro returns how
@@ -629,7 +629,6 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   struct curltime now;
   size_t i;
   int ongoing, not_started;
-  const char *hostname;
 
   /* Check if any of the conn->tempsock we use for establishing connections
    * succeeded and, if so, close any ongoing other ones.
@@ -748,23 +747,34 @@ evaluate:
     }
   }
 
+  {
+    const char *hostname, *proxy_name = NULL;
+    int port;
 #ifndef CURL_DISABLE_PROXY
-  if(conn->bits.socksproxy)
-    hostname = conn->socks_proxy.host.name;
-  else if(conn->bits.httpproxy)
-    hostname = conn->http_proxy.host.name;
-  else
+    if(conn->bits.socksproxy)
+      proxy_name = conn->socks_proxy.host.name;
+    else if(conn->bits.httpproxy)
+      proxy_name = conn->http_proxy.host.name;
 #endif
-    if(conn->bits.conn_to_host)
-      hostname = conn->conn_to_host.name;
-  else
-    hostname = conn->host.name;
+    hostname = conn->bits.conn_to_host ?
+               conn->conn_to_host.name : conn->host.name;
 
-  failf(data, "Failed to connect to %s port %u after "
-        "%" FMT_TIMEDIFF_T " ms: %s",
-        hostname, conn->primary.remote_port,
-        curlx_timediff(now, data->progress.t_startsingle),
-        curl_easy_strerror(result));
+    if(cf->sockindex == SECONDARYSOCKET)
+      port = conn->secondary_port;
+    else if(cf->conn->bits.conn_to_port)
+      port = conn->conn_to_port;
+    else
+      port = conn->remote_port;
+
+    failf(data, "Failed to connect to %s port %u %s%s%safter "
+          "%" FMT_TIMEDIFF_T " ms: %s",
+          hostname, port,
+          proxy_name ? "via " : "",
+          proxy_name ? proxy_name : "",
+          proxy_name ? " " : "",
+          curlx_timediff(now, data->progress.t_startsingle),
+          curl_easy_strerror(result));
+  }
 
 #ifdef SOCKETIMEDOUT
   if(SOCKETIMEDOUT == data->state.os_errno)
@@ -990,7 +1000,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         if(Curl_trc_cf_is_verbose(cf, data)) {
           struct ip_quadruple ipquad;
-          int is_ipv6;
+          bool is_ipv6;
           if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
             const char *host;
             int port;

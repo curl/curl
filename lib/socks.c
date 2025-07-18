@@ -1139,7 +1139,21 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   result = connect_SOCKS(cf, sx, data);
   if(!result && sx->state == CONNECT_DONE) {
     cf->connected = TRUE;
-    Curl_verboseconnect(data, conn, cf->sockindex);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    if(Curl_trc_is_verbose(data)) {
+      struct ip_quadruple ipquad;
+      bool is_ipv6;
+      result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
+      if(result)
+        return result;
+      infof(data, "Opened %sSOCKS connection from %s port %u to %s port %u "
+            "(via %s port %u)",
+            (sockindex == SECONDARYSOCKET) ? "2nd " : "",
+            ipquad.local_ip, ipquad.local_port,
+            sx->hostname, sx->remote_port,
+            ipquad.remote_ip, ipquad.remote_port);
+    }
+#endif
     socks_proxy_cf_free(cf);
   }
 

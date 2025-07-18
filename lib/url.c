@@ -1385,36 +1385,6 @@ ConnectionExists(struct Curl_easy *data,
 }
 
 /*
- * verboseconnect() displays verbose information after a connect
- */
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
-void Curl_verboseconnect(struct Curl_easy *data,
-                         struct connectdata *conn, int sockindex)
-{
-  if(data->set.verbose && sockindex == SECONDARYSOCKET)
-    infof(data, "Connected 2nd connection to %s port %u",
-          conn->secondary.remote_ip, conn->secondary.remote_port);
-  else
-    infof(data, "Connected to %s (%s) port %u",
-          CURL_CONN_HOST_DISPNAME(conn), conn->primary.remote_ip,
-          conn->primary.remote_port);
-#ifndef CURL_DISABLE_HTTP
-    if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
-      const char *alpn = Curl_conn_get_alpn_negotiated(data, conn);
-      if(!alpn || !strcmp("http/1.1", alpn) || !strcmp("http/1.0", alpn))
-        infof(data, "using HTTP/1.x");
-      else if(!strcmp("h2", alpn))
-        infof(data, "using HTTP/2");
-      else if(!strcmp("h3", alpn))
-        infof(data, "using HTTP/3");
-      else
-        infof(data, "using ALPN protocol '%s'", alpn);
-    }
-#endif
-}
-#endif
-
-/*
  * Allocate and initialize a new connectdata object.
  */
 static struct connectdata *allocate_conn(struct Curl_easy *data)
@@ -1430,7 +1400,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->sockfd = CURL_SOCKET_BAD;
   conn->writesockfd = CURL_SOCKET_BAD;
   conn->connection_id = -1;    /* no ID */
-  conn->primary.remote_port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown at this point */
 
   /* Default protocol-independent behavior does not support persistent
@@ -2042,7 +2011,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
         valid = FALSE;
     }
     if(valid)
-      conn->primary.remote_port = conn->remote_port = (unsigned short)port;
+      conn->remote_port = (unsigned short)port;
   }
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
@@ -2101,33 +2070,21 @@ static CURLcode setup_range(struct Curl_easy *data)
 static CURLcode setup_connection_internals(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
-  const struct Curl_handler *p;
   const char *hostname;
   int port;
   CURLcode result;
 
-  /* Perform setup complement if some. */
-  p = conn->handler;
-
-  if(p->setup_connection) {
-    result = (*p->setup_connection)(data, conn);
-
+  if(conn->handler->setup_connection) {
+    result = conn->handler->setup_connection(data, conn);
     if(result)
       return result;
-
-    p = conn->handler;              /* May have changed. */
   }
-
-  if(conn->primary.remote_port < 0)
-    /* we check for -1 here since if proxy was detected already, this was
-       likely already set to the proxy port */
-    conn->primary.remote_port = p->defport;
 
   /* Now create the destination name */
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
     hostname = conn->http_proxy.host.name;
-    port = conn->primary.remote_port;
+    port = conn->http_proxy.port;
   }
   else
 #endif
@@ -2388,12 +2345,8 @@ static CURLcode parse_proxy(struct Curl_easy *data,
         port = CURL_DEFAULT_PROXY_PORT;
     }
   }
-  if(port >= 0) {
+  if(port >= 0)
     proxyinfo->port = port;
-    if(conn->primary.remote_port < 0 || sockstype ||
-       !conn->socks_proxy.host.rawalloc)
-      conn->primary.remote_port = port;
-  }
 
   /* now, clone the proxy hostname */
   uc = curl_url_get(uhp, CURLUPART_HOST, &host, CURLU_URLDECODE);
@@ -3302,6 +3255,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
                                struct Curl_dns_entry **pdns)
 {
   struct hostname *ehost;
+  int eport;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
   const char *peertype = "host";
   CURLcode result;
@@ -3331,6 +3285,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
   if(CONN_IS_PROXIED(conn)) {
     ehost = conn->bits.socksproxy ? &conn->socks_proxy.host :
       &conn->http_proxy.host;
+    eport = conn->bits.socksproxy ? conn->socks_proxy.port :
+      conn->http_proxy.port;
     peertype = "proxy";
   }
   else
@@ -3339,8 +3295,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     ehost = conn->bits.conn_to_host ? &conn->conn_to_host : &conn->host;
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
-    conn->primary.remote_port = conn->bits.conn_to_port ? conn->conn_to_port :
-      conn->remote_port;
+    eport = conn->bits.conn_to_port ? conn->conn_to_port : conn->remote_port;
   }
 
   /* Resolve target host right on */
@@ -3349,7 +3304,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   result = Curl_resolv_timeout(data, conn->hostname_resolve,
-                               conn->primary.remote_port, conn->ip_version,
+                               eport, conn->ip_version,
                                pdns, timeout_ms);
   DEBUGASSERT(!result || !*pdns);
   if(result == CURLE_AGAIN) {
