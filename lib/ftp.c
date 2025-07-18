@@ -1807,7 +1807,7 @@ static char *control_address_dup(struct Curl_easy *data,
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
     return strdup(conn->host.name);
 #endif
-  if(!Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET, &is_ipv6, &ipquad))
+  if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad))
     return strdup(ipquad.remote_ip);
   return NULL;
 }
