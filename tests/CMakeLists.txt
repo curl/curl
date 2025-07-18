@@ -45,7 +45,12 @@ add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(tunit)
 add_subdirectory(unit)
-add_subdirectory(certs)
+
+# Internal option to increase performance for build tests
+option(_CURL_DISABLE_TEST_CERTS "Disable generating test certificates" OFF)
+if(NOT _CURL_DISABLE_TEST_CERTS)
+  add_subdirectory(certs)
+endif()
 
 # Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
 #include <stdint.h>
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
@@ -488,7 +488,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *value, size_t valuelen,
                      uint8_t flags,
                      void *userp);
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int error_callback(nghttp2_session *session, const char *msg,
                           size_t len, void *userp);
 #endif
@@ -523,7 +523,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_begin_headers_callback(
     cbs, on_begin_headers);
   nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
 #endif
 
@@ -1779,7 +1779,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   return (nread == 0) ? NGHTTP2_ERR_DEFERRED : nread;
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -3008,7 +3008,7 @@ void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data)
   return Curl_crealloc(ptr, size);
 }
 
-#else /* !USE_NGHTTP2 */
+#else /* CURL_DISABLE_HTTP || !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */
 #include <curl/curl.h>
@@ -3027,4 +3027,4 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
   return NULL;
 }
 
-#endif /* USE_NGHTTP2 */
+#endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */

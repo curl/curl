@@ -149,6 +149,7 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 };
 #endif
 
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static const struct alpn_spec *
 alpn_get_spec(http_majors allowed, bool use_alpn)
 {
@@ -167,6 +168,7 @@ alpn_get_spec(http_majors allowed, bool use_alpn)
      Avoid "http/1.0" because some servers do not support it. */
   return &ALPN_SPEC_H11;
 }
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 #endif /* USE_SSL */
 
 
@@ -1640,6 +1642,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   DEBUGASSERT(data->conn);
 
 #ifdef CURL_DISABLE_HTTP
+  (void)conn;
   /* We only support ALPN for HTTP so far. */
   DEBUGASSERT(!conn->bits.tls_enable_alpn);
   ctx = cf_ctx_new(data, NULL);

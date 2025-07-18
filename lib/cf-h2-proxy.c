@@ -24,7 +24,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
+  defined(USE_NGHTTP2)
 
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
@@ -1606,4 +1607,4 @@ out:
   return result;
 }
 
-#endif /* defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY) */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY && USE_NGHTTP2 */
