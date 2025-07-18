@@ -1,16 +1,21 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
+anonymou
+aNULL
+bu
 clen
-te
-wont
-statics
-nome
-wast
-numer
-anull
+CNA
+hel
+htpt
 inout
-msdos
-ba
-fo
-ede
+PASE
+passwor
+perfec
+proxys
+seh
+ser
+strat
+te
+UE
+WONT

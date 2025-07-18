@@ -2067,7 +2067,7 @@ static CURLcode client_write_header(struct Curl_easy *data,
    * the body write callback when data->set.include_header is set
    * via CURLOPT_HEADER.
    * For historic reasons, FTP never played this game and expects
-   * all its HEADERs to do that always. Set that flag during the
+   * all its headers to do that always. Set that flag during the
    * call to Curl_client_write() so it does the right thing.
    *
    * Notice that we cannot enable this flag for FTP in general,

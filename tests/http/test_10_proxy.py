@@ -235,7 +235,7 @@ class TestProxy:
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
-    def test_10_09_reuse_ser(self, env: Env, httpd, nghttpx_fwd, tunnel):
+    def test_10_09_reuse_server(self, env: Env, httpd, nghttpx_fwd, tunnel):
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
         curl = CurlClient(env=env)

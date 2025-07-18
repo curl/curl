@@ -51,7 +51,7 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   X509 *cert = NULL;
   BIO *bio = NULL;
@@ -124,7 +124,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     "-----END RSA PRIVATE KEY-----\n";
 
   (void)curl; /* avoid warnings */
-  (void)parm; /* avoid warnings */
+  (void)pointer; /* avoid warnings */
 
   /* get a BIO */
   bio = BIO_new_mem_buf((char *)mypem, -1);

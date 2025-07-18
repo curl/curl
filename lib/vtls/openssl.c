@@ -1516,7 +1516,7 @@ int cert_stuff(struct Curl_easy *data,
         goto fail;
       }
 
-      if(!SSL_CTX_check_private_key (ctx)) {
+      if(!SSL_CTX_check_private_key(ctx)) {
         failf(data, "private key from PKCS12 file '%s' "
               "does not match certificate in same file", cert_file);
         goto fail;

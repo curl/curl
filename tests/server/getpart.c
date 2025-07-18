@@ -244,11 +244,11 @@ int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
 # define MAX_TAG_LEN 200
-  char couter[MAX_TAG_LEN + 1]; /* current outermost section */
-  char cmain[MAX_TAG_LEN + 1];  /* current main section */
-  char csub[MAX_TAG_LEN + 1];   /* current sub section */
-  char ptag[MAX_TAG_LEN + 1];   /* potential tag */
-  char patt[MAX_TAG_LEN + 1];   /* potential attributes */
+  char curouter[MAX_TAG_LEN + 1]; /* current outermost section */
+  char curmain[MAX_TAG_LEN + 1];  /* current main section */
+  char cursub[MAX_TAG_LEN + 1];   /* current sub section */
+  char ptag[MAX_TAG_LEN + 1];     /* potential tag */
+  char patt[MAX_TAG_LEN + 1];     /* potential attributes */
   char *buffer = NULL;
   char *ptr;
   char *end;
@@ -278,7 +278,7 @@ int getpart(char **outbuf, size_t *outlen,
     return GPE_OUT_OF_MEMORY;
   *(*outbuf) = '\0';
 
-  couter[0] = cmain[0] = csub[0] = ptag[0] = patt[0] = '\0';
+  curouter[0] = curmain[0] = cursub[0] = ptag[0] = patt[0] = '\0';
 
   while((error = readline(&buffer, &bufsize, &datalen, stream)) == GPE_OK) {
 
@@ -314,10 +314,10 @@ int getpart(char **outbuf, size_t *outlen,
       memcpy(ptag, ptr, len.uns);
       ptag[len.uns] = '\0';
 
-      if((STATE_INSUB == state) && !strcmp(csub, ptag)) {
+      if((STATE_INSUB == state) && !strcmp(cursub, ptag)) {
         /* end of current sub section */
         state = STATE_INMAIN;
-        csub[0] = '\0';
+        cursub[0] = '\0';
         if(in_wanted_part) {
           /* Do we need to base64 decode the data? */
           if(base64) {
@@ -330,10 +330,10 @@ int getpart(char **outbuf, size_t *outlen,
           break;
         }
       }
-      else if((STATE_INMAIN == state) && !strcmp(cmain, ptag)) {
+      else if((STATE_INMAIN == state) && !strcmp(curmain, ptag)) {
         /* end of current main section */
         state = STATE_OUTER;
-        cmain[0] = '\0';
+        curmain[0] = '\0';
         if(in_wanted_part) {
           /* Do we need to base64 decode the data? */
           if(base64) {
@@ -346,10 +346,10 @@ int getpart(char **outbuf, size_t *outlen,
           break;
         }
       }
-      else if((STATE_OUTER == state) && !strcmp(couter, ptag)) {
+      else if((STATE_OUTER == state) && !strcmp(curouter, ptag)) {
         /* end of outermost file section */
         state = STATE_OUTSIDE;
-        couter[0] = '\0';
+        curouter[0] = '\0';
         if(in_wanted_part)
           break;
       }
@@ -393,21 +393,21 @@ int getpart(char **outbuf, size_t *outlen,
 
       if(STATE_OUTSIDE == state) {
         /* outermost element (<testcase>) */
-        strcpy(couter, ptag);
+        strcpy(curouter, ptag);
         state = STATE_OUTER;
         continue;
       }
       else if(STATE_OUTER == state) {
         /* start of a main section */
-        strcpy(cmain, ptag);
+        strcpy(curmain, ptag);
         state = STATE_INMAIN;
         continue;
       }
       else if(STATE_INMAIN == state) {
         /* start of a sub section */
-        strcpy(csub, ptag);
+        strcpy(cursub, ptag);
         state = STATE_INSUB;
-        if(!strcmp(cmain, main) && !strcmp(csub, sub)) {
+        if(!strcmp(curmain, main) && !strcmp(cursub, sub)) {
           /* start of wanted part */
           in_wanted_part = 1;
           if(strstr(patt, "base64="))
