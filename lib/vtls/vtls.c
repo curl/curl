@@ -1648,6 +1648,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   DEBUGASSERT(data->conn);
 
 #ifdef CURL_DISABLE_HTTP
+  (void)conn;
   /* We only support ALPN for HTTP so far. */
   DEBUGASSERT(!conn->bits.tls_enable_alpn);
   ctx = cf_ctx_new(data, NULL);
