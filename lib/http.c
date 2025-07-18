@@ -2688,8 +2688,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
     if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.proxy && !conn->bits.tunnel_proxy
-      ) {
+       conn->bits.proxy && !conn->bits.tunnel_proxy) {
       result = Curl_http2_switch(data);
       if(result)
         goto fail;
