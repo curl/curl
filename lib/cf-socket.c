@@ -1600,11 +1600,10 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* use this socket from now on */
   cf->conn->sock[cf->sockindex] = ctx->sock;
   set_local_ip(cf, data);
-  if(cf->sockindex == FIRSTSOCKET) {
-  #ifdef USE_IPV6
+#ifdef USE_IPV6
+  if(cf->sockindex == FIRSTSOCKET)
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6);
-  #endif
-  }
+#endif
   ctx->active = TRUE;
 }
 

@@ -1927,11 +1927,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
-     /*
-     * This connection uses a proxy and we need to connect to the proxy again
+    /* This connection uses a proxy and we need to connect to the proxy again
      * here. We do not want to rely on a former host lookup that might've
-     * expired now, instead we remake the lookup here and now!
-     */
+     * expired now, instead we remake the lookup here and now! */
     struct ip_quadruple ipquad;
     int is_ipv6;
     const char * const host_name = conn->bits.socksproxy ?
