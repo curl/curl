@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
 #include <stdint.h>
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
@@ -3008,7 +3008,7 @@ void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data)
   return Curl_crealloc(ptr, size);
 }
 
-#else /* !USE_NGHTTP2 */
+#else /* CURL_DISABLE_HTTP || !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */
 #include <curl/curl.h>
@@ -3027,4 +3027,4 @@ char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
   return NULL;
 }
 
-#endif /* USE_NGHTTP2 */
+#endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */
