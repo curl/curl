@@ -199,7 +199,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 
 
 static void trc_infof(struct Curl_easy *data,
