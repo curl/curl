@@ -2674,6 +2674,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   const char *p_accept;      /* Accept: string */
   unsigned char httpversion;
   const char *alpn;
+  const char *info_version = NULL;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that are not yet sent, since we can deal with
@@ -2682,6 +2683,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   alpn = Curl_conn_get_alpn_negotiated(data, conn);
   if(alpn && !strcmp("h3", alpn)) {
     DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
+    info_version = "HTTP/3";
   }
   else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
@@ -2694,7 +2696,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
     else
 #endif
-      DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
+    DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
+    info_version = "HTTP/2";
   }
   else {
     /* Check if user wants to use HTTP/2 with clear TCP */
@@ -2703,8 +2706,14 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       result = Curl_http2_switch(data);
       if(result)
         goto fail;
+      info_version = "HTTP/2";
     }
+    else
+      info_version = "HTTP/1.x";
   }
+
+  if(info_version && !data->conn->bits.reuse)
+    infof(data, "using %s", info_version);
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse

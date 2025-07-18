@@ -1793,17 +1793,23 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
 }
 
 
-static char *control_address(struct connectdata *conn)
+static char *control_address_dup(struct Curl_easy *data,
+                                 struct connectdata *conn)
 {
+    struct ip_quadruple ipquad;
+    int is_ipv6;
+
   /* Returns the control connection IP address.
      If a proxy tunnel is used, returns the original hostname instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-    return conn->host.name;
+    return strdup(conn->host.name);
 #endif
-  return conn->primary.remote_ip;
+  if(!Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET, &is_ipv6, &ipquad))
+    return strdup(ipquad.remote_ip);
+  return NULL;
 }
 
 static bool match_pasv_6nums(const char *p,
@@ -1856,7 +1862,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
         ftpc->newport = (unsigned short)num;
-        ftpc->newhost = strdup(control_address(conn));
+        ftpc->newhost = control_address_dup(data, conn);
         if(!ftpc->newhost)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -1900,7 +1906,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       infof(data, "Skip %u.%u.%u.%u for data connection, reuse %s instead",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
-      ftpc->newhost = strdup(control_address(conn));
+      ftpc->newhost = control_address_dup(data, conn);
     }
     else
       ftpc->newhost = aprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
@@ -1921,17 +1927,26 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
-    /*
+     /*
      * This connection uses a proxy and we need to connect to the proxy again
      * here. We do not want to rely on a former host lookup that might've
      * expired now, instead we remake the lookup here and now!
      */
+    struct ip_quadruple ipquad;
+    int is_ipv6;
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
-    (void)Curl_resolv_blocking(data, host_name, conn->primary.remote_port,
-                               conn->ip_version, &dns);
+
+    result = Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET,
+                                   &is_ipv6, &ipquad);
+    if(result)
+      return result;
+
+    (void)Curl_resolv_blocking(data, host_name, ipquad.remote_port,
+                               is_ipv6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4,
+                               &dns);
     /* we connect to the proxy's port */
-    connectport = (unsigned short)conn->primary.remote_port;
+    connectport = (unsigned short)ipquad.remote_port;
 
     if(!dns) {
       failf(data, "cannot resolve proxy host %s:%hu", host_name, connectport);
@@ -1947,7 +1962,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
       free(ftpc->newhost);
-      ftpc->newhost = strdup(control_address(conn));
+      ftpc->newhost = control_address_dup(data, conn);
       if(!ftpc->newhost)
         return CURLE_OUT_OF_MEMORY;
     }

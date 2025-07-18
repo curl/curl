@@ -404,6 +404,10 @@ bool Curl_conn_get_ssl_info(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
                             struct curl_tlssessioninfo *info);
 
+CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
+                               struct connectdata *conn, int sockindex,
+                               int *is_ipv6, struct ip_quadruple *ipquad);
+
 /**
  * Connection provides multiplexing of easy handles at `socketindex`.
  */
