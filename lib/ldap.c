@@ -335,6 +335,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
   char *user = NULL;
   char *passwd = NULL;
+  struct ip_quadruple ipquad;
+  int is_ipv6;
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
@@ -351,6 +353,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     result = CURLE_URL_MALFORMAT;
     goto quit;
   }
+
+  result = Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad);
+  if(result)
+    goto quit;
 
   /* Get the URL scheme (either ldap or ldaps) */
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET))
@@ -383,7 +389,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef HAVE_LDAP_SSL
 #ifdef USE_WIN32_LDAP
     /* Win32 LDAP SDK does not support insecure mode without CA! */
-    server = ldap_sslinit(host, (curl_ldap_num_t)conn->primary.remote_port, 1);
+    server = ldap_sslinit(host, (curl_ldap_num_t)ipquad.remote_port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else
     int ldap_option;
@@ -422,10 +428,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-    server = ldap_init(host, conn->primary.remote_port);
+    server = ldap_init(host, ipquad.remote_port);
     if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->primary.remote_port);
+            conn->host.dispname, ipquad.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
@@ -465,10 +471,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
   else {
-    server = ldap_init(host, (curl_ldap_num_t)conn->primary.remote_port);
+    server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
     if(!server) {
       failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, conn->primary.remote_port);
+            conn->host.dispname, ipquad.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
