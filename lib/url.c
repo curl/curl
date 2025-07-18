@@ -2070,21 +2070,14 @@ static CURLcode setup_range(struct Curl_easy *data)
 static CURLcode setup_connection_internals(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
-  const struct Curl_handler *p;
   const char *hostname;
   int port;
   CURLcode result;
 
-  /* Perform setup complement if some. */
-  p = conn->handler;
-
-  if(p->setup_connection) {
-    result = (*p->setup_connection)(data, conn);
-
+  if(conn->handler->setup_connection) {
+    result = conn->handler->setup_connection(data, conn);
     if(result)
       return result;
-
-    p = conn->handler;              /* May have changed. */
   }
 
   /* Now create the destination name */
