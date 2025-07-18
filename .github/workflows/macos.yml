@@ -345,7 +345,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
