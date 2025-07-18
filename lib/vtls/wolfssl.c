@@ -1542,6 +1542,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  (void)cf;
 #endif
 
   if(pinnedpubkey) {
