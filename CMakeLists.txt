@@ -1068,7 +1068,7 @@ if(USE_SSLS_EXPORT)
   if(_ssl_enabled)
     message(STATUS "SSL export enabled.")
   else()
-    message(FATAL_ERROR "SSL session export requires SSL enabled")
+    message(WARNING "SSL session export requires SSL enabled")
   endif()
 endif()
 
