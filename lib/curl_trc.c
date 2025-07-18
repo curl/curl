@@ -463,7 +463,7 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_happy_eyeballs, TRC_CT_NETWORK },
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
 #endif
 #ifdef USE_SSL
