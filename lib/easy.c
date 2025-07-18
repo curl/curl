@@ -950,7 +950,11 @@ static void dupeasy_meta_freeentry(void *p)
 CURL *curl_easy_duphandle(CURL *d)
 {
   struct Curl_easy *data = d;
-  struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
+  struct Curl_easy *outcurl = NULL;
+
+  if(!GOOD_EASY_HANDLE(data))
+    goto fail;
+  outcurl = calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
     goto fail;
 
@@ -1074,6 +1078,9 @@ fail:
 void curl_easy_reset(CURL *d)
 {
   struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return;
+
   Curl_req_hard_reset(&data->req, data);
   Curl_hash_clean(&data->meta_hash);
 
@@ -1213,6 +1220,8 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
   struct connectdata *c;
   struct Curl_easy *data = d;
 
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
@@ -1288,6 +1297,8 @@ CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
   size_t written = 0;
   CURLcode result;
   struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
