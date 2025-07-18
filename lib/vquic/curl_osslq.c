@@ -24,7 +24,8 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_OPENSSL_QUIC) && \
+  defined(USE_NGHTTP3)
 
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
@@ -2443,4 +2444,4 @@ void Curl_osslq_ver(char *p, size_t len)
   (void)msnprintf(p, len, "nghttp3/%s", ht3->version_str);
 }
 
-#endif /* USE_OPENSSL_QUIC && USE_NGHTTP3 */
+#endif /* !CURL_DISABLE_HTTP && USE_OPENSSL_QUIC && USE_NGHTTP3 */
