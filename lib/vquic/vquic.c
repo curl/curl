@@ -52,7 +52,7 @@
 #include "../memdebug.h"
 
 
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    2
@@ -728,7 +728,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#else /* USE_HTTP3 */
+#else /* CURL_DISABLE_HTTP || !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
@@ -741,4 +741,4 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !USE_HTTP3 */
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */

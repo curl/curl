@@ -218,10 +218,10 @@ static CURLcode sftp_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
-#ifndef DEBUGBUILD
-#define myssh_to(x,y,z) myssh_set_state(x,y,z)
-#else
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define myssh_to(x,y,z) myssh_set_state(x,y,z, __LINE__)
+#else
+#define myssh_to(x,y,z) myssh_set_state(x,y,z)
 #endif
 
 /*
@@ -231,7 +231,7 @@ static CURLcode sftp_error_to_CURLE(int err)
 static void myssh_set_state(struct Curl_easy *data,
                             struct ssh_conn *sshc,
                             sshstate nowstate
-#ifdef DEBUGBUILD
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
                           , int lineno
 #endif
   )

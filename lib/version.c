@@ -197,10 +197,10 @@ char *curl_version(void)
 #ifdef USE_SSH
   char ssh_version[30];
 #endif
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   char h2_version[30];
 #endif
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   char h3_version[30];
 #endif
 #ifdef USE_LIBRTMP
@@ -258,11 +258,11 @@ char *curl_version(void)
   Curl_ssh_version(ssh_version, sizeof(ssh_version));
   src[i++] = ssh_version;
 #endif
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   Curl_http2_ver(h2_version, sizeof(h2_version));
   src[i++] = h2_version;
 #endif
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   Curl_quic_ver(h3_version, sizeof(h3_version));
   src[i++] = h3_version;
 #endif
@@ -488,10 +488,10 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_HSTS
   FEATURE("HSTS",        NULL,                CURL_VERSION_HSTS),
 #endif
-#if defined(USE_NGHTTP2)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
 #endif
-#if defined(USE_HTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   FEATURE("HTTP3",       NULL,                CURL_VERSION_HTTP3),
 #endif
 #if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
@@ -673,7 +673,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   }
 #endif
 
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   {
     static char quicbuffer[80];
     Curl_quic_ver(quicbuffer, sizeof(quicbuffer));

@@ -24,7 +24,7 @@
 
 #include "../curl_setup.h"
 
-#ifdef USE_SSLS_EXPORT
+#if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
 
 #include "../urldata.h"
 #include "../curl_trc.h"
@@ -343,4 +343,4 @@ out:
   return r;
 }
 
-#endif /* USE_SSLS_EXPORT */
+#endif /* USE_SSL && USE_SSLS_EXPORT */

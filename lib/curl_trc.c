@@ -201,7 +201,6 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
 
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 
-
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
                       const char *opt_id, int opt_id_idx,
@@ -463,7 +462,7 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_happy_eyeballs, TRC_CT_NETWORK },
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
 #endif
 #ifdef USE_SSL
@@ -483,7 +482,7 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_haproxy,        TRC_CT_PROXY },
   { &Curl_cft_socks_proxy,    TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_PROXY */
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
 #if !defined(CURL_DISABLE_HTTP)
@@ -633,17 +632,18 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 #endif
-#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }
 #endif
-
+#ifdef USE_SSL
 void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data;
   (void)fmt;
 }
+#endif
 
 #endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */

@@ -26,7 +26,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>

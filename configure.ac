@@ -5146,7 +5146,7 @@ if test "x$want_ssls_export" != "xno"; then
   SSLS_EXPORT_SUPPORT=''
 
   if test "x$SSL_ENABLED" != "x1"; then
-    AC_MSG_ERROR([--enable-ssls-export ignored: No SSL support])
+    AC_MSG_WARN([--enable-ssls-export ignored: No SSL support])
   else
     SSLS_EXPORT_ENABLED=1
     AC_DEFINE(USE_SSLS_EXPORT, 1, [if SSL session export support is available])
