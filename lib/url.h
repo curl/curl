@@ -79,13 +79,6 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x,y,z)  Curl_nop_stmt
-#else
-void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
-                         int sockindex);
-#endif
-
 /**
  * Return TRUE iff the given connection is considered dead.
  * @param nowp      NULL or pointer to time being checked against.
