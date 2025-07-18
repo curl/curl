@@ -1682,10 +1682,23 @@ static void opt_depr(struct GlobalConfig *global,
   warnf(global, "--%s is deprecated and has no function anymore", a->lname);
 }
 
+static ParameterError opt_sslver(struct OperationConfig *config,
+                                 unsigned char ver)
+{
+  if(config->ssl_version_max &&
+     (config->ssl_version_max < ver)) {
+    errorf(config->global, "Minimum TLS version set higher than max");
+    return PARAM_BAD_USE;
+  }
+  config->ssl_version = ver;
+  return PARAM_OK;
+}
+
 /* opt_none is the function that handles ARG_NONE options */
 static ParameterError opt_none(struct OperationConfig *config,
                                const struct LongShort *a)
 {
+  ParameterError err = PARAM_OK;
   switch(a->cmd) {
   case C_ANYAUTH: /* --anyauth */
     config->authtype = CURLAUTH_ANY;
@@ -1731,19 +1744,19 @@ static ParameterError opt_none(struct OperationConfig *config,
       sethttpver(config, CURL_HTTP_VERSION_3ONLY);
     break;
   case C_TLSV1: /* --tlsv1 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1;
+    err = opt_sslver(config, 1);
     break;
   case C_TLSV1_0: /* --tlsv1.0 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+    err = opt_sslver(config, 1);
     break;
   case C_TLSV1_1: /* --tlsv1.1 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+    err = opt_sslver(config, 2);
     break;
   case C_TLSV1_2: /* --tlsv1.2 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+    err = opt_sslver(config, 3);
     break;
   case C_TLSV1_3: /* --tlsv1.3 */
-    config->ssl_version = CURL_SSLVERSION_TLSv1_3;
+    err = opt_sslver(config, 4);
     break;
   case C_IPV4: /* --ipv4 */
     config->ip_version = CURL_IPRESOLVE_V4;
@@ -1758,7 +1771,7 @@ static ParameterError opt_none(struct OperationConfig *config,
     config->proxy_ssl_version = CURL_SSLVERSION_TLSv1;
     break;
   }
-  return PARAM_OK;
+  return err;
 }
 
 /* opt_bool is the function that handles boolean options */
@@ -2423,6 +2436,10 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     break;
   case C_TLS_MAX: /* --tls-max */
     err = str2tls_max(&config->ssl_version_max, nextarg);
+    if(!err && (config->ssl_version_max < config->ssl_version)) {
+      errorf(global, "--tls-max set lower than minimum accepted version");
+      err = PARAM_BAD_USE;
+    }
     break;
   case C_HAPPY_EYEBALLS_TIMEOUT_MS: /* --happy-eyeballs-timeout-ms */
     err = str2unum(&config->happy_eyeballs_timeout_ms, nextarg);
