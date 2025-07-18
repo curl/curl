@@ -308,7 +308,8 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
   }
 }
 
-static CURLcode ws_send_raw_blocking(CURL *data, struct websocket *ws,
+static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
+                                     struct websocket *ws,
                                      const char *buffer, size_t buflen);
 
 typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
@@ -1155,6 +1156,8 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
 
   *nread = 0;
   *metap = NULL;
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(!conn) {
     /* Unhappy hack with lifetimes of transfers and connection */
@@ -1288,12 +1291,12 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   return CURLE_OK;
 }
 
-static CURLcode ws_send_raw_blocking(CURL *d, struct websocket *ws,
+static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
+                                     struct websocket *ws,
                                      const char *buffer, size_t buflen)
 {
   CURLcode result = CURLE_OK;
   size_t nwritten;
-  struct Curl_easy *data = d;
 
   (void)ws;
   while(buflen) {
@@ -1378,6 +1381,8 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = d;
 
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
               ", flags=%x), raw=%d",
               buflen, fragsize, flags, data->set.ws_raw_mode);
