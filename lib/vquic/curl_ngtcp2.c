@@ -24,7 +24,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 #include <ngtcp2/ngtcp2.h>
 #include <nghttp3/nghttp3.h>
 
