@@ -1502,6 +1502,7 @@ if(ENABLE_UNIX_SOCKETS AND NOT WINCE)
     check_struct_has_member("struct sockaddr_un" "sun_path" "sys/un.h" USE_UNIX_SOCKETS)
   endif()
 else()
+  set(USE_UNIX_SOCKETS 0)
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
