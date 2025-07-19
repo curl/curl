@@ -303,6 +303,10 @@ jobs:
             compiler: llvm@18
             install: brotli mbedtls zstd
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON
+          - name: 'mbedTLS openldap brotli zstd TEST'
+            install: brotli mbedtls zstd openldap
+            install_steps: pytest
+            generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
