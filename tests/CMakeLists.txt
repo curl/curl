@@ -53,9 +53,12 @@ function(curl_add_runtests _targetname _test_flags)
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
+  if(BUILD_CURL_EXE)
+    list(APPEND _depends curlinfo)
+  endif()
   if(NOT _targetname STREQUAL "test-ci")
     if(BUILD_CURL_EXE)
-      list(APPEND _depends ${EXE_NAME} curlinfo)
+      list(APPEND _depends ${EXE_NAME})
     endif()
     list(APPEND _depends "testdeps")
   endif()
