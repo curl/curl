@@ -39,6 +39,9 @@ Debug
 crypto
 aws
 </features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
 
 <name>
 HTTP AWS_SIGV4 for AWS S3: MIMEPOST

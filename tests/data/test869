@@ -42,6 +42,9 @@ Debug
 crypto
 digest
 </features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
 <name>
 POP3 DIGEST-MD5 authentication
 </name>

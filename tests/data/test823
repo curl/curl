@@ -40,6 +40,9 @@ Debug
 crypto
 digest
 </features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
 <name>
 IMAP DIGEST-MD5 authentication
 </name>
