@@ -310,6 +310,7 @@ class Httpd:
                 f'LogLevel {self._get_log_level()}',
                 'StartServers 4',
                 'ReadBufferSize 16000',
+                'KeepAliveTimeout 30',  # CI may exceed the default of 5 sec
                 'H2MinWorkers 16',
                 'H2MaxWorkers 256',
                 f'TypesConfig "{self._conf_dir}/mime.types',
