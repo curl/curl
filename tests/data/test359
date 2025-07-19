@@ -40,7 +40,7 @@ http/2
 HTTPS GET translated by alt-svc lookup to HTTP/2 GET
 </name>
 <setenv>
-# make debug-curl accept Alt-Svc over plain HTTP
+# make Debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
 <command>
