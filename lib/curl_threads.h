@@ -48,18 +48,20 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
+#else
+#  define CURL_STDCALL
+#endif
+
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#define CURL_THREAD_RETURN_T DWORD
+#else
+#define CURL_THREAD_RETURN_T unsigned int
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-                                 DWORD
-#else
-                                 unsigned int
-#endif
-                                 (CURL_STDCALL *func) (void *),
-                                 void *arg);
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
+                                 (CURL_STDCALL *func) (void *), void *arg);
 
 void Curl_thread_destroy(curl_thread_t *hnd);
 
