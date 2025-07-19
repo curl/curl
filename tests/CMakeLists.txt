@@ -31,7 +31,7 @@ configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
 if(BUILD_CURL_EXE)
-  add_dependencies(testdeps curlinfo)
+  add_dependencies(testdeps ${EXE_NAME} curlinfo)
 endif()
 
 if(CURL_CLANG_TIDY)

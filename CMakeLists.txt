@@ -175,6 +175,7 @@ else()
 endif()
 
 set(LIB_NAME "libcurl")
+set(EXE_NAME "curl")
 
 set_property(DIRECTORY APPEND PROPERTY INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/include")
 
