@@ -272,7 +272,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               logmsg("instructed to stream");
               req->rcmd = RCMD_STREAM;
             }
-            else if(1 == sscanf(ptr, "pipe: %d", &num)) {
+            else if(sscanf(ptr, "pipe: %d", &num) == 1) {
               logmsg("instructed to allow a pipe size of %d", num);
               if(num < 0)
                 logmsg("negative pipe size ignored");
@@ -280,7 +280,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
                 req->pipe = num-1; /* decrease by one since we don't count the
                                       first request in this number */
             }
-            else if(1 == sscanf(ptr, "skip: %d", &num)) {
+            else if(sscanf(ptr, "skip: %d", &num) == 1) {
               logmsg("instructed to skip this number of bytes %d", num);
               req->skip = num;
             }
@@ -786,7 +786,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   else {
     FILE *stream = test2fopen(req->testno, logdir);
     char partbuf[80]="data";
-    if(0 != req->partno)
+    if(req->partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", req->partno);
     if(!stream) {
       error = errno;
@@ -937,7 +937,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     int num;
     ptr = cmd;
     do {
-      if(2 == sscanf(ptr, "%31s %d", command, &num)) {
+      if(sscanf(ptr, "%31s %d", command, &num) == 2) {
         if(!strcmp("wait", command)) {
           logmsg("Told to sleep for %d seconds", num);
           quarters = num * 4;
@@ -1101,8 +1101,8 @@ static int test_rtspd(int argc, char *argv[])
   }
 
   flag = 1;
-  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
