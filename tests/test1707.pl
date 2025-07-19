@@ -98,7 +98,7 @@ while(<R>) {
 }
 close(R);
 
-my $error;
+my $error = 0;
 if(scalar(@curlout) != scalar(@txtout)) {
     printf "curl -h $opt is %d lines, $txt says %d lines\n",
         scalar(@curlout), scalar(@txtout);

@@ -10,6 +10,11 @@
 # might have a problem with that we still deem is fine.
 #
 
+use strict;
+use warnings;
+
+my @asyms;
+
 open(S, "<./docs/libcurl/symbols-in-versions")
     || die "can't find symbols-in-versions";
 while(<S>) {

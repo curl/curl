@@ -22,6 +22,9 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+use strict;
+use warnings;
+
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;
 

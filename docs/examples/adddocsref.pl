@@ -25,9 +25,12 @@
 
 # pass files as argument(s)
 
+use strict;
+use warnings;
+
 my $docroot="https://curl.se/libcurl/c";
 
-for $f (@ARGV) {
+for my $f (@ARGV) {
     open(NEW, ">$f.new");
     open(F, "<$f");
     while(<F>) {
