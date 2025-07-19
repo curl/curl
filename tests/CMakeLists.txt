@@ -30,6 +30,9 @@ mark_as_advanced(TEST_NGHTTPX)
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
+if(BUILD_CURL_EXE)
+  add_dependencies(testdeps curlinfo)
+endif()
 
 if(CURL_CLANG_TIDY)
   add_custom_target(tests-clang-tidy)
@@ -53,9 +56,6 @@ function(curl_add_runtests _targetname _test_flags)
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
-  if(BUILD_CURL_EXE)
-    list(APPEND _depends curlinfo)
-  endif()
   if(NOT _targetname STREQUAL "test-ci")
     if(BUILD_CURL_EXE)
       list(APPEND _depends ${EXE_NAME})
