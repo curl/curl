@@ -26,13 +26,6 @@
 
 #include "../curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
-  !defined(CURL_DISABLE_LDAP) || \
-  !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  !defined(CURL_DISABLE_IMAP) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  !defined(CURL_DISABLE_DOH) || defined(USE_SSL) || !defined(BUILDING_LIBCURL)
 #include <curl/curl.h>
 #include "warnless.h"
 #include "base64.h"
@@ -281,5 +274,3 @@ CURLcode curlx_base64url_encode(const char *inputbuff, size_t insize,
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
 }
-
-#endif /* no users so disabled */
