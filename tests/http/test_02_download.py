@@ -493,6 +493,8 @@ class TestDownload:
     # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
         client = LocalClient(name='tls_session_reuse', env=env)
         if not client.exists():
@@ -503,6 +505,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?&chunks=6&chunk_size=8000'
         client = LocalClient(env=env, name='h2_pausing')
@@ -512,6 +516,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?error=502'
         client = LocalClient(env=env, name='h2_pausing')
@@ -521,6 +527,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?status=200&chunks=1&chunk_size=100'
         client = LocalClient(env=env, name='h2_pausing')
@@ -557,6 +565,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_29_h2_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
