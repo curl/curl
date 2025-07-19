@@ -296,10 +296,10 @@ jobs:
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-          - name: 'mbedTLS !ldap brotli zstd'
+          - name: 'mbedTLS !ldap brotli zstd MultiSSL'
             compiler: llvm@18
             install: brotli mbedtls zstd
-            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
