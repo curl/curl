@@ -30,9 +30,6 @@ mark_as_advanced(TEST_NGHTTPX)
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
-if(BUILD_CURL_EXE)
-  add_dependencies(testdeps ${EXE_NAME} curlinfo)
-endif()
 
 if(CURL_CLANG_TIDY)
   add_custom_target(tests-clang-tidy)
@@ -57,7 +54,10 @@ function(curl_add_runtests _targetname _test_flags)
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
   if(NOT _targetname STREQUAL "test-ci")
-    set(_depends "testdeps")
+    if(BUILD_CURL_EXE)
+      list(APPEND _depends ${EXE_NAME} curlinfo)
+    endif()
+    list(APPEND _depends "testdeps")
   endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
@@ -78,7 +78,10 @@ endfunction()
 function(curl_add_pytests _targetname _test_flags)
   set(_depends "")
   if(NOT _targetname STREQUAL "pytest-ci")
-    set(_depends "clients")
+    if(BUILD_CURL_EXE)
+      list(APPEND _depends ${EXE_NAME})
+    endif()
+    list(APPEND _depends "clients")
   endif()
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}
