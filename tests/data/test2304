@@ -26,7 +26,7 @@ upgrade
 #
 # Client-side
 <client>
-# require debug for the forced CURL_ENTROPY
+# require Debug for the forced CURL_ENTROPY
 <features>
 Debug
 ws
