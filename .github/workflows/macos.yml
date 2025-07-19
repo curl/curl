@@ -309,7 +309,7 @@ jobs:
           - name: 'Rustls'
             compiler: clang
             install: rustls-ffi
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             install_steps: torture
