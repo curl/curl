@@ -294,7 +294,7 @@ jobs:
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             install_steps: pytest
-            generate: -DCURL_USE_WOLFSSL=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
           - name: 'mbedTLS !ldap brotli zstd MultiSSL'
             compiler: llvm@18
             install: brotli mbedtls zstd
