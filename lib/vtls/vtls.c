@@ -137,9 +137,11 @@ static bool blobcmp(struct curl_blob *first, struct curl_blob *second)
 }
 
 #ifdef USE_SSL
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static const struct alpn_spec ALPN_SPEC_H11 = {
   { ALPN_HTTP_1_1 }, 1
 };
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 #ifdef USE_HTTP2
 static const struct alpn_spec ALPN_SPEC_H2 = {
   { ALPN_H2 }, 1
