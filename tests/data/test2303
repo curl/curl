@@ -25,6 +25,9 @@ hello
 Debug
 ws
 </features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
 <server>
 http
 </server>
