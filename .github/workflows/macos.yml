@@ -264,8 +264,9 @@ jobs:
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
           - name: 'OpenSSL'
             compiler: clang
+            install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
@@ -277,8 +278,8 @@ jobs:
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
-            install: gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
+            install: libnghttp3 libngtcp2 gsasl rtmpdump
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGHTTP3=ON -DUSE_NGTCP2=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
@@ -312,13 +313,15 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
           - name: 'OpenSSL torture !FTP'
             compiler: clang
+            install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
             tflags: -t --shallow=25 !FTP
           - name: 'OpenSSL torture FTP'
             compiler: clang
+            install: libnghttp3
             install_steps: torture
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
             tflags: -t --shallow=20 FTP
         exclude:
           # opt out jobs from combinations that have the compiler set manually
