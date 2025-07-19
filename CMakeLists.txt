@@ -480,6 +480,7 @@ if(CURL_DISABLE_HTTP)
   set(CURL_DISABLE_RTSP ON)
   set(CURL_DISABLE_ALTSVC ON)
   set(CURL_DISABLE_HSTS ON)
+  set(CURL_DISABLE_WEBSOCKETS ON)
 endif()
 
 # Corresponds to HTTP_ONLY in lib/curl_setup.h
