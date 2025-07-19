@@ -882,6 +882,14 @@ static int multissl_init(void)
   return 1;
 }
 
+static CURLcode multissl_random(struct Curl_easy *data,
+                                unsigned char *entropy, size_t length)
+{
+  if(multissl_setup(NULL))
+    return CURLE_FAILED_INIT;
+  return Curl_ssl->random(data, entropy, length);
+}
+
 static CURLcode multissl_connect(struct Curl_cfilter *cf,
                                  struct Curl_easy *data, bool *done)
 {
@@ -943,7 +951,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_version,                  /* version */
   NULL,                              /* shutdown */
   NULL,                              /* data_pending */
-  NULL,                              /* random */
+  multissl_random,                   /* random */
   NULL,                              /* cert_status_request */
   multissl_connect,                  /* connect */
   multissl_adjust_pollset,           /* adjust_pollset */
