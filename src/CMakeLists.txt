@@ -21,6 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
 
 set(_curl_cfiles_gen "")
