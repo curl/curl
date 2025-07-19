@@ -280,6 +280,7 @@ jobs:
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
             generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
             clang-tidy: true
@@ -310,19 +311,16 @@ jobs:
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'OpenSSL torture !FTP'
+            compiler: clang
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: -t --shallow=25 !FTP
             torture: true
           - name: 'OpenSSL torture FTP'
+            compiler: clang
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
             tflags: -t --shallow=20 FTP
             torture: true
         exclude:
-          - { compiler: llvm@18, build: { macos-version-min: '10.15' } }
-          - { compiler: llvm@18, build: { torture: true } }
-          - { compiler: gcc-12, build: { torture: true } }
-          - { compiler: llvm@18, build: { clang-tidy: true } }
-          - { compiler: gcc-12, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
           - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
