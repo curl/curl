@@ -32,9 +32,6 @@ Debug
 crypto
 aws
 </features>
-<setenv>
-CURL_FORCEHOST=1
-</setenv>
 
 <name>
 HTTP AWS_SIGV4 for AWS S3: UPLOAD with unknown INFILESIZE

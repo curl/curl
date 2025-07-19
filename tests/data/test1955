@@ -39,9 +39,6 @@ Debug
 crypto
 aws
 </features>
-<setenv>
-CURL_FORCEHOST=1
-</setenv>
 
 <name>
 HTTP AWS_SIGV4 without X-Xxx-Content-Sha256
