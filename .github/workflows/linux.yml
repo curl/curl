@@ -120,7 +120,7 @@ jobs:
 
           - name: 'mbedtls-pkg MultiSSL'
             install_packages: libnghttp2-dev libmbedtls-dev
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
 
           - name: 'mbedtls-pkg !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
