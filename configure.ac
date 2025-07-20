@@ -5382,7 +5382,7 @@ else
     AC_LANG_PROGRAM([[
       #include <windows.h>
     ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #if (_WIN32_WINNT < 0x600)
       #error
       #endif
     ]])
