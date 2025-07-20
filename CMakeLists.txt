@@ -1609,14 +1609,16 @@ if(WIN32)
   endif()
 
   # Pre-fill detection results based on target OS version
-  if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-     (MINGW AND MINGW64_VERSION VERSION_LESS 2.0) OR
-     WINCE OR WINDOWS_STORE)
-    set(HAVE_IF_NAMETOINDEX 0)
-    unset(HAVE_IF_NAMETOINDEX CACHE)
-  elseif(MSVC OR MINGW)
-    set(HAVE_IF_NAMETOINDEX 1)
-    unset(HAVE_IF_NAMETOINDEX CACHE)
+  if(_CURL_PREFILL)
+    if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
+       (MINGW AND MINGW64_VERSION VERSION_LESS 2.0) OR
+       WINCE OR WINDOWS_STORE)
+      set(HAVE_IF_NAMETOINDEX 0)
+      unset(HAVE_IF_NAMETOINDEX CACHE)
+    elseif(MSVC OR MINGW)
+      set(HAVE_IF_NAMETOINDEX 1)
+      unset(HAVE_IF_NAMETOINDEX CACHE)
+    endif()
   endif()
 endif()
 
