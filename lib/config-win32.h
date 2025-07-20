@@ -48,10 +48,7 @@
 #    ifndef _WIN32_WINNT
 #    define _WIN32_WINNT VS2012_DEF_TARGET
 #    endif
-#    ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
+#    if _WIN32_WINNT < VS2012_MIN_TARGET
 #      ifdef _USING_V110_SDK71_
 #        error VS2012 does not support build targets prior to Windows XP
 #      else
@@ -69,10 +66,7 @@
 #    ifndef _WIN32_WINNT
 #    define _WIN32_WINNT VS2008_DEF_TARGET
 #    endif
-#    ifndef WINVER
-#    define WINVER VS2008_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
+#    if _WIN32_WINNT < VS2008_MIN_TARGET
 #      error VS2008 does not support build targets prior to Windows XP
 #    endif
 #  endif
