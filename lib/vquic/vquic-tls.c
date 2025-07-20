@@ -208,7 +208,7 @@ bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
   return TRUE;
 #elif defined(USE_GNUTLS)
   (void)give_ssl_ctx; /* gnutls always returns its session */
-  info->backend = CURLSSLBACKEND_OPENSSL;
+  info->backend = CURLSSLBACKEND_GNUTLS;
   info->internals = ctx->gtls.session;
   return TRUE;
 #elif defined(USE_WOLFSSL)
