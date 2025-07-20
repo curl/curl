@@ -93,30 +93,6 @@
 #endif
 #endif /* _MSC_VER */
 
-#ifdef _WIN32
-/*
- * Do not include unneeded stuff in Windows headers to avoid compiler
- * warnings and macro clashes.
- * Make sure to define this macro before including any Windows headers.
- */
-#  ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-#  endif
-#  ifndef NOGDI
-#  define NOGDI
-#  endif
-/* Detect Windows App environment which has a restricted access
- * to the Win32 APIs. */
-#  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-     defined(WINAPI_FAMILY)
-#    include <winapifamily.h>
-#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-       !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#      define CURL_WINDOWS_UWP
-#    endif
-#  endif
-#endif
-
 /* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
    C99 (-std=gnu99) mode */
 #if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
@@ -162,6 +138,31 @@
 #endif
 
 #endif /* HAVE_CONFIG_H */
+
+/* Keep this section after config-win32.h to honor a _WIN32_WINNT set there */
+#ifdef _WIN32
+/*
+ * Do not include unneeded stuff in Windows headers to avoid compiler
+ * warnings and macro clashes.
+ * Make sure to define this macro before including any Windows headers.
+ */
+#  ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifndef NOGDI
+#  define NOGDI
+#  endif
+/* Detect Windows App environment which has a restricted access
+ * to the Win32 APIs. */
+#  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+     defined(WINAPI_FAMILY)
+#    include <winapifamily.h>
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+       !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#      define CURL_WINDOWS_UWP
+#    endif
+#  endif
+#endif
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
