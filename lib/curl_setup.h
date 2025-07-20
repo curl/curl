@@ -739,10 +739,6 @@
 #if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
 /* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
 #define NO_OLD_WC_NAMES
-/* Prevent wolfSSL headers including wolfssl/openssl/md4.h, to avoid its
-   MD4_CTX type clashing with the one defined via nettle/md4.h, and used
-   in md4.c when GnuTLS is enabled. */
-#define NO_MD4
 #endif
 
 /* Single point where USE_SPNEGO definition might be defined */

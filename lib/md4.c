@@ -64,10 +64,8 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_GNUTLS)
-#include <nettle/md4.h>
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
-#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 #include <wolfssl/openssl/md4.h>
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
@@ -83,6 +81,8 @@
 #include <CommonCrypto/CommonDigest.h>
 #elif defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
+#elif defined(USE_GNUTLS)
+#include <nettle/md4.h>
 #elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
 #include <mbedtls/md4.h>
 #endif
@@ -93,27 +93,7 @@
 #include "memdebug.h"
 
 
-#if defined(USE_GNUTLS)
-
-typedef struct md4_ctx MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx)
-{
-  md4_init(ctx);
-  return 1;
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  md4_update(ctx, size, data);
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  md4_digest(ctx, MD4_DIGEST_SIZE, result);
-}
-
-#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
 #ifdef OPENSSL_COEXIST
   #define MD4_CTX WOLFSSL_MD4_CTX
@@ -191,6 +171,26 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
   if(ctx->hCryptProv)
     CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
+#elif defined(USE_GNUTLS)
+
+typedef struct md4_ctx MD4_CTX;
+
+static int MD4_Init(MD4_CTX *ctx)
+{
+  md4_init(ctx);
+  return 1;
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+{
+  md4_update(ctx, size, data);
+}
+
+static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+{
+  md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
 #elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
