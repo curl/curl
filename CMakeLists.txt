@@ -1609,14 +1609,17 @@ if(WIN32)
   endif()
 
   # Pre-fill detection results based on target OS version
-  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600 AND  # Windows Vista or newer
-     (MINGW OR MSVC) AND
-     NOT WINCE AND NOT WINDOWS_STORE)
-    set(HAVE_IF_NAMETOINDEX 1)
-  else()
-    set(HAVE_IF_NAMETOINDEX 0)
+  if(_CURL_PREFILL)
+    if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
+       (MINGW AND MINGW64_VERSION VERSION_LESS 2.0) OR
+       WINCE OR WINDOWS_STORE)
+      set(HAVE_IF_NAMETOINDEX 0)
+      unset(HAVE_IF_NAMETOINDEX CACHE)
+    elseif(MSVC OR MINGW)
+      set(HAVE_IF_NAMETOINDEX 1)
+      unset(HAVE_IF_NAMETOINDEX CACHE)
+    endif()
   endif()
-  unset(HAVE_IF_NAMETOINDEX CACHE)
 endif()
 
 if(NOT WIN32)
@@ -1772,12 +1775,14 @@ check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
-check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # iphlpapi.h (Windows Vista+ non-UWP), net/if.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
-if(NOT WIN32)
+if(WIN32)
+  check_symbol_exists("if_nametoindex"  "winsock2.h;iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP
+else()
+  check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)

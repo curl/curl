@@ -4224,7 +4224,6 @@ AC_CHECK_FUNCS([\
   getpwuid_r \
   getrlimit \
   gettimeofday \
-  if_nametoindex \
   mach_absolute_time \
   pipe \
   pipe2 \
@@ -4238,8 +4237,27 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-if test "$curl_cv_native_windows" != 'yes'; then
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_MSG_CHECKING([for if_nametoindex on Windows])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifndef WIN32_LEAN_AND_MEAN
+      #define WIN32_LEAN_AND_MEAN
+      #endif
+      #include <winsock2.h>
+      #include <iphlpapi.h>
+    ]],[[
+      if_nametoindex("");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_IF_NAMETOINDEX, 1, [if you have the 'if_nametoindex' function])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+else
   AC_CHECK_FUNCS([\
+    if_nametoindex \
     realpath \
     sched_yield \
   ])
