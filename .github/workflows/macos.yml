@@ -279,7 +279,7 @@ jobs:
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
             install: libnghttp3 libngtcp2 gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGHTTP3=ON -DUSE_NGTCP2=ON
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
