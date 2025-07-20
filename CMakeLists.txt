@@ -2198,7 +2198,7 @@ curl_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION 
 curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
 curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
 curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-curl_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
+curl_add_if("Rustls"           _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
