@@ -52,7 +52,7 @@ curl> python3 tests/http/scorecard.py -d --download-sizes=1mb --download-count=1
 
 Similar options are available for uploads and requests scenarios.
 
-##sockd
+## sockd
 
 If you have configured curl with `--with-test-sockd=<sockd-path>` for a
 `dante sockd` server installed on your system, you can provide the scorecard

@@ -771,6 +771,7 @@ smtp
 smtps
 SMTPS
 SNI
+sockd
 socketopen
 socketpair
 sockopt
