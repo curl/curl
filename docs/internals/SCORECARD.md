@@ -54,9 +54,9 @@ Similar options are available for uploads and requests scenarios.
 
 ##sockd
 
-If you have configured curl with `--with-test-sockd=<sockd-path>` for a dante
-sockd server installed on your system, you can provide the scorecard with
-arguments `--socks4` or `--socks5` to test performance with a SOCKS proxy
+If you have configured curl with `--with-test-sockd=<sockd-path>` for a
+`dante sockd` server installed on your system, you can provide the scorecard
+with arguments `--socks4` or `--socks5` to test performance with a SOCKS proxy
 involved. (Note: this does not work for HTTP/3)
 
 ## dtrace
