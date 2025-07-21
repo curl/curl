@@ -225,6 +225,8 @@ class EnvConfig:
                 self.caddy = None
 
         self.vsftpd = self.config['vsftpd']['vsftpd']
+        if self.vsftpd == '':
+            self.vsftpd = None
         self._vsftpd_version = None
         if self.vsftpd is not None:
             try:
@@ -255,23 +257,27 @@ class EnvConfig:
                 self.vsftpd = None
 
         self.sockd = self.config['sockd']['sockd']
+        if self.sockd == '':
+            self.sockd = None
         self._sockd_version = None
         if self.sockd is not None:
-            p = subprocess.run(args=[self.sockd, '-v'],
-                               capture_output=True, text=True)
-            assert p.returncode == 0
-            if p.returncode != 0:
-                # not a working vsftpd
+            try:
+                p = subprocess.run(args=[self.sockd, '-v'],
+                                   capture_output=True, text=True)
+                assert p.returncode == 0
+                if p.returncode != 0:
+                    # not a working vsftpd
+                    self.sockd = None
+                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
+                if not m:
+                    m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
+                if m:
+                    self._sockd_version = m.group(1)
+                else:
+                    self.sockd = None
+                    raise Exception(f'Unable to determine sockd version from: {p.stderr}')
+            except Exception:
                 self.sockd = None
-            m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
-            if not m:
-                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
-            if m:
-                self._sockd_version = m.group(1)
-            else:
-                self.sockd = None
-                raise Exception(f'Unable to determine sockd version from: {p.stderr}')
-
 
         self._tcpdump = shutil.which('tcpdump')
 
