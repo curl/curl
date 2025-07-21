@@ -181,6 +181,7 @@ static void socksstate(struct socks_state *sx,
   };
 #endif
 
+  (void)cf;
   (void)data;
   if(oldstate == state)
     /* do not bother when the new state is the same as the old state */

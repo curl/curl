@@ -101,4 +101,3 @@ class TestSocks:
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata
-

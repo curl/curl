@@ -145,7 +145,7 @@ class Dante:
             'socksmethod: none',
             'client pass {',
             '  from: 127.0.0.0/24 to: 0.0.0.0/0',
-	        '  log: error',
+            '  log: error',
             '}',
             'socks pass {',
             '  from: 0.0.0.0/0 to: 0.0.0.0/0',
