@@ -372,6 +372,36 @@ fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
 
+dnl we'd like a sockd as test server
+dnl
+SOCKD_ENABLED="maybe"
+AC_ARG_WITH(test-sockd, [AS_HELP_STRING([--with-test-sockd=PATH],
+                         [where to find dante sockd for testing])],
+  [request_sockd=$withval], [request_sockd=check])
+if test x"$request_sockd" = "xcheck" -o x"$request_sockd" = "xyes"; then
+  if test -x "/usr/sbin/sockd"; then
+    # common location on distros (debian/ubuntu)
+    SOCKD="/usr/sbin/sockd"
+  else
+    AC_PATH_PROG([SOCKD], [sockd])
+    if test "x$SOCKD" = "x"; then
+      AC_PATH_PROG([SOCKD], [sockd])
+    fi
+  fi
+elif test x"$request_sockd" != "xno"; then
+  SOCKD="${request_sockd}"
+  if test ! -x "${SOCKD}"; then
+    AC_MSG_NOTICE([sockd not found as ${SOCKD}, sockd tests disabled])
+    SOCKD_ENABLED="no"
+  else
+    AC_MSG_NOTICE([using SOCKD=$SOCKD for tests])
+  fi
+fi
+if test x"$SOCKD_ENABLED" = "xno"; then
+  SOCKD=""
+fi
+AC_SUBST(SOCKD)
+
 dnl the nghttpx we might use in httpd testing
 if test "x$TEST_NGHTTPX" != "x" -a "x$TEST_NGHTTPX" != "xnghttpx"; then
   HTTPD_NGHTTPX="$TEST_NGHTTPX"
