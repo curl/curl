@@ -139,7 +139,7 @@
 
 #endif /* HAVE_CONFIG_H */
 
-/* Keep this section after config-win32.h to honor an _WIN32_WINNT set there */
+/* Keep this section after config-win32.h to honor a _WIN32_WINNT set there */
 #ifdef _WIN32
 /*
  * Do not include unneeded stuff in Windows headers to avoid compiler
