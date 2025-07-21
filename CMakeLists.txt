@@ -1780,7 +1780,7 @@ check_function_exists("setlocale"       HAVE_SETLOCALE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(WIN32)
-  check_symbol_exists("if_nametoindex"  "iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP
+  check_symbol_exists("if_nametoindex"  "winsock2.h;iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP
 else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
