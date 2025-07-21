@@ -2834,7 +2834,8 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
       AC_LANG_PROGRAM([[
         #include <windows.h>
       ]],[[
-        #if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600
+        #if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && \
+          (!defined(WINVER) || WINVER < 0x600)
         WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
                                            const WCHAR *lpASCIICharStr,
                                            int cchASCIIChar,
