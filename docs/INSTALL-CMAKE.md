@@ -463,6 +463,7 @@ Details via CMake
 - `CADDY`:                                  Default: `caddy`
 - `HTTPD_NGHTTPX`:                          Default: `nghttpx`
 - `HTTPD`:                                  Default: `apache2`
+- `SOCKD`:                                  Default: `sockd`
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
 
