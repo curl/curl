@@ -35,7 +35,7 @@ from testenv import Env, CurlClient, Dante
 log = logging.getLogger(__name__)
 
 
-# @pytest.mark.skipif(condition=not Env.has_sockd(), reason="missing sockd")
+@pytest.mark.skipif(condition=not Env.has_sockd(), reason="missing sockd")
 class TestSocks:
 
     @pytest.fixture(scope='class')
