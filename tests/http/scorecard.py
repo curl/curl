@@ -676,7 +676,7 @@ def run_score(args, protocol):
     sockd = None
     socks_args = None
     if args.socks4 and args.socks5:
-        raise ScoreCardError(f'unable to run --socks4 and --socks5 together')
+        raise ScoreCardError('unable to run --socks4 and --socks5 together')
     elif args.socks4 or args.socks5:
         sockd = Dante(env=env)
     if sockd:
