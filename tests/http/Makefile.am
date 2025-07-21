@@ -28,6 +28,7 @@ testenv/caddy.py                      \
 testenv/certs.py                      \
 testenv/client.py                     \
 testenv/curl.py                       \
+testenv/dante.py                      \
 testenv/env.py                        \
 testenv/httpd.py                      \
 testenv/mod_curltest/mod_curltest.c   \
@@ -64,6 +65,7 @@ test_20_websockets.py  \
 test_30_vsftpd.py      \
 test_31_vsftpds.py     \
 test_32_ftps_vsftpd.py \
+test_40_socks.py \
 $(TESTENV)
 
 clean-local:
