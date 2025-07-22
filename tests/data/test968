@@ -26,6 +26,9 @@ IDN
 !win32
 codeset-utf8
 </features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
 <name>
 SMTP VRFY with SMTPUTF8 support
 </name>

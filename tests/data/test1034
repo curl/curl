@@ -28,6 +28,9 @@ http
 proxy
 codeset-utf8
 </features>
+<setenv>
+LC_ALL=C.UTF-8
+</setenv>
 <name>
 HTTP over proxy with malformatted IDN host name
 </name>
