@@ -32,7 +32,7 @@ http
 --libcurl for simple POST
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c -d "foo=bar" -d "baz=quux"

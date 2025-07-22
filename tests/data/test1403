@@ -32,7 +32,7 @@ http
 --libcurl for GET with query
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c -G -d "foo=bar" -d "baz=quux"

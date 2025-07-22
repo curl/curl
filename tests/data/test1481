@@ -33,7 +33,7 @@ SSL
 --libcurl with TLS version options
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://moo/ --libcurl %LOGDIR/test%TESTNUMBER.c --tls-max 1.3 --proxy-tlsv1 -x http://%HOSTIP:%HTTPPORT
