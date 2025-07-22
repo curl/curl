@@ -44,7 +44,6 @@ codeset-utf8
 </features>
 <setenv>
 LC_ALL=C.UTF-8
-PLACEHOLDER2
 </setenv>
 <name>
 Connection reuse with IDN host name
