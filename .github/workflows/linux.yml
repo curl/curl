@@ -685,8 +685,10 @@ jobs:
             fi
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
-          export LC_ALL=C
-          export LC_CTYPE=C
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            export LC_ALL=C
+            export LC_CTYPE=C
+          fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
           else

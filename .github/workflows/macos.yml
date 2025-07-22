@@ -480,8 +480,10 @@ jobs:
         run: |
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
-          export LC_ALL=C
-          export LC_CTYPE=C
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            export LC_ALL=C
+            export LC_CTYPE=C
+          fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
