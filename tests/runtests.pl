@@ -494,7 +494,7 @@ sub is_utf8_supported {
     if($was_defined) {
         $old_LC_ALL = $ENV{'LC_ALL'};
     }
-    setlocale(LC_ALL, $ENV{'LC_ALL'} = 'C.UTF-8');
+    setlocale(LC_ALL, $ENV{'LC_ALL'} = "C.UTF-8");
     $result = lc(langinfo(CODESET())) eq "utf-8";
     if($was_defined) {
         $ENV{'LC_ALL'} = $old_LC_ALL;
