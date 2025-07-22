@@ -24,7 +24,7 @@ IDN
 codeset-utf8
 </features>
 <setenv>
-PLACEHOLDER1
+LC_ALL
 PLACEHOLDER2=1
 </setenv>
 <name>
