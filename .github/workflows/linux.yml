@@ -686,6 +686,7 @@ jobs:
           fi
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            env | grep -E '(LC_|LANG)' | sort || true
             export LC_ALL=C
             export LC_CTYPE=C
             export LC_NUMERIC=fr_FR.UTF-8
