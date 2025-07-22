@@ -44,7 +44,7 @@ codeset-utf8
 </features>
 <setenv>
 PLACEHOLDER1
-LC_CTYPE=en_US.UTF-8
+PLACEHOLDER2=1
 </setenv>
 <name>
 Redirect following to UTF-8 IDN host name

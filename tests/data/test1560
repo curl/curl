@@ -14,7 +14,7 @@ none
 </server>
 <setenv>
 PLACEHOLDER1
-LC_CTYPE=en_US.UTF-8
+PLACEHOLDER2=1
 </setenv>
 <features>
 file
