@@ -4569,7 +4569,7 @@ struct name_const {
 };
 
 /* keep them sorted by length! */
-static struct name_const H2_NON_FIELD[] = {
+static const struct name_const H2_NON_FIELD[] = {
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
   { STRCONST("Connection") },
