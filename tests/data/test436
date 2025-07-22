@@ -30,7 +30,7 @@ http
 </server>
 <setenv>
 CURL_HOME=%PWD/%LOGDIR
-XDG_CONFIG_HOME=
+XDG_CONFIG_HOME
 </setenv>
 <name>
 Find .curlrc in .config/curlrc via CURL_HOME
