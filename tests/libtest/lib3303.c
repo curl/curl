@@ -21,12 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* testing the CURLALTSVC_NO_RETRY flag */
-
 #include "first.h"
 
 #include "memdebug.h"
+
+/* testing the CURLALTSVC_NO_RETRY flag */
 
 static CURLcode test_lib3303(char *URL)
 {
