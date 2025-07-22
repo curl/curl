@@ -2301,11 +2301,25 @@ static CURLMcode state_connect(struct Curl_multi *multi,
 static bool is_altsvc_error(CURLcode rc)
 {
   switch(rc) {
-  case CURLE_OK:
-  case CURLE_OUT_OF_MEMORY:
-    return false;
-  default:
+  case CURLE_URL_MALFORMAT:
+  case CURLE_COULDNT_RESOLVE_PROXY:
+  case CURLE_COULDNT_RESOLVE_HOST:
+  case CURLE_COULDNT_CONNECT:
+  case CURLE_HTTP2:
+  case CURLE_HTTP2_STREAM:
+  case CURLE_HTTP3:
+  case CURLE_QUIC_CONNECT_ERROR:
+  case CURLE_SSL_CONNECT_ERROR:
+  case CURLE_GOT_NOTHING:
+  case CURLE_SEND_ERROR:
+  case CURLE_RECV_ERROR:
+  case CURLE_PROXY:
+  case CURLE_ECH_REQUIRED:
+  case CURLE_BAD_CONTENT_ENCODING:
     return true;
+
+  default:
+    return false;
   }
 }
 #endif
