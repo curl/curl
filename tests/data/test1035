@@ -24,6 +24,7 @@ none
 IDN
 http
 proxy
+codeset-utf8
 </features>
 <name>
 HTTP over proxy with too long IDN host name

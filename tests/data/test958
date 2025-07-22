@@ -19,6 +19,7 @@ smtp
 </server>
 <features>
 !win32
+codeset-utf8
 </features>
 <name>
 SMTP external VRFY without SMTPUTF8 - UTF-8 recipient (local part only)

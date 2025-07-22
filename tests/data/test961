@@ -20,6 +20,7 @@ smtp
 <features>
 !IDN
 !win32
+codeset-utf8
 </features>
 <name>
 SMTP external VRFY without SMTPUTF8 - UTF-8 recipient (host part only)
