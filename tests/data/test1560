@@ -14,6 +14,7 @@ none
 </server>
 <setenv>
 LC_ALL
+LC_CTYPE=en_US.UTF-8
 </setenv>
 <features>
 file
