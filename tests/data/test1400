@@ -31,7 +31,7 @@ http
 --libcurl for simple HTTP GET
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c

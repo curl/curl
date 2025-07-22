@@ -39,7 +39,7 @@ cookies
 --libcurl
 </features>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --basic -u fake:user -H "X-Files: Mulder" -H "X-Men: cyclops, iceman" -A MyUA -b chocolate=chip --proto "=http,ftp,file"
