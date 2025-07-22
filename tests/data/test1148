@@ -37,10 +37,6 @@ progress-bar
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -# --stderr %LOGDIR/stderrlog%TESTNUMBER
 </command>
-<setenv>
-LC_ALL=
-LC_NUMERIC=en_US.UTF-8
-</setenv>
 </client>
 
 #
