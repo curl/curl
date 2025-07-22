@@ -83,6 +83,7 @@ BEGIN {
 use Digest::MD5 qw(md5);
 use List::Util 'sum';
 use I18N::Langinfo qw(langinfo CODESET);
+use POSIX qw(setlocale LC_ALL);
 
 use serverhelp qw(
     server_exe
@@ -484,6 +485,25 @@ sub parseprotocols {
     push @protocols, 'none';
 }
 
+#######################################################################
+# Check if the operating environment supports UTF-8.
+sub is_utf8_supported {
+    my $result;
+    my $old_LC_ALL;
+    my $was_defined = defined $ENV{'LC_ALL'};
+    if($was_defined) {
+        $old_LC_ALL = $ENV{'LC_ALL'};
+    }
+    setlocale(LC_ALL, $ENV{'LC_ALL'} = 'en_US.UTF-8');
+    $result = lc(langinfo(CODESET())) eq "utf-8";
+    if($was_defined) {
+        $ENV{'LC_ALL'} = $old_LC_ALL;
+    }
+    else {
+        delete $ENV{'LC_ALL'};
+    }
+    return $result;
+}
 
 #######################################################################
 # Check & display information about curl and the host the test suite runs on.
@@ -808,7 +828,7 @@ sub checksystemfeatures {
     # Use this as a proxy for any cryptographic authentication
     $feature{"crypto"} = $feature{"NTLM"} || $feature{"Kerberos"} || $feature{"SPNEGO"};
     $feature{"local-http"} = servers::localhttp();
-    $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
+    $feature{"codeset-utf8"} = is_utf8_supported();
     if($feature{"codeset-utf8"}) {
         $ENV{'CURL_TEST_HAVE_CODESET_UTF8'} = 1;
     }
