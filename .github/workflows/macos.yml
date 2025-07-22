@@ -214,6 +214,7 @@ jobs:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_COMPILER: '${{ matrix.compiler }}'
       MATRIX_INSTALL: '${{ matrix.build.install }}'
+      MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
       fail-fast: false
@@ -381,7 +382,6 @@ jobs:
           MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
-          MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
         run: |
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
