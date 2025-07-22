@@ -2660,9 +2660,6 @@ statemachine_end:
           Curl_conn_terminate(data, conn, TRUE);
         }
 
-        /* some code paths in !FTP do not call this */
-        Curl_async_destroy(data);
-
         stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
         goto do_connect;
