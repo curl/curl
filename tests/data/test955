@@ -21,7 +21,6 @@ smtp
 </server>
 <features>
 !win32
-codeset-utf8
 </features>
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based sender (local part only)

@@ -24,7 +24,6 @@ smtp
 <features>
 IDN
 !win32
-codeset-utf8
 </features>
 <name>
 SMTP VRFY with SMTPUTF8 support
