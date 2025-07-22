@@ -62,7 +62,6 @@ Failed connection problems that trigger this fallback:
 4. unsupported protocols
 5. response appears to be the wrong protocol
 
-
 ## CURLALTSVC_READONLYFILE
 
 Do not write the alt-svc cache back to the file specified with
