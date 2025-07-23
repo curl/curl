@@ -875,6 +875,7 @@ sub checksystemfeatures {
             "* System: $hosttype\n",
             "* OS: $hostos\n",
             "* Perl: $^V ($^X)\n",
+            "* LC_ALL: '$ENV{'LC_ALL'}' LC_CTYPE: '$ENV{'LC_CTYPE'}' LC_NUMERIC: '$ENV{'LC_NUMERIC'}'\n",
             "* diff: $havediff\n",
             "* Args: $args\n");
 
