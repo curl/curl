@@ -2772,6 +2772,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
         if(multi_handle_timeout(data, &now, &stream_unused, &result_unused)) {
           infof(data, "PENDING handle timeout");
           move_pending_to_connect(multi, data);
+          continue;
         }
       }
       (void)add_next_timeout(now, multi, Curl_splayget(t));
