@@ -714,12 +714,8 @@ static CURLcode mqtt_read_pub_varheader(struct Curl_easy *data)
   if(rest > sizeof(buffer))
     rest = sizeof(buffer);
   result = Curl_xfer_recv(data, buffer, rest, &nread);
-  if(result) {
-    if(CURLE_AGAIN == result) {
-      infof(data, "E AGAIN");
-    }
+  if(result)
     goto end;
-  }
   if(!nread) {
     infof(data, "server disconnected");
     result = CURLE_PARTIAL_FILE;
@@ -794,12 +790,8 @@ static CURLcode mqtt_read_pub_varheader(struct Curl_easy *data)
       mq->npacket -= nread;
       nprocessed = 0;
       result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
-      if(result) {
-        if(CURLE_AGAIN == result) {
-          infof(data, "E AGAIN");
-        }
+      if(result)
         goto end;
-      }
       if(!nread) {
         infof(data, "server disconnected");
         result = CURLE_PARTIAL_FILE;
@@ -898,6 +890,7 @@ MQTT_SUBACK_COMING:
     data->req.bytecount = 0;
     data->req.size = remlen;
     mq->npacket = remlen; /* get this many bytes */
+
     /* we are at the very start of the packet an need to read the header */
     result = mqtt_read_pub_varheader(data);
     if(result)
@@ -915,12 +908,8 @@ MQTT_SUBACK_COMING:
     if(rest > sizeof(buffer))
       rest = sizeof(buffer);
     result = Curl_xfer_recv(data, buffer, rest, &nread);
-    if(result) {
-      if(CURLE_AGAIN == result) {
-        infof(data, "E AGAIN");
-      }
+    if(result)
       goto end;
-    }
     if(!nread) {
       infof(data, "server disconnected");
       result = CURLE_PARTIAL_FILE;
