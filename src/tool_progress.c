@@ -134,8 +134,6 @@ static curl_off_t all_ultotal = 0;
 static curl_off_t all_dlalready = 0;
 static curl_off_t all_ulalready = 0;
 
-curl_off_t all_xfers = 0;   /* current total */
-
 struct speedcount {
   curl_off_t dl;
   curl_off_t ul;
@@ -151,6 +149,7 @@ static struct speedcount speedstore[SPEEDCNT];
   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
 */
 bool progress_meter(struct GlobalConfig *global,
+                    CURLM *multi,
                     struct curltime *start,
                     bool final)
 {
@@ -184,7 +183,6 @@ bool progress_meter(struct GlobalConfig *global,
     curl_off_t all_ulnow = 0;
     bool dlknown = TRUE;
     bool ulknown = TRUE;
-    curl_off_t all_running = 0; /* in progress */
     curl_off_t speed = 0;
     unsigned int i;
     stamp = now;
@@ -210,8 +208,6 @@ bool progress_meter(struct GlobalConfig *global,
         all_ultotal += per->ultotal;
         per->ultotal_added = TRUE;
       }
-      if(per->added)
-        all_running++;
     }
     if(dlknown && all_dltotal)
       msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
@@ -292,8 +288,8 @@ bool progress_meter(struct GlobalConfig *global,
             ulpercen,  /* 3 letters */
             max5data(all_dlnow, buffer[0]),
             max5data(all_ulnow, buffer[1]),
-            all_xfers,
-            all_running,
+            curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED),
+            curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING),
             time_total,
             time_spent,
             time_left,
