@@ -453,7 +453,7 @@ typedef enum {
   CURLMINFO_NONE, /* first, never use this */
   /* The number of easy handles currently managed by the multi handle,
    * e.g. have been added but not yet removed. */
-  CURLMINFO_XFERS_CURRENT   = 1,
+  CURLMINFO_XFERS_CURRENT = 1,
   /* The number of easy handles running, e.g. not done and not queueing. */
   CURLMINFO_XFERS_RUNNING = 2,
   /* The number of easy handles waiting to start, e.g. for a connection
