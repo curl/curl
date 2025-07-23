@@ -2240,12 +2240,12 @@ static CURLcode wssl_sha256sum(const unsigned char *tmp, /* input */
 }
 
 static void *wssl_get_internals(struct ssl_connect_data *connssl,
-                                CURLINFO info UNUSED_PARAM)
+                                CURLINFO info)
 {
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
-  (void)info;
   DEBUGASSERT(wssl);
-  return wssl->ssl;
+  return info == CURLINFO_TLS_SESSION ?
+    (void *)wssl->ssl_ctx : (void *)wssl->ssl;
 }
 
 const struct Curl_ssl Curl_ssl_wolfssl = {

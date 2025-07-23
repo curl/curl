@@ -2658,7 +2658,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   case CF_QUERY_SSL_CTX_INFO: {
     struct curl_tlssessioninfo *info = pres2;
     if(Curl_vquic_tls_get_ssl_info(&ctx->tls,
-                                   (query == CF_QUERY_SSL_INFO), info))
+                                   (query == CF_QUERY_SSL_CTX_INFO), info))
       return CURLE_OK;
     break;
   }

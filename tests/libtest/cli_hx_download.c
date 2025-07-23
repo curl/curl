@@ -24,6 +24,27 @@
 #include "first.h"
 
 #include "testtrace.h"
+
+#include "curl_mem_undef.h"
+
+#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+#include <openssl/ssl.h>
+#endif
+#ifdef USE_WOLFSSL
+#include <wolfssl/options.h>
+#include <wolfssl/version.h>
+#include <wolfssl/ssl.h>
+#endif
+#ifdef USE_GNUTLS
+#include <gnutls/gnutls.h>
+#endif
+#ifdef USE_MBEDTLS
+#include <mbedtls/ssl.h>
+#endif
+#ifdef USE_RUSTLS
+#include <rustls.h>
+#endif
+
 #include "memdebug.h"
 
 static int verbose_d = 1;
@@ -41,6 +62,7 @@ struct transfer_d {
   int paused;
   int resumed;
   int done;
+  int checked_ssl;
   CURLcode result;
 };
 
@@ -113,6 +135,80 @@ static int my_progress_d_cb(void *userdata,
                   "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, dlnow);
     return 1;
   }
+
+#if defined(USE_QUICHE) || defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
+  defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+  if(!t->checked_ssl && dlnow > 0) {
+    struct curl_tlssessioninfo *tls;
+    CURLcode res;
+
+    t->checked_ssl = TRUE;
+    res = curl_easy_getinfo(t->easy, CURLINFO_TLS_SSL_PTR, &tls);
+    if(res) {
+      curl_mfprintf(stderr, "[t-%d] info CURLINFO_TLS_SSL_PTR failed: %d\n",
+                    t->idx, res);
+      assert(0);
+    }
+    else {
+      switch(tls->backend) {
+#if defined(USE_QUICHE) || defined(USE_OPENSSL)
+      case CURLSSLBACKEND_OPENSSL: {
+        const char *version = SSL_get_version((SSL*)tls->internals);
+        assert(version);
+        assert(strcmp(version, "unknown"));
+        curl_mfprintf(stderr, "[t-%d] info OpenSSL using %s\n",
+                      t->idx, version);
+        break;
+      }
+#endif
+#ifdef USE_WOLFSSL
+      case CURLSSLBACKEND_WOLFSSL: {
+        const char *version = wolfSSL_get_version((WOLFSSL*)tls->internals);
+        assert(version);
+        assert(strcmp(version, "unknown"));
+        curl_mfprintf(stderr, "[t-%d] info wolfSSL using %s\n",
+                      t->idx, version);
+        break;
+      }
+#endif
+#ifdef USE_GNUTLS
+      case CURLSSLBACKEND_GNUTLS: {
+        int v = gnutls_protocol_get_version((gnutls_session_t)tls->internals);
+        assert(v);
+        curl_mfprintf(stderr, "[t-%d] info GnuTLS using %s\n",
+                      t->idx, gnutls_protocol_get_name(v));
+        break;
+      }
+#endif
+#ifdef USE_MBEDTLS
+      case CURLSSLBACKEND_MBEDTLS: {
+        const char *version = mbedtls_ssl_get_version(
+          (mbedtls_ssl_context*)tls->internals);
+        assert(version);
+        assert(strcmp(version, "unknown"));
+        curl_mfprintf(stderr, "[t-%d] info mbedTLS using %s\n",
+                      t->idx, version);
+        break;
+      }
+#endif
+#ifdef USE_RUSTLS
+      case CURLSSLBACKEND_RUSTLS: {
+        int v = rustls_connection_get_protocol_version(
+          (struct rustls_connection*)tls->internals);
+        assert(v);
+        curl_mfprintf(stderr, "[t-%d] info rustls TLS version 0x%x\n",
+                      t->idx, v);
+        break;
+      }
+#endif
+      default:
+        curl_mfprintf(stderr, "[t-%d] info SSL_PTR backend=%d, ptr=%p\n",
+                      t->idx, tls->backend, (void *)tls->internals);
+        break;
+      }
+    }
+  }
+#endif
   return 0;
 }
 
@@ -443,6 +539,8 @@ static CURLcode test_cli_hx_download(const char *URL)
     }
     if(t->result)
       result = t->result;
+    else /* on success we expect ssl to have been checked */
+      assert(t->checked_ssl);
   }
   free(transfer_d);
 
