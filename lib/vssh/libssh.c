@@ -1460,15 +1460,8 @@ static int myssh_in_SFTP_SHUTDOWN(struct Curl_easy *data,
      before we proceed */
   ssh_set_blocking(sshc->ssh_session, 0);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  if(sshc->sftp_send_aio) {
-    sftp_aio_free(sshc->sftp_send_aio);
-    sshc->sftp_send_aio = NULL;
-  }
-
-  if(sshc->sftp_recv_aio) {
-    sftp_aio_free(sshc->sftp_recv_aio);
-    sshc->sftp_recv_aio = NULL;
-  }
+  SFTP_AIO_FREE(sshc->sftp_send_aio);
+  SFTP_AIO_FREE(sshc->sftp_recv_aio);
 #endif
 
   if(sshc->sftp_file) {
