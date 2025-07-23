@@ -2643,7 +2643,10 @@ do_connect:
 statemachine_end:
     /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(data->asi && data->asi->used && !data->asi->errored) {
+    if(
+      result &&
+      data->asi && data->asi->used && !data->asi->errored
+      ) {
       data->asi->errored = is_altsvc_error(result);
 
       if(data->asi->errored &&
@@ -2653,11 +2656,12 @@ statemachine_end:
         infof(data, "Alt-Svc connection failed(%d). "
                     "Retrying with original target", result);
 
-        if(data->conn) {
+        if(data->conn && stream_error) {
+          bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
           struct connectdata *conn = data->conn;
 
           Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, TRUE);
+          Curl_conn_terminate(data, conn, dead_connection);
         }
 
         stream_error = FALSE;
