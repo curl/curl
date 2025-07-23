@@ -1300,7 +1300,7 @@ cr_get_internals(struct ssl_connect_data *connssl,
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   DEBUGASSERT(backend);
-  return &backend->conn;
+  return backend->conn;
 }
 
 static CURLcode
