@@ -143,7 +143,7 @@ CURLcode tool_setopt(CURL *curl, bool str,
 #define my_setopt_offt(x,y,z) \
   curl_easy_setopt(x, y, (curl_off_t)(z))
 
-#define my_setopt_str(x,y,z)                    \
+#define my_setopt_str(x,y,z) \
   curl_easy_setopt(x, y, z)
 
 #define my_setopt_enum(x,y,z) \
