@@ -207,7 +207,6 @@ static curl_off_t VmsSpecialSize(const char *name,
 
 struct per_transfer *transfers; /* first node */
 static struct per_transfer *transfersl; /* last node */
-static curl_off_t all_pers;
 
 /* add_per_transfer creates a new 'per_transfer' node in the linked
    list of transfers */
@@ -229,8 +228,6 @@ static CURLcode add_per_transfer(struct per_transfer **per)
     transfersl = p;
   }
   *per = p;
-  all_xfers++; /* count total number of transfers added */
-  all_pers++;
 
   return CURLE_OK;
 }
@@ -259,7 +256,6 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
     transfersl = p;
 
   free(per);
-  all_pers--;
 
   return n;
 }
@@ -1422,7 +1418,8 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   char *errorbuf;
   *addedp = FALSE;
   *morep = FALSE;
-  if(all_pers < (global->parallel_max*2)) {
+  if(curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT) <
+     (curl_off_t)(global->parallel_max*2)) {
     bool skipped = FALSE;
     do {
       result = create_transfer(global, share, addedp, &skipped);
@@ -1760,7 +1757,7 @@ static CURLcode check_finished(struct parastate *s)
   CURLMsg *msg;
   bool checkmore = FALSE;
   struct GlobalConfig *global = s->global;
-  progress_meter(global, &s->start, FALSE);
+  progress_meter(global, s->multi, &s->start, FALSE);
   do {
     msg = curl_multi_info_read(s->multi, &rc);
     if(msg) {
@@ -1885,7 +1882,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
         result = check_finished(s);
     }
 
-    (void)progress_meter(global, &s->start, TRUE);
+    (void)progress_meter(global, s->multi, &s->start, TRUE);
   }
 
   /* Make sure to return some kind of error if there was a multi problem */

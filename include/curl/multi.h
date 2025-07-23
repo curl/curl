@@ -448,6 +448,36 @@ CURL_EXTERN CURLMcode curl_multi_assign(CURLM *multi_handle,
  */
 CURL_EXTERN CURL **curl_multi_get_handles(CURLM *multi_handle);
 
+
+typedef enum {
+  CURLMINFO_NONE, /* first, never use this */
+  /* The number of easy handles currently managed by the multi handle,
+   * e.g. have been added but not yet removed. */
+  CURLMINFO_XFERS_CURRENT   = 1,
+  /* The number of easy handles running, e.g. not done and not queueing. */
+  CURLMINFO_XFERS_RUNNING = 2,
+  /* The number of easy handles waiting to start, e.g. for a connection
+   * to become available due to limits on parallelism, max connections
+   * or other factors. */
+  CURLMINFO_XFERS_PENDING = 3,
+  /* The number of easy handles finished, waiting for their results to
+   * be read via `curl_multi_info_read()`. */
+  CURLMINFO_XFERS_DONE = 4,
+  /* The total number of easy handles added to the multi handle, ever. */
+  CURLMINFO_XFERS_ADDED = 5
+} CURLMinfo_offt;
+
+/*
+ * Name:    curl_multi_get_offt()
+ *
+ * Desc:    Retrieves a numeric value for the `CURLMINFO_*` enums.
+ *
+ * Returns: the curl_off_t value from a valid multi handle and
+ *          supported `info` or -1.
+ */
+CURL_EXTERN curl_off_t curl_multi_get_offt(CURLM *multi_handle,
+                                           CURLMinfo_offt info);
+
 /*
  * Name: curl_push_callback
  *

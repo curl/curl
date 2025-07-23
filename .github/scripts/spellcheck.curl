@@ -132,6 +132,7 @@ curl_multi_timeout
 curl_multi_setopt
 curl_multi_assign
 curl_multi_get_handles
+curl_multi_get_offt
 curl_pushheader_bynum
 curl_pushheader_byname
 curl_multi_waitfds

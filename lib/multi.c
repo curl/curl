@@ -479,6 +479,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   /* add the easy handle to the process set */
   Curl_uint_bset_add(&multi->process, data->mid);
   ++multi->xfers_alive;
+  ++multi->xfers_total_ever;
 
   Curl_cpool_xfer_init(data);
   multi_warn_debug(multi, data);
@@ -3732,6 +3733,33 @@ CURL **curl_multi_get_handles(CURLM *m)
     a[i] = NULL; /* last entry is a NULL */
   }
   return a;
+}
+
+CURL_EXTERN curl_off_t curl_multi_get_offt(CURLM *m, CURLMinfo_offt info)
+{
+  struct Curl_multi *multi = m;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return -1;
+
+  switch(info) {
+  case CURLMINFO_XFERS_CURRENT: {
+    unsigned int n = Curl_uint_tbl_count(&multi->xfers);
+    if(n && multi->admin)
+      --n;
+    return (curl_off_t)n;
+  }
+  case CURLMINFO_XFERS_RUNNING:
+    return (curl_off_t)Curl_uint_bset_count(&multi->process);
+  case CURLMINFO_XFERS_PENDING:
+    return (curl_off_t)Curl_uint_bset_count(&multi->pending);
+  case CURLMINFO_XFERS_DONE:
+    return (curl_off_t)Curl_uint_bset_count(&multi->msgsent);
+  case CURLMINFO_XFERS_ADDED:
+    return multi->xfers_total_ever;
+  default:
+    return -1;
+  }
 }
 
 CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
