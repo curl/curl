@@ -1685,18 +1685,9 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       conn->scope_id = (unsigned int)scope;
 #ifdef HAVE_IF_NAMETOINDEX
     else {
-#elif defined(_WIN32)
-    else if(Curl_if_nametoindex) {
-#endif
-
-#if defined(HAVE_IF_NAMETOINDEX) || defined(_WIN32)
       /* Zone identifier is not numeric */
       unsigned int scopeidx = 0;
-#ifdef HAVE_IF_NAMETOINDEX
       scopeidx = if_nametoindex(zoneid);
-#else
-      scopeidx = Curl_if_nametoindex(zoneid);
-#endif
       if(!scopeidx) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
@@ -1707,7 +1698,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
       else
         conn->scope_id = scopeidx;
     }
-#endif /* HAVE_IF_NAMETOINDEX || _WIN32 */
+#endif /* HAVE_IF_NAMETOINDEX */
 
     curlx_free(zoneid);
   }
