@@ -31,7 +31,6 @@
 #include <curl/curl.h>
 
 extern LARGE_INTEGER Curl_freq;
-extern bool Curl_isVistaOrGreater;
 
 CURLcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
