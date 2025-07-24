@@ -75,6 +75,11 @@
 #endif
 #endif
 
+#if defined(__MINGW32__) && \
+  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
+#error "Building curl requires mingw-w64 3.0 or later"
+#endif
+
 /* Visual Studio 2008 is the minimum Visual Studio version we support.
    Workarounds for older versions of Visual Studio have been removed. */
 #if defined(_MSC_VER) && (_MSC_VER < 1500)
