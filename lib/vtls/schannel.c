@@ -916,14 +916,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                "schannel: SSL/TLS connection with %s port %d (step 1/3)",
                connssl->peer.hostname, connssl->peer.port));
 
-  if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
-                                  VERSION_LESS_THAN_EQUAL)) {
-    /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
-       algorithms that may not be supported by all servers. */
-    infof(data, "schannel: Windows version is old and may not be able to "
-          "connect to some servers due to lack of SNI, algorithms, etc.");
-  }
-
 #ifdef HAS_ALPN_SCHANNEL
   backend->use_alpn = connssl->alpn && s_win_has_alpn;
 #else
