@@ -61,7 +61,7 @@
 
 #if defined(HAVE_IF_NAMETOINDEX) && defined(_WIN32)
 #if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 5)
-#include <wincrypt.h>  /* to avoid a mingw-w64 header issue */
+#include <wincrypt.h>  /* for mingw-w64 versions missing to include it */
 #endif
 #include <iphlpapi.h>
 #endif
