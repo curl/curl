@@ -61,11 +61,10 @@ environment:
       SCHANNEL: 'ON'
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
-    - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples, XP'
+    - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
-      WINTARGET: 0x0501  # Windows XP
       PRJ_CFG: Debug
       SCHANNEL: 'ON'
       SHARED: 'ON'

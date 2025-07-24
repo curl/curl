@@ -26,21 +26,11 @@
 #include "curl_setup.h"
 
 #ifdef _WIN32
-
 extern LARGE_INTEGER Curl_freq;
-extern bool Curl_isVistaOrGreater;
 
 CURLcode Curl_win32_init(long flags);
 void Curl_win32_cleanup(long init_flags);
-
-#ifndef HAVE_IF_NAMETOINDEX
-/* We use our own typedef here since some headers might lack this */
-typedef unsigned int(WINAPI *IF_NAMETOINDEX_FN)(const char *);
-
-/* This is used instead of if_nametoindex if available on Windows */
-extern IF_NAMETOINDEX_FN Curl_if_nametoindex;
-#endif
-#else /* !_WIN32 */
+#else
 #define Curl_win32_init(x) CURLE_OK
 #endif /* _WIN32 */
 

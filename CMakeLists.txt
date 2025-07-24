@@ -1427,21 +1427,9 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501)
-    # Windows XP is required for freeaddrinfo, getaddrinfo
-    message(FATAL_ERROR "Building for Windows XP or newer is required.")
-  endif()
-
-  # Pre-fill detection results based on target OS version
-  if(_CURL_PREFILL)
-    if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-       WINDOWS_STORE)
-      set(HAVE_IF_NAMETOINDEX 0)
-      unset(HAVE_IF_NAMETOINDEX CACHE)
-    elseif(MSVC OR MINGW)
-      set(HAVE_IF_NAMETOINDEX 1)
-      unset(HAVE_IF_NAMETOINDEX CACHE)
-    endif()
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0600)
+    # Windows Vista is required for freeaddrinfo, getaddrinfo, if_nametoindex
+    message(FATAL_ERROR "Building for Windows Vista or newer is required.")
   endif()
 endif()
 
@@ -1599,10 +1587,7 @@ check_function_exists("getrlimit"     HAVE_GETRLIMIT)
 check_function_exists("setlocale"     HAVE_SETLOCALE)
 check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
-if(WIN32)
-  # include wincrypt.h as a workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
-  check_symbol_exists("if_nametoindex"  "winsock2.h;wincrypt.h;iphlpapi.h" HAVE_IF_NAMETOINDEX)  # Windows Vista+ non-UWP */
-else()
+if(NOT WIN32)
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
@@ -2004,9 +1989,7 @@ curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPE
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO_NEW)))
 curl_add_if("Unicode"       ENABLE_UNICODE)
-curl_add_if("threadsafe"    HAVE_ATOMIC OR
-                            (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                            (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+curl_add_if("threadsafe"    HAVE_ATOMIC OR (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR WIN32)
 curl_add_if("Debug"         ENABLE_DEBUG)
 curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)

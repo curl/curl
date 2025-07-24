@@ -199,7 +199,7 @@ jobs:
           - { build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel libssh2-devel', name: 'default' }
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '--with-openssl', install: 'openssl-devel libssh2-devel', name: 'default R' }
           # MinGW
-          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static --without-zlib CPPFLAGS=-D_WIN32_WINNT=0x0501', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default XP' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static --without-zlib', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default' }
           - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''          , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-static --disable-shared', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1650', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U' }
           # MinGW torture
@@ -443,7 +443,7 @@ jobs:
             env: 'x86_64'
             ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
@@ -453,7 +453,7 @@ jobs:
             env: 'i686'
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
+            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
@@ -462,7 +462,7 @@ jobs:
             env: 'x86_64'
             ver: '4.8.1'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
             tflags: 'skipall'
             chkprefill: ''  # Set it once to silence actionlint

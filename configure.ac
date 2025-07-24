@@ -579,6 +579,22 @@ if test "$curl_cv_native_windows" = "yes"; then
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
+
+  AC_MSG_CHECKING([if building for Windows Vista or newer])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if (_WIN32_WINNT < 0x600)
+      #error
+      #endif
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([Building for Windows Vista or newer is required.])
+  ])
 fi
 
 CURL_SET_COMPILER_BASIC_OPTS
@@ -2812,7 +2828,7 @@ if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINIDN="default"
   AC_ARG_WITH(winidn,
-AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+AS_HELP_STRING([--with-winidn],[enable Windows native IDN])
 AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     OPT_WINIDN=$withval)
   case "$OPT_WINIDN" in
@@ -2821,75 +2837,18 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
       want_winidn="no"
       AC_MSG_RESULT([no])
       ;;
-    yes)
-      dnl --with-winidn option used without path
-      want_winidn="yes"
-      want_winidn_path="default"
-      AC_MSG_RESULT([yes])
-      ;;
     *)
-      dnl --with-winidn option used with path
+      dnl --with-winidn option
       want_winidn="yes"
-      want_winidn_path="$withval"
-      AC_MSG_RESULT([yes ($withval)])
+      AC_MSG_RESULT([yes])
       ;;
   esac
 
   if test "$want_winidn" = "yes"; then
-    dnl WinIDN library support has been requested
-    clean_CPPFLAGS="$CPPFLAGS"
-    clean_LDFLAGS="$LDFLAGS"
-    clean_LDFLAGSPC="$LDFLAGSPC"
-    clean_LIBS="$LIBS"
-    WINIDN_LIBS="-lnormaliz"
-    WINIDN_CPPFLAGS=""
-    #
-    if test "$want_winidn_path" != "default"; then
-      dnl path has been specified
-      dnl pkg-config not available or provides no info
-      WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
-      WINIDN_CPPFLAGS="-I$want_winidn_path/include"
-    fi
-    #
-    CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
-    LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
-    LDFLAGSPC="$LDFLAGSPC $WINIDN_LDFLAGS"
-    LIBS="$WINIDN_LIBS $LIBS"
-    #
-    AC_MSG_CHECKING([if IdnToUnicode can be linked])
-    AC_LINK_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <windows.h>
-      ]],[[
-        #if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && \
-          (!defined(WINVER) || WINVER < 0x600)
-        WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
-                                           const WCHAR *lpASCIICharStr,
-                                           int cchASCIIChar,
-                                           WCHAR *lpUnicodeCharStr,
-                                           int cchUnicodeChar);
-        #endif
-        IdnToUnicode(0, NULL, 0, NULL, 0);
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_links_winidn="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_links_winidn="no"
-    ])
-    #
-    if test "$tst_links_winidn" = "yes"; then
-      AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
-      IDN_ENABLED=1
-      curl_idn_msg="enabled (Windows-native)"
-    else
-      AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
-      CPPFLAGS="$clean_CPPFLAGS"
-      LDFLAGS="$clean_LDFLAGS"
-      LDFLAGSPC="$clean_LDFLAGSPC"
-      LIBS="$clean_LIBS"
-    fi
+    LIBS="-lnormaliz $LIBS"
+    AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
+    IDN_ENABLED=1
+    curl_idn_msg="enabled (Windows-native)"
   fi
 fi
 
@@ -4250,26 +4209,7 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-if test "$curl_cv_native_windows" = "yes"; then
-  AC_MSG_CHECKING([for if_nametoindex on Windows])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      #ifndef WIN32_LEAN_AND_MEAN
-      #define WIN32_LEAN_AND_MEAN
-      #endif
-      #include <winsock2.h>
-      #include <wincrypt.h>  /* workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
-      #include <iphlpapi.h>
-    ]],[[
-      if_nametoindex("");
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_IF_NAMETOINDEX, 1, [if you have the 'if_nametoindex' function])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-else
+if test "$curl_cv_native_windows" != "yes"; then
   AC_CHECK_FUNCS([\
     if_nametoindex \
     realpath \
@@ -5369,19 +5309,8 @@ if test "$tst_atomic" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 elif test "$USE_THREADS_POSIX" = "1" && test "$ac_cv_header_pthread_h" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-else
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-    SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-  ],[
-  ])
+elif test "$curl_cv_native_windows" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 fi
 
 if test "$want_winuni" = "yes"; then

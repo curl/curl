@@ -143,20 +143,6 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
 #ifdef USE_WIN32_IDN
 /* using Windows kernel32 and normaliz libraries. */
 
-#if (!defined(_WIN32_WINNT) || _WIN32_WINNT < _WIN32_WINNT_VISTA) && \
-  (!defined(WINVER) || WINVER < 0x600)
-WINBASEAPI int WINAPI IdnToAscii(DWORD dwFlags,
-                                 const WCHAR *lpUnicodeCharStr,
-                                 int cchUnicodeChar,
-                                 WCHAR *lpASCIICharStr,
-                                 int cchASCIIChar);
-WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
-                                   const WCHAR *lpASCIICharStr,
-                                   int cchASCIIChar,
-                                   WCHAR *lpUnicodeCharStr,
-                                   int cchUnicodeChar);
-#endif
-
 #define IDN_MAX_LENGTH 255
 
 static char *idn_curlx_convert_wchar_to_UTF8(const wchar_t *str_w, int chars)

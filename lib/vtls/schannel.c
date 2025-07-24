@@ -105,11 +105,6 @@
  * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
-/* Offered when targeting Vista (XP SP2+) */
-#ifndef CALG_SHA_256
-#define CALG_SHA_256 0x0000800c
-#endif
-
 /* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
@@ -221,99 +216,48 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_MAC),
   CIPHEROPTION(CALG_RSA_SIGN),
   CIPHEROPTION(CALG_DSS_SIGN),
-/* ifdefs for the options that are defined conditionally in wincrypt.h */
-#ifdef CALG_NO_SIGN
   CIPHEROPTION(CALG_NO_SIGN),
-#endif
   CIPHEROPTION(CALG_RSA_KEYX),
   CIPHEROPTION(CALG_DES),
-#ifdef CALG_3DES_112
   CIPHEROPTION(CALG_3DES_112),
-#endif
   CIPHEROPTION(CALG_3DES),
   CIPHEROPTION(CALG_DESX),
   CIPHEROPTION(CALG_RC2),
   CIPHEROPTION(CALG_RC4),
   CIPHEROPTION(CALG_SEAL),
-#ifdef CALG_DH_SF
   CIPHEROPTION(CALG_DH_SF),
-#endif
   CIPHEROPTION(CALG_DH_EPHEM),
-#ifdef CALG_AGREEDKEY_ANY
   CIPHEROPTION(CALG_AGREEDKEY_ANY),
-#endif
-#ifdef CALG_HUGHES_MD5
   CIPHEROPTION(CALG_HUGHES_MD5),
-#endif
   CIPHEROPTION(CALG_SKIPJACK),
-#ifdef CALG_TEK
   CIPHEROPTION(CALG_TEK),
-#endif
   CIPHEROPTION(CALG_CYLINK_MEK), /* spellchecker:disable-line */
   CIPHEROPTION(CALG_SSL3_SHAMD5),
-#ifdef CALG_SSL3_MASTER
   CIPHEROPTION(CALG_SSL3_MASTER),
-#endif
-#ifdef CALG_SCHANNEL_MASTER_HASH
   CIPHEROPTION(CALG_SCHANNEL_MASTER_HASH),
-#endif
-#ifdef CALG_SCHANNEL_MAC_KEY
   CIPHEROPTION(CALG_SCHANNEL_MAC_KEY),
-#endif
-#ifdef CALG_SCHANNEL_ENC_KEY
   CIPHEROPTION(CALG_SCHANNEL_ENC_KEY),
-#endif
-#ifdef CALG_PCT1_MASTER
   CIPHEROPTION(CALG_PCT1_MASTER),
-#endif
-#ifdef CALG_SSL2_MASTER
   CIPHEROPTION(CALG_SSL2_MASTER),
-#endif
-#ifdef CALG_TLS1_MASTER
   CIPHEROPTION(CALG_TLS1_MASTER),
-#endif
-#ifdef CALG_RC5
   CIPHEROPTION(CALG_RC5),
-#endif
-#ifdef CALG_HMAC
   CIPHEROPTION(CALG_HMAC),
-#endif
-#ifdef CALG_TLS1PRF
   CIPHEROPTION(CALG_TLS1PRF),
-#endif
-#ifdef CALG_HASH_REPLACE_OWF
   CIPHEROPTION(CALG_HASH_REPLACE_OWF),
-#endif
-#ifdef CALG_AES_128
   CIPHEROPTION(CALG_AES_128),
-#endif
-#ifdef CALG_AES_192
   CIPHEROPTION(CALG_AES_192),
-#endif
-#ifdef CALG_AES_256
   CIPHEROPTION(CALG_AES_256),
-#endif
-#ifdef CALG_AES
   CIPHEROPTION(CALG_AES),
-#endif
-#ifdef CALG_SHA_256
   CIPHEROPTION(CALG_SHA_256),
-#endif
-#ifdef CALG_SHA_384
   CIPHEROPTION(CALG_SHA_384),
-#endif
-#ifdef CALG_SHA_512
   CIPHEROPTION(CALG_SHA_512),
-#endif
-#ifdef CALG_ECDH
   CIPHEROPTION(CALG_ECDH),
-#endif
+/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifdef CALG_ECMQV
   CIPHEROPTION(CALG_ECMQV),
 #endif
-#ifdef CALG_ECDSA
   CIPHEROPTION(CALG_ECDSA),
-#endif
+/* Offered by mingw-w64 v7+. MS SDK 7.0A+. */
 #ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
 #endif
@@ -613,12 +557,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(Curl_isVistaOrGreater)
-          cert_store = PFXImportCertStore(&datablob, pszPassword,
-                                          PKCS12_NO_PERSIST_KEY);
-        else
-          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
-
+        cert_store = PFXImportCertStore(&datablob, pszPassword,
+                                        PKCS12_NO_PERSIST_KEY);
         curlx_free(pszPassword);
       }
       if(!blob)
@@ -857,14 +797,6 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
   DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 1/3)",
                connssl->peer.hostname, connssl->peer.port));
-
-  if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
-                                  VERSION_LESS_THAN_EQUAL)) {
-    /* Schannel in Windows XP (OS version 5.1) uses legacy handshakes and
-       algorithms that may not be supported by all servers. */
-    infof(data, "schannel: Windows version is old and may not be able to "
-          "connect to some servers due to lack of SNI, algorithms, etc.");
-  }
 
 #ifdef HAS_ALPN_SCHANNEL
   backend->use_alpn = connssl->alpn && s_win_has_alpn;

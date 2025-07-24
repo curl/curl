@@ -27,7 +27,7 @@
 
 #define GLOBAL_INIT_IS_THREADSAFE
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
+#ifdef _WIN32
 
 #define curl_simple_lock      SRWLOCK
 #define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
@@ -72,8 +72,6 @@ static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
       __builtin_ia32_pause();
 #elif defined(__aarch64__)
       __asm__ volatile("yield" ::: "memory");
-#elif defined(_WIN32)
-      Sleep(1);
 #elif defined(HAVE_SCHED_YIELD)
       sched_yield();
 #endif

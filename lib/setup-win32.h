@@ -90,12 +90,6 @@
  * newer symbols.
  */
 
-#ifndef _WIN32_WINNT_WINXP
-#define _WIN32_WINNT_WINXP          0x0501   /* Windows XP */
-#endif
-#ifndef _WIN32_WINNT_WS03
-#define _WIN32_WINNT_WS03           0x0502   /* Windows Server 2003 */
-#endif
 #ifndef _WIN32_WINNT_VISTA
 #define _WIN32_WINNT_VISTA          0x0600   /* Windows Vista */
 #endif
