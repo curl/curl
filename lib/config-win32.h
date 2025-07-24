@@ -28,25 +28,6 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
-/* Define some minimum and default build targets for Visual Studio */
-#ifdef _MSC_VER
-   /* Default target settings and minimum build target check for
-      VS2010. The minimum and default build targets for VS2012
-      are Vista and 8, respectively */
-#  define VS2010_MIN_TARGET 0x0600  /* Vista */
-#  define VS2010_DEF_TARGET 0x0600  /* Vista */
-
-#  ifndef _WIN32_WINNT
-#  define _WIN32_WINNT VS2010_DEF_TARGET
-#  endif
-#  ifndef WINVER
-#  define WINVER VS2010_DEF_TARGET
-#  endif
-#  if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
-#    error Visual Studio does not support build targets prior to Windows Vista
-#  endif
-#endif /* _MSC_VER */
-
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
