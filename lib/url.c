@@ -60,6 +60,7 @@
 #endif
 
 #if defined(HAVE_IF_NAMETOINDEX) && defined(_WIN32)
+#include <winsock2.h>
 #include <iphlpapi.h>
 #endif
 
