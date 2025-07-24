@@ -156,8 +156,16 @@
 
 #endif /* HAVE_CONFIG_H */
 
-#if defined(_WIN32) && defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
-#error The minimum build target is Windows Vista (0x0600)
+#ifdef _WIN32
+#  if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
+#    error The minimum build target is Windows Vista (0x0600)
+#  endif
+
+#  if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#    ifndef HAVE_IF_NAMETOINDEX
+#    define HAVE_IF_NAMETOINDEX
+#    endif
+#  endif
 #endif
 
 /* ================================================================ */
