@@ -246,6 +246,9 @@ if(WIN32)
       string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${CURL_TEST_OUTPUT}")
       if(MINGW64_VERSION)
         message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
+        if(MINGW64_VERSION VERSION_LESS 3.0)
+          message(FATAL_ERROR "mingw-w64 3.0 or upper is required")
+        endif()
       endif()
     endif()
     unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
@@ -1595,7 +1598,6 @@ if(WIN32)
   # Pre-fill detection results based on target OS version
   if(_CURL_PREFILL)
     if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-       (MINGW AND MINGW64_VERSION VERSION_LESS 2.0) OR
        WINCE OR WINDOWS_STORE)
       set(HAVE_IF_NAMETOINDEX 0)
       unset(HAVE_IF_NAMETOINDEX CACHE)
