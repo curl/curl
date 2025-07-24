@@ -202,17 +202,9 @@ if(MINGW OR MSVC)
     curl_prefill_type_size("ADDRESS_FAMILY" 2)
   else()
     # SSIZE_T: 8 for _WIN64, 4 otherwise
-    if(MINGW64_VERSION)
-      if(MINGW64_VERSION VERSION_GREATER_EQUAL 3.0)
-        set(HAVE_FILE_OFFSET_BITS 1)
-        curl_prefill_type_size("OFF_T" 8)
-      endif()
-      if(MINGW64_VERSION VERSION_GREATER_EQUAL 2.0)
-        curl_prefill_type_size("ADDRESS_FAMILY" 2)
-      else()
-        set(HAVE_SIZEOF_ADDRESS_FAMILY 0)
-      endif()
-    endif()
+    set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 v3+
+    curl_prefill_type_size("OFF_T" 8)  # mingw-w64 v3+
+    curl_prefill_type_size("ADDRESS_FAMILY" 2)  # mingw-w64 v2+
   endif()
 endif()
 
