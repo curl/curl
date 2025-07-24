@@ -41,11 +41,7 @@
 #  define curl_mutex_t           CRITICAL_SECTION
 #  define curl_thread_t          HANDLE
 #  define curl_thread_t_null     (HANDLE)0
-#  if !defined(_WIN32_WINNT) || (_WIN32_WINNT < _WIN32_WINNT_VISTA)
-#    define Curl_mutex_init(m)   InitializeCriticalSection(m)
-#  else
-#    define Curl_mutex_init(m)   InitializeCriticalSectionEx(m, 0, 1)
-#  endif
+#  define Curl_mutex_init(m)     InitializeCriticalSectionEx(m, 0, 1)
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
