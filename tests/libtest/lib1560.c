@@ -895,6 +895,10 @@ static const struct setgetcase setget_parts_list[] = {
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
+  {"https://example.com/",
+   "path=one /$!$&'()*+;=:@{}[]%,",
+   "https://example.com/one%20/$!$&'()*+;=:@{}[]%25",
+   0, CURLU_URLENCODE, CURLUE_OK, CURLUE_OK},
   {NULL, /* start fresh! */
    "scheme=https,path=/,url=\"\",", /* incomplete url, redirect to "" */
    "https://example.com/",
