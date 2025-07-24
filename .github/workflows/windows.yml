@@ -437,23 +437,23 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel mbedtls U'  # mingw-w64 6.0
+          - name: 'schannel mbedtls U Vista'  # mingw-w64 6.0
             sys: 'mingw64'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -DCMAKE_C_FLAGS=-D_WIN32_WINNT=0x0600'
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel !unity'  # mingw-w64 5.0
+          - name: 'schannel !unity Vista'  # mingw-w64 5.0
             sys: 'mingw32'
             dir: 'mingw32'
             env: 'i686'
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
+            config: '-DENABLE_DEBUG=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -DCMAKE_C_FLAGS=-D_WIN32_WINNT=0x0600'
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
