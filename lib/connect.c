@@ -74,7 +74,6 @@
 #include "conncache.h"
 #include "multihandle.h"
 #include "share.h"
-#include "curlx/version_win32.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 #include "http_proxy.h"
 #include "socks.h"
