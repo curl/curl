@@ -617,12 +617,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(Curl_isVistaOrGreater)
-          cert_store = PFXImportCertStore(&datablob, pszPassword,
-                                          PKCS12_NO_PERSIST_KEY);
-        else
-          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
-
+        cert_store = PFXImportCertStore(&datablob, pszPassword,
+                                        PKCS12_NO_PERSIST_KEY);
         curlx_free(pszPassword);
       }
       if(!blob)

@@ -25,54 +25,26 @@
 
 #ifdef _WIN32
 
-#include "version_win32.h"
 #include "../system_win32.h"
 
 LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
 
 /* For tool or tests, we must initialize before calling curlx_now().
    Providing this function here is wrong. */
 void curlx_now_init(void)
 {
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL))
-    Curl_isVistaOrGreater = true;
-  else
-    Curl_isVistaOrGreater = false;
-
   QueryPerformanceFrequency(&Curl_freq);
 }
 
 /* In case of bug fix this function has a counterpart in tool_util.c */
 void curlx_pnow(struct curltime *pnow)
 {
-  bool isVistaOrGreater;
-  isVistaOrGreater = Curl_isVistaOrGreater;
-  if(isVistaOrGreater) { /* QPC timer might have issues pre-Vista */
-    LARGE_INTEGER count;
-    LARGE_INTEGER freq;
-    freq = Curl_freq;
-    DEBUGASSERT(freq.QuadPart);
-    QueryPerformanceCounter(&count);
-    pnow->tv_sec = (time_t)(count.QuadPart / freq.QuadPart);
-    pnow->tv_usec = (int)((count.QuadPart % freq.QuadPart) * 1000000 /
-                        freq.QuadPart);
-  }
-  else {
-    /* Disable /analyze warning that GetTickCount64 is preferred  */
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:28159)
-#endif
-    DWORD milliseconds = GetTickCount();
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-    pnow->tv_sec = (time_t)(milliseconds / 1000);
-    pnow->tv_usec = (int)((milliseconds % 1000) * 1000);
-  }
+  LARGE_INTEGER count;
+  DEBUGASSERT(Curl_freq.QuadPart);
+  QueryPerformanceCounter(&count);
+  pnow->tv_sec = (time_t)(count.QuadPart / Curl_freq.QuadPart);
+  pnow->tv_usec = (int)((count.QuadPart % Curl_freq.QuadPart) * 1000000 /
+                        Curl_freq.QuadPart);
 }
 
 #elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \

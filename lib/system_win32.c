@@ -26,7 +26,6 @@
 #ifdef _WIN32
 
 #include "system_win32.h"
-#include "curlx/version_win32.h"
 #include "curl_sspi.h"
 
 #ifndef HAVE_IF_NAMETOINDEX
@@ -100,15 +99,6 @@ CURLcode Curl_win32_init(long flags)
       Curl_if_nametoindex = pIfNameToIndex;
   }
 #endif
-
-  /* curlx_verify_windows_version must be called during init at least once
-     because it has its own initialization routine. */
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL)) {
-    Curl_isVistaOrGreater = TRUE;
-  }
-  else
-    Curl_isVistaOrGreater = FALSE;
 
   QueryPerformanceFrequency(&Curl_freq);
   return CURLE_OK;
