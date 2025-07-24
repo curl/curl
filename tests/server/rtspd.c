@@ -120,22 +120,22 @@ static const char *docbadconnect =
 
 /* send back this on HTTP 404 file not found */
 static const char *doc404_HTTP = "HTTP/1.1 404 Not Found\r\n"
-    "Server: " RTSPDVERSION "\r\n"
-    "Connection: close\r\n"
-    "Content-Type: text/html"
-    END_OF_HEADERS
-    "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
-    "<HTML><HEAD>\n"
-    "<TITLE>404 Not Found</TITLE>\n"
-    "</HEAD><BODY>\n"
-    "<H1>Not Found</H1>\n"
-    "The requested URL was not found on this server.\n"
-    "<P><HR><ADDRESS>" RTSPDVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
+  "Server: " RTSPDVERSION "\r\n"
+  "Connection: close\r\n"
+  "Content-Type: text/html"
+  END_OF_HEADERS
+  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
+  "<HTML><HEAD>\n"
+  "<TITLE>404 Not Found</TITLE>\n"
+  "</HEAD><BODY>\n"
+  "<H1>Not Found</H1>\n"
+  "The requested URL was not found on this server.\n"
+  "<P><HR><ADDRESS>" RTSPDVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
 /* send back this on RTSP 404 file not found */
 static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
-    "Server: " RTSPDVERSION
-    END_OF_HEADERS;
+  "Server: " RTSPDVERSION
+  END_OF_HEADERS;
 
 /* Default size to send away fake RTP data */
 #define RTP_DATA_SIZE 12

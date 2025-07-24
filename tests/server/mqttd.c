@@ -228,11 +228,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
   return 1;
 }
 
-
-
 /*
   do
-
      encodedByte = X MOD 128
 
      X = X DIV 128
