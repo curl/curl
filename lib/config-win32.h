@@ -30,36 +30,20 @@
 
 /* Define some minimum and default build targets for Visual Studio */
 #ifdef _MSC_VER
-   /* VS2012 default target settings and minimum build target check. */
-#  if _MSC_VER >= 1700
-     /* The minimum and default build targets for VS2012 are Vista and 8,
-        respectively */
-#    define VS2012_MIN_TARGET 0x0600  /* Vista */
-#    define VS2012_DEF_TARGET 0x0600  /* Vista */
+   /* Default target settings and minimum build target check for
+      VS2010. The minimum and default build targets for VS2012
+      are Vista and 8, respectively */
+#  define VS2010_MIN_TARGET 0x0600  /* Vista */
+#  define VS2010_DEF_TARGET 0x0600  /* Vista */
 
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2012_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2012_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#      error VS2012 does not support build targets prior to Windows Vista
-#    endif
-   /* VS2010 default target settings and minimum build target check. */
-#  else
-#    define VS2010_MIN_TARGET 0x0600  /* Vista */
-#    define VS2010_DEF_TARGET 0x0600  /* Vista */
-
-#    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2010_DEF_TARGET
-#    endif
-#    ifndef WINVER
-#    define WINVER VS2010_DEF_TARGET
-#    endif
-#    if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
-#      error VS2010 does not support build targets prior to Windows Vista
-#    endif
+#  ifndef _WIN32_WINNT
+#  define _WIN32_WINNT VS2010_DEF_TARGET
+#  endif
+#  ifndef WINVER
+#  define WINVER VS2010_DEF_TARGET
+#  endif
+#  if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
+#    error Visual Studio does not support build targets prior to Windows Vista
 #  endif
 #endif /* _MSC_VER */
 
