@@ -156,6 +156,10 @@
 
 #endif /* HAVE_CONFIG_H */
 
+#if defined(_WIN32) && defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
+#error The minimum build target is Windows Vista (0x0600)
+#endif
+
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
 /* behavior or generated code characteristics must be done here,    */
