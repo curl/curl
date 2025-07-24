@@ -959,19 +959,19 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   default:
   case RCMD_NORMALREQ:
     break; /* continue with business as usual */
-  case RCMD_STREAM:
-#define STREAMTHIS "a string to stream 01234567890\n"
-    count = strlen(STREAMTHIS);
+  case RCMD_STREAM: {
+    static const char streamthis[] = "a string to stream 01234567890\n";
     for(;;) {
-      written = swrite(sock, STREAMTHIS, count);
+      written = swrite(sock, streamthis, sizeof(streamthis)-1);
       if(got_exit_signal)
         return -1;
-      if(written != (ssize_t)count) {
+      if(written != (ssize_t)(sizeof(streamthis)-1)) {
         logmsg("Stopped streaming");
         break;
       }
     }
     return -1;
+  }
   case RCMD_IDLE:
     /* Do nothing. Sit idle. Pretend it rains. */
     return 0;
