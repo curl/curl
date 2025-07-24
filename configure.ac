@@ -4275,6 +4275,7 @@ if test "$curl_cv_native_windows" = 'yes'; then
       #define WIN32_LEAN_AND_MEAN
       #endif
       #include <winsock2.h>
+      #include <wincrypt.h>  /* for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 */
       #include <iphlpapi.h>
     ]],[[
       if_nametoindex("");
