@@ -31,6 +31,9 @@ if(MINGW)
   set(HAVE_DIRENT_H 1)
   set(HAVE_FTRUNCATE 1)
   set(HAVE_GETTIMEOFDAY 1)
+  if(MINGW64_VERSION AND MINGW64_VERSION VERSION_GREATER_EQUAL 2.0)
+    set(HAVE_IF_NAMETOINDEX 1)
+  endif()
   set(HAVE_LIBGEN_H 1)
   set(HAVE_OPENDIR 1)
   set(HAVE_SNPRINTF 1)
@@ -45,6 +48,7 @@ else()
   set(HAVE_DIRENT_H 0)
   set(HAVE_FTRUNCATE 0)
   set(HAVE_GETTIMEOFDAY 0)
+  set(HAVE_IF_NAMETOINDEX 1)
   set(HAVE_LIBGEN_H 0)
   set(HAVE_OPENDIR 0)
   set(HAVE_STRINGS_H 0)
@@ -201,4 +205,10 @@ if(MINGW OR MSVC)
     set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 v3+
     curl_prefill_type_size("OFF_T" 8)  # mingw-w64 v3+
   endif()
+endif()
+
+# UWP exceptions
+
+if(WINDOWS_STORE)
+  set(HAVE_IF_NAMETOINDEX 0)
 endif()
