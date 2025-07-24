@@ -76,10 +76,10 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
   }
 
   if(loadfile(cafile, &certdata, &certsize)) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE,     1L);
-    curl_easy_setopt(curl, CURLOPT_HEADER,      1L);
-    curl_easy_setopt(curl, CURLOPT_URL,         url);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT,   "CURLOPT_CAINFO_BLOB");
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "CURLOPT_CAINFO_BLOB");
     curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS,
                      (long)CURLSSLOPT_REVOKE_BEST_EFFORT);
 
