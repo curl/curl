@@ -150,6 +150,14 @@ const struct NameValue setopt_nv_CURL_NETRC[] = {
   NVEND,
 };
 
+const struct NameValue setopt_nv_CURLOPT_FOLLOWLOCATION[] = {
+  NV(0L),
+  NV(CURLFOLLOW_ALL),
+  NV(CURLFOLLOW_OBEYCODE),
+  NV(CURLFOLLOW_FIRSTONLY),
+  NVEND,
+};
+
 /* These options have non-zero default values. */
 static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
   NV1(CURLOPT_SSL_VERIFYPEER, 1),
