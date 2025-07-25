@@ -579,6 +579,22 @@ if test "$curl_cv_native_windows" = "yes"; then
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
+
+  AC_MSG_CHECKING([if building for Windows Vista or newer])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if (_WIN32_WINNT < 0x600)
+      #error
+      #endif
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([Building for Windows Vista or newer is required.])
+  ])
 fi
 
 CURL_SET_COMPILER_BASIC_OPTS
