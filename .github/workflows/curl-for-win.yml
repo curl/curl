@@ -58,7 +58,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-werror-linux-a64-r64-x64-musl-gcc'
+          export CW_CONFIG='-werror-linux-x64-musl-gcc'
           export CW_REVISION="${GITHUB_SHA}"
           DOCKER_IMAGE='debian:testing-slim'
           sudo podman image trust set --type reject default
