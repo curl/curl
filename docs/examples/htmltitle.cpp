@@ -144,7 +144,7 @@ static void StartElement(void *voidContext,
     context->title = "";
     context->addTitle = true;
   }
-  (void) attributes;
+  (void)attributes;
 }
 
 //
