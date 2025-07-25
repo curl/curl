@@ -476,6 +476,8 @@ jobs:
           pkg-config --print-errors --exists gnutls || true
           echo '-----------'
           pkg-config --debug --exists gnutls || true
+          echo '-----------'
+          PKG_CONFIG_DEBUG_SPEW=1 pkg-config --exists gnutls || true
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
