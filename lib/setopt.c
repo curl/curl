@@ -327,8 +327,8 @@ static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
 #endif /* ! CURL_DISABLE_HTTP */
 
 #ifdef USE_SSL
-static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
-                                  long arg)
+CURLcode Curl_setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
+                                long arg)
 {
   /*
    * Set explicit SSL version to try to connect with, as some SSL
@@ -353,6 +353,8 @@ static CURLcode setopt_SSLVERSION(struct Curl_easy *data, CURLoption option,
        version_max < CURL_SSLVERSION_MAX_NONE ||
        version_max >= CURL_SSLVERSION_MAX_LAST)
       return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(version == CURL_SSLVERSION_DEFAULT)
+      version = CURL_SSLVERSION_TLSv1_2;
 
     primary->version = (unsigned char)version;
     primary->version_max = (unsigned int)version_max;
@@ -624,11 +626,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLVERSION:
 #endif
-#ifdef USE_SSL
-    return setopt_SSLVERSION(data, option, arg);
-#else
-    return CURLE_NOT_BUILT_IN;
-#endif
+    return Curl_setopt_SSLVERSION(data, option, arg);
 
   case CURLOPT_POSTFIELDSIZE:
     /*

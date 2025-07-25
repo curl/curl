@@ -229,6 +229,53 @@ extern const unsigned char curl_ca_embed[];
 #endif
 #endif
 
+static long tlsversion(unsigned char mintls,
+                       unsigned char maxtls)
+{
+  long tlsver = 0;
+  if(!mintls) { /* minimum is at default */
+    /* minimum is set to default, which we want to be 1.2 */
+    if(maxtls && (maxtls < 3))
+      /* max is set lower than 1.2 and minimum is default, change minimum to
+         the same as max */
+      mintls = maxtls;
+  }
+  switch(mintls) {
+  case 1:
+    tlsver = CURL_SSLVERSION_TLSv1_0;
+    break;
+  case 2:
+    tlsver = CURL_SSLVERSION_TLSv1_1;
+    break;
+  case 0: /* let default minimum be 1.2 */
+  case 3:
+    tlsver = CURL_SSLVERSION_TLSv1_2;
+    break;
+  case 4:
+  default: /* just in case */
+    tlsver = CURL_SSLVERSION_TLSv1_3;
+    break;
+  }
+  switch(maxtls) {
+  case 0: /* not set, leave it */
+    break;
+  case 1:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_0;
+    break;
+  case 2:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_1;
+    break;
+  case 3:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_2;
+    break;
+  case 4:
+  default: /* just in case */
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_3;
+    break;
+  }
+  return tlsver;
+}
+
 /* only called if libcurl supports TLS */
 static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 {
@@ -360,7 +407,8 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1);
 
   my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
-                       config->ssl_version | config->ssl_version_max);
+                       tlsversion(config->ssl_version,
+                                  config->ssl_version_max));
   if(config->proxy)
     my_setopt_SSLVERSION(curl, CURLOPT_PROXY_SSLVERSION,
                          config->proxy_ssl_version);

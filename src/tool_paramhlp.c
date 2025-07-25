@@ -739,17 +739,17 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
  * data.
  */
 
-ParameterError str2tls_max(long *val, const char *str)
+ParameterError str2tls_max(unsigned char *val, const char *str)
 {
-   static struct s_tls_max {
+  static struct s_tls_max {
     const char *tls_max_str;
-    long tls_max;
+    unsigned char tls_max;
   } const tls_max_array[] = {
-    { "default", CURL_SSLVERSION_MAX_DEFAULT },
-    { "1.0",     CURL_SSLVERSION_MAX_TLSv1_0 },
-    { "1.1",     CURL_SSLVERSION_MAX_TLSv1_1 },
-    { "1.2",     CURL_SSLVERSION_MAX_TLSv1_2 },
-    { "1.3",     CURL_SSLVERSION_MAX_TLSv1_3 }
+    { "default", 0 }, /* lets the library decide */
+    { "1.0",     1 },
+    { "1.1",     2 },
+    { "1.2",     3 },
+    { "1.3",     4 }
   };
   size_t i = 0;
   if(!str)
