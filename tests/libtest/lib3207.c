@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 #include <pthread.h>
 #endif
 
