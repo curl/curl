@@ -2952,7 +2952,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-  (void) data;
+  (void)data;
 #endif
 
   *hostname_result = NULL;

@@ -924,7 +924,7 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
                                  bool dead_connection)
 {
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
-  (void) dead_connection;
+  (void)dead_connection;
 #ifndef USE_SSL
   (void)data;
 #endif

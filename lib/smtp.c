@@ -1892,7 +1892,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
     host->name = host->name + 1;
 
     /* Attempt to convert the hostname to IDN ACE */
-    (void) Curl_idnconvert_hostname(host);
+    (void)Curl_idnconvert_hostname(host);
 
     /* If Curl_idnconvert_hostname() fails then we shall attempt to continue
        and send the hostname using UTF-8 rather than as 7-bit ACE (which is

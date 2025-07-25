@@ -496,7 +496,7 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
   struct smb_conn *smbc = Curl_conn_meta_get(conn, CURL_META_SMB_CONN);
   char *slash;
 
-  (void) done;
+  (void)done;
   if(!smbc)
     return CURLE_FAILED_INIT;
 

@@ -203,8 +203,8 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
-  (void) data;
-  (void) writer;
+  (void)data;
+  (void)writer;
 }
 
 static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)

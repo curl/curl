@@ -587,7 +587,7 @@ static CURLcode ws_cw_init(struct Curl_easy *data,
 static void ws_cw_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 {
   struct ws_cw_ctx *ctx = writer->ctx;
-  (void) data;
+  (void)data;
   Curl_bufq_free(&ctx->buf);
 }
 
