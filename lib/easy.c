@@ -465,7 +465,7 @@ static int events_socket(CURL *easy,      /* easy handle */
   bool found = FALSE;
   struct Curl_easy *data = easy;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)easy;
 #endif
   (void)socketp;
