@@ -72,7 +72,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
-#if defined(HAVE_WIN_BCRYPTGENRANDOM)
+#ifdef HAVE_WIN_BCRYPTGENRANDOM
   if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
@@ -119,7 +119,7 @@ static CURLcode weak_random(struct Curl_easy *data,
   }
 #endif
 
-#if defined(HAVE_ARC4RANDOM)
+#ifdef HAVE_ARC4RANDOM
   (void)data;
   r = (unsigned int)arc4random();
   memcpy(entropy, &r, length);

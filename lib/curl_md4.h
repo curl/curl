@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 #include <curl/curl.h>
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 #define MD4_DIGEST_LENGTH 16
 

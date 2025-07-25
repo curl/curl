@@ -149,7 +149,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * platforms.
    */
 
-#if defined(HAVE_GETHOSTBYNAME_R_5)
+#ifdef HAVE_GETHOSTBYNAME_R_5
   /* Solaris, IRIX and more */
   h = gethostbyname_r(hostname,
                       (struct hostent *)buf,

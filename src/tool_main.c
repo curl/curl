@@ -61,8 +61,8 @@
 int vms_show = 0;
 #endif
 
-#if defined(__AMIGA__)
-#if defined(__GNUC__)
+#ifdef __AMIGA__
+#ifdef __GNUC__
 #define CURL_USED __attribute__((used))
 #else
 #define CURL_USED

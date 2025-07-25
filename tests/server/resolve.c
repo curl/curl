@@ -42,7 +42,7 @@ static int test_resolve(int argc, char *argv[])
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
              "/IPv6"
 #else
              ""
@@ -51,7 +51,7 @@ static int test_resolve(int argc, char *argv[])
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
       arg++;
@@ -63,7 +63,7 @@ static int test_resolve(int argc, char *argv[])
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
       ipv_inuse = "IPv4";
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
       use_ipv6 = FALSE;
 #endif
       arg++;
@@ -76,7 +76,7 @@ static int test_resolve(int argc, char *argv[])
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
          " --ipv4"
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
          "\n --ipv6"
 #endif
          );
@@ -88,7 +88,7 @@ static int test_resolve(int argc, char *argv[])
     return 2;
 #endif
 
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);

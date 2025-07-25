@@ -38,7 +38,7 @@
  * * Rustls
  * Skip the backend if it does not support the required algorithm */
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 #  include <openssl/opensslv.h>
 #  if (!defined(LIBRESSL_VERSION_NUMBER) && \
         defined(OPENSSL_VERSION_NUMBER) && \
@@ -78,12 +78,12 @@
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
 #  include <nettle/sha.h>
-#  if defined(SHA512_256_DIGEST_SIZE)
+#  ifdef SHA512_256_DIGEST_SIZE
 #    define USE_GNUTLS_SHA512_256           1
 #  endif
 #endif /* ! HAS_SHA512_256_IMPLEMENTATION && USE_GNUTLS */
 
-#if defined(USE_OPENSSL_SHA512_256)
+#ifdef USE_OPENSSL_SHA512_256
 
 /* OpenSSL does not provide macros for SHA-512/256 sizes */
 

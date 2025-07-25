@@ -508,7 +508,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   curl_socklen_t fromaddrlen;
 
   for(;;) {
-#if defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
+#ifdef HAVE_IOCTLSOCKET_CAMEL_FIONBIO
     long i;
     (void)IoctlSocket(f, FIONBIO, &i);
 #elif defined(HAVE_IOCTLSOCKET)

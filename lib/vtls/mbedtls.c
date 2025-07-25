@@ -880,12 +880,12 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 
-#if defined(MBEDTLS_SSL_RENEGOTIATION)
+#ifdef MBEDTLS_SSL_RENEGOTIATION
   mbedtls_ssl_conf_renegotiation(&backend->config,
                                  MBEDTLS_SSL_RENEGOTIATION_ENABLED);
 #endif
 
-#if defined(MBEDTLS_SSL_SESSION_TICKETS)
+#ifdef MBEDTLS_SSL_SESSION_TICKETS
   mbedtls_ssl_conf_session_tickets(&backend->config,
                                    MBEDTLS_SSL_SESSION_TICKETS_DISABLED);
 #endif
@@ -1426,7 +1426,7 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   int ret;
   mbedtls_entropy_context ctr_entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
