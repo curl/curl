@@ -118,7 +118,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__TANDEM)
-#  if !defined(__LP64)
+#  ifndef __LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -266,7 +266,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__xlc__) /* IBM xlc compiler */
-#  if !defined(_LP64)
+#  ifndef _LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -284,7 +284,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__hpux) /* HP aCC compiler */
-#  if !defined(_LP64)
+#  ifndef _LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
