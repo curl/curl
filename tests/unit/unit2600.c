@@ -146,7 +146,7 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
     infof(data, "%04dms: cf[%s] continuing", (int)duration_ms, ctx->id);
     curlx_wait_ms(10);
   }
-  Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_RUN_NOW);
+  Curl_expire(data, ctx->fail_delay_ms - duration_ms, EXPIRE_TIMEOUT);
   return CURLE_OK;
 }
 
@@ -224,7 +224,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
 
-  Curl_expire(data, ctx->fail_delay_ms, EXPIRE_RUN_NOW);
+  Curl_expire(data, ctx->fail_delay_ms, EXPIRE_TIMEOUT);
 
 out:
   *pcf = (!result) ? cf : NULL;
