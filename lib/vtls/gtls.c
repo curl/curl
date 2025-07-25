@@ -2121,7 +2121,7 @@ static void gtls_close(struct Curl_cfilter *cf,
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
 
-  (void) data;
+  (void)data;
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "close");
   if(backend->gtls.session) {

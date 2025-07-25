@@ -2487,8 +2487,8 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
     if(block) {
       curl_socket_t fd_read = conn->sock[FIRSTSOCKET];
       /* wait for the socket to become ready */
-      (void) Curl_socket_check(fd_read, CURL_SOCKET_BAD,
-                               CURL_SOCKET_BAD, left > 1000 ? 1000 : left);
+      (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD,
+                              CURL_SOCKET_BAD, left > 1000 ? 1000 : left);
     }
 
   }
@@ -2807,7 +2807,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  (void) dead_connection;
+  (void)dead_connection;
 
   if(sshc && sshc->ssh_session && sshp) {
     /* only if there is a session still around to use! */
@@ -2848,7 +2848,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
   struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
-  (void) premature;             /* not used */
+  (void)premature;             /* not used */
 
   if(!sshc)
     return CURLE_FAILED_INIT;
@@ -2866,7 +2866,7 @@ static CURLcode scp_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
 
-  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
   (void)eos;
   *pnwritten = 0;
 
@@ -2899,7 +2899,7 @@ static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   ssize_t nread;
 
-  (void) sockindex; /* we only support SCP on the fixed known primary socket */
+  (void)sockindex; /* we only support SCP on the fixed known primary socket */
   *pnread = 0;
 
   if(!sshc)
@@ -2984,7 +2984,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
   CURLcode result = CURLE_OK;
-  (void) dead_connection;
+  (void)dead_connection;
 
   DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 

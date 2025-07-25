@@ -235,7 +235,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
 {
   const char *p = buf;
 
-  (void) handle;
+  (void)handle;
 
   fprintf(stderr, "0x");
   while(len-- > 0)
@@ -269,7 +269,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
   size_t type2len = Curl_bufref_len(type2ref);
 
 #if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+  (void)data;
 #endif
 
   if(type2len >= 48) {

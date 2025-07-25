@@ -428,7 +428,7 @@ static int idn_present(curl_version_info_data *info)
   !defined(CURL_DISABLE_HTTP)
 static int https_proxy_present(curl_version_info_data *info)
 {
-  (void) info;
+  (void)info;
   return Curl_ssl_supports(NULL, SSLSUPP_HTTPS_PROXY);
 }
 #endif
@@ -436,7 +436,7 @@ static int https_proxy_present(curl_version_info_data *info)
 #if defined(USE_SSL) && defined(USE_ECH)
 static int ech_present(curl_version_info_data *info)
 {
-  (void) info;
+  (void)info;
   return Curl_ssl_supports(NULL, SSLSUPP_ECH);
 }
 #endif
