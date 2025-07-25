@@ -470,7 +470,7 @@ jobs:
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           #sed -i.bak -E 's/^Requires: .+//g' /home/runner/ngtcp2/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc
-          sed -i.bak 's/^Requires:/Requires.private:/g' "$PWD"/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc
+          sed -i.bak 's/^Requires:/Requires.private:/g' /home/runner/ngtcp2/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc
           cat /home/runner/ngtcp2/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
