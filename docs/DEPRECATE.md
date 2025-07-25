@@ -55,6 +55,13 @@ Bumping the minimum to VS2010. VS2008 is a pain to support.
 
 Previous discussion and details: https://github.com/curl/curl/discussions/15972
 
+## Windows XP
+
+In January 2026, curl drops support for Windows XP and Server 2003. Their
+"mainstream support" ended in 2014, with final updates on May 14, 2019.
+
+Making the new minimum target Windows version Vista / Server 2008.
+
 ## Past removals
 
  - axTLS (removed in 7.63.0)
