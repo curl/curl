@@ -358,6 +358,7 @@ This is the full list of functions generally banned.
     strncat
     strncpy
     strtok
+    strtok_r
     strtol
     strtoul
     vsnprint
