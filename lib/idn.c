@@ -51,7 +51,7 @@
 #include "memdebug.h"
 
 /* for macOS and iOS targets */
-#if defined(USE_APPLE_IDN)
+#ifdef USE_APPLE_IDN
 #include <unicode/uidna.h>
 #include <iconv.h>
 #include <langinfo.h>

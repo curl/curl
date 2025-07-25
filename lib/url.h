@@ -118,7 +118,7 @@ CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else
 #define Curl_data_priority_clear_state(x)
-#endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
+#endif /* USE_HTTP2 || USE_HTTP3 */
 
 #ifdef USE_NGHTTP2
 CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,

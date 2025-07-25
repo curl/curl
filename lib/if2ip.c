@@ -94,7 +94,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 
 #if !defined(CURL_DISABLE_BINDLOCAL) || !defined(CURL_DISABLE_FTP)
 
-#if defined(HAVE_GETIFADDRS)
+#ifdef HAVE_GETIFADDRS
 
 if2ip_result_t Curl_if2ip(int af,
 #ifdef USE_IPV6

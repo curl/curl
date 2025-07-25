@@ -54,7 +54,7 @@
  *
  * Returns a pointer to the newly allocated SPN.
  */
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef USE_WINDOWS_SSPI
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm)
 {

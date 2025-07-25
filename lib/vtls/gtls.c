@@ -892,15 +892,15 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
      * on QUIC this is common. */
     init_flags |= GNUTLS_ENABLE_EARLY_DATA;
 
-#if defined(GNUTLS_FORCE_CLIENT_CERT)
+#ifdef GNUTLS_FORCE_CLIENT_CERT
   init_flags |= GNUTLS_FORCE_CLIENT_CERT;
 #endif
 
-#if defined(GNUTLS_NO_TICKETS_TLS12)
+#ifdef GNUTLS_NO_TICKETS_TLS12
     init_flags |= GNUTLS_NO_TICKETS_TLS12;
 #endif
 
-#if defined(GNUTLS_NO_STATUS_REQUEST)
+#ifdef GNUTLS_NO_STATUS_REQUEST
   if(!config->verifystatus)
     /* Disable the "status_request" TLS extension, enabled by default since
        GnuTLS 3.8.0. */

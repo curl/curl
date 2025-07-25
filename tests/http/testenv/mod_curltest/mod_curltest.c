@@ -51,7 +51,7 @@ AP_DECLARE_MODULE(curltest) =
   NULL,  /* func to merge per server config */
   NULL,              /* command handlers */
   curltest_hooks,
-#if defined(AP_MODULE_FLAG_NONE)
+#ifdef AP_MODULE_FLAG_NONE
   AP_MODULE_FLAG_ALWAYS_MERGE
 #endif
 };

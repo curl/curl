@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#ifndef CURL_DISABLE_PROXY
 
 #include <curl/curl.h>
 #include "urldata.h"

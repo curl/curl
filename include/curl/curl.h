@@ -102,7 +102,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -124,7 +124,7 @@ typedef void CURLSH;
 #elif defined(_WIN32) || \
      (CURL_HAS_DECLSPEC_ATTRIBUTE(dllexport) && \
       CURL_HAS_DECLSPEC_ATTRIBUTE(dllimport))
-#  if defined(BUILDING_LIBCURL)
+#  ifdef BUILDING_LIBCURL
 #    define CURL_EXTERN  __declspec(dllexport)
 #  else
 #    define CURL_EXTERN  __declspec(dllimport)
@@ -3302,7 +3302,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
                                            void *userptr);
 
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 

@@ -407,7 +407,7 @@ dnl included when bsdsocket.h is to be included.
 AC_DEFUN([CURL_INCLUDES_BSDSOCKET], [
 curl_includes_bsdsocket="\
 /* includes start */
-#if defined(HAVE_PROTO_BSDSOCKET_H)
+#ifdef HAVE_PROTO_BSDSOCKET_H
 #  define __NO_NET_API
 #  define __USE_INLINE__
 #  include <proto/bsdsocket.h>

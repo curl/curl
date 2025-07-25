@@ -235,12 +235,12 @@ static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
     FD_SET(sockets->sockets[i], fdset);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
     if(*maxFd < sockets->sockets[i] + 1) {

@@ -150,7 +150,7 @@ static void _ftp_state(struct Curl_easy *data,
 #endif
   )
 {
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #ifdef DEBUGBUILD
   (void)lineno;

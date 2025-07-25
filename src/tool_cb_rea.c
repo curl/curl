@@ -71,12 +71,12 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       timeout.tv_usec = (int)((wait%1000)*1000);
 
       FD_ZERO(&bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(per->infd, &bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
@@ -161,12 +161,12 @@ int tool_readbusy_cb(void *clientp,
       timeout.tv_usec = 1000;
 
       FD_ZERO(&bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(per->infd, &bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       select(per->infd + 1, &bits, NULL, NULL, &timeout);

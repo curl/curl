@@ -68,7 +68,7 @@
  */
 
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
-    defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
+  defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
 # define vqualifier volatile
 #else
@@ -513,7 +513,7 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
   freeaddrinfo(freethis);
 #endif
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
+#endif /* CURLDEBUG && HAVE_FREEADDRINFO */
 
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
@@ -553,7 +553,7 @@ curl_dbg_getaddrinfo(const char *hostname,
                  source, line);
   return res;
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
+#endif /* CURLDEBUG && HAVE_GETADDRINFO */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

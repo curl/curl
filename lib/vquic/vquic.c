@@ -612,7 +612,7 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             vquic_recv_pkt_cb *recv_cb, void *userp)
 {
   CURLcode result;
-#if defined(HAVE_SENDMMSG)
+#ifdef HAVE_SENDMMSG
   result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #elif defined(HAVE_SENDMSG)
   result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);

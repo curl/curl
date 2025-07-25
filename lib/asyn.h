@@ -236,7 +236,7 @@ struct doh_probes;
 
 #ifdef USE_CURL_ASYNC
 struct Curl_async {
-#ifdef CURLRES_ARES /*  */
+#ifdef CURLRES_ARES
   struct async_ares_ctx ares;
 #elif defined(CURLRES_THREADED)
   struct async_thrdd_ctx thrdd;
