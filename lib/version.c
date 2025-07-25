@@ -498,7 +498,7 @@ static const struct feat features_table[] = {
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
-#if defined(USE_HTTPSRR)
+#ifdef USE_HTTPSRR
   FEATURE("HTTPSRR",     NULL,                0),
 #endif
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
@@ -523,7 +523,7 @@ static const struct feat features_table[] = {
 #ifdef USE_NTLM
   FEATURE("NTLM",        NULL,                CURL_VERSION_NTLM),
 #endif
-#if defined(USE_LIBPSL)
+#ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
 #ifdef USE_SPNEGO
@@ -532,7 +532,7 @@ static const struct feat features_table[] = {
 #ifdef USE_SSL
   FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
 #endif
-#if defined(USE_SSLS_EXPORT)
+#ifdef USE_SSLS_EXPORT
   FEATURE("SSLS-EXPORT", NULL,                0),
 #endif
 #ifdef USE_WINDOWS_SSPI
@@ -607,7 +607,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   const struct feat *p;
   int features = 0;
 
-#if defined(USE_SSH)
+#ifdef USE_SSH
   static char ssh_buf[80];  /* 'ssh_buffer' clashes with libssh/libssh.h */
 #endif
 #ifdef USE_SSL
@@ -648,7 +648,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   version_info.libidn = idn2_check_version(IDN2_VERSION);
 #endif
 
-#if defined(USE_SSH)
+#ifdef USE_SSH
   Curl_ssh_version(ssh_buf, sizeof(ssh_buf));
   version_info.libssh_version = ssh_buf;
 #endif
