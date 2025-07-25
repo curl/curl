@@ -1154,7 +1154,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
         if(!FDSET_SOCK(ps.sockets[i]))
           /* pretend it does not exist */
           continue;
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
@@ -1162,7 +1162,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
           FD_SET(ps.sockets[i], read_fd_set);
         if(ps.actions[i] & CURL_POLL_OUT)
           FD_SET(ps.sockets[i], write_fd_set);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
         if((int)ps.sockets[i] > this_max_fd)
