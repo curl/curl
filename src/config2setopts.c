@@ -640,7 +640,7 @@ static void gen_cb_setopts(struct OperationConfig *config,
                            CURL *curl)
 {
   struct GlobalConfig *global = config->global;
-  (void) config;
+  (void)config;
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
   my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);

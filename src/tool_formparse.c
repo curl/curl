@@ -204,7 +204,7 @@ size_t tool_mime_stdin_read(char *buffer,
 {
   struct tool_mime *sip = (struct tool_mime *) arg;
   curl_off_t bytesleft;
-  (void) size;  /* Always 1: ignored. */
+  (void)size;  /* Always 1: ignored. */
 
   if(sip->size >= 0) {
     if(sip->curpos >= sip->size)
