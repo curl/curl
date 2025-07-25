@@ -1989,9 +1989,7 @@ curl_add_if("HTTPS-proxy"   NOT CURL_DISABLE_PROXY AND _ssl_enabled AND (USE_OPE
                             OR USE_SCHANNEL OR USE_RUSTLS OR USE_MBEDTLS OR
                             (USE_WOLFSSL AND HAVE_WOLFSSL_BIO_NEW)))
 curl_add_if("Unicode"       ENABLE_UNICODE)
-curl_add_if("threadsafe"    HAVE_ATOMIC OR
-                            (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                            (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+curl_add_if("threadsafe"    HAVE_ATOMIC OR (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR WIN32)
 curl_add_if("Debug"         ENABLE_DEBUG)
 curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
