@@ -52,7 +52,7 @@ env:
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
   NGHTTP3_VERSION: 1.10.1
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  NGTCP2_VERSION: 1.13.0
+  NGTCP2_VERSION: 1.14.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.66.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
@@ -260,7 +260,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
@@ -269,7 +269,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
-              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
@@ -278,7 +278,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
-              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
@@ -287,7 +287,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
-              --with-ngtcp2=/home/runner/ngtcp2/build --enable-warnings --enable-werror --enable-debug
+              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
@@ -303,13 +303,12 @@ jobs:
               -DCURL_USE_LIBUV=ON
 
           - name: 'openssl-quic'
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
-              --with-nghttp3=/home/runner/nghttp3/build
               --with-libuv
 
           - name: 'quiche'
