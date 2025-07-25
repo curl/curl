@@ -23,6 +23,14 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
+my %with;
+my %without;
+my %used;
+my %avail;
+
 # these options are enabled by default in the sense that they will attempt to
 # check for and use this feature without the configure flag
 my %defaulton = (
