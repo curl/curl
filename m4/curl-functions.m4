@@ -370,7 +370,7 @@ curl_includes_winsock2="\
 /* includes start */
 #ifdef _WIN32
 #  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
 #endif
@@ -389,7 +389,7 @@ curl_includes_ws2tcpip="\
 /* includes start */
 #ifdef _WIN32
 #  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <winsock2.h>
 #  include <ws2tcpip.h>

@@ -323,8 +323,8 @@ static CURLcode test_cli_hx_download(const char *URL)
     t = &transfer_d[i];
     t->easy = curl_easy_init();
     if(!t->easy ||
-      setup_hx_download(t->easy, url, t, http_version, host, share,
-                        use_earlydata, fresh_connect)) {
+       setup_hx_download(t->easy, url, t, http_version, host, share,
+                         use_earlydata, fresh_connect)) {
       curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       result = (CURLcode)1;
       goto cleanup;

@@ -3013,7 +3013,7 @@ if test "$want_idn" = "yes"; then
     tst_links_libidn="no"
   ])
   #
-  AC_CHECK_HEADERS( idn2.h )
+  AC_CHECK_HEADERS(idn2.h)
 
   if test "$tst_links_libidn" = "yes"; then
     AC_DEFINE(HAVE_LIBIDN2, 1, [Define to 1 if you have the `idn2' library (-lidn2).])

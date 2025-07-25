@@ -125,7 +125,7 @@ jobs:
             install_steps: skipall
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
-          - name: awslc
+          - name: 'awslc'
             install_packages: zlib1g-dev
             install_steps: awslc pytest
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
