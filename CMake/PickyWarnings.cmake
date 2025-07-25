@@ -118,7 +118,7 @@ if(PICKY_COMPILER)
       -Wfloat-equal                        # clang  1.0  gcc  2.96 (3.0)
       -Wformat-security                    # clang  2.7  gcc  4.1
       -Wignored-qualifiers                 # clang  2.8  gcc  4.3
-      -Wmissing-field-initializers         # clang  2.7  gcc  4.1
+      -Werror=missing-field-initializers   # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
       -Wno-sign-conversion                 # clang  2.9  gcc  4.3
