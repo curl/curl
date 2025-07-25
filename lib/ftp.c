@@ -615,7 +615,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   if(ftpcode)
     *ftpcode = code;
 
-  if(421 == code) {
+  if(code == 421) {
     /* 421 means "Service not available, closing control connection." and FTP
      * servers use it to signal that idle session timeout has been exceeded.
      * If we ignored the response, it could end up hanging in some cases.

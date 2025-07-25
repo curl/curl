@@ -1888,8 +1888,8 @@ static int clear_url(void)
         curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
 
       rc = curl_url_get(u, clear_url_list[i].part, &p, 0);
-      if(rc != clear_url_list[i].ucode || (clear_url_list[i].out &&
-         0 != strcmp(p, clear_url_list[i].out))) {
+      if(rc != clear_url_list[i].ucode ||
+         (clear_url_list[i].out && strcmp(p, clear_url_list[i].out) != 0)) {
 
         curl_mfprintf(stderr, "unexpected return code line %u\n", __LINE__);
         error++;

@@ -1986,7 +1986,7 @@ static bool gtls_data_pending(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx && ctx->backend);
   backend = (struct gtls_ssl_backend_data *)ctx->backend;
   if(backend->gtls.session &&
-     0 != gnutls_record_check_pending(backend->gtls.session))
+     gnutls_record_check_pending(backend->gtls.session) != 0)
     return TRUE;
   return FALSE;
 }

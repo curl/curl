@@ -872,7 +872,7 @@ parse_netscape(struct Cookie *co,
       break;
     }
   }
-  if(6 == fields) {
+  if(fields == 6) {
     /* we got a cookie with blank contents, fix it */
     co->value = strdup("");
     if(!co->value)
@@ -881,7 +881,7 @@ parse_netscape(struct Cookie *co,
       fields++;
   }
 
-  if(7 != fields)
+  if(fields != 7)
     /* we did not find the sufficient number of fields */
     return CERR_FIELDS;
 
