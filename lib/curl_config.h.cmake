@@ -336,9 +336,6 @@
 /* Define to 1 if symbol `sa_family_t' exists */
 #cmakedefine HAVE_SA_FAMILY_T 1
 
-/* Define to 1 if symbol `ADDRESS_FAMILY' exists */
-#cmakedefine HAVE_ADDRESS_FAMILY 1
-
 /* Define to 1 if you have the ioctlsocket function. */
 #cmakedefine HAVE_IOCTLSOCKET 1
 

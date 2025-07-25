@@ -937,10 +937,10 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  ifdef HAVE_SA_FAMILY_T
-#    define CURL_SA_FAMILY_T sa_family_t
-#  elif defined(HAVE_ADDRESS_FAMILY)
+#  if defined(_WIN32) && !defined(UNDER_CE)
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  elif defined(HAVE_SA_FAMILY_T)
+#    define CURL_SA_FAMILY_T sa_family_t
 #  elif defined(__AMIGA__)
 #    define CURL_SA_FAMILY_T unsigned char
 #  else
