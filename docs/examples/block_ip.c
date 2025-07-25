@@ -34,7 +34,7 @@
 int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
 
-#ifdef _WIN32 /* Requires Windows Vista+ */
+#ifdef _WIN32 /* Requires Vista+ */
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif
