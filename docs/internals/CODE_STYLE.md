@@ -338,6 +338,7 @@ This is the full list of functions generally banned.
     _tcsncat
     _waccess
     _wcscat
+    _wcsdup
     _wcsncat
     access
     gets
@@ -357,7 +358,9 @@ This is the full list of functions generally banned.
     strncat
     strncpy
     strtok
+    strtok_r
     strtol
     strtoul
     vsnprint
     vsprintf
+    wcsdup
