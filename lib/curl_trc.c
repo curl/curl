@@ -199,7 +199,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
@@ -471,8 +471,8 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_ssl_proxy,      TRC_CT_PROXY },
 #endif
 #endif
-#if !defined(CURL_DISABLE_PROXY)
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_PROXY
+#ifndef CURL_DISABLE_HTTP
   { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
   { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
@@ -485,7 +485,7 @@ static struct trc_cft_def trc_cfts[] = {
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
 };
