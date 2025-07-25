@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 #include <string.h>
 
@@ -220,7 +220,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data) {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
     mbedtls_md4(ctx->data, ctx->size, result);
 #else
     (void)mbedtls_md4_ret(ctx->data, ctx->size, result);
