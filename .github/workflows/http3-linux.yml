@@ -472,7 +472,9 @@ jobs:
           echo "|${PKG_CONFIG_PATH}|"
           env | grep PKG || true
           pkg-config --version
-          pkg-config --list-all
+          pkg-config --list-all | sort
+          pkg-config --print-errors --exists gnutls || true
+          echo '-----------'
           pkg-config --debug --exists gnutls || true
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
