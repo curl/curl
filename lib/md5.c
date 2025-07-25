@@ -177,7 +177,7 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_update(ctx, data, length);
 #else
   (void)mbedtls_md5_update_ret(ctx, data, length);
@@ -186,7 +186,7 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_finish(ctx, digest);
 #else
   (void)mbedtls_md5_finish_ret(ctx, digest);

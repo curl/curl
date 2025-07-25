@@ -248,7 +248,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#if !defined(CURL_DISABLE_DIGEST_AUTH)
+#ifndef CURL_DISABLE_DIGEST_AUTH
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;
   }

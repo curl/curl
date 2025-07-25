@@ -58,7 +58,7 @@
   #endif
 #elif defined(USE_WOLFSSL)
   #include <wolfssl/options.h>
-  #if !defined(NO_DES3)
+  #ifndef NO_DES3
     #define USE_OPENSSL_DES
   #endif
 #endif
@@ -129,7 +129,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if !defined(CURL_NTLM_NOT_SUPPORTED)
+#ifndef CURL_NTLM_NOT_SUPPORTED
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
@@ -329,7 +329,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
-#if !defined(CURL_NTLM_NOT_SUPPORTED)
+#ifndef CURL_NTLM_NOT_SUPPORTED
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
@@ -380,7 +380,7 @@ static void ascii_to_unicode_le(unsigned char *dest, const char *src,
   }
 }
 
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef USE_WINDOWS_SSPI
 
 static void ascii_uppercase_to_unicode_le(unsigned char *dest,
                                           const char *src, size_t srclen)
@@ -422,7 +422,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   return result;
 }
 
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef USE_WINDOWS_SSPI
 
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
 #define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
