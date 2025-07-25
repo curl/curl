@@ -1087,7 +1087,12 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL, /* end_stream */
   cb_h3_reset_stream,
   NULL, /* shutdown */
-  NULL /* recv_settings */
+  NULL, /* recv_settings */
+#ifdef NGHTTP3_CALLBACKS_V2
+  NULL, /* recv_origin */
+  NULL, /* end_origin */
+  NULL, /* rand */
+#endif
 };
 
 static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
