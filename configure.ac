@@ -5302,19 +5302,8 @@ if test "$tst_atomic" = "yes"; then
 elif test "x$USE_THREADS_POSIX" = "x1" -a \
      "x$ac_cv_header_pthread_h" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-else
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-    SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-  ],[
-  ])
+elif test "$curl_cv_native_windows" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 fi
 
 if test "x$want_winuni" = "xyes"; then
