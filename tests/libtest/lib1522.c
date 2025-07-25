@@ -33,8 +33,8 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
 {
 #if defined(SOL_SOCKET) && defined(SO_SNDBUF)
   int sndbufsize = 4 * 1024; /* 4KB send buffer */
-  (void) clientp;
-  (void) purpose;
+  (void)clientp;
+  (void)purpose;
   setsockopt(curlfd, SOL_SOCKET, SO_SNDBUF,
              (char *)&sndbufsize, sizeof(sndbufsize));
 #else

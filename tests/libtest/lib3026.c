@@ -54,7 +54,7 @@ static CURLcode test_lib3026(char *URL)
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if((ver->features & CURL_VERSION_THREADSAFE) == 0) {
@@ -118,7 +118,7 @@ static CURLcode test_lib3026(char *URL)
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if((ver->features & CURL_VERSION_THREADSAFE) == 0) {

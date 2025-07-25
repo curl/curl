@@ -510,13 +510,13 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   for(;;) {
 #if defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
     long i;
-    (void) IoctlSocket(f, FIONBIO, &i);
+    (void)IoctlSocket(f, FIONBIO, &i);
 #elif defined(HAVE_IOCTLSOCKET)
     unsigned long i;
-    (void) ioctlsocket(f, FIONREAD, &i);
+    (void)ioctlsocket(f, FIONREAD, &i);
 #else
     int i;
-    (void) ioctl(f, FIONREAD, &i);
+    (void)ioctl(f, FIONREAD, &i);
 #endif
     if(i) {
       j++;
@@ -528,8 +528,8 @@ static int synchnet(curl_socket_t f /* socket to flush */)
       else
         fromaddrlen = sizeof(fromaddr.sa6);
 #endif
-      (void) recvfrom(f, rbuf, sizeof(rbuf), 0,
-                      &fromaddr.sa, &fromaddrlen);
+      (void)recvfrom(f, rbuf, sizeof(rbuf), 0,
+                     &fromaddr.sa, &fromaddrlen);
     }
     else
       break;
@@ -1179,7 +1179,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
     sdp->th_block = htons(sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
-    (void) sigsetjmp(timeoutbuf, 1);
+    (void)sigsetjmp(timeoutbuf, 1);
 #endif
     if(test->writedelay) {
       logmsg("Pausing %d seconds before %d bytes", test->writedelay,
@@ -1223,7 +1223,7 @@ send_data:
           break;
         }
         /* Re-synchronize with the other side */
-        (void) synchnet(peer);
+        (void)synchnet(peer);
         if(sap->th_block == (sendblock-1)) {
           goto send_data;
         }
@@ -1257,7 +1257,7 @@ static void recvtftp(struct testcase *test, const struct formats *pf)
     rap->th_block = htons(recvblock);
     recvblock++;
 #ifdef HAVE_SIGSETJMP
-    (void) sigsetjmp(timeoutbuf, 1);
+    (void)sigsetjmp(timeoutbuf, 1);
 #endif
 send_ack:
     logmsg("write");
@@ -1291,7 +1291,7 @@ send_ack:
           break;                         /* normal */
         }
         /* Re-synchronize with the other side */
-        (void) synchnet(peer);
+        (void)synchnet(peer);
         if(rdp->th_block == (recvblock-1))
           goto send_ack;                 /* rexmit */
       }
@@ -1315,7 +1315,7 @@ send_ack:
 
   rap->th_opcode = htons(opcode_ACK);  /* send the "final" ack */
   rap->th_block = htons(recvblock);
-  (void) swrite(peer, &ackbuf.storage[0], 4);
+  (void)swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
   alarm(rexmtval);
@@ -1330,7 +1330,7 @@ send_ack:
   if(n >= 4 &&                               /* if read some data */
      rdp->th_opcode == opcode_DATA &&        /* and got a data block */
      recvblock == rdp->th_block) {           /* then my last ack was lost */
-    (void) swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
+    (void)swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
   }
 abort:
   /* make sure the output file is closed in case of abort */

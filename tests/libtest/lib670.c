@@ -65,10 +65,10 @@ static int t670_xferinfo(void *clientp,
 {
   struct t670_ReadThis *pooh = (struct t670_ReadThis *) clientp;
 
-  (void) dltotal;
-  (void) dlnow;
-  (void) ultotal;
-  (void) ulnow;
+  (void)dltotal;
+  (void)dlnow;
+  (void)ultotal;
+  (void)ulnow;
 
   if(pooh->origin) {
     time_t delta = time(NULL) - pooh->origin;
