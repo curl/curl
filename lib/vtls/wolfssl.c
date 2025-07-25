@@ -178,7 +178,7 @@ wssl_tls13_secret_callback(SSL *ssl, int id, const unsigned char *secret,
   Curl_tls_keylog_write(label, client_random, secret, secretSz);
   return 0;
 }
-#endif /* defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13) */
+#endif /* HAVE_SECRET_CALLBACK && WOLFSSL_TLS13 */
 
 static void wssl_log_tls12_secret(WOLFSSL *ssl)
 {

@@ -513,7 +513,7 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
   freeaddrinfo(freethis);
 #endif
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
+#endif /* CURLDEBUG && HAVE_FREEADDRINFO */
 
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
@@ -553,7 +553,7 @@ curl_dbg_getaddrinfo(const char *hostname,
                  source, line);
   return res;
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
+#endif /* CURLDEBUG && HAVE_GETADDRINFO */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

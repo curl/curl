@@ -3202,8 +3202,8 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                &as /* to */,
                                allowed_alpns);
     }
- #endif
- #ifdef USE_HTTP2
+#endif
+#ifdef USE_HTTP2
     if(!hit && (neg->wanted & CURL_HTTP_V2x) &&
        !neg->h2_prior_knowledge) {
       srcalpnid = ALPN_h2;
@@ -3212,7 +3212,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                &as /* to */,
                                allowed_alpns);
     }
- #endif
+#endif
     if(!hit && (neg->wanted & CURL_HTTP_V1x) &&
        !neg->only_10) {
       srcalpnid = ALPN_h1;
@@ -4089,7 +4089,7 @@ void Curl_data_priority_clear_state(struct Curl_easy *data)
   memset(&data->state.priority, 0, sizeof(data->state.priority));
 }
 
-#endif /* defined(USE_HTTP2) || defined(USE_HTTP3) */
+#endif /* USE_HTTP2 || USE_HTTP3 */
 
 
 CURLcode Curl_conn_meta_set(struct connectdata *conn, const char *key,

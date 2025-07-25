@@ -1510,7 +1510,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(result)
       goto out;
   }
-#endif /* !defined(CURL_DISABLE_HTTP) */
+#endif /* !CURL_DISABLE_HTTP */
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
