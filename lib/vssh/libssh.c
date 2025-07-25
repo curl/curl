@@ -1468,10 +1468,8 @@ static int myssh_in_SFTP_SHUTDOWN(struct Curl_easy *data,
      before we proceed */
   ssh_set_blocking(sshc->ssh_session, 0);
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  if(sshc->sftp_aio) {
-    sftp_aio_free(sshc->sftp_aio);
-    sshc->sftp_aio = NULL;
-  }
+  SFTP_AIO_FREE(sshc->sftp_send_aio);
+  SFTP_AIO_FREE(sshc->sftp_recv_aio);
 #endif
 
   if(sshc->sftp_file) {
@@ -3033,32 +3031,30 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  /* limit the writes to the maximum specified in Section 3 of
-   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
-   */
-  if(len > 32768)
-    len = 32768;
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   switch(sshc->sftp_send_state) {
     case 0:
       sftp_file_set_nonblocking(sshc->sftp_file);
       if(sftp_aio_begin_write(sshc->sftp_file, mem, len,
-                              &sshc->sftp_aio) == SSH_ERROR) {
+                              &sshc->sftp_send_aio) == SSH_ERROR) {
         return CURLE_SEND_ERROR;
       }
       sshc->sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
-      nwrite = sftp_aio_wait_write(&sshc->sftp_aio);
+      nwrite = sftp_aio_wait_write(&sshc->sftp_send_aio);
       myssh_block2waitfor(conn, sshc, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
       if(nwrite == SSH_AGAIN)
         return CURLE_AGAIN;
       else if(nwrite < 0)
         return CURLE_SEND_ERROR;
-      if(sshc->sftp_aio) {
-        sftp_aio_free(sshc->sftp_aio);
-        sshc->sftp_aio = NULL;
-      }
+
+      /*
+       * sftp_aio_wait_write() would free sftp_send_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
+
       sshc->sftp_send_state = 0;
       *pnwritten = (size_t)nwrite;
       return CURLE_OK;
@@ -3067,6 +3063,17 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
       return CURLE_SEND_ERROR;
   }
 #else
+  /*
+   * limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   *
+   * libssh started applying appropriate read/write length limits
+   * internally since version 0.11.0, hence such an operation is
+   * not needed for versions after (and including) 0.11.0.
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(sshc->sftp_file, mem, len);
 
   myssh_block2waitfor(conn, sshc, FALSE);
@@ -3106,16 +3113,28 @@ static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
 
   switch(sshc->sftp_recv_state) {
     case 0:
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      if(sftp_aio_begin_read(sshc->sftp_file, len,
+                             &sshc->sftp_recv_aio) == SSH_ERROR) {
+        return CURLE_RECV_ERROR;
+      }
+#else
       sshc->sftp_file_index =
         sftp_async_read_begin(sshc->sftp_file, (uint32_t)len);
       if(sshc->sftp_file_index < 0)
         return CURLE_RECV_ERROR;
+#endif
 
       FALLTHROUGH();
     case 1:
       sshc->sftp_recv_state = 1;
+
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      nread = sftp_aio_wait_read(&sshc->sftp_recv_aio, mem, len);
+#else
       nread = sftp_async_read(sshc->sftp_file, mem, (uint32_t)len,
                               (uint32_t)sshc->sftp_file_index);
+#endif
 
       myssh_block2waitfor(conn, sshc, (nread == SSH_AGAIN));
 
@@ -3123,6 +3142,12 @@ static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
         return CURLE_AGAIN;
       else if(nread < 0)
         return CURLE_RECV_ERROR;
+
+      /*
+       * sftp_aio_wait_read() would free sftp_recv_aio and
+       * assign it NULL in all cases except when it returns
+       * SSH_AGAIN.
+       */
 
       sshc->sftp_recv_state = 0;
       *pnread = (size_t)nread;
