@@ -273,7 +273,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
   }
   return rc;
 }
-#endif /* #if defined(USE_WINDOWS_SSPI) */
+#endif /* USE_WINDOWS_SSPI */
 
 static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
                          const char *user, const char *passwd)
@@ -300,7 +300,7 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
 
   return rc;
 }
-#endif /* #if defined(USE_WIN32_LDAP) */
+#endif /* USE_WIN32_LDAP */
 
 #ifdef USE_WIN32_LDAP
 #define FREE_ON_WINLDAP(x) curlx_unicodefree(x)

@@ -34,6 +34,6 @@
 CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
                     const size_t len);
 
-#endif /* defined(USE_CURL_NTLM_CORE) */
+#endif /* USE_CURL_NTLM_CORE */
 
 #endif /* HEADER_CURL_MD4_H */

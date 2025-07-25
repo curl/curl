@@ -605,7 +605,7 @@ static CURLcode test_unit3205(char *arg)
       j++;
     }
   }
-#endif /* defined(USE_MBEDTLS) || defined(USE_RUSTLS) */
+#endif /* USE_MBEDTLS || USE_RUSTLS */
 
   UNITTEST_END_SIMPLE
 }
