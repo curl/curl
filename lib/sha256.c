@@ -134,7 +134,7 @@ typedef mbedtls_sha256_context my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_starts(ctx, 0);
 #else
   (void)mbedtls_sha256_starts_ret(ctx, 0);
@@ -146,7 +146,7 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_update(ctx, data, length);
 #else
   (void)mbedtls_sha256_update_ret(ctx, data, length);
@@ -155,7 +155,7 @@ static void my_sha256_update(void *ctx,
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_finish(ctx, digest);
 #else
   (void)mbedtls_sha256_finish_ret(ctx, digest);
@@ -191,7 +191,7 @@ struct sha256_ctx {
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
-#if !defined(CALG_SHA_256)
+#ifndef CALG_SHA_256
 #define CALG_SHA_256 0x0000800c
 #endif
 

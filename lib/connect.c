@@ -1309,7 +1309,7 @@ connect_sub_chain:
     }
 #endif /* USE_SSL */
 
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
     if(cf->conn->bits.tunnel_proxy) {
       result = Curl_cf_http_proxy_insert_after(cf, data);
       if(result)
@@ -1323,7 +1323,7 @@ connect_sub_chain:
 #endif /* !CURL_DISABLE_PROXY */
 
   if(ctx->state < CF_SETUP_CNNCT_HAPROXY) {
-#if !defined(CURL_DISABLE_PROXY)
+#ifndef CURL_DISABLE_PROXY
     if(data->set.haproxyprotocol) {
       if(Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
         failf(data, "haproxy protocol not support with SSL "
@@ -1502,7 +1502,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   Curl_resolv_unlink(data, &data->state.dns[sockindex]);
   data->state.dns[sockindex] = dns;
 
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
   if(!conn->cfilter[sockindex] &&
      conn->handler->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);

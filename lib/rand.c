@@ -100,7 +100,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-#if !defined(USE_SSL)
+#ifndef USE_SSL
 /* ---- possibly non-cryptographic version following ---- */
 static CURLcode weak_random(struct Curl_easy *data,
                             unsigned char *entropy,

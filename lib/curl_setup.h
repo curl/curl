@@ -1003,7 +1003,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-#  if !defined(UNIX_PATH_MAX)
+#  ifndef UNIX_PATH_MAX
      /* Replicating logic present in afunix.h
         (distributed with newer Windows 10 SDK versions only) */
 #    define UNIX_PATH_MAX 108

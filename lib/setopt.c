@@ -648,7 +648,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.postfieldsize = arg;
     break;
 #ifndef CURL_DISABLE_HTTP
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   case CURLOPT_COOKIESESSION:
     /*
      * Set this option to TRUE to start a new "cookie session". It will
@@ -1780,7 +1780,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     return Curl_setstropt(&data->set.str[STRING_ENCODING], ptr);
 
-#if !defined(CURL_DISABLE_AWS)
+#ifndef CURL_DISABLE_AWS
   case CURLOPT_AWS_SIGV4:
     /*
      * String that is merged to some authentication
@@ -1812,7 +1812,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_USERAGENT], ptr);
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   case CURLOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.
