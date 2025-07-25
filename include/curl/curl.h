@@ -124,7 +124,7 @@ typedef void CURLSH;
 #elif defined(_WIN32) || \
      (CURL_HAS_DECLSPEC_ATTRIBUTE(dllexport) && \
       CURL_HAS_DECLSPEC_ATTRIBUTE(dllimport))
-#  if defined(BUILDING_LIBCURL)
+#  ifdef BUILDING_LIBCURL
 #    define CURL_EXTERN  __declspec(dllexport)
 #  else
 #    define CURL_EXTERN  __declspec(dllimport)
