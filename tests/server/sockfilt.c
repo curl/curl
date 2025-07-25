@@ -965,12 +965,12 @@ static bool juggle(curl_socket_t *sockfdp,
   FD_ZERO(&fds_write);
   FD_ZERO(&fds_err);
 
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
   FD_SET((curl_socket_t)fileno(stdin), &fds_read);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
 
@@ -981,12 +981,12 @@ static bool juggle(curl_socket_t *sockfdp,
     /* server mode */
     sockfd = listenfd;
     /* there's always a socket to wait for */
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
     FD_SET(sockfd, &fds_read);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
     maxfd = (int)sockfd;
@@ -1002,12 +1002,12 @@ static bool juggle(curl_socket_t *sockfdp,
     }
     else {
       /* there's always a socket to wait for */
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(sockfd, &fds_read);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       maxfd = (int)sockfd;
@@ -1019,12 +1019,12 @@ static bool juggle(curl_socket_t *sockfdp,
     sockfd = *sockfdp;
     /* sockfd turns CURL_SOCKET_BAD when our connection has been closed */
     if(CURL_SOCKET_BAD != sockfd) {
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(sockfd, &fds_read);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       maxfd = (int)sockfd;
