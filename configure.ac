@@ -4045,30 +4045,16 @@ AC_CHECK_TYPE([bool],[
 #endif
 ])
 
-# check for sa_family_t
-AC_CHECK_TYPE(sa_family_t,
-  AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),
+if test "$curl_cv_native_windows" != 'yes'; then
+  # check for sa_family_t
+  AC_CHECK_TYPE(sa_family_t,
+    AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),,
   [
-  # The Windows name?
-  AC_CHECK_TYPE(ADDRESS_FAMILY,
-    AC_DEFINE(HAVE_ADDRESS_FAMILY, 1, [Define to 1 if symbol `ADDRESS_FAMILY' exists]),
-    [],
-    [
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-    ])
-  ],
-[
-#ifndef _WIN32
-#include <sys/socket.h>
-#endif
-])
+  #ifndef _WIN32
+  #include <sys/socket.h>
+  #endif
+  ])
+fi
 
 # check for suseconds_t
 AC_CHECK_TYPE([suseconds_t],[
