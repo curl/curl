@@ -159,7 +159,7 @@ addr_ctx_create(const char *hostname, int port,
   DEBUGASSERT(hints);
   addr_ctx->hints = *hints;
 #else
-  (void) hints;
+  (void)hints;
 #endif
 
   Curl_mutex_init(&addr_ctx->mutx);

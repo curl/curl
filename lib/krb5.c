@@ -718,7 +718,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   size_t decoded_sz = 0;
   CURLcode error;
 
-  (void) data;
+  (void)data;
 
   if(!conn->mech)
     /* not initialized, return error */

@@ -222,7 +222,7 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
     infof(data, "SASL %p state change from %s to %s",
           (void *)sasl, names[sasl->state], names[newstate]);
 #else
-  (void) data;
+  (void)data;
 #endif
 
   sasl->state = newstate;

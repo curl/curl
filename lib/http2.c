@@ -3015,15 +3015,15 @@ void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data)
 
 char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
 {
-  (void) h;
-  (void) num;
+  (void)h;
+  (void)num;
   return NULL;
 }
 
 char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
 {
-  (void) h;
-  (void) header;
+  (void)h;
+  (void)header;
   return NULL;
 }
 

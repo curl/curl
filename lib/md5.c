@@ -178,18 +178,18 @@ static void my_md5_update(void *ctx,
                           unsigned int length)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_update(ctx, data, length);
+  (void)mbedtls_md5_update(ctx, data, length);
 #else
-  (void) mbedtls_md5_update_ret(ctx, data, length);
+  (void)mbedtls_md5_update_ret(ctx, data, length);
 #endif
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_finish(ctx, digest);
+  (void)mbedtls_md5_finish(ctx, digest);
 #else
-  (void) mbedtls_md5_finish_ret(ctx, digest);
+  (void)mbedtls_md5_finish_ret(ctx, digest);
 #endif
 }
 
