@@ -57,7 +57,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(CURLRES_SYNCH)
+#ifdef CURLRES_SYNCH
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(const struct Curl_addrinfo *ai)

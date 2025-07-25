@@ -1124,7 +1124,7 @@ static bool is_pkcs11_uri(const char *string)
 #endif
 
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
-#if defined(OPENSSL_HAS_PROVIDERS)
+#ifdef OPENSSL_HAS_PROVIDERS
 static CURLcode ossl_set_provider(struct Curl_easy *data,
                                   const char *provider);
 #endif
@@ -1378,7 +1378,7 @@ int cert_stuff(struct Curl_easy *data,
     }
     break;
 #endif
-#if defined(OPENSSL_HAS_PROVIDERS)
+#ifdef OPENSSL_HAS_PROVIDERS
       /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
     {
@@ -1631,7 +1631,7 @@ fail:
     }
     break;
 #endif
-#if defined(OPENSSL_HAS_PROVIDERS)
+#ifdef OPENSSL_HAS_PROVIDERS
       /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
     {
@@ -1967,7 +1967,7 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
   return list;
 }
 
-#if defined(OPENSSL_HAS_PROVIDERS)
+#ifdef OPENSSL_HAS_PROVIDERS
 
 static void ossl_provider_cleanup(struct Curl_easy *data)
 {

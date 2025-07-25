@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 /*
  * NTLM details:
@@ -51,7 +51,7 @@
      in NTLM type-3 messages.
  */
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     #define USE_OPENSSL_DES
@@ -63,14 +63,14 @@
   #endif
 #endif
 
-#if defined(USE_OPENSSL_DES)
+#ifdef USE_OPENSSL_DES
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
 #  include <openssl/des.h>
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  if defined(OPENSSL_IS_AWSLC)
+#  ifdef OPENSSL_IS_AWSLC
 #    define DES_set_key_unchecked (void)DES_set_key
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
@@ -83,7 +83,7 @@
 #  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
 #  include <wolfssl/openssl/rand.h>
-#  if defined(OPENSSL_COEXIST)
+#  ifdef OPENSSL_COEXIST
 #    define DES_key_schedule WOLFSSL_DES_key_schedule
 #    define DES_cblock WOLFSSL_DES_cblock
 #    define DES_set_odd_parity wolfSSL_DES_set_odd_parity
@@ -146,7 +146,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 }
 #endif
 
-#if defined(USE_OPENSSL_DES)
+#ifdef USE_OPENSSL_DES
 /*
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
@@ -288,7 +288,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#if defined(USE_OPENSSL_DES)
+#ifdef USE_OPENSSL_DES
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -342,7 +342,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
   {
     /* Create LanManager hashed password. */
 
-#if defined(USE_OPENSSL_DES)
+#ifdef USE_OPENSSL_DES
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));

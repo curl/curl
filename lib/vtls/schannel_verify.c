@@ -390,7 +390,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   BOOL Win8_compat)
 {
   DWORD actual_length = 0;
-#if defined(CURL_WINDOWS_UWP)
+#ifdef CURL_WINDOWS_UWP
   (void)data;
   (void)cert_context;
   (void)host_names;
@@ -510,7 +510,7 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#if defined(CURL_WINDOWS_UWP)
+#ifdef CURL_WINDOWS_UWP
   (void)data;
   (void)ctx;
   (void)alt_name_info;

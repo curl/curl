@@ -317,7 +317,7 @@ struct ssl_general_config {
 #ifndef CURL_DISABLE_DIGEST_AUTH
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
@@ -745,7 +745,7 @@ struct connectdata {
   CtxtHandle *sslContext;
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;
 #endif
@@ -1052,7 +1052,7 @@ struct UrlState {
   struct Curl_async async;  /* asynchronous name resolver data */
 #endif
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
   /* void instead of OSSL_PROVIDER */
@@ -1254,7 +1254,7 @@ enum dupstring {
   STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
   STRING_FTPPORT,         /* port to send with the FTP PORT command */
 #endif
-#if defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   STRING_KRB_LEVEL,       /* krb security level */
 #endif
 #ifndef CURL_DISABLE_NETRC
@@ -1619,7 +1619,7 @@ struct UserDefined {
                              location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(verbose);        /* output verbosity */
-#if defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   BIT(krb);            /* Kerberos connection requested */
 #endif
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */

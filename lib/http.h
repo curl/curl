@@ -58,7 +58,7 @@ typedef unsigned char http_majors;
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(USE_HTTP3)
+#ifdef USE_HTTP3
 #include <stdint.h>
 #endif
 

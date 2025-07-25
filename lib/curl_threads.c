@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 #  ifdef HAVE_PTHREAD_H
 #    include <pthread.h>
 #  endif
@@ -39,7 +39,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 
 struct Curl_actual_call {
   unsigned int (*func)(void *);
