@@ -1534,6 +1534,12 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = NULL;
+    return CURLE_OK;
+  }
   default:
     break;
   }

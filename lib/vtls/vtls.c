@@ -1571,15 +1571,24 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
   case CF_QUERY_SSL_INFO:
-  case CF_QUERY_SSL_CTX_INFO: {
-    struct curl_tlssessioninfo *info = pres2;
-    struct cf_call_data save;
-    CF_DATA_SAVE(save, cf, data);
-    info->backend = Curl_ssl_backend();
-    info->internals = connssl->ssl_impl->get_internals(
-      cf->ctx, (query == CF_QUERY_SSL_INFO) ?
-      CURLINFO_TLS_SSL_PTR : CURLINFO_TLS_SESSION);
-    CF_DATA_RESTORE(cf, save);
+  case CF_QUERY_SSL_CTX_INFO:
+    if(!Curl_ssl_cf_is_proxy(cf)) {
+      struct curl_tlssessioninfo *info = pres2;
+      struct cf_call_data save;
+      CF_DATA_SAVE(save, cf, data);
+      info->backend = Curl_ssl_backend();
+      info->internals = connssl->ssl_impl->get_internals(
+        cf->ctx, (query == CF_QUERY_SSL_INFO) ?
+        CURLINFO_TLS_SSL_PTR : CURLINFO_TLS_SESSION);
+      CF_DATA_RESTORE(cf, save);
+      return CURLE_OK;
+    }
+    break;
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = connssl->negotiated.alpn;
+    CURL_TRC_CF(data, cf, "query ALPN: returning '%s'", *palpn);
     return CURLE_OK;
   }
   default:
@@ -1636,7 +1645,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   Curl_cf_def_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  ssl_cf_query,
 };
 
 #endif /* !CURL_DISABLE_PROXY */
@@ -1708,9 +1717,11 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct Curl_cfilter *cf = NULL;
   struct ssl_connect_data *ctx;
   CURLcode result;
-  bool use_alpn = conn->bits.tls_enable_alpn;
+  /* ALPN is default, but if user explicitly disables it, obey */
+  bool use_alpn = data->set.ssl_enable_alpn;
   http_majors allowed = CURL_HTTP_V1x;
 
+  (void)conn;
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
@@ -1939,14 +1950,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   size_t proto_len)
 {
   CURLcode result = CURLE_OK;
-  unsigned char *palpn =
-#ifndef CURL_DISABLE_PROXY
-    (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf)) ?
-    &cf->conn->proxy_alpn : &cf->conn->alpn
-#else
-    &cf->conn->alpn
-#endif
-    ;
+  (void)cf;
 
   if(connssl->negotiated.alpn) {
     /* When we ask for a specific ALPN protocol, we need the confirmation
@@ -1988,38 +1992,12 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   }
 
   if(proto && proto_len) {
-    if(proto_len == ALPN_HTTP_1_1_LENGTH &&
-       !memcmp(ALPN_HTTP_1_1, proto, ALPN_HTTP_1_1_LENGTH)) {
-      *palpn = CURL_HTTP_VERSION_1_1;
-    }
-#ifdef USE_HTTP2
-    else if(proto_len == ALPN_H2_LENGTH &&
-            !memcmp(ALPN_H2, proto, ALPN_H2_LENGTH)) {
-      *palpn = CURL_HTTP_VERSION_2;
-    }
-#endif
-#ifdef USE_HTTP3
-    else if(proto_len == ALPN_H3_LENGTH &&
-            !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
-      *palpn = CURL_HTTP_VERSION_3;
-    }
-#endif
-    else {
-      *palpn = CURL_HTTP_VERSION_NONE;
-      failf(data, "unsupported ALPN protocol: '%.*s'", (int)proto_len, proto);
-      /* Previous code just ignored it and some vtls backends even ignore the
-       * return code of this function. */
-      /* return CURLE_NOT_BUILT_IN; */
-      goto out;
-    }
-
     if(connssl->state == ssl_connection_deferred)
       infof(data, VTLS_INFOF_ALPN_DEFERRED, (int)proto_len, proto);
     else
       infof(data, VTLS_INFOF_ALPN_ACCEPTED, (int)proto_len, proto);
   }
   else {
-    *palpn = CURL_HTTP_VERSION_NONE;
     if(connssl->state == ssl_connection_deferred)
       infof(data, VTLS_INFOF_NO_ALPN_DEFERRED);
     else
