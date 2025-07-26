@@ -55,7 +55,6 @@ my %remove = (
     '#define HAVE_LIBSSL 1' => 1,
     '#define HAVE_LIBWOLFSSH' => 1,
     '#define HAVE_LIBZSTD 1' => 1,
-    '#define HAVE_MSH3_H 1' => 1,
     '#define HAVE_NGHTTP2_NGHTTP2_H 1' => 1,
     '#define HAVE_NGHTTP3_NGHTTP3_H 1' => 1,
     '#define HAVE_NGTCP2_NGTCP2_CRYPTO_H 1' => 1,

@@ -586,7 +586,7 @@ class ScoreRunner:
             score['meta']['protocol'] = 'h3'
             if not self.env.have_h3_curl():
                 raise ScoreCardError('curl does not support HTTP/3')
-            for lib in ['ngtcp2', 'quiche', 'msh3', 'nghttp3']:
+            for lib in ['ngtcp2', 'quiche', 'nghttp3']:
                 if self.env.curl_uses_lib(lib):
                     score['meta']['implementation'] = lib
                     break

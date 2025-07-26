@@ -42,8 +42,6 @@ class TestErrors:
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -66,8 +64,6 @@ class TestErrors:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip("openssl-quic is flaky in yielding proper error codes")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \

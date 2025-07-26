@@ -173,7 +173,7 @@ curl_headers_msg="enabled (--disable-headers-api)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2)"
-     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic, --with-msh3)"
+     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -3782,97 +3782,6 @@ if test X"$want_quiche" != Xno; then
 fi
 
 dnl **********************************************************************
-dnl Check for msh3/msquic (QUIC)
-dnl **********************************************************************
-
-OPT_MSH3="no"
-
-if test "x$disable_http" = "xyes" -o "x$USE_NGTCP" = "x1"; then
-  # without HTTP or with ngtcp2, msh3 is no use
-  OPT_MSH3="no"
-fi
-
-AC_ARG_WITH(msh3,
-AS_HELP_STRING([--with-msh3=PATH],[Enable msh3 usage])
-AS_HELP_STRING([--without-msh3],[Disable msh3 usage]),
-  [OPT_MSH3=$withval])
-case "$OPT_MSH3" in
-  no)
-    dnl --without-msh3 option used
-    want_msh3="no"
-    ;;
-  yes)
-    dnl --with-msh3 option used without path
-    want_msh3="default"
-    want_msh3_path=""
-    ;;
-  *)
-    dnl --with-msh3 option used with path
-    want_msh3="yes"
-    want_msh3_path="$withval"
-    ;;
-esac
-
-if test X"$want_msh3" != Xno; then
-
-  dnl msh3 on non-Windows needs an OpenSSL with the QUIC API
-  if test "$curl_cv_native_windows" != "yes"; then
-    if test "$QUIC_ENABLED" != "yes"; then
-      AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-msh3 a no-no])
-    fi
-    if test "$OPENSSL_ENABLED" != "1"; then
-      AC_MSG_ERROR([msh3/msquic requires OpenSSL])
-    fi
-  fi
-
-  if test "$NGHTTP3_ENABLED" = 1; then
-    AC_MSG_ERROR([--with-msh3 and --with-ngtcp2 are mutually exclusive])
-  fi
-  if test "$USE_QUICHE" = 1; then
-    AC_MSG_ERROR([--with-msh3 and --with-quiche are mutually exclusive])
-  fi
-
-  dnl backup the pre-msh3 variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANLDFLAGSPC="$LDFLAGSPC"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  if test -n "$want_msh3_path"; then
-    LD_MSH3="-L$want_msh3_path/lib"
-    CPP_MSH3="-I$want_msh3_path/include"
-    DIR_MSH3="$want_msh3_path/lib"
-    LDFLAGS="$LDFLAGS $LD_MSH3"
-    LDFLAGSPC="$LDFLAGSPC $LD_MSH3"
-    CPPFLAGS="$CPPFLAGS $CPP_MSH3"
-  fi
-  LIBS="-lmsh3 $LIBS"
-
-  AC_CHECK_LIB(msh3, MsH3ApiOpen,
-    [
-      AC_CHECK_HEADERS(msh3.h,
-        curl_h3_msg="enabled (msh3)"
-        AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-        USE_MSH3=1
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
-        dnl FIXME: Enable when msh3 was detected via pkg-config
-        if false; then
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
-        fi
-        experimental="$experimental HTTP3"
-      )
-    ],
-      dnl not found, revert back to clean variables
-      LDFLAGS=$CLEANLDFLAGS
-      LDFLAGSPC=$CLEANLDFLAGSPC
-      CPPFLAGS=$CLEANCPPFLAGS
-      LIBS=$CLEANLIBS
-  )
-fi
-
-dnl **********************************************************************
 dnl libuv is only ever used for debug purposes
 dnl **********************************************************************
 
@@ -5316,7 +5225,7 @@ if test "x$USE_NGHTTP2" = "x1"; then
 fi
 
 if test "x$USE_NGTCP2_H3" = "x1" -o "x$USE_QUICHE" = "x1" \
-    -o "x$USE_OPENSSL_H3" = "x1" -o "x$USE_MSH3" = "x1"; then
+    -o "x$USE_OPENSSL_H3" = "x1"; then
   if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
     AC_MSG_ERROR([MultiSSL cannot be enabled with HTTP/3 and vice versa])
   fi
