@@ -655,9 +655,9 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target testdeps
+            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target testdeps
           else
-            make -C bld V=1 -C tests
+            ${MATRIX_MAKE_PREFIX} make -C bld V=1 -C tests
           fi
 
       - name: 'install test prereqs'
