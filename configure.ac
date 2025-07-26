@@ -530,6 +530,26 @@ if test "$curl_cv_native_windows" = "yes"; then
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
+
+  case $host_os in
+    mingw*)
+      AC_MSG_CHECKING([if building with mingw-w64 3.0 or upper])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <_mingw.h>
+        ]],[[
+          #if !defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 6)
+          #error
+          #endif
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+      ],[
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([Building with mingw-w64 3.0 or upper is required.])
+      ])
+      ;;
+  esac
 fi
 
 CURL_SET_COMPILER_BASIC_OPTS
