@@ -37,13 +37,6 @@ curl drops support for the winbuild build method after September 2025.
 We recommend migrating to CMake. See the migration guide in
 `docs/INSTALL-CMAKE.md`.
 
-## Windows CE
-
-Windows CE "mainstream support" ended on October 9, 2018, and "Extended
-Support" ended on October 10, 2023.
-
-curl drops all support in November 2025.
-
 ## VS2008
 
 curl drops support for getting built with Microsoft Visual Studio 2008 in
@@ -78,3 +71,4 @@ Making the new minimum target Windows version Vista / Server 2008.
  - Support for Visual Studio 2005 and older (removed in 8.13.0)
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
+ - Windows CE (removed in 8.16.0)

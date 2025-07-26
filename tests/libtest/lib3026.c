@@ -26,7 +26,7 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
 static DWORD WINAPI t3026_run_thread(LPVOID ptr)
 #else
 #include <process.h>
@@ -44,7 +44,7 @@ static unsigned int WINAPI t3026_run_thread(void *ptr)
 
 static CURLcode test_lib3026(char *URL)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
   typedef HANDLE curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
@@ -67,7 +67,7 @@ static CURLcode test_lib3026(char *URL)
   for(i = 0; i < tid_count; i++) {
     curl_win_thread_handle_t th;
     results[i] = CURL_LAST; /* initialize with invalid value */
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
     th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
 #else
     th = _beginthreadex(NULL, 0, t3026_run_thread, &results[i], 0, NULL);

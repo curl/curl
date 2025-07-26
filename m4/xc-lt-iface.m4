@@ -74,7 +74,7 @@ fi
 if test "x$xc_lt_want_enable_shared" = 'xyes' &&
   test "x$xc_lt_want_enable_static" = 'xyes'; then
   case $host_os in @%:@ (
-    cegcc* | os2* | aix*)
+    os2* | aix*)
       xc_lt_want_enable_static='no'
       ;;
   esac
@@ -265,7 +265,7 @@ elif test "x$allow_undefined_flag" = 'xunsupported'; then
   xc_lt_shlib_use_no_undefined='yes'
 fi
 case $host_os in @%:@ (
-  cygwin* | mingw* | cegcc* | os2* | aix*)
+  cygwin* | mingw* | os2* | aix*)
     xc_lt_shlib_use_no_undefined='yes'
     ;;
 esac

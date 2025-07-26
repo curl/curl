@@ -75,9 +75,9 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
   len = strlen(tmp);
   if(len == 0 || len >= size) {
 #ifdef USE_WINSOCK
-    CURL_SETERRNO(WSAEINVAL);
+    errno = WSAEINVAL;
 #else
-    CURL_SETERRNO(ENOSPC);
+    errno = ENOSPC;
 #endif
     return NULL;
   }
@@ -189,9 +189,9 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
    */
   if((size_t)(tp - tmp) > size) {
 #ifdef USE_WINSOCK
-    CURL_SETERRNO(WSAEINVAL);
+    errno = WSAEINVAL;
 #else
-    CURL_SETERRNO(ENOSPC);
+    errno = ENOSPC;
 #endif
     return NULL;
   }
@@ -218,7 +218,7 @@ char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
   case AF_INET6:
     return inet_ntop6((const unsigned char *)src, buf, size);
   default:
-    CURL_SETERRNO(SOCKEAFNOSUPPORT);
+    errno = SOCKEAFNOSUPPORT;
     return NULL;
   }
 }
