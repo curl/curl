@@ -450,6 +450,14 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
+          - name: 'schannel !examples'  # mingw-w64 3.0
+            dir: 'mingw64'
+            env: 'x86_64'
+            ver: '4.8.1'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
+            type: 'Release'
+            tflags: 'skiprun'
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
@@ -568,6 +576,7 @@ jobs:
           cmake --build bld --target test-ci
 
       - name: 'build examples'
+        if: ${{ !contains(matrix.name, '!examples') }}
         timeout-minutes: 5
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
