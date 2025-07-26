@@ -474,9 +474,15 @@ jobs:
           pkg-config --version
           pkg-config --list-all | sort
           pkg-config --print-errors --exists gnutls || true
-          echo '-----------'
+          echo '----------- 0'
+          cat /home/runner/gnutls/build/lib/pkgconfig/gnutls.pc
+          echo '----------- 1'
           pkg-config --debug --exists gnutls || true
-          echo '-----------'
+          echo '----------- 2'
+          pkg-config --libs gnutls || true
+          echo '----------- 3'
+          pkg-config --libs libngtcp2_crypto_gnutls || true
+          echo '----------- 4'
           PKG_CONFIG_DEBUG_SPEW=1 pkg-config --exists gnutls || true
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
