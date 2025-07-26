@@ -144,7 +144,8 @@ static CURLcode test_lib517(char *URL)
     {"Thu, 31-Dec-1969 23:59:58 GMT", -2 },
     {"Thu, 31-Dec-1969 23:59:59 GMT", 0 }, /* avoids -1 ! */
 #if SIZEOF_TIME_T > 4
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#if (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)) || \
+  defined(_MSC_VER)
     /* gcc: this decimal constant is unsigned only in ISO C90 */
 #warning INCLUDED-1
     {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t)2362034977 },
