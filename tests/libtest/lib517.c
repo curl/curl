@@ -182,8 +182,11 @@ static CURLcode test_lib517(char *URL)
   for(i = 0; dates[i].input; i++) {
     time_t out = curl_getdate(dates[i].input, NULL);
     if(out != dates[i].output) {
-      curl_mprintf("WRONGLY %s => %ld (instead of %ld)\n",
-                   dates[i].input, (long)out, (long)dates[i].output);
+      curl_mprintf("WRONGLY %s => %" CURL_FORMAT_CURL_OFF_T
+                   " (instead of %" CURL_FORMAT_CURL_OFF_T ")\n",
+                   dates[i].input,
+                   (curl_off_t)out,
+                   (curl_off_t)dates[i].output);
       error++;
     }
   }
