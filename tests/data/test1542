@@ -55,11 +55,11 @@ Accept: */*
 
 </protocol>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-== Info: Connection #0 to host %HOSTIP left intact
-== Info: Connection #0 to host %HOSTIP left intact
-== Info: Connection #0 to host %HOSTIP left intact
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
+== Info: Connection #0 to host %HOSTIP:%HTTPPORT left intact
 == Info: shutting down connection #0
-== Info: Connection #1 to host %HOSTIP left intact
+== Info: Connection #1 to host %HOSTIP:%HTTPPORT left intact
 </file>
 <stripfile>
 $_ = '' if(($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) connection #\d+/))
