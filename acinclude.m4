@@ -1392,18 +1392,30 @@ dnl Optionally PKG_CONFIG_LIBDIR may be given as $pcdir.
 dnl
 
 AC_DEFUN([CURL_CHECK_PKGCONFIG], [
+  AC_MSG_NOTICE([TRACE-Z:$1:$2])
+  AC_MSG_NOTICE([TRACE-A:$PKG_CONFIG])
   if test -n "$PKG_CONFIG"; then
     PKGCONFIG="$PKG_CONFIG"
+    AC_MSG_NOTICE([TRACE-Aa:$PKGCONFIG])
   else
     AC_PATH_TOOL([PKGCONFIG], [pkg-config], [no],
       [$PATH:/usr/bin:/usr/local/bin])
   fi
+  AC_MSG_NOTICE([TRACE-B:$PKGCONFIG])
 
   if test "x$PKGCONFIG" != "xno"; then
     AC_MSG_CHECKING([for $1 options with pkg-config])
+    itexists2=`CURL_EXPORT_PCDIR([$2])`
+    AC_MSG_NOTICE([TRACE-F:$itexists2:$2])
+    itexists3=`$PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
+    AC_MSG_NOTICE([TRACE-G:$itexists3:$1])
+    itexists4=`$PKGCONFIG --exists $1 && echo 1`
+    AC_MSG_NOTICE([TRACE-G:$itexists4:$1])
     dnl ask pkg-config about $1
     itexists=`CURL_EXPORT_PCDIR([$2]) dnl
       $PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
+
+    AC_MSG_NOTICE([TRACE-C:$PKGCONFIG])
 
     if test -z "$itexists"; then
       dnl pkg-config does not have info about the given module! set the
