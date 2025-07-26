@@ -450,6 +450,14 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -D_CURL_SKIP_BUILD_CERTS=ON'
             type: 'Debug'
             tflags: 'skiprun'
+          - name: 'schannel'  # mingw-w64 5.0
+            dir: 'mingw64'
+            env: 'x86_64'
+            ver: '5.1.0'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.1.0/threads-win32/seh/x86_64-5.1.0-release-win32-seh-rt_v4-rev0.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -D_CURL_SKIP_BUILD_CERTS=ON'
+            type: 'Release'
+            tflags: 'skiprun'
           - name: 'schannel'  # mingw-w64 3.0
             dir: 'mingw64'
             env: 'x86_64'
