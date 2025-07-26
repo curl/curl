@@ -615,7 +615,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   if(ftpcode)
     *ftpcode = code;
 
-  if(421 == code) {
+  if(code == 421) {
     /* 421 means "Service not available, closing control connection." and FTP
      * servers use it to signal that idle session timeout has been exceeded.
      * If we ignored the response, it could end up hanging in some cases.
@@ -2356,7 +2356,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 
   if(instate == FTP_SIZE) {
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
-    if(-1 != filesize) {
+    if(filesize != -1) {
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
                 "Content-Length: %" FMT_OFF_T "\r\n", filesize);
@@ -3439,7 +3439,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     }
   }
   else {
-    if((-1 != data->req.size) &&
+    if((data->req.size != -1) &&
        (data->req.size != data->req.bytecount) &&
        (data->req.maxdownload != data->req.bytecount)) {
       failf(data, "Received only partial file: %" FMT_OFF_T " bytes",

@@ -3949,7 +3949,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */
-  if((0 == k->maxdownload) && (k->httpversion_sent < 20))
+  if((k->maxdownload == 0) && (k->httpversion_sent < 20))
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */

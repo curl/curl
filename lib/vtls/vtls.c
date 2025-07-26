@@ -670,7 +670,7 @@ static CURLcode pubkey_pem_to_der(const char *pem,
 
   pem_count = begin_pos - pem;
   /* Invalid if not at beginning AND not directly following \n */
-  if(0 != pem_count && '\n' != pem[pem_count - 1])
+  if(pem_count && '\n' != pem[pem_count - 1])
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* 26 is length of "-----BEGIN PUBLIC KEY-----" */
@@ -1790,7 +1790,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
         result = CURLE_RECV_ERROR;
         goto out;
       }
-      else if(0 == what) {
+      else if(what == 0) {
         /* timeout */
         failf(data, "SSL shutdown timeout");
         result = CURLE_OPERATION_TIMEDOUT;

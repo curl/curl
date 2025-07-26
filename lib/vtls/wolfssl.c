@@ -1759,7 +1759,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
       }
     }
 #ifdef USE_ECH_WOLFSSL
-    else if(-1 == detail) {
+    else if(detail == -1) {
       /* try access a retry_config ECHConfigList for tracing */
       byte echConfigs[1000];
       word32 echConfigsLen = 1000;

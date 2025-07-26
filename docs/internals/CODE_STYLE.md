@@ -253,7 +253,7 @@ If no parenthesis, use the default indent:
 
 ```c
 data->set.http_disable_hostname_check_before_authentication =
-  (0 != va_arg(param, long)) ? TRUE : FALSE;
+  va_arg(param, long) ? TRUE : FALSE;
 ```
 
 Function invoke with an open parenthesis:
