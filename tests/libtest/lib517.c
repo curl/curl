@@ -153,8 +153,8 @@ static CURLcode test_lib517(char *URL)
 /* With MSVC this results in:
    - compiler warning:
      unary minus operator applied to unsigned type, result still unsigned
-   - with that silenced, a test failure:
-     WRONGLY Sun, 06 Nov 1900 08:49:37 GMT => 2112707873 (instead of 2112707873)
+   - with the above silenced, a test failure:
+     WRONGLY Sun, 06 Nov 1900 08:49:37 GMT => -2182259423 (instead of 2112707873)
  */
 #if !defined(__GNUC__) || !defined(__MINGW32__) || (__GNUC__ >= 5) || \
   !defined(_MSC_VER)
