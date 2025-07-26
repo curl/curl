@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* This test attempts to use all form API features that are not
  * used elsewhere.
  */

@@ -32,8 +32,6 @@
 
 #include "cf-socket.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1663_setup(void)
 {
   CURLcode res = CURLE_OK;

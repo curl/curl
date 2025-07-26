@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "curl_memory.h"
-
 #ifndef CURL_STATICLIB
 
 #if defined(_MSC_VER) && defined(_DLL)

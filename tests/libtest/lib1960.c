@@ -32,8 +32,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include "memdebug.h"
-
 /* to prevent libcurl from closing our socket */
 static int closesocket_cb(void *clientp, curl_socket_t item)
 {

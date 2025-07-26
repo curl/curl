@@ -26,8 +26,6 @@
 #include "urldata.h"
 #include "url.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1620_setup(void)
 {
   CURLcode res = CURLE_OK;

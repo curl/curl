@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "bufref.h"
-#include "memdebug.h"
 
 static int freecount = 0;
 

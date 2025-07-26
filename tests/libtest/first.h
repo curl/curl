@@ -51,6 +51,12 @@ extern int unitfail; /* for unittests */
 
 #include "curl_printf.h"
 
+/* The last 2 #include files should be in this order */
+#ifndef UNITTESTS
+#include "curl_memory.h"
+#endif
+#include "memdebug.h"
+
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and
    does not support 'pragma GCC diagnostic' inside functions. */
 #if (defined(__GNUC__) && \
