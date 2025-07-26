@@ -423,7 +423,7 @@ jobs:
             env: 'x86_64'
             ver: '15.0.1'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.1-snapshot20250406posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.1-snapshot20250406-mingw-w64ucrt-12.0.0-r1.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -D_CURL_SKIP_BUILD_CERTS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel'
@@ -438,7 +438,7 @@ jobs:
             env: 'x86_64'
             ver: '7.3.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON -D_CURL_SKIP_BUILD_CERTS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_USE_MBEDTLS=ON'
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
@@ -447,7 +447,7 @@ jobs:
             env: 'i686'
             ver: '6.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/6.4.0/threads-win32/dwarf/i686-6.4.0-release-win32-dwarf-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF -D_CURL_SKIP_BUILD_CERTS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel'  # mingw-w64 5.0
@@ -455,7 +455,7 @@ jobs:
             env: 'x86_64'
             ver: '5.4.0'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/5.4.0/threads-posix/seh/x86_64-5.4.0-release-posix-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -D_CURL_SKIP_BUILD_CERTS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel'  # mingw-w64 3.0
@@ -463,7 +463,7 @@ jobs:
             env: 'x86_64'
             ver: '4.8.1'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -D_CURL_SKIP_BUILD_CERTS=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
             type: 'Release'
             tflags: 'skiprun'
       fail-fast: false
@@ -719,7 +719,6 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_ENABLE_SSL=OFF
               -DUSE_WIN32_IDN=ON
-              -D_CURL_SKIP_BUILD_CERTS=ON
 
           - name: 'openssl +examples'
             install-msys2: >-
