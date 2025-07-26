@@ -191,6 +191,7 @@ if(MINGW OR MSVC)
   curl_prefill_type_size("LONG_LONG" 8)
   curl_prefill_type_size("__INT64" 8)
   curl_prefill_type_size("CURL_OFF_T" 8)
+  curl_prefill_type_size("ADDRESS_FAMILY" 2)  # MSVC or mingw-w64 v2+
   # CURL_SOCKET_T, SIZE_T: 8 for _WIN64, 4 otherwise
   # TIME_T: 8 for _WIN64 or UCRT or MSVC and not Windows CE, 4 otherwise
   #   Also 4 for non-UCRT 32-bit when _USE_32BIT_TIME_T is set.
@@ -199,20 +200,10 @@ if(MINGW OR MSVC)
     set(HAVE_SIZEOF_SSIZE_T 0)
     set(HAVE_FILE_OFFSET_BITS 0)
     curl_prefill_type_size("OFF_T" 4)
-    curl_prefill_type_size("ADDRESS_FAMILY" 2)
   else()
     # SSIZE_T: 8 for _WIN64, 4 otherwise
-    if(MINGW64_VERSION)
-      if(MINGW64_VERSION VERSION_GREATER_EQUAL 3.0)
-        set(HAVE_FILE_OFFSET_BITS 1)
-        curl_prefill_type_size("OFF_T" 8)
-      endif()
-      if(MINGW64_VERSION VERSION_GREATER_EQUAL 2.0)
-        curl_prefill_type_size("ADDRESS_FAMILY" 2)
-      else()
-        set(HAVE_SIZEOF_ADDRESS_FAMILY 0)
-      endif()
-    endif()
+    set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 v3+
+    curl_prefill_type_size("OFF_T" 8)  # mingw-w64 v3+
   endif()
 endif()
 
