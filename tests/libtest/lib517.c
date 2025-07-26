@@ -150,15 +150,16 @@ static CURLcode test_lib517(char *URL)
 #endif
     {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
-/* With MSVC this results in:
-   - compiler warning:
-     unary minus operator applied to unsigned type, result still unsigned
-   - with that silenced, a test failure:
-     WRONGLY Sun, 06 Nov 1900 08:49:37 GMT => 2112707873 (instead of 2112707873)
- */
-#if !defined(__GNUC__) || !defined(__MINGW32__) || (__GNUC__ >= 5) || \
-  !defined(_MSC_VER)
+#ifdef _MSC_VER
+#pragma warning(push)
+/* unary minus operator applied to unsigned type, result still unsigned */
+#pragma warning(disable:4146)
+#endif
+#if !defined(__GNUC__) || !defined(__MINGW32__) || (__GNUC__ >= 5)
     {"Sun, 06 Nov 1900 08:49:37 GMT", -2182259423 },
+#endif
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
     {"Sun, 06 Nov 1800 08:49:37 GMT", -5337933023 },
     {"Thu, 01-Jan-1583 00:00:00 GMT", -12212553600 },
