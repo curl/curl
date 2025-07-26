@@ -184,8 +184,10 @@ course cannot know if the provided scheme is a valid one or not.
 When set, curl_url_set(3) URL encodes the part on entry, except for
 **scheme**, **port** and **URL**.
 
-When setting the path component with URL encoding enabled, the slash character
-is skipped.
+When setting the path component with URL encoding enabled, the following
+characters are left as-is if present:
+
+    ! $ & ' ( ) { } [ ] * + , ; = : @
 
 The query part gets space-to-plus converted before the URL conversion is
 applied.
