@@ -229,7 +229,6 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
-          #sed -i.bak -E 's/^Requires: .+//g' "$PWD"/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc  # workaround for ngtcp2 1.14.0
 
       - name: 'build nghttp2'
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
@@ -469,25 +468,6 @@ jobs:
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
-          echo "|${PKG_CONFIG_PATH}|"
-          env | grep PKG || true
-          pkg-config --version
-          pkg-config --list-all | sort
-          pkg-config --print-errors --exists gnutls || true
-          echo '----------- a'
-          pkg-config --exists gnutls && echo 'FOUND gnutls' || true
-          echo '----------- b'
-          pkg-config --exists libngtcp2_crypto_gnutls && echo 'FOUND libngtcp2_crypto_gnutls' || true
-          echo '----------- 0'
-          cat /home/runner/gnutls/build/lib/pkgconfig/gnutls.pc
-          echo '----------- 1'
-          pkg-config --debug --exists gnutls || true
-          echo '----------- 2'
-          pkg-config --libs gnutls || true
-          echo '----------- 3'
-          pkg-config --libs libngtcp2_crypto_gnutls || true
-          echo '----------- 4'
-          PKG_CONFIG_DEBUG_SPEW=1 pkg-config --exists gnutls || true
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
