@@ -145,13 +145,12 @@ static CURLcode test_lib517(char *URL)
     {"Thu, 31-Dec-1969 23:59:59 GMT", 0 }, /* avoids -1 ! */
 #if SIZEOF_TIME_T > 4
 /* gcc 4.8.1: this decimal constant is unsigned only in ISO C90 */
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ > 199901L)
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
     {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t)2362034977 },
 #endif
     {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ > 199901L)
-#ifndef _MSC_VER
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 /* With MSVC this results in:
    - compiler warning:
      unary minus operator applied to unsigned type, result still unsigned
@@ -160,7 +159,6 @@ static CURLcode test_lib517(char *URL)
        -2182259423 (instead of 2112707873)
  */
     {"Sun, 06 Nov 1900 08:49:37 GMT", -2182259423 },
-#endif /* !_MSC_VER */
 #endif
     {"Sun, 06 Nov 1800 08:49:37 GMT", -5337933023 },
     {"Thu, 01-Jan-1583 00:00:00 GMT", -12212553600 },
