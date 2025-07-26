@@ -549,11 +549,11 @@
 
 #ifndef SIZEOF_OFF_T
 #  if defined(__VMS) && !defined(__VAX)
-#    if defined(_LARGEFILE)
+#    ifdef _LARGEFILE
 #      define SIZEOF_OFF_T 8
 #    endif
 #  elif defined(__OS400__) && defined(__ILEC400__)
-#    if defined(_LARGE_FILES)
+#    ifdef _LARGE_FILES
 #      define SIZEOF_OFF_T 8
 #    endif
 #  elif defined(__MVS__) && defined(__IBMC__)
@@ -932,7 +932,7 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  if defined(HAVE_SA_FAMILY_T)
+#  ifdef HAVE_SA_FAMILY_T
 #    define CURL_SA_FAMILY_T sa_family_t
 #  elif defined(HAVE_ADDRESS_FAMILY)
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
@@ -1003,7 +1003,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-#  if !defined(UNIX_PATH_MAX)
+#  ifndef UNIX_PATH_MAX
      /* Replicating logic present in afunix.h
         (distributed with newer Windows 10 SDK versions only) */
 #    define UNIX_PATH_MAX 108

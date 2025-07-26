@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 #include "urldata.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#ifndef CURL_DISABLE_PROXY
 
 CURLcode Curl_cf_haproxy_insert_after(struct Curl_cfilter *cf_at,
                                       struct Curl_easy *data);

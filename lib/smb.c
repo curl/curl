@@ -1267,5 +1267,4 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE &&
-          SIZEOF_CURL_OFF_T > 4 */
+#endif /* CURL_DISABLE_SMB && USE_CURL_NTLM_CORE && SIZEOF_CURL_OFF_T > 4 */

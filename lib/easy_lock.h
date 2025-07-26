@@ -44,7 +44,7 @@
 
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
 #include <stdatomic.h>
-#if defined(HAVE_SCHED_YIELD)
+#ifdef HAVE_SCHED_YIELD
 #include <sched.h>
 #endif
 

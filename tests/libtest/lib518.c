@@ -471,7 +471,7 @@ test_cleanup:
   return res;
 }
 
-#else /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
+#else /* HAVE_GETRLIMIT && HAVE_SETRLIMIT */
 
 static CURLcode test_lib518(char *URL)
 {
@@ -480,4 +480,4 @@ static CURLcode test_lib518(char *URL)
   return TEST_ERR_MAJOR_BAD; /* skip test */
 }
 
-#endif /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
+#endif /* HAVE_GETRLIMIT && HAVE_SETRLIMIT */

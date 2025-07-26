@@ -57,7 +57,7 @@
   #endif
 #endif
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
@@ -84,7 +84,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
 
@@ -177,7 +177,7 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_update(ctx, data, length);
 #else
   (void)mbedtls_md5_update_ret(ctx, data, length);
@@ -186,7 +186,7 @@ static void my_md5_update(void *ctx,
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_finish(ctx, digest);
 #else
   (void)mbedtls_md5_finish_ret(ctx, digest);

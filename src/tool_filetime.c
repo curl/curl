@@ -151,4 +151,4 @@ void setfiletime(curl_off_t filetime, const char *filename,
 #endif
   }
 }
-#endif /* defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(_WIN32) */
+#endif /* HAVE_UTIME || HAVE_UTIMES || _WIN32 */

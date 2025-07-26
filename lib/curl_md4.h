@@ -27,13 +27,13 @@
 #include "curl_setup.h"
 #include <curl/curl.h>
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 #define MD4_DIGEST_LENGTH 16
 
 CURLcode Curl_md4it(unsigned char *output, const unsigned char *input,
                     const size_t len);
 
-#endif /* defined(USE_CURL_NTLM_CORE) */
+#endif /* USE_CURL_NTLM_CORE */
 
 #endif /* HEADER_CURL_MD4_H */

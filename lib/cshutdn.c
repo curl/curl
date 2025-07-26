@@ -498,7 +498,7 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
       Curl_detach_connection(data);
 
       for(i = 0; i < ps.num; i++) {
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
@@ -506,7 +506,7 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
           FD_SET(ps.sockets[i], read_fd_set);
         if(ps.actions[i] & CURL_POLL_OUT)
           FD_SET(ps.sockets[i], write_fd_set);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
         if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&

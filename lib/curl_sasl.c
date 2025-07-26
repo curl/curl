@@ -557,7 +557,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   /* Calculate the supported authentication mechanism, by decreasing order of
      security, as well as the initial response where appropriate */
   if(sasl_choose_external(data, &sctx) ||
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
      sasl_choose_krb5(data, &sctx) ||
 #endif
 #ifdef USE_GSASL
@@ -722,7 +722,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   }
 #endif
 
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
   case SASL_GSSAPI: {
     struct kerberos5data *krb5 = Curl_auth_krb5_get(conn);
     result = !krb5 ? CURLE_OUT_OF_MEMORY :

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -749,4 +749,4 @@ out:
   return result;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) */
+#endif /* !CURL_DISABLE_HTTP */
