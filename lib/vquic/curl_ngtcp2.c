@@ -1506,11 +1506,15 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].namelen = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].valuelen = e->valuelen;
-    nva[i].flags = NGHTTP3_NV_FLAG_NONE;
+    if(e) {
+      nva[i].name = (unsigned char *)e->name;
+      nva[i].namelen = e->namelen;
+      nva[i].value = (unsigned char *)e->value;
+      nva[i].valuelen = e->valuelen;
+      nva[i].flags = NGHTTP3_NV_FLAG_NONE;
+    }
+    else
+      memset(&nva[i], 0, sizeof(*nva));
   }
 
   rc = ngtcp2_conn_open_bidi_stream(ctx->qconn, &sid, data);

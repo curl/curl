@@ -1009,10 +1009,14 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   for(i = 0; i < nheader; ++i) {
     struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].name_len = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].value_len = e->valuelen;
+    if(e) {
+      nva[i].name = (unsigned char *)e->name;
+      nva[i].name_len = e->namelen;
+      nva[i].value = (unsigned char *)e->value;
+      nva[i].value_len = e->valuelen;
+    }
+    else
+      memset(&nva[i], 0, sizeof(*nva));
   }
 
   *pnwritten = (size_t)nwritten;

@@ -642,10 +642,14 @@ static CURLcode cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     for(i = 0; i < nheader; ++i) {
       struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-      nva[i].Name = e->name;
-      nva[i].NameLength = e->namelen;
-      nva[i].Value = e->value;
-      nva[i].ValueLength = e->valuelen;
+      if(e) {
+        nva[i].Name = e->name;
+        nva[i].NameLength = e->namelen;
+        nva[i].Value = e->value;
+        nva[i].ValueLength = e->valuelen;
+      }
+      else
+        memset(&nva[i], 0, sizeof(*nva));
     }
 
     CURL_TRC_CF(data, cf, "req: send %zu headers", nheader);
