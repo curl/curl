@@ -3412,7 +3412,12 @@ if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
+  AC_MSG_NOTICE([TRACE-0:$want_tcp2])
+  AC_MSG_NOTICE([TRACE-1:$want_tcp2_path])
+
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_gnutls, $want_tcp2_path)
+
+  AC_MSG_NOTICE([TRACE-2:$PKGCONFIG])
 
   if test "$PKGCONFIG" != "no"; then
     LIB_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
