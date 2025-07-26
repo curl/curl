@@ -711,6 +711,7 @@ jobs:
               -DENABLE_DEBUG=ON
               -DCURL_ENABLE_SSL=OFF
               -DUSE_WIN32_IDN=ON
+              -D_CURL_SKIP_BUILD_CERTS=ON
 
           - name: 'openssl +examples'
             install-msys2: >-
