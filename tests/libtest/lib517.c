@@ -145,6 +145,7 @@ static CURLcode test_lib517(char *URL)
     {"Thu, 31-Dec-1969 23:59:59 GMT", 0 }, /* avoids -1 ! */
 #if SIZEOF_TIME_T > 4
     {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t) 2362034977 },
+#warning INCLUDED-CHECK-CHECK
     {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
 #if 0
