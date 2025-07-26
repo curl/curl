@@ -146,6 +146,7 @@ static CURLcode test_lib517(char *URL)
 #if SIZEOF_TIME_T > 4
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
     /* gcc: this decimal constant is unsigned only in ISO C90 */
+#warning INCLUDED-1
     {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t)2362034977 },
 #endif
     {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
@@ -158,6 +159,7 @@ static CURLcode test_lib517(char *URL)
         WRONGLY Sun, 06 Nov 1900 08:49:37 GMT =>
           -2182259423 (instead of 2112707873)
      */
+#warning INCLUDED-2
     {"Sun, 06 Nov 1900 08:49:37 GMT", -2182259423 },
 #endif
     {"Sun, 06 Nov 1800 08:49:37 GMT", -5337933023 },
