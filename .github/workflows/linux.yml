@@ -661,7 +661,7 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
         run: |
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
