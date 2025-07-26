@@ -179,7 +179,7 @@ jobs:
 
           - name: 'openssl clang krb5 LTO'
             install_packages: zlib1g-dev libkrb5-dev clang
-            install_steps: skipall
+            install_steps: skiprun
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
@@ -273,7 +273,7 @@ jobs:
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
-            install_steps: rust rustls skipall pytest
+            install_steps: rust rustls skiprun pytest
             generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'IntelC openssl'
@@ -661,7 +661,7 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'skipall') && matrix.build.container == null }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
         run: |
           [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
