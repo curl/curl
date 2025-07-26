@@ -1375,7 +1375,8 @@ dnl
 
 AC_DEFUN([CURL_EXPORT_PCDIR], [
   if test -n "$1"; then
-    PKG_CONFIG_LIBDIR="$1"
+    PKG_CONFIG_DIR="$1:$PKG_CONFIG_DIR"
+    export PKG_CONFIG_DIR
   fi
 ])
 
