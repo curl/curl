@@ -147,9 +147,7 @@ static CURLcode test_lib517(char *URL)
     {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t) 2362034977 },
     {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
-#if 0
     {"Sun, 06 Nov 1900 08:49:37 GMT", -2182259423 },  /* causes warning on MSVC */
-#endif
     {"Sun, 06 Nov 1800 08:49:37 GMT", -5337933023 },
     {"Thu, 01-Jan-1583 00:00:00 GMT", -12212553600 },
 #endif
