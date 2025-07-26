@@ -474,6 +474,10 @@ jobs:
           pkg-config --version
           pkg-config --list-all | sort
           pkg-config --print-errors --exists gnutls || true
+          echo '----------- a'
+          pkg-config --exists gnutls && echo 'FOUND gnutls' || true
+          echo '----------- b'
+          pkg-config --exists libngtcp2_crypto_gnutls && echo 'FOUND libngtcp2_crypto_gnutls' || true
           echo '----------- 0'
           cat /home/runner/gnutls/build/lib/pkgconfig/gnutls.pc
           echo '----------- 1'
