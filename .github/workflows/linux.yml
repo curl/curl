@@ -227,7 +227,7 @@ jobs:
 
           - name: 'scanbuild'
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
-            install_steps: skiprun
+            install_steps: skipall
             configure: --with-openssl --enable-debug --with-libssh2 --disable-unity
             CC: clang
             configure-prefix: scan-build
@@ -655,9 +655,9 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target testdeps
+            cmake --build bld --verbose --target testdeps
           else
-            ${MATRIX_MAKE_PREFIX} make -C bld V=1 -C tests
+            make -C bld V=1 -C tests
           fi
 
       - name: 'install test prereqs'
