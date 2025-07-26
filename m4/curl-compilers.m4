@@ -592,7 +592,6 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         dnl #1025: zero extending result of unary operation
         dnl #1469: "cc" clobber ignored
         dnl #2259: non-pointer conversion from X to Y may lose significant bits
-        tmp_CPPFLAGS="$tmp_CPPFLAGS -diag-disable 279,981,1025,1469,2259"
         ;;
         #
       INTEL_WINDOWS_C)
