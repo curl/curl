@@ -418,7 +418,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'schannel'  # mingw-w64 12.0
+          - name: 'schannel'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '15.0.1'
@@ -426,14 +426,14 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -D_CURL_SKIP_BUILD_CERTS=ON'
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel'  # mingw-w64 10.0
+          - name: 'schannel'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-          - name: 'schannel mbedtls U'  # mingw-w64 6.0
+          - name: 'schannel mbedtls U'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
@@ -442,7 +442,7 @@ jobs:
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel !unity'  # mingw-w64 5.0
+          - name: 'schannel !unity'
             dir: 'mingw32'
             env: 'i686'
             ver: '6.4.0'
