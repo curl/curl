@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Prepare a directory with known files and clean up afterwards
 use Time::Local;

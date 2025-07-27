@@ -31,7 +31,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $dir = $ARGV[0] || die "specify directory!";
 

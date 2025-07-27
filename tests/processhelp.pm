@@ -25,7 +25,7 @@
 package processhelp;
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 BEGIN {
     use base qw(Exporter);

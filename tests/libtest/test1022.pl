@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Determine if curl-config --version matches the curl --version
 if($#ARGV != 2) {

@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Perform simple file and directory manipulation in a portable way
 if($#ARGV <= 0) {
