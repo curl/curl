@@ -30,12 +30,6 @@
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 
-#ifdef __MINGW32__
-#ifndef SRWLOCK_INIT
-#define SRWLOCK_INIT NULL
-#endif
-#endif /* __MINGW32__ */
-
 #define curl_simple_lock SRWLOCK
 #define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
 
