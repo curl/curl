@@ -32,6 +32,7 @@
 
 #ifndef CURL_WINDOWS_UWP
 #define HAS_MANUAL_VERIFY_API
+#warning HAS_MANUAL_VERIFY_API
 #endif
 
 /* These two macros are missing from mingw-w64 in UWP mode as of v13 */
