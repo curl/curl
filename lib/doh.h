@@ -51,12 +51,12 @@ typedef enum {
 } DOHcode;
 
 typedef enum {
-  DNS_TYPE_A = 1,
-  DNS_TYPE_NS = 2,
-  DNS_TYPE_CNAME = 5,
-  DNS_TYPE_AAAA = 28,
-  DNS_TYPE_DNAME = 39,           /* RFC6672 */
-  DNS_TYPE_HTTPS = 65
+  CURL_DNS_TYPE_A = 1,
+  CURL_DNS_TYPE_NS = 2,
+  CURL_DNS_TYPE_CNAME = 5,
+  CURL_DNS_TYPE_AAAA = 28,
+  CURL_DNS_TYPE_DNAME = 39,           /* RFC6672 */
+  CURL_DNS_TYPE_HTTPS = 65
 } DNStype;
 
 enum doh_slot_num {
