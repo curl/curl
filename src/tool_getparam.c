@@ -2814,6 +2814,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     bool noflagged = FALSE;
     bool expand = FALSE;
+    const char *p;
+    struct Curl_str out;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
@@ -2827,23 +2829,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       expand = TRUE;
     }
 
-    {
-      const char *p = word;
-      struct Curl_str out;
-      /* is there an '=' ? */
-      if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
-         !curlx_str_single(&p, '=') ) {
-        /* there's an equal sign */
-        char tempword[MAX_OPTION_LEN + 1];
-        memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
-        tempword[curlx_strlen(&out)] = 0;
-        a = findlongopt(tempword);
-        nextarg = p;
-        consumearg = FALSE; /* it is not separate */
-      }
-      else
-        a = findlongopt(word);
+    p = word;
+    /* is there an '=' ? */
+    if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
+       !curlx_str_single(&p, '=') ) {
+      /* there's an equal sign */
+      char tempword[MAX_OPTION_LEN + 1];
+      memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
+      tempword[curlx_strlen(&out)] = 0;
+      a = findlongopt(tempword);
+      nextarg = p;
+      consumearg = FALSE; /* it is not separate */
     }
+    else
+      a = findlongopt(word);
 
     if(a) {
       longopt = TRUE;
