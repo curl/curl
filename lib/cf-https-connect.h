@@ -40,12 +40,6 @@ CURLcode Curl_cf_http_connect_add(struct Curl_easy *data,
                                   int sockindex,
                                   bool try_h3, bool try_h21);
 
-CURLcode
-Curl_cf_http_connect_insert_after(struct Curl_cfilter *cf_at,
-                                  struct Curl_easy *data,
-                                  bool try_h3, bool try_h21);
-
-
 CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex);
