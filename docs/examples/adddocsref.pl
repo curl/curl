@@ -26,7 +26,7 @@
 # pass files as argument(s)
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $docroot="https://curl.se/libcurl/c";
 
