@@ -2336,7 +2336,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_LIBSSH2
   #   USE_LIBUV
   #   USE_MBEDTLS
-  #   USE_MSH3
   #   USE_NGHTTP2
   #   USE_NGHTTP3
   #   USE_NGTCP2
@@ -2374,7 +2373,6 @@ if(NOT CURL_DISABLE_INSTALL)
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibuv.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMSH3.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
