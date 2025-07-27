@@ -20,7 +20,6 @@ name: 'Fuzzer'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -35,7 +34,6 @@ name: 'Fuzzer'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
 
 permissions: {}
 

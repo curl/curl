@@ -18,7 +18,6 @@ name: 'Source'
       - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -29,7 +28,6 @@ name: 'Source'
       - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
-      - 'winbuild/**'
 
 permissions: {}
 
