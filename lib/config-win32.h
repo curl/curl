@@ -264,11 +264,11 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-/* Must use local implementations on Windows. */
+/* Must always use local implementations on Windows. */
 /* Define to 1 if you have an IPv6 capable working inet_ntop function. */
-#undef HAVE_INET_NTOP
+/* #undef HAVE_INET_NTOP */
 /* Define to 1 if you have an IPv6 capable working inet_pton function. */
-#undef HAVE_INET_PTON
+/* #undef HAVE_INET_PTON */
 
 /* Define to 1 if you have the `basename' function. */
 #ifdef __MINGW32__
