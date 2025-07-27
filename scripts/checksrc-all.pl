@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: curl
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 use File::Basename;
 use File::Find;

@@ -34,7 +34,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $unittests;
 if(@ARGV && $ARGV[0] eq "--unit") {

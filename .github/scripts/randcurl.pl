@@ -19,7 +19,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $curl = "../src/curl";
 my $url = "localhost:7777"; # not listening to this

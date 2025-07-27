@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $autotools = $ARGV[0];
 my $cmake = $ARGV[1];
