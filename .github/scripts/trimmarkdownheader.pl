@@ -8,7 +8,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $f = $ARGV[0] || '';
 

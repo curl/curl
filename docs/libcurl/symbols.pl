@@ -45,7 +45,7 @@
 #
 #
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 open F, "<symbols-in-versions";
 

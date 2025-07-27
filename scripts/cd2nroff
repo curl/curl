@@ -31,7 +31,7 @@ Converts a curldown file to nroff (manpage).
 =cut
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $cd2nroff = "0.1"; # to keep check
 my $dir;

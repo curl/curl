@@ -55,7 +55,7 @@
 ################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $cleanup = (@ARGV && $ARGV[0] eq "cleanup");
 my @gitlog=`git log @^{/RELEASE-NOTES:.synced}..` if(!$cleanup);

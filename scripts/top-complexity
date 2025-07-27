@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 #######################################################################
 # Check for a command in the PATH of the test server.

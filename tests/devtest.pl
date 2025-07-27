@@ -34,7 +34,7 @@
 #   curl -vkL https://localhost:<protoport>/11
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 use 5.006;
 
 BEGIN {

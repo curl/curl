@@ -39,7 +39,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 open(S, "<../libcurl/symbols-in-versions") || die;
 

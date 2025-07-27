@@ -30,7 +30,7 @@
 # MEM sendf.c:232 free(f6520)
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $mallocs=0;
 my $callocs=0;

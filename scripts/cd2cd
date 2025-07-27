@@ -37,7 +37,7 @@ Example: cd2cd [--in-place] <file.md> > <file.md>
 =cut
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $cd2cd = "0.1"; # to keep check
 my $dir;

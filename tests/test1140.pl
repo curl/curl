@@ -27,7 +27,7 @@
 # codes or references to non-existing curl manpages.
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $docsroot = $ARGV[0] || '.';
 

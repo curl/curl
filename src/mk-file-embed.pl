@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $varname = "var";
 if(@ARGV && $ARGV[0] eq "--var") {

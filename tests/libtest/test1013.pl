@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Determine if curl-config --protocols/--features matches the
 # curl --version protocols/features

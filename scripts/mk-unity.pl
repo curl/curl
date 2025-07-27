@@ -28,7 +28,7 @@
 # includes the individual source files and tests.
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 if(!@ARGV) {
     die "Usage: $0 [--test <tests>] [--include <include-c-sources>]\n";

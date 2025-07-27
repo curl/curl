@@ -31,7 +31,7 @@
 # In the git clone root, invoke 'scripts/delta [release tag]'
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 use POSIX;
 use Time::Piece;

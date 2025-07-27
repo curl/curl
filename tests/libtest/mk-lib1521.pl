@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Usage:
 #   perl mk-lib1521.pl < ../../include/curl/curl.h lib1521.c

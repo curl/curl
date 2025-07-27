@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my @tabs = (
     "^m4/zz40-xc-ovr.m4",
