@@ -398,11 +398,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr->sin_addr, inaddr, sizeof(struct in_addr));
-#ifdef __MINGW32__
-    addr->sin_family = (short)af;
-#else
     addr->sin_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr->sin_port = htons((unsigned short)port);
     break;
 
@@ -411,11 +407,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr6->sin6_addr, inaddr, sizeof(struct in6_addr));
-#ifdef __MINGW32__
-    addr6->sin6_family = (short)af;
-#else
     addr6->sin6_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr6->sin6_port = htons((unsigned short)port);
     break;
 #endif
