@@ -135,7 +135,7 @@
               _curl_easy_setopt_err_error_buffer();                     \
           if((option) == CURLOPT_CURLU)                                 \
             if(!curlcheck_ptr((value), CURLU))                          \
-              _curl_easy_setopt_err_curlu();                    \
+              _curl_easy_setopt_err_curlu();                            \
           if((option) == CURLOPT_STDERR)                                \
             if(!curlcheck_FILE(value))                                  \
               _curl_easy_setopt_err_FILE();                             \
@@ -178,7 +178,7 @@
               _curl_easy_getinfo_err_curl_slist();                      \
           if(curlcheck_tlssessioninfo_info(info))                       \
             if(!curlcheck_arr((arg), struct curl_tlssessioninfo *))     \
-              _curl_easy_getinfo_err_curl_tlssessioninfo();            \
+              _curl_easy_getinfo_err_curl_tlssessioninfo();             \
           if(curlcheck_certinfo_info(info))                             \
             if(!curlcheck_arr((arg), struct curl_certinfo *))           \
               _curl_easy_getinfo_err_curl_certinfo();                   \
@@ -546,7 +546,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    curlcheck_arr((expr), unsigned char))
 
 /* evaluates to true if expr is a CURL * */
-#define curlcheck_curl(expr)                                          \
+#define curlcheck_curl(expr)                                            \
   (curlcheck_NULL(expr) ||                                              \
    __builtin_types_compatible_p(__typeof__(expr), CURL *))
 
@@ -840,8 +840,8 @@ typedef long (*_curl_chunk_bgn_callback2)(void *, void *, int);
    curlcheck_cb_compatible((expr), curl_sshhostkeycallback))
 
 /* evaluates to true if expr is of type curl_sshkeycallback */
-#define curlcheck_ssh_key_cb(expr)                                  \
-  (curlcheck_NULL(expr) ||                                          \
+#define curlcheck_ssh_key_cb(expr)                                      \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_sshkeycallback))
 
 /* evaluates to true if expr is of type curl_interleave_callback */
@@ -855,13 +855,13 @@ typedef size_t (*_curl_interleave_callback2)(char *p, size_t s,
                                              size_t n, void *u);
 
 /* evaluates to true if expr is of type curl_prereq_callback */
-#define curlcheck_prereq_cb(expr)                                    \
-  (curlcheck_NULL(expr) ||                                           \
+#define curlcheck_prereq_cb(expr)                                       \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_prereq_callback))
 
 /* evaluates to true if expr is of type curl_trailer_callback */
-#define curlcheck_trailer_cb(expr)                                    \
-  (curlcheck_NULL(expr) ||                                            \
+#define curlcheck_trailer_cb(expr)                                      \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_trailer_callback))
 
 #endif /* CURLINC_TYPECHECK_GCC_H */
