@@ -40,7 +40,7 @@ while(<STDIN>) {
     }
 }
 
-my $errors;
+my $errors = 0;
 
 sub file {
     my ($f) = @_;
