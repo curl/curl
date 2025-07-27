@@ -462,7 +462,7 @@ jobs:
             env: 'x86_64'
             ver: '4.8.1'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DCURL_TARGET_WINDOWS_VERSION=0x0600'
             type: 'Debug'
             tflags: 'skipall'
             chkprefill: ''  # Set it once to silence actionlint
