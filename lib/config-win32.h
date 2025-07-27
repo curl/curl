@@ -267,9 +267,9 @@
 /* Keep these disabled regardless of Windows target version. Windows
    build must use the curl implementations. */
 /* Define to 1 if you have an IPv6 capable working inet_ntop function. */
-#define HAVE_INET_NTOP 0
+#undef HAVE_INET_NTOP
 /* Define to 1 if you have an IPv6 capable working inet_pton function. */
-#define HAVE_INET_PTON 0
+#undef HAVE_INET_PTON
 
 /* Define to 1 if you have the `basename' function. */
 #ifdef __MINGW32__
