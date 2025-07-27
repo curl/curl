@@ -23,9 +23,7 @@ It consists of the following steps after you have unpacked the source.
 
 We recommend building with CMake on Windows. For instructions on migrating
 from the `projects/Windows` Visual Studio solution files, see
-[this section](#migrating-from-visual-studio-ide-project-files). For
-instructions on migrating from the winbuild builds, see
-[the following section](#migrating-from-winbuild-builds).
+[this section](#migrating-from-visual-studio-ide-project-files).
 
 ## Using `cmake`
 
@@ -546,59 +544,3 @@ We do *not* specify `-DCMAKE_BUILD_TYPE=Debug` here as we might do for the
 `"NMake Makefiles"` generator because the Visual Studio generators are
 [multi-config generators](https://cmake.org/cmake/help/latest/prop_gbl/GENERATOR_IS_MULTI_CONFIG.html)
 and therefore ignore the value of `CMAKE_BUILD_TYPE`.
-
-# Migrating from winbuild builds
-
-We recommend CMake to build curl with MSVC. The winbuild build system is
-deprecated and is going to be removed in September 2025 in favor of the CMake
-build system.
-
-In CMake you can customize the path of dependencies by passing the absolute
-header path and the full path of the library via `*_INCLUDE_DIR` and
-`*_LIBRARY` options (see the complete list in the option listing above).
-The full path to the library can point to a static library or an import
-library, which defines if the dependency is linked as a dll or statically.
-For OpenSSL this works
-[differently](https://cmake.org/cmake/help/latest/module/FindOpenSSL.html):
-You can pass the root directory of the OpenSSL installation via
-`OPENSSL_ROOT_DIR`, then pass `OPENSSL_USE_STATIC_LIBS=ON` to select static
-libs.
-
-winbuild options                  | Equivalent CMake options
-:-------------------------------- | :--------------------------------
-`DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
-`GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
-`LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
-`VC`: `<N>`                       | see the CMake [Visual Studio generators](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators)
-`MACHINE`: `x64`, `x86`           | `-A x64`, `-A Win32`
-`MODE`: `dll`, `static`           | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: dll)
-`RTLIBCFG`: `static`              | `CURL_STATIC_CRT=ON`
-`ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
-`ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
-`ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
-`ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
-`ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
-`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON` (default with Schannel)
-`ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
-`WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
-`WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
-`WITH_CARES`, `CARES_PATH`        | `ENABLE_ARES=ON`, optional: `CARES_INCLUDE_DIR`, `CARES_LIBRARY`
-`WITH_MBEDTLS`, `MBEDTLS_PATH`    | `CURL_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
-`WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
-`WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
-`WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
-`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
-`WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
-`WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
-
-For example this command-line:
-
-    > nmake -f Makefile.vc VC=17 MACHINE=x64 DEBUG=ON mode=dll SSL_PATH=C:\OpenSSL WITH_SSL=dll ENABLE_UNICODE=ON
-
-translates to:
-
-    > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
-    > cmake --build . --config Debug
-
-We use `--config` with `cmake --build` because the Visual Studio CMake
-generators are multi-config and therefore ignore `CMAKE_BUILD_TYPE`.
