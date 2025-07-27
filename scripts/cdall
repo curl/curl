@@ -26,7 +26,7 @@
 # provide all dir names to scan on the cmdline
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 sub convert {
     my ($dir)=@_;

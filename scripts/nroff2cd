@@ -37,7 +37,7 @@ for code.
 =cut
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $nroff2cd = "0.1"; # to keep check
 
