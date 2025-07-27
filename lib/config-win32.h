@@ -264,13 +264,12 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-/* Vista */
-#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && !defined(UNDER_CE)
+/* Keep these disabled regardless of Windows target version. Windows
+   build must use the curl implementations. */
 /* Define to 1 if you have an IPv6 capable working inet_ntop function. */
-#define HAVE_INET_NTOP 1
+#define HAVE_INET_NTOP 0
 /* Define to 1 if you have an IPv6 capable working inet_pton function. */
-#define HAVE_INET_PTON 1
-#endif
+#define HAVE_INET_PTON 0
 
 /* Define to 1 if you have the `basename' function. */
 #ifdef __MINGW32__
