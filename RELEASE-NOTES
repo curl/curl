@@ -8,30 +8,39 @@ curl and libcurl 8.15.1
 
 This release includes the following changes:
 
+ o vquic: drop msh3 [8]
 
 This release includes the following bugfixes:
 
  o build: enable _GNU_SOURCE on GNU/Hurd [27]
  o build: fix build errors/warnings in rare configurations [7]
  o build: link to Apple frameworks required by static wolfSSL [40]
+ o cf-https-connect: delete unused declaration [15]
  o cmake: capitalize 'Rustls' in the config summary
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: keep websockets disabled if HTTP is disabled
  o cmake: make `runtests` targets build the curl tool [32]
+ o CODE_STYLE: sync with recent `checksrc.pl` updates [49]
  o curl/system.h: fix for GCC 3.3.x and older [38]
  o curl: tool_read_cb fix of segfault [18]
+ o curl_addrinfo: drop workaround for old-mingw [14]
  o curl_fnmatch, servers: drop local macros in favour of `sizeof()` [21]
+ o curl_ossl: extend callback table for nghttp3 1.11.0 [46]
+ o curl_setup.h: move UWP detection after `config-win32.h` (revert) [51]
  o curl_setup.h: move UWP detection after `config-win32.h` [23]
+ o DEPRECATE.md: drop support for Windows XP/2003 [31]
  o DISTROS.md: add Haiku [39]
  o docs: fix name in curl_easy_ssls_export man page [12]
  o easy handle: check validity on external calls [28]
  o gnutls: some small cleanups [41]
  o hmac: return error if init fails [2]
  o http: const up readonly H2_NON_FIELD [10]
+ o http: silence `-Warray-bounds` with gcc 13+ [44]
  o lib1560: fix memory leak when run without UTF-8 support [17]
  o multi event: remove only announced [25]
  o multissl: initialize when requesting a random number [30]
+ o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o openssl: some small cleanups [42]
  o pytest: add SOCKS tests and scoring [9]
  o pytest: increase server KeepAliveTimeout [26]
@@ -48,7 +57,9 @@ This release includes the following bugfixes:
  o tidy-up: `Curl_thread_create()` callback return type [20]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
+ o windows: drop unused `curlx/version_win32.h` includes [52]
  o windows: fix `if_nametoindex()` detection with autotools, improve with cmake [24]
+ o windows: include `wincrypt.h` before `iphlpapi.h` for mingw-w64 <6 [50]
  o windows: target version macro tidy-ups [3]
 
 This release includes the following known bugs:
@@ -87,11 +98,14 @@ References to bug reports and discussions on issues:
  [5] = https://curl.se/bug/?i=17991
  [6] = https://curl.se/bug/?i=17988
  [7] = https://curl.se/bug/?i=17962
+ [8] = https://curl.se/bug/?i=17729
  [9] = https://curl.se/bug/?i=17986
  [10] = https://curl.se/bug/?i=17996
  [11] = https://curl.se/bug/?i=18004
  [12] = https://curl.se/bug/?i=17995
  [13] = https://curl.se/bug/?i=17993
+ [14] = https://curl.se/bug/?i=18038
+ [15] = https://curl.se/bug/?i=18036
  [17] = https://curl.se/bug/?i=17998
  [18] = https://curl.se/bug/?i=17978
  [19] = https://curl.se/bug/?i=17938
@@ -105,6 +119,7 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=17958
  [29] = https://curl.se/bug/?i=17976
  [30] = https://curl.se/bug/?i=17963
+ [31] = https://curl.se/bug/?i=18016
  [32] = https://curl.se/bug/?i=17967
  [34] = https://curl.se/bug/?i=17933
  [35] = https://curl.se/bug/?i=17971
@@ -115,3 +130,10 @@ References to bug reports and discussions on issues:
  [41] = https://curl.se/bug/?i=17941
  [42] = https://curl.se/bug/?i=17940
  [43] = https://curl.se/bug/?i=17942
+ [44] = https://curl.se/bug/?i=18030
+ [46] = https://curl.se/bug/?i=18026
+ [47] = https://curl.se/bug/?i=18019
+ [49] = https://curl.se/bug/?i=18015
+ [50] = https://curl.se/bug/?i=18012
+ [51] = https://curl.se/bug/?i=18014
+ [52] = https://curl.se/bug/?i=18011
