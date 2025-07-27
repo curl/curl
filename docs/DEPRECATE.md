@@ -12,10 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Nothing
-
-Nothing is currently scheduled to be removed.
-
 ## winbuild build system
 
 curl drops support for the winbuild build method after September 2025.
