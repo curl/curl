@@ -31,7 +31,6 @@ name: 'Old Linux'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -43,7 +42,6 @@ name: 'Old Linux'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
-      - 'winbuild/**'
 
 permissions: {}
 

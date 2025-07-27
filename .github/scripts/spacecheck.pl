@@ -40,7 +40,6 @@ my @mixed_eol = (
 
 my @need_crlf = (
     "\\.(bat|sln)\$",
-    "^winbuild/.+\\.md\$",
 );
 
 my @space_at_eol = (
