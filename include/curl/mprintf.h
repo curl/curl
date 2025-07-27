@@ -28,7 +28,7 @@
 #include <stdio.h> /* needed for FILE */
 #include "curl.h"  /* for CURL_EXTERN */
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -78,7 +78,7 @@ CURL_EXTERN char *curl_mvaprintf(const char *format, va_list args)
 
 #undef CURL_TEMP_PRINTF
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 

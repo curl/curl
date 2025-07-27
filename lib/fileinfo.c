@@ -23,7 +23,9 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_FTP
+
 #include "strdup.h"
 #include "fileinfo.h"
 #include "curl_memory.h"
@@ -43,4 +45,5 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
   curlx_dyn_free(&finfo->buf);
   free(finfo);
 }
+
 #endif

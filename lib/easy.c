@@ -822,7 +822,6 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   return result;
 }
 
-
 /*
  * curl_easy_perform() is the external interface that performs a blocking
  * transfer as previously setup.
@@ -841,7 +840,6 @@ CURLcode curl_easy_perform_ev(struct Curl_easy *data)
 {
   return easy_perform(data, TRUE);
 }
-
 #endif
 
 /*

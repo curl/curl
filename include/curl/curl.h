@@ -102,7 +102,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -3302,7 +3302,7 @@ CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
                                            void *userptr);
 
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 
