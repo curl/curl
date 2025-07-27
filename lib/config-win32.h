@@ -264,8 +264,7 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-/* Keep these disabled regardless of Windows target version. Windows
-   build must use the curl implementations. */
+/* Must use local implementations on Windows. */
 /* Define to 1 if you have an IPv6 capable working inet_ntop function. */
 #undef HAVE_INET_NTOP
 /* Define to 1 if you have an IPv6 capable working inet_pton function. */
