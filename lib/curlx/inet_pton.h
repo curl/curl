@@ -26,8 +26,6 @@
 
 #include "../curl_setup.h"
 
-int curlx_inet_pton(int, const char *, void *);
-
 #ifdef HAVE_INET_PTON
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -43,6 +41,8 @@ int curlx_inet_pton(int, const char *, void *);
 #else
 #define curlx_inet_pton(x,y,z) inet_pton(x,y,z)
 #endif
-#endif
+#else
+int curlx_inet_pton(int, const char *, void *);
+#endif /* HAVE_INET_PTON */
 
 #endif /* HEADER_CURL_INET_PTON_H */

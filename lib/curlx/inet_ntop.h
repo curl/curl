@@ -26,8 +26,6 @@
 
 #include "../curl_setup.h"
 
-char *curlx_inet_ntop(int af, const void *addr, char *buf, size_t size);
-
 #ifdef HAVE_INET_NTOP
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -46,6 +44,8 @@ char *curlx_inet_ntop(int af, const void *addr, char *buf, size_t size);
 #define curlx_inet_ntop(af,addr,buf,size)                \
   inet_ntop(af, addr, buf, (curl_socklen_t)(size))
 #endif
-#endif
+#else
+char *curlx_inet_ntop(int af, const void *addr, char *buf, size_t size);
+#endif /* HAVE_INET_NTOP */
 
 #endif /* HEADER_CURL_INET_NTOP_H */
