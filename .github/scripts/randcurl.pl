@@ -92,7 +92,7 @@ sub randarg {
         "0123456789".
         ",-?#$%!@ ";
     my $len = getnum(20);
-    my $o;
+    my $o = '';
     for (1 .. $len) {
         $o .= substr($nice, getnum(length($nice)), 1);
     }
