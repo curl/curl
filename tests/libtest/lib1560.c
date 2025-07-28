@@ -1428,7 +1428,7 @@ static int set_url(void)
    2. Set one or more parts
    3. Extract and compare all parts - not the URL
 */
-static int setget_parts(int has_utf8)
+static int setget_parts(bool has_utf8)
 {
   int i;
   int error = 0;
@@ -1531,7 +1531,7 @@ static int set_parts(void)
   return error;
 }
 
-static int get_url(int has_utf8)
+static int get_url(bool has_utf8)
 {
   int i;
   int error = 0;
@@ -1574,7 +1574,7 @@ static int get_url(int has_utf8)
   return error;
 }
 
-static int get_parts(int has_utf8)
+static int get_parts(bool has_utf8)
 {
   int i;
   int error = 0;
@@ -2030,7 +2030,7 @@ err:
 
 static CURLcode test_lib1560(char *URL)
 {
-  int has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
+  bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
   (void)URL; /* not used */
 
