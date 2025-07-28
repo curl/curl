@@ -85,7 +85,7 @@ static CURLcode test_lib1527(char *URL)
   test_setopt(curl, CURLOPT_READFUNCTION, t1527_read_cb);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1527_testdata));
-  test_setopt(curl, CURLOPT_HEADEROPT, (long)CURLHEADER_UNIFIED);
+  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
 
   res = curl_easy_perform(curl);
 
