@@ -237,7 +237,7 @@ while(<$fileh>) {
             }
 
             $totalmem += $newsize;
-            $memsum += $size;
+            $memsum += $newsize;
             $sizeataddr{$newaddr}=$newsize;
 
             if($trace) {
