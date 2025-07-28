@@ -1121,11 +1121,13 @@ void Curl_multi_getsock(struct Curl_easy *data,
                  caller, ps->num, Curl_llist_count(&data->state.timeoutlist));
       break;
   }
-  if(expect_sockets && !ps->num &&
+  if(expect_sockets && !ps->num && data->multi &&
+     !Curl_uint_bset_contains(&data->multi->dirty, data->mid) &&
      !Curl_llist_count(&data->state.timeoutlist) &&
      !Curl_cwriter_is_paused(data) && !Curl_creader_is_paused(data) &&
      Curl_conn_is_ip_connected(data, FIRSTSOCKET)) {
     /* We expected sockets for POLL monitoring, but none are set.
+     * We are not dirty (and run anyway).
      * We are not waiting on any timer.
      * None of the READ/WRITE directions are paused.
      * We are connected to the server on IP level, at least. */
