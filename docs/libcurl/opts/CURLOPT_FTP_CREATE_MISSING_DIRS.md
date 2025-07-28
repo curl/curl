@@ -67,7 +67,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://example.com/non-existing/new.txt");
     curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                     CURLFTP_CREATE_DIR_RETRY);
+                     (long)CURLFTP_CREATE_DIR_RETRY);
 
     res = curl_easy_perform(curl);
 
