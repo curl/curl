@@ -41,7 +41,7 @@ static CURLcode test_lib564(char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  easy_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_SOCKS4);
+  easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
   multi_init(m);
 
