@@ -221,11 +221,17 @@ while(<$fileh>) {
         elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
             my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
 
-            $totalmem -= $sizeataddr{$oldaddr};
-            if($trace) {
-                printf("REALLOC: %d less bytes and ", $sizeataddr{$oldaddr});
+            if($oldaddr) {
+                my $oldsize = $sizeataddr{$oldaddr} ? $sizeataddr{$oldaddr} : 0;
+
+                $totalmem -= $oldsize;
+                if($trace) {
+                    printf("REALLOC: %d less bytes and ", $oldsize);
+                }
+                $sizeataddr{$oldaddr}=0;
+
+                $getmem{$oldaddr}="";
             }
-            $sizeataddr{$oldaddr}=0;
 
             $totalmem += $newsize;
             $memsum += $size;
@@ -238,7 +244,6 @@ while(<$fileh>) {
             newtotal($totalmem);
             $reallocs++;
 
-            $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
         elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
