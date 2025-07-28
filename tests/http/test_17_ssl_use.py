@@ -365,6 +365,7 @@ class TestSSLUse:
         else:
             assert r.exit_code != 0, f'should fail, server={server_ver:04x}, curl=[{curl_min_ver:04x}, {curl_max_ver:04x}]\n{r.dump_logs()}'
 
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_17_10_h3_session_reuse(self, env: Env, httpd, nghttpx):
         if not env.have_h3():
             pytest.skip("h3 not supported")

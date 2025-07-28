@@ -26,6 +26,7 @@
 #
 import logging
 import re
+import pytest
 
 from testenv import Env
 from testenv import CurlClient
@@ -34,6 +35,7 @@ from testenv import CurlClient
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
 class TestTracing:
 
     # default verbose output
