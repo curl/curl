@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#include "curl_mem_undef.h" /* FIRST include file */
+
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 
