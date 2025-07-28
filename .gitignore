@@ -28,7 +28,6 @@
 /.vs
 /bld/
 /build/
-/builds/
 /stats/
 __pycache__
 Debug
