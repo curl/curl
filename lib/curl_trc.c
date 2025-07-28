@@ -161,10 +161,12 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_TEXT:
       case CURLINFO_HEADER_OUT:
       case CURLINFO_HEADER_IN:
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
         if(CURL_TRC_IDS(data)) {
           len = trc_print_ids(data, buf, TRC_LINE_MAX);
           fwrite(buf, len, 1, data->set.err);
         }
+#endif
         fwrite(s_infotype[type], 2, 1, data->set.err);
         fwrite(ptr, size, 1, data->set.err);
         break;

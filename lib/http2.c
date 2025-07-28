@@ -2220,7 +2220,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
   const void *body = NULL;
-  size_t nheader, bodylen, i;
+  size_t nheader, bodylen;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
@@ -2282,9 +2282,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     goto out;
   }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #define MAX_ACC 60000  /* <64KB to account for some overhead */
   if(Curl_trc_is_verbose(data)) {
-    size_t acc = 0;
+    size_t acc = 0, i;
 
     infof(data, "[HTTP/2] [%d] OPENED stream for %s",
           stream_id, data->state.url);
@@ -2302,6 +2303,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
             "stream to be rejected.", MAX_ACC);
     }
   }
+#endif
 
   stream->id = stream_id;
 

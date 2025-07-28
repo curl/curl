@@ -987,6 +987,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
         if(Curl_trc_cf_is_verbose(cf, data)) {
           struct ip_quadruple ipquad;
           int is_ipv6;
@@ -998,6 +999,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
                         host, ipquad.remote_ip, ipquad.remote_port);
           }
         }
+#endif
         data->info.numconnects++; /* to track the # of connections made */
       }
       break;
