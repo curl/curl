@@ -132,6 +132,8 @@ static int my_progress_d_cb(void *userdata,
     return 1;
   }
 
+#if defined(USE_QUICHE) || defined(USE_OPENSSL) || defined(USE_WOLFSSL) || \
+  defined(USE_GNUTLS) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
   if(!t->checked_ssl && dlnow > 0) {
     struct curl_tlssessioninfo *tls;
     CURLcode res;
@@ -202,6 +204,7 @@ static int my_progress_d_cb(void *userdata,
       }
     }
   }
+#endif
   return 0;
 }
 
