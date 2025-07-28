@@ -1150,7 +1150,7 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
                       const struct curl_ws_frame **metap)
 {
   struct Curl_easy *data = d;
-  struct connectdata *conn = data->conn;
+  struct connectdata *conn;
   struct websocket *ws;
   struct ws_collect ctx;
 
@@ -1159,6 +1159,7 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  conn = data->conn;
   if(!conn) {
     /* Unhappy hack with lifetimes of transfers and connection */
     if(!data->set.connect_only) {
