@@ -1648,7 +1648,8 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
     /* flush, blocking when in callback */
     result = ws_flush(data, ws, Curl_is_in_callback(data));
     if(!result && ws->sendbuf_payload > 0) {
-      *sent += ws->sendbuf_payload;
+      if(sent)
+        *sent += ws->sendbuf_payload;
       buffer += ws->sendbuf_payload;
       buflen -= ws->sendbuf_payload;
       ws->sendbuf_payload = 0;
@@ -1658,7 +1659,8 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
         /* blocked, part of payload bytes remain, report length
          * that we managed to send. */
         size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
-        *sent += flushed;
+        if(sent)
+          *sent += flushed;
         ws->sendbuf_payload -= flushed;
         result = CURLE_OK;
         goto out;
@@ -1668,7 +1670,7 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
          * OK on 0-length send (caller counts only payload) and EAGAIN */
         CURL_TRC_WS(data, "EAGAIN flushing sendbuf, payload_encoded: %zu/%zu",
                     ws->sendbuf_payload, buflen);
-        DEBUGASSERT(*sent == 0);
+        DEBUGASSERT(!sent || *sent == 0);
         result = CURLE_AGAIN;
         goto out;
       }
