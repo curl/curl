@@ -5,7 +5,7 @@ Long: proxy-digest
 Help: Digest auth with the proxy
 Category: proxy tls
 Added: 7.12.0
-Multi: mutex
+Multi: boolean
 See-also:
   - proxy
   - proxy-anyauth
