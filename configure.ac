@@ -4050,9 +4050,7 @@ if test "$curl_cv_native_windows" != 'yes'; then
   AC_CHECK_TYPE(sa_family_t,
     AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),,
   [
-  #ifndef _WIN32
   #include <sys/socket.h>
-  #endif
   ])
 fi
 
