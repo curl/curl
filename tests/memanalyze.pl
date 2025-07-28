@@ -29,6 +29,9 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
+use strict;
+use warnings;
+
 my $mallocs=0;
 my $callocs=0;
 my $reallocs=0;
@@ -60,15 +63,15 @@ while(@ARGV) {
     }
 }
 
-my $memsum; # the total number of memory allocated over the lifetime
-my $maxmem; # the high water mark
+my $memsum = 0; # the total number of memory allocated over the lifetime
+my $maxmem = 0; # the high water mark
 
 sub newtotal {
     my ($newtot)=@_;
     # count a max here
 
     if($newtot > $maxmem) {
-        $maxmem= $newtot;
+        $maxmem = $newtot;
     }
 }
 
@@ -199,7 +202,7 @@ while(<$fileh>) {
             my $arg1 = $1;
             my $arg2 = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile, rebuild curl now\n";
             }
@@ -221,14 +224,20 @@ while(<$fileh>) {
         elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
             my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
 
-            $totalmem -= $sizeataddr{$oldaddr};
-            if($trace) {
-                printf("REALLOC: %d less bytes and ", $sizeataddr{$oldaddr});
+            if($oldaddr) {
+                my $oldsize = $sizeataddr{$oldaddr} ? $sizeataddr{$oldaddr} : 0;
+
+                $totalmem -= $oldsize;
+                if($trace) {
+                    printf("REALLOC: %d less bytes and ", $oldsize);
+                }
+                $sizeataddr{$oldaddr}=0;
+
+                $getmem{$oldaddr}="";
             }
-            $sizeataddr{$oldaddr}=0;
 
             $totalmem += $newsize;
-            $memsum += $size;
+            $memsum += $newsize;
             $sizeataddr{$newaddr}=$newsize;
 
             if($trace) {
@@ -238,7 +247,6 @@ while(<$fileh>) {
             newtotal($totalmem);
             $reallocs++;
 
-            $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
         elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
