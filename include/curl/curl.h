@@ -1021,7 +1021,7 @@ typedef enum {
 
 /* bitmask defines for CURLOPT_HEADEROPT */
 #define CURLHEADER_UNIFIED  0L
-#define CURLHEADER_SEPARATE (long)(1<<0)
+#define CURLHEADER_SEPARATE (1L<<0)
 
 /* CURLALTSVC_* are bits for the CURLOPT_ALTSVC_CTRL option */
 #define CURLALTSVC_READONLYFILE (1<<2)
