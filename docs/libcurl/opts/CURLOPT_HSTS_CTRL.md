@@ -64,7 +64,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
+    curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, (long)CURLHSTS_ENABLE);
     curl_easy_perform(curl);
   }
 }
