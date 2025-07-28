@@ -23,11 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "curl_mem_undef.h" /* FIRST include file */
-
 #include "tool_getparam.h"
-
-#include "memdebug.h" /* LAST include file */
 
 static CURLcode test_tool1394(char *arg)
 {
