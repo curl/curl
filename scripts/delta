@@ -92,7 +92,7 @@ chomp $branch;
 # Number of files in git
 my $afiles=`git ls-files | wc -l`;
 my $deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
-my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null| wc -l`;
+my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null | wc -l`;
 
 # Time since that tag
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
