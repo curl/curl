@@ -1024,8 +1024,8 @@ typedef enum {
 } curl_ftpmethod;
 
 /* bitmask defines for CURLOPT_HEADEROPT */
-#define CURLHEADER_UNIFIED  0
-#define CURLHEADER_SEPARATE (1<<0)
+#define CURLHEADER_UNIFIED  0L
+#define CURLHEADER_SEPARATE (1L<<0)
 
 /* CURLALTSVC_* are bits for the CURLOPT_ALTSVC_CTRL option */
 #define CURLALTSVC_READONLYFILE (1L<<2)
