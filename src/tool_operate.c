@@ -1689,6 +1689,8 @@ static CURLcode parallel_event(struct parastate *s)
   curl_multi_setopt(s->multi, CURLMOPT_SOCKETDATA, &uv);
   curl_multi_setopt(s->multi, CURLMOPT_TIMERFUNCTION, cb_timeout);
   curl_multi_setopt(s->multi, CURLMOPT_TIMERDATA, &uv);
+  curl_multi_setopt(s->multi, CURLMOPT_MAX_HOST_CONNECTIONS,
+                    s->global->parallel_host);
 
   /* kickstart the thing */
   curl_multi_socket_action(s->multi, CURL_SOCKET_TIMEOUT, 0,

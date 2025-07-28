@@ -151,6 +151,7 @@
 --parallel (-Z)                      7.66.0
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0
+--parallel-max-host                  8.16.0
 --pass                               7.9.3
 --path-as-is                         7.42.0
 --pinnedpubkey                       7.39.0
