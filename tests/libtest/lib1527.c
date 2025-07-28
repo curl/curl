@@ -79,7 +79,7 @@ static CURLcode test_lib1527(char *URL)
   test_setopt(curl, CURLOPT_POST, 0L);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_HTTP);
+  test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, t1527_read_cb);

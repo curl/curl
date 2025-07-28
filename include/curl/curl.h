@@ -788,20 +788,24 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                                           mbedtls_ssl_config */
                                           void *userptr);
 
+#define CURLPROXY_HTTP            0L /* added in 7.10, new in 7.19.4 default is
+                                        to use CONNECT HTTP/1.1 */
+#define CURLPROXY_HTTP_1_0        1L /* force to use CONNECT HTTP/1.0
+                                        added in 7.19.4 */
+#define CURLPROXY_HTTPS           2L /* HTTPS but stick to HTTP/1
+                                        added in 7.52.0 */
+#define CURLPROXY_HTTPS2          3L /* HTTPS and attempt HTTP/2
+                                        added in 8.2.0 */
+#define CURLPROXY_SOCKS4          4L /* support added in 7.15.2, enum existed
+                                        already in 7.10 */
+#define CURLPROXY_SOCKS5          5L /* added in 7.10 */
+#define CURLPROXY_SOCKS4A         6L /* added in 7.18.0 */
+#define CURLPROXY_SOCKS5_HOSTNAME 7L /* Use the SOCKS5 protocol but pass along
+                                        the hostname rather than the IP
+                                        address. added in 7.18.0 */
+
 typedef enum {
-  CURLPROXY_HTTP = 0,   /* added in 7.10, new in 7.19.4 default is to use
-                           CONNECT HTTP/1.1 */
-  CURLPROXY_HTTP_1_0 = 1,   /* added in 7.19.4, force to use CONNECT
-                               HTTP/1.0  */
-  CURLPROXY_HTTPS = 2,  /* HTTPS but stick to HTTP/1 added in 7.52.0 */
-  CURLPROXY_HTTPS2 = 3, /* HTTPS and attempt HTTP/2 added in 8.2.0 */
-  CURLPROXY_SOCKS4 = 4, /* support added in 7.15.2, enum existed already
-                           in 7.10 */
-  CURLPROXY_SOCKS5 = 5, /* added in 7.10 */
-  CURLPROXY_SOCKS4A = 6, /* added in 7.18.0 */
-  CURLPROXY_SOCKS5_HOSTNAME = 7 /* Use the SOCKS5 protocol but pass along the
-                                   hostname rather than the IP address. added
-                                   in 7.18.0 */
+  CURLPROXY_LAST = 8 /* never use */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
 /*

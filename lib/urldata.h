@@ -625,8 +625,7 @@ struct ip_quadruple {
 struct proxy_info {
   struct hostname host;
   int port;
-  unsigned char proxytype; /* curl_proxytype: what kind of proxy that is in
-                              use */
+  unsigned char proxytype; /* what kind of proxy that is in use */
   char *user;    /* proxy username string, allocated */
   char *passwd;  /* proxy password string, allocated */
 };
@@ -1435,7 +1434,7 @@ struct UserDefined {
   unsigned short proxyport; /* If non-zero, use this port number by
                                default. If the proxy string features a
                                ":[port]" that one will override this. */
-  unsigned char proxytype; /* what kind of proxy: curl_proxytype */
+  unsigned char proxytype; /* what kind of proxy */
   unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
