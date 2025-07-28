@@ -6,7 +6,7 @@ Help: HTTP Basic Authentication
 Protocols: HTTP
 Category: auth
 Added: 7.10.6
-Multi: mutex
+Multi: boolean
 See-also:
   - proxy-basic
 Example:
