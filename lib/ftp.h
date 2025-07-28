@@ -152,7 +152,7 @@ struct ftp_conn {
                            connection is established */
   unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                               IMAP or POP3 or others! (type: curl_usessl)*/
-  long ccc;         /* ccc level for this connection */
+  unsigned char ccc;       /* ccc level for this connection */
   BIT(ftp_trying_alternative);
   BIT(dont_check);  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
