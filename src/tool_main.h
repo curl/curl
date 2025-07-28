@@ -33,4 +33,7 @@
 #define MAX_PARALLEL 65535
 #define PARALLEL_DEFAULT 50
 
+#define MAX_PARALLEL_HOST 65535
+#define PARALLEL_HOST_DEFAULT 0 /* means not used */
+
 #endif /* HEADER_CURL_TOOL_MAIN_H */

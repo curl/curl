@@ -357,6 +357,7 @@ struct GlobalConfig {
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
+  unsigned short parallel_host; /* MAX_PARALLEL_HOST is the maximum */
   unsigned short parallel_max; /* MAX_PARALLEL is the maximum */
   unsigned char verbosity;        /* How verbose we should be */
 #ifdef DEBUGBUILD

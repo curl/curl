@@ -230,6 +230,7 @@ static const struct LongShort aliases[]= {
   {"parallel",                   ARG_BOOL, 'Z', C_PARALLEL},
   {"parallel-immediate",         ARG_BOOL, ' ', C_PARALLEL_IMMEDIATE},
   {"parallel-max",               ARG_STRG, ' ', C_PARALLEL_MAX},
+  {"parallel-max-host",          ARG_STRG, ' ', C_PARALLEL_HOST},
   {"pass",                       ARG_STRG|ARG_CLEAR, ' ', C_PASS},
   {"path-as-is",                 ARG_BOOL, ' ', C_PATH_AS_IS},
   {"pinnedpubkey",               ARG_STRG|ARG_TLS, ' ', C_PINNEDPUBKEY},
@@ -2179,6 +2180,7 @@ static ParameterError opt_filestring(struct OperationConfig *config,
 {
   ParameterError err = PARAM_OK;
   curl_off_t value;
+  long val;
   struct GlobalConfig *global = config->global;
   static const char *redir_protos[] = {
     "http",
@@ -2788,8 +2790,19 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     if(!err && !config->low_speed_time)
       config->low_speed_time = 30;
     break;
-  case C_PARALLEL_MAX: {  /* --parallel-max */
-    long val;
+  case C_PARALLEL_HOST: /* --parallel-max-host */
+    err = str2unum(&val, nextarg);
+    if(err)
+      break;
+    if(val > MAX_PARALLEL_HOST)
+      global->parallel_host = MAX_PARALLEL_HOST;
+    else if(val < 1)
+      global->parallel_host = PARALLEL_HOST_DEFAULT;
+    else
+      global->parallel_host = (unsigned short)val;
+    break;
+    break;
+  case C_PARALLEL_MAX:  /* --parallel-max */
     err = str2unum(&val, nextarg);
     if(err)
       break;
@@ -2800,7 +2813,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     else
       global->parallel_max = (unsigned short)val;
     break;
-  }
   case C_TIME_COND: /* --time-cond */
     err = parse_time_cond(config, nextarg);
     break;

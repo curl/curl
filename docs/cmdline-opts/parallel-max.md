@@ -10,6 +10,7 @@ Multi: single
 Scope: global
 See-also:
   - parallel
+  - parallel-max-host
 Example:
   - --parallel-max 100 -Z $URL ftp://example.com/
 ---
