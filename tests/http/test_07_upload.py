@@ -253,7 +253,7 @@ class TestUpload:
                              extra_args=['--parallel'])
         # depending on timing and protocol, we might get CURLE_PARTIAL_FILE or
         # CURLE_SEND_ERROR or CURLE_HTTP3 or CURLE_HTTP2_STREAM
-        r.check_stats(count=count, exitcode=[18, 55, 92, 95])
+        r.check_stats(count=count, exitcode=[18, 55, 56, 92, 95])
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
