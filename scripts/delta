@@ -30,9 +30,6 @@
 #
 # In the git clone root, invoke 'scripts/delta [release tag]'
 
-use strict;
-use warnings;
-
 $start = $ARGV[0];
 
 if($start eq "-h") {
