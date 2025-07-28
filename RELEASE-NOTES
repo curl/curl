@@ -4,24 +4,34 @@ curl and libcurl 8.15.1
  Command line options:         269
  curl_easy_setopt() options:   308
  Public functions in libcurl:  96
- Contributors:                 3467
+ Contributors:                 3469
 
 This release includes the following changes:
 
+ o build: bump minimum required mingw-w64 to v3.0 (from v1.0) [33]
+ o netrc: use the NETRC environment variable (first) if set [70]
+ o tls: make default TLS version be minimum 1.2 [71]
+ o tool_getparam: add support for `--longopt=value` [69]
  o vquic: drop msh3 [8]
 
 This release includes the following bugfixes:
 
  o build: enable _GNU_SOURCE on GNU/Hurd [27]
+ o build: extend GNU C guards to clang where applicable, fix fallouts [61]
  o build: fix build errors/warnings in rare configurations [7]
+ o build: fix disable-verbose [48]
  o build: link to Apple frameworks required by static wolfSSL [40]
+ o build: tidy up compiler definition for tests [37]
  o cf-https-connect: delete unused declaration [15]
  o cmake: capitalize 'Rustls' in the config summary
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: keep websockets disabled if HTTP is disabled
  o cmake: make `runtests` targets build the curl tool [32]
+ o cmake: omit linking duplicate/unnecessary libs to tests & examples [45]
  o CODE_STYLE: sync with recent `checksrc.pl` updates [49]
+ o config-win32.h: do not use winsock2 `inet_ntop()`/`inet_pton()` [58]
+ o connection: terminate after goaway [62]
  o curl/system.h: fix for GCC 3.3.x and older [38]
  o curl: tool_read_cb fix of segfault [18]
  o curl_addrinfo: drop workaround for old-mingw [14]
@@ -29,21 +39,33 @@ This release includes the following bugfixes:
  o curl_ossl: extend callback table for nghttp3 1.11.0 [46]
  o curl_setup.h: move UWP detection after `config-win32.h` (revert) [51]
  o curl_setup.h: move UWP detection after `config-win32.h` [23]
+ o CURLOPT: bump `CURLFTP*` enums to `long`, drop casts [54]
+ o CURLOPT: drop redundant `long` casts [55]
  o DEPRECATE.md: drop support for Windows XP/2003 [31]
+ o DEPRECATE.md: remove leftover "nothing" [57]
  o DISTROS.md: add Haiku [39]
  o docs: fix name in curl_easy_ssls_export man page [12]
+ o doh: rename symbols to avoid collision with mingw-w64 headers [66]
  o easy handle: check validity on external calls [28]
  o gnutls: some small cleanups [41]
  o hmac: return error if init fails [2]
  o http: const up readonly H2_NON_FIELD [10]
  o http: silence `-Warray-bounds` with gcc 13+ [44]
+ o inet_pton, inet_ntop: drop declarations when unused [59]
  o lib1560: fix memory leak when run without UTF-8 support [17]
+ o memanalyze: fix warnings [22]
  o multi event: remove only announced [25]
+ o multi: don't insert a node into the splay tree twice [68]
+ o multi: fix assert in multi_getsock() [53]
+ o multi: replace remaining EXPIRE_RUN_NOW [67]
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o openssl: some small cleanups [42]
  o pytest: add SOCKS tests and scoring [9]
  o pytest: increase server KeepAliveTimeout [26]
+ o pytest: relax error check on test_07_22 [16]
+ o scripts: enable strict warnings in Perl where missing, fix fallouts [63]
+ o scripts: fix two Perl uninitialized value warnings [60]
  o socks: do_SOCKS5: Fix invalid buffer content on short send [43]
  o test1148: drop redundant `LC_NUMBER=` env setting [13]
  o test1560: set locale/codeset with `LC_ALL` (was: `LANG`), test in CI [19]
@@ -55,6 +77,8 @@ This release includes the following bugfixes:
  o tests: set `CURL_ENTROPY` per test, not globally [35]
  o tests: unset some envs instead of blanking them [4]
  o tidy-up: `Curl_thread_create()` callback return type [20]
+ o tidy-up: move literal to the right side of comparisons [65]
+ o tidy-up: prefer `ifdef`/`ifndef` for single checks [64]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
  o windows: drop unused `curlx/version_win32.h` includes [52]
@@ -72,7 +96,6 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
- o Support for the msh3 HTTP/3 backend
  o Supporting curl builds using VS2008
  o The winbuild build system
  o Windows CE support
@@ -82,12 +105,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ahmad Gani, Ammar Faizi, Caolán McNamara, d1r3ct0r, Dan Fandrich,
-  Daniel Stenberg, Harry Sintonen, Kai Pastor, LoRd_MuldeR,
-  nevakrien on github, Philippe Antoine, Pino Toscano, Qriist on github,
-  renovate[bot], Schrijvers Luc, Sergio Durigan Junior, Stefan Eissing,
-  Tal Regev, Viktor Szakats, yaoy6 on github
-  (20 contributors)
+  Ahmad Gani, Ammar Faizi, Berthin Torres Callañaupa, Caolán McNamara,
+  d1r3ct0r, Dan Fandrich, Daniel Stenberg, David Zhuang, Harry Sintonen,
+  Kai Pastor, LoRd_MuldeR, nevakrien on github, Philippe Antoine, Pino Toscano,
+  Qriist on github, renovate[bot], Schrijvers Luc, Sergio Durigan Junior,
+  Stefan Eissing, Tal Regev, Viktor Szakats, yaoy6 on github
+  (22 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -106,11 +129,13 @@ References to bug reports and discussions on issues:
  [13] = https://curl.se/bug/?i=17993
  [14] = https://curl.se/bug/?i=18038
  [15] = https://curl.se/bug/?i=18036
+ [16] = https://curl.se/bug/?i=18050
  [17] = https://curl.se/bug/?i=17998
  [18] = https://curl.se/bug/?i=17978
  [19] = https://curl.se/bug/?i=17938
  [20] = https://curl.se/bug/?i=17889
  [21] = https://curl.se/bug/?i=17898
+ [22] = https://curl.se/bug/?i=18049
  [23] = https://curl.se/bug/?i=17980
  [24] = https://curl.se/bug/?i=17982
  [25] = https://curl.se/bug/?i=17949
@@ -121,9 +146,11 @@ References to bug reports and discussions on issues:
  [30] = https://curl.se/bug/?i=17963
  [31] = https://curl.se/bug/?i=18016
  [32] = https://curl.se/bug/?i=17967
+ [33] = https://curl.se/bug/?i=17984
  [34] = https://curl.se/bug/?i=17933
  [35] = https://curl.se/bug/?i=17971
  [36] = https://curl.se/bug/?i=17972
+ [37] = https://curl.se/bug/?i=17768
  [38] = https://curl.se/bug/?i=17951
  [39] = https://curl.se/bug/?i=17953
  [40] = https://github.com/microsoft/vcpkg/pull/46444#pullrequestreview-3026575393
@@ -131,9 +158,29 @@ References to bug reports and discussions on issues:
  [42] = https://curl.se/bug/?i=17940
  [43] = https://curl.se/bug/?i=17942
  [44] = https://curl.se/bug/?i=18030
+ [45] = https://curl.se/bug/?i=17696
  [46] = https://curl.se/bug/?i=18026
  [47] = https://curl.se/bug/?i=18019
+ [48] = https://curl.se/bug/?i=18053
  [49] = https://curl.se/bug/?i=18015
  [50] = https://curl.se/bug/?i=18012
  [51] = https://curl.se/bug/?i=18014
  [52] = https://curl.se/bug/?i=18011
+ [53] = https://curl.se/bug/?i=18046
+ [54] = https://curl.se/bug/?i=17797
+ [55] = https://curl.se/bug/?i=17791
+ [57] = https://curl.se/bug/?i=18044
+ [58] = https://curl.se/bug/?i=18045
+ [59] = https://curl.se/bug/?i=18043
+ [60] = https://curl.se/bug/?i=18047
+ [61] = https://curl.se/bug/?i=17955
+ [62] = https://curl.se/bug/?i=17884
+ [63] = https://curl.se/bug/?i=17877
+ [64] = https://curl.se/bug/?i=18018
+ [65] = https://curl.se/bug/?i=17876
+ [66] = https://curl.se/bug/?i=18041
+ [67] = https://curl.se/bug/?i=17883
+ [68] = https://curl.se/bug/?i=18005
+ [69] = https://curl.se/bug/?i=17789
+ [70] = https://curl.se/bug/?i=17712
+ [71] = https://curl.se/bug/?i=17894
