@@ -30,7 +30,7 @@
 #define RETRY_SLEEP_DEFAULT 1000L   /* ms */
 #define RETRY_SLEEP_MAX     600000L /* ms == 10 minutes */
 
-#define MAX_PARALLEL 300 /* conservative */
+#define MAX_PARALLEL 65535
 #define PARALLEL_DEFAULT 50
 
 #endif /* HEADER_CURL_TOOL_MAIN_H */

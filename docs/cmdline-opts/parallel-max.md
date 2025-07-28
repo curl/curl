@@ -19,4 +19,4 @@ Example:
 When asked to do parallel transfers, using --parallel, this option controls
 the maximum amount of transfers to do simultaneously.
 
-The default is 50. 300 is the largest supported value.
+The default is 50. 65535 is the largest supported value.
