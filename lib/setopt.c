@@ -883,7 +883,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_FTP_SSL_CCC:
     if((arg < CURLFTPSSL_CCC_NONE) || (arg >= CURLFTPSSL_CCC_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ftp_ccc = arg;
+    data->set.ftp_ccc = (unsigned char)arg;
     break;
 
   case CURLOPT_FTP_SKIP_PASV_IP:
@@ -900,7 +900,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     if((arg < CURLFTPAUTH_DEFAULT) || (arg >= CURLFTPAUTH_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.ftpsslauth = arg;
+    data->set.ftpsslauth = (unsigned char)arg;
     break;
   case CURLOPT_ACCEPTTIMEOUT_MS:
     /*

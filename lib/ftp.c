@@ -2760,8 +2760,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           ftpc->count1 = 1;
           break;
         default:
-          failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %ld",
-                data->set.ftpsslauth);
+          failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
+                (int)data->set.ftpsslauth);
           return CURLE_UNKNOWN_OPTION; /* we do not know what to do */
         }
         result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",

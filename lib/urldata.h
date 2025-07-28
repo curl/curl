@@ -1456,8 +1456,8 @@ struct UserDefined {
 #ifndef CURL_DISABLE_FTP
   timediff_t accepttimeout;   /* in milliseconds, 0 means no timeout */
   unsigned char ftp_filemethod; /* how to get to a file: curl_ftpfile  */
-  long ftpsslauth;  /* what AUTH XXX to try: curl_ftpauth */
-  long ftp_ccc;     /* FTP CCC options: curl_ftpccc */
+  unsigned char ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
+  unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   struct curl_slist *quote;     /* after connection is established */
