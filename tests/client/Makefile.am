@@ -62,7 +62,7 @@ $(BUNDLE).c: $(top_srcdir)/scripts/mk-unity.pl Makefile.inc $(FIRST_C) $(curlx_c
 	@PERL@ $(top_srcdir)/scripts/mk-unity.pl --include $(curlx_c_lib) --test $(TESTS_C) > $(BUNDLE).c
 
 noinst_PROGRAMS = $(BUNDLE)
-LDADD = $(top_builddir)/lib/libcurl.la
+LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 CLEANFILES = $(BUNDLE).c
 
 CHECKSRC = $(CS_$(V))
