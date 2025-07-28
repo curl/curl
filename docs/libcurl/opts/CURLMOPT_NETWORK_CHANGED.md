@@ -9,7 +9,7 @@ See-also:
   - CURLOPT_FORBID_REUSE (3)
 Protocol:
   - All
-Added-in: 8.15.0
+Added-in: 8.16.0
 ---
 
 # NAME
