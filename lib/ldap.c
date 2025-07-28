@@ -336,7 +336,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   char *user = NULL;
   char *passwd = NULL;
   struct ip_quadruple ipquad;
-  int is_ipv6;
+  bool is_ipv6;
 
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",

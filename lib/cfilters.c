@@ -445,7 +445,7 @@ static CURLcode cf_verboseconnect(struct Curl_easy *data,
 {
   if(Curl_trc_is_verbose(data)) {
     struct ip_quadruple ipquad;
-    int is_ipv6;
+    bool is_ipv6;
     CURLcode result;
 
     result = Curl_conn_cf_get_ip_info(cf, data, &is_ipv6, &ipquad);
@@ -620,7 +620,7 @@ bool Curl_conn_get_ssl_info(struct Curl_easy *data,
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
                                struct connectdata *conn, int sockindex,
-                               int *is_ipv6, struct ip_quadruple *ipquad)
+                               bool *is_ipv6, struct ip_quadruple *ipquad)
 {
   struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
   return Curl_conn_cf_get_ip_info(cf, data, is_ipv6, ipquad);
@@ -874,11 +874,15 @@ cf_get_remote_addr(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  int *is_ipv6, struct ip_quadruple *ipquad)
+                                  bool *is_ipv6, struct ip_quadruple *ipquad)
 {
-  if(cf)
-    return cf->cft->query(cf, data, CF_QUERY_IP_INFO, is_ipv6, ipquad);
-  return CURLE_UNKNOWN_OPTION;
+  CURLcode result = CURLE_UNKNOWN_OPTION;
+  if(cf) {
+    int ipv6 = 0;
+    result = cf->cft->query(cf, data, CF_QUERY_IP_INFO, &ipv6, ipquad);
+    *is_ipv6 = !!ipv6;
+  }
+  return result;
 }
 
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)

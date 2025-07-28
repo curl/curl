@@ -345,7 +345,7 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
 
 CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  int *is_ipv6, struct ip_quadruple *ipquad);
+                                  bool *is_ipv6, struct ip_quadruple *ipquad);
 
 bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data);
@@ -406,7 +406,7 @@ bool Curl_conn_get_ssl_info(struct Curl_easy *data,
 
 CURLcode Curl_conn_get_ip_info(struct Curl_easy *data,
                                struct connectdata *conn, int sockindex,
-                               int *is_ipv6, struct ip_quadruple *ipquad);
+                               bool *is_ipv6, struct ip_quadruple *ipquad);
 
 /**
  * Connection provides multiplexing of easy handles at `socketindex`.

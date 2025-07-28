@@ -72,7 +72,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   CURLcode result;
   const char *client_ip;
   struct ip_quadruple ipquad;
-  int is_ipv6;
+  bool is_ipv6;
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);

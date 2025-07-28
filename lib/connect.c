@@ -1000,7 +1000,7 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         if(Curl_trc_cf_is_verbose(cf, data)) {
           struct ip_quadruple ipquad;
-          int is_ipv6;
+          bool is_ipv6;
           if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
             const char *host;
             int port;

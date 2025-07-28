@@ -1142,7 +1142,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
     if(Curl_trc_is_verbose(data)) {
       struct ip_quadruple ipquad;
-      int is_ipv6;
+      bool is_ipv6;
       result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
       if(result)
         return result;

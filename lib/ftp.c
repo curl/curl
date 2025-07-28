@@ -1797,7 +1797,7 @@ static char *control_address_dup(struct Curl_easy *data,
                                  struct connectdata *conn)
 {
     struct ip_quadruple ipquad;
-    int is_ipv6;
+    bool is_ipv6;
 
   /* Returns the control connection IP address.
      If a proxy tunnel is used, returns the original hostname instead, because
@@ -1931,7 +1931,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
      * here. We do not want to rely on a former host lookup that might've
      * expired now, instead we remake the lookup here and now! */
     struct ip_quadruple ipquad;
-    int is_ipv6;
+    bool is_ipv6;
     const char * const host_name = conn->bits.socksproxy ?
       conn->socks_proxy.host.name : conn->http_proxy.host.name;
 
