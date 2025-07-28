@@ -60,15 +60,15 @@ while(@ARGV) {
     }
 }
 
-my $memsum; # the total number of memory allocated over the lifetime
-my $maxmem; # the high water mark
+my $memsum = 0; # the total number of memory allocated over the lifetime
+my $maxmem = 0; # the high water mark
 
 sub newtotal {
     my ($newtot)=@_;
     # count a max here
 
     if($newtot > $maxmem) {
-        $maxmem= $newtot;
+        $maxmem = $newtot;
     }
 }
 
@@ -199,7 +199,7 @@ while(<$fileh>) {
             my $arg1 = $1;
             my $arg2 = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile, rebuild curl now\n";
             }
