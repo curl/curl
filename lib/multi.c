@@ -3735,30 +3735,40 @@ CURL **curl_multi_get_handles(CURLM *m)
   return a;
 }
 
-CURL_EXTERN curl_off_t curl_multi_get_offt(CURLM *m, CURLMinfo_offt info)
+CURLMcode curl_multi_get_offt(CURLM *m,
+                              CURLMinfo_offt info,
+                              curl_off_t *pvalue)
 {
   struct Curl_multi *multi = m;
 
   if(!GOOD_MULTI_HANDLE(multi))
-    return -1;
+    return CURLM_BAD_HANDLE;
+  if(!pvalue)
+    return CURLM_BAD_FUNCTION_ARGUMENT;
 
   switch(info) {
   case CURLMINFO_XFERS_CURRENT: {
     unsigned int n = Curl_uint_tbl_count(&multi->xfers);
     if(n && multi->admin)
       --n;
-    return (curl_off_t)n;
+    *pvalue = (curl_off_t)n;
+    return CURLM_OK;
   }
   case CURLMINFO_XFERS_RUNNING:
-    return (curl_off_t)Curl_uint_bset_count(&multi->process);
+    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->process);
+    return CURLM_OK;
   case CURLMINFO_XFERS_PENDING:
-    return (curl_off_t)Curl_uint_bset_count(&multi->pending);
+    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->pending);
+    return CURLM_OK;
   case CURLMINFO_XFERS_DONE:
-    return (curl_off_t)Curl_uint_bset_count(&multi->msgsent);
+    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->msgsent);
+    return CURLM_OK;
   case CURLMINFO_XFERS_ADDED:
-    return multi->xfers_total_ever;
+    *pvalue = multi->xfers_total_ever;
+    return CURLM_OK;
   default:
-    return -1;
+    *pvalue = -1;
+    return CURLM_UNKNOWN_OPTION;
   }
 }
 

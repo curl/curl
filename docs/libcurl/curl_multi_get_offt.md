@@ -21,7 +21,9 @@ curl_multi_get_offt - extract information from a multi handle
 ~~~c
 #include <curl/curl.h>
 
-curl_off_t curl_multi_get_offt(CURLM *multi, CURLMinfo_offt info);
+CURLMcode curl_multi_get_offt(CURLM *multi_handle,
+                              CURLMinfo_offt info,
+                              curl_off_t *pvalue);
 ~~~
 
 # DESCRIPTION
@@ -84,7 +86,7 @@ int main(void)
     /* add the transfer */
     curl_multi_add_handle(multi, curl);
 
-    n = curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED);
+    curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED, &n);
     /* on successful add, n is 1 */
   }
 }

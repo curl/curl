@@ -472,11 +472,11 @@ typedef enum {
  *
  * Desc:    Retrieves a numeric value for the `CURLMINFO_*` enums.
  *
- * Returns: the curl_off_t value from a valid multi handle and
- *          supported `info` or -1.
+ * Returns: CULRM_OK or error when value could not be obtained.
  */
-CURL_EXTERN curl_off_t curl_multi_get_offt(CURLM *multi_handle,
-                                           CURLMinfo_offt info);
+CURL_EXTERN CURLMcode curl_multi_get_offt(CURLM *multi_handle,
+                                          CURLMinfo_offt info,
+                                          curl_off_t *pvalue);
 
 /*
  * Name: curl_push_callback

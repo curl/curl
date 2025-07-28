@@ -181,6 +181,8 @@ bool progress_meter(struct GlobalConfig *global,
     struct per_transfer *per;
     curl_off_t all_dlnow = 0;
     curl_off_t all_ulnow = 0;
+    curl_off_t xfers_added = 0;
+    curl_off_t xfers_running = 0;
     bool dlknown = TRUE;
     bool ulknown = TRUE;
     curl_off_t speed = 0;
@@ -270,6 +272,8 @@ bool progress_meter(struct GlobalConfig *global,
     }
     time2str(time_spent, spent);
 
+    (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED, &xfers_added);
+    (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING, &xfers_running);
     fprintf(tool_stderr,
             "\r"
             "%-3s " /* percent downloaded */
@@ -288,8 +292,8 @@ bool progress_meter(struct GlobalConfig *global,
             ulpercen,  /* 3 letters */
             max5data(all_dlnow, buffer[0]),
             max5data(all_ulnow, buffer[1]),
-            curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED),
-            curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING),
+            xfers_added,
+            xfers_running,
             time_total,
             time_spent,
             time_left,

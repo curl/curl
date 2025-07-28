@@ -1416,10 +1416,17 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   CURLMcode mcode;
   bool sleeping = FALSE;
   char *errorbuf;
+  curl_off_t nxfers;
+
   *addedp = FALSE;
   *morep = FALSE;
-  if(curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT) <
-     (curl_off_t)(global->parallel_max*2)) {
+  mcode = curl_multi_get_offt(multi, CURLMINFO_XFERS_CURRENT, &nxfers);
+  if(mcode) {
+    DEBUGASSERT(0);
+    return CURLE_UNKNOWN_OPTION;
+  }
+
+  if(nxfers < (curl_off_t)(global->parallel_max*2)) {
     bool skipped = FALSE;
     do {
       result = create_transfer(global, share, addedp, &skipped);
