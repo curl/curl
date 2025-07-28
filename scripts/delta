@@ -33,6 +33,9 @@
 use strict;
 use warnings;
 
+use POSIX;
+use Time::Piece;
+
 my $start = $ARGV[0] || '';
 
 if($start eq "-h") {
@@ -95,10 +98,10 @@ my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>
 my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
 my $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
 chomp $taggednice;
-my $now=`date +%s`;
+my $now=POSIX::strftime("%s", localtime());
 my $elapsed=$now - $tagged; # number of seconds since tag
-my $total=$now - `date -d 19980320 +%s`;
-my $totalhttpget=$now - `date -d 19961111 +%s`;
+my $total=$now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
+my $totalhttpget=$now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
 my $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
