@@ -29,9 +29,6 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
-use strict;
-use warnings;
-
 my $mallocs=0;
 my $callocs=0;
 my $reallocs=0;
