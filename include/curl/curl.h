@@ -805,6 +805,7 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                         address. added in 7.18.0 */
 
 typedef enum {
+  CURLPROXY_LAST = 8 /* never use */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
 /*
