@@ -119,9 +119,9 @@ if($diffstat =~ /^ *(\d+) files changed, (\d+) insertions\(\+\), (\d+)/) {
 my $numchanges = 0;
 my $numbugfixes = 0;
 my $numcontributors = 0;
+my $mode = 0;
 open(F, "<RELEASE-NOTES");
 while(<F>) {
-    my $mode=0;
     if($_ =~ /following changes:/) {
         $mode=1;
     }
