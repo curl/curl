@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "cli_util.h"
+
 static int verbose_u = 1;
 
 struct transfer_u {

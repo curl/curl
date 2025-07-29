@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "cli_util.h"
+
 static int my_trace(CURL *handle, curl_infotype type,
                     char *data, size_t size, void *userp)
 {

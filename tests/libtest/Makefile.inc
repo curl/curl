@@ -31,7 +31,7 @@ FIRST_H = first.h
 
 # Common files used by test programs
 UTILS_C = memptr.c testutil.c testtrace.c
-UTILS_H = testutil.h testtrace.h unitcheck.h
+UTILS_H = cli_util.h testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
   ../../lib/curlx/warnless.c \
@@ -41,6 +41,18 @@ CURLX_C = \
   ../../lib/curl_threads.c \
   ../../lib/curlx/version_win32.c \
   ../../lib/curlx/wait.c
+
+# All test clients
+TESTS_C = \
+  h2_pausing.c \
+  h2_serverpush.c \
+  h2_upgrade_extreme.c \
+  hx_download.c \
+  hx_upload.c \
+  tls_session_reuse.c \
+  upload_pausing.c \
+  ws_data.c \
+  ws_pingpong.c
 
 # All libtest programs
 TESTS_C = \

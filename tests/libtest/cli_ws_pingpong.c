@@ -25,6 +25,8 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
+#include "cli_util.h"
+
 static CURLcode ping(CURL *curl, const char *send_payload)
 {
   size_t sent;

@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "cli_util.h"
+
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)
 {
@@ -64,7 +66,7 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
         goto cleanup;
       }
       curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
+      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
       curl_easy_setopt(easy, CURLOPT_URL, url);
       curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
       curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);

@@ -25,6 +25,8 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
+#include "cli_util.h"
+
 static CURLcode check_recv(const struct curl_ws_frame *frame,
                            size_t r_offset, size_t nread, size_t exp_len)
 {

@@ -25,6 +25,8 @@
  */
 #include "first.h"
 
+#include "cli_util.h"
+
 static void usage_h2_pausing(const char *msg)
 {
   if(msg)
@@ -76,6 +78,12 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
                 (int)handle->idx, (long)realsize);
   return realsize;
 }
+
+#define CLI_ERR()                                                             \
+  do {                                                                        \
+    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
+    return 2;                                                                 \
+  } while(0)
 
 static int test_h2_pausing(int argc, char *argv[])
 {
@@ -165,30 +173,30 @@ static int test_h2_pausing(int argc, char *argv[])
         != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_DEBUGFUNCTION, debug_cb)
+      curl_easy_setopt(handles[i].h, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
         != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
-      ERR();
+      CLI_ERR();
     }
     curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, (long)http_version);
   }
 
   multi_handle = curl_multi_init();
   if(!multi_handle)
-    ERR();
+    CLI_ERR();
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK)
-      ERR();
+      CLI_ERR();
   }
 
   for(rounds = 0;; rounds++) {
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
     if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK)
-      ERR();
+      CLI_ERR();
 
     if(!still_running) {
       int as_expected = 1;
@@ -222,7 +230,7 @@ static int test_h2_pausing(int argc, char *argv[])
     }
 
     if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK)
-      ERR();
+      CLI_ERR();
 
     /* !checksrc! disable EQUALSNULL 1 */
     while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
@@ -267,8 +275,10 @@ static int test_h2_pausing(int argc, char *argv[])
 
 out:
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    curl_multi_remove_handle(multi_handle, handles[i].h);
-    curl_easy_cleanup(handles[i].h);
+    if(handles[i].h) {
+      curl_multi_remove_handle(multi_handle, handles[i].h);
+      curl_easy_cleanup(handles[i].h);
+    }
   }
 
   curl_slist_free_all(resolve);

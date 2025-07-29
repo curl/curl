@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "cli_util.h"
+
 static int verbose_d = 1;
 
 struct transfer_d {
@@ -140,7 +142,7 @@ static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
   /* please be verbose */
   if(verbose_d) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   }
 
   /* wait for pipe connection to confirm */

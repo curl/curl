@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "cli_util.h"
+
 static int tse_found_tls_session = FALSE;
 
 static size_t write_tse_cb(char *ptr, size_t size, size_t nmemb, void *opaque)

@@ -1,5 +1,5 @@
-#ifndef HEADER_CLIENT_FIRST_H
-#define HEADER_CLIENT_FIRST_H
+#ifndef HEADER_CLIENT_UTIL_H
+#define HEADER_CLIENT_UTIL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,28 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_NO_OLDIES
-
-#include "curl_setup.h"
-
-typedef int (*entry_func_t)(int, char **);
-
-struct entry_s {
-  const char *name;
-  entry_func_t ptr;
-};
-
-extern const struct entry_s s_entries[];
-
-#include <curl/curl.h>
-
-#include <curlx/curlx.h>
-
-#define ERR()                                                                 \
-  do {                                                                        \
-    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
-    return 2;                                                                 \
-  } while(0)
 
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
@@ -67,8 +45,8 @@ static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 /*
 ** callback for CURLOPT_DEBUGFUNCTION
 */
-static int debug_cb(CURL *handle, curl_infotype type,
-                    char *data, size_t size, void *userdata)
+static int cli_debug_cb(CURL *handle, curl_infotype type,
+                        char *data, size_t size, void *userdata)
 {
   FILE *output = stderr;
   static int newl = 0;
@@ -265,4 +243,4 @@ static int cgetopt(int argc, char * const argv[], const char *optstring)
   }
 }
 
-#endif /* HEADER_CLIENT_FIRST_H */
+#endif /* HEADER_CLIENT_UTIL_H */

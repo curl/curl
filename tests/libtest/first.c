@@ -126,8 +126,9 @@ int main(int argc, const char **argv)
   test_argc = argc - 1;
   test_argv = argv + 1;
 
-  if(argc < 3) {
-    curl_mfprintf(stderr, "Pass testname and URL as arguments please\n");
+  if(argc < 2) {
+    curl_mfprintf(stderr, "Pass testname "
+                  "(and URL as argument for numbered tests) please\n");
     return 1;
   }
 
@@ -145,6 +146,8 @@ int main(int argc, const char **argv)
     return 1;
   }
 
+  URL = argc > 2 ? argv[2] : "";
+
   if(argc > 3)
     libtest_arg2 = argv[3];
 
@@ -153,8 +156,6 @@ int main(int argc, const char **argv)
 
   if(argc > 5)
     libtest_arg4 = argv[5];
-
-  URL = argv[2]; /* provide this to the rest */
 
   env = getenv("CURL_TESTNUM");
   if(env)

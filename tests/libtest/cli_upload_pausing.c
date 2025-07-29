@@ -25,6 +25,8 @@
  */
 #include "first.h"
 
+#include "cli_util.h"
+
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
