@@ -1248,7 +1248,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
           return CURLE_FAILED_INIT;
         }
       }
-      *added = TRUE;
       per->config = config;
       per->curl = curl;
       per->urlnum = (unsigned int)u->num;
@@ -1382,6 +1381,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
         state->up++;
         tool_safefree(state->uploadfile); /* clear it to get the next */
       }
+      *added = TRUE;
       break;
     }
 
@@ -2136,10 +2136,8 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
 
   if(!result) {
     result = single_transfer(config, share, added, skipped);
-    if(!*added || result) {
-      *added = FALSE;
+    if(!*added || result)
       single_transfer_cleanup(config);
-    }
   }
 
   return result;
