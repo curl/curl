@@ -25,7 +25,7 @@
 
 #include "http_aws_sigv4.h"
 
-static CURLcode test_unit1979(char *arg)
+static CURLcode test_unit1979(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

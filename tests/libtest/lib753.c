@@ -61,7 +61,7 @@ static size_t t753_hd_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return len;
 }
 
-static bool t753_setup(char *URL, const char *name,
+static bool t753_setup(const char *URL, const char *name,
                        CURL **peasy,
                        struct t753_transfer_status *st)
 {
@@ -96,7 +96,7 @@ test_cleanup:
   return FALSE;
 }
 
-static CURLcode test_lib753(char *URL)
+static CURLcode test_lib753(const char *URL)
 {
   CURL *easy1 = NULL, *easy2 = NULL;
   CURLM *multi = NULL;

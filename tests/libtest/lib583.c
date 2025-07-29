@@ -30,7 +30,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib583(char *URL)
+static CURLcode test_lib583(const char *URL)
 {
   int stillRunning;
   CURLM *multiHandle = NULL;

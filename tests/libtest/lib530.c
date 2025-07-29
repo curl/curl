@@ -279,7 +279,7 @@ static int t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
   return result;
 }
 
-static CURLcode testone(char *URL, int timer_fail_at, int socket_fail_at)
+static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;  CURLM *m = NULL;
@@ -393,7 +393,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib530(char *URL)
+static CURLcode test_lib530(const char *URL)
 {
   CURLcode rc;
   /* rerun the same transfer multiple times and make it fail in different

@@ -34,7 +34,7 @@ struct etest {
   size_t olen;
 };
 
-static CURLcode test_unit1302(char *arg)
+static CURLcode test_unit1302(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   CURLcode rc;

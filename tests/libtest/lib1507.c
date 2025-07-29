@@ -42,7 +42,7 @@ static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode test_lib1507(char *URL)
+static CURLcode test_lib1507(const char *URL)
 {
    static const int MULTI_PERFORM_HANG_TIMEOUT = 60 * 1000;
 

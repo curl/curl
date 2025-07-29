@@ -63,7 +63,7 @@ static curlioerr t547_ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_OK;
 }
 
-static CURLcode test_lib547(char *URL)
+static CURLcode test_lib547(const char *URL)
 {
   CURLcode res;
   CURL *curl;

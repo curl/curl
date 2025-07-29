@@ -92,7 +92,7 @@ static size_t t2302_write_cb(char *buffer, size_t size, size_t nitems, void *p)
 }
 #endif
 
-static CURLcode test_lib2302(char *URL)
+static CURLcode test_lib2302(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;

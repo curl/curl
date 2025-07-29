@@ -30,7 +30,7 @@
 /* struct containing data of a thread */
 struct t586_Tdata {
   CURLSH *share;
-  char *url;
+  const char *url;
 };
 
 struct t586_userdata {
@@ -130,11 +130,10 @@ static void *t586_test_fire(void *ptr)
 }
 
 /* test function */
-static CURLcode test_lib586(char *URL)
+static CURLcode test_lib586(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLSHcode scode = CURLSHE_OK;
-  char *url;
   struct t586_Tdata tdata;
   CURL *curl;
   CURLSH *share;
@@ -208,8 +207,7 @@ static CURLcode test_lib586(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  url = URL;
-  test_setopt(curl, CURLOPT_URL, url);
+  test_setopt(curl, CURLOPT_URL, URL);
   curl_mprintf("CURLOPT_SHARE\n");
   test_setopt(curl, CURLOPT_SHARE, share);
 

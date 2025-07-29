@@ -390,7 +390,7 @@ const char *Curl_netrc_strerror(NETRCcode ret)
  */
 NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
                           char **loginp, char **passwordp,
-                          char *netrcfile)
+                          const char *netrcfile)
 {
   NETRCcode retcode = NETRC_OK;
   char *filealloc = NULL;

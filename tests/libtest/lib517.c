@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib517(char *URL)
+static CURLcode test_lib517(const char *URL)
 {
   struct dcheck {
     const char *input;

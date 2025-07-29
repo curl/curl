@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib2404(char *URL)
+static CURLcode test_lib2404(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {0};
@@ -35,8 +35,8 @@ static CURLcode test_lib2404(char *URL)
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  char *port = libtest_arg3;
-  char *address = libtest_arg2;
+  const char *port = libtest_arg3;
+  const char *address = libtest_arg2;
 
   (void)URL;
 

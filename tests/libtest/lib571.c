@@ -90,7 +90,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   return size * nmemb;
 }
 
-static CURLcode test_lib571(char *URL)
+static CURLcode test_lib571(const char *URL)
 {
   CURLcode res;
   CURL *curl;

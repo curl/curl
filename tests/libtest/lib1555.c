@@ -53,7 +53,7 @@ static int progressCallback(void *arg,
   return 1;
 }
 
-static CURLcode test_lib1555(char *URL)
+static CURLcode test_lib1555(const char *URL)
 {
   CURLcode res = CURLE_OK;
 

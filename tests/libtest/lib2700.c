@@ -209,7 +209,7 @@ static CURLcode recv_frame(CURL *curl, bool *stop)
 }
 #endif
 
-static CURLcode test_lib2700(char *URL)
+static CURLcode test_lib2700(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURLcode res = CURLE_OK;

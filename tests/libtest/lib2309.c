@@ -32,7 +32,7 @@ static size_t cb_ignore(char *buffer, size_t size, size_t nmemb, void *userp)
   return CURL_WRITEFUNC_ERROR;
 }
 
-static CURLcode test_lib2309(char *URL)
+static CURLcode test_lib2309(const char *URL)
 {
   CURL *curl;
   CURL *curldupe;

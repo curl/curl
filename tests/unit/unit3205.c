@@ -25,7 +25,7 @@
 
 #include "vtls/cipher_suite.h"
 
-static CURLcode test_unit3205(char *arg)
+static CURLcode test_unit3205(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

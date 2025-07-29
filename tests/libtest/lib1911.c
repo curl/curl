@@ -29,7 +29,7 @@
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
 
-static CURLcode test_lib1911(char *URL)
+static CURLcode test_lib1911(const char *URL)
 {
   static char testbuf[MAX_INPUT_LENGTH + 2];
 

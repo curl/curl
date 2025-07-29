@@ -56,7 +56,7 @@ static size_t t587_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode t554_test_once(char *URL, bool oldstyle)
+static CURLcode t554_test_once(const char *URL, bool oldstyle)
 {
   static const char testdata[] =
     "this is what we post to the silly web server\n";
@@ -192,7 +192,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib554(char *URL)
+static CURLcode test_lib554(const char *URL)
 {
   CURLcode res;
 

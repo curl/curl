@@ -85,7 +85,7 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   return TRUE;
 }
 
-static CURLcode test_unit1657(char *arg)
+static CURLcode test_unit1657(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -114,7 +114,7 @@ static CURLcode test_unit1657(char *arg)
 
 #else
 
-static CURLcode test_unit1657(char *arg)
+static CURLcode test_unit1657(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   puts("not tested since Curl_x509_getASN1Element() is not built in");

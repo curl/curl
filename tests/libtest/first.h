@@ -34,7 +34,7 @@
 
 #include <curl/curl.h>
 
-typedef CURLcode (*entry_func_t)(char *);
+typedef CURLcode (*entry_func_t)(const char *);
 
 struct entry_s {
   const char *name;
@@ -69,13 +69,13 @@ extern int unitfail; /* for unittests */
   if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK)      \
     goto test_cleanup
 
-extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
-extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
-extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
+extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
+extern const char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
+extern const char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 
 /* argc and argv as passed in to the main() function */
 extern int test_argc;
-extern char **test_argv;
+extern const char **test_argv;
 extern int testnum;
 extern struct curltime tv_test_start; /* for test timing */
 

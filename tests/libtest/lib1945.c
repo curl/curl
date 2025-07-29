@@ -46,7 +46,7 @@ static size_t t1945_write_cb(char *data, size_t n, size_t l, void *userp)
   return n*l;
 }
 
-static CURLcode test_lib1945(char *URL)
+static CURLcode test_lib1945(const char *URL)
 {
   CURL *easy;
   CURLcode res = CURLE_OK;

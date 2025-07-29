@@ -46,7 +46,7 @@ static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return len;
 }
 
-static CURLcode test_lib668(char *URL)
+static CURLcode test_lib668(const char *URL)
 {
   static const char testdata[] = "dummy";
 

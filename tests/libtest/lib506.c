@@ -163,7 +163,7 @@ static void *t506_test_fire(void *ptr)
 }
 
 /* test function */
-static CURLcode test_lib506(char *URL)
+static CURLcode test_lib506(const char *URL)
 {
   CURLcode res;
   CURLSHcode scode = CURLSHE_OK;

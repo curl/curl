@@ -50,11 +50,11 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
   return select(nfds, rd, wr, exc, tv);
 }
 
-char *libtest_arg2 = NULL;
-char *libtest_arg3 = NULL;
-char *libtest_arg4 = NULL;
+const char *libtest_arg2 = NULL;
+const char *libtest_arg3 = NULL;
+const char *libtest_arg4 = NULL;
 int test_argc;
-char **test_argv;
+const char **test_argv;
 int testnum;
 
 struct curltime tv_test_start; /* for test timing */
@@ -98,12 +98,12 @@ char *hexdump(const unsigned char *buf, size_t len)
 }
 
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-  char *URL;
+  const char *URL;
   CURLcode result;
   entry_func_t entry_func;
-  char *entry_name;
+  const char *entry_name;
   char *env;
   size_t tmp;
 

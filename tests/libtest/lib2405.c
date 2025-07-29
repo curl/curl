@@ -74,7 +74,7 @@ static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static CURLcode set_easy(char *URL, CURL *easy, long option)
+static CURLcode set_easy(const char *URL, CURL *easy, long option)
 {
   CURLcode res = CURLE_OK;
 
@@ -116,7 +116,8 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_run(char *URL, long option, unsigned int *max_fd_count)
+static CURLcode test_run(const char *URL, long option,
+                         unsigned int *max_fd_count)
 {
   CURLMcode mc = CURLM_OK;
   CURLM *multi = NULL;
@@ -367,7 +368,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib2405(char *URL)
+static CURLcode test_lib2405(const char *URL)
 {
   CURLcode res = CURLE_OK;
   unsigned int fd_count = 0;

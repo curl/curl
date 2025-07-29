@@ -2028,7 +2028,7 @@ err:
   return 1;
 }
 
-static CURLcode test_lib1560(char *URL)
+static CURLcode test_lib1560(const char *URL)
 {
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 

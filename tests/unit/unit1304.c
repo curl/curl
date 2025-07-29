@@ -33,7 +33,7 @@ static void t1304_stop(char **password, char **login)
   Curl_safefree(*login);
 }
 
-static CURLcode test_unit1304(char *arg)
+static CURLcode test_unit1304(const char *arg)
 {
   char *login = NULL;
   char *password = NULL;
@@ -178,7 +178,7 @@ static CURLcode test_unit1304(char *arg)
 
 #else
 
-static CURLcode test_unit1304(char *arg)
+static CURLcode test_unit1304(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

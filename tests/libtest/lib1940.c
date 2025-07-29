@@ -77,7 +77,7 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
   }
 }
 
-static CURLcode test_lib1940(char *URL)
+static CURLcode test_lib1940(const char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;
