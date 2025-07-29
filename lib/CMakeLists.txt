@@ -55,7 +55,7 @@ if(CURL_BUILD_TESTING)
       ${CSOURCES} > "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/extract-unit-protos" ${CSOURCES}
     VERBATIM)
-  add_custom_target(curlu-unitprotos ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h")
+  add_custom_target(curlu-unitprotos DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h")
 endif()
 
 ## Library definition
