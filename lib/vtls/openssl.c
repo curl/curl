@@ -1452,7 +1452,7 @@ static int engineload(struct Curl_easy *data,
   return 1;
 }
 #else
-#define engineload()
+#define engineload(a,b,c) 0
 #endif
 
 #ifdef OPENSSL_HAS_PROVIDERS
@@ -1559,7 +1559,7 @@ static int pkcs12load(struct Curl_easy *data,
       return 0;
     }
 
-    if(BIO_read_filename(cert_bio, cert_file) <= 0) {
+    if(BIO_read_filename(cert_bio, CURL_UNCONST(cert_file)) <= 0) {
       failf(data, "could not open PKCS12 file '%s'", cert_file);
       BIO_free(cert_bio);
       return 0;
