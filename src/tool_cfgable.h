@@ -74,7 +74,7 @@ struct State {
   curl_off_t infilenum; /* number of files to upload */
   curl_off_t up;        /* upload file counter within a single upload glob */
   curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
-  curl_off_t li;
+  curl_off_t li;        /* index for globbed URLs */
 };
 
 struct OperationConfig {

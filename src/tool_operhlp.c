@@ -45,8 +45,8 @@ void clean_getout(struct OperationConfig *config)
       node = next;
     }
     config->url_list = NULL;
+    single_transfer_cleanup(config);
   }
-  single_transfer_cleanup(config);
 }
 
 bool output_expected(const char *url, const char *uploadfile)

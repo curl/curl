@@ -347,15 +347,16 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 
 void single_transfer_cleanup(struct OperationConfig *config)
 {
-  if(config) {
-    struct State *state = &config->state;
-    /* Free list of remaining URLs */
-    glob_cleanup(&state->urls);
-    state->outfiles = NULL;
-    tool_safefree(state->uploadfile);
-    /* Free list of globbed upload files */
-    glob_cleanup(&state->inglob);
-  }
+  struct State *state;
+  DEBUGASSERT(config);
+
+  state = &config->state;
+  /* Free list of remaining URLs */
+  glob_cleanup(&state->urls);
+  state->outfiles = NULL;
+  tool_safefree(state->uploadfile);
+  /* Free list of globbed upload files */
+  glob_cleanup(&state->inglob);
 }
 
 static CURLcode retrycheck(struct OperationConfig *config,
@@ -1126,46 +1127,31 @@ static CURLcode single_transfer(struct OperationConfig *config,
         httpgetfields = state->httpgetfields = config->postfields;
         config->postfields = NULL;
         if(SetHTTPrequest(config, (config->no_body ? TOOL_HTTPREQ_HEAD :
-                                   TOOL_HTTPREQ_GET), &config->httpreq)) {
-          result = CURLE_FAILED_INIT;
-        }
+                                   TOOL_HTTPREQ_GET), &config->httpreq))
+          return CURLE_FAILED_INIT;
       }
     }
-    else {
-      if(SetHTTPrequest(config, TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
-        result = CURLE_FAILED_INIT;
-    }
-    if(result)
-      goto fail;
+    else if(SetHTTPrequest(config, TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
+      return CURLE_FAILED_INIT;
   }
+
+  result = set_cert_types(config);
+  if(result)
+    return result;
+
   if(!state->urlnode) {
     /* first time caller, setup things */
     state->urlnode = config->url_list;
     state->infilenum = 1;
   }
 
-  result = set_cert_types(config);
-  if(result)
-    goto fail;
+  while((urlnode = state->urlnode)) {
 
-  for(; state->urlnode; state->urlnode = urlnode->next) {
-    static bool warn_more_options = FALSE;
-    curl_off_t urlnum;
-
-    urlnode = state->urlnode;
     /* urlnode->url is the full URL or NULL */
     if(!urlnode->url) {
-      /* This node has no URL. Free node data without destroying the
-         node itself nor modifying next pointer and continue to next */
-      urlnode->outset = urlnode->urlset = urlnode->useremote =
-        urlnode->uploadset = urlnode->noupload = urlnode->noglob = FALSE;
-      state->up = 0;
-      if(!warn_more_options) {
-        /* only show this once */
-        warnf(config->global, "Got more output options than URLs");
-        warn_more_options = TRUE;
-      }
-      continue; /* next URL please */
+      /* This node has no URL. End of the road. */
+      warnf(config->global, "Got more output options than URLs");
+      break;
     }
 
     /* save outfile pattern before expansion */
@@ -1178,7 +1164,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
                         (!global->silent || global->showerror) ?
                         tool_stderr : NULL);
       if(result)
-        break;
+        return result;
     }
 
 
@@ -1196,7 +1182,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
         }
       }
       if(result)
-        break;
+        return result;
     }
 
     if(!state->urlnum) {
@@ -1207,14 +1193,11 @@ static CURLcode single_transfer(struct OperationConfig *config,
                           (!global->silent || global->showerror) ?
                           tool_stderr : NULL);
         if(result)
-          break;
-        urlnum = state->urlnum;
+          return result;
       }
       else
-        urlnum = 1; /* without globbing, this is a single URL */
+        state->urlnum = 1; /* without globbing, this is a single URL */
     }
-    else
-      urlnum = state->urlnum;
 
     if(state->up < state->infilenum) {
       struct per_transfer *per = NULL;
@@ -1234,7 +1217,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       if(config->etag_compare_file) {
         result = etag_compare(config);
         if(result)
-          break;
+          return result;
       }
 
       if(config->etag_save_file) {
@@ -1253,21 +1236,16 @@ static CURLcode single_transfer(struct OperationConfig *config,
         curl_easy_cleanup(curl);
         if(etag_save->fopened)
           fclose(etag_save->stream);
-        break;
+        return result;
       }
       per->etag_save = etag_first; /* copy the whole struct */
       if(state->uploadfile) {
         per->uploadfile = strdup(state->uploadfile);
-        if(!per->uploadfile) {
-          curl_easy_cleanup(curl);
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
-        if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
+        if(!per->uploadfile ||
+           SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
           tool_safefree(per->uploadfile);
           curl_easy_cleanup(curl);
-          result = CURLE_FAILED_INIT;
-          break;
+          return CURLE_FAILED_INIT;
         }
       }
       *added = TRUE;
@@ -1283,7 +1261,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       if(config->headerfile) {
         result = setup_headerfile(config, per, heads);
         if(result)
-          break;
+          return result;
       }
       hdrcbdata = &per->hdrcbdata;
 
@@ -1299,26 +1277,22 @@ static CURLcode single_transfer(struct OperationConfig *config,
       if(state->urls) {
         result = glob_next_url(&per->url, state->urls);
         if(result)
-          break;
+          return result;
       }
       else if(!state->li) {
         per->url = strdup(urlnode->url);
-        if(!per->url) {
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
+        if(!per->url)
+          return CURLE_OUT_OF_MEMORY;
       }
-      else
+      else {
         per->url = NULL;
-      if(!per->url)
         break;
+      }
 
       if(state->outfiles) {
         per->outfile = strdup(state->outfiles);
-        if(!per->outfile) {
-          result = CURLE_OUT_OF_MEMORY;
-          break;
-        }
+        if(!per->outfile)
+          return CURLE_OUT_OF_MEMORY;
       }
 
       outs->out_null = urlnode->out_null;
@@ -1326,7 +1300,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
           (per->outfile && strcmp("-", per->outfile)))) {
         result = setup_outfile(config, per, outs, skipped);
         if(result)
-          break;
+          return result;
       }
 
       if(per->uploadfile) {
@@ -1340,7 +1314,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
           result = add_file_name_to_url(per->curl, &per->url,
                                         per->uploadfile);
           if(result)
-            break;
+            return result;
         }
       }
 
@@ -1363,7 +1337,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
         result = append2query(config, per,
                               httpgetfields ? httpgetfields : config->query);
         if(result)
-          break;
+          return result;
       }
 
       if((!per->outfile || !strcmp(per->outfile, "-")) &&
@@ -1390,7 +1364,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
 
       result = config2setopts(config, per, curl, share);
       if(result)
-        break;
+        return result;
 
       /* initialize retry vars for loop below */
       per->retry_sleep_default = (config->retry_delay) ?
@@ -1401,13 +1375,14 @@ static CURLcode single_transfer(struct OperationConfig *config,
 
       state->li++;
       /* Here's looping around each globbed URL */
-      if(state->li >= urlnum) {
+      if(state->li >= state->urlnum) {
         state->li = 0;
         state->urlnum = 0; /* forced reglob of URLs */
         glob_cleanup(&state->urls);
         state->up++;
         tool_safefree(state->uploadfile); /* clear it to get the next */
       }
+      break;
     }
     else {
       /* Free this URL node data without destroying the
@@ -1422,16 +1397,10 @@ static CURLcode single_transfer(struct OperationConfig *config,
       /* Free list of globbed upload files */
       glob_cleanup(&state->inglob);
       state->up = 0;
-      continue;
+      state->urlnode = urlnode->next; /* next node */
     }
-    break;
   }
   state->outfiles = NULL;
-fail:
-  if(!*added || result) {
-    *added = FALSE;
-    single_transfer_cleanup(config);
-  }
   return result;
 }
 
@@ -2033,7 +2002,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     /* returncode errors have priority */
     result = returncode;
 
-  if(result)
+  if(result && global->current)
     single_transfer_cleanup(global->current);
 
   return result;
@@ -2166,8 +2135,13 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
       result = cacertpaths(config);
   }
 
-  if(!result)
+  if(!result) {
     result = single_transfer(config, share, added, skipped);
+    if(!*added || result) {
+      *added = FALSE;
+      single_transfer_cleanup(config);
+    }
+  }
 
   return result;
 }
