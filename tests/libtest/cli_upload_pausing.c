@@ -176,10 +176,11 @@ static int test_cli_upload_pausing(const char *URL)
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   if(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
-     != CURLE_OK ||
-     curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK)
-    ERR();
+     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb) != CURLE_OK ||
+     curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK) {
+    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");
+    return 2;
+  }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
