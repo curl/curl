@@ -94,7 +94,7 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
   return easy;
 }
 
-static int test_tls_session_reuse(int argc, char *argv[])
+static int test_tls_session_reuse(char *URL)
 {
   const char *url;
   CURLM *multi = NULL;
@@ -111,17 +111,19 @@ static int test_tls_session_reuse(int argc, char *argv[])
   int http_version = CURL_HTTP_VERSION_1_1;
   int exitcode = 1;
 
-  if(argc != 3) {
-    curl_mfprintf(stderr, "%s proto URL\n", argv[0]);
+  (void)URL;
+
+  if(test_argc != 3) {
+    curl_mfprintf(stderr, "%s proto URL\n", test_argv[0]);
     return 2;
   }
 
-  if(!strcmp("h2", argv[1]))
+  if(!strcmp("h2", test_argv[1]))
     http_version = CURL_HTTP_VERSION_2;
-  else if(!strcmp("h3", argv[1]))
+  else if(!strcmp("h3", test_argv[1]))
     http_version = CURL_HTTP_VERSION_3ONLY;
 
-  url = argv[2];
+  url = test_argv[2];
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");

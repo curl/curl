@@ -177,7 +177,7 @@ static void usage_hx_download(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_hx_download(int argc, char *argv[])
+static int test_hx_download(char *URL)
 {
   CURLM *multi_handle;
   struct CURLMsg *m;
@@ -199,7 +199,9 @@ static int test_hx_download(int argc, char *argv[])
   int fresh_connect = 0;
   int result = 0;
 
-  while((ch = cgetopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
@@ -262,18 +264,18 @@ static int test_hx_download(int argc, char *argv[])
       goto cleanup;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_hx_download("not enough arguments");
     result = 2;
     goto cleanup;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   if(resolve)
     host = curl_slist_append(NULL, resolve);

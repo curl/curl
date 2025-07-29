@@ -142,7 +142,7 @@ out:
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_h2_serverpush(int argc, char *argv[])
+static int test_h2_serverpush(char *URL)
 {
   CURL *easy;
   CURLM *multi_handle;
@@ -150,11 +150,13 @@ static int test_h2_serverpush(int argc, char *argv[])
   struct CURLMsg *m;
   const char *url;
 
-  if(argc != 2) {
+  (void)URL;
+
+  if(test_argc != 2) {
     curl_mfprintf(stderr, "need URL as argument\n");
     return 2;
   }
-  url = argv[1];
+  url = test_argv[1];
 
   multi_handle = curl_multi_init();
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);

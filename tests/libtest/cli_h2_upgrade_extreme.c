@@ -33,7 +33,7 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static int test_h2_upgrade_extreme(int argc, char *argv[])
+static int test_h2_upgrade_extreme(char *URL)
 {
   const char *url;
   CURLM *multi = NULL;
@@ -45,12 +45,14 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
   char range[128];
   int exitcode = 1;
 
-  if(argc != 2) {
-    curl_mfprintf(stderr, "%s URL\n", argv[0]);
+  (void)URL;
+
+  if(test_argc != 2) {
+    curl_mfprintf(stderr, "%s URL\n", test_argv[0]);
     return 2;
   }
 
-  url = argv[1];
+  url = test_argv[1];
   multi = curl_multi_init();
   if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init failed\n");

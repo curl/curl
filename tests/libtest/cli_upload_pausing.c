@@ -82,7 +82,7 @@ static void usage_upload_pausing(const char *msg)
   );
 }
 
-static int test_upload_pausing(int argc, char *argv[])
+static int test_upload_pausing(char *URL)
 {
   CURL *curl;
   CURLcode rc = CURLE_OK;
@@ -93,7 +93,9 @@ static int test_upload_pausing(int argc, char *argv[])
   long http_version = CURL_HTTP_VERSION_1_1;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "V:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "V:")) != -1) {
     switch(ch) {
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
@@ -113,14 +115,14 @@ static int test_upload_pausing(int argc, char *argv[])
       return 1;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_upload_pausing("not enough arguments");
     return 2;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time");

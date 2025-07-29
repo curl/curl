@@ -91,19 +91,21 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 
 #endif
 
-static int test_ws_pingpong(int argc, char *argv[])
+static int test_ws_pingpong(char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url, *payload;
 
-  if(argc != 3) {
+  (void)URL;
+
+  if(test_argc != 3) {
     curl_mfprintf(stderr, "usage: ws-pingpong url payload\n");
     return 2;
   }
-  url = argv[1];
-  payload = argv[2];
+  url = test_argv[1];
+  payload = test_argv[2];
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -127,8 +129,7 @@ static int test_ws_pingpong(int argc, char *argv[])
   return (int)res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
-  (void)argc;
-  (void)argv;
+  (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
 #endif /* CURL_DISABLE_WEBSOCKETS */

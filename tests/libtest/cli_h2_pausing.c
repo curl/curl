@@ -85,7 +85,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
     return 2;                                                                 \
   } while(0)
 
-static int test_h2_pausing(int argc, char *argv[])
+static int test_h2_pausing(char *URL)
 {
   struct handle handles[2];
   CURLM *multi_handle;
@@ -103,7 +103,9 @@ static int test_h2_pausing(int argc, char *argv[])
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "hV:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "hV:")) != -1) {
     switch(ch) {
     case 'h':
       usage_h2_pausing(NULL);
@@ -126,14 +128,14 @@ static int test_h2_pausing(int argc, char *argv[])
       return 1;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     curl_mfprintf(stderr, "ERROR: need URL as argument\n");
     return 2;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");

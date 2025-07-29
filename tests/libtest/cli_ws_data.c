@@ -177,7 +177,7 @@ static void usage_ws_data(const char *msg)
 
 #endif
 
-static int test_ws_data(int argc, char *argv[])
+static int test_ws_data(char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
@@ -186,7 +186,9 @@ static int test_ws_data(int argc, char *argv[])
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "c:hm:M:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "c:hm:M:")) != -1) {
     switch(ch) {
     case 'h':
       usage_ws_data(NULL);
@@ -207,8 +209,8 @@ static int test_ws_data(int argc, char *argv[])
       goto cleanup;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
   if(!plen_max)
     plen_max = plen_min;
@@ -220,12 +222,12 @@ static int test_ws_data(int argc, char *argv[])
     goto cleanup;
   }
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_ws_data(NULL);
     res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -251,8 +253,7 @@ cleanup:
   return (int)res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
-  (void)argc;
-  (void)argv;
+  (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
 #endif /* CURL_DISABLE_WEBSOCKETS */
