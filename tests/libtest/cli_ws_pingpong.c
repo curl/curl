@@ -101,7 +101,7 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
   (void)URL;
 
   if(test_argc != 3) {
-    curl_mfprintf(stderr, "usage: ws-pingpong url payload\n");
+    curl_mfprintf(stderr, "need args: URL payload\n");
     return 2;
   }
   url = test_argv[1];

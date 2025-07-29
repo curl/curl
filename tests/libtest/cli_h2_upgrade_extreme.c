@@ -35,7 +35,6 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
 
 static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
-  const char *url;
   CURLM *multi = NULL;
   CURL *easy;
   CURLMcode mc;
@@ -45,14 +44,11 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   char range[128];
   CURLcode exitcode = 1;
 
-  (void)URL;
-
-  if(test_argc != 2) {
-    curl_mfprintf(stderr, "%s URL\n", test_argv[0]);
+  if(!URL) {
+    curl_mfprintf(stderr, "need URL as argument\n");
     return 2;
   }
 
-  url = test_argv[1];
   multi = curl_multi_init();
   if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init failed\n");
@@ -69,7 +65,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
       }
       curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
-      curl_easy_setopt(easy, CURLOPT_URL, url);
+      curl_easy_setopt(easy, CURLOPT_URL, URL);
       curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
       curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
       curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);

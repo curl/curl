@@ -117,15 +117,11 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
-  const char *url;
 
-  (void)URL;
-
-  if(test_argc != 2) {
+  if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
     return 2;
   }
-  url = test_argv[1];
 
   multi_handle = curl_multi_init();
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
@@ -133,7 +129,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-  if(setup_h2_serverpush(easy, url)) {
+  if(setup_h2_serverpush(easy, URL)) {
     fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
     return 1;

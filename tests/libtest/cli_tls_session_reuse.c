@@ -114,7 +114,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   (void)URL;
 
   if(test_argc != 3) {
-    curl_mfprintf(stderr, "%s proto URL\n", test_argv[0]);
+    curl_mfprintf(stderr, "need args: proto URL\n");
     return 2;
   }
 
