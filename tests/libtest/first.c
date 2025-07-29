@@ -172,7 +172,7 @@ CURLcode ws_send_ping(CURL *curl, const char *send_payload)
 }
 
 /* just close the connection */
-void websocket_close(CURL *curl)
+void ws_close(CURL *curl)
 {
   size_t sent;
   CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);

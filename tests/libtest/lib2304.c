@@ -84,7 +84,7 @@ static void t2304_websocket(CURL *curl)
     }
     curlx_wait_ms(2000);
   } while(i++ < 10);
-  websocket_close(curl);
+  ws_close(curl);
 }
 #endif
 

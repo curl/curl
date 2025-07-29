@@ -158,7 +158,7 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
 out:
   if(!r)
-    websocket_close(curl);
+    ws_close(curl);
   free(send_buf);
   free(recv_buf);
   return r;

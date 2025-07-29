@@ -71,10 +71,10 @@ static CURLcode pingpong(CURL *curl, const char *payload)
       curlx_wait_ms(100);
       continue;
     }
-    websocket_close(curl);
+    ws_close(curl);
     return res;
   }
-  websocket_close(curl);
+  ws_close(curl);
   return CURLE_RECV_ERROR;
 }
 

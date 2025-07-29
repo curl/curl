@@ -91,7 +91,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode ws_send_ping(CURL *curl, const char *send_payload);
 /* just close the connection */
-void websocket_close(CURL *curl);
+void ws_close(CURL *curl);
 #endif
 
 /*
