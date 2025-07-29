@@ -47,7 +47,7 @@ extern FILE *tool_stderr;
 
 #include <curl/curl.h> /* external interface */
 
-#include <curlx/curlx.h>
+#include "curlx/curlx.h"
 
 /*
  * Platform specific stuff.

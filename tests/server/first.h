@@ -64,7 +64,7 @@ extern const struct entry_s s_entries[];
 #include <netdb.h>
 #endif
 
-#include <curlx/curlx.h>
+#include "curlx/curlx.h"
 
 /* adjust for old MSVC */
 #if defined(_MSC_VER) && (_MSC_VER < 1900)

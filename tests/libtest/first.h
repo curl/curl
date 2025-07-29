@@ -45,7 +45,7 @@ extern const struct entry_s s_entries[];
 
 extern int unitfail; /* for unittests */
 
-#include <curlx/curlx.h>
+#include "curlx/curlx.h"
 
 #ifdef HAVE_SYS_SELECT_H
 /* since so many tests use select(), we can just as well include it here */
