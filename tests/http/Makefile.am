@@ -72,7 +72,7 @@ clean-local:
 	rm -rf *.pyc __pycache__
 	rm -rf gen
 
-check: clients
+check: libtests
 
-clients:
-	@(cd ../client; $(MAKE) check)
+libtests:
+	@(cd ../libtests; $(MAKE) check)
