@@ -25,9 +25,9 @@
  ***************************************************************************/
 #include "first.h"
 
-void libtest_debug_dump(const char *timebuf, const char *text,
-                        FILE *stream, const unsigned char *ptr,
-                        size_t size, int nohex);
+void debug_dump(const char *timebuf, const char *text,
+                FILE *stream, const unsigned char *ptr,
+                size_t size, int nohex);
 
 struct libtest_trace_cfg {
   int tracetime;  /* 0 represents FALSE, anything else TRUE */
