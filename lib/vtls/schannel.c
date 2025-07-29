@@ -73,14 +73,6 @@
 #define SCH_DEV(x) do { } while(0)
 #endif
 
-#ifndef BCRYPT_CHAIN_MODE_CCM
-#define BCRYPT_CHAIN_MODE_CCM L"ChainingModeCCM"
-#endif
-
-#ifndef BCRYPT_CHAIN_MODE_GCM
-#define BCRYPT_CHAIN_MODE_GCM L"ChainingModeGCM"
-#endif
-
 #ifndef BCRYPT_AES_ALGORITHM
 #define BCRYPT_AES_ALGORITHM L"AES"
 #endif
