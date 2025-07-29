@@ -21,10 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "testtrace.h"
-#include "testutil.h"
-#include "memdebug.h"
+#include "first.h"
 
+#include "testtrace.h"
+
+#include "memdebug.h"
 
 static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
                                char *url_3033, int index)
@@ -96,7 +97,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib3033(char *URL)
+static CURLcode test_lib3033(const char *URL)
 {
   CURL *curl = NULL;
   CURLM *multi = NULL;
