@@ -29,11 +29,6 @@
 int cli_debug_cb(CURL *handle, curl_infotype type,
                  char *data, size_t size, void *userp);
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-/* just close the connection */
-void websocket_close(CURL *curl);
-#endif
-
 extern int coptind;
 extern const char *coptarg;
 

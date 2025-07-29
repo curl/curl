@@ -97,6 +97,17 @@ char *hexdump(const unsigned char *buf, size_t len)
   return dump;
 }
 
+#ifndef CURL_DISABLE_WEBSOCKETS
+/* just close the connection */
+void websocket_close(CURL *curl)
+{
+  size_t sent;
+  CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  curl_mfprintf(stderr,
+                "ws: curl_ws_send returned %u, sent %u\n", result, (int)sent);
+}
+#endif /* CURL_DISABLE_WEBSOCKETS */
+
 
 int main(int argc, const char **argv)
 {

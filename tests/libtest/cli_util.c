@@ -117,18 +117,6 @@ int cli_debug_cb(CURL *handle, curl_infotype type,
   return 0;
 }
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-/* just close the connection */
-void websocket_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %u\n",
-                (int)result, (int)sent);
-}
-#endif /* CURL_DISABLE_WEBSOCKETS */
-
 int coptind;
 const char *coptarg;
 

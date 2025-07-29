@@ -80,16 +80,6 @@ static CURLcode recv_any(CURL *curl)
   return CURLE_OK;
 }
 
-/* just close the connection */
-static void t2304_websocket_close(CURL *curl)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr,
-                "ws: curl_ws_send returned %d, sent %u\n", result, (int)sent);
-}
-
 static void t2304_websocket(CURL *curl)
 {
   int i = 0;
@@ -106,7 +96,7 @@ static void t2304_websocket(CURL *curl)
     }
     curlx_wait_ms(2000);
   } while(i++ < 10);
-  t2304_websocket_close(curl);
+  websocket_close(curl);
 }
 #endif
 
