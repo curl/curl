@@ -29,7 +29,7 @@
  * Get a single URL without select().
  */
 
-static CURLcode test_lib659(char *URL)
+static CURLcode test_lib659(const char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;

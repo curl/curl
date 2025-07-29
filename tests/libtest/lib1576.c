@@ -47,7 +47,7 @@ static int t1576_seek_callback(void *ptr, curl_off_t offset, int origin)
   return CURL_SEEKFUNC_OK;
 }
 
-static CURLcode test_lib1576(char *URL)
+static CURLcode test_lib1576(const char *URL)
 {
   CURLcode res;
   CURL *curl;

@@ -72,7 +72,7 @@ static void t1663_parse(
   free(host);
 }
 
-static CURLcode test_unit1663(char *arg)
+static CURLcode test_unit1663(const char *arg)
 {
   UNITTEST_BEGIN(t1663_setup())
 

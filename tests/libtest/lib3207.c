@@ -169,7 +169,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 
 #endif
 
-static CURLcode test_lib3207(char *URL)
+static CURLcode test_lib3207(const char *URL)
 {
   CURLcode res = CURLE_OK;
   size_t i;

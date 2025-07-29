@@ -30,7 +30,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib549(char *URL)
+static CURLcode test_lib549(const char *URL)
 {
   CURLcode res;
   CURL *curl;

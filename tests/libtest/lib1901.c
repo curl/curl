@@ -47,7 +47,7 @@ static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return 0;
 }
 
-static CURLcode test_lib1901(char *URL)
+static CURLcode test_lib1901(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

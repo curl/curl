@@ -27,7 +27,7 @@
 
 /* Test CURLINFO_FILETIME */
 
-static CURLcode test_lib1534(char *URL)
+static CURLcode test_lib1534(const char *URL)
 {
   CURL *curl, *dupe = NULL;
   long filetime;

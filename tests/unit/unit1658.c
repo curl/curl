@@ -114,7 +114,7 @@ static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
   }
 }
 
-static CURLcode test_unit1658(char *arg)
+static CURLcode test_unit1658(const char *arg)
 {
   UNITTEST_BEGIN(t1658_setup())
 
@@ -543,7 +543,7 @@ static CURLcode test_unit1658(char *arg)
 
 #else /* CURL_DISABLE_DOH or not HTTPSRR enabled */
 
-static CURLcode test_unit1658(char *arg)
+static CURLcode test_unit1658(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

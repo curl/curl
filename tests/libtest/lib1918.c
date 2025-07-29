@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1918(char *URL)
+static CURLcode test_lib1918(const char *URL)
 {
   const struct curl_easyoption *o;
   (void)URL;

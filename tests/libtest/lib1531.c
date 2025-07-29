@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1531(char *URL)
+static CURLcode test_lib1531(const char *URL)
 {
   static char const testData[] = ".abc\0xyz";
   static curl_off_t const testDataSize = sizeof(testData) - 1;

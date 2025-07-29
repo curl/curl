@@ -71,7 +71,7 @@ static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;
 }
 
-static CURLcode test_lib1520(char *URL)
+static CURLcode test_lib1520(const char *URL)
 {
   CURLcode res;
   CURL *curl;

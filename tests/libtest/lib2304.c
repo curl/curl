@@ -110,7 +110,7 @@ static void t2304_websocket(CURL *curl)
 }
 #endif
 
-static CURLcode test_lib2304(char *URL)
+static CURLcode test_lib2304(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;

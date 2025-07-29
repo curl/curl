@@ -32,7 +32,7 @@
     }                                                            \
   } while(0)
 
-static CURLcode test_lib1301(char *URL)
+static CURLcode test_lib1301(const char *URL)
 {
   int rc;
   (void)URL;

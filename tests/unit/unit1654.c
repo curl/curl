@@ -26,7 +26,7 @@
 #include "urldata.h"
 #include "altsvc.h"
 
-static CURLcode test_unit1654(char *arg)
+static CURLcode test_unit1654(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

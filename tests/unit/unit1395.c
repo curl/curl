@@ -25,7 +25,7 @@
 #include "memdebug.h"
 #include "unitprotos.h"
 
-static CURLcode test_unit1395(char *arg)
+static CURLcode test_unit1395(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

@@ -44,7 +44,7 @@ static size_t t1527_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return strlen(t1527_testdata);
 }
 
-static CURLcode test_lib1527(char *URL)
+static CURLcode test_lib1527(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;

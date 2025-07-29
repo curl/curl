@@ -100,7 +100,7 @@ char *hexdump(const unsigned char *buf, size_t len)
 
 int main(int argc, char **argv)
 {
-  char *URL;
+  const char *URL;
   CURLcode result;
   entry_func_t entry_func;
   char *entry_name;

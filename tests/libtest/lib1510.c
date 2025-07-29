@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1510(char *URL)
+static CURLcode test_lib1510(const char *URL)
 {
   static const int NUM_URLS = 4;
 

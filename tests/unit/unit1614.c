@@ -25,7 +25,7 @@
 
 #include "noproxy.h"
 
-static CURLcode test_unit1614(char *arg)
+static CURLcode test_unit1614(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

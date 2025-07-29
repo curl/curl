@@ -45,7 +45,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   return CURL_SOCKOPT_OK;
 }
 
-static CURLcode test_lib1522(char *URL)
+static CURLcode test_lib1522(const char *URL)
 {
   static char g_Data[40 * 1024]; /* POST 40KB */
 

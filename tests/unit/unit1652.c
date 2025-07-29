@@ -82,7 +82,7 @@ static int verify(const char *info, const char *two)
   return strncmp(info, two, nl - info);
 }
 
-static CURLcode test_unit1652(char *arg)
+static CURLcode test_unit1652(const char *arg)
 {
   struct Curl_easy *easy;
 

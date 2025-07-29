@@ -131,7 +131,7 @@ test_cleanup:
 /* for debugging: */
 /* #define SINGLETEST 9 */
 
-static CURLcode test_lib1156(char *URL)
+static CURLcode test_lib1156(const char *URL)
 {
   CURLcode res;
   CURL *curl;

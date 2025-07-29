@@ -44,7 +44,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib526(char *URL)
+static CURLcode test_lib526(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES];

@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1508(char *URL)
+static CURLcode test_lib1508(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLM *m = NULL;

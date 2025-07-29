@@ -32,7 +32,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1512(char *URL)
+static CURLcode test_lib1512(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[2] = {NULL, NULL};

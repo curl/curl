@@ -25,7 +25,7 @@
 
 #include "curl_md5.h"
 
-static CURLcode test_unit1601(char *arg)
+static CURLcode test_unit1601(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

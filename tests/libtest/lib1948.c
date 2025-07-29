@@ -40,7 +40,7 @@ static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return tocopy;
 }
 
-static CURLcode test_lib1948(char *URL)
+static CURLcode test_lib1948(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

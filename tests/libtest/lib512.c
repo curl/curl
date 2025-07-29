@@ -28,7 +28,7 @@
 /* Test case code based on source in a bug report filed by James Bursa on
    28 Apr 2004 */
 
-static CURLcode test_lib512(char *URL)
+static CURLcode test_lib512(const char *URL)
 {
   CURLcode code;
   int rc = 99;

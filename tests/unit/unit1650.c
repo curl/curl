@@ -25,7 +25,7 @@
 
 #include "doh.h"
 
-static CURLcode test_unit1650(char *arg)
+static CURLcode test_unit1650(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

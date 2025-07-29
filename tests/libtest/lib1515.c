@@ -35,7 +35,7 @@
 
 #define DNS_TIMEOUT 1L
 
-static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
+static CURLcode do_one_request(CURLM *m, const char *URL, char *resolve)
 {
   CURL *curls;
   struct curl_slist *resolve_list = NULL;
@@ -100,13 +100,12 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib1515(char *URL)
+static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
   char *address = libtest_arg2;
   char *port = libtest_arg3;
-  char *path = URL;
   char dns_entry[256];
   int i;
   int count = 2;
@@ -123,7 +122,7 @@ static CURLcode test_lib1515(char *URL)
   for(i = 1; i <= count; i++) {
     char target_url[256];
     curl_msnprintf(target_url, sizeof(target_url),
-                   "http://testserver.example.com:%s/%s%04d", port, path, i);
+                   "http://testserver.example.com:%s/%s%04d", port, URL, i);
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);

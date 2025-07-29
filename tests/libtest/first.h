@@ -34,7 +34,7 @@
 
 #include <curl/curl.h>
 
-typedef CURLcode (*entry_func_t)(char *);
+typedef CURLcode (*entry_func_t)(const char *);
 
 struct entry_s {
   const char *name;

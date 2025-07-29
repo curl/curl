@@ -52,7 +52,7 @@ static int t1598_trailers_callback(struct curl_slist **list, void *userdata)
   }
 }
 
-static CURLcode test_lib1598(char *URL)
+static CURLcode test_lib1598(const char *URL)
 {
   static const char *post_data = "xxx=yyy&aaa=bbbbb";
 

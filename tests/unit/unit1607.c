@@ -36,7 +36,7 @@ static CURLcode t1607_setup(void)
   return res;
 }
 
-static CURLcode test_unit1607(char *arg)
+static CURLcode test_unit1607(const char *arg)
 {
   /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
      addresses, so we have to do that as well. */

@@ -39,7 +39,7 @@ static size_t print_httppost_callback(void *arg, const char *buf, size_t len)
     }                                                            \
   } while(0)
 
-static CURLcode test_lib1308(char *URL)
+static CURLcode test_lib1308(const char *URL)
 {
   int errorcount = 0;
   CURLFORMcode rc;

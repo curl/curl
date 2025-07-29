@@ -27,7 +27,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib543(char *URL)
+static CURLcode test_lib543(const char *URL)
 {
   static const unsigned char a[] = {
       0x9c, 0x26, 0x4b, 0x3d, 0x49, 0x4, 0xa1, 0x1,

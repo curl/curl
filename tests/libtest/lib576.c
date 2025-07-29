@@ -96,7 +96,7 @@ static long chunk_end(void *ptr)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static CURLcode test_lib576(char *URL)
+static CURLcode test_lib576(const char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;

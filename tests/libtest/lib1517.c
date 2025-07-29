@@ -51,7 +51,7 @@ static size_t t1517_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return tocopy;
 }
 
-static CURLcode test_lib1517(char *URL)
+static CURLcode test_lib1517(const char *URL)
 {
   static const char testdata[] =
     "this is what we post to the silly web server\n";
