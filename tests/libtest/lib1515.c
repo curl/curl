@@ -28,15 +28,12 @@
  * (test1515) nor a dead connection is detected (test1616).
  */
 
-#include "test.h"
+#include "first.h"
+
 #include "testtrace.h"
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-#define DNS_TIMEOUT 1
+#define DNS_TIMEOUT 1L
 
 static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
 {
@@ -103,7 +100,7 @@ test_cleanup:
   return res;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1515(char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
@@ -114,8 +111,8 @@ CURLcode test(char *URL)
   int i;
   int count = 2;
 
-  msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
-            port, address);
+  curl_msnprintf(dns_entry, sizeof(dns_entry), "testserver.example.com:%s:%s",
+                 port, address);
 
   start_test_timing();
 
@@ -125,18 +122,18 @@ CURLcode test(char *URL)
 
   for(i = 1; i <= count; i++) {
     char target_url[256];
-    msnprintf(target_url, sizeof(target_url),
-              "http://testserver.example.com:%s/%s%04d", port, path, i);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
     if(res != CURLE_OK) {
-      fprintf(stderr, "request %s failed with %d\n", target_url, res);
+      curl_mfprintf(stderr, "request %s failed with %d\n", target_url, res);
       goto test_cleanup;
     }
 
     if(i < count)
-      sleep(DNS_TIMEOUT + 1);
+      curlx_wait_ms((DNS_TIMEOUT + 1) * 1000);
   }
 
 test_cleanup:

@@ -51,7 +51,7 @@ AP_DECLARE_MODULE(curltest) =
   NULL,  /* func to merge per server config */
   NULL,              /* command handlers */
   curltest_hooks,
-#if defined(AP_MODULE_FLAG_NONE)
+#ifdef AP_MODULE_FLAG_NONE
   AP_MODULE_FLAG_ALWAYS_MERGE
 #endif
 };
@@ -253,6 +253,10 @@ static int curltest_echo_handler(request_rec *r)
 
   ct = apr_table_get(r->headers_in, "content-type");
   ap_set_content_type(r, ct ? ct : "application/octet-stream");
+
+  if(apr_table_get(r->headers_in, "TE"))
+    apr_table_setn(r->headers_out, "Request-TE",
+                   apr_table_get(r->headers_in, "TE"));
 
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */

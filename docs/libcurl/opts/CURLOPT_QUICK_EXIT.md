@@ -14,7 +14,7 @@ Added-in: 7.87.0
 
 # NAME
 
-CURLOPT_QUICK_EXIT - allow to exit quickly
+CURLOPT_QUICK_EXIT - allow libcurl to exit quickly
 
 # SYNOPSIS
 

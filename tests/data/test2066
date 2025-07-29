@@ -54,9 +54,10 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
-HTTP with RFC7616 Digest authorization with bad password, SHA-256 and userhash=true
+HTTP with RFC7616 Digest, bad password, SHA-256 and userhash
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:test2pass --digest

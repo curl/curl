@@ -20,7 +20,7 @@ Example:
 
 # `--http3-only`
 
-Instructs curl to use HTTP/3 to the host in the URL, with no fallback to
+Instruct curl to use HTTP/3 to the host in the URL, with no fallback to
 earlier HTTP versions. HTTP/3 can only be used for HTTPS and not for HTTP
 URLs. For HTTP, this option triggers an error.
 

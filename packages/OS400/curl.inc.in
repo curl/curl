@@ -469,6 +469,8 @@
       *
      d CURLWS_RAW_MODE...
      d                 c                   X'00000001'
+     d CURLWS_NOAUTOPONG...
+     d                 c                   X'00000002'
       *
       **************************************************************************
       *                                Types
@@ -921,17 +923,23 @@
      d                 c                   3
       *
      d CURLSSLOPT_ALLOW_BEAST...
-     d                 c                   X'0001'
+     d                 c                   X'00000001'
      d CURLSSLOPT_NO_REVOKE...
-     d                 c                   X'0002'
+     d                 c                   X'00000002'
      d CURLSSLOPT_NO_PARTIALCHAIN...
-     d                 c                   X'0004'
+     d                 c                   X'00000004'
      d CURLSSLOPT_REVOKE_BEST_EFFORT...
-     d                 c                   X'0008'
+     d                 c                   X'00000008'
      d CURLSSLOPT_NATIVE_CA...
-     d                 c                   X'0010'
+     d                 c                   X'00000010'
      d CURLSSLOPT_AUTO_CLIENT_CERT...
-     d                 c                   X'0020'
+     d                 c                   X'00000020'
+      *
+     d CURLFOLLOW_ALL  c                   1
+     d CURLFOLLOW_OBEYCODE...
+     d                 c                   2
+     d CURLFOLLOW_FIRSTONLY...
+     d                 c                   3
       *
      d CURL_HET_DEFAULT...
      d                 c                   200
@@ -1000,6 +1008,17 @@
      d                 c                   X'00000010'
      d  CURLALTSVC_H3...
      d                 c                   X'00000020'
+      *
+     d  CURLULFLAG_ANSWERED...
+     d                 c                   X'00000001'
+     d  CURLULFLAG_DELETED...
+     d                 c                   X'00000002'
+     d  CURLULFLAG_DRAFT...
+     d                 c                   X'00000004'
+     d  CURLULFLAG_FLAGGED...
+     d                 c                   X'00000008'
+     d  CURLULFLAG_SEEN...
+     d                 c                   X'00000010'
       *
      d  CURLHSTS_ENABLE...
      d                 c                   X'00000001'
@@ -1672,6 +1691,10 @@
      d  CURLOPT_ECH    c                   10325
      d  CURLOPT_TCP_KEEPCNT...
      d                 c                   00326
+     d  CURLOPT_UPLOAD_FLAGS...
+     d                 c                   00327
+     d  CURLOPT_SSL_SIGNATURE_ALGORITHMS...
+     d                 c                   10328
       *
       /if not defined(CURL_NO_OLDIES)
      d  CURLOPT_FILE   c                   10001
@@ -2179,7 +2202,7 @@
      d  CURLMOPT_MAX_CONCURRENT_STREAMS...
      d                 c                   10016
       *
-      * Bitmask bits for CURLMOPT_PIPELING.
+      * Bitmask bits for CURLMOPT_PIPELINING.
       *
      d CURLPIPE_NOTHING...
      d                 c                   x'00000000'

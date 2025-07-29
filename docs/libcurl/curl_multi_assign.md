@@ -56,11 +56,11 @@ It is acceptable to call this function from your multi callback functions.
 int main(void)
 {
   CURLM *multi = curl_multi_init();
-  void *ourstructp; /* pointer to our data */
-  curl_socket_t fd; /* file descriptor to associate our data with */
+  int private = 123;
+  curl_socket_t fd = 0; /* file descriptor to associate our data with */
 
   /* make our struct pointer associated with socket fd */
-  CURLMcode mc = curl_multi_assign(multi, fd, ourstructp);
+  CURLMcode mc = curl_multi_assign(multi, fd, &private);
   if(mc)
     printf("error: %s\n", curl_multi_strerror(mc));
 }

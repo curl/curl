@@ -25,7 +25,7 @@ REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= A002 NO Not authorized
 imap
 </server>
 <name>
-IMAP plain authentication with alternative authorization identity (Not authorized)
+IMAP plain auth with alt authorization identity (Not authorized)
 </name>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u kurt:xipj3plmq --sasl-authzid ursel

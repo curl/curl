@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 
 typedef enum {
@@ -70,10 +70,5 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
                       struct curltime timestamp);
 
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
-
-#define PGRS_HIDE    (1<<4)
-#define PGRS_UL_SIZE_KNOWN (1<<5)
-#define PGRS_DL_SIZE_KNOWN (1<<6)
-#define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
 
 #endif /* HEADER_CURL_PROGRESS_H */

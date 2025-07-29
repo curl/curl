@@ -53,9 +53,13 @@ Untrusted Publishers block list which it seems cannot be bypassed. (Added in
 ## CURLSSLOPT_NO_PARTIALCHAIN
 
 Tells libcurl to not accept "partial" certificate chains, which it otherwise
-does by default. This option is only supported for OpenSSL and fails the
-certificate verification if the chain ends with an intermediate certificate
-and not with a root cert. (Added in 7.68.0)
+does by default. This option fails the certificate verification if the chain
+ends with an intermediate certificate and not with a root cert.
+
+Works with OpenSSL and its forks (LibreSSL, BoringSSL, etc). (Added in 7.68.0)
+
+Works with Schannel if the user specified certificates to verify the peer.
+(Added in 8.15.0)
 
 ## CURLSSLOPT_REVOKE_BEST_EFFORT
 
@@ -75,6 +79,11 @@ native CA store.
 Works with wolfSSL on Windows, Linux (Debian, Ubuntu, Gentoo, Fedora, RHEL),
 macOS, Android and iOS (added in 8.3.0); with GnuTLS (added in 8.5.0) and with
 OpenSSL and its forks (LibreSSL, BoringSSL, etc) on Windows (Added in 7.71.0).
+
+This works with rustls on Windows, macOS, Android and iOS. On Linux it is
+equivalent to using the Mozilla CA certificate bundle. When used with rustls
+_only_ the native CA store is consulted, not other locations set at run time or
+build time. (Added in 8.13.0)
 
 ## CURLSSLOPT_AUTO_CLIENT_CERT
 

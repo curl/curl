@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -73,11 +73,12 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   unsigned int flags);
 
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
-#define CURLWS_RAW_MODE (1<<0)
+#define CURLWS_RAW_MODE   (1<<0)
+#define CURLWS_NOAUTOPONG (1<<1)
 
 CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

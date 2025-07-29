@@ -21,17 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-static const char testcmd[] = "A1 IDLE\r\n";
-static char testbuf[1024];
-
-CURLcode test(char *URL)
+static CURLcode test_lib677(char *URL)
 {
+  static const char testcmd[] = "A1 IDLE\r\n";
+  static char testbuf[1024];
+
   CURLM *mcurl;
   CURL *curl = NULL;
   int mrun;
@@ -65,7 +63,7 @@ CURLcode test(char *URL)
         curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sock);
         if(sock == CURL_SOCKET_BAD)
           goto test_cleanup;
-        printf("Connected fine, extracted socket. Moving on\n");
+        curl_mprintf("Connected fine, extracted socket. Moving on\n");
       }
     }
 
@@ -88,8 +86,8 @@ CURLcode test(char *URL)
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+          curl_mfprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
@@ -109,8 +107,8 @@ CURLcode test(char *URL)
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+          curl_mfprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
+                        (int)ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }

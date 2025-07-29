@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1906(char *URL)
 {
   CURLcode res = CURLE_OK;
   char *url_after = NULL;
@@ -47,9 +45,9 @@ CURLcode test(char *URL)
   easy_setopt(curl, CURLOPT_PORT, 1L);
   res = curl_easy_perform(curl);
   if(res != CURLE_COULDNT_CONNECT && res != CURLE_OPERATION_TIMEDOUT) {
-    fprintf(stderr, "failure expected, "
-            "curl_easy_perform returned %d: <%s>, <%s>\n",
-            res, curl_easy_strerror(res), error_buffer);
+    curl_mfprintf(stderr, "failure expected, "
+                  "curl_easy_perform returned %d: <%s>, <%s>\n",
+                  res, curl_easy_strerror(res), error_buffer);
     if(res == CURLE_OK)
       res = TEST_ERR_MAJOR_BAD;  /* force an error return */
     goto test_cleanup;
@@ -58,7 +56,7 @@ CURLcode test(char *URL)
 
   /* print the used url */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
-  fprintf(stderr, "curlu now: <%s>\n", url_after);
+  curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
   curl_free(url_after);
   url_after = NULL;
 
@@ -67,13 +65,13 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res)
-    fprintf(stderr, "success expected, "
-            "curl_easy_perform returned %d: <%s>, <%s>\n",
-            res, curl_easy_strerror(res), error_buffer);
+    curl_mfprintf(stderr, "success expected, "
+                  "curl_easy_perform returned %d: <%s>, <%s>\n",
+                  res, curl_easy_strerror(res), error_buffer);
 
   /* print url */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
-  fprintf(stderr, "curlu now: <%s>\n", url_after);
+  curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
 
 test_cleanup:
   curl_free(url_after);

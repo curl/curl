@@ -26,7 +26,7 @@ certificate verification) or for the application protocols.
 original hostname and port number.
 
 A hostname specified to this option is compared as a string, so it needs to
-match the name used in request URL. It can be either numerical such as
+match the name used in the request URL. It can be either numerical such as
 `127.0.0.1` or the full host name such as `example.org`.
 
 Example: redirect connects from the example.com hostname to 127.0.0.1

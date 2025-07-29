@@ -27,7 +27,7 @@ pop3
 --libcurl for POP3 LIST one message
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -l -u user:secret --libcurl %LOGDIR/test%TESTNUMBER.c
@@ -35,6 +35,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -l -u user:secret --libcurl %LOGDIR/test%TE
 # Need ftp so the FTP options are written in the --libcurl template
 <features>
 ftp
+--libcurl
 </features>
 </client>
 
@@ -61,30 +62,29 @@ int main(int argc, char *argv[])
   CURL *hnd;
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "pop3://%HOSTIP:%POP3PORT/%TESTNUMBER");
   curl_easy_setopt(hnd, CURLOPT_DIRLISTONLY, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement
      them yourself.
 
+  CURLOPT_DEBUGFUNCTION was set to a function pointer
+  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_WRITEDATA was set to an object pointer
   CURLOPT_WRITEFUNCTION was set to a function pointer
   CURLOPT_READDATA was set to an object pointer
   CURLOPT_READFUNCTION was set to a function pointer
   CURLOPT_SEEKDATA was set to an object pointer
   CURLOPT_SEEKFUNCTION was set to a function pointer
-  CURLOPT_ERRORBUFFER was set to an object pointer
-  CURLOPT_STDERR was set to an object pointer
-  CURLOPT_DEBUGFUNCTION was set to a function pointer
-  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_HEADERFUNCTION was set to a function pointer
   CURLOPT_HEADERDATA was set to an object pointer
+  CURLOPT_ERRORBUFFER was set to an object pointer
+  CURLOPT_STDERR was set to an object pointer
 
   */
 
@@ -107,6 +107,7 @@ $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 </stripfile>
 </verify>
 </testcase>

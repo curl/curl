@@ -48,8 +48,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        ".circleci/config.yml"
+      "managerFilePatterns": [
+        "/.circleci/config.yml/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VER=(?<currentValue>.*)\\s"
@@ -59,23 +59,23 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/.*\\.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?-version:\\s*(?<currentValue>.*)\\s"
+        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION:\\s*(?<currentValue>.*)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/linux.yml$",
-        "^.github/workflows/http3-linux.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/",
+        "/^.github/workflows/http3-linux.yml$/"
       ],
       "matchStrings": [
-        "openssl-version: (?<currentValue>.*)\\s"
+        "OPENSSL_VERSION: (?<currentValue>.*)\\s"
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "openssl/openssl",
@@ -84,17 +84,30 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "^.github/workflows/linux.yml$",
-        "^.github/workflows/http3-linux.yml$"
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/",
+        "/^.github/workflows/http3-linux.yml$/"
       ],
       "matchStrings": [
-        "quictls-version: (?<currentValue>.*)\\s"
+        "QUICTLS_VERSION: (?<currentValue>.*)\\s"
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "quictls/openssl",
       "versioningTemplate": "semver",
       "extractVersionTemplate": "^openssl-(?<version>.*)-quic1$"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^.github/workflows/linux.yml$/"
+      ],
+      "matchStrings": [
+        "OPENLDAP_VERSION: (?<currentValue>.*)\\s"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "openldap/openldap",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^OPENLDAP_REL_ENG_(?<major>\\d+)_(?<minor>\\d+)_(?<patch>\\d+)$"
     }
   ]
 }

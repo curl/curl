@@ -21,10 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#include "test.h"
-#include "testutil.h"
 #include "testtrace.h"
+
 #include "memdebug.h"
 
 struct libtest_trace_cfg libtest_debug_config;
@@ -32,9 +30,9 @@ struct libtest_trace_cfg libtest_debug_config;
 static time_t epoch_offset; /* for test time tracing */
 static int    known_offset; /* for test time tracing */
 
-static
-void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
-                        const unsigned char *ptr, size_t size, int nohex)
+static void libtest_debug_dump(const char *timebuf, const char *text,
+                               FILE *stream, const unsigned char *ptr,
+                               size_t size, int nohex)
 {
   size_t i;
   size_t c;
@@ -45,18 +43,18 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
-          size, size);
+  curl_mfprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
+                size, size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04zx: ", i);
+    curl_mfprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          curl_mfprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
@@ -69,8 +67,9 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c", ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
-              ptr[i + c] : '.');
+      curl_mfprintf(stream, "%c",
+                    ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
+                    ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex &&
          (i + c + 2 < size) && (ptr[i + c + 1] == 0x0D) &&
@@ -89,10 +88,8 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 {
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
-  struct timeval tv;
   char timebuf[20];
   char *timestr;
-  time_t secs;
 
   (void)handle;
 
@@ -101,20 +98,23 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 
   if(trace_cfg->tracetime) {
     struct tm *now;
-    tv = tutil_tvnow();
+    struct curltime tv;
+    time_t secs;
+    tv = curlx_now();
     if(!known_offset) {
       epoch_offset = time(NULL) - tv.tv_sec;
       known_offset = 1;
     }
     secs = epoch_offset + tv.tv_sec;
+    /* !checksrc! disable BANNEDFUNC 1 */
     now = localtime(&secs);  /* not thread safe but we don't care */
-    msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
-              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+    curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
+                   now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "%s== Info: %s", timestr, (char *)data);
+    curl_mfprintf(stderr, "%s== Info: %s", timestr, (char *)data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";

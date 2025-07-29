@@ -135,10 +135,6 @@ struct SASL {
   (wordlen == (sizeof(mech) - 1) / sizeof(char) && \
    !memcmp(line, mech, wordlen))
 
-/* This is used to cleanup any libraries or curl modules used by the sasl
-   functions */
-void Curl_sasl_cleanup(struct connectdata *conn, unsigned short authused);
-
 /* Convert a mechanism name to a token */
 unsigned short Curl_sasl_decode_mech(const char *ptr,
                                      size_t maxlen, size_t *len);
@@ -161,5 +157,7 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
 /* Continue an SASL authentication  */
 CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
                             int code, saslprogress *progress);
+
+CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data);
 
 #endif /* HEADER_CURL_SASL_H */

@@ -28,7 +28,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "sendf.h"
 #include "http.h"
 #include "http1.h"
@@ -40,11 +40,11 @@
 #include "cf-h1-proxy.h"
 #include "connect.h"
 #include "curl_trc.h"
-#include "curlx.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
-#include "strtoofft.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -97,8 +97,8 @@ static CURLcode tunnel_reinit(struct Curl_cfilter *cf,
   (void)data;
   (void)cf;
   DEBUGASSERT(ts);
-  Curl_dyn_reset(&ts->rcvbuf);
-  Curl_dyn_reset(&ts->request_data);
+  curlx_dyn_reset(&ts->rcvbuf);
+  curlx_dyn_reset(&ts->request_data);
   ts->tunnel_state = H1_TUNNEL_INIT;
   ts->keepon = KEEPON_CONNECT;
   ts->cl = 0;
@@ -123,8 +123,8 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
 
   infof(data, "allocate connect buffer");
 
-  Curl_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
-  Curl_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
+  curlx_dyn_init(&ts->rcvbuf, DYN_PROXY_CONNECT_HEADERS);
+  curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
   Curl_httpchunk_init(data, &ts->ch, TRUE);
 
   *pts =  ts;
@@ -150,7 +150,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "new tunnel state 'connect'");
     ts->tunnel_state = H1_TUNNEL_CONNECT;
     ts->keepon = KEEPON_CONNECT;
-    Curl_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->rcvbuf);
     break;
 
   case H1_TUNNEL_RECEIVE:
@@ -173,8 +173,8 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     if(new_state == H1_TUNNEL_FAILED)
       CURL_TRC_CF(data, cf, "new tunnel state 'failed'");
     ts->tunnel_state = new_state;
-    Curl_dyn_reset(&ts->rcvbuf);
-    Curl_dyn_reset(&ts->request_data);
+    curlx_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->request_data);
     /* restore the protocol pointer */
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
@@ -193,8 +193,8 @@ static void tunnel_free(struct Curl_cfilter *cf,
     struct h1_tunnel_state *ts = cf->ctx;
     if(ts) {
       h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
-      Curl_dyn_free(&ts->rcvbuf);
-      Curl_dyn_free(&ts->request_data);
+      curlx_dyn_free(&ts->rcvbuf);
+      curlx_dyn_free(&ts->request_data);
       Curl_httpchunk_free(data, &ts->ch);
       free(ts);
       cf->ctx = NULL;
@@ -226,7 +226,7 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
 
   infof(data, "Establish HTTP proxy tunnel to %s", req->authority);
 
-  Curl_dyn_reset(&ts->request_data);
+  curlx_dyn_reset(&ts->request_data);
   ts->nsent = 0;
   ts->headerlines = 0;
   http_minor = (cf->conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0) ? 0 : 1;
@@ -248,11 +248,11 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
                              struct h1_tunnel_state *ts,
                              bool *done)
 {
-  char *buf = Curl_dyn_ptr(&ts->request_data);
-  size_t request_len = Curl_dyn_len(&ts->request_data);
+  char *buf = curlx_dyn_ptr(&ts->request_data);
+  size_t request_len = curlx_dyn_len(&ts->request_data);
   size_t blen = request_len;
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(blen <= ts->nsent)
     goto out;  /* we are done */
@@ -260,16 +260,15 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   blen -= ts->nsent;
   buf += ts->nsent;
 
-  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
-  if(nwritten < 0) {
-    if(result == CURLE_AGAIN) {
+  result = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &nwritten);
+  if(result) {
+    if(result == CURLE_AGAIN)
       result = CURLE_OK;
-    }
     goto out;
   }
 
-  DEBUGASSERT(blen >= (size_t)nwritten);
-  ts->nsent += (size_t)nwritten;
+  DEBUGASSERT(blen >= nwritten);
+  ts->nsent += nwritten;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
 
 out:
@@ -315,8 +314,8 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
             k->httpcode);
     }
     else {
-      if(curlx_strtoofft(header + strlen("Content-Length:"),
-                         NULL, 10, &ts->cl)) {
+      const char *p = header + strlen("Content-Length:");
+      if(curlx_str_numblanks(&p, &ts->cl)) {
         failf(data, "Unsupported Content-Length value");
         return CURLE_WEIRD_SERVER_REPLY;
       }
@@ -375,11 +374,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   error = SELECT_OK;
   *done = FALSE;
 
-  if(!Curl_conn_data_pending(data, cf->sockindex))
-    return CURLE_OK;
-
   while(ts->keepon) {
-    ssize_t nread;
+    size_t nread;
     char byte;
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
@@ -397,7 +393,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       break;
     }
 
-    if(nread <= 0) {
+    if(!nread) {
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->state.aptr.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
@@ -444,7 +440,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       continue;
     }
 
-    if(Curl_dyn_addn(&ts->rcvbuf, &byte, 1)) {
+    if(curlx_dyn_addn(&ts->rcvbuf, &byte, 1)) {
       failf(data, "CONNECT response too large");
       return CURLE_RECV_ERROR;
     }
@@ -454,8 +450,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       continue;
 
     ts->headerlines++;
-    linep = Curl_dyn_ptr(&ts->rcvbuf);
-    line_len = Curl_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
+    linep = curlx_dyn_ptr(&ts->rcvbuf);
+    line_len = curlx_dyn_len(&ts->rcvbuf); /* amount of bytes in this line */
 
     /* output debug if that is requested */
     Curl_debug(data, CURLINFO_HEADER_IN, linep, line_len);
@@ -512,7 +508,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     if(result)
       return result;
 
-    Curl_dyn_reset(&ts->rcvbuf);
+    curlx_dyn_reset(&ts->rcvbuf);
   } /* while there is buffer left and loop is requested */
 
   if(error)
@@ -687,8 +683,8 @@ out:
 }
 
 static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct easy_pollset *ps)
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
 
@@ -741,7 +737,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_connect,
   cf_h1_proxy_close,
   Curl_cf_def_shutdown,
-  Curl_cf_http_proxy_get_host,
   cf_h1_proxy_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -749,7 +744,7 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  Curl_cf_http_proxy_query,
 };
 
 CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,

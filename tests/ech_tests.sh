@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -66,7 +66,7 @@ declare -A ech_targets=(
     [draft-13.esni.defo.ie:11413]=""
     [draft-13.esni.defo.ie:12413]=""
     [draft-13.esni.defo.ie:12414]=""
-    [crypto.cloudflare.com]="cdn-cgi/trace"
+    [cloudflare-ech.com]="cdn-cgi/trace"
     [tls-ech.dev]=""
     # this one's gone away for now (possibly temporarily)
     # [epochbelt.com]=""
@@ -292,11 +292,11 @@ then
     digcmd="kdig @$DOHSERVER +https +short"
 fi
 # see if our dig version knows HTTPS
-dout=$($digcmd https defo.ie)
-if [[ $dout != "1 . "* ]]
+digout=$($digcmd https defo.ie)
+if [[ $digout != "1 . "* ]]
 then
-    dout=$($digcmd -t TYPE65 defo.ie)
-    if [[ $dout == "1 . "* ]]
+    digout=$($digcmd -t TYPE65 defo.ie)
+    if [[ $digout == "1 . "* ]]
     then
         # we're good
         have_presout="yes"
@@ -337,7 +337,7 @@ echo "curl: have $have_curl, cURL command: |$CURL ${CURL_PARAMS[*]}|"
 echo "ossl: have: $have_ossl, using: $using_ossl"
 echo "wolf: have: $have_wolf, using: $using_wolf"
 echo "bssl: have: $have_bssl, using: $using_bssl"
-echo "dig: $have_dig, kdig: $have_kdig, HTTPS pres format: $have_presout"
+echo "dig: $have_dig, kdig: $have_kdig, HTTPS presentation format: $have_presout"
 echo "dig command: |$digcmd|"
 echo "ports != 443 blocked: $have_portsblocked"
 
@@ -361,7 +361,7 @@ do
     then
         case $targ in
             "draft-13.esni.defo.ie:8414" | "tls-ech.dev" | \
-            "crypto.cloudflare.com" | "epochbelt.com")
+            "cloudflare-ech.com" | "epochbelt.com")
                 echo "Skipping $targ 'cause wolf"; continue;;
             *)
                 ;;
@@ -413,7 +413,7 @@ then
             echo "Skipping $targ as ports != 443 seem blocked"
             continue
         fi
-        if [[ "$host" == "crypto.cloudflare.com" ]]
+        if [[ "$host" == "cloudflare-ech.com" ]]
         then
             echo "Skipping $host as they've blocked PN override"
             continue

@@ -29,6 +29,7 @@
 package servers;
 
 use IO::Socket;
+use Time::HiRes;
 use strict;
 use warnings;
 
@@ -54,7 +55,6 @@ BEGIN {
         # functions
         qw(
             checkcmd
-            clearlocks
             serverfortest
             stopserver
             stopservers
@@ -113,6 +113,7 @@ use testutil qw(
     logmsg
     runclient
     runclientoutput
+    exerunner
     shell_quote
     );
 
@@ -141,6 +142,7 @@ my $SSHSRVSHA256 = "[uninitialized]"; # SHA256 of ssh server public key
 my $USER;                  # name of the current user
 my $sshdid;                # for socks server, ssh daemon version id
 my $ftpchecktime=1;        # time it took to verify our test FTP server
+my $SERVER_TIMEOUT_SEC = 15; # time for a server to spin up
 
 # Variables shared with runtests.pl
 our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
@@ -155,7 +157,7 @@ our $stunnel;        # path to stunnel command
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
     my @paths;
-    if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
+    if($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
         @paths=(split(';', $ENV{'PATH'}), @extrapaths);
     }
@@ -164,7 +166,7 @@ sub checkcmd {
                 "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
     }
     for(@paths) {
-        if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
+        if(-x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
             return "$_/$cmd";
         }
@@ -205,11 +207,19 @@ sub initserverconfig {
 
     # get the name of the current user
     $USER = $ENV{USER};          # Linux
-    if (!$USER) {
+    if(!$USER) {
         $USER = $ENV{USERNAME};     # Windows
-        if (!$USER) {
-            $USER = $ENV{LOGNAME};  # Some Unix (I think)
-        }
+    }
+    if(!$USER) {
+        $USER = $ENV{LOGNAME};  # Some Unix (I think)
+    }
+    if(!$USER) {
+        $USER = `whoami`;
+        chomp $USER;
+    }
+    if(!$USER) {
+        $USER = `id -un`;
+        chomp $USER;
     }
     init_serverpidfile_hash();
 }
@@ -219,96 +229,49 @@ sub initserverconfig {
 # possible servers.
 #
 sub init_serverpidfile_hash {
-  for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
-    for my $ssl (('', 's')) {
-      for my $ipvnum ((4, 6)) {
-        for my $idnum ((1, 2, 3)) {
-          my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
-          my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                        $ipvnum, $idnum);
-          $serverpidfile{$serv} = $pidf;
-          my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                          $ipvnum, $idnum);
-          $serverportfile{$serv} = $portf;
-        }
-      }
-    }
-  }
-  for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
-                  'dict', 'smb', 'smbs', 'telnet', 'mqtt')) {
-    for my $ipvnum ((4, 6)) {
-      for my $idnum ((1, 2)) {
-        my $serv = servername_id($proto, $ipvnum, $idnum);
-        my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                      $idnum);
-        $serverpidfile{$serv} = $pidf;
-        my $portf = server_portfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                        $idnum);
-        $serverportfile{$serv} = $portf;
-      }
-    }
-  }
-  for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
-    for my $ssl (('', 's')) {
-      my $serv = servername_id("$proto$ssl", "unix", 1);
-      my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                    "unix", 1);
-      $serverpidfile{$serv} = $pidf;
-      my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
-                                      "unix", 1);
-      $serverportfile{$serv} = $portf;
-    }
-  }
-}
-
-
-#######################################################################
-# Kill the processes that still have lock files in a directory
-#
-sub clearlocks {
-    my $dir = $_[0];
-    my $done = 0;
-
-    if(os_is_win()) {
-        $dir = sys_native_abs_path($dir);
-        # Must use backslashes for handle64 to find a match
-        if ($^O eq 'MSWin32') {
-            $dir =~ s/\//\\/g;
-        }
-        else {
-            $dir =~ s/\//\\\\/g;
-        }
-        my $handle = "handle";
-        if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
-            $handle = "handle64";
-        }
-        if(checkcmd($handle)) {
-            # https://learn.microsoft.com/sysinternals/downloads/handle#usage
-            my $cmd = "$handle $dir -accepteula -nobanner";
-            logmsg "clearlocks: Executing query: '$cmd'\n";
-            my @handles = `$cmd`;
-            for my $tryhandle (@handles) {
-                # Skip the "No matching handles found." warning when returned
-                if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
-                    logmsg "clearlocks: Found $3 lock of '$5' ($4) by $1 ($2)\n";
-                    # Ignore stunnel since we cannot do anything about its locks
-                    if("$3" eq "File" && "$1" ne "tstunnel.exe") {
-                        logmsg "clearlocks: Killing IMAGENAME eq $1 and PID eq $2\n";
-                        # https://ss64.com/nt/taskkill.html
-                        my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
-                        logmsg "clearlocks: Executing kill: '$cmd'\n";
-                        system($cmd);
-                        $done = 1;
-                    }
+    for my $proto (('ftp', 'gopher', 'http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
+        for my $ssl (('', 's')) {
+            for my $ipvnum ((4, 6)) {
+                for my $idnum ((1, 2, 3)) {
+                    my $serv = servername_id("$proto$ssl", $ipvnum, $idnum);
+                    my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                                  $ipvnum, $idnum);
+                    $serverpidfile{$serv} = $pidf;
+                    my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                                    $ipvnum, $idnum);
+                    $serverportfile{$serv} = $portf;
                 }
             }
         }
-        else {
-            logmsg "Warning: 'handle' tool not found.\n";
+    }
+    for my $proto (('tftp', 'sftp', 'socks', 'ssh', 'rtsp', 'httptls',
+                    'dict', 'smb', 'smbs', 'telnet', 'mqtt', 'https-mtls',
+                    'dns')) {
+        for my $ipvnum ((4, 6)) {
+            for my $idnum ((1, 2)) {
+                my $serv = servername_id($proto, $ipvnum, $idnum);
+                my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
+                                              $idnum);
+                $serverpidfile{$serv} = $pidf;
+                my $portf = server_portfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
+                                                $idnum);
+                $serverportfile{$serv} = $portf;
+            }
         }
     }
-    return $done;
+    for my $proto (('http', 'imap', 'pop3', 'smtp', 'http/2', 'http/3')) {
+        for my $ssl (('', 's')) {
+            my $serv = servername_id("$proto$ssl", "unix", 1);
+            my $pidf = server_pidfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                          "unix", 1);
+            $serverpidfile{$serv} = $pidf;
+            my $portf = server_portfilename("$LOGDIR/$PIDDIR", "$proto$ssl",
+                                            "unix", 1);
+            $serverportfile{$serv} = $portf;
+        }
+    }
 }
+
 
 #######################################################################
 # Check if a given child process has just died. Reaps it if so.
@@ -343,6 +306,7 @@ sub serverfortest {
     for(my $i = scalar(@what) - 1; $i >= 0; $i--) {
         my $srvrline = $what[$i];
         chomp $srvrline if($srvrline);
+
         if($srvrline =~ /^(\S+)((\s*)(.*))/) {
             my $server = "${1}";
             my $lnrest = "${2}";
@@ -351,7 +315,12 @@ sub serverfortest {
                 $server = "${1}${4}${5}";
                 $tlsext = uc("TLS-${3}");
             }
-            if(! grep /^\Q$server\E$/, @protocols) {
+
+            my @lprotocols = @protocols;
+
+            push @lprotocols, "dns";
+
+            if(! grep /^\Q$server\E$/, @lprotocols) {
                 if(substr($server,0,5) ne "socks") {
                     if($tlsext) {
                         return ("curl lacks $tlsext support", 4);
@@ -376,7 +345,7 @@ sub serverfortest {
 sub startnew {
     my ($cmd, $pidfile, $timeout, $fakepidfile)=@_;
 
-    logmsg "startnew: $cmd\n" if ($verbose);
+    logmsg "startnew: $cmd\n" if($verbose);
 
     my $child = fork();
 
@@ -401,7 +370,7 @@ sub startnew {
     }
 
     # Ugly hack but ssh client and gnutls-serv don't support pid files
-    if ($fakepidfile) {
+    if($fakepidfile) {
         if(open(my $out, ">", "$pidfile")) {
             print $out $child . "\n";
             close($out) || die "Failure writing pidfile";
@@ -412,7 +381,7 @@ sub startnew {
         }
         # could/should do a while connect fails sleep a bit and loop
         portable_sleep($timeout);
-        if (checkdied($child)) {
+        if(checkdied($child)) {
             logmsg "startnew: child process has failed to start\n" if($verbose);
             return (-1,-1);
         }
@@ -421,14 +390,14 @@ sub startnew {
     my $pid2 = 0;
     my $count = $timeout;
     while($count--) {
-        $pid2 = pidfromfile($pidfile);
+        $pid2 = pidfromfile($pidfile, 0);
         if(($pid2 > 0) && pidexists($pid2)) {
             # if $pid2 is valid, then make sure this pid is alive, as
             # otherwise it is just likely to be the _previous_ pidfile or
             # similar!
             last;
         }
-        if (checkdied($child)) {
+        if(checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
                 if($verbose);
             # We can't just abort waiting for the server with a
@@ -535,7 +504,7 @@ sub stopserver {
         foreach my $lockfile (@lockfiles) {
             if(-f $lockfile) {
                 unlink($lockfile);
-                logmsg "RUN: kill $server, cleaned up $lockfile\n" if ($verbose);
+                logmsg "RUN: kill $server, cleaned up $lockfile\n" if($verbose);
             }
         }
     }
@@ -591,7 +560,7 @@ sub verifyhttp {
     $flags .= "--http3-only " if($do_http3);
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -668,7 +637,7 @@ sub verifyftp {
     }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -734,7 +703,7 @@ sub verifyrtsp {
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -867,7 +836,7 @@ sub verifyhttptls {
     }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -917,29 +886,15 @@ sub verifyhttptls {
 }
 
 #######################################################################
-# STUB for verifying mqtt
+# For verifying mqtt and socks
 #
-sub verifymqtt {
+sub verifypid {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
                                      $idnum);
     my $pid = processexists($pidfile);
     if($pid < 0) {
-        logmsg "RUN: MQTT server has died after starting up\n";
-    }
-    return $pid;
-}
-
-#######################################################################
-# STUB for verifying socks
-#
-sub verifysocks {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-    my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
-                                     $idnum);
-    my $pid = processexists($pidfile);
-    if($pid < 0) {
-        logmsg "RUN: SOCKS server has died after starting up\n";
+        logmsg "RUN: $proto server has died\n";
     }
     return $pid;
 }
@@ -968,7 +923,7 @@ sub verifysmb {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1028,7 +983,8 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
+    my $cmd = "echo 'verifiedserver' | " .
+        exerunner() . "$VCURL $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1078,6 +1034,7 @@ sub verifytelnet {
 
 my %protofunc = ('http' => \&verifyhttp,
                  'https' => \&verifyhttp,
+                 'https-mtls' => \&verifypid,
                  'rtsp' => \&verifyrtsp,
                  'ftp' => \&verifyftp,
                  'pop3' => \&verifyftp,
@@ -1086,40 +1043,18 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
-                 'mqtt' => \&verifymqtt,
+                 'mqtt' => \&verifypid,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
-                 'socks' => \&verifysocks,
-                 'socks5unix' => \&verifysocks,
+                 'dns' => \&verifypid,
+                 'socks' => \&verifypid,
+                 'socks5unix' => \&verifypid,
                  'gopher' => \&verifyhttp,
                  'httptls' => \&verifyhttptls,
                  'dict' => \&verifyftp,
                  'smb' => \&verifysmb,
                  'telnet' => \&verifytelnet);
-
-sub verifyserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
-
-    my $count = 30; # try for this many seconds
-    my $pid;
-
-    while($count--) {
-        my $fun = $protofunc{$proto};
-
-        $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
-
-        if($pid > 0) {
-            last;
-        }
-        elsif($pid < 0) {
-            # a real failure, stop trying and bail out
-            return 0;
-        }
-        sleep(1);
-    }
-    return $pid;
-}
 
 #######################################################################
 # Single shot server responsiveness test. This should only be used
@@ -1176,7 +1111,7 @@ sub runhttpserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1209,6 +1144,8 @@ sub runhttpserver {
     $flags .= "--srcdir \"$srcdir\"";
 
     my $cmd = "$exe $flags";
+
+    unlink($portfile); # need to see a new one
     my ($httppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
     if($httppid <= 0 || !pidexists($httppid)) {
@@ -1221,20 +1158,13 @@ sub runhttpserver {
 
     # where is it?
     my $port = 0;
-    if(!$port_or_path) {
-        $port = $port_or_path = pidfromfile($portfile);
-    }
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$httppid $pid2");
+    $port = $port_or_path = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$port) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server is on PID $httppid port $port_or_path\n";
@@ -1260,7 +1190,7 @@ sub runhttp2server {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0, 0);
     }
 
@@ -1321,7 +1251,7 @@ sub runhttp3server {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1387,7 +1317,7 @@ sub runhttpsserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1409,6 +1339,9 @@ sub runhttpsserver {
     $flags .= "--ipv$ipvnum --proto $proto ";
     $flags .= "--certfile \"$certfile\" " if($certfile ne 'certs/test-localhost.pem');
     $flags .= "--stunnel \"$stunnel\" --srcdir \"$srcdir\" ";
+    if($proto eq "https-mtls") {
+        $flags .= "--mtls ";
+    }
     if($proto eq "gophers") {
         $flags .= "--connect " . protoport("gopher");
     }
@@ -1465,7 +1398,7 @@ sub runhttptlsserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1528,7 +1461,7 @@ sub runpingpongserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
 
@@ -1550,6 +1483,7 @@ sub runpingpongserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --addr \"$ip\"";
 
+    unlink($portfile); # need to see a new one
     my $cmd = "$perl " . shell_quote("$srcdir/ftpserver.pl") . " " . $flags;
     my ($ftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
@@ -1562,20 +1496,15 @@ sub runpingpongserver {
     }
 
     # where is it?
-    my $port = pidfromfile($portfile);
+    my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$port) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        return (1, 0, 0, 0);
+    }
 
     logmsg "PINGPONG runs on port $port ($portfile)\n" if($verb);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$ftppid $pid2");
-        $doesntrun{$pidfile} = 1;
-        return (1, 0, 0);
-    }
-    $pid2 = $pid3;
 
     logmsg "RUN: $srvrname server is PID $ftppid port $port\n" if($verb);
 
@@ -1603,7 +1532,7 @@ sub runsecureserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1674,7 +1603,7 @@ sub runtftpserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1697,6 +1626,7 @@ sub runtftpserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
+    unlink($portfile); # need to see a new one
     my $cmd = "$perl " . shell_quote("$srcdir/tftpserver.pl") . " " . $flags;
     my ($tftppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
@@ -1708,18 +1638,13 @@ sub runtftpserver {
         return (1, 0, 0, 0);
     }
 
-    my $port = pidfromfile($portfile);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$tftppid $pid2");
+    my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$port) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server on PID $tftppid port $port\n";
@@ -1728,6 +1653,77 @@ sub runtftpserver {
     return (0, $pid2, $tftppid, $port);
 }
 
+#######################################################################
+# start the dns server
+#
+sub rundnsserver {
+    my ($id, $verb, $ipv6) = @_;
+    my $ip = $HOSTIP;
+    my $proto = 'dns';
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $ip = $HOST6IP;
+    }
+
+    my $server = servername_id($proto, $ipvnum, $idnum);
+
+    my $pidfile = $serverpidfile{$server};
+
+    # don't retry if the server doesn't work
+    if($doesntrun{$pidfile}) {
+        return (2, 0, 0, 0);
+    }
+
+    my $pid = processexists($pidfile);
+    if($pid > 0) {
+        stopserver($server, "$pid");
+    }
+    unlink($pidfile) if(-f $pidfile);
+
+    my $srvrname = servername_str($proto, $ipvnum, $idnum);
+    my $portfile = $serverportfile{$server};
+    my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
+
+    my $cmd=server_exe('dnsd');
+    $cmd .= " --port 0";
+    $cmd .= " --verbose" if($debugprotocol);
+    $cmd .= " --pidfile \"$pidfile\"";
+    $cmd .= " --portfile \"$portfile\"";
+    $cmd .= " --logfile \"$logfile\"";
+    $cmd .= " --logdir \"$LOGDIR\"";
+    $cmd .= " --id $idnum" if($idnum > 1);
+    $cmd .= " --ipv$ipvnum";
+
+    unlink($portfile); # need to see a new one
+    # start DNS server on a random port
+    my ($dnspid, $pid2) = startnew($cmd, $pidfile, 15, 0);
+
+    if($dnspid <= 0 || !pidexists($dnspid)) {
+        # it is NOT alive
+        logmsg "RUN: failed to start the $srvrname server\n";
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        return (1, 0, 0, 0);
+    }
+
+    my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$port) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        return (1, 0, 0, 0);
+    }
+
+    if($verb) {
+        logmsg "RUN: $srvrname server on PID $dnspid port $port\n";
+    }
+
+    return (0, $pid2, $dnspid, $port);
+}
 
 #######################################################################
 # start the rtsp server
@@ -1751,7 +1747,7 @@ sub runrtspserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1773,6 +1769,7 @@ sub runrtspserver {
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --port 0 --srcdir \"$srcdir\"";
 
+    unlink($portfile); # need to see a new one
     my $cmd = "$perl " . shell_quote("$srcdir/rtspserver.pl") . " " . $flags;
     my ($rtsppid, $pid2) = startnew($cmd, $pidfile, 15, 0);
 
@@ -1784,18 +1781,13 @@ sub runrtspserver {
         return (1, 0, 0, 0);
     }
 
-    my $port = pidfromfile($portfile);
-
-    # Server is up. Verify that we can speak to it.
-    my $pid3 = verifyserver($proto, $ipvnum, $idnum, $ip, $port);
-    if(!$pid3) {
-        logmsg "RUN: $srvrname server failed verification\n";
-        # failed to talk to it properly. Kill the server and return failure
-        stopserver($server, "$rtsppid $pid2");
+    my $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$port) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
         $doesntrun{$pidfile} = 1;
         return (1, 0, 0, 0);
     }
-    $pid2 = $pid3;
 
     if($verb) {
         logmsg "RUN: $srvrname server PID $rtsppid port $port\n";
@@ -1825,7 +1817,7 @@ sub runsshserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -1943,7 +1935,7 @@ sub runmqttserver {
     my $portfile = $serverportfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
 
@@ -1956,6 +1948,7 @@ sub runmqttserver {
     my $srvrname = servername_str($proto, $ipvnum, $idnum);
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
+    unlink($portfile); # need to see a new one
     # start our MQTT server - on a random port!
     my $cmd=server_exe('mqttd').
         " --port 0".
@@ -1974,7 +1967,13 @@ sub runmqttserver {
         return (1, 0, 0);
     }
 
-    my $mqttport = pidfromfile($portfile);
+    my $mqttport = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+    if(!$mqttport) {
+        logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+        stopserver($server, "$pid2");
+        $doesntrun{$pidfile} = 1;
+        return (1, 0, 0, 0);
+    }
 
     if($verb) {
         logmsg "RUN: $srvrname server is now running PID $pid2 on PORT $mqttport\n";
@@ -1998,7 +1997,7 @@ sub runsocksserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2012,6 +2011,7 @@ sub runsocksserver {
     my $portfile = $serverportfile{$server};
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
+    unlink($portfile); # need to see a new one
     # start our socks server, get commands from the FTP cmd file
     my $cmd="";
     if($is_unix) {
@@ -2022,6 +2022,7 @@ sub runsocksserver {
             " --unix-socket $SOCKSUNIXPATH".
             " --backend $HOSTIP".
             " --config $LOGDIR/$SERVERCMD";
+        $portfile = "none";
     } else {
         $cmd=server_exe('socksd').
             " --port 0".
@@ -2042,7 +2043,16 @@ sub runsocksserver {
         return (1, 0, 0, 0);
     }
 
-    my $port = pidfromfile($portfile);
+    my $port = 0;
+    if($portfile ne "none") {
+        $port = pidfromfile($portfile, $SERVER_TIMEOUT_SEC);
+        if(!$port) {
+            logmsg "RUN: timeout for $srvrname to produce port file $portfile\n";
+            stopserver($server, "$pid2");
+            $doesntrun{$pidfile} = 1;
+            return (1, 0, 0, 0);
+        }
+    }
 
     if($verb) {
         logmsg "RUN: $srvrname server is now running PID $pid2\n";
@@ -2070,7 +2080,7 @@ sub rundictserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2131,7 +2141,7 @@ sub runsmbserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2192,7 +2202,7 @@ sub runnegtelnetserver {
     my $pidfile = $serverpidfile{$server};
 
     # don't retry if the server doesn't work
-    if ($doesntrun{$pidfile}) {
+    if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
 
@@ -2343,6 +2353,28 @@ sub responsive_tftp_server {
 }
 
 #######################################################################
+# Single shot dns server responsiveness test. This should only be
+# used to verify that a server present in %run hash is still functional
+#
+sub responsive_dns_server {
+    my ($id, $verb, $ipv6) = @_;
+    my $proto = 'dns';
+    my $port = protoport($proto);
+    my $ip = $HOSTIP;
+    my $ipvnum = 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    if($ipv6) {
+        # if IPv6, use a different setup
+        $ipvnum = 6;
+        $port = protoport('dns6');
+        $ip = $HOST6IP;
+    }
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
+}
+
+#######################################################################
 # Single shot non-stunnel HTTP TLS extensions capable server
 # responsiveness test. This should only be used to verify that a
 # server present in %run hash is still functional
@@ -2355,7 +2387,7 @@ sub responsive_httptls_server {
     my $ip = "$HOSTIP";
     my $idnum = 1;
 
-    if ($ipvnum == 6) {
+    if($ipvnum == 6) {
         $port = protoport("httptls6");
         $ip = "$HOST6IP";
     }
@@ -2383,7 +2415,7 @@ sub startservers {
         $what =~ s/[^a-z0-9\/-]//g;
 
         my $certfile;
-        if($what =~ /^(ftp|gopher|http|imap|pop3|smtp)s((\d*)(-ipv6|-unix|))$/) {
+        if($what =~ /^(ftp|gopher|http|imap|pop3|smtp)s|https-mtls((\d*)(-ipv6|-unix|))$/) {
             $certfile = ($whatlist[1]) ? $whatlist[1] : 'certs/test-localhost.pem';
         }
 
@@ -2592,14 +2624,14 @@ sub startservers {
         elsif($what eq "file") {
             # we support it but have no server!
         }
-        elsif($what eq "https") {
+        elsif($what eq "https" || $what eq "https-mtls") {
             if(!$stunnel) {
                 # we can't run https tests without stunnel
                 return ("no stunnel", 4);
             }
-            if($runcert{'https'} && ($runcert{'https'} ne $certfile)) {
+            if($runcert{$what} && ($runcert{$what} ne $certfile)) {
                 # stop server when running and using a different cert
-                if(stopserver('https')) {
+                if(stopserver($what)) {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2607,10 +2639,10 @@ sub startservers {
                     return ("failed stopping HTTP server", 3);
                 }
             }
-            if($run{'https'} &&
-               !responsive_http_server("https", $verbose, 0,
-                                       protoport('https'))) {
-                if(stopserver('https')) {
+            if($run{$what} &&
+               !responsive_http_server($what, $verbose, 0,
+                                       protoport($what))) {
+                if(stopserver($what)) {
                     return ("failed stopping unresponsive HTTPS server", 3);
                 }
                 # also stop http server, we do not know which state it is in
@@ -2619,7 +2651,7 @@ sub startservers {
                 }
             }
             # check a running http server if we not already checked https
-            if($run{'http'} && !$run{'https'} &&
+            if($run{'http'} && !$run{$what} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {
@@ -2635,15 +2667,15 @@ sub startservers {
                 logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
                 $run{'http'}="$pid $pid2";
             }
-            if(!$run{'https'}) {
-                ($serr, $pid, $pid2, $PORT{'https'}) =
-                    runhttpsserver($verbose, "https", "", $certfile);
+            if(!$run{$what}) {
+                ($serr, $pid, $pid2, $PORT{$what}) =
+                    runhttpsserver($verbose, $what, "", $certfile);
                 if($pid <= 0) {
                     return ("failed starting HTTPS server (stunnel)", $serr);
                 }
-                logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
+                logmsg sprintf("* pid $what => %d %d\n", $pid, $pid2)
                     if($verbose);
-                $run{'https'}="$pid $pid2";
+                $run{$what}="$pid $pid2";
             }
         }
         elsif($what eq "http/2") {
@@ -2846,6 +2878,23 @@ sub startservers {
                 $run{'httptls-ipv6'}="$pid $pid2";
             }
         }
+        elsif($what eq "dns") {
+            if($run{'dns'} &&
+               !responsive_dns_server("", $verbose)) {
+                if(stopserver('dns')) {
+                    return ("failed stopping unresponsive DNS server", 3);
+                }
+            }
+            if(!$run{'dns'}) {
+                ($serr, $pid, $pid2, $PORT{'dns'}) =
+                    rundnsserver("", $verbose);
+                if($pid <= 0) {
+                    return ("failed starting DNS server", $serr);
+                }
+                logmsg sprintf("* pid dns => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'dns'}="$pid $pid2";
+            }
+        }
         elsif($what eq "tftp") {
             if($run{'tftp'} &&
                !responsive_tftp_server("", $verbose)) {
@@ -2980,7 +3029,7 @@ sub startservers {
             }
         }
         elsif($what eq "none") {
-            logmsg "* starts no server\n" if ($verbose);
+            logmsg "* starts no server\n" if($verbose);
         }
         else {
             warn "we don't support a server for $what";
@@ -3061,10 +3110,10 @@ sub subvariables {
 
     # test server ports
     # Substitutes variables like %HTTPPORT and %SMTP6PORT with the server ports
-    foreach my $proto ('DICT',
+    foreach my $proto ('DICT', 'DNS',
                        'FTP', 'FTP6', 'FTPS',
                        'GOPHER', 'GOPHER6', 'GOPHERS',
-                       'HTTP', 'HTTP6', 'HTTPS',
+                       'HTTP', 'HTTP6', 'HTTPS', 'HTTPS-MTLS',
                        'HTTPSPROXY', 'HTTPTLS', 'HTTPTLS6',
                        'HTTP2', 'HTTP2TLS',
                        'HTTP3',
@@ -3107,7 +3156,6 @@ sub subvariables {
     $$thing =~ s/${prefix}CURL/$CURL/g;
     $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
-    $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
     $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
     $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
@@ -3125,13 +3173,15 @@ sub subvariables {
     # this only works after the SSH server has been started
     # TODO: call sshversioninfo early and store $sshdid so this substitution
     # always works
-    if ($sshdid && $sshdid =~ /OpenSSH-Windows/) {
+    if($sshdid && $sshdid =~ /OpenSSH-Windows/) {
         $ssh_pwd = $file_pwd;
     }
 
     $$thing =~ s/${prefix}FILE_PWD/$file_pwd/g;
-    $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
+    $$thing =~ s/${prefix}SCP_PWD/$posix_pwd/g;
+    $$thing =~ s/${prefix}SFTP_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
+    $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
 

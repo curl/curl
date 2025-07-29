@@ -28,9 +28,7 @@ appleOS:
           - any-glob-to-all-files: "{\
               .github/workflows/macos.yml,\
               lib/config-mac.h,\
-              lib/macos*,\
-              lib/vtls/sectransp*,\
-              m4/curl-sectransp.m4\
+              lib/macos*\
               }"
 
 authentication:
@@ -284,7 +282,6 @@ HTTP/3:
               .github/workflows/ngtcp2*,\
               .github/workflows/quiche*,\
               .github/workflows/osslq*,\
-              CMake/FindMSH3.cmake,\
               CMake/FindNGHTTP3.cmake,\
               CMake/FindNGTCP2.cmake,\
               docs/HTTP3.md,\
@@ -455,7 +452,6 @@ TLS:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              CMake/FindBearSSL.cmake,\
               CMake/FindMbedTLS.cmake,\
               CMake/FindWolfSSL.cmake,\
               CMake/FindRustls.cmake,\
@@ -475,13 +471,11 @@ TLS:
               docs/libcurl/opts/CURLOPT_TLS*,\
               docs/libcurl/opts/CURLOPT_USE_SSL*,\
               lib/vtls/**,\
-              m4/curl-bearssl.m4,\
               m4/curl-gnutls.m4,\
               m4/curl-mbedtls.m4,\
               m4/curl-openssl.m4,\
               m4/curl-rustls.m4,\
               m4/curl-schannel.m4,\
-              m4/curl-sectransp.m4,\
               m4/curl-wolfssl.m4\
               }"
 
@@ -520,7 +514,7 @@ Windows:
               .github/workflows/windows.yml,\
               CMake/win32-cache.cmake,\
               lib/*win32*,\
-              lib/curl_multibyte.*,\
+              lib/curlx/multibyte.*,\
               lib/rename.*,\
               lib/vtls/schannel*,\
               m4/curl-schannel.m4,\

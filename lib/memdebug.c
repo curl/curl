@@ -30,8 +30,6 @@
 
 #include "urldata.h"
 
-#define MEMDEBUG_NODEFINES /* do not redefine the standard functions */
-
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -70,7 +68,7 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
-    fclose(curl_dbg_logfile);
+    (fclose)(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
 }
@@ -80,7 +78,11 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-      curl_dbg_logfile = fopen(logname, FOPEN_WRITETEXT);
+#ifdef CURL_FOPEN
+      curl_dbg_logfile = CURL_FOPEN(logname, FOPEN_WRITETEXT);
+#else
+      curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
+#endif
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -117,20 +119,19 @@ static bool countcheck(const char *func, int line, const char *source)
       fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
               source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
+      /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
       return TRUE; /* RETURN ERROR! */
     }
     else
       memsize--; /* countdown */
-
-
   }
 
   return FALSE; /* allow this */
 }
 
-ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
-                                 int line, const char *source)
+ALLOC_FUNC
+void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
 {
   struct memdebug *mem;
   size_t size;
@@ -156,8 +157,9 @@ ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
-                                 int line, const char *source)
+ALLOC_FUNC
+void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
+                      int line, const char *source)
 {
   struct memdebug *mem;
   size_t size, user_size;
@@ -184,8 +186,8 @@ ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   return mem ? mem->mem : NULL;
 }
 
-ALLOC_FUNC char *curl_dbg_strdup(const char *str,
-                                 int line, const char *source)
+ALLOC_FUNC
+char *curl_dbg_strdup(const char *str, int line, const char *source)
 {
   char *mem;
   size_t len;
@@ -209,8 +211,8 @@ ALLOC_FUNC char *curl_dbg_strdup(const char *str,
 }
 
 #if defined(_WIN32) && defined(UNICODE)
-ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
-                                    int line, const char *source)
+ALLOC_FUNC
+wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 {
   wchar_t *mem;
   size_t wsiz, bsiz;
@@ -229,7 +231,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
   if(source)
     curl_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, bsiz, (void *)mem);
+                source, line, (const void *)str, bsiz, (void *)mem);
 
   return mem;
 }
@@ -238,7 +240,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 /* We provide a realloc() that accepts a NULL as pointer, which then
    performs a malloc(). In order to work with ares. */
 void *curl_dbg_realloc(void *ptr, size_t wantedsize,
-                      int line, const char *source)
+                       int line, const char *source)
 {
   struct memdebug *mem = NULL;
 
@@ -302,14 +304,14 @@ void curl_dbg_free(void *ptr, int line, const char *source)
 }
 
 curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
-                             int line, const char *source)
+                              int line, const char *source)
 {
   curl_socket_t sockfd;
 
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
-  sockfd = socket(domain, type, protocol);
+  sockfd = (socket)(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
@@ -326,7 +328,7 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
-  rc = send(sockfd, buf, len, flags);
+  rc = (send)(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -340,7 +342,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
-  rc = recv(sockfd, buf, len, flags);
+  rc = (recv)(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -349,12 +351,12 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
 
 #ifdef HAVE_SOCKETPAIR
 int curl_dbg_socketpair(int domain, int type, int protocol,
-                       curl_socket_t socket_vector[2],
-                       int line, const char *source)
+                        curl_socket_t socket_vector[2],
+                        int line, const char *source)
 {
-  int res = socketpair(domain, type, protocol, socket_vector);
+  int res = (socketpair)(domain, type, protocol, socket_vector);
 
-  if(source && (0 == res))
+  if(source && (res == 0))
     curl_dbg_log("FD %s:%d socketpair() = "
                  "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
                  source, line, socket_vector[0], socket_vector[1]);
@@ -364,12 +366,12 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 #endif
 
 curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
-                             int line, const char *source)
+                              int line, const char *source)
 {
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
-  curl_socket_t sockfd = accept(s, addr, addrlen);
+  curl_socket_t sockfd = (accept)(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
@@ -377,6 +379,24 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
 
   return sockfd;
 }
+
+#ifdef HAVE_ACCEPT4
+curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr, void *saddrlen,
+                               int flags,
+                               int line, const char *source)
+{
+  struct sockaddr *addr = (struct sockaddr *)saddr;
+  curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
+
+  curl_socket_t sockfd = (accept4)(s, addr, addrlen, flags);
+
+  if(source && (sockfd != CURL_SOCKET_BAD))
+    curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
+                 source, line, sockfd);
+
+  return sockfd;
+}
+#endif
 
 /* separate function to allow libcurl to mark a "faked" close */
 void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
@@ -389,15 +409,21 @@ void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 /* this is our own defined way to close sockets on *ALL* platforms */
 int curl_dbg_sclose(curl_socket_t sockfd, int line, const char *source)
 {
-  int res = sclose(sockfd);
+  int res = CURL_SCLOSE(sockfd);
   curl_dbg_mark_sclose(sockfd, line, source);
   return res;
 }
 
-ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
-                                int line, const char *source)
+ALLOC_FUNC
+FILE *curl_dbg_fopen(const char *file, const char *mode,
+                     int line, const char *source)
 {
-  FILE *res = fopen(file, mode);
+  FILE *res;
+#ifdef CURL_FOPEN
+  res = CURL_FOPEN(file, mode);
+#else
+  res = (fopen)(file, mode);
+#endif
 
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
@@ -406,10 +432,11 @@ ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
   return res;
 }
 
-ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                                 int line, const char *source)
+ALLOC_FUNC
+FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                      int line, const char *source)
 {
-  FILE *res = fdopen(filedes, mode);
+  FILE *res = (fdopen)(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -426,38 +453,30 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
-  res = fclose(file);
+  res = (fclose)(file);
 
   return res;
 }
 
-#define LOGLINE_BUFSIZE  1024
-
 /* this does the writing to the memory tracking log file */
 void curl_dbg_log(const char *format, ...)
 {
-  char *buf;
+  char buf[1024];
   int nchars;
   va_list ap;
 
   if(!curl_dbg_logfile)
     return;
 
-  buf = (Curl_cmalloc)(LOGLINE_BUFSIZE);
-  if(!buf)
-    return;
-
   va_start(ap, format);
-  nchars = mvsnprintf(buf, LOGLINE_BUFSIZE, format, ap);
+  nchars = mvsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
 
-  if(nchars > LOGLINE_BUFSIZE - 1)
-    nchars = LOGLINE_BUFSIZE - 1;
+  if(nchars > (int)sizeof(buf) - 1)
+    nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0)
-    fwrite(buf, 1, (size_t)nchars, curl_dbg_logfile);
-
-  (Curl_cfree)(buf);
+    (fwrite)(buf, 1, (size_t)nchars, curl_dbg_logfile);
 }
 
 #endif /* CURLDEBUG */

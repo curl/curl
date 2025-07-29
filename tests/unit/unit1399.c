@@ -21,22 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "progress.h"
-
-static int usec_magnitude = 1000000;
-
-static bool unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
 
 /*
  * Invoke Curl_pgrsTime for TIMER_STARTSINGLE to trigger the behavior that
@@ -54,18 +42,21 @@ static void fake_t_startsingle_time(struct Curl_easy *data,
 
 static bool usec_matches_seconds(timediff_t time_usec, int expected_seconds)
 {
+  static int usec_magnitude = 1000000;
+
   int time_sec = (int)(time_usec / usec_magnitude);
   bool same = (time_sec == expected_seconds);
-  fprintf(stderr, "is %d us same as %d seconds? %s\n",
-          (int)time_usec, expected_seconds,
-          same ? "Yes" : "No");
+  curl_mfprintf(stderr, "is %d us same as %d seconds? %s\n",
+                (int)time_usec, expected_seconds,
+                same ? "Yes" : "No");
   return same;
 }
 
 static void expect_timer_seconds(struct Curl_easy *data, int seconds)
 {
   char msg[64];
-  msnprintf(msg, sizeof(msg), "about %d seconds should have passed", seconds);
+  curl_msnprintf(msg, sizeof(msg), "about %d seconds should have passed",
+                 seconds);
   fail_unless(usec_matches_seconds(data->progress.t_nslookup, seconds), msg);
   fail_unless(usec_matches_seconds(data->progress.t_connect, seconds), msg);
   fail_unless(usec_matches_seconds(data->progress.t_appconnect, seconds), msg);
@@ -80,9 +71,12 @@ static void expect_timer_seconds(struct Curl_easy *data, int seconds)
  * E.g., if t_starttransfer took 2 seconds initially and took another 1
  * second for the redirect request, then the resulting t_starttransfer should
  * be 3 seconds. */
-UNITTEST_START
+static CURLcode test_unit1399(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
+
   struct Curl_easy data;
-  struct curltime now = Curl_now();
+  struct curltime now = curlx_now();
 
   data.progress.t_nslookup = 0;
   data.progress.t_connect = 0;
@@ -116,4 +110,6 @@ UNITTEST_START
   Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
   expect_timer_seconds(&data, 3);
-UNITTEST_STOP
+
+  UNITTEST_END_SIMPLE
+}

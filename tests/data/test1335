@@ -30,7 +30,7 @@ http
 HTTP GET with -O without Content-Disposition, -D stdout
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O -D - --output-dir %LOGDIR
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O -D - --output-dir="%LOGDIR"
 </command>
 </client>
 

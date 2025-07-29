@@ -31,7 +31,6 @@
 #include "easyif.h"
 #include "cfilters.h"
 #include "multiif.h"
-#include "strcase.h"
 
 #include "cf-socket.h"
 #include "connect.h"
@@ -43,7 +42,7 @@
 #include "cf-haproxy.h"
 #include "cf-https-connect.h"
 #include "socks.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
@@ -53,13 +52,14 @@
 #include "memdebug.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
-                      char *ptr, size_t size)
+                      const char *ptr, size_t size)
 {
   if(data->set.verbose) {
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, TRUE);
-      (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+      (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr), size,
+                                data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
     }
     else {
@@ -130,7 +130,7 @@ static size_t trc_end_buf(char *buf, size_t len, size_t maxlen, bool addnl)
 }
 
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
-                char *ptr, size_t size)
+                const char *ptr, size_t size)
 {
   if(data->set.verbose) {
     static const char s_infotype[CURLINFO_END][3] = {
@@ -151,7 +151,8 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       }
       else {
         Curl_set_in_callback(data, TRUE);
-        (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+        (void)(*data->set.fdebug)(data, type, CURL_UNCONST(ptr),
+                                  size, data->set.debugdata);
         Curl_set_in_callback(data, inCallback);
       }
     }
@@ -160,10 +161,12 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
       case CURLINFO_TEXT:
       case CURLINFO_HEADER_OUT:
       case CURLINFO_HEADER_IN:
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
         if(CURL_TRC_IDS(data)) {
           len = trc_print_ids(data, buf, TRC_LINE_MAX);
           fwrite(buf, len, 1, data->set.err);
         }
+#endif
         fwrite(s_infotype[type], 2, 1, data->set.err);
         fwrite(ptr, size, 1, data->set.err);
         break;
@@ -198,13 +201,12 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
-
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
                       const char *opt_id, int opt_id_idx,
-                      const char * const fmt, va_list ap)  CURL_PRINTF(5, 0);
+                      const char * const fmt, va_list ap) CURL_PRINTF(5, 0);
 
 static void trc_infof(struct Curl_easy *data,
                       struct curl_trc_feat *feat,
@@ -241,7 +243,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   }
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   DEBUGASSERT(cf);
@@ -462,7 +464,7 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
   { &Curl_cft_happy_eyeballs, TRC_CT_NETWORK },
   { &Curl_cft_setup,          TRC_CT_PROTOCOL },
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
   { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
 #endif
 #ifdef USE_SSL
@@ -471,8 +473,8 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_ssl_proxy,      TRC_CT_PROXY },
 #endif
 #endif
-#if !defined(CURL_DISABLE_PROXY)
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_PROXY
+#ifndef CURL_DISABLE_HTTP
   { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
   { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
@@ -482,10 +484,10 @@ static struct trc_cft_def trc_cfts[] = {
   { &Curl_cft_haproxy,        TRC_CT_PROXY },
   { &Curl_cft_socks_proxy,    TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_PROXY */
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
 };
@@ -495,13 +497,13 @@ static void trc_apply_level_by_name(struct Curl_str *token, int lvl)
   size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
-    if(Curl_str_casecompare(token, trc_cfts[i].cft->name)) {
+    if(curlx_str_casecompare(token, trc_cfts[i].cft->name)) {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
   for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
-    if(Curl_str_casecompare(token, trc_feats[i].feat->name)) {
+    if(curlx_str_casecompare(token, trc_feats[i].feat->name)) {
       trc_feats[i].feat->log_level = lvl;
       break;
     }
@@ -525,33 +527,33 @@ static void trc_apply_level_by_category(int category, int lvl)
 static CURLcode trc_opt(const char *config)
 {
   struct Curl_str out;
-  while(!Curl_str_until(&config, &out, 32, ',')) {
+  while(!curlx_str_until(&config, &out, 32, ',')) {
     int lvl = CURL_LOG_LVL_INFO;
-    const char *token = Curl_str(&out);
+    const char *token = curlx_str(&out);
 
     if(*token == '-') {
       lvl = CURL_LOG_LVL_NONE;
-      Curl_str_nudge(&out, 1);
+      curlx_str_nudge(&out, 1);
     }
     else if(*token == '+')
-      Curl_str_nudge(&out, 1);
+      curlx_str_nudge(&out, 1);
 
-    if(Curl_str_casecompare(&out, "all"))
+    if(curlx_str_casecompare(&out, "all"))
       trc_apply_level_by_category(TRC_CT_NONE, lvl);
-    else if(Curl_str_casecompare(&out, "protocol"))
+    else if(curlx_str_casecompare(&out, "protocol"))
       trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
-    else if(Curl_str_casecompare(&out, "network"))
+    else if(curlx_str_casecompare(&out, "network"))
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
-    else if(Curl_str_casecompare(&out, "proxy"))
+    else if(curlx_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
-    else if(Curl_str_casecompare(&out, "doh")) {
+    else if(curlx_str_casecompare(&out, "doh")) {
       struct Curl_str dns = { "dns", 3 };
       trc_apply_level_by_name(&dns, lvl);
     }
     else
       trc_apply_level_by_name(&out, lvl);
 
-    if(Curl_str_single(&config, ','))
+    if(curlx_str_single(&config, ','))
       break;
   }
   return CURLE_OK;
@@ -580,7 +582,7 @@ CURLcode Curl_trc_init(void)
 #endif
 }
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
 
 CURLcode Curl_trc_init(void)
 {
@@ -592,8 +594,7 @@ void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 
-void Curl_trc_cf_infof(struct Curl_easy *data,
-                       struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...)
 {
   (void)data; (void)cf; (void)fmt;
@@ -607,6 +608,11 @@ void Curl_trc_multi(struct Curl_easy *data, const char *fmt, ...)
 }
 
 void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+void Curl_trc_dns(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }
@@ -628,17 +634,18 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 #endif
-#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }
 #endif
-
+#ifdef USE_SSL
 void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data;
   (void)fmt;
 }
+#endif
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */

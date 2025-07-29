@@ -40,13 +40,13 @@ proxy
 <protocol>
 GET /user1/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjE6Zm9vMQ==
+Authorization: Basic %b64[user1:foo1]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
 GET /user2/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjI6Zm9vMg==
+Authorization: Basic %b64[user2:foo2]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

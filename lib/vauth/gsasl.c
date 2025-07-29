@@ -24,22 +24,22 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_GSASL
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "sendf.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../sendf.h"
 
 #include <gsasl.h>
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,

@@ -29,17 +29,22 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
+use strict;
+use warnings;
+
 my $mallocs=0;
 my $callocs=0;
 my $reallocs=0;
 my $strdups=0;
 my $wcsdups=0;
-my $showlimit;
+my $showlimit=0;
 my $sends=0;
 my $recvs=0;
 my $sockets=0;
+my $verbose=0;
+my $trace=0;
 
-while(1) {
+while(@ARGV) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
         shift @ARGV;
@@ -58,19 +63,19 @@ while(1) {
     }
 }
 
-my $memsum; # the total number of memory allocated over the lifetime
-my $maxmem; # the high water mark
+my $memsum = 0; # the total number of memory allocated over the lifetime
+my $maxmem = 0; # the high water mark
 
 sub newtotal {
     my ($newtot)=@_;
     # count a max here
 
     if($newtot > $maxmem) {
-        $maxmem= $newtot;
+        $maxmem = $newtot;
     }
 }
 
-my $file = $ARGV[0];
+my $file = $ARGV[0] || '';
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
@@ -94,11 +99,36 @@ if($showlimit) {
     exit;
 }
 
+my %sizeataddr;
+my %getmem;
 
-my $lnum=0;
+my $totalmem = 0;
+my $frees = 0;
+
+my $dup;
+my $size;
+my $addr;
+
+my %filedes;
+my %getfile;
+
+my %fopen;
+my %fopenfile;
+my $openfile = 0;
+my $fopens = 0;
+
+my %addrinfo;
+my %addrinfofile;
+my $addrinfos = 0;
+
+my $source;
+my $linenum;
+my $function;
+
+my $lnum = 0;
 while(<$fileh>) {
     chomp $_;
-    $line = $_;
+    my $line = $_;
     $lnum++;
     if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
@@ -145,13 +175,13 @@ while(<$fileh>) {
             $size = $1;
             $addr = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile ($source:$linenum at line $lnum), rebuild curl now\n";
                 print "We think $sizeataddr{$addr} bytes are already allocated at that memory address: $addr!\n";
             }
 
-            $sizeataddr{$addr}=$size;
+            $sizeataddr{$addr} = $size;
             $totalmem += $size;
             $memsum += $size;
 
@@ -169,10 +199,10 @@ while(<$fileh>) {
             $size = $1*$2;
             $addr = $3;
 
-            $arg1 = $1;
-            $arg2 = $2;
+            my $arg1 = $1;
+            my $arg2 = $2;
 
-            if($sizeataddr{$addr}>0) {
+            if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile, rebuild curl now\n";
             }
@@ -194,14 +224,20 @@ while(<$fileh>) {
         elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
             my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
 
-            $totalmem -= $sizeataddr{$oldaddr};
-            if($trace) {
-                printf("REALLOC: %d less bytes and ", $sizeataddr{$oldaddr});
+            if($oldaddr) {
+                my $oldsize = $sizeataddr{$oldaddr} ? $sizeataddr{$oldaddr} : 0;
+
+                $totalmem -= $oldsize;
+                if($trace) {
+                    printf("REALLOC: %d less bytes and ", $oldsize);
+                }
+                $sizeataddr{$oldaddr}=0;
+
+                $getmem{$oldaddr}="";
             }
-            $sizeataddr{$oldaddr}=0;
 
             $totalmem += $newsize;
-            $memsum += $size;
+            $memsum += $newsize;
             $sizeataddr{$newaddr}=$newsize;
 
             if($trace) {
@@ -211,7 +247,6 @@ while(<$fileh>) {
             newtotal($totalmem);
             $reallocs++;
 
-            $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
         elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
@@ -343,7 +378,7 @@ while(<$fileh>) {
         $function = $3;
 
         if($function =~ /getaddrinfo\(\) = (\(nil\)|0x([0-9a-f]*))/) {
-            my $add = $2;
+            my $add = $1;
             if($add eq "(nil)") {
                 ;
             }
@@ -357,12 +392,13 @@ while(<$fileh>) {
             }
         }
         # fclose(0x1026c8)
-        elsif($function =~ /freeaddrinfo\(0x([0-9a-f]*)\)/) {
-            if(!$addrinfo{$1}) {
+        elsif($function =~ /freeaddrinfo\((0x[0-9a-f]*)\)/) {
+            my $addr = $1;
+            if(!$addrinfo{$addr}) {
                 print "freeaddrinfo() without getaddrinfo(): $line\n";
             }
             else {
-                $addrinfo{$1}=0;
+                $addrinfo{$addr}=0;
                 $addrinfos--;
             }
             if($trace) {

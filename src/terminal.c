@@ -28,8 +28,6 @@
 #endif
 
 #include "terminal.h"
-#include "strtoofft.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef HAVE_TERMIOS_H

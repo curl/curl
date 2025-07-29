@@ -41,27 +41,35 @@ manual carefully as bad input values may cause libcurl to behave badly. You
 can only set one option in each function call. A typical application uses many
 curl_easy_setopt(3) calls in the setup phase.
 
-Options set with this function call are valid for all forthcoming transfers
-performed using this *handle*. The options are not in any way reset between
-transfers, so if you want subsequent transfers with different options, you
-must change them between the transfers. You can optionally reset all options
-back to internal default with curl_easy_reset(3).
+The *handle* argument is the return code from a curl_easy_init(3) or
+curl_easy_duphandle(3) call.
+
+Options set with this function call are sticky. They remain set for all
+forthcoming transfers performed using this *handle*. The options are not in
+any way reset between transfers, so if you want subsequent transfers with
+different options, you must change them between the transfers. You can
+optionally reset all options back to internal default with curl_easy_reset(3).
+
+The order in which the options are set does not matter.
+
+# STRINGS
 
 Strings passed to libcurl as 'char *' arguments, are copied by the library;
 the string storage associated to the pointer argument may be discarded or
 reused after curl_easy_setopt(3) returns. The only exception to this rule is
 really CURLOPT_POSTFIELDS(3), but the alternative that copies the string
 CURLOPT_COPYPOSTFIELDS(3) has some usage characteristics you need to read up
-on. This function does not accept input strings longer than
+on.
+
+This function does not accept input strings longer than
 **CURL_MAX_INPUT_LENGTH** (8 MB).
 
-The order in which the options are set does not matter.
+libcurl does little to no verification of the contents of provided strings.
+Passing in "creative octets" like newlines where they are not expected might
+trigger unexpected results.
 
 Before version 7.17.0, strings were not copied. Instead the user was forced
 keep them available until libcurl no longer needed them.
-
-The *handle* is the return code from a curl_easy_init(3) or
-curl_easy_duphandle(3) call.
 
 # OPTIONS
 
@@ -1118,7 +1126,7 @@ Enable use of ALPN. See CURLOPT_SSL_ENABLE_ALPN(3)
 
 ## CURLOPT_SSL_FALSESTART
 
-Enable TLS False Start. See CURLOPT_SSL_FALSESTART(3)
+**Deprecated option** Enable TLS False Start. See CURLOPT_SSL_FALSESTART(3)
 
 ## CURLOPT_SSL_OPTIONS
 
@@ -1127,6 +1135,10 @@ Control SSL behavior. See CURLOPT_SSL_OPTIONS(3)
 ## CURLOPT_SSL_SESSIONID_CACHE
 
 Disable SSL session-id cache. See CURLOPT_SSL_SESSIONID_CACHE(3)
+
+## CURLOPT_SSL_SIGNATURE_ALGORITHMS
+
+TLS signature algorithms to use. See CURLOPT_SSL_SIGNATURE_ALGORITHMS(3)
 
 ## CURLOPT_SSL_VERIFYHOST
 

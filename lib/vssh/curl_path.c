@@ -22,15 +22,15 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
-#if defined(USE_SSH)
+#ifdef USE_SSH
 
 #include "curl_path.h"
 #include <curl/curl.h>
-#include "curl_memory.h"
-#include "escape.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../escape.h"
+#include "../memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
@@ -50,13 +50,13 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
     return result;
 
   /* new path to switch to in case we need to */
-  Curl_dyn_init(&npath, MAX_SSHPATH_LEN);
+  curlx_dyn_init(&npath, MAX_SSHPATH_LEN);
 
   /* Check for /~/, indicating relative to the user's home directory */
   if((data->conn->handler->protocol & CURLPROTO_SCP) &&
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
-    if(Curl_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
+    if(curlx_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -64,7 +64,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   else if((data->conn->handler->protocol & CURLPROTO_SFTP) &&
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
-    if(Curl_dyn_add(&npath, homedir)) {
+    if(curlx_dyn_add(&npath, homedir)) {
       free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -73,24 +73,30 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       const char *p;
       int copyfrom = 3;
       /* Copy a separating '/' if homedir does not end with one */
-      len = Curl_dyn_len(&npath);
-      p = Curl_dyn_ptr(&npath);
+      len = curlx_dyn_len(&npath);
+      p = curlx_dyn_ptr(&npath);
       if(len && (p[len-1] != '/'))
         copyfrom = 2;
 
-      if(Curl_dyn_addn(&npath,
-                       &working_path[copyfrom], working_path_len - copyfrom)) {
+      if(curlx_dyn_addn(&npath, &working_path[copyfrom],
+                        working_path_len - copyfrom)) {
+        free(working_path);
+        return CURLE_OUT_OF_MEMORY;
+      }
+    }
+    else {
+      if(curlx_dyn_add(&npath, "/")) {
         free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
   }
 
-  if(Curl_dyn_len(&npath)) {
+  if(curlx_dyn_len(&npath)) {
     free(working_path);
 
     /* store the pointer for the caller to receive */
-    *path = Curl_dyn_ptr(&npath);
+    *path = curlx_dyn_ptr(&npath);
   }
   else
     *path = working_path;
@@ -133,7 +139,7 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
   if(!*cp || !homedir)
     return CURLE_QUOTE_ERROR;
 
-  Curl_dyn_init(&out, MAX_PATHLENGTH);
+  curlx_dyn_init(&out, MAX_PATHLENGTH);
 
   /* Ignore leading whitespace */
   cp += strspn(cp, WHITESPACE);
@@ -158,12 +164,12 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
           goto fail;
         }
       }
-      result = Curl_dyn_addn(&out, &cp[i], 1);
+      result = curlx_dyn_addn(&out, &cp[i], 1);
       if(result)
         return result;
     }
 
-    if(!Curl_dyn_len(&out))
+    if(!curlx_dyn_len(&out))
       goto fail;
 
     /* return pointer to second parameter if it exists */
@@ -180,23 +186,23 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 
     /* Handling for relative path - prepend home directory */
     if(cp[0] == '/' && cp[1] == '~' && cp[2] == '/') {
-      result = Curl_dyn_add(&out, homedir);
+      result = curlx_dyn_add(&out, homedir);
       if(!result)
-        result = Curl_dyn_addn(&out, "/", 1);
+        result = curlx_dyn_addn(&out, "/", 1);
       if(result)
         return result;
       cp += 3;
     }
     /* Copy path name up until first "whitespace" */
-    result = Curl_dyn_addn(&out, cp, (end - cp));
+    result = curlx_dyn_addn(&out, cp, (end - cp));
     if(result)
       return result;
   }
-  *path = Curl_dyn_ptr(&out);
+  *path = curlx_dyn_ptr(&out);
   return CURLE_OK;
 
 fail:
-  Curl_dyn_free(&out);
+  curlx_dyn_free(&out);
   return CURLE_QUOTE_ERROR;
 }
 

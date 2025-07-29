@@ -2,10 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-lib[1234][0-9][0-9][0-9]
-lib[56][0-9][0-9]
+libtests
+libtests.c
 lib1521.c
-libtest_bundle.c
-libauthretry
-libntlmconnect
-libprereq

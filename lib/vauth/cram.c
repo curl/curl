@@ -24,22 +24,22 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
-#include "urldata.h"
+#include "../urldata.h"
 
-#include "vauth/vauth.h"
-#include "curl_hmac.h"
-#include "curl_md5.h"
-#include "warnless.h"
-#include "curl_printf.h"
+#include "vauth.h"
+#include "../curl_hmac.h"
+#include "../curl_md5.h"
+#include "../curlx/warnless.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 
 /*

@@ -19,7 +19,7 @@ ftp
 FTP SSL required on non-SSL server
 </name>
 <command>
--k --ftp-ssl-reqd ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+--insecure --ftp-ssl-reqd ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 

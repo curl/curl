@@ -35,10 +35,10 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 Populate the long *bitmask* with the correct set of features to instruct
 libcurl how to handle Alt-Svc for the transfers using this handle.
 
-libcurl only accepts Alt-Svc headers over a Secure Transport, meaning
-HTTPS. It also only completes a request to an alternative origin if that
-origin is properly hosted over HTTPS. These requirements are there to make
-sure both the source and the destination are legitimate.
+libcurl only accepts Alt-Svc headers over HTTPS. It also only completes a
+request to an alternative origin if that origin is properly hosted over HTTPS.
+These requirements are there to make sure both the source and the destination
+are legitimate.
 
 Alternative services are only used when setting up new connections. If there
 exists an existing connection to the host in the connection pool, then that is

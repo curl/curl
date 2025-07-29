@@ -24,11 +24,11 @@
 
 /* Testing Retry-After header parser */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1594(char *URL)
 {
   struct curl_slist *header = NULL;
   curl_off_t retry;
@@ -49,7 +49,7 @@ CURLcode test(char *URL)
   if(res)
     goto test_cleanup;
 
-  printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
+  curl_mprintf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry);
 
 test_cleanup:
 

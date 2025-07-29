@@ -2,7 +2,8 @@
 <info>
 <keywords>
 SFTP
-server sha256 key check
+server key check
+SHA256
 </keywords>
 </info>
 
@@ -28,7 +29,7 @@ sftp
 SFTP correct sha256 host key
 </name>
 <command>
---hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt
+--hostpubsha256 %SSHSRVSHA256 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt
 </command>
 <setenv>
 # Needed for MSYS2 to not treat the argument as a POSIX path list

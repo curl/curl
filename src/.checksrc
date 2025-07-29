@@ -1,5 +1,5 @@
 enable STDERR
-banfunc strncpy
+banfunc snprintf
 banfunc sscanf
 banfunc strtol
-banfunc strtoul
+banfunc vsnprint

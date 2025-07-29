@@ -62,7 +62,7 @@ The variables available are:
 
 ## `certs`
 Output the certificate chain with details. Supported only by the OpenSSL,
-GnuTLS, Schannel, Rustls, and Secure Transport backends. (Added in 7.88.0)
+GnuTLS, Schannel and Rustls backends. (Added in 7.88.0)
 
 ## `conn_id`
 The connection identifier last used by the transfer. The connection id is
@@ -128,8 +128,7 @@ The http method used in the most recent HTTP request. (Added in 7.72.0)
 
 ## `num_certs`
 Number of server certificates received in the TLS handshake. Supported only by
-the OpenSSL, GnuTLS, Schannel, Rustls and Secure Transport backends.
-(Added in 7.88.0)
+the OpenSSL, GnuTLS, Schannel and Rustls backends. (Added in 7.88.0)
 
 ## `num_connects`
 Number of new connects made in the recent transfer. (Added in 7.12.3)
@@ -255,7 +254,7 @@ started. `time_redirect` shows the complete execution time for multiple
 redirections. (Added in 7.12.3)
 
 ## `time_starttransfer`
-The time, in seconds, it took from the start until the first byte is received.
+The time, in seconds, it took from the start until the first byte was received.
 This includes time_pretransfer and also the time the server needed to calculate
 the result.
 

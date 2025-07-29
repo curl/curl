@@ -22,23 +22,23 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_WINDOWS_SSPI) && defined(USE_NTLM)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "curl_ntlm_core.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
-#include "strdup.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../curl_ntlm_core.h"
+#include "../curlx/warnless.h"
+#include "../curlx/multibyte.h"
+#include "../sendf.h"
+#include "../strdup.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_is_ntlm_supported()
@@ -55,8 +55,9 @@ bool Curl_auth_is_ntlm_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for NTLM */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
-                                              &SecurityPackage);
+  status = Curl_pSecFn->QuerySecurityPackageInfo(
+                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if(status == SEC_E_OK) {
@@ -103,8 +104,9 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   Curl_auth_cleanup_ntlm(ntlm);
 
   /* Query the security package for NTLM */
-  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
-                                              &SecurityPackage);
+  status = Curl_pSecFn->QuerySecurityPackageInfo(
+                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
     return CURLE_AUTH_ERROR;
@@ -142,10 +144,10 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Acquire our credentials handle */
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT(SP_NAME_NTLM),
-                                              SECPKG_CRED_OUTBOUND, NULL,
-                                              ntlm->p_identity, NULL, NULL,
-                                              ntlm->credentials, &expiry);
+                                     (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NTLM)),
+                                     SECPKG_CRED_OUTBOUND, NULL,
+                                     ntlm->p_identity, NULL, NULL,
+                                     ntlm->credentials, &expiry);
   if(status != SEC_E_OK)
     return CURLE_LOGIN_DENIED;
 
@@ -203,8 +205,8 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const struct bufref *type2,
                                              struct ntlmdata *ntlm)
 {
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
 #endif
 
   /* Ensure we have a valid type-2 message */
@@ -255,11 +257,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
 #endif
-  (void) passwdp;
-  (void) userp;
+  (void)passwdp;
+  (void)userp;
 
   /* Setup the type-2 "input" security buffer */
   type_2_desc.ulVersion     = SECBUFFER_VERSION;

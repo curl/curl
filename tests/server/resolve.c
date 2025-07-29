@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "first.h"
 
 /* Purpose
  *
@@ -33,24 +33,7 @@
  *
  */
 
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef _XOPEN_SOURCE_EXTENDED
-/* This define is "almost" required to build on HP-UX 11 */
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
-#include "curlx.h" /* from the private lib dir */
-#include "util.h"
-
-/* include memdebug.h last */
-#include "memdebug.h"
-
-int main(int argc, char *argv[])
+static int test_resolve(int argc, char *argv[])
 {
   int arg = 1;
   const char *host = NULL;
@@ -59,7 +42,7 @@ int main(int argc, char *argv[])
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
              "/IPv6"
 #else
              ""
@@ -68,7 +51,7 @@ int main(int argc, char *argv[])
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
       arg++;
@@ -80,7 +63,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
       ipv_inuse = "IPv4";
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
       use_ipv6 = FALSE;
 #endif
       arg++;
@@ -93,7 +76,7 @@ int main(int argc, char *argv[])
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
          " --ipv4"
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
          "\n --ipv6"
 #endif
          );
@@ -105,7 +88,7 @@ int main(int argc, char *argv[])
     return 2;
 #endif
 
-#if defined(CURLRES_IPV6)
+#ifdef CURLRES_IPV6
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
     curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
@@ -135,7 +118,7 @@ int main(int argc, char *argv[])
     struct hostent *he;  /* gethostbyname() resolve */
 
 #ifdef __AMIGA__
-    he = gethostbyname((unsigned char *)host);
+    he = gethostbyname((unsigned char *)CURL_UNCONST(host));
 #else
     he = gethostbyname(host);
 #endif

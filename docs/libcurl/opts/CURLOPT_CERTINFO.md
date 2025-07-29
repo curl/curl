@@ -16,7 +16,6 @@ TLS-backend:
   - OpenSSL
   - GnuTLS
   - Schannel
-  - Secure Transport
   - rustls
 Added-in: 7.19.1
 ---
@@ -88,8 +87,7 @@ int main(void)
 
 # HISTORY
 
-Schannel support added in 7.50.0. Secure Transport support added in 7.79.0.
-mbedTLS support added in 8.9.0.
+Schannel support added in 7.50.0. mbedTLS support added in 8.9.0.
 
 # %AVAILABILITY%
 

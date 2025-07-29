@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-void tool_help(char *category);
+void tool_help(const char *category);
 void tool_list_engines(void);
 void tool_version_info(void);
 struct scan_ctx {
@@ -45,7 +45,7 @@ struct scan_ctx {
 };
 void inithelpscan(struct scan_ctx *ctx, const char *trigger,
                   const char *arg, const char *endarg);
-bool helpscan(unsigned char *buf, size_t len, struct scan_ctx *ctx);
+bool helpscan(const unsigned char *buf, size_t len, struct scan_ctx *ctx);
 
 struct helptxt {
   const char *opt;

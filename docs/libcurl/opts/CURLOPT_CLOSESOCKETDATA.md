@@ -31,6 +31,11 @@ Pass a *pointer* that remains untouched by libcurl and passed as the first
 argument in the closesocket callback set with
 CURLOPT_CLOSESOCKETFUNCTION(3).
 
+Note that when using multi/share handles, your callback may get invoked even
+after the easy handle has been cleaned up. The callback and data is
+inherited by a new connection and that connection may live longer
+than the transfer itself in the multi/share handle's connection cache.
+
 # DEFAULT
 
 NULL

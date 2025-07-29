@@ -48,9 +48,6 @@ typedef enum {
  */
 struct pingpong {
   size_t nread_resp;  /* number of bytes currently read of a server response */
-  bool pending_resp;  /* set TRUE when a server response is pending or in
-                         progress, and is cleared once the last response is
-                         read */
   char *sendthis; /* pointer to a buffer that is to be sent to the server */
   size_t sendleft; /* number of bytes left to send from the sendthis buffer */
   size_t sendsize; /* total size of the sendthis buffer */
@@ -62,7 +59,7 @@ struct pingpong {
   struct dynbuf recvbuf;
   size_t overflow; /* number of bytes left after a final response line */
   size_t nfinal;   /* number of bytes in the final response line, which
-                      after a match is first in the receice buffer */
+                      after a match is first in the receive buffer */
 
   /* Function pointers the protocols MUST implement and provide for the
      pingpong layer to function */
@@ -70,13 +67,17 @@ struct pingpong {
   CURLcode (*statemachine)(struct Curl_easy *data, struct connectdata *conn);
   bool (*endofresp)(struct Curl_easy *data, struct connectdata *conn,
                     const char *ptr, size_t len, int *code);
+  BIT(initialised);
+  BIT(pending_resp);  /* set TRUE when a server response is pending or in
+                         progress, and is cleared once the last response is
+                         read */
 };
 
 #define PINGPONG_SETUP(pp,s,e)                   \
   do {                                           \
-    pp->response_time = RESP_TIMEOUT;            \
-    pp->statemachine = s;                        \
-    pp->endofresp = e;                           \
+    (pp)->response_time = RESP_TIMEOUT;          \
+    (pp)->statemachine = s;                      \
+    (pp)->endofresp = e;                         \
   } while(0)
 
 /*

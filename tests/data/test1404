@@ -25,15 +25,16 @@ Connection: close
 <client>
 <features>
 Mime
+--libcurl
 </features>
 <server>
 http
 </server>
 <name>
---libcurl for HTTP RFC1867-type formposting - -F with 3 files, one with explicit type & encoder
+--libcurl plus -F with 3 files, one with explicit type & encoder
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2' --libcurl %LOGDIR/test%TESTNUMBER.c
@@ -98,6 +99,7 @@ $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 # CURL_DOES_CONVERSION generates an extra comment.
 $_ = '' if /\/\* "value" \*\//
 </stripfile>
@@ -125,6 +127,7 @@ int main(int argc, char *argv[])
   slist1 = curl_slist_append(slist1, "X-testheader-2: header 2");
 
   hnd = curl_easy_init();
+  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
   mime1 = curl_mime_init(hnd);
@@ -149,28 +152,24 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-%if ftp
-  curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
-%endif
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated
      as source easily. You may choose to either not use them or implement
      them yourself.
 
+  CURLOPT_DEBUGFUNCTION was set to a function pointer
+  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_WRITEDATA was set to an object pointer
   CURLOPT_WRITEFUNCTION was set to a function pointer
   CURLOPT_READDATA was set to an object pointer
   CURLOPT_READFUNCTION was set to a function pointer
   CURLOPT_SEEKDATA was set to an object pointer
   CURLOPT_SEEKFUNCTION was set to a function pointer
-  CURLOPT_ERRORBUFFER was set to an object pointer
-  CURLOPT_STDERR was set to an object pointer
-  CURLOPT_DEBUGFUNCTION was set to a function pointer
-  CURLOPT_DEBUGDATA was set to an object pointer
   CURLOPT_HEADERFUNCTION was set to a function pointer
   CURLOPT_HEADERDATA was set to an object pointer
+  CURLOPT_ERRORBUFFER was set to an object pointer
+  CURLOPT_STDERR was set to an object pointer
 
   */
 

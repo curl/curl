@@ -226,7 +226,7 @@ printed with an explicit precision 0, the output is empty.
 
 ## e, E
 
-The double argument is rounded and output in the style **"[-]d.ddde±dd"**
+The double argument is rounded and output in the style **"[-]d.ddde{+|-}dd"**
 
 ## f, F
 

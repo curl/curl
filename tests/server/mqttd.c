@@ -21,10 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "server_setup.h"
+#include "first.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
 
 /* Function
  *
@@ -36,32 +36,6 @@
  */
 
 /* based on sockfilt.c */
-
-#ifndef UNDER_CE
-#include <signal.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
-#include "curlx.h" /* from the private lib dir */
-#include "getpart.h"
-#include "server_sockaddr.h"
-#include "warnless.h"
-
-#include "tool_binmode.h"
-
-/* include memdebug.h last */
-#include "memdebug.h"
 
 #define MQTT_MSG_CONNECT    0x10
 #define MQTT_MSG_CONNACK    0x20
@@ -107,7 +81,7 @@ static void mqttd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[32];
-      if(2 == sscanf(buffer, "%31s %31s", key, value)) {
+      if(sscanf(buffer, "%31s %31s", key, value) == 2) {
         if(!strcmp(key, "version")) {
           m_config.version = byteval(value);
           logmsg("version [%d] set", m_config.version);
@@ -158,13 +132,13 @@ static void logprotocol(mqttdir dir,
   int left = sizeof(data);
 
   for(i = 0; i < len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
+    snprintf(optr, left, "%02x", ptr[i]);
     optr += 2;
     left -= 2;
   }
-  fprintf(output, "%s %s %zx %s\n",
+  fprintf(output, "%s %s %x %s\n",
           dir == FROM_CLIENT ? "client" : "server",
-          prefix, remlen, data);
+          prefix, (int)remlen, data);
 }
 
 
@@ -254,11 +228,8 @@ static int disconnect(FILE *dump, curl_socket_t fd)
   return 1;
 }
 
-
-
 /*
   do
-
      encodedByte = X MOD 128
 
      X = X DIV 128
@@ -326,7 +297,7 @@ static size_t decode_length(unsigned char *buffer,
 /* return 0 on success */
 static int publish(FILE *dump,
                    curl_socket_t fd, unsigned short packetid,
-                   char *topic, char *payload, size_t payloadlen)
+                   char *topic, const char *payload, size_t payloadlen)
 {
   size_t topiclen = strlen(topic);
   unsigned char *packet;
@@ -447,7 +418,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     'M','Q','T','T',  /* protocol name */
     0x04              /* protocol level */
   };
-  msnprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
+  snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
   dump = fopen(dumpfile, "ab");
   if(!dump)
     goto end;
@@ -464,6 +435,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     logmsg("Out of memory, unable to allocate buffer");
     goto end;
   }
+  memset(buffer, 0, buff_size);
 
   do {
     unsigned char usr_flag = 0x80;
@@ -584,6 +556,12 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       logmsg("SUBSCRIBE to '%s' [%d]", topic, packet_id);
       stream = test2fopen(testno, logdir);
+      if(!stream) {
+        error = errno;
+        logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+        logmsg("Couldn't open test file %ld", testno);
+        goto end;
+      }
       error = getpart(&data, &datalen, "reply", "data", stream);
       if(!error) {
         if(!m_config.publish_before_suback) {
@@ -607,7 +585,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         }
       }
       else {
-        char *def = (char *)"this is random payload yes yes it is";
+        const char *def = "this is random payload yes yes it is";
         publish(dump, fd, packet_id, topic, def, strlen(def));
       }
       disconnect(dump, fd);
@@ -688,12 +666,12 @@ static bool mqttd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_err);
 
     /* there's always a socket to wait for */
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
     FD_SET(sockfd, &fds_read);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
 
@@ -716,12 +694,11 @@ static bool mqttd_incoming(curl_socket_t listenfd)
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
-               "failed with error (%d) %s", sockfd, error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
       }
       else {
-        logmsg("====> Client connect, fd %" FMT_SOCKET_T ". "
-               "Read config from %s", newfd, configfile);
+        logmsg("====> Client connect, fd %ld. "
+               "Read config from %s", (long)newfd, configfile);
         set_advisor_read_lock(loglockfile);
         (void)mqttit(newfd); /* until done */
         clear_advisor_read_lock(loglockfile);
@@ -735,150 +712,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static curl_socket_t mqttd_sockdaemon(curl_socket_t sock,
-                                      unsigned short *listenport,
-                                      bool bind_only)
-{
-  /* passive daemon style */
-  srvr_sockaddr_union_t listener;
-  int flag;
-  int rc;
-  int totdelay = 0;
-  int maxretr = 10;
-  int delay = 20;
-  int attempt = 0;
-  int error = 0;
-
-  do {
-    attempt++;
-    flag = 1;
-    rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-         (void *)&flag, sizeof(flag));
-    if(rc) {
-      error = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             error, sstrerror(error));
-      if(maxretr) {
-        rc = wait_ms(delay);
-        if(rc) {
-          /* should not happen */
-          error = SOCKERRNO;
-          logmsg("wait_ms() failed with error (%d) %s",
-                 error, sstrerror(error));
-          sclose(sock);
-          return CURL_SOCKET_BAD;
-        }
-        if(got_exit_signal) {
-          logmsg("signalled to die, exiting...");
-          sclose(sock);
-          return CURL_SOCKET_BAD;
-        }
-        totdelay += delay;
-        delay *= 2; /* double the sleep for next attempt */
-      }
-    }
-  } while(rc && maxretr--);
-
-  if(rc) {
-    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
-           attempt, totdelay, error, strerror(error));
-    logmsg("Continuing anyway...");
-  }
-
-  /* When the specified listener port is zero, it is actually a
-     request to let the system choose a non-zero available port. */
-
-#ifdef USE_IPV6
-  if(!use_ipv6) {
-#endif
-    memset(&listener.sa4, 0, sizeof(listener.sa4));
-    listener.sa4.sin_family = AF_INET;
-    listener.sa4.sin_addr.s_addr = INADDR_ANY;
-    listener.sa4.sin_port = htons(*listenport);
-    rc = bind(sock, &listener.sa, sizeof(listener.sa4));
-#ifdef USE_IPV6
-  }
-  else {
-    memset(&listener.sa6, 0, sizeof(listener.sa6));
-    listener.sa6.sin6_family = AF_INET6;
-    listener.sa6.sin6_addr = in6addr_any;
-    listener.sa6.sin6_port = htons(*listenport);
-    rc = bind(sock, &listener.sa, sizeof(listener.sa6));
-  }
-#endif /* USE_IPV6 */
-  if(rc) {
-    error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s",
-           *listenport, error, sstrerror(error));
-    sclose(sock);
-    return CURL_SOCKET_BAD;
-  }
-
-  if(!*listenport) {
-    /* The system was supposed to choose a port number, figure out which
-       port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
-    srvr_sockaddr_union_t localaddr;
-#ifdef USE_IPV6
-    if(!use_ipv6)
-#endif
-      la_size = sizeof(localaddr.sa4);
-#ifdef USE_IPV6
-    else
-      la_size = sizeof(localaddr.sa6);
-#endif
-    memset(&localaddr.sa, 0, (size_t)la_size);
-    if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
-      error = SOCKERRNO;
-      logmsg("getsockname() failed with error (%d) %s",
-             error, sstrerror(error));
-      sclose(sock);
-      return CURL_SOCKET_BAD;
-    }
-    switch(localaddr.sa.sa_family) {
-    case AF_INET:
-      *listenport = ntohs(localaddr.sa4.sin_port);
-      break;
-#ifdef USE_IPV6
-    case AF_INET6:
-      *listenport = ntohs(localaddr.sa6.sin6_port);
-      break;
-#endif
-    default:
-      break;
-    }
-    if(!*listenport) {
-      /* Real failure, listener port shall not be zero beyond this point. */
-      logmsg("Apparently getsockname() succeeded, with listener port zero.");
-      logmsg("A valid reason for this failure is a binary built without");
-      logmsg("proper network library linkage. This might not be the only");
-      logmsg("reason, but double check it before anything else.");
-      sclose(sock);
-      return CURL_SOCKET_BAD;
-    }
-  }
-
-  /* bindonly option forces no listening */
-  if(bind_only) {
-    logmsg("instructed to bind port without listening");
-    return sock;
-  }
-
-  /* start accepting connections */
-  rc = listen(sock, 5);
-  if(0 != rc) {
-    error = SOCKERRNO;
-    logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error (%d) %s",
-           sock, error, sstrerror(error));
-    sclose(sock);
-    return CURL_SOCKET_BAD;
-  }
-
-  return sock;
-}
-
-
-int main(int argc, char *argv[])
+static int test_mqttd(int argc, char *argv[])
 {
   curl_socket_t sock = CURL_SOCKET_BAD;
   curl_socket_t msgsock = CURL_SOCKET_BAD;
@@ -932,16 +766,16 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef USE_IPV6
+      socket_domain = AF_INET6;
       ipv_inuse = "IPv6";
-      use_ipv6 = TRUE;
 #endif
       arg++;
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
 #ifdef USE_IPV6
+      socket_domain = AF_INET;
       ipv_inuse = "IPv4";
-      use_ipv6 = FALSE;
 #endif
       arg++;
     }
@@ -975,28 +809,21 @@ int main(int argc, char *argv[])
     }
   }
 
-  msnprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
-            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
+  snprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
+           logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
 #ifdef _WIN32
   if(win32_init())
     return 2;
 #endif
 
-  CURL_SET_BINMODE(stdin);
-  CURL_SET_BINMODE(stdout);
-  CURL_SET_BINMODE(stderr);
+  CURLX_SET_BINMODE(stdin);
+  CURLX_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stderr);
 
   install_signal_handlers(FALSE);
 
-#ifdef USE_IPV6
-  if(!use_ipv6)
-#endif
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-#ifdef USE_IPV6
-  else
-    sock = socket(AF_INET6, SOCK_STREAM, 0);
-#endif
+  sock = socket(socket_domain, SOCK_STREAM, 0);
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
@@ -1006,7 +833,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = mqttd_sockdaemon(sock, &server_port, FALSE);
+    sock = sockdaemon(sock, &server_port, NULL, FALSE);
     if(CURL_SOCKET_BAD == sock) {
       goto mqttd_cleanup;
     }

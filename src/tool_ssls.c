@@ -23,25 +23,22 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_cb_dbg.h"
 #include "tool_msgs.h"
 #include "tool_setopt.h"
 #include "tool_ssls.h"
-#include "dynbuf.h"
-#include "curl_base64.h"
 #include "tool_parsecfg.h"
 
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
 
 
-static CURLcode tool_ssls_easy(struct GlobalConfig *global,
-                               struct OperationConfig *config,
+static CURLcode tool_ssls_easy(struct OperationConfig *config,
                                CURLSH *share, CURL **peasy)
 {
   CURLcode result = CURLE_OK;
+  struct GlobalConfig *global = config->global;
 
   *peasy = curl_easy_init();
   if(!*peasy)
@@ -51,13 +48,12 @@ static CURLcode tool_ssls_easy(struct GlobalConfig *global,
   if(!result && (global->tracetype != TRACE_NONE)) {
     my_setopt(*peasy, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(*peasy, CURLOPT_DEBUGDATA, config);
-    my_setopt(*peasy, CURLOPT_VERBOSE, 1L);
+    my_setopt_long(*peasy, CURLOPT_VERBOSE, 1L);
   }
   return result;
 }
 
-CURLcode tool_ssls_load(struct GlobalConfig *global,
-                        struct OperationConfig *config,
+CURLcode tool_ssls_load(struct OperationConfig *config,
                         CURLSH *share, const char *filename)
 {
   FILE *fp;
@@ -69,6 +65,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
   CURLcode r = CURLE_OK;
   int i, imported;
   bool error = FALSE;
+  struct GlobalConfig *global = config->global;
 
   curlx_dyn_init(&buf, MAX_SSLS_LINE);
   fp = fopen(filename, FOPEN_READTEXT);
@@ -77,7 +74,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     goto out;
   }
 
-  r = tool_ssls_easy(global, config, share, &easy);
+  r = tool_ssls_easy(config, share, &easy);
   if(r)
     goto out;
 
@@ -86,7 +83,7 @@ CURLcode tool_ssls_load(struct GlobalConfig *global,
     ++i;
     curl_free(shmac);
     curl_free(sdata);
-    line = Curl_dyn_ptr(&buf);
+    line = curlx_dyn_ptr(&buf);
 
     c = memchr(line, ':', strlen(line));
     if(!c) {
@@ -190,23 +187,23 @@ out:
   return r;
 }
 
-CURLcode tool_ssls_save(struct GlobalConfig *global,
-                        struct OperationConfig *config,
+CURLcode tool_ssls_save(struct OperationConfig *config,
                         CURLSH *share, const char *filename)
 {
   struct tool_ssls_ctx ctx;
   CURL *easy = NULL;
   CURLcode r = CURLE_OK;
 
-  ctx.global = global;
+  ctx.global = config->global;
   ctx.exported = 0;
   ctx.fp = fopen(filename, FOPEN_WRITETEXT);
   if(!ctx.fp) {
-    warnf(global, "Warning: Failed to create SSL session file %s", filename);
+    warnf(config->global, "Warning: Failed to create SSL session file %s",
+          filename);
     goto out;
   }
 
-  r = tool_ssls_easy(global, config, share, &easy);
+  r = tool_ssls_easy(config, share, &easy);
   if(r)
     goto out;
 

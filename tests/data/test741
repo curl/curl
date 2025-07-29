@@ -13,6 +13,9 @@ IPFS
 #
 # Client-side
 <client>
+<features>
+ipfs
+</features>
 <server>
 http
 </server>
@@ -20,7 +23,7 @@ http
 HOME=%PWD/%LOGDIR
 </setenv>
 <name>
-IPFS with malformed gateway URL from multiline gateway file, first line no url
+IPFS malformed gw URL from multiline gateway file, first line no url
 </name>
 <command>
 ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u

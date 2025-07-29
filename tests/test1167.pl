@@ -43,7 +43,7 @@ my $rc = eval {
 };
 # Set default values if configure has not generated a configurehelp.pm file.
 # This is the case with cmake.
-if (!$rc) {
+if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 
@@ -67,8 +67,6 @@ my $summary=0;
 my $misses=0;
 
 my @syms;
-my %doc;
-my %rem;
 
 sub scanenums {
     my ($file)=@_;
@@ -76,9 +74,9 @@ sub scanenums {
 
     open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
         die "Cannot preprocess $file";
-    while ( <H_IN> ) {
+    while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
-        if( /^#(line|) (\d+) \"(.*)\"/) {
+        if(/^#(line|) (\d+) \"(.*)\"/) {
             # if the included file isn't in our incdir, then we skip this section
             # until next #line
             #
@@ -93,10 +91,10 @@ sub scanenums {
         if($skipit) {
             next;
         }
-        if (/^#/) {
+        if(/^#/) {
             next;
         }
-        if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
+        if(/enum\s+(\S+\s+)?{/ .. /}/) {
             s/^\s+//;
             chomp;
             s/[,\s].*//;
@@ -124,7 +122,7 @@ sub scanheader {
     open H, "<$f";
     while(<H>) {
         my ($line, $linenum) = ($_, $.);
-        if (/^ *# *define +([^ \n]*)/) {
+        if(/^ *# *define +([^ \n]*)/) {
             if($verbose) {
                 print "Source: $f\n";
                 print "Symbol: $1\n";

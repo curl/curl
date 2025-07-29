@@ -66,14 +66,14 @@ proxy
 <proxy>
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.0
 Host: test.%TESTNUMBER:%HTTPPORT
-Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
+Proxy-Authorization: Basic %b64[youare:yourself]b64%
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-Authorization: Basic aWFtOm15c2VsZg==
+Authorization: Basic %b64[iam:myself]b64%
 Accept: */*
 
 </protocol>

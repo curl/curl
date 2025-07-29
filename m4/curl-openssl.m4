@@ -316,12 +316,17 @@ if test "x$OPT_OPENSSL" != xno; then
   fi
 
   dnl is this OpenSSL (fork) providing the original QUIC API?
-  AC_CHECK_FUNCS([SSL_set_quic_use_legacy_codepoint],
-                 [QUIC_ENABLED=yes])
+  AC_CHECK_FUNCS([SSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])
   if test "$QUIC_ENABLED" = "yes"; then
     AC_MSG_NOTICE([OpenSSL fork speaks QUIC API])
   else
-    AC_MSG_NOTICE([OpenSSL version does not speak QUIC API])
+    AC_CHECK_FUNCS([SSL_set_quic_tls_cbs], [QUIC_ENABLED=yes])
+    if test "$QUIC_ENABLED" = "yes"; then
+      AC_MSG_NOTICE([OpenSSL with QUIC APIv2])
+      OPENSSL_QUIC_API2=1
+    else
+      AC_MSG_NOTICE([OpenSSL version does not speak any known QUIC API])
+    fi
   fi
 
   if test "$OPENSSL_ENABLED" = "1"; then

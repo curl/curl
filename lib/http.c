@@ -54,7 +54,7 @@
 #include "formdata.h"
 #include "mime.h"
 #include "progress.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "cookie.h"
 #include "vauth/vauth.h"
 #include "vtls/vtls.h"
@@ -72,12 +72,11 @@
 #include "headers.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
-#include "strtoofft.h"
 #include "multiif.h"
 #include "strcase.h"
 #include "content_encoding.h"
 #include "http_proxy.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "http2.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -86,7 +85,7 @@
 #include "hsts.h"
 #include "ws.h"
 #include "curl_ctype.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -117,7 +116,7 @@ static CURLcode http_req_set_reader(struct Curl_easy *data,
                                     const char **tep);
 static CURLcode http_size(struct Curl_easy *data);
 static CURLcode http_statusline(struct Curl_easy *data,
-                                     struct connectdata *conn);
+                                struct connectdata *conn);
 static CURLcode http_target(struct Curl_easy *data, struct connectdata *conn,
                             struct dynbuf *req);
 static CURLcode http_useragent(struct Curl_easy *data);
@@ -233,7 +232,7 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
   connkeep(conn, "HTTP default");
   if(data->state.http_neg.wanted == CURL_HTTP_V3x) {
     /* only HTTP/3, needs to work */
-    CURLcode result = Curl_conn_may_http3(data, conn);
+    CURLcode result = Curl_conn_may_http3(data, conn, conn->transport_wanted);
     if(result)
       return result;
   }
@@ -260,7 +259,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
   for(head = (conn->bits.proxy && data->set.sep_headers) ?
         data->set.proxyheaders : data->set.headers;
       head; head = head->next) {
-    if(strncasecompare(head->data, thisheader, thislen) &&
+    if(curl_strnequal(head->data, thisheader, thislen) &&
        Curl_headersep(head->data[thislen]))
       return head->data;
   }
@@ -286,12 +285,12 @@ char *Curl_copy_header_value(const char *header)
   struct Curl_str out;
 
   /* find the end of the header name */
-  if(!Curl_str_cspn(&header, &out, ";:") &&
-     (!Curl_str_single(&header, ':') || !Curl_str_single(&header, ';'))) {
-    Curl_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
-    Curl_str_trimblanks(&out);
+  if(!curlx_str_cspn(&header, &out, ";:") &&
+     (!curlx_str_single(&header, ':') || !curlx_str_single(&header, ';'))) {
+    curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
+    curlx_str_trimblanks(&out);
 
-    return Curl_memdup0(Curl_str(&out), Curl_strlen(&out));
+    return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
   /* bad input */
   return NULL;
@@ -337,7 +336,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
-  result = Curl_base64_encode(out, strlen(out), &authorization, &size);
+  result = curlx_base64_encode(out, strlen(out), &authorization, &size);
   if(result)
     goto fail;
 
@@ -475,7 +474,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(abort_upload) {
     /* We'd like to abort the upload - but should we? */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
       ongoing_auth = "NTLM";
@@ -487,7 +486,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
       }
     }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
@@ -583,7 +582,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     /* In case this is GSS auth, the newurl field is already allocated so
        we must make sure to free it before allocating a new one. As figured
        out in bug #2284386 */
-    Curl_safefree(data->req.newurl);
+    free(data->req.newurl);
     data->req.newurl = strdup(data->state.url); /* clone URL */
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
@@ -769,12 +768,12 @@ Curl_http_output_auth(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     (conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
 #endif
-     data->state.aptr.user ||
+    data->state.aptr.user ||
 #ifdef USE_SPNEGO
-     authhost->want & CURLAUTH_NEGOTIATE ||
-     authproxy->want & CURLAUTH_NEGOTIATE ||
+    authhost->want & CURLAUTH_NEGOTIATE ||
+    authproxy->want & CURLAUTH_NEGOTIATE ||
 #endif
-     data->set.str[STRING_BEARER])
+    data->set.str[STRING_BEARER])
     /* continue please */;
   else {
     authhost->done = TRUE;
@@ -863,7 +862,7 @@ static bool authcmp(const char *auth, const char *line)
 {
   /* the auth string must not have an alnum following */
   size_t n = strlen(auth);
-  return strncasecompare(auth, line, n) && !ISALNUM(line[n]);
+  return curl_strnequal(auth, line, n) && !ISALNUM(line[n]);
 }
 #endif
 
@@ -1074,14 +1073,16 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       auth++;
     else
       break;
-    Curl_str_passblanks(&auth);
+    curlx_str_passblanks(&auth);
   }
-#else
-  (void) proxy;
-  /* nothing to do when disabled */
-#endif
-
   return result;
+#else
+  (void)data;
+  (void)proxy;
+  (void)auth;
+  /* nothing to do when disabled */
+  return CURLE_OK;
+#endif
 }
 
 /**
@@ -1177,6 +1178,8 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
   bool reachedmax = FALSE;
   char *follow_url = NULL;
   CURLUcode uc;
+  CURLcode rewind_result;
+  bool switch_to_get = FALSE;
 
   DEBUGASSERT(type != FOLLOW_NONE);
 
@@ -1334,7 +1337,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
 
   data->state.url = follow_url;
   data->state.url_alloc = TRUE;
-  Curl_req_soft_reset(&data->req, data);
+  rewind_result = Curl_req_soft_reset(&data->req, data);
   infof(data, "Issue another request to this URL: '%s'", data->state.url);
   if((data->set.http_follow_mode == CURLFOLLOW_FIRSTONLY) &&
      data->set.str[STRING_CUSTOMREQUEST] &&
@@ -1383,8 +1386,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_301))
+       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
       http_switch_to_get(data, 301);
+      switch_to_get = TRUE;
+    }
     break;
   case 302: /* Found */
     /* (quote from RFC7231, section 6.4.3)
@@ -1406,8 +1411,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     if((data->state.httpreq == HTTPREQ_POST
         || data->state.httpreq == HTTPREQ_POST_FORM
         || data->state.httpreq == HTTPREQ_POST_MIME)
-       && !(data->set.keep_post & CURL_REDIR_POST_302))
+       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
       http_switch_to_get(data, 302);
+      switch_to_get = TRUE;
+    }
     break;
 
   case 303: /* See Other */
@@ -1420,8 +1427,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
        ((data->state.httpreq != HTTPREQ_POST &&
          data->state.httpreq != HTTPREQ_POST_FORM &&
          data->state.httpreq != HTTPREQ_POST_MIME) ||
-        !(data->set.keep_post & CURL_REDIR_POST_303)))
+        !(data->set.keep_post & CURL_REDIR_POST_303))) {
       http_switch_to_get(data, 303);
+      switch_to_get = TRUE;
+    }
     break;
   case 304: /* Not Modified */
     /* 304 means we did a conditional request and it was "Not modified".
@@ -1438,6 +1447,12 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
      */
     break;
   }
+
+  /* When rewind of upload data failed and we are not switching to GET,
+   * we need to fail the follow, as we cannot send the data again. */
+  if(rewind_result && !switch_to_get)
+    return rewind_result;
+
   Curl_pgrsTime(data, TIMER_REDIRECT);
   Curl_pgrsResetTransferSizes(data);
 
@@ -1469,22 +1484,22 @@ Curl_compareheader(const char *headerline, /* line to check */
   DEBUGASSERT(header);
   DEBUGASSERT(content);
 
-  if(!strncasecompare(headerline, header, hlen))
+  if(!curl_strnequal(headerline, header, hlen))
     return FALSE; /* does not start with header */
 
   /* pass the header */
   p = &headerline[hlen];
 
-  if(Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE))
+  if(curlx_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE))
     return FALSE;
-  Curl_str_trimblanks(&val);
+  curlx_str_trimblanks(&val);
 
   /* find the content string in the rest of the line */
-  if(Curl_strlen(&val) >= clen) {
+  if(curlx_strlen(&val) >= clen) {
     size_t len;
-    p = Curl_str(&val);
-    for(len = Curl_strlen(&val); len >= Curl_strlen(&val); len--, p++) {
-      if(strncasecompare(p, content, clen))
+    p = curlx_str(&val);
+    for(len = curlx_strlen(&val); len >= curlx_strlen(&val); len--, p++) {
+      if(curl_strnequal(p, content, clen))
         return TRUE; /* match! */
     }
   }
@@ -1534,7 +1549,7 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authhost.multipass = FALSE;
   data->state.authproxy.multipass = FALSE;
 
-  Curl_dyn_reset(&data->state.headerb);
+  curlx_dyn_reset(&data->state.headerb);
 
   if(status)
     return status;
@@ -1655,19 +1670,19 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
       /* explicitly asked to send header without content is done by a header
          that ends with a semicolon, but there must be no colon present in the
          name */
-      if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ';') &&
-         !Curl_str_single(&p, ';') &&
-         !Curl_str_single(&p, '\0') &&
-         !memchr(Curl_str(&name), ':', Curl_strlen(&name)))
+      if(!curlx_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ';') &&
+         !curlx_str_single(&p, ';') &&
+         !curlx_str_single(&p, '\0') &&
+         !memchr(curlx_str(&name), ':', curlx_strlen(&name)))
         blankheader = TRUE;
       else {
         p = origp;
-        if(!Curl_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
-           !Curl_str_single(&p, ':')) {
+        if(!curlx_str_until(&p, &name, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
+           !curlx_str_single(&p, ':')) {
           struct Curl_str val;
-          Curl_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
-          Curl_str_trimblanks(&val);
-          if(!Curl_strlen(&val))
+          curlx_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
+          curlx_str_trimblanks(&val);
+          if(!curlx_strlen(&val))
             /* no content, don't send this */
             continue;
         }
@@ -1682,41 +1697,41 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
          /* a Host: header was sent already, do not pass on any custom
             Host: header as that will produce *two* in the same
             request! */
-         Curl_str_casecompare(&name, "Host"))
+         curlx_str_casecompare(&name, "Host"))
         ;
       else if(data->state.httpreq == HTTPREQ_POST_FORM &&
               /* this header (extended by formdata.c) is sent later */
-              Curl_str_casecompare(&name, "Content-Type"))
+              curlx_str_casecompare(&name, "Content-Type"))
         ;
       else if(data->state.httpreq == HTTPREQ_POST_MIME &&
               /* this header is sent later */
-              Curl_str_casecompare(&name, "Content-Type"))
+              curlx_str_casecompare(&name, "Content-Type"))
         ;
       else if(data->req.authneg &&
               /* while doing auth neg, do not allow the custom length since
                  we will force length zero then */
-              Curl_str_casecompare(&name, "Content-Length"))
+              curlx_str_casecompare(&name, "Content-Length"))
         ;
       else if(data->state.aptr.te &&
               /* when asking for Transfer-Encoding, do not pass on a custom
                  Connection: */
-              Curl_str_casecompare(&name, "Connection"))
+              curlx_str_casecompare(&name, "Connection"))
         ;
       else if((httpversion >= 20) &&
-              Curl_str_casecompare(&name, "Transfer-Encoding"))
+              curlx_str_casecompare(&name, "Transfer-Encoding"))
         /* HTTP/2 does not support chunked requests */
         ;
-      else if((Curl_str_casecompare(&name, "Authorization") ||
-               Curl_str_casecompare(&name, "Cookie")) &&
+      else if((curlx_str_casecompare(&name, "Authorization") ||
+               curlx_str_casecompare(&name, "Cookie")) &&
               /* be careful of sending this potentially sensitive header to
                  other hosts */
               !Curl_auth_allowed_to_host(data))
         ;
       else if(blankheader)
-        result = Curl_dyn_addf(req, "%.*s:\r\n", (int)Curl_strlen(&name),
-                               Curl_str(&name));
+        result = curlx_dyn_addf(req, "%.*s:\r\n", (int)curlx_strlen(&name),
+                                curlx_str(&name));
       else
-        result = Curl_dyn_addf(req, "%s\r\n", origp);
+        result = curlx_dyn_addf(req, "%s\r\n", origp);
 
       if(result)
         return result;
@@ -1791,7 +1806,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
             tm->tm_min,
             tm->tm_sec);
 
-  result = Curl_dyn_add(req, datestr);
+  result = curlx_dyn_add(req, datestr);
   return result;
 }
 #else
@@ -1880,8 +1895,8 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
 
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
-             strcasecompare(data->state.first_host, conn->host.name))) {
-#if !defined(CURL_DISABLE_COOKIES)
+             curl_strequal(data->state.first_host, conn->host.name))) {
+#ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
@@ -1911,12 +1926,12 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
         if(colon)
           *colon = 0; /* The host must not include an embedded port number */
       }
-      Curl_safefree(aptr->cookiehost);
+      free(aptr->cookiehost);
       aptr->cookiehost = cookiehost;
     }
 #endif
 
-    if(!strcasecompare("Host:", ptr)) {
+    if(!curl_strequal("Host:", ptr)) {
       aptr->host = aprintf("Host:%s\r\n", &ptr[5]);
       if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
@@ -1992,7 +2007,7 @@ static CURLcode http_target(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
     }
 
-    if(strcasecompare("http", data->state.up.scheme)) {
+    if(curl_strequal("http", data->state.up.scheme)) {
       /* when getting HTTP, we do not want the userinfo the URL */
       uc = curl_url_set(h, CURLUPART_USER, NULL, 0);
       if(uc) {
@@ -2015,13 +2030,13 @@ static CURLcode http_target(struct Curl_easy *data,
     curl_url_cleanup(h);
 
     /* target or URL */
-    result = Curl_dyn_add(r, data->set.str[STRING_TARGET] ?
+    result = curlx_dyn_add(r, data->set.str[STRING_TARGET] ?
       data->set.str[STRING_TARGET] : url);
     free(url);
     if(result)
       return result;
 
-    if(strcasecompare("ftp", data->state.up.scheme)) {
+    if(curl_strequal("ftp", data->state.up.scheme)) {
       if(data->set.proxy_transfer_mode) {
         /* when doing ftp, append ;type=<a|i> if not present */
         char *type = strstr(path, ";type=");
@@ -2036,8 +2051,8 @@ static CURLcode http_target(struct Curl_easy *data,
           }
         }
         if(!type) {
-          result = Curl_dyn_addf(r, ";type=%c",
-                                 data->state.prefer_ascii ? 'a' : 'i');
+          result = curlx_dyn_addf(r, ";type=%c",
+                                  data->state.prefer_ascii ? 'a' : 'i');
           if(result)
             return result;
         }
@@ -2050,11 +2065,11 @@ static CURLcode http_target(struct Curl_easy *data,
     (void)conn; /* not used in disabled-proxy builds */
 #endif
   {
-    result = Curl_dyn_add(r, path);
+    result = curlx_dyn_add(r, path);
     if(result)
       return result;
     if(query)
-      result = Curl_dyn_addf(r, "?%s", query);
+      result = curlx_dyn_addf(r, "?%s", query);
   }
 
   return result;
@@ -2312,7 +2327,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
        operations (as there is one packet coming back from the web server) */
     curl_off_t client_len = Curl_creader_client_length(data);
     if(client_len > EXPECT_100_THRESHOLD || client_len < 0) {
-      result = Curl_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
+      result = curlx_dyn_addn(r, STRCONST("Expect: 100-continue\r\n"));
       if(result)
         return result;
       *announced_exp100 = TRUE;
@@ -2356,8 +2371,8 @@ static CURLcode http_req_complete(struct Curl_easy *data,
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
          although it is not very wise to actually set your own */
-      result = Curl_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
-                             req_clen);
+      result = curlx_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
+                              req_clen);
     }
     if(result)
       goto out;
@@ -2369,7 +2384,7 @@ static CURLcode http_req_complete(struct Curl_easy *data,
       struct curl_slist *hdr;
 
       for(hdr = data->state.mimepost->curlheaders; hdr; hdr = hdr->next) {
-        result = Curl_dyn_addf(r, "%s\r\n", hdr->data);
+        result = curlx_dyn_addf(r, "%s\r\n", hdr->data);
         if(result)
           goto out;
       }
@@ -2377,8 +2392,8 @@ static CURLcode http_req_complete(struct Curl_easy *data,
 #endif
     if(httpreq == HTTPREQ_POST) {
       if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-        result = Curl_dyn_addn(r, STRCONST("Content-Type: application/"
-                                           "x-www-form-urlencoded\r\n"));
+        result = curlx_dyn_addn(r, STRCONST("Content-Type: application/"
+                                            "x-www-form-urlencoded\r\n"));
         if(result)
           goto out;
       }
@@ -2392,7 +2407,7 @@ static CURLcode http_req_complete(struct Curl_easy *data,
   }
 
   /* end of headers */
-  result = Curl_dyn_addn(r, STRCONST("\r\n"));
+  result = curlx_dyn_addn(r, STRCONST("\r\n"));
   if(!result) {
     Curl_pgrsSetUploadSize(data, req_clen);
     if(announced_exp100)
@@ -2407,7 +2422,7 @@ out:
   return result;
 }
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
 
 static CURLcode http_cookies(struct Curl_easy *data,
                              struct connectdata *conn,
@@ -2430,7 +2445,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
         data->state.aptr.cookiehost : conn->host.name;
       const bool secure_context =
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
-        strcasecompare("localhost", host) ||
+        curl_strequal("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
         !strcmp(host, "::1");
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
@@ -2448,7 +2463,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
         if(co->value) {
           size_t add;
           if(!count) {
-            result = Curl_dyn_addn(r, STRCONST("Cookie: "));
+            result = curlx_dyn_addn(r, STRCONST("Cookie: "));
             if(result)
               break;
           }
@@ -2459,8 +2474,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
             linecap = TRUE;
             break;
           }
-          result = Curl_dyn_addf(r, "%s%s=%s", count ? "; " : "",
-                                 co->name, co->value);
+          result = curlx_dyn_addf(r, "%s%s=%s", count ? "; " : "",
+                                  co->name, co->value);
           if(result)
             break;
           clen += add + (count ? 2 : 0);
@@ -2471,14 +2486,14 @@ static CURLcode http_cookies(struct Curl_easy *data,
     }
     if(addcookies && !result && !linecap) {
       if(!count)
-        result = Curl_dyn_addn(r, STRCONST("Cookie: "));
+        result = curlx_dyn_addn(r, STRCONST("Cookie: "));
       if(!result) {
-        result = Curl_dyn_addf(r, "%s%s", count ? "; " : "", addcookies);
+        result = curlx_dyn_addf(r, "%s%s", count ? "; " : "", addcookies);
         count++;
       }
     }
     if(count && !result)
-      result = Curl_dyn_addn(r, STRCONST("\r\n"));
+      result = curlx_dyn_addn(r, STRCONST("\r\n"));
 
     if(result)
       return result;
@@ -2658,17 +2673,17 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   char *altused = NULL;
   const char *p_accept;      /* Accept: string */
   unsigned char httpversion;
+  const char *alpn;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that are not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
-
-  switch(conn->alpn) {
-  case CURL_HTTP_VERSION_3:
+  alpn = Curl_conn_get_alpn_negotiated(data, conn);
+  if(alpn && !strcmp("h3", alpn)) {
     DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
-    break;
-  case CURL_HTTP_VERSION_2:
+  }
+  else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
     if((Curl_conn_http_version(data, conn) != 20) &&
        conn->bits.proxy && !conn->bits.tunnel_proxy
@@ -2680,11 +2695,8 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     else
 #endif
       DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
-    break;
-  case CURL_HTTP_VERSION_1_1:
-    /* continue with HTTP/1.x when explicitly requested */
-    break;
-  default:
+  }
+  else {
     /* Check if user wants to use HTTP/2 with clear TCP */
     if(Curl_http2_may_switch(data)) {
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
@@ -2692,7 +2704,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       if(result)
         goto fail;
     }
-    break;
   }
 
   /* Add collecting of headers written to client. For a new connection,
@@ -2736,7 +2747,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
      data->set.str[STRING_ENCODING]) {
-    Curl_safefree(data->state.aptr.accept_encoding);
+    free(data->state.aptr.accept_encoding);
     data->state.aptr.accept_encoding =
       aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
     if(!data->state.aptr.accept_encoding)
@@ -2767,19 +2778,19 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
 
   /* initialize a dynamic send-buffer */
-  Curl_dyn_init(&req, DYN_HTTP_REQUEST);
+  curlx_dyn_init(&req, DYN_HTTP_REQUEST);
 
   /* make sure the header buffer is reset - if there are leftovers from a
      previous transfer */
-  Curl_dyn_reset(&data->state.headerb);
+  curlx_dyn_reset(&data->state.headerb);
 
   /* add the main request stuff */
   /* GET/HEAD/POST/PUT */
-  result = Curl_dyn_addf(&req, "%s ", request);
+  result = curlx_dyn_addf(&req, "%s ", request);
   if(!result)
     result = http_target(data, conn, &req);
   if(result) {
-    Curl_dyn_free(&req);
+    curlx_dyn_free(&req);
     goto fail;
   }
 
@@ -2788,62 +2799,62 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     altused = aprintf("Alt-Used: %s:%d\r\n",
                       conn->conn_to_host.name, conn->conn_to_port);
     if(!altused) {
-      Curl_dyn_free(&req);
+      curlx_dyn_free(&req);
       return CURLE_OUT_OF_MEMORY;
     }
   }
 #endif
   result =
-    Curl_dyn_addf(&req,
-                  " HTTP/%s\r\n" /* HTTP version */
-                  "%s" /* host */
-                  "%s" /* proxyuserpwd */
-                  "%s" /* userpwd */
-                  "%s" /* range */
-                  "%s" /* user agent */
-                  "%s" /* accept */
-                  "%s" /* TE: */
-                  "%s" /* accept-encoding */
-                  "%s" /* referer */
-                  "%s" /* Proxy-Connection */
-                  "%s" /* transfer-encoding */
-                  "%s",/* Alt-Used */
+    curlx_dyn_addf(&req,
+                   " HTTP/%s\r\n" /* HTTP version */
+                   "%s" /* host */
+                   "%s" /* proxyuserpwd */
+                   "%s" /* userpwd */
+                   "%s" /* range */
+                   "%s" /* user agent */
+                   "%s" /* accept */
+                   "%s" /* TE: */
+                   "%s" /* accept-encoding */
+                   "%s" /* referer */
+                   "%s" /* Proxy-Connection */
+                   "%s" /* transfer-encoding */
+                   "%s",/* Alt-Used */
 
-                  httpstring,
-                  (data->state.aptr.host ? data->state.aptr.host : ""),
+                   httpstring,
+                   (data->state.aptr.host ? data->state.aptr.host : ""),
 #ifndef CURL_DISABLE_PROXY
-                  data->state.aptr.proxyuserpwd ?
-                  data->state.aptr.proxyuserpwd : "",
+                   data->state.aptr.proxyuserpwd ?
+                   data->state.aptr.proxyuserpwd : "",
 #else
-                  "",
+                   "",
 #endif
-                  data->state.aptr.userpwd ? data->state.aptr.userpwd : "",
-                  (data->state.use_range && data->state.aptr.rangeline) ?
-                  data->state.aptr.rangeline : "",
-                  (data->set.str[STRING_USERAGENT] &&
-                   *data->set.str[STRING_USERAGENT] &&
-                   data->state.aptr.uagent) ?
-                  data->state.aptr.uagent : "",
-                  p_accept ? p_accept : "",
-                  data->state.aptr.te ? data->state.aptr.te : "",
-                  (data->set.str[STRING_ENCODING] &&
-                   *data->set.str[STRING_ENCODING] &&
-                   data->state.aptr.accept_encoding) ?
-                  data->state.aptr.accept_encoding : "",
-                  (data->state.referer && data->state.aptr.ref) ?
-                  data->state.aptr.ref : "" /* Referer: <data> */,
+                   data->state.aptr.userpwd ? data->state.aptr.userpwd : "",
+                   (data->state.use_range && data->state.aptr.rangeline) ?
+                   data->state.aptr.rangeline : "",
+                   (data->set.str[STRING_USERAGENT] &&
+                    *data->set.str[STRING_USERAGENT] &&
+                    data->state.aptr.uagent) ?
+                   data->state.aptr.uagent : "",
+                   p_accept ? p_accept : "",
+                   data->state.aptr.te ? data->state.aptr.te : "",
+                   (data->set.str[STRING_ENCODING] &&
+                    *data->set.str[STRING_ENCODING] &&
+                    data->state.aptr.accept_encoding) ?
+                   data->state.aptr.accept_encoding : "",
+                   (data->state.referer && data->state.aptr.ref) ?
+                   data->state.aptr.ref : "" /* Referer: <data> */,
 #ifndef CURL_DISABLE_PROXY
-                  (conn->bits.httpproxy &&
-                   !conn->bits.tunnel_proxy &&
-                   !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
-                   !Curl_checkProxyheaders(data, conn,
-                                           STRCONST("Proxy-Connection"))) ?
-                  "Proxy-Connection: Keep-Alive\r\n":"",
+                   (conn->bits.httpproxy &&
+                    !conn->bits.tunnel_proxy &&
+                    !Curl_checkheaders(data, STRCONST("Proxy-Connection")) &&
+                    !Curl_checkProxyheaders(data, conn,
+                                            STRCONST("Proxy-Connection"))) ?
+                   "Proxy-Connection: Keep-Alive\r\n":"",
 #else
-                  "",
+                   "",
 #endif
-                  te,
-                  altused ? altused : ""
+                   te,
+                   altused ? altused : ""
       );
 
   /* clear userpwd and proxyuserpwd to avoid reusing old credentials
@@ -2855,7 +2866,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   free(altused);
 
   if(result) {
-    Curl_dyn_free(&req);
+    curlx_dyn_free(&req);
     goto fail;
   }
 
@@ -2866,7 +2877,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        over SSL */
     result = Curl_http2_request_upgrade(&req, data);
     if(result) {
-      Curl_dyn_free(&req);
+      curlx_dyn_free(&req);
       return result;
     }
   }
@@ -2887,7 +2898,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if(!result)
       result = Curl_req_send(data, &req, httpversion);
   }
-  Curl_dyn_free(&req);
+  curlx_dyn_free(&req);
   if(result)
     goto fail;
 
@@ -2988,376 +2999,488 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
    Curl_compareheader(hd, STRCONST(n), STRCONST(v)))
 
 /*
+ * http_header_a() parses a single response header starting with A.
+ */
+static CURLcode http_header_a(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+#ifndef CURL_DISABLE_ALTSVC
+  const char *v;
+  struct connectdata *conn = data->conn;
+  v = (data->asi &&
+       (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
+#ifdef DEBUGBUILD
+        /* allow debug builds to circumvent the HTTPS restriction */
+        getenv("CURL_ALTSVC_HTTP")
+#else
+        0
+#endif
+         )) ? HD_VAL(hd, hdlen, "Alt-Svc:") : NULL;
+  if(v) {
+    /* the ALPN of the current request */
+    struct SingleRequest *k = &data->req;
+    enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
+      (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
+    return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
+                             curlx_uitous((unsigned int)conn->remote_port));
+  }
+#else
+  (void)data;
+  (void)hd;
+  (void)hdlen;
+#endif
+  return CURLE_OK;
+}
+
+/*
+ * http_header_c() parses a single response header starting with C.
+ */
+static CURLcode http_header_c(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  struct connectdata *conn = data->conn;
+  struct SingleRequest *k = &data->req;
+  const char *v;
+
+  /* Check for Content-Length: header lines to get size */
+  v = (!k->http_bodyless && !data->set.ignorecl) ?
+    HD_VAL(hd, hdlen, "Content-Length:") : NULL;
+  if(v) {
+    curl_off_t contentlength;
+    int offt = curlx_str_numblanks(&v, &contentlength);
+
+    if(offt == STRE_OK) {
+      k->size = contentlength;
+      k->maxdownload = k->size;
+    }
+    else if(offt == STRE_OVERFLOW) {
+      /* out of range */
+      if(data->set.max_filesize) {
+        failf(data, "Maximum file size exceeded");
+        return CURLE_FILESIZE_EXCEEDED;
+      }
+      streamclose(conn, "overflow content-length");
+      infof(data, "Overflow Content-Length: value");
+    }
+    else {
+      /* negative or just rubbish - bad HTTP */
+      failf(data, "Invalid Content-Length: value");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+    return CURLE_OK;
+  }
+  v = (!k->http_bodyless && data->set.str[STRING_ENCODING]) ?
+    HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
+  if(v) {
+    /*
+     * Process Content-Encoding. Look for the values: identity,
+     * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
+     * x-compress are the same as gzip and compress. (Sec 3.5 RFC
+     * 2616). zlib cannot handle compress. However, errors are
+     * handled further down when the response body is processed
+     */
+    return Curl_build_unencoding_stack(data, v, FALSE);
+  }
+  /* check for Content-Type: header lines to get the MIME-type */
+  v = HD_VAL(hd, hdlen, "Content-Type:");
+  if(v) {
+    char *contenttype = Curl_copy_header_value(hd);
+    if(!contenttype)
+      return CURLE_OUT_OF_MEMORY;
+    if(!*contenttype)
+      /* ignore empty data */
+      free(contenttype);
+    else {
+      free(data->info.contenttype);
+      data->info.contenttype = contenttype;
+    }
+    return CURLE_OK;
+  }
+  if(HD_IS_AND_SAYS(hd, hdlen, "Connection:", "close")) {
+    /*
+     * [RFC 2616, section 8.1.2.1]
+     * "Connection: close" is HTTP/1.1 language and means that
+     * the connection will close when this request has been
+     * served.
+     */
+    streamclose(conn, "Connection: close used");
+    return CURLE_OK;
+  }
+  if((k->httpversion == 10) &&
+     HD_IS_AND_SAYS(hd, hdlen, "Connection:", "keep-alive")) {
+    /*
+     * An HTTP/1.0 reply with the 'Connection: keep-alive' line
+     * tells us the connection will be kept alive for our
+     * pleasure. Default action for 1.0 is to close.
+     *
+     * [RFC2068, section 19.7.1] */
+    connkeep(conn, "Connection keep-alive");
+    infof(data, "HTTP/1.0 connection set to keep alive");
+    return CURLE_OK;
+  }
+  v = !k->http_bodyless ? HD_VAL(hd, hdlen, "Content-Range:") : NULL;
+  if(v) {
+    /* Content-Range: bytes [num]-
+       Content-Range: bytes: [num]-
+       Content-Range: [num]-
+       Content-Range: [asterisk]/[total]
+
+       The second format was added since Sun's webserver
+       JavaWebServer/1.1.1 obviously sends the header this way!
+       The third added since some servers use that!
+       The fourth means the requested range was unsatisfied.
+    */
+
+    const char *ptr = v;
+
+    /* Move forward until first digit or asterisk */
+    while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
+      ptr++;
+
+    /* if it truly stopped on a digit */
+    if(ISDIGIT(*ptr)) {
+      if(!curlx_str_number(&ptr, &k->offset, CURL_OFF_T_MAX) &&
+         (data->state.resume_from == k->offset))
+        /* we asked for a resume and we got it */
+        k->content_range = TRUE;
+    }
+    else if(k->httpcode < 300)
+      data->state.resume_from = 0; /* get everything */
+  }
+  return CURLE_OK;
+}
+
+/*
+ * http_header_l() parses a single response header starting with L.
+ */
+static CURLcode http_header_l(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  struct connectdata *conn = data->conn;
+  struct SingleRequest *k = &data->req;
+  const char *v = (!k->http_bodyless &&
+                   (data->set.timecondition || data->set.get_filetime)) ?
+    HD_VAL(hd, hdlen, "Last-Modified:") : NULL;
+  if(v) {
+    k->timeofdoc = Curl_getdate_capped(v);
+    if(data->set.get_filetime)
+      data->info.filetime = k->timeofdoc;
+    return CURLE_OK;
+  }
+  if((k->httpcode >= 300 && k->httpcode < 400) &&
+     HD_IS(hd, hdlen, "Location:") &&
+     !data->req.location) {
+    /* this is the URL that the server advises us to use instead */
+    char *location = Curl_copy_header_value(hd);
+    if(!location)
+      return CURLE_OUT_OF_MEMORY;
+    if(!*location)
+      /* ignore empty data */
+      free(location);
+    else {
+      data->req.location = location;
+
+      if(data->set.http_follow_mode) {
+        CURLcode result;
+        DEBUGASSERT(!data->req.newurl);
+        data->req.newurl = strdup(data->req.location); /* clone */
+        if(!data->req.newurl)
+          return CURLE_OUT_OF_MEMORY;
+
+        /* some cases of POST and PUT etc needs to rewind the data
+           stream at this point */
+        result = http_perhapsrewind(data, conn);
+        if(result)
+          return result;
+
+        /* mark the next request as a followed location: */
+        data->state.this_is_a_follow = TRUE;
+      }
+    }
+  }
+  return CURLE_OK;
+}
+
+/*
+ * http_header_p() parses a single response header starting with P.
+ */
+static CURLcode http_header_p(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  struct SingleRequest *k = &data->req;
+
+#ifndef CURL_DISABLE_PROXY
+  const char *v = HD_VAL(hd, hdlen, "Proxy-Connection:");
+  if(v) {
+    struct connectdata *conn = data->conn;
+    if((k->httpversion == 10) && conn->bits.httpproxy &&
+       HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
+      /*
+       * When an HTTP/1.0 reply comes when using a proxy, the
+       * 'Proxy-Connection: keep-alive' line tells us the
+       * connection will be kept alive for our pleasure.
+       * Default action for 1.0 is to close.
+       */
+      connkeep(conn, "Proxy-Connection keep-alive"); /* do not close */
+      infof(data, "HTTP/1.0 proxy connection set to keep alive");
+    }
+    else if((k->httpversion == 11) && conn->bits.httpproxy &&
+            HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "close")) {
+      /*
+       * We get an HTTP/1.1 response from a proxy and it says it will
+       * close down after this transfer.
+       */
+      connclose(conn, "Proxy-Connection: asked to close after done");
+      infof(data, "HTTP/1.1 proxy connection set close");
+    }
+    return CURLE_OK;
+  }
+#endif
+  if((407 == k->httpcode) && HD_IS(hd, hdlen, "Proxy-authenticate:")) {
+    char *auth = Curl_copy_header_value(hd);
+    CURLcode result;
+    if(!auth)
+      return CURLE_OUT_OF_MEMORY;
+    result = Curl_http_input_auth(data, TRUE, auth);
+    free(auth);
+    return result;
+  }
+#ifdef USE_SPNEGO
+  if(HD_IS(hd, hdlen, "Persistent-Auth:")) {
+    struct connectdata *conn = data->conn;
+    struct negotiatedata *negdata = Curl_auth_nego_get(conn, FALSE);
+    struct auth *authp = &data->state.authhost;
+    if(!negdata)
+      return CURLE_OUT_OF_MEMORY;
+    if(authp->picked == CURLAUTH_NEGOTIATE) {
+      char *persistentauth = Curl_copy_header_value(hd);
+      if(!persistentauth)
+        return CURLE_OUT_OF_MEMORY;
+      negdata->noauthpersist = !!checkprefix("false", persistentauth);
+      negdata->havenoauthpersist = TRUE;
+      infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
+            negdata->noauthpersist, persistentauth);
+      free(persistentauth);
+    }
+  }
+#endif
+  return CURLE_OK;
+}
+
+/*
+ * http_header_r() parses a single response header starting with R.
+ */
+static CURLcode http_header_r(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  const char *v = HD_VAL(hd, hdlen, "Retry-After:");
+  if(v) {
+    /* Retry-After = HTTP-date / delay-seconds */
+    curl_off_t retry_after = 0; /* zero for unknown or "now" */
+    time_t date;
+    curlx_str_passblanks(&v);
+
+    /* try it as a date first, because a date can otherwise start with and
+       get treated as a number */
+    date = Curl_getdate_capped(v);
+
+    if((time_t)-1 != date) {
+      time_t current = time(NULL);
+      if(date >= current)
+        /* convert date to number of seconds into the future */
+        retry_after = date - current;
+    }
+    else
+      /* Try it as a decimal number, ignore errors */
+      (void)curlx_str_number(&v, &retry_after, CURL_OFF_T_MAX);
+    /* limit to 6 hours max. this is not documented so that it can be changed
+       in the future if necessary. */
+    if(retry_after > 21600)
+      retry_after = 21600;
+    data->info.retry_after = retry_after;
+  }
+  return CURLE_OK;
+}
+
+/*
+ * http_header_s() parses a single response header starting with S.
+ */
+static CURLcode http_header_s(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_HSTS)
+  struct connectdata *conn = data->conn;
+  const char *v;
+#else
+  (void)data;
+  (void)hd;
+  (void)hdlen;
+#endif
+
+#ifndef CURL_DISABLE_COOKIES
+  v = (data->cookies && data->state.cookie_engine) ?
+    HD_VAL(hd, hdlen, "Set-Cookie:") : NULL;
+  if(v) {
+    /* If there is a custom-set Host: name, use it here, or else use
+     * real peer hostname. */
+    const char *host = data->state.aptr.cookiehost ?
+      data->state.aptr.cookiehost : conn->host.name;
+    const bool secure_context =
+      conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
+      curl_strequal("localhost", host) ||
+      !strcmp(host, "127.0.0.1") ||
+      !strcmp(host, "::1");
+
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
+                    CURL_LOCK_ACCESS_SINGLE);
+    Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
+                    data->state.up.path, secure_context);
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+    return CURLE_OK;
+  }
+#endif
+#ifndef CURL_DISABLE_HSTS
+  /* If enabled, the header is incoming and this is over HTTPS */
+  v = (data->hsts &&
+       (Curl_conn_is_ssl(conn, FIRSTSOCKET) ||
+#ifdef DEBUGBUILD
+        /* allow debug builds to circumvent the HTTPS restriction */
+        getenv("CURL_HSTS_HTTP")
+#else
+        0
+#endif
+         )
+    ) ? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
+  if(v) {
+    CURLcode check =
+      Curl_hsts_parse(data->hsts, conn->host.name, v);
+    if(check)
+      infof(data, "Illegal STS header skipped");
+#ifdef DEBUGBUILD
+    else
+      infof(data, "Parsed STS header fine (%zu entries)",
+            Curl_llist_count(&data->hsts->list));
+#endif
+  }
+#endif
+
+  return CURLE_OK;
+}
+
+/*
+ * http_header_t() parses a single response header starting with T.
+ */
+static CURLcode http_header_t(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  struct connectdata *conn = data->conn;
+  struct SingleRequest *k = &data->req;
+
+  /* RFC 9112, ch. 6.1
+   * "Transfer-Encoding MAY be sent in a response to a HEAD request or
+   *  in a 304 (Not Modified) response (Section 15.4.5 of [HTTP]) to a
+   *  GET request, neither of which includes a message body, to indicate
+   *  that the origin server would have applied a transfer coding to the
+   *  message body if the request had been an unconditional GET."
+   *
+   * Read: in these cases the 'Transfer-Encoding' does not apply
+   * to any data following the response headers. Do not add any decoders.
+   */
+  const char *v = (!k->http_bodyless &&
+                   (data->state.httpreq != HTTPREQ_HEAD) &&
+                   (k->httpcode != 304)) ?
+    HD_VAL(hd, hdlen, "Transfer-Encoding:") : NULL;
+  if(v) {
+    /* One or more encodings. We check for chunked and/or a compression
+       algorithm. */
+    CURLcode result = Curl_build_unencoding_stack(data, v, TRUE);
+    if(result)
+      return result;
+    if(!k->chunk && data->set.http_transfer_encoding) {
+      /* if this is not chunked, only close can signal the end of this
+       * transfer as Content-Length is said not to be trusted for
+       * transfer-encoding! */
+      connclose(conn, "HTTP/1.1 transfer-encoding without chunks");
+      k->ignore_cl = TRUE;
+    }
+    return CURLE_OK;
+  }
+  v = HD_VAL(hd, hdlen, "Trailer:");
+  if(v) {
+    data->req.resp_trailer = TRUE;
+    return CURLE_OK;
+  }
+  return CURLE_OK;
+}
+
+/*
+ * http_header_w() parses a single response header starting with W.
+ */
+static CURLcode http_header_w(struct Curl_easy *data,
+                              const char *hd, size_t hdlen)
+{
+  struct SingleRequest *k = &data->req;
+  CURLcode result = CURLE_OK;
+
+  if((401 == k->httpcode) && HD_IS(hd, hdlen, "WWW-Authenticate:")) {
+    char *auth = Curl_copy_header_value(hd);
+    if(!auth)
+      return CURLE_OUT_OF_MEMORY;
+    result = Curl_http_input_auth(data, FALSE, auth);
+    free(auth);
+  }
+  return result;
+}
+
+/*
  * http_header() parses a single response header.
  */
 static CURLcode http_header(struct Curl_easy *data,
                             const char *hd, size_t hdlen)
 {
-  struct connectdata *conn = data->conn;
-  CURLcode result;
-  struct SingleRequest *k = &data->req;
-  const char *v;
+  CURLcode result = CURLE_OK;
 
   switch(hd[0]) {
   case 'a':
   case 'A':
-#ifndef CURL_DISABLE_ALTSVC
-    v = (data->asi &&
-         (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
-#ifdef DEBUGBUILD
-          /* allow debug builds to circumvent the HTTPS restriction */
-          getenv("CURL_ALTSVC_HTTP")
-#else
-          0
-#endif
-        )) ? HD_VAL(hd, hdlen, "Alt-Svc:") : NULL;
-    if(v) {
-      /* the ALPN of the current request */
-      enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
-                         (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
-      return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
-                               curlx_uitous((unsigned int)conn->remote_port));
-    }
-#endif
+    result = http_header_a(data, hd, hdlen);
     break;
   case 'c':
   case 'C':
-    /* Check for Content-Length: header lines to get size */
-    v = (!k->http_bodyless && !data->set.ignorecl) ?
-      HD_VAL(hd, hdlen, "Content-Length:") : NULL;
-    if(v) {
-      curl_off_t contentlength;
-      CURLofft offt = curlx_strtoofft(v, NULL, 10, &contentlength);
-
-      if(offt == CURL_OFFT_OK) {
-        k->size = contentlength;
-        k->maxdownload = k->size;
-      }
-      else if(offt == CURL_OFFT_FLOW) {
-        /* out of range */
-        if(data->set.max_filesize) {
-          failf(data, "Maximum file size exceeded");
-          return CURLE_FILESIZE_EXCEEDED;
-        }
-        streamclose(conn, "overflow content-length");
-        infof(data, "Overflow Content-Length: value");
-      }
-      else {
-        /* negative or just rubbish - bad HTTP */
-        failf(data, "Invalid Content-Length: value");
-        return CURLE_WEIRD_SERVER_REPLY;
-      }
-      return CURLE_OK;
-    }
-    v = (!k->http_bodyless && data->set.str[STRING_ENCODING]) ?
-      HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
-    if(v) {
-      /*
-       * Process Content-Encoding. Look for the values: identity,
-       * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
-       * x-compress are the same as gzip and compress. (Sec 3.5 RFC
-       * 2616). zlib cannot handle compress. However, errors are
-       * handled further down when the response body is processed
-       */
-      return Curl_build_unencoding_stack(data, v, FALSE);
-    }
-    /* check for Content-Type: header lines to get the MIME-type */
-    v = HD_VAL(hd, hdlen, "Content-Type:");
-    if(v) {
-      char *contenttype = Curl_copy_header_value(hd);
-      if(!contenttype)
-        return CURLE_OUT_OF_MEMORY;
-      if(!*contenttype)
-        /* ignore empty data */
-        free(contenttype);
-      else {
-        Curl_safefree(data->info.contenttype);
-        data->info.contenttype = contenttype;
-      }
-      return CURLE_OK;
-    }
-    if(HD_IS_AND_SAYS(hd, hdlen, "Connection:", "close")) {
-      /*
-       * [RFC 2616, section 8.1.2.1]
-       * "Connection: close" is HTTP/1.1 language and means that
-       * the connection will close when this request has been
-       * served.
-       */
-      streamclose(conn, "Connection: close used");
-      return CURLE_OK;
-    }
-    if((k->httpversion == 10) &&
-       HD_IS_AND_SAYS(hd, hdlen, "Connection:", "keep-alive")) {
-      /*
-       * An HTTP/1.0 reply with the 'Connection: keep-alive' line
-       * tells us the connection will be kept alive for our
-       * pleasure. Default action for 1.0 is to close.
-       *
-       * [RFC2068, section 19.7.1] */
-      connkeep(conn, "Connection keep-alive");
-      infof(data, "HTTP/1.0 connection set to keep alive");
-      return CURLE_OK;
-    }
-    v = !k->http_bodyless ? HD_VAL(hd, hdlen, "Content-Range:") : NULL;
-    if(v) {
-      /* Content-Range: bytes [num]-
-         Content-Range: bytes: [num]-
-         Content-Range: [num]-
-         Content-Range: [asterisk]/[total]
-
-         The second format was added since Sun's webserver
-         JavaWebServer/1.1.1 obviously sends the header this way!
-         The third added since some servers use that!
-         The fourth means the requested range was unsatisfied.
-      */
-
-      const char *ptr = v;
-
-      /* Move forward until first digit or asterisk */
-      while(*ptr && !ISDIGIT(*ptr) && *ptr != '*')
-        ptr++;
-
-      /* if it truly stopped on a digit */
-      if(ISDIGIT(*ptr)) {
-        if(!Curl_str_number(&ptr, &k->offset, CURL_OFF_T_MAX) &&
-           (data->state.resume_from == k->offset))
-          /* we asked for a resume and we got it */
-          k->content_range = TRUE;
-      }
-      else if(k->httpcode < 300)
-        data->state.resume_from = 0; /* get everything */
-    }
+    result = http_header_c(data, hd, hdlen);
     break;
   case 'l':
   case 'L':
-    v = (!k->http_bodyless &&
-         (data->set.timecondition || data->set.get_filetime)) ?
-        HD_VAL(hd, hdlen, "Last-Modified:") : NULL;
-    if(v) {
-      k->timeofdoc = Curl_getdate_capped(v);
-      if(data->set.get_filetime)
-        data->info.filetime = k->timeofdoc;
-      return CURLE_OK;
-    }
-    if((k->httpcode >= 300 && k->httpcode < 400) &&
-            HD_IS(hd, hdlen, "Location:") &&
-            !data->req.location) {
-      /* this is the URL that the server advises us to use instead */
-      char *location = Curl_copy_header_value(hd);
-      if(!location)
-        return CURLE_OUT_OF_MEMORY;
-      if(!*location)
-        /* ignore empty data */
-        free(location);
-      else {
-        data->req.location = location;
-
-        if(data->set.http_follow_mode) {
-          DEBUGASSERT(!data->req.newurl);
-          data->req.newurl = strdup(data->req.location); /* clone */
-          if(!data->req.newurl)
-            return CURLE_OUT_OF_MEMORY;
-
-          /* some cases of POST and PUT etc needs to rewind the data
-             stream at this point */
-          result = http_perhapsrewind(data, conn);
-          if(result)
-            return result;
-
-          /* mark the next request as a followed location: */
-          data->state.this_is_a_follow = TRUE;
-        }
-      }
-    }
+    result = http_header_l(data, hd, hdlen);
     break;
   case 'p':
   case 'P':
-#ifndef CURL_DISABLE_PROXY
-    v = HD_VAL(hd, hdlen, "Proxy-Connection:");
-    if(v) {
-      if((k->httpversion == 10) && conn->bits.httpproxy &&
-         HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
-        /*
-         * When an HTTP/1.0 reply comes when using a proxy, the
-         * 'Proxy-Connection: keep-alive' line tells us the
-         * connection will be kept alive for our pleasure.
-         * Default action for 1.0 is to close.
-         */
-        connkeep(conn, "Proxy-Connection keep-alive"); /* do not close */
-        infof(data, "HTTP/1.0 proxy connection set to keep alive");
-      }
-      else if((k->httpversion == 11) && conn->bits.httpproxy &&
-              HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "close")) {
-        /*
-         * We get an HTTP/1.1 response from a proxy and it says it will
-         * close down after this transfer.
-         */
-        connclose(conn, "Proxy-Connection: asked to close after done");
-        infof(data, "HTTP/1.1 proxy connection set close");
-      }
-      return CURLE_OK;
-    }
-#endif
-    if((407 == k->httpcode) && HD_IS(hd, hdlen, "Proxy-authenticate:")) {
-      char *auth = Curl_copy_header_value(hd);
-      if(!auth)
-        return CURLE_OUT_OF_MEMORY;
-      result = Curl_http_input_auth(data, TRUE, auth);
-      free(auth);
-      return result;
-    }
-#ifdef USE_SPNEGO
-    if(HD_IS(hd, hdlen, "Persistent-Auth:")) {
-      struct negotiatedata *negdata = &conn->negotiate;
-      struct auth *authp = &data->state.authhost;
-      if(authp->picked == CURLAUTH_NEGOTIATE) {
-        char *persistentauth = Curl_copy_header_value(hd);
-        if(!persistentauth)
-          return CURLE_OUT_OF_MEMORY;
-        negdata->noauthpersist = !!checkprefix("false", persistentauth);
-        negdata->havenoauthpersist = TRUE;
-        infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
-              negdata->noauthpersist, persistentauth);
-        free(persistentauth);
-      }
-    }
-#endif
+    result = http_header_p(data, hd, hdlen);
     break;
   case 'r':
   case 'R':
-    v = HD_VAL(hd, hdlen, "Retry-After:");
-    if(v) {
-      /* Retry-After = HTTP-date / delay-seconds */
-      curl_off_t retry_after = 0; /* zero for unknown or "now" */
-      time_t date;
-      Curl_str_passblanks(&v);
-
-      /* try it as a date first, because a date can otherwise start with and
-         get treated as a number */
-      date = Curl_getdate_capped(v);
-
-      if((time_t)-1 != date) {
-        time_t current = time(NULL);
-        if(date >= current)
-          /* convert date to number of seconds into the future */
-          retry_after = date - current;
-      }
-      else
-        /* Try it as a decimal number */
-        Curl_str_number(&v, &retry_after, CURL_OFF_T_MAX);
-      /* limit to 6 hours max. this is not documented so that it can be changed
-         in the future if necessary. */
-      if(retry_after > 21600)
-        retry_after = 21600;
-      data->info.retry_after = retry_after;
-      return CURLE_OK;
-    }
+    result = http_header_r(data, hd, hdlen);
     break;
   case 's':
   case 'S':
-#if !defined(CURL_DISABLE_COOKIES)
-    v = (data->cookies && data->state.cookie_engine) ?
-        HD_VAL(hd, hdlen, "Set-Cookie:") : NULL;
-    if(v) {
-      /* If there is a custom-set Host: name, use it here, or else use
-       * real peer hostname. */
-      const char *host = data->state.aptr.cookiehost ?
-        data->state.aptr.cookiehost : conn->host.name;
-      const bool secure_context =
-        conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
-        strcasecompare("localhost", host) ||
-        !strcmp(host, "127.0.0.1") ||
-        !strcmp(host, "::1");
-
-      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
-                      CURL_LOCK_ACCESS_SINGLE);
-      Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
-                      data->state.up.path, secure_context);
-      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-      return CURLE_OK;
-    }
-#endif
-#ifndef CURL_DISABLE_HSTS
-    /* If enabled, the header is incoming and this is over HTTPS */
-    v = (data->hsts &&
-         (Curl_conn_is_ssl(conn, FIRSTSOCKET) ||
-#ifdef DEBUGBUILD
-           /* allow debug builds to circumvent the HTTPS restriction */
-           getenv("CURL_HSTS_HTTP")
-#else
-           0
-#endif
-            )
-        ) ? HD_VAL(hd, hdlen, "Strict-Transport-Security:") : NULL;
-    if(v) {
-      CURLcode check =
-        Curl_hsts_parse(data->hsts, conn->host.name, v);
-      if(check)
-        infof(data, "Illegal STS header skipped");
-#ifdef DEBUGBUILD
-      else
-        infof(data, "Parsed STS header fine (%zu entries)",
-              Curl_llist_count(&data->hsts->list));
-#endif
-    }
-#endif
+    result = http_header_s(data, hd, hdlen);
     break;
   case 't':
   case 'T':
-    /* RFC 9112, ch. 6.1
-     * "Transfer-Encoding MAY be sent in a response to a HEAD request or
-     *  in a 304 (Not Modified) response (Section 15.4.5 of [HTTP]) to a
-     *  GET request, neither of which includes a message body, to indicate
-     *  that the origin server would have applied a transfer coding to the
-     *  message body if the request had been an unconditional GET."
-     *
-     * Read: in these cases the 'Transfer-Encoding' does not apply
-     * to any data following the response headers. Do not add any decoders.
-     */
-    v = (!k->http_bodyless &&
-         (data->state.httpreq != HTTPREQ_HEAD) &&
-         (k->httpcode != 304)) ?
-      HD_VAL(hd, hdlen, "Transfer-Encoding:") : NULL;
-    if(v) {
-      /* One or more encodings. We check for chunked and/or a compression
-         algorithm. */
-      result = Curl_build_unencoding_stack(data, v, TRUE);
-      if(result)
-        return result;
-      if(!k->chunk && data->set.http_transfer_encoding) {
-        /* if this is not chunked, only close can signal the end of this
-         * transfer as Content-Length is said not to be trusted for
-         * transfer-encoding! */
-        connclose(conn, "HTTP/1.1 transfer-encoding without chunks");
-        k->ignore_cl = TRUE;
-      }
-      return CURLE_OK;
-    }
-    v = HD_VAL(hd, hdlen, "Trailer:");
-    if(v) {
-      data->req.resp_trailer = TRUE;
-      return CURLE_OK;
-    }
+    result = http_header_t(data, hd, hdlen);
     break;
   case 'w':
   case 'W':
-    if((401 == k->httpcode) && HD_IS(hd, hdlen, "WWW-Authenticate:")) {
-      char *auth = Curl_copy_header_value(hd);
-      if(!auth)
-        return CURLE_OUT_OF_MEMORY;
-      result = Curl_http_input_auth(data, FALSE, auth);
-      free(auth);
-      return result;
-    }
+    result = http_header_w(data, hd, hdlen);
     break;
   }
 
-  if(conn->handler->protocol & CURLPROTO_RTSP) {
-    result = Curl_rtsp_parseheader(data, hd);
-    if(result)
-      return result;
+  if(!result) {
+    struct connectdata *conn = data->conn;
+    if(conn->handler->protocol & CURLPROTO_RTSP)
+      result = Curl_rtsp_parseheader(data, hd);
   }
-  return CURLE_OK;
+  return result;
 }
 
 /*
@@ -3542,7 +3665,7 @@ static CURLcode http_write_header(struct Curl_easy *data,
 
   /* now, only output this if the header AND body are requested:
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
@@ -3625,7 +3748,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
         /* We expect more response from HTTP/2 later */
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
-        k->httpversion_sent = 20; /* It's a HTTP/2 request now */
+        k->httpversion_sent = 20; /* It's an HTTP/2 request now */
         /* Any remaining `buf` bytes are already HTTP/2 and passed to
          * be processed. */
         result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
@@ -3688,7 +3811,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   /* At this point we have some idea about the fate of the connection.
      If we are closing the connection it may result auth failure. */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   if(conn->bits.close &&
      (((data->req.httpcode == 401) &&
        (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
@@ -3698,7 +3821,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     data->state.authproblem = TRUE;
   }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
   if(conn->bits.close &&
     (((data->req.httpcode == 401) &&
       (conn->http_negotiate_state == GSS_AUTHRECV)) ||
@@ -3822,7 +3945,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */
-  if((0 == k->maxdownload) && (k->httpversion_sent < 20))
+  if((k->maxdownload == 0) && (k->httpversion_sent < 20))
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */
@@ -3837,9 +3960,8 @@ static CURLcode http_on_response(struct Curl_easy *data,
 out:
   if(last_hd) {
     /* if not written yet, write it now */
-    CURLcode r2 = http_write_header(data, last_hd, last_hd_len);
-    if(!result)
-      result = r2;
+    result = Curl_1st_err(
+      result, http_write_header(data, last_hd, last_hd_len));
   }
   return result;
 }
@@ -3859,8 +3981,8 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     struct dynbuf last_header;
     size_t consumed;
 
-    Curl_dyn_init(&last_header, hdlen + 1);
-    result = Curl_dyn_addn(&last_header, hd, hdlen);
+    curlx_dyn_init(&last_header, hdlen + 1);
+    result = curlx_dyn_addn(&last_header, hd, hdlen);
     if(result)
       return result;
 
@@ -3868,12 +3990,12 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     /* Caveat: we clear anything in the header brigade, because a
      * response might switch HTTP version which may call use recursively.
      * Not nice, but that is currently the way of things. */
-    Curl_dyn_reset(&data->state.headerb);
-    result = http_on_response(data, Curl_dyn_ptr(&last_header),
-                              Curl_dyn_len(&last_header),
+    curlx_dyn_reset(&data->state.headerb);
+    result = http_on_response(data, curlx_dyn_ptr(&last_header),
+                              curlx_dyn_len(&last_header),
                               buf_remain, blen, &consumed);
     *pconsumed += consumed;
-    Curl_dyn_free(&last_header);
+    curlx_dyn_free(&last_header);
     return result;
   }
 
@@ -3898,7 +4020,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
        */
       const char *p = hd;
 
-      Curl_str_passblanks(&p);
+      curlx_str_passblanks(&p);
       if(!strncmp(p, "HTTP/", 5)) {
         p += 5;
         switch(*p) {
@@ -3911,9 +4033,9 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
-                p += 3;
-                if(ISBLANK(*p))
-                  fine_statusline = TRUE;
+                /* RFC 9112 requires a single space following the status code,
+                   but the browsers don't so let's not insist */
+                fine_statusline = TRUE;
               }
             }
           }
@@ -3961,11 +4083,11 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
       curl_off_t status;
       /* we set the max string a little excessive to forgive some leading
          spaces */
-      if(!Curl_str_until(&p, &ver, 32, ' ') &&
-         !Curl_str_single(&p, ' ') &&
-         !Curl_str_number(&p, &status, 999)) {
-        Curl_str_trimblanks(&ver);
-        if(Curl_str_cmp(&ver, "RTSP/1.0")) {
+      if(!curlx_str_until(&p, &ver, 32, ' ') &&
+         !curlx_str_single(&p, ' ') &&
+         !curlx_str_number(&p, &status, 999)) {
+        curlx_str_trimblanks(&ver);
+        if(curlx_str_cmp(&ver, "RTSP/1.0")) {
           k->httpcode = (int)status;
           fine_statusline = TRUE;
           k->httpversion = 11; /* RTSP acts like HTTP 1.1 */
@@ -3998,7 +4120,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   /*
    * Taken in one (more) header. Write it to the client.
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   if(k->httpcode/100 == 1)
     writetype |= CLIENTWRITE_1XX;
@@ -4035,7 +4157,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
     if(!end_ptr) {
       /* Not a complete header line within buffer, append the data to
          the end of the headerbuff. */
-      result = Curl_dyn_addn(&data->state.headerb, buf, blen);
+      result = curlx_dyn_addn(&data->state.headerb, buf, blen);
       if(result)
         return result;
       *pconsumed += blen;
@@ -4044,8 +4166,8 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
         /* check if this looks like a protocol header */
         statusline st =
           checkprotoprefix(data, conn,
-                           Curl_dyn_ptr(&data->state.headerb),
-                           Curl_dyn_len(&data->state.headerb));
+                           curlx_dyn_ptr(&data->state.headerb),
+                           curlx_dyn_len(&data->state.headerb));
 
         if(st == STATUS_BAD) {
           /* this is not the beginning of a protocol first header line.
@@ -4069,7 +4191,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
 
     /* decrease the size of the remaining (supposed) header line */
     consumed = (end_ptr - buf) + 1;
-    result = Curl_dyn_addn(&data->state.headerb, buf, consumed);
+    result = curlx_dyn_addn(&data->state.headerb, buf, consumed);
     if(result)
       return result;
     blen -= consumed;
@@ -4083,8 +4205,8 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
     if(!k->headerline) {
       /* the first read header */
       statusline st = checkprotoprefix(data, conn,
-                                       Curl_dyn_ptr(&data->state.headerb),
-                                       Curl_dyn_len(&data->state.headerb));
+                                       curlx_dyn_ptr(&data->state.headerb),
+                                       curlx_dyn_len(&data->state.headerb));
       if(st == STATUS_BAD) {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
         /* this is not the beginning of a protocol first header line.
@@ -4103,13 +4225,13 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       }
     }
 
-    result = http_rw_hd(data, Curl_dyn_ptr(&data->state.headerb),
-                        Curl_dyn_len(&data->state.headerb),
+    result = http_rw_hd(data, curlx_dyn_ptr(&data->state.headerb),
+                        curlx_dyn_len(&data->state.headerb),
                         buf, blen, &consumed);
     /* We are done with this line. We reset because response
      * processing might switch to HTTP/2 and that might call us
      * directly again. */
-    Curl_dyn_reset(&data->state.headerb);
+    curlx_dyn_reset(&data->state.headerb);
     if(consumed) {
       blen -= consumed;
       buf += consumed;
@@ -4124,7 +4246,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
      buffer. */
 out:
   if(!k->header && !leftover_body) {
-    Curl_dyn_free(&data->state.headerb);
+    curlx_dyn_free(&data->state.headerb);
   }
   return CURLE_OK;
 }
@@ -4162,15 +4284,15 @@ CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
 
     result = http_parse_headers(data, buf, blen, pconsumed);
     if(!result && !data->req.header) {
-      if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
+      if(!data->req.no_body && curlx_dyn_len(&data->state.headerb)) {
         /* leftover from parsing something that turned out not
          * to be a header, only happens if we allow for
          * HTTP/0.9 like responses */
         result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                   Curl_dyn_ptr(&data->state.headerb),
-                                   Curl_dyn_len(&data->state.headerb));
+                                   curlx_dyn_ptr(&data->state.headerb),
+                                   curlx_dyn_len(&data->state.headerb));
       }
-      Curl_dyn_free(&data->state.headerb);
+      curlx_dyn_free(&data->state.headerb);
     }
     return result;
   }
@@ -4199,7 +4321,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if(is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Curl_client_write(data, flags, buf, blen);
   }
 out:
   return result;
@@ -4239,14 +4361,22 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
   struct httpreq *req;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic push
+/* error: 'memcpy' offset [137, 142] from the object at 'req' is out of
+   the bounds of referenced subobject 'method' with type 'char[1]' at
+   offset 136 */
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
   memcpy(req->method, method, m_len);
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   if(scheme) {
     req->scheme = Curl_memdup0(scheme, s_len);
     if(!req->scheme)
@@ -4281,7 +4411,7 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
   CURLcode result = CURLE_URL_MALFORMAT;
 
   user = pass = host = port = NULL;
-  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+  curlx_dyn_init(&buf, DYN_HTTP_REQUEST);
 
   uc = curl_url_get(url, CURLUPART_HOST, &host, 0);
   if(uc && uc != CURLUE_NO_HOST)
@@ -4305,27 +4435,27 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
   }
 
   if(user) {
-    result = Curl_dyn_add(&buf, user);
+    result = curlx_dyn_add(&buf, user);
     if(result)
       goto out;
     if(pass) {
-      result = Curl_dyn_addf(&buf, ":%s", pass);
+      result = curlx_dyn_addf(&buf, ":%s", pass);
       if(result)
         goto out;
     }
-    result = Curl_dyn_add(&buf, "@");
+    result = curlx_dyn_add(&buf, "@");
     if(result)
       goto out;
   }
-  result = Curl_dyn_add(&buf, host);
+  result = curlx_dyn_add(&buf, host);
   if(result)
     goto out;
   if(port) {
-    result = Curl_dyn_addf(&buf, ":%s", port);
+    result = curlx_dyn_addf(&buf, ":%s", port);
     if(result)
       goto out;
   }
-  req->authority = strdup(Curl_dyn_ptr(&buf));
+  req->authority = strdup(curlx_dyn_ptr(&buf));
   if(!req->authority)
     goto out;
   result = CURLE_OK;
@@ -4335,7 +4465,7 @@ out:
   free(pass);
   free(host);
   free(port);
-  Curl_dyn_free(&buf);
+  curlx_dyn_free(&buf);
   return result;
 }
 
@@ -4347,7 +4477,7 @@ static CURLcode req_assign_url_path(struct httpreq *req, CURLU *url)
   CURLcode result = CURLE_URL_MALFORMAT;
 
   path = query = NULL;
-  Curl_dyn_init(&buf, DYN_HTTP_REQUEST);
+  curlx_dyn_init(&buf, DYN_HTTP_REQUEST);
 
   uc = curl_url_get(url, CURLUPART_PATH, &path, CURLU_PATH_AS_IS);
   if(uc)
@@ -4365,16 +4495,16 @@ static CURLcode req_assign_url_path(struct httpreq *req, CURLU *url)
   }
   else {
     if(path) {
-      result = Curl_dyn_add(&buf, path);
+      result = curlx_dyn_add(&buf, path);
       if(result)
         goto out;
     }
     if(query) {
-      result = Curl_dyn_addf(&buf, "?%s", query);
+      result = curlx_dyn_addf(&buf, "?%s", query);
       if(result)
         goto out;
     }
-    req->path = strdup(Curl_dyn_ptr(&buf));
+    req->path = strdup(curlx_dyn_ptr(&buf));
     if(!req->path)
       goto out;
   }
@@ -4383,7 +4513,7 @@ static CURLcode req_assign_url_path(struct httpreq *req, CURLU *url)
 out:
   free(path);
   free(query);
-  Curl_dyn_free(&buf);
+  curlx_dyn_free(&buf);
   return result;
 }
 
@@ -4395,11 +4525,9 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   CURLUcode uc;
 
-  DEBUGASSERT(method);
-  if(m_len + 1 > sizeof(req->method))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+  DEBUGASSERT(method && m_len);
 
-  req = calloc(1, sizeof(*req));
+  req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
   memcpy(req->method, method, m_len);
@@ -4449,8 +4577,7 @@ struct name_const {
 };
 
 /* keep them sorted by length! */
-static struct name_const H2_NON_FIELD[] = {
-  { STRCONST("TE") },
+static const struct name_const H2_NON_FIELD[] = {
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
   { STRCONST("Connection") },
@@ -4459,15 +4586,44 @@ static struct name_const H2_NON_FIELD[] = {
   { STRCONST("Transfer-Encoding") },
 };
 
-static bool h2_non_field(const char *name, size_t namelen)
+static bool h2_permissible_field(struct dynhds_entry *e)
 {
   size_t i;
   for(i = 0; i < CURL_ARRAYSIZE(H2_NON_FIELD); ++i) {
-    if(namelen < H2_NON_FIELD[i].namelen)
-      return FALSE;
-    if(namelen == H2_NON_FIELD[i].namelen &&
-       strcasecompare(H2_NON_FIELD[i].name, name))
+    if(e->namelen < H2_NON_FIELD[i].namelen)
       return TRUE;
+    if(e->namelen == H2_NON_FIELD[i].namelen &&
+       curl_strequal(H2_NON_FIELD[i].name, e->name))
+      return FALSE;
+  }
+  return TRUE;
+}
+
+static bool http_TE_has_token(const char *fvalue, const char *token)
+{
+  while(*fvalue) {
+    struct Curl_str name;
+
+    /* skip to first token */
+    while(ISBLANK(*fvalue) || *fvalue == ',')
+      fvalue++;
+    if(curlx_str_cspn(&fvalue, &name, " \t\r;,"))
+      return FALSE;
+    if(curlx_str_casecompare(&name, token))
+      return TRUE;
+
+    /* skip any remainder after token, e.g. parameters with quoted strings */
+    while(*fvalue && *fvalue != ',') {
+      if(*fvalue == '"') {
+        struct Curl_str qw;
+        /* if we do not cleanly find a quoted word here, the header value
+         * does not follow HTTP syntax and we reject */
+        if(curlx_str_quotedword(&fvalue, &qw, CURL_MAX_HTTP_HEADER))
+          return FALSE;
+      }
+      else
+        fvalue++;
+    }
   }
   return FALSE;
 }
@@ -4490,7 +4646,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
     scheme = Curl_checkheaders(data, STRCONST(HTTP_PSEUDO_SCHEME));
     if(scheme) {
       scheme += sizeof(HTTP_PSEUDO_SCHEME);
-      Curl_str_passblanks(&scheme);
+      curlx_str_passblanks(&scheme);
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {
@@ -4526,7 +4682,14 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
   }
   for(i = 0; !result && i < Curl_dynhds_count(&req->headers); ++i) {
     e = Curl_dynhds_getn(&req->headers, i);
-    if(!h2_non_field(e->name, e->namelen)) {
+    /* "TE" is special in that it is only permissible when it
+     * has only value "trailers". RFC 9113 ch. 8.2.2 */
+    if(e->namelen == 2 && curl_strequal("TE", e->name)) {
+      if(http_TE_has_token(e->value, "trailers"))
+        result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
+                                 "trailers", sizeof("trailers") - 1);
+    }
+    else if(h2_permissible_field(e)) {
       result = Curl_dynhds_add(h2_headers, e->name, e->namelen,
                                e->value, e->valuelen);
     }
@@ -4618,7 +4781,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
            "timeout %ldms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
-    ctx->start = Curl_now();
+    ctx->start = curlx_now();
     Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);
     data->req.keepon &= ~KEEP_SEND;
     data->req.keepon |= KEEP_SEND_TIMED;
@@ -4631,7 +4794,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     *eos = FALSE;
     return CURLE_READ_ERROR;
   case EXP100_AWAITING_CONTINUE:
-    ms = Curl_timediff(Curl_now(), ctx->start);
+    ms = curlx_timediff(curlx_now(), ctx->start);
     if(ms < data->set.expect_100_timeout) {
       DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
       data->req.keepon &= ~KEEP_SEND;

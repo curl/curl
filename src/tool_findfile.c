@@ -29,16 +29,12 @@
 #define __NO_NET_API
 #endif
 
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
-#include <curlx.h>
-
 #include "tool_findfile.h"
+#include "tool_cfgable.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

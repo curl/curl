@@ -24,7 +24,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -37,7 +37,7 @@
 #pragma warning(pop)
 #endif
 /* Wincrypt must be included before anything that could include OpenSSL. */
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
 /* Undefine wincrypt conflicting symbols for BoringSSL. */
 #undef X509_NAME
@@ -50,10 +50,10 @@
 
 #include <schnlsp.h>
 #include <schannel.h>
-#include "curl_sspi.h"
+#include "../curl_sspi.h"
 
-#include "cfilters.h"
-#include "urldata.h"
+#include "../cfilters.h"
+#include "../urldata.h"
 
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
  * Or in case of ldap.c, it was included via <winldap.h>.
@@ -68,7 +68,7 @@
  * BoringSSL's <openssl/x509.h>: So just undefine those defines here
  * (and only here).
  */
-#if defined(OPENSSL_IS_BORINGSSL)
+#ifdef OPENSSL_IS_BORINGSSL
 # undef X509_NAME
 # undef X509_CERT_PAIR
 # undef X509_EXTENSIONS

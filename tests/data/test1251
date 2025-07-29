@@ -27,7 +27,7 @@ foo
 http
 </server>
 <name>
-Access a non-proxied host with using the combination of http_proxy env var and NO_PROXY env var
+Non-proxied host plus http_proxy env var and NO_PROXY env var
 </name>
 <setenv>
 http_proxy=http://dummy:%PROXYPORT/
@@ -43,7 +43,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --max-time 5
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjpzZWNyZXQ=
+Authorization: Basic %b64[user:secret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

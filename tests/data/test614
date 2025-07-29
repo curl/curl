@@ -12,8 +12,8 @@ directory
 <reply>
 <datacheck>
 d?????????    N U         U               N ???  N NN:NN asubdir
--r-?r-?r-?    1 U         U              37 Jan  1  2000 plainfile.txt
--r-?r-?r-?    1 U         U              47 Dec 31  2000 rofile.txt
+-r-???????    1 U         U              37 Jan  1  2000 plainfile.txt
+-r-???????    1 U         U              47 Dec 31  2000 rofile.txt
 </datacheck>
 </reply>
 
@@ -30,7 +30,7 @@ sftp
 SFTP pre-quote chmod
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 </client>
 

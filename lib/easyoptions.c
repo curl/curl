@@ -28,7 +28,7 @@
 #include "easyoptions.h"
 
 /* all easy setopt options listed in alphabetical order */
-struct curl_easyoption Curl_easyopts[] = {
+const struct curl_easyoption Curl_easyopts[] = {
   {"ABSTRACT_UNIX_SOCKET", CURLOPT_ABSTRACT_UNIX_SOCKET, CURLOT_STRING, 0},
   {"ACCEPTTIMEOUT_MS", CURLOPT_ACCEPTTIMEOUT_MS, CURLOT_LONG, 0},
   {"ACCEPT_ENCODING", CURLOPT_ACCEPT_ENCODING, CURLOT_STRING, 0},
@@ -317,6 +317,8 @@ struct curl_easyoption Curl_easyopts[] = {
   {"SSL_FALSESTART", CURLOPT_SSL_FALSESTART, CURLOT_LONG, 0},
   {"SSL_OPTIONS", CURLOPT_SSL_OPTIONS, CURLOT_VALUES, 0},
   {"SSL_SESSIONID_CACHE", CURLOPT_SSL_SESSIONID_CACHE, CURLOT_LONG, 0},
+  {"SSL_SIGNATURE_ALGORITHMS", CURLOPT_SSL_SIGNATURE_ALGORITHMS,
+   CURLOT_STRING, 0},
   {"SSL_VERIFYHOST", CURLOPT_SSL_VERIFYHOST, CURLOT_LONG, 0},
   {"SSL_VERIFYPEER", CURLOPT_SSL_VERIFYPEER, CURLOT_LONG, 0},
   {"SSL_VERIFYSTATUS", CURLOPT_SSL_VERIFYSTATUS, CURLOT_LONG, 0},
@@ -378,6 +380,6 @@ struct curl_easyoption Curl_easyopts[] = {
  */
 int Curl_easyopts_check(void)
 {
-  return (CURLOPT_LASTENTRY % 10000) != (327 + 1);
+  return (CURLOPT_LASTENTRY % 10000) != (328 + 1);
 }
 #endif

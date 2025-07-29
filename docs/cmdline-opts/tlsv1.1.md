@@ -16,7 +16,7 @@ Example:
 
 # `--tlsv1.1`
 
-Forces curl to use TLS version 1.1 or later when connecting to a remote TLS server.
+Force curl to use TLS version 1.1 or later when connecting to a remote TLS server.
 
 In old versions of curl this option was documented to allow _only_ TLS 1.1.
 That behavior was inconsistent depending on the TLS library. Use --tls-max if

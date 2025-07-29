@@ -36,5 +36,5 @@ yourself. With remote gateways there could potentially be malicious actors
 returning you data that does not match the request you made, inspect or even
 interfere with the request. You may not notice this when using curl. A
 mitigation could be to go for a "trustless" gateway. This means you locally
-verify that the data. Consult the docs page on trusted vs trustless:
+verify the data. Consult the docs page on trusted vs trustless:
 https://docs.ipfs.tech/reference/http/gateway/#trusted-vs-trustless

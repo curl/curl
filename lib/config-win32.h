@@ -28,6 +28,58 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
+#ifndef UNDER_CE
+
+/* Define some minimum and default build targets for Visual Studio */
+#ifdef _MSC_VER
+   /* VS2012 default target settings and minimum build target check. */
+#  if _MSC_VER >= 1700
+     /* The minimum and default build targets for VS2012 are Vista and 8,
+        respectively, unless Update 1 is installed and the v110_xp toolset
+        is chosen. */
+#    ifdef _USING_V110_SDK71_
+#      define VS2012_MIN_TARGET 0x0501  /* XP */
+#      define VS2012_DEF_TARGET 0x0501  /* XP */
+#    else
+#      define VS2012_MIN_TARGET 0x0600  /* Vista */
+#      define VS2012_DEF_TARGET 0x0602  /* 8 */
+#    endif
+
+#    ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2012_DEF_TARGET
+#    endif
+#    ifndef WINVER
+#    define WINVER VS2012_DEF_TARGET
+#    endif
+#    if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
+#      ifdef _USING_V110_SDK71_
+#        error VS2012 does not support build targets prior to Windows XP
+#      else
+#        error VS2012 does not support build targets prior to Windows Vista
+#      endif
+#    endif
+   /* Default target settings and minimum build target check for
+      VS2008 and VS2010 */
+#  else
+#    define VS2008_MIN_TARGET 0x0501  /* XP */
+     /* VS2008 default build target is Windows Vista (0x0600).
+        We override default target to be Windows XP. */
+#    define VS2008_DEF_TARGET 0x0501  /* XP */
+
+#    ifndef _WIN32_WINNT
+#    define _WIN32_WINNT VS2008_DEF_TARGET
+#    endif
+#    ifndef WINVER
+#    define WINVER VS2008_DEF_TARGET
+#    endif
+#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
+#      error VS2008 does not support build targets prior to Windows XP
+#    endif
+#  endif
+#endif /* _MSC_VER */
+
+#endif /* UNDER_CE */
+
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
@@ -61,6 +113,11 @@
 #endif
 #endif
 
+/* Define to 1 if you have the <stdint.h> header file. */
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__)
+#define HAVE_STDINT_H 1
+#endif
+
 /* Define if you have the <sys/param.h> header file. */
 #ifdef __MINGW32__
 #define HAVE_SYS_PARAM_H 1
@@ -69,19 +126,8 @@
 /* Define if you have the <sys/select.h> header file. */
 /* #define HAVE_SYS_SELECT_H 1 */
 
-/* Define if you have the <sys/socket.h> header file. */
-/* #define HAVE_SYS_SOCKET_H 1 */
-
 /* Define if you have the <sys/sockio.h> header file. */
 /* #define HAVE_SYS_SOCKIO_H 1 */
-
-/* Define if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
-
-/* Define if you have the <sys/time.h> header file. */
-#ifdef __MINGW32__
-#define HAVE_SYS_TIME_H 1
-#endif
 
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
@@ -218,13 +264,11 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-/* Vista */
-#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && !defined(UNDER_CE)
-/* Define to 1 if you have a IPv6 capable working inet_ntop function. */
-#define HAVE_INET_NTOP 1
-/* Define to 1 if you have a IPv6 capable working inet_pton function. */
-#define HAVE_INET_PTON 1
-#endif
+/* Must always use local implementations on Windows. */
+/* Define to 1 if you have an IPv6 capable working inet_ntop function. */
+/* #undef HAVE_INET_NTOP */
+/* Define to 1 if you have an IPv6 capable working inet_pton function. */
+/* #undef HAVE_INET_PTON */
 
 /* Define to 1 if you have the `basename' function. */
 #ifdef __MINGW32__
@@ -301,72 +345,6 @@
 #    define SIZEOF_TIME_T 4
 #  endif
 #endif
-
-#ifndef UNDER_CE
-
-/* Define some minimum and default build targets for Visual Studio */
-#ifdef _MSC_VER
-   /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
-      2000 as a supported build target. VS2008 default installations provides
-      an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
-      valid build target for VS2008. Popular belief is that binaries built with
-      VS2008 using Windows SDK versions v6.X and Windows 2000 as a build target
-      are functional. */
-#  define VS2008_MIN_TARGET 0x0500
-
-   /* The minimum build target for VS2012 is Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
-#  ifdef _USING_V110_SDK71_
-#    define VS2012_MIN_TARGET 0x0501
-#  else
-#    define VS2012_MIN_TARGET 0x0600
-#  endif
-
-   /* VS2008 default build target is Windows Vista. We override default target
-      to be Windows XP. */
-#  define VS2008_DEF_TARGET 0x0501
-
-   /* VS2012 default build target is Windows Vista unless Update 1 is installed
-      and the v110_xp toolset is chosen. */
-#  ifdef _USING_V110_SDK71_
-#    define VS2012_DEF_TARGET 0x0501
-#  else
-#    define VS2012_DEF_TARGET 0x0600
-#  endif
-#endif
-
-/* VS2008 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER <= 1600)
-#  ifndef _WIN32_WINNT
-#  define _WIN32_WINNT VS2008_DEF_TARGET
-#  endif
-#  ifndef WINVER
-#  define WINVER VS2008_DEF_TARGET
-#  endif
-#  if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#    error VS2008 does not support Windows build targets prior to Windows 2000
-#  endif
-#endif
-
-/* VS2012 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1700)
-#  ifndef _WIN32_WINNT
-#  define _WIN32_WINNT VS2012_DEF_TARGET
-#  endif
-#  ifndef WINVER
-#  define WINVER VS2012_DEF_TARGET
-#  endif
-#  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#    ifdef _USING_V110_SDK71_
-#      error VS2012 does not support Windows build targets prior to Windows XP
-#    else
-#      error VS2012 does not support Windows build targets prior to Windows \
-Vista
-#    endif
-#  endif
-#endif
-
-#endif /* UNDER_CE */
 
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
 #ifndef UNDER_CE

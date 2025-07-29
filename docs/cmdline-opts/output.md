@@ -9,6 +9,7 @@ Category: important output
 Added: 4.0
 Multi: per-URL
 See-also:
+  - out-null
   - remote-name
   - remote-name-all
   - remote-header-name
@@ -55,6 +56,10 @@ To suppress response bodies, you can redirect output to /dev/null:
 Or for Windows:
 
     curl example.com -o nul
+
+Or, even more efficient and portable, use
+
+    curl example.com --out-null
 
 Specify the filename as single minus to force the output to stdout, to
 override curl's internal binary output in terminal prevention:

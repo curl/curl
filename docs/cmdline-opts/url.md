@@ -37,7 +37,7 @@ On Windows, `file://` accesses can be converted to network accesses by the
 operating system.
 
 Starting in curl 8.13.0, curl can be told to download URLs provided in a text
-file, one URL per line. It is done by with `--url @filename`: so instead of a
+file, one URL per line. It is done with `--url @filename`: so instead of a
 URL, you specify a filename prefixed with the `@` symbol. It can be told to
 load the list of URLs from stdin by providing an argument like `@-`.
 

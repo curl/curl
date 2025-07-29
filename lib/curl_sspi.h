@@ -45,7 +45,7 @@
 CURLcode Curl_sspi_global_init(void);
 void Curl_sspi_global_cleanup(void);
 
-/* This is used to populate the domain in a SSPI identity structure */
+/* This is used to populate the domain in an SSPI identity structure */
 CURLcode Curl_override_sspi_http_realm(const char *chlg,
                                        SEC_WINNT_AUTH_IDENTITY *identity);
 
@@ -57,7 +57,6 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 void Curl_sspi_free_identity(SEC_WINNT_AUTH_IDENTITY *identity);
 
 /* Forward-declaration of global variables defined in curl_sspi.c */
-extern HMODULE Curl_hSecDll;
 extern PSecurityFunctionTable Curl_pSecFn;
 
 /* Provide some definitions missing in old headers */
@@ -290,13 +289,13 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #endif
 #endif /* __MINGW32CE__ */
 #ifndef SEC_E_INVALID_PARAMETER
-# define SEC_E_INVALID_PARAMETER              ((HRESULT)0x8009035DL)
+#define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
 #ifndef SEC_E_DELEGATION_POLICY
-# define SEC_E_DELEGATION_POLICY              ((HRESULT)0x8009035EL)
+#define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
 #ifndef SEC_E_POLICY_NLTM_ONLY
-# define SEC_E_POLICY_NLTM_ONLY               ((HRESULT)0x8009035FL)
+#define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
 
 #ifdef __MINGW32CE__

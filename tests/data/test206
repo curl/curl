@@ -74,12 +74,13 @@ http
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP proxy CONNECT auth Digest
 </name>
 <command>
-http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy=http://%HOSTIP:%HTTPPORT --proxy-user=silly:person --proxy-digest --proxytunnel
 </command>
 </client>
 

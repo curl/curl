@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-Basic
+HTTP Basic auth
 </keywords>
 </info>
 
@@ -49,13 +49,13 @@ http://first:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER -L -u smith:doggie
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic c21pdGg6ZG9nZ2ll
+Authorization: Basic %b64[smith:doggie]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
 GET /user/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic c21pdGg6ZG9nZ2ll
+Authorization: Basic %b64[smith:doggie]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

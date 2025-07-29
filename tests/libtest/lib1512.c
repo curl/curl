@@ -28,42 +28,40 @@
  * easy transfer finds and uses the populated stuff.
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-#define NUM_HANDLES 2
-
-CURLcode test(char *URL)
+static CURLcode test_lib1512(char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {NULL, NULL};
+  CURL *curl[2] = {NULL, NULL};
   char *port = libtest_arg3;
   char *address = libtest_arg2;
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  int i;
+  size_t i;
   char target_url[256];
   (void)URL; /* URL is setup in the code */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
-            port, address);
-  printf("%s\n", dnsentry);
+  curl_msnprintf(dnsentry, sizeof(dnsentry), "server.example.curl:%s:%s",
+                 port, address);
+  curl_mprintf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    msnprintf(target_url, sizeof(target_url),
-              "http://server.example.curl:%s/path/1512%04i",
-              port, i + 1);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://server.example.curl:%s/path/1512%04i",
+                   port, (int)i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -71,16 +69,14 @@ CURLcode test(char *URL)
     /* include headers */
     easy_setopt(curl[i], CURLOPT_HEADER, 1L);
 
-    CURL_IGNORE_DEPRECATION(
-      easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
-    )
+    easy_setopt(curl[i], CURLOPT_DNS_USE_GLOBAL_CACHE, 1L);
   }
 
   /* make the first one populate the GLOBAL cache */
   easy_setopt(curl[0], CURLOPT_RESOLVE, slist);
 
-  /* run NUM_HANDLES transfers */
-  for(i = 0; (i < NUM_HANDLES) && !res; i++) {
+  /* run each transfer */
+  for(i = 0; (i < CURL_ARRAYSIZE(curl)) && !res; i++) {
     res = curl_easy_perform(curl[i]);
     if(res)
       goto test_cleanup;

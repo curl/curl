@@ -21,17 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
-static char testdata[]="this is a short string.\n";
+static char t578_testdata[] = "this is a short string.\n";
 
-static size_t data_size = CURL_ARRAYSIZE(testdata);
+static size_t data_size = CURL_ARRAYSIZE(t578_testdata);
 
-static int progress_callback(void *clientp, double dltotal, double dlnow,
-                             double ultotal, double ulnow)
+static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
+                                  double ultotal, double ulnow)
 {
   FILE *moo = fopen(libtest_arg2, "wb");
 
@@ -41,28 +41,28 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
 
   if(moo) {
     if((size_t)ultotal == data_size && (size_t)ulnow == data_size)
-      fprintf(moo, "PASSED, UL data matched data size\n");
+      curl_mfprintf(moo, "PASSED, UL data matched data size\n");
     else
-      fprintf(moo, "Progress callback called with UL %f out of %f\n",
-              ulnow, ultotal);
+      curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
+                    ulnow, ultotal);
     fclose(moo);
   }
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib578(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -75,13 +75,11 @@ CURLcode test(char *URL)
 
   /* Set the expected POST size */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
-  test_setopt(curl, CURLOPT_POSTFIELDS, testdata);
+  test_setopt(curl, CURLOPT_POSTFIELDS, t578_testdata);
 
   /* we want to use our own progress function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-  )
+  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  test_setopt(curl, CURLOPT_PROGRESSFUNCTION, t578_progress_callback);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

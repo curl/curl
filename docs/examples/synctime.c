@@ -87,12 +87,11 @@
 
 #define SYNCTIME_UA "synctime/1.0"
 
-typedef struct
-{
+struct conf {
   char http_proxy[MAX_STRING1];
   char proxy_user[MAX_STRING1];
   char timeserver[MAX_STRING1];
-} conf_t;
+};
 
 static const char DefaultTimeServer[3][MAX_STRING1] =
 {
@@ -229,22 +228,22 @@ static void showUsage(void)
   return;
 }
 
-static int conf_init(conf_t *conf)
+static int conf_init(struct conf *conf)
 {
   int i;
 
-  *conf->http_proxy       = 0;
+  *conf->http_proxy = 0;
   for(i = 0; i < MAX_STRING1; i++)
-    conf->proxy_user[i]     = 0;    /* Clean up password from memory */
-  *conf->timeserver       = 0;
+    conf->proxy_user[i] = 0;    /* Clean up password from memory */
+  *conf->timeserver = 0;
   return 1;
 }
 
 int main(int argc, char *argv[])
 {
-  CURL    *curl;
-  conf_t  conf[1];
-  int     RetValue;
+  CURL *curl;
+  struct conf conf[1];
+  int RetValue;
 
   ShowAllHeader   = 0;    /* Do not show HTTP Header */
   AutoSyncTime    = 0;    /* Do not synchronise computer clock */
@@ -299,8 +298,10 @@ int main(int argc, char *argv[])
 
     /* Calculating time diff between GMT and localtime */
     tt       = time(0);
+    /* !checksrc! disable BANNEDFUNC 1 */
     lt       = localtime(&tt);
     tt_local = mktime(lt);
+    /* !checksrc! disable BANNEDFUNC 1 */
     gmt      = gmtime(&tt);
     tt_gmt   = mktime(gmt);
     tzonediffFloat = difftime(tt_local, tt_gmt);

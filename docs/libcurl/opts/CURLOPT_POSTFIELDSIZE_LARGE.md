@@ -50,7 +50,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     const char *data = large_chunk;
-    curl_off_t length_of_data; /* set somehow */
+    curl_off_t length_of_data = 12345; /* set somehow */
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 

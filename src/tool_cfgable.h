@@ -23,6 +23,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
+#include <curl/mprintf.h>
 #include "tool_setup.h"
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
@@ -37,6 +39,29 @@
 #endif
 #endif
 
+/* make the tool use the libcurl *printf family */
+# undef printf
+# undef fprintf
+# undef msnprintf
+# undef vprintf
+# undef vfprintf
+# undef mvsnprintf
+# undef aprintf
+# undef vaprintf
+# define printf curl_mprintf
+# define fprintf curl_mfprintf
+# define msnprintf curl_msnprintf
+# define vprintf curl_mvprintf
+# define vfprintf curl_mvfprintf
+# define mvsnprintf curl_mvsnprintf
+# define aprintf curl_maprintf
+# define vaprintf curl_mvaprintf
+
+#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
+
+#define tool_safefree(ptr)                      \
+  do { free((ptr)); (ptr) = NULL;} while(0)
+
 struct GlobalConfig;
 
 struct State {
@@ -48,14 +73,13 @@ struct State {
   char *uploadfile;
   curl_off_t infilenum; /* number of files to upload */
   curl_off_t up;        /* upload file counter within a single upload glob */
-  curl_off_t urlnum;    /* how many iterations this single URL has with ranges
-                           etc */
+  curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
   curl_off_t li;
 };
 
 struct OperationConfig {
   struct State state;             /* for create_transfer() */
-  struct curlx_dynbuf postdata;
+  struct dynbuf postdata;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
   char *cookiejar;          /* write to this file */
@@ -135,6 +159,7 @@ struct OperationConfig {
   char *etag_compare_file;
   char *customrequest;
   char *ssl_ec_curves;
+  char *ssl_signature_algorithms;
   char *krblevel;
   char *request_target;
   char *writeout;           /* %-styled format string to output */
@@ -171,8 +196,6 @@ struct OperationConfig {
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
 
-  long ssl_version;
-  long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
   long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
@@ -192,7 +215,7 @@ struct OperationConfig {
   long retry_delay;         /* delay between retries (in seconds) */
   long retry_maxtime;       /* maximum time to keep retrying */
 
-  long mime_options;        /* Mime option flags. */
+  unsigned long mime_options; /* Mime option flags. */
   long tftp_blksize;        /* TFTP BLKSIZE option */
   long alivetime;           /* keepalive-time */
   long alivecnt;            /* keepalive-cnt */
@@ -202,11 +225,9 @@ struct OperationConfig {
                                      0 is valid. default: CURL_HET_DEFAULT. */
   unsigned long timecond;
   HttpReq httpreq;
-  int proxyver;             /* set to CURLPROXY_HTTP* define */
-  int ftp_ssl_ccc_mode;
-  int ftp_filemethod;
-  int default_node_flags;   /* default flags to search for each 'node', which
-                               is basically each given URL to transfer */
+  long proxyver;             /* set to CURLPROXY_HTTP* define */
+  long ftp_ssl_ccc_mode;
+  long ftp_filemethod;
   enum {
     CLOBBER_DEFAULT, /* Provides compatibility with previous versions of curl,
                         by using the default behavior for -o, -O, and -J.
@@ -218,6 +239,9 @@ struct OperationConfig {
   } file_clobber_mode;
   unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
+  unsigned char ssl_version;     /* 0 - 4, 0 being default */
+  unsigned char ssl_version_max; /* 0 - 4, 0 being default */
+  BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
   BIT(encoding);            /* Accept-Encoding please */
@@ -305,7 +329,6 @@ struct OperationConfig {
   BIT(proxy_ssl_auto_client_cert); /* proxy version of ssl_auto_client_cert */
   BIT(noalpn);                    /* enable/disable TLS ALPN extension */
   BIT(abstract_unix_socket);      /* path to an abstract Unix domain socket */
-  BIT(falsestart);
   BIT(path_as_is);
   BIT(suppress_connect_headers);  /* suppress proxy CONNECT response headers
                                      from user callbacks */
@@ -324,14 +347,13 @@ struct GlobalConfig {
   FILE *trace_stream;
   char *libcurl;                  /* Output libcurl code to this filename */
   char *ssl_sessions;             /* file to load/save SSL session tickets */
-  char *help_category;            /* The help category, if set */
   char *knownhosts;               /* known host path, if set. curl_free()
                                      this */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-  long ms_per_transfer;           /* start next transfer after (at least) this
+  timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
@@ -354,7 +376,7 @@ struct GlobalConfig {
   BIT(isatty);                    /* Updated internally if output is a tty */
 };
 
-void config_init(struct OperationConfig *config);
+struct OperationConfig *config_alloc(struct GlobalConfig *global);
 void config_free(struct OperationConfig *config);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */

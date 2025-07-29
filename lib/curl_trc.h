@@ -52,7 +52,7 @@ CURLcode Curl_trc_opt(const char *config);
 
 /* the function used to output verbose information */
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
-                char *ptr, size_t size);
+                const char *ptr, size_t size);
 
 /**
  * Output a failure message on registered callbacks for transfer.
@@ -80,7 +80,7 @@ void Curl_infof(struct Curl_easy *data,
  * Output an informational message when both transfer's verbose logging
  * and connection filters verbose logging are enabled.
  */
-void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
+void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
                        const char *fmt, ...) CURL_PRINTF(3, 4);
 void Curl_trc_multi(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
@@ -203,7 +203,7 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
              (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        (FALSE)
@@ -211,6 +211,6 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
 #define Curl_trc_ft_is_verbose(x,y)   (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */

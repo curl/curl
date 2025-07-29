@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 
     /* only allow HTTP, TFTP and SFTP */
     curl_easy_setopt(curl, CURLOPT_PROTOCOLS,
-                     CURLPROTO_HTTP | CURLPROTO_TFTP | CURLPROTO_SFTP);
+                     (long)CURLPROTO_HTTP | CURLPROTO_TFTP | CURLPROTO_SFTP);
 
     /* Perform the request */
     curl_easy_perform(curl);

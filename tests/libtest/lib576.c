@@ -21,9 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
 #include "memdebug.h"
 
 struct chunk_data {
@@ -31,71 +30,73 @@ struct chunk_data {
   int print_content;
 };
 
-static
-long chunk_bgn(const void *f, void *ptr, int remains)
+static long chunk_bgn(const void *f, void *ptr, int remains)
 {
   const struct curl_fileinfo *finfo = f;
   struct chunk_data *ch_d = ptr;
   ch_d->remains = remains;
 
-  printf("=============================================================\n");
-  printf("Remains:      %d\n", remains);
-  printf("Filename:     %s\n", finfo->filename);
+  curl_mprintf("=================================="
+               "===========================\n");
+  curl_mprintf("Remains:      %d\n", remains);
+  curl_mprintf("Filename:     %s\n", finfo->filename);
   if(finfo->strings.perm) {
-    printf("Permissions:  %s", finfo->strings.perm);
+    curl_mprintf("Permissions:  %s", finfo->strings.perm);
     if(finfo->flags & CURLFINFOFLAG_KNOWN_PERM)
-      printf(" (parsed => %o)", finfo->perm);
-    printf("\n");
+      curl_mprintf(" (parsed => %o)", finfo->perm);
+    curl_mprintf("\n");
   }
-  printf("Size:         %ldB\n", (long)finfo->size);
+  curl_mprintf("Size:         %ldB\n", (long)finfo->size);
   if(finfo->strings.user)
-    printf("User:         %s\n", finfo->strings.user);
+    curl_mprintf("User:         %s\n", finfo->strings.user);
   if(finfo->strings.group)
-    printf("Group:        %s\n", finfo->strings.group);
+    curl_mprintf("Group:        %s\n", finfo->strings.group);
   if(finfo->strings.time)
-    printf("Time:         %s\n", finfo->strings.time);
-  printf("Filetype:     ");
+    curl_mprintf("Time:         %s\n", finfo->strings.time);
+  curl_mprintf("Filetype:     ");
   switch(finfo->filetype) {
   case CURLFILETYPE_FILE:
-    printf("regular file\n");
+    curl_mprintf("regular file\n");
     break;
   case CURLFILETYPE_DIRECTORY:
-    printf("directory\n");
+    curl_mprintf("directory\n");
     break;
   case CURLFILETYPE_SYMLINK:
-    printf("symlink\n");
-    printf("Target:       %s\n", finfo->strings.target);
+    curl_mprintf("symlink\n");
+    curl_mprintf("Target:       %s\n", finfo->strings.target);
     break;
   default:
-    printf("other type\n");
+    curl_mprintf("other type\n");
     break;
   }
   if(finfo->filetype == CURLFILETYPE_FILE) {
     ch_d->print_content = 1;
-    printf("Content:\n"
-      "-------------------------------------------------------------\n");
+    curl_mprintf("Content:\n"
+                 "-------------------------------------------"
+                 "------------------\n");
   }
   if(strcmp(finfo->filename, "someothertext.txt") == 0) {
-    printf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");
+    curl_mprintf("# THIS CONTENT WAS SKIPPED IN CHUNK_BGN CALLBACK #\n");
     return CURL_CHUNK_BGN_FUNC_SKIP;
   }
   return CURL_CHUNK_BGN_FUNC_OK;
 }
 
-static
-long chunk_end(void *ptr)
+static long chunk_end(void *ptr)
 {
   struct chunk_data *ch_d = ptr;
   if(ch_d->print_content) {
     ch_d->print_content = 0;
-    printf("-------------------------------------------------------------\n");
+    curl_mprintf("-------------------------------------------"
+                 "------------------\n");
   }
   if(ch_d->remains == 1)
-    printf("=============================================================\n");
+    curl_mprintf("==========================================="
+                 "==================\n");
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib576(char *URL)
 {
   CURL *handle = NULL;
   CURLcode res = CURLE_OK;

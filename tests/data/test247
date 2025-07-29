@@ -2,6 +2,7 @@
 <info>
 <keywords>
 FTP
+MDTM
 </keywords>
 </info>
 
@@ -37,8 +38,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt -z "apr 1 2005
 <strip>
 QUIT
 </strip>
-<upload>
-</upload>
 <protocol>
 USER anonymous
 PASS ftp@example.com

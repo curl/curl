@@ -5,7 +5,7 @@ Long: false-start
 Help: Enable TLS False Start
 Protocols: TLS
 Added: 7.42.0
-Category: tls
+Category: deprecated
 Multi: boolean
 See-also:
   - tcp-fastopen
@@ -15,9 +15,8 @@ Example:
 
 # `--false-start`
 
+No TLS backend currently supports this feature.
+
 Use false start during the TLS handshake. False start is a mode where a TLS
 client starts sending application data before verifying the server's Finished
 message, thus saving a round trip when performing a full handshake.
-
-This functionality is currently only implemented in the Secure Transport (on
-iOS 7.0 or later, or macOS 10.9 or later) backend.

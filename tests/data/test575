@@ -120,5 +120,8 @@ This file should have permissions 777
 This is content of file "file.txt"
 Some junk ;-) This file does not really exist.
 </stdout>
+<limits>
+Allocations: 1500
+</limits>
 </verify>
 </testcase>

@@ -25,7 +25,7 @@
 #ifndef HEADER_CURL_RUSTLS_H
 #define HEADER_CURL_RUSTLS_H
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_RUSTLS
 

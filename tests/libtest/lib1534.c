@@ -21,13 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
 /* Test CURLINFO_FILETIME */
 
-CURLcode test(char *URL)
+static CURLcode test_lib1534(char *URL)
 {
   CURL *curl, *dupe = NULL;
   long filetime;
@@ -42,13 +42,15 @@ CURLcode test(char *URL)
 
   res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
@@ -58,8 +60,9 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
@@ -68,14 +71,15 @@ CURLcode test(char *URL)
 
   res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(filetime != 30) {
-    fprintf(stderr, "%s:%d filetime of http resource is incorrect; "
-            "expected 30 but is %ld\n",
-            __FILE__, __LINE__, filetime);
+    curl_mfprintf(stderr, "%s:%d filetime of http resource is incorrect; "
+                  "expected 30 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
     res = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
@@ -85,25 +89,26 @@ CURLcode test(char *URL)
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
-    fprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
-            __FILE__, __LINE__);
+    curl_mfprintf(stderr, "%s:%d curl_easy_duphandle() failed\n",
+                  __FILE__, __LINE__);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
 
   res = curl_easy_getinfo(dupe, CURLINFO_FILETIME, &filetime);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
-
 
   /* Test that a filetime is properly initialized on curl_easy_reset.
   */
@@ -112,13 +117,15 @@ CURLcode test(char *URL)
 
   res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr,
+                  "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
   if(filetime != -1) {
-    fprintf(stderr, "%s:%d filetime init failed; expected -1 but is %ld\n",
-            __FILE__, __LINE__, filetime);
+    curl_mfprintf(stderr,
+                  "%s:%d filetime init failed; expected -1 but is %ld\n",
+                  __FILE__, __LINE__, filetime);
     res = CURLE_FAILED_INIT;
     goto test_cleanup;
   }

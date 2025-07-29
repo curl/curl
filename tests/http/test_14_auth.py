@@ -38,11 +38,7 @@ class TestAuth:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
-        httpd.clear_extra_configs()
-        httpd.reload()
 
     # download 1 file, not authenticated
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -57,6 +53,8 @@ class TestAuth:
     # download 1 file, authenticated
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_14_02_digest_get_auth(self, env: Env, httpd, nghttpx, proto):
+        if not env.curl_has_feature('digest'):
+            pytest.skip("curl built without digest")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -69,8 +67,12 @@ class TestAuth:
     # PUT data, authenticated
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_14_03_digest_put_auth(self, env: Env, httpd, nghttpx, proto):
+        if not env.curl_has_feature('digest'):
+            pytest.skip("curl built without digest")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_ossl_quic():
+            pytest.skip("openssl-quic is flaky in retrying POST")
         data='0123456789'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
@@ -82,6 +84,8 @@ class TestAuth:
     # PUT data, digest auth large pw
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_14_04_digest_large_pw(self, env: Env, httpd, nghttpx, proto):
+        if not env.curl_has_feature('digest'):
+            pytest.skip("curl built without digest")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         data='0123456789'

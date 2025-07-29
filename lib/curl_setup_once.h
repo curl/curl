@@ -41,11 +41,9 @@
 #include <sys/types.h>
 #endif
 
-#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 
-#ifdef HAVE_SYS_TIME_H
+#if !defined(_WIN32) || defined(__MINGW32__)
 #include <sys/time.h>
 #endif
 
@@ -65,8 +63,18 @@
 #include <unistd.h>
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
+#endif
+
+/* Macro to strip 'const' without triggering a compiler warning.
+   Use it for APIs that do not or cannot support the const qualifier. */
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#elif defined(_WIN32)  /* for VS2008 */
+#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
+#else
+#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
 
 #ifdef USE_SCHANNEL
@@ -86,7 +94,7 @@
 #  endif
 #endif
 
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #include <sys/socket.h>
 #endif
 
@@ -168,11 +176,11 @@ struct timeval {
 #ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
-                                     (SEND_TYPE_ARG2)(y), \
+                                     (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                      (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
-                                    (SEND_QUAL_ARG2 SEND_TYPE_ARG2)(y), \
+                              (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                     (SEND_TYPE_ARG3)(z), \
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #else /* HAVE_SEND */
@@ -187,15 +195,15 @@ struct timeval {
  */
 
 #ifdef HAVE_CLOSESOCKET
-#  define sclose(x)  closesocket((x))
+#  define CURL_SCLOSE(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
-#  define sclose(x)  CloseSocket((x))
+#  define CURL_SCLOSE(x)  CloseSocket((x))
 #elif defined(MSDOS)  /* Watt-32 */
-#  define sclose(x)  close_s((x))
+#  define CURL_SCLOSE(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
-#  define sclose(x)  lwip_close((x))
+#  define CURL_SCLOSE(x)  lwip_close((x))
 #else
-#  define sclose(x)  close((x))
+#  define CURL_SCLOSE(x)  close((x))
 #endif
 
 /*
@@ -311,32 +319,39 @@ typedef unsigned int bit;
  */
 
 #ifdef USE_WINSOCK
-#undef  EBADF            /* override definition in errno.h */
-#define EBADF            WSAEBADF
-#undef  EINTR            /* override definition in errno.h */
-#define EINTR            WSAEINTR
-#undef  EINVAL           /* override definition in errno.h */
-#define EINVAL           WSAEINVAL
-#undef  EWOULDBLOCK      /* override definition in errno.h */
-#define EWOULDBLOCK      WSAEWOULDBLOCK
-#undef  EINPROGRESS      /* override definition in errno.h */
-#define EINPROGRESS      WSAEINPROGRESS
-#undef  EMSGSIZE         /* override definition in errno.h */
-#define EMSGSIZE         WSAEMSGSIZE
-#undef  EAFNOSUPPORT     /* override definition in errno.h */
-#define EAFNOSUPPORT     WSAEAFNOSUPPORT
-#undef  EADDRINUSE       /* override definition in errno.h */
-#define EADDRINUSE       WSAEADDRINUSE
-#undef  EADDRNOTAVAIL    /* override definition in errno.h */
-#define EADDRNOTAVAIL    WSAEADDRNOTAVAIL
-#undef  ECONNRESET       /* override definition in errno.h */
-#define ECONNRESET       WSAECONNRESET
-#undef  EISCONN          /* override definition in errno.h */
-#define EISCONN          WSAEISCONN
-#undef  ETIMEDOUT        /* override definition in errno.h */
-#define ETIMEDOUT        WSAETIMEDOUT
-#undef  ECONNREFUSED     /* override definition in errno.h */
-#define ECONNREFUSED     WSAECONNREFUSED
+#define SOCKEACCES        WSAEACCES
+#define SOCKEADDRINUSE    WSAEADDRINUSE
+#define SOCKEADDRNOTAVAIL WSAEADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  WSAEAFNOSUPPORT
+#define SOCKEBADF         WSAEBADF
+#define SOCKECONNREFUSED  WSAECONNREFUSED
+#define SOCKECONNRESET    WSAECONNRESET
+#define SOCKEINPROGRESS   WSAEINPROGRESS
+#define SOCKEINTR         WSAEINTR
+#define SOCKEINVAL        WSAEINVAL
+#define SOCKEISCONN       WSAEISCONN
+#define SOCKEMSGSIZE      WSAEMSGSIZE
+#define SOCKENOMEM        WSA_NOT_ENOUGH_MEMORY
+#define SOCKETIMEDOUT     WSAETIMEDOUT
+#define SOCKEWOULDBLOCK   WSAEWOULDBLOCK
+#else
+#define SOCKEACCES        EACCES
+#define SOCKEADDRINUSE    EADDRINUSE
+#define SOCKEADDRNOTAVAIL EADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  EAFNOSUPPORT
+#define SOCKEBADF         EBADF
+#define SOCKECONNREFUSED  ECONNREFUSED
+#define SOCKECONNRESET    ECONNRESET
+#define SOCKEINPROGRESS   EINPROGRESS
+#define SOCKEINTR         EINTR
+#define SOCKEINVAL        EINVAL
+#define SOCKEISCONN       EISCONN
+#define SOCKEMSGSIZE      EMSGSIZE
+#define SOCKENOMEM        ENOMEM
+#ifdef ETIMEDOUT
+#define SOCKETIMEDOUT     ETIMEDOUT
+#endif
+#define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
 /*

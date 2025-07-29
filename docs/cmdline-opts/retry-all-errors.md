@@ -31,7 +31,7 @@ file, which are not reset. We strongly suggest you do not parse or record
 output via redirect in combination with this option, since you may receive
 duplicate data.
 
-By default curl does not return error for transfers with an HTTP response code
+By default curl does not return an error for transfers with an HTTP response code
 that indicates an HTTP error, if the transfer was successful. For example, if
 a server replies 404 Not Found and the reply is fully received then that is
 not an error. When --retry is used then curl retries on some HTTP response

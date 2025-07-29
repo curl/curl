@@ -27,7 +27,7 @@
 # This script updates the docs/THANKS document.
 #
 
-set -eu
+set -u
 
 start="${1:-}"
 
@@ -79,7 +79,7 @@ tail -n +7 ./docs/THANKS | sed 's/ github/ github/i'  > $rand
   sed 's/, */\n/g'| \
   sed 's/^ *//'
 } | \
-sed -f ./docs/THANKS-filter | \
+LC_ALL=C sed -f ./docs/THANKS-filter | \
 sort -fu | \
 grep -aixvFf ./docs/THANKS >> $rand
 

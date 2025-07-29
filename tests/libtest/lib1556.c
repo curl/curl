@@ -21,10 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 struct headerinfo {
@@ -44,7 +42,7 @@ static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib1556(char *URL)
 {
   CURLcode code;
   CURL *curl = NULL;
@@ -62,14 +60,14 @@ CURLcode test(char *URL)
 
   code = curl_easy_perform(curl);
   if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, code, curl_easy_strerror(code));
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  printf("Max = %ld\n", (long)info.largest);
+  curl_mprintf("Max = %ld\n", (long)info.largest);
 
 test_cleanup:
 

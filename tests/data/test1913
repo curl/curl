@@ -19,7 +19,7 @@ REPLY SIZE 550 no such file
 ftp
 </server>
 
-# require debug so that alt-svc can work over plain old HTTP
+# require Debug so that alt-svc can work over plain old HTTP
 <name>
 FTP with NOBODY set, getting a missing file
 </name>

@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 /*
   Check range/resume returned error codes and data presence.
@@ -71,12 +71,12 @@ static const struct testparams testparams[] = {
                                                                    CURLE_OK }
 };
 
-static int      hasbody;
+static int hasbody;
 
 static size_t writedata(char *data, size_t size, size_t nmemb, void *userdata)
 {
-  (void) data;
-  (void) userdata;
+  (void)data;
+  (void)userdata;
 
   if(size && nmemb)
     hasbody = 1;
@@ -93,7 +93,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   replyselector = (p->flags & F_CONTENTRANGE) ? 1 : 0;
   if(p->flags & F_HTTP416)
     replyselector += 2;
-  msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
+  curl_msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   test_setopt(curl, CURLOPT_URL, urlbuf);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3L : 0L);
@@ -103,22 +103,22 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    printf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
-           "content-range=%s, expected=%d\n", num, res,
-           (p->flags & F_RESUME) ? "yes": "no",
-           (p->flags & F_FAIL) ? "yes": "no",
-           (p->flags & F_HTTP416) ? "yes": "no",
-           (p->flags & F_CONTENTRANGE) ? "yes": "no",
-           p->result);
+    curl_mprintf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
+                 "content-range=%s, expected=%d\n", num, res,
+                 (p->flags & F_RESUME) ? "yes": "no",
+                 (p->flags & F_FAIL) ? "yes": "no",
+                 (p->flags & F_HTTP416) ? "yes": "no",
+                 (p->flags & F_CONTENTRANGE) ? "yes": "no",
+                 p->result);
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {
-    printf("body should be ignored and is not: resume=%s, fail=%s, "
-           "http416=%s, content-range=%s\n",
-           (p->flags & F_RESUME) ? "yes": "no",
-           (p->flags & F_FAIL) ? "yes": "no",
-           (p->flags & F_HTTP416) ? "yes": "no",
-           (p->flags & F_CONTENTRANGE) ? "yes": "no");
+    curl_mprintf("body should be ignored and is not: resume=%s, fail=%s, "
+                 "http416=%s, content-range=%s\n",
+                 (p->flags & F_RESUME) ? "yes": "no",
+                 (p->flags & F_FAIL) ? "yes": "no",
+                 (p->flags & F_HTTP416) ? "yes": "no",
+                 (p->flags & F_CONTENTRANGE) ? "yes": "no");
     return 1;
   }
   return 0;
@@ -131,7 +131,7 @@ test_cleanup:
 /* for debugging: */
 /* #define SINGLETEST 9 */
 
-CURLcode test(char *URL)
+static CURLcode test_lib1156(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -139,14 +139,14 @@ CURLcode test(char *URL)
   int status = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(testparams); i++) {
     curl = curl_easy_init();
     if(!curl) {
-      fprintf(stderr, "curl_easy_init() failed\n");
+      curl_mfprintf(stderr, "curl_easy_init() failed\n");
       curl_global_cleanup();
       return TEST_ERR_MAJOR_BAD;
     }
@@ -161,7 +161,7 @@ CURLcode test(char *URL)
   }
 
   curl_global_cleanup();
-  printf("%d\n", status);
+  curl_mprintf("%d\n", status);
   return (CURLcode)status;
 
 test_cleanup:

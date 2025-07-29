@@ -66,7 +66,7 @@ static char *dirslash(const char *path)
   size_t n;
   struct dynbuf out;
   DEBUGASSERT(path);
-  Curl_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
+  curlx_dyn_init(&out, CURL_MAX_INPUT_LENGTH);
   n = strlen(path);
   if(n) {
     /* find the rightmost path separator, if any */
@@ -76,12 +76,12 @@ static char *dirslash(const char *path)
     while(n && IS_SEP(path[n-1]))
       --n;
   }
-  if(Curl_dyn_addn(&out, path, n))
+  if(curlx_dyn_addn(&out, path, n))
     return NULL;
   /* if there was a directory, append a single trailing slash */
-  if(n && Curl_dyn_addn(&out, PATHSEP, 1))
+  if(n && curlx_dyn_addn(&out, PATHSEP, 1))
     return NULL;
-  return Curl_dyn_ptr(&out);
+  return curlx_dyn_ptr(&out);
 }
 
 /*
@@ -136,7 +136,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 
   result = CURLE_WRITE_ERROR;
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
-    (defined(__i386__) || defined(__arm__))
+  (defined(__i386__) || defined(__arm__))
   fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, (mode_t)(0600|sb.st_mode));
 #else
   fd = open(tempstore, O_WRONLY | O_CREAT | O_EXCL, 0600|sb.st_mode);

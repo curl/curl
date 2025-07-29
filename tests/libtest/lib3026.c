@@ -21,19 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#include "testutil.h"
-#include "warnless.h"
+#include "first.h"
 
 #define NUM_THREADS 100
 
 #ifdef _WIN32
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-static DWORD WINAPI run_thread(LPVOID ptr)
+static DWORD WINAPI t3026_run_thread(LPVOID ptr)
 #else
 #include <process.h>
-static unsigned int WINAPI run_thread(void *ptr)
+static unsigned int WINAPI t3026_run_thread(void *ptr)
 #endif
 {
   CURLcode *result = ptr;
@@ -45,7 +42,7 @@ static unsigned int WINAPI run_thread(void *ptr)
   return 0;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib3026(char *URL)
 {
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
   typedef HANDLE curl_win_thread_handle_t;
@@ -53,66 +50,57 @@ CURLcode test(char *URL)
   typedef uintptr_t curl_win_thread_handle_t;
 #endif
   CURLcode results[NUM_THREADS];
-  curl_win_thread_handle_t ths[NUM_THREADS];
+  curl_win_thread_handle_t thread_handles[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
-  int test_failure = 0;
+  CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if((ver->features & CURL_VERSION_THREADSAFE) == 0) {
-    fprintf(stderr, "%s:%d On Windows but the "
-            "CURL_VERSION_THREADSAFE feature flag is not set\n",
-            __FILE__, __LINE__);
-    return (CURLcode)-1;
+    curl_mfprintf(stderr, "%s:%d On Windows but the "
+                  "CURL_VERSION_THREADSAFE feature flag is not set\n",
+                  __FILE__, __LINE__);
+    return TEST_ERR_MAJOR_BAD;
   }
-
-  /* On Windows libcurl global init/cleanup calls LoadLibrary/FreeLibrary for
-     secur32.dll and iphlpapi.dll. Here we load them beforehand so that when
-     libcurl calls LoadLibrary/FreeLibrary it only increases/decreases the
-     library's refcount rather than actually loading/unloading the library,
-     which would affect the test runtime. */
-  (void)win32_load_system_library(TEXT("secur32.dll"));
-  (void)win32_load_system_library(TEXT("iphlpapi.dll"));
 
   for(i = 0; i < tid_count; i++) {
     curl_win_thread_handle_t th;
     results[i] = CURL_LAST; /* initialize with invalid value */
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-    th = CreateThread(NULL, 0, run_thread, &results[i], 0, NULL);
+    th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
 #else
-    th = _beginthreadex(NULL, 0, run_thread, &results[i], 0, NULL);
+    th = _beginthreadex(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
 #endif
     if(!th) {
-      fprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
-              __FILE__, __LINE__, GetLastError());
+      curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
+                    __FILE__, __LINE__, GetLastError());
       tid_count = i;
-      test_failure = -1;
+      test_failure = TEST_ERR_MAJOR_BAD;
       goto cleanup;
     }
-    ths[i] = th;
+    thread_handles[i] = th;
   }
 
 cleanup:
   for(i = 0; i < tid_count; i++) {
-    WaitForSingleObject((HANDLE)ths[i], INFINITE);
-    CloseHandle((HANDLE)ths[i]);
+    WaitForSingleObject((HANDLE)thread_handles[i], INFINITE);
+    CloseHandle((HANDLE)thread_handles[i]);
     if(results[i] != CURLE_OK) {
-      fprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
-              "with code %d (%s)\n", __FILE__, __LINE__,
-              i, (int) results[i], curl_easy_strerror(results[i]));
-      test_failure = -1;
+      curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
+                    "with code %d (%s)\n", __FILE__, __LINE__,
+                    i, (int) results[i], curl_easy_strerror(results[i]));
+      test_failure = TEST_ERR_MAJOR_BAD;
     }
   }
 
-  return (CURLcode)test_failure;
+  return test_failure;
 }
 
 #elif defined(HAVE_PTHREAD_H)
 #include <pthread.h>
-#include <unistd.h>
 
-static void *run_thread(void *ptr)
+static void *t3026_run_thread(void *ptr)
 {
   CURLcode *result = ptr;
 
@@ -123,32 +111,32 @@ static void *run_thread(void *ptr)
   return NULL;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib3026(char *URL)
 {
   CURLcode results[NUM_THREADS];
   pthread_t tids[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
-  (void) URL;
+  (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if((ver->features & CURL_VERSION_THREADSAFE) == 0) {
-    fprintf(stderr, "%s:%d Have pthread but the "
-            "CURL_VERSION_THREADSAFE feature flag is not set\n",
-            __FILE__, __LINE__);
-    return (CURLcode)-1;
+    curl_mfprintf(stderr, "%s:%d Have pthread but the "
+                  "CURL_VERSION_THREADSAFE feature flag is not set\n",
+                  __FILE__, __LINE__);
+    return TEST_ERR_MAJOR_BAD;
   }
 
   for(i = 0; i < tid_count; i++) {
     int res;
     results[i] = CURL_LAST; /* initialize with invalid value */
-    res = pthread_create(&tids[i], NULL, run_thread, &results[i]);
+    res = pthread_create(&tids[i], NULL, t3026_run_thread, &results[i]);
     if(res) {
-      fprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
-              __FILE__, __LINE__, res);
+      curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
+                    __FILE__, __LINE__, res);
       tid_count = i;
-      test_failure = (CURLcode)-1;
+      test_failure = TEST_ERR_MAJOR_BAD;
       goto cleanup;
     }
   }
@@ -157,10 +145,10 @@ cleanup:
   for(i = 0; i < tid_count; i++) {
     pthread_join(tids[i], NULL);
     if(results[i] != CURLE_OK) {
-      fprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
-              "with code %d (%s)\n", __FILE__, __LINE__,
-              i, (int) results[i], curl_easy_strerror(results[i]));
-      test_failure = (CURLcode)-1;
+      curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
+                    "with code %d (%s)\n", __FILE__, __LINE__,
+                    i, (int) results[i], curl_easy_strerror(results[i]));
+      test_failure = TEST_ERR_MAJOR_BAD;
     }
   }
 
@@ -168,17 +156,17 @@ cleanup:
 }
 
 #else /* without pthread or Windows, this test doesn't work */
-CURLcode test(char *URL)
+static CURLcode test_lib3026(char *URL)
 {
   curl_version_info_data *ver;
   (void)URL;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if((ver->features & CURL_VERSION_THREADSAFE) != 0) {
-    fprintf(stderr, "%s:%d No pthread but the "
-            "CURL_VERSION_THREADSAFE feature flag is set\n",
-            __FILE__, __LINE__);
-    return (CURLcode)-1;
+    curl_mfprintf(stderr, "%s:%d No pthread but the "
+                  "CURL_VERSION_THREADSAFE feature flag is set\n",
+                  __FILE__, __LINE__);
+    return TEST_ERR_MAJOR_BAD;
   }
   return CURLE_OK;
 }

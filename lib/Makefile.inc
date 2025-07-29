@@ -21,6 +21,39 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Shared between CMakeLists.txt and Makefile.am
+
+LIB_CURLX_CFILES = \
+  curlx/base64.c   \
+  curlx/dynbuf.c   \
+  curlx/inet_ntop.c \
+  curlx/inet_pton.c \
+  curlx/multibyte.c \
+  curlx/nonblock.c \
+  curlx/strparse.c \
+  curlx/timediff.c \
+  curlx/timeval.c  \
+  curlx/version_win32.c \
+  curlx/wait.c     \
+  curlx/warnless.c \
+  curlx/winapi.c
+
+LIB_CURLX_HFILES = \
+  curlx/binmode.h  \
+  curlx/base64.h   \
+  curlx/curlx.h    \
+  curlx/dynbuf.h   \
+  curlx/inet_ntop.h \
+  curlx/inet_pton.h \
+  curlx/multibyte.h \
+  curlx/nonblock.h \
+  curlx/strparse.h \
+  curlx/timediff.h \
+  curlx/timeval.h  \
+  curlx/version_win32.h \
+  curlx/wait.h     \
+  curlx/warnless.h \
+  curlx/winapi.h
 
 LIB_VAUTH_CFILES =      \
   vauth/cleartext.c     \
@@ -39,11 +72,9 @@ LIB_VAUTH_CFILES =      \
 
 LIB_VAUTH_HFILES =      \
   vauth/digest.h        \
-  vauth/ntlm.h          \
   vauth/vauth.h
 
 LIB_VTLS_CFILES =           \
-  vtls/bearssl.c            \
   vtls/cipher_suite.c       \
   vtls/gtls.c               \
   vtls/hostcheck.c          \
@@ -54,7 +85,6 @@ LIB_VTLS_CFILES =           \
   vtls/rustls.c             \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
-  vtls/sectransp.c          \
   vtls/vtls.c               \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \
@@ -62,7 +92,6 @@ LIB_VTLS_CFILES =           \
   vtls/x509asn1.c
 
 LIB_VTLS_HFILES =           \
-  vtls/bearssl.h            \
   vtls/cipher_suite.h       \
   vtls/gtls.h               \
   vtls/hostcheck.h          \
@@ -73,7 +102,6 @@ LIB_VTLS_HFILES =           \
   vtls/rustls.h             \
   vtls/schannel.h           \
   vtls/schannel_int.h       \
-  vtls/sectransp.h          \
   vtls/vtls.h               \
   vtls/vtls_int.h           \
   vtls/vtls_scache.h        \
@@ -82,7 +110,6 @@ LIB_VTLS_HFILES =           \
   vtls/x509asn1.h
 
 LIB_VQUIC_CFILES = \
-  vquic/curl_msh3.c   \
   vquic/curl_ngtcp2.c   \
   vquic/curl_osslq.c   \
   vquic/curl_quiche.c   \
@@ -90,7 +117,6 @@ LIB_VQUIC_CFILES = \
   vquic/vquic-tls.c
 
 LIB_VQUIC_HFILES = \
-  vquic/curl_msh3.h   \
   vquic/curl_ngtcp2.h   \
   vquic/curl_osslq.h   \
   vquic/curl_quiche.h   \
@@ -112,8 +138,8 @@ LIB_CFILES =         \
   altsvc.c           \
   amigaos.c          \
   asyn-ares.c        \
-  asyn-thread.c      \
-  base64.c           \
+  asyn-base.c        \
+  asyn-thrdd.c       \
   bufq.c             \
   bufref.c           \
   cf-h1-proxy.c      \
@@ -123,10 +149,10 @@ LIB_CFILES =         \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
-  cshutdn.c          \
   connect.c          \
   content_encoding.c \
   cookie.c           \
+  cshutdn.c          \
   curl_addrinfo.c    \
   curl_des.c         \
   curl_endian.c      \
@@ -135,7 +161,6 @@ LIB_CFILES =         \
   curl_gethostname.c \
   curl_gssapi.c      \
   curl_memrchr.c     \
-  curl_multibyte.c   \
   curl_ntlm_core.c   \
   curl_range.c       \
   curl_rtmp.c        \
@@ -147,14 +172,13 @@ LIB_CFILES =         \
   cw-out.c           \
   cw-pause.c         \
   dict.c             \
-  dllmain.c          \
   doh.c              \
-  dynbuf.c           \
   dynhds.c           \
   easy.c             \
   easygetopt.c       \
   easyoptions.c      \
   escape.c           \
+  fake_addrinfo.c    \
   file.c             \
   fileinfo.c         \
   fopen.c            \
@@ -165,14 +189,11 @@ LIB_CFILES =         \
   getinfo.c          \
   gopher.c           \
   hash.c             \
-  hash_offt.c        \
   headers.c          \
   hmac.c             \
-  hostasyn.c         \
   hostip.c           \
   hostip4.c          \
   hostip6.c          \
-  hostsyn.c          \
   hsts.c             \
   http.c             \
   http1.c            \
@@ -187,8 +208,6 @@ LIB_CFILES =         \
   idn.c              \
   if2ip.c            \
   imap.c             \
-  inet_ntop.c        \
-  inet_pton.c        \
   krb5.c             \
   ldap.c             \
   llist.c            \
@@ -202,7 +221,6 @@ LIB_CFILES =         \
   multi.c            \
   multi_ev.c         \
   netrc.c            \
-  nonblock.c         \
   noproxy.c          \
   openldap.c         \
   parsedate.c        \
@@ -232,19 +250,17 @@ LIB_CFILES =         \
   strdup.c           \
   strequal.c         \
   strerror.c         \
-  strparse.c         \
-  strtoofft.c        \
   system_win32.c     \
   telnet.c           \
   tftp.c             \
-  timediff.c         \
-  timeval.c          \
   transfer.c         \
+  uint-bset.c        \
+  uint-hash.c        \
+  uint-spbset.c      \
+  uint-table.c       \
   url.c              \
   urlapi.c           \
   version.c          \
-  version_win32.c    \
-  warnless.c         \
   ws.c
 
 LIB_HFILES =         \
@@ -266,7 +282,6 @@ LIB_HFILES =         \
   content_encoding.h \
   cookie.h           \
   curl_addrinfo.h    \
-  curl_base64.h      \
   curl_ctype.h       \
   curl_des.h         \
   curl_endian.h      \
@@ -279,9 +294,9 @@ LIB_HFILES =         \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \
+  curl_mem_undef.h   \
   curl_memory.h      \
   curl_memrchr.h     \
-  curl_multibyte.h   \
   curl_ntlm_core.h   \
   curl_printf.h      \
   curl_range.h       \
@@ -294,17 +309,16 @@ LIB_HFILES =         \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
-  curlx.h            \
   cw-out.h           \
   cw-pause.h         \
   dict.h             \
   doh.h              \
-  dynbuf.h           \
   dynhds.h           \
   easy_lock.h        \
   easyif.h           \
   easyoptions.h      \
   escape.h           \
+  fake_addrinfo.h    \
   file.h             \
   fileinfo.h         \
   fopen.h            \
@@ -315,7 +329,6 @@ LIB_HFILES =         \
   getinfo.h          \
   gopher.h           \
   hash.h             \
-  hash_offt.h        \
   headers.h          \
   hostip.h           \
   hsts.h             \
@@ -332,8 +345,6 @@ LIB_HFILES =         \
   idn.h              \
   if2ip.h            \
   imap.h             \
-  inet_ntop.h        \
-  inet_pton.h        \
   llist.h            \
   macos.h            \
   memdebug.h         \
@@ -343,7 +354,6 @@ LIB_HFILES =         \
   multi_ev.h         \
   multiif.h          \
   netrc.h            \
-  nonblock.h         \
   noproxy.h          \
   parsedate.h        \
   pingpong.h         \
@@ -373,24 +383,22 @@ LIB_HFILES =         \
   strcase.h          \
   strdup.h           \
   strerror.h         \
-  strparse.h         \
-  strtoofft.h        \
   system_win32.h     \
   telnet.h           \
   tftp.h             \
-  timediff.h         \
-  timeval.h          \
   transfer.h         \
+  uint-bset.h        \
+  uint-hash.h        \
+  uint-spbset.h      \
+  uint-table.h       \
   url.h              \
   urlapi-int.h       \
   urldata.h          \
-  version_win32.h    \
-  warnless.h         \
   ws.h
 
 LIB_RCFILES = libcurl.rc
 
 CSOURCES = $(LIB_CFILES) $(LIB_VAUTH_CFILES) $(LIB_VTLS_CFILES) \
-  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES)
+  $(LIB_VQUIC_CFILES) $(LIB_VSSH_CFILES) $(LIB_CURLX_CFILES)
 HHEADERS = $(LIB_HFILES) $(LIB_VAUTH_HFILES) $(LIB_VTLS_HFILES) \
-  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES)
+  $(LIB_VQUIC_HFILES) $(LIB_VSSH_HFILES) $(LIB_CURLX_HFILES)

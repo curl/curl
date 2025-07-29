@@ -52,5 +52,11 @@ if(NOT HTTPD_NGHTTPX)
 endif()
 mark_as_advanced(HTTPD_NGHTTPX)
 
-# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, VSFTPD
+find_program(SOCKD "sockd")
+if(NOT SOCKD)
+  set(SOCKD "")
+endif()
+mark_as_advanced(SOCKD)
+
+# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, SOCKD, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

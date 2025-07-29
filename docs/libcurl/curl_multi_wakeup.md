@@ -51,8 +51,10 @@ extern int decide_to_stop_thread1();
 int main(void)
 {
   CURL *easy;
-  CURLM *multi;
+  CURLM *multi = curl_multi_init();
   int still_running;
+
+  easy = curl_easy_init();
 
   /* add the individual easy handle */
   curl_multi_add_handle(multi, easy);

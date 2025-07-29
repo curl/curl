@@ -63,6 +63,7 @@ BearSSL
 Benoit
 BeOS
 bitmask
+bitset
 bitwise
 Björn
 Bjørn
@@ -175,6 +176,7 @@ DELE
 DER
 dereference
 dereferences
+DES
 deselectable
 deserialization
 Deserialized
@@ -204,6 +206,7 @@ doxygen
 drftpd
 dsa
 DSN
+dtrace
 Dudka
 Dymond
 dynbuf
@@ -448,6 +451,8 @@ librtmp
 libs
 libssh
 libssh2
+libtest
+libtests
 Libtool
 libtool
 libuv
@@ -723,6 +728,7 @@ Ruslan
 rustc
 Rustls
 rustls
+rustup
 Sagula
 SanDisk
 SAS
@@ -766,6 +772,7 @@ smtp
 smtps
 SMTPS
 SNI
+sockd
 socketopen
 socketpair
 sockopt
@@ -819,12 +826,14 @@ subdirectory
 submitters
 substring
 substrings
+sudo
 SunOS
 SunSSH
 superset
 svc
 svcb
 SVCB
+SVG
 Svyatoslav
 Swisscom
 sws

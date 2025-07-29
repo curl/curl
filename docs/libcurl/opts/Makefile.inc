@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Shared between Makefile.am and CMakeLists.txt
+# Shared between CMakeLists.txt and Makefile.am
 
 man_MANS =                                      \
   CURLINFO_ACTIVESOCKET.3                       \
@@ -108,6 +108,7 @@ man_MANS =                                      \
   CURLMOPT_MAX_PIPELINE_LENGTH.3                \
   CURLMOPT_MAX_TOTAL_CONNECTIONS.3              \
   CURLMOPT_MAXCONNECTS.3                        \
+  CURLMOPT_NETWORK_CHANGED.3                    \
   CURLMOPT_PIPELINING.3                         \
   CURLMOPT_PIPELINING_SERVER_BL.3               \
   CURLMOPT_PIPELINING_SITE_BL.3                 \
@@ -367,6 +368,7 @@ man_MANS =                                      \
   CURLOPT_SSL_FALSESTART.3                      \
   CURLOPT_SSL_OPTIONS.3                         \
   CURLOPT_SSL_SESSIONID_CACHE.3                 \
+  CURLOPT_SSL_SIGNATURE_ALGORITHMS.3            \
   CURLOPT_SSL_VERIFYHOST.3                      \
   CURLOPT_SSL_VERIFYPEER.3                      \
   CURLOPT_SSL_VERIFYSTATUS.3                    \

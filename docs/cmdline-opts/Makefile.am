@@ -27,6 +27,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 MANPAGE = curl.1
 ASCIIPAGE = curl.txt
 
+# Get SUPPORT, DPAGES variables
 include Makefile.inc
 
 EXTRA_DIST = $(DPAGES) MANPAGE.md $(SUPPORT) CMakeLists.txt mainpage.idx

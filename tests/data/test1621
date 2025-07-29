@@ -14,10 +14,12 @@ none
 </server>
 <features>
 unittest
-https
 </features>
 <name>
 unit tests for stripcredentials from URL
 </name>
+<tool>
+tool%TESTNUMBER
+</tool>
 </client>
 </testcase>

@@ -29,7 +29,7 @@ sftp
 SFTP post-quote rename * asterisk accept-fail
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-*rename %SSH_PWD/%LOGDIR/test%TESTNUMBER-not-exists-dir %SSH_PWD/%LOGDIR/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "-*rename %SFTP_PWD/%LOGDIR/test%TESTNUMBER-not-exists-dir %SFTP_PWD/%LOGDIR/test%TESTNUMBER.new" sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
 </command>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Dummy test file for rename test

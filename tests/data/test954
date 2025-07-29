@@ -5,7 +5,7 @@ SMTP
 SASL
 SASL AUTH PLAIN
 RFC4616
-RFC4%TESTNUMBER
+RFC4954
 </keywords>
 </info>
 
@@ -26,7 +26,7 @@ REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= 501 Not authorized
 smtp
 </server>
 <name>
-SMTP plain authentication with alternative authorization identity (Not authorized)
+SMTP plain auth with alt authorization identity (Not authorized)
 </name>
 <stdin>
 mail body

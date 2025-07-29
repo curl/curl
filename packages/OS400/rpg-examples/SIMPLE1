@@ -97,7 +97,7 @@
       *
      d len             s             10u 0
       *
-     c                   eval      len = %scan(X'00': string: 1: length)        Limit 0-terminated
+     c                   eval      len = %scan(X'00': string: 1: length)        Limit null-terminated
      c                   if        len = 0
      c                   eval      len = length + 1
      c                   endif

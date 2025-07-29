@@ -144,17 +144,8 @@
 /* Define if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
 
-/* Define if you have the <sys/socket.h> header file. */
-#define HAVE_SYS_SOCKET_H
-
 /* Define if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H
-
-/* Define if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/time.h> header file. */
-#define HAVE_SYS_TIME_H
 
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H
@@ -185,9 +176,6 @@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
-
-/* Define for large files, on AIX-style hosts. */
-#undef _LARGE_FILES
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const

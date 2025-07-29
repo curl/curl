@@ -21,11 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
+#include "first.h"
 
 #include "memdebug.h"
 
@@ -33,7 +29,7 @@
  * Two FTP uploads, the second with no content sent.
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib541(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -42,16 +38,16 @@ CURLcode test(char *URL)
   struct_stat file_info;
 
   if(!libtest_arg2) {
-    fprintf(stderr, "Usage: <url> <file-to-upload>\n");
+    curl_mfprintf(stderr, "Usage: <url> <file-to-upload>\n");
     return TEST_ERR_USAGE;
   }
 
   hd_src = fopen(libtest_arg2, "rb");
   if(!hd_src) {
-    fprintf(stderr, "fopen failed with error (%d) %s\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    return (CURLcode)-2; /* if this happens things are major weird */
+    curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
+                  errno, strerror(errno));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
@@ -62,21 +58,21 @@ CURLcode test(char *URL)
 #endif
   if(hd == -1) {
     /* can't open file, bail out */
-    fprintf(stderr, "fstat() failed with error (%d) %s\n",
-            errno, strerror(errno));
-    fprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
+    curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
+                  errno, strerror(errno));
+    curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(!file_info.st_size) {
-    fprintf(stderr, "File %s has zero size!\n", libtest_arg2);
+    curl_mfprintf(stderr, "File %s has zero size!\n", libtest_arg2);
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
@@ -84,7 +80,7 @@ CURLcode test(char *URL)
   /* get a curl handle */
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;

@@ -203,7 +203,7 @@ int main(void)
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -230,7 +230,7 @@ int main(void)
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -257,7 +257,7 @@ int main(void)
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 int main(void)
@@ -278,6 +278,7 @@ int main(void)
 {
   char buffer[1024];
   /* This will not compile if strerror_r does not return a char* */
+  /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer))[0]);
   return 0;
 }
@@ -294,6 +295,7 @@ int main(void)
 {
   char buffer[1024];
   /* This will not compile if strerror_r does not return an int */
+  /* !checksrc! disable ERRNOVAR 1 */
   check(strerror_r(EACCES, buffer, sizeof(buffer)));
   return 0;
 }

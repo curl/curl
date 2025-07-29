@@ -22,7 +22,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-#
 
 use strict;
 use warnings;
@@ -87,13 +86,18 @@ sub scan_cmake_config_h {
     scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
 }
 
+my %whitelisted = ("CURL_DISABLE_TYPECHECK" => 1);
+
 sub scan_file {
     my ($source)=@_;
     open F, "<$source";
     while(<F>) {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym)=($1);
-            $file{$sym} = $source;
+
+            if(!$whitelisted{$sym}) {
+                $file{$sym} = $source;
+            }
         }
     }
     close F;

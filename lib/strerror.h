@@ -29,9 +29,6 @@
 #define STRERROR_LEN 256 /* a suitable length */
 
 const char *Curl_strerror(int err, char *buf, size_t buflen);
-#ifdef _WIN32
-const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen);
-#endif
 #ifdef USE_WINDOWS_SSPI
 const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
 #endif

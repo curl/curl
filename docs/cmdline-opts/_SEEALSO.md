@@ -2,4 +2,4 @@
 <!-- SPDX-License-Identifier: curl -->
 # SEE ALSO
 
-**ftp (1)**, **wget (1)**
+**ftp(1)**, **wget(1)**

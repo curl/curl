@@ -21,44 +21,32 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-
-static CURLU *u;
-
-static CURLcode
-unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void
-unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
 #define free_and_clear(x) free(x); x = NULL
 
-static CURLUcode parse_port(CURLU *url,
-                           char *h, bool has_scheme)
+static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
 {
   struct dynbuf host;
   CURLUcode ret;
-  Curl_dyn_init(&host, 10000);
-  if(Curl_dyn_add(&host, h))
+  curlx_dyn_init(&host, 10000);
+  if(curlx_dyn_add(&host, h))
     return CURLUE_OUT_OF_MEMORY;
   ret = Curl_parse_port(url, &host, has_scheme);
-  Curl_dyn_free(&host);
+  curlx_dyn_free(&host);
   return ret;
 }
 
-UNITTEST_START
+static CURLcode test_unit1653(char *arg)
 {
+  UNITTEST_BEGIN_SIMPLE
+
+  CURLU *u;
+
   CURLUcode ret;
   char *ipv6port = NULL;
   char *portnum;
@@ -228,5 +216,5 @@ fail:
   free(ipv6port);
   curl_url_cleanup(u);
 
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP

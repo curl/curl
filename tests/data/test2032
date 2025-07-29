@@ -75,7 +75,7 @@ SSL
 http
 </server>
 <tool>
-libntlmconnect
+lib2032
 </tool>
 
 <name>
@@ -91,12 +91,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0200 HTTP/1.1

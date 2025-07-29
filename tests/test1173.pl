@@ -107,7 +107,7 @@ sub checkref {
         return;
     }
     foreach my $d (keys %docsdirs) {
-        if( -f "$d/$f.$sec") {
+        if(-f "$d/$f.$sec") {
             $present = 1;
             $ref{"$f.$sec"}=1;
             last;
@@ -119,11 +119,22 @@ sub checkref {
     }
 }
 
+# option-looking words that aren't options
+my %allownonref = (
+    'CURLINFO_TEXT' => 1,
+    'CURLINFO_HEADER_IN' => 1,
+    'CURLINFO_HEADER_OUT' => 1,
+    'CURLINFO_DATA_IN' => 1,
+    'CURLINFO_DATA_OUT' => 1,
+    'CURLINFO_SSL_DATA_IN' => 1,
+    'CURLINFO_SSL_DATA_OUT' => 1,
+    );
+
 sub scanmanpage {
     my ($file) = @_;
     my $reqex = 0;
     my $inseealso = 0;
-    my $inex = 0;
+    my $inexample = 0;
     my $insynop = 0;
     my $exsize = 0;
     my $synopsize = 0;
@@ -155,18 +166,18 @@ sub scanmanpage {
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
             # this is for libcurl manpage SYNOPSIS checks
             $insynop = 1;
-            $inex = 0;
+            $inexample = 0;
         }
         elsif($_ =~ /^\.SH EXAMPLE/i) {
             $insynop = 0;
-            $inex = 1;
+            $inexample = 1;
         }
         elsif($_ =~ /^\.SH \"SEE ALSO\"/i) {
             $inseealso = 1;
         }
         elsif($_ =~ /^\.SH/i) {
             $insynop = 0;
-            $inex = 0;
+            $inexample = 0;
         }
         elsif($inseealso) {
             if($_ =~ /^\.BR (.*)/i) {
@@ -195,13 +206,13 @@ sub scanmanpage {
                 }
             }
         }
-        elsif($inex)  {
+        elsif($inexample) {
             $exsize++;
             if($_ =~ /[^\\]\\n/) {
                 print STDERR "$file:$line '\\n' need to be '\\\\n'!\n";
             }
         }
-        elsif($insynop)  {
+        elsif($insynop) {
             $synopsize++;
             if(($synopsize == 1) && ($_ !~ /\.nf/)) {
                 print STDERR "$file:$line:1:ERROR: be .nf for proper formatting\n";
@@ -233,8 +244,12 @@ sub scanmanpage {
         }
         if(($_ =~ /\\f([BI])((libcurl|CURLOPT_|CURLSHOPT_|CURLINFO_|CURLMOPT_|curl_easy_|curl_multi_|curl_url|curl_mime|curl_global|curl_share)[a-zA-Z_0-9-]+)(.)/) &&
            ($4 ne "(")) {
-            print STDERR "$file:$line curl ref to $2 without section\n";
-            $errors++;
+            my $word = $2;
+
+            if(!$allownonref{$word}) {
+                print STDERR "$file:$line curl ref to $word without section\n";
+                $errors++;
+            }
         }
         if($_ =~ /(.*)\\f([^BIP])/) {
             my ($pre, $format) = ($1, $2);

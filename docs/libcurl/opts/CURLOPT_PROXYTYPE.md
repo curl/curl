@@ -35,8 +35,7 @@ HTTP Proxy. Default.
 ## CURLPROXY_HTTPS
 
 HTTPS Proxy using HTTP/1. (Added in 7.52.0 for OpenSSL and GnuTLS. Since
-7.87.0, it also works for BearSSL, mbedTLS, Rustls, Schannel, Secure Transport
-and wolfSSL.)
+7.87.0, it also works for mbedTLS, Rustls, Schannel and wolfSSL.)
 
 ## CURLPROXY_HTTPS2
 
@@ -86,7 +85,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "local.example.com:1080");
     /* set the proxy type */
-    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+    curl_easy_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_SOCKS5);
     ret = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }

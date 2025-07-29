@@ -21,34 +21,32 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT (60 * 1000)
 
 static int new_fnmatch(void *ptr,
                        const char *pattern, const char *string)
 {
   (void)ptr;
-  fprintf(stderr, "lib574: match string '%s' against pattern '%s'\n",
-          string, pattern);
+  curl_mfprintf(stderr, "lib574: match string '%s' against pattern '%s'\n",
+                string, pattern);
   return CURL_FNMATCHFUNC_MATCH;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib574(char *URL)
 {
   CURLcode res;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -60,12 +58,12 @@ CURLcode test(char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
     goto test_cleanup;
   }
   res = curl_easy_perform(curl);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
     goto test_cleanup;
   }
 

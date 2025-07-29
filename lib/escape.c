@@ -32,9 +32,11 @@
 struct Curl_easy;
 
 #include "urldata.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "escape.h"
 #include "strdup.h"
+#include "curlx/strparse.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -69,7 +71,7 @@ char *curl_easy_escape(CURL *data, const char *string,
   if(!length)
     return strdup("");
 
-  Curl_dyn_init(&d, length * 3 + 1);
+  curlx_dyn_init(&d, length * 3 + 1);
 
   while(length--) {
     /* treat the characters unsigned */
@@ -77,32 +79,20 @@ char *curl_easy_escape(CURL *data, const char *string,
 
     if(ISUNRESERVED(in)) {
       /* append this */
-      if(Curl_dyn_addn(&d, &in, 1))
+      if(curlx_dyn_addn(&d, &in, 1))
         return NULL;
     }
     else {
       /* encode it */
-      const char hex[] = "0123456789ABCDEF";
-      char out[3]={'%'};
-      out[1] = hex[in >> 4];
-      out[2] = hex[in & 0xf];
-      if(Curl_dyn_addn(&d, out, 3))
+      unsigned char out[3]={'%'};
+      Curl_hexbyte(&out[1], in);
+      if(curlx_dyn_addn(&d, out, 3))
         return NULL;
     }
   }
 
-  return Curl_dyn_ptr(&d);
+  return curlx_dyn_ptr(&d);
 }
-
-static const unsigned char hextable[] = {
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0,       /* 0x30 - 0x3f */
-  0, 10, 11, 12, 13, 14, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* 0x40 - 0x4f */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,       /* 0x50 - 0x5f */
-  0, 10, 11, 12, 13, 14, 15                             /* 0x60 - 0x66 */
-};
-
-/* the input is a single hex digit */
-#define onehex2dec(x) hextable[x - '0']
 
 /*
  * Curl_urldecode() URL decodes the given string.
@@ -144,8 +134,8 @@ CURLcode Curl_urldecode(const char *string, size_t length,
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
-      in = (unsigned char)(onehex2dec(string[1]) << 4) | onehex2dec(string[2]);
-
+      in = (unsigned char)((Curl_hexval(string[1]) << 4) |
+                           Curl_hexval(string[2]));
       string += 3;
       alloc -= 3;
     }
@@ -219,19 +209,28 @@ void curl_free(void *p)
 void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
                     unsigned char *out, size_t olen) /* output buffer size */
 {
-  const char *hex = "0123456789abcdef";
   DEBUGASSERT(src && len && (olen >= 3));
   if(src && len && (olen >= 3)) {
     while(len-- && (olen >= 3)) {
-      /* clang-tidy warns on this line without this comment: */
-      /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
-      *out++ = (unsigned char)hex[(*src & 0xF0) >> 4];
-      *out++ = (unsigned char)hex[*src & 0x0F];
+      out[0] = Curl_ldigits[*src >> 4];
+      out[1] = Curl_ldigits[*src & 0x0F];
       ++src;
+      out += 2;
       olen -= 2;
     }
     *out = 0;
   }
   else if(olen)
     *out = 0;
+}
+
+/* Curl_hexbyte
+ *
+ * Output a single unsigned char as a two-digit UPPERCASE hex number.
+ */
+void Curl_hexbyte(unsigned char *dest, /* must fit two bytes */
+                  unsigned char val)
+{
+  dest[0] = Curl_udigits[val >> 4];
+  dest[1] = Curl_udigits[val & 0x0F];
 }

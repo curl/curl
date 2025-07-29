@@ -31,9 +31,12 @@ send some traffic on existing connections in order to keep them alive; this
 can prevent connections from being closed due to overzealous firewalls, for
 example.
 
-Currently the only protocol with a connection upkeep mechanism is HTTP/2: when
+For HTTP/2 we have an upkeep mechanism: when
 the connection upkeep interval is exceeded and curl_easy_upkeep(3)
 is called, an HTTP/2 PING frame is sent on the connection.
+
+For MQTT the upkeep interval defines when to send ping requests to prevent the
+server from disconnecting.
 
 This function must be explicitly called in order to perform the upkeep work.
 The connection upkeep interval is set with

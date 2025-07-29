@@ -23,20 +23,15 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
-
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
 #include "tool_findfile.h"
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
-#include "dynbuf.h"
-#include "curl_base64.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
 #include "var.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_EXPAND_CONTENT 10000000
@@ -60,7 +55,7 @@ void varcleanup(struct GlobalConfig *global)
   while(list) {
     struct tool_var *t = list;
     list = list->next;
-    free((char *)t->content);
+    free(CURL_UNCONST(t->content));
     free(t);
   }
 }
@@ -99,7 +94,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
                               size_t clen, /* content length */
                               char *f, /* functions */
                               size_t flen, /* function string length */
-                              struct curlx_dynbuf *out)
+                              struct dynbuf *out)
 {
   bool alloc = FALSE;
   ParameterError err = PARAM_OK;
@@ -228,7 +223,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
 }
 
 ParameterError varexpand(struct GlobalConfig *global,
-                         const char *line, struct curlx_dynbuf *out,
+                         const char *line, struct dynbuf *out,
                          bool *replaced)
 {
   CURLcode result;
@@ -307,10 +302,10 @@ ParameterError varexpand(struct GlobalConfig *global,
         else {
           char *value;
           size_t vlen = 0;
-          struct curlx_dynbuf buf;
+          struct dynbuf buf;
           const struct tool_var *v = varcontent(global, name, nlen);
           if(v) {
-            value = (char *)v->content;
+            value = (char *)CURL_UNCONST(v->content);
             vlen = v->clen;
           }
           else
@@ -471,7 +466,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     struct dynbuf fname;
     line++;
 
-    Curl_dyn_init(&fname, MAX_FILENAME);
+    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -490,7 +485,7 @@ ParameterError setvariable(struct GlobalConfig *global,
       if(clen)
         contalloc = TRUE;
     }
-    Curl_dyn_free(&fname);
+    curlx_dyn_free(&fname);
     if(!use_stdin && file)
       fclose(file);
     if(err)
@@ -500,7 +495,7 @@ ParameterError setvariable(struct GlobalConfig *global,
     line++;
     clen = strlen(line);
     /* this is the exact content */
-    content = (char *)line;
+    content = (char *)CURL_UNCONST(line);
     if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
       if(startoffset >= (curl_off_t)clen)
         clen = 0;

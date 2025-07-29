@@ -24,15 +24,15 @@
 
 #include "curl_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
 #include <curl/curl.h>
 
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
@@ -57,7 +57,7 @@
   #endif
 #endif
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
@@ -84,7 +84,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
 
@@ -177,19 +177,19 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_update(ctx, data, length);
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+  (void)mbedtls_md5_update(ctx, data, length);
 #else
-  (void) mbedtls_md5_update_ret(ctx, data, length);
+  (void)mbedtls_md5_update_ret(ctx, data, length);
 #endif
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_finish(ctx, digest);
+#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+  (void)mbedtls_md5_finish(ctx, digest);
 #else
-  (void) mbedtls_md5_finish_ret(ctx, digest);
+  (void)mbedtls_md5_finish_ret(ctx, digest);
 #endif
 }
 
@@ -252,7 +252,11 @@ static void my_md5_update(void *in,
                           unsigned int inputLen)
 {
   my_md5_ctx *ctx = in;
-  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+#ifdef __MINGW32CE__
+  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(input), inputLen, 0);
+#else
+  CryptHashData(ctx->hHash, (const BYTE *)input, inputLen, 0);
+#endif
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
@@ -356,7 +360,7 @@ static void my_md5_final(unsigned char *result, void *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD5_SET(n) \
-        (*(MD5_u32plus *)(void *)&ptr[(n) * 4])
+        (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
 #define MD5_GET(n) \
         MD5_SET(n)
 #else

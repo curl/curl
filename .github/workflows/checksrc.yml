@@ -4,7 +4,7 @@
 
 # This workflow contains checks at the source code level only.
 
-name: Source
+name: 'Source'
 
 'on':
   push:
@@ -15,6 +15,7 @@ name: Source
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
+      - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
       - 'winbuild/**'
@@ -25,6 +26,7 @@ name: Source
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
+      - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
       - 'winbuild/**'
@@ -33,88 +35,128 @@ permissions: {}
 
 jobs:
   checksrc:
+    name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: check
-        run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
+      - name: 'check'
+        run: scripts/checksrc-all.pl
 
-  codespell-cmakelint-pytype-ruff:
+  spellcheck-cmakelint-pytype-ruff:
+    name: 'spellcheck, cmakelint, pytype, ruff'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: install
+      - name: 'install'
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
-            codespell python3-pip python3-networkx python3-pydot python3-yaml \
+            python3-pip python3-networkx python3-pydot python3-yaml \
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
             python3-typing-extensions python3-libcst python3-impacket \
-            python3-websockets python3-pytest
-          python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.9.13 ruff==0.6.8
+            python3-websockets python3-pytest python3-filelock python3-pytest-xdist
+          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9 codespell==2.4.1
 
-      - name: spellcheck
+      - name: 'codespell'
         run: |
-          codespell \
-            --skip scripts/mk-ca-bundle.pl \
-            --skip src/tool_hugehelp.c \
-            -I .github/scripts/codespell-ignore.txt \
-            CMake include m4 scripts src lib
+          codespell --version
+          .github/scripts/codespell.sh
 
-      - name: cmakelint
+      - name: 'typos'
+        run: |
+          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
+
+      - name: 'cmakelint'
         run: scripts/cmakelint.sh
 
-      - name: pytype
+      - name: 'pytype'
         run: find . -name '*.py' -exec pytype -j auto -k {} +
 
-      - name: ruff
-        run: ruff check --extend-select=B007,B016,C405,C416,COM818,D200,D213,D204,D401,D415,FURB129,N818,PERF401,PERF403,PIE790,PIE808,PLW0127,Q004,RUF010,SIM101,SIM117,SIM118,TRY400,TRY401
+      - name: 'ruff'
+        run: scripts/pythonlint.sh
 
   reuse:
+    name: 'REUSE'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: REUSE Compliance Check
+      - name: 'check'
         uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
 
+  complexity:
+    name: 'complexity'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'install pmccabe'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            pmccabe
+
+      - name: 'check scores'
+        run: ./scripts/top-complexity
+
   miscchecks:
+    name: 'misc checks'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: 'install prereqs'
+        run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
-        name: checkout
 
-      - name: shellcheck
-        run: .github/scripts/shellcheck.sh
+      - name: 'zizmor GHA'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          zizmor --pedantic .github/workflows/*.yml
 
-      - name: spacecheck
+      - name: 'shellcheck CI'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          shellcheck --version
+          .github/scripts/shellcheck-ci.sh
+
+      - name: 'shellcheck'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          shellcheck --version
+          .github/scripts/shellcheck.sh
+
+      - name: 'spacecheck'
         run: .github/scripts/spacecheck.pl
 
-      - name: yamlcheck
+      - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
-      - name: binarycheck
-        run: .github/scripts/binarycheck.pl
-
       # we allow some extra in source code
-      - name: badwords
+      - name: 'badwords'
         run: |
+          # shellcheck disable=SC2046
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
           .github/scripts/badwords.pl $(git ls-files -- src lib include)

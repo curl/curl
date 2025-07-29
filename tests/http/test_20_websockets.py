@@ -27,12 +27,15 @@
 import logging
 import os
 import shutil
+import socket
 import subprocess
 import time
 from datetime import datetime, timedelta
+from typing import Dict
 import pytest
 
 from testenv import Env, CurlClient, LocalClient
+from testenv.ports import alloc_ports_and_do
 
 
 log = logging.getLogger(__name__)
@@ -42,9 +45,13 @@ log = logging.getLogger(__name__)
                     reason='curl lacks ws protocol support')
 class TestWebsockets:
 
-    def check_alive(self, env, timeout=5):
+    PORT_SPECS = {
+        'ws': socket.SOCK_STREAM,
+    }
+
+    def check_alive(self, env, port, timeout=Env.SERVER_TIMEOUT):
         curl = CurlClient(env=env)
-        url = f'http://localhost:{env.ws_port}/'
+        url = f'http://localhost:{port}/'
         end = datetime.now() + timedelta(seconds=timeout)
         while datetime.now() < end:
             r = curl.http_download(urls=[url])
@@ -63,20 +70,36 @@ class TestWebsockets:
 
     @pytest.fixture(autouse=True, scope='class')
     def ws_echo(self, env):
-        run_dir = os.path.join(env.gen_dir, 'ws-echo-server')
-        err_file = os.path.join(run_dir, 'stderr')
-        self._rmrf(run_dir)
-        self._mkpath(run_dir)
+        self.run_dir = os.path.join(env.gen_dir, 'ws_echo_server')
+        err_file = os.path.join(self.run_dir, 'stderr')
+        self._rmrf(self.run_dir)
+        self._mkpath(self.run_dir)
+        self.cmd = os.path.join(env.project_dir,
+                                'tests/http/testenv/ws_echo_server.py')
+        self.wsproc = None
+        self.cerr = None
 
-        with open(err_file, 'w') as cerr:
-            cmd = os.path.join(env.project_dir,
-                               'tests/http/testenv/ws_echo_server.py')
-            args = [cmd, '--port', str(env.ws_port)]
-            p = subprocess.Popen(args=args, cwd=run_dir, stderr=cerr,
-                                 stdout=cerr)
-            assert self.check_alive(env)
+        def startup(ports: Dict[str, int]) -> bool:
+            wargs = [self.cmd, '--port', str(ports['ws'])]
+            log.info(f'start_ {wargs}')
+            self.wsproc = subprocess.Popen(args=wargs,
+                                           cwd=self.run_dir,
+                                           stderr=self.cerr,
+                                           stdout=self.cerr)
+            if self.check_alive(env, ports['ws']):
+                env.update_ports(ports)
+                return True
+            log.error(f'not alive {wargs}')
+            self.wsproc.terminate()
+            self.wsproc = None
+            return False
+
+        with open(err_file, 'w') as self.cerr:
+            assert alloc_ports_and_do(TestWebsockets.PORT_SPECS, startup,
+                                      env.gen_root, max_tries=3)
+            assert self.wsproc
             yield
-            p.terminate()
+            self.wsproc.terminate()
 
     def test_20_01_basic(self, env: Env, ws_echo):
         curl = CurlClient(env=env)
@@ -86,7 +109,7 @@ class TestWebsockets:
 
     def test_20_02_pingpong_small(self, env: Env, ws_echo):
         payload = 125 * "x"
-        client = LocalClient(env=env, name='ws-pingpong')
+        client = LocalClient(env=env, name='ws_pingpong')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -96,15 +119,15 @@ class TestWebsockets:
     # the python websocket server does not like 'large' control frames
     def test_20_03_pingpong_too_large(self, env: Env, ws_echo):
         payload = 127 * "x"
-        client = LocalClient(env=env, name='ws-pingpong')
+        client = LocalClient(env=env, name='ws_pingpong')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
         r = client.run(args=[url, payload])
-        r.check_exit_code(56)
+        r.check_exit_code(100)  # CURLE_TOO_LARGE
 
     def test_20_04_data_small(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws-data')
+        client = LocalClient(env=env, name='ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -112,7 +135,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     def test_20_05_data_med(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws-data')
+        client = LocalClient(env=env, name='ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -120,7 +143,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     def test_20_06_data_large(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws-data')
+        client = LocalClient(env=env, name='ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -130,7 +153,7 @@ class TestWebsockets:
     def test_20_07_data_large_small_recv(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_SIZE'] = '1024'
-        client = LocalClient(env=env, name='ws-data', run_env=run_env)
+        client = LocalClient(env=env, name='ws_data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -142,12 +165,11 @@ class TestWebsockets:
     def test_20_08_data_very_large(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_EAGAIN'] = '8192'
-        client = LocalClient(env=env, name='ws-data', run_env=run_env)
+        client = LocalClient(env=env, name='ws_data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
         count = 10
-        large = 512 * 1024
         large = 20000
         r = client.run(args=['-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)

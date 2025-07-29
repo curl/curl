@@ -38,12 +38,11 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "curlx.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
 #include "vauth/vauth.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -53,7 +52,7 @@
 static bool hd_name_eq(const char *n1, size_t n1len,
                        const char *n2, size_t n2len)
 {
-  return (n1len == n2len) ? strncasecompare(n1, n2, n1len) : FALSE;
+  return (n1len == n2len) ? curl_strnequal(n1, n2, n1len) : FALSE;
 }
 
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
@@ -109,7 +108,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the colon */
-        Curl_str_passblanks(&ptr);
+        curlx_str_passblanks(&ptr);
         if(*ptr) {
           value = ptr;
           valuelen = strlen(value);
@@ -131,7 +130,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the semicolon */
-        Curl_str_passblanks(&ptr);
+        curlx_str_passblanks(&ptr);
         if(!*ptr) {
           /* quirk #2, send an empty header */
           value = "";
@@ -326,36 +325,42 @@ connect_sub:
   if(!ctx->cf_protocol) {
     struct Curl_cfilter *cf_protocol = NULL;
     int httpversion = 0;
-    int alpn = Curl_conn_cf_is_ssl(cf->next) ?
-      cf->conn->proxy_alpn : CURL_HTTP_VERSION_1_1;
+    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
 
-    /* First time call after the subchain connected */
-    switch(alpn) {
-    case CURL_HTTP_VERSION_NONE:
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
-      infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
-            (alpn == CURL_HTTP_VERSION_1_0) ? 0 : 1);
+    if(alpn)
+      infof(data, "CONNECT: '%s' negotiated", alpn);
+    else
+      infof(data, "CONNECT: no ALPN negotiated");
+
+    if(alpn && !strcmp(alpn, "http/1.0")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.0");
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;
       cf_protocol = cf->next;
-      httpversion = (alpn == CURL_HTTP_VERSION_1_0) ? 10 : 11;
-      break;
+      httpversion = 10;
+    }
+    else if(!alpn || !strcmp(alpn, "http/1.1")) {
+      CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
+      result = Curl_cf_h1_proxy_insert_after(cf, data);
+      if(result)
+        goto out;
+      cf_protocol = cf->next;
+      /* Assume that without an ALPN, we are talking to an ancient one */
+      httpversion = 11;
+    }
 #ifdef USE_NGHTTP2
-    case CURL_HTTP_VERSION_2:
+    else if(!strcmp(alpn, "h2")) {
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/2");
-      infof(data, "CONNECT tunnel: HTTP/2 negotiated");
       result = Curl_cf_h2_proxy_insert_after(cf, data);
       if(result)
         goto out;
       cf_protocol = cf->next;
       httpversion = 20;
-      break;
+    }
 #endif
-    default:
-      infof(data, "CONNECT tunnel: unsupported ALPN(%d) negotiated", alpn);
+    else {
+      failf(data, "CONNECT: negotiated ALPN '%s' not supported", alpn);
       result = CURLE_COULDNT_CONNECT;
       goto out;
     }
@@ -383,21 +388,27 @@ out:
   return result;
 }
 
-void Curl_cf_http_proxy_get_host(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 const char **phost,
-                                 const char **pdisplay_host,
-                                 int *pport)
+CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int query, int *pres1, void *pres2)
 {
-  (void)data;
-  if(!cf->connected) {
-    *phost = cf->conn->http_proxy.host.name;
-    *pdisplay_host = cf->conn->http_proxy.host.dispname;
-    *pport = (int)cf->conn->http_proxy.port;
+  switch(query) {
+  case CF_QUERY_HOST_PORT:
+    *pres1 = (int)cf->conn->http_proxy.port;
+    *((const char **)pres2) = cf->conn->http_proxy.host.name;
+    return CURLE_OK;
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = NULL;
+    return CURLE_OK;
   }
-  else {
-    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
+  default:
+    break;
   }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
 }
 
 static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
@@ -443,7 +454,6 @@ struct Curl_cftype Curl_cft_http_proxy = {
   http_proxy_cf_connect,
   http_proxy_cf_close,
   Curl_cf_def_shutdown,
-  Curl_cf_http_proxy_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -451,7 +461,7 @@ struct Curl_cftype Curl_cft_http_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  Curl_cf_http_proxy_query,
 };
 
 CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,

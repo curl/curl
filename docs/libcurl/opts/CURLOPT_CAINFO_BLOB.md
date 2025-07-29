@@ -12,12 +12,10 @@ See-also:
   - CURLOPT_SSL_VERIFYHOST (3)
   - CURLOPT_SSL_VERIFYPEER (3)
 TLS-backend:
-  - BearSSL
   - OpenSSL
   - mbedTLS
   - rustls
   - wolfSSL
-  - Secure Transport
   - Schannel
 Added-in: 7.77.0
 ---
@@ -63,7 +61,7 @@ NULL
 
 int main(void)
 {
-  char *strpem; /* strpem must point to a PEM string */
+  char *strpem = "PEMDATA"; /* strpem must point to a PEM string */
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode res;
@@ -81,9 +79,8 @@ int main(void)
 
 # HISTORY
 
-This option is supported by the BearSSL (since 7.79.0), mbedTLS (since
-7.81.0), Rustls (since 7.82.0), wolfSSL (since 8.2.0), OpenSSL, Secure
-Transport and Schannel backends.
+This option is supported by the mbedTLS (since 7.81.0), Rustls (since 7.82.0),
+wolfSSL (since 8.2.0), OpenSSL and Schannel backends.
 
 # %AVAILABILITY%
 

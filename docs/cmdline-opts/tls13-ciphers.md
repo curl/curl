@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: tls13-ciphers
 Arg: <list>
-help: TLS 1.3 cipher suites to use
+Help: TLS 1.3 cipher suites to use
 Protocols: TLS
 Category: tls
 Added: 7.61.0
@@ -18,9 +18,9 @@ Example:
 
 # `--tls13-ciphers`
 
-Specifies which cipher suites to use in the connection if it negotiates TLS
-1.3. The list of ciphers suites must specify valid ciphers. Read up on TLS 1.3
-cipher suite details on this URL:
+Set which cipher suites to use in the connection if it negotiates TLS 1.3. The
+list of ciphers suites must specify valid ciphers. Read up on TLS 1.3 cipher
+suite details on this URL:
 
 https://curl.se/docs/ssl-ciphers.html
 

@@ -23,17 +23,11 @@
  ***************************************************************************/
 /* used for test case 533, 534, 535 and 546 */
 
-#include "test.h"
+#include "first.h"
 
-#include <fcntl.h>
-
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-CURLcode test(char *URL)
+static CURLcode test_lib533(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
@@ -55,7 +49,7 @@ CURLcode test(char *URL)
 
   multi_add_handle(m, curl);
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
   for(;;) {
     struct timeval interval;
@@ -71,7 +65,7 @@ CURLcode test(char *URL)
 
     if(!running) {
       if(!current++) {
-        fprintf(stderr, "Advancing to URL 1\n");
+        curl_mfprintf(stderr, "Advancing to URL 1\n");
         /* remove the handle we use */
         curl_multi_remove_handle(m, curl);
 

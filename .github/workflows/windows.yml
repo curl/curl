@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: Windows
+name: 'Windows'
 
 'on':
   push:
@@ -13,6 +13,7 @@ name: Windows
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
+      - 'Dockerfile'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
@@ -24,6 +25,7 @@ name: Windows
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
+      - 'Dockerfile'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
@@ -35,42 +37,46 @@ concurrency:
 
 permissions: {}
 
+env:
+  CURL_CI: github
+
 jobs:
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     defaults:
       run:
-        shell: C:\cygwin\bin\bash.exe '{0}'
+        shell: D:\cygwin\bin\bash.exe '{0}'
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
+      MATRIX_BUILD: '${{ matrix.build }}'
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel', name: 'openssl R' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel', name: 'openssl' }
+          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel libssh2-devel', name: 'openssl R' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
-
-      - uses: cygwin/cygwin-install-action@f61179d72284ceddc397ed07ddb444d82bf9e559 # v5
+      - uses: cygwin/cygwin-install-action@f2009323764960f80959895c7bc3bb30210afe4d # v6
         with:
           platform: ${{ matrix.platform }}
           site: https://mirrors.kernel.org/sourceware/cygwin/
+          work-vol: 'D:'
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
             ${{ matrix.build }} make ninja
             openssh
-            libssh2-devel
             libpsl-devel
             zlib-devel
             libbrotli-devel
             libzstd-devel
             libnghttp2-devel
+            ${{ matrix.install }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -79,39 +85,49 @@ jobs:
       - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
-        run: autoreconf -fi
+        run: |
+          PATH=/usr/bin
+          autoreconf -fi
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           PATH=/usr/bin
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
               -DCURL_WERROR=ON \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+        run: |
+          PATH=/usr/bin
+          cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
+          PATH=/usr/bin
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+          PATH=/usr/bin
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+            cmake --install bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -119,8 +135,9 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
+          PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
           bld/src/curl.exe --disable --version
@@ -129,8 +146,9 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 15
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
+          PATH=/usr/bin
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
@@ -138,14 +156,17 @@ jobs:
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
+          PATH=/usr/bin
+          TFLAGS="-j8 ${TFLAGS}"
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             make -C bld V=1 test-ci
           fi
@@ -154,46 +175,54 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+          PATH=/usr/bin
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
-    runs-on: windows-latest
-    timeout-minutes: 20
+    runs-on: ${{ matrix.image || 'windows-latest' }}
+    timeout-minutes: 15
     defaults:
       run:
         shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_SYS: '${{ matrix.sys }}'
+      MATRIX_TEST: '${{ matrix.test }}'
     strategy:
       matrix:
         include:
           # MSYS
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', install: 'openssl-devel', name: '!proxy' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver', install: 'openssl-devel', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel', name: 'default' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: ''       , config: '--with-openssl', install: 'openssl-devel', name: 'default R' }
+          - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''       , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-proxy', install: 'openssl-devel libssh2-devel', name: '!proxy' }
+          - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver', install: 'openssl-devel libssh2-devel', name: 'default' }
+          - { build: 'cmake'    , sys: 'msys'      , env: 'x86_64'       , tflags: ''       , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'openssl-devel libssh2-devel', name: 'default' }
+          - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''       , config: '--with-openssl', install: 'openssl-devel libssh2-devel', name: 'default R' }
           # MinGW
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', install: 'mingw-w64-x86_64-openssl', name: 'default' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares', install: 'mingw-w64-x86_64-openssl', name: 'c-ares U' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: '', type: 'Debug', name: 'schannel c-ares U' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON', install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2', type: 'Debug', name: 'gnutls' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', install: '', type: 'Release', name: 'schannel R TrackMemory' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', install: 'mingw-w64-clang-x86_64-openssl', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', install: '', type: 'Release', test: 'uwp', name: 'schannel' }
-          # { build: 'autotools', sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun', config: '--without-debug --with-schannel --enable-shared', install: '', type: 'Release', test: 'uwp', name: 'schannel' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: '', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
-          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: '', type: 'Release', name: 'schannel R' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun', config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib CPPFLAGS=-D_WIN32_WINNT=0x0501', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default XP' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''       , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-shared=no', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
+          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U' }
+          # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
+          #          read its configuration from, making it vulnerable to attacks on
+          #          Windows. Do not use this component till there is a fix for these.
+          # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
+          - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: ''       , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON', install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh', type: 'Debug', name: 'gnutls libssh' }
+          - { build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', install: 'mingw-w64-clang-aarch64-libssh2', type: 'Release', name: 'schannel R TrackMemory', image: 'windows-11-arm' }
+          - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-libssh2', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
+          - { build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
+          # { build: 'autotools', sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun', config: '--without-debug --with-schannel --enable-shared', install: 'mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
+          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug', image: 'windows-2025' }
+          - { build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
 
-      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
+      - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -202,37 +231,25 @@ jobs:
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
             diffutils
-            openssh
             zlib-devel
             brotli-devel
             libzstd-devel
             libnghttp2-devel
             libpsl-devel
-            libssh2-devel
             ${{ matrix.install }}
 
-      - uses: msys2/setup-msys2@61f9e5e925871ba6c9e3e8da24ede83ea27fa91f # v2
+      - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
+          update: ${{ matrix.sys == 'clangarm64' }}  # delete this line on next msys2/setup-msys2 bump
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-diffutils
-            openssh
-            mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
-
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -245,32 +262,41 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          CFLAGS: '${{ matrix.cflags }}'
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
+          MATRIX_ENV: '${{ matrix.env }}'
+          MATRIX_TYPE: '${{ matrix.type }}'
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          if [ '${{ matrix.test }}' = 'uwp' ]; then
+          if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-            if [[ '${{ matrix.env }}' != 'clang'* ]]; then
+            if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
               CFLAGS="-specs=${specs}"
               CFLAGS_CMAKE="-specs=$(cygpath -w "${specs}")"
             fi
           fi
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            for _chkprefill in '' ${{ matrix.chkprefill }}; do
-              if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
+              if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
               else
                 options='-DCMAKE_C_COMPILER=gcc'
               fi
-              [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
-              [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ "${MATRIX_SYS}" = 'msys' ] && options+=' -D_CURL_PREFILL=ON'
+              [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja ${options} \
-                -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
-                -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+                -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
+                -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
+                -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
+                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
                 -DCURL_WERROR=ON \
-                ${{ matrix.config }}
+                ${MATRIX_CONFIG}
             done
             if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
               echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -278,11 +304,11 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --prefix="${HOME}"/install \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           fi
 
       - name: 'configure log'
@@ -293,12 +319,14 @@ jobs:
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
+          cat bld/cmake_install.cmake || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose
+            cmake --install bld --verbose
           else
             make -C bld V=1 install
           fi
@@ -306,15 +334,15 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
-            # avoid libtool's curl.exe wrapper
-            mv bld/src/.libs/curl.exe bld/src/curl.exe
+            # avoid libtool's curl.exe wrapper for shared builds
+            mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
+          if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
 
@@ -322,16 +350,17 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}  # Save time by skipping this for autotools
         timeout-minutes: 10
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target testdeps
           else
             make -C bld V=1 -C tests
           fi
-          if [ '${{ matrix.build }}' != 'cmake' ]; then
-            # avoid libtool's .exe wrappers
-            mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
-            mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
-            mv bld/tests/server/.libs/*.exe bld/tests/server
+          if [ "${MATRIX_BUILD}" != 'cmake' ]; then
+            # avoid libtool's .exe wrappers for shared builds
+            mv bld/tests/client/.libs/*.exe bld/tests/client || true
+            mv bld/tests/libtest/.libs/*.exe bld/tests/libtest || true
+            mv bld/tests/server/.libs/*.exe bld/tests/server || true
+            mv bld/tests/tunit/.libs/*.exe bld/tests/tunit || true
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
@@ -339,24 +368,30 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          MATRIX_INSTALL: '${{ matrix.install }}'
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~613'  # SFTP
-          if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~612'  # SFTP
+          TFLAGS="-j8 ${TFLAGS}"
+          if [ "${MATRIX_SYS}" != 'msys' ]; then
+            TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
+            if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
+              TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
+            fi
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --target test-ci
+            cmake --build bld --verbose --target test-ci
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
@@ -366,8 +401,8 @@ jobs:
         if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-examples
           else
             make -C bld V=1 examples
           fi
@@ -375,23 +410,32 @@ jobs:
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     defaults:
       run:
         shell: msys2 {0}
     env:
       MAKEFLAGS: -j 5
+      MATRIX_DIR: '${{ matrix.dir }}'
     strategy:
       matrix:
         include:
-          - name: 'schannel'
+          - name: 'schannel'  # mingw-w64 12.0
+            dir: 'mingw64'
+            env: 'x86_64'
+            ver: '15.0.1'
+            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.1-snapshot20250406posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.1-snapshot20250406-mingw-w64ucrt-12.0.0-r1.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
+            type: 'Release'
+            tflags: 'skiprun'
+          - name: 'schannel'  # mingw-w64 10.0
             dir: 'mingw64'
             env: 'x86_64'
             ver: '9.5.0'
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-          - name: 'schannel mbedtls U'
+          - name: 'schannel mbedtls U'  # mingw-w64 6.0
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
@@ -400,7 +444,7 @@ jobs:
             install: mingw-w64-x86_64-mbedtls
             type: 'Release'
             tflags: 'skiprun'
-          - name: 'schannel !unity'
+          - name: 'schannel !unity'  # mingw-w64 5.0
             dir: 'mingw32'
             env: 'i686'
             ver: '6.4.0'
@@ -408,9 +452,17 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF -DCMAKE_UNITY_BUILD=OFF'
             type: 'Debug'
             tflags: 'skiprun'
+          - name: 'schannel !examples'  # mingw-w64 3.0
+            dir: 'mingw64'
+            env: 'x86_64'
+            ver: '4.8.1'
+            url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.8.1/threads-win32/seh/x86_64-4.8.1-release-win32-seh-rt_v3-rev2.7z'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
+            type: 'Debug'
+            tflags: 'skipall'
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
+      - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         with:
           msystem: ${{ matrix.dir }}
           release: false
@@ -425,17 +477,20 @@ jobs:
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
         id: cache-compiler
         with:
-          path: ~\my-cache
+          path: D:\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
         timeout-minutes: 5
+        env:
+          MATRIX_URL: '${{ matrix.url }}'
         run: |
-          cd "${USERPROFILE}" || exit 1
+          cd /d
           mkdir my-cache
-          cd my-cache || exit 1
-          curl --fail --silent --show-error --retry 3 --retry-connrefused --output pack.bin --location --proto-redir =https '${{ matrix.url }}'
+          cd my-cache
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
+            --location --proto-redir =https "${MATRIX_URL}" --output pack.bin
           pwd
           7z x -y pack.bin >/dev/null
           rm -r -f pack.bin
@@ -449,18 +504,24 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
+          MATRIX_TYPE: '${{ matrix.type }}'
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
+            [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            cmake -B "bld${_chkprefill}" -G "${{ contains(matrix.url, '/winlibs_mingw/') && 'Ninja' || 'MSYS Makefiles' }}" ${options} \
+            cmake -B "bld${_chkprefill}" -G Ninja ${options} \
               -DCMAKE_C_COMPILER=gcc \
-              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -479,7 +540,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -493,7 +554,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
@@ -503,21 +564,15 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
-
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -525,9 +580,10 @@ jobs:
           cmake --build bld --target test-ci
 
       - name: 'build examples'
+        if: ${{ !contains(matrix.name, '!examples') }}
         timeout-minutes: 5
         run: |
-          PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:$PATH"
+          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
@@ -537,15 +593,23 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
+      MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_COMPILER: '${{ matrix.compiler }}'
     strategy:
       fail-fast: false
       matrix:
-        build: [autotools, cmake]
-        compiler: [gcc]
+        include:
+          - { build: 'autotools', compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'gcc' }
+          - { build: 'cmake'    , compiler: 'clang-tidy' }
     steps:
       - name: 'install packages'
         timeout-minutes: 5
-        run: sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+        env:
+          INSTALL_PACKAGES: ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64 ${INSTALL_PACKAGES}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -557,17 +621,26 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            if [ "${MATRIX_COMPILER}" = 'clang-tidy' ]; then
+              options+=' -DCURL_CLANG_TIDY=ON'
+              options+=' -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON'
+              options+=' -DCMAKE_C_COMPILER=clang'
+              options+=" -DCMAKE_RC_COMPILER=llvm-windres-$(clang -dumpversion | cut -d '.' -f 1)"
+            else
+              options+=" -DCMAKE_C_COMPILER=${TRIPLET}-gcc"
+            fi
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
-              -DCMAKE_C_COMPILER="${TRIPLET}-gcc" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
-              -DCURL_USE_LIBPSL=OFF
+              -DCURL_USE_LIBPSL=OFF \
+              -D_CURL_SKIP_BUILD_CERTS=ON \
+              ${options}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
@@ -585,7 +658,7 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld
           else
             make -C bld
@@ -595,124 +668,18 @@ jobs:
         run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
+        if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target testdeps
           else
             make -C bld -C tests
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target curl-examples
-          else
-            make -C bld examples
-          fi
-
-  wince:
-    name: "mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} 4.4.0-arm schannel"
-    runs-on: 'macos-latest'
-    timeout-minutes: 10
-    env:
-      MAKEFLAGS: -j 4
-      toolchain-version: '0.59.1'
-    strategy:
-      matrix:
-        build: [autotools, cmake]
-      fail-fast: false
-    steps:
-      - name: 'install packages'
-        if: ${{ matrix.build == 'autotools' }}
-        timeout-minutes: 5
-        run: |
-          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
-
-      - name: 'cache compiler (mingw32ce)'
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-compiler
-        with:
-          path: ~/opt/mingw32ce
-          key: ${{ runner.os }}-mingw32ce-${{ env.toolchain-version }}-amd64
-
-      - name: 'install compiler (mingw32ce)'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
-        timeout-minutes: 5
-        run: |
-          cd "${HOME}" || exit 1
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
-            --location 'https://downloads.sourceforge.net/cegcc/cegcc/${{ env.toolchain-version }}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2' | tar -x
-          ls -l
-
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
-      - name: 'configure'
-        run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake -B bld \
-              -DCMAKE_SYSTEM_NAME=WindowsCE \
-              -DCMAKE_SYSTEM_VERSION=8.0 \
-              -DCMAKE_SYSTEM_PROCESSOR=arm \
-              -DCMAKE_C_FLAGS='-O3 -DNDEBUG' \
-              -DCMAKE_C_COMPILER_TARGET=arm-mingw32ce \
-              -DCMAKE_C_COMPILER=arm-mingw32ce-gcc \
-              -DCMAKE_RC_COMPILER=arm-mingw32ce-windres \
-              -DMINGW32CE_LIBRARY_DIR="$HOME/opt/mingw32ce/arm-mingw32ce/lib" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50 -DCURL_TEST_BUNDLES=ON \
-              -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
-              -DCURL_WERROR=ON \
-              -DCURL_USE_SCHANNEL=ON \
-              -DCURL_USE_LIBPSL=OFF
-          else
-            autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --host=arm-mingw32ce \
-              --with-schannel \
-              --without-libpsl \
-              --disable-shared
-          fi
-
-      - name: 'configure log'
-        if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'build'
-        run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
-          else
-            make -C bld
-          fi
-
-      - name: 'curl info'
-        run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
-
-      - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
-        run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --target testdeps
-          else
-            make -C bld -C tests
-          fi
-
-      - name: 'build examples'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
-        run: |
-          PATH="$HOME/opt/mingw32ce/bin:$PATH"
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --target curl-examples
           else
             make -C bld examples
@@ -720,114 +687,115 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    runs-on: windows-latest
-    timeout-minutes: 55
+    runs-on: ${{ matrix.image || 'windows-latest' }}
+    timeout-minutes: 15
     defaults:
       run:
-        shell: C:\msys64\usr\bin\bash.exe {0}
+        shell: msys2 {0}
     env:
-      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      MATRIX_ARCH: '${{ matrix.arch }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_INSTALL_MSYS2: '${{ matrix.install-msys2 }}'
+      MATRIX_INSTALL_VCPKG: '${{ matrix.install-vcpkg }}'
+      MATRIX_OPENSSH: '${{ matrix.openssh }}'
+      MATRIX_PLAT: '${{ matrix.plat }}'
+      MATRIX_TYPE: '${{ matrix.type }}'
+      OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         include:
-          - name: 'openssl +examples'
-            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
+          - name: '!ssl +examples'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
             arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'uwp'
             type: 'Debug'
+            image: 'windows-2025'
             tflags: 'skiprun'
             config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_LIBPSL=OFF
+              -DENABLE_DEBUG=ON
+              -DCURL_ENABLE_SSL=OFF
+              -DUSE_WIN32_IDN=ON
 
-          - name: 'openssl'
-            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv krb5'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
+          - name: 'openssl +examples'
+            install-msys2: >-
+              mingw-w64-ucrt-x86_64-brotli
+              mingw-w64-ucrt-x86_64-zlib
+              mingw-w64-ucrt-x86_64-zstd
+              mingw-w64-ucrt-x86_64-openssl
+              mingw-w64-ucrt-x86_64-libssh2
+              mingw-w64-ucrt-x86_64-nghttp2
+              mingw-w64-ucrt-x86_64-nghttp3
+              mingw-w64-ucrt-x86_64-ngtcp2
 
-          - name: 'schannel MultiSSL U'
-            # GnuTLS is not fully functional with MSVC, build-test only
-            # https://github.com/ShiftMediaProject/gnutls/issues/23
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl shiftmedia-libgnutls openssl mbedtls wolfssl'
             arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
-
-          - name: 'libressl'
-            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
-              -DCURL_CA_SEARCH_SAFE=ON -DUSE_SSLS_EXPORT=ON
-
-          - name: 'boringssl'
-            install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
-              -DUSE_ECH=ON
-
-          - name: 'wolfssl +examples'
-            install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-              -DCURL_USE_GSASL=ON
-              -DUSE_ECH=ON
-
-          - name: 'mbedtls'
-            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
-            arch: 'x64'
+            env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
             chkprefill: '_chkprefill'
-            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
-            #          read its configuration from, making it vulnerable to attacks on
-            #          Windows. Do not use this component till there is a fix for these.
-            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
-              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
-              -DCURL_USE_GSASL=ON
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
+              -DOPENSSL_INCLUDE_DIR=/ucrt64/include
+              -DSSL_EAY_DEBUG=/ucrt64/lib/libssl.dll.a
+              -DSSL_EAY_RELEASE=/ucrt64/lib/libssl.dll.a
+              -DLIB_EAY_DEBUG=/ucrt64/lib/libcrypto.dll.a
+              -DLIB_EAY_RELEASE=/ucrt64/lib/libcrypto.dll.a
+              -DUSE_WIN32_IDN=ON -DUSE_SSLS_EXPORT=ON
+              -DBROTLI_INCLUDE_DIR=/ucrt64/include
+              -DBROTLICOMMON_LIBRARY=/ucrt64/lib/libbrotlicommon.dll.a
+              -DBROTLIDEC_LIBRARY=/ucrt64/lib/libbrotlidec.dll.a
+              -DZSTD_INCLUDE_DIR=/ucrt64/include
+              -DZSTD_LIBRARY=/ucrt64/lib/libzstd.dll.a
+              -DZLIB_INCLUDE_DIR=/ucrt64/include
+              -DZLIB_LIBRARY=/ucrt64/lib/libz.dll.a
+              -DLIBSSH2_INCLUDE_DIR=/ucrt64/include
+              -DLIBSSH2_LIBRARY=/ucrt64/lib/libssh2.dll.a
+              -DNGHTTP2_INCLUDE_DIR=/ucrt64/include
+              -DNGHTTP2_LIBRARY=/ucrt64/lib/libnghttp2.dll.a
+              -DNGHTTP3_INCLUDE_DIR=/ucrt64/include
+              -DNGHTTP3_LIBRARY=/ucrt64/lib/libnghttp3.dll.a
+              -DNGTCP2_INCLUDE_DIR=/ucrt64/include
+              -DNGTCP2_LIBRARY=/ucrt64/lib/libngtcp2.dll.a
+              -DNGTCP2_CRYPTO_OSSL_LIBRARY=/ucrt64/lib/libngtcp2_crypto_ossl.dll.a
+
+          - name: 'schannel U'
+            install-vcpkg: 'zlib libssh2[core,zlib]'
+            arch: 'arm64'
+            env: 'clang-aarch64'
+            plat: 'windows'
+            type: 'Debug'
+            image: 'windows-11-arm'
+            openssh: 'OpenSSH-Windows'
+            config: >-
+              -DENABLE_DEBUG=ON
+              -DCURL_USE_SCHANNEL=ON
+              -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON -DUSE_SSLS_EXPORT=ON
 
       fail-fast: false
     steps:
-      - name: 'vcpkg cache setup'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+      - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+          msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
+          release: ${{ contains(matrix.image, 'arm') }}
+          cache: ${{ contains(matrix.image, 'arm') }}
+          path-type: inherit
+          install: >-
+            mingw-w64-${{ matrix.env }}-libpsl
+            ${{ matrix.install-msys2 }}
 
       - name: 'vcpkg versions'
+        if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
         run: |
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
       - name: 'vcpkg build'
-        timeout-minutes: 35
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        if: ${{ matrix.install-vcpkg  }}
+        timeout-minutes: 45
+        run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -835,33 +803,42 @@ jobs:
 
       - name: 'configure'
         timeout-minutes: 5
+        env:
+          MATRIX_CHKPREFILL: '${{ matrix.chkprefill }}'
+          MATRIX_CONFIG: '${{ matrix.config }}'
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          for _chkprefill in '' ${{ matrix.chkprefill }}; do
+          [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
+          for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
-            if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
               ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            [ '${{ matrix.arch }}' = 'arm64' ] && options+=' -A ARM64'
-            [ '${{ matrix.arch }}' = 'x64' ] && options+=' -A x64'
-            [ '${{ matrix.arch }}' = 'x86' ] && options+=' -A Win32'
+            [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
+            [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
+            [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
+            [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
+            if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
+              options+=" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+              options+=" -DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed"
+              options+=" -DVCPKG_TARGET_TRIPLET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+              options+=" -DCMAKE_C_COMPILER_TARGET=${MATRIX_ARCH}-${MATRIX_PLAT}"
+            fi
             cmake -B "bld${_chkprefill}" ${options} \
-              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
-              -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
+              -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
+              -DLIBPSL_LIBRARY="${MINGW_PREFIX}/lib/libpsl.dll.a" \
               -DBUILD_SHARED_LIBS=OFF \
-              -DENABLE_DEBUG=ON \
-              ${{ matrix.config }}
+              ${MATRIX_CONFIG}
           done
           if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
             echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
@@ -879,63 +856,73 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
-          if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH"
-            'bld/src/${{ matrix.type }}/curl.exe' --disable --version
+          if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
+            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
+            "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
           fi
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-
-      - name: 'downgrade msys2-runtime'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 2
-        # Downgrade to a known good MSYS2 runtime version to avoid the performance regression
-        # causing runtests.pl to run at 2-3x reduced speed.
-        run: |
-          /usr/bin/sed -i 's/^CheckSpace/#CheckSpace/' /etc/pacman.conf
-          exec /usr/bin/pacman --noconfirm --noprogressbar --upgrade https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.5.4-8-x86_64.pkg.tar.zst
+          if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
+            # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
+            if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
+              pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
+            fi
+          else  # OpenSSH-Windows
+            cd /c  # no D: drive on windows-11-arm runners
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
+            unzip bin.zip
+            rm -f bin.zip
+          fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
+            python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
+        env:
+          TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export CURL_DIRSUFFIX='${{ matrix.type }}'
-          export TFLAGS='-j8 ${{ matrix.tflags }}'
-          TFLAGS+=' ~2310'  # flaky
-          TFLAGS+=' ~SCP'  # 601 603 612 617 619 621 641 665 2004 3022
-          TFLAGS+=' ~612'  # SFTP
-          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-            TFLAGS+=' ~SFTP'
-          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+          export CURL_DIRSUFFIX="${MATRIX_TYPE}"
+          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
+          if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
+                "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
+            TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
           fi
-          PATH="$PWD/bld/lib/${{ matrix.type }}:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          if [ -n "${MATRIX_OPENSSH}" ]; then  # OpenSSH-Windows
+            TFLAGS+=' ~601 ~603 ~617 ~619 ~621 ~641 ~665 ~2004'  # SCP
+            if [[ "${MATRIX_INSTALL_MSYS2} " = *'libssh '* || \
+                  "${MATRIX_INSTALL_VCPKG} " = *'libssh '* ]]; then
+              TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+            else
+              TFLAGS+=' ~3022'  # 'SCP correct sha256 host key' SCP, server sha256 key check
+            fi
+            PATH="/c/OpenSSH-Win64:$PATH"
+          fi
+          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: |
-          PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples

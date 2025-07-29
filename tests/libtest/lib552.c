@@ -25,19 +25,17 @@
  * argv2 = proxy with embedded user+password
  */
 
-#include "test.h"
+#include "first.h"
 
-#include "warnless.h"
 #include "memdebug.h"
 
-struct testdata {
+struct t552_testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
-static
-void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text,
+                 FILE *stream, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
@@ -48,17 +46,17 @@ void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
+  curl_mfprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04zx: ", i);
+    curl_mfprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          fprintf(stream, "%02x ", ptr[i + c]);
+          curl_mfprintf(stream, "%02x ", ptr[i + c]);
         else
           fputs("   ", stream);
     }
@@ -70,7 +68,7 @@ void dump(const char *text,
         i += (c + 2 - width);
         break;
       }
-      fprintf(stream, "%c",
+      curl_mfprintf(stream, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
@@ -84,18 +82,17 @@ void dump(const char *text,
   fflush(stream);
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userp)
 {
-  struct testdata *config = (struct testdata *)userp;
+  struct t552_testdata *config = (struct t552_testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== Info: %s", (char *)data);
+    curl_mfprintf(stderr, "== Info: %s", (char *)data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
@@ -123,12 +120,11 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t t552_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
   size_t  available = sizeof(databuf) - current_offset; /* What we have to
@@ -140,23 +136,20 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return given;
 }
 
-
-static size_t write_callback(char *ptr, size_t size, size_t nmemb,
-                             void *stream)
+static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   int amount = curlx_uztosi(size * nmemb);
-  printf("%.*s", amount, (char *)ptr);
+  curl_mprintf("%.*s", amount, (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
-
 
 static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
 {
   (void)clientp;
   if(cmd == CURLIOCMD_RESTARTREAD) {
-    printf("APPLICATION received a CURLIOCMD_RESTARTREAD request\n");
-    printf("APPLICATION ** REWINDING! **\n");
+    curl_mprintf("APPLICATION received a CURLIOCMD_RESTARTREAD request\n");
+    curl_mprintf("APPLICATION ** REWINDING! **\n");
     current_offset = 0;
     return CURLIOE_OK;
   }
@@ -164,13 +157,11 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_UNKNOWNCMD;
 }
 
-
-
-CURLcode test(char *URL)
+static CURLcode test_lib552(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct testdata config;
+  struct t552_testdata config;
   size_t i;
   static const char fill[] = "test data";
 
@@ -193,15 +184,13 @@ CURLcode test(char *URL)
 
   /* Setup read callback */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(curl, CURLOPT_READFUNCTION, t552_read_cb);
 
   /* Write callback */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  test_setopt(curl, CURLOPT_WRITEFUNCTION, t552_write_cb);
 
   /* Ioctl function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
-  )
+  test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
 
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 
@@ -209,7 +198,7 @@ CURLcode test(char *URL)
 
   /* Accept any auth. But for this bug configure proxy with DIGEST, basic
      might work too, not NTLM */
-  test_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+  test_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 
   res = curl_easy_perform(curl);
 

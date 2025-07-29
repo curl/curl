@@ -36,7 +36,7 @@ https test-localhost.pem
 simple HTTPS GET with DER public key pinning
 </name>
 <command>
--4 --cacert %SRCDIR/certs/test-ca.crt --pinnedpubkey %SRCDIR/certs/test-localhost.pub.der https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.pub.der https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -30,7 +30,7 @@ ftp
 proxy
 </features>
 <name>
-HTTP PUT to a FTP URL with username+password - over HTTP proxy
+HTTP PUT to an FTP URL with username+password - over HTTP proxy
 </name>
 <command>
 -x http://%HOSTIP:%HTTPPORT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt
@@ -53,7 +53,7 @@ the
 <protocol>
 PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
 Host: host.com:21
-Authorization: Basic ZGFuaWVsOm15c2VjcmV0
+Authorization: Basic %b64[daniel:mysecret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

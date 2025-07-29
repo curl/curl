@@ -8,7 +8,7 @@ See-also:
   - curl_version (3)
 Protocol:
   - All
-Added-in: 7.10.0
+Added-in: 7.10
 ---
 
 # NAME
@@ -137,7 +137,9 @@ entry. See the list of features names below.
 
 *ssl_version* is an ASCII string for the TLS library name + version used. If
 libcurl has no SSL support, this is NULL. For example "Schannel", "Secure
-Transport" or "OpenSSL/1.1.0g".
+Transport" or "OpenSSL/1.1.0g". For MultiSSL builds the string contains all
+SSL backend names and the inactive backend names are in parentheses. For
+example "(OpenSSL/3.0.8) Schannel" or "OpenSSL/3.0.8 (Schannel)".
 
 *ssl_version_num* is always 0.
 

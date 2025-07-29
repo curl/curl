@@ -62,7 +62,6 @@
 
  4. FTP
  4.1 HOST
- 4.4 Support CURLOPT_PREQUOTE for directories listings
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -122,9 +121,11 @@
  13.11 Some TLS options are not offered for HTTPS proxies
  13.13 Make sure we forbid TLS 1.3 post-handshake authentication
  13.14 Support the clienthello extension
- 13.15 Select signature algorithms
  13.16 Share the CA cache
  13.17 Add missing features to TLS backends
+
+ 14. Proxy
+ 14.1 Retry SOCKS handshake on address type not supported
 
  15. Schannel
  15.1 Extend support for client certificate authentication
@@ -178,12 +179,11 @@
 
  20. Test suite
  20.1 SSL tunnel
- 20.2 nicer lacking perl message
- 20.3 more protocols supported
- 20.4 more platforms supported
- 20.5 write an SMB test server to replace impacket
- 20.6 Use the RFC 6265 test suite
- 20.8 Run web-platform-tests URL tests
+ 20.2 more protocols supported
+ 20.3 more platforms supported
+ 20.4 write an SMB test server to replace impacket
+ 20.5 Use the RFC 6265 test suite
+ 20.6 Run web-platform-tests URL tests
 
  21. MQTT
  21.1 Support rate-limiting
@@ -237,7 +237,7 @@
  See https://github.com/curl/curl/issues/4915 and lib1541.c
 
  The share interface offers CURL_LOCK_DATA_HSTS to have multiple easy handle
- share a HSTS cache, but this is not thread-safe.
+ share an HSTS cache, but this is not thread-safe.
 
 1.5 get rid of PATH_MAX
 
@@ -554,13 +554,6 @@
 
  https://datatracker.ietf.org/doc/html/rfc7151
 
-4.4 Support CURLOPT_PREQUOTE for directions listings
-
- The lack of support is mostly an oversight and requires the FTP state machine
- to get updated to get fixed.
-
- https://github.com/curl/curl/issues/8602
-
 4.6 GSSAPI via Windows SSPI
 
  In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
@@ -751,7 +744,7 @@
 
 11.1 File listing support
 
- Add support for listing the contents of a SMB share. The output should
+ Add support for listing the contents of an SMB share. The output should
  probably be the same as/similar to FTP.
 
 11.2 Honor file timestamps
@@ -901,14 +894,6 @@
  https://datatracker.ietf.org/doc/html/rfc7685
  https://github.com/curl/curl/issues/2299
 
-13.15 Select signature algorithms
-
- Consider adding an option or a way for users to select TLS signature
- algorithm. The signature algorithms set by a client are used directly in the
- supported signature algorithm in the client hello message.
-
- https://github.com/curl/curl/issues/12982
-
 13.16 Share the CA cache
 
  For TLS backends that supports CA caching, it makes sense to allow the share
@@ -921,6 +906,21 @@
  The feature matrix at https://curl.se/libcurl/c/tls-options.html shows which
  features are supported by which TLS backends, and thus also where there are
  feature gaps.
+
+14. Proxy
+
+14.1 Retry SOCKS handshake on address type not supported
+
+ When curl resolves a hostname, it might get a mix of IPv6 and IPv4 returned.
+ curl might then use an IPv6 address with a SOCKS5 proxy, which - if it does
+ not support IPv6 - returns "Address type not supported" and curl exits with
+ that error.
+
+ Perhaps it is preferred if curl would in this situation instead first retry
+ the SOCKS handshake again for this case and then use one of the IPv4
+ addresses for the target host.
+
+ See https://github.com/curl/curl/issues/17222
 
 15. Schannel
 
@@ -1297,29 +1297,24 @@
  and FTP-SSL tests without the stunnel dependency, and it could allow us to
  provide test tools built with either OpenSSL or GnuTLS
 
-20.2 nicer lacking perl message
-
- If perl was not found by the configure script, do not attempt to run the tests
- but explain something nice why it does not.
-
-20.3 more protocols supported
+20.2 more protocols supported
 
  Extend the test suite to include more protocols. The telnet could just do FTP
  or http operations (for which we have test servers).
 
-20.4 more platforms supported
+20.3 more platforms supported
 
  Make the test suite work on more platforms. OpenBSD and macOS. Remove
  fork()s and it should become even more portable.
 
-20.5 write an SMB test server to replace impacket
+20.4 write an SMB test server to replace impacket
 
  This would allow us to run SMB tests on more platforms and do better and more
  covering tests.
 
  See https://github.com/curl/curl/issues/15697
 
-20.6 Use the RFC 6265 test suite
+20.5 Use the RFC 6265 test suite
 
  A test suite made for HTTP cookies (RFC 6265) by Adam Barth is available at
  https://github.com/abarth/http-state/tree/master/tests
@@ -1328,7 +1323,7 @@
  with that test suite and detect deviances. Ideally, that would even be
  incorporated into our regular test suite.
 
-20.8 Run web-platform-tests URL tests
+20.6 Run web-platform-tests URL tests
 
  Run web-platform-tests URL tests and compare results with browsers on wpt.fyi
 

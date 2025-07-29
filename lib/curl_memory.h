@@ -54,78 +54,6 @@
  *
  */
 
-#ifdef HEADER_CURL_MEMDEBUG_H
-/* cleanup after memdebug.h */
-
-#ifdef MEMDEBUG_NODEFINES
-#ifdef CURLDEBUG
-
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#undef send
-#undef recv
-
-#ifdef _WIN32
-#  ifdef UNICODE
-#    undef wcsdup
-#    undef _wcsdup
-#    undef _tcsdup
-#  else
-#    undef _tcsdup
-#  endif
-#endif
-
-#undef socket
-#undef accept
-#ifdef HAVE_SOCKETPAIR
-#undef socketpair
-#endif
-
-/* sclose is probably already defined, redefine it! */
-#undef sclose
-#undef fopen
-#undef fdopen
-#undef fclose
-
-#endif /* MEMDEBUG_NODEFINES */
-#endif /* CURLDEBUG */
-
-#undef HEADER_CURL_MEMDEBUG_H
-#endif /* HEADER_CURL_MEMDEBUG_H */
-
-/*
-** Following section applies even when CURLDEBUG is not defined.
-*/
-
-#undef fake_sclose
-
-#ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
-/*
- * The following memory function replacement typedef's are COPIED from
- * curl/curl.h and MUST match the originals. We copy them to avoid having to
- * include curl/curl.h here. We avoid that include since it includes stdio.h
- * and other headers that may get messed up with defines done here.
- */
-typedef void *(*curl_malloc_callback)(size_t size);
-typedef void (*curl_free_callback)(void *ptr);
-typedef void *(*curl_realloc_callback)(void *ptr, size_t size);
-typedef char *(*curl_strdup_callback)(const char *str);
-typedef void *(*curl_calloc_callback)(size_t nmemb, size_t size);
-#define CURL_DID_MEMORY_FUNC_TYPEDEFS
-#endif
-
-extern curl_malloc_callback Curl_cmalloc;
-extern curl_free_callback Curl_cfree;
-extern curl_realloc_callback Curl_crealloc;
-extern curl_strdup_callback Curl_cstrdup;
-extern curl_calloc_callback Curl_ccalloc;
-#if defined(_WIN32) && defined(UNICODE)
-extern curl_wcsdup_callback Curl_cwcsdup;
-#endif
-
 #ifndef CURLDEBUG
 
 /*
@@ -149,18 +77,13 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 #define free(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef wcsdup
-#    define wcsdup(ptr) Curl_cwcsdup(ptr)
-#    undef _wcsdup
-#    define _wcsdup(ptr) Curl_cwcsdup(ptr)
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cwcsdup(ptr)
-#  else
-#    undef _tcsdup
-#    define _tcsdup(ptr) Curl_cstrdup(ptr)
-#  endif
+#undef _tcsdup
+#ifdef UNICODE
+#define _tcsdup(ptr) Curl_wcsdup(ptr)
+#else
+#define _tcsdup(ptr) Curl_cstrdup(ptr)
 #endif
+#endif /* _WIN32 */
 
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMORY_H */

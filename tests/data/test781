@@ -55,7 +55,7 @@ this.hsts.example "99991001 04:47:41"
 HSTS update expiry, with parent includeSubDomains domain present
 </name>
 <command>
--x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -k
+-x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER --insecure
 </command>
 <disable>
 test-duphandle

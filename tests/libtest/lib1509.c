@@ -21,10 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream);
@@ -32,7 +30,7 @@ size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
 
 static unsigned long realHeaderSize = 0;
 
-CURLcode test(char *URL)
+static CURLcode test_lib1509(char *URL)
 {
   long headerSize;
   CURLcode code;
@@ -55,24 +53,24 @@ CURLcode test(char *URL)
 
   code = curl_easy_perform(curl);
   if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, code, curl_easy_strerror(code));
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
   code = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headerSize);
   if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
-            "with code %d (%s)\n",
-            __FILE__, __LINE__, code, curl_easy_strerror(code));
+    curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  printf("header length is ........: %ld\n", headerSize);
-  printf("header length should be..: %lu\n", realHeaderSize);
+  curl_mprintf("header length is ........: %ld\n", headerSize);
+  curl_mprintf("header length should be..: %lu\n", realHeaderSize);
 
 test_cleanup:
 

@@ -21,27 +21,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
 #include "first.h"
 
 #ifdef HAVE_LOCALE_H
-#  include <locale.h> /* for setlocale() */
+#include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef CURLDEBUG
-#  define MEMDEBUG_NODEFINES
-#  include "memdebug.h"
-#endif
-
-#include "timediff.h"
-
-#include "tool_binmode.h"
+#include "memdebug.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
   if(nfds < 0) {
-    SET_SOCKERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #ifdef USE_WINSOCK
@@ -58,28 +50,14 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
   return select(nfds, rd, wr, exc, tv);
 }
 
-void wait_ms(int ms)
-{
-  if(ms < 0)
-    return;
-#ifdef USE_WINSOCK
-  Sleep((DWORD)ms);
-#else
-  {
-    struct timeval t;
-    curlx_mstotv(&t, ms);
-    select_wrapper(0, NULL, NULL, NULL, &t);
-  }
-#endif
-}
-
 char *libtest_arg2 = NULL;
 char *libtest_arg3 = NULL;
 char *libtest_arg4 = NULL;
 int test_argc;
 char **test_argv;
+int testnum;
 
-struct timeval tv_test_start; /* for test timing */
+struct curltime tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
 
@@ -88,27 +66,18 @@ static void memory_tracking_init(void)
 {
   char *env;
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
-  env = curl_getenv("CURL_MEMDEBUG");
+  env = getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as file name */
-    char fname[CURL_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
-      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
-    strcpy(fname, env);
-    curl_free(env);
-    curl_dbg_memdebug(fname);
-    /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a free()
-       without an alloc! */
+    curl_dbg_memdebug(env);
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
-  env = curl_getenv("CURL_MEMLIMIT");
+  env = getenv("CURL_MEMLIMIT");
   if(env) {
     char *endptr;
     long num = strtol(env, &endptr, 10);
     if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
       curl_dbg_memlimit(num);
-    curl_free(env);
   }
 }
 #else
@@ -124,7 +93,7 @@ char *hexdump(const unsigned char *buf, size_t len)
   if(len > 200)
     return NULL;
   for(i = 0; i < len; i++, p += 3)
-    msnprintf(p, 4, "%02x ", buf[i]);
+    curl_msnprintf(p, 4, "%02x ", buf[i]);
   return dump;
 }
 
@@ -133,12 +102,17 @@ int main(int argc, char **argv)
 {
   char *URL;
   CURLcode result;
-  int basearg;
-  test_func_t test_func;
+  entry_func_t entry_func;
+  char *entry_name;
+  char *env;
+  size_t tmp;
 
-  CURL_SET_BINMODE(stdout);
+  CURLX_SET_BINMODE(stdout);
 
   memory_tracking_init();
+#ifdef _WIN32
+  curlx_now_init();
+#endif
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
@@ -149,68 +123,49 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  test_argc = argc;
-  test_argv = argv;
+  test_argc = argc - 1;
+  test_argv = argv + 1;
 
-#ifdef CURLTESTS_BUNDLED
-  {
-    char *test_name;
-
-    --test_argc;
-    ++test_argv;
-
-    basearg = 2;
-
-    if(argc < (basearg + 1)) {
-      fprintf(stderr, "Pass testname and URL as arguments please\n");
-      return 1;
-    }
-
-    test_name = argv[basearg - 1];
-    test_func = NULL;
-    {
-      size_t tmp;
-      for(tmp = 0; tmp < CURL_ARRAYSIZE(s_tests); ++tmp) {
-        if(strcmp(test_name, s_tests[tmp].name) == 0) {
-          test_func = s_tests[tmp].ptr;
-          break;
-        }
-      }
-    }
-
-    if(!test_func) {
-      fprintf(stderr, "Test '%s' not found.\n", test_name);
-      return 1;
-    }
-
-    fprintf(stderr, "Test: %s\n", test_name);
-  }
-#else
-  basearg = 1;
-
-  if(argc < (basearg + 1)) {
-    fprintf(stderr, "Pass URL as argument please\n");
+  if(argc < 3) {
+    curl_mfprintf(stderr, "Pass testname and URL as arguments please\n");
     return 1;
   }
 
-  test_func = test;
-#endif
+  entry_name = argv[1];
+  entry_func = NULL;
+  for(tmp = 0; s_entries[tmp].ptr; ++tmp) {
+    if(strcmp(entry_name, s_entries[tmp].name) == 0) {
+      entry_func = s_entries[tmp].ptr;
+      break;
+    }
+  }
 
-  if(argc > (basearg + 1))
-    libtest_arg2 = argv[basearg + 1];
+  if(!entry_func) {
+    curl_mfprintf(stderr, "Test '%s' not found.\n", entry_name);
+    return 1;
+  }
 
-  if(argc > (basearg + 2))
-    libtest_arg3 = argv[basearg + 2];
+  if(argc > 3)
+    libtest_arg2 = argv[3];
 
-  if(argc > (basearg + 2))
-    libtest_arg4 = argv[basearg + 3];
+  if(argc > 4)
+    libtest_arg3 = argv[4];
 
-  URL = argv[basearg]; /* provide this to the rest */
+  if(argc > 5)
+    libtest_arg4 = argv[5];
 
-  fprintf(stderr, "URL: %s\n", URL);
+  URL = argv[2]; /* provide this to the rest */
 
-  result = test_func(URL);
-  fprintf(stderr, "Test ended with result %d\n", result);
+  env = getenv("CURL_TESTNUM");
+  if(env)
+    testnum = atoi(env);
+  else
+    testnum = 0;
+
+  curl_mfprintf(stderr, "URL: %s\n", URL);
+
+  result = entry_func(URL);
+  curl_mfprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32
   /* flush buffers of all streams regardless of mode */

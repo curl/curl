@@ -28,16 +28,13 @@ use warnings;
 
 my @tabs = (
     "^m4/zz40-xc-ovr.m4",
-    "Makefile\\.[a-z]+\$",
+    "Makefile\\.(am|example)\$",
     "/mkfile",
     "\\.(bat|sln|vc)\$",
-    "^tests/certs/.+\\.der\$",
     "^tests/data/test",
 );
 
 my @mixed_eol = (
-    "^tests/certs/.+\\.(crt|der)\$",
-    "^tests/certs/Server-localhost0h-sv.pem",
     "^tests/data/test",
 );
 
@@ -47,19 +44,29 @@ my @need_crlf = (
 );
 
 my @space_at_eol = (
-    "^tests/.+\\.(cacert|crt|pem)\$",
     "^tests/data/test",
 );
 
-my @eol_at_eof = (
-    "^tests/certs/.+\\.der\$",
+my @non_ascii_allowed = (
+    '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
+);
+
+my $non_ascii_allowed = join(', ', @non_ascii_allowed);
+
+my @non_ascii = (
+    ".github/scripts/spellcheck.words",
+    ".mailmap",
+    "RELEASE-NOTES",
+    "docs/BINDINGS.md",
+    "docs/THANKS",
+    "docs/THANKS-filter",
 );
 
 sub fn_match {
     my ($filename, @masklist) = @_;
 
     foreach my $mask (@masklist) {
-        if ($filename =~ $mask) {
+        if($filename =~ $mask) {
             return 1;
         }
     }
@@ -72,26 +79,26 @@ sub eol_detect {
     my $cr = () = $content =~ /\r/g;
     my $lf = () = $content =~ /\n/g;
 
-    if ($cr > 0 && $lf == 0) {
-        return "cr"
+    if($cr > 0 && $lf == 0) {
+        return "cr";
     }
-    elsif ($cr == 0 && $lf > 0) {
-        return "lf"
+    elsif($cr == 0 && $lf > 0) {
+        return "lf";
     }
-    elsif ($cr == 0 && $lf == 0) {
-        return "bin"
+    elsif($cr == 0 && $lf == 0) {
+        return "bin";
     }
-    elsif ($cr == $lf) {
-        return "crlf"
+    elsif($cr == $lf) {
+        return "crlf";
     }
 
-    return ""
+    return "";
 }
 
 my $issues = 0;
 
 open my $git_ls_files, '-|', 'git ls-files' or die "Failed running git ls-files: $!";
-while (my $filename = <$git_ls_files>) {
+while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
     open my $fh, '<', $filename or die "Cannot open '$filename': $!";
@@ -100,46 +107,70 @@ while (my $filename = <$git_ls_files>) {
 
     my @err = ();
 
-    if (!fn_match($filename, @tabs) &&
+    if(!fn_match($filename, @tabs) &&
         $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
     my $eol = eol_detect($content);
 
-    if ($eol eq "" &&
+    if($eol eq "" &&
         !fn_match($filename, @mixed_eol)) {
         push @err, "content: has mixed EOL types";
     }
 
-    if ($eol ne "crlf" &&
+    if($eol ne "crlf" &&
         fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
-    if ($eol ne "lf" && $content ne "" &&
+    if($eol ne "lf" && $content ne "" &&
         !fn_match($filename, @need_crlf) &&
         !fn_match($filename, @mixed_eol)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if (!fn_match($filename, @space_at_eol) &&
-        $content =~ /[ \t]\n/) {
-        push @err, "content: has line-ending whitespace";
+    if(!fn_match($filename, @space_at_eol) &&
+       $content =~ /[ \t]\n/) {
+        my $line;
+        for my $l (split(/\n/, $content)) {
+            $line++;
+            if($l =~ /[ \t]$/) {
+                push @err, "line $line: trailing whitespace";
+            }
+        }
     }
 
-    if ($content ne "" &&
-        !fn_match($filename, @eol_at_eof) &&
+    if($content ne "" &&
         $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
 
-    if ($content =~ /\n\n\z/ ||
+    if($content =~ /\n\n\z/ ||
         $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
 
-    if (@err) {
+    if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
+        push @err, "content: has binary contents";
+    }
+
+    if($filename !~ /tests\/data/) {
+        # the tests have no allowed UTF bytes
+        $content =~ s/[$non_ascii_allowed]//g;
+    }
+
+    if(!fn_match($filename, @non_ascii) &&
+       ($content =~ /([\x80-\xff]+)/)) {
+        my $non = $1;
+        my $hex;
+        for my $e (split(//, $non)) {
+            $hex .= sprintf("%s%02x", $hex ? " ": "", ord($e));
+        }
+        push @err, "content: has non-ASCII: '$non' ($hex)";
+    }
+
+    if(@err) {
         $issues++;
         foreach my $err (@err) {
             print "$filename: $err\n";
@@ -148,6 +179,6 @@ while (my $filename = <$git_ls_files>) {
 }
 close $git_ls_files;
 
-if ($issues) {
+if($issues) {
     exit 1;
 }

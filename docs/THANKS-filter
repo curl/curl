@@ -158,3 +158,4 @@ s/andrewkirillov-ibm/Andrew Kirillov/
 s/\(.*\) via #[0-9]*//
 s/jethrogb$/jethrogb on github/
 s/on github/on github/i
+s/Maksim Sciepanienka/Maksim Ściepanienka/

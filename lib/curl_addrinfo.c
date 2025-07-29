@@ -50,8 +50,9 @@
 #include <stddef.h>
 
 #include "curl_addrinfo.h"
-#include "inet_pton.h"
-#include "warnless.h"
+#include "fake_addrinfo.h"
+#include "curlx/inet_pton.h"
+#include "curlx/warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -67,7 +68,7 @@
  */
 
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
-    defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
+  defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
 # define vqualifier volatile
 #else
@@ -217,7 +218,7 @@ Curl_getaddrinfo_ex(const char *nodename,
  *
  * This function returns a pointer to the first element of a newly allocated
  * Curl_addrinfo struct linked list filled with the data of a given hostent.
- * Curl_addrinfo is meant to work like the addrinfo struct does for a IPv6
+ * Curl_addrinfo is meant to work like the addrinfo struct does for an IPv6
  * stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
@@ -397,11 +398,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr->sin_addr, inaddr, sizeof(struct in_addr));
-#ifdef __MINGW32__
-    addr->sin_family = (short)af;
-#else
     addr->sin_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr->sin_port = htons((unsigned short)port);
     break;
 
@@ -410,11 +407,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr6->sin6_addr, inaddr, sizeof(struct in6_addr));
-#ifdef __MINGW32__
-    addr6->sin6_family = (short)af;
-#else
     addr6->sin6_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr6->sin6_port = htons((unsigned short)port);
     break;
 #endif
@@ -430,13 +423,13 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
 struct Curl_addrinfo *Curl_str2addr(char *address, int port)
 {
   struct in_addr in;
-  if(Curl_inet_pton(AF_INET, address, &in) > 0)
+  if(curlx_inet_pton(AF_INET, address, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(AF_INET, &in, address, port);
 #ifdef USE_IPV6
   {
     struct in6_addr in6;
-    if(Curl_inet_pton(AF_INET6, address, &in6) > 0)
+    if(curlx_inet_pton(AF_INET6, address, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */
       return Curl_ip2addr(AF_INET6, &in6, address, port);
   }
@@ -467,7 +460,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
   sa_un = (void *) ai->ai_addr;
   sa_un->sun_family = AF_UNIX;
 
-  /* sun_path must be able to store the NUL-terminated path */
+  /* sun_path must be able to store the null-terminated path */
   path_len = strlen(path) + 1;
   if(path_len > sizeof(sa_un->sun_path)) {
     free(ai);
@@ -508,11 +501,19 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
                source, line, (void *)freethis);
 #ifdef USE_LWIPSOCK
   lwip_freeaddrinfo(freethis);
+#elif defined(USE_FAKE_GETADDRINFO)
+  {
+    const char *env = getenv("CURL_DNS_SERVER");
+    if(env)
+      r_freeaddrinfo(freethis);
+    else
+      freeaddrinfo(freethis);
+  }
 #else
   freeaddrinfo(freethis);
 #endif
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
+#endif /* CURLDEBUG && HAVE_FREEADDRINFO */
 
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
@@ -526,17 +527,24 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
 
 int
 curl_dbg_getaddrinfo(const char *hostname,
-                    const char *service,
-                    const struct addrinfo *hints,
-                    struct addrinfo **result,
-                    int line, const char *source)
+                     const char *service,
+                     const struct addrinfo *hints,
+                     struct addrinfo **result,
+                     int line, const char *source)
 {
 #ifdef USE_LWIPSOCK
   int res = lwip_getaddrinfo(hostname, service, hints, result);
+#elif defined(USE_FAKE_GETADDRINFO)
+  int res;
+  const char *env = getenv("CURL_DNS_SERVER");
+  if(env)
+    res = r_getaddrinfo(hostname, service, hints, result);
+  else
+    res = getaddrinfo(hostname, service, hints, result);
 #else
   int res = getaddrinfo(hostname, service, hints, result);
 #endif
-  if(0 == res)
+  if(res == 0)
     /* success */
     curl_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
                  source, line, (void *)*result);
@@ -545,7 +553,7 @@ curl_dbg_getaddrinfo(const char *hostname,
                  source, line);
   return res;
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
+#endif /* CURLDEBUG && HAVE_GETADDRINFO */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

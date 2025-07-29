@@ -44,7 +44,7 @@ extern CURLcode easysrc_addf(struct slist_wc **plist,
 extern CURLcode easysrc_perform(void);
 extern CURLcode easysrc_cleanup(void);
 
-void dumpeasysrc(struct GlobalConfig *config);
+void dumpeasysrc(struct GlobalConfig *global);
 
 #else /* CURL_DISABLE_LIBCURL_OPTION is defined */
 

@@ -26,15 +26,12 @@
 #ifdef __VMS
 
 #if defined(__DECC) && !defined(__VAX) && \
-    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+  defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
 #include <unixlib.h>
 #endif
 
-#include "curlx.h"
-
 #include "curlmsg_vms.h"
 #include "tool_vms.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 void decc$__posix_exit(int __status);
@@ -110,7 +107,7 @@ void vms_special_exit(int code, int vms_show)
 }
 
 #if defined(__DECC) && !defined(__VAX) && \
-    defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
+  defined(__CRTL_VER) && (__CRTL_VER >= 70301000)
 
 /*
  * 2004-09-19 SMS.

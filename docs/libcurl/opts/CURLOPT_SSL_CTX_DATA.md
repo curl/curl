@@ -13,7 +13,6 @@ TLS-backend:
   - OpenSSL
   - wolfSSL
   - mbedTLS
-  - BearSSL
 Added-in: 7.10.6
 ---
 
@@ -50,12 +49,12 @@ NULL
 #include <curl/curl.h>
 #include <stdio.h>
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   X509_STORE *store;
   X509 *cert = NULL;
   BIO *bio;
-  char *mypem = parm;
+  char *mypem = pointer;
   /* get a BIO */
   bio = BIO_new_mem_buf(mypem, -1);
   /* use it to read the PEM formatted certificate from memory into an
@@ -118,8 +117,7 @@ int main(void)
 
 # HISTORY
 
-Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL, in 7.54.0 for mbedTLS,
-in 7.83.0 in BearSSL.
+Added in 7.11.0 for OpenSSL, in 7.42.0 for wolfSSL, in 7.54.0 for mbedTLS.
 
 # %AVAILABILITY%
 

@@ -43,7 +43,7 @@ class TestVsFTPD:
     @pytest.fixture(autouse=True, scope='class')
     def vsftpd(self, env):
         vsftpd = VsFTPD(env=env)
-        assert vsftpd.start()
+        assert vsftpd.initial_start()
         yield vsftpd
         vsftpd.stop()
 
@@ -140,6 +140,7 @@ class TestVsFTPD:
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_30_06_shutdownh_download(self, env: Env, vsftpd: VsFTPD):
         docname = 'data-1k'
         curl = CurlClient(env=env)
@@ -148,10 +149,15 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
+        # vsftp closes control connection without niceties,
+        # look only at ports from DATA connection.
+        data_ports = vsftpd.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_30_07_shutdownh_upload(self, env: Env, vsftpd: VsFTPD):
         docname = 'upload-1k'
         curl = CurlClient(env=env)
@@ -163,7 +169,11 @@ class TestVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
+        # vsftp closes control connection without niceties,
+        # look only at ports from DATA connection.
+        data_ports = vsftpd.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     def test_30_08_active_download(self, env: Env, vsftpd: VsFTPD):
         docname = 'data-10k'
@@ -177,7 +187,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
 
-    def test_30_09_active_upload(self, env: Env, vsftpd: VsFTPD):
+    def test_30_09_active_up_file(self, env: Env, vsftpd: VsFTPD):
         docname = 'upload-1k'
         curl = CurlClient(env=env)
         srcfile = os.path.join(env.gen_dir, docname)
@@ -190,6 +200,20 @@ class TestVsFTPD:
         ])
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpd, docname=docname)
+
+    def test_30_10_active_up_ascii(self, env: Env, vsftpd: VsFTPD):
+        docname = 'upload-1k'
+        curl = CurlClient(env=env)
+        srcfile = os.path.join(env.gen_dir, docname)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
+        self._rmf(dstfile)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/'
+        r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, extra_args=[
+            '--ftp-port', '127.0.0.1', '--use-ascii'
+        ])
+        r.check_stats(count=count, http_status=226)
+        self.check_upload(env, vsftpd, docname=docname, binary=False)
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
@@ -204,7 +228,7 @@ class TestVsFTPD:
                                                     n=1))
                 assert False, f'download {dfile} differs:\n{diff}'
 
-    def check_upload(self, env, vsftpd: VsFTPD, docname):
+    def check_upload(self, env, vsftpd: VsFTPD, docname, binary=True):
         srcfile = os.path.join(env.gen_dir, docname)
         dstfile = os.path.join(vsftpd.docs_dir, docname)
         assert os.path.exists(srcfile)
@@ -215,4 +239,4 @@ class TestVsFTPD:
                                                 fromfile=srcfile,
                                                 tofile=dstfile,
                                                 n=1))
-            assert False, f'upload {dstfile} differs:\n{diff}'
+            assert not binary and len(diff) == 0, f'upload {dstfile} differs:\n{diff}'

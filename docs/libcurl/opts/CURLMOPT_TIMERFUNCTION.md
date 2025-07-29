@@ -46,7 +46,8 @@ time *replaces* the former timeout. The application should then effectively
 cancel the old timeout and set a new timeout using this new expire time.
 
 A **timeout_ms** value of -1 passed to this callback means you should delete
-the timer. All other values are valid expire times in number of milliseconds.
+the timer. All other values are valid expire times in number of milliseconds -
+including zero milliseconds.
 
 The **timer_callback** is called when the timeout expire time is changed.
 
@@ -82,12 +83,13 @@ static int timerfunc(CURLM *multi, long timeout_ms, void *clientp)
   struct priv *mydata = clientp;
   printf("our ptr: %p\n", mydata->custom);
 
-  if(timeout_ms) {
-    /* this is the new single timeout to wait for */
+  if(timeout_ms >= 0) {
+    /* this is the new single timeout to wait for, including zero */
   }
   else {
     /* delete the timeout, nothing to wait for now */
   }
+  return 0;
 }
 
 int main(void)

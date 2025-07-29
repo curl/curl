@@ -86,44 +86,26 @@ static size_t chunk_read(struct buf_chunk *chunk,
   }
 }
 
-static size_t chunk_unwrite(struct buf_chunk *chunk, size_t len)
-{
-  size_t n = chunk->w_offset - chunk->r_offset;
-  DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
-  if(!n) {
-    return 0;
-  }
-  else if(n <= len) {
-    chunk->r_offset = chunk->w_offset = 0;
-    return n;
-  }
-  else {
-    chunk->w_offset -= len;
-    return len;
-  }
-}
-
-static ssize_t chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
-                            Curl_bufq_reader *reader,
-                            void *reader_ctx, CURLcode *err)
+static CURLcode chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
+                             Curl_bufq_reader *reader,
+                             void *reader_ctx, size_t *pnread)
 {
   unsigned char *p = &chunk->x.data[chunk->w_offset];
   size_t n = chunk->dlen - chunk->w_offset; /* free amount */
-  ssize_t nread;
+  CURLcode result;
 
+  *pnread = 0;
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
-  if(!n) {
-    *err = CURLE_AGAIN;
-    return -1;
-  }
+  if(!n)
+    return CURLE_AGAIN;
   if(max_len && n > max_len)
     n = max_len;
-  nread = reader(reader_ctx, p, n, err);
-  if(nread > 0) {
-    DEBUGASSERT((size_t)nread <= n);
-    chunk->w_offset += nread;
+  result = reader(reader_ctx, p, n, pnread);
+  if(!result) {
+    DEBUGASSERT(*pnread <= n);
+    chunk->w_offset += *pnread;
   }
-  return nread;
+  return result;
 }
 
 static void chunk_peek(const struct buf_chunk *chunk,
@@ -357,49 +339,6 @@ static void prune_head(struct bufq *q)
   }
 }
 
-static struct buf_chunk *chunk_prev(struct buf_chunk *head,
-                                    struct buf_chunk *chunk)
-{
-  while(head) {
-    if(head == chunk)
-      return NULL;
-    if(head->next == chunk)
-      return head;
-    head = head->next;
-  }
-  return NULL;
-}
-
-static void prune_tail(struct bufq *q)
-{
-  struct buf_chunk *chunk;
-
-  while(q->tail && chunk_is_empty(q->tail)) {
-    chunk = q->tail;
-    q->tail = chunk_prev(q->head, chunk);
-    if(q->tail)
-      q->tail->next = NULL;
-    if(q->head == chunk)
-      q->head = q->tail;
-    if(q->pool) {
-      bufcp_put(q->pool, chunk);
-      --q->chunk_count;
-    }
-    else if((q->chunk_count > q->max_chunks) ||
-       (q->opts & BUFQ_OPT_NO_SPARES)) {
-      /* SOFT_LIMIT allowed us more than max. free spares until
-       * we are at max again. Or free them if we are configured
-       * to not use spares. */
-      free(chunk);
-      --q->chunk_count;
-    }
-    else {
-      chunk->next = q->spare;
-      q->spare = chunk;
-    }
-  }
-}
-
 static struct buf_chunk *get_non_full_tail(struct bufq *q)
 {
   struct buf_chunk *chunk;
@@ -421,90 +360,60 @@ static struct buf_chunk *get_non_full_tail(struct bufq *q)
   return chunk;
 }
 
-ssize_t Curl_bufq_write(struct bufq *q,
-                        const unsigned char *buf, size_t len,
-                        CURLcode *err)
+CURLcode Curl_bufq_write(struct bufq *q,
+                         const unsigned char *buf, size_t len,
+                         size_t *pnwritten)
 {
   struct buf_chunk *tail;
-  ssize_t nwritten = 0;
   size_t n;
 
   DEBUGASSERT(q->max_chunks > 0);
+  *pnwritten = 0;
   while(len) {
     tail = get_non_full_tail(q);
     if(!tail) {
-      if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT)) {
-        *err = CURLE_OUT_OF_MEMORY;
-        return -1;
-      }
+      if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT))
+        /* should have gotten a tail, but did not */
+        return CURLE_OUT_OF_MEMORY;
       break;
     }
     n = chunk_append(tail, buf, len);
     if(!n)
       break;
-    nwritten += n;
+    *pnwritten += n;
     buf += n;
     len -= n;
   }
-  if(nwritten == 0 && len) {
-    *err = CURLE_AGAIN;
-    return -1;
-  }
-  *err = CURLE_OK;
-  return nwritten;
+  return (!*pnwritten && len) ? CURLE_AGAIN : CURLE_OK;
 }
 
 CURLcode Curl_bufq_cwrite(struct bufq *q,
                           const char *buf, size_t len,
                           size_t *pnwritten)
 {
-  ssize_t n;
-  CURLcode result;
-  n = Curl_bufq_write(q, (const unsigned char *)buf, len, &result);
-  *pnwritten = (n < 0) ? 0 : (size_t)n;
-  return result;
+  return Curl_bufq_write(q, (const unsigned char *)buf, len, pnwritten);
 }
 
-CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len)
+CURLcode Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
+                        size_t *pnread)
 {
-  while(len && q->tail) {
-    len -= chunk_unwrite(q->tail, len);
-    prune_tail(q);
-  }
-  return len ? CURLE_AGAIN : CURLE_OK;
-}
-
-ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
-                       CURLcode *err)
-{
-  ssize_t nread = 0;
-  size_t n;
-
-  *err = CURLE_OK;
+  *pnread = 0;
   while(len && q->head) {
-    n = chunk_read(q->head, buf, len);
+    size_t n = chunk_read(q->head, buf, len);
     if(n) {
-      nread += n;
+      *pnread += n;
       buf += n;
       len -= n;
     }
     prune_head(q);
   }
-  if(nread == 0) {
-    *err = CURLE_AGAIN;
-    return -1;
-  }
-  return nread;
+  return (!*pnread) ? CURLE_AGAIN : CURLE_OK;
 }
 
 CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
                          size_t *pnread)
 {
-  ssize_t n;
-  CURLcode result;
-  n = Curl_bufq_read(q, (unsigned char *)buf, len, &result);
-  *pnread = (n < 0) ? 0 : (size_t)n;
-  return result;
+  return Curl_bufq_read(q, (unsigned char *)buf, len, pnread);
 }
 
 bool Curl_bufq_peek(struct bufq *q,
@@ -556,156 +465,139 @@ void Curl_bufq_skip(struct bufq *q, size_t amount)
   }
 }
 
-ssize_t Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
-                       void *writer_ctx, CURLcode *err)
+CURLcode Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
+                        void *writer_ctx, size_t *pwritten)
 {
   const unsigned char *buf;
   size_t blen;
-  ssize_t nwritten = 0;
+  CURLcode result = CURLE_OK;
 
+  *pwritten = 0;
   while(Curl_bufq_peek(q, &buf, &blen)) {
-    ssize_t chunk_written;
+    size_t chunk_written;
 
-    chunk_written = writer(writer_ctx, buf, blen, err);
-    if(chunk_written < 0) {
-      if(!nwritten || *err != CURLE_AGAIN) {
-        /* blocked on first write or real error, fail */
-        nwritten = -1;
+    result = writer(writer_ctx, buf, blen, &chunk_written);
+    if(result) {
+      if((result == CURLE_AGAIN) && *pwritten) {
+        /* blocked on subsequent write, report success */
+        result = CURLE_OK;
       }
       break;
     }
     if(!chunk_written) {
-      if(!nwritten) {
+      if(!*pwritten) {
         /* treat as blocked */
-        *err = CURLE_AGAIN;
-        nwritten = -1;
+        result = CURLE_AGAIN;
       }
       break;
     }
-    Curl_bufq_skip(q, (size_t)chunk_written);
-    nwritten += chunk_written;
+    *pwritten += chunk_written;
+    Curl_bufq_skip(q, chunk_written);
   }
-  return nwritten;
+  return result;
 }
 
-ssize_t Curl_bufq_write_pass(struct bufq *q,
-                             const unsigned char *buf, size_t len,
-                             Curl_bufq_writer *writer, void *writer_ctx,
-                             CURLcode *err)
+CURLcode Curl_bufq_write_pass(struct bufq *q,
+                              const unsigned char *buf, size_t len,
+                              Curl_bufq_writer *writer, void *writer_ctx,
+                              size_t *pwritten)
 {
-  ssize_t nwritten = 0, n;
+  CURLcode result = CURLE_OK;
+  size_t n;
 
-  *err = CURLE_OK;
+  *pwritten = 0;
   while(len) {
     if(Curl_bufq_is_full(q)) {
       /* try to make room in case we are full */
-      n = Curl_bufq_pass(q, writer, writer_ctx, err);
-      if(n < 0) {
-        if(*err != CURLE_AGAIN) {
+      result = Curl_bufq_pass(q, writer, writer_ctx, &n);
+      if(result) {
+        if(result != CURLE_AGAIN) {
           /* real error, fail */
-          return -1;
+          return result;
         }
         /* would block, bufq is full, give up */
         break;
       }
     }
 
-    /* Add whatever is remaining now to bufq */
-    n = Curl_bufq_write(q, buf, len, err);
-    if(n < 0) {
-      if(*err != CURLE_AGAIN) {
+    /* Add to bufq as much as there is room for */
+    result = Curl_bufq_write(q, buf, len, &n);
+    if(result) {
+      if(result != CURLE_AGAIN)
         /* real error, fail */
-        return -1;
-      }
-      /* no room in bufq */
-      break;
+        return result;
+      if((result == CURLE_AGAIN) && *pwritten)
+        /* we did write successfully before */
+        result = CURLE_OK;
+      return result;
     }
-    /* edge case of writer returning 0 (and len is >0)
-     * break or we might enter an infinite loop here */
-    if(n == 0)
+    else if(n == 0)
+      /* edge case of writer returning 0 (and len is >0)
+       * break or we might enter an infinite loop here */
       break;
 
-    /* Maybe only part of `data` has been added, continue to loop */
-    buf += (size_t)n;
-    len -= (size_t)n;
-    nwritten += (size_t)n;
+    /* Track what we added to bufq */
+    buf += n;
+    len -= n;
+    *pwritten += n;
   }
 
-  if(!nwritten && len) {
-    *err = CURLE_AGAIN;
-    return -1;
-  }
-  *err = CURLE_OK;
-  return nwritten;
+  return (!*pwritten && len) ? CURLE_AGAIN : CURLE_OK;
 }
 
-ssize_t Curl_bufq_sipn(struct bufq *q, size_t max_len,
-                       Curl_bufq_reader *reader, void *reader_ctx,
-                       CURLcode *err)
+CURLcode Curl_bufq_sipn(struct bufq *q, size_t max_len,
+                        Curl_bufq_reader *reader, void *reader_ctx,
+                        size_t *pnread)
 {
   struct buf_chunk *tail = NULL;
-  ssize_t nread;
 
-  *err = CURLE_AGAIN;
+  *pnread = 0;
   tail = get_non_full_tail(q);
   if(!tail) {
-    if(q->chunk_count < q->max_chunks) {
-      *err = CURLE_OUT_OF_MEMORY;
-      return -1;
-    }
+    if(q->chunk_count < q->max_chunks)
+      return CURLE_OUT_OF_MEMORY;
     /* full, blocked */
-    *err = CURLE_AGAIN;
-    return -1;
+    return CURLE_AGAIN;
   }
 
-  nread = chunk_slurpn(tail, max_len, reader, reader_ctx, err);
-  if(nread < 0) {
-    return -1;
-  }
-  else if(nread == 0) {
-    /* eof */
-    *err = CURLE_OK;
-  }
-  return nread;
+  return chunk_slurpn(tail, max_len, reader, reader_ctx, pnread);
 }
 
 /**
  * Read up to `max_len` bytes and append it to the end of the buffer queue.
  * if `max_len` is 0, no limit is imposed and the call behaves exactly
  * the same as `Curl_bufq_slurp()`.
- * Returns the total amount of buf read (may be 0) or -1 on other
- * reader errors.
- * Note that even in case of a -1 chunks may have been read and
+ * Returns the total amount of buf read (may be 0) in `pnread` or error
+ * Note that even in case of an error chunks may have been read and
  * the buffer queue will have different length than before.
  */
-static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
-                           Curl_bufq_reader *reader, void *reader_ctx,
-                           CURLcode *err)
+static CURLcode bufq_slurpn(struct bufq *q, size_t max_len,
+                            Curl_bufq_reader *reader, void *reader_ctx,
+                            size_t *pnread)
 {
-  ssize_t nread = 0, n;
+  CURLcode result;
 
-  *err = CURLE_AGAIN;
+  *pnread = 0;
   while(1) {
-
-    n = Curl_bufq_sipn(q, max_len, reader, reader_ctx, err);
-    if(n < 0) {
-      if(!nread || *err != CURLE_AGAIN) {
+    size_t n;
+    result = Curl_bufq_sipn(q, max_len, reader, reader_ctx, &n);
+    if(result) {
+      if(!*pnread || result != CURLE_AGAIN) {
         /* blocked on first read or real error, fail */
-        nread = -1;
+        return result;
       }
-      else
-        *err = CURLE_OK;
+      result = CURLE_OK;
       break;
     }
     else if(n == 0) {
       /* eof */
-      *err = CURLE_OK;
+      result = CURLE_OK;
       break;
     }
-    nread += (size_t)n;
+    *pnread += n;
     if(max_len) {
-      DEBUGASSERT((size_t)n <= max_len);
-      max_len -= (size_t)n;
+      DEBUGASSERT(n <= max_len);
+      max_len -= n;
       if(!max_len)
         break;
     }
@@ -713,11 +605,11 @@ static ssize_t bufq_slurpn(struct bufq *q, size_t max_len,
     if(q->tail && !chunk_is_full(q->tail))
       break;
   }
-  return nread;
+  return result;
 }
 
-ssize_t Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
-                        void *reader_ctx, CURLcode *err)
+CURLcode Curl_bufq_slurp(struct bufq *q, Curl_bufq_reader *reader,
+                         void *reader_ctx, size_t *pnread)
 {
-  return bufq_slurpn(q, 0, reader, reader_ctx, err);
+  return bufq_slurpn(q, 0, reader, reader_ctx, pnread);
 }

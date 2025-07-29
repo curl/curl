@@ -35,7 +35,7 @@
 /*
   List of URLs to fetch.
 
-  If you intend to use a SSL-based protocol here you might need to setup TLS
+  If you intend to use an SSL-based protocol here you might need to setup TLS
   library mutex callbacks as described here:
 
   https://curl.se/libcurl/c/threadsafe.html
@@ -80,7 +80,7 @@ int main(void)
                                NULL, /* default attributes please */
                                pull_one_url,
                                (void *)urls[i]);
-    if(0 != error)
+    if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);

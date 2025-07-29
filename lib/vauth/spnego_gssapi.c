@@ -24,23 +24,23 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_SPNEGO)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "curl_gssapi.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../curlx/base64.h"
+#include "../curl_gssapi.h"
+#include "../curlx/warnless.h"
+#include "../curlx/multibyte.h"
+#include "../sendf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
@@ -93,14 +93,13 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
   struct gss_channel_bindings_struct chan;
 
-  (void) user;
-  (void) password;
+  (void)user;
+  (void)password;
 
   if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
@@ -111,6 +110,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   if(!nego->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -139,7 +140,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      result = curlx_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
         return result;
     }
@@ -156,10 +157,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Set channel binding data if available */
-  if(nego->channel_binding_data.leng > 0) {
+  if(curlx_dyn_len(&nego->channel_binding_data)) {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
-    chan.application_data.length = nego->channel_binding_data.leng;
-    chan.application_data.value = nego->channel_binding_data.bufr;
+    chan.application_data.length = curlx_dyn_len(&nego->channel_binding_data);
+    chan.application_data.value = curlx_dyn_ptr(&nego->channel_binding_data);
     chan_bindings = &chan;
   }
 
@@ -228,9 +229,9 @@ CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
   OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(nego->output_token.value,
-                              nego->output_token.length,
-                              outptr, outlen);
+  result = curlx_base64_encode(nego->output_token.value,
+                               nego->output_token.length,
+                               outptr, outlen);
 
   if(result) {
     gss_release_buffer(&minor_status, &nego->output_token);
@@ -267,7 +268,8 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 
   /* Free our security context */
   if(nego->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &nego->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &nego->context,
+                                GSS_C_NO_BUFFER);
     nego->context = GSS_C_NO_CONTEXT;
   }
 
@@ -276,7 +278,6 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
     gss_release_buffer(&minor_status, &nego->output_token);
     nego->output_token.value = NULL;
     nego->output_token.length = 0;
-
   }
 
   /* Free the SPN */

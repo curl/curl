@@ -26,7 +26,7 @@
  ***************************************************************************/
 
 #include <curl/curl.h>
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 struct connectdata;
 struct Curl_easy;
@@ -73,6 +73,12 @@ size_t Curl_cshutdn_count(struct Curl_easy *data);
 
 /* Number of connections to the destination being shut down. */
 size_t Curl_cshutdn_dest_count(struct Curl_easy *data,
+                               const char *destination);
+
+/* Close the oldest connection in shutdown to destination or,
+ * when destination is NULL for any destination.
+ * Return TRUE if a connection has been closed. */
+bool Curl_cshutdn_close_oldest(struct Curl_easy *data,
                                const char *destination);
 
 /* Add a connection to have it shut down. Will terminate the oldest

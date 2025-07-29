@@ -77,7 +77,7 @@ Accept: application/sdp
 DESCRIBE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 2
 Accept: application/sdp
-Authorization: Basic dXNlcjpwYXNzd29yZA==
+Authorization: Basic %b64[user:pass]b64%d29yZA==
 
 </protocol>
 </verify>

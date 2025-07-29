@@ -9,31 +9,21 @@ compressed
 #
 # Server-side
 <reply>
-<data base64="yes">
-SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDA0IDIxOjU2OjUzIEdNVA0KU2Vy
-dmVyOiBBcGFjaGUvMS4zLjMxIChEZWJpYW4gR05VL0xpbnV4KSBtb2RfZ3ppcC8xLjMuMjYuMWEg
-UEhQLzQuMy45LTEgbW9kX3NzbC8yLjguMjAgT3BlblNTTC8wLjkuN2QgbW9kX3BlcmwvMS4yOQ0K
-VmFyeTogQWNjZXB0LUVuY29kaW5nDQpDb250ZW50LVR5cGU6IHRleHQvaHRtbDsgY2hhcnNldD1J
-U08tODg1OS0xDQpDb250ZW50LUVuY29kaW5nOiBicg0KQ29udGVudC1MZW5ndGg6IDEwNTYNCg0K
-G7ATAJwFdhtdgaQ8i+mZBoO/lwogPKuqHpeP38jV5TDITTB7/oJVCS69FFDKWDVtMk8y4SfMSu/a
-9vvLxWPweDCKePH/2y9VIkbF+EgCYSNs9v53J8QTIHT4ZucHCCRQiXRdT6XdE60KSlbIvobr5rJQ
-sRn7ipIjMVMq3Go+/UXtY2d0yP1qaaGSxCn8nZuUNGh74KOI7EEkgFl1tjYytkpc9mJJy9J+wTTI
-+HroUQP2VR2DYkNoUECqgtOLlGcVEln4+eVzEWcrb8fNrcrVxLArJBpSd8FX8eZs8ebJUO7aBZ5e
-pHz6zel7lhLlfHoQIkGh34riaSVr7VTGDmmO6HjSCzKO27LybZ9I3CtMSD2Il4mB131Tlcbut1Bd
-zL4XU4DZYMLBN4jwVZEoHpjzHX+vQ3prnrNw4oB7OWOr/fBzjvfjDuO24WxwzPqPo+V6VNcthz1p
-fF1+sMK4yWY7He33m32EuQgQFSZ3a5Wu4FyQcAb45Z+wUxM5XCmX52YmdUR2YTs+W+bNw2EZSfMR
-cP3CinyJI/cTT+JubL3T4COkhz0Rffeoh/3E4c/6ugma1ubhokYecXp8HBwmeDL48d62H26u69DO
-yMhg1PFj+oVDWnK4K+L5AlRr0mpJLqoGHrzflMLQ6qL2oIo9hN6qCeZEEqXM+/KunVYpWVeTY+ht
-hA0y5p5RLLTTS4cehaJOpbFyAVxZOardIkJAVx0NshOZY4hDbts9BXsXzFEOgsFhrIQYgh04StZz
-llIRMVDptYlwGmpZCHHmVECdGiFIfEhkQ2INSwMCuuKpaycgSOO9hJA9UFKDBdzTiLJBP9oUVkKL
-bHjwicICCi3k0HcppcvQaW27AMI06kuQU4WUGizgnkaUDcZqCgsotMgG528UFlBo8SFpb05OAjJq
-2gEI0UgN93KS1OvAOYSLN5IaLOCeRnQpJXuLUwcm7urpg6lYxAk26uEoADdsRytHGkSWjOKP6T07
-wiceuNo7CXyu7ohtUZXoEWawRHGVkPDVJYqH+xa0DDRKSSgM4K3efLVPSTaUPvBGIZgnn2JBFFWa
-MsKZguUuUnz6qaSGqnmGAYiupdC1EFye58V4CLbWVjJU4NF2jrOUYR/Dv04zYwVQtQcFzgmK6H4N
-HAhmb0a6pQRKxZaZ+x2vCC7sCuIu4dNCATwqzk12ue6oEsxzYybLPNGJd084M43O9W8E+5/drd/F
-QVB2X4jlFlCuHuWeQxQo+w73Tb9swW692v3BlfQTP1ClWzuJ+RwuSb9m4V3QVa4MEL+0Xzc5FX9P
-+YX1cgaL+6oMHw7L+IOjOt+n1BOloyqk35lLHX7RZmu8SckMnGP95XjWc4FRKP9x/iXrKaeCnut/
-zstyZdJS5FRmBT/wb5KK9YWBGnqPLO8isN2HS8gA
+<data>
+HTTP/1.1 200 OK
+Date: Mon, 29 Nov 2004 21:56:53 GMT
+Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
+Vary: Accept-Encoding
+Content-Type: text/html; charset=ISO-8859-1
+Content-Encoding: br
+Content-Length: 1056
+
+%hex[%1b%b0%13%00%9c%05%76%1b%5d%81%a4%3c%8b%e9%99%06%83%bf%97]hex%
+%hex[%20%3c%ab%aa%1e%97%8f%df%c8%d5%e5%30%c8%4d%30%7b%fe%82%55%09%2e%bd%14%50%ca%58%35%6d%32%4f%32%e1%27%cc%4a%ef%da%f6%fb%cb%c5%63%f0%78%30%8a%78%f1%ff%db%2f%55%22%46%c5%f8%48%02%61%23%6c%f6%fe%77%27%c4%13%20%74%f8%66%e7%07%08%24%50%89%74%5d%4f%a5%dd%13%ad]hex%
+%hex[%4a%56%c8%be%86%eb%e6%b2%50%b1%19%fb%8a%92%23%31%53%2a%dc%6a%3e%fd%45%ed%63%67%74%c8%fd%6a%69%a1%92%c4%29%fc%9d%9b%94%34%68%7b%e0%a3%88%ec%41%24%80%59%75%b6%36%32%b6%4a%5c%f6%62%49%cb%d2%7e%c1%34%c8%f8%7a%e8%51%03%f6%55%1d%83%62%43%68%50%40%aa%82%d3%8b%94%67%15%12%59%f8%f9%e5%73%11%67%2b%6f%c7%cd%ad%ca%d5%c4%b0%2b%24%1a%52%77%c1%57%f1%e6%6c%f1%e6%c9%50%ee%da%05%9e%5e%a4%7c%fa%cd%e9%7b%96%12%e5%7c%7a%10%22%41%a1%df%8a%e2%69%25%6b%ed%54%c6%0e%69%8e%e8%78%d2%0b%32%8e%db%b2%f2%6d%9f%48%dc%2b%4c%48%3d%88%97%89%81%d7%7d%53%95%c6%ee%b7%50%5d%cc%be%17%53%80%d9%60%c2%c1%37%88%f0%55%91%28%1e%98%f3%1d%7f%af%43%7a%6b%9e%b3%70%e2%80%7b%39%63%ab%fd%f0%73%8e%f7%e3%0e%e3%b6%e1%6c%70%cc%fa%8f%a3%e5%7a%54%d7%2d%87%3d%69%7c%5d%7e%b0%c2%b8%c9%66%3b%1d%ed%f7%9b%7d%84%b9%08%10%15%26%77%6b%95%ae%e0%5c%90%70%06%f8%e5%9f%b0%53%13%39%5c%29%97%e7%66%26%75%44%76%61%3b%3e%5b%e6%cd%c3%61%19%49%f3%11%70%fd%c2%8a%7c%89%23%f7%13%4f%e2%6e%6c%bd%d3%e0%23%a4%87%3d%11%7d%f7%a8%87%fd%c4%e1%cf%fa%ba%09%9a%d6%e6%e1%a2%46%1e%71%7a%7c%1c%1c%26%78%32%f8%f1%de%b6%1f%6e%ae%eb%d0%ce%c8%c8%60%d4%f1%63%fa%85%43%5a%72%b8%2b%e2%f9%02%54%6b%d2%6a%49%2e%aa%06%1e%bc%df%94%c2%d0%ea%a2%f6%a0%8a%3d%84%de%aa%09%e6%44%12%a5%cc%fb%f2%ae%9d%56%29%59%57%93%63%e8%6d%84%0d%32%e6%9e%51%2c%b4%d3%4b%87%1e%85%a2%4e%a5%b1%72%01%5c%59%39%aa%dd%22%42%40%57%1d%0d%b2%13%99%63%88%43%6e%db%3d%05%7b%17%cc%51%0e%82%c1%61%ac%84%18%82%1d%38%4a%d6%73%96%52%11%31%50%e9%b5%89%70%1a%6a%59%08%71%e6%54%40%9d%1a%21%48%7c%48%64%43%62%0d%4b%03%02%ba%e2%a9%6b%27%20%48%e3%bd%84%90%3d%50%52%83%05%dc%d3%88%b2%41%3f%da%14%56%42%8b%6c%78%f0%89%c2%02]hex%
+%hex[%2d%e4%d0%77%29%a5%cb%d0%69%6d%bb%00%c2%34%ea%4b%90%53%85%94%1a%2c%e0%9e%46%94%0d%c6%6a]hex%
+%hex[%0b%28%b4%c8%06%e7%6f%14%16%50%68%f1%21%69%6f%4e%4e%02%32%6a%da%01%08%d1%48%0d%f7%72%92%d4%eb%c0%39%84%8b%37%92%1a%2c%e0%9e%46%74%29%25%7b%8b%53%07%26%ee%ea%e9%83%a9%58%c4%09%36%ea%e1%28%00%37%6c%47%2b%47%1a%44%96%8c%e2%8f%e9%3d%3b%c2%27%1e%b8%da%3b%09%7c%ae%ee%88%6d%51%95%e8%11%66%b0%44%71%95%90%f0%d5%25%8a%87%fb%16%b4%0c%34%4a%49%28%0c%e0%ad%de%7c%b5%4f%49%36%94%3e%f0%46%21%98%27%9f%62%41%14%55%9a%32%c2%99%82%e5%2e%52%7c%fa%a9%a4%86%aa%79%86%01%88%ae%a5%d0%b5%10%5c%9e%e7%c5%78%08%b6%d6%56%32%54%e0%d1%76%8e%b3%94%61%1f%c3%bf%4e%33%63%05%50%b5%07%05%ce%09%8a%e8%7e%0d%1c%08%66%6f%46%ba%a5%04%4a%c5%96%99%fb%1d%af%08%2e%ec]hex%
+%hex[%e2%2e%e1%d3%42%01%3c%2a%ce%4d%76%b9%ee%a8%12%cc%73%63%26%cb%3c%d1%89%77%4f%38%33%8d%ce%f5%6f%04%fb%9f%dd%ad%df%c5%41%50%76%5f%88%e5%16%50%ae%1e%e5%9e%43%14%28%fb%0e%f7%4d%bf%6c%c1%6e%bd%da%fd%c1%95%f4%13%3f%50%a5%5b%3b%89%f9%1c%2e%49%bf%66%e1%5d%d0%55%ae%0c%10%bf%b4%5f%37%39%15%7f%4f%f9%85%f5%72%06%8b%fb%aa%0c%1f%0e%cb%f8%83%a3%3a%df%a7%d4%13%a5%a3%2a%a4%df%99%4b%1d%7e%d1%66%6b%bc%49%c9%0c%9c%63%fd%e5%78%d6%73%81%51%28%ff%71%fe%25%eb%29%a7%82%9e%eb%7f%ce%cb%72%65%d2%52%e4%54%66%05%3f%f0%6f%92%8a%f5%85%81%1a%7a%8f%2c%ef%22%b0%dd%87%4b%c8%00]hex%
 </data>
 
 <datacheck>

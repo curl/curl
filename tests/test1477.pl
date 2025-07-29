@@ -49,7 +49,7 @@ sub scanheader {
         $line++;
         if($_ =~ /^  (CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
             my ($name)=($1);
-            if(($name !~ /OBSOLETE/) && ($name !~ /_LAST\z/)) {
+            if(($name !~ /(OBSOLETE|CURLE_RESERVED)/) && ($name !~ /_LAST\z/)) {
                 push @hnames, $name;
                 if($wherefrom{$name}) {
                     print STDERR "double: $name\n";
@@ -69,8 +69,10 @@ sub scanmanpage {
         $line++;
         if($_ =~ /^\.IP \"(CURL(E|UE|SHE|HE|M)_[A-Z0-9_]*)/) {
             my ($name)=($1);
-            push @mnames, $name;
-            $manfrom{$name}="$file:$line";
+            if($name !~ /(CURLM_CALL_MULTI_SOCKET)/) {
+                push @mnames, $name;
+                $manfrom{$name}="$file:$line";
+            }
         }
     }
     close(H);

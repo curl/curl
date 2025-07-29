@@ -85,7 +85,7 @@ Curl_llist_insert_next(struct Curl_llist *list,
 #ifdef DEBUGBUILD
   ne->_init = NODEINIT;
 #endif
-  ne->_ptr = (void *) p;
+  ne->_ptr = CURL_UNCONST(p);
   ne->_list = list;
   if(list->_size == 0) {
     list->_head = ne;
@@ -181,7 +181,8 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
 /*
  * @unittest: 1300
  */
-void
+UNITTEST void Curl_node_uremove(struct Curl_llist_node *, void *);
+UNITTEST void
 Curl_node_uremove(struct Curl_llist_node *e, void *user)
 {
   struct Curl_llist *list;

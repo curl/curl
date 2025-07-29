@@ -33,6 +33,8 @@ aren't:are not
  a html: an html
  a http: an http
  a ftp: an ftp
+ a IPv4: an IPv4
+ a IPv6: an IPv6
  url =URL
 internet\b=Internet
 isation:ization

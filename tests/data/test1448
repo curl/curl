@@ -18,7 +18,7 @@ HTTP/1.1 302 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: http://åäö.se:%HTTPPORT/%TESTNUMBER0001
+Location: http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se:%HTTPPORT/%TESTNUMBER0001
 
 redirect
 </data>
@@ -43,15 +43,14 @@ IDN
 codeset-utf8
 </features>
 <setenv>
-LC_ALL=en_US.UTF-8
-LC_CTYPE=en_US.UTF-8
+LC_ALL=C.UTF-8
 </setenv>
 <name>
 Redirect following to UTF-8 IDN host name
 </name>
 
 <command>
-http://åäö.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -L --connect-to %HOSTIP:%HTTPPORT:%HOSTIP:%HTTPPORT
+http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP -L --connect-to %HOSTIP:%HTTPPORT:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -76,7 +75,7 @@ HTTP/1.1 302 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
 Content-Type: text/plain
-Location: http://åäö.se:%HTTPPORT/%TESTNUMBER0001
+Location: http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se:%HTTPPORT/%TESTNUMBER0001
 
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT

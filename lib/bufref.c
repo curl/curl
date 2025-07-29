@@ -61,7 +61,7 @@ void Curl_bufref_free(struct bufref *br)
   DEBUGASSERT(br->ptr || !br->len);
 
   if(br->ptr && br->dtor)
-    br->dtor((void *) br->ptr);
+    br->dtor(CURL_UNCONST(br->ptr));
 
   br->dtor = NULL;
   br->ptr = NULL;

@@ -47,7 +47,7 @@ class TestFtpsVsFTPD:
         if not TestFtpsVsFTPD.SUPPORTS_SSL:
             pytest.skip('vsftpd does not seem to support SSL')
         vsftpds = VsFTPD(env=env, with_ssl=True, ssl_implicit=True)
-        if not vsftpds.start():
+        if not vsftpds.initial_start():
             vsftpds.stop()
             TestFtpsVsFTPD.SUPPORTS_SSL = False
             pytest.skip('vsftpd does not seem to support SSL')
@@ -159,6 +159,7 @@ class TestFtpsVsFTPD:
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_32_06_shutdownh_download(self, env: Env, vsftpds: VsFTPD):
         docname = 'data-1k'
         curl = CurlClient(env=env)
@@ -167,11 +168,14 @@ class TestFtpsVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
-        # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
+        # look only at ports from DATA connection.
+        data_ports = vsftpds.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_32_07_shutdownh_upload(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-1k'
         curl = CurlClient(env=env)
@@ -183,8 +187,10 @@ class TestFtpsVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, with_tcpdump=True)
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
-        # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
+        # look only at ports from DATA connection.
+        data_ports = vsftpds.get_data_ports(r)
+        assert len(data_ports), f'unable to find FTP data port connected to\n{r.dump_logs()}'
+        assert len(r.tcpdump.get_rsts(ports=data_ports)) == 0, 'Unexpected TCP RST packets'
 
     def test_32_08_upload_ascii(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-ascii'
@@ -235,7 +241,8 @@ class TestFtpsVsFTPD:
         self.check_upload(env, vsftpds, docname=docname)
 
     @pytest.mark.parametrize("indata", [
-        '1234567890', ''
+        pytest.param('1234567890', id='10-bytes'),
+        pytest.param('', id='0-bytes'),
     ])
     def test_32_10_upload_stdin(self, env: Env, vsftpds: VsFTPD, indata):
         curl = CurlClient(env=env)
@@ -249,7 +256,7 @@ class TestFtpsVsFTPD:
         assert os.path.exists(dstfile)
         destdata = open(dstfile).readlines()
         expdata = [indata] if len(indata) else []
-        assert expdata == destdata, f'exected: {expdata}, got: {destdata}'
+        assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

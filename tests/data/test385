@@ -35,7 +35,7 @@ http
 HTTP with --json x 2
 </name>
 <command>
---json '{ "drink": "coffe",' --json ' "crunch": "cookie" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Content-Type: drinks/hot"
+--json '{ "drink": "coffee",' --json ' "crunch": "cookie" }' http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H "Content-Type: drinks/hot"
 </command>
 </client>
 
@@ -48,9 +48,9 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Content-Type: drinks/hot
 Accept: application/json
-Content-Length: 40
+Content-Length: 41
 
-{ "drink": "coffe", "crunch": "cookie" }
+{ "drink": "coffee", "crunch": "cookie" }
 </protocol>
 </verify>
 </testcase>

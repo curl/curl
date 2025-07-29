@@ -87,7 +87,7 @@ static void cw_pause_close(struct Curl_easy *data,
 static CURLcode cw_pause_init(struct Curl_easy *data,
                               struct Curl_cwriter *writer);
 
-struct Curl_cwtype Curl_cwt_pause = {
+const struct Curl_cwtype Curl_cwt_pause = {
   "cw-pause",
   NULL,
   cw_pause_init,

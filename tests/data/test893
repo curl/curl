@@ -27,7 +27,7 @@ REPLY dXJzZWwAa3VydAB4aXBqM3BsbXE= -ERR Not authorized
 pop3
 </server>
 <name>
-POP3 plain authentication with alternative authorization identity (Not authorized)
+POP3 plain auth with alt authorization identity (Not authorized)
 </name>
 <command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u kurt:xipj3plmq --sasl-authzid ursel

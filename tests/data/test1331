@@ -81,7 +81,7 @@ Proxy-Connection: Keep-Alive
 
 GET http://z.x.com/%TESTNUMBER HTTP/1.1
 Host: z.x.com
-Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
+Proxy-Authorization: Basic %b64[myname:mypassword]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

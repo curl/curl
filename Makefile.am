@@ -32,7 +32,6 @@ CMAKE_DIST =                                    \
  CMake/curl-config.cmake.in                     \
  CMake/CurlSymbolHiding.cmake                   \
  CMake/CurlTests.c                              \
- CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
  CMake/FindGSS.cmake                            \
@@ -44,8 +43,6 @@ CMAKE_DIST =                                    \
  CMake/FindLibssh.cmake                         \
  CMake/FindLibssh2.cmake                        \
  CMake/FindLibuv.cmake                          \
- CMake/FindMbedTLS.cmake                        \
- CMake/FindMSH3.cmake                           \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
@@ -67,10 +64,7 @@ CMAKE_DIST =                                    \
  tests/cmake/test.c                             \
  tests/cmake/test.sh
 
-VC_DIST = projects/README.md                           \
- projects/build-openssl.bat                            \
- projects/checksrc.bat                                 \
- projects/generate.bat
+VC_DIST = projects/README.md projects/generate.bat
 
 WINBUILD_DIST = winbuild/README.md \
  winbuild/MakefileBuild.vc winbuild/Makefile.vc winbuild/makedebug.bat
@@ -222,3 +216,6 @@ checksrc:
 tidy:
 	(cd src && $(MAKE) tidy)
 	(cd lib && $(MAKE) tidy)
+
+clean-local:
+	(cd tests && $(MAKE) clean)

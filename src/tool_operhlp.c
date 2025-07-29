@@ -24,15 +24,10 @@
 #include "tool_setup.h"
 #include "tool_operate.h"
 
-#include "strcase.h"
-
-#include "curlx.h"
-
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_msgs.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 void clean_getout(struct OperationConfig *config)
@@ -43,10 +38,10 @@ void clean_getout(struct OperationConfig *config)
 
     while(node) {
       next = node->next;
-      Curl_safefree(node->url);
-      Curl_safefree(node->outfile);
-      Curl_safefree(node->infile);
-      Curl_safefree(node);
+      tool_safefree(node->url);
+      tool_safefree(node->outfile);
+      tool_safefree(node->infile);
+      tool_safefree(node);
       node = next;
     }
     config->url_list = NULL;
@@ -210,16 +205,16 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
         }
       }
 
-      if(pc)
+      if(pc) {
         /* duplicate the string beyond the slash */
-        pc++;
+        *filename = strdup(pc + 1);
+      }
       else {
         /* no slash => empty string, use default */
-        pc = (char *)"curl_response";
-        warnf(global, "No remote file name, uses \"%s\"", pc);
+        *filename = strdup("curl_response");
+        warnf(global, "No remote file name, uses \"%s\"", *filename);
       }
 
-      *filename = strdup(pc);
       curl_free(path);
       if(!*filename)
         return CURLE_OUT_OF_MEMORY;
@@ -228,7 +223,7 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
       {
         char *sanitized;
         SANITIZEcode sc = sanitize_file_name(&sanitized, *filename, 0);
-        Curl_safefree(*filename);
+        tool_safefree(*filename);
         if(sc) {
           if(sc == SANITIZE_ERR_OUT_OF_MEMORY)
             return CURLE_OUT_OF_MEMORY;

@@ -21,17 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 /*
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+static CURLcode test_lib674(char *URL)
 {
   CURL *handle = NULL;
   CURL *handle2;
@@ -45,19 +43,18 @@ CURLcode test(char *URL)
   urlp = curl_url();
 
   if(!urlp) {
-    fprintf(stderr, "problem init URL api.");
+    curl_mfprintf(stderr, "problem init URL api.");
     goto test_cleanup;
   }
 
   uc = curl_url_set(urlp, CURLUPART_URL, URL, 0);
   if(uc) {
-    fprintf(stderr, "problem setting CURLUPART_URL: %s.",
-            curl_url_strerror(uc));
+    curl_mfprintf(stderr, "problem setting CURLUPART_URL: %s.",
+                  curl_url_strerror(uc));
     goto test_cleanup;
   }
 
   /* demonstrate override behavior */
-
 
   easy_setopt(handle, CURLOPT_CURLU, urlp);
   easy_setopt(handle, CURLOPT_VERBOSE, 1L);
@@ -65,8 +62,9 @@ CURLcode test(char *URL)
   res = curl_easy_perform(handle);
 
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
+                  "with code %d (%s)\n",
+                  __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 

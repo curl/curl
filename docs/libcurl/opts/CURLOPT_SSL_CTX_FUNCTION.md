@@ -17,7 +17,6 @@ TLS-backend:
   - OpenSSL
   - wolfSSL
   - mbedTLS
-  - BearSSL
 Added-in: 7.10.6
 ---
 
@@ -46,10 +45,10 @@ of an SSL connection after having processed all other SSL related options to
 give a last chance to an application to modify the behavior of the SSL
 initialization. The *ssl_ctx* parameter is a pointer to the SSL library's
 *SSL_CTX* for OpenSSL or wolfSSL, a pointer to *mbedtls_ssl_config* for
-mbedTLS or a pointer to *br_ssl_client_context* for BearSSL. If an error is
-returned from the callback no attempt to establish a connection is made and
-the perform operation returns the callback's error code. Set the *clientp*
-argument passed in to this callback with the CURLOPT_SSL_CTX_DATA(3) option.
+mbedTLS. If an error is returned from the callback no attempt to establish a
+connection is made and the perform operation returns the callback's error
+code. Set the *clientp* argument passed in to this callback with the
+CURLOPT_SSL_CTX_DATA(3) option.
 
 This function gets called for all new connections made to a server, during the
 SSL negotiation. While *ssl_ctx* points to a newly initialized object each
@@ -101,12 +100,12 @@ NULL
 #include <curl/curl.h>
 #include <stdio.h>
 
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
   X509_STORE *store;
   X509 *cert = NULL;
   BIO *bio;
-  char *mypem = parm;
+  char *mypem = pointer;
   /* get a BIO */
   bio = BIO_new_mem_buf(mypem, -1);
   /* use it to read the PEM formatted certificate from memory into an

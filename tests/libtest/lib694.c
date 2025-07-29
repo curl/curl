@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib694(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -33,13 +33,13 @@ CURLcode test(char *URL)
   int count = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -48,16 +48,20 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HTTPAUTH,
-              (long) (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
+              CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
   test_setopt(curl, CURLOPT_USERPWD, "me:password");
 
   do {
 
     res = curl_easy_perform(curl);
+    if(res)
+      goto test_cleanup;
 
     res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
+    if(res)
+      goto test_cleanup;
     if(CURLAUTH_NTLM != usedauth) {
-      printf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
+      curl_mprintf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
     }
 
     /* set a new URL for the second, so that we don't restart NTLM */

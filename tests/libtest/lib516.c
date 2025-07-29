@@ -21,32 +21,30 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib516(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_HTTPPOST, NULL);
-  )
+  test_setopt(curl, CURLOPT_HTTPPOST, NULL);
   test_setopt(curl, CURLOPT_VERBOSE, 1L); /* show verbose for debug */
   test_setopt(curl, CURLOPT_HEADER, 1L); /* include header */
 

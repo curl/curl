@@ -61,7 +61,7 @@ static const struct detail scheme[] = {
   {"rtmpts", "#ifdef USE_LIBRTMP" },
   {"rtsp", "#ifndef CURL_DISABLE_RTSP" },
   {"scp", "#if defined(USE_SSH) && !defined(USE_WOLFSSH)" },
-  {"sftp", "#if defined(USE_SSH)" },
+  {"sftp", "#ifdef USE_SSH" },
   {"smb", "#if !defined(CURL_DISABLE_SMB) && \\\n"
    "  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)" },
   {"smbs", "#if defined(USE_SSL) && !defined(CURL_DISABLE_SMB) && \\\n"

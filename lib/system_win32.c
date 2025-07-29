@@ -28,22 +28,24 @@
 
 #include <curl/curl.h>
 #include "system_win32.h"
-#include "version_win32.h"
+#include "curlx/version_win32.h"
 #include "curl_sspi.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
 
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
-
+#ifndef HAVE_IF_NAMETOINDEX
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
 
 /* Pointer to the if_nametoindex function */
 IF_NAMETOINDEX_FN Curl_if_nametoindex = NULL;
+
+/* This is used to dynamically load DLLs */
+static HMODULE curl_load_library(LPCTSTR filename);
+#endif
 
 /* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
@@ -93,7 +95,8 @@ CURLcode Curl_win32_init(long flags)
   }
 #endif
 
-  s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
+#ifndef HAVE_IF_NAMETOINDEX
+  s_hIpHlpApiDll = curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
 #ifdef UNDER_CE
@@ -109,6 +112,7 @@ CURLcode Curl_win32_init(long flags)
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
   }
+#endif
 
   /* curlx_verify_windows_version must be called during init at least once
      because it has its own initialization routine. */
@@ -126,11 +130,13 @@ CURLcode Curl_win32_init(long flags)
 /* Curl_win32_cleanup() is the opposite of Curl_win32_init() */
 void Curl_win32_cleanup(long init_flags)
 {
+#ifndef HAVE_IF_NAMETOINDEX
   if(s_hIpHlpApiDll) {
     FreeLibrary(s_hIpHlpApiDll);
     s_hIpHlpApiDll = NULL;
     Curl_if_nametoindex = NULL;
   }
+#endif
 
 #ifdef USE_WINDOWS_SSPI
   Curl_sspi_global_cleanup();
@@ -143,11 +149,13 @@ void Curl_win32_cleanup(long init_flags)
   }
 }
 
-#if !defined(LOAD_WITH_ALTERED_SEARCH_PATH)
+#ifndef HAVE_IF_NAMETOINDEX
+
+#ifndef LOAD_WITH_ALTERED_SEARCH_PATH
 #define LOAD_WITH_ALTERED_SEARCH_PATH  0x00000008
 #endif
 
-#if !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+#ifndef LOAD_LIBRARY_SEARCH_SYSTEM32
 #define LOAD_LIBRARY_SEARCH_SYSTEM32   0x00000800
 #endif
 
@@ -166,7 +174,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 #endif
 
 /*
- * Curl_load_library()
+ * curl_load_library()
  *
  * This is used to dynamically load DLLs using the most secure method available
  * for the version of Windows that we are running on.
@@ -179,7 +187,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  *
  * Returns the handle of the module on success; otherwise NULL.
  */
-HMODULE Curl_load_library(LPCTSTR filename)
+static HMODULE curl_load_library(LPCTSTR filename)
 {
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
@@ -217,7 +225,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     /* Attempt to get the Windows system path */
     UINT systemdirlen = GetSystemDirectory(NULL, 0);
     if(systemdirlen) {
-      /* Allocate space for the full DLL path (Room for the null terminator
+      /* Allocate space for the full DLL path (Room for the null-terminator
          is included in systemdirlen) */
       size_t filenamelen = _tcslen(filename);
       TCHAR *path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));
@@ -231,7 +239,6 @@ HMODULE Curl_load_library(LPCTSTR filename)
         hModule = pLoadLibraryEx ?
           pLoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH) :
           LoadLibrary(path);
-
       }
       free(path);
     }
@@ -243,5 +250,6 @@ HMODULE Curl_load_library(LPCTSTR filename)
   return NULL;
 #endif
 }
+#endif /* !HAVE_IF_NAMETOINDEX */
 
 #endif /* _WIN32 */

@@ -24,9 +24,9 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
-#ifdef USE_QUICHE
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_QUICHE)
 
 #include <quiche.h>
 #include <openssl/ssl.h>
@@ -40,10 +40,6 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai);
-
-bool Curl_conn_is_quiche(const struct Curl_easy *data,
-                         const struct connectdata *conn,
-                         int sockindex);
 
 #endif
 

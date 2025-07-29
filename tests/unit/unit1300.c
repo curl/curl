@@ -21,13 +21,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "llist.h"
-
-static struct Curl_llist llist;
-
-static struct Curl_llist llist_destination;
+#include "unitprotos.h"
 
 static void test_Curl_llist_dtor(void *key, void *value)
 {
@@ -36,19 +33,13 @@ static void test_Curl_llist_dtor(void *key, void *value)
   (void)value;
 }
 
-static CURLcode unit_setup(void)
+static CURLcode test_unit1300(char *arg)
 {
-  Curl_llist_init(&llist, test_Curl_llist_dtor);
-  Curl_llist_init(&llist_destination, test_Curl_llist_dtor);
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
-}
+  struct Curl_llist llist;
+  struct Curl_llist llist_destination;
 
-UNITTEST_START
-{
   int unusedData_case1 = 1;
   int unusedData_case2 = 2;
   int unusedData_case3 = 3;
@@ -60,7 +51,10 @@ UNITTEST_START
   struct Curl_llist_node *element_next;
   struct Curl_llist_node *element_prev;
   struct Curl_llist_node *to_remove;
-  size_t llist_size = Curl_llist_count(&llist);
+  size_t llist_size;
+
+  Curl_llist_init(&llist, test_Curl_llist_dtor);
+  Curl_llist_init(&llist_destination, test_Curl_llist_dtor);
 
   /**
    * testing llist_init
@@ -271,5 +265,6 @@ UNITTEST_START
 
   Curl_llist_destroy(&llist, NULL);
   Curl_llist_destroy(&llist_destination, NULL);
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP

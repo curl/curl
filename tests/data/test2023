@@ -106,7 +106,7 @@ Finally, this is the real page!
 http
 </server>
 <tool>
-libauthretry
+lib2023
 </tool>
 
 <name>
@@ -122,27 +122,27 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER basic basic
 <protocol>
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Authorization: Basic %b64[testuser:wrongpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0200 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0300 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Authorization: Basic %b64[testuser:wrongpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0400 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6d3JvbmdwYXNz
+Authorization: Basic %b64[testuser:wrongpass]b64%
 Accept: */*
 
 GET /%TESTNUMBER0500 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 Accept: */*
 
 </protocol>

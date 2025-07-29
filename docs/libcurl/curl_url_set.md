@@ -79,7 +79,7 @@ is replaced with the components of the newly set URL.
 Pass a pointer to a null-terminated string to the *url* parameter. The string
 must point to a correctly formatted "RFC 3986+" URL or be a NULL pointer. The
 URL parser only understands and parses the subset of URLS that are
-"hierarchical" and therefore contain a :// separator - not the ones that are
+"hierarchical" and therefore contain a `://` separator - not the ones that are
 normally specified with only a colon separator.
 
 By default this API only parses URLs using schemes for protocols that are
@@ -92,6 +92,10 @@ Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
 
 When a full URL is set (parsed), the hostname component is stored URL decoded.
+
+It is considered fine to set a blank URL ("") as a redirect, but not as a
+normal URL. Therefore, setting a "" URL works fine if the handle already holds
+a URL, otherwise it triggers an error.
 
 ## CURLUPART_SCHEME
 

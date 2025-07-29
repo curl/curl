@@ -21,23 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-#define TEST_HANG_TIMEOUT 60 * 1000
-
-#define NUM_HANDLES 4
-
-CURLcode test(char *URL)
+static CURLcode test_lib1506(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {0};
   int running;
   CURLM *m = NULL;
-  int i;
+  size_t i;
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL, *slist2;
@@ -47,13 +41,13 @@ CURLcode test(char *URL)
   (void)URL;
 
   /* Create fake DNS entries for serverX.example.com for all handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
-    msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
-              i + 1, port, address);
-    printf("%s\n", dnsentry);
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
+    curl_msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s",
+                   (int)i + 1, port, address);
+    curl_mprintf("%s\n", dnsentry);
     slist2 = curl_slist_append(slist, dnsentry);
     if(!slist2) {
-      fprintf(stderr, "curl_slist_append() failed\n");
+      curl_mfprintf(stderr, "curl_slist_append() failed\n");
       goto test_cleanup;
     }
     slist = slist2;
@@ -67,14 +61,14 @@ CURLcode test(char *URL)
 
   multi_setopt(m, CURLMOPT_MAXCONNECTS, 3L);
 
-  /* get NUM_HANDLES easy handles */
-  for(i = 0; i < NUM_HANDLES; i++) {
+  /* get each easy handle */
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* get an easy handle */
     easy_init(curl[i]);
     /* specify target */
-    msnprintf(target_url, sizeof(target_url),
-              "http://server%d.example.com:%s/path/1506%04i",
-              i + 1, port, i + 1);
+    curl_msnprintf(target_url, sizeof(target_url),
+                   "http://server%d.example.com:%s/path/1506%04i",
+                   (int)i + 1, port, (int)i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */
@@ -85,9 +79,9 @@ CURLcode test(char *URL)
     easy_setopt(curl[i], CURLOPT_RESOLVE, slist);
   }
 
-  fprintf(stderr, "Start at URL 0\n");
+  curl_mfprintf(stderr, "Start at URL 0\n");
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     /* add handle to multi */
     multi_add_handle(m, curl[i]);
 
@@ -118,14 +112,14 @@ CURLcode test(char *URL)
 
       abort_on_test_timeout();
     }
-    wait_ms(1); /* to ensure different end times */
+    curlx_wait_ms(1); /* to ensure different end times */
   }
 
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  for(i = 0; i < NUM_HANDLES; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
     curl_multi_remove_handle(m, curl[i]);
     curl_easy_cleanup(curl[i]);
   }

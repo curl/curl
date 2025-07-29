@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -21,9 +21,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "inet_pton.h"
+#ifdef HAVE_INET_PTON
+
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 #include "memdebug.h"
 
 /* to prevent libcurl from closing our socket */
@@ -56,8 +64,15 @@ static int sockopt_cb(void *clientp,
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
 
+#ifdef __AMIGA__
+#define my_inet_pton(x,y,z) inet_pton(x,(unsigned char *)y,z)
+#else
+#define my_inet_pton(x,y,z) inet_pton(x,y,z)
+#endif
+
+
 /* Expected args: URL IP PORT */
-CURLcode test(char *URL)
+static CURLcode test_lib1960(char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = TEST_ERR_MAJOR_BAD;
@@ -72,7 +87,7 @@ CURLcode test(char *URL)
   port = (unsigned short)atoi(libtest_arg3);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -83,27 +98,27 @@ CURLcode test(char *URL)
    */
   client_fd = socket(AF_INET, SOCK_STREAM, 0);
   if(client_fd == CURL_SOCKET_BAD) {
-    fprintf(stderr, "socket creation error\n");
+    curl_mfprintf(stderr, "socket creation error\n");
     goto test_cleanup;
   }
 
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port);
 
-  if(Curl_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
-    fprintf(stderr, "inet_pton failed\n");
+  if(my_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
+    curl_mfprintf(stderr, "inet_pton failed\n");
     goto test_cleanup;
   }
 
   status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
   if(status < 0) {
-    fprintf(stderr, "connection failed\n");
+    curl_mfprintf(stderr, "connection failed\n");
     goto test_cleanup;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     goto test_cleanup;
   }
 
@@ -128,3 +143,11 @@ test_cleanup:
 
   return res;
 }
+#else
+static CURLcode test_lib1960(char *URL)
+{
+  (void)URL;
+  curl_mprintf("lacks inet_pton\n");
+  return CURLE_OK;
+}
+#endif

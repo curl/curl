@@ -64,6 +64,7 @@ lib547
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP proxy auth Digest with POST data from read callback

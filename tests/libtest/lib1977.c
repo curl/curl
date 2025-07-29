@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1977(char *URL)
 {
   CURLcode res = CURLE_OK;
   CURLU *curlu = curl_url();
@@ -50,7 +48,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
   /* second transfer: set URL + query in the second CURLU handle */
@@ -66,7 +64,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
   /* third transfer: append extra query in the second CURLU handle, but do not
@@ -83,7 +81,7 @@ CURLcode test(char *URL)
   res = curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effective);
   if(res)
     goto test_cleanup;
-  printf("effective URL: %s\n", effective);
+  curl_mprintf("effective URL: %s\n", effective);
 
 
 test_cleanup:

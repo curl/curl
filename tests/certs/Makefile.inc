@@ -21,14 +21,20 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-CERTCONFIGS = \
-  test-ca.prm \
+# Shared between CMakeLists.txt and Makefile.am
+
+CERTCONFIG_CA = \
   test-ca.cnf \
+  test-ca.prm
+
+CERTCONFIGS = \
   test-localhost.prm \
   test-localhost.nn.prm \
   test-localhost0h.prm \
   test-localhost-san-first.prm \
-  test-localhost-san-last.prm
+  test-localhost-san-last.prm \
+  test-client-cert.prm \
+  test-client-eku-only.prm
 
 GENERATEDCERTS = \
   test-ca.cacert \
@@ -63,7 +69,13 @@ GENERATEDCERTS = \
   test-localhost-san-last.key \
   test-localhost-san-last.pem \
   test-localhost-san-last.pub.der \
-  test-localhost-san-last.pub.pem
+  test-localhost-san-last.pub.pem \
+  test-client-cert.crl \
+  test-client-cert.crt \
+  test-client-cert.key \
+  test-client-cert.pem \
+  test-client-cert.pub.der \
+  test-client-cert.pub.pem
 
 SRPFILES = \
   srp-verifier-conf \

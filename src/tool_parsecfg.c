@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
-
 #include "tool_cfgable.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
@@ -32,8 +30,6 @@
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 #include "tool_util.h"
-#include "dynbuf.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 /* only acknowledge colon or equals as separators if the option was not
@@ -50,7 +46,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   FILE *file = NULL;
   bool usedarg = FALSE;
   int rc = 0;
-  struct OperationConfig *operation = global->last;
+  struct OperationConfig *config = global->last;
   char *pathalloc = NULL;
 
   if(!filename) {
@@ -68,9 +64,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
-      file = Curl_execpath(".curlrc", &fullp);
+      file = tool_execpath(".curlrc", &fullp);
       if(!file)
-        file = Curl_execpath("_curlrc", &fullp);
+        file = tool_execpath("_curlrc", &fullp);
       if(file)
         /* this is the filename we read from */
         filename = fullp;
@@ -90,7 +86,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     char *param;
     int lineno = 0;
     bool dashed_option;
-    struct curlx_dynbuf buf;
+    struct dynbuf buf;
     bool fileerror = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
@@ -160,9 +156,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           case '#': /* comment */
             break;
           default:
-            warnf(operation->global, "%s:%d: warning: '%s' uses unquoted "
+            warnf(config->global, "%s:%d: warning: '%s' uses unquoted "
                   "whitespace", filename, lineno, option);
-            warnf(operation->global, "This may cause side-effects. "
+            warnf(config->global, "This may cause side-effects. "
                   "Consider using double quotes?");
           }
         }
@@ -175,31 +171,24 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #ifdef DEBUG_CONFIG
       fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, NULL, NULL,
-                         &usedarg, global, operation);
-      operation = global->last;
+      res = getparameter(option, param, &usedarg, config);
+      config = global->last;
 
       if(!res && param && *param && !usedarg)
         /* we passed in a parameter that was not used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
       if(res == PARAM_NEXT_OPERATION) {
-        if(operation->url_list && operation->url_list->url) {
+        if(config->url_list && config->url_list->url) {
           /* Allocate the next config */
-          operation->next = malloc(sizeof(struct OperationConfig));
-          if(operation->next) {
-            /* Initialise the newly created config */
-            config_init(operation->next);
-
-            /* Set the global config pointer */
-            operation->next->global = global;
-
+          config->next = config_alloc(global);
+          if(config->next) {
             /* Update the last operation pointer */
-            global->last = operation->next;
+            global->last = config->next;
 
             /* Move onto the new config */
-            operation->next->prev = operation;
-            operation = operation->next;
+            config->next->prev = config;
+            config = config->next;
           }
           else
             res = PARAM_NO_MEM;
@@ -217,14 +206,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
           const char *reason = param2text(res);
-          errorf(operation->global, "%s:%d: '%s' %s",
+          errorf(config->global, "%s:%d: '%s' %s",
                  filename, lineno, option, reason);
           rc = (int)res;
         }
       }
 
       if(alloced_param)
-        Curl_safefree(param);
+        tool_safefree(param);
     }
     curlx_dyn_free(&buf);
     if(file != stdin)
@@ -241,10 +230,10 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 
 /*
  * Copies the string from line to the buffer at param, unquoting
- * backslash-quoted characters and NUL-terminating the output string.
- * Stops at the first non-backslash-quoted double quote character or the
- * end of the input string. param must be at least as long as the input
- * string. Returns the pointer after the last handled input character.
+ * backslash-quoted characters and null-terminating the output string. Stops
+ * at the first non-backslash-quoted double quote character or the end of the
+ * input string. param must be at least as long as the input string. Returns
+ * the pointer after the last handled input character.
  */
 static const char *unslashquote(const char *line, char *param)
 {
@@ -312,6 +301,8 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
       else if(feof(input))
         return TRUE; /* all good */
     }
+    else if(curlx_dyn_len(buf))
+      return TRUE; /* all good */
     else
       break;
   }
@@ -319,7 +310,7 @@ static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 }
 
 /*
- * Returns a line from the given file. Every line is NULL terminated (no
+ * Returns a line from the given file. Every line is null-terminated (no
  * newline). Skips #-commented and space/tabs-only lines automatically.
  */
 bool my_get_line(FILE *input, struct dynbuf *buf, bool *error)

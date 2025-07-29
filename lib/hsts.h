@@ -36,8 +36,8 @@ extern time_t deltatime;
 struct stsentry {
   struct Curl_llist_node node;
   const char *host;
-  bool includeSubDomains;
   curl_off_t expires; /* the timestamp of this entry's expiry */
+  BIT(includeSubDomains);
 };
 
 /* The HSTS cache. Needs to be able to tailmatch hostnames. */

@@ -76,7 +76,7 @@ int main(void)
     if(res == CURLE_OK) {
       char buf[256];
       size_t nread;
-      long sockfd;
+      curl_socket_t sockfd;
 
       /* Extract the socket from the curl handle - we need it for waiting. */
       res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);

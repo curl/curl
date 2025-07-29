@@ -2,7 +2,6 @@
 <info>
 <keywords>
 HTTP
-
 </keywords>
 </info>
 
@@ -35,7 +34,7 @@ http
 warn about Unicode quote character read from config file
 </name>
 <file name="%LOGDIR/input%TESTNUMBER">
--H “host:fake”
+-H %hex[%e2%80%9c]hex%host:fake%hex[%e2%80%9d]hex%
 </file>
 <command>
 %HOSTIP:%HTTPPORT --no-progress-meter -K "%LOGDIR/input%TESTNUMBER"

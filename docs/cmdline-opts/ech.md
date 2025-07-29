@@ -16,7 +16,7 @@ Example:
 
 # `--ech`
 
-Specifies how to do ECH (Encrypted Client Hello).
+Specify how to do ECH (Encrypted Client Hello).
 
 The values allowed for \<config\> can be:
 

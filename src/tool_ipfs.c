@@ -24,13 +24,10 @@
 #include "tool_setup.h"
 
 #ifndef CURL_DISABLE_IPFS
-#include "curlx.h"
-#include "dynbuf.h"
 
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_ipfs.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 /* ensure input ends in slash */
@@ -39,15 +36,15 @@ static CURLcode ensure_trailing_slash(char **input)
   if(*input && **input) {
     size_t len = strlen(*input);
     if(((*input)[len - 1] != '/')) {
-      struct curlx_dynbuf dyn;
+      struct dynbuf dyn;
       curlx_dyn_init(&dyn, len + 2);
 
       if(curlx_dyn_addn(&dyn, *input, len)) {
-        Curl_safefree(*input);
+        tool_safefree(*input);
         return CURLE_OUT_OF_MEMORY;
       }
 
-      Curl_safefree(*input);
+      tool_safefree(*input);
 
       if(curlx_dyn_addn(&dyn, "/", 1))
         return CURLE_OUT_OF_MEMORY;
@@ -92,11 +89,11 @@ static char *ipfs_gateway(void)
     goto fail;
 
   gateway_file = fopen(gateway_composed_file_path, FOPEN_READTEXT);
-  Curl_safefree(gateway_composed_file_path);
+  tool_safefree(gateway_composed_file_path);
 
   if(gateway_file) {
     int c;
-    struct curlx_dynbuf dyn;
+    struct dynbuf dyn;
     curlx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
 
     /* get the first line of the gateway file, ignore the rest */
@@ -118,15 +115,15 @@ static char *ipfs_gateway(void)
     if(!gateway)
       goto fail;
 
-    Curl_safefree(ipfs_path);
+    tool_safefree(ipfs_path);
 
     return gateway;
   }
 fail:
   if(gateway_file)
     fclose(gateway_file);
-  Curl_safefree(gateway);
-  Curl_safefree(ipfs_path);
+  tool_safefree(gateway);
+  tool_safefree(ipfs_path);
   return NULL;
 }
 
@@ -247,7 +244,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   /* Free whatever it has now, rewriting is next */
-  Curl_safefree(*url);
+  tool_safefree(*url);
 
   if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
     goto clean;

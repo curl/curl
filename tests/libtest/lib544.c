@@ -21,29 +21,33 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-static char teststring[] =
-{   'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
-    'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
-    'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
-    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
-
-CURLcode test(char *URL)
+static CURLcode test_lib544(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
 
+  static const char teststring_init[] = {
+    'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
+    'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
+    'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
+    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
+
+  char teststring[sizeof(teststring_init)];
+
+  memcpy(teststring, teststring_init, sizeof(teststring_init));
+
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -51,9 +55,8 @@ CURLcode test(char *URL)
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-#ifdef LIB545
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
-#endif
+  if(testnum == 545)
+    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
 
   test_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
 

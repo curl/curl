@@ -21,14 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-static char testbuf[17000]; /* more than 16K */
-
-CURLcode test(char *URL)
+static CURLcode test_lib666(char *URL)
 {
+  static char testbuf[17000]; /* more than 16K */
+
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   curl_mime *mime = NULL;
@@ -45,13 +45,13 @@ CURLcode test(char *URL)
       testbuf[i] = (char) (0x41 + i % 26); /* A...Z */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -59,34 +59,34 @@ CURLcode test(char *URL)
   /* Build mime structure. */
   mime = curl_mime_init(curl);
   if(!mime) {
-    fprintf(stderr, "curl_mime_init() failed\n");
+    curl_mfprintf(stderr, "curl_mime_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   part = curl_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart() failed\n");
+    curl_mfprintf(stderr, "curl_mime_addpart() failed\n");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   res = curl_mime_name(part, "upfile");
   if(res) {
-    fprintf(stderr, "curl_mime_name() failed\n");
+    curl_mfprintf(stderr, "curl_mime_name() failed\n");
     goto test_cleanup;
   }
   res = curl_mime_filename(part, "myfile.txt");
   if(res) {
-    fprintf(stderr, "curl_mime_filename() failed\n");
+    curl_mfprintf(stderr, "curl_mime_filename() failed\n");
     goto test_cleanup;
   }
   res = curl_mime_data(part, testbuf, sizeof(testbuf));
   if(res) {
-    fprintf(stderr, "curl_mime_data() failed\n");
+    curl_mfprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;
   }
   res = curl_mime_encoder(part, "binary");
   if(res) {
-    fprintf(stderr, "curl_mime_encoder() failed\n");
+    curl_mfprintf(stderr, "curl_mime_encoder() failed\n");
     goto test_cleanup;
   }
 

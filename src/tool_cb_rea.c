@@ -27,14 +27,11 @@
 #include <sys/select.h>
 #endif
 
-#include "curlx.h"
-
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
 #include "tool_operate.h"
 #include "tool_util.h"
 #include "tool_msgs.h"
-#include "tool_sleep.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -55,8 +52,8 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   }
 
   if(config->timeout_ms) {
-    struct timeval now = tvnow();
-    long msdelta = tvdiff(now, per->start);
+    struct curltime now = curlx_now();
+    long msdelta = (long)curlx_timediff(now, per->start);
 
     if(msdelta > config->timeout_ms)
       /* timeout */
@@ -74,12 +71,12 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       timeout.tv_usec = (int)((wait%1000)*1000);
 
       FD_ZERO(&bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(per->infd, &bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
@@ -88,15 +85,39 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
 
-  rc = read(per->infd, buffer, sz*nmemb);
-  if(rc < 0) {
-    if(errno == EAGAIN) {
-      CURL_SETERRNO(0);
-      config->readbusy = TRUE;
-      return CURL_READFUNC_PAUSE;
+  /* If we are on Windows, and using `-T .`, then per->infd points to a socket
+   connected to stdin via a reader thread, and needs to be read with recv()
+   Make sure we are in non-blocking mode and infd is not regular stdin
+   On Linux per->infd should be stdin (0) and the block below should not
+   execute */
+  if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+    rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
+    if(rc < 0) {
+      if(SOCKERRNO == SOCKEWOULDBLOCK) {
+        CURL_SETERRNO(0);
+        config->readbusy = TRUE;
+        return CURL_READFUNC_PAUSE;
+      }
+
+      rc = 0;
     }
-    /* since size_t is unsigned we cannot return negative values fine */
-    rc = 0;
+#else
+    warnf(per->config->global, "per->infd != 0: FD == %d. This behavior"
+          " is only supported on desktop Windows", per->infd);
+#endif
+  }
+  else {
+    rc = read(per->infd, buffer, sz*nmemb);
+    if(rc < 0) {
+      if(errno == EAGAIN) {
+        CURL_SETERRNO(0);
+        config->readbusy = TRUE;
+        return CURL_READFUNC_PAUSE;
+      }
+      /* since size_t is unsigned we cannot return negative values fine */
+      rc = 0;
+    }
   }
   if((per->uploadfilesize != -1) &&
      (per->uploadedsofar + rc > per->uploadfilesize)) {
@@ -123,6 +144,7 @@ int tool_readbusy_cb(void *clientp,
 {
   struct per_transfer *per = clientp;
   struct OperationConfig *config = per->config;
+  static curl_off_t ulprev;
 
   (void)dltotal;  /* unused */
   (void)dlnow;  /* unused */
@@ -130,34 +152,35 @@ int tool_readbusy_cb(void *clientp,
   (void)ulnow;  /* unused */
 
   if(config->readbusy) {
-    /* lame code to keep the rate down because the input might not deliver
-       anything, get paused again and come back here immediately */
-    static long rate = 500;
-    static struct timeval prev;
-    static curl_off_t ulprev;
-
     if(ulprev == ulnow) {
-      /* it did not upload anything since last call */
-      struct timeval now = tvnow();
-      if(prev.tv_sec)
-        /* get a rolling average rate */
-        /* rate = rate - rate/4 + tvdiff(now, prev)/4; */
-        rate -= rate/4 - tvdiff(now, prev)/4;
-      prev = now;
+#ifndef _WIN32
+      fd_set bits;
+      struct timeval timeout;
+      /* wait this long at the most */
+      timeout.tv_sec = 0;
+      timeout.tv_usec = 1000;
+
+      FD_ZERO(&bits);
+#ifdef __DJGPP__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+      FD_SET(per->infd, &bits);
+#ifdef __DJGPP__
+#pragma GCC diagnostic pop
+#endif
+      select(per->infd + 1, &bits, NULL, NULL, &timeout);
+#else
+      /* sleep */
+      curlx_wait_ms(1);
+#endif
     }
-    else {
-      rate = 50;
-      ulprev = ulnow;
-    }
-    if(rate >= 50) {
-      /* keeps the looping down to 20 times per second in the crazy case */
-      config->readbusy = FALSE;
-      curl_easy_pause(per->curl, CURLPAUSE_CONT);
-    }
-    else
-      /* sleep half a period */
-      tool_go_sleep(25);
+
+    config->readbusy = FALSE;
+    curl_easy_pause(per->curl, CURLPAUSE_CONT);
   }
+
+  ulprev = ulnow;
 
   return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
 }

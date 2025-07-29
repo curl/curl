@@ -15,8 +15,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  2. TLS
  2.1 IMAPS connection fails with Rustls error
- 2.3 Unable to use PKCS12 certificate with Secure Transport
- 2.4 Secure Transport does not import PKCS#12 client certificates without a password
+ 2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
@@ -46,14 +45,13 @@ problems may have been fixed or changed somewhat since this was written.
  6. Authentication
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
- 6.5 NTLM does not support password with § character
+ 6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
  6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
- 6.12 cannot use Secure Transport with Crypto Token Kit
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
@@ -66,14 +64,15 @@ problems may have been fixed or changed somewhat since this was written.
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+ 9.6 wolfssh: all tests fail
 
  10. Connection
  10.1 --interface with link-scoped IPv6 address
+ 10.2 Does not acknowledge getaddrinfo sorting policy
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
  11.2 error buffer not set if connection to multiple addresses fails
- 11.3 TFTP tests fail on OpenBSD
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 test cases sometimes timeout
@@ -92,16 +91,12 @@ problems may have been fixed or changed somewhat since this was written.
 
  15. CMake
  15.1 cmake outputs: no version information available
- 15.2 support build with GnuTLS
- 15.3 unusable tool_hugehelp.c with MinGW
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
  15.13 CMake build with MIT Kerberos does not work
 
  16. aws-sigv4
  16.2 aws-sigv4 does not handle multipart/form-data correctly
- 16.3 aws-sigv4 has problems with particular URLs
- 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
  17.1 HTTP/2 prior knowledge over proxy
@@ -126,15 +121,13 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/10457
 
-2.3 Unable to use PKCS12 certificate with Secure Transport
+2.5 Client cert handling with Issuer DN differs between backends
 
- See https://github.com/curl/curl/issues/5403
+ When the specified client certificate does not match any of the
+ server-specified DNs, the OpenSSL and GnuTLS backends behave differently.
+ The github discussion may contain a solution.
 
-2.4 Secure Transport does not import PKCS#12 client certificates without a password
-
- libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
- function rejects certificates that do not have a password.
- https://github.com/curl/curl/issues/1308
+ See https://github.com/curl/curl/issues/1411
 
 2.7 Client cert (MTLS) issues with Schannel
 
@@ -319,8 +312,10 @@ problems may have been fixed or changed somewhat since this was written.
  "system context" makes it use wrong(?) username - at least when compared to
  what winhttp does. See https://curl.se/bug/view.cgi?id=535
 
-6.5 NTLM does not support password with § character
+6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
 
+ https://en.wikipedia.org/wiki/Section_sign
+ https://codepoints.net/U+00A7 SECTION SIGN
  https://github.com/curl/curl/issues/2120
 
 6.6 libcurl can fail to try alternatives with --proxy-any
@@ -370,10 +365,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/5881
 
-6.12 cannot use Secure Transport with Crypto Token Kit
-
- https://github.com/curl/curl/issues/7048
-
 6.13 Negotiate authentication against Hadoop HDFS
 
  https://github.com/curl/curl/issues/8264
@@ -401,9 +392,9 @@ problems may have been fixed or changed somewhat since this was written.
 
 9.1 SFTP does not do CURLOPT_POSTQUOTE correct
 
- When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP server
- using the multi interface, the commands are not being sent correctly and
- instead the connection is "cancelled" (the operation is considered done)
+ When libcurl sends CURLOPT_POSTQUOTE commands when connected to an SFTP
+ server using the multi interface, the commands are not being sent correctly
+ and instead the connection is "cancelled" (the operation is considered done)
  prematurely. There is a half-baked (busy-looping) patch provided in the bug
  report but it cannot be accepted as-is. See
  https://curl.se/bug/view.cgi?id=748
@@ -437,12 +428,18 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/11244
 
+9.6 wolfssh: all tests fail
+
+ Something fundamental stops them all from working properly.
+
+ https://github.com/curl/curl/issues/16794
+
 10. Connection
 
 10.1 --interface with link-scoped IPv6 address
 
  When you give the `--interface` option telling curl to use a specific
- interface for its outgoing traffic in combination with a IPv6 address in the
+ interface for its outgoing traffic in combination with an IPv6 address in the
  URL that uses a link-local scope, curl might pick the wrong address from the
  named interface and the subsequent transfer fails.
 
@@ -454,6 +451,13 @@ problems may have been fixed or changed somewhat since this was written.
  input to somehow make curl make a better choice for this.
 
  https://github.com/curl/curl/issues/14782
+
+10.2 Does not acknowledge getaddrinfo sorting policy
+
+ Even if a user edits /etc/gai.conf to prefer IPv4, curl still prefers and
+ tries IPv6 addresses first.
+
+ https://github.com/curl/curl/issues/16718
 
 11. Internals
 
@@ -469,13 +473,6 @@ problems may have been fixed or changed somewhat since this was written.
  when you only have IPv4 connectivity. libcurl fails with
  CURLE_COULDNT_CONNECT, but the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
-
-11.3 TFTP tests fail on OpenBSD
-
- When adding an OpenBSD job with tests to GHA, some tests consistently fail
- to run.
-
- See https://github.com/curl/curl/issues/13623
 
 11.4 HTTP test server 'connection-monitor' problems
 
@@ -599,14 +596,6 @@ problems may have been fixed or changed somewhat since this was written.
 16.2 aws-sigv4 does not handle multipart/form-data correctly
 
  https://github.com/curl/curl/issues/13351
-
-16.3 aws-sigv4 has problems with particular URLs
-
- https://github.com/curl/curl/issues/13085
-
-16.6 aws-sigv4 does not behave well with AWS VPC Lattice
-
- https://github.com/curl/curl/issues/11007
 
 17. HTTP/2
 

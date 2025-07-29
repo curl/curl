@@ -48,13 +48,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%H
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dXNlcjE6cGFzc3dvcmQx
+Authorization: Basic %b64[user1:password1]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic MnVzZXI6cGFzc3dvcmQy
+Authorization: Basic %b64[2user:password2]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

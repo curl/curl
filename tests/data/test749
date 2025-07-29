@@ -1,0 +1,61 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+HTTP CONNECT
+HTTP proxy
+proxytunnel
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<connect>
+HTTP/1.1 400 Bad request
+Connection: close
+
+</connect>
+
+<datacheck crlf="yes">
+HTTP/1.1 400 Bad request
+Connection: close
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+<name>
+HTTP CONNECT with proxy returning 400 and closing
+</name>
+<command>
+http://test.example --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -sS
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+CONNECT test.example:80 HTTP/1.1
+Host: test.example:80
+User-Agent: curl/%VERSION
+Proxy-Connection: Keep-Alive
+
+</protocol>
+<errorcode>
+56
+</errorcode>
+<stderr mode="text">
+curl: (56) CONNECT tunnel failed, response 400
+</stderr>
+</verify>
+</testcase>

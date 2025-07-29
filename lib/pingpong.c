@@ -51,10 +51,10 @@
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
-  struct connectdata *conn = data->conn;
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout) ?
+  timediff_t response_time = (data->set.server_response_timeout > 0) ?
     data->set.server_response_timeout : pp->response_time;
+  struct curltime now = curlx_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is
@@ -63,14 +63,11 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 
   /* Without a requested timeout, we only wait 'response_time' seconds for the
      full response to arrive before we bail out */
-  timeout_ms = response_time -
-    Curl_timediff(Curl_now(), pp->response); /* spent time */
+  timeout_ms = response_time - curlx_timediff(now, pp->response);
 
-  if(data->set.timeout && !disconnecting) {
-    /* if timeout is requested, find out how much remaining time we have */
-    timediff_t timeout2_ms = data->set.timeout - /* timeout time */
-      Curl_timediff(Curl_now(), conn->now); /* spent time */
-
+  if((data->set.timeout > 0) && !disconnecting) {
+    /* if timeout is requested, find out how much overall remains */
+    timediff_t timeout2_ms = Curl_timeleft(data, &now, FALSE);
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
   }
@@ -119,18 +116,22 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
-  else
+  else {
+    DEBUGF(infof(data, "pp_statematch, select, timeout=%" FMT_TIMEDIFF_T
+           ", sendleft=%zu",
+           timeout_ms, pp->sendleft));
     rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
                            CURL_SOCKET_BAD,
                            pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
                            interval_ms);
+  }
 
   if(block) {
     /* if we did not wait, we do not have to spend time on this now */
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
-      result = Curl_speedcheck(data, Curl_now());
+      result = Curl_speedcheck(data, curlx_now());
 
     if(result)
       return result;
@@ -151,11 +152,13 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 /* initialize stuff to prepare for reading a fresh new response */
 void Curl_pp_init(struct pingpong *pp)
 {
+  DEBUGASSERT(!pp->initialised);
   pp->nread_resp = 0;
-  pp->response = Curl_now(); /* start response time-out now! */
+  pp->response = curlx_now(); /* start response time-out now! */
   pp->pending_resp = TRUE;
-  Curl_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
-  Curl_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
+  curlx_dyn_init(&pp->sendbuf, DYN_PINGPPONG_CMD);
+  curlx_dyn_init(&pp->recvbuf, DYN_PINGPPONG_CMD);
+  pp->initialised = TRUE;
 }
 
 /***********************************************************************
@@ -191,19 +194,19 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
     /* cannot send without a connection! */
     return CURLE_SEND_ERROR;
 
-  Curl_dyn_reset(&pp->sendbuf);
-  result = Curl_dyn_vaddf(&pp->sendbuf, fmt, args);
+  curlx_dyn_reset(&pp->sendbuf);
+  result = curlx_dyn_vaddf(&pp->sendbuf, fmt, args);
   if(result)
     return result;
 
   /* append CRLF */
-  result = Curl_dyn_addn(&pp->sendbuf, "\r\n", 2);
+  result = curlx_dyn_addn(&pp->sendbuf, "\r\n", 2);
   if(result)
     return result;
 
   pp->pending_resp = TRUE;
-  write_len = Curl_dyn_len(&pp->sendbuf);
-  s = Curl_dyn_ptr(&pp->sendbuf);
+  write_len = curlx_dyn_len(&pp->sendbuf);
+  s = curlx_dyn_ptr(&pp->sendbuf);
 
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
@@ -232,7 +235,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = curlx_now();
   }
 
   return CURLE_OK;
@@ -267,7 +270,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
                               int sockindex,
                               char *buffer,
                               size_t buflen,
-                              ssize_t *nread)
+                              size_t *nread)
 {
   CURLcode result;
 #ifdef HAVE_GSSAPI
@@ -295,7 +298,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  ssize_t gotbytes;
+  size_t gotbytes;
   char buffer[900];
 
   *code = 0; /* 0 for errors or not done */
@@ -306,10 +309,10 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     if(pp->nfinal) {
       /* a previous call left this many bytes in the beginning of the buffer as
          that was the final line; now ditch that */
-      size_t full = Curl_dyn_len(&pp->recvbuf);
+      size_t full = curlx_dyn_len(&pp->recvbuf);
 
       /* trim off the "final" leading part */
-      Curl_dyn_tail(&pp->recvbuf, full -  pp->nfinal);
+      curlx_dyn_tail(&pp->recvbuf, full -  pp->nfinal);
 
       pp->nfinal = 0; /* now gone */
     }
@@ -322,12 +325,12 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(result)
         return result;
 
-      if(gotbytes <= 0) {
+      if(!gotbytes) {
         failf(data, "response reading failed (errno: %d)", SOCKERRNO);
         return CURLE_RECV_ERROR;
       }
 
-      result = Curl_dyn_addn(&pp->recvbuf, buffer, gotbytes);
+      result = curlx_dyn_addn(&pp->recvbuf, buffer, gotbytes);
       if(result)
         return result;
 
@@ -337,8 +340,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
     }
 
     do {
-      char *line = Curl_dyn_ptr(&pp->recvbuf);
-      char *nl = memchr(line, '\n', Curl_dyn_len(&pp->recvbuf));
+      char *line = curlx_dyn_ptr(&pp->recvbuf);
+      char *nl = memchr(line, '\n', curlx_dyn_len(&pp->recvbuf));
       if(nl) {
         /* a newline is CRLF in pp-talk, so the CR is ignored as
            the line is not really terminated until the LF comes */
@@ -364,8 +367,8 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
              parsers). Store the overflow counter to inform about additional
              data in this buffer after the endofresp line. */
           pp->nfinal = length;
-          if(Curl_dyn_len(&pp->recvbuf) > length)
-            pp->overflow = Curl_dyn_len(&pp->recvbuf) - length;
+          if(curlx_dyn_len(&pp->recvbuf) > length)
+            pp->overflow = curlx_dyn_len(&pp->recvbuf) - length;
           else
             pp->overflow = 0;
           *size = pp->nread_resp; /* size of the response */
@@ -373,11 +376,11 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
           gotbytes = 0; /* force break out of outer loop */
           break;
         }
-        if(Curl_dyn_len(&pp->recvbuf) > length)
+        if(curlx_dyn_len(&pp->recvbuf) > length)
           /* keep the remaining piece */
-          Curl_dyn_tail((&pp->recvbuf), Curl_dyn_len(&pp->recvbuf) - length);
+          curlx_dyn_tail((&pp->recvbuf), curlx_dyn_len(&pp->recvbuf) - length);
         else
-          Curl_dyn_reset(&pp->recvbuf);
+          curlx_dyn_reset(&pp->recvbuf);
       }
       else {
         /* without a newline, there is no overflow */
@@ -443,21 +446,24 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   else {
     pp->sendthis = NULL;
     pp->sendleft = pp->sendsize = 0;
-    pp->response = Curl_now();
+    pp->response = curlx_now();
   }
   return CURLE_OK;
 }
 
 CURLcode Curl_pp_disconnect(struct pingpong *pp)
 {
-  Curl_dyn_free(&pp->sendbuf);
-  Curl_dyn_free(&pp->recvbuf);
+  if(pp->initialised) {
+    curlx_dyn_free(&pp->sendbuf);
+    curlx_dyn_free(&pp->recvbuf);
+    memset(pp, 0, sizeof(*pp));
+  }
   return CURLE_OK;
 }
 
 bool Curl_pp_moredata(struct pingpong *pp)
 {
-  return !pp->sendleft && Curl_dyn_len(&pp->recvbuf) > pp->nfinal;
+  return !pp->sendleft && curlx_dyn_len(&pp->recvbuf) > pp->nfinal;
 }
 
 #endif

@@ -21,13 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
-
-#define TEST_HANG_TIMEOUT 60 * 1000
 
 /*
  * Source code in here hugely as reported in bug report 651464 by
@@ -36,7 +32,7 @@
  * Use multi interface to get document over proxy with bad port number.
  * This caused the interface to "hang" in libcurl 7.10.2.
  */
-CURLcode test(char *URL)
+static CURLcode test_lib504(char *URL)
 {
   CURL *c = NULL;
   CURLcode res = CURLE_OK;
@@ -68,7 +64,7 @@ CURLcode test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    fprintf(stderr, "curl_multi_perform()\n");
+    curl_mfprintf(stderr, "curl_multi_perform()\n");
 
     multi_perform(m, &running);
 
@@ -77,7 +73,7 @@ CURLcode test(char *URL)
       int num;
       mres = curl_multi_wait(m, NULL, 0, TEST_HANG_TIMEOUT, &num);
       if(mres != CURLM_OK) {
-        printf("curl_multi_wait() returned %d\n", mres);
+        curl_mprintf("curl_multi_wait() returned %d\n", mres);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -93,20 +89,20 @@ CURLcode test(char *URL)
       /* This is where this code is expected to reach */
       int numleft;
       CURLMsg *msg = curl_multi_info_read(m, &numleft);
-      fprintf(stderr, "Expected: not running\n");
+      curl_mfprintf(stderr, "Expected: not running\n");
       if(msg && !numleft)
         res = TEST_ERR_SUCCESS; /* this is where we should be */
       else
         res = TEST_ERR_FAILURE; /* not correct */
       break; /* done */
     }
-    fprintf(stderr, "running == %d\n", running);
+    curl_mfprintf(stderr, "running == %d\n", running);
 
     FD_ZERO(&rd);
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    fprintf(stderr, "curl_multi_fdset()\n");
+    curl_mfprintf(stderr, "curl_multi_fdset()\n");
 
     multi_fdset(m, &rd, &wr, &exc, &maxfd);
 

@@ -36,7 +36,7 @@ http
 Download two URLs provided in a file
 </name>
 <command>
---url @%LOGDIR/urls
+--output-dir %LOGDIR --url @%LOGDIR/urls
 </command>
 <file name="%LOGDIR/urls">
 http://%HOSTIP:%HTTPPORT/a

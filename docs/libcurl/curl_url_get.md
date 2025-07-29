@@ -71,7 +71,7 @@ does not decode the scheme, the port number or the full URL.
 The query component also gets plus-to-space conversion as a bonus when this
 bit is set.
 
-Note that this URL decoding is charset unaware and you get a zero terminated
+Note that this URL decoding is charset unaware and you get a null-terminated
 string back with data that could be intended for a particular encoding.
 
 If there are byte values lower than 32 in the decoded string, the get
@@ -146,8 +146,8 @@ CURLU_GUESS_SCHEME is used.
 
 ## CURLUPART_URL
 
-When asked to return the full URL, curl_url_get(3) returns a normalized and
-possibly cleaned up version using all available URL parts.
+When asked to return the full URL, curl_url_get(3) returns a slightly cleaned
+up version of the complete URL using all available parts.
 
 We advise using the *CURLU_PUNYCODE* option to get the URL as "normalized" as
 possible since IDN allows hostnames to be written in many different ways that

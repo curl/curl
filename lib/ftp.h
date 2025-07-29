@@ -37,6 +37,9 @@ extern const struct Curl_handler Curl_handler_ftps;
 
 CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
                              int *ftpcode);
+
+bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn);
+
 #endif /* CURL_DISABLE_FTP */
 
 /****************************************************************************
@@ -59,12 +62,14 @@ enum {
   FTP_QUOTE, /* waiting for a response to a command sent in a quote list */
   FTP_RETR_PREQUOTE,
   FTP_STOR_PREQUOTE,
+  FTP_LIST_PREQUOTE,
   FTP_POSTQUOTE,
   FTP_CWD,  /* change dir */
   FTP_MKD,  /* if the dir did not exist */
   FTP_MDTM, /* to figure out the datestamp */
   FTP_TYPE, /* to set type when doing a head-like request */
   FTP_LIST_TYPE, /* set type when about to do a dir list */
+  FTP_RETR_LIST_TYPE,
   FTP_RETR_TYPE, /* set type when about to RETR a file */
   FTP_STOR_TYPE, /* set type when about to STOR a file */
   FTP_SIZE, /* get the remote file's size for head-like request */
@@ -162,6 +167,11 @@ struct ftp_conn {
   BIT(wait_data_conn); /* this is set TRUE if data connection is waited */
   BIT(shutdown);    /* connection is being shutdown, e.g. QUIT */
 };
+
+/* meta key for storing `struct FTP` as easy meta data */
+#define CURL_META_FTP_EASY   "meta:proto:ftp:easy"
+/* meta key for storing `struct ftp_conn` as connection meta data */
+#define CURL_META_FTP_CONN   "meta:proto:ftp:conn"
 
 #define DEFAULT_ACCEPT_TIMEOUT   60000 /* milliseconds == one minute */
 

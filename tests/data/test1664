@@ -23,7 +23,7 @@ unit tests for strparse.c string parsing functions
 
 <verify>
 <stdout>
-Curl_str_word
+curlx_str_word
 0: ("word") 0, "word" [4], line 4
 1: ("word ") 0, "word" [4], line 4
 2: (" word ") 2, "" [0], line 0
@@ -33,7 +33,7 @@ Curl_str_word
 6: ("perfect") 0, "perfect" [7], line 7
 7: ("") 2, "" [0], line 0
 8: ("longerth") 1, "" [0], line 0
-Curl_str_until
+curlx_str_until
 0: ("word") 0, "wor" [3], line 3
 1: ("word ") 0, "wor" [3], line 3
 2: (" word ") 0, " wor" [4], line 4
@@ -43,7 +43,7 @@ Curl_str_until
 6: ("perfect") 0, "perfect" [7], line 7
 7: ("") 2, "" [0], line 0
 8: ("longerth") 1, "" [0], line 0
-Curl_str_quotedword
+curlx_str_quotedword
 0: (""word"") 0, "word" [4], line 6
 1: (""word") 4, "" [0], line 0
 2: ("word"") 3, "" [0], line 0
@@ -56,7 +56,7 @@ Curl_str_quotedword
 9: ("""") 0, "" [0], line 2
 10: ("") 3, "" [0], line 0
 11: (""longerth"") 1, "" [0], line 0
-Curl_str_single
+curlx_str_single
 0: ("a") 0, line 1
 1: ("aa") 0, line 1
 2: ("A") 5, line 0
@@ -64,7 +64,7 @@ Curl_str_single
 4: ("\") 5, line 0
 5: (" ") 5, line 0
 6: ("") 5, line 0
-Curl_str_singlespace
+curlx_str_singlespace
 0: ("a") 5, line 0
 1: ("aa") 5, line 0
 2: ("A") 5, line 0
@@ -75,7 +75,7 @@ Curl_str_singlespace
 7: ("
 ") 5, line 0
 8: ("") 5, line 0
-Curl_str_single
+curlx_str_single
 0: ("a") 0, line 1
 1: ("aa") 0, line 1
 2: ("A") 5, line 0
@@ -83,7 +83,7 @@ Curl_str_single
 4: ("\") 5, line 0
 5: (" ") 5, line 0
 6: ("") 5, line 0
-Curl_str_number
+curlx_str_number
 0: ("1") 0, [1] line 1
 1: ("10000") 7, [0] line 0
 2: ("1234") 0, [1234] line 4
@@ -96,7 +96,7 @@ Curl_str_number
 9: ("-12") 8, [0] line 0
 10: (" 123") 8, [0] line 0
 11: ("") 8, [0] line 0
-Curl_str_number varying max
+curlx_str_number varying max
 0: ("00") max 8 == 0, [0]
 1: ("1") max 8 == 0, [1]
 2: ("1") max 1 == 0, [1]
@@ -110,7 +110,7 @@ Curl_str_number varying max
 10: ("10") max 10 == 0, [10]
 11: ("11") max 10 == 7, [0]
 12: ("12") max 10 == 7, [0]
-Curl_str_hex varying max
+curlx_str_hex varying max
 0: ("00") max 8 == 0, [0]
 1: ("1") max 8 == 0, [1]
 2: ("1") max 1 == 0, [1]
@@ -131,7 +131,7 @@ Curl_str_hex varying max
 17: ("10") max 16 == 0, [16]
 18: ("11") max 16 == 7, [0]
 19: ("12") max 16 == 7, [0]
-Curl_str_octal varying max
+curlx_str_octal varying max
 0: ("00") max 4 == 0, [0]
 1: ("1") max 4 == 0, [1]
 2: ("1") max 4 == 0, [1]
@@ -147,7 +147,7 @@ Curl_str_octal varying max
 12: ("12") max 9 == 7, [0]
 13: ("13") max 9 == 7, [0]
 14: ("8") max 10 == 8, [0]
-Curl_str_number / max
+curlx_str_number / max
 0: ("9223372036854775807") 0, [9223372036854775807] line 19
 1: ("9223372036854775808") 7, [0] line 0
 2: ("18446744073709551615") 7, [0] line 0
@@ -167,7 +167,7 @@ Curl_str_number / max
 16: ("7777777777777777777") 0, [7777777777777777777] line 19
 17: ("8888888888888888888") 0, [8888888888888888888] line 19
 18: ("999999999999999999") 0, [999999999999999999] line 18
-Curl_str_newline
+curlx_str_newline
 0: (%61) 6, line 0
 1: (%61) 6, line 0
 2: (%41) 6, line 0
@@ -179,7 +179,7 @@ Curl_str_newline
 8: (%0d) 0, line 1
 9: (%0c) 6, line 0
 10: (%00) 6, line 0
-Curl_str_hex
+curlx_str_hex
 0: ("1") 0, [1] line 1
 1: ("1000") 0, [4096] line 4
 2: ("1234") 0, [4660] line 4
@@ -192,7 +192,7 @@ Curl_str_hex
 9: ("-12") 8, [0] line 0
 10: (" 123") 8, [0] line 0
 11: ("") 8, [0] line 0
-Curl_str_octal
+curlx_str_octal
 0: ("1") 0, [1] line 1
 1: ("1000") 0, [512] line 4
 2: ("1234") 0, [668] line 4
@@ -205,7 +205,7 @@ Curl_str_octal
 9: ("-12") 8, [0] line 0
 10: (" 123") 8, [0] line 0
 11: ("") 8, [0] line 0
-Curl_str_octal / max
+curlx_str_octal / max
 0: ("777777777777777777777") 0, [9223372036854775807] line 21
 1: ("1000000000000000000000") 7, [0] line 0
 2: ("111111111111111111111") 0, [1317624576693539401] line 21
@@ -214,7 +214,7 @@ Curl_str_octal / max
 5: ("444444444444444444444") 0, [5270498306774157604] line 21
 6: ("555555555555555555555") 0, [6588122883467697005] line 21
 7: ("666666666666666666666") 0, [7905747460161236406] line 21
-Curl_str_hex / max
+curlx_str_hex / max
 0: ("7FFFFFFFFFFFFFFF") 0, [9223372036854775807] line 16
 1: ("8000000000000000") 7, [0] line 0
 2: ("1111111111111111") 0, [1229782938247303441] line 16

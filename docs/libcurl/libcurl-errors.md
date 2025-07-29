@@ -105,7 +105,7 @@ CURLOPT_ACCEPTTIMEOUT_MS(3) (or the internal default) timeout expired.
 ## CURLE_FTP_WEIRD_PASV_REPLY (13)
 
 libcurl failed to get a sensible result back from the server as a response to
-either a PASV or a EPSV command. The server is flawed.
+either a PASV or an EPSV command. The server is flawed.
 
 ## CURLE_FTP_WEIRD_227_FORMAT (14)
 
@@ -504,6 +504,12 @@ curl_multi_perform(3) again without doing select() or similar in
 between. Before version 7.20.0 (released on February 9 2010) this could be returned by
 curl_multi_perform(3), but in later versions this return code is never
 used.
+
+## CURLM_CALL_MULTI_SOCKET (-1)
+
+An alias for *CURLM_CALL_MULTI_PERFORM*. Never returned by modern libcurl
+versions.
+(Added in 7.15.5)
 
 ## CURLM_OK (0)
 

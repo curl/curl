@@ -31,7 +31,7 @@
 
 struct sigpipe_ignore {
   struct sigaction old_pipe_act;
-  bool no_signal;
+  BIT(no_signal);
 };
 
 #define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x

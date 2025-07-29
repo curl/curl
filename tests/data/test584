@@ -44,7 +44,7 @@ http
 </server>
 # tool to invoke
 <tool>
-lib%TESTNUMBER
+lib589
 </tool>
 
 <name>

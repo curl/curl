@@ -21,10 +21,11 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Get 'man_MANS' variable
+# Get man_MANS variable
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+# Generate man pages
 function(curl_add_manual_pages _listname)
   # Maximum number of files per command to stay within shell/OS limits
   if(CMAKE_HOST_UNIX)
@@ -42,7 +43,7 @@ function(curl_add_manual_pages _listname)
       add_custom_command(OUTPUT ${_rofffiles}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}
-        DEPENDS ${_mdfiles}
+        DEPENDS "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" ${_mdfiles}
         VERBATIM
       )
       set(_file_count 0)
@@ -69,8 +70,8 @@ add_custom_command(OUTPUT "libcurl-symbols.md"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl" <
     "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions" > "libcurl-symbols.md"
   DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
     "${CMAKE_CURRENT_SOURCE_DIR}/mksymbolsmanpage.pl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/symbols-in-versions"
   VERBATIM
 )
 
@@ -78,8 +79,8 @@ curl_add_manual_pages(man_MANS)
 add_custom_target(curl-man ALL DEPENDS ${man_MANS})
 if(NOT CURL_DISABLE_INSTALL)
   set(_src "")
-  foreach(_f IN LISTS man_MANS)
-    list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_f}")
+  foreach(_file IN LISTS man_MANS)
+    list(APPEND _src "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
   endforeach()
   install(FILES ${_src} DESTINATION "${CMAKE_INSTALL_MANDIR}/man3")
   unset(_src)

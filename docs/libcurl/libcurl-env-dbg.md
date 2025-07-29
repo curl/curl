@@ -29,8 +29,8 @@ Bypass the AltSvc HTTPS protocol restriction if this variable exists.
 
 ## `CURL_DBG_SOCK_RBLOCK`
 
-The percentage of recv() calls that should be answered with a EAGAIN at random.
-For TCP/UNIX sockets.
+The percentage of recv() calls that should be answered with an EAGAIN at
+random. For TCP/UNIX sockets.
 
 ## `CURL_DBG_SOCK_RMAX`
 
@@ -42,8 +42,8 @@ maximum of 400 bytes.
 
 ## `CURL_DBG_SOCK_WBLOCK`
 
-The percentage of send() calls that should be answered with a EAGAIN at random.
-For TCP/UNIX sockets.
+The percentage of send() calls that should be answered with an EAGAIN at
+random. For TCP/UNIX sockets.
 
 ## `CURL_DBG_SOCK_WPARTIAL`
 
@@ -76,6 +76,18 @@ HTTP/2.
 ## `CURL_DEBUG_SIZE`
 
 Fake the size returned by CURLINFO_HEADER_SIZE and CURLINFO_REQUEST_SIZE.
+
+## `CURL_DNS_SERVER`
+
+When built with c-ares for name resolving, setting this environment variable
+to `[IP:port]` makes libcurl use that DNS server instead of the system
+default. This is used by the curl test suite.
+
+## `CURL_FTP_PWD_STOP`
+
+When set, the first transfer - when using ftp: - returns before sending
+the `PWD` command and stop any further progress. This is used to test
+an edge case
 
 ## `CURL_GETHOSTNAME`
 
@@ -135,6 +147,11 @@ decoding.
 Used to simulate blocking sends after this chunk size for WebSocket
 connections.
 
+## `CURL_WS_FORCE_ZERO_MASK`
+
+Used to set the bitmask of all sent WebSocket frames to zero. The value of the
+environment variable does not matter.
+
 ## `CURL_FORBID_REUSE`
 
 Used to set the CURLOPT_FORBID_REUSE flag on each transfer initiated
@@ -147,3 +164,8 @@ Make a blocking, graceful shutdown of all remaining connections when
 a multi handle is destroyed. This implicitly triggers for easy handles
 that are run via easy_perform. The value of the environment variable
 gives the shutdown timeout in milliseconds.
+
+## `CURL_H2_STREAM_WIN_MAX`
+
+Set to a positive 32-bit number to override the HTTP/2 stream window's
+default of 10MB. Used in testing to verify correct window update handling.

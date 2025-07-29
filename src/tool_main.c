@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <sys/stat.h>
-
 #ifdef _WIN32
 #include <tchar.h>
 #endif
@@ -36,8 +34,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-#include "curlx.h"
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
@@ -65,8 +61,8 @@
 int vms_show = 0;
 #endif
 
-#if defined(__AMIGA__)
-#if defined(__GNUC__)
+#ifdef __AMIGA__
+#ifdef __GNUC__
 #define CURL_USED __attribute__((used))
 #else
 #define CURL_USED
@@ -120,9 +116,9 @@ static void memory_tracking_init(void)
   env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     /* use the value as filename */
-    char fname[CURL_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
-      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    char fname[512];
+    if(strlen(env) >= sizeof(fname))
+      env[sizeof(fname)-1] = '\0';
     strcpy(fname, env);
     curl_free(env);
     curl_dbg_memdebug(fname);
@@ -141,7 +137,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#  define memory_tracking_init() tool_nop_stmt
 #endif
 
 /*
@@ -149,7 +145,7 @@ static void memory_tracking_init(void)
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-static CURLcode main_init(struct GlobalConfig *config)
+static CURLcode main_init(struct GlobalConfig *global)
 {
   CURLcode result = CURLE_OK;
 
@@ -159,68 +155,63 @@ static CURLcode main_init(struct GlobalConfig *config)
 #endif
 
   /* Initialise the global config */
-  config->showerror = FALSE;          /* show errors when silent */
-  config->styled_output = TRUE;       /* enable detection */
-  config->parallel_max = PARALLEL_DEFAULT;
+  global->showerror = FALSE;          /* show errors when silent */
+  global->styled_output = TRUE;       /* enable detection */
+  global->parallel_max = PARALLEL_DEFAULT;
 
   /* Allocate the initial operate config */
-  config->first = config->last = malloc(sizeof(struct OperationConfig));
-  if(config->first) {
+  global->first = global->last = config_alloc(global);
+  if(global->first) {
     /* Perform the libcurl initialization */
     result = curl_global_init(CURL_GLOBAL_DEFAULT);
     if(!result) {
       /* Get information about libcurl */
       result = get_libcurl_info();
 
-      if(!result) {
-        /* Initialise the config */
-        config_init(config->first);
-        config->first->global = config;
-      }
-      else {
-        errorf(config, "error retrieving curl library information");
-        free(config->first);
+      if(result) {
+        errorf(global, "error retrieving curl library information");
+        free(global->first);
       }
     }
     else {
-      errorf(config, "error initializing curl library");
-      free(config->first);
+      errorf(global, "error initializing curl library");
+      free(global->first);
     }
   }
   else {
-    errorf(config, "error initializing curl");
+    errorf(global, "error initializing curl");
     result = CURLE_FAILED_INIT;
   }
 
   return result;
 }
 
-static void free_globalconfig(struct GlobalConfig *config)
+static void free_globalconfig(struct GlobalConfig *global)
 {
-  Curl_safefree(config->trace_dump);
+  tool_safefree(global->trace_dump);
 
-  if(config->trace_fopened && config->trace_stream)
-    fclose(config->trace_stream);
-  config->trace_stream = NULL;
+  if(global->trace_fopened && global->trace_stream)
+    fclose(global->trace_stream);
+  global->trace_stream = NULL;
 
-  Curl_safefree(config->libcurl);
+  tool_safefree(global->libcurl);
 }
 
 /*
- * This is the main global destructor for the app. Call this after
- * _all_ libcurl usage is done.
+ * This is the main global destructor for the app. Call this after _all_
+ * libcurl usage is done.
  */
-static void main_free(struct GlobalConfig *config)
+static void main_free(struct GlobalConfig *global)
 {
   /* Cleanup the easy handle */
   /* Main cleanup */
   curl_global_cleanup();
-  free_globalconfig(config);
+  free_globalconfig(global);
 
-  /* Free the config structures */
-  config_free(config->last);
-  config->first = NULL;
-  config->last = NULL;
+  /* Free the OperationConfig structures */
+  config_free(global->last);
+  global->first = NULL;
+  global->last = NULL;
 }
 
 /*

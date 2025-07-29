@@ -72,7 +72,7 @@ QUIT
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic am9lOnNlY3JldA==
+Authorization: Basic %b64[joe:secret]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

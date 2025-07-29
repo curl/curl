@@ -19,7 +19,7 @@ symbols-in-versions and manpages agree on added-in versions
 </name>
 
 <command type="perl">
-%SRCDIR/test1488.pl %SRCDIR/.. ../include/curl
+%SRCDIR/test1488.pl %SRCDIR/.. ../include/curl %SRCDIR/../docs/VERSIONS.md
 </command>
 </client>
 

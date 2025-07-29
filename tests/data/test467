@@ -17,7 +17,7 @@ use a bad short option letter that does not exist (after one does exist)
 
 # the second option is outside the normal accepted range
 <command>
-curl -v http://example.com
+%hex[curl -v%08 http://example.com]hex%
 </command>
 </client>
 

@@ -24,19 +24,20 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-#include "bufq.h"
-#include "vtls/vtls.h"
-#include "vtls/vtls_int.h"
-#include "vtls/openssl.h"
+#include "../curl_setup.h"
+#include "../bufq.h"
+#include "../vtls/vtls.h"
+#include "../vtls/vtls_int.h"
+#include "../vtls/openssl.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
-#include "vtls/wolfssl.h"
+#include "../vtls/wolfssl.h"
 
 struct ssl_peer;
 struct Curl_ssl_session;
+struct curl_tlssessioninfo;
 
 struct curl_tls_ctx {
 #ifdef USE_OPENSSL
@@ -105,6 +106,14 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
                                     struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct ssl_peer *peer);
+
+bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
+                                 bool give_ssl_ctx,
+                                 struct curl_tlssessioninfo *info);
+
+void Curl_vquic_report_handshake(struct curl_tls_ctx *ctx,
+                                 struct Curl_cfilter *cf,
+                                 struct Curl_easy *data);
 
 #endif /* !USE_HTTP3 && (USE_OPENSSL || USE_GNUTLS || USE_WOLFSSL) */
 

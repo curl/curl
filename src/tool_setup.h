@@ -24,7 +24,9 @@
  *
  ***************************************************************************/
 
+#ifndef CURL_NO_OLDIES
 #define CURL_NO_OLDIES
+#endif
 
 /*
  * curl_setup.h may define preprocessor macros such as _FILE_OFFSET_BITS and
@@ -45,6 +47,8 @@ extern FILE *tool_stderr;
 
 #include <curl/curl.h> /* external interface */
 
+#include <curlx/curlx.h>
+
 /*
  * Platform specific stuff.
  */
@@ -54,23 +58,27 @@ extern FILE *tool_stderr;
 #endif
 
 #ifndef CURL_OS
-#  define CURL_OS "unknown"
+#define CURL_OS "unknown"
 #endif
 
 #ifndef UNPRINTABLE_CHAR
-   /* define what to use for unprintable characters */
-#  define UNPRINTABLE_CHAR '.'
+/* define what to use for unprintable characters */
+#define UNPRINTABLE_CHAR '.'
 #endif
 
 #ifndef HAVE_STRDUP
-#  include "tool_strdup.h"
+#include "tool_strdup.h"
+#endif
+
+#ifndef tool_nop_stmt
+#define tool_nop_stmt do { } while(0)
 #endif
 
 #ifdef _WIN32
 #  define CURL_STRICMP(p1, p2)  _stricmp(p1, p2)
 #elif defined(HAVE_STRCASECMP)
 #  ifdef HAVE_STRINGS_H
-#    include <strings.h>
+#  include <strings.h>
 #  endif
 #  define CURL_STRICMP(p1, p2)  strcasecmp(p1, p2)
 #elif defined(HAVE_STRCMPI)
@@ -82,9 +90,6 @@ extern FILE *tool_stderr;
 #endif
 
 #ifdef _WIN32
-/* set in win32_init() */
-extern LARGE_INTEGER tool_freq;
-extern bool tool_isVistaOrGreater;
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
 
@@ -95,8 +100,6 @@ extern bool tool_term_has_bold;
 #  define _get_osfhandle(fd) (fd)
 #  undef _getch
 #  define _getch() 0
-#  undef STDIN_FILENO
-#  define STDIN_FILENO 0
 #endif
 
 #ifndef HAVE_FTRUNCATE
@@ -111,6 +114,5 @@ int tool_ftruncate64(int fd, curl_off_t where);
 
 #endif /* ! HAVE_FTRUNCATE */
 #endif /* _WIN32 */
-
 
 #endif /* HEADER_CURL_TOOL_SETUP_H */

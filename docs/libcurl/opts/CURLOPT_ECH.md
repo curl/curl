@@ -11,6 +11,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - wolfSSL
+  - rustls
 Added-in: 8.8.0
 ---
 
@@ -32,7 +33,7 @@ ECH is only compatible with TLSv1.3.
 
 This experimental feature requires a special build of OpenSSL, as ECH is not
 yet supported in OpenSSL releases. In contrast ECH is supported by the latest
-BoringSSL and wolfSSL releases.
+BoringSSL, wolfSSL and rustls-ffi releases.
 
 There is also a known issue with using wolfSSL which does not support ECH when
 the HelloRetryRequest mechanism is used.

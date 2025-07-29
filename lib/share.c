@@ -46,12 +46,14 @@ curl_share_init(void)
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
-    Curl_init_dnscache(&share->hostcache, 23);
+    Curl_dnscache_init(&share->dnscache, 23);
     share->admin = curl_easy_init();
     if(!share->admin) {
       free(share);
       return NULL;
     }
+    /* admin handles have mid 0 */
+    share->admin->mid = 0;
     share->admin->state.internal = TRUE;
 #ifdef DEBUGBUILD
     if(getenv("CURL_DEBUG"))
@@ -136,9 +138,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_CONNECT:
       /* It is safe to set this option several times on a share. */
       if(!share->cpool.initialised) {
-        if(Curl_cpool_init(&share->cpool, Curl_on_disconnect,
-                           share->admin, share, 103))
-          res = CURLSHE_NOMEM;
+        Curl_cpool_init(&share->cpool, share->admin, share, 103);
       }
       break;
 
@@ -249,7 +249,8 @@ curl_share_cleanup(CURLSH *sh)
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
     Curl_cpool_destroy(&share->cpool);
   }
-  Curl_hash_destroy(&share->hostcache);
+
+  Curl_dnscache_destroy(&share->dnscache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   Curl_cookie_cleanup(share->cookies);

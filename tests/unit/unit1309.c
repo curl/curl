@@ -21,21 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "splay.h"
-#include "warnless.h"
-
-
-static CURLcode unit_setup(void)
-{
-  return CURLE_OK;
-}
-
-static void unit_stop(void)
-{
-
-}
 
 static void splayprint(struct Curl_tree *t, int d, char output)
 {
@@ -68,7 +56,9 @@ static void splayprint(struct Curl_tree *t, int d, char output)
   splayprint(t->smaller, d + 1, output);
 }
 
-UNITTEST_START
+static CURLcode test_unit1309(char *arg)
+{
+  UNITTEST_BEGIN_SIMPLE
 
 /* number of nodes to add to the splay tree */
 #define NUM_NODES 50
@@ -99,8 +89,8 @@ UNITTEST_START
     int rem = (i + 7)%NUM_NODES;
     printf("Tree look:\n");
     splayprint(root, 0, 1);
-    printf("remove pointer %d, payload %zu\n", rem,
-           *(size_t *)Curl_splayget(&nodes[rem]));
+    curl_mprintf("remove pointer %d, payload %zu\n", rem,
+                 *(size_t *)Curl_splayget(&nodes[rem]));
     rc = Curl_splayremove(root, &nodes[rem], &root);
     if(rc) {
       /* failed! */
@@ -132,13 +122,14 @@ UNITTEST_START
     tv_now.tv_usec = i;
     root = Curl_splaygetbest(tv_now, root, &removed);
     while(removed) {
-      printf("removed payload %zu[%zu]\n",
-             *(size_t *)Curl_splayget(removed) / 10,
-             *(size_t *)Curl_splayget(removed) % 10);
+      curl_mprintf("removed payload %zu[%zu]\n",
+                   *(size_t *)Curl_splayget(removed) / 10,
+                   *(size_t *)Curl_splayget(removed) % 10);
       root = Curl_splaygetbest(tv_now, root, &removed);
     }
   }
 
   fail_unless(root == NULL, "tree not empty when it should be");
 
-UNITTEST_STOP
+  UNITTEST_END_SIMPLE
+}

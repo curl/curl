@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_OPENSSL
 /*
@@ -35,7 +35,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
-#include "urldata.h"
+#include "../urldata.h"
 
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
@@ -137,10 +137,14 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
  * ssl config verifypeer or -host is set. Otherwise all this is for
  * informational purposes only!
  */
-CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct ossl_ctx *octx,
-                                  struct ssl_peer *peer);
+CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ossl_ctx *octx,
+                                   struct ssl_peer *peer);
+
+/* Report properties of a successful handshake */
+void Curl_ossl_report_handshake(struct Curl_easy *data,
+                                struct ossl_ctx *octx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

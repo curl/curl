@@ -28,11 +28,18 @@
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
-#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
-#endif
 /* The last #include file should be: */
 #include "memdebug.h"
+
+static int appendnl(struct dynbuf *buf)
+{
+  CURLcode result = curlx_dyn_addn(buf, "\n", 1);
+  if(result)
+    /* too long line or out of memory */
+    return 0; /* error */
+  return 1; /* all good */
+}
 
 /*
  * Curl_get_line() makes sure to only return complete whole lines that end
@@ -42,17 +49,18 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
 {
   CURLcode result;
   char buffer[128];
-  Curl_dyn_reset(buf);
+  curlx_dyn_reset(buf);
   while(1) {
     char *b = fgets(buffer, sizeof(buffer), input);
+    size_t rlen;
 
     if(b) {
-      size_t rlen = strlen(b);
+      rlen = strlen(b);
 
       if(!rlen)
         break;
 
-      result = Curl_dyn_addn(buf, b, rlen);
+      result = curlx_dyn_addn(buf, b, rlen);
       if(result)
         /* too long line or out of memory */
         return 0; /* error */
@@ -61,17 +69,24 @@ int Curl_get_line(struct dynbuf *buf, FILE *input)
         /* end of the line */
         return 1; /* all good */
 
-      else if(feof(input)) {
+      else if(feof(input))
         /* append a newline */
-        result = Curl_dyn_addn(buf, "\n", 1);
-        if(result)
-          /* too long line or out of memory */
-          return 0; /* error */
+        return appendnl(buf);
+    }
+    else {
+      rlen = curlx_dyn_len(buf);
+      if(rlen) {
+        b = curlx_dyn_ptr(buf);
+
+        if(b[rlen-1] != '\n')
+          /* append a newline */
+          return appendnl(buf);
+
         return 1; /* all good */
       }
+      else
+        break;
     }
-    else
-      break;
   }
   return 0;
 }

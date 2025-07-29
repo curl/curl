@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-Basic
+HTTP Basic auth
 </keywords>
 </info>
 
@@ -39,7 +39,7 @@ http://:example@%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic OmV4YW1wbGU=
+Authorization: Basic %b64[:example]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

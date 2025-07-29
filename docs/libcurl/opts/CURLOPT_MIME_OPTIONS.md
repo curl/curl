@@ -69,7 +69,7 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
+    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, (long)CURLMIMEOPT_FORMESCAPE);
 
     form = curl_mime_init(curl);
     if(form) {

@@ -193,15 +193,15 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         # Wrap processing in a try block which allows us to throw SmbError
         # to control the flow.
         try:
-            ncax_parms = imp_smb.SMBNtCreateAndX_Parameters(
+            ncax_params = imp_smb.SMBNtCreateAndX_Parameters(
                 smb_command["Parameters"])
 
             path = self.get_share_path(conn_data,
-                                       ncax_parms["RootFid"],
+                                       ncax_params["RootFid"],
                                        recv_packet["Tid"])
             log.info("[SMB] Requested share path: %s", path)
 
-            disposition = ncax_parms["Disposition"]
+            disposition = ncax_params["Disposition"]
             log.debug("[SMB] Requested disposition: %s", disposition)
 
             # Currently we only support reading files.
@@ -235,7 +235,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
 
             self.tmpfiles.append(full_path)
 
-            resp_parms = imp_smb.SMBNtCreateAndXResponse_Parameters()
+            resp_params = imp_smb.SMBNtCreateAndXResponse_Parameters()
             resp_data = ""
 
             # Simple way to generate a fid
@@ -243,16 +243,16 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
                 fakefid = 1
             else:
                 fakefid = conn_data["OpenedFiles"].keys()[-1] + 1
-            resp_parms["Fid"] = fakefid
-            resp_parms["CreateAction"] = disposition
+            resp_params["Fid"] = fakefid
+            resp_params["CreateAction"] = disposition
 
             if os.path.isdir(path):
-                resp_parms[
+                resp_params[
                     "FileAttributes"] = imp_smb.SMB_FILE_ATTRIBUTE_DIRECTORY
-                resp_parms["IsDirectory"] = 1
+                resp_params["IsDirectory"] = 1
             else:
-                resp_parms["IsDirectory"] = 0
-                resp_parms["FileAttributes"] = ncax_parms["FileAttributes"]
+                resp_params["IsDirectory"] = 0
+                resp_params["FileAttributes"] = ncax_params["FileAttributes"]
 
             # Get this file's information
             resp_info, error_code = imp_smbserver.queryPathInformation(
@@ -262,17 +262,17 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if error_code != STATUS_SUCCESS:
                 raise SmbError(error_code, "Failed to query path info")
 
-            resp_parms["CreateTime"] = resp_info["CreationTime"]
-            resp_parms["LastAccessTime"] = resp_info[
+            resp_params["CreateTime"] = resp_info["CreationTime"]
+            resp_params["LastAccessTime"] = resp_info[
                 "LastAccessTime"]
-            resp_parms["LastWriteTime"] = resp_info["LastWriteTime"]
-            resp_parms["LastChangeTime"] = resp_info[
+            resp_params["LastWriteTime"] = resp_info["LastWriteTime"]
+            resp_params["LastChangeTime"] = resp_info[
                 "LastChangeTime"]
-            resp_parms["FileAttributes"] = resp_info[
+            resp_params["FileAttributes"] = resp_info[
                 "ExtFileAttributes"]
-            resp_parms["AllocationSize"] = resp_info[
+            resp_params["AllocationSize"] = resp_info[
                 "AllocationSize"]
-            resp_parms["EndOfFile"] = resp_info["EndOfFile"]
+            resp_params["EndOfFile"] = resp_info["EndOfFile"]
 
             # Let's store the fid for the connection
             # smbServer.log("Create file %s, mode:0x%x" % (pathName, mode))
@@ -284,11 +284,11 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         except SmbError as s:
             log.debug("[SMB] SmbError hit: %s", s)
             error_code = s.error_code
-            resp_parms = ""
+            resp_params = ""
             resp_data = ""
 
         resp_cmd = imp_smb.SMBCommand(imp_smb.SMB.SMB_COM_NT_CREATE_ANDX)
-        resp_cmd["Parameters"] = resp_parms
+        resp_cmd["Parameters"] = resp_params
         resp_cmd["Data"] = resp_data
         smb_server.setConnectionData(conn_id, conn_data)
 

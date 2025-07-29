@@ -21,14 +21,14 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-static char testbuf[17000]; /* more than 16K */
-
-CURLcode test(char *URL)
+static CURLcode test_lib651(char *URL)
 {
+  static char testbuf[17000]; /* more than 16K */
+
   CURL *curl;
   CURLcode res = CURLE_OK;
   CURLFORMcode formrc;
@@ -45,27 +45,23 @@ CURLcode test(char *URL)
   testbuf[sizeof(testbuf)-1] = 0; /* null-terminate */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  CURL_IGNORE_DEPRECATION(
-    /* Check proper name and data copying. */
-    formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, "hello",
-                          CURLFORM_COPYCONTENTS, testbuf,
-                          CURLFORM_END);
-  )
+  /* Check proper name and data copying. */
+  formrc = curl_formadd(&formpost, &lastptr,
+                        CURLFORM_COPYNAME, "hello",
+                        CURLFORM_COPYCONTENTS, testbuf,
+                        CURLFORM_END);
   if(formrc)
-    printf("curl_formadd(1) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", (int) formrc);
 
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    CURL_IGNORE_DEPRECATION(
-      curl_formfree(formpost);
-    )
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
+    curl_formfree(formpost);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -73,10 +69,8 @@ CURLcode test(char *URL)
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  CURL_IGNORE_DEPRECATION(
-    /* send a multi-part formpost */
-    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
-  )
+  /* send a multi-part formpost */
+  test_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -92,10 +86,8 @@ test_cleanup:
   /* always cleanup */
   curl_easy_cleanup(curl);
 
-  CURL_IGNORE_DEPRECATION(
-    /* now cleanup the formpost chain */
-    curl_formfree(formpost);
-  )
+  /* now cleanup the formpost chain */
+  curl_formfree(formpost);
 
   curl_global_cleanup();
 

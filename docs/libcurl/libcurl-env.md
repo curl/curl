@@ -51,8 +51,8 @@ backend at first use. If no selection is done by the program using libcurl,
 this variable's selection is used. Setting a name that is not a built-in
 alternative makes libcurl stay with the default.
 
-SSL backend names (case-insensitive): BearSSL, GnuTLS, mbedTLS, OpenSSL,
-Rustls, Schannel, Secure-Transport, wolfSSL
+SSL backend names (case-insensitive): GnuTLS, mbedTLS, OpenSSL, Rustls,
+Schannel, wolfSSL
 
 ## `HOME`
 
@@ -66,10 +66,10 @@ When the netrc feature is used (CURLOPT_NETRC(3)), this variable is
 checked as the secondary way to find the "current" home directory (on Windows
 only) in which the .netrc file is likely to exist.
 
-## `LOGNAME`
+## `NETRC`
 
-Username to use when invoking the *ntlm-wb* tool, if *NTLMUSER* was
-not set.
+The filename used as netrc file when CURLOPT_NETRC(3) is used without
+CURLOPT_NETRC_FILE(3). (Added in 8.16.0)
 
 ## `NO_PROXY`
 
@@ -77,24 +77,15 @@ This has the same functionality as the CURLOPT_NOPROXY(3) option: it
 gives libcurl a comma-separated list of hostname patterns for which libcurl
 should not use a proxy.
 
-## `NTLMUSER`
-
-Username to use when invoking the *ntlm-wb* tool.
-
 ## `SSLKEYLOGFILE`
 
-When set and libcurl runs with a SSL backend that supports this feature,
+When set and libcurl runs with an SSL backend that supports this feature,
 libcurl saves SSL secrets into the given filename. Using those SSL secrets,
 other tools (such as Wireshark) can decrypt the SSL communication and
 analyze/view the traffic.
 
 These secrets and this file might be sensitive. Users are advised to take
 precautions so that they are not stolen or otherwise inadvertently revealed.
-
-## `USER`
-
-Username to use when invoking the *ntlm-wb* tool, if *NTLMUSER* and *LOGNAME*
-were not set.
 
 # Debug Variables
 

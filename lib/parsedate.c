@@ -80,10 +80,9 @@
 #include <limits.h>
 
 #include <curl/curl.h>
-#include "strcase.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "parsedate.h"
-#include "strparse.h"
+#include "curlx/strparse.h"
 
 /*
  * parsedate()
@@ -106,7 +105,7 @@ static int parsedate(const char *date, time_t *output);
 #endif
 
 #if !defined(CURL_DISABLE_PARSEDATE) || !defined(CURL_DISABLE_FTP) || \
-  !defined(CURL_DISABLE_FILE)
+  !defined(CURL_DISABLE_FILE) || defined(USE_GNUTLS)
 /* These names are also used by FTP and FILE code */
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
@@ -151,7 +150,7 @@ static const struct tzinfo tz[]= {
   {"HDT", 600 tDAYZONE},   /* Hawaii Daylight */
   {"CAT", 600},            /* Central Alaska */
   {"AHST", 600},           /* Alaska-Hawaii Standard */
-  {"NT",  660},            /* Nome */
+  {"NT",  660},            /* Nome */ /* spellchecker:disable-line */
   {"IDLW", 720},           /* International Date Line West */
   {"CET", -60},            /* Central European */
   {"MET", -60},            /* Middle European */
@@ -162,7 +161,8 @@ static const struct tzinfo tz[]= {
   {"FWT", -60},            /* French Winter */
   {"FST", -60 tDAYZONE},   /* French Summer */
   {"EET", -120},           /* Eastern Europe, USSR Zone 1 */
-  {"WAST", -420},          /* West Australian Standard */
+  {"WAST", -420}, /* spellchecker:disable-line */
+                           /* West Australian Standard */
   {"WADT", -420 tDAYZONE}, /* West Australian Daylight */
   {"CCT", -480},           /* China Coast, USSR Zone 7 */
   {"JST", -540},           /* Japan Standard, USSR Zone 8 */
@@ -224,7 +224,7 @@ static int checkday(const char *check, size_t len)
   for(i = 0; i < 7; i++) {
     size_t ilen = strlen(what[0]);
     if((ilen == len) &&
-       strncasecompare(check, what[0], len))
+       curl_strnequal(check, what[0], len))
       return i;
     what++;
   }
@@ -239,7 +239,7 @@ static int checkmonth(const char *check, size_t len)
     return -1; /* not a month */
 
   for(i = 0; i < 12; i++) {
-    if(strncasecompare(check, what[0], 3))
+    if(curl_strnequal(check, what[0], 3))
       return i;
     what++;
   }
@@ -259,7 +259,7 @@ static int checktz(const char *check, size_t len)
   for(i = 0; i < CURL_ARRAYSIZE(tz); i++) {
     size_t ilen = strlen(what->name);
     if((ilen == len) &&
-       strncasecompare(check, what->name, len))
+       curl_strnequal(check, what->name, len))
       return what->offset*60;
     what++;
   }
@@ -339,7 +339,7 @@ match:
   *h = hh;
   *m = mm;
   *s = ss;
-  *endp = (char *)p;
+  *endp = (char *)CURL_UNCONST(p);
   return TRUE;
 }
 
@@ -423,7 +423,7 @@ static int parsedate(const char *date, time_t *output)
         curl_off_t lval;
         int num_digits = 0;
         const char *p = date;
-        if(Curl_str_number(&p, &lval, 99999999))
+        if(curlx_str_number(&p, &lval, 99999999))
           return PARSEDATE_FAIL;
 
         /* we know num_digits cannot be larger than 8 */

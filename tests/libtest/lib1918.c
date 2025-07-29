@@ -21,13 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib1918(char *URL)
 {
   const struct curl_easyoption *o;
   (void)URL;
@@ -43,12 +41,12 @@ CURLcode test(char *URL)
       curl_easy_option_by_id(o->id);
 
     if(ename->id != o->id) {
-      printf("name lookup id %d doesn't match %d\n",
-             ename->id, o->id);
+      curl_mprintf("name lookup id %d doesn't match %d\n",
+                   ename->id, o->id);
     }
     else if(eid->id != o->id) {
-      printf("ID lookup %d doesn't match %d\n",
-             ename->id, o->id);
+      curl_mprintf("ID lookup %d doesn't match %d\n",
+                   ename->id, o->id);
     }
   }
   curl_global_cleanup();

@@ -34,12 +34,13 @@ http
 <features>
 Debug
 Unicode
+aws
 </features>
 <name>
 aws-sigv4 with query
 </name>
 <command>
-"http://fake.fake.fake:8000/%TESTNUMBER/a=あ" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
+"http://fake.fake.fake:8000/%TESTNUMBER/a=%hex[%e3%81%82]hex%" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -47,9 +48,9 @@ aws-sigv4 with query
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /472/a=%e3%81%82 HTTP/1.1
+GET /472/a=%E3%81%82 HTTP/1.1
 Host: fake.fake.fake:8000
-Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=c63315c199922f7ee00141869a250389405d19e205057249fb74726d940b1fc3
+Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=b8783c8387a5249b084642126fe1f8e07e12a2847820fd5b6cd64b2047149da4
 X-Amz-Date: 19700101T000000Z
 User-Agent: curl/%VERSION
 Accept: */*

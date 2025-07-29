@@ -26,6 +26,7 @@
 #
 import logging
 import re
+import pytest
 
 from testenv import Env
 from testenv import CurlClient
@@ -34,6 +35,7 @@ from testenv import CurlClient
 log = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
 class TestTracing:
 
     # default verbose output
@@ -89,8 +91,7 @@ class TestTracing:
             m = re.match(r'^([0-9:.]+) \[0-[0x]] .+ \[TCP].+', line)
             if m is not None:
                 found_tcp = True
-        if not found_tcp:
-            assert False, f'TCP filter does not appear in trace "all": {r.stderr}'
+        assert found_tcp, f'TCP filter does not appear in trace "all": {r.stderr}'
 
     # trace all, no TCP, no time
     def test_15_05_trace_all(self, env: Env, httpd):

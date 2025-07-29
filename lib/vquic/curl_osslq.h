@@ -24,9 +24,10 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
-#if defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_OPENSSL_QUIC) && \
+  defined(USE_NGHTTP3)
 
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
@@ -34,7 +35,7 @@
 
 struct Curl_cfilter;
 
-#include "urldata.h"
+#include "../urldata.h"
 
 void Curl_osslq_ver(char *p, size_t len);
 

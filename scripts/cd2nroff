@@ -76,7 +76,7 @@ HELP
 
 use POSIX qw(strftime);
 my @ts;
-if (defined($ENV{SOURCE_DATE_EPOCH})) {
+if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = gmtime($ENV{SOURCE_DATE_EPOCH});
 } else {
     @ts = localtime;
@@ -186,13 +186,11 @@ my %knownprotos = (
     );
 
 my %knowntls = (
-    'BearSSL' => 1,
     'GnuTLS' => 1,
     'mbedTLS' => 1,
     'OpenSSL' => 1,
     'rustls' => 1,
     'Schannel' => 1,
-    'Secure Transport' => 1,
     'wolfSSL' => 1,
     'All' => 1,
     'none' => 1,
@@ -403,7 +401,7 @@ sub single {
                 push @desc, ".fi\n";
                 next;
             }
-            # convert single backslahes to doubles
+            # convert single backslashes to doubles
             $d =~ s/\\/\\\\/g;
             # lines starting with a period needs it escaped
             $d =~ s/^\./\\&./;

@@ -106,7 +106,8 @@ This is a ping message. It may contain up to 125 bytes of payload text.
 libcurl does not verify that the payload is valid UTF-8.
 
 Upon receiving a ping message, libcurl automatically responds with a pong
-message unless the **CURLWS_RAW_MODE** bit of CURLOPT_WS_OPTIONS(3) is set.
+message unless the **CURLWS_NOAUTOPONG** or **CURLWS_RAW_MODE** bit of
+CURLOPT_WS_OPTIONS(3) is set.
 
 ## CURLWS_PONG
 
@@ -136,13 +137,14 @@ struct customdata {
   void *ptr;
 };
 
-static size_t writecb(unsigned char *buffer,
+static size_t writecb(char *buffer,
                       size_t size, size_t nitems, void *p)
 {
   struct customdata *c = (struct customdata *)p;
   const struct curl_ws_frame *m = curl_ws_meta(c->easy);
 
   printf("flags: %x\n", m->flags);
+  return 0;
 }
 
 int main(void)
@@ -158,6 +160,7 @@ int main(void)
     curl_easy_perform(curl);
 
   }
+  return 0;
 }
 ~~~
 

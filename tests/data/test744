@@ -1,0 +1,79 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--netrc-file
+netrc
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</data>
+<connect>
+HTTP/1.1 200 Mighty fine indeed
+
+</connect>
+<datacheck>
+HTTP/1.1 200 Mighty fine indeed
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+Content-Length: 9
+
+contents
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+http-proxy
+</server>
+<name>
+--netrc-file with a 127 byte line
+</name>
+<file name="%LOGDIR/netrc%TESTNUMBER" nonewline="yes">
+machine foo.host login foo password baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar
+</file>
+<command>
+http://foo.host:%HTTPPORT/%TESTNUMBER -p --proxy1.0 %HOSTIP:%PROXYPORT -A "" --netrc-file %LOGDIR/netrc%TESTNUMBER
+</command>
+<features>
+proxy
+</features>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<proxy>
+CONNECT foo.host:%HTTPPORT HTTP/1.0
+Host: foo.host:%HTTPPORT
+Proxy-Connection: Keep-Alive
+
+</proxy>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: foo.host:%HTTPPORT
+Authorization: Basic %b64[foo:baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar]b64%
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

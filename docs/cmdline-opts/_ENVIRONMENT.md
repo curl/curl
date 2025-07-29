@@ -40,7 +40,7 @@ accesses the target URL directly, and
 
 accesses the target URL through the proxy.
 
-The list of hostnames can also be include numerical IP addresses, and IPv6
+The list of hostnames can also include numerical IP addresses, and IPv6
 versions should then be given without enclosing brackets.
 
 IP addresses can be specified using CIDR notation: an appended slash and
@@ -72,8 +72,8 @@ the case insensitive name of the particular backend to use when curl is
 invoked. Setting a name that is not a built-in alternative makes curl stay
 with the default.
 
-SSL backend names (case-insensitive): **bearssl**, **gnutls**, **mbedtls**,
-**openssl**, **rustls**, **schannel**, **secure-transport**, **wolfssl**
+SSL backend names (case-insensitive): **gnutls**, **mbedtls**, **openssl**,
+**rustls**, **schannel**, **wolfssl**
 
 ## `HOME` <dir>
 If set, this is used to find the home directory when that is needed. Like when
@@ -102,11 +102,11 @@ If you set this environment variable to a filename, curl stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the
 TLS traffic in real time using network analyzing tools such as Wireshark. This
 works with the following TLS backends: OpenSSL, LibreSSL (TLS 1.2 max),
-BoringSSL, GnuTLS and wolfSSL.
+BoringSSL, GnuTLS, wolfSSL and Rustls.
 
 ## `USERPROFILE` <dir>
 On Windows, this variable is used when trying to find the home directory. If
-the other, primary, variable are all unset. If set, curl uses the path
+the other, primary, variables are all unset. If set, curl uses the path
 **"$USERPROFILE\Application Data"**.
 
 ## `XDG_CONFIG_HOME` <dir>

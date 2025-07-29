@@ -30,7 +30,7 @@ imaps
 IMAPS FETCH with redundant explicit SSL request
 </name>
 <command>
--k --ssl-reqd -u '"user:sec"ret{' 'imaps://%HOSTIP:%IMAPSPORT/%TESTNUMBER/;MAILINDEX=1'
+--insecure --ssl-reqd -u '"user:sec"ret{' 'imaps://%HOSTIP:%IMAPSPORT/%TESTNUMBER/;MAILINDEX=1'
 </command>
 </client>
 

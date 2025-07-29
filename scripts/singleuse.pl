@@ -33,13 +33,16 @@
 # --unit : built to support unit tests
 #
 
+use strict;
+use warnings;
+
 my $unittests;
-if($ARGV[0] eq "--unit") {
+if(@ARGV && $ARGV[0] eq "--unit") {
     $unittests = "tests/unit ";
     shift @ARGV;
 }
 
-my $file = $ARGV[0];
+my $file = $ARGV[0] || '';
 
 my %wl = (
     'Curl_xfer_write_resp' => 'internal api',
@@ -47,7 +50,11 @@ my %wl = (
     'Curl_creader_def_close' => 'internal api',
     'Curl_creader_def_read' => 'internal api',
     'Curl_creader_def_total_length' => 'internal api',
+    'Curl_meta_reset' => 'internal api',
     'Curl_trc_dns' => 'internal api',
+    'curlx_base64_decode' => 'internal api',
+    'curlx_base64_encode' => 'internal api',
+    'curlx_base64url_encode' => 'internal api',
 );
 
 my %api = (
@@ -174,8 +181,7 @@ open(N, "nm $file|") ||
 
 my %exist;
 my %uses;
-my $file;
-while (<N>) {
+while(<N>) {
     my $l = $_;
     chomp $l;
 
@@ -200,7 +206,7 @@ while (<N>) {
 }
 close(N);
 
-my $err;
+my $err = 0;
 for(sort keys %exist) {
     #printf "%s is defined in %s, used by: %s\n", $_, $exist{$_}, $uses{$_};
     if(!$uses{$_}) {

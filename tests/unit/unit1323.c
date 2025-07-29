@@ -21,38 +21,29 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
-#include "timeval.h"
-
-static CURLcode unit_setup(void)
+static CURLcode test_unit1323(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void unit_stop(void)
-{
+  struct a {
+    struct curltime first;
+    struct curltime second;
+    time_t result;
+  };
 
-}
-
-struct a {
-  struct curltime first;
-  struct curltime second;
-  time_t result;
-};
-
-UNITTEST_START
-{
   struct a tests[] = {
     { {36762, 8345 }, {36761, 995926 }, 13 },
     { {36761, 995926 }, {36762, 8345 }, -13 },
     { {36761, 995926 }, {0, 0}, 36761995 },
     { {0, 0}, {36761, 995926 }, -36761995 },
   };
+
   size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
-    timediff_t result = Curl_timediff(tests[i].first, tests[i].second);
+    timediff_t result = curlx_timediff(tests[i].first, tests[i].second);
     if(result != tests[i].result) {
       printf("%ld.%06u to %ld.%06u got %d, but expected %ld\n",
              (long)tests[i].first.tv_sec,
@@ -64,5 +55,6 @@ UNITTEST_START
       fail("unexpected result!");
     }
   }
+
+  UNITTEST_END_SIMPLE
 }
-UNITTEST_STOP

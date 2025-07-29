@@ -35,7 +35,7 @@ https test-localhost.pem
 simple HTTPS GET
 </name>
 <command>
--4 --cacert %SRCDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %CERTDIR/certs/test-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

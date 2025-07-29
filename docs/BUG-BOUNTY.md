@@ -31,8 +31,7 @@ Bounty and they set the reward amounts. If it would turn out that they set
 amounts that are way lower than we can accept, the curl project intends to
 "top up" rewards.
 
-In 2022, typical "Medium" rated vulnerabilities have been rewarded 2,400 USD
-each.
+In 2025, typical "Medium" rated vulnerabilities are rewarded 2,500 USD each.
 
 ## Who is eligible for a reward?
 

@@ -57,7 +57,7 @@ int main(void)
      * of using CURLUSESSL_TRY here, because if TLS upgrade fails, the
      * transfer continues anyway - see the security discussion in the libcurl
      * tutorial for more details. */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
     /* If your server does not have a valid certificate, then you can disable
      * part of the Transport Layer Security protection by setting the

@@ -2,11 +2,5 @@
 #
 # SPDX-License-Identifier: curl
 
-disabled
-mqttd
-resolve
-rtspd
-sockfilt
-socksd
-sws
-tftpd
+servers
+servers.c

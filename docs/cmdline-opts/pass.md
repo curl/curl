@@ -17,4 +17,4 @@ Example:
 
 # `--pass`
 
-Passphrase for the private key.
+Passphrase for the private key used for SSH or TLS.

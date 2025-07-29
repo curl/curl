@@ -25,23 +25,23 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if !defined(CURL_DISABLE_IMAP) || !defined(CURL_DISABLE_SMTP) ||       \
   !defined(CURL_DISABLE_POP3) || \
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include <curl/curl.h>
-#include "urldata.h"
+#include "../urldata.h"
 
-#include "vauth/vauth.h"
-#include "warnless.h"
-#include "sendf.h"
-#include "curl_printf.h"
+#include "vauth.h"
+#include "../curlx/warnless.h"
+#include "../sendf.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_create_plain_message()
@@ -127,7 +127,7 @@ void Curl_auth_create_login_message(const char *valuep, struct bufref *out)
  * Returns void.
  */
 void Curl_auth_create_external_message(const char *user,
-                                           struct bufref *out)
+                                       struct bufref *out)
 {
   /* This is the same formatting as the login message */
   Curl_auth_create_login_message(user, out);

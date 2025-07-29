@@ -39,7 +39,7 @@ my $dir=".";
 my $wlist="";
 my @alist;
 my $windows_os = $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys';
-my $verbose;
+my $verbose = 0;
 my %skiplist;
 
 my %ignore;
@@ -56,12 +56,17 @@ my %banfunc = (
     "vsprintf" => 1,
     "strcat" => 1,
     "strncat" => 1,
+    "strncpy" => 1,
+    "strtok_r" => 1,
+    "strtoul" => 1,
     "_mbscat" => 1,
     "_mbsncat" => 1,
     "_tcscat" => 1,
     "_tcsncat" => 1,
     "_wcscat" => 1,
     "_wcsncat" => 1,
+    "_wcsdup" => 1,
+    "wcsdup" => 1,
     "LoadLibrary" => 1,
     "LoadLibraryA" => 1,
     "LoadLibraryW" => 1,
@@ -97,6 +102,7 @@ my %warnings = (
     'EMPTYLINEBRACE'        => 'Empty line before the open brace',
     'EQUALSNOSPACE'         => 'equals sign without following space',
     'EQUALSNULL'            => 'if/while comparison with == NULL',
+    'ERRNOVAR'              => 'use of bare errno define',
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
     'INCLUDEDUP',           => 'same file is included again',
@@ -163,17 +169,17 @@ sub readlocalfile {
         $i++;
 
         # Lines starting with '#' are considered comments
-        if (/^\s*(#.*)/) {
+        if(/^\s*(#.*)/) {
             next;
         }
-        elsif (/^enable ([A-Z]+)$/) {
+        elsif(/^enable ([A-Z]+)$/) {
             if(!defined($warnings_extended{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
             }
             $warnings{$1} = $warnings_extended{$1};
         }
-        elsif (/^disable ([A-Z]+)$/) {
+        elsif(/^disable ([A-Z]+)$/) {
             if(!defined($warnings{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
@@ -181,10 +187,10 @@ sub readlocalfile {
             # Accept-list
             push @alist, $1;
         }
-        elsif (/^banfunc ([^ ]*)/) {
+        elsif(/^banfunc ([^ ]*)/) {
             $banfunc{$1} = $1;
         }
-        elsif (/^allowfunc ([^ ]*)/) {
+        elsif(/^allowfunc ([^ ]*)/) {
             undef $banfunc{$1};
         }
         else {
@@ -287,6 +293,11 @@ while(defined $file) {
         $file = shift @ARGV;
         next;
     }
+    elsif($file =~ /^-v/) {
+        $verbose = 1;
+        $file = shift @ARGV;
+        next;
+    }
     elsif($file =~ /^(-h|--help)/) {
         undef $file;
         last;
@@ -306,6 +317,7 @@ if(!$file) {
     print "  -W[file]  Skip the given file - ignore all its flaws\n";
     print "  -i<n>     Indent spaces. Default: 2\n";
     print "  -m<n>     Maximum line length. Default: 79\n";
+    print "  -v        Verbose\n";
     print "\nDetects and warns for these problems:\n";
     my @allw = keys %warnings;
     push @allw, keys %warnings_extended;
@@ -332,7 +344,7 @@ readlocalfile($file);
 do {
     if("$wlist" !~ / $file /) {
         my $fullname = $file;
-        $fullname = "$dir/$file" if ($fullname !~ '^\.?\.?/');
+        $fullname = "$dir/$file" if($fullname !~ '^\.?\.?/');
         scanfile($fullname);
     }
     $file = shift @ARGV;
@@ -447,6 +459,11 @@ sub scanfile {
     my $l = "";
     my $prep = 0;
     my $prevp = 0;
+
+    if($verbose) {
+        printf "Checking file: $file\n";
+    }
+
     open(my $R, '<', $file) || die "failed to open $file";
 
     my $incomment=0;
@@ -479,10 +496,10 @@ sub scanfile {
             my $count = 0;
             while($l =~ /([\d]{4})/g) {
                 push @copyright, {
-                  year => $1,
-                  line => $line,
-                  col => index($l, $1),
-                  code => $l
+                    year => $1,
+                    line => $line,
+                    col => index($l, $1),
+                    code => $l
                 };
                 $count++;
             }
@@ -873,7 +890,7 @@ sub scanfile {
             $suff =~ s/\(/\\(/;
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
-      }
+        }
         $l = $bl; # restore to pre-bannedfunc content
 
         if($warnings{"STDERR"}) {
@@ -1022,6 +1039,12 @@ sub scanfile {
                       "space after exclamation mark");
         }
 
+        if($nostr =~ /(.*)\b(EACCES|EADDRINUSE|EADDRNOTAVAIL|EAFNOSUPPORT|EBADF|ECONNREFUSED|ECONNRESET|EINPROGRESS|EINTR|EINVAL|EISCONN|EMSGSIZE|ENOMEM|ETIMEDOUT|EWOULDBLOCK)\b/) {
+            checkwarn("ERRNOVAR",
+                      $line, length($1), $file, $ol,
+                      "use of bare errno define $2, use SOCK$2");
+        }
+
         # check for more than one consecutive space before open brace or
         # question mark. Skip lines containing strings since they make it hard
         # due to artificially getting multiple spaces
@@ -1033,16 +1056,16 @@ sub scanfile {
         }
       preproc:
         if($prep) {
-          # scan for use of banned symbols on a preprocessor line
-          if($l =~ /^(^|.*\W)
-                     (WIN32)
-                     (\W|$)
-                   /x) {
-              checkwarn("BANNEDPREPROC",
-                        $line, length($1), $file, $ol,
-                        "use of $2 is banned from preprocessor lines" .
-                        (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
-          }
+            # scan for use of banned symbols on a preprocessor line
+            if($l =~ /^(^|.*\W)
+                       (WIN32)
+                       (\W|$)
+                     /x) {
+                checkwarn("BANNEDPREPROC",
+                          $line, length($1), $file, $ol,
+                          "use of $2 is banned from preprocessor lines" .
+                          (($2 eq "WIN32") ? ", use _WIN32 instead" : ""));
+            }
         }
         $line++;
         $prevp = $prep;
@@ -1116,5 +1139,7 @@ if($errors || $warnings || $verbose) {
         $serrors,
         $swarnings;
     }
-    exit 5; # return failure
+    if($errors || $warnings) {
+        exit 5; # return failure
+    }
 }

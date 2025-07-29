@@ -1,0 +1,48 @@
+<testcase>
+<info>
+<keywords>
+netrc
+FTP
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data>
+content
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<features>
+proxy
+</features>
+<name>
+.netrc with embedded NULL byte, with quoted token
+</name>
+<command>
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
+</command>
+<file name="%LOGDIR/netrc%TESTNUMBER" >
+machine %HOSTIP login username "password"%hex[%00]hex% hello
+</file>
+</client>
+
+<verify>
+<protocol crlf="yes">
+USER username
+PASS 
+PWD
+EPSV
+TYPE I
+SIZE %TESTNUMBER
+RETR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>

@@ -21,10 +21,8 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "testutil.h"
-#include "warnless.h"
 #include "memdebug.h"
 
 static int loadfile(const char *filename, void **filedata, size_t *filesize)
@@ -73,17 +71,16 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     return CURLE_FAILED_INIT;
   }
 
   if(loadfile(cafile, &certdata, &certsize)) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE,     1L);
-    curl_easy_setopt(curl, CURLOPT_HEADER,      1L);
-    curl_easy_setopt(curl, CURLOPT_URL,         url);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT,   "CURLOPT_CAINFO_BLOB");
-    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS,
-                     CURLSSLOPT_REVOKE_BEST_EFFORT);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "CURLOPT_CAINFO_BLOB");
+    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_REVOKE_BEST_EFFORT);
 
     blob.data = certdata;
     blob.len = certsize;
@@ -97,7 +94,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
   return code;
 }
 
-CURLcode test(char *URL)
+static CURLcode test_lib678(char *URL)
 {
   CURLcode res = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -109,7 +106,7 @@ CURLcode test(char *URL)
     if(e) {
       w = curl_easy_setopt(e, CURLOPT_CAINFO_BLOB, &blob);
       if(w)
-        printf("CURLOPT_CAINFO_BLOB is not supported\n");
+        curl_mprintf("CURLOPT_CAINFO_BLOB is not supported\n");
       curl_easy_cleanup(e);
     }
     res = w;

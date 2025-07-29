@@ -16,6 +16,8 @@ Example:
 
 # `--happy-eyeballs-timeout-ms`
 
+Set the timeout for Happy Eyeballs.
+
 Happy Eyeballs is an algorithm that attempts to connect to both IPv4 and IPv6
 addresses for dual-stack hosts, giving IPv6 a head-start of the specified
 number of milliseconds. If the IPv6 address cannot be connected to within that

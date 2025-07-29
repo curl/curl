@@ -23,7 +23,7 @@ swsclose
 http
 </server>
 <name>
-HTTP GET with a invalid HTTP/1 response line start
+HTTP GET with an invalid HTTP/1 response line start
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http0.9

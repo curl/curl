@@ -39,9 +39,9 @@ struct altsvc {
   struct althost src;
   struct althost dst;
   time_t expires;
-  bool persist;
-  unsigned int prio;
   struct Curl_llist_node node;
+  unsigned int prio;
+  BIT(persist);
 };
 
 struct altsvcinfo {

@@ -24,8 +24,9 @@
 #include "curl/curl.h"
 #include <stdio.h>
 
-int main(void)
+int main(int argc, char **argv)
 {
-  printf("curl_version(): |%s|\n", curl_version());
+  (void)argc;
+  printf("libcurl test: |%s|%s|\n", argv[0], curl_version());
   return 0;
 }

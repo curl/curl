@@ -3,6 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
+IPv6
 --resolve
 </keywords>
 </info>
@@ -29,6 +30,10 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+http
+IPv6
+</features>
 <server>
 http-ipv6
 </server>

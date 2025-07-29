@@ -25,6 +25,7 @@
 #
 pytest
 cryptography
-multipart
+filelock
 websockets
 psutil
+pytest-xdist

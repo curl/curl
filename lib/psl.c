@@ -40,7 +40,7 @@ void Curl_psl_destroy(struct PslCache *pslcache)
 {
   if(pslcache->psl) {
     if(pslcache->dynamic)
-      psl_free((psl_ctx_t *) pslcache->psl);
+      psl_free((psl_ctx_t *)CURL_UNCONST(pslcache->psl));
     pslcache->psl = NULL;
     pslcache->dynamic = FALSE;
   }
@@ -48,7 +48,7 @@ void Curl_psl_destroy(struct PslCache *pslcache)
 
 static time_t now_seconds(void)
 {
-  struct curltime now = Curl_now();
+  struct curltime now = curlx_now();
 
   return now.tv_sec;
 }

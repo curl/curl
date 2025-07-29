@@ -121,7 +121,7 @@ hash_elem_create(const void *key, size_t key_len, const void *p,
     /* copy the key */
     memcpy(he->key, key, key_len);
     he->key_len = key_len;
-    he->ptr = (void *) p;
+    he->ptr = CURL_UNCONST(p);
     he->dtor = dtor;
   }
   return he;
@@ -352,8 +352,8 @@ size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
   return (h % slots_num);
 }
 
-size_t Curl_str_key_compare(void *k1, size_t key1_len,
-                            void *k2, size_t key2_len)
+size_t curlx_str_key_compare(void *k1, size_t key1_len,
+                             void *k2, size_t key2_len)
 {
   if((key1_len == key2_len) && !memcmp(k1, k2, key1_len))
     return 1;

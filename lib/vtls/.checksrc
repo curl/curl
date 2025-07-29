@@ -1,5 +1,5 @@
-banfunc strerror
-banfunc strncpy
+banfunc snprintf
 banfunc sscanf
-banfunc strtoul
+banfunc strerror
 banfunc strtol
+banfunc vsnprint

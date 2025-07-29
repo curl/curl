@@ -22,10 +22,9 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
-#if defined(USE_OPENSSL)                        \
-  || defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
@@ -34,15 +33,13 @@
 #ifdef HAVE_NETINET_IN6_H
 #include <netinet/in6.h>
 #endif
-#include "curl_memrchr.h"
-
+#include "../curl_memrchr.h"
 #include "hostcheck.h"
-#include "strcase.h"
-#include "hostip.h"
+#include "../hostip.h"
 
-#include "curl_memory.h"
+#include "../curl_memory.h"
 /* The last #include file should be: */
-#include "memdebug.h"
+#include "../memdebug.h"
 
 /* check the two input strings with given length, but do not
    assume they end in nul-bytes */
@@ -51,7 +48,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
 {
   if(hostlen != patternlen)
     return FALSE;
-  return strncasecompare(hostname, pattern, hostlen);
+  return curl_strnequal(hostname, pattern, hostlen);
 }
 
 /*

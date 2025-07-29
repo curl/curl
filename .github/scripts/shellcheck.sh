@@ -3,7 +3,6 @@
 #
 # SPDX-License-Identifier: curl
 
-shellcheck --version
 # shellcheck disable=SC2046
 shellcheck --exclude=1091 \
   --enable=avoid-nullary-conditions,deprecate-which \

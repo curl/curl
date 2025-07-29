@@ -25,6 +25,11 @@ the FTP server command SIZE is not used by curl.
 Use "-C -" to instruct curl to automatically find out where/how to resume the
 transfer. It then uses the given output/input files to figure that out.
 
+When using this option for HTTP uploads using POST or PUT, functionality is
+not guaranteed. The HTTP protocol has no standard interoperable resume upload
+and curl uses a set of headers for this purpose that once proved working for
+some servers and have been left for those who find that useful.
+
 This command line option is mutually exclusive with --range: you can only use
 one of them for a single transfer.
 

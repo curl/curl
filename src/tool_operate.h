@@ -39,8 +39,8 @@ struct per_transfer {
   long retry_sleep_default;
   long retry_sleep;
   long num_retries; /* counts the performed retries */
-  struct timeval start; /* start of this transfer */
-  struct timeval retrystart;
+  struct curltime start; /* start of this transfer */
+  struct curltime retrystart;
   char *url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;
@@ -79,7 +79,7 @@ struct per_transfer {
   BIT(skip);  /* considered already done */
 };
 
-CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);
+CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[]);
 void single_transfer_cleanup(struct OperationConfig *config);
 
 extern struct per_transfer *transfers; /* first node */

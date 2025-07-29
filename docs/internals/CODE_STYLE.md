@@ -253,7 +253,7 @@ If no parenthesis, use the default indent:
 
 ```c
 data->set.http_disable_hostname_check_before_authentication =
-  (0 != va_arg(param, long)) ? TRUE : FALSE;
+  va_arg(param, long) ? TRUE : FALSE;
 ```
 
 Function invoke with an open parenthesis:
@@ -338,6 +338,7 @@ This is the full list of functions generally banned.
     _tcsncat
     _waccess
     _wcscat
+    _wcsdup
     _wcsncat
     access
     gets
@@ -357,7 +358,9 @@ This is the full list of functions generally banned.
     strncat
     strncpy
     strtok
+    strtok_r
     strtol
     strtoul
     vsnprint
     vsprintf
+    wcsdup

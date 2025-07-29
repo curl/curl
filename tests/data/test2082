@@ -27,7 +27,7 @@ http
 Pre-request callback for HTTP
 </name>
 <tool>
-libprereq
+lib2082
 </tool>
 
 <command>

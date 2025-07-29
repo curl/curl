@@ -52,9 +52,10 @@ http
 <features>
 !SSPI
 crypto
+digest
 </features>
 <name>
-HTTP POST --digest with SHA-256, userhash=true and user-specified Content-Length header
+HTTP POST Digest with SHA-256, userhash and set Content-Length header
 </name>
 # This test is to ensure 'Content-Length: 0' is sent while negotiating auth
 # even when there is a user-specified Content-Length header.

@@ -50,7 +50,7 @@ HTTP Basic authorization, then without authorization
 <protocol>
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 

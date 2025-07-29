@@ -25,10 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_MSH3) && !defined(_WIN32)
-#include <pthread.h>
-#endif
-
 #include "bufq.h"
 #include "dynhds.h"
 #include "ws.h"
@@ -62,7 +58,7 @@ typedef unsigned char http_majors;
 
 #ifndef CURL_DISABLE_HTTP
 
-#if defined(USE_HTTP3)
+#ifdef USE_HTTP3
 #include <stdint.h>
 #endif
 
@@ -174,6 +170,10 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    version. This count includes CONNECT response headers. */
 #define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
+/* MAX_HTTP_RESP_HEADER_COUNT is the maximum number of response headers that
+   libcurl allows for a single HTTP response, including CONNECT and
+   redirects. */
+#define MAX_HTTP_RESP_HEADER_COUNT 5000
 
 #endif /* CURL_DISABLE_HTTP */
 
@@ -218,12 +218,12 @@ CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
  * All about a core HTTP request, excluding body and trailers
  */
 struct httpreq {
-  char method[24];
+  struct dynhds headers;
+  struct dynhds trailers;
   char *scheme;
   char *authority;
   char *path;
-  struct dynhds headers;
-  struct dynhds trailers;
+  char method[1];
 };
 
 /**

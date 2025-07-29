@@ -79,7 +79,6 @@
 #include "connect.h"
 #include "http2.h"
 #include "mime.h"
-#include "strcase.h"
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
@@ -106,7 +105,7 @@ char *Curl_checkheaders(const struct Curl_easy *data,
   DEBUGASSERT(thisheader[thislen-1] != ':');
 
   for(head = data->set.headers; head; head = head->next) {
-    if(strncasecompare(head->data, thisheader, thislen) &&
+    if(curl_strnequal(head->data, thisheader, thislen) &&
        Curl_headersep(head->data[thislen]) )
       return head->data;
   }
@@ -115,7 +114,7 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 }
 #endif
 
-static int data_pending(struct Curl_easy *data)
+static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
@@ -124,8 +123,9 @@ static int data_pending(struct Curl_easy *data)
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
-    Curl_conn_data_pending(data, FIRSTSOCKET);
+  return (!rcvd_eagain &&
+          conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP)) ||
+         Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
 /*
@@ -210,7 +210,7 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
                               bool eos_reliable,
                               CURLcode *err)
 {
-  ssize_t nread;
+  size_t nread;
 
   DEBUGASSERT(blen > 0);
   /* If we are reading BODY data and the connection does NOT handle EOF
@@ -251,8 +251,7 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
     }
     DEBUGF(infof(data, "sendrecv_dl: we are done"));
   }
-  DEBUGASSERT(nread >= 0);
-  return nread;
+  return (ssize_t)nread;
 }
 
 /*
@@ -271,6 +270,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   int maxloops = 10;
   curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
+  bool rcvd_eagain = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
@@ -303,23 +303,25 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
         bytestoread = (size_t)data->set.max_recv_speed;
     }
 
+    rcvd_eagain = FALSE;
     nread = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &result);
     if(nread < 0) {
       if(CURLE_AGAIN != result)
         goto out; /* real error */
+      rcvd_eagain = TRUE;
       result = CURLE_OK;
       if(data->req.download_done && data->req.no_body &&
          !data->req.resp_trailer) {
         DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
                "not waiting for EOS"));
         nread = 0;
-        /* continue as if we read the EOS */
+        /* continue as if we received the EOS */
       }
       else
         break; /* get out of loop */
     }
 
-    /* We only get a 0-length read on EndOfStream */
+    /* We only get a 0-length receive at the end of the response */
     blen = (size_t)nread;
     is_eos = (blen == 0);
     *didwhat |= KEEP_RECV;
@@ -355,12 +357,12 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
   } while(maxloops--);
 
-  if((maxloops <= 0) || data_pending(data)) {
-    /* did not read until EAGAIN or there is still pending data, mark as
-       read-again-please */
-    data->state.select_bits = CURL_CSELECT_IN;
-    if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
-      data->state.select_bits |= CURL_CSELECT_OUT;
+  if(!Curl_xfer_is_blocked(data) &&
+     (!rcvd_eagain || data_pending(data, rcvd_eagain))) {
+    /* Did not read until EAGAIN or there is still data pending
+     * in buffers. Mark as read-again via simulated SELECT results. */
+    Curl_multi_mark_dirty(data);
+    CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
   }
 
   if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
@@ -396,24 +398,6 @@ static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
   return CURLE_OK;
 }
 
-static int select_bits_paused(struct Curl_easy *data, int select_bits)
-{
-  /* See issue #11982: we really need to be careful not to progress
-   * a transfer direction when that direction is paused. Not all parts
-   * of our state machine are handling PAUSED transfers correctly. So, we
-   * do not want to go there.
-   * NOTE: we are only interested in PAUSE, not HOLD. */
-
-  /* if there is data in a direction not paused, return false */
-  if(((select_bits & CURL_CSELECT_IN) &&
-      !(data->req.keepon & KEEP_RECV_PAUSE)) ||
-     ((select_bits & CURL_CSELECT_OUT) &&
-      !(data->req.keepon & KEEP_SEND_PAUSE)))
-    return FALSE;
-
-  return (data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE));
-}
-
 /*
  * Curl_sendrecv() is the low-level function to be called when data is to
  * be read and written to/from the connection.
@@ -425,14 +409,9 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   int didwhat = 0;
 
   DEBUGASSERT(nowp);
-  if(data->state.select_bits) {
-    if(select_bits_paused(data, data->state.select_bits)) {
-      /* leave the bits unchanged, so they'll tell us what to do when
-       * this transfer gets unpaused. */
-      result = CURLE_OK;
-      goto out;
-    }
-    data->state.select_bits = 0;
+  if(Curl_xfer_is_blocked(data)) {
+    result = CURLE_OK;
+    goto out;
   }
 
   /* We go ahead and do a read if we have a readable socket or if the stream
@@ -470,13 +449,13 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              Curl_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              Curl_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;
@@ -502,7 +481,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if(0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS)))
+  if((k->keepon & (KEEP_RECVBITS|KEEP_SENDBITS)) == 0)
     data->req.done = TRUE;
 
 out:
@@ -656,7 +635,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * protocol.
    */
   if(data->set.str[STRING_USERAGENT]) {
-    Curl_safefree(data->state.aptr.uagent);
+    free(data->state.aptr.uagent);
     data->state.aptr.uagent =
       aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)
@@ -948,7 +927,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
 
 CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
-                        ssize_t *pnrcvd)
+                        size_t *pnrcvd)
 {
   int sockindex;
 
@@ -974,9 +953,48 @@ bool Curl_xfer_is_blocked(struct Curl_easy *data)
   bool want_send = ((data)->req.keepon & KEEP_SEND);
   bool want_recv = ((data)->req.keepon & KEEP_RECV);
   if(!want_send)
-    return want_recv && Curl_cwriter_is_paused(data);
+    return want_recv && Curl_xfer_recv_is_paused(data);
   else if(!want_recv)
-    return want_send && Curl_creader_is_paused(data);
+    return want_send && Curl_xfer_send_is_paused(data);
   else
-    return Curl_creader_is_paused(data) && Curl_cwriter_is_paused(data);
+    return Curl_xfer_recv_is_paused(data) && Curl_xfer_send_is_paused(data);
+}
+
+bool Curl_xfer_send_is_paused(struct Curl_easy *data)
+{
+  return (data->req.keepon & KEEP_SEND_PAUSE);
+}
+
+bool Curl_xfer_recv_is_paused(struct Curl_easy *data)
+{
+  return (data->req.keepon & KEEP_RECV_PAUSE);
+}
+
+CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
+{
+  CURLcode result = CURLE_OK;
+  if(enable) {
+    data->req.keepon |= KEEP_SEND_PAUSE;
+  }
+  else {
+    data->req.keepon &= ~KEEP_SEND_PAUSE;
+    if(Curl_creader_is_paused(data))
+      result = Curl_creader_unpause(data);
+  }
+  return result;
+}
+
+CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
+{
+  CURLcode result = CURLE_OK;
+  if(enable) {
+    data->req.keepon |= KEEP_RECV_PAUSE;
+  }
+  else {
+    data->req.keepon &= ~KEEP_RECV_PAUSE;
+    if(Curl_cwriter_is_paused(data))
+      result = Curl_cwriter_unpause(data);
+  }
+  Curl_conn_ev_data_pause(data, enable);
+  return result;
 }

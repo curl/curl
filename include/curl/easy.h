@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -118,7 +118,7 @@ CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
  */
 CURL_EXTERN CURLcode curl_easy_upkeep(CURL *curl);
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 } /* end of extern "C" */
 #endif
 

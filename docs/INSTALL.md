@@ -11,7 +11,7 @@ SPDX-License-Identifier: curl
 Lots of people download binary distributions of curl and libcurl. This
 document does not describe how to install curl or libcurl using such a binary
 package. This document describes how to compile, build and install curl and
-libcurl from source code.
+libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
@@ -30,7 +30,7 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the `GIT-INFO.md` file in the root directory for specific instructions on how
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
 to proceed.
 
 # Unix
@@ -137,13 +137,11 @@ alter it, you can select how to deal with each individual library.
 These options are provided to select the TLS backend to use.
 
  - AmiSSL: `--with-amissl`
- - BearSSL: `--with-bearssl`
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
  - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
  - rustls: `--with-rustls`
  - Schannel: `--with-schannel`
- - Secure Transport: `--with-secure-transport`
  - wolfSSL: `--with-wolfssl`
 
 You can build curl with *multiple* TLS backends at your choice, but some TLS
@@ -183,7 +181,7 @@ Building for Windows XP is required as a minimum.
 You can build curl with:
 
 - Microsoft Visual Studio 2008 v9.0 or later (`_MSC_VER >= 1500`)
-- MinGW-w64
+- MinGW-w64 3.0 or later (`__MINGW64_VERSION_MAJOR >= 3`)
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
@@ -208,11 +206,69 @@ multi-threaded dynamic C runtime.
 
 ## Cygwin
 
-Almost identical to the Unix installation. Run the configure script in the
-curl source tree root with `sh configure`. Make sure you have the `sh`
+Almost identical to the Unix installation. Essentially run the configure script in the
+curl source tree root with `sh configure`, then run `make`.
+
+To expand on building with `cygwin` first ensure it is in your path, and there are no
+conflicting tools (*i.e. Chocolatey with sed package*). If so move `cygwin` ahead of any items
+in your path that would conflict with `cygwin` commands, making sure you have the `sh`
 executable in `/bin/` or you see the configure fail toward the end.
 
-Run `make`
+Download the setup installer from
+[`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
+packages are needed for the install. For more on installing packages visit
+[`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
+
+Either run setup-x86_64.exe, then search and select packages individually, or try:
+
+    setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
+
+If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
+the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
+until you reach the "Select Packages" window; then select packages, click next, and finish
+the `cygwin` package installation.
+
+Download the latest version of the `cygwin` packages required (*and suggested*) for a successful install:
+
+<details>
+    <summary>Package List</summary>
+
+```
+ binutil - required
+ gcc-core - required
+ libpsl-devel - required
+ libtool - required
+ perl - required
+ make - required
+ - NOTE - if there is an error regarding make, open the cygwin terminal, and run:
+   ln -s /usr/bin/make /usr/bin/gmake
+```
+
+</details>
+
+Once all the packages have been installed, begin the process of installing curl from the source code:
+
+ <details>
+     <summary>configure_options</summary>
+
+```
+    --with-gnutls
+    --with-mbedtls
+    --with-openssl (also works for OpenSSL forks)
+    --with-rustls
+    --with-wolfssl
+    --without-ssl
+```
+
+ </details>
+
+ 1. `sh configure <configure_options>`
+ 2. `make`
+
+If any error occurs during curl installation, try:
+ - reinstalling the required `cygwin` packages from the list above
+ - temporarily move `cygwin` to the top of your path
+ - install all of the suggested `cygwin` packages
 
 ## MS-DOS
 
@@ -284,7 +340,8 @@ environment, therefore, you cannot use the various disable-protocol options of
 the configure utility on this platform.
 
 You can use specific defines to disable specific protocols and features. See
-[CURL-DISABLE](CURL-DISABLE.md) for the full list.
+[CURL-DISABLE](https://github.com/curl/curl/blob/master/docs/CURL-DISABLE.md)
+for the full list.
 
 If you want to set any of these defines you have the following options:
 
@@ -338,85 +395,6 @@ support the legacy handshakes and algorithms used by those versions. If you
 are using curl in one of those earlier versions of Windows you should choose
 another SSL backend such as OpenSSL.
 
-# Apple Platforms (macOS, iOS, tvOS, watchOS, and their simulator counterparts)
-
-On modern Apple operating systems, curl can be built to use Apple's SSL/TLS
-implementation, Secure Transport, instead of OpenSSL. To build with Secure
-Transport for SSL/TLS, use the configure option `--with-secure-transport`.
-
-When Secure Transport is in use, the curl options `--cacert` and `--capath`
-and their libcurl equivalents, are ignored, because Secure Transport uses the
-certificates stored in the Keychain to evaluate whether or not to trust the
-server. This, of course, includes the root certificates that ship with the OS.
-The `--cert` and `--engine` options, and their libcurl equivalents, are
-currently unimplemented in curl with Secure Transport.
-
-In general, a curl build for an Apple `ARCH/SDK/DEPLOYMENT_TARGET` combination
-can be taken by providing appropriate values for `ARCH`, `SDK`, `DEPLOYMENT_TARGET`
-below and running the commands:
-
-```bash
-# Set these three according to your needs
-export ARCH=x86_64
-export SDK=macosx
-export DEPLOYMENT_TARGET=10.8
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-With CMake:
-
-```bash
-cmake . \
-  -DCMAKE_OSX_ARCHITECTURES=x86_64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=10.8 \
-  -DCMAKE_OSX_SYSROOT="$(xcrun --sdk macosx --show-sdk-path)"
-```
-
-The above command lines build curl for macOS platform with `x86_64`
-architecture and `10.8` as deployment target.
-
-Here is an example for iOS device:
-
-```bash
-export ARCH=arm64
-export SDK=iphoneos
-export DEPLOYMENT_TARGET=11.0
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-With CMake (3.16 or upper recommended):
-
-```bash
-cmake . \
-  -DCMAKE_SYSTEM_NAME=iOS \
-  -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
-```
-
-Another example for watchOS simulator for macs with Apple Silicon:
-
-```bash
-export ARCH=arm64
-export SDK=watchsimulator
-export DEPLOYMENT_TARGET=5.0
-
-export CFLAGS="-arch $ARCH -isysroot $(xcrun -sdk $SDK --show-sdk-path) -m$SDK-version-min=$DEPLOYMENT_TARGET"
-./configure --host=$ARCH-apple-darwin --prefix $(pwd)/artifacts --with-secure-transport
-make -j8
-make install
-```
-
-In all above, the built libraries and executables can be found in the
-`artifacts` folder.
-
 # Android
 
 When building curl for Android you can you CMake or curl's `configure` script.
@@ -459,7 +437,7 @@ to adjust those variables accordingly. After that you can build curl like this:
     ./configure --host aarch64-linux-android --with-pic --disable-shared
 
 Note that this does not give you SSL/TLS support. If you need SSL/TLS, you
-have to build curl with a SSL/TLS library, e.g. OpenSSL, because it is
+have to build curl with an SSL/TLS library, e.g. OpenSSL, because it is
 impossible for curl to access Android's native SSL/TLS layer. To build curl
 for Android using OpenSSL, follow the OpenSSL build instructions and then
 install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
@@ -567,17 +545,19 @@ configure command-line as you can to disable all the libcurl features that you
 know your application is not going to need. Besides specifying the
 `--disable-PROTOCOL` flags for all the types of URLs your application do not
 use, here are some other flags that can reduce the size of the library by
-disabling support for some feature (run `./configure --help` to see them all):
+disabling support for some features (run `./configure --help` to see them all):
 
- - `--disable-alt-svc` (HTTP Alt-Svc)
- - `--disable-ares` (the C-ARES DNS library)
- - `--disable-cookies` (HTTP cookies)
+ - `--disable-aws` (cryptographic authentication)
  - `--disable-basic-auth` (cryptographic authentication)
  - `--disable-bearer-auth` (cryptographic authentication)
  - `--disable-digest-auth` (cryptographic authentication)
+ - `--disable-http-auth` (all HTTP authentication)
  - `--disable-kerberos-auth` (cryptographic authentication)
  - `--disable-negotiate-auth` (cryptographic authentication)
- - `--disable-aws` (cryptographic authentication)
+ - `--disable-ntlm` (NTLM authentication)
+ - `--disable-alt-svc` (HTTP Alt-Svc)
+ - `--disable-ares` (the C-ARES DNS library)
+ - `--disable-cookies` (HTTP cookies)
  - `--disable-dateparse` (date parsing for time conditionals)
  - `--disable-dnsshuffle` (internal server load spreading)
  - `--disable-doh` (DNS-over-HTTP)
@@ -585,17 +565,13 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-get-easy-options` (lookup easy options at runtime)
  - `--disable-headers-api` (API to access headers)
  - `--disable-hsts` (HTTP Strict Transport Security)
- - `--disable-http-auth` (all HTTP authentication)
  - `--disable-ipv6` (IPv6)
  - `--disable-libcurl-option` (--libcurl C code generation support)
  - `--disable-manual` (--manual built-in documentation)
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
- - `--disable-ntlm` (NTLM authentication)
- - `--disable-ntlm-wb` (NTLM winbind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
- - `--disable-pthreads` (multi-threading)
  - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
@@ -611,7 +587,7 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--without-libidn2` (internationalized domain names)
  - `--without-librtmp` (RTMP)
  - `--without-ssl` (SSL/TLS)
- - `--without-zlib` (on-the-fly decompression)
+ - `--without-zlib` (gzip/deflate on-the-fly decompression)
 
 Be sure also to strip debugging symbols from your binaries after compiling
 using 'strip' or an option like `-s`. If space is really tight, you may be able
@@ -619,8 +595,8 @@ to gain a few bytes by removing some unneeded sections of the shared library
 using the -R option to objcopy (e.g. the .comment section).
 
 Using these techniques it is possible to create a basic HTTP-only libcurl
-shared library for i386 Linux platforms that is only 130 KiB in size
-(as of libcurl version 8.6.0, using gcc 13.2.0).
+shared library for i386 Linux platforms that is only 137 KiB in size
+(as of libcurl version 8.13.0, using gcc 14.2.0).
 
 You may find that statically linking libcurl to your application results in a
 lower total size than dynamically linking.

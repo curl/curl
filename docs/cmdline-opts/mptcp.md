@@ -14,7 +14,7 @@ Example:
 
 # `--mptcp`
 
-Enables the use of Multipath TCP (MPTCP) for connections. MPTCP is an extension
+Enable the use of Multipath TCP (MPTCP) for connections. MPTCP is an extension
 to the standard TCP that allows multiple TCP streams over different network
 paths between the same source and destination. This can enhance bandwidth and
 improve reliability by using multiple paths simultaneously.
@@ -24,7 +24,7 @@ servers, such as mobile networks where a device may switch between WiFi and
 cellular data or in wired networks with multiple Internet Service Providers.
 
 This option is currently only supported on Linux starting from kernel 5.6. Only
-TCP connections are modified, hence this option does not effect HTTP/3 (QUIC)
+TCP connections are modified, hence this option does not affect HTTP/3 (QUIC)
 or UDP connections.
 
 The server curl connects to must also support MPTCP. If not, the connection

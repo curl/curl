@@ -28,9 +28,13 @@
 #include "hash.h"
 #include "conncache.h"
 #include "cshutdn.h"
+#include "hostip.h"
 #include "multi_ev.h"
 #include "psl.h"
 #include "socketpair.h"
+#include "uint-bset.h"
+#include "uint-spbset.h"
+#include "uint-table.h"
 
 struct connectdata;
 struct Curl_easy;
@@ -76,7 +80,7 @@ typedef enum {
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#if !defined(CURL_DISABLE_SOCKETPAIR)
+#ifndef CURL_DISABLE_SOCKETPAIR
 #define ENABLE_WAKEUP
 #endif
 
@@ -89,19 +93,19 @@ struct Curl_multi {
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   unsigned int magic;
 
-  unsigned int num_easy; /* amount of entries in the linked list above. */
-  unsigned int num_alive; /* amount of easy handles that are added but have
-                             not yet reached COMPLETE state */
+  unsigned int xfers_alive; /* amount of added transfers that have
+                               not yet reached COMPLETE state */
+  struct uint_tbl xfers; /* transfers added to this multi */
+  /* Each transfer's mid may be present in at most one of these */
+  struct uint_bset process; /* transfer being processed */
+  struct uint_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
+  struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
+  struct uint_bset msgsent; /* transfers done with message for application */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  /* Each added easy handle is added to ONE of these three lists */
-  struct Curl_llist process; /* not in PENDING or MSGSENT */
-  struct Curl_llist pending; /* in PENDING */
-  struct Curl_llist msgsent; /* in MSGSENT */
-  curl_off_t next_easy_mid; /* next multi-id for easy handle added */
-
-  struct Curl_easy *admin; /* internal easy handle for admin operations */
+  struct Curl_easy *admin; /* internal easy handle for admin operations.
+                              gets assigned `mid` 0 on multi init */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;
@@ -111,7 +115,7 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
-  struct Curl_hash hostcache; /* Hostname cache */
+  struct Curl_dnscache dnscache; /* DNS cache */
   struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL

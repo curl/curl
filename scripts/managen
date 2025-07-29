@@ -39,6 +39,9 @@ Unfortunately it seems some perls like msysgit cannot handle a global input-only
 =end comment
 =cut
 
+use strict;
+use warnings;
+
 my %optshort;
 my %optlong;
 my %helplong;
@@ -49,7 +52,7 @@ my %catlong;
 
 use POSIX qw(strftime);
 my @ts;
-if (defined($ENV{SOURCE_DATE_EPOCH})) {
+if(defined($ENV{SOURCE_DATE_EPOCH})) {
     @ts = gmtime($ENV{SOURCE_DATE_EPOCH});
 } else {
     @ts = localtime;
@@ -65,7 +68,7 @@ my $indent = 4;
 sub manpageify {
     my ($k)=@_;
     my $l;
-    my $trail;
+    my $trail = '';
     # the matching pattern might include a trailing dot that cannot be part of
     # the option name
     if($k =~ s/\.$//) {
@@ -127,8 +130,10 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
+    my $l = 0;
     $line[0] =~ s/^( +)//;
-    prefixline($lvl * $indent + length($1));
+    $l = length($1) if($1);
+    prefixline($lvl * $indent + $l);
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
@@ -174,9 +179,11 @@ sub printdesc {
     }
     else {
         my $p = -1;
-        my $para;
+        my $pnum;
+        my $para = '';
         for my $l (@desc) {
-            my $lvl;
+            my $lvl = 0;
+            my $lvlnum;
             if($l !~ /^[\n\r]+/) {
                 # get the indent level off the string
                 $l =~ s/^\[([0-9q]*)\]//;
@@ -186,16 +193,20 @@ sub printdesc {
                 # the previous was quoted, this is not
                 print "\n";
             }
-            if($lvl != $p) {
-                outputpara($baselvl + $p, $para);
+            if($lvl ne $p) {
+                $pnum = $p;
+                $pnum =~ s/q$//;
+                outputpara($baselvl + $pnum, $para);
                 $para = "";
             }
             if($lvl =~ /q/) {
                 # quoted, do not right-justify
                 chomp $l;
-                lastline($baselvl + $lvl + 1, $l);
-                my $w = ($baselvl + $lvl + 1) * $indent + length($l);
-                if ($w > $colwidth) {
+                $lvlnum = $lvl;
+                $lvlnum =~ s/q$//;
+                lastline($baselvl + $lvlnum + 1, $l);
+                my $w = ($baselvl + $lvlnum + 1) * $indent + length($l);
+                if($w > $colwidth) {
                     print STDERR "ERROR: $w columns is too long\n";
                     print STDERR "$l\n";
                     $error++;
@@ -207,7 +218,9 @@ sub printdesc {
 
             $p = $lvl;
         }
-        outputpara($baselvl + $p, $para);
+        $pnum = $p;
+        $pnum =~ s/q$//;
+        outputpara($baselvl + $pnum, $para);
     }
 }
 
@@ -281,10 +294,11 @@ sub render {
     my $header = 0;
     # if $top is TRUE, it means a top-level page and not a command line option
     my $top = ($line == 1);
-    my $quote;
-    my $level;
+    my $quote = 0;
+    my $level = 0;
     my $finalblank;
-    $start = 0;
+    my $blankline = 0;
+    my $start = 0;
 
     while(<$fh>) {
         my $d = $_;
@@ -320,7 +334,23 @@ sub render {
             $quote = 1;
             $d = "$word\n";
         }
-        elsif($quote) {
+        elsif($d =~ /^(```|~~~)/) {
+            if(!$quote) {
+                if($manpage) {
+                    push @desc, "\n" if($blankline);
+                    push @desc, ".nf\n";
+                    $blankline = 0;
+                }
+                $quote = 2;
+            }
+            else {
+                # end of quote
+                push @desc, ".fi\n" if($manpage);
+                $quote = 0;
+            }
+            next;
+        }
+        elsif($quote == 1) {
             # end of quote
             push @desc, ".fi\n" if($manpage);
             $quote = 0;
@@ -559,7 +589,7 @@ sub single {
             $protocols=$1;
         }
         elsif(/^See-also: +(.+)/i) {
-            if($seealso) {
+            if(@seealso) {
                 print STDERR "ERROR: duplicated See-also in $f\n";
                 return 1;
             }
@@ -650,10 +680,6 @@ sub single {
 
     my @desc = render($manpage, $fh, $f, $line);
     close($fh);
-    if($tablemode) {
-        # end of table
-        push @desc, ".RE\n.IP\n";
-    }
     my $opt;
 
     if(defined($short) && $long) {
@@ -786,7 +812,7 @@ sub single {
         my @m=split(/ /, $mutexed);
         my $mstr;
         my $num = scalar(@m);
-        my $count;
+        my $count = 0;
         for my $k (@m) {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
@@ -810,7 +836,7 @@ sub single {
             print ".nf\n";
             foreach my $e (@examples) {
                 $e =~ s!\$URL!https://example.com!g;
-                # convert single backslahes to doubles
+                # convert single backslashes to doubles
                 $e =~ s/\\/\\\\/g;
                 print "curl $e\n";
             }
@@ -860,13 +886,13 @@ sub single {
     push @foot, seealso($standalone, $mstr);
 
     print "\n";
-    my $f = join("", @foot);
+    my $ft = join("", @foot);
     if($manpage) {
-        $f =~ s/ +\z//; # remove trailing space
-        print "$f\n";
+        $ft =~ s/ +\z//; # remove trailing space
+        print "$ft\n";
     }
     else {
-        printdesc($manpage, 2, "[1]$f");
+        printdesc($manpage, 2, "[1]$ft");
     }
     return 0;
 }
@@ -934,8 +960,8 @@ sub getshortlong {
 
 sub indexoptions {
     my ($dir, @files) = @_;
-    foreach my $f (@files) {
-        getshortlong($dir, $f);
+    foreach my $file (@files) {
+        getshortlong($dir, $file);
     }
 }
 
@@ -1106,7 +1132,6 @@ sub listglobals {
         }
         close(F);
     }
-    return $ret if($ret);
     for my $e (0 .. $#globalopts) {
         $globals .= sprintf "%s--%s",  $e?($globalopts[$e+1] ? ", " : " and "):"",
             $globalopts[$e],;
@@ -1160,7 +1185,7 @@ sub mainpage {
 .\\"
 .TH curl 1 "$date" "curl $version" "curl Manual"
 HEADER
-        if ($manpage);
+        if($manpage);
 
     while(<$fh>) {
         my $f = $_;
@@ -1241,7 +1266,7 @@ sub getargs {
 
 my $dir = ".";
 my $include = "../../include";
-my $cmd = shift @ARGV;
+my $cmd = shift @ARGV || '';
 
  check:
 if($cmd eq "-d") {

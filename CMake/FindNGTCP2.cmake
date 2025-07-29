@@ -30,26 +30,32 @@
 # - BoringSSL:  Use `libngtcp2_crypto_boringssl`. (choose this for AWS-LC)
 # - wolfSSL:    Use `libngtcp2_crypto_wolfssl`.
 # - GnuTLS:     Use `libngtcp2_crypto_gnutls`.
+# - ossl:       Use `libngtcp2_crypto_ossl`.
 #
 # Input variables:
 #
-# - `NGTCP2_INCLUDE_DIR`:   The ngtcp2 include directory.
-# - `NGTCP2_LIBRARY`:       Path to `ngtcp2` library.
+# - `NGTCP2_INCLUDE_DIR`:               The ngtcp2 include directory.
+# - `NGTCP2_LIBRARY`:                   Path to `ngtcp2` library.
+# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Path to `ngtcp2_crypto_boringssl` library.
+# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Path to `ngtcp2_crypto_gnutls` library.
+# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Path to `ngtcp2_crypto_ossl` library.
+# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Path to `ngtcp2_crypto_quictls` library.
+# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Path to `ngtcp2_crypto_wolfssl` library.
 #
 # Result variables:
 #
-# - `NGTCP2_FOUND`:         System has ngtcp2.
-# - `NGTCP2_INCLUDE_DIRS`:  The ngtcp2 include directories.
-# - `NGTCP2_LIBRARIES`:     The ngtcp2 library names.
-# - `NGTCP2_LIBRARY_DIRS`:  The ngtcp2 library directories.
-# - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
-# - `NGTCP2_CFLAGS`:        Required compiler flags.
-# - `NGTCP2_VERSION`:       Version of ngtcp2.
+# - `NGTCP2_FOUND`:                     System has ngtcp2.
+# - `NGTCP2_INCLUDE_DIRS`:              The ngtcp2 include directories.
+# - `NGTCP2_LIBRARIES`:                 The ngtcp2 library names.
+# - `NGTCP2_LIBRARY_DIRS`:              The ngtcp2 library directories.
+# - `NGTCP2_PC_REQUIRES`:               The ngtcp2 pkg-config packages.
+# - `NGTCP2_CFLAGS`:                    Required compiler flags.
+# - `NGTCP2_VERSION`:                   Version of ngtcp2.
 
 if(NGTCP2_FIND_COMPONENTS)
   set(_ngtcp2_crypto_backend "")
   foreach(_component IN LISTS NGTCP2_FIND_COMPONENTS)
-    if(_component MATCHES "^(BoringSSL|quictls|wolfSSL|GnuTLS)")
+    if(_component MATCHES "^(BoringSSL|GnuTLS|ossl|quictls|wolfSSL)")
       if(_ngtcp2_crypto_backend)
         message(FATAL_ERROR "NGTCP2: Only one crypto library can be selected")
       endif()
@@ -65,7 +71,7 @@ endif()
 
 set(NGTCP2_PC_REQUIRES "libngtcp2")
 if(_ngtcp2_crypto_backend)
-  set(NGTCP2_CRYPTO_PC_REQUIRES "lib${_crypto_library_lower}")
+  list(APPEND NGTCP2_PC_REQUIRES "lib${_crypto_library_lower}")
 endif()
 
 if(CURL_USE_PKGCONFIG AND
@@ -73,18 +79,10 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGTCP2_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(NGTCP2 ${NGTCP2_PC_REQUIRES})
-  if(_ngtcp2_crypto_backend)
-    pkg_check_modules("${_crypto_library_upper}" ${NGTCP2_CRYPTO_PC_REQUIRES})
-  else()
-    set("${_crypto_library_upper}_FOUND" TRUE)
-  endif()
 endif()
 
-list(APPEND NGTCP2_PC_REQUIRES ${NGTCP2_CRYPTO_PC_REQUIRES})
-
-if(NGTCP2_FOUND AND "${${_crypto_library_upper}_FOUND}")
-  list(APPEND NGTCP2_LIBRARIES "${${_crypto_library_upper}_LIBRARIES}")
-  list(REMOVE_DUPLICATES NGTCP2_LIBRARIES)
+if(NGTCP2_FOUND)
+  set(NGTCP2_VERSION "${NGTCP2_libngtcp2_VERSION}")
   string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()

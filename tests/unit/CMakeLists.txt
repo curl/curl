@@ -22,38 +22,33 @@
 #
 ###########################################################################
 
-# Get 'UNITPROGS', '*_SOURCES', 'FIRSTFILES' variables
+# Get BUNDLE, FIRST_C, TESTS_C variables
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_TEST_BUNDLES)
-  add_custom_command(
-    OUTPUT "unit_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "unit_bundle.c"
-    DEPENDS
-      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES}
-      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
-    VERBATIM)
+add_custom_command(OUTPUT "${BUNDLE}.c"
+  COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl"
+    --test ${TESTS_C} > "${BUNDLE}.c"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/scripts/mk-unity.pl" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    ${FIRST_C} ${TESTS_C}
+  VERBATIM)
 
-  set(UNITPROGS "units")
-  set(units_SOURCES "unit_bundle.c")
+add_executable(${BUNDLE} EXCLUDE_FROM_ALL "${BUNDLE}.c")
+add_dependencies(${BUNDLE} curlu-unitprotos)
+add_dependencies(testdeps ${BUNDLE})
+target_link_libraries(${BUNDLE} curlu)
+target_include_directories(${BUNDLE} PRIVATE
+  "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h", "unitprotos.h"
+  "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
+  "${PROJECT_SOURCE_DIR}/tests/libtest"  # for "first.h", "unitcheck.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
+)
+# unit tests are small pretend-libcurl-programs, pass BUILDING_LIBCURL to reflect that
+target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
+set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
+
+curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${TESTS_C})
+if(TARGET "${BUNDLE}-clang-tidy")
+  add_dependencies("${BUNDLE}-clang-tidy" curlu-unitprotos)
 endif()
-
-foreach(_target IN LISTS UNITPROGS)
-  set(_target_name "${_target}")
-  add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
-  add_dependencies(testdeps ${_target_name})
-  target_link_libraries(${_target_name} curltool curlu)
-  target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/src"
-    "${PROJECT_SOURCE_DIR}/tests/libtest"
-  )
-  if(CURL_TEST_BUNDLES)
-    target_include_directories(${_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/tests/unit")
-  endif()
-  set_target_properties(${_target_name} PROPERTIES
-    OUTPUT_NAME "${_target}"
-    PROJECT_LABEL "Test unit ${_target}")
-endforeach()

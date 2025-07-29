@@ -77,7 +77,7 @@ line three
 four is the number of lines
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Authorization: Basic %b64[testuser:testpass]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 85

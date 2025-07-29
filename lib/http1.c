@@ -44,14 +44,14 @@ void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 {
   memset(parser, 0, sizeof(*parser));
   parser->max_line_len = max_line_len;
-  Curl_dyn_init(&parser->scratch, max_line_len);
+  curlx_dyn_init(&parser->scratch, max_line_len);
 }
 
 void Curl_h1_req_parse_free(struct h1_req_parser *parser)
 {
   if(parser) {
     Curl_http_req_free(parser->req);
-    Curl_dyn_free(&parser->scratch);
+    curlx_dyn_free(&parser->scratch);
     parser->req = NULL;
     parser->done = FALSE;
   }
@@ -108,18 +108,18 @@ static ssize_t next_line(struct h1_req_parser *parser,
   if(parser->line) {
     parser->line = NULL;
     parser->line_len = 0;
-    Curl_dyn_reset(&parser->scratch);
+    curlx_dyn_reset(&parser->scratch);
   }
 
   nread = detect_line(parser, buf, buflen, err);
   if(nread >= 0) {
-    if(Curl_dyn_len(&parser->scratch)) {
+    if(curlx_dyn_len(&parser->scratch)) {
       /* append detected line to scratch to have the complete line */
-      *err = Curl_dyn_addn(&parser->scratch, parser->line, parser->line_len);
+      *err = curlx_dyn_addn(&parser->scratch, parser->line, parser->line_len);
       if(*err)
         return -1;
-      parser->line = Curl_dyn_ptr(&parser->scratch);
-      parser->line_len = Curl_dyn_len(&parser->scratch);
+      parser->line = curlx_dyn_ptr(&parser->scratch);
+      parser->line_len = curlx_dyn_len(&parser->scratch);
     }
     *err = trim_line(parser, options);
     if(*err)
@@ -127,7 +127,8 @@ static ssize_t next_line(struct h1_req_parser *parser,
   }
   else if(*err == CURLE_AGAIN) {
     /* no line end in `buf`, add it to our scratch */
-    *err = Curl_dyn_addn(&parser->scratch, (const unsigned char *)buf, buflen);
+    *err = curlx_dyn_addn(&parser->scratch, (const unsigned char *)buf,
+                          buflen);
     nread = (*err) ? -1 : (ssize_t)buflen;
   }
   return nread;
@@ -208,7 +209,7 @@ static CURLcode start_req(struct h1_req_parser *parser,
     path = target;
     path_len = target_len;
 
-    /* URL parser wants 0-termination */
+    /* URL parser wants null-termination */
     if(target_len >= sizeof(tmp))
       goto out;
     memcpy(tmp, target, target_len);
@@ -299,7 +300,7 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
         goto out;
       }
       parser->done = TRUE;
-      Curl_dyn_reset(&parser->scratch);
+      curlx_dyn_reset(&parser->scratch);
       /* last chance adjustments */
     }
     else {
@@ -321,13 +322,13 @@ CURLcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
 {
   CURLcode result;
 
-  result = Curl_dyn_addf(dbuf, "%s %s%s%s%s HTTP/1.%d\r\n",
-                         req->method,
-                         req->scheme ? req->scheme : "",
-                         req->scheme ? "://" : "",
-                         req->authority ? req->authority : "",
-                         req->path ? req->path : "",
-                         http_minor);
+  result = curlx_dyn_addf(dbuf, "%s %s%s%s%s HTTP/1.%d\r\n",
+                          req->method,
+                          req->scheme ? req->scheme : "",
+                          req->scheme ? "://" : "",
+                          req->authority ? req->authority : "",
+                          req->path ? req->path : "",
+                          http_minor);
   if(result)
     goto out;
 
@@ -335,7 +336,7 @@ CURLcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,
   if(result)
     goto out;
 
-  result = Curl_dyn_addn(dbuf, STRCONST("\r\n"));
+  result = curlx_dyn_addn(dbuf, STRCONST("\r\n"));
 
 out:
   return result;

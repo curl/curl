@@ -21,38 +21,24 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
-#include "warnless.h"
 #include "memdebug.h"
 
-/* For Windows, mainly (may be moved in a config file?) */
-#ifndef STDIN_FILENO
-#define STDIN_FILENO 0
-#endif
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO 1
-#endif
-#ifndef STDERR_FILENO
-#define STDERR_FILENO 2
-#endif
-
-CURLcode test(char *URL)
+static CURLcode test_lib556(char *URL)
 {
   CURLcode res;
   CURL *curl;
-#ifdef LIB696
   int transfers = 0;
-#endif
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -61,15 +47,13 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-#ifdef LIB696
 again:
-#endif
 
   res = curl_easy_perform(curl);
 
   if(!res) {
     /* we are connected, now get an HTTP document the raw way */
-    const char *request =
+    static const char *request =
       "GET /556 HTTP/1.1\r\n"
       "Host: ninja\r\n\r\n";
     const char *sbuf = request;
@@ -99,8 +83,8 @@ again:
 #else
         if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
 #endif
-          fprintf(stderr, "write() failed: errno %d (%s)\n",
-                  errno, strerror(errno));
+          curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
+                        errno, strerror(errno));
           res = TEST_ERR_FAILURE;
           break;
         }
@@ -112,12 +96,12 @@ again:
       res = TEST_ERR_FAILURE;
   }
 
-#ifdef LIB696
-  ++transfers;
-  /* perform the transfer a second time */
-  if(!res && transfers == 1)
-    goto again;
-#endif
+  if(testnum == 696) {
+    ++transfers;
+    /* perform the transfer a second time */
+    if(!res && transfers == 1)
+      goto again;
+  }
 
 test_cleanup:
 

@@ -8,9 +8,9 @@ SPDX-License-Identifier: curl
 
 ## Native vs file based
 
-If curl was built with Schannel or Secure Transport support, then curl uses
-the system native CA store for verification. All other TLS libraries use a
-file based CA store by default.
+If curl was built with Schannel support, then curl uses the system native CA
+store for verification. All other TLS libraries use a file based CA store by
+default.
 
 ## Verification
 
@@ -55,7 +55,8 @@ With the curl command line tool: `--cacert [file]`
 
 If you use the curl command line tool without a native CA store, then you can
 specify your own CA cert file by setting the environment variable
-`CURL_CA_BUNDLE` to the path of your choice.
+`CURL_CA_BUNDLE` to the path of your choice. `SSL_CERT_FILE` and `SSL_CERT_DIR`
+are also supported.
 
 If you are using the curl command line tool on Windows, curl searches for a CA
 cert file named `curl-ca-bundle.crt` in these directories and in this order:
@@ -101,17 +102,13 @@ latest Firefox bundle.
 
 ## Native CA store
 
-If curl was built with Schannel, Secure Transport or were instructed to use
-the native CA Store, then curl uses the certificates that are built into the
-OS. These are the same certificates that appear in the Internet Options
-control panel (under Windows) or Keychain Access application (under macOS).
-Any custom security rules for certificates are honored.
+If curl was built with Schannel or was instructed to use the native CA Store,
+then curl uses the certificates that are built into the OS. These are the same
+certificates that appear in the Internet Options control panel (under Windows)
+or Keychain Access application (under macOS). Any custom security rules for
+certificates are honored.
 
 Schannel runs CRL checks on certificates unless peer verification is disabled.
-Secure Transport on iOS runs OCSP checks on certificates unless peer
-verification is disabled. Secure Transport on macOS runs either OCSP or CRL
-checks on certificates if those features are enabled, and this behavior can be
-adjusted in the preferences of Keychain Access.
 
 ## HTTPS proxy
 

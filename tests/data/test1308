@@ -1,7 +1,6 @@
 <testcase>
 <info>
 <keywords>
-unittest
 curl_formadd
 curl_formget
 FORM
@@ -12,7 +11,6 @@ FORM
 # Client-side
 <client>
 <features>
-unittest
 http
 form-api
 </features>
@@ -20,8 +18,11 @@ form-api
 none
 </server>
 <name>
-formpost unit tests
+formpost tests
 </name>
+<tool>
+lib%TESTNUMBER
+</tool>
 <command>
 %LOGDIR/test-%TESTNUMBER
 </command>

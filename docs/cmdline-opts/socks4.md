@@ -18,8 +18,8 @@ Example:
 # `--socks4`
 
 Use the specified SOCKS4 proxy. If the port number is not specified, it is
-assumed at port 1080. Using this socket type make curl resolve the hostname
-and passing the address on to the proxy.
+assumed at port 1080. Using this socket type makes curl resolve the hostname
+and pass the address on to the proxy.
 
 To specify proxy on a Unix domain socket, use localhost for host, e.g.
 `socks4://localhost/path/to/socket.sock`

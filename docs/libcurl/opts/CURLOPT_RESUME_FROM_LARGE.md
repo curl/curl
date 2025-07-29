@@ -51,8 +51,8 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    curl_off_t resume_position; /* get it somehow */
-    curl_off_t file_size; /* get it somehow as well */
+    curl_off_t resume_position = 1234; /* get it somehow */
+    curl_off_t file_size = 9876; /* get it somehow as well */
 
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
 

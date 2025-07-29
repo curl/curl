@@ -23,12 +23,16 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 # This script invokes nghttpx properly to have it serve HTTP/3 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 
 use Cwd;
 use Cwd 'abs_path';
 use File::Basename;
+use File::Spec;
 
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
@@ -38,7 +42,7 @@ my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "test-localhost";
 my $conf = "nghttpx.conf";
-my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+my $dev_null = File::Spec->devnull();
 
 #***************************************************************************
 # Process command line options
@@ -102,11 +106,8 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-my $srcdir = dirname(__FILE__);
-$certfile = "$srcdir/certs/$cert.pem";
-$keyfile = "$srcdir/certs/$cert.key";
-$certfile = abs_path($certfile);
-$keyfile = abs_path($keyfile);
+$certfile = abs_path("certs/$cert.pem");
+$keyfile = abs_path("certs/$cert.key");
 
 my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
     "--backend-keep-alive-timeout=500ms ".

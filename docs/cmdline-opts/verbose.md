@@ -20,10 +20,11 @@ Example:
 
 # `--verbose`
 
-Makes curl verbose during the operation. Useful for debugging and seeing
-what's going on under the hood. A line starting with \> means header data sent
-by curl, \< means header data received by curl that is hidden in normal cases,
-and a line starting with * means additional info provided by curl.
+Make curl output verbose information during the operation. Useful for
+debugging and seeing what's going on under the hood. A line starting with \>
+means header data sent by curl, \< means header data received by curl that is
+hidden in normal cases, and a line starting with * means additional info
+provided by curl.
 
 If you only want HTTP headers in the output, --show-headers or --dump-header
 might be more suitable options.
@@ -36,13 +37,13 @@ verbosity when the option is mentioned in the command line *and* curl config
 files.
 
 Using it twice, e.g. `-vv`, outputs time (--trace-time) and transfer ids
-(--trace-ids), as well as enable tracing for all protocols (--trace-config
+(--trace-ids), as well as enabling tracing for all protocols (--trace-config
 protocol).
 
-Adding a third verbose outputs transfer content (--trace-ascii %) and enable
+Adding a third verbose outputs transfer content (--trace-ascii %) and enables
 tracing of more components (--trace-config read,write,ssl).
 
-A forth time adds tracing of all network components. (--trace-config network).
+A fourth time adds tracing of all network components. (--trace-config network).
 
 Any addition of the verbose option after that has no effect.
 

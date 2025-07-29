@@ -22,24 +22,25 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "urldata.h"
-#include "strcase.h"
-#include "curl_multibyte.h"
-#include "curl_printf.h"
+#include "../strdup.h"
+#include "../urldata.h"
+#include "../curlx/multibyte.h"
+#include "../curl_printf.h"
+#include "../url.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_build_spn()
  *
- * This is used to build a SPN string in the following formats:
+ * This is used to build an SPN string in the following formats:
  *
  * service/host@realm (Not currently used)
  * service/host       (Not used by GSS-API)
@@ -53,7 +54,7 @@
  *
  * Returns a pointer to the newly allocated SPN.
  */
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef USE_WINDOWS_SSPI
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm)
 {
@@ -78,7 +79,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   TCHAR *tchar_spn = NULL;
   TCHAR *dupe_tchar_spn = NULL;
 
-  (void) realm;
+  (void)realm;
 
   /* Note: We could use DsMakeSPN() or DsClientMakeSpnForTargetServer() rather
      than doing this ourselves but the first is only available in Windows XP
@@ -156,7 +157,121 @@ bool Curl_auth_allowed_to_host(struct Curl_easy *data)
   return !data->state.this_is_a_follow ||
          data->set.allow_auth_to_other_hosts ||
          (data->state.first_host &&
-          strcasecompare(data->state.first_host, conn->host.name) &&
+          curl_strequal(data->state.first_host, conn->host.name) &&
           (data->state.first_remote_port == conn->remote_port) &&
           (data->state.first_remote_protocol == conn->handler->protocol));
 }
+
+#ifdef USE_NTLM
+
+static void ntlm_conn_dtor(void *key, size_t klen, void *entry)
+{
+  struct ntlmdata *ntlm = entry;
+  (void)key;
+  (void)klen;
+  DEBUGASSERT(ntlm);
+  Curl_auth_cleanup_ntlm(ntlm);
+  free(ntlm);
+}
+
+struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
+{
+  const char *key = proxy ? CURL_META_NTLM_PROXY_CONN :
+                    CURL_META_NTLM_CONN;
+  struct ntlmdata *ntlm = Curl_conn_meta_get(conn, key);
+  if(!ntlm) {
+    ntlm = calloc(1, sizeof(*ntlm));
+    if(!ntlm ||
+       Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
+      return NULL;
+  }
+  return ntlm;
+}
+
+void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy)
+{
+  Curl_conn_meta_remove(conn, proxy ?
+    CURL_META_NTLM_PROXY_CONN : CURL_META_NTLM_CONN);
+}
+
+#endif /* USE_NTLM */
+
+#ifdef USE_KERBEROS5
+
+static void krb5_conn_dtor(void *key, size_t klen, void *entry)
+{
+  struct kerberos5data *krb5 = entry;
+  (void)key;
+  (void)klen;
+  DEBUGASSERT(krb5);
+  Curl_auth_cleanup_gssapi(krb5);
+  free(krb5);
+}
+
+struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
+{
+  struct kerberos5data *krb5 = Curl_conn_meta_get(conn, CURL_META_KRB5_CONN);
+  if(!krb5) {
+    krb5 = calloc(1, sizeof(*krb5));
+    if(!krb5 ||
+       Curl_conn_meta_set(conn, CURL_META_KRB5_CONN, krb5, krb5_conn_dtor))
+      return NULL;
+  }
+  return krb5;
+}
+
+#endif /* USE_KERBEROS5 */
+
+#ifdef USE_GSASL
+
+static void gsasl_conn_dtor(void *key, size_t klen, void *entry)
+{
+  struct gsasldata *gsasl = entry;
+  (void)key;
+  (void)klen;
+  DEBUGASSERT(gsasl);
+  Curl_auth_gsasl_cleanup(gsasl);
+  free(gsasl);
+}
+
+struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
+{
+  struct gsasldata *gsasl = Curl_conn_meta_get(conn, CURL_META_GSASL_CONN);
+  if(!gsasl) {
+    gsasl = calloc(1, sizeof(*gsasl));
+    if(!gsasl ||
+       Curl_conn_meta_set(conn, CURL_META_GSASL_CONN, gsasl, gsasl_conn_dtor))
+      return NULL;
+  }
+  return gsasl;
+}
+
+#endif /* USE_GSASL */
+
+#ifdef USE_SPNEGO
+
+static void nego_conn_dtor(void *key, size_t klen, void *entry)
+{
+  struct negotiatedata *nego = entry;
+  (void)key;
+  (void)klen;
+  DEBUGASSERT(nego);
+  Curl_auth_cleanup_spnego(nego);
+  free(nego);
+}
+
+struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
+{
+  const char *key = proxy ? CURL_META_NEGO_PROXY_CONN :
+                    CURL_META_NEGO_CONN;
+  struct negotiatedata *nego = Curl_conn_meta_get(conn, key);
+  if(!nego) {
+    nego = calloc(1, sizeof(*nego));
+    if(!nego ||
+       Curl_conn_meta_set(conn, key, nego, nego_conn_dtor))
+      return NULL;
+  }
+  return nego;
+}
+
+#endif /* USE_SPNEGO */

@@ -127,6 +127,7 @@ options:
         CURLOPT_SSLKEYTYPE
         CURLOPT_SSL_CIPHER_LIST
         CURLOPT_SSL_EC_CURVES
+        CURLOPT_SSL_SIGNATURE_ALGORITHMS
         CURLOPT_TLS13_CIPHERS
         CURLOPT_TLSAUTH_PASSWORD
         CURLOPT_TLSAUTH_TYPE
@@ -268,7 +269,7 @@ _ As a prerequisite, QADRT development environment must be installed.
 _ If data compression has to be supported, ZLIB development environment must
   be installed.
 _ Likewise, if SCP and SFTP protocols have to be compiled in, LIBSSH2
-  developent environment must be installed.
+  development environment must be installed.
 _ Install the curl source directory in IFS. Do NOT install it in the
   installation target directory (which defaults to /curl).
 _ Enter Qshell (QSH, not PASE)

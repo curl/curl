@@ -184,7 +184,7 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
 {
   int r = WaitSelect(nfds, readfds, writefds, errorfds, timeout, 0);
   /* Ensure Ctrl-C signal is actioned */
-  if((r == -1) && (SOCKERRNO == EINTR))
+  if((r == -1) && (SOCKERRNO == SOCKEINTR))
     raise(SIGINT);
   return r;
 }

@@ -165,11 +165,14 @@ lib%TESTNUMBER
 </tool>
 # provide URL and ca-cert
 <command>
-https://localhost:%HTTPSPORT/%TESTNUMBER  %SRCDIR/certs/test-ca.crt
+https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
+<limits>
+Allocations: 13500
+</limits>
 </verify>
 </testcase>

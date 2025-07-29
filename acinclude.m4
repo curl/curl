@@ -600,9 +600,7 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
      #ifdef HAVE_SYS_TYPES_H
      #include <sys/types.h>
      #endif
-     #ifdef HAVE_SYS_SOCKET_H
      #include <sys/socket.h>
-     #endif
      #ifdef HAVE_NETINET_IN_H
      #include <netinet/in.h>
      #endif
@@ -620,7 +618,7 @@ dnl Test if the socket recv() function is available,
 AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   #
   AC_MSG_CHECKING([for recv])
   AC_LINK_IFELSE([
@@ -636,9 +634,7 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_SOCKET_H
       #include <sys/socket.h>
-      #endif
       #endif
     ]],[[
       recv(0, 0, 0, 0);
@@ -668,7 +664,7 @@ dnl Test if the socket send() function is available,
 AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   #
   AC_MSG_CHECKING([for send])
   AC_LINK_IFELSE([
@@ -684,9 +680,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
       #endif
-      #ifdef HAVE_SYS_SOCKET_H
       #include <sys/socket.h>
-      #endif
       #endif
     ]],[[
       char s[] = "";
@@ -714,7 +708,7 @@ dnl -------------------------------------------------
 dnl Check for MSG_NOSIGNAL
 
 AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
-  AC_CHECK_HEADERS(sys/types.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_CACHE_CHECK([for MSG_NOSIGNAL], [curl_cv_msg_nosignal], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -728,9 +722,7 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
         #ifdef HAVE_SYS_TYPES_H
         #include <sys/types.h>
         #endif
-        #ifdef HAVE_SYS_SOCKET_H
         #include <sys/socket.h>
-        #endif
         #endif
       ]],[[
         int flag = MSG_NOSIGNAL;
@@ -757,7 +749,7 @@ dnl Check for timeval struct
 
 AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_CHECK_HEADERS(sys/types.h sys/time.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -767,17 +759,14 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         #define WIN32_LEAN_AND_MEAN
         #endif
         #include <winsock2.h>
+        #else
+        #include <sys/socket.h>
+        #include <sys/time.h>
         #endif
         #ifdef HAVE_SYS_TYPES_H
         #include <sys/types.h>
         #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
-        #endif
         #include <time.h>
-        #ifdef HAVE_SYS_SOCKET_H
-        #include <sys/socket.h>
-        #endif
       ]],[[
         struct timeval ts;
         ts.tv_sec  = 0;
@@ -804,32 +793,32 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
-  AC_CHECK_HEADERS(sys/types.h sys/time.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" = "xno" ; then
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #ifdef HAVE_SYS_TYPES_H
-        #include <sys/types.h>
-        #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
-        #endif
-        #include <time.h>
-      ]],[[
-        struct timespec ts;
-        (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-        (void)ts;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      curl_func_clock_gettime="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      curl_func_clock_gettime="no"
-    ])
-  fi
+
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifndef _WIN32
+      #include <sys/time.h>
+      #endif
+      #include <time.h>
+    ]],[[
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+      (void)ts;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    curl_func_clock_gettime="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    curl_func_clock_gettime="no"
+  ])
+
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
   dnl until library linking and run-time checks for clock_gettime succeed.
 ])
@@ -839,32 +828,30 @@ dnl -------------------------------------------------
 dnl Check if monotonic clock_gettime is available.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
-  AC_CHECK_HEADERS(sys/types.h sys/time.h)
+  AC_CHECK_HEADERS(sys/types.h)
   AC_MSG_CHECKING([for raw monotonic clock_gettime])
   #
-  if test "x$dontwant_rt" = "xno" ; then
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #ifdef HAVE_SYS_TYPES_H
-        #include <sys/types.h>
-        #endif
-        #ifdef HAVE_SYS_TIME_H
-        #include <sys/time.h>
-        #endif
-        #include <time.h>
-      ]],[[
-        struct timespec ts;
-        (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
-        (void)ts;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC_RAW, 1,
-        [Define to 1 if you have the clock_gettime function and raw monotonic timer.])
-    ],[
-      AC_MSG_RESULT([no])
-    ])
-  fi
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifndef _WIN32
+      #include <sys/time.h>
+      #endif
+      #include <time.h>
+    ]],[[
+      struct timespec ts;
+      (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+      (void)ts;
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_CLOCK_GETTIME_MONOTONIC_RAW, 1,
+      [Define to 1 if you have the clock_gettime function and raw monotonic timer.])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 ])
 
 
@@ -895,7 +882,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
             #ifdef HAVE_SYS_TYPES_H
             #include <sys/types.h>
             #endif
-            #ifdef HAVE_SYS_TIME_H
+            #ifndef _WIN32
             #include <sys/time.h>
             #endif
             #include <time.h>
@@ -923,13 +910,18 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         curl_func_clock_gettime="yes"
         ;;
       *)
-        if test -z "$curl_cv_save_LIBS"; then
-          LIBS="$curl_cv_gclk_LIBS"
+        if test "x$dontwant_rt" = "xyes" ; then
+          AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
+          curl_func_clock_gettime="no"
         else
-          LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+          if test -z "$curl_cv_save_LIBS"; then
+            LIBS="$curl_cv_gclk_LIBS"
+          else
+            LIBS="$curl_cv_gclk_LIBS $curl_cv_save_LIBS"
+          fi
+          AC_MSG_RESULT([$curl_cv_gclk_LIBS])
+          curl_func_clock_gettime="yes"
         fi
-        AC_MSG_RESULT([$curl_cv_gclk_LIBS])
-        curl_func_clock_gettime="yes"
         ;;
     esac
     #
@@ -943,7 +935,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
           #ifdef HAVE_SYS_TYPES_H
           #include <sys/types.h>
           #endif
-          #ifdef HAVE_SYS_TIME_H
+          #ifndef _WIN32
           #include <sys/time.h>
           #endif
           #include <time.h>
@@ -1031,7 +1023,7 @@ dnl Test if the socket select() function is available.
 AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_REQUIRE([CURL_CHECK_STRUCT_TIMEVAL])dnl
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
-  AC_CHECK_HEADERS(sys/select.h sys/socket.h)
+  AC_CHECK_HEADERS(sys/select.h)
   #
   AC_MSG_CHECKING([for select])
   AC_LINK_IFELSE([
@@ -1042,12 +1034,12 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #define WIN32_LEAN_AND_MEAN
       #endif
       #include <winsock2.h>
+      #else
+      #include <sys/socket.h>
+      #include <sys/time.h>
       #endif
       #ifdef HAVE_SYS_TYPES_H
       #include <sys/types.h>
-      #endif
-      #ifdef HAVE_SYS_TIME_H
-      #include <sys/time.h>
       #endif
       #include <time.h>
       #ifndef _WIN32
@@ -1055,9 +1047,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
       #include <sys/select.h>
       #elif defined(HAVE_UNISTD_H)
       #include <unistd.h>
-      #endif
-      #ifdef HAVE_SYS_SOCKET_H
-      #include <sys/socket.h>
       #endif
       $curl_includes_bsdsocket
       #endif

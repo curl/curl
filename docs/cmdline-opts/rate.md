@@ -41,6 +41,6 @@ more than 1000 per second, it instead runs unrestricted.
 When retrying transfers, enabled with --retry, the separate retry delay logic
 is used and not this setting.
 
-Starting in version 8.10.0, you can specify number of time units in the rate
+Starting in version 8.10.0, you can specify the number of time units in the rate
 expression. Make curl do no more than 5 transfers per 15 seconds with "5/15s"
 or limit it to 3 transfers per 4 hours with "3/4h". No spaces allowed.

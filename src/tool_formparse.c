@@ -23,13 +23,8 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "strcase.h"
-
-#include "curlx.h"
-
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
-#include "tool_binmode.h"
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
@@ -135,7 +130,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     curl_off_t origin;
     struct_stat sbuf;
 
-    CURL_SET_BINMODE(stdin);
+    CURLX_SET_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */
@@ -171,7 +166,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
     if(!m)
-      Curl_safefree(data);
+      tool_safefree(data);
     else {
       m->data = data;
       m->origin = origin;
@@ -192,11 +187,11 @@ void tool_mime_free(struct tool_mime *mime)
       tool_mime_free(mime->subparts);
     if(mime->prev)
       tool_mime_free(mime->prev);
-    Curl_safefree(mime->name);
-    Curl_safefree(mime->filename);
-    Curl_safefree(mime->type);
-    Curl_safefree(mime->encoder);
-    Curl_safefree(mime->data);
+    tool_safefree(mime->name);
+    tool_safefree(mime->filename);
+    tool_safefree(mime->type);
+    tool_safefree(mime->encoder);
+    tool_safefree(mime->data);
     curl_slist_free_all(mime->headers);
     free(mime);
   }
@@ -209,7 +204,7 @@ size_t tool_mime_stdin_read(char *buffer,
 {
   struct tool_mime *sip = (struct tool_mime *) arg;
   curl_off_t bytesleft;
-  (void) size;  /* Always 1: ignored. */
+  (void)size;  /* Always 1: ignored. */
 
   if(sip->size >= 0) {
     if(sip->curpos >= sip->size)
@@ -228,9 +223,9 @@ size_t tool_mime_stdin_read(char *buffer,
       nitems = fread(buffer, 1, nitems, stdin);
       if(ferror(stdin)) {
         /* Show error only once. */
-        if(sip->config) {
-          warnf(sip->config, "stdin: %s", strerror(errno));
-          sip->config = NULL;
+        if(sip->global) {
+          warnf(sip->global, "stdin: %s", strerror(errno));
+          sip->global = NULL;
         }
         return CURL_READFUNC_ABORT;
       }
@@ -350,7 +345,7 @@ CURLcode tool2curlmime(CURL *curl, struct tool_mime *m, curl_mime **mime)
 
 /*
  * helper function to get a word from form param
- * after call get_parm_word, str either point to string end
+ * after call get_param_word, str either point to string end
  * or point to any of end chars.
  */
 static char *get_param_word(struct OperationConfig *config, char **str,
@@ -828,7 +823,7 @@ int formparse(struct OperationConfig *config,
           goto fail;
         part->headers = headers;
         headers = NULL;
-        part->config = config->global;
+        part->global = config->global;
         if(res == CURLE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by
@@ -838,8 +833,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
-          part->data = NULL;
+          tool_safefree(part->data);
           part->size = -1;
           res = CURLE_OK;
         }
@@ -865,7 +859,7 @@ int formparse(struct OperationConfig *config,
           goto fail;
         part->headers = headers;
         headers = NULL;
-        part->config = config->global;
+        part->global = config->global;
         if(res == CURLE_READ_ERROR) {
             /* An error occurred while reading stdin: if read has started,
                issue the error now. Else, delay it until processed by
@@ -875,8 +869,7 @@ int formparse(struct OperationConfig *config,
                   "error while reading standard input");
             goto fail;
           }
-          Curl_safefree(part->data);
-          part->data = NULL;
+          tool_safefree(part->data);
           part->size = -1;
           res = CURLE_OK;
         }
@@ -918,7 +911,7 @@ int formparse(struct OperationConfig *config,
   }
   err = 0;
 fail:
-  Curl_safefree(contents);
+  tool_safefree(contents);
   curl_slist_free_all(headers);
   return err;
 }

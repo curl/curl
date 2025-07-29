@@ -37,7 +37,7 @@
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
 
@@ -48,7 +48,7 @@
 
 #ifdef _WIN32
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \
   !defined(CURL_WINDOWS_UWP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
@@ -72,7 +72,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
-#if defined(HAVE_WIN_BCRYPTGENRANDOM)
+#ifdef HAVE_WIN_BCRYPTGENRANDOM
   if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
@@ -100,11 +100,11 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-#if !defined(USE_SSL)
+#ifndef USE_SSL
 /* ---- possibly non-cryptographic version following ---- */
 static CURLcode weak_random(struct Curl_easy *data,
-                          unsigned char *entropy,
-                          size_t length) /* always 4, size of int */
+                            unsigned char *entropy,
+                            size_t length) /* always 4, size of int */
 {
   unsigned int r;
   DEBUGASSERT(length == sizeof(int));
@@ -119,7 +119,7 @@ static CURLcode weak_random(struct Curl_easy *data,
   }
 #endif
 
-#if defined(HAVE_ARC4RANDOM)
+#ifdef HAVE_ARC4RANDOM
   (void)data;
   r = (unsigned int)arc4random();
   memcpy(entropy, &r, length);
@@ -130,7 +130,7 @@ static CURLcode weak_random(struct Curl_easy *data,
     static bool seeded = FALSE;
     unsigned int rnd;
     if(!seeded) {
-      struct curltime now = Curl_now();
+      struct curltime now = curlx_now();
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;
@@ -191,12 +191,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
  * Curl_rand() stores 'num' number of random unsigned characters in the buffer
  * 'rnd' points to.
  *
- * If libcurl is built without TLS support or with a TLS backend that lacks a
- * proper random API (Rustls or mbedTLS), this function will use "weak"
- * random.
+ * If libcurl is built without TLS support or arc4random, this function will
+ * use "weak" random.
  *
- * When built *with* TLS support and a backend that offers strong random, it
- * will return error if it cannot provide strong random values.
+ * When built *with* TLS support, it will return error if it cannot provide
+ * strong random values.
  *
  * NOTE: 'data' may be passed in as NULL when coming from external API without
  * easy handle!

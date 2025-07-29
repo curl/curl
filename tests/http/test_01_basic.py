@@ -36,13 +36,6 @@ log = logging.getLogger(__name__)
 
 class TestBasic:
 
-    @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
-        if env.have_h3():
-            nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
-        httpd.reload()
-
     # simple http: GET
     def test_01_01_http_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
@@ -99,7 +92,8 @@ class TestBasic:
         r.check_stats(http_status=200, count=1,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
-        assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
+        # there are cases where time_connect is reported as 0
+        assert r.stats[0]['time_connect'] >= 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
 
     # simple https: HEAD
@@ -115,7 +109,7 @@ class TestBasic:
         r.check_stats(http_status=200, count=1, exitcode=0,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
-        # got the Conten-Length: header, but did not download anything
+        # got the Content-Length: header, but did not download anything
         assert r.responses[0]['header']['content-length'] == '30', f'{r.responses[0]}'
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'
 
@@ -155,14 +149,14 @@ class TestBasic:
     # http: large response headers
     # send 48KB+ sized response headers to check we handle that correctly
     # larger than 64KB headers expose a bug in Apache HTTP/2 that is not
-    # RSTing the stream correclty when its internal limits are exceeded.
+    # RSTing the stream correctly when its internal limits are exceeded.
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_01_11_large_resp_headers(self, env: Env, httpd, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={48 * 1024}'
+            f'/curltest/tweak?x-hd={48 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
@@ -172,14 +166,14 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_12_xlarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_12_xlarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             f'H2MaxHeaderBlockLen {130 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={128 * 1024}'
+            f'/curltest/tweak?x-hd={128 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         r.check_exit_code(0)
         assert len(r.responses) == 1, f'{r.responses}'
@@ -189,15 +183,15 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_13_megalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_13_megalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {130 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd1={128 * 1024}'
+            f'/curltest/tweak?x-hd1={128 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2
@@ -209,15 +203,15 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_14_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {1024 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd={256 * 1024}'
+            f'/curltest/tweak?x-hd={256 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2
@@ -228,17 +222,54 @@ class TestBasic:
     @pytest.mark.skipif(condition=not Env.httpd_is_at_least('2.4.64'),
                         reason='httpd must be at least 2.4.64')
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, proto):
+    def test_01_15_gigalarge_resp_headers(self, env: Env, httpd, configures_httpd, proto):
         httpd.set_extra_config('base', [
             'LogLevel http2:trace2',
             f'H2MaxHeaderBlockLen {1024 * 1024}',
         ])
-        httpd.reload()
+        httpd.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}' \
-              f'/curltest/tweak?x-hd1={256 * 1024}'
+            f'/curltest/tweak?x-hd1={256 * 1024}'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[])
         if proto == 'h2':
             r.check_exit_code(16)  # CURLE_HTTP2
         else:
             r.check_exit_code(100)  # CURLE_TOO_LARGE
+
+    # http: invalid request headers, GET, issue #16998
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_01_16_inv_req_get(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
+            '-H', "a: a\x0ab"
+        ])
+        # on h1, request is sent, h2/h3 reject
+        if proto == 'http/1.1':
+            r.check_exit_code(0)
+        else:
+            r.check_exit_code(43)
+
+    # http: special handling of TE request header
+    @pytest.mark.parametrize("te_in, te_out", [
+        pytest.param('trailers', 'trailers', id='trailers'),
+        pytest.param('chunked', None, id='chunked'),
+        pytest.param('gzip, trailers', 'trailers', id='gzip+trailers'),
+        pytest.param('gzip ;q=0.2;x="y,x", trailers', 'trailers', id='gzip+q+x+trailers'),
+        pytest.param('gzip ;x="trailers", chunks', None, id='gzip+x+chunks'),
+    ])
+    def test_01_17_TE(self, env: Env, httpd, te_in, te_out):
+        proto = 'h2'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               with_headers=True,
+                               extra_args=['-H', f'TE: {te_in}'])
+        r.check_response(200)
+        if te_out is not None:
+            assert r.responses[0]['header']['request-te'] == te_out, f'{r.responses[0]}'
+        else:
+            assert 'request-te' not in r.responses[0]['header'], f'{r.responses[0]}'

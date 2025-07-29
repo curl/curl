@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-hash
+uint_hash
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-Internal hash_offt create/add/destroy testing, exercising clean functions
+Internal uint_hash create/add/destroy testing, exercising clean functions
 </name>
 </client>
 </testcase>

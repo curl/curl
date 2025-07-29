@@ -26,7 +26,7 @@
  * bug report #1871269, fixed on Jan 14 2008 before the 7.18.0 release.
  */
 
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
@@ -55,29 +55,29 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 #define NUM_HEADERS 8
 #define SIZE_HEADERS 5000
 
-static char testbuf[SIZE_HEADERS + 100];
-
-CURLcode test(char *URL)
+static CURLcode test_lib553(char *URL)
 {
+  static char testbuf[SIZE_HEADERS + 100];
+
   CURL *curl;
   CURLcode res = CURLE_FAILED_INIT;
   int i;
   struct curl_slist *headerlist = NULL, *hl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   for(i = 0; i < NUM_HEADERS; i++) {
-    int len = msnprintf(testbuf, sizeof(testbuf), "Header%d: ", i);
+    int len = curl_msnprintf(testbuf, sizeof(testbuf), "Header%d: ", i);
     memset(&testbuf[len], 'A', SIZE_HEADERS);
     testbuf[len + SIZE_HEADERS] = 0; /* null-terminate */
     hl = curl_slist_append(headerlist, testbuf);

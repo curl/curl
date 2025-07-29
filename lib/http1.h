@@ -42,7 +42,7 @@ struct h1_req_parser {
   const char *line;
   size_t max_line_len;
   size_t line_len;
-  bool done;
+  BIT(done);
 };
 
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len);

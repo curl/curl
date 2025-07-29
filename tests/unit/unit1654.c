@@ -21,26 +21,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "altsvc.h"
 
-static CURLcode
-unit_setup(void)
+static CURLcode test_unit1654(char *arg)
 {
-  return CURLE_OK;
-}
+  UNITTEST_BEGIN_SIMPLE
 
-static void
-unit_stop(void)
-{
-  curl_global_cleanup();
-}
-
-UNITTEST_START
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
-{
   char outname[256];
   CURL *curl;
   CURLcode result;
@@ -58,7 +48,7 @@ UNITTEST_START
     goto fail;
   }
   fail_unless(Curl_llist_count(&asi->list) == 4, "wrong number of entries");
-  msnprintf(outname, sizeof(outname), "%s-out", arg);
+  curl_msnprintf(outname, sizeof(outname), "%s-out", arg);
 
   result = Curl_altsvc_parse(curl, asi, "h2=\"example.com:8080\"\r\n",
                              ALPN_h1, "example.org", 8080);
@@ -88,7 +78,7 @@ UNITTEST_START
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:443\"; ma=\"180\";\r\n",
                              ALPN_h2, "example.net", 80);
-  fail_if(result, "Curl_altsvc_parse(4) failed!");
+  fail_if(result, "Curl_altsvc_parse(5) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   result =
@@ -96,40 +86,59 @@ UNITTEST_START
                       "h2=\":443\", h3=\":443\"; "
                       "persist = \"1\"; ma = 120;\r\n",
                       ALPN_h1, "curl.se", 80);
-  fail_if(result, "Curl_altsvc_parse(5) failed!");
+  fail_if(result, "Curl_altsvc_parse(6) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;\r\n",
                              ALPN_h1, "curl.se", 80);
+  fail_if(result, "Curl_altsvc_parse(7) failed!");
+  fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
+
+  result =
+    Curl_altsvc_parse(curl, asi,
+                      "h2=\":443\", h3=\":443\"; "
+                      "persist = \"1\"; ma = 120;\r\n",
+                      ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(6) failed!");
+  fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
+
+  /* clear - without semicolon */
+  result = Curl_altsvc_parse(curl, asi, "clear\r\n",
+                             ALPN_h1, "curl.se", 80);
+  fail_if(result, "Curl_altsvc_parse(7) failed!");
   fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   /* only a non-existing alpn */
   result = Curl_altsvc_parse(curl, asi,
                              "h6=\"example.net:443\"; ma=\"180\";\r\n",
                              ALPN_h2, "5.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(8) failed!");
 
   /* missing quote in alpn host */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:443,; ma=\"180\";\r\n",
                              ALPN_h2, "6.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(9) failed!");
 
   /* missing port in host name */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net\"; ma=\"180\";\r\n",
                              ALPN_h2, "7.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(10) failed!");
 
   /* illegal port in host name */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:70000\"; ma=\"180\";\r\n",
                              ALPN_h2, "8.example.net", 80);
+  fail_if(result, "Curl_altsvc_parse(11) failed!");
 
   Curl_altsvc_save(curl, asi, outname);
 
   curl_easy_cleanup(curl);
 fail:
   Curl_altsvc_cleanup(&asi);
-}
 #endif
-UNITTEST_STOP
+
+  UNITTEST_END(curl_global_cleanup())
+}

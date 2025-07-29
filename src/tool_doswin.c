@@ -38,8 +38,8 @@
 
 #include "tool_bname.h"
 #include "tool_doswin.h"
+#include "tool_msgs.h"
 
-#include "curlx.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef _WIN32
@@ -177,7 +177,6 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
     if(clip) {
       *clip = '\0';
-      len = clip - target;
     }
   }
 
@@ -595,7 +594,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
   if(res_len > 0) {
     char *mstr = curlx_convert_tchar_to_UTF8(buf);
-    Curl_safefree(config->cacert);
+    tool_safefree(config->cacert);
     if(mstr)
       config->cacert = strdup(mstr);
     curlx_unicodefree(mstr);
@@ -732,27 +731,228 @@ static void init_terminal(void)
 }
 #endif
 
-LARGE_INTEGER tool_freq;
-bool tool_isVistaOrGreater;
-
 CURLcode win32_init(void)
 {
-  /* curlx_verify_windows_version must be called during init at least once
-     because it has its own initialization routine. */
-  if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL))
-    tool_isVistaOrGreater = true;
-  else
-    tool_isVistaOrGreater = false;
-
-  QueryPerformanceFrequency(&tool_freq);
-
+  curlx_now_init();
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   init_terminal();
 #endif
 
   return CURLE_OK;
 }
+
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+/* The following STDIN non - blocking read techniques are heavily inspired
+   by nmap and ncat (https://nmap.org/ncat/) */
+struct win_thread_data {
+  /* This is a copy of the true stdin file handle before any redirection. It is
+      read by the thread. */
+  HANDLE stdin_handle;
+  /* This is the listen socket for the thread. It is closed after the first
+      connection. */
+  curl_socket_t socket_l;
+  /* This is the global config - used for printing errors and so forth */
+  struct GlobalConfig *global;
+};
+
+static DWORD WINAPI win_stdin_thread_func(void *thread_data)
+{
+  struct win_thread_data *tdata = (struct win_thread_data *)thread_data;
+  DWORD n;
+  int nwritten;
+  char buffer[BUFSIZ];
+  BOOL r;
+
+  SOCKADDR_IN clientAddr;
+  int clientAddrLen = sizeof(clientAddr);
+
+  curl_socket_t socket_w = accept(tdata->socket_l, (SOCKADDR*)&clientAddr,
+                           &clientAddrLen);
+
+  if(socket_w == CURL_SOCKET_BAD) {
+    errorf(tdata->global, "accept error: %08lx\n", GetLastError());
+    goto ThreadCleanup;
+  }
+
+  closesocket(tdata->socket_l); /* sclose here fails test 1498 */
+  tdata->socket_l = CURL_SOCKET_BAD;
+  if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
+    errorf(tdata->global, "shutdown error: %08lx\n", GetLastError());
+    goto ThreadCleanup;
+  }
+  for(;;) {
+    r = ReadFile(tdata->stdin_handle, buffer, sizeof(buffer), &n, NULL);
+    if(r == 0)
+      break;
+    if(n == 0)
+      break;
+    nwritten = send(socket_w, buffer, n, 0);
+    if(nwritten == SOCKET_ERROR)
+      break;
+    if((DWORD)nwritten != n)
+      break;
+  }
+ThreadCleanup:
+  CloseHandle(tdata->stdin_handle);
+  tdata->stdin_handle = NULL;
+  if(tdata->socket_l != CURL_SOCKET_BAD) {
+    sclose(tdata->socket_l);
+    tdata->socket_l = CURL_SOCKET_BAD;
+  }
+  if(socket_w != CURL_SOCKET_BAD)
+    sclose(socket_w);
+
+  if(tdata) {
+    free(tdata);
+  }
+
+  return 0;
+}
+
+/* The background thread that reads and buffers the true stdin. */
+static HANDLE stdin_thread = NULL;
+static curl_socket_t socket_r = CURL_SOCKET_BAD;
+
+curl_socket_t win32_stdin_read_thread(struct GlobalConfig *global)
+{
+  int result;
+  bool r;
+  int rc = 0, socksize = 0;
+  struct win_thread_data *tdata = NULL;
+  SOCKADDR_IN selfaddr;
+
+  if(socket_r != CURL_SOCKET_BAD) {
+    assert(stdin_thread != NULL);
+    return socket_r;
+  }
+  assert(stdin_thread == NULL);
+
+  do {
+    /* Prepare handles for thread */
+    tdata = (struct win_thread_data*)calloc(1, sizeof(struct win_thread_data));
+    if(!tdata) {
+      errorf(global, "calloc() error");
+      break;
+    }
+    /* Create the listening socket for the thread. When it starts, it will
+    * accept our connection and begin writing STDIN data to the connection. */
+    tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
+                                 IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+    if(tdata->socket_l == CURL_SOCKET_BAD) {
+      errorf(global, "WSASocketW error: %08lx", GetLastError());
+      break;
+    }
+
+    socksize = sizeof(selfaddr);
+    memset(&selfaddr, 0, socksize);
+    selfaddr.sin_family = AF_INET;
+    selfaddr.sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
+    /* Bind to any available loopback port */
+    result = bind(tdata->socket_l, (SOCKADDR*)&selfaddr, socksize);
+    if(result == SOCKET_ERROR) {
+      errorf(global, "bind error: %08lx", GetLastError());
+      break;
+    }
+
+    /* Bind to any available loopback port */
+    result = getsockname(tdata->socket_l, (SOCKADDR*)&selfaddr, &socksize);
+    if(result == SOCKET_ERROR) {
+      errorf(global, "getsockname error: %08lx", GetLastError());
+      break;
+    }
+
+    result = listen(tdata->socket_l, 1);
+    if(result == SOCKET_ERROR) {
+      errorf(global, "listen error: %08lx\n", GetLastError());
+      break;
+    }
+
+    /* Make a copy of the stdin handle to be used by win_stdin_thread_func */
+    r = DuplicateHandle(GetCurrentProcess(), GetStdHandle(STD_INPUT_HANDLE),
+                        GetCurrentProcess(), &tdata->stdin_handle,
+                        0, FALSE, DUPLICATE_SAME_ACCESS);
+
+    if(!r) {
+      errorf(global, "DuplicateHandle error: %08lx", GetLastError());
+      break;
+    }
+
+    /* Start up the thread. We don't bother keeping a reference to it
+       because it runs until program termination. From here on out all reads
+       from the stdin handle or file descriptor 0 will be reading from the
+       socket that is fed by the thread. */
+    stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
+                                tdata, 0, NULL);
+    if(!stdin_thread) {
+      errorf(global, "CreateThread error: %08lx", GetLastError());
+      break;
+    }
+
+    /* Connect to the thread and rearrange our own STDIN handles */
+    socket_r = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(socket_r == CURL_SOCKET_BAD) {
+      errorf(global, "socket error: %08lx", GetLastError());
+      break;
+    }
+
+    /* Hard close the socket on closesocket() */
+    setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
+
+    if(connect(socket_r, (SOCKADDR*)&selfaddr, socksize) == SOCKET_ERROR) {
+      errorf(global, "connect error: %08lx", GetLastError());
+      break;
+    }
+
+    if(shutdown(socket_r, SD_SEND) == SOCKET_ERROR) {
+      errorf(global, "shutdown error: %08lx", GetLastError());
+      break;
+    }
+
+    /* Set the stdin handle to read from the socket. */
+    if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
+      errorf(global, "SetStdHandle error: %08lx", GetLastError());
+      break;
+    }
+
+    rc = 1;
+  } while(0);
+
+  if(rc != 1) {
+    if(socket_r != CURL_SOCKET_BAD && tdata) {
+      if(GetStdHandle(STD_INPUT_HANDLE) == (HANDLE)socket_r &&
+        tdata->stdin_handle) {
+          /* restore STDIN */
+          SetStdHandle(STD_INPUT_HANDLE, tdata->stdin_handle);
+          tdata->stdin_handle = NULL;
+        }
+
+      sclose(socket_r);
+      socket_r = CURL_SOCKET_BAD;
+    }
+
+    if(stdin_thread) {
+      TerminateThread(stdin_thread, 1);
+      stdin_thread = NULL;
+    }
+
+    if(tdata) {
+      if(tdata->stdin_handle)
+        CloseHandle(tdata->stdin_handle);
+      if(tdata->socket_l != CURL_SOCKET_BAD)
+        sclose(tdata->socket_l);
+
+      free(tdata);
+    }
+
+    return CURL_SOCKET_BAD;
+  }
+
+  assert(socket_r != CURL_SOCKET_BAD);
+  return socket_r;
+}
+
+#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
 
 #endif /* _WIN32 */
 

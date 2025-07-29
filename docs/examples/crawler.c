@@ -55,15 +55,15 @@ static void sighandler(int dummy)
 }
 
 /* resizable buffer */
-typedef struct {
+struct memory {
   char *buf;
   size_t size;
-} memory;
+};
 
 static size_t grow_buffer(void *contents, size_t sz, size_t nmemb, void *ctx)
 {
   size_t realsize = sz * nmemb;
-  memory *mem = (memory*) ctx;
+  struct memory *mem = (struct memory*) ctx;
   char *ptr = realloc(mem->buf, mem->size + realsize);
   if(!ptr) {
     /* out of memory */
@@ -79,14 +79,14 @@ static size_t grow_buffer(void *contents, size_t sz, size_t nmemb, void *ctx)
 static CURL *make_handle(const char *url)
 {
   CURL *handle = curl_easy_init();
-  memory *mem;
+  struct memory *mem;
 
   /* Important: use HTTP2 over HTTPS */
   curl_easy_setopt(handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
   curl_easy_setopt(handle, CURLOPT_URL, url);
 
   /* buffer body */
-  mem = malloc(sizeof(memory));
+  mem = malloc(sizeof(*mem));
   mem->size = 0;
   mem->buf = malloc(1);
   curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, grow_buffer);
@@ -119,7 +119,8 @@ static CURL *make_handle(const char *url)
 }
 
 /* HREF finder implemented in libxml2 but could be any HTML parser */
-static size_t follow_links(CURLM *multi_handle, memory *mem, const char *url)
+static size_t follow_links(CURLM *multi_handle, struct memory *mem,
+                           const char *url)
 {
   int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | \
              HTML_PARSE_NOWARNING | HTML_PARSE_NONET;
@@ -213,7 +214,7 @@ int main(void)
       if(m->msg == CURLMSG_DONE) {
         CURL *handle = m->easy_handle;
         char *url;
-        memory *mem;
+        struct memory *mem;
         curl_easy_getinfo(handle, CURLINFO_PRIVATE, &mem);
         curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
         if(m->data.result == CURLE_OK) {

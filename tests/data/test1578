@@ -30,7 +30,7 @@ Connection: close
 Content-Type: text/html
 
 -bar-
-</data>
+</data1>
 <datacheck crlf="yes">
 HTTP/1.1 302 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -69,7 +69,7 @@ lib1576
 CURLFOLLOW_FIRSTONLY with custom PUT method, 302 => PUT
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER %TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

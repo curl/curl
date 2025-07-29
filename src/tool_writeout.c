@@ -23,12 +23,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
 #include "tool_writeout_json.h"
-#include "dynbuf.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 static int writeTime(FILE *stream, const struct writeoutvar *wovar,
@@ -427,7 +424,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     if(use_json)
       fprintf(stream, "\"%s\":null", wovar->name);
   }
-  curl_free((char *)freestr);
+  curl_free((char *)CURL_UNCONST(freestr));
 
   curlx_dyn_free(&buf);
   return 1; /* return 1 if anything was written */

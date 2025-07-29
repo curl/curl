@@ -23,13 +23,10 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
-#include "dynbuf.h"
-
 #include "memdebug.h" /* keep this as LAST include */
 
 #define GLOBERROR(string, column, code) \
@@ -71,8 +68,9 @@ static int multiply(curl_off_t *amount, curl_off_t with)
     sum = 0;
   }
   else {
-#if defined(__GNUC__) && \
-  ((__GNUC__ > 5) || ((__GNUC__ == 5) && (__GNUC_MINOR__ >= 1)))
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 5) || ((__GNUC__ == 5) && (__GNUC_MINOR__ >= 1)))) || \
+  (defined(__clang__) && __clang_major__ >= 8)
     if(__builtin_mul_overflow(*amount, with, &sum))
       return 1;
 #else
@@ -449,7 +447,7 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
 
   glob_expand = calloc(1, sizeof(struct URLGlob));
   if(!glob_expand) {
-    Curl_safefree(glob_buffer);
+    tool_safefree(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
   }
   glob_expand->urllen = strlen(url);
@@ -499,13 +497,13 @@ void glob_cleanup(struct URLGlob **globp)
       for(elem = glob->pattern[i].content.Set.size - 1;
           elem >= 0;
           --elem) {
-        Curl_safefree(glob->pattern[i].content.Set.elements[elem]);
+        tool_safefree(glob->pattern[i].content.Set.elements[elem]);
       }
-      Curl_safefree(glob->pattern[i].content.Set.elements);
+      tool_safefree(glob->pattern[i].content.Set.elements);
     }
   }
-  Curl_safefree(glob->glob_buffer);
-  Curl_safefree(glob);
+  tool_safefree(glob->glob_buffer);
+  tool_safefree(glob);
   *globp = NULL;
 }
 
@@ -609,9 +607,9 @@ CURLcode glob_match_url(char **result, const char *filename,
                         struct URLGlob *glob)
 {
   char numbuf[18];
-  const char *appendthis = (char *)"";
+  const char *appendthis = "";
   size_t appendlen = 0;
-  struct curlx_dynbuf dyn;
+  struct dynbuf dyn;
 
   *result = NULL;
 

@@ -41,7 +41,7 @@ is illegal.
 ~~~c
 int main(void)
 {
-  CURL *handle;
+  CURL *handle = curl_easy_init();
   struct curl_slist *slist = NULL;
 
   slist = curl_slist_append(slist, "X-libcurl: coolness");

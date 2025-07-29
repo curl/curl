@@ -23,6 +23,9 @@
 #
 ###########################################################################
 
+use strict;
+use warnings;
+
 my $autotools = $ARGV[0];
 my $cmake = $ARGV[1];
 
@@ -55,7 +58,6 @@ my %remove = (
     '#define HAVE_LIBSSL 1' => 1,
     '#define HAVE_LIBWOLFSSH' => 1,
     '#define HAVE_LIBZSTD 1' => 1,
-    '#define HAVE_MSH3_H 1' => 1,
     '#define HAVE_NGHTTP2_NGHTTP2_H 1' => 1,
     '#define HAVE_NGHTTP3_NGHTTP3_H 1' => 1,
     '#define HAVE_NGTCP2_NGTCP2_CRYPTO_H 1' => 1,
@@ -67,14 +69,17 @@ my %remove = (
     '#define HAVE_OPENSSL_SSL_H 1' => 1,
     '#define HAVE_OPENSSL_X509_H 1' => 1,
     '#define HAVE_QUICHE_H 1' => 1,
+    '#define HAVE_SSL_SET_QUIC_TLS_CBS 1' => 1,
     '#define HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT 1' => 1,
     '#define HAVE_STDINT_H 1' => 1,
     '#define HAVE_STDIO_H 1' => 1,
     '#define HAVE_STDLIB_H 1' => 1,
     '#define HAVE_STRING_H 1' => 1,
+    '#define HAVE_SYS_STAT_H 1' => 1,
     '#define HAVE_SYS_XATTR_H 1' => 1,
     '#define HAVE_UNICODE_UIDNA_H 1' => 1,
     '#define HAVE_WOLFSSH_SSH_H 1' => 1,
+    '#define HAVE_WOLFSSL_SET_QUIC_USE_LEGACY_CODEPOINT 1' => 1,
     '#define HAVE_ZSTD 1' => 1,
     '#define HAVE_ZSTD_H 1' => 1,
     '#define LT_OBJDIR ".libs/"' => 1,

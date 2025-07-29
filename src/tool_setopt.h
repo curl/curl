@@ -31,10 +31,6 @@
  * Macros used in operate()
  */
 
-#define SETOPT_CHECK(v,opt) do {              \
-    result = (v);                             \
-  } while(0)
-
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* Associate symbolic names with option values */
@@ -79,81 +75,91 @@ extern const struct NameValueUnsigned setopt_nv_CURLHSTS[];
 
 /* Intercept setopt calls for --libcurl */
 
-CURLcode tool_setopt_enum(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_enum(CURL *curl, struct OperationConfig *config,
                           const char *name, CURLoption tag,
                           const struct NameValue *nv, long lval);
-CURLcode tool_setopt_SSLVERSION(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
                                 const char *name, CURLoption tag,
                                 long lval);
-CURLcode tool_setopt_flags(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_flags(CURL *curl, struct OperationConfig *config,
                            const char *name, CURLoption tag,
                            const struct NameValue *nv, long lval);
-CURLcode tool_setopt_bitmask(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_bitmask(CURL *curl, struct OperationConfig *config,
                              const char *name, CURLoption tag,
                              const struct NameValueUnsigned *nv, long lval);
-CURLcode tool_setopt_mimepost(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
                               const char *name, CURLoption tag,
                               curl_mime *mimepost);
-CURLcode tool_setopt_slist(CURL *curl, struct GlobalConfig *config,
+CURLcode tool_setopt_slist(CURL *curl, struct OperationConfig *config,
                            const char *name, CURLoption tag,
                            struct curl_slist *list);
-CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
+CURLcode tool_setopt_long(CURL *curl, struct OperationConfig *config,
+                          const char *name, CURLoption tag,
+                          long lval);
+CURLcode tool_setopt_offt(CURL *curl, struct OperationConfig *config,
+                          const char *name, CURLoption tag,
+                          curl_off_t lval);
+CURLcode tool_setopt(CURL *curl, bool str,
                      struct OperationConfig *config,
                      const char *name, CURLoption tag, ...);
 
 #define my_setopt(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, FALSE, global, config, #y, y, z), y)
+  tool_setopt(x, FALSE, config, #y, y, z)
+
+#define my_setopt_long(x,y,z) \
+  tool_setopt_long(x, config, #y, y, z)
+
+#define my_setopt_offt(x,y,z) \
+  tool_setopt_offt(x, config, #y, y, z)
 
 #define my_setopt_str(x,y,z) \
-  SETOPT_CHECK(tool_setopt(x, TRUE, global, config, #y, y, z), y)
+  tool_setopt(x, TRUE, config, #y, y, z)
 
 #define my_setopt_enum(x,y,z) \
-  SETOPT_CHECK(tool_setopt_enum(x, global, #y, y, setopt_nv_ ## y, z), y)
+  tool_setopt_enum(x, config, #y, y, setopt_nv_ ## y, z)
 
 #define my_setopt_SSLVERSION(x,y,z) \
-  SETOPT_CHECK(tool_setopt_SSLVERSION(x, global, #y, y, z), y)
+  tool_setopt_SSLVERSION(x, config, #y, y, z)
 
 #define my_setopt_bitmask(x,y,z) \
-  SETOPT_CHECK(tool_setopt_bitmask(x, global, #y, y, setopt_nv_ ## y, z), y)
+  tool_setopt_bitmask(x, config, #y, y, setopt_nv_ ## y, z)
 
 #define my_setopt_mimepost(x,y,z) \
-  SETOPT_CHECK(tool_setopt_mimepost(x, global, #y, y, z), y)
+  tool_setopt_mimepost(x, config, #y, y, z)
 
 #define my_setopt_slist(x,y,z) \
-  SETOPT_CHECK(tool_setopt_slist(x, global, #y, y, z), y)
-
-#define res_setopt(x,y,z) tool_setopt(x, FALSE, global, config, #y, y, z)
-
-#define res_setopt_str(x,y,z) tool_setopt(x, TRUE, global, config, #y, y, z)
+  tool_setopt_slist(x, config, #y, y, z)
 
 #else /* CURL_DISABLE_LIBCURL_OPTION */
 
 /* No --libcurl, so pass options directly to library */
 
 #define my_setopt(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, z)
+
+#define my_setopt_long(x,y,z) \
+  curl_easy_setopt(x, y, (long)(z))
+
+#define my_setopt_offt(x,y,z) \
+  curl_easy_setopt(x, y, (curl_off_t)(z))
 
 #define my_setopt_str(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, z)
 
 #define my_setopt_enum(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, z)
 
 #define my_setopt_SSLVERSION(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, z)
 
 #define my_setopt_bitmask(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, (long)z)
 
 #define my_setopt_mimepost(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
+  curl_easy_setopt(x, y, z)
 
 #define my_setopt_slist(x,y,z) \
-  SETOPT_CHECK(curl_easy_setopt(x, y, z), y)
-
-#define res_setopt(x,y,z) curl_easy_setopt(x,y,z)
-
-#define res_setopt_str(x,y,z) curl_easy_setopt(x,y,z)
+  curl_easy_setopt(x, y, z)
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 

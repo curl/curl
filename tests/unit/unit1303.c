@@ -21,30 +21,28 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "unitcheck.h"
 
 #include "urldata.h"
 #include "connect.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *testdata;
-
-static CURLcode unit_setup(void)
+static CURLcode t1303_setup(struct Curl_easy **easy)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  testdata = curl_easy_init();
-  if(!testdata) {
+  *easy = curl_easy_init();
+  if(!*easy) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
   return res;
 }
 
-static void unit_stop(void)
+static void t1303_stop(struct Curl_easy *easy)
 {
-  curl_easy_cleanup(testdata);
+  curl_easy_cleanup(easy);
   curl_global_cleanup();
 }
 
@@ -55,8 +53,8 @@ static void unit_stop(void)
 /* macro to set the pretended current time */
 #define NOW(x,y) now.tv_sec = x; now.tv_usec = y
 /* macro to set the millisecond based timeouts to use */
-#define TIMEOUTS(x,y) testdata->set.timeout = x; \
-                      testdata->set.connecttimeout = y
+#define TIMEOUTS(x,y) easy->set.timeout = x; \
+                      easy->set.connecttimeout = y
 
 /*
  * To test:
@@ -67,20 +65,24 @@ static void unit_stop(void)
  * N           various values of now
  */
 
-struct timetest {
-  int now_s;
-  int now_us;
-  unsigned int timeout_ms;
-  unsigned int connecttimeout_ms;
-  bool connecting;
-  timediff_t result;
-  const char *comment;
-};
-
-UNITTEST_START
+static CURLcode test_unit1303(char *arg)
 {
+  struct Curl_easy *easy;
+
+  UNITTEST_BEGIN(t1303_setup(&easy))
+
   struct curltime now;
   unsigned int i;
+
+  struct timetest {
+    int now_s;
+    int now_us;
+    unsigned int timeout_ms;
+    unsigned int connecttimeout_ms;
+    bool connecting;
+    timediff_t result;
+    const char *comment;
+  };
 
   const struct timetest run[] = {
   /* both timeouts set, not connecting */
@@ -137,18 +139,19 @@ UNITTEST_START
   };
 
   /* this is the pretended start time of the transfer */
-  testdata->progress.t_startsingle.tv_sec = BASE;
-  testdata->progress.t_startsingle.tv_usec = 0;
-  testdata->progress.t_startop.tv_sec = BASE;
-  testdata->progress.t_startop.tv_usec = 0;
+  easy->progress.t_startsingle.tv_sec = BASE;
+  easy->progress.t_startsingle.tv_usec = 0;
+  easy->progress.t_startop.tv_sec = BASE;
+  easy->progress.t_startop.tv_usec = 0;
 
   for(i = 0; i < CURL_ARRAYSIZE(run); i++) {
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(testdata, &now, run[i].connecting);
+    timeout =  Curl_timeleft(easy, &now, run[i].connecting);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }
+
+  UNITTEST_END(t1303_stop(easy))
 }
-UNITTEST_STOP

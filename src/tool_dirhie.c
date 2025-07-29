@@ -23,24 +23,19 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include <sys/stat.h>
-
 #if defined(_WIN32) && !defined(UNDER_CE)
 #  include <direct.h>
 #endif
 
-#include "curlx.h"
-
 #include "tool_dirhie.h"
 #include "tool_msgs.h"
-#include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
 #  define mkdir(x,y) (mkdir)((x))
 #  ifndef F_OK
-#    define F_OK 0
+#  define F_OK 0
 #  endif
 #endif
 
@@ -48,6 +43,7 @@ static void show_dir_errno(struct GlobalConfig *global, const char *name)
 {
   switch(errno) {
 #ifdef EACCES
+  /* !checksrc! disable ERRNOVAR 1 */
   case EACCES:
     errorf(global, "You do not have permission to create %s", name);
     break;
@@ -98,7 +94,7 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
 {
   CURLcode result = CURLE_OK;
   size_t outlen = strlen(outfile);
-  struct curlx_dynbuf dirbuf;
+  struct dynbuf dirbuf;
 
   curlx_dyn_init(&dirbuf, outlen + 1);
 
@@ -129,7 +125,8 @@ CURLcode create_dir_hierarchy(const char *outfile, struct GlobalConfig *global)
       return result;
 
     /* Create directory. Ignore access denied error to allow traversal. */
-    if(!skip && (-1 == mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750)) &&
+    /* !checksrc! disable ERRNOVAR 1 */
+    if(!skip && (mkdir(curlx_dyn_ptr(&dirbuf), (mode_t)0000750) == -1) &&
        (errno != EACCES) && (errno != EEXIST)) {
       show_dir_errno(global, curlx_dyn_ptr(&dirbuf));
       result = CURLE_WRITE_ERROR;

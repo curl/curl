@@ -59,7 +59,6 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
-    logmsg
     );
 
 use pathhelp qw(
@@ -79,7 +78,7 @@ sub portable_sleep {
     if($Time::HiRes::VERSION) {
         Time::HiRes::sleep($seconds);
     }
-    elsif (os_is_win()) {
+    elsif(os_is_win()) {
         Win32::Sleep($seconds*1000);
     }
     else {
@@ -95,12 +94,18 @@ sub portable_sleep {
 #
 sub pidfromfile {
     my $pidfile = $_[0];
+    my $timeout_sec = $_[1];
     my $pid = 0;
-
-    if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", "$pidfile")) {
-        $pid = 0 + <$pidfh>;
-        close($pidfh);
-        $pid = 0 if($pid < 0);
+    my $waits = 0;
+    # wait at max 15 seconds for the file to exist and have valid content
+    while(!$pid && ($waits <= ($timeout_sec * 10))) {
+        if(-f $pidfile && -s $pidfile && open(my $pidfh, "<", "$pidfile")) {
+            $pid = 0 + <$pidfh>;
+            close($pidfh);
+            $pid = 0 if($pid < 0);
+        }
+        Time::HiRes::sleep(0.1) unless $pid || !$timeout_sec;
+        ++$waits;
     }
     return $pid;
 }
@@ -133,7 +138,7 @@ sub pidexists {
     if($pid > 0) {
         # verify if currently existing Windows process
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
@@ -164,12 +169,12 @@ sub pidterm {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
-                my $cmd = "taskkill -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
+                print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
@@ -189,12 +194,12 @@ sub pidkill {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);
-        if ($pid > 4194304 && os_is_win()) {
+        if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
@@ -214,12 +219,22 @@ sub pidwait {
 
     $pid = winpid_to_pid($pid);
     # check if the process exists
-    if ($pid > 4194304 && os_is_win()) {
+    if($pid > 4194304 && os_is_win()) {
         if($flags == &WNOHANG) {
             return pidexists($pid)?0:$pid;
         }
+        my $start = time;
+        my $warn_at = 5;
         while(pidexists($pid)) {
-            portable_sleep(0.01);
+            if(time - $start > $warn_at) {
+                print "pidwait: still waiting for PID ", $pid, "\n";
+                $warn_at += 5;
+                if($warn_at > 20) {
+                    print "pidwait: giving up waiting for PID ", $pid, "\n";
+                    last;
+                }
+            }
+            portable_sleep(0.2);
         }
         return $pid;
     }
@@ -241,7 +256,7 @@ sub processexists {
     my $pidfile = $_[0];
 
     # fetch pid from pidfile
-    my $pid = pidfromfile($pidfile);
+    my $pid = pidfromfile($pidfile, 0);
 
     if($pid > 0) {
         # verify if currently alive
@@ -250,7 +265,7 @@ sub processexists {
         }
         else {
             # get rid of the certainly invalid pidfile
-            unlink($pidfile) if($pid == pidfromfile($pidfile));
+            unlink($pidfile) if($pid == pidfromfile($pidfile, 0));
             # reap its dead children, if not done yet
             pidwait($pid, &WNOHANG);
             # negative return value means dead process

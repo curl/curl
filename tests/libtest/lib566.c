@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "test.h"
+#include "first.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+static CURLcode test_lib566(char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -33,13 +33,13 @@ CURLcode test(char *URL)
   double content_length = 3;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -51,13 +51,12 @@ CURLcode test(char *URL)
 
   if(!res) {
     FILE *moo;
-    CURL_IGNORE_DEPRECATION(
-      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
-                              &content_length);
-    )
+    res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
+                            &content_length);
+
     moo = fopen(libtest_arg2, "wb");
     if(moo) {
-      fprintf(moo, "CL %.0f\n", content_length);
+      curl_mfprintf(moo, "CL %.0f\n", content_length);
       fclose(moo);
     }
   }

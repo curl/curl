@@ -175,7 +175,7 @@ FTP chunk callback reported error.
 ## 89
 No connection available, the session is queued.
 ## 90
-SSL public key does not matched pinned public key.
+SSL public key does not match pinned public key.
 ## 91
 Invalid SSL certificate status.
 ## 92

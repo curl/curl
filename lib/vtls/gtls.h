@@ -24,13 +24,13 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 #include <curl/curl.h>
 
 #ifdef USE_GNUTLS
 
 #include <gnutls/gnutls.h>
-#include "timeval.h"
+#include "../curlx/timeval.h"
 
 #ifdef HAVE_GNUTLS_SRP
 /* the function exists */
@@ -116,6 +116,10 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len);
+
+/* Report properties of a successful handshake */
+void Curl_gtls_report_handshake(struct Curl_easy *data,
+                                struct gtls_ctx *gctx);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

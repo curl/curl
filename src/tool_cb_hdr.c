@@ -23,12 +23,9 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#include "strcase.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include "curlx.h"
 
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
@@ -59,7 +56,7 @@ static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef LINK
 static void write_linked_location(CURL *curl, const char *location,
-    size_t loclen, FILE *stream);
+                                  size_t loclen, FILE *stream);
 #endif
 
 int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
@@ -84,7 +81,6 @@ fail:
 /*
 ** callback for CURLOPT_HEADERFUNCTION
 */
-
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct per_transfer *per = userdata;
@@ -102,7 +98,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 #ifdef DEBUGBUILD
   if(size * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
-    warnf(per->config->global, "Header data exceeds single call write limit");
+    warnf(per->config->global, "Header data exceeds write limit");
     return CURL_WRITEFUNC_ERROR;
   }
 #endif
@@ -249,8 +245,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       if(hdrcbdata->honor_cd_filename &&
          hdrcbdata->config->show_headers) {
         /* still awaiting the Content-Disposition header, store the header in
-           memory. Since it is not zero terminated, we need an extra dance. */
-        char *clone = aprintf("%.*s", (int)cb, (char *)str);
+           memory. Since it is not null-terminated, we need an extra dance. */
+        char *clone = aprintf("%.*s", (int)cb, str);
         if(clone) {
           struct curl_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = curl_slist_append(old, clone);
@@ -352,7 +348,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(q) {
     p = q + 1;
     if(!*p) {
-      Curl_safefree(copy);
+      tool_safefree(copy);
       return NULL;
     }
   }
@@ -364,7 +360,7 @@ static char *parse_filename(const char *ptr, size_t len)
   if(q) {
     p = q + 1;
     if(!*p) {
-      Curl_safefree(copy);
+      tool_safefree(copy);
       return NULL;
     }
   }
@@ -385,7 +381,7 @@ static char *parse_filename(const char *ptr, size_t len)
   {
     char *sanitized;
     SANITIZEcode sc = sanitize_file_name(&sanitized, copy, 0);
-    Curl_safefree(copy);
+    tool_safefree(copy);
     if(sc)
       return NULL;
     copy = sanitized;
@@ -405,9 +401,9 @@ static char *parse_filename(const char *ptr, size_t len)
  * should not be needed but the real world returns plenty of relative
  * URLs here.
  */
-static
-void write_linked_location(CURL *curl, const char *location, size_t loclen,
-                           FILE *stream) {
+static void write_linked_location(CURL *curl, const char *location,
+                                  size_t loclen, FILE *stream)
+{
   /* This would so simple if CURLINFO_REDIRECT_URL were available here */
   CURLU *u = NULL;
   char *copyloc = NULL, *locurl = NULL, *scheme = NULL, *finalurl = NULL;
@@ -441,7 +437,7 @@ void write_linked_location(CURL *curl, const char *location, size_t loclen,
   if(!u)
     goto locout;
 
-  /* Create a NUL-terminated and whitespace-stripped copy of Location: */
+  /* Create a null-terminated and whitespace-stripped copy of Location: */
   copyloc = malloc(llen + 1);
   if(!copyloc)
     goto locout;

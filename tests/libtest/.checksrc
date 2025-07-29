@@ -1,3 +1,0 @@
-disable TYPEDEFSTRUCT
-allowfunc localtime
-allowfunc LoadLibrary

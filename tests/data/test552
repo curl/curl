@@ -57,6 +57,7 @@ lib%TESTNUMBER
 !SSPI
 crypto
 proxy
+digest
 </features>
 <name>
 HTTP proxy auth Digest with 70K POST data from read callback

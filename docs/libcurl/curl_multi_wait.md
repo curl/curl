@@ -91,6 +91,8 @@ int main(void)
   CURLM *multi = curl_multi_init();
   int still_running;
 
+  easy = curl_easy_init();
+
   /* add the individual easy handle */
   curl_multi_add_handle(multi, easy);
 
