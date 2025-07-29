@@ -30,8 +30,8 @@ FIRST_C = first.c
 FIRST_H = first.h
 
 # Common files used by test programs
-UTILS_C = cli_util.c memptr.c testutil.c testtrace.c
-UTILS_H = cli_util.h testutil.h testtrace.h unitcheck.h
+UTILS_C = memptr.c testutil.c testtrace.c
+UTILS_H = testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
   ../../lib/curlx/warnless.c \
