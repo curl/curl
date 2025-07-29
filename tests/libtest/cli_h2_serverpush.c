@@ -27,8 +27,7 @@
 
 static FILE *out_download;
 
-static int setup_h2_serverpush(CURL *hnd, const char *url,
-                               struct libtest_trace_cfg *config)
+static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
   out_download = fopen("download_0.data", "wb");
   if(!out_download)
@@ -44,7 +43,7 @@ static int setup_h2_serverpush(CURL *hnd, const char *url,
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, config);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, &libtest_debug_config);
 
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
@@ -114,8 +113,8 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
 
-  struct libtest_trace_cfg config = {0};
-  config.nohex = 1; /* enable ASCII tracing */
+  libtest_debug_config.nohex = 1;
+  libtest_debug_config.tracetime = 0;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
@@ -128,7 +127,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-  if(setup_h2_serverpush(easy, URL, &config)) {
+  if(setup_h2_serverpush(easy, URL)) {
     fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
     return (CURLcode)1;
