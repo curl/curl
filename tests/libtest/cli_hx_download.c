@@ -201,7 +201,8 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   (void)URL;
 
-  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:"))
+        != -1) {
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
