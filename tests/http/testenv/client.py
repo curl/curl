@@ -86,7 +86,7 @@ class LocalClient:
         self._rmf(self._stderrfile)
         start = datetime.now()
         exception = None
-        myargs = [self.path, self.name, "URL"]
+        myargs = [self.path, self.name]
         myargs.extend(args)
         run_env = None
         if self._run_env:
