@@ -190,7 +190,7 @@ static int test_hx_download(char *URL)
   size_t fail_offset = 0;
   int abort_paused = 0, use_earlydata = 0;
   struct transfer_d *t;
-  int http_version = CURL_HTTP_VERSION_2_0;
+  long http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
   char *resolve = NULL;

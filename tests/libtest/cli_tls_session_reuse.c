@@ -108,7 +108,7 @@ static int test_tls_session_reuse(char *URL)
   int msgs_in_queue;
   int add_more, waits, ongoing = 0;
   char *host = NULL, *port = NULL;
-  int http_version = CURL_HTTP_VERSION_1_1;
+  long http_version = CURL_HTTP_VERSION_1_1;
   int exitcode = 1;
 
   (void)URL;

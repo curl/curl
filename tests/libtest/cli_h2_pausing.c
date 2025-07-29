@@ -100,7 +100,7 @@ static int test_h2_pausing(char *URL)
   char *url, *host = NULL, *port = NULL;
   int all_paused = 0;
   int resume_round = -1;
-  int http_version = CURL_HTTP_VERSION_2_0;
+  long http_version = CURL_HTTP_VERSION_2_0;
   int ch;
 
   (void)URL;
@@ -183,7 +183,7 @@ static int test_h2_pausing(char *URL)
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
       CLI_ERR();
     }
-    curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, (long)http_version);
+    curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version);
   }
 
   multi_handle = curl_multi_init();

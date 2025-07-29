@@ -226,7 +226,7 @@ static int test_hx_upload(char *URL)
   int use_earlydata = 0;
   int announce_length = 0;
   struct transfer_u *t;
-  int http_version = CURL_HTTP_VERSION_2_0;
+  long http_version = CURL_HTTP_VERSION_2_0;
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
   int ch;
