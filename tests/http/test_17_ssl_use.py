@@ -377,7 +377,7 @@ class TestSSLUse:
         count = 2
         docname = 'data-10k'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

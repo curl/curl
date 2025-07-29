@@ -109,7 +109,7 @@ class TestWebsockets:
 
     def test_20_02_pingpong_small(self, env: Env, ws_echo):
         payload = 125 * "x"
-        client = LocalClient(env=env, name='ws_pingpong')
+        client = LocalClient(env=env, name='cli_ws_pingpong')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -119,7 +119,7 @@ class TestWebsockets:
     # the python websocket server does not like 'large' control frames
     def test_20_03_pingpong_too_large(self, env: Env, ws_echo):
         payload = 127 * "x"
-        client = LocalClient(env=env, name='ws_pingpong')
+        client = LocalClient(env=env, name='cli_ws_pingpong')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -127,7 +127,7 @@ class TestWebsockets:
         r.check_exit_code(100)  # CURLE_TOO_LARGE
 
     def test_20_04_data_small(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws_data')
+        client = LocalClient(env=env, name='cli_ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -135,7 +135,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     def test_20_05_data_med(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws_data')
+        client = LocalClient(env=env, name='cli_ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -143,7 +143,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     def test_20_06_data_large(self, env: Env, ws_echo):
-        client = LocalClient(env=env, name='ws_data')
+        client = LocalClient(env=env, name='cli_ws_data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -153,7 +153,7 @@ class TestWebsockets:
     def test_20_07_data_large_small_recv(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_SIZE'] = '1024'
-        client = LocalClient(env=env, name='ws_data', run_env=run_env)
+        client = LocalClient(env=env, name='cli_ws_data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
@@ -165,7 +165,7 @@ class TestWebsockets:
     def test_20_08_data_very_large(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_EAGAIN'] = '8192'
-        client = LocalClient(env=env, name='ws_data', run_env=run_env)
+        client = LocalClient(env=env, name='cli_ws_data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
