@@ -1664,7 +1664,7 @@ int cert_stuff(struct Curl_easy *data,
      (file_type == SSL_FILETYPE_PROVIDER)) {
     SSL *ssl;
     X509 *x509;
-    bool cert_done = FALSE;
+    bool pcks12_done = FALSE;
     int cert_use_result;
 
     if(key_passwd) {
@@ -1725,7 +1725,7 @@ int cert_stuff(struct Curl_easy *data,
     case SSL_FILETYPE_PKCS12:
       if(!pkcs12load(data, ctx, cert_blob, cert_file, key_passwd))
         return 0;
-      cert_done = TRUE;
+      pcks12_done = TRUE;
       break;
 
     default:
@@ -1764,7 +1764,7 @@ int cert_stuff(struct Curl_easy *data,
       break;
 
     case SSL_FILETYPE_PKCS12:
-      if(!cert_done) {
+      if(!pcks12_done) {
         failf(data, "file type P12 for private key not supported");
         return 0;
       }
