@@ -79,6 +79,10 @@ extern const char **test_argv;
 extern int testnum;
 extern struct curltime tv_test_start; /* for test timing */
 
+extern int coptind;
+extern const char *coptarg;
+int cgetopt(int argc, const char * const argv[], const char *optstring);
+
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
 

@@ -29,9 +29,4 @@
 int cli_debug_cb(CURL *handle, curl_infotype type,
                  char *data, size_t size, void *userp);
 
-extern int coptind;
-extern const char *coptarg;
-
-int cgetopt(int argc, const char * const argv[], const char *optstring);
-
 #endif /* HEADER_CLI_UTIL_H */
