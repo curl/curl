@@ -324,6 +324,8 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_I_NO_LSA_CONTEXT                  ((HRESULT)0x00090323L)
 #endif
 #endif /* __MINGW32CE__ */
+
+/* Offered by mingw-w64 v8+. SDK 7.1A+. */
 #ifndef SEC_I_SIGNATURE_NEEDED
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif
