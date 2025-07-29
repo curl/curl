@@ -114,16 +114,16 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   (void)URL;
 
   if(test_argc != 3) {
-    curl_mfprintf(stderr, "need args: proto URL\n");
+    curl_mfprintf(stderr, "need args: URL proto\n");
     return 2;
   }
 
-  if(!strcmp("h2", test_argv[1]))
+  if(!strcmp("h2", test_argv[2]))
     http_version = CURL_HTTP_VERSION_2;
-  else if(!strcmp("h3", test_argv[1]))
+  else if(!strcmp("h3", test_argv[2]))
     http_version = CURL_HTTP_VERSION_3ONLY;
 
-  url = test_argv[2];
+  url = test_argv[1];
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");

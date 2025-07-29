@@ -491,7 +491,7 @@ class TestDownload:
         client = LocalClient(name='cli_tls_session_reuse', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        r = client.run(args=[proto, url])
+        r = client.run(args=[url, proto])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
