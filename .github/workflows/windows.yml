@@ -357,7 +357,6 @@ jobs:
           fi
           if [ "${MATRIX_BUILD}" != 'cmake' ]; then
             # avoid libtool's .exe wrappers for shared builds
-            mv bld/tests/client/.libs/*.exe bld/tests/client || true
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest || true
             mv bld/tests/server/.libs/*.exe bld/tests/server || true
             mv bld/tests/tunit/.libs/*.exe bld/tests/tunit || true
