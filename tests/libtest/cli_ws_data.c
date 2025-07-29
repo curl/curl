@@ -146,8 +146,8 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
     if(memcmp(send_buf, recv_buf, len)) {
       curl_mfprintf(stderr, "recv_data: data differs\n");
-      dump("expected:", (unsigned char *)send_buf, len, 0);
-      dump("received:", (unsigned char *)recv_buf, len, 0);
+      dump("expected:", stderr, (unsigned char *)send_buf, len, 0);
+      dump("received:", stderr, (unsigned char *)recv_buf, len, 0);
       r = CURLE_RECV_ERROR;
       goto out;
     }

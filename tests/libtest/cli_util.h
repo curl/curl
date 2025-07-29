@@ -24,7 +24,8 @@
  *
  ***************************************************************************/
 
-static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
+static void dump(const char *text, FILE *stream, unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -35,19 +36,19 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  curl_mfprintf(stderr, "%s, %zu bytes (0x%zx)\n", text, size, size);
+  curl_mfprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i < size; i += width) {
 
-    curl_mfprintf(stderr, "%4.4zx: ", i);
+    curl_mfprintf(stream, "%4.4zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
       for(c = 0; c < width; c++)
         if(i + c < size)
-          curl_mfprintf(stderr, "%02x ", ptr[i + c]);
+          curl_mfprintf(stream, "%02x ", ptr[i + c]);
         else
-          fputs("   ", stderr);
+          fputs("   ", stream);
     }
 
     for(c = 0; (c < width) && (i + c < size); c++) {
@@ -57,7 +58,7 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
         i += (c + 2 - width);
         break;
       }
-      curl_mfprintf(stderr, "%c",
+      curl_mfprintf(stream, "%c",
                     ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
                     ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
@@ -67,7 +68,7 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
         break;
       }
     }
-    fputc('\n', stderr); /* newline */
+    fputc('\n', stream); /* newline */
   }
 }
 
