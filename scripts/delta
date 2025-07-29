@@ -120,8 +120,8 @@ my $numchanges = 0;
 my $numbugfixes = 0;
 my $numcontributors = 0;
 open(F, "<RELEASE-NOTES");
+my $mode=0;
 while(<F>) {
-    my $mode=0;
     if($_ =~ /following changes:/) {
         $mode=1;
     }
