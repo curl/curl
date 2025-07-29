@@ -74,14 +74,14 @@ static CURLcode test_lib552(const char *URL)
   size_t i;
   static const char fill[] = "test data";
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 0;
+  debug_config.nohex = 1;
+  debug_config.tracetime = 0;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  test_setopt(curl, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 

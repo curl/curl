@@ -83,7 +83,7 @@ static bool t753_setup(const char *URL, const char *name,
   easy_setopt(easy, CURLOPT_HEADERDATA, st);
 
   easy_setopt(easy, CURLOPT_NOPROGRESS, 1L);
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 
@@ -107,8 +107,8 @@ static CURLcode test_lib753(const char *URL)
 
   start_test_timing();
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
+  debug_config.nohex = 1;
+  debug_config.tracetime = 1;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 

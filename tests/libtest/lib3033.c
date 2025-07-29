@@ -45,7 +45,7 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
 
   curl_easy_reset(easy);
   curl_easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 
@@ -107,8 +107,8 @@ static CURLcode test_lib3033(const char *URL)
   multi_init(multi);
   easy_init(curl);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
+  debug_config.nohex = 1;
+  debug_config.tracetime = 1;
 
   res = t3033_req_test(multi, curl, URL, 0);
   if(res != CURLE_OK)
