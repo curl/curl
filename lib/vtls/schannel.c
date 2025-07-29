@@ -117,6 +117,7 @@
  * #define failf(x, y, ...) printf(y, __VA_ARGS__)
  */
 
+/* Offered when targeting Vista (XP SP2+) */
 #ifndef CALG_SHA_256
 #define CALG_SHA_256 0x0000800c
 #endif
@@ -127,10 +128,12 @@
 #define ALG_CLASS_DHASH ALG_CLASS_HASH
 #endif
 
+/* Offered by mingw-w64 v4+. SDK 7.1A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
+/* Offered by mingw-w64 v4+. Not by MS SDK 7.1A. */
 #ifndef CERT_FIND_HAS_PRIVATE_KEY
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
@@ -1672,7 +1675,7 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   if(ssl_connect_done == connssl->connecting_state) {
     connssl->state = ssl_connection_complete;
 
-#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS  /* mingw-w64 v9+. SDK 7.1A+. */
     /* When SSPI is used in combination with Schannel
      * we need the Schannel context to create the Schannel
      * binding to pass the IIS extended protection checks.
