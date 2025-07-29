@@ -25,34 +25,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 #if 0
-static CURLcode t2301_recv_pong(CURL *curl, const char *expected_payload)
-{
-  size_t rlen;
-  unsigned int rflags;
-  char buffer[256];
-  CURLcode result =
-    curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &rflags);
-  if(rflags & CURLWS_PONG) {
-    int same = 0;
-    curl_mfprintf(stderr, "ws: got PONG back\n");
-    if(rlen == strlen(expected_payload)) {
-      if(!memcmp(expected_payload, buffer, rlen)) {
-        curl_mfprintf(stderr, "ws: got the same payload back\n");
-        same = 1;
-      }
-    }
-    if(!same)
-      curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
-  }
-  else {
-    curl_mfprintf(stderr, "recv_pong: got %d bytes rflags %x\n",
-                  (int)rlen, rflags);
-  }
-  curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %d\n", result,
-                (int)rlen);
-  return result;
-}
-
 static void t2301_websocket(CURL *curl)
 {
   int i = 0;
@@ -60,13 +32,12 @@ static void t2301_websocket(CURL *curl)
   do {
     if(ws_send_ping(curl, "foobar"))
       return;
-    if(t2301_recv_pong(curl, "foobar"))
+    if(ws_recv_pong(curl, "foobar"))
       return;
     curlx_wait_ms(2000);
   } while(i++ < 10);
   ws_close(curl);
 }
-
 #endif
 
 static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)

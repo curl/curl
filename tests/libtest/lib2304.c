@@ -24,36 +24,6 @@
 #include "first.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
-
-static CURLcode t2304_recv_pong(CURL *curl, const char *expected_payload)
-{
-  size_t rlen;
-  const struct curl_ws_frame *meta;
-  char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
-    if(meta->flags & CURLWS_PONG) {
-      int same = 0;
-      curl_mfprintf(stderr, "ws: got PONG back\n");
-      if(rlen == strlen(expected_payload)) {
-        if(!memcmp(expected_payload, buffer, rlen)) {
-          curl_mfprintf(stderr, "ws: got the same payload back\n");
-          same = 1;
-        }
-      }
-      if(!same)
-        curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
-    }
-    else {
-      curl_mfprintf(stderr, "recv_pong: got %zd bytes rflags %x\n", rlen,
-                    meta->flags);
-    }
-  }
-  curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %zd\n", result,
-                rlen);
-  return result;
-}
-
 static CURLcode recv_any(CURL *curl)
 {
   size_t rlen;
@@ -78,7 +48,7 @@ static void t2304_websocket(CURL *curl)
     if(ws_send_ping(curl, "foobar"))
       return;
     curl_mfprintf(stderr, "Receive pong\n");
-    if(t2304_recv_pong(curl, "foobar")) {
+    if(ws_recv_pong(curl, "foobar")) {
       curl_mprintf("Connection closed\n");
       return;
     }
