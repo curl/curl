@@ -39,9 +39,6 @@ static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
     fputs(s_infotype[type], log);
 }
 
-#define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
-#define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
-                                   CURL_FORMAT_CURL_OFF_T "] "
 /*
 ** callback for CURLOPT_DEBUGFUNCTION
 */
@@ -60,11 +57,13 @@ static int cli_debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
        conn_id >= 0) {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
-                     conn_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf),
+                     "[%" CURL_FORMAT_CURL_OFF_T "-"
+                      "%" CURL_FORMAT_CURL_OFF_T "] ", xfer_id, conn_id);
     }
     else {
-      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf),
+                     "[%" CURL_FORMAT_CURL_OFF_T "-x] ", xfer_id);
     }
   }
   else
