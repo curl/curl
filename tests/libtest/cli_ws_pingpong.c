@@ -61,7 +61,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
   CURLcode res;
   int i;
 
-  res = websocket_send_ping(curl, payload);
+  res = ws_send_ping(curl, payload);
   if(res)
     return res;
   for(i = 0; i < 10; ++i) {

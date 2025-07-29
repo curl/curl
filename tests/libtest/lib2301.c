@@ -58,7 +58,7 @@ static void t2301_websocket(CURL *curl)
   int i = 0;
   curl_mfprintf(stderr, "ws: websocket() starts\n");
   do {
-    if(websocket_send_ping(curl, "foobar"))
+    if(ws_send_ping(curl, "foobar"))
       return;
     if(t2301_recv_pong(curl, "foobar"))
       return;

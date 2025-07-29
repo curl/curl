@@ -75,7 +75,7 @@ static void t2304_websocket(CURL *curl)
   do {
     recv_any(curl);
     curl_mfprintf(stderr, "Send ping\n");
-    if(websocket_send_ping(curl, "foobar"))
+    if(ws_send_ping(curl, "foobar"))
       return;
     curl_mfprintf(stderr, "Receive pong\n");
     if(t2304_recv_pong(curl, "foobar")) {
