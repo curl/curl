@@ -32,11 +32,15 @@ handle should react. The following values in the mask are
 defined. All bits not mentioned are reserved for future
 extensions.
 
-This option can be set at any time and repeatedly. Any connection created or
-DNS information cached afterwards is considered fresh again. The call affects
-only the connection and DNS cache of the multi handle itself and not the
-ones owned by SHARE handles.
+This option can be set at any time and repeatedly. Each call only
+affects the *currently* cached connections and DNS information.
+Any connection created or DNS information added afterwards is
+cached the usual way again. Phrasing it another way: the option is
+not persisted but setting it serves as a "trigger"
+to clear the caches.
 
+The call affects  only the connection and DNS cache of the multi handle
+itself and not the ones owned by SHARE handles.
 
 ## CURLM_NWCOPT_CLEAR_CONNS
 
