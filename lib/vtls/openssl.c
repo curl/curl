@@ -1249,27 +1249,441 @@ end:
   return ret;
 }
 
-static
-int cert_stuff(struct Curl_easy *data,
-               SSL_CTX* ctx,
-               char *cert_file,
-               const struct curl_blob *cert_blob,
-               const char *cert_type,
-               char *key_file,
-               const struct curl_blob *key_blob,
-               const char *key_type,
-               char *key_passwd)
+static int enginecheck(struct Curl_easy *data,
+                       SSL_CTX* ctx,
+                       const char *key_file,
+                       const char *key_passwd)
+#ifdef USE_OPENSSL_ENGINE
+{
+  EVP_PKEY *priv_key = NULL;
+
+  /* Implicitly use pkcs11 engine if none was provided and the
+   * key_file is a PKCS#11 URI */
+  if(!data->state.engine) {
+    if(is_pkcs11_uri(key_file)) {
+      if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+        return 0;
+      }
+    }
+  }
+
+  if(data->state.engine) {
+    UI_METHOD *ui_method =
+      UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
+    if(!ui_method) {
+      failf(data, "unable do create " OSSL_PACKAGE
+            " user-interface method");
+      return 0;
+    }
+    UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+    UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+    UI_method_set_reader(ui_method, ssl_ui_reader);
+    UI_method_set_writer(ui_method, ssl_ui_writer);
+    priv_key = ENGINE_load_private_key(data->state.engine, key_file,
+                                       ui_method,
+                                       CURL_UNCONST(key_passwd));
+    UI_destroy_method(ui_method);
+    if(!priv_key) {
+      failf(data, "failed to load private key from crypto engine");
+      return 0;
+    }
+    if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
+      failf(data, "unable to set private key");
+      EVP_PKEY_free(priv_key);
+      return 0;
+    }
+    EVP_PKEY_free(priv_key);  /* we do not need the handle any more... */
+  }
+  else {
+    failf(data, "crypto engine not set, cannot load private key");
+    return 0;
+  }
+  return 1;
+}
+#else
+{
+  (void)ctx;
+  (void)key_file;
+  (void)key_passwd;
+  failf(data, "SSL_FILETYPE_ENGINE not supported for private key");
+  return 0;
+}
+#endif
+
+static int providercheck(struct Curl_easy *data,
+                         SSL_CTX* ctx,
+                         const char *key_file)
+#ifdef OPENSSL_HAS_PROVIDERS
+{
+  char error_buffer[256];
+  /* Implicitly use pkcs11 provider if none was provided and the
+   * key_file is a PKCS#11 URI */
+  if(!data->state.provider_loaded) {
+    if(is_pkcs11_uri(key_file)) {
+      if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+        return 0;
+      }
+    }
+  }
+
+  if(data->state.provider_loaded) {
+    /* Load the private key from the provider */
+    EVP_PKEY *priv_key = NULL;
+    OSSL_STORE_CTX *store = NULL;
+    OSSL_STORE_INFO *info = NULL;
+    UI_METHOD *ui_method =
+      UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
+    if(!ui_method) {
+      failf(data, "unable do create " OSSL_PACKAGE
+            " user-interface method");
+      return 0;
+    }
+    UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+    UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+    UI_method_set_reader(ui_method, ssl_ui_reader);
+    UI_method_set_writer(ui_method, ssl_ui_writer);
+
+    store = OSSL_STORE_open_ex(key_file, data->state.libctx,
+                               data->state.propq, ui_method, NULL, NULL,
+                               NULL, NULL);
+    if(!store) {
+      failf(data, "Failed to open OpenSSL store: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+    if(OSSL_STORE_expect(store, OSSL_STORE_INFO_PKEY) != 1) {
+      failf(data, "Failed to set store preference. Ignoring the error: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+    }
+
+    info = OSSL_STORE_load(store);
+    if(info) {
+      int ossl_type = OSSL_STORE_INFO_get_type(info);
+
+      if(ossl_type == OSSL_STORE_INFO_PKEY)
+        priv_key = OSSL_STORE_INFO_get1_PKEY(info);
+      OSSL_STORE_INFO_free(info);
+    }
+    OSSL_STORE_close(store);
+    UI_destroy_method(ui_method);
+    if(!priv_key) {
+      failf(data, "No private key found in the openssl store: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+
+    if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
+      failf(data, "unable to set private key [%s]",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      EVP_PKEY_free(priv_key);
+      return 0;
+    }
+    EVP_PKEY_free(priv_key); /* we do not need the handle any more... */
+  }
+  else {
+    failf(data, "crypto provider not set, cannot load private key");
+    return 0;
+  }
+  return 1;
+}
+#else
+{
+  (void)ctx;
+  (void)key_file;
+  failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
+  return 0;
+}
+#endif
+
+static int engineload(struct Curl_easy *data,
+                      SSL_CTX* ctx,
+                      const char *cert_file)
+#if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
+{
+  char error_buffer[256];
+  /* Implicitly use pkcs11 engine if none was provided and the
+   * cert_file is a PKCS#11 URI */
+  if(!data->state.engine) {
+    if(is_pkcs11_uri(cert_file)) {
+      if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
+        return 0;
+      }
+    }
+  }
+
+  if(data->state.engine) {
+    const char *cmd_name = "LOAD_CERT_CTRL";
+    struct {
+      const char *cert_id;
+      X509 *cert;
+    } params;
+
+    params.cert_id = cert_file;
+    params.cert = NULL;
+
+    /* Does the engine supports LOAD_CERT_CTRL ? */
+    if(!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
+                    0, CURL_UNCONST(cmd_name), NULL)) {
+      failf(data, "ssl engine does not support loading certificates");
+      return 0;
+    }
+
+    /* Load the certificate from the engine */
+    if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
+                        0, &params, NULL, 1)) {
+      failf(data, "ssl engine cannot load client cert with id"
+            " '%s' [%s]", cert_file,
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+
+    if(!params.cert) {
+      failf(data, "ssl engine did not initialized the certificate "
+            "properly.");
+      return 0;
+    }
+
+    if(SSL_CTX_use_certificate(ctx, params.cert) != 1) {
+      failf(data, "unable to set client certificate [%s]",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+    X509_free(params.cert); /* we do not need the handle any more... */
+  }
+  else {
+    failf(data, "crypto engine not set, cannot load certificate");
+    return 0;
+  }
+  return 1;
+}
+#else
+{
+  (void)ctx;
+  (void)cert_file;
+  failf(data, "SSL_FILETYPE_ENGINE not supported for certificate");
+  return 0;
+}
+#endif
+
+static int providerload(struct Curl_easy *data,
+                        SSL_CTX* ctx,
+                        const char *cert_file)
+#ifdef OPENSSL_HAS_PROVIDERS
+{
+  char error_buffer[256];
+  /* Implicitly use pkcs11 provider if none was provided and the
+   * cert_file is a PKCS#11 URI */
+  if(!data->state.provider_loaded) {
+    if(is_pkcs11_uri(cert_file)) {
+      if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+        return 0;
+      }
+    }
+  }
+
+  if(data->state.provider_loaded) {
+    /* Load the certificate from the provider */
+    OSSL_STORE_INFO *info = NULL;
+    X509 *cert = NULL;
+    OSSL_STORE_CTX *store =
+      OSSL_STORE_open_ex(cert_file, data->state.libctx,
+                         NULL, NULL, NULL, NULL, NULL, NULL);
+    if(!store) {
+      failf(data, "Failed to open OpenSSL store: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+    if(OSSL_STORE_expect(store, OSSL_STORE_INFO_CERT) != 1) {
+      failf(data, "Failed to set store preference. Ignoring the error: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+    }
+
+    info = OSSL_STORE_load(store);
+    if(info) {
+      int ossl_type = OSSL_STORE_INFO_get_type(info);
+
+      if(ossl_type == OSSL_STORE_INFO_CERT)
+        cert = OSSL_STORE_INFO_get1_CERT(info);
+      OSSL_STORE_INFO_free(info);
+    }
+    OSSL_STORE_close(store);
+    if(!cert) {
+      failf(data, "No cert found in the openssl store: %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+
+    if(SSL_CTX_use_certificate(ctx, cert) != 1) {
+      failf(data, "unable to set client certificate [%s]",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)));
+      return 0;
+    }
+    X509_free(cert); /* we do not need the handle any more... */
+  }
+  else {
+    failf(data, "crypto provider not set, cannot load certificate");
+    return 0;
+  }
+  return 1;
+}
+#else
+{
+  (void)ctx;
+  (void)cert_file;
+  failf(data, "SSL_FILETYPE_PROVIDER not supported for certificate");
+  return 0;
+}
+#endif
+
+static int pkcs12load(struct Curl_easy *data,
+                      SSL_CTX* ctx,
+                      const struct curl_blob *cert_blob,
+                      const char *cert_file,
+                      const char *key_passwd)
+{
+  char error_buffer[256];
+  BIO *cert_bio = NULL;
+  PKCS12 *p12 = NULL;
+  EVP_PKEY *pri;
+  X509 *x509;
+  int cert_done = 0;
+  STACK_OF(X509) *ca = NULL;
+  if(cert_blob) {
+    cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
+    if(!cert_bio) {
+      failf(data,
+            "BIO_new_mem_buf NULL, " OSSL_PACKAGE
+            " error %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)) );
+      return 0;
+    }
+  }
+  else {
+    cert_bio = BIO_new(BIO_s_file());
+    if(!cert_bio) {
+      failf(data,
+            "BIO_new return NULL, " OSSL_PACKAGE
+            " error %s",
+            ossl_strerror(ERR_get_error(), error_buffer,
+                          sizeof(error_buffer)) );
+      return 0;
+    }
+
+    if(BIO_read_filename(cert_bio, CURL_UNCONST(cert_file)) <= 0) {
+      failf(data, "could not open PKCS12 file '%s'", cert_file);
+      BIO_free(cert_bio);
+      return 0;
+    }
+  }
+
+  p12 = d2i_PKCS12_bio(cert_bio, NULL);
+  BIO_free(cert_bio);
+
+  if(!p12) {
+    failf(data, "error reading PKCS12 file '%s'",
+          cert_blob ? "(memory blob)" : cert_file);
+    return 0;
+  }
+
+  PKCS12_PBE_add();
+
+  if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
+    failf(data,
+          "could not parse PKCS12 file, check password, " OSSL_PACKAGE
+          " error %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)) );
+    PKCS12_free(p12);
+    return 0;
+  }
+
+  PKCS12_free(p12);
+
+  if(SSL_CTX_use_certificate(ctx, x509) != 1) {
+    failf(data,
+          "could not load PKCS12 client certificate, " OSSL_PACKAGE
+          " error %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)) );
+    goto fail;
+  }
+
+  if(SSL_CTX_use_PrivateKey(ctx, pri) != 1) {
+    failf(data, "unable to use private key from PKCS12 file '%s'",
+          cert_file);
+    goto fail;
+  }
+
+  if(!SSL_CTX_check_private_key(ctx)) {
+    failf(data, "private key from PKCS12 file '%s' "
+          "does not match certificate in same file", cert_file);
+    goto fail;
+  }
+  /* Set Certificate Verification chain */
+  if(ca) {
+    while(sk_X509_num(ca)) {
+      /*
+       * Note that sk_X509_pop() is used below to make sure the cert is
+       * removed from the stack properly before getting passed to
+       * SSL_CTX_add_extra_chain_cert(), which takes ownership. Previously
+       * we used sk_X509_value() instead, but then we would clean it in the
+       * subsequent sk_X509_pop_free() call.
+       */
+      X509 *x = sk_X509_pop(ca);
+      if(!SSL_CTX_add_client_CA(ctx, x)) {
+        X509_free(x);
+        failf(data, "cannot add certificate to client CA list");
+        goto fail;
+      }
+      if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
+        X509_free(x);
+        failf(data, "cannot add certificate to certificate chain");
+        goto fail;
+      }
+    }
+  }
+
+  cert_done = 1;
+fail:
+  EVP_PKEY_free(pri);
+  X509_free(x509);
+  sk_X509_pop_free(ca, X509_free);
+  if(!cert_done)
+    return 0; /* failure! */
+  return 1;
+}
+
+
+static CURLcode client_cert(struct Curl_easy *data,
+                            SSL_CTX* ctx,
+                            char *cert_file,
+                            const struct curl_blob *cert_blob,
+                            const char *cert_type,
+                            char *key_file,
+                            const struct curl_blob *key_blob,
+                            const char *key_type,
+                            char *key_passwd)
 {
   char error_buffer[256];
   bool check_privkey = TRUE;
-
   int file_type = ossl_do_file_type(cert_type);
 
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE) ||
      (file_type == SSL_FILETYPE_PROVIDER)) {
     SSL *ssl;
     X509 *x509;
-    int cert_done = 0;
+    bool pcks12_done = FALSE;
     int cert_use_result;
 
     if(key_passwd) {
@@ -1278,7 +1692,6 @@ int cert_stuff(struct Curl_easy *data,
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
     }
-
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
@@ -1294,7 +1707,7 @@ int cert_stuff(struct Curl_easy *data,
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
 
@@ -1314,249 +1727,29 @@ int cert_stuff(struct Curl_easy *data,
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
+
     case SSL_FILETYPE_ENGINE:
-#if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
-    {
-      /* Implicitly use pkcs11 engine if none was provided and the
-       * cert_file is a PKCS#11 URI */
-      if(!data->state.engine) {
-        if(is_pkcs11_uri(cert_file)) {
-          if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
-            return 0;
-          }
-        }
-      }
+      if(!engineload(data, ctx, cert_file))
+        return CURLE_SSL_CERTPROBLEM;
+      break;
 
-      if(data->state.engine) {
-        const char *cmd_name = "LOAD_CERT_CTRL";
-        struct {
-          const char *cert_id;
-          X509 *cert;
-        } params;
-
-        params.cert_id = cert_file;
-        params.cert = NULL;
-
-        /* Does the engine supports LOAD_CERT_CTRL ? */
-        if(!ENGINE_ctrl(data->state.engine, ENGINE_CTRL_GET_CMD_FROM_NAME,
-                        0, CURL_UNCONST(cmd_name), NULL)) {
-          failf(data, "ssl engine does not support loading certificates");
-          return 0;
-        }
-
-        /* Load the certificate from the engine */
-        if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
-                            0, &params, NULL, 1)) {
-          failf(data, "ssl engine cannot load client cert with id"
-                " '%s' [%s]", cert_file,
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-
-        if(!params.cert) {
-          failf(data, "ssl engine did not initialized the certificate "
-                "properly.");
-          return 0;
-        }
-
-        if(SSL_CTX_use_certificate(ctx, params.cert) != 1) {
-          failf(data, "unable to set client certificate [%s]",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-        X509_free(params.cert); /* we do not need the handle any more... */
-      }
-      else {
-        failf(data, "crypto engine not set, cannot load certificate");
-        return 0;
-      }
-    }
-    break;
-#endif
-#ifdef OPENSSL_HAS_PROVIDERS
-      /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
-    {
-      /* Implicitly use pkcs11 provider if none was provided and the
-       * cert_file is a PKCS#11 URI */
-      if(!data->state.provider_loaded) {
-        if(is_pkcs11_uri(cert_file)) {
-          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
-            return 0;
-          }
-        }
-      }
-
-      if(data->state.provider_loaded) {
-        /* Load the certificate from the provider */
-        OSSL_STORE_INFO *info = NULL;
-        X509 *cert = NULL;
-        OSSL_STORE_CTX *store =
-          OSSL_STORE_open_ex(cert_file, data->state.libctx,
-                             NULL, NULL, NULL, NULL, NULL, NULL);
-        if(!store) {
-          failf(data, "Failed to open OpenSSL store: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-        if(OSSL_STORE_expect(store, OSSL_STORE_INFO_CERT) != 1) {
-          failf(data, "Failed to set store preference. Ignoring the error: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-        }
-
-        info = OSSL_STORE_load(store);
-        if(info) {
-          int ossl_type = OSSL_STORE_INFO_get_type(info);
-
-          if(ossl_type == OSSL_STORE_INFO_CERT)
-            cert = OSSL_STORE_INFO_get1_CERT(info);
-          OSSL_STORE_INFO_free(info);
-        }
-        OSSL_STORE_close(store);
-        if(!cert) {
-          failf(data, "No cert found in the openssl store: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-
-        if(SSL_CTX_use_certificate(ctx, cert) != 1) {
-          failf(data, "unable to set client certificate [%s]",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-        X509_free(cert); /* we do not need the handle any more... */
-      }
-      else {
-        failf(data, "crypto provider not set, cannot load certificate");
-        return 0;
-      }
-    }
-    break;
-#endif
+      if(!providerload(data, ctx, cert_file))
+        return CURLE_SSL_CERTPROBLEM;
+      break;
 
     case SSL_FILETYPE_PKCS12:
-    {
-      BIO *cert_bio = NULL;
-      PKCS12 *p12 = NULL;
-      EVP_PKEY *pri;
-      STACK_OF(X509) *ca = NULL;
-      if(cert_blob) {
-        cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
-        if(!cert_bio) {
-          failf(data,
-                "BIO_new_mem_buf NULL, " OSSL_PACKAGE
-                " error %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)) );
-          return 0;
-        }
-      }
-      else {
-        cert_bio = BIO_new(BIO_s_file());
-        if(!cert_bio) {
-          failf(data,
-                "BIO_new return NULL, " OSSL_PACKAGE
-                " error %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)) );
-          return 0;
-        }
-
-        if(BIO_read_filename(cert_bio, cert_file) <= 0) {
-          failf(data, "could not open PKCS12 file '%s'", cert_file);
-          BIO_free(cert_bio);
-          return 0;
-        }
-      }
-
-      p12 = d2i_PKCS12_bio(cert_bio, NULL);
-      BIO_free(cert_bio);
-
-      if(!p12) {
-        failf(data, "error reading PKCS12 file '%s'",
-              cert_blob ? "(memory blob)" : cert_file);
-        return 0;
-      }
-
-      PKCS12_PBE_add();
-
-      if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
-        failf(data,
-              "could not parse PKCS12 file, check password, " OSSL_PACKAGE
-              " error %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)) );
-        PKCS12_free(p12);
-        return 0;
-      }
-
-      PKCS12_free(p12);
-
-      if(SSL_CTX_use_certificate(ctx, x509) != 1) {
-        failf(data,
-              "could not load PKCS12 client certificate, " OSSL_PACKAGE
-              " error %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)) );
-        goto fail;
-      }
-
-      if(SSL_CTX_use_PrivateKey(ctx, pri) != 1) {
-        failf(data, "unable to use private key from PKCS12 file '%s'",
-              cert_file);
-        goto fail;
-      }
-
-      if(!SSL_CTX_check_private_key(ctx)) {
-        failf(data, "private key from PKCS12 file '%s' "
-              "does not match certificate in same file", cert_file);
-        goto fail;
-      }
-      /* Set Certificate Verification chain */
-      if(ca) {
-        while(sk_X509_num(ca)) {
-          /*
-           * Note that sk_X509_pop() is used below to make sure the cert is
-           * removed from the stack properly before getting passed to
-           * SSL_CTX_add_extra_chain_cert(), which takes ownership. Previously
-           * we used sk_X509_value() instead, but then we would clean it in the
-           * subsequent sk_X509_pop_free() call.
-           */
-          X509 *x = sk_X509_pop(ca);
-          if(!SSL_CTX_add_client_CA(ctx, x)) {
-            X509_free(x);
-            failf(data, "cannot add certificate to client CA list");
-            goto fail;
-          }
-          if(!SSL_CTX_add_extra_chain_cert(ctx, x)) {
-            X509_free(x);
-            failf(data, "cannot add certificate to certificate chain");
-            goto fail;
-          }
-        }
-      }
-
-      cert_done = 1;
-fail:
-      EVP_PKEY_free(pri);
-      X509_free(x509);
-      sk_X509_pop_free(ca, X509_free);
-      if(!cert_done)
-        return 0; /* failure! */
+      if(!pkcs12load(data, ctx, cert_blob, cert_file, key_passwd))
+        return CURLE_SSL_CERTPROBLEM;
+      pcks12_done = TRUE;
       break;
-    }
+
     default:
       failf(data, "not supported file type '%s' for certificate", cert_type);
-      return 0;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     if((!key_file) && (!key_blob)) {
@@ -1568,9 +1761,6 @@ fail:
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
-      if(cert_done)
-        break;
-      FALLTHROUGH();
     case SSL_FILETYPE_ASN1:
       cert_use_result = key_blob ?
         use_privatekey_blob(ctx, key_blob, file_type, key_passwd) :
@@ -1579,153 +1769,34 @@ fail:
         failf(data, "unable to set private key file: '%s' type %s",
               key_file ? key_file : "(memory blob)",
               key_type ? key_type : "PEM");
-        return 0;
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       }
       break;
     case SSL_FILETYPE_ENGINE:
-#ifdef USE_OPENSSL_ENGINE
-    {
-      EVP_PKEY *priv_key = NULL;
+      if(!enginecheck(data, ctx, key_file, key_passwd))
+        return CURLE_SSL_CERTPROBLEM;
+      break;
 
-      /* Implicitly use pkcs11 engine if none was provided and the
-       * key_file is a PKCS#11 URI */
-      if(!data->state.engine) {
-        if(is_pkcs11_uri(key_file)) {
-          if(ossl_set_engine(data, "pkcs11") != CURLE_OK) {
-            return 0;
-          }
-        }
-      }
-
-      if(data->state.engine) {
-        UI_METHOD *ui_method =
-          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
-        if(!ui_method) {
-          failf(data, "unable do create " OSSL_PACKAGE
-                " user-interface method");
-          return 0;
-        }
-        UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
-        UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
-        UI_method_set_reader(ui_method, ssl_ui_reader);
-        UI_method_set_writer(ui_method, ssl_ui_writer);
-        priv_key = ENGINE_load_private_key(data->state.engine, key_file,
-                                           ui_method,
-                                           key_passwd);
-        UI_destroy_method(ui_method);
-        if(!priv_key) {
-          failf(data, "failed to load private key from crypto engine");
-          return 0;
-        }
-        if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
-          failf(data, "unable to set private key");
-          EVP_PKEY_free(priv_key);
-          return 0;
-        }
-        EVP_PKEY_free(priv_key);  /* we do not need the handle any more... */
-      }
-      else {
-        failf(data, "crypto engine not set, cannot load private key");
-        return 0;
-      }
-    }
-    break;
-#endif
-#ifdef OPENSSL_HAS_PROVIDERS
-      /* fall through to compatible provider */
     case SSL_FILETYPE_PROVIDER:
-    {
-      /* Implicitly use pkcs11 provider if none was provided and the
-       * key_file is a PKCS#11 URI */
-      if(!data->state.provider_loaded) {
-        if(is_pkcs11_uri(key_file)) {
-          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
-            return 0;
-          }
-        }
-      }
-
-      if(data->state.provider_loaded) {
-        /* Load the private key from the provider */
-        EVP_PKEY *priv_key = NULL;
-        OSSL_STORE_CTX *store = NULL;
-        OSSL_STORE_INFO *info = NULL;
-        UI_METHOD *ui_method =
-          UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
-        if(!ui_method) {
-          failf(data, "unable do create " OSSL_PACKAGE
-                " user-interface method");
-          return 0;
-        }
-        UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
-        UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
-        UI_method_set_reader(ui_method, ssl_ui_reader);
-        UI_method_set_writer(ui_method, ssl_ui_writer);
-
-        store = OSSL_STORE_open_ex(key_file, data->state.libctx,
-                                   data->state.propq, ui_method, NULL, NULL,
-                                   NULL, NULL);
-        if(!store) {
-          failf(data, "Failed to open OpenSSL store: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-        if(OSSL_STORE_expect(store, OSSL_STORE_INFO_PKEY) != 1) {
-          failf(data, "Failed to set store preference. Ignoring the error: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-        }
-
-        info = OSSL_STORE_load(store);
-        if(info) {
-          int ossl_type = OSSL_STORE_INFO_get_type(info);
-
-          if(ossl_type == OSSL_STORE_INFO_PKEY)
-            priv_key = OSSL_STORE_INFO_get1_PKEY(info);
-          OSSL_STORE_INFO_free(info);
-        }
-        OSSL_STORE_close(store);
-        UI_destroy_method(ui_method);
-        if(!priv_key) {
-          failf(data, "No private key found in the openssl store: %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          return 0;
-        }
-
-        if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
-          failf(data, "unable to set private key [%s]",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)));
-          EVP_PKEY_free(priv_key);
-          return 0;
-        }
-        EVP_PKEY_free(priv_key); /* we do not need the handle any more... */
-      }
-      else {
-        failf(data, "crypto provider not set, cannot load private key");
-        return 0;
-      }
-    }
-    break;
-#endif
+      if(!providercheck(data, ctx, key_file))
+        return CURLE_SSL_CERTPROBLEM;
+      break;
 
     case SSL_FILETYPE_PKCS12:
-      if(!cert_done) {
+      if(!pcks12_done) {
         failf(data, "file type P12 for private key not supported");
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
     default:
       failf(data, "not supported file type for private key");
-      return 0;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     ssl = SSL_new(ctx);
     if(!ssl) {
       failf(data, "unable to create an SSL structure");
-      return 0;
+      return CURLE_OUT_OF_MEMORY;
     }
 
     x509 = SSL_get_certificate(ssl);
@@ -1769,11 +1840,11 @@ fail:
        * the SSL context */
       if(!SSL_CTX_check_private_key(ctx)) {
         failf(data, "Private key does not match the certificate public key");
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
     }
   }
-  return 1;
+  return CURLE_OK;
 }
 
 /* returns non-zero on failure */
@@ -4098,7 +4169,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #else
     result = ossl_set_ssl_version_min_max_legacy(&ctx_options, cf, data);
 #endif
-    if(result != CURLE_OK)
+    if(result)
       return result;
     break;
 
@@ -4156,14 +4227,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
-    if(!result &&
-       !cert_stuff(data, octx->ssl_ctx,
-                   ssl_cert, ssl_cert_blob, ssl_cert_type,
-                   ssl_config->key, ssl_config->key_blob,
-                   ssl_config->key_type, ssl_config->key_passwd))
-      result = CURLE_SSL_CERTPROBLEM;
+    result = client_cert(data, octx->ssl_ctx,
+                         ssl_cert, ssl_cert_blob, ssl_cert_type,
+                         ssl_config->key, ssl_config->key_blob,
+                         ssl_config->key_type, ssl_config->key_passwd);
     if(result)
-      /* failf() is already done in cert_stuff() */
+      /* failf() is already done in client_cert() */
       return result;
   }
 
