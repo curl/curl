@@ -35,7 +35,7 @@
 
 #define DNS_TIMEOUT 1L
 
-static CURLcode do_one_request(CURLM *m, const char *URL, char *resolve)
+static CURLcode do_one_request(CURLM *m, const char *URL, const char *resolve)
 {
   CURL *curls;
   struct curl_slist *resolve_list = NULL;
