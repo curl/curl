@@ -111,7 +111,7 @@ out:
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_cli_h2_serverpush(const char *URL)
+static CURLcode test_cli_h2_serverpush(const char *URL)
 {
   CURL *easy;
   CURLM *multi_handle;
@@ -175,5 +175,5 @@ static int test_cli_h2_serverpush(const char *URL)
   if(out_push)
     fclose(out_push);
 
-  return 0;
+  return CURLE_OK;
 }

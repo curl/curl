@@ -94,7 +94,7 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
   return easy;
 }
 
-static int test_cli_tls_session_reuse(const char *URL)
+static CURLcode test_cli_tls_session_reuse(const char *URL)
 {
   const char *url;
   CURLM *multi = NULL;
@@ -109,7 +109,7 @@ static int test_cli_tls_session_reuse(const char *URL)
   int add_more, waits, ongoing = 0;
   char *host = NULL, *port = NULL;
   long http_version = CURL_HTTP_VERSION_1_1;
-  int exitcode = 1;
+  CURLcode exitcode = 1;
 
   (void)URL;
 
@@ -238,7 +238,7 @@ static int test_cli_tls_session_reuse(const char *URL)
   }
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = 0;
+  exitcode = CURLE_OK;
 
 cleanup:
 

@@ -177,7 +177,7 @@ static void usage_hx_download(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_cli_hx_download(const char *URL)
+static CURLcode test_cli_hx_download(const char *URL)
 {
   CURLM *multi_handle;
   struct CURLMsg *m;
@@ -197,7 +197,7 @@ static int test_cli_hx_download(const char *URL)
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
-  int result = 0;
+  CURLcode result = CURLE_OK;
 
   (void)URL;
 

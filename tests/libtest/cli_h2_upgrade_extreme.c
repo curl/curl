@@ -33,7 +33,7 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static int test_cli_h2_upgrade_extreme(const char *URL)
+static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
   const char *url;
   CURLM *multi = NULL;
@@ -43,7 +43,7 @@ static int test_cli_h2_upgrade_extreme(const char *URL)
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  int exitcode = 1;
+  CURLcode exitcode = 1;
 
   (void)URL;
 
@@ -147,7 +147,7 @@ static int test_cli_h2_upgrade_extreme(const char *URL)
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = 0;
+  exitcode = CURLE_OK;
 
 cleanup:
 

@@ -177,7 +177,7 @@ static void usage_ws_data(const char *msg)
 
 #endif
 
-static int test_cli_ws_data(const char *URL)
+static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
@@ -250,7 +250,7 @@ static int test_cli_ws_data(const char *URL)
 
 cleanup:
   curl_global_cleanup();
-  return (int)res;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

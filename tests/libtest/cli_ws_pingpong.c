@@ -91,7 +91,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 
 #endif
 
-static int test_cli_ws_pingpong(const char *URL)
+static CURLcode test_cli_ws_pingpong(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
@@ -126,7 +126,7 @@ static int test_cli_ws_pingpong(const char *URL)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

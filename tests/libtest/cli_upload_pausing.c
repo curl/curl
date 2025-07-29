@@ -82,7 +82,7 @@ static void usage_upload_pausing(const char *msg)
   );
 }
 
-static int test_cli_upload_pausing(const char *URL)
+static CURLcode test_cli_upload_pausing(const char *URL)
 {
   CURL *curl;
   CURLcode rc = CURLE_OK;
@@ -198,5 +198,5 @@ static int test_cli_upload_pausing(const char *URL)
   curl_url_cleanup(cu);
   curl_global_cleanup();
 
-  return (int)rc;
+  return rc;
 }
