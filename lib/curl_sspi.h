@@ -65,6 +65,7 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SP_NAME_NEGOTIATE           "Negotiate"
 #define SP_NAME_KERBEROS            "Kerberos"
 
+/* Offered by mingw-w64 v9+. MS SDK 7.0A+. */
 #ifndef ISC_REQ_USE_HTTP_STYLE
 #define ISC_REQ_USE_HTTP_STYLE                0x01000000
 #endif
@@ -288,12 +289,15 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_E_KDC_CERT_REVOKED                ((HRESULT)0x8009035BL)
 #endif
 #endif /* __MINGW32CE__ */
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_INVALID_PARAMETER
 #define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_DELEGATION_POLICY
 #define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_POLICY_NLTM_ONLY
 #define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
@@ -324,6 +328,8 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_I_NO_LSA_CONTEXT                  ((HRESULT)0x00090323L)
 #endif
 #endif /* __MINGW32CE__ */
+
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_I_SIGNATURE_NEEDED
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif

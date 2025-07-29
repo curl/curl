@@ -191,6 +191,7 @@ struct sha256_ctx {
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
+/* Offered when targeting Vista (XP SP2+) */
 #ifndef CALG_SHA_256
 #define CALG_SHA_256 0x0000800c
 #endif

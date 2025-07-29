@@ -164,6 +164,7 @@ static void nosigpipe(struct Curl_easy *data,
 #define KEEPALIVE_FACTOR(x)
 #endif
 
+/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
 #if defined(USE_WINSOCK) && !defined(SIO_KEEPALIVE_VALS)
 #define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
 
@@ -1406,6 +1407,7 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
 
 #ifdef USE_WINSOCK
 
+/* Offered by mingw-w64 v13+. MS SDK 7.0A+. */
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
