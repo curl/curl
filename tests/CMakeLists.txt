@@ -83,7 +83,7 @@ function(curl_add_pytests _targetname _test_flags)
     if(BUILD_CURL_EXE)
       list(APPEND _depends ${EXE_NAME})
     endif()
-    list(APPEND _depends "clients")
+    list(APPEND _depends "libtests")
   endif()
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}
