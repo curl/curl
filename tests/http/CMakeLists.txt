@@ -52,11 +52,11 @@ if(NOT HTTPD_NGHTTPX)
 endif()
 mark_as_advanced(HTTPD_NGHTTPX)
 
-find_program(SOCKD "sockd")
-if(NOT SOCKD)
-  set(SOCKD "")
+find_program(DANTED "danted")
+if(NOT DANTED)
+  set(DANTED "")
 endif()
-mark_as_advanced(SOCKD)
+mark_as_advanced(DANTED)
 
-# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, SOCKD, VSFTPD
+# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, DANTED, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

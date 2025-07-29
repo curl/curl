@@ -38,5 +38,5 @@ caddy = @CADDY@
 [vsftpd]
 vsftpd = @VSFTPD@
 
-[sockd]
-sockd = @SOCKD@
+[danted]
+danted = @DANTED@

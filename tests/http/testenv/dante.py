@@ -28,9 +28,12 @@ import logging
 import os
 import socket
 import subprocess
+import time
+from datetime import timedelta, datetime
 
 from typing import Dict
 
+from . import CurlClient
 from .env import Env
 from .ports import alloc_ports_and_do
 
@@ -41,12 +44,12 @@ class Dante:
 
     def __init__(self, env: Env):
         self.env = env
-        self._cmd = env.sockd
+        self._cmd = env.danted
         self._port = 0
-        self.name = 'sockd'
-        self._port_skey = 'sockd'
+        self.name = 'danted'
+        self._port_skey = 'danted'
         self._port_specs = {
-            'sockd': socket.SOCK_STREAM,
+            'danted': socket.SOCK_STREAM,
         }
         self._dante_dir = os.path.join(env.gen_dir, self.name)
         self._run_dir = os.path.join(self._dante_dir, 'run')
@@ -124,7 +127,21 @@ class Dante:
         self._process = subprocess.Popen(args=args, stderr=procerr)
         if self._process.returncode is not None:
             return False
-        return True
+        return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
+
+    def wait_live(self, timeout: timedelta):
+        curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
+                          timeout=timeout.total_seconds(), socks_args=[
+            '--socks5', f'127.0.0.1:{self._port}'
+        ])
+        try_until = datetime.now() + timeout
+        while datetime.now() < try_until:
+            r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
+            if r.exit_code == 0:
+                return True
+            time.sleep(.1)
+        log.error(f"Server still not responding after {timeout}")
+        return False
 
     def _rmf(self, path):
         if os.path.exists(path):
