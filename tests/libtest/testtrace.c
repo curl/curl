@@ -112,7 +112,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
 
   switch(type) {
   case CURLINFO_TEXT:
-    curl_mfprintf(stderr, "%s== Info: %s", timestr, (char *)data);
+    curl_mfprintf(stderr, "%s== Info: %s", timestr, data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
@@ -136,7 +136,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
     return 0;
   }
 
-  libtest_debug_dump(timebuf, text, stderr, (unsigned char *)data, size,
+  libtest_debug_dump(timebuf, text, stderr, (const unsigned char *)data, size,
                      trace_cfg->nohex);
   return 0;
 }

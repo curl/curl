@@ -30,44 +30,6 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-static int my_trace(CURL *handle, curl_infotype type,
-                    char *data, size_t size, void *userp)
-{
-  struct libtest_trace_cfg *config = (struct libtest_trace_cfg *)userp;
-  const char *text;
-  (void)handle; /* prevent compiler warning */
-
-  switch(type) {
-  case CURLINFO_TEXT:
-    curl_mfprintf(stderr, "== Info: %s", (char *)data);
-    return 0;
-  case CURLINFO_HEADER_OUT:
-    text = "=> Send header";
-    break;
-  case CURLINFO_DATA_OUT:
-    text = "=> Send data";
-    break;
-  case CURLINFO_SSL_DATA_OUT:
-    text = "=> Send SSL data";
-    break;
-  case CURLINFO_HEADER_IN:
-    text = "<= Recv header";
-    break;
-  case CURLINFO_DATA_IN:
-    text = "<= Recv data";
-    break;
-  case CURLINFO_SSL_DATA_IN:
-    text = "<= Recv SSL data";
-    break;
-  default: /* in case a new one is introduced to shock us */
-    return 0;
-  }
-
-  libtest_debug_dump("", text, stderr, (unsigned char *)data, size,
-                     config->nohex);
-  return 0;
-}
-
 static size_t current_offset = 0;
 static char databuf[70000]; /* MUST be more than 64k OR
                                MAX_INITIAL_POST_SIZE */
@@ -118,7 +80,7 @@ static CURLcode test_lib552(const char *URL)
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
-  test_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+  test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   test_setopt(curl, CURLOPT_DEBUGDATA, &config);
   /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

@@ -26,46 +26,14 @@
 #include "cli_util.h"
 #include "testtrace.h"
 
-static int my_trace(CURL *handle, curl_infotype type,
-                    char *data, size_t size, void *userp)
-{
-  const char *text;
-  (void)handle; /* prevent compiler warning */
-  (void)userp;
-  switch(type) {
-  case CURLINFO_TEXT:
-    curl_mfprintf(stderr, "== Info: %s", data);
-    return 0;
-  case CURLINFO_HEADER_OUT:
-    text = "=> Send header";
-    break;
-  case CURLINFO_DATA_OUT:
-    text = "=> Send data";
-    break;
-  case CURLINFO_SSL_DATA_OUT:
-    text = "=> Send SSL data";
-    break;
-  case CURLINFO_HEADER_IN:
-    text = "<= Recv header";
-    break;
-  case CURLINFO_DATA_IN:
-    text = "<= Recv data";
-    break;
-  case CURLINFO_SSL_DATA_IN:
-    text = "<= Recv SSL data";
-    break;
-  default: /* in case a new one is introduced to shock us */
-    return 0;
-  }
-
-  libtest_debug_dump("", text, stderr, (const unsigned char *)data, size, 1);
-  return 0;
-}
-
 static FILE *out_download;
 
 static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
+  struct libtest_trace_cfg config = {0};
+
+  config.nohex = 1; /* enable ASCII tracing */
+
   out_download = fopen("download_0.data", "wb");
   if(!out_download)
     return 1;  /* failed */
@@ -79,7 +47,8 @@ static int setup_h2_serverpush(CURL *hnd, const char *url)
 
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, &config);
 
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
