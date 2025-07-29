@@ -1111,7 +1111,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
                                 bool *skipped)
 {
   CURLcode result = CURLE_OK;
-  struct getout *urlnode;
   struct GlobalConfig *global = config->global;
   bool orig_noprogress = global->noprogress;
   bool orig_isatty = global->isatty;
@@ -1145,7 +1144,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
     state->infilenum = 1;
   }
 
-  while((urlnode = state->urlnode)) {
+  while(state->urlnode) {
+    struct getout *urlnode = state->urlnode;
 
     /* urlnode->url is the full URL or NULL */
     if(!urlnode->url) {
