@@ -40,7 +40,6 @@ if(CURL_CLANG_TIDY)
 endif()
 
 add_subdirectory(http)
-add_subdirectory(client)
 add_subdirectory(server)
 add_subdirectory(libtest)
 add_subdirectory(tunit)
