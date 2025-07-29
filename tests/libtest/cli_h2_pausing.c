@@ -278,10 +278,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 
 out:
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    if(handles[i].h) {
-      curl_multi_remove_handle(multi_handle, handles[i].h);
-      curl_easy_cleanup(handles[i].h);
-    }
+    curl_multi_remove_handle(multi_handle, handles[i].h);
+    curl_easy_cleanup(handles[i].h);
   }
 
   curl_slist_free_all(resolve);
