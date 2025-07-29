@@ -96,22 +96,19 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
-  const char *url, *payload;
+  const char *payload;
 
-  (void)URL;
-
-  if(test_argc != 3) {
+  if(!URL || !libtest_arg2) {
     curl_mfprintf(stderr, "need args: URL payload\n");
     return 2;
   }
-  url = test_argv[1];
-  payload = test_argv[2];
+  payload = libtest_arg2;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
 
     /* use the callback style */
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-pingpong");
