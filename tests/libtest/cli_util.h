@@ -35,12 +35,11 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  curl_mfprintf(stderr, "%s, %lu bytes (0x%lx)\n",
-                text, (unsigned long)size, (unsigned long)size);
+  curl_mfprintf(stderr, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
   for(i = 0; i < size; i += width) {
 
-    curl_mfprintf(stderr, "%4.4lx: ", (unsigned long)i);
+    curl_mfprintf(stderr, "%4.4zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
@@ -59,7 +58,8 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
         break;
       }
       curl_mfprintf(stderr, "%c",
-               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
+                    ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
+                    ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
