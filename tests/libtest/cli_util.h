@@ -42,7 +42,7 @@ static void cli_dump(const char *timebuf, const char *text,
 
   for(i = 0; i < size; i += width) {
 
-    curl_mfprintf(stream, "%4.4zx: ", i);
+    curl_mfprintf(stream, "%04zx: ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */
