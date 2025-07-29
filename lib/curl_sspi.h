@@ -328,10 +328,6 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif
 
-#ifndef CRYPT_E_REVOCATION_OFFLINE
-#define CRYPT_E_REVOCATION_OFFLINE            ((HRESULT)0x80092013L)
-#endif
-
 #ifndef CRYPT_E_NOT_IN_REVOCATION_DATABASE
 #define CRYPT_E_NOT_IN_REVOCATION_DATABASE    ((HRESULT)0x80092014L)
 #endif
