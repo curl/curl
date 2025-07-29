@@ -37,7 +37,7 @@
 
 #if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && \
   !defined(DISABLE_SCHANNEL_CLIENT_CERT)
-#define HAS_CLIENT_CERT_PATH
+#define HAS_CLIENT_CERT_PATH  /* missing from mingw-w64 UWP as of v13 */
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
