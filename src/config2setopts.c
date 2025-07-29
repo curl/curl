@@ -854,11 +854,8 @@ CURLcode config2setopts(struct OperationConfig *config,
   /* call after the line above. It may override CURLOPT_NOPROGRESS */
   gen_cb_setopts(config, per, curl);
 
-  if(config->no_body)
-    my_setopt_long(curl, CURLOPT_NOBODY, 1);
-
-  if(config->oauth_bearer)
-    my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
+  my_setopt_long(curl, CURLOPT_NOBODY, config->no_body);
+  my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
   result = proxy_setopts(config, curl);
   if(result)
@@ -877,12 +874,9 @@ CURLcode config2setopts(struct OperationConfig *config,
   else
     my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
 
-  if(config->netrc_file)
-    my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
-
+  my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
   my_setopt_long(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
-  if(config->login_options)
-    my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
+  my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
   my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
   my_setopt_str(curl, CURLOPT_RANGE, config->range);
   if(!global->parallel) {
@@ -924,11 +918,9 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  /* new in libcurl 7.81.0 */
   if(config->mime_options)
     my_setopt_long(curl, CURLOPT_MIME_OPTIONS, config->mime_options);
 
-  /* new in libcurl 7.10.6 (default is Basic) */
   if(config->authtype)
     my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, config->authtype);
 
@@ -996,68 +988,34 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
   customrequest_helper(config, config->httpreq, config->customrequest);
   my_setopt(curl, CURLOPT_STDERR, tool_stderr);
-
-  /* three new ones in libcurl 7.3: */
   my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
   my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
   progressbarinit(&per->progressbar, config);
-
-  /* new in libcurl 7.24.0: */
-  if(config->dns_servers)
-    my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
-
-  /* new in libcurl 7.33.0: */
-  if(config->dns_interface)
-    my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
-  if(config->dns_ipv4_addr)
-    my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
-  if(config->dns_ipv6_addr)
-    my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
-
-  /* new in libcurl 7.6.2: */
+  my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
+  my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
+  my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
+  my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
   my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
-
-  /* new in libcurl 7.7: */
   my_setopt_long(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connecttimeout_ms);
-
-  if(config->doh_url)
-    my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
-
-  /* new in curl 7.10.7, extended in 7.19.4. Modified to use
-     CREATE_DIR_RETRY in 7.49.0 */
+  my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
   my_setopt_long(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                  (config->ftp_create_dirs ?
                   CURLFTP_CREATE_DIR_RETRY : CURLFTP_CREATE_DIR_NONE));
-
-  /* new in curl 7.10.8 */
-  if(config->max_filesize)
-    my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE,
-                   config->max_filesize);
-
+  my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE,
+                 config->max_filesize);
   my_setopt_long(curl, CURLOPT_IPRESOLVE, config->ip_version);
-
-  /* new in curl 7.19.4 */
   if(config->socks5_gssapi_nec)
     my_setopt_long(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1);
-
-  /* new in curl 7.55.0 */
   if(config->socks5_auth)
     my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH, config->socks5_auth);
-
-  /* new in curl 7.43.0 */
-  if(config->service_name)
-    my_setopt_str(curl, CURLOPT_SERVICE_NAME, config->service_name);
-
-  /* curl 7.13.0 */
+  my_setopt_str(curl, CURLOPT_SERVICE_NAME, config->service_name);
   my_setopt_long(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
-  /* curl 7.15.2 */
   if(config->localport) {
     my_setopt_long(curl, CURLOPT_LOCALPORT, config->localport);
     my_setopt_long(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
   }
 
-  /* curl 7.16.2 */
   if(config->raw) {
     my_setopt_long(curl, CURLOPT_HTTP_CONTENT_DECODING, 0);
     my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0);
@@ -1067,20 +1025,13 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  /* curl 7.20.0 */
   if(config->tftp_blksize && proto_tftp)
     my_setopt_long(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
 
-  if(config->mail_from)
-    my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
-
-  if(config->mail_rcpt)
-    my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
-
-  /* curl 7.69.x */
+  my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
+  my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
   my_setopt_long(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS,
                  config->mail_rcpt_allowfails);
-
   if(config->create_file_mode)
     my_setopt_long(curl, CURLOPT_NEW_FILE_PERMS, config->create_file_mode);
 
@@ -1089,34 +1040,19 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(config->proto_redir_present)
     my_setopt_str(curl, CURLOPT_REDIR_PROTOCOLS_STR, config->proto_redir_str);
 
-  if(config->resolve)
-    /* new in 7.21.3 */
-    my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
-  if(config->connect_to)
-    /* new in 7.49.0 */
-    my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
-
-  /* new in 7.21.4 */
   if(feature_tls_srp)
     tls_srp_setopts(config, curl);
 
-  /* new in 7.22.0 */
   if(config->gssapi_delegation)
     my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
 
-  if(config->mail_auth)
-    my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+  my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+  my_setopt_str(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
+  my_setopt_long(curl, CURLOPT_SASL_IR, config->sasl_ir);
 
-  /* new in 7.66.0 */
-  if(config->sasl_authzid)
-    my_setopt_str(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
-
-  /* new in 7.31.0 */
-  if(config->sasl_ir)
-    my_setopt_long(curl, CURLOPT_SASL_IR, 1);
-
-  /* new in 7.40.0, abstract support added in 7.53.0 */
   if(config->unix_socket_path) {
     if(config->abstract_unix_socket) {
       my_setopt_str(curl, CURLOPT_ABSTRACT_UNIX_SOCKET,
@@ -1128,23 +1064,17 @@ CURLcode config2setopts(struct OperationConfig *config,
     }
   }
 
-  /* new in 7.45.0 */
-  if(config->proto_default)
-    my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
+  my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
+  my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS,
+                 config->tftp_no_options && proto_tftp);
 
-  /* new in 7.48.0 */
-  if(config->tftp_no_options && proto_tftp)
-    my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS, 1);
-
-  /* new in 7.59.0 */
   if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
     my_setopt_long(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                    config->happy_eyeballs_timeout_ms);
 
-  if(config->disallow_username_in_url)
-    my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1);
+  my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL,
+                 config->disallow_username_in_url);
 
-  /* new in 8.9.0 */
   if(config->ip_tos > 0 || config->vlan_priority > 0) {
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
     my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
@@ -1162,8 +1092,6 @@ CURLcode config2setopts(struct OperationConfig *config,
     }
 #endif
   }
-  /* new in 8.13.0 */
-  if(config->upload_flags)
-    my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
+  my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
   return result;
 }
