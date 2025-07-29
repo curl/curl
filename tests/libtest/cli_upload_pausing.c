@@ -107,13 +107,13 @@ static CURLcode test_cli_upload_pausing(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_upload_pausing("invalid http version");
-        return 1;
+        return (CURLcode)1;
       }
       break;
     }
     default:
       usage_upload_pausing("invalid option");
-      return 1;
+      return (CURLcode)1;
     }
   }
   test_argc -= coptind;
@@ -121,7 +121,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
 
   if(test_argc != 1) {
     usage_upload_pausing("not enough arguments");
-    return 2;
+    return (CURLcode)2;
   }
   url = test_argv[0];
 
@@ -131,19 +131,19 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
@@ -153,7 +153,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   /* We want to use our own read function. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -180,7 +180,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb) != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK) {
     curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");
-    return 2;
+    return (CURLcode)2;
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);

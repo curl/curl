@@ -100,7 +100,7 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
 
   if(!URL || !libtest_arg2) {
     curl_mfprintf(stderr, "need args: URL payload\n");
-    return 2;
+    return (CURLcode)2;
   }
   payload = libtest_arg2;
 
@@ -128,6 +128,6 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
-  return 1;
+  return (CURLcode)1;
 #endif /* CURL_DISABLE_WEBSOCKETS */
 }

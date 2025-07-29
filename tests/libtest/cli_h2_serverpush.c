@@ -120,7 +120,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
-    return 2;
+    return (CURLcode)2;
   }
 
   multi_handle = curl_multi_init();
@@ -132,7 +132,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   if(setup_h2_serverpush(easy, URL)) {
     fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
-    return 1;
+    return (CURLcode)1;
   }
 
   curl_multi_add_handle(multi_handle, easy);

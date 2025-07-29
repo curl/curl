@@ -82,7 +82,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 #define CLI_ERR()                                                             \
   do {                                                                        \
     curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
-    return 2;                                                                 \
+    return (CURLcode)2;                                                       \
   } while(0)
 
 static CURLcode test_cli_h2_pausing(const char *URL)
@@ -110,7 +110,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     switch(ch) {
     case 'h':
       usage_h2_pausing(NULL);
-      return 2;
+      return (CURLcode)2;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
         http_version = CURL_HTTP_VERSION_1_1;
@@ -120,13 +120,13 @@ static CURLcode test_cli_h2_pausing(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_h2_pausing("invalid http version");
-        return 1;
+        return (CURLcode)1;
       }
       break;
     }
     default:
       usage_h2_pausing("invalid option");
-      return 1;
+      return (CURLcode)1;
     }
   }
   test_argc -= coptind;
@@ -134,7 +134,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 
   if(test_argc != 1) {
     curl_mfprintf(stderr, "ERROR: need URL as argument\n");
-    return 2;
+    return (CURLcode)2;
   }
   url = test_argv[0];
 
@@ -144,19 +144,19 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
@@ -227,7 +227,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       if(!as_expected) {
         curl_mfprintf(stderr, "ERROR: handles not in expected state "
                       "after %d rounds\n", rounds);
-        rc = 1;
+        rc = (CURLcode)1;
       }
       break;
     }
@@ -244,7 +244,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
               curl_mfprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
                             "result %d - wtf?\n", (int)i, handles[i].paused,
                             handles[i].resumed, msg->data.result);
-              rc = 1;
+              rc = (CURLcode)1;
               goto out;
             }
           }

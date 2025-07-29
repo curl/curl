@@ -255,6 +255,6 @@ cleanup:
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
-  return 1;
+  return (CURLcode)1;
 #endif /* CURL_DISABLE_WEBSOCKETS */
 }

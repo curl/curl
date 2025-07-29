@@ -108,11 +108,11 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   int add_more, waits, ongoing = 0;
   char *host = NULL, *port = NULL;
   long http_version = CURL_HTTP_VERSION_1_1;
-  CURLcode exitcode = 1;
+  CURLcode exitcode = (CURLcode)1;
 
   if(!URL || !libtest_arg2) {
     curl_mfprintf(stderr, "need args: URL proto\n");
-    return 2;
+    return (CURLcode)2;
   }
 
   if(!strcmp("h2", libtest_arg2))
@@ -123,7 +123,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_set(cu, CURLUPART_URL, URL, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", URL);

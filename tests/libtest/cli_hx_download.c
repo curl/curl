@@ -206,7 +206,7 @@ static CURLcode test_cli_hx_download(const char *URL)
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      result = 2;
+      result = (CURLcode)2;
       goto cleanup;
     case 'a':
       abort_paused = 1;
@@ -254,14 +254,14 @@ static CURLcode test_cli_hx_download(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        result = 1;
+        result = (CURLcode)1;
         goto cleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      result = 1;
+      result = (CURLcode)1;
       goto cleanup;
     }
   }
@@ -273,7 +273,7 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    result = 2;
+    result = (CURLcode)2;
     goto cleanup;
   }
   url = test_argv[0];
@@ -284,7 +284,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    result = 1;
+    result = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -297,7 +297,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    result = 1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
@@ -325,7 +325,7 @@ static CURLcode test_cli_hx_download(const char *URL)
       setup_hx_download(t->easy, url, t, http_version, host, share,
                         use_earlydata, fresh_connect)) {
       curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-      result = 1;
+      result = (CURLcode)1;
       goto cleanup;
     }
     curl_multi_add_handle(multi_handle, t->easy);
@@ -408,7 +408,7 @@ static CURLcode test_cli_hx_download(const char *URL)
               setup_hx_download(t->easy, url, t, http_version, host, share,
                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-              result = 1;
+              result = (CURLcode)1;
               goto cleanup;
             }
             curl_multi_add_handle(multi_handle, t->easy);

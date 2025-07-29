@@ -238,7 +238,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     switch(ch) {
     case 'h':
       usage_hx_upload(NULL);
-      return 2;
+      return (CURLcode)2;
     case 'a':
       abort_paused = 1;
       break;
@@ -287,13 +287,13 @@ static CURLcode test_cli_hx_upload(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_upload("invalid http version");
-        return 1;
+        return (CURLcode)1;
       }
       break;
     }
     default:
       usage_hx_upload("invalid option");
-      return 1;
+      return (CURLcode)1;
     }
   }
   test_argc -= coptind;
@@ -301,7 +301,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
   if(max_parallel > 1 && reuse_easy) {
     usage_hx_upload("cannot mix -R and -P");
-    return 2;
+    return (CURLcode)2;
   }
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -309,7 +309,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
   if(test_argc != 1) {
     usage_hx_upload("not enough arguments");
-    return 2;
+    return (CURLcode)2;
   }
   url = test_argv[0];
 
@@ -319,7 +319,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    return 1;
+    return (CURLcode)1;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
@@ -331,7 +331,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    return 1;
+    return (CURLcode)1;
   }
 
   active_transfers = 0;
@@ -350,7 +350,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     CURLcode rc = CURLE_OK;
     if(!easy) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
-      return 1;
+      return (CURLcode)1;
     }
     for(i = 0; i < transfer_count_u; ++i) {
       t = &transfer_u[i];
@@ -358,7 +358,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(setup_hx_upload(t->easy, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-        return 1;
+        return (CURLcode)1;
       }
 
       curl_mfprintf(stderr, "[t-%d] STARTING\n", t->idx);
@@ -380,7 +380,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-        return 1;
+        return (CURLcode)1;
       }
       curl_multi_add_handle(multi_handle, t->easy);
       t->started = 1;
@@ -465,7 +465,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-                return 1;
+                return (CURLcode)1;
               }
               curl_multi_add_handle(multi_handle, t->easy);
               t->started = 1;

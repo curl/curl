@@ -42,11 +42,11 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  CURLcode exitcode = 1;
+  CURLcode exitcode = (CURLcode)1;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
-    return 2;
+    return (CURLcode)2;
   }
 
   multi = curl_multi_init();
