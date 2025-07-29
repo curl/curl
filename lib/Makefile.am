@@ -162,7 +162,7 @@ CHECKSOURCES = checksrc
 endif
 endif
 
-all-local: $(CHECKSOURCES) $(UNITPROTOS)
+all-local: $(CHECKSOURCES)
 
 UNIT_V = $(UNITV_$(V))
 UNITV_0 = @echo "  UNITPR  " $@;
