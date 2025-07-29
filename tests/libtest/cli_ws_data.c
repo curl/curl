@@ -177,7 +177,7 @@ static void usage_ws_data(const char *msg)
 
 #endif
 
-static int test_ws_data(char *URL)
+static int test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;

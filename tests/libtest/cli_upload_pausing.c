@@ -82,7 +82,7 @@ static void usage_upload_pausing(const char *msg)
   );
 }
 
-static int test_upload_pausing(char *URL)
+static int test_cli_upload_pausing(const char *URL)
 {
   CURL *curl;
   CURLcode rc = CURLE_OK;

@@ -94,7 +94,7 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
   return easy;
 }
 
-static int test_tls_session_reuse(char *URL)
+static int test_cli_tls_session_reuse(const char *URL)
 {
   const char *url;
   CURLM *multi = NULL;

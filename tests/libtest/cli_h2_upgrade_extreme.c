@@ -33,7 +33,7 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static int test_h2_upgrade_extreme(char *URL)
+static int test_cli_h2_upgrade_extreme(const char *URL)
 {
   const char *url;
   CURLM *multi = NULL;

@@ -177,7 +177,7 @@ static void usage_hx_download(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_hx_download(char *URL)
+static int test_cli_hx_download(const char *URL)
 {
   CURLM *multi_handle;
   struct CURLMsg *m;
