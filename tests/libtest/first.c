@@ -193,7 +193,7 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   if(rlen == strlen(expected_payload) &&
      !memcmp(expected_payload, buffer, rlen)) {
     curl_mfprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;  /* lib2304 returns 'result' here. Intentional? */
+    return CURLE_OK;  /* lib2304 returned 'result' here. Intentional? */
   }
   curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
   return CURLE_RECV_ERROR;
