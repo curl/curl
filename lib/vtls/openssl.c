@@ -1394,7 +1394,6 @@ static int providercheck(struct Curl_easy *data,
 {
   (void)ctx;
   (void)key_file;
-  (void)key_passwd;
   failf(data, "SSL_FILETYPE_PROVIDER not supported for private key");
   return 0;
 }
