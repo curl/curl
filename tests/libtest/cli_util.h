@@ -24,8 +24,8 @@
  *
  ***************************************************************************/
 
-static void dump(const char *text, FILE *stream, unsigned char *ptr,
-                 size_t size, char nohex)
+static void cli_dump(const char *text, FILE *stream, unsigned char *ptr,
+                     size_t size, char nohex)
 {
   size_t i;
   size_t c;
