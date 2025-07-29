@@ -28,18 +28,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode ping(CURL *curl, const char *send_payload)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                 CURLWS_PING);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %u\n",
-                (int)result, (int)sent);
-
-  return result;
-}
-
 static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
@@ -73,7 +61,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
   CURLcode res;
   int i;
 
-  res = ping(curl, payload);
+  res = websocket_send_ping(curl, payload);
   if(res)
     return res;
   for(i = 0; i < 10; ++i) {

@@ -161,6 +161,16 @@ char *hexdump(const unsigned char *buf, size_t len)
 }
 
 #ifndef CURL_DISABLE_WEBSOCKETS
+CURLcode websocket_send_ping(CURL *curl, const char *send_payload)
+{
+  size_t sent;
+  CURLcode result = curl_ws_send(curl, send_payload, strlen(send_payload),
+                                 &sent, 0, CURLWS_PING);
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+                result, sent);
+  return result;
+}
+
 /* just close the connection */
 void websocket_close(CURL *curl)
 {

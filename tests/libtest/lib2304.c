@@ -25,18 +25,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode t2304_send_ping(CURL *curl, const char *send_payload)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                 CURLWS_PING);
-  curl_mfprintf(stderr,
-                "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
-
-  return result;
-}
-
 static CURLcode t2304_recv_pong(CURL *curl, const char *expected_payload)
 {
   size_t rlen;
@@ -87,7 +75,7 @@ static void t2304_websocket(CURL *curl)
   do {
     recv_any(curl);
     curl_mfprintf(stderr, "Send ping\n");
-    if(t2304_send_ping(curl, "foobar"))
+    if(websocket_send_ping(curl, "foobar"))
       return;
     curl_mfprintf(stderr, "Receive pong\n");
     if(t2304_recv_pong(curl, "foobar")) {
