@@ -1665,20 +1665,18 @@ fail:
 }
 
 
-static
-int cert_stuff(struct Curl_easy *data,
-               SSL_CTX* ctx,
-               char *cert_file,
-               const struct curl_blob *cert_blob,
-               const char *cert_type,
-               char *key_file,
-               const struct curl_blob *key_blob,
-               const char *key_type,
-               char *key_passwd)
+static int client_cert(struct Curl_easy *data,
+                       SSL_CTX* ctx,
+                       char *cert_file,
+                       const struct curl_blob *cert_blob,
+                       const char *cert_type,
+                       char *key_file,
+                       const struct curl_blob *key_blob,
+                       const char *key_type,
+                       char *key_passwd)
 {
   char error_buffer[256];
   bool check_privkey = TRUE;
-
   int file_type = ossl_do_file_type(cert_type);
 
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE) ||
@@ -4230,13 +4228,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
     if(!result &&
-       !cert_stuff(data, octx->ssl_ctx,
-                   ssl_cert, ssl_cert_blob, ssl_cert_type,
-                   ssl_config->key, ssl_config->key_blob,
-                   ssl_config->key_type, ssl_config->key_passwd))
+       !client_cert(data, octx->ssl_ctx,
+                    ssl_cert, ssl_cert_blob, ssl_cert_type,
+                    ssl_config->key, ssl_config->key_blob,
+                    ssl_config->key_type, ssl_config->key_passwd))
       result = CURLE_SSL_CERTPROBLEM;
     if(result)
-      /* failf() is already done in cert_stuff() */
+      /* failf() is already done in client_cert() */
       return result;
   }
 
