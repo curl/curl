@@ -33,7 +33,7 @@ struct t552_testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
-static void dump(const char *text,
+static void dump(const char *timebuf, const char *text,
                  FILE *stream, const unsigned char *ptr, size_t size,
                  int nohex)
 {
@@ -46,7 +46,8 @@ static void dump(const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  curl_mfprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
+  curl_mfprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
+                size, size);
 
   for(i = 0; i < size; i += width) {
 
@@ -116,7 +117,7 @@ static int my_trace(CURL *handle, curl_infotype type,
     return 0;
   }
 
-  dump(text, stderr, (unsigned char *)data, size, config->trace_ascii);
+  dump("", text, stderr, (unsigned char *)data, size, config->trace_ascii);
   return 0;
 }
 
