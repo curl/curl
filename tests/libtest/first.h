@@ -75,7 +75,7 @@ extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 
 /* argc and argv as passed in to the main() function */
 extern int test_argc;
-extern char **test_argv;
+extern const char **test_argv;
 extern int testnum;
 extern struct curltime tv_test_start; /* for test timing */
 
