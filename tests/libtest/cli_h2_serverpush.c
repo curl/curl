@@ -24,6 +24,7 @@
 #include "first.h"
 
 #include "cli_util.h"
+#include "testtrace.h"
 
 static int my_trace(CURL *handle, curl_infotype type,
                     char *data, size_t size, void *userp)
@@ -57,7 +58,7 @@ static int my_trace(CURL *handle, curl_infotype type,
     return 0;
   }
 
-  cli_dump("", text, stderr, (const unsigned char *)data, size, 1);
+  libtest_debug_dump("", text, stderr, (const unsigned char *)data, size, 1);
   return 0;
 }
 

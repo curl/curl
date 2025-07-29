@@ -26,6 +26,7 @@
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 #include "cli_util.h"
+#include "testtrace.h"
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,
                            size_t r_offset, size_t nread, size_t exp_len)
@@ -146,10 +147,10 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
     if(memcmp(send_buf, recv_buf, len)) {
       curl_mfprintf(stderr, "recv_data: data differs\n");
-      cli_dump("", "expected:", stderr, (const unsigned char *)send_buf, len,
-               0);
-      cli_dump("", "received:", stderr, (const unsigned char *)recv_buf, len,
-               0);
+      libtest_debug_dump("", "expected:", stderr,
+                         (const unsigned char *)send_buf, len, 0);
+      libtest_debug_dump("", "received:", stderr,
+                         (const unsigned char *)recv_buf, len, 0);
       r = CURLE_RECV_ERROR;
       goto out;
     }
