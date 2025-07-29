@@ -1665,15 +1665,15 @@ fail:
 }
 
 
-static int client_cert(struct Curl_easy *data,
-                       SSL_CTX* ctx,
-                       char *cert_file,
-                       const struct curl_blob *cert_blob,
-                       const char *cert_type,
-                       char *key_file,
-                       const struct curl_blob *key_blob,
-                       const char *key_type,
-                       char *key_passwd)
+static CURLcode client_cert(struct Curl_easy *data,
+                            SSL_CTX* ctx,
+                            char *cert_file,
+                            const struct curl_blob *cert_blob,
+                            const char *cert_type,
+                            char *key_file,
+                            const struct curl_blob *key_blob,
+                            const char *key_type,
+                            char *key_passwd)
 {
   char error_buffer[256];
   bool check_privkey = TRUE;
@@ -1707,7 +1707,7 @@ static int client_cert(struct Curl_easy *data,
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
 
@@ -1727,29 +1727,29 @@ static int client_cert(struct Curl_easy *data,
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
 
     case SSL_FILETYPE_ENGINE:
       if(!engineload(data, ctx, cert_file))
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PROVIDER:
       if(!providerload(data, ctx, cert_file))
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PKCS12:
       if(!pkcs12load(data, ctx, cert_blob, cert_file, key_passwd))
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       pcks12_done = TRUE;
       break;
 
     default:
       failf(data, "not supported file type '%s' for certificate", cert_type);
-      return 0;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     if((!key_file) && (!key_blob)) {
@@ -1769,34 +1769,34 @@ static int client_cert(struct Curl_easy *data,
         failf(data, "unable to set private key file: '%s' type %s",
               key_file ? key_file : "(memory blob)",
               key_type ? key_type : "PEM");
-        return 0;
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       }
       break;
     case SSL_FILETYPE_ENGINE:
       if(!enginecheck(data, ctx, key_file, key_passwd))
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PROVIDER:
       if(!providercheck(data, ctx, key_file))
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PKCS12:
       if(!pcks12_done) {
         failf(data, "file type P12 for private key not supported");
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
       break;
     default:
       failf(data, "not supported file type for private key");
-      return 0;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     ssl = SSL_new(ctx);
     if(!ssl) {
       failf(data, "unable to create an SSL structure");
-      return 0;
+      return CURLE_OUT_OF_MEMORY;
     }
 
     x509 = SSL_get_certificate(ssl);
@@ -1840,11 +1840,11 @@ static int client_cert(struct Curl_easy *data,
        * the SSL context */
       if(!SSL_CTX_check_private_key(ctx)) {
         failf(data, "Private key does not match the certificate public key");
-        return 0;
+        return CURLE_SSL_CERTPROBLEM;
       }
     }
   }
-  return 1;
+  return CURLE_OK;
 }
 
 /* returns non-zero on failure */
@@ -4169,7 +4169,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #else
     result = ossl_set_ssl_version_min_max_legacy(&ctx_options, cf, data);
 #endif
-    if(result != CURLE_OK)
+    if(result)
       return result;
     break;
 
@@ -4227,12 +4227,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
-    if(!result &&
-       !client_cert(data, octx->ssl_ctx,
-                    ssl_cert, ssl_cert_blob, ssl_cert_type,
-                    ssl_config->key, ssl_config->key_blob,
-                    ssl_config->key_type, ssl_config->key_passwd))
-      result = CURLE_SSL_CERTPROBLEM;
+    result = client_cert(data, octx->ssl_ctx,
+                         ssl_cert, ssl_cert_blob, ssl_cert_type,
+                         ssl_config->key, ssl_config->key_blob,
+                         ssl_config->key_type, ssl_config->key_passwd);
     if(result)
       /* failf() is already done in client_cert() */
       return result;
