@@ -104,6 +104,7 @@ static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
+  const char *path = URL;
   const char *address = libtest_arg2;
   const char *port = libtest_arg3;
   char dns_entry[256];
@@ -122,7 +123,7 @@ static CURLcode test_lib1515(const char *URL)
   for(i = 1; i <= count; i++) {
     char target_url[256];
     curl_msnprintf(target_url, sizeof(target_url),
-                   "http://testserver.example.com:%s/%s%04d", port, URL, i);
+                   "http://testserver.example.com:%s/%s%04d", port, path, i);
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
