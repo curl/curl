@@ -30,7 +30,7 @@ FIRST_C = first.c
 FIRST_H = first.h
 
 # Common files used by test programs
-UTILS_C = memptr.c testutil.c testtrace.c
+UTILS_C = cli_util.c memptr.c testutil.c testtrace.c
 UTILS_H = cli_util.h testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
@@ -42,20 +42,18 @@ CURLX_C = \
   ../../lib/curlx/version_win32.c \
   ../../lib/curlx/wait.c
 
-# All test clients
-TESTS_C = \
-  h2_pausing.c \
-  h2_serverpush.c \
-  h2_upgrade_extreme.c \
-  hx_download.c \
-  hx_upload.c \
-  tls_session_reuse.c \
-  upload_pausing.c \
-  ws_data.c \
-  ws_pingpong.c
-
 # All libtest programs
 TESTS_C = \
+  cli_h2_pausing.c \
+  cli_h2_serverpush.c \
+  cli_h2_upgrade_extreme.c \
+  cli_hx_download.c \
+  cli_hx_upload.c \
+  cli_tls_session_reuse.c \
+  cli_upload_pausing.c \
+  cli_ws_data.c \
+  cli_ws_pingpong.c \
+  \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \
   lib508.c lib509.c lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c \
   lib516.c lib517.c lib518.c lib519.c lib520.c lib521.c lib523.c lib524.c \
