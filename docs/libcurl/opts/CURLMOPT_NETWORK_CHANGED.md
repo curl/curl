@@ -39,7 +39,7 @@ cached the usual way again. Phrasing it another way: the option is
 not persisted but setting it serves as a "trigger"
 to clear the caches.
 
-The call affects  only the connection and DNS cache of the multi handle
+The call affects only the connection and DNS cache of the multi handle
 itself and not the ones owned by SHARE handles.
 
 ## CURLM_NWCOPT_CLEAR_CONNS
