@@ -26,6 +26,7 @@
 #include "first.h"
 
 #include "testtrace.h"
+#include "memdebug.h"
 
 static void usage_h2_pausing(const char *msg)
 {

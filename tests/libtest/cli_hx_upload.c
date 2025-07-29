@@ -24,6 +24,7 @@
 #include "first.h"
 
 #include "testtrace.h"
+#include "memdebug.h"
 
 static int verbose_u = 1;
 

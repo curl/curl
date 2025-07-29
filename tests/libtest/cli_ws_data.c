@@ -23,9 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#ifndef CURL_DISABLE_WEBSOCKETS
-
 #include "testtrace.h"
+#include "memdebug.h"
+
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,
                            size_t r_offset, size_t nread, size_t exp_len)
