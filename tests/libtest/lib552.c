@@ -30,14 +30,10 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-struct t552_testdata {
-  char trace_ascii; /* 1 or 0 */
-};
-
 static int my_trace(CURL *handle, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
-  struct t552_testdata *config = (struct t552_testdata *)userp;
+  struct libtest_trace_cfg *config = (struct libtest_trace_cfg *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
@@ -68,7 +64,7 @@ static int my_trace(CURL *handle, curl_infotype type,
   }
 
   libtest_debug_dump("", text, stderr, (unsigned char *)data, size,
-                     config->trace_ascii);
+                     config->nohex);
   return 0;
 }
 
@@ -113,11 +109,11 @@ static CURLcode test_lib552(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct t552_testdata config;
+  struct libtest_trace_cfg config = {0};
   size_t i;
   static const char fill[] = "test data";
 
-  config.trace_ascii = 1; /* enable ASCII tracing */
+  config.nohex = 1; /* enable ASCII tracing */
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
