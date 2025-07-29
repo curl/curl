@@ -1,5 +1,5 @@
-#ifndef HEADER_CLIENT_UTIL_H
-#define HEADER_CLIENT_UTIL_H
+#ifndef HEADER_CLI_UTIL_H
+#define HEADER_CLI_UTIL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -243,4 +243,4 @@ static int cgetopt(int argc, char * const argv[], const char *optstring)
   }
 }
 
-#endif /* HEADER_CLIENT_UTIL_H */
+#endif /* HEADER_CLI_UTIL_H */
