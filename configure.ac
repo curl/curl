@@ -5463,7 +5463,6 @@ AC_CONFIG_FILES([\
   tests/libtest/Makefile \
   tests/unit/Makefile \
   tests/tunit/Makefile \
-  tests/client/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
   packages/Makefile \

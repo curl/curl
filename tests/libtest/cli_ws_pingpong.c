@@ -23,91 +23,53 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 #ifndef CURL_DISABLE_WEBSOCKETS
-
-static CURLcode ping(CURL *curl, const char *send_payload)
-{
-  size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                 CURLWS_PING);
-  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %u\n",
-                (int)result, (int)sent);
-
-  return result;
-}
-
-static CURLcode recv_pong(CURL *curl, const char *expected_payload)
-{
-  size_t rlen;
-  const struct curl_ws_frame *meta;
-  char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(result) {
-    curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %ld\n",
-                  (int)result, (long)rlen);
-    return result;
-  }
-
-  if(!(meta->flags & CURLWS_PONG)) {
-    curl_mfprintf(stderr, "recv_pong: wrong frame, got %d bytes rflags %x\n",
-                  (int)rlen, meta->flags);
-    return CURLE_RECV_ERROR;
-  }
-
-  curl_mfprintf(stderr, "ws: got PONG back\n");
-  if(rlen == strlen(expected_payload) &&
-     !memcmp(expected_payload, buffer, rlen)) {
-    curl_mfprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;
-  }
-  curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
-  return CURLE_RECV_ERROR;
-}
 
 static CURLcode pingpong(CURL *curl, const char *payload)
 {
   CURLcode res;
   int i;
 
-  res = ping(curl, payload);
+  res = ws_send_ping(curl, payload);
   if(res)
     return res;
   for(i = 0; i < 10; ++i) {
     curl_mfprintf(stderr, "Receive pong\n");
-    res = recv_pong(curl, payload);
+    res = ws_recv_pong(curl, payload);
     if(res == CURLE_AGAIN) {
       curlx_wait_ms(100);
       continue;
     }
-    websocket_close(curl);
+    ws_close(curl);
     return res;
   }
-  websocket_close(curl);
+  ws_close(curl);
   return CURLE_RECV_ERROR;
 }
 
 #endif
 
-static int test_ws_pingpong(int argc, char *argv[])
+static CURLcode test_cli_ws_pingpong(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
-  const char *url, *payload;
+  const char *payload;
 
-  if(argc != 3) {
-    curl_mfprintf(stderr, "usage: ws-pingpong url payload\n");
-    return 2;
+  if(!URL || !libtest_arg2) {
+    curl_mfprintf(stderr, "need args: URL payload\n");
+    return (CURLcode)2;
   }
-  url = argv[1];
-  payload = argv[2];
+  payload = libtest_arg2;
 
   curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
 
     /* use the callback style */
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-pingpong");
@@ -122,12 +84,11 @@ static int test_ws_pingpong(int argc, char *argv[])
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
-  (void)argc;
-  (void)argv;
+  (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
-  return 1;
+  return (CURLcode)1;
 #endif /* CURL_DISABLE_WEBSOCKETS */
 }

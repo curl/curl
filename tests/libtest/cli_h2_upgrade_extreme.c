@@ -23,6 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)
 {
@@ -31,9 +34,8 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static int test_h2_upgrade_extreme(int argc, char *argv[])
+static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
-  const char *url;
   CURLM *multi = NULL;
   CURL *easy;
   CURLMcode mc;
@@ -41,14 +43,13 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  int exitcode = 1;
+  CURLcode exitcode = (CURLcode)1;
 
-  if(argc != 2) {
-    curl_mfprintf(stderr, "%s URL\n", argv[0]);
-    return 2;
+  if(!URL) {
+    curl_mfprintf(stderr, "need URL as argument\n");
+    return (CURLcode)2;
   }
 
-  url = argv[1];
   multi = curl_multi_init();
   if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init failed\n");
@@ -64,8 +65,8 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
         goto cleanup;
       }
       curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
-      curl_easy_setopt(easy, CURLOPT_URL, url);
+      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
+      curl_easy_setopt(easy, CURLOPT_URL, URL);
       curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
       curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
       curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
@@ -143,7 +144,7 @@ static int test_h2_upgrade_extreme(int argc, char *argv[])
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = 0;
+  exitcode = CURLE_OK;
 
 cleanup:
 

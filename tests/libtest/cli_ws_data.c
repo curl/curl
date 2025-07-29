@@ -23,6 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,
@@ -144,8 +147,10 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
     if(memcmp(send_buf, recv_buf, len)) {
       curl_mfprintf(stderr, "recv_data: data differs\n");
-      dump("expected:", (unsigned char *)send_buf, len, 0);
-      dump("received:", (unsigned char *)recv_buf, len, 0);
+      debug_dump("", "expected:", stderr,
+                 (const unsigned char *)send_buf, len, 0);
+      debug_dump("", "received:", stderr,
+                 (const unsigned char *)recv_buf, len, 0);
       r = CURLE_RECV_ERROR;
       goto out;
     }
@@ -153,7 +158,7 @@ static CURLcode data_echo(CURL *curl, size_t count,
 
 out:
   if(!r)
-    websocket_close(curl);
+    ws_close(curl);
   free(send_buf);
   free(recv_buf);
   return r;
@@ -172,7 +177,7 @@ static void usage_ws_data(const char *msg)
 
 #endif
 
-static int test_ws_data(int argc, char *argv[])
+static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
@@ -181,7 +186,9 @@ static int test_ws_data(int argc, char *argv[])
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "c:hm:M:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "c:hm:M:")) != -1) {
     switch(ch) {
     case 'h':
       usage_ws_data(NULL);
@@ -202,8 +209,8 @@ static int test_ws_data(int argc, char *argv[])
       goto cleanup;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
   if(!plen_max)
     plen_max = plen_min;
@@ -215,12 +222,12 @@ static int test_ws_data(int argc, char *argv[])
     goto cleanup;
   }
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_ws_data(NULL);
     res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -243,12 +250,11 @@ static int test_ws_data(int argc, char *argv[])
 
 cleanup:
   curl_global_cleanup();
-  return (int)res;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
-  (void)argc;
-  (void)argv;
+  (void)URL;
   curl_mfprintf(stderr, "WebSockets not enabled in libcurl\n");
-  return 1;
+  return (CURLcode)1;
 #endif /* CURL_DISABLE_WEBSOCKETS */
 }

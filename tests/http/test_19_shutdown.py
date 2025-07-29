@@ -112,7 +112,7 @@ class TestShutdown:
         count = 10
         docname = 'data.json'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env, run_env={
+        client = LocalClient(name='cli_hx_download', env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
             'CURL_DEBUG': 'ssl,multi'
         })
@@ -185,7 +185,7 @@ class TestShutdown:
         count = 500
         docname = 'data.json'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env, run_env={
+        client = LocalClient(name='cli_hx_download', env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
             'CURL_DEBUG': 'ssl,multi'
         })

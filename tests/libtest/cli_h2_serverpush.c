@@ -23,41 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
-static int my_trace(CURL *handle, curl_infotype type,
-                    char *data, size_t size, void *userp)
-{
-  const char *text;
-  (void)handle; /* prevent compiler warning */
-  (void)userp;
-  switch(type) {
-  case CURLINFO_TEXT:
-    curl_mfprintf(stderr, "== Info: %s", data);
-    return 0;
-  case CURLINFO_HEADER_OUT:
-    text = "=> Send header";
-    break;
-  case CURLINFO_DATA_OUT:
-    text = "=> Send data";
-    break;
-  case CURLINFO_SSL_DATA_OUT:
-    text = "=> Send SSL data";
-    break;
-  case CURLINFO_HEADER_IN:
-    text = "<= Recv header";
-    break;
-  case CURLINFO_DATA_IN:
-    text = "<= Recv data";
-    break;
-  case CURLINFO_SSL_DATA_IN:
-    text = "<= Recv SSL data";
-    break;
-  default: /* in case a new one is introduced to shock us */
-    return 0;
-  }
-
-  dump(text, (unsigned char *)data, size, 1);
-  return 0;
-}
+#include "testtrace.h"
+#include "memdebug.h"
 
 static FILE *out_download;
 
@@ -76,7 +43,8 @@ static int setup_h2_serverpush(CURL *hnd, const char *url)
 
   /* please be verbose */
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, &debug_config);
 
   /* wait for pipe connection to confirm */
   curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
@@ -139,19 +107,20 @@ out:
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_h2_serverpush(int argc, char *argv[])
+static CURLcode test_cli_h2_serverpush(const char *URL)
 {
   CURL *easy;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
-  const char *url;
 
-  if(argc != 2) {
+  debug_config.nohex = 1;
+  debug_config.tracetime = 0;
+
+  if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
-    return 2;
+    return (CURLcode)2;
   }
-  url = argv[1];
 
   multi_handle = curl_multi_init();
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
@@ -159,10 +128,10 @@ static int test_h2_serverpush(int argc, char *argv[])
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
-  if(setup_h2_serverpush(easy, url)) {
+  if(setup_h2_serverpush(easy, URL)) {
     fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
-    return 1;
+    return (CURLcode)1;
   }
 
   curl_multi_add_handle(multi_handle, easy);
@@ -201,5 +170,5 @@ static int test_h2_serverpush(int argc, char *argv[])
   if(out_push)
     fclose(out_push);
 
-  return 0;
+  return CURLE_OK;
 }

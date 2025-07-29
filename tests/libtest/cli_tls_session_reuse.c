@@ -23,6 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 static int tse_found_tls_session = FALSE;
 
 static size_t write_tse_cb(char *ptr, size_t size, size_t nmemb, void *opaque)
@@ -67,7 +70,7 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
     return NULL;
   }
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
+  curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   curl_easy_setopt(easy, CURLOPT_URL, url);
   curl_easy_setopt(easy, CURLOPT_SHARE, share);
   curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
@@ -92,9 +95,8 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
   return easy;
 }
 
-static int test_tls_session_reuse(int argc, char *argv[])
+static CURLcode test_cli_tls_session_reuse(const char *URL)
 {
-  const char *url;
   CURLM *multi = NULL;
   CURLMcode mc;
   int running_handles = 0, numfds;
@@ -106,35 +108,34 @@ static int test_tls_session_reuse(int argc, char *argv[])
   int msgs_in_queue;
   int add_more, waits, ongoing = 0;
   char *host = NULL, *port = NULL;
-  int http_version = CURL_HTTP_VERSION_1_1;
-  int exitcode = 1;
+  long http_version = CURL_HTTP_VERSION_1_1;
+  CURLcode exitcode = (CURLcode)1;
 
-  if(argc != 3) {
-    curl_mfprintf(stderr, "%s proto URL\n", argv[0]);
-    return 2;
+  if(!URL || !libtest_arg2) {
+    curl_mfprintf(stderr, "need args: URL proto\n");
+    return (CURLcode)2;
   }
 
-  if(!strcmp("h2", argv[1]))
+  if(!strcmp("h2", libtest_arg2))
     http_version = CURL_HTTP_VERSION_2;
-  else if(!strcmp("h3", argv[1]))
+  else if(!strcmp("h3", libtest_arg2))
     http_version = CURL_HTTP_VERSION_3ONLY;
 
-  url = argv[2];
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
-  if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
-    curl_mfprintf(stderr, "not a URL: '%s'\n", url);
+  if(curl_url_set(cu, CURLUPART_URL, URL, 0)) {
+    curl_mfprintf(stderr, "not a URL: '%s'\n", URL);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
-    curl_mfprintf(stderr, "could not get host of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get host of '%s'\n", URL);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
-    curl_mfprintf(stderr, "could not get port of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get port of '%s'\n", URL);
     goto cleanup;
   }
 
@@ -156,7 +157,7 @@ static int test_tls_session_reuse(int argc, char *argv[])
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
 
-  if(!tse_add_transfer(multi, share, resolve, url, http_version))
+  if(!tse_add_transfer(multi, share, resolve, URL, http_version))
     goto cleanup;
   ++ongoing;
   add_more = 6;
@@ -183,7 +184,7 @@ static int test_tls_session_reuse(int argc, char *argv[])
     }
     else {
       while(add_more) {
-        if(!tse_add_transfer(multi, share, resolve, url, http_version))
+        if(!tse_add_transfer(multi, share, resolve, URL, http_version))
           goto cleanup;
         ++ongoing;
         --add_more;
@@ -234,7 +235,7 @@ static int test_tls_session_reuse(int argc, char *argv[])
   }
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = 0;
+  exitcode = CURLE_OK;
 
 cleanup:
 

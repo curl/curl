@@ -76,7 +76,7 @@ class TestPush:
         self.httpd_configure(env, httpd)
         # use localhost as we do not have resolve support in local client
         url = f'https://localhost:{env.https_port}/push/data1'
-        client = LocalClient(name='h2_serverpush', env=env)
+        client = LocalClient(name='cli_h2_serverpush', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])

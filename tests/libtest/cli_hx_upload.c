@@ -23,6 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 static int verbose_u = 1;
 
 struct transfer_u {
@@ -175,7 +178,7 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
   /* please be verbose */
   if(verbose_u) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   }
 
   /* wait for pipe connection to confirm */
@@ -207,7 +210,7 @@ static void usage_hx_upload(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_hx_upload(int argc, char *argv[])
+static CURLcode test_cli_hx_upload(const char *URL)
 {
   CURLM *multi_handle;
   CURLSH *share;
@@ -224,16 +227,19 @@ static int test_hx_upload(int argc, char *argv[])
   int use_earlydata = 0;
   int announce_length = 0;
   struct transfer_u *t;
-  int http_version = CURL_HTTP_VERSION_2_0;
+  long http_version = CURL_HTTP_VERSION_2_0;
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "aefhlm:n:A:F:M:P:r:RS:V:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "aefhlm:n:A:F:M:P:r:RS:V:"))
+        != -1) {
     switch(ch) {
     case 'h':
       usage_hx_upload(NULL);
-      return 2;
+      return (CURLcode)2;
     case 'a':
       abort_paused = 1;
       break;
@@ -282,31 +288,31 @@ static int test_hx_upload(int argc, char *argv[])
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_upload("invalid http version");
-        return 1;
+        return (CURLcode)1;
       }
       break;
     }
     default:
       usage_hx_upload("invalid option");
-      return 1;
+      return (CURLcode)1;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
   if(max_parallel > 1 && reuse_easy) {
     usage_hx_upload("cannot mix -R and -P");
-    return 2;
+    return (CURLcode)2;
   }
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_hx_upload("not enough arguments");
-    return 2;
+    return (CURLcode)2;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   if(resolve)
     host = curl_slist_append(NULL, resolve);
@@ -314,7 +320,7 @@ static int test_hx_upload(int argc, char *argv[])
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    return 1;
+    return (CURLcode)1;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
@@ -326,7 +332,7 @@ static int test_hx_upload(int argc, char *argv[])
   transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    return 1;
+    return (CURLcode)1;
   }
 
   active_transfers = 0;
@@ -345,7 +351,7 @@ static int test_hx_upload(int argc, char *argv[])
     CURLcode rc = CURLE_OK;
     if(!easy) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
-      return 1;
+      return (CURLcode)1;
     }
     for(i = 0; i < transfer_count_u; ++i) {
       t = &transfer_u[i];
@@ -353,7 +359,7 @@ static int test_hx_upload(int argc, char *argv[])
       if(setup_hx_upload(t->easy, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-        return 1;
+        return (CURLcode)1;
       }
 
       curl_mfprintf(stderr, "[t-%d] STARTING\n", t->idx);
@@ -375,7 +381,7 @@ static int test_hx_upload(int argc, char *argv[])
       if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-        return 1;
+        return (CURLcode)1;
       }
       curl_multi_add_handle(multi_handle, t->easy);
       t->started = 1;
@@ -460,7 +466,7 @@ static int test_hx_upload(int argc, char *argv[])
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-                return 1;
+                return (CURLcode)1;
               }
               curl_multi_add_handle(multi_handle, t->easy);
               t->started = 1;
@@ -494,5 +500,5 @@ static int test_hx_upload(int argc, char *argv[])
   free(transfer_u);
   curl_share_cleanup(share);
 
-  return 0;
+  return CURLE_OK;
 }

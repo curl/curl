@@ -106,9 +106,9 @@ static CURLcode test_lib1540(const char *URL)
   easy_setopt(curls, CURLOPT_XFERINFODATA, &st);
   easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  debug_config.nohex = 1;
+  debug_config.tracetime = 1;
+  test_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curls, CURLOPT_VERBOSE, 1L);
 

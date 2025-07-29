@@ -23,6 +23,9 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 static int verbose_d = 1;
 
 struct transfer_d {
@@ -140,7 +143,7 @@ static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
   /* please be verbose */
   if(verbose_d) {
     curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, debug_cb);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   }
 
   /* wait for pipe connection to confirm */
@@ -175,7 +178,7 @@ static void usage_hx_download(const char *msg)
 /*
  * Download a file over HTTP/2, take care of server push.
  */
-static int test_hx_download(int argc, char *argv[])
+static CURLcode test_cli_hx_download(const char *URL)
 {
   CURLM *multi_handle;
   struct CURLMsg *m;
@@ -188,20 +191,23 @@ static int test_hx_download(int argc, char *argv[])
   size_t fail_offset = 0;
   int abort_paused = 0, use_earlydata = 0;
   struct transfer_d *t;
-  int http_version = CURL_HTTP_VERSION_2_0;
+  long http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
   char *resolve = NULL;
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
-  int result = 0;
+  CURLcode result = CURLE_OK;
 
-  while((ch = cgetopt(argc, argv, "aefhm:n:xA:F:M:P:r:T:V:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:"))
+        != -1) {
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      result = 2;
+      result = (CURLcode)2;
       goto cleanup;
     case 'a':
       abort_paused = 1;
@@ -249,29 +255,29 @@ static int test_hx_download(int argc, char *argv[])
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        result = 1;
+        result = (CURLcode)1;
         goto cleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      result = 1;
+      result = (CURLcode)1;
       goto cleanup;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    result = 2;
+    result = (CURLcode)2;
     goto cleanup;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   if(resolve)
     host = curl_slist_append(NULL, resolve);
@@ -279,7 +285,7 @@ static int test_hx_download(int argc, char *argv[])
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    result = 1;
+    result = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -292,7 +298,7 @@ static int test_hx_download(int argc, char *argv[])
   transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    result = 1;
+    result = (CURLcode)1;
     goto cleanup;
   }
 
@@ -320,7 +326,7 @@ static int test_hx_download(int argc, char *argv[])
       setup_hx_download(t->easy, url, t, http_version, host, share,
                         use_earlydata, fresh_connect)) {
       curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-      result = 1;
+      result = (CURLcode)1;
       goto cleanup;
     }
     curl_multi_add_handle(multi_handle, t->easy);
@@ -403,7 +409,7 @@ static int test_hx_download(int argc, char *argv[])
               setup_hx_download(t->easy, url, t, http_version, host, share,
                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
-              result = 1;
+              result = (CURLcode)1;
               goto cleanup;
             }
             curl_multi_add_handle(multi_handle, t->easy);

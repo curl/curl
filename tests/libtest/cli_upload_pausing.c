@@ -25,6 +25,9 @@
  */
 #include "first.h"
 
+#include "testtrace.h"
+#include "memdebug.h"
+
 static size_t total_read = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb,
@@ -80,18 +83,21 @@ static void usage_upload_pausing(const char *msg)
   );
 }
 
-static int test_upload_pausing(int argc, char *argv[])
+static CURLcode test_cli_upload_pausing(const char *URL)
 {
   CURL *curl;
   CURLcode rc = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
-  char *url, *host = NULL, *port = NULL;
+  const char *url;
+  char *host = NULL, *port = NULL;
   long http_version = CURL_HTTP_VERSION_1_1;
   int ch;
 
-  while((ch = cgetopt(argc, argv, "V:")) != -1) {
+  (void)URL;
+
+  while((ch = cgetopt(test_argc, test_argv, "V:")) != -1) {
     switch(ch) {
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
@@ -102,23 +108,23 @@ static int test_upload_pausing(int argc, char *argv[])
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_upload_pausing("invalid http version");
-        return 1;
+        return (CURLcode)1;
       }
       break;
     }
     default:
       usage_upload_pausing("invalid option");
-      return 1;
+      return (CURLcode)1;
     }
   }
-  argc -= coptind;
-  argv += coptind;
+  test_argc -= coptind;
+  test_argv += coptind;
 
-  if(argc != 1) {
+  if(test_argc != 1) {
     usage_upload_pausing("not enough arguments");
-    return 2;
+    return (CURLcode)2;
   }
-  url = argv[0];
+  url = test_argv[0];
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time");
@@ -126,19 +132,19 @@ static int test_upload_pausing(int argc, char *argv[])
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    return 1;
+    return (CURLcode)1;
   }
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
@@ -148,7 +154,7 @@ static int test_upload_pausing(int argc, char *argv[])
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "out of memory\n");
-    return 1;
+    return (CURLcode)1;
   }
   /* We want to use our own read function. */
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -172,10 +178,11 @@ static int test_upload_pausing(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   if(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_cb)
-     != CURLE_OK ||
-     curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK)
-    ERR();
+     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb) != CURLE_OK ||
+     curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK) {
+    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");
+    return (CURLcode)2;
+  }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
@@ -192,5 +199,5 @@ static int test_upload_pausing(int argc, char *argv[])
   curl_url_cleanup(cu);
   curl_global_cleanup();
 
-  return (int)rc;
+  return rc;
 }
