@@ -100,7 +100,7 @@ char *hexdump(const unsigned char *buf, size_t len)
 
 int main(int argc, const char **argv)
 {
-  const char *URL;
+  const char *URL = "";
   CURLcode result;
   entry_func_t entry_func;
   const char *entry_name;
@@ -146,7 +146,10 @@ int main(int argc, const char **argv)
     return 1;
   }
 
-  URL = argc > 2 ? argv[2] : "";
+  if(argc > 2) {
+    URL = argv[2];
+    curl_mfprintf(stderr, "URL: %s\n", URL);
+  }
 
   if(argc > 3)
     libtest_arg2 = argv[3];
@@ -162,8 +165,6 @@ int main(int argc, const char **argv)
     testnum = atoi(env);
   else
     testnum = 0;
-
-  curl_mfprintf(stderr, "URL: %s\n", URL);
 
   result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);
