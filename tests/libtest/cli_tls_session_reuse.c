@@ -111,9 +111,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   long http_version = CURL_HTTP_VERSION_1_1;
   CURLcode exitcode = 1;
 
-  (void)URL;
-
-  if(test_argc != 3) {
+  if(!URL || test_argc != 3) {
     curl_mfprintf(stderr, "need args: URL proto\n");
     return 2;
   }
@@ -123,22 +121,21 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   else if(!strcmp("h3", test_argv[2]))
     http_version = CURL_HTTP_VERSION_3ONLY;
 
-  url = test_argv[1];
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
     return 1;
   }
-  if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
-    curl_mfprintf(stderr, "not a URL: '%s'\n", url);
+  if(curl_url_set(cu, CURLUPART_URL, URL, 0)) {
+    curl_mfprintf(stderr, "not a URL: '%s'\n", URL);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
-    curl_mfprintf(stderr, "could not get host of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get host of '%s'\n", URL);
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
-    curl_mfprintf(stderr, "could not get port of '%s'\n", url);
+    curl_mfprintf(stderr, "could not get port of '%s'\n", URL);
     goto cleanup;
   }
 
@@ -160,7 +157,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
 
-  if(!tse_add_transfer(multi, share, resolve, url, http_version))
+  if(!tse_add_transfer(multi, share, resolve, URL, http_version))
     goto cleanup;
   ++ongoing;
   add_more = 6;
@@ -187,7 +184,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
     }
     else {
       while(add_more) {
-        if(!tse_add_transfer(multi, share, resolve, url, http_version))
+        if(!tse_add_transfer(multi, share, resolve, URL, http_version))
           goto cleanup;
         ++ongoing;
         --add_more;
