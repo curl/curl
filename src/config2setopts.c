@@ -514,6 +514,13 @@ static CURLcode http_setopts(struct OperationConfig *config,
     my_setopt_long(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
                    config->expect100timeout_ms);
 
+#ifdef USE_SCION
+  if (config->scion_topology_path)
+    my_setopt_str(curl, CURLOPT_SCION_TOPOLOGY_PATH, config->scion_topology_path);
+  if (config->scion_dst_ia)
+    my_setopt_long(curl, CURLOPT_SCION_DST_IA, config->scion_dst_ia);
+#endif
+
   return CURLE_OK;
 }
 

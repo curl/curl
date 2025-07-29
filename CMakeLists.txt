@@ -1197,6 +1197,22 @@ if(USE_OPENSSL_QUIC)
   endif()
 endif()
 
+option(USE_SCION "Use QUIC over SCION" OFF)
+if (USE_SCION)
+  option(SCION_INCLUDE_DIR "Path to the SCION include directory" OFF)
+  option(SCION_LIBRARY_DIR "Path to the SCION lib directory" OFF)
+
+  if (SCION_INCLUDE_DIR AND SCION_LIBRARY_DIR)
+    list(APPEND CURL_LIBS "scion" "nghttp2" "protobuf-c")
+    list(APPEND CURL_LIBDIRS ${SCION_LIBRARY_DIR})
+
+    include_directories(SYSTEM ${SCION_INCLUDE_DIR})
+    link_directories("${SCION_LIBRARY_DIR}")
+  else()
+    message(FATAL_ERROR "If SCION is enabled both SCION_INCLUDE_DIR and SCION_LIBRARY_DIR need to be set")
+  endif()
+endif ()
+
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
   message(FATAL_ERROR "MultiSSL cannot be enabled with HTTP/3 and vice versa.")
 endif()

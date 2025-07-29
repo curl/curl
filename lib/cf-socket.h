@@ -167,6 +167,14 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
                              const struct Curl_sockaddr_ex **paddr,
                              struct ip_quadruple *pip);
 
+#ifdef USE_SCION
+CURLcode Curl_cf_socket_peek_scion(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             curl_socket_t *psock,
+                             const struct Curl_sockaddr_ex **paddr,
+                             struct ip_quadruple *pip, struct scion_socket **socket);
+#endif
+
 extern struct Curl_cftype Curl_cft_tcp;
 extern struct Curl_cftype Curl_cft_udp;
 extern struct Curl_cftype Curl_cft_unix;

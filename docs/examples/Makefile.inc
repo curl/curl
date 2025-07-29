@@ -60,6 +60,7 @@ check_PROGRAMS = \
   http2-serverpush \
   http2-upload \
   http3 \
+  http3-scion \
   http3-present \
   httpcustomheader \
   httpput \

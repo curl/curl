@@ -127,7 +127,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
                            const uint8_t *pkt, size_t pktlen, size_t gsolen,
                            size_t *psent)
 {
-#ifdef HAVE_SENDMSG
+#if defined(HAVE_SENDMSG) || defined(USE_SCION)
   struct iovec msg_iov;
   struct msghdr msg = {0};
   ssize_t sent;
@@ -157,7 +157,24 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
 
+#ifdef USE_SCION
+  sent = scion_sendmsg(qctx->socket, &msg, 0, 0, NULL);
 
+  if (sent < 0) {
+    switch(sent) {
+    case SCION_ERR_WOULD_BLOCK:
+      return CURLE_AGAIN;
+    case SCION_ERR_MSG_TOO_LARGE:
+      printf("Drop msg too long\n");
+      break;
+    default:
+      failf(data, "sendmsg() returned %zd", sent);
+      return CURLE_SEND_ERROR;
+    }
+  } else {
+    assert(pktlen == (size_t)sent);
+  }
+#else
   while((sent = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
@@ -189,6 +206,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   else {
     assert(pktlen == (size_t)sent);
   }
+#endif
 #else
   ssize_t sent;
   (void)gsolen;
@@ -358,7 +376,7 @@ static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 }
 #endif
 
-#ifdef HAVE_SENDMMSG
+#if defined(HAVE_SENDMMSG) && !defined(USE_SCION)
 static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
@@ -461,7 +479,7 @@ out:
   return result;
 }
 
-#elif defined(HAVE_SENDMSG)
+#elif defined(HAVE_SENDMSG) || defined(USE_SCION)
 static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 struct cf_quic_ctx *qctx,
@@ -495,6 +513,21 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = sizeof(msg_ctrl);
 
+#ifdef USE_SCION
+    nread = scion_recvmsg(qctx->socket, &msg, 0, NULL, NULL);
+
+    if (nread < 0) {
+      if (nread == SCION_ERR_WOULD_BLOCK) {
+        goto out;
+      }
+
+      (void)errstr;
+      failf(data, "QUIC: recvmsg() unexpectedly returned %zd",
+                  nread);
+      result = CURLE_RECV_ERROR;
+      goto out;
+    }
+#else
     while((nread = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
           SOCKERRNO == SOCKEINTR)
       ;
@@ -516,6 +549,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       result = CURLE_RECV_ERROR;
       goto out;
     }
+#endif
 
     total_nread += (size_t)nread;
 
@@ -549,7 +583,7 @@ out:
   return result;
 }
 
-#else /* HAVE_SENDMMSG || HAVE_SENDMSG */
+#else /* HAVE_SENDMMSG || HAVE_SENDMSG || USE_SCION */
 static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct cf_quic_ctx *qctx,
@@ -606,7 +640,7 @@ out:
                 pkts, total_nread, result);
   return result;
 }
-#endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
+#endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG && !USE_SCION */
 
 CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
@@ -615,7 +649,9 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             vquic_recv_pkt_cb *recv_cb, void *userp)
 {
   CURLcode result;
-#if defined(HAVE_SENDMMSG)
+#if defined(USE_SCION)
+  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+#elif defined(HAVE_SENDMMSG)
   result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #elif defined(HAVE_SENDMSG)
   result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);

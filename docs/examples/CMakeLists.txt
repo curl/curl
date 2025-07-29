@@ -28,6 +28,8 @@ add_custom_target(curl-examples)
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+configure_file("../../topology.json" "${CMAKE_CURRENT_BINARY_DIR}/topology.json" COPYONLY)
+
 foreach(_target IN LISTS check_PROGRAMS)
   set(_target_name "curl-example-${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c")

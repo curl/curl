@@ -186,6 +186,10 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->ech);
   tool_safefree(config->ech_config);
   tool_safefree(config->ech_public);
+
+#ifdef USE_SCION
+  tool_safefree(config->scion_topology_path);
+#endif
 }
 
 void config_free(struct OperationConfig *config)

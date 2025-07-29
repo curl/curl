@@ -241,6 +241,12 @@ struct OperationConfig {
   } file_clobber_mode;
   unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
+
+#ifdef USE_SCION
+  char *scion_topology_path;
+  scion_ia scion_dst_ia;
+#endif
+
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */

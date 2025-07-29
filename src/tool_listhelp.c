@@ -650,6 +650,14 @@ const struct helptxt helptext[] = {
   {"    --sasl-ir",
    "Initial response in SASL authentication",
    CURLHELP_AUTH},
+#ifdef USE_SCION
+ {"    --scion-dst-ia <isd-as>",
+  "IA number of the destination AS",
+  CURLHELP_HTTP },
+ {"    --scion-topology-path <path>",
+  "Path to the SCION topology file",
+  CURLHELP_HTTP },
+#endif
   {"    --service-name <name>",
    "SPNEGO service name",
    CURLHELP_AUTH},

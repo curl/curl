@@ -33,6 +33,9 @@
 #define MAX_UDP_PAYLOAD_SIZE  1452
 
 struct cf_quic_ctx {
+#ifdef USE_SCION
+  struct scion_socket *socket;
+#endif
   curl_socket_t sockfd; /* connected UDP socket */
   struct sockaddr_storage local_addr; /* address socket is bound to */
   socklen_t local_addrlen; /* length of local address */

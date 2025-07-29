@@ -25,6 +25,7 @@
 .libs
 .project
 .settings
+.idea
 /.vs
 /bld/
 /build/
@@ -73,3 +74,4 @@ libstandaloneengine.a
 tests/string
 tests/config
 tests/ech-log/
+csnet-dist

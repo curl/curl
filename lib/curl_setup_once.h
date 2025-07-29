@@ -98,6 +98,10 @@
 #include <sys/socket.h>
 #endif
 
+#ifdef USE_SCION
+#include <scion/scion.h>
+#endif
+
 #include "functypes.h"
 
 #ifdef __hpux

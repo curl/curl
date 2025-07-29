@@ -90,6 +90,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef USE_SCION
+#define setsockopt_quic(ctx,level,optname,optval,optlen) scion_setsockopt(ctx->socket,level,optname,optval,optlen)
+#else
+#define setsockopt_quic(ctx,level,optname,optval,optlen) setsockopt(ctx->sock,level,optname,optval,optlen)
+#endif
 
 #if defined(USE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
 /* It makes support for IPv4-mapped IPv6 addresses.
@@ -384,6 +389,47 @@ static CURLcode socket_open(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifdef USE_SCION
+static CURLcode socket_open_scion(struct Curl_easy *data, struct Curl_sockaddr_ex *addr,
+                            curl_socket_t *sockfd, struct scion_topology **topology, struct scion_network **network, struct scion_socket **socket) {
+  int result;
+
+  DEBUGASSERT(addr->protocol == IPPROTO_UDP);
+  result = scion_topology_from_file(topology, data->set.topology_file_path);
+  if (result)
+    goto err;
+
+  result = scion_network(network, *topology);
+  if (result)
+
+    goto cleanup_topology;
+
+  result = scion_socket(socket, addr->family, addr->socktype, SCION_PROTO_UDP, *network);
+  if (result)
+    goto cleanup_network;
+
+  scion_getsockfd(*socket, sockfd);
+
+#if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  if(data->conn->scope_id && (addr->family == AF_INET6)) {
+    struct sockaddr_in6 * const sa6 = (void *)&addr->curl_sa_addr;
+    sa6->sin6_scope_id = data->conn->scope_id;
+  }
+#endif
+  return CURLE_OK;
+
+  cleanup_network:
+    scion_network_free(*network);
+
+  cleanup_topology:
+    scion_topology_free(*topology);
+
+  err:
+    /* no socket, no connection */
+    return CURLE_COULDNT_CONNECT;
+}
+#endif
+
 /*
  * Create a socket based on info from 'conn' and 'ai'.
  *
@@ -436,6 +482,25 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
 
   return 0;
 }
+
+#ifdef USE_SCION
+static int socket_close_scion(struct Curl_easy *data, struct connectdata *conn, curl_socket_t sock,
+                              struct scion_socket *socket, struct scion_network *network,
+                              struct scion_topology *topology) {
+  if(socket == NULL)
+    return 0;
+
+  if(conn)
+    /* tell the multi-socket code about this */
+      Curl_multi_will_close(data, sock);
+
+  scion_close(socket);
+  scion_network_free(network);
+  scion_topology_free(topology);
+
+  return 0;
+}
+#endif
 
 /*
  * Close a socket.
@@ -561,6 +626,85 @@ CURLcode Curl_parse_interface(const char *input,
 }
 
 #ifndef CURL_DISABLE_BINDLOCAL
+#ifdef USE_SCION
+
+static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
+                          struct scion_socket *socket, int af)
+{
+  struct Curl_sockaddr_storage sa;
+  struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
+  curl_socklen_t sizeof_sa = 0; /* size of the data sock points to */
+  struct sockaddr_in *si4 = (struct sockaddr_in *)&sa;
+#ifdef USE_IPV6
+  struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
+#endif
+
+  unsigned short port = data->set.localport; /* use this port number, 0 for
+                                                "random" */
+  /* how many port numbers to try to bind to, increasing one at a time */
+  int portnum = data->set.localportrange;
+#ifdef IP_BIND_ADDRESS_NO_PORT
+  int on = 1;
+#endif
+#ifndef USE_IPV6
+  (void)scope;
+#endif
+
+  /*************************************************************
+   * Select device to bind socket to
+   *************************************************************/
+  if(!port)
+    /* no local kind of binding was requested */
+    return CURLE_OK;
+
+  memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
+
+#ifdef USE_IPV6
+  if(af == AF_INET6) {
+    si6->sin6_family = AF_INET6;
+    si6->sin6_port = htons(port);
+    sizeof_sa = sizeof(struct sockaddr_in6);
+  }
+  else
+#endif
+  if(af == AF_INET) {
+    si4->sin_family = AF_INET;
+    si4->sin_port = htons(port);
+    sizeof_sa = sizeof(struct sockaddr_in);
+  }
+
+#ifdef IP_BIND_ADDRESS_NO_PORT
+  (void)scion_setsockopt(socket, SOL_IP, IP_BIND_ADDRESS_NO_PORT, &on, sizeof(on));
+#endif
+  for(;;) {
+    if(scion_bind(socket, sock, sizeof_sa) >= 0) {
+      /* we succeeded to bind */
+      infof(data, "Local port: %hu", port);
+      conn->bits.bound = TRUE;
+      return CURLE_OK;
+    }
+
+    if(--portnum > 0) {
+      port++; /* try next port */
+      if(port == 0)
+        break;
+      infof(data, "Bind to local port %d failed, trying next", port - 1);
+      /* We reuse/clobber the port variable here below */
+      if(sock->sa_family == AF_INET)
+        si4->sin_port = ntohs(port);
+#ifdef USE_IPV6
+      else
+        si6->sin6_port = ntohs(port);
+#endif
+    }
+    else
+      break;
+  }
+
+  return CURLE_INTERFACE_FAILED;
+}
+
+#else
 static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
                           curl_socket_t sockfd, int af, unsigned int scope)
 {
@@ -808,6 +952,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   return CURLE_INTERFACE_FAILED;
 }
 #endif
+#endif
 
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
@@ -916,6 +1061,11 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 struct cf_socket_ctx {
   int transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
+#ifdef USE_SCION
+  struct scion_topology *topology;
+  struct scion_network *network;
+  struct scion_socket *socket;
+#endif
   curl_socket_t sock;                /* current attempt socket */
   struct ip_quadruple ip;            /* The IP quadruple 2x(addr+port) */
   struct curltime started_at;        /* when socket was created */
@@ -993,7 +1143,15 @@ static void cf_socket_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "cf_socket_close, fd=%" FMT_SOCKET_T, ctx->sock);
     if(ctx->sock == cf->conn->sock[cf->sockindex])
       cf->conn->sock[cf->sockindex] = CURL_SOCKET_BAD;
+#ifdef USE_SCION
+    if (ctx->transport == TRNSPRT_QUIC) {
+      socket_close_scion(data, cf->conn, ctx->sock, ctx->socket, ctx->network, ctx->topology);
+    } else {
+      socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
+    }
+#else
     socket_close(data, cf->conn, !ctx->accepted, ctx->sock);
+#endif
     ctx->sock = CURL_SOCKET_BAD;
     ctx->active = FALSE;
     memset(&ctx->started_at, 0, sizeof(ctx->started_at));
@@ -1050,12 +1208,31 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
     curl_socklen_t slen = sizeof(struct Curl_sockaddr_storage);
 
     memset(&ssloc, 0, sizeof(ssloc));
+
+#ifdef USE_SCION
+    if (ctx->transport == TRNSPRT_QUIC) {
+      int result = scion_getsockname(ctx->socket, (struct sockaddr*) &ssloc, &slen, NULL);
+      if (result) {
+        failf(data, "scion_getsockname() failed with errno %d: %s",
+              result, scion_strerror(result));
+        return CURLE_FAILED_INIT;
+      }
+    } else {
+      if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
+        int error = SOCKERRNO;
+        failf(data, "getsockname() failed with errno %d: %s",
+              error, Curl_strerror(error, buffer, sizeof(buffer)));
+        return CURLE_FAILED_INIT;
+      }
+    }
+#else
     if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
       int error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
             error, Curl_strerror(error, buffer, sizeof(buffer)));
       return CURLE_FAILED_INIT;
     }
+#endif
     if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
                          ctx->ip.local_ip, &ctx->ip.local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
@@ -1111,7 +1288,18 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   if(!data->set.fopensocket)
     ctx->addr.socktype |= SOCK_NONBLOCK;
 #endif
+
+#ifdef USE_SCION
+  if (ctx->transport == TRNSPRT_QUIC)
+  {
+    result = socket_open_scion(data, &ctx->addr, &ctx->sock, &ctx->topology, &ctx->network, &ctx->socket);
+  } else
+  {
+    result = socket_open(data, &ctx->addr, &ctx->sock);
+  }
+#else
   result = socket_open(data, &ctx->addr, &ctx->sock);
+#endif
 #ifdef SOCK_NONBLOCK
   /* Restore the socktype after the socket is created. */
   if(!data->set.fopensocket)
@@ -1174,8 +1362,12 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
      || ctx->addr.family == AF_INET6
 #endif
     ) {
+#ifdef USE_SCION
+    result = bindlocal(data, cf->conn, ctx->socket, ctx->addr.family);
+#else
     result = bindlocal(data, cf->conn, ctx->sock, ctx->addr.family,
                        Curl_ipv6_scope(&ctx->addr.curl_sa_addr));
+#endif
     if(result) {
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
         /* The address family is not supported on this interface.
@@ -1797,11 +1989,22 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 
   /* error: The 1st argument to 'connect' is -1 but should be >= 0
      NOLINTNEXTLINE(clang-analyzer-unix.StdCLibraryFunctions) */
+#ifdef USE_SCION
+  rc = scion_connect(ctx->socket, &ctx->addr.curl_sa_addr,
+               (curl_socklen_t)ctx->addr.addrlen, data->set.ia);
+  if (rc != 0) {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+    infof(data, "Immediate connect fail for %s: %d", ctx->ip.remote_ip, rc);
+#endif
+    return CURLE_COULDNT_CONNECT;
+  }
+#else
   rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
   }
+#endif
   ctx->sock_connected = TRUE;
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "%s socket %" FMT_SOCKET_T
@@ -1820,7 +2023,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #ifdef IP_MTU_DISCOVER
   case AF_INET: {
     int val = IP_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+    (void)setsockopt_quic(ctx, IPPROTO_IP, IP_MTU_DISCOVER, &val,
                      sizeof(val));
     break;
   }
@@ -1828,7 +2031,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #ifdef IPV6_MTU_DISCOVER
   case AF_INET6: {
     int val = IPV6_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+    (void)setsockopt_quic(ctx, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
                      sizeof(val));
     break;
   }
@@ -1838,7 +2041,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
 #if defined(UDP_GRO) &&                                                       \
   (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&                        \
   ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
-  (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
+  (void)setsockopt_quic(ctx, IPPROTO_UDP, UDP_GRO, &one,
                    (socklen_t)sizeof(one));
 #endif
 #endif
@@ -2260,3 +2463,27 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
   }
   return CURLE_FAILED_INIT;
 }
+
+#ifdef USE_SCION
+CURLcode Curl_cf_socket_peek_scion(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             curl_socket_t *psock,
+                             const struct Curl_sockaddr_ex **paddr,
+                             struct ip_quadruple *pip, struct scion_socket **socket) {
+  (void)data;
+  if(cf_is_socket(cf) && cf->ctx) {
+    struct cf_socket_ctx *ctx = cf->ctx;
+
+    if(psock)
+      *psock = ctx->sock;
+    if(paddr)
+      *paddr = &ctx->addr;
+    if(pip)
+      *pip = ctx->ip;
+    if (socket)
+      *socket = ctx->socket;
+    return CURLE_OK;
+  }
+  return CURLE_FAILED_INIT;
+}
+#endif

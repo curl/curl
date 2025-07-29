@@ -2442,12 +2442,21 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(result)
     return result;
 
+#ifdef USE_SCION
+  Curl_cf_socket_peek_scion(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL, &ctx->q.socket);
+#else
   Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL);
+#endif
   if(!sockaddr)
     return CURLE_QUIC_CONNECT_ERROR;
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
+#ifdef USE_SCION
+  rv = scion_getsockname(ctx->q.socket, (struct sockaddr *)&ctx->q.local_addr,
+                   &ctx->q.local_addrlen, NULL);
+#else
   rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
                    &ctx->q.local_addrlen);
+#endif
   if(rv == -1)
     return CURLE_QUIC_CONNECT_ERROR;
 

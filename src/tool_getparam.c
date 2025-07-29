@@ -296,6 +296,10 @@ static const struct LongShort aliases[]= {
   {"retry-max-time",             ARG_STRG, ' ', C_RETRY_MAX_TIME},
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
+#ifdef USE_SCION
+  {"scion-dst-ia",               ARG_STRG, ' ', C_SCION_DST_IA },
+  {"scion-topology-path",        ARG_FILE, ' ', C_SCION_TOPOLOGY_PATH },
+#endif
   {"service-name",               ARG_STRG, ' ', C_SERVICE_NAME},
   {"sessionid",                  ARG_BOOL|ARG_NO, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
@@ -2782,6 +2786,16 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_UPLOAD_FLAGS: /* --upload-flags */
     err = parse_upload_flags(config, nextarg);
     break;
+#ifdef USE_SCION
+  case C_SCION_TOPOLOGY_PATH:
+    err = getstr(&config->scion_topology_path, nextarg, DENY_BLANK);
+    break;
+  case C_SCION_DST_IA: {
+      int ret = scion_ia_parse(nextarg, strlen(nextarg), &config->scion_dst_ia);
+      err = ret == 0 ? PARAM_OK : PARAM_BAD_USE;
+      break;
+  }
+#endif
   }
   return err;
 }

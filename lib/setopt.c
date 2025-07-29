@@ -1421,6 +1421,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_UPLOAD_FLAGS:
     data->set.upload_flags = (unsigned char)arg;
     break;
+#ifdef USE_SCION
+  case CURLOPT_SCION_DST_IA:
+    data->set.ia = arg;
+    break;
+#endif
   default:
     /* unknown option */
     return CURLE_UNKNOWN_OPTION;
@@ -2702,6 +2707,11 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     break;
   }
+#endif
+#ifdef USE_SCION
+  case CURLOPT_SCION_TOPOLOGY_PATH:
+    data->set.topology_file_path = ptr;
+    break;
 #endif
   default:
     return CURLE_UNKNOWN_OPTION;
