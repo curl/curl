@@ -372,35 +372,35 @@ fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
 
-dnl we'd like a sockd as test server
+dnl we'd like a dante as test socks server
 dnl
-SOCKD_ENABLED="maybe"
-AC_ARG_WITH(test-sockd, [AS_HELP_STRING([--with-test-sockd=PATH],
-                         [where to find dante sockd for testing])],
-  [request_sockd=$withval], [request_sockd=check])
-if test x"$request_sockd" = "xcheck" -o x"$request_sockd" = "xyes"; then
-  if test -x "/usr/sbin/sockd"; then
+DANTED_ENABLED="maybe"
+AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
+                         [where to find danted socks daemon for testing])],
+  [request_danted=$withval], [request_danted=check])
+if test x"$request_danted" = "xcheck" -o x"$request_danted" = "xyes"; then
+  if test -x "/usr/sbin/danted"; then
     # common location on distros (debian/ubuntu)
-    SOCKD="/usr/sbin/sockd"
+    DANTED="/usr/sbin/danted"
   else
-    AC_PATH_PROG([SOCKD], [sockd])
-    if test "x$SOCKD" = "x"; then
-      AC_PATH_PROG([SOCKD], [sockd])
+    AC_PATH_PROG([DANTED], [danted])
+    if test "x$DANTED" = "x"; then
+      AC_PATH_PROG([DANTED], [danted])
     fi
   fi
-elif test x"$request_sockd" != "xno"; then
-  SOCKD="${request_sockd}"
-  if test ! -x "${SOCKD}"; then
-    AC_MSG_NOTICE([sockd not found as ${SOCKD}, sockd tests disabled])
-    SOCKD_ENABLED="no"
+elif test x"$request_danted" != "xno"; then
+  DANTED="${request_danted}"
+  if test ! -x "${DANTED}"; then
+    AC_MSG_NOTICE([danted not found as ${DANTED}, danted tests disabled])
+    DANTED_ENABLED="no"
   else
-    AC_MSG_NOTICE([using SOCKD=$SOCKD for tests])
+    AC_MSG_NOTICE([using DANTED=$DANTED for tests])
   fi
 fi
-if test x"$SOCKD_ENABLED" = "xno"; then
-  SOCKD=""
+if test x"$DANTED_ENABLED" = "xno"; then
+  DANTED=""
 fi
-AC_SUBST(SOCKD)
+AC_SUBST(DANTED)
 
 dnl the nghttpx we might use in httpd testing
 if test "x$TEST_NGHTTPX" != "x" -a "x$TEST_NGHTTPX" != "xnghttpx"; then

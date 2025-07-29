@@ -256,28 +256,28 @@ class EnvConfig:
             except Exception:
                 self.vsftpd = None
 
-        self.sockd = self.config['sockd']['sockd']
-        if self.sockd == '':
-            self.sockd = None
-        self._sockd_version = None
-        if self.sockd is not None:
+        self.danted = self.config['danted']['danted']
+        if self.danted == '':
+            self.danted = None
+        self._danted_version = None
+        if self.danted is not None:
             try:
-                p = subprocess.run(args=[self.sockd, '-v'],
+                p = subprocess.run(args=[self.danted, '-v'],
                                    capture_output=True, text=True)
                 assert p.returncode == 0
                 if p.returncode != 0:
                     # not a working vsftpd
-                    self.sockd = None
+                    self.danted = None
                 m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
                 if not m:
                     m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
                 if m:
-                    self._sockd_version = m.group(1)
+                    self._danted_version = m.group(1)
                 else:
-                    self.sockd = None
-                    raise Exception(f'Unable to determine sockd version from: {p.stderr}')
+                    self.danted = None
+                    raise Exception(f'Unable to determine danted version from: {p.stderr}')
             except Exception:
-                self.sockd = None
+                self.danted = None
 
         self._tcpdump = shutil.which('tcpdump')
 
@@ -508,8 +508,8 @@ class Env:
         return Env.CONFIG.vsftpd_version
 
     @staticmethod
-    def has_sockd() -> bool:
-        return Env.CONFIG.sockd is not None
+    def has_danted() -> bool:
+        return Env.CONFIG.danted is not None
 
     @staticmethod
     def tcpdump() -> Optional[str]:
@@ -673,8 +673,8 @@ class Env:
         return self.CONFIG.ports['caddy']
 
     @property
-    def sockd(self) -> str:
-        return self.CONFIG.sockd
+    def danted(self) -> str:
+        return self.CONFIG.danted
 
     @property
     def vsftpd(self) -> str:

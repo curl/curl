@@ -288,7 +288,7 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }}
-            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd' || '' }}
+            ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
 
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
