@@ -84,8 +84,7 @@ static void dump(const char *text,
 }
 
 static int my_trace(CURL *handle, curl_infotype type,
-                    char *data, size_t size,
-                    void *userp)
+                    char *data, size_t size, void *userp)
 {
   struct t552_testdata *config = (struct t552_testdata *)userp;
   const char *text;
