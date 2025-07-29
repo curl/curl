@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static int verbose_d = 1;
 

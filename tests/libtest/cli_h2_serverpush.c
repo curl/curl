@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "cli_util.h"
 #include "testtrace.h"
 
 static FILE *out_download;

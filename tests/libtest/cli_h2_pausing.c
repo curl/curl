@@ -25,7 +25,7 @@
  */
 #include "first.h"
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static void usage_h2_pausing(const char *msg)
 {

@@ -25,8 +25,5 @@
  ***************************************************************************/
 #include "first.h"
 
-/* callback for CURLOPT_DEBUGFUNCTION (used in client tests) */
-int cli_debug_cb(CURL *handle, curl_infotype type,
-                 char *data, size_t size, void *userp);
 
 #endif /* HEADER_CLI_UTIL_H */

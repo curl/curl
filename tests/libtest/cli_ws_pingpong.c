@@ -25,7 +25,7 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static CURLcode ping(CURL *curl, const char *send_payload)
 {

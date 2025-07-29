@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static int tse_found_tls_session = FALSE;
 

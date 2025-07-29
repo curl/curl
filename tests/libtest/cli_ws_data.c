@@ -25,7 +25,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-#include "cli_util.h"
 #include "testtrace.h"
 
 static CURLcode check_recv(const struct curl_ws_frame *frame,

@@ -25,7 +25,7 @@
  */
 #include "first.h"
 
-#include "cli_util.h"
+#include "testtrace.h"
 
 static size_t total_read = 0;
 
