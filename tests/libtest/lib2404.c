@@ -35,8 +35,8 @@ static CURLcode test_lib2404(const char *URL)
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  char *port = libtest_arg3;
-  char *address = libtest_arg2;
+  const char *port = libtest_arg3;
+  const char *address = libtest_arg2;
 
   (void)URL;
 

@@ -69,9 +69,9 @@ extern int unitfail; /* for unittests */
   if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK)      \
     goto test_cleanup
 
-extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
-extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
-extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
+extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
+extern const char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
+extern const char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 
 /* argc and argv as passed in to the main() function */
 extern int test_argc;

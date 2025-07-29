@@ -50,9 +50,9 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
   return select(nfds, rd, wr, exc, tv);
 }
 
-char *libtest_arg2 = NULL;
-char *libtest_arg3 = NULL;
-char *libtest_arg4 = NULL;
+const char *libtest_arg2 = NULL;
+const char *libtest_arg3 = NULL;
+const char *libtest_arg4 = NULL;
 int test_argc;
 const char **test_argv;
 int testnum;

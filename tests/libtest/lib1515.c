@@ -104,8 +104,8 @@ static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
-  char *address = libtest_arg2;
-  char *port = libtest_arg3;
+  const char *address = libtest_arg2;
+  const char *port = libtest_arg3;
   char dns_entry[256];
   int i;
   int count = 2;
