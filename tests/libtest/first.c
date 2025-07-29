@@ -103,8 +103,8 @@ void websocket_close(CURL *curl)
 {
   size_t sent;
   CURLcode result = curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
-  curl_mfprintf(stderr,
-                "ws: curl_ws_send returned %u, sent %zu\n", result, sent);
+  curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n",
+                result, sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
