@@ -1145,22 +1145,22 @@ static CURLcode single_transfer(struct OperationConfig *config,
   }
 
   while(state->urlnode) {
-    struct getout *urlnode = state->urlnode;
+    struct getout *u = state->urlnode;
 
-    /* urlnode->url is the full URL or NULL */
-    if(!urlnode->url) {
+    /* u->url is the full URL or NULL */
+    if(!u->url) {
       /* This node has no URL. End of the road. */
       warnf(config->global, "Got more output options than URLs");
       break;
     }
 
     /* save outfile pattern before expansion */
-    if(urlnode->outfile && !state->outfiles)
-      state->outfiles = urlnode->outfile;
+    if(u->outfile && !state->outfiles)
+      state->outfiles = u->outfile;
 
-    if(!config->globoff && urlnode->infile && !state->inglob) {
+    if(!config->globoff && u->infile && !state->inglob) {
       /* Unless explicitly shut off */
-      result = glob_url(&state->inglob, urlnode->infile, &state->infilenum,
+      result = glob_url(&state->inglob, u->infile, &state->infilenum,
                         (!global->silent || global->showerror) ?
                         tool_stderr : NULL);
       if(result)
@@ -1168,7 +1168,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
 
-    if(state->up || urlnode->infile) {
+    if(state->up || u->infile) {
       if(!state->uploadfile) {
         if(state->inglob) {
           result = glob_next_url(&state->uploadfile, state->inglob);
@@ -1177,8 +1177,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
         }
         else if(!state->up) {
           /* copy the allocated string */
-          state->uploadfile = urlnode->infile;
-          urlnode->infile = NULL;
+          state->uploadfile = u->infile;
+          u->infile = NULL;
         }
       }
       if(result)
@@ -1186,10 +1186,10 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
     if(!state->urlnum) {
-      if(!config->globoff && !urlnode->noglob) {
+      if(!config->globoff && !u->noglob) {
         /* Unless explicitly shut off, we expand '{...}' and '[...]'
            expressions and return total number of URLs in pattern set */
-        result = glob_url(&state->urls, urlnode->url, &state->urlnum,
+        result = glob_url(&state->urls, u->url, &state->urlnum,
                           (!global->silent || global->showerror) ?
                           tool_stderr : NULL);
         if(result)
@@ -1251,7 +1251,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       *added = TRUE;
       per->config = config;
       per->curl = curl;
-      per->urlnum = (unsigned int)urlnode->num;
+      per->urlnum = (unsigned int)u->num;
 
       /* default headers output stream is stdout */
       heads = &per->heads;
@@ -1280,7 +1280,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
           return result;
       }
       else if(!state->li) {
-        per->url = strdup(urlnode->url);
+        per->url = strdup(u->url);
         if(!per->url)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -1295,8 +1295,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
           return CURLE_OUT_OF_MEMORY;
       }
 
-      outs->out_null = urlnode->out_null;
-      if(!outs->out_null && (urlnode->useremote ||
+      outs->out_null = u->out_null;
+      if(!outs->out_null && (u->useremote ||
           (per->outfile && strcmp("-", per->outfile)))) {
         result = setup_outfile(config, per, outs, skipped);
         if(result)
@@ -1351,7 +1351,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       config->terminal_binary_ok =
         (per->outfile && !strcmp(per->outfile, "-"));
 
-      if(config->content_disposition && urlnode->useremote)
+      if(config->content_disposition && u->useremote)
         hdrcbdata->honor_cd_filename = TRUE;
       else
         hdrcbdata->honor_cd_filename = FALSE;
@@ -1384,21 +1384,20 @@ static CURLcode single_transfer(struct OperationConfig *config,
       }
       break;
     }
-    else {
-      /* Free this URL node data without destroying the
-         node itself nor modifying next pointer. */
-      urlnode->outset = urlnode->urlset = urlnode->useremote =
-        urlnode->uploadset = urlnode->noupload = urlnode->noglob = FALSE;
-      glob_cleanup(&state->urls);
-      state->urlnum = 0;
 
-      state->outfiles = NULL;
-      tool_safefree(state->uploadfile);
-      /* Free list of globbed upload files */
-      glob_cleanup(&state->inglob);
-      state->up = 0;
-      state->urlnode = urlnode->next; /* next node */
-    }
+    /* Free this URL node data without destroying the
+       node itself nor modifying next pointer. */
+    u->outset = u->urlset = u->useremote =
+      u->uploadset = u->noupload = u->noglob = FALSE;
+    glob_cleanup(&state->urls);
+    state->urlnum = 0;
+
+    state->outfiles = NULL;
+    tool_safefree(state->uploadfile);
+    /* Free list of globbed upload files */
+    glob_cleanup(&state->inglob);
+    state->up = 0;
+    state->urlnode = u->next; /* next node */
   }
   state->outfiles = NULL;
   return result;
