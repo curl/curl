@@ -43,7 +43,7 @@ static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 ** callback for CURLOPT_DEBUGFUNCTION
 */
 static int cli_debug_cb(CURL *handle, curl_infotype type,
-                        char *data, size_t size, void *userdata)
+                        char *data, size_t size, void *userp)
 {
   FILE *output = stderr;
   static int newl = 0;
@@ -52,7 +52,7 @@ static int cli_debug_cb(CURL *handle, curl_infotype type,
   curl_off_t xfer_id, conn_id;
 
   (void)handle; /* not used */
-  (void)userdata;
+  (void)userp;
 
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
