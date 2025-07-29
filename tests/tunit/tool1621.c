@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
+#include "curl_mem_undef.h" /* FIRST include file */
+
 #include "tool_xattr.h"
 
 #include "memdebug.h" /* LAST include file */

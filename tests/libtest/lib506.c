@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 #define JAR libtest_arg2
 #define THREADS 2

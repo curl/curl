@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 #if !defined(HAVE_POLL) && !defined(USE_WINSOCK) && !defined(FD_SETSIZE)
 #error "this test requires FD_SETSIZE"

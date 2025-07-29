@@ -30,9 +30,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
-
 static struct t530_ctx {
   int socket_calls;
   int max_socket_calls;
