@@ -85,7 +85,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
     return 2;                                                                 \
   } while(0)
 
-static int test_h2_pausing(char *URL)
+static CURLcode test_h2_pausing(char *URL)
 {
   struct handle handles[2];
   CURLM *multi_handle;
@@ -93,7 +93,7 @@ static int test_h2_pausing(char *URL)
   size_t i;
   CURLMsg *msg;
   int rounds = 0;
-  int rc = 0;
+  CURLcode rc = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
