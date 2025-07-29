@@ -90,6 +90,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode ws_send_ping(CURL *curl, const char *send_payload);
+CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
 /* just close the connection */
 void ws_close(CURL *curl);
 #endif

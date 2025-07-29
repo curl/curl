@@ -28,34 +28,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode recv_pong(CURL *curl, const char *expected_payload)
-{
-  size_t rlen;
-  const struct curl_ws_frame *meta;
-  char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(result) {
-    curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %zd\n",
-                  result, rlen);
-    return result;
-  }
-
-  if(!(meta->flags & CURLWS_PONG)) {
-    curl_mfprintf(stderr, "recv_pong: wrong frame, got %zd bytes rflags %x\n",
-                  rlen, meta->flags);
-    return CURLE_RECV_ERROR;
-  }
-
-  curl_mfprintf(stderr, "ws: got PONG back\n");
-  if(rlen == strlen(expected_payload) &&
-     !memcmp(expected_payload, buffer, rlen)) {
-    curl_mfprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;
-  }
-  curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
-  return CURLE_RECV_ERROR;
-}
-
 static CURLcode pingpong(CURL *curl, const char *payload)
 {
   CURLcode res;
@@ -66,7 +38,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
     return res;
   for(i = 0; i < 10; ++i) {
     curl_mfprintf(stderr, "Receive pong\n");
-    res = recv_pong(curl, payload);
+    res = ws_recv_pong(curl, payload);
     if(res == CURLE_AGAIN) {
       curlx_wait_ms(100);
       continue;
