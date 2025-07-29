@@ -111,14 +111,14 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   long http_version = CURL_HTTP_VERSION_1_1;
   CURLcode exitcode = 1;
 
-  if(!URL || test_argc != 3) {
+  if(!URL || !libtest_arg2) {
     curl_mfprintf(stderr, "need args: URL proto\n");
     return 2;
   }
 
-  if(!strcmp("h2", test_argv[2]))
+  if(!strcmp("h2", libtest_arg2))
     http_version = CURL_HTTP_VERSION_2;
-  else if(!strcmp("h3", test_argv[2]))
+  else if(!strcmp("h3", libtest_arg2))
     http_version = CURL_HTTP_VERSION_3ONLY;
 
   cu = curl_url();
