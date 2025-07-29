@@ -71,17 +71,17 @@ static CURLcode test_lib552(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct libtest_trace_cfg config = {0};
   size_t i;
   static const char fill[] = "test data";
 
-  config.nohex = 1; /* enable ASCII tracing */
+  libtest_debug_config.nohex = 1;
+  libtest_debug_config.tracetime = 0;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  test_setopt(curl, CURLOPT_DEBUGDATA, &config);
+  test_setopt(curl, CURLOPT_DEBUGDATA, &libtest_debug_config);
   /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
