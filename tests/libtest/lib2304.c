@@ -45,12 +45,12 @@ static CURLcode t2304_recv_pong(CURL *curl, const char *expected_payload)
         curl_mfprintf(stderr, "ws: did NOT get the same payload back\n");
     }
     else {
-      curl_mfprintf(stderr, "recv_pong: got %d bytes rflags %x\n", (int)rlen,
+      curl_mfprintf(stderr, "recv_pong: got %zd bytes rflags %x\n", rlen,
                     meta->flags);
     }
   }
-  curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %d\n", result,
-                (int)rlen);
+  curl_mfprintf(stderr, "ws: curl_ws_recv returned %d, received %zd\n", result,
+                rlen);
   return result;
 }
 
