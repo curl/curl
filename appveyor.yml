@@ -32,7 +32,7 @@ version: 7.50.0.{build}
 
 environment:
   BUILD_SYSTEM: CMake
-  UNITY: 'OFF'
+  UNITY: 'ON'
   OPENSSL: 'OFF'
   SCHANNEL: 'OFF'
   ENABLE_UNICODE: 'OFF'

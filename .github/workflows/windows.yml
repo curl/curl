@@ -832,7 +832,7 @@ jobs:
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
-              -DCMAKE_UNITY_BUILD=OFF \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
               -DLIBPSL_LIBRARY="${MINGW_PREFIX}/lib/libpsl.dll.a" \
