@@ -24,8 +24,9 @@
  *
  ***************************************************************************/
 
-static void cli_dump(const char *text, FILE *stream, unsigned char *ptr,
-                     size_t size, char nohex)
+static void cli_dump(const char *timebuf, const char *text,
+                     FILE *stream, const unsigned char *ptr,
+                     size_t size, int nohex)
 {
   size_t i;
   size_t c;
@@ -36,7 +37,8 @@ static void cli_dump(const char *text, FILE *stream, unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  curl_mfprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
+  curl_mfprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
+                size, size);
 
   for(i = 0; i < size; i += width) {
 
