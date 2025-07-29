@@ -69,7 +69,7 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
     return NULL;
   }
   curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, debug_cb);
+  curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   curl_easy_setopt(easy, CURLOPT_URL, url);
   curl_easy_setopt(easy, CURLOPT_SHARE, share);
   curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);

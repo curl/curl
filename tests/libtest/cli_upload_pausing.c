@@ -174,7 +174,7 @@ static int test_upload_pausing(int argc, char *argv[])
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   if(curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_cb)
+     curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
      != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK)
     ERR();
