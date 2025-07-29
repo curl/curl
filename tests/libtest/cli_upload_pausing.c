@@ -89,7 +89,8 @@ static int test_cli_upload_pausing(const char *URL)
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
-  char *url, *host = NULL, *port = NULL;
+  const char *url;
+  char *host = NULL, *port = NULL;
   long http_version = CURL_HTTP_VERSION_1_1;
   int ch;
 

@@ -35,8 +35,8 @@ void websocket_close(CURL *curl);
 #endif
 
 extern int coptind;
-extern char *coptarg;
+extern const char *coptarg;
 
-int cgetopt(int argc, char * const argv[], const char *optstring);
+int cgetopt(int argc, const char * const argv[], const char *optstring);
 
 #endif /* HEADER_CLI_UTIL_H */

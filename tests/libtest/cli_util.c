@@ -130,13 +130,13 @@ void websocket_close(CURL *curl)
 #endif /* CURL_DISABLE_WEBSOCKETS */
 
 int coptind;
-char *coptarg;
+const char *coptarg;
 
-int cgetopt(int argc, char * const argv[], const char *optstring)
+int cgetopt(int argc, const char * const argv[], const char *optstring)
 {
   static int optpos = 1;
   int coptopt;
-  char *arg;
+  const char *arg;
 
   if(coptind == 0) {  /* Reset? */
     coptind = !!argc;

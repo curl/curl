@@ -97,7 +97,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
-  char *url, *host = NULL, *port = NULL;
+  const char *url;
+  char *host = NULL, *port = NULL;
   int all_paused = 0;
   int resume_round = -1;
   long http_version = CURL_HTTP_VERSION_2_0;
