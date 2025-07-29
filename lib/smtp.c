@@ -887,7 +887,8 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
   else
     /* An invalid mailbox was provided but we will simply let the server worry
        about that and reply with a 501 error */
-    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s>%s", address, suffix);
+    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s>%s", 
+                           address, suffix);
 
   Curl_free_idnconverted_hostname(&host);
   free(address);
