@@ -58,7 +58,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix="$HOME"/temp --without-ssl --without-libpsl
+          ./configure --prefix="$HOME"/temp --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           make install
@@ -84,7 +84,7 @@ jobs:
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
           mkdir build
           pushd build
-          ../curl-99.98.97/configure --without-ssl --without-libpsl
+          ../curl-99.98.97/configure --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           popd
@@ -108,15 +108,68 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --without-ssl --enable-debug --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --enable-debug --without-libpsl
           make
           make test-ci
           make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l
           popd
           scripts/checksrc-all.pl
 
+  verify-out-of-tree-autotools:
+    name: 'AM out-of-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'disable preinstalled perl'
+        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          mkdir build
+          pushd build
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l
+          popd
+
+  verify-in-tree-autotools:
+    name: 'AM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'disable preinstalled perl'
+        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l
+
   verify-out-of-tree-cmake:
-    name: 'CM out-of-tree'
+    name: 'CM out-of-tree !perl'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
@@ -130,9 +183,34 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build build
           cmake --install build
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l
+
+  verify-in-tree-cmake:
+    name: 'CM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake . -G Ninja -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
+          cmake --build .
+          cmake --install .
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l
 
   missing-files:
     name: 'missing files'
