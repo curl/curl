@@ -446,6 +446,10 @@ static void print_cheatsheet(int i, int col_num)
     /* The headers */
     if(cheat_items[c + i].heading[0])
       printf("%-30s ", cheat_items[c + i].heading[0]);
+    else {
+      col_num = c; /* redefine for uneven rows */
+      break;
+    }
   }
   puts("");
   for(c = 0; c < col_num; c++)
