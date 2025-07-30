@@ -65,6 +65,7 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SP_NAME_NEGOTIATE           "Negotiate"
 #define SP_NAME_KERBEROS            "Kerberos"
 
+/* Offered by mingw-w64 v9+. MS SDK 7.1A+. */
 #ifndef ISC_REQ_USE_HTTP_STYLE
 #define ISC_REQ_USE_HTTP_STYLE                0x01000000
 #endif
