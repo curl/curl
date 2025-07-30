@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_TOOL_HELP_H
-#define HEADER_CURL_TOOL_HELP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,71 +21,190 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
 
-void tool_help(const char *category);
-void tool_list_engines(void);
-void tool_version_info(void);
-struct scan_ctx {
-  const char *trigger;
-  size_t tlen;
-  const char *arg;
-  size_t flen;
-  const char *endarg;
-  size_t elen;
-  size_t olen;
-  char rbuf[40];
-  char obuf[160];
-  unsigned char show; /* start as at 0.
-                         trigger match moves it to 1
-                         arg match moves it to 2
-                         endarg stops the search */
-};
-void inithelpscan(struct scan_ctx *ctx, const char *trigger,
-                  const char *arg, const char *endarg);
-bool helpscan(const unsigned char *buf, size_t len, struct scan_ctx *ctx);
+#include "tool_help_cheatsheet.h"
+#include "tool_help.h"
+#include "terminal.h"
 
-struct helptxt {
-  const char *opt;
-  const char *desc;
-  unsigned int categories;
-};
+#include "memdebug.h" /* keep this as LAST include */
 
-/*
- * The bitmask output is generated with the following command
- ------------------------------------------------------------
-  make -C docs/cmdline-opts listcats
- */
+int incre_i(int i, int j) {
+  if (j == 0)
+    return i + 1;
+  else
+    return i + 1 + j;
+}
+ 
+/* Support to print number of columns per screen width. */
+static void print_one(int i) {
+  if(cheat_items[i].heading[0] != NULL &&
+     cheat_items[i].heading[0] != "")
+    printf("%-20s\n%s\n%s\n\n",
+     cheat_items[i].heading[0], spacer, cheat_items[i].heading[1]);
+}
+static void print_two(int i) {
+  if(cheat_items[i+1].heading[0] == NULL ||
+     cheat_items[i+1].heading[0] == "")
+    print_one(i);
+  else
+    if (cheat_items[i].heading[0] != NULL &&
+        cheat_items[i].heading[0] != "")
+      printf("%-*s %-*s\n%s %s\n%-*s %-*s\n\n",
+        width, cheat_items[i].heading[0],
+        width, cheat_items[i+1].heading[0],
+        spacer, spacer,
+        width, cheat_items[i].heading[1],
+        width, cheat_items[i+1].heading[1]);
+}
+static void print_three(int i) {
+  if(cheat_items[i+1].heading[0] == NULL ||
+     cheat_items[i+1].heading[0] == "")
+    print_one(i);
+  else if (cheat_items[i+2].heading[0] == NULL ||
+           cheat_items[i+2].heading[0] == "")
+    print_two(i);
+  else
+    if (cheat_items[i].heading[0] != NULL &&
+        cheat_items[i].heading[0] != "")
+      printf("%-*s %-*s %-*s\n%s %s %s\n%-*s %-*s %-*s\n\n",
+        width, cheat_items[i].heading[0],
+        width, cheat_items[i+1].heading[0],
+        width, cheat_items[i+2].heading[0],
+        spacer, spacer, spacer,
+        width, cheat_items[i].heading[1],
+        width, cheat_items[i+1].heading[1],
+        width, cheat_items[i+2].heading[1]);
+}
+static void print_four(int i) {
+  if(cheat_items[i+1].heading[0] == NULL ||
+     cheat_items[i+1].heading[0] == "")
+    print_one(i);
+  else if (cheat_items[i+2].heading[0] == NULL ||
+           cheat_items[i+2].heading[0] == "")
+    print_two(i);
+  else if (cheat_items[i+3].heading[0] == NULL ||
+           cheat_items[i+3].heading[0] == "")
+    print_three(i);
+  else
+    if (cheat_items[i].heading[0] != NULL &&
+        cheat_items[i].heading[0] != "")
+      printf("%-*s %-*s %-*s %-*s\n%s %s %s %s\n"
+             "%-*s %-*s %-*s %-*s\n\n",
+        width, cheat_items[i].heading[0],
+        width, cheat_items[i+1].heading[0],
+        width, cheat_items[i+2].heading[0],
+        width, cheat_items[i+3].heading[0],
+        spacer, spacer, spacer, spacer,
+        width, cheat_items[i].heading[1],
+        width, cheat_items[i+1].heading[1],
+        width, cheat_items[i+2].heading[1],
+        width, cheat_items[i+3].heading[1]);
+}
+static void print_five(int i) {
+  if(cheat_items[i+1].heading[0] == NULL ||
+     cheat_items[i+1].heading[0] == "")
+    print_one(i);
+  else if (cheat_items[i+2].heading[0] == NULL ||
+           cheat_items[i+2].heading[0] == "")
+    print_two(i);
+  else if (cheat_items[i+3].heading[0] == NULL ||
+           cheat_items[i+3].heading[0] == "")
+    print_three(i);
+  else if (cheat_items[i+4].heading[0] == NULL ||
+           cheat_items[i+4].heading[0] == "")
+    print_four(i);
+  else
+    if (cheat_items[i].heading[0] != NULL &&
+        cheat_items[i].heading[0] != "")
+      printf("%-*s %-*s %-*s %-*s %-*s\n%s %s %s %s %s\n"
+             "%-*s %-*s %-*s %-*s %-*s\n\n",
+        width, cheat_items[i].heading[0],
+        width, cheat_items[i+1].heading[0],
+        width, cheat_items[i+2].heading[0],
+        width, cheat_items[i+3].heading[0],
+        width, cheat_items[i+4].heading[0],
+        spacer, spacer, spacer, spacer, spacer,
+        width, cheat_items[i].heading[1],
+        width, cheat_items[i+1].heading[1],
+        width, cheat_items[i+2].heading[1],
+        width, cheat_items[i+3].heading[1],
+        width, cheat_items[i+4].heading[1]);
+}
 
-#define CURLHELP_AUTH       (1u << 0u)
-#define CURLHELP_CONNECTION (1u << 1u)
-#define CURLHELP_CURL       (1u << 2u)
-#define CURLHELP_DEPRECATED (1u << 3u)
-#define CURLHELP_DNS        (1u << 4u)
-#define CURLHELP_FILE       (1u << 5u)
-#define CURLHELP_FTP        (1u << 6u)
-#define CURLHELP_GLOBAL     (1u << 7u)
-#define CURLHELP_HTTP       (1u << 8u)
-#define CURLHELP_IMAP       (1u << 9u)
-#define CURLHELP_IMPORTANT  (1u << 10u)
-#define CURLHELP_LDAP       (1u << 11u)
-#define CURLHELP_OUTPUT     (1u << 12u)
-#define CURLHELP_POP3       (1u << 13u)
-#define CURLHELP_POST       (1u << 14u)
-#define CURLHELP_PROXY      (1u << 15u)
-#define CURLHELP_SCP        (1u << 16u)
-#define CURLHELP_SFTP       (1u << 17u)
-#define CURLHELP_SMTP       (1u << 18u)
-#define CURLHELP_SSH        (1u << 19u)
-#define CURLHELP_TELNET     (1u << 20u)
-#define CURLHELP_TFTP       (1u << 21u)
-#define CURLHELP_TIMEOUT    (1u << 22u)
-#define CURLHELP_TLS        (1u << 23u)
-#define CURLHELP_UPLOAD     (1u << 24u)
-#define CURLHELP_VERBOSE    (1u << 25u)
+/* Output cheat-sheet. */
+CURL_EXTERN void tool_cheat_sheet(void)
+{
+  /* Get terminal width for proper formatting */
+  unsigned int cols = get_terminal_columns();
 
-#define CURLHELP_ALL        (0xfffffffu)
+  /* Cheat sheet data structure organized by heading and value. */
+  static const struct cheat_table {
+    const char *heading[2];
+  } cheat_items[] = {
+    /* Verbose section */
+    {"Verbose", "-v, --trace-ascii file"},
+    {"Hide progress", "-s"},
+    {"extra info", "-w format"},
+    {"Write output", "-O, -o file"},
+    {"Timeout", "-m secs"},
+    {"POST", "-d string, -d @file"},
+    {"multipart", "-F name=value, -F name=@file"},
+    {"PUT", "-T file"},
+    {"HEAD", "-I"},
+    {"custom", "-X METHOD"},
+    {"Basic auth", "-u user:password"},
+    {"read cookies", "-b <file>"},
+    {"write cookies", "-c <file>"},
+    {"send cookies", "-b \"c=1; d=2\""},
+    {"user-agent", "-A string"},
+    {"Use proxy", "-x host:port"},
+    {"Headers add/remove", "-H \"name: value\", -H name:"},
+    {"follow redirs", "-L"},
+    {"gzip", "--compressed"},
+    {"insecure", "-k"},
+    {"", ""},
+    {NULL, NULL}
+  };
+  
+  /* Spacer variable for heading. */
+  const char *spacer = "------------------------------";
 
-extern const struct helptxt helptext[];
+  /* Use consistent width for each column. */
+  int width = 30;
 
-#endif /* HEADER_CURL_TOOL_HELP_H */
+  /* Get the table length. */
+  int table_length = sizeof(cheat_items) / sizeof(cheat_items[0]);
+
+  /* Handle for loop according to cols */
+  unsigned int i, j;
+
+  /* Set j based on col width, setting once, not in a loop. */
+  if (cols <= 75)
+    j = 0;
+  else if (cols > 75 && cols <= 125)
+    j = 1;
+  else if (cols > 125 &&  cols <= 175)
+    j = 2;
+  else if (cols > 175 && cols <= 225)
+    j = 3;
+  else
+    j = 4;
+
+  /* Loop through cheat sheet sections */
+  for(i = 0; i < table_length; i = incre_i(i, j)) {
+    if (cheat_items[i+j].heading[0] == NULL) {
+      break;
+    } else {
+     if (cols <= 75)                    /* Output one columns.  */
+       print_one(i);
+     else if(cols > 75 && cols <= 125)  /* output two columns   */
+       print_two(i);
+     else if(cols > 125 && cols <= 175) /* output three columns */
+       print_three(i);
+     else if(cols > 175 && cols <= 225) /* output four columns  */
+       print_four(i);
+     else
+       print_five(i);                   /* output five columns  */
+    }
+  }
+}
