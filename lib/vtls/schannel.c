@@ -545,7 +545,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   case CURL_SSLVERSION_TLSv1_3:
   {
     result = schannel_set_ssl_version_min_max(&enabled_protocols, cf, data);
-    if(result != CURLE_OK)
+    if(result)
       return result;
     break;
   }
@@ -843,7 +843,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
               "user set an algorithm cipher list.");
       }
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
-      if(CURLE_OK != result) {
+      if(result) {
         failf(data, "schannel: Failed setting algorithm cipher list");
         return result;
       }
@@ -1132,7 +1132,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                              outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
                              &written);
   Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
-  if((result != CURLE_OK) || (outbuf.cbBuffer != written)) {
+  if(result || (outbuf.cbBuffer != written)) {
     failf(data, "schannel: failed to send initial handshake data: "
           "sent %zu of %lu bytes", written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
@@ -1241,7 +1241,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                      "need more data"));
         return CURLE_OK;
       }
-      else if((result != CURLE_OK) || (nread == 0)) {
+      else if(result || (nread == 0)) {
         failf(data, "schannel: failed to receive handshake, "
               "SSL/TLS connection failed");
         return CURLE_SSL_CONNECT_ERROR;
@@ -1320,8 +1320,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
           result = Curl_conn_cf_send(cf->next, data,
                                      outbuf[i].pvBuffer, outbuf[i].cbBuffer,
                                      FALSE, &written);
-          if((result != CURLE_OK) ||
-             (outbuf[i].cbBuffer != written)) {
+          if(result || (outbuf[i].cbBuffer != written)) {
             failf(data, "schannel: failed to send next handshake data: "
                   "sent %zu of %lu bytes", written, outbuf[i].cbBuffer);
             return CURLE_SSL_CONNECT_ERROR;
@@ -1828,7 +1827,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                                   FALSE, &this_write);
       if(result == CURLE_AGAIN)
         continue;
-      else if(result != CURLE_OK) {
+      else if(result) {
         break;
       }
 
