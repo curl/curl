@@ -139,7 +139,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --without-ssl --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --without-ssl --without-libpsl --disable-docs
           make
           make install
           curl-install/bin/curl --disable --version
