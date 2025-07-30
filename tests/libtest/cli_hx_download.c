@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 #include <openssl/ssl.h>
@@ -44,6 +43,7 @@
 #include <rustls.h>
 #endif
 
+#include "memdebug.h"
 
 static int verbose_d = 1;
 
