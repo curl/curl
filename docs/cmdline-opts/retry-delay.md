@@ -19,3 +19,9 @@ Make curl sleep this amount of time before each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
 between retries). This option is only interesting if --retry is also
 used. Setting this delay to zero makes curl use the default backoff time.
+
+By default, curl uses an expontentially increasing timeout between retries.
+
+Staring in curl 8.16.0, this option accepts a time as decimal number for parts
+of seconds. The decimal value needs to be provided using a dot (.) as decimal
+separator - not the local version even if it might be using another separator.

@@ -2344,10 +2344,10 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     err = str2unum(&config->req_retry, nextarg);
     break;
   case C_RETRY_DELAY: /* --retry-delay */
-    err = str2unummax(&config->retry_delay, nextarg, LONG_MAX/1000);
+    err = secs2ms(&config->retry_delay_ms, nextarg);
     break;
   case C_RETRY_MAX_TIME: /* --retry-max-time */
-    err = str2unummax(&config->retry_maxtime, nextarg, LONG_MAX/1000);
+    err = secs2ms(&config->retry_maxtime_ms, nextarg);
     break;
   case C_FTP_ACCOUNT: /* --ftp-account */
     err = getstr(&config->ftp_account, nextarg, DENY_BLANK);
