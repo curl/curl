@@ -340,14 +340,6 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #endif
 #endif /* __MINGW32CE__ */
 
-#ifdef UNICODE
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
-#else
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
-#endif
-
 /*
  * Definitions required from ntsecapi.h are directly provided below this point
  * to avoid including ntsecapi.h due to a conflict with OpenSSL's safestack.h
