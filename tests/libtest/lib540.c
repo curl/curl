@@ -34,16 +34,14 @@
 
 #include "memdebug.h"
 
-#define PROXY libtest_arg2
-#define PROXYUSERPWD libtest_arg3
-#define HOST test_argv[4]
-
 static CURL *testeh[2];
 
 static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
                      struct curl_slist *headers)
 {
   CURLcode res = CURLE_OK;
+
+  const char *PROXY = libtest_arg2;
 
   res_easy_init(testeh[num]);
   if(res)
@@ -192,6 +190,9 @@ static CURLcode test_lib540(const char *URL)
   CURLcode res = CURLE_OK;
   size_t i;
 
+  const char *PROXYUSERPWD = libtest_arg3;
+  const char *HOST;
+
   for(i = 0; i < CURL_ARRAYSIZE(testeh); i++)
     testeh[i] = NULL;
 
@@ -200,6 +201,7 @@ static CURLcode test_lib540(const char *URL)
   if(test_argc < 4)
     return TEST_ERR_MAJOR_BAD;
 
+  HOST = test_argv[4];
   curl_msnprintf(buffer, sizeof(buffer), "Host: %s", HOST);
 
   /* now add a custom Host: header */
