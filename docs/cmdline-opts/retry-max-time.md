@@ -9,6 +9,7 @@ Category: curl timeout
 Multi: single
 See-also:
   - retry
+  - retry-delay
 Example:
   - --retry-max-time 30 --retry 10 $URL
 ---
