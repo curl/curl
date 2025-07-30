@@ -189,10 +189,7 @@ jobs:
           pushd curl-99.98.97
           cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build build
-          build/src/curl --disable --version
-          build/src/curl --manual | wc -l
           cmake --install build
-          echo "|$LD_LIBRARY_PATH|"
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
           curl-install/bin/curl --manual | wc -l
@@ -214,10 +211,7 @@ jobs:
           pushd curl-99.98.97
           cmake . -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build .
-          src/curl --disable --version
-          src/curl --manual | wc -l
           cmake --install .
-          echo "|$LD_LIBRARY_PATH|"
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
           curl-install/bin/curl --manual | wc -l
