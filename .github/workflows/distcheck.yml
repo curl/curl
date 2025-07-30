@@ -117,8 +117,8 @@ jobs:
           popd
           scripts/checksrc-all.pl
 
-  verify-out-of-tree-autotools-noperl:
-    name: 'AM out-of-tree (!perl)'
+  verify-out-of-tree-autotools:
+    name: 'AM out-of-tree !perl'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
@@ -146,8 +146,8 @@ jobs:
           curl-install/bin/curl --manual | wc -l
           popd
 
-  verify-in-tree-autotools-noperl:
-    name: 'AM in-tree (!perl)'
+  verify-in-tree-autotools:
+    name: 'AM in-tree !perl'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
