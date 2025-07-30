@@ -187,7 +187,7 @@ static CURLcode test_lib650(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  test_setopt(curl, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_301);
+  test_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_301);
 
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);
