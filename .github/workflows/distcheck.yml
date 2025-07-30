@@ -127,10 +127,8 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'remove preinstalled perl'
-        run: |
-          sudo apt-get -o Dpkg::Use-Pty=0 purge perl
-          sudo mv /usr/bin/perl /usr/bin/noperl
+      - name: 'disable preinstalled perl'
+        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
 
       - name: 'build & install'
         run: |
@@ -156,10 +154,8 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'remove preinstalled perl'
-        run: |
-          sudo apt-get -o Dpkg::Use-Pty=0 purge perl
-          sudo mv /usr/bin/perl /usr/bin/noperl
+      - name: 'disable preinstalled perl'
+        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
 
       - name: 'build & install'
         run: |
