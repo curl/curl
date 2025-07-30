@@ -84,11 +84,11 @@ static int server_push_callback(CURL *parent,
   curl_easy_setopt(easy, CURLOPT_WRITEDATA, out_push);
 
   curl_mfprintf(stderr, "**** push callback approves stream %u, "
-                "got %lu headers!\n", count, (unsigned long)num_headers);
+                "got %zu headers!\n", count, num_headers);
 
   for(i = 0; i < num_headers; i++) {
     headp = curl_pushheader_bynum(headers, i);
-    curl_mfprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
+    curl_mfprintf(stderr, "**** header %zu: %s\n", i, headp);
   }
 
   headp = curl_pushheader_byname(headers, ":path");
