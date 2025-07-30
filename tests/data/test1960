@@ -22,7 +22,7 @@ Content-Length: 0
 # Client-side
 <client>
 <precheck>
-./libtest/lib%TESTNUMBER check
+./libtest/libtests %TESTNUMBER check
 </precheck>
 <server>
 http
