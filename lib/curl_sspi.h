@@ -328,9 +328,11 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif
 
+#ifdef __MINGW32CE__
 #ifndef CRYPT_E_NOT_IN_REVOCATION_DATABASE
 #define CRYPT_E_NOT_IN_REVOCATION_DATABASE    ((HRESULT)0x80092014L)
 #endif
+#endif /* __MINGW32CE__ */
 
 #ifdef UNICODE
 #  define SECFLAG_WINNT_AUTH_IDENTITY \
