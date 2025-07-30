@@ -40,22 +40,6 @@
 #define HAS_CLIENT_CERT_PATH
 #endif
 
-#ifndef CRYPT_DECODE_NOCOPY_FLAG
-#define CRYPT_DECODE_NOCOPY_FLAG 0x1
-#endif
-
-#ifndef CRYPT_DECODE_ALLOC_FLAG
-#define CRYPT_DECODE_ALLOC_FLAG 0x8000
-#endif
-
-#ifndef CERT_ALT_NAME_DNS_NAME
-#define CERT_ALT_NAME_DNS_NAME 3
-#endif
-
-#ifndef CERT_ALT_NAME_IP_ADDRESS
-#define CERT_ALT_NAME_IP_ADDRESS 8
-#endif
-
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
    'type cast' : conversion from 'int' to 'LPCSTR' of greater size */
