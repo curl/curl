@@ -47,14 +47,15 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
     return CURLE_RECV_ERROR;
   }
   if(frame->offset != (curl_off_t)r_offset) {
-    curl_mfprintf(stderr, "recv_data: frame offset, expected %zu, got %ld\n",
-                  r_offset, (long)frame->offset);
+    curl_mfprintf(stderr, "recv_data: frame offset, expected %zu, "
+                  "got %" CURL_FORMAT_CURL_OFF_T "\n",
+                  r_offset, frame->offset);
     return CURLE_RECV_ERROR;
   }
   if(frame->bytesleft != (curl_off_t)(exp_len - r_offset - nread)) {
     curl_mfprintf(stderr, "recv_data: frame bytesleft, "
-                  "expected %ld, got %ld\n",
-                  (long)(exp_len - r_offset - nread), (long)frame->bytesleft);
+                  "expected %ld, got %" CURL_FORMAT_CURL_OFF_T "\n",
+                  (long)(exp_len - r_offset - nread), frame->bytesleft);
     return CURLE_RECV_ERROR;
   }
   if(r_offset + nread > exp_len) {
