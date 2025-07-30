@@ -105,11 +105,6 @@
  * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
-/* Offered when targeting Vista (XP SP2+) */
-#ifndef CALG_SHA_256
-#define CALG_SHA_256 0x0000800c
-#endif
-
 /* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
