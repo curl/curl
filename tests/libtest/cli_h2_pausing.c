@@ -58,25 +58,25 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   (void)data;
   if(curl_easy_getinfo(handle->h, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                        &totalsize) == CURLE_OK)
-    curl_mfprintf(stderr, "INFO: [%d] write, "
+    curl_mfprintf(stderr, "INFO: [%zu] write, "
                   "Content-Length %" CURL_FORMAT_CURL_OFF_T "\n",
-                  (int)handle->idx, totalsize);
+                  handle->idx, totalsize);
 
   if(!handle->resumed) {
     ++handle->paused;
-    curl_mfprintf(stderr, "INFO: [%d] write, PAUSING %d time on %lu bytes\n",
-                  (int)handle->idx, handle->paused, (long)realsize);
+    curl_mfprintf(stderr, "INFO: [%zu] write, PAUSING %d time on %zu bytes\n",
+                  handle->idx, handle->paused, realsize);
     assert(handle->paused == 1);
     return CURL_WRITEFUNC_PAUSE;
   }
   if(handle->fail_write) {
     ++handle->errored;
-    curl_mfprintf(stderr, "INFO: [%d] FAIL write of %lu bytes, %d time\n",
-                  (int)handle->idx, (long)realsize, handle->errored);
+    curl_mfprintf(stderr, "INFO: [%zu] FAIL write of %zu bytes, %d time\n",
+                  handle->idx, realsize, handle->errored);
     return CURL_WRITEFUNC_ERROR;
   }
-  curl_mfprintf(stderr, "INFO: [%d] write, accepting %lu bytes\n",
-                (int)handle->idx, (long)realsize);
+  curl_mfprintf(stderr, "INFO: [%zu] write, accepting %zu bytes\n",
+                handle->idx, realsize);
   return realsize;
 }
 
@@ -207,21 +207,21 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       curl_mfprintf(stderr, "INFO: no more handles running\n");
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         if(!handles[i].paused) {
-          curl_mfprintf(stderr, "ERROR: [%d] NOT PAUSED\n", (int)i);
+          curl_mfprintf(stderr, "ERROR: [%zu] NOT PAUSED\n", i);
           as_expected = 0;
         }
         else if(handles[i].paused != 1) {
-          curl_mfprintf(stderr, "ERROR: [%d] PAUSED %d times!\n",
-                        (int)i, handles[i].paused);
+          curl_mfprintf(stderr, "ERROR: [%zu] PAUSED %d times!\n",
+                        i, handles[i].paused);
           as_expected = 0;
         }
         else if(!handles[i].resumed) {
-          curl_mfprintf(stderr, "ERROR: [%d] NOT resumed!\n", (int)i);
+          curl_mfprintf(stderr, "ERROR: [%zu] NOT resumed!\n", i);
           as_expected = 0;
         }
         else if(handles[i].errored != 1) {
-          curl_mfprintf(stderr, "ERROR: [%d] NOT errored once, %d instead!\n",
-                        (int)i, handles[i].errored);
+          curl_mfprintf(stderr, "ERROR: [%zu] NOT errored once, %d instead!\n",
+                        i, handles[i].errored);
           as_expected = 0;
         }
       }
@@ -242,8 +242,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
         for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
           if(msg->easy_handle == handles[i].h) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
-              curl_mfprintf(stderr, "ERROR: [%d] done, pauses=%d, resumed=%d, "
-                            "result %d - wtf?\n", (int)i, handles[i].paused,
+              curl_mfprintf(stderr, "ERROR: [%zu] done, pauses=%d, resumed=%d, "
+                            "result %d - wtf?\n", i, handles[i].paused,
                             handles[i].resumed, msg->data.result);
               rc = (CURLcode)1;
               goto out;
@@ -270,7 +270,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     if(resume_round > 0 && rounds == resume_round) {
       /* time to resume */
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-        curl_mfprintf(stderr, "INFO: [%d] resumed\n", (int)i);
+        curl_mfprintf(stderr, "INFO: [%zu] resumed\n", i);
         handles[i].resumed = 1;
         curl_easy_pause(handles[i].h, CURLPAUSE_CONT);
       }
