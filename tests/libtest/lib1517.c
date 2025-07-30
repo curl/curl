@@ -62,7 +62,7 @@ static CURLcode test_lib1517(const char *URL)
   struct t1517_WriteThis pooh;
 
   if(!strcmp(URL, "check")) {
-#if (defined(_WIN32) || defined(__CYGWIN__))
+#ifdef _WIN32
     curl_mprintf("Windows TCP does not deliver response data but reports "
                  "CONNABORTED\n");
     return TEST_ERR_FAILURE; /* skip since it fails on Windows without
