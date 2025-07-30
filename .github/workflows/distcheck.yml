@@ -138,6 +138,7 @@ jobs:
           ../configure --prefix="$PWD"/curl-install --without-ssl --without-libpsl
           make
           make install
+          find curl-install
           popd
 
   verify-out-of-tree-cmake:
@@ -158,6 +159,9 @@ jobs:
           cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build build
           cmake --install build
+          find curl-install
+          build/src/curl --disable --version
+          build/src/curl --manual | wc -l
 
   verify-in-tree-cmake:
     name: 'CM in-tree'
@@ -177,6 +181,9 @@ jobs:
           cmake . -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build .
           cmake --install .
+          find curl-install
+          src/curl --disable --version
+          src/curl --manual | wc -l
 
   missing-files:
     name: 'missing files'
