@@ -3184,6 +3184,8 @@ sub subvariables {
     $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
+    my $ext_tool = exe_ext('TOOL');
+    $$thing =~ s/${prefix}EXT_TOOL/$ext_tool/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
