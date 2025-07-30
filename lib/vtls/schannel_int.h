@@ -40,6 +40,7 @@
 #define HAS_CLIENT_CERT_PATH
 #endif
 
+#ifdef __MINGW32CE__
 #ifndef CRYPT_DECODE_NOCOPY_FLAG
 #define CRYPT_DECODE_NOCOPY_FLAG 0x1
 #endif
@@ -55,6 +56,7 @@
 #ifndef CERT_ALT_NAME_IP_ADDRESS
 #define CERT_ALT_NAME_IP_ADDRESS 8
 #endif
+#endif /* __MINGW32CE__ */
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
