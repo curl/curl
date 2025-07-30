@@ -29,7 +29,7 @@
 static int verbose_d = 1;
 
 struct transfer_d {
-  int idx;
+  size_t idx;
   CURL *easy;
   char filename[128];
   FILE *out;
@@ -65,10 +65,10 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
-  curl_mfprintf(stderr, "[t-%d] RECV %ld bytes, total=%ld, pause_at=%ld\n",
-                t->idx, (long)blen, (long)t->recv_size, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, total=%ld, pause_at=%ld\n",
+                t->idx, blen, (long)t->recv_size, (long)t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%u.data",
+    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
                    t->idx);
     t->out = fopen(t->filename, "wb");
     if(!t->out)
@@ -78,19 +78,19 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
   if(!t->resumed &&
      t->recv_size < t->pause_at &&
      ((t->recv_size + (curl_off_t)blen) >= t->pause_at)) {
-    curl_mfprintf(stderr, "[t-%d] PAUSE\n", t->idx);
+    curl_mfprintf(stderr, "[t-%zu] PAUSE\n", t->idx);
     t->paused = 1;
     return CURL_WRITEFUNC_PAUSE;
   }
 
   nwritten = fwrite(buf, nitems, buflen, t->out);
   if(nwritten < blen) {
-    curl_mfprintf(stderr, "[t-%d] write failure\n", t->idx);
+    curl_mfprintf(stderr, "[t-%zu] write failure\n", t->idx);
     return 0;
   }
   t->recv_size += (curl_off_t)nwritten;
   if(t->fail_at > 0 && t->recv_size >= t->fail_at) {
-    curl_mfprintf(stderr, "[t-%d] FAIL by write callback at %ld bytes\n",
+    curl_mfprintf(stderr, "[t-%zu] FAIL by write callback at %ld bytes\n",
                   t->idx, (long)t->recv_size);
     return CURL_WRITEFUNC_ERROR;
   }
@@ -107,7 +107,7 @@ static int my_progress_d_cb(void *userdata,
   (void)ulnow;
   (void)dltotal;
   if(t->abort_at > 0 && dlnow >= t->abort_at) {
-    curl_mfprintf(stderr, "[t-%d] ABORT by progress_cb at %ld bytes\n",
+    curl_mfprintf(stderr, "[t-%zu] ABORT by progress_cb at %ld bytes\n",
                   t->idx, (long)dlnow);
     return 1;
   }
@@ -312,7 +312,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   active_transfers = 0;
   for(i = 0; i < transfer_count_d; ++i) {
     t = &transfer_d[i];
-    t->idx = (int)i;
+    t->idx = i;
     t->abort_at = (curl_off_t)abort_offset;
     t->fail_at = (curl_off_t)fail_offset;
     t->pause_at = (curl_off_t)pause_offset;
@@ -325,14 +325,14 @@ static CURLcode test_cli_hx_download(const char *URL)
     if(!t->easy ||
        setup_hx_download(t->easy, url, t, http_version, host, share,
                          use_earlydata, fresh_connect)) {
-      curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
+      curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
       result = (CURLcode)1;
       goto cleanup;
     }
     curl_multi_add_handle(multi_handle, t->easy);
     t->started = 1;
     ++active_transfers;
-    curl_mfprintf(stderr, "[t-%d] STARTED\n", t->idx);
+    curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
   }
 
   do {
@@ -358,12 +358,12 @@ static CURLcode test_cli_hx_download(const char *URL)
         if(t) {
           t->done = 1;
           t->result = m->data.result;
-          curl_mfprintf(stderr, "[t-%d] FINISHED with result %d\n",
+          curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
                         t->idx, t->result);
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
-            curl_mfprintf(stderr, "[t-%d] EarlyData: %ld\n", t->idx,
+            curl_mfprintf(stderr, "[t-%zu] EarlyData: %ld\n", t->idx,
                           (long)sent);
           }
         }
@@ -382,7 +382,7 @@ static CURLcode test_cli_hx_download(const char *URL)
             curl_multi_remove_handle(multi_handle, t->easy);
             t->done = 1;
             active_transfers--;
-            curl_mfprintf(stderr, "[t-%d] ABORTED\n", t->idx);
+            curl_mfprintf(stderr, "[t-%zu] ABORTED\n", t->idx);
           }
         }
       }
@@ -394,7 +394,7 @@ static CURLcode test_cli_hx_download(const char *URL)
             t->resumed = 1;
             t->paused = 0;
             curl_easy_pause(t->easy, CURLPAUSE_CONT);
-            curl_mfprintf(stderr, "[t-%d] RESUMED\n", t->idx);
+            curl_mfprintf(stderr, "[t-%zu] RESUMED\n", t->idx);
             break;
           }
         }
@@ -408,14 +408,14 @@ static CURLcode test_cli_hx_download(const char *URL)
             if(!t->easy ||
               setup_hx_download(t->easy, url, t, http_version, host, share,
                                 use_earlydata, fresh_connect)) {
-              curl_mfprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
+              curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
               result = (CURLcode)1;
               goto cleanup;
             }
             curl_multi_add_handle(multi_handle, t->easy);
             t->started = 1;
             ++active_transfers;
-            curl_mfprintf(stderr, "[t-%d] STARTED\n", t->idx);
+            curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
             break;
           }
         }
