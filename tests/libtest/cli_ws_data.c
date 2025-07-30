@@ -54,8 +54,9 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
   }
   if(frame->bytesleft != (curl_off_t)(exp_len - r_offset - nread)) {
     curl_mfprintf(stderr, "recv_data: frame bytesleft, "
-                  "expected %ld, got %" CURL_FORMAT_CURL_OFF_T "\n",
-                  (long)(exp_len - r_offset - nread), frame->bytesleft);
+                  "expected %" CURL_FORMAT_CURL_OFF_T ", "
+                  "got %" CURL_FORMAT_CURL_OFF_T "\n",
+                  (curl_off_t)(exp_len - r_offset - nread), frame->bytesleft);
     return CURLE_RECV_ERROR;
   }
   if(r_offset + nread > exp_len) {
@@ -98,8 +99,9 @@ static CURLcode data_echo(CURL *curl, size_t count,
         r = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
         sblock = (r == CURLE_AGAIN);
         if(!r || (r == CURLE_AGAIN)) {
-          curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %d, %zu (%ld/%zu)\n",
-                        slen, r, nwritten, (long)(len - slen), len);
+          curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %d, "
+                        "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n",
+                        slen, r, nwritten, (curl_off_t)(len - slen), len);
           sbuf += nwritten;
           slen -= nwritten;
         }
