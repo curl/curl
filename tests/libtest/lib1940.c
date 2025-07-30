@@ -59,8 +59,8 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
         size_t index = 0;
         size_t amount = header->amount;
         do {
-          curl_mprintf("- %s == %s (%u/%u)\n", header->name, header->value,
-                       (int)index, (int)amount);
+          curl_mprintf("- %s == %s (%zu/%zu)\n", header->name, header->value,
+                       index, amount);
 
           if(++index == amount)
             break;

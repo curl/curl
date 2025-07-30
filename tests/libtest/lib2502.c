@@ -64,8 +64,8 @@ static CURLcode test_lib2502(const char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "https://localhost:%s/path/2502%04i",
-                   port, (int)i + 1);
+                   "https://localhost:%s/path/2502%04zu",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */

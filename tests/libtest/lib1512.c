@@ -60,8 +60,8 @@ static CURLcode test_lib1512(const char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "http://server.example.curl:%s/path/1512%04i",
-                   port, (int)i + 1);
+                   "http://server.example.curl:%s/path/1512%04zu",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */

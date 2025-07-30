@@ -83,8 +83,8 @@ static CURLcode test_lib1522(const char *URL)
       curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {
-      curl_mprintf("sent %d, libcurl says %d\n",
-                   (int)sizeof(g_Data), (int)uploadSize);
+      curl_mprintf("sent %lu, libcurl says %ld\n",
+                   sizeof(g_Data), (long)uploadSize);
     }
   }
   else {
