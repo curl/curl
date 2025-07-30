@@ -42,7 +42,7 @@ struct per_transfer {
   struct curltime start; /* start of this transfer */
   struct curltime retrystart;
   char *url;
-  unsigned int urlnum; /* the index of the given URL */
+  curl_off_t urlnum; /* the index of the given URL */
   char *outfile;
   int infd;
   struct ProgressData progressbar;
