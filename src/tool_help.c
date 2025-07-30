@@ -433,112 +433,30 @@ static const struct cheat_table {
   {{"follow redirs", "-L"}},
   {{"gzip", "--compressed"}},
   {{"insecure", "-k"}},
-  {{"", ""}},
   {{NULL, NULL}}
 };
-
-static int incre_i(int i, int j)
-{
-  if(j == 0)
-    return i + 1;
-  else
-    return i + 1 + j;
-}
 
 /* Support to print number of columns per screen width. */
 static void print_cheatsheet(int i, int col_num)
 {
-  /* Spacer variable for heading. */
-  const char *spacer = "------------------------------";
-
   /* Use consistent width for each column. */
-  int width = 30;
+  int c;
 
-  if(col_num == 1) {
-    if(cheat_items[i].heading[0]         &&
-       strcmp(cheat_items[i].heading[0], "") != 0)
-      printf("%-20s\n%s\n%s\n\n",
-       cheat_items[i].heading[0], spacer, cheat_items[i].heading[1]);
+  for(c = 0; c < col_num; c++) {
+    /* The headers */
+    if(cheat_items[c + i].heading[0])
+      printf("%-30s ", cheat_items[c + i].heading[0]);
   }
-  else if(col_num == 2) {
-    if(!cheat_items[i + 1].heading[0])
-      print_cheatsheet(i, 1);
-    else
-      if(cheat_items[i].heading[0]  &&
-         strcmp(cheat_items[i].heading[0], "") != 0)
-        printf("%-*s %-*s\n%s %s\n%-*s %-*s\n\n",
-          width, cheat_items[i].heading[0],
-          width, cheat_items[i + 1].heading[0],
-          spacer, spacer,
-          width, cheat_items[i].heading[1],
-          width, cheat_items[i + 1].heading[1]);
+  puts("");
+  for(c = 0; c < col_num; c++)
+    printf("------------------------------ "); /* The separators */
+  puts("");
+  for(c = 0; c < col_num; c++) {
+    /* The options */
+    if(cheat_items[c + i].heading[1])
+      printf("%-30s ", cheat_items[c + i].heading[1]);
   }
-  else if(col_num == 3) {
-    if(!cheat_items[i + 1].heading[0])
-      print_cheatsheet(i, 1);
-    else if(!cheat_items[i + 2].heading[0])
-      print_cheatsheet(i, 2);
-    else
-      if(cheat_items[i].heading[0]  &&
-         strcmp(cheat_items[i].heading[0], "") != 0)
-        printf("%-*s %-*s %-*s\n%s %s %s\n%-*s %-*s %-*s\n\n",
-          width, cheat_items[i].heading[0],
-          width, cheat_items[i + 1].heading[0],
-          width, cheat_items[i + 2].heading[0],
-          spacer, spacer, spacer,
-          width, cheat_items[i].heading[1],
-          width, cheat_items[i + 1].heading[1],
-          width, cheat_items[i + 2].heading[1]);
-  }
-  else if(col_num == 4) {
-    if(!cheat_items[i + 1].heading[0])
-      print_cheatsheet(i, 1);
-    else if(!cheat_items[i + 2].heading[0])
-      print_cheatsheet(i, 2);
-    else if(!cheat_items[i + 3].heading[0])
-      print_cheatsheet(i, 3);
-    else
-      if(cheat_items[i].heading[0]  &&
-         strcmp(cheat_items[i].heading[0], "") != 0)
-        printf("%-*s %-*s %-*s %-*s\n%s %s %s %s\n"
-               "%-*s %-*s %-*s %-*s\n\n",
-          width, cheat_items[i].heading[0],
-          width, cheat_items[i + 1].heading[0],
-          width, cheat_items[i + 2].heading[0],
-          width, cheat_items[i + 3].heading[0],
-          spacer, spacer, spacer, spacer,
-          width, cheat_items[i].heading[1],
-          width, cheat_items[i + 1].heading[1],
-          width, cheat_items[i + 2].heading[1],
-          width, cheat_items[i + 3].heading[1]);
-  }
-  else if(col_num == 5) {
-    if(!cheat_items[i + 1].heading[0])
-      print_cheatsheet(i, 1);
-    else if(!cheat_items[i + 2].heading[0])
-      print_cheatsheet(i, 2);
-    else if(!cheat_items[i + 3].heading[0])
-      print_cheatsheet(i, 3);
-    else if(cheat_items[i + 4].heading[0]  &&
-            cheat_items[i + 4].heading[0] == NULL)
-      print_cheatsheet(i, 4);
-    else
-      if(cheat_items[i].heading[0]         &&
-         strcmp(cheat_items[i].heading[0], "") != 0)
-        printf("%-*s %-*s %-*s %-*s %-*s\n%s %s %s %s %s\n"
-               "%-*s %-*s %-*s %-*s %-*s\n\n",
-          width, cheat_items[i].heading[0],
-          width, cheat_items[i + 1].heading[0],
-          width, cheat_items[i + 2].heading[0],
-          width, cheat_items[i + 3].heading[0],
-          width, cheat_items[i + 4].heading[0],
-          spacer, spacer, spacer, spacer, spacer,
-          width, cheat_items[i].heading[1],
-          width, cheat_items[i + 1].heading[1],
-          width, cheat_items[i + 2].heading[1],
-          width, cheat_items[i + 3].heading[1],
-          width, cheat_items[i + 4].heading[1]);
-  }
+  puts("\n");
 }
 
 /* Output cheat-sheet. */
@@ -554,33 +472,13 @@ void tool_cheat_sheet(void)
   unsigned int i, j;
 
   /* Set j based on col width, setting once, not in a loop. */
-  if(cols <= 75)
-    j = 0;
-  else if(cols > 75 && cols <= 125)
+  j = cols/31;
+  if(j > 8)
+    j  = 8;
+  else if(j == 0)
     j = 1;
-  else if(cols > 125 &&  cols <= 175)
-    j = 2;
-  else if(cols > 175 && cols <= 225)
-    j = 3;
-  else
-    j = 4;
 
   /* Loop through cheat sheet sections */
-  for(i = 0; i < table_length; i = incre_i(i, j)) {
-    if(!cheat_items[i + j].heading[0]) {
-      break;
-    }
-    else {
-     if(cols <= 75)                     /* Output one columns.  */
-       print_cheatsheet(i, 1);
-     else if(cols > 75 && cols <= 125)  /* output two columns   */
-       print_cheatsheet(i, 2);
-     else if(cols > 125 && cols <= 175) /* output three columns */
-       print_cheatsheet(i, 3);
-     else if(cols > 175 && cols <= 225) /* output four columns  */
-       print_cheatsheet(i, 4);
-     else
-       print_cheatsheet(i, 5);          /* output five columns  */
-    }
-  }
+  for(i = 0; i < table_length; i += j)
+    print_cheatsheet(i, j);
 }
