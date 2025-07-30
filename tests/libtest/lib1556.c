@@ -67,7 +67,7 @@ static CURLcode test_lib1556(const char *URL)
     goto test_cleanup;
   }
 
-  curl_mprintf("Max = %ld\n", (long)info.largest);
+  curl_mprintf("Max = %zu\n", info.largest);
 
 test_cleanup:
 

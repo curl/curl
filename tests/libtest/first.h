@@ -193,7 +193,7 @@ void ws_close(CURL *curl);
   if((ec = curl_easy_setopt((A), (B), (C))) != CURLE_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_easy_setopt() failed, " \
                   "with code %d (%s)\n",                      \
-                  (Y), (Z), (int)ec, curl_easy_strerror(ec)); \
+                  (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
 } while(0)
@@ -217,7 +217,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_setopt((A), (B), (C))) != CURLM_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_multi_setopt() failed, " \
                   "with code %d (%s)\n",                       \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
+                  (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \
 } while(0)
@@ -241,7 +241,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_add_handle((A), (B))) != CURLM_OK) {         \
     curl_mfprintf(stderr, "%s:%d curl_multi_add_handle() failed, " \
                   "with code %d (%s)\n",                           \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
+                  (Y), (Z), ec, curl_multi_strerror(ec));          \
     res = TEST_ERR_MULTI;                                          \
   }                                                                \
 } while(0)
@@ -265,7 +265,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_remove_handle((A), (B))) != CURLM_OK) {         \
     curl_mfprintf(stderr, "%s:%d curl_multi_remove_handle() failed, " \
                   "with code %d (%s)\n",                              \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));        \
+                  (Y), (Z), ec, curl_multi_strerror(ec));             \
     res = TEST_ERR_MULTI;                                             \
   }                                                                   \
 } while(0)
@@ -290,7 +290,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_perform((A), (B))) != CURLM_OK) {                \
     curl_mfprintf(stderr, "%s:%d curl_multi_perform() failed, "        \
                   "with code %d (%s)\n",                               \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));         \
+                  (Y), (Z), ec, curl_multi_strerror(ec));              \
     res = TEST_ERR_MULTI;                                              \
   }                                                                    \
   else if(*((B)) < 0) {                                                \
@@ -320,7 +320,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_fdset((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_fdset() failed, "        \
                   "with code %d (%s)\n",                             \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));       \
+                  (Y), (Z), ec, curl_multi_strerror(ec));            \
     res = TEST_ERR_MULTI;                                            \
   }                                                                  \
   else if(*((E)) < -1) {                                             \
@@ -350,7 +350,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_timeout((A), (B))) != CURLM_OK) {            \
     curl_mfprintf(stderr, "%s:%d curl_multi_timeout() failed, "    \
                   "with code %d (%s)\n",                           \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
+                  (Y), (Z), ec, curl_multi_strerror(ec));          \
     res = TEST_ERR_BAD_TIMEOUT;                                    \
   }                                                                \
   else if(*((B)) < -1L) {                                          \
@@ -380,7 +380,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_poll() failed, "        \
                   "with code %d (%s)\n",                            \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));      \
+                  (Y), (Z), ec, curl_multi_strerror(ec));           \
     res = TEST_ERR_MULTI;                                           \
   }                                                                 \
   else if(*((E)) < 0) {                                             \
@@ -410,7 +410,7 @@ void ws_close(CURL *curl);
   if((ec = curl_multi_wakeup((A))) != CURLM_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_multi_wakeup() failed, " \
                   "with code %d (%s)\n",                       \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
+                  (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \
 } while(0)
@@ -495,7 +495,7 @@ void ws_close(CURL *curl);
   if((ec = curl_global_init((A))) != CURLE_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_global_init() failed, " \
                   "with code %d (%s)\n",                      \
-                  (Y), (Z), (int)ec, curl_easy_strerror(ec)); \
+                  (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
 } while(0)

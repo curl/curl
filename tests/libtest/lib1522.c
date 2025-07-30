@@ -77,14 +77,14 @@ static CURLcode test_lib1522(const char *URL)
     curl_off_t uploadSize;
     curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &uploadSize);
 
-    curl_mprintf("uploadSize = %ld\n", (long)uploadSize);
+    curl_mprintf("uploadSize = %" CURL_FORMAT_CURL_OFF_T "\n", uploadSize);
 
     if((size_t) uploadSize == sizeof(g_Data)) {
       curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {
-      curl_mprintf("sent %lu, libcurl says %ld\n",
-                   sizeof(g_Data), (long)uploadSize);
+      curl_mprintf("sent %zu, libcurl says %" CURL_FORMAT_CURL_OFF_T "\n",
+                   sizeof(g_Data), uploadSize);
     }
   }
   else {

@@ -65,8 +65,10 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
-  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, total=%ld, pause_at=%ld\n",
-                t->idx, blen, (long)t->recv_size, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, "
+                "total=%" CURL_FORMAT_CURL_OFF_T ", "
+                "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
+                t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
                    t->idx);
@@ -90,8 +92,8 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
   }
   t->recv_size += (curl_off_t)nwritten;
   if(t->fail_at > 0 && t->recv_size >= t->fail_at) {
-    curl_mfprintf(stderr, "[t-%zu] FAIL by write callback at %ld bytes\n",
-                  t->idx, (long)t->recv_size);
+    curl_mfprintf(stderr, "[t-%zu] FAIL by write callback at "
+                  "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, t->recv_size);
     return CURL_WRITEFUNC_ERROR;
   }
 
@@ -107,8 +109,8 @@ static int my_progress_d_cb(void *userdata,
   (void)ulnow;
   (void)dltotal;
   if(t->abort_at > 0 && dlnow >= t->abort_at) {
-    curl_mfprintf(stderr, "[t-%zu] ABORT by progress_cb at %ld bytes\n",
-                  t->idx, (long)dlnow);
+    curl_mfprintf(stderr, "[t-%zu] ABORT by progress_cb at "
+                  "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, dlnow);
     return 1;
   }
   return 0;
@@ -363,8 +365,8 @@ static CURLcode test_cli_hx_download(const char *URL)
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
-            curl_mfprintf(stderr, "[t-%zu] EarlyData: %ld\n", t->idx,
-                          (long)sent);
+            curl_mfprintf(stderr, "[t-%zu] EarlyData: "
+                          "%" CURL_FORMAT_CURL_OFF_T "\n", t->idx, sent);
           }
         }
         else {

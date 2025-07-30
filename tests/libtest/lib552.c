@@ -93,7 +93,7 @@ static CURLcode test_lib552(const char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* Setup read callback */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(databuf));
   test_setopt(curl, CURLOPT_READFUNCTION, t552_read_cb);
 
   /* Write callback */

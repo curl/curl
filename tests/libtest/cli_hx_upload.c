@@ -67,8 +67,10 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
   size_t blen = (nitems * buflen);
   size_t nwritten;
 
-  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, total=%ld, pause_at=%ld\n",
-                t->idx, blen, (long)t->recv_size, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%zu] RECV %zu bytes, "
+                "total=%" CURL_FORMAT_CURL_OFF_T ", "
+                "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
+                t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
                    t->idx);
@@ -100,8 +102,10 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
   else
     nread = blen;
 
-  curl_mfprintf(stderr, "[t-%zu] SEND %zu bytes, total=%ld, pause_at=%ld\n",
-                t->idx, nread, (long)t->send_total, (long)t->pause_at);
+  curl_mfprintf(stderr, "[t-%zu] SEND %zu bytes, "
+                "total=%" CURL_FORMAT_CURL_OFF_T ", "
+                "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
+                t->idx, nread, t->send_total, t->pause_at);
 
   if(!t->resumed &&
      t->send_size < t->pause_at &&
@@ -114,8 +118,8 @@ static size_t my_read_cb(char *buf, size_t nitems, size_t buflen,
   memset(buf, 'x', nread);
   t->send_size += (curl_off_t)nread;
   if(t->fail_at > 0 && t->send_size >= t->fail_at) {
-    curl_mfprintf(stderr, "[t-%zu] ABORT by read callback at %ld bytes\n",
-                  t->idx, (long)t->send_size);
+    curl_mfprintf(stderr, "[t-%zu] ABORT by read callback at "
+                  "%" CURL_FORMAT_CURL_OFF_T " bytes\n", t->idx, t->send_size);
     return CURL_READFUNC_ABORT;
   }
   return (size_t)nread;
@@ -130,8 +134,8 @@ static int my_progress_u_cb(void *userdata,
   (void)dlnow;
   (void)dltotal;
   if(t->abort_at > 0 && ulnow >= t->abort_at) {
-    curl_mfprintf(stderr, "[t-%zu] ABORT by progress_cb at %ld bytes sent\n",
-                  t->idx, (long)ulnow);
+    curl_mfprintf(stderr, "[t-%zu] ABORT by progress_cb at "
+                  "%" CURL_FORMAT_CURL_OFF_T " bytes sent\n", t->idx, ulnow);
     return 1;
   }
   return 0;
@@ -419,8 +423,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
             if(use_earlydata) {
               curl_off_t sent;
               curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
-              curl_mfprintf(stderr, "[t-%zu] EarlyData: %ld\n", t->idx,
-                            (long)sent);
+              curl_mfprintf(stderr, "[t-%zu] EarlyData: "
+                            "%" CURL_FORMAT_CURL_OFF_T "\n", t->idx, sent);
             }
           }
           else {

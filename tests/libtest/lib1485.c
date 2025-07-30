@@ -68,7 +68,7 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
       if(clen < 0) {
         curl_mfprintf(stderr,
                       "header_callback, expected known Content-Length, "
-                      "got: %ld\n", (long)clen);
+                      "got: %" CURL_FORMAT_CURL_OFF_T "\n", clen);
         return CURLE_WRITE_ERROR;
       }
     }
