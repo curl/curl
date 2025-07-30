@@ -134,6 +134,25 @@ jobs:
           cmake --build build
           cmake --install build
 
+  verify-in-tree-cmake:
+    name: 'CM in-tree'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
+          cmake --build
+          cmake --install
+
   missing-files:
     name: 'missing files'
     runs-on: ubuntu-latest
