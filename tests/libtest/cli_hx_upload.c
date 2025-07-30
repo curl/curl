@@ -418,7 +418,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
             long res_status;
             curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &res_status);
             t->done = 1;
-            curl_mfprintf(stderr, "[t-%zu] FINISHED, result=%d, response=%ld\n",
+            curl_mfprintf(stderr, "[t-%zu] FINISHED, "
+                          "result=%d, response=%ld\n",
                           t->idx, m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;
