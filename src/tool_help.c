@@ -248,7 +248,7 @@ void tool_help(const char *category)
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
-  else if (curl_strequal(category, "cheat-sheet"))
+  else if(curl_strequal(category, "cheat-sheet"))
     tool_cheat_sheet();
   else if(category[0] == '-') {
 #ifdef USE_MANUAL
@@ -438,7 +438,7 @@ static const struct cheat_table {
 };
 
 static int incre_i(int i, int j) {
-  if (j == 0)
+  if(j == 0)
     return i + 1;
   else
     return i + 1 + j;
@@ -452,16 +452,16 @@ static void print_cheatsheet(int i, int col_num) {
   /* Use consistent width for each column. */
   int width = 30;
 
-  if (col_num == 1) {
+  if(col_num == 1) {
     if(cheat_items[i].heading[0]         &&
        cheat_items[i].heading[0] != NULL &&
        strcmp(cheat_items[i].heading[0], "") != 0)
       printf("%-20s\n%s\n%s\n\n",
        cheat_items[i].heading[0], spacer, cheat_items[i].heading[1]);
   }
-  else if (col_num == 2) {
-    if(cheat_items[i+1].heading[0]  &&
-       cheat_items[i+1].heading[0] == NULL)
+  else if(col_num == 2) {
+    if(cheat_items[i + 1].heading[0]  &&
+       cheat_items[i + 1].heading[0] == NULL)
       print_cheatsheet(i, 1);
     else
       if(cheat_items[i].heading[0]  &&
@@ -469,17 +469,17 @@ static void print_cheatsheet(int i, int col_num) {
          strcmp(cheat_items[i].heading[0], "") != 0)
         printf("%-*s %-*s\n%s %s\n%-*s %-*s\n\n",
           width, cheat_items[i].heading[0],
-          width, cheat_items[i+1].heading[0],
+          width, cheat_items[i + 1].heading[0],
           spacer, spacer,
           width, cheat_items[i].heading[1],
-          width, cheat_items[i+1].heading[1]);
+          width, cheat_items[i + 1].heading[1]);
   }
-  else if (col_num == 3) {
-    if(cheat_items[i+1].heading[0]  &&
-       cheat_items[i+1].heading[0] == NULL)
+  else if(col_num == 3) {
+    if(cheat_items[i + 1].heading[0]  &&
+       cheat_items[i + 1].heading[0] == NULL)
       print_cheatsheet(i, 1);
-    else if(cheat_items[i+2].heading[0]  &&
-            cheat_items[i+2].heading[0] == NULL)
+    else if(cheat_items[i + 2].heading[0]  &&
+            cheat_items[i + 2].heading[0] == NULL)
       print_cheatsheet(i, 2);
     else
       if(cheat_items[i].heading[0]         &&
@@ -487,51 +487,51 @@ static void print_cheatsheet(int i, int col_num) {
          strcmp(cheat_items[i].heading[0], "") != 0)
         printf("%-*s %-*s %-*s\n%s %s %s\n%-*s %-*s %-*s\n\n",
           width, cheat_items[i].heading[0],
-          width, cheat_items[i+1].heading[0],
-          width, cheat_items[i+2].heading[0],
+          width, cheat_items[i + 1].heading[0],
+          width, cheat_items[i + 2].heading[0],
           spacer, spacer, spacer,
           width, cheat_items[i].heading[1],
-          width, cheat_items[i+1].heading[1],
-          width, cheat_items[i+2].heading[1]);
+          width, cheat_items[i + 1].heading[1],
+          width, cheat_items[i + 2].heading[1]);
   }
-  else if (col_num == 4) {
-    if(cheat_items[i+1].heading[0]  &&
-       cheat_items[i+1].heading[0] == NULL)
+  else if(col_num == 4) {
+    if(cheat_items[i + 1].heading[0]  &&
+       cheat_items[i + 1].heading[0] == NULL)
       print_cheatsheet(i, 1);
-    else if(cheat_items[i+2].heading[0]  &&
-            cheat_items[i+2].heading[0] == NULL)
+    else if(cheat_items[i + 2].heading[0]  &&
+            cheat_items[i + 2].heading[0] == NULL)
       print_cheatsheet(i, 2);
-    else if(cheat_items[i+3].heading[0]  &&
-            cheat_items[i+3].heading[0] == NULL)
+    else if(cheat_items[i + 3].heading[0]  &&
+            cheat_items[i + 3].heading[0] == NULL)
       print_cheatsheet(i, 3);
     else
-      if (cheat_items[i].heading[0]         &&
+      if(cheat_items[i].heading[0]         &&
           cheat_items[i].heading[0] != NULL &&
           strcmp(cheat_items[i].heading[0], "") != 0)
         printf("%-*s %-*s %-*s %-*s\n%s %s %s %s\n"
                "%-*s %-*s %-*s %-*s\n\n",
           width, cheat_items[i].heading[0],
-          width, cheat_items[i+1].heading[0],
-          width, cheat_items[i+2].heading[0],
-          width, cheat_items[i+3].heading[0],
+          width, cheat_items[i + 1].heading[0],
+          width, cheat_items[i + 2].heading[0],
+          width, cheat_items[i + 3].heading[0],
           spacer, spacer, spacer, spacer,
           width, cheat_items[i].heading[1],
-          width, cheat_items[i+1].heading[1],
-          width, cheat_items[i+2].heading[1],
-          width, cheat_items[i+3].heading[1]);
+          width, cheat_items[i + 1].heading[1],
+          width, cheat_items[i + 2].heading[1],
+          width, cheat_items[i + 3].heading[1]);
   }
-  else if (col_num == 5) {
-    if(cheat_items[i+1].heading[0]  &&
-       cheat_items[i+1].heading[0] == NULL)
+  else if(col_num == 5) {
+    if(cheat_items[i + 1].heading[0]  &&
+       cheat_items[i + 1].heading[0] == NULL)
       print_cheatsheet(i, 1);
-    else if(cheat_items[i+2].heading[0]  &&
-            cheat_items[i+2].heading[0] == NULL)
+    else if(cheat_items[i + 2].heading[0]  &&
+            cheat_items[i + 2].heading[0] == NULL)
       print_cheatsheet(i, 2);
-    else if(cheat_items[i+3].heading[0]  &&
-            cheat_items[i+3].heading[0] == NULL)
+    else if(cheat_items[i + 3].heading[0]  &&
+            cheat_items[i + 3].heading[0] == NULL)
       print_cheatsheet(i, 3);
-    else if(cheat_items[i+4].heading[0]  &&
-            cheat_items[i+4].heading[0] == NULL)
+    else if(cheat_items[i + 4].heading[0]  &&
+            cheat_items[i + 4].heading[0] == NULL)
       print_cheatsheet(i, 4);
     else
       if(cheat_items[i].heading[0]         &&
@@ -540,16 +540,16 @@ static void print_cheatsheet(int i, int col_num) {
         printf("%-*s %-*s %-*s %-*s %-*s\n%s %s %s %s %s\n"
                "%-*s %-*s %-*s %-*s %-*s\n\n",
           width, cheat_items[i].heading[0],
-          width, cheat_items[i+1].heading[0],
-          width, cheat_items[i+2].heading[0],
-          width, cheat_items[i+3].heading[0],
-          width, cheat_items[i+4].heading[0],
+          width, cheat_items[i + 1].heading[0],
+          width, cheat_items[i + 2].heading[0],
+          width, cheat_items[i + 3].heading[0],
+          width, cheat_items[i + 4].heading[0],
           spacer, spacer, spacer, spacer, spacer,
           width, cheat_items[i].heading[1],
-          width, cheat_items[i+1].heading[1],
-          width, cheat_items[i+2].heading[1],
-          width, cheat_items[i+3].heading[1],
-          width, cheat_items[i+4].heading[1]);
+          width, cheat_items[i + 1].heading[1],
+          width, cheat_items[i + 2].heading[1],
+          width, cheat_items[i + 3].heading[1],
+          width, cheat_items[i + 4].heading[1]);
   }
 }
 
@@ -566,23 +566,24 @@ void tool_cheat_sheet(void)
   unsigned int i, j;
 
   /* Set j based on col width, setting once, not in a loop. */
-  if (cols <= 75)
+  if(cols <= 75)
     j = 0;
-  else if (cols > 75 && cols <= 125)
+  else if(cols > 75 && cols <= 125)
     j = 1;
-  else if (cols > 125 &&  cols <= 175)
+  else if(cols > 125 &&  cols <= 175)
     j = 2;
-  else if (cols > 175 && cols <= 225)
+  else if(cols > 175 && cols <= 225)
     j = 3;
   else
     j = 4;
 
   /* Loop through cheat sheet sections */
   for(i = 0; i < table_length; i = incre_i(i, j)) {
-    if (cheat_items[i+j].heading[0] == NULL) {
+    if(cheat_items[i+j].heading[0] == NULL) {
       break;
-    } else {
-     if (cols <= 75)                    /* Output one columns.  */
+    }
+    else {
+     if(cols <= 75)                     /* Output one columns.  */
        print_cheatsheet(i, 1);
      else if(cols > 75 && cols <= 125)  /* output two columns   */
        print_cheatsheet(i, 2);
