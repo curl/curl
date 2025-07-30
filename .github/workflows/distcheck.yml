@@ -115,6 +115,31 @@ jobs:
           popd
           scripts/checksrc-all.pl
 
+  verify-out-of-tree-autotools-noperl:
+    name: 'AM out-of-tree (!perl)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - name: 'remove preinstalled perl'
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge perl
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          mkdir build
+          pushd build
+          ../configure --prefix="$PWD"/curl-install --without-ssl --without-libpsl
+          make
+          make install
+          popd
+
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree'
     runs-on: ubuntu-latest
