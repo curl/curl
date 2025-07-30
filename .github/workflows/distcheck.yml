@@ -192,6 +192,8 @@ jobs:
           build/src/curl --disable --version
           build/src/curl --manual | wc -l
           cmake --install build
+          echo "|$LD_LIBRARY_PATH|"
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
           curl-install/bin/curl --manual | wc -l
 
@@ -215,6 +217,8 @@ jobs:
           src/curl --disable --version
           src/curl --manual | wc -l
           cmake --install .
+          echo "|$LD_LIBRARY_PATH|"
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
           curl-install/bin/curl --manual | wc -l
 
