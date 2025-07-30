@@ -1250,7 +1250,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       }
       per->config = config;
       per->curl = curl;
-      per->urlnum = (unsigned int)u->num;
+      per->urlnum = u->num;
 
       /* default headers output stream is stdout */
       heads = &per->heads;

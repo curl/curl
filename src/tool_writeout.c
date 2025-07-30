@@ -148,7 +148,7 @@ static const struct writeoutvar variables[] = {
   {"urle.scheme", VAR_INPUT_URLESCHEME, CURLINFO_NONE, writeString},
   {"urle.user", VAR_INPUT_URLEUSER, CURLINFO_NONE, writeString},
   {"urle.zoneid", VAR_INPUT_URLEZONEID, CURLINFO_NONE, writeString},
-  {"urlnum", VAR_URLNUM, CURLINFO_NONE, writeLong},
+  {"urlnum", VAR_URLNUM, CURLINFO_NONE, writeOffset},
   {"xfer_id", VAR_EASY_ID, CURLINFO_XFER_ID, writeOffset}
 };
 
@@ -462,12 +462,6 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
       longinfo = (long)per_result;
       valid = true;
       break;
-    case VAR_URLNUM:
-      if(per->urlnum <= INT_MAX) {
-        longinfo = (long)per->urlnum;
-        valid = true;
-      }
-      break;
     default:
       DEBUGASSERT(0);
       break;
@@ -508,7 +502,16 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
       valid = true;
   }
   else {
-    DEBUGASSERT(0);
+    switch(wovar->id) {
+    case VAR_URLNUM:
+      if(per->urlnum <= INT_MAX) {
+        offinfo = per->urlnum;
+        valid = true;
+      }
+      break;
+    default:
+      DEBUGASSERT(0);
+    }
   }
 
   if(valid) {

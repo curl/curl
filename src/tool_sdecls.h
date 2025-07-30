@@ -88,7 +88,7 @@ struct getout {
   char          *url;       /* the URL we deal with */
   char          *outfile;   /* where to store the output */
   char          *infile;    /* file to upload, if GETOUT_UPLOAD is set */
-  int            num;       /* which URL number in an invocation */
+  curl_off_t    num;        /* which URL number in an invocation */
 
   BIT(outset);    /* when outfile is set */
   BIT(urlset);    /* when URL is set */
