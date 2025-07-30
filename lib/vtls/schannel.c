@@ -133,7 +133,7 @@
 #define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
-/* Offered by mingw-w64 v4+. MS SDK ~10+. */
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifndef CERT_FIND_HAS_PRIVATE_KEY
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
