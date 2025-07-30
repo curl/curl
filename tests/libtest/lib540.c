@@ -171,7 +171,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
         }
       }
       else
-        curl_mfprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
+        curl_mfprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
     }
 
     res_test_timedout();
