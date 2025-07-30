@@ -35,9 +35,10 @@
 #define HAS_MANUAL_VERIFY_API
 #endif
 
+/* These two macros are missing from mingw-w64 in UWP mode as of v13 */
 #if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && \
   !defined(DISABLE_SCHANNEL_CLIENT_CERT)
-#define HAS_CLIENT_CERT_PATH  /* missing from mingw-w64 UWP as of v13 */
+#define HAS_CLIENT_CERT_PATH
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
