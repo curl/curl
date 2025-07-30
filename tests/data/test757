@@ -1,0 +1,78 @@
+<testcase>
+<info>
+<keywords>
+MIME
+</keywords>
+</info>
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.0 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<features>
+Mime
+</features>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+<name>
+MIME parts reused as a child part, using data_cb
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^--------------------------[A-Za-z0-9]*/------------------------------/
+s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
+</strippart>
+<protocol>
+POST /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 200
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data; name="data"
+Content-Type: text/html
+
+<title>fun-times</title>
+--------------------------------
+POST /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Content-Length: 427
+Content-Type: multipart/form-data; boundary=----------------------------
+
+------------------------------
+Content-Disposition: form-data
+Content-Type: multipart/mixed; boundary=----------------------------
+
+------------------------------
+Content-Disposition: attachment; name="data"
+Content-Type: text/html
+
+<title>fun-times</title>
+--------------------------------
+
+--------------------------------
+</protocol>
+</verify>
+</testcase>
