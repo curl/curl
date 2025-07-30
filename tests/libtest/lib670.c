@@ -147,7 +147,7 @@ static CURLcode test_lib670(const char *URL)
                           CURLFORM_CONTENTLEN, (curl_off_t) 2,
                           CURLFORM_END);
     if(formrc) {
-      curl_mfprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
+      curl_mfprintf(stderr, "curl_formadd() = %d\n", formrc);
       goto test_cleanup;
     }
 
