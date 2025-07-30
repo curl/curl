@@ -177,7 +177,7 @@ static CURLcode test_lib506(const char *URL)
   int i;
   struct t506_userdata user;
 
-  const char *JAR = libtest_arg2;
+  const char *jar = libtest_arg2;
 
   user.text = "Pigs in space";
   user.counter = 0;
@@ -285,7 +285,7 @@ static CURLcode test_lib506(const char *URL)
   curl_mprintf("CURLOPT_SHARE\n");
   test_setopt(curl, CURLOPT_SHARE,      share);
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEJAR,  JAR);
+  test_setopt(curl, CURLOPT_COOKIEJAR,  jar);
   curl_mprintf("CURLOPT_COOKIELIST FLUSH\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
 
@@ -314,7 +314,7 @@ static CURLcode test_lib506(const char *URL)
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEFILE, JAR);
+  test_setopt(curl, CURLOPT_COOKIEFILE, jar);
   curl_mprintf("CURLOPT_COOKIELIST RELOAD\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
 
@@ -328,7 +328,7 @@ static CURLcode test_lib506(const char *URL)
   }
   curl_mprintf("loaded cookies:\n");
   if(!cookies) {
-    curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", JAR);
+    curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", jar);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
