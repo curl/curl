@@ -3184,7 +3184,7 @@ sub subvariables {
     $$thing =~ s/${prefix}CERTDIR/./g;
     $$thing =~ s/${prefix}USER/$USER/g;
     $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
-    my $libtests = './libtest/libtests' . exe_ext('TOOL');
+    my $libtests = $LIBDIR . 'libtests' . exe_ext('TOOL');
     $$thing =~ s/${prefix}LIBTESTS/$libtests/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
