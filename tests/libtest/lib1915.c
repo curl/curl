@@ -103,8 +103,8 @@ static CURLcode test_lib1915(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
 
   easy_init(hnd);
   easy_setopt(hnd, CURLOPT_URL, URL);

@@ -25,14 +25,6 @@
 
 #include "memdebug.h"
 
-/*
- * This is the list of basic details you need to tweak to get things right.
- */
-#define USERNAME "user@example.com"
-#define PASSWORD "123qwerty"
-#define RECIPIENT "<1507-recipient@example.com>"
-#define MAILFROM "<1507-realuser@example.com>"
-
 static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   (void)ptr;
@@ -59,19 +51,19 @@ static CURLcode test_lib1507(const char *URL)
 
   multi_init(mcurl);
 
-  rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
+  rcpt_list = curl_slist_append(rcpt_list, "<1507-recipient@example.com>");
 #if 0
   /* more addresses can be added here */
   rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
 #endif
   curl_easy_setopt(curl, CURLOPT_URL, URL);
 #if 0
-  curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
-  curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
+  curl_easy_setopt(curl, CURLOPT_USERNAME, "user@example.com");
+  curl_easy_setopt(curl, CURLOPT_PASSWORD, "123qwerty");
 #endif
   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, t1507_read_cb);
-  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "<1507-realuser@example.com>");
   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   multi_add_handle(mcurl, curl);

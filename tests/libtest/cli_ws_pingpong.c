@@ -76,7 +76,7 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
     res = curl_easy_perform(curl);
-    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
+    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", res);
     if(res == CURLE_OK)
       res = pingpong(curl, payload);
 

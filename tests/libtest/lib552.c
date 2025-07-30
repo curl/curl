@@ -74,8 +74,8 @@ static CURLcode test_lib552(const char *URL)
   size_t i;
   static const char fill[] = "test data";
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 0;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = FALSE;
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
@@ -93,7 +93,7 @@ static CURLcode test_lib552(const char *URL)
   test_setopt(curl, CURLOPT_POST, 1L);
 
   /* Setup read callback */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
+  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(databuf));
   test_setopt(curl, CURLOPT_READFUNCTION, t552_read_cb);
 
   /* Write callback */

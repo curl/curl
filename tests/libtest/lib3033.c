@@ -107,8 +107,8 @@ static CURLcode test_lib3033(const char *URL)
   multi_init(multi);
   easy_init(curl);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
 
   res = t3033_req_test(multi, curl, URL, 0);
   if(res != CURLE_OK)

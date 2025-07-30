@@ -60,8 +60,8 @@ static CURLcode test_lib1522(const char *URL)
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, g_Data);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(g_Data));
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -77,14 +77,14 @@ static CURLcode test_lib1522(const char *URL)
     curl_off_t uploadSize;
     curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &uploadSize);
 
-    curl_mprintf("uploadSize = %ld\n", (long)uploadSize);
+    curl_mprintf("uploadSize = %" CURL_FORMAT_CURL_OFF_T "\n", uploadSize);
 
     if((size_t) uploadSize == sizeof(g_Data)) {
       curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {
-      curl_mprintf("sent %d, libcurl says %d\n",
-                   (int)sizeof(g_Data), (int)uploadSize);
+      curl_mprintf("sent %zu, libcurl says %" CURL_FORMAT_CURL_OFF_T "\n",
+                   sizeof(g_Data), uploadSize);
     }
   }
   else {

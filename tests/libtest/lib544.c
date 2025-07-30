@@ -56,7 +56,7 @@ static CURLcode test_lib544(const char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
 
   if(testnum == 545)
-    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(teststring));
+    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(teststring));
 
   test_setopt(curl, CURLOPT_COPYPOSTFIELDS, teststring);
 
