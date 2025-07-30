@@ -75,7 +75,7 @@
 #endif
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW32CE__) && \
+#if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
 #error "Building curl requires mingw-w64 3.0 or later"
 #endif
