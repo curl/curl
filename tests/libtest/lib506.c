@@ -26,7 +26,6 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#define JAR libtest_arg2
 #define THREADS 2
 
 /* struct containing data of a thread */
@@ -177,6 +176,8 @@ static CURLcode test_lib506(const char *URL)
   struct curl_slist *next_cookie = NULL;
   int i;
   struct t506_userdata user;
+
+  const char *JAR = libtest_arg2;
 
   user.text = "Pigs in space";
   user.counter = 0;
