@@ -30,8 +30,7 @@
 
 #include "vtls.h"
 
-#if (defined(__MINGW32CE__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) && \
-  !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
 #define HAS_MANUAL_VERIFY_API
 #endif
 
