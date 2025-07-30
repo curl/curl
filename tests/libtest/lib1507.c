@@ -60,10 +60,10 @@ static CURLcode test_lib1507(const char *URL)
   multi_init(mcurl);
 
   rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
-  /* more addresses can be added here
-     rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
-  */
-
+#if 0
+  /* more addresses can be added here */
+  rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
+#endif
   curl_easy_setopt(curl, CURLOPT_URL, URL);
 #if 0
   curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
