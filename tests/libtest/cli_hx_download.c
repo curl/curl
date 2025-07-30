@@ -25,6 +25,8 @@
 
 #include "testtrace.h"
 
+#include "curl_mem_undef.h"
+
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 #include <openssl/ssl.h>
 #endif
