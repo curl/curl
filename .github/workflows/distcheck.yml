@@ -173,7 +173,7 @@ jobs:
           curl-install/bin/curl --manual | wc -l
 
   verify-out-of-tree-cmake:
-    name: 'CM out-of-tree'
+    name: 'CM out-of-tree !perl'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
@@ -195,7 +195,7 @@ jobs:
           curl-install/bin/curl --manual | wc -l
 
   verify-in-tree-cmake:
-    name: 'CM in-tree'
+    name: 'CM in-tree !perl'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
