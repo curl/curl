@@ -94,7 +94,7 @@ struct cert_chain_engine_config_win8 {
   DWORD dwExclusiveFlags;
 };
 
-/* Not defined before mingw-w64 4.0.0 */
+/* Offered by mingw-w64 v4+. MS SDK ~10+. */
 #ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
 #define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
 #endif
