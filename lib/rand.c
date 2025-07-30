@@ -59,7 +59,6 @@
 #  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
 #  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  endif
-   /* Necessary for mingw-w64 */
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #  endif
