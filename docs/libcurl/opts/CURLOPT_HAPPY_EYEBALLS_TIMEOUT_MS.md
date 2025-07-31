@@ -84,7 +84,7 @@ When HTTPS only involves a TCP connection, the versions are negotiated
 via ALPN, the TLS extension, in a single connect. Since HTTP/3 runs on
 QUIC (which runs on UDP), it requires a separate connect attempt.
 
-The HTTP/3 attempt is started first and, after *timeout* expired, the
+The HTTP/3 attempt is started first and, after *timeout* expires, the
 HTTP/2 (or 1.1) attempt is started in parallel.
 
 # DEFAULT
