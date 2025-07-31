@@ -152,7 +152,7 @@ int main(void)
 
     /* run a transfer, all TLS sessions received will be added
      * to the share. */
-    curl_easy_setopt(curl, CURLOPT_URL, "https://www.curl.se/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
     curl_easy_perform(curl);
 
     /* export the TLS sessions collected in the share */
