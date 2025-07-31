@@ -4392,7 +4392,7 @@ if test "$curl_cv_winuwp" != 'yes'; then
     LIBS="-lsecur32 $LIBS"
   fi
 elif test "x$SCHANNEL_ENABLED" = "x1"; then
-  AC_MSG_ERROR([UWP does not support SSPI, which is required Schannel.])
+  AC_MSG_ERROR([UWP does not support SSPI, which is required by Schannel.])
 fi
 
 dnl ************************************************************

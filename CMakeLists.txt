@@ -729,7 +729,7 @@ if(CURL_USE_SCHANNEL)
   set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
   if(WINDOWS_STORE)
-    message(FATAL_ERROR "UWP does not support SSPI, which is required Schannel.")
+    message(FATAL_ERROR "UWP does not support SSPI, which is required by Schannel.")
   endif()
   set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL requires CURL_WINDOWS_SSPI
 
