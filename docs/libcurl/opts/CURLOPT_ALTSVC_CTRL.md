@@ -26,7 +26,7 @@ CURLOPT_ALTSVC_CTRL - control alt-svc behavior
 #define CURLALTSVC_H1           (1<<3)
 #define CURLALTSVC_H2           (1<<4)
 #define CURLALTSVC_H3           (1<<5)
-#define CURLALTSVC_NO_RETRY     (1<<6)
+#define CURLALTSVC_NO_RETRY     (1L<<6)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ALTSVC_CTRL, long bitmask);
 ~~~
