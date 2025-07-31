@@ -437,10 +437,10 @@ static const struct cheat_table {
 };
 
 /* Support to print number of columns per screen width. */
-static void print_cheatsheet(int i, int col_num)
+static void print_cheatsheet(size_t i, size_t col_num)
 {
   /* Use consistent width for each column. */
-  int c;
+  size_t c;
 
   for(c = 0; c < col_num; c++) {
     /* The headers */
@@ -466,23 +466,17 @@ static void print_cheatsheet(int i, int col_num)
 /* Output cheat-sheet. */
 void tool_cheat_sheet(void)
 {
-  /* Get terminal width for proper formatting */
-  unsigned int cols = get_terminal_columns();
-
-  /* Get the table length. */
-  unsigned int table_length = sizeof(cheat_items) / sizeof(cheat_items[0]);
-
-  /* Handle for loop according to cols */
-  unsigned int i, j;
+  size_t cols = get_terminal_columns();
+  size_t i, j;
 
   /* Set j based on col width, setting once, not in a loop. */
   j = cols/31;
   if(j > 8)
-    j  = 8;
+    j = 8;
   else if(j == 0)
     j = 1;
 
   /* Loop through cheat sheet sections */
-  for(i = 0; i < table_length; i += j)
+  for(i = 0; i < CURL_ARRAYSIZE(cheat_items); i += j)
     print_cheatsheet(i, j);
 }
