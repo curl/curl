@@ -29,7 +29,6 @@ set(_curl_hfiles_gen "")
 set(_curl_definitions "")
 
 if(ENABLE_CURL_MANUAL AND PERL_FOUND)
-  list(APPEND _curl_definitions "USE_MANUAL")
   add_custom_command(OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
@@ -48,11 +47,11 @@ if(ENABLE_CURL_MANUAL AND PERL_FOUND)
     VERBATIM)
   list(APPEND _curl_cfiles_gen "tool_hugehelp.c")
   list(APPEND _curl_hfiles_gen "tool_hugehelp.h")
+  list(APPEND _curl_definitions "USE_MANUAL")
 endif()
 
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
-    list(APPEND _curl_definitions "CURL_CA_EMBED")
     add_custom_command(OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
@@ -61,6 +60,7 @@ if(CURL_CA_EMBED_SET)
         "${CURL_CA_EMBED}"
       VERBATIM)
     list(APPEND _curl_cfiles_gen "tool_ca_embed.c")
+    list(APPEND _curl_definitions "CURL_CA_EMBED")
   else()
     message(WARNING "Perl not found. Will not embed the CA bundle.")
   endif()
