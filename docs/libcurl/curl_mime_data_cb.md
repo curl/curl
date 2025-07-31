@@ -44,6 +44,8 @@ from a data read callback function.
 
 *part* is the part's to assign contents to.
 
+*datasize* is the number of bytes the read callback is expected to provide.
+
 *readfunc* is a pointer to a data read callback function, with a signature
 as shown by the above prototype. It may not be set to NULL.
 
@@ -160,8 +162,8 @@ int main(void)
     hugectl.buffer = hugedata;
     hugectl.size = sizeof(hugedata);
     hugectl.position = 0;
-    curl_mime_data_cb(part, hugectl.size, read_callback, seek_callback, NULL,
-                      &hugectl);
+    curl_mime_data_cb(part, hugectl.size, read_callback,
+                      seek_callback, NULL, &hugectl);
   }
 }
 ~~~
