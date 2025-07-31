@@ -539,6 +539,72 @@ matchvar(const void *m1, const void *m2)
 
 #define MAX_WRITEOUT_NAME_LENGTH 24
 
+/* return the position after %time{} */
+static const char *outtime(const char *ptr, /* %time{ ... */
+                           FILE *stream)
+{
+  const char *end;
+  ptr += 6;
+  end = strchr(ptr, '}');
+  if(end) {
+    struct tm *utc;
+    struct dynbuf format;
+    char output[256]; /* max output time length */
+#ifdef HAVE_GETTIMEOFDAY
+    struct timeval cnow;
+#else
+    struct curltime cnow;
+#endif
+    time_t now;
+    size_t i;
+    size_t vlen;
+    CURLcode result = CURLE_OK;
+
+#ifdef HAVE_GETTIMEOFDAY
+    gettimeofday(&cnow, NULL);
+#else
+    cnow.tv_sec = time(NULL);
+    cnow.tv_usec = 0;
+#endif
+#ifdef DEBUGBUILD
+    {
+      const char *timestr = getenv("CURL_TIME");
+      if(timestr) {
+        curl_off_t val;
+        curlx_str_number(&timestr, &val, TIME_T_MAX);
+        cnow.tv_sec = (time_t)val;
+        cnow.tv_usec = val % 1000000;
+      }
+    }
+#endif
+    now = cnow.tv_sec;
+    vlen = end - ptr;
+    curlx_dyn_init(&format, 1024);
+
+    /* insert sub-seconds for %f */
+    for(i = 0; !result && i < vlen; i++) {
+      if((i < vlen - 1) && ptr[i] == '%' && ptr[i + 1] == 'f') {
+        result = curlx_dyn_addf(&format, "%06u",
+                                (unsigned int)cnow.tv_usec);
+        i++;
+        continue;
+      }
+      result = curlx_dyn_addn(&format, &ptr[i], 1);
+    }
+    if(!result) {
+      /* !checksrc! disable BANNEDFUNC 1 */
+      utc = gmtime(&now);
+      strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc);
+      fputs(output, stream);
+      curlx_dyn_free(&format);
+    }
+    ptr = end + 1;
+  }
+  else
+    fputs("%time{", stream);
+  return ptr;
+}
+
 void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result)
 {
@@ -639,6 +705,9 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
           }
           else
             fputs("%header{", stream);
+        }
+        else if(!strncmp("time{", &ptr[1], 5)) {
+          ptr = outtime(ptr, stream);
         }
         else if(!strncmp("output{", &ptr[1], 7)) {
           bool append = FALSE;
