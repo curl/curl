@@ -28,7 +28,7 @@ set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
 set(_curl_definitions "")
 
-if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
+if(ENABLE_CURL_MANUAL AND PERL_FOUND)
   list(APPEND _curl_definitions "USE_MANUAL")
   add_custom_command(OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
