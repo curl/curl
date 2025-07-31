@@ -107,23 +107,6 @@ void Curl_conncontrol(struct connectdata *conn,
 #define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
-/**
- * Create a cfilter for making an "ip" connection to the
- * given address, using parameters from `conn`. The "ip" connection
- * can be a TCP socket, a UDP socket or even a QUIC connection.
- *
- * It MUST use only the supplied `ai` for its connection attempt.
- *
- * Such a filter may be used in "happy eyeball" scenarios, and its
- * `connect` implementation needs to support non-blocking. Once connected,
- * it MAY be installed in the connection filter chain to serve transfers.
- */
-typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
-                                      struct Curl_easy *data,
-                                      struct connectdata *conn,
-                                      const struct Curl_addrinfo *ai,
-                                      int transport);
-
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
                                     int transport,
@@ -140,12 +123,6 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct Curl_dns_entry *dns,
                          int ssl_mode);
 
-extern struct Curl_cftype Curl_cft_happy_eyeballs;
 extern struct Curl_cftype Curl_cft_setup;
-
-#ifdef UNITTESTS
-void Curl_debug_set_transport_provider(int transport,
-                                       cf_ip_connect_create *cf_create);
-#endif
 
 #endif /* HEADER_CURL_CONNECT_H */
