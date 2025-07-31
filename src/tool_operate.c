@@ -469,12 +469,11 @@ static CURLcode retrycheck(struct OperationConfig *config,
         /* if adding retry_after seconds to the process would exceed the
            maximum time allowed for retrying, then exit the retries right
            away */
-        if(config->retry_maxtime) {
-          curl_off_t seconds = curlx_timediff(curlx_now(),
-                                              per->retrystart)/1000;
+        if(config->retry_maxtime_ms) {
+          timediff_t ms = curlx_timediff(curlx_now(), per->retrystart);
 
-          if((CURL_OFF_T_MAX - retry_after < seconds) ||
-             (seconds + retry_after > config->retry_maxtime)) {
+          if((CURL_OFF_T_MAX - sleeptime < ms) ||
+             (ms + sleeptime > config->retry_maxtime_ms)) {
             warnf(config->global, "The Retry-After: time would "
                   "make this command line exceed the maximum allowed time "
                   "for retries.");
@@ -493,7 +492,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
           (per->retry_remaining > 1 ? "ies" : "y"));
 
     per->retry_remaining--;
-    if(!config->retry_delay) {
+    if(!config->retry_delay_ms) {
       per->retry_sleep *= 2;
       if(per->retry_sleep > RETRY_SLEEP_MAX)
         per->retry_sleep = RETRY_SLEEP_MAX;
@@ -659,9 +658,9 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
   /* if retry-max-time is non-zero, make sure we have not exceeded the
      time */
   if(per->retry_remaining &&
-     (!config->retry_maxtime ||
+     (!config->retry_maxtime_ms ||
       (curlx_timediff(curlx_now(), per->retrystart) <
-       config->retry_maxtime*1000L)) ) {
+       config->retry_maxtime_ms)) ) {
     result = retrycheck(config, per, result, retryp, delay);
     if(!result && *retryp)
       return CURLE_OK; /* retry! */
@@ -1366,8 +1365,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
         return result;
 
       /* initialize retry vars for loop below */
-      per->retry_sleep_default = (config->retry_delay) ?
-        config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
+      per->retry_sleep_default = config->retry_delay_ms ?
+        config->retry_delay_ms : RETRY_SLEEP_DEFAULT; /* ms */
       per->retry_remaining = config->req_retry;
       per->retry_sleep = per->retry_sleep_default; /* ms */
       per->retrystart = curlx_now();

@@ -212,8 +212,8 @@ struct OperationConfig {
   long httpversion;
   unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   long req_retry;           /* number of retries */
-  long retry_delay;         /* delay between retries (in seconds) */
-  long retry_maxtime;       /* maximum time to keep retrying */
+  long retry_delay_ms;      /* delay between retries (in milliseconds) */
+  long retry_maxtime_ms;    /* maximum time to keep retrying */
 
   unsigned long mime_options; /* Mime option flags. */
   long tftp_blksize;        /* TFTP BLKSIZE option */
