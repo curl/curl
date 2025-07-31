@@ -388,6 +388,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   LPTSTR current_pos = NULL;
   DWORD i;
 
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
   if(Win8_compat) {
