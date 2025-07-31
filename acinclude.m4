@@ -1284,9 +1284,14 @@ AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the cur
 
   CURL_CA_EMBED=''
   if test "x$want_ca_embed" != "xno" -a "x$want_ca_embed" != "xunset" -a -f "$want_ca_embed"; then
-    CURL_CA_EMBED="$want_ca_embed"
-    AC_SUBST(CURL_CA_EMBED)
-    AC_MSG_RESULT([$want_ca_embed])
+    if test -n "$PERL"; then
+      CURL_CA_EMBED="$want_ca_embed"
+      AC_SUBST(CURL_CA_EMBED)
+      AC_MSG_RESULT([$want_ca_embed])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_WARN([perl was not found. Will not do CA embed.])
+    fi
   else
     AC_MSG_RESULT([no])
   fi

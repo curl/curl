@@ -141,6 +141,7 @@ curl_CPPFLAGS += -DUSE_MANUAL
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
 
+if PERL
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
@@ -162,6 +163,19 @@ $(HUGE): $(ASCIIPAGE) $(MKHELP)
 	echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE);   \
 	echo '#include "tool_setup.h"' >> $(HUGE);                 \
 	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE) )
+endif
+else # PERL
+$(HUGE):
+	$(HUGECMD)(                                                \
+	if test ! -f "$(srcdir)/$(HUGE)"; then                     \
+	  echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE); \
+	  echo '#include "tool_hugehelp.h"' >> $(HUGE);            \
+	  echo 'void hugehelp(void) {}' >> $(HUGE);                \
+	  echo 'void showhelp(const char *trigger, const char *arg, const char *endarg)' >> $(HUGE); \
+	  echo '{' >> $(HUGE);                                     \
+	  echo '  (void)trigger; (void)arg; (void)endarg;' >> $(HUGE); \
+	  echo '}' >> $(HUGE);                                     \
+	fi)
 endif
 
 else # USE_MANUAL

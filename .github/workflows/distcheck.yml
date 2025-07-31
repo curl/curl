@@ -113,7 +113,7 @@ jobs:
           make test-ci
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
           popd
           scripts/checksrc-all.pl
 
@@ -127,9 +127,6 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'disable preinstalled perl'
-        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
-
       - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
@@ -137,11 +134,11 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
           popd
 
   verify-in-tree-autotools:
@@ -154,19 +151,16 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'disable preinstalled perl'
-        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
-
       - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree !perl'
@@ -188,7 +182,7 @@ jobs:
           cmake --install build
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   verify-in-tree-cmake:
     name: 'CM in-tree !perl'
@@ -210,7 +204,7 @@ jobs:
           cmake --install .
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   missing-files:
     name: 'missing files'
