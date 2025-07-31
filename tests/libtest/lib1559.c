@@ -59,13 +59,13 @@ static CURLcode test_lib1559(const char *URL)
   if(u) {
     CURLUcode uc = curl_url_set(u, CURLUPART_URL, longurl, 0);
     curl_mprintf("CURLUPART_URL %d bytes URL == %d (%s)\n",
-                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
+                 EXCESSIVE, uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_SCHEME, longurl, CURLU_NON_SUPPORT_SCHEME);
     curl_mprintf("CURLUPART_SCHEME %d bytes scheme == %d (%s)\n",
-                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
+                 EXCESSIVE, uc, curl_url_strerror(uc));
     uc = curl_url_set(u, CURLUPART_USER, longurl, 0);
     curl_mprintf("CURLUPART_USER %d bytes user == %d (%s)\n",
-                 EXCESSIVE, (int)uc, curl_url_strerror(uc));
+                 EXCESSIVE, uc, curl_url_strerror(uc));
     curl_url_cleanup(u);
   }
 

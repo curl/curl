@@ -53,8 +53,8 @@ static CURLcode test_lib573(const char *URL)
   easy_setopt(c, CURLOPT_HEADER, 1L);
   easy_setopt(c, CURLOPT_URL, URL);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   easy_setopt(c, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(c, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(c, CURLOPT_VERBOSE, 1L);

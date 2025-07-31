@@ -49,7 +49,7 @@ static CURLcode test_lib1911(const char *URL)
   memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
   testbuf[MAX_INPUT_LENGTH + 1] = 0;
 
-  curl_mprintf("string length: %d\n", (int)strlen(testbuf));
+  curl_mprintf("string length: %zu\n", strlen(testbuf));
 
   for(o = curl_easy_option_next(NULL);
       o;

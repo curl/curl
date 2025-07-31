@@ -62,8 +62,7 @@ static size_t rtp_write(char *ptr, size_t size, size_t nmemb, void *stream)
   curl_mprintf("RTP: message size %d, channel %d\n", message_size, channel);
   if(message_size != coded_size) {
     curl_mprintf("RTP embedded size (%d) does not match "
-                 "the write size (%d).\n",
-                 coded_size, message_size);
+                 "the write size (%d).\n", coded_size, message_size);
     return failure;
   }
 

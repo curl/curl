@@ -32,7 +32,7 @@ static int    known_offset; /* for test time tracing */
 
 void debug_dump(const char *timebuf, const char *text,
                 FILE *stream, const unsigned char *ptr,
-                size_t size, int nohex)
+                size_t size, bool nohex)
 {
   size_t i;
   size_t c;
@@ -221,7 +221,7 @@ int cli_debug_cb(CURL *handle, curl_infotype type,
     if(!traced_data) {
       if(!newl)
         log_line_start(output, idsbuf, type);
-      curl_mfprintf(output, "[%ld bytes data]\n", (long)size);
+      curl_mfprintf(output, "[%zu bytes data]\n", size);
       newl = 0;
       traced_data = 1;
     }

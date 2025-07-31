@@ -44,7 +44,7 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "Remove socket fd %d\n", (int) fd);
+    curl_mfprintf(stderr, "Remove socket fd %d\n", (int)fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -66,7 +66,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
+  curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int)fd, what);
   t582_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
@@ -153,7 +153,7 @@ static int t582_checkForCompletion(CURLM *curl, int *success)
     }
     else {
       curl_mfprintf(stderr, "Got an unexpected message from curl: %i\n",
-                    (int)message->msg);
+                    message->msg);
       result = 1;
       *success = 0;
     }
@@ -265,7 +265,8 @@ static CURLcode test_lib582(const char *URL)
     fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
-  curl_mfprintf(stderr, "Set to upload %d bytes\n", (int)file_info.st_size);
+  curl_mfprintf(stderr, "Set to upload %" CURL_FORMAT_CURL_OFF_T " bytes\n",
+                (curl_off_t)file_info.st_size);
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res != CURLE_OK) {

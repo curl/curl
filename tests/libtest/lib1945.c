@@ -32,8 +32,8 @@ static void t1945_showem(CURL *easy, unsigned int type)
 
   /* !checksrc! disable EQUALSNULL 1 */
   while((header = curl_easy_nextheader(easy, type, 0, prev)) != NULL) {
-    curl_mprintf(" %s == %s (%u/%u)\n", header->name, header->value,
-                 (int)header->index, (int)header->amount);
+    curl_mprintf(" %s == %s (%zu/%zu)\n", header->name, header->value,
+                 header->index, header->amount);
     prev = header;
   }
 }
