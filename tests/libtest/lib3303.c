@@ -27,7 +27,7 @@
 
 /* testing the CURLALTSVC_NO_RETRY flag */
 
-static CURLcode test_lib3303(char *URL)
+static CURLcode test_lib3303(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
