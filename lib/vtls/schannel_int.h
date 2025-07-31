@@ -30,16 +30,6 @@
 
 #include "vtls.h"
 
-#ifndef CURL_WINDOWS_UWP
-#define HAS_MANUAL_VERIFY_API
-#endif
-
-/* These two macros are missing from mingw-w64 in UWP mode as of v13 */
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && \
-  !defined(DISABLE_SCHANNEL_CLIENT_CERT)
-#define HAS_CLIENT_CERT_PATH
-#endif
-
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
    'type cast' : conversion from 'int' to 'LPCSTR' of greater size */
@@ -111,9 +101,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   TCHAR *sni_hostname;
-#ifdef HAS_CLIENT_CERT_PATH
   HCERTSTORE client_cert_store;
-#endif
   int refcount;
 };
 
@@ -139,15 +127,10 @@ struct schannel_ssl_backend_data {
   BIT(recv_connection_closed); /* true if connection closed, regardless how */
   BIT(recv_renegotiating);     /* true if recv is doing renegotiation */
   BIT(use_alpn); /* true if ALPN is used for this connection */
-#ifdef HAS_MANUAL_VERIFY_API
   BIT(use_manual_cred_validation); /* true if manual cred validation is used */
-#endif
   BIT(sent_shutdown);
   BIT(encdata_is_incomplete);
 };
-
-/* key to use at `multi->proto_hash` */
-#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
 
 struct schannel_cert_share {
   unsigned char CAinfo_blob_digest[CURL_SHA256_DIGEST_LENGTH];

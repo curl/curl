@@ -138,6 +138,9 @@
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
 
+/* key to use at `multi->proto_hash` */
+#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
+
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
@@ -385,8 +388,6 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
   return CURLE_OK;
 }
 
-#ifdef HAS_CLIENT_CERT_PATH
-
 /* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
@@ -442,7 +443,6 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
-#endif
 
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
@@ -452,10 +452,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 
-#ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
   HCERTSTORE client_cert_store = NULL;
-#endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
@@ -469,11 +467,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(conn_config->verifypeer) {
-#ifdef HAS_MANUAL_VERIFY_API
     if(backend->use_manual_cred_validation)
       flags = SCH_CRED_MANUAL_CRED_VALIDATION;
     else
-#endif
       flags = SCH_CRED_AUTO_CRED_VALIDATION;
 
     if(ssl_config->no_revoke) {
@@ -541,7 +537,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_CLIENT_CERT_PATH
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
@@ -739,12 +734,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
     client_cert_store = cert_store;
   }
-#else
-  if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
-    failf(data, "schannel: client cert support not built in");
-    return CURLE_NOT_BUILT_IN;
-  }
-#endif
 
   /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
@@ -752,23 +741,19 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   if(!backend->cred) {
     failf(data, "schannel: unable to allocate memory");
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
     if(client_cert_store)
       CertCloseStore(client_cert_store, 0);
-#endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   backend->cred->refcount = 1;
 
-#ifdef HAS_CLIENT_CERT_PATH
   /* Since we did not persist the key, we need to extend the store's
    * lifetime until the end of the connection
    */
   backend->cred->client_cert_store = client_cert_store;
-#endif
 
   /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
      long as the user did not set a legacy algorithm list
@@ -794,12 +779,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     credentials.pTlsParameters->grbitDisabledProtocols =
       (DWORD)~enabled_protocols;
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
       credentials.cCreds = 1;
       credentials.paCred = client_certs;
     }
-#endif
 
     sspi_status =
       Curl_pSecFn->AcquireCredentialsHandle(NULL,
@@ -835,12 +818,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       schannel_cred.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
     }
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
       schannel_cred.cCreds = 1;
       schannel_cred.paCred = client_certs;
     }
-#endif
 
     sspi_status =
       Curl_pSecFn->AcquireCredentialsHandle(NULL,
@@ -851,10 +832,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             &backend->cred->time_stamp);
   }
 
-#ifdef HAS_CLIENT_CERT_PATH
   if(client_certs[0])
     CertFreeCertificateContext(client_certs[0]);
-#endif
 
   if(sspi_status != SEC_E_OK) {
     char buffer[STRERROR_LEN];
@@ -918,15 +897,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
 #ifdef UNDER_CE
-#ifdef HAS_MANUAL_VERIFY_API
   /* certificate validation on Windows CE does not seem to work right; we will
    * do it following a more manual process. */
   backend->use_manual_cred_validation = TRUE;
 #else
-#error "compiler too old to support Windows CE requisite manual cert verify"
-#endif
-#else
-#ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
@@ -940,12 +914,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   else
     backend->use_manual_cred_validation = FALSE;
-#else
-  if(conn_config->CAfile || conn_config->ca_info_blob) {
-    failf(data, "schannel: CA cert support not built in");
-    return CURLE_NOT_BUILT_IN;
-  }
-#endif
 #endif
 
   backend->cred = NULL;
@@ -1089,17 +1057,17 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "schannel: SNI or certificate check failed: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       return CURLE_PEER_FAILED_VERIFICATION;
-      /*
-        case SEC_E_INVALID_HANDLE:
-        case SEC_E_INVALID_TOKEN:
-        case SEC_E_LOGON_DENIED:
-        case SEC_E_TARGET_UNKNOWN:
-        case SEC_E_NO_AUTHENTICATING_AUTHORITY:
-        case SEC_E_INTERNAL_ERROR:
-        case SEC_E_NO_CREDENTIALS:
-        case SEC_E_UNSUPPORTED_FUNCTION:
-        case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
-      */
+#if 0
+    case SEC_E_INVALID_HANDLE:
+    case SEC_E_INVALID_TOKEN:
+    case SEC_E_LOGON_DENIED:
+    case SEC_E_TARGET_UNKNOWN:
+    case SEC_E_NO_AUTHENTICATING_AUTHORITY:
+    case SEC_E_INTERNAL_ERROR:
+    case SEC_E_NO_CREDENTIALS:
+    case SEC_E_UNSUPPORTED_FUNCTION:
+    case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+#endif
     default:
       failf(data, "schannel: initial InitializeSecurityContext failed: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
@@ -1409,12 +1377,10 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-#ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->verifypeer && backend->use_manual_cred_validation) {
     /* Certificate verification also verifies the hostname if verifyhost */
     return Curl_verify_certificate(cf, data);
   }
-#endif
 
   /* Verify the hostname manually when certificate verification is disabled,
      because in that case Schannel will not verify it. */
@@ -1509,12 +1475,10 @@ static void schannel_session_free(void *sessionid)
     if(cred->refcount == 0) {
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
-#ifdef HAS_CLIENT_CERT_PATH
       if(cred->client_cert_store) {
         CertCloseStore(cred->client_cert_store, 0);
         cred->client_cert_store = NULL;
       }
-#endif
       Curl_safefree(cred);
     }
   }
@@ -2361,26 +2325,16 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static int schannel_init(void)
 {
 #if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
-  bool wine = FALSE;
-  bool wine_has_alpn = FALSE;
-
-#ifndef CURL_WINDOWS_UWP
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
-  /* GetModuleHandle() not available for UWP.
-     Assume no WINE because WINE has no UWP support. */
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
                         (GetProcAddress(GetModuleHandleA("ntdll"),
                                         "wine_get_version")));
-  wine = !!p_wine_get_version;
-  if(wine) {
+  if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
-    wine_has_alpn = wine_version && atoi(wine_version) >= 6;
+    s_win_has_alpn = wine_version && atoi(wine_version) >= 6;
   }
-#endif
-  if(wine)
-    s_win_has_alpn = wine_has_alpn;
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
@@ -2485,13 +2439,6 @@ static void schannel_checksum(const unsigned char *input,
                               DWORD provType,
                               const unsigned int algId)
 {
-#ifdef CURL_WINDOWS_UWP
-  (void)input;
-  (void)inputlen;
-  (void)provType;
-  (void)algId;
-  memset(checksum, 0, checksumlen);
-#else
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
   DWORD cbHashSize = 0;
@@ -2537,7 +2484,6 @@ static void schannel_checksum(const unsigned char *input,
 
   if(hProv)
     CryptReleaseContext(hProv, 0);
-#endif
 }
 
 static CURLcode schannel_sha256sum(const unsigned char *input,
@@ -2707,12 +2653,8 @@ const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
   SSLSUPP_CERTINFO |
-#ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
-#endif
-#ifndef CURL_WINDOWS_UWP
   SSLSUPP_PINNEDPUBKEY |
-#endif
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST,
