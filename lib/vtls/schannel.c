@@ -464,11 +464,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(conn_config->verifypeer) {
-#ifdef HAS_MANUAL_VERIFY_API
     if(backend->use_manual_cred_validation)
       flags = SCH_CRED_MANUAL_CRED_VALIDATION;
     else
-#endif
       flags = SCH_CRED_AUTO_CRED_VALIDATION;
 
     if(ssl_config->no_revoke) {
@@ -919,15 +917,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
 #ifdef UNDER_CE
-#ifdef HAS_MANUAL_VERIFY_API
   /* certificate validation on Windows CE does not seem to work right; we will
    * do it following a more manual process. */
   backend->use_manual_cred_validation = TRUE;
 #else
-#error "compiler too old to support Windows CE requisite manual cert verify"
-#endif
-#else
-#ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
@@ -941,12 +934,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   else
     backend->use_manual_cred_validation = FALSE;
-#else
-  if(conn_config->CAfile || conn_config->ca_info_blob) {
-    failf(data, "schannel: CA cert support not built in");
-    return CURLE_NOT_BUILT_IN;
-  }
-#endif
 #endif
 
   backend->cred = NULL;
@@ -1410,12 +1397,10 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-#ifdef HAS_MANUAL_VERIFY_API
   if(conn_config->verifypeer && backend->use_manual_cred_validation) {
     /* Certificate verification also verifies the hostname if verifyhost */
     return Curl_verify_certificate(cf, data);
   }
-#endif
 
   /* Verify the hostname manually when certificate verification is disabled,
      because in that case Schannel will not verify it. */
@@ -2690,9 +2675,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
   { CURLSSLBACKEND_SCHANNEL, "schannel" }, /* info */
 
   SSLSUPP_CERTINFO |
-#ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
-#endif
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |

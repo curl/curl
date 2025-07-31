@@ -56,8 +56,6 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#ifdef HAS_MANUAL_VERIFY_API
-
 #ifdef __MINGW32CE__
 #define CERT_QUERY_OBJECT_BLOB 0x00000002
 #define CERT_QUERY_CONTENT_CERT 1
@@ -370,11 +368,7 @@ cleanup:
 
   return result;
 }
-#endif
 
-#endif /* HAS_MANUAL_VERIFY_API */
-
-#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -751,7 +745,6 @@ cleanup:
   return result;
 }
 
-#ifdef HAS_MANUAL_VERIFY_API
 /* Verify the server's certificate and hostname */
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
@@ -963,5 +956,4 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   return result;
 }
 
-#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

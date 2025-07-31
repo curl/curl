@@ -30,8 +30,6 @@
 
 #include "vtls.h"
 
-#define HAS_MANUAL_VERIFY_API
-
 #if !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
@@ -135,9 +133,7 @@ struct schannel_ssl_backend_data {
   BIT(recv_connection_closed); /* true if connection closed, regardless how */
   BIT(recv_renegotiating);     /* true if recv is doing renegotiation */
   BIT(use_alpn); /* true if ALPN is used for this connection */
-#ifdef HAS_MANUAL_VERIFY_API
   BIT(use_manual_cred_validation); /* true if manual cred validation is used */
-#endif
   BIT(sent_shutdown);
   BIT(encdata_is_incomplete);
 };
