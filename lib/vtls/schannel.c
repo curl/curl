@@ -380,8 +380,6 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
   return CURLE_OK;
 }
 
-#ifdef HAS_CLIENT_CERT_PATH
-
 /* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
@@ -437,7 +435,6 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
-#endif
 
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
@@ -447,10 +444,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 
-#ifdef HAS_CLIENT_CERT_PATH
   PCCERT_CONTEXT client_certs[1] = { NULL };
   HCERTSTORE client_cert_store = NULL;
-#endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CURLcode result;
 
@@ -534,7 +529,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_CLIENT_CERT_PATH
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
@@ -738,12 +732,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
     client_cert_store = cert_store;
   }
-#else
-  if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
-    failf(data, "schannel: client cert support not built in");
-    return CURLE_NOT_BUILT_IN;
-  }
-#endif
 
   /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
@@ -751,23 +739,19 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   if(!backend->cred) {
     failf(data, "schannel: unable to allocate memory");
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0])
       CertFreeCertificateContext(client_certs[0]);
     if(client_cert_store)
       CertCloseStore(client_cert_store, 0);
-#endif
 
     return CURLE_OUT_OF_MEMORY;
   }
   backend->cred->refcount = 1;
 
-#ifdef HAS_CLIENT_CERT_PATH
   /* Since we did not persist the key, we need to extend the store's
    * lifetime until the end of the connection
    */
   backend->cred->client_cert_store = client_cert_store;
-#endif
 
   /* We support TLS 1.3 starting in Windows 10 version 1809 (OS build 17763) as
      long as the user did not set a legacy algorithm list
@@ -793,12 +777,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     credentials.pTlsParameters->grbitDisabledProtocols =
       (DWORD)~enabled_protocols;
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
       credentials.cCreds = 1;
       credentials.paCred = client_certs;
     }
-#endif
 
     sspi_status =
       Curl_pSecFn->AcquireCredentialsHandle(NULL,
@@ -834,12 +816,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       schannel_cred.dwFlags = flags | SCH_USE_STRONG_CRYPTO;
     }
 
-#ifdef HAS_CLIENT_CERT_PATH
     if(client_certs[0]) {
       schannel_cred.cCreds = 1;
       schannel_cred.paCred = client_certs;
     }
-#endif
 
     sspi_status =
       Curl_pSecFn->AcquireCredentialsHandle(NULL,
@@ -850,10 +830,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             &backend->cred->time_stamp);
   }
 
-#ifdef HAS_CLIENT_CERT_PATH
   if(client_certs[0])
     CertFreeCertificateContext(client_certs[0]);
-#endif
 
   if(sspi_status != SEC_E_OK) {
     char buffer[STRERROR_LEN];
@@ -1495,12 +1473,10 @@ static void schannel_session_free(void *sessionid)
     if(cred->refcount == 0) {
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
-#ifdef HAS_CLIENT_CERT_PATH
       if(cred->client_cert_store) {
         CertCloseStore(cred->client_cert_store, 0);
         cred->client_cert_store = NULL;
       }
-#endif
       Curl_safefree(cred);
     }
   }

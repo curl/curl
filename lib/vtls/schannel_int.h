@@ -30,8 +30,6 @@
 
 #include "vtls.h"
 
-#define HAS_CLIENT_CERT_PATH
-
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
    'type cast' : conversion from 'int' to 'LPCSTR' of greater size */
@@ -103,9 +101,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   TCHAR *sni_hostname;
-#ifdef HAS_CLIENT_CERT_PATH
   HCERTSTORE client_cert_store;
-#endif
   int refcount;
 };
 
