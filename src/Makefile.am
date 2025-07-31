@@ -132,11 +132,10 @@ HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
 
-curl_CPPFLAGS = $(AM_CPPFLAGS)
+curl_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MANUAL
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
-curl_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
