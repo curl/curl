@@ -1185,15 +1185,17 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       if(result)
         goto out;
 
-      /* Add our client readerr encoding WS BINARY frames */
-      result = Curl_creader_create(&ws_enc_reader, data, &ws_cr_encode,
-                                   CURL_CR_CONTENT_ENCODE);
-      if(result)
-        goto out;
-      result = Curl_creader_add(data, ws_enc_reader);
-      if(result)
-        goto out;
-      ws_enc_reader = NULL; /* owned by transfer now */
+      if(!data->set.ws_raw_mode) {
+        /* Add our client readerr encoding WS BINARY frames */
+        result = Curl_creader_create(&ws_enc_reader, data, &ws_cr_encode,
+                                     CURL_CR_CONTENT_ENCODE);
+        if(result)
+          goto out;
+        result = Curl_creader_add(data, ws_enc_reader);
+        if(result)
+          goto out;
+        ws_enc_reader = NULL; /* owned by transfer now */
+      }
 
       /* start over with sending */
       data->req.eos_read = FALSE;
@@ -1722,6 +1724,13 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *d,
   struct websocket *ws;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = d;
+
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(data->set.ws_raw_mode) {
+    failf(data, "cannot curl_ws_start_frame() with CURLWS_RAW_MODE enabled");
+    return CURLE_FAILED_INIT;
+  }
 
   CURL_TRC_WS(data, "curl_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
               flags, frame_len);
