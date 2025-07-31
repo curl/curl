@@ -271,15 +271,18 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
 {
   struct Curl_cfilter *cf_prev = a->cf;
   struct Curl_cfilter *wcf;
+  CURLcode result;
 
   /* When restarting, we tear down and existing filter *after* we
    * started up the new one. This gives us a new socket number and
    * probably a new local port. Which may prevent confusion. */
+  a->result = CURLE_OK;
+  a->connected = FALSE;
   a->inconclusive = FALSE;
   a->cf = NULL;
 
-  a->result = a->cf_create(&a->cf, data, cf->conn, a->addr, a->transport);
-  if(!a->result) {
+  result = a->cf_create(&a->cf, data, cf->conn, a->addr, a->transport);
+  if(!result) {
     bool dummy;
     /* the new filter might have sub-filters */
     for(wcf = a->cf; wcf; wcf = wcf->next) {
@@ -290,7 +293,7 @@ static CURLcode cf_ip_attempt_restart(struct cf_ip_attempt *a,
   }
   if(cf_prev)
     Curl_conn_cf_discard_chain(&cf_prev, data);
-  return a->result;
+  return result;
 }
 
 static void cf_ip_ballers_clear(struct Curl_cfilter *cf,
@@ -348,24 +351,28 @@ static CURLcode cf_ip_ballers_init(struct cf_ip_ballers *bs, int ip_version,
 static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
                                   struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  struct curltime now,
                                   bool *connected)
 {
   CURLcode result = CURLE_OK;
   struct cf_ip_attempt *a = NULL, **panchor;
-  bool do_next = FALSE, out_of_addresses = FALSE;
+  bool do_more, more_possible;
+  struct curltime now;
   timediff_t next_expire_ms;
-  int i, ongoing, inconclusive;
+  int i, inconclusive, ongoing;
 
   if(bs->winner)
     return CURLE_OK;
 
 evaluate:
-  inconclusive = ongoing = i = 0;
+  now = curlx_now();
+  ongoing = inconclusive = 0;
+  do_more = FALSE;
+  more_possible = TRUE;
+
   /* check if a running baller connects now */
-  if(bs->running)
-    CURL_TRC_CF(data, cf, "checking ip connect attempts");
+  i = -1;
   for(panchor = &bs->running; *panchor; panchor = &((*panchor)->next)) {
+    ++i;
     a = *panchor;
     a->result = cf_ip_attempt_connect(a, data, connected);
     if(!a->result) {
@@ -383,39 +390,31 @@ evaluate:
         }
         return CURLE_OK;
       }
-      /* still waiting */
+      /* still running */
       ++ongoing;
     }
-    else if(a->inconclusive)
+    else if(a->inconclusive) /* failed, but inconclusive */
       ++inconclusive;
-    ++i;
   }
+  if(bs->running)
+    CURL_TRC_CF(data, cf, "checked connect attempts: "
+                "%d ongoing, %d inconclusive", ongoing, inconclusive);
 
-  /* no baller connected yet, start another one? */
-  if(!bs->started.tv_sec && !bs->started.tv_usec) {
-    bs->started = now;
-    do_next = TRUE;
+  /* no attempt connected yet, start another one? */
+  if(!ongoing) {
+    if(!bs->started.tv_sec && !bs->started.tv_usec)
+      bs->started = now;
+    do_more = TRUE;
   }
   else {
-    do_next = (curlx_timediff(now, bs->last_attempt_started) >=
+    do_more = (curlx_timediff(now, bs->last_attempt_started) >=
                bs->attempt_delay_ms);
-    if(do_next) {
+    if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
                   "start next attempt");
-    }
-    else { /* delay does not count when all running failed */
-      for(a = bs->running; a; a = a->next) {
-        if(!a->result) /* still running */
-          break;
-      }
-      if(!a) { /* exhausted list, no more running */
-        CURL_TRC_CF(data, cf, "all previous attempts failed");
-        do_next = TRUE;
-      }
-    }
   }
 
-  if(do_next) {
+  if(do_more) {
     /* start the next attempt if there is another ip address to try.
      * Alternate between address families when possible. */
     const struct Curl_addrinfo *addr = NULL;
@@ -431,82 +430,85 @@ evaluate:
       addr = cf_ai_iter_next(&bs->addr_iter);
       ai_family = bs->addr_iter.ai_family;
     }
-    if(!addr) {
-      CURL_TRC_CF(data, cf, "no more addresses to try");
-      out_of_addresses = TRUE;
+
+    if(addr) {  /* try another address */
+      result = cf_ip_attempt_new(&a, cf, data, addr, ai_family,
+                                bs->transport, bs->cf_create);
+      CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
+                  bs->running ? "next" : "first",
+                  (ai_family == AF_INET) ? "4" : "6", result);
+      if(result)
+        goto out;
+      DEBUGASSERT(a);
+
+      /* append to running list */
+      panchor = &bs->running;
+      while(*panchor)
+        panchor = &((*panchor)->next);
+      *panchor = a;
+      bs->last_attempt_started = now;
+      bs->last_attempt_ai_family = ai_family;
+      /* and run everything again */
+      goto evaluate;
+    }
+    else if(inconclusive) {
+      /* tried all addresses, no success but some where inconclusive.
+       * Let's restart the inconclusive ones. */
+      if(curlx_timediff(now, bs->last_attempt_started) >=
+         bs->attempt_delay_ms) {
+        CURL_TRC_CF(data, cf, "tried all addresses with inconclusive results"
+                    ", restarting one");
+        i = -1;
+        for(a = bs->running; a; a = a->next) {
+          ++i;
+          if(!a->inconclusive)
+            continue;
+          result = cf_ip_attempt_restart(a, cf, data);
+          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
+          if(result) /* serious failure */
+            goto out;
+          bs->last_attempt_started = now;
+          goto evaluate;
+        }
+        DEBUGASSERT(0); /* should not come here */
+      }
+      /* attempt timeout for restart has not expired yet */
       goto out;
     }
-
-    result = cf_ip_attempt_new(&a, cf, data, addr, ai_family,
-                              bs->transport, bs->cf_create);
-    CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
-                bs->running ? "next" : "first",
-                (ai_family == AF_INET) ? "4" : "6", result);
-    if(result)
-      goto out;
-    DEBUGASSERT(a);
-
-    /* append to running list */
-    panchor = &bs->running;
-    while(*panchor)
-      panchor = &((*panchor)->next);
-    *panchor = a;
-    bs->last_attempt_started = now;
-    bs->last_attempt_ai_family = ai_family;
-    /* and run everything again */
-    goto evaluate;
+    else if(ongoing) {
+      /* no more addresses, no inconclusive attempts */
+      more_possible = FALSE;
+    }
+    else {
+      CURL_TRC_CF(data, cf, "no more attempts to try");
+      result = CURLE_COULDNT_CONNECT;
+      i = 0;
+      for(a = bs->running; a; a = a->next) {
+        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
+        if(a->result)
+          result = a->result;
+      }
+    }
   }
 
 out:
-  if(!ongoing && out_of_addresses && inconclusive) {
-    /* tried all addresses, no success but some where inconclusive.
-     * Let's restart the inconclusive ones. */
-    int restarted = 0;
-    CURL_TRC_CF(data, cf, "tried all addresses, some with "
-                "inconclusive results, restarting those");
-    i = -1;
-    for(a = bs->running; a; a = a->next) {
-      ++i;
-      if(!a->inconclusive)
-        continue;
-      result = cf_ip_attempt_restart(a, cf, data);
-      CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
-      if(result)
-        goto out;
-      ++restarted;
+  if(!result) {
+    /* when do we need to be called again? */
+    next_expire_ms = Curl_timeleft(data, &now, TRUE);
+    if(more_possible) {
+      timediff_t expire_ms, elapsed_ms;
+      elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
+      expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
+      next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
     }
-    if(restarted)
-      goto evaluate;
-  }
 
-  if(!ongoing && out_of_addresses) {
-    /* all attempts failed and we have no more addresses */
-    CURL_TRC_CF(data, cf, "all ballers failed");
-    result = CURLE_COULDNT_CONNECT;
-    i = 0;
-    for(a = bs->running; a; a = a->next) {
-      CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
-      if(a->result)
-        result = a->result;
+    if(next_expire_ms <= 0) {
+      failf(data, "Connection timeout after %" FMT_OFF_T " ms",
+            curlx_timediff(now, data->progress.t_startsingle));
+      return CURLE_OPERATION_TIMEDOUT;
     }
-    return result;
+    Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);
   }
-
-  /* when do we need to be called again? */
-  next_expire_ms = Curl_timeleft(data, &now, TRUE);
-  if(!out_of_addresses) {
-    timediff_t expire_ms, elapsed_ms;
-    elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
-    expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
-    next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
-  }
-
-  if(next_expire_ms <= 0) {
-    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-          curlx_timediff(now, data->progress.t_startsingle));
-    return CURLE_OPERATION_TIMEDOUT;
-  }
-  Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);
   return result;
 }
 
@@ -615,10 +617,8 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
   struct cf_ip_happy_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   CURLcode result;
-  struct curltime now;
 
-  now = curlx_now();
-  result = cf_ip_ballers_run(&ctx->ballers, cf, data, now, connected);
+  result = cf_ip_ballers_run(&ctx->ballers, cf, data, connected);
 
   if(!result)
     return CURLE_OK;
@@ -648,7 +648,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
           proxy_name ? "via " : "",
           proxy_name ? proxy_name : "",
           proxy_name ? " " : "",
-          curlx_timediff(now, data->progress.t_startsingle),
+          curlx_timediff(curlx_now(), data->progress.t_startsingle),
           curl_easy_strerror(result));
   }
 
