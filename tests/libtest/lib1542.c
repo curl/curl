@@ -46,8 +46,8 @@ static CURLcode test_lib1542(const char *URL)
 
   easy_setopt(easy, CURLOPT_URL, URL);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 0;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = FALSE;
   easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);

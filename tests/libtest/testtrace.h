@@ -27,11 +27,11 @@
 
 void debug_dump(const char *timebuf, const char *text,
                 FILE *stream, const unsigned char *ptr,
-                size_t size, int nohex);
+                size_t size, bool nohex);
 
 struct libtest_trace_cfg {
-  int tracetime;  /* 0 represents FALSE, anything else TRUE */
-  int nohex;      /* 0 represents FALSE, anything else TRUE */
+  bool tracetime;
+  bool nohex;
 };
 
 extern struct libtest_trace_cfg debug_config;

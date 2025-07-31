@@ -52,8 +52,8 @@ static CURLcode do_one_request(CURLM *m, const char *URL, const char *resolve)
   easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
   easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   easy_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curls, CURLOPT_VERBOSE, 1L);

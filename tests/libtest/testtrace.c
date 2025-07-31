@@ -32,7 +32,7 @@ static int    known_offset; /* for test time tracing */
 
 void debug_dump(const char *timebuf, const char *text,
                 FILE *stream, const unsigned char *ptr,
-                size_t size, int nohex)
+                size_t size, bool nohex)
 {
   size_t i;
   size_t c;

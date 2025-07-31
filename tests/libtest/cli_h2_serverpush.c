@@ -114,8 +114,8 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   int transfers = 1; /* we start with one */
   struct CURLMsg *m;
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 0;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = FALSE;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");

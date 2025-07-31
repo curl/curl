@@ -222,8 +222,8 @@ static CURLcode test_lib2700(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_USERAGENT, "client/test2700");
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);

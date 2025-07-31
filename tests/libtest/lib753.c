@@ -107,8 +107,8 @@ static CURLcode test_lib753(const char *URL)
 
   start_test_timing();
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 

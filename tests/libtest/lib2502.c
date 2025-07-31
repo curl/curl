@@ -75,8 +75,8 @@ static CURLcode test_lib2502(const char *URL)
     /* wait for first connection established to see if we can share it */
     easy_setopt(curl[i], CURLOPT_PIPEWAIT, 1L);
     /* go verbose */
-    debug_config.nohex = 1;
-    debug_config.tracetime = 0;
+    debug_config.nohex = TRUE;
+    debug_config.tracetime = FALSE;
     test_setopt(curl[i], CURLOPT_DEBUGDATA, &debug_config);
     easy_setopt(curl[i], CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);

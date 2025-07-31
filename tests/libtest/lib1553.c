@@ -71,8 +71,8 @@ static CURLcode test_lib1553(const char *URL)
   easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, t1553_xferinfo);
   easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   test_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curls, CURLOPT_VERBOSE, 1L);

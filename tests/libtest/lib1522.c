@@ -60,8 +60,8 @@ static CURLcode test_lib1522(const char *URL)
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, g_Data);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(g_Data));
 
-  debug_config.nohex = 1;
-  debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
   test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
   test_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
