@@ -3838,12 +3838,6 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
   DEBUGASSERT(dns);
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(conn->handler->flags & PROTOPT_NONETWORK) {
-    /* nothing to setup when not using a network */
-    *protocol_done = TRUE;
-    return result;
-  }
-
   if(!conn->bits.reuse)
     result = Curl_conn_setup(data, conn, FIRSTSOCKET, dns,
                              CURL_CF_SSL_DEFAULT);

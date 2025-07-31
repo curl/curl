@@ -54,11 +54,12 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+#include "altsvc.h" /* seems this is needed in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "altsvc.h"
 
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
@@ -2336,17 +2337,9 @@ static bool is_altsvc_error(CURLcode rc)
   case CURLE_COULDNT_RESOLVE_PROXY:
   case CURLE_COULDNT_RESOLVE_HOST:
   case CURLE_COULDNT_CONNECT:
-  case CURLE_HTTP2:
-  case CURLE_HTTP2_STREAM:
-  case CURLE_HTTP3:
-  case CURLE_QUIC_CONNECT_ERROR:
-  case CURLE_SSL_CONNECT_ERROR:
   case CURLE_GOT_NOTHING:
   case CURLE_SEND_ERROR:
   case CURLE_RECV_ERROR:
-  case CURLE_PROXY:
-  case CURLE_ECH_REQUIRED:
-  case CURLE_BAD_CONTENT_ENCODING:
     return true;
 
   default:
@@ -2676,14 +2669,12 @@ do_connect:
 statemachine_end:
     /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(
-      result &&
-      data->asi && data->asi->used && !data->asi->errored
-      ) {
+    if(result &&
+       data->asi && data->asi->used && !data->asi->errored) {
       data->asi->errored = is_altsvc_error(result);
 
       if(data->asi->errored &&
-        !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
         data->mstate <= MSTATE_PROTOCONNECTING &&
         data->mstate >= MSTATE_CONNECT) {
         infof(data, "Alt-Svc connection failed(%d). "
