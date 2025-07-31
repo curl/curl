@@ -42,7 +42,7 @@ fail, the next IPv6 address is used, then the next IPv4, etc. If there
 are only addresses for one stack, those are tried one after the other.
 
 When there is neither a positive nor negative response to an attempt,
-another attempt is started after *timeout* has passed. And then another,
+another attempt is started after *timeout* has passed. Then another,
 after *timeout* has passed again. As long as there are addresses available.
 
 When all addresses have been tried and failed, the transfer fails.
