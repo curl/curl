@@ -30,9 +30,7 @@
 
 #include "vtls.h"
 
-#if !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
-#endif
 
 #if defined(_MSC_VER) && (_MSC_VER <= 1600)
 /* Workaround for warning:
