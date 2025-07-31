@@ -146,9 +146,6 @@ struct schannel_ssl_backend_data {
   BIT(encdata_is_incomplete);
 };
 
-/* key to use at `multi->proto_hash` */
-#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
-
 struct schannel_cert_share {
   unsigned char CAinfo_blob_digest[CURL_SHA256_DIGEST_LENGTH];
   size_t CAinfo_blob_size;           /* CA info blob size */

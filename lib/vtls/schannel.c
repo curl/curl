@@ -130,6 +130,9 @@
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
 #endif
 
+/* key to use at `multi->proto_hash` */
+#define MPROTO_SCHANNEL_CERT_SHARE_KEY   "tls:schannel:cert:share"
+
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
      https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
