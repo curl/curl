@@ -127,9 +127,6 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'disable preinstalled perl'
-        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
-
       - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
@@ -137,6 +134,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
+          export ac_cv_path_PERL=
           ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
           make
           make install
@@ -154,14 +152,12 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - name: 'disable preinstalled perl'
-        run: sudo mv "$(command -v perl)" "$(command -v perl)"-disabled
-
       - name: 'build & install'
         run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
+          export ac_cv_path_PERL=
           ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
           make
           make install
