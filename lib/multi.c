@@ -2657,7 +2657,7 @@ statemachine_end:
       data->asi->errored = is_altsvc_error(result);
 
       if(data->asi->errored &&
-        !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
         data->mstate <= MSTATE_PROTOCONNECTING &&
         data->mstate >= MSTATE_CONNECT) {
         infof(data, "Alt-Svc connection failed(%d). "
