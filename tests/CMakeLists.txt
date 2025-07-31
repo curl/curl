@@ -74,8 +74,8 @@ function(curl_add_runtests _targetname _test_flags)
     COMMAND
       ${_setenv}
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
-      ${_test_flags_list}
-      "\$TFLAGS"
+        ${_test_flags_list}
+        "\$TFLAGS"
     DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
   )

@@ -120,18 +120,15 @@ declare -A neither_targets=(
 
 DEFPORT=443
 
-function whenisitagain()
-{
+function whenisitagain() {
   /bin/date -u +%Y%m%d-%H%M%S
 }
 
-function fileage()
-{
+function fileage() {
   echo $(($(date +%s) - $(date +%s -r "$1")))
 }
 
-function hostport2host()
-{
+function hostport2host() {
   case $1 in
     *:*) host=${1%:*} port=${1##*:};;
       *) host=$1      port=$DEFPORT;;
@@ -139,8 +136,7 @@ function hostport2host()
   echo "$host"
 }
 
-function hostport2port()
-{
+function hostport2port() {
   case $1 in
     *:*) host=${1%:*} port=${1##*:};;
       *) host=$1      port=$DEFPORT;;
@@ -148,8 +144,7 @@ function hostport2port()
   echo "$port"
 }
 
-function cli_test()
-{
+function cli_test() {
   # 1st param is target URL
   turl=$1
   # 2nd param is 0 if we expect curl to not work or 1 if we expect it
@@ -191,8 +186,7 @@ function cli_test()
   rm -f "$TMPF"
 }
 
-function get_ech_configlist()
-{
+function get_ech_configlist() {
   domain=$1
   ecl=$(dig +short https "$domain" | grep "ech=" | sed -e 's/^.*ech=//' | sed -e 's/ .*//')
   echo "$ecl"

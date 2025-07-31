@@ -254,7 +254,7 @@ static curl_socket_t opensocket(void *clientp,
       struct connection_filter *filter = (struct connection_filter *)clientp;
 #ifdef AF_INET6
       int mapped = !filter->ipv6_v6only &&
-        is_ipv4_mapped_ipv6_address(address->family, cinaddr);
+                   is_ipv4_mapped_ipv6_address(address->family, cinaddr);
 #endif
 
       for(ip = filter->list; ip; ip = ip->next) {
@@ -281,7 +281,7 @@ static curl_socket_t opensocket(void *clientp,
           char buf[128] = {0};
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr,
-            "* Rejecting IP %s due to missing whitelist entry.\n", buf);
+                  "* Rejecting IP %s due to missing whitelist entry.\n", buf);
         }
         return CURL_SOCKET_BAD;
       }
