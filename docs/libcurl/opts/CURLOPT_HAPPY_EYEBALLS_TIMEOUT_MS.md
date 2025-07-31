@@ -55,8 +55,8 @@ Eyeballs RFC 6555 says "It is RECOMMENDED that connection attempts be paced
 currently defaults to 200 ms. Firefox and Chrome currently default to 300 ms.
 
 As an example, for a host that resolves to 'a1_v4, a2_v4, a3_v6, a4_v6'
-curl will open a socket to 'a3_v6' first. When that does not report back,
-it will open another socket to 'a1_v4' after 200ms. The first socket is
+curl opens a socket to 'a3_v6' first. When that does not report back,
+it opens another socket to 'a1_v4' after 200ms. The first socket is
 left open and might still succeed. When 200ms have gone by again, a
 socket for 'a4_v6' is opened. 200ms later, 'a2_v4' is tried.
 
@@ -70,7 +70,7 @@ considered being inconclusive. The QUIC protocol may encounter this.
 When a QUIC server restarts, it may send replies indicating that it
 is not accepting new connections right now, but maybe later.
 
-Such "inclusive" connect attempt failures will cause a restart of
+Such "inclusive" connect attempt failures cause a restart of
 the attempt, with the same address on a new socket, closing the
 previous one. Repeatedly until CURLOPT_CONNECTTIMEOUT_MS(3) strikes.
 
@@ -82,7 +82,7 @@ attempting these versions.
 
 When HTTPS only involves a TCP connection, the versions are negotiated
 via ALPN, the TLS extension, in a single connect. Since HTTP/3 runs on
-QUIC (which runs on UDP), it requires a separate connect atempt.
+QUIC (which runs on UDP), it requires a separate connect attempt.
 
 The HTTP/3 attempt is started first and, after *timeout* expired, the
 HTTP/2 (or 1.1) attempt is started in parallel.

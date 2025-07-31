@@ -366,7 +366,6 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
 evaluate:
   now = curlx_now();
   ongoing = inconclusive = 0;
-  do_more = FALSE;
   more_possible = TRUE;
 
   /* check if a running baller connects now */
