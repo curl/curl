@@ -408,32 +408,33 @@ void tool_list_engines(void)
   curl_easy_cleanup(curl);
 }
 
-/* Functions for outputting cheat-sheet argument. */
-/* Cheat sheet data structure organized by heading and value. */
+/* Functions for outputting cheat-sheet argument.
+   Cheat sheet data structure organized by heading and option. */
 static const struct cheat_table {
-  const char *heading[2];
+  const char *head;
+  const char *opt;
 } cheat_items[] = {
-  {{"Verbose", "-v, --trace-ascii file"}},
-  {{"Hide progress", "-s"}},
-  {{"extra info", "-w format"}},
-  {{"Write output", "-O, -o file"}},
-  {{"Timeout", "-m secs"}},
-  {{"POST", "-d string, -d @file"}},
-  {{"multipart", "-F name=value, -F name=@file"}},
-  {{"PUT", "-T file"}},
-  {{"HEAD", "-I"}},
-  {{"custom", "-X METHOD"}},
-  {{"Basic auth", "-u user:password"}},
-  {{"read cookies", "-b <file>"}},
-  {{"write cookies", "-c <file>"}},
-  {{"send cookies", "-b \"c=1; d=2\""}},
-  {{"user-agent", "-A string"}},
-  {{"Use proxy", "-x host:port"}},
-  {{"Headers add/remove", "-H \"name: value\", -H name:"}},
-  {{"follow redirs", "-L"}},
-  {{"gzip", "--compressed"}},
-  {{"insecure", "-k"}},
-  {{NULL, NULL}}
+  {"Basic auth", "-u user:password"},
+  {"Custom", "-X METHOD"},
+  {"Extra info", "-w format"},
+  {"Follow redirs", "-L"},
+  {"Gzip", "--compressed"},
+  {"Head", "-I"},
+  {"Headers add/remove", "-H \"name: value\", -H name:"},
+  {"Hide progress", "-s"},
+  {"Insecure", "-k"},
+  {"Multipart", "-F name=value, -F name=@file"},
+  {"Post", "-d string, -d @file"},
+  {"Put", "-T file"},
+  {"Read cookies", "-b <file>"},
+  {"Send cookies", "-b \"c=1; d=2\""},
+  {"Timeout", "-m secs"},
+  {"Use proxy", "-x host:port"},
+  {"User-agent", "-A string"},
+  {"Verbose", "-v, --trace-ascii file"},
+  {"Write cookies", "-c <file>"},
+  {"Write output", "-O, -o file"},
+  {NULL, NULL}
 };
 
 /* Support to print number of columns per screen width. */
@@ -443,23 +444,22 @@ static void print_cheatsheet(size_t i, size_t col_num)
   size_t c;
 
   for(c = 0; c < col_num; c++) {
-    /* The headers */
-    if(cheat_items[c + i].heading[0])
-      printf("%-30s ", cheat_items[c + i].heading[0]);
+    /* The headings. */
+    if(cheat_items[c + i].head)
+      printf("%-30s ", cheat_items[c + i].head);
     else {
-      col_num = c; /* redefine for uneven rows */
+      col_num = c; /* Redefine for uneven rows. */
       break;
     }
   }
   puts("");
   for(c = 0; c < col_num; c++)
-    printf("------------------------------ "); /* The separators */
+    printf("------------------------------ "); /* The separators. */
   puts("");
-  for(c = 0; c < col_num; c++) {
-    /* The options */
-    if(cheat_items[c + i].heading[1])
-      printf("%-30s ", cheat_items[c + i].heading[1]);
-  }
+
+  /* The options. */
+  for(c = 0; c < col_num; c++)
+    printf("%-30s ", cheat_items[c + i].opt);
   puts("\n");
 }
 
@@ -476,7 +476,7 @@ void tool_cheat_sheet(void)
   else if(j == 0)
     j = 1;
 
-  /* Loop through cheat sheet sections */
+  /* Loop through cheat sheet sections. */
   for(i = 0; i < CURL_ARRAYSIZE(cheat_items); i += j)
     print_cheatsheet(i, j);
 }
