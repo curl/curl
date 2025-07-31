@@ -2008,10 +2008,6 @@ CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
 
-if test "x$SCHANNEL_ENABLED" = "x1" -a "$curl_cv_winuwp" = 'yes'; then
-  AC_MSG_ERROR([UWP does not support Schannel.])
-fi
-
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
   LIBS="-lcrypt32 $LIBS"
