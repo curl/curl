@@ -29,7 +29,7 @@ CURLMcode curl_multi_get_offt(CURLM *multi_handle,
 # DESCRIPTION
 
 Get the *info* kept in the *multi* handle for `CURLMI_OFFT_*`.
-If the multi handle is not valid or the *info* is not applicable, returns 0.
+If the *info* is not applicable, this function returns CURLM_UNKNOWN_OPTION.
 
 # OPTIONS
 
@@ -42,7 +42,7 @@ count handles removed. It does count internal handles that get
 added for tasks (like resolving via DoH, for example).
 
 For the total number of easy handles ever added to the multi, see
-curl_multi_get_offt(3).
+*CURLMINFO_XFERS_ADDED*.
 
 ## CURLMINFO_XFERS_RUNNING
 
@@ -96,4 +96,7 @@ int main(void)
 
 # RETURN VALUE
 
-The extracted value
+This function returns a CURLMcode indicating success or error.
+
+CURLM_OK (0) means everything was OK, non-zero means an error occurred,
+see libcurl-errors(3).
