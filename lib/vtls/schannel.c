@@ -388,6 +388,7 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
   return CURLE_OK;
 }
 
+#ifndef UNDER_CE
 /* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
@@ -443,6 +444,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
+#endif
 
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
@@ -537,6 +539,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+#ifndef UNDER_CE
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
@@ -734,6 +737,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
     client_cert_store = cert_store;
   }
+#endif
 
   /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
