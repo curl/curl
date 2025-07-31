@@ -390,14 +390,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   BOOL Win8_compat)
 {
   DWORD actual_length = 0;
-#ifdef CURL_WINDOWS_UWP
-  (void)data;
-  (void)cert_context;
-  (void)host_names;
-  (void)length;
-  (void)alt_name_info;
-  (void)Win8_compat;
-#else
   BOOL compute_content = FALSE;
   LPTSTR current_pos = NULL;
   DWORD i;
@@ -471,7 +463,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
-#endif
   return actual_length;
 }
 
@@ -510,12 +501,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#ifdef CURL_WINDOWS_UWP
-  (void)data;
-  (void)ctx;
-  (void)alt_name_info;
-  (void)alt_name_info_size;
-#else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
@@ -553,7 +538,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
     return result;
   }
   result = TRUE;
-#endif
   return result;
 }
 #endif /* !UNDER_CE */

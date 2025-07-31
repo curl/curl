@@ -30,13 +30,9 @@
 
 #include "vtls.h"
 
-#ifndef CURL_WINDOWS_UWP
 #define HAS_MANUAL_VERIFY_API
-#endif
 
-/* These two macros are missing from mingw-w64 in UWP mode as of v13 */
-#if defined(CryptStringToBinary) && defined(CRYPT_STRING_HEX) && \
-  !defined(DISABLE_SCHANNEL_CLIENT_CERT)
+#if !defined(DISABLE_SCHANNEL_CLIENT_CERT)
 #define HAS_CLIENT_CERT_PATH
 #endif
 

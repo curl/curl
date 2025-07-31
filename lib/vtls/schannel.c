@@ -2362,26 +2362,16 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static int schannel_init(void)
 {
 #if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
-  bool wine = FALSE;
-  bool wine_has_alpn = FALSE;
-
-#ifndef CURL_WINDOWS_UWP
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
-  /* GetModuleHandle() not available for UWP.
-     Assume no WINE because WINE has no UWP support. */
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
                         (GetProcAddress(GetModuleHandleA("ntdll"),
                                         "wine_get_version")));
-  wine = !!p_wine_get_version;
-  if(wine) {
+  if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
-    wine_has_alpn = wine_version && atoi(wine_version) >= 6;
+    s_win_has_alpn = wine_version && atoi(wine_version) >= 6;
   }
-#endif
-  if(wine)
-    s_win_has_alpn = wine_has_alpn;
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
@@ -2486,13 +2476,6 @@ static void schannel_checksum(const unsigned char *input,
                               DWORD provType,
                               const unsigned int algId)
 {
-#ifdef CURL_WINDOWS_UWP
-  (void)input;
-  (void)inputlen;
-  (void)provType;
-  (void)algId;
-  memset(checksum, 0, checksumlen);
-#else
   HCRYPTPROV hProv = 0;
   HCRYPTHASH hHash = 0;
   DWORD cbHashSize = 0;
@@ -2538,7 +2521,6 @@ static void schannel_checksum(const unsigned char *input,
 
   if(hProv)
     CryptReleaseContext(hProv, 0);
-#endif
 }
 
 static CURLcode schannel_sha256sum(const unsigned char *input,
@@ -2711,9 +2693,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
 #ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
 #endif
-#ifndef CURL_WINDOWS_UWP
   SSLSUPP_PINNEDPUBKEY |
-#endif
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST,
