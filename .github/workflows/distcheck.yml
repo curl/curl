@@ -134,8 +134,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          export ac_cv_path_PERL=
-          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version
@@ -157,8 +156,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          export ac_cv_path_PERL=
-          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs
+          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl --disable-docs ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version
