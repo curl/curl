@@ -1006,7 +1006,7 @@ CONNECT_REQ_SEND:
 
        ATYP:
        o  IP v4 address: X'01', BND.ADDR = 4 byte
-       o  domain name:  X'03', BND.ADDR = [ 1 byte length, string ]
+       o  domain name:   X'03', BND.ADDR = [ 1 byte length, string ]
        o  IP v6 address: X'04', BND.ADDR = 16 byte
     */
 
