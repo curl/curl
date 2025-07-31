@@ -56,8 +56,6 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#ifdef HAS_MANUAL_VERIFY_API
-
 #ifdef __MINGW32CE__
 #define CERT_QUERY_OBJECT_BLOB 0x00000002
 #define CERT_QUERY_CONTENT_CERT 1
@@ -370,11 +368,7 @@ cleanup:
 
   return result;
 }
-#endif
 
-#endif /* HAS_MANUAL_VERIFY_API */
-
-#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -390,14 +384,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   BOOL Win8_compat)
 {
   DWORD actual_length = 0;
-#ifdef CURL_WINDOWS_UWP
-  (void)data;
-  (void)cert_context;
-  (void)host_names;
-  (void)length;
-  (void)alt_name_info;
-  (void)Win8_compat;
-#else
   BOOL compute_content = FALSE;
   LPTSTR current_pos = NULL;
   DWORD i;
@@ -471,7 +457,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
-#endif
   return actual_length;
 }
 
@@ -510,12 +495,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#ifdef CURL_WINDOWS_UWP
-  (void)data;
-  (void)ctx;
-  (void)alt_name_info;
-  (void)alt_name_info_size;
-#else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
@@ -553,7 +532,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
     return result;
   }
   result = TRUE;
-#endif
   return result;
 }
 #endif /* !UNDER_CE */
@@ -767,7 +745,6 @@ cleanup:
   return result;
 }
 
-#ifdef HAS_MANUAL_VERIFY_API
 /* Verify the server's certificate and hostname */
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
@@ -979,5 +956,4 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   return result;
 }
 
-#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

@@ -726,6 +726,9 @@ elseif(_enabled_ssl_options_count EQUAL 0)
 endif()
 
 if(CURL_USE_SCHANNEL)
+  if(WINDOWS_STORE)
+    message(FATAL_ERROR "UWP does not support Schannel.")
+  endif()
   set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL requires CURL_WINDOWS_SSPI
@@ -734,7 +737,7 @@ if(CURL_USE_SCHANNEL)
     set(_valid_default_ssl_backend TRUE)
   endif()
 endif()
-if(CURL_WINDOWS_SSPI)
+if(CURL_WINDOWS_SSPI AND NOT WINDOWS_STORE)
   set(USE_WINDOWS_SSPI ON)
 endif()
 
