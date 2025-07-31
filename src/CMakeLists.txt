@@ -28,23 +28,27 @@ set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
 set(_curl_definitions "")
 
-if(ENABLE_CURL_MANUAL AND PERL_FOUND)
-  add_custom_command(OUTPUT "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable INCLUDEDUP all */" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable LONGLINE all */" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> "tool_hugehelp.c"
-    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"    < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "#else" >> "tool_hugehelp.c"
-    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> "tool_hugehelp.c"
-    DEPENDS
-      generate-curl.1
-      "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
-      "${CURL_ASCIIPAGE}"
-    VERBATIM)
+if(ENABLE_CURL_MANUAL AND (PERL_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.c"))
+  if(PERL_FOUND)
+    add_custom_command(OUTPUT "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable INCLUDEDUP all */" >> "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable LONGLINE all */" >> "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> "tool_hugehelp.c"
+      COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"    < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "#else" >> "tool_hugehelp.c"
+      COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
+      COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> "tool_hugehelp.c"
+      DEPENDS
+        generate-curl.1
+        "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
+        "${CURL_ASCIIPAGE}"
+      VERBATIM)
+  else()
+    message(STATUS "Perl not found. Using the pre-built tool_hugehelp.c found in the source tree.")
+  endif()
   list(APPEND _curl_cfiles_gen "tool_hugehelp.c")
   list(APPEND _curl_hfiles_gen "tool_hugehelp.h")
   list(APPEND _curl_definitions "USE_MANUAL")
