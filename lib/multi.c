@@ -2652,10 +2652,8 @@ do_connect:
 statemachine_end:
     /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(
-      result &&
-      data->asi && data->asi->used && !data->asi->errored
-      ) {
+    if(result &&
+       data->asi && data->asi->used && !data->asi->errored) {
       data->asi->errored = is_altsvc_error(result);
 
       if(data->asi->errored &&
