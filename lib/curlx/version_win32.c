@@ -135,7 +135,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 
   if(onetime) {
     pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+      GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo"));
     onetime = FALSE;
   }
 
