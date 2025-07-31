@@ -146,6 +146,7 @@ LIB_CFILES =         \
   cf-h2-proxy.c      \
   cf-haproxy.c       \
   cf-https-connect.c \
+  cf-ip-happy.c      \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
@@ -274,6 +275,7 @@ LIB_HFILES =         \
   cf-h2-proxy.h      \
   cf-haproxy.h       \
   cf-https-connect.h \
+  cf-ip-happy.h      \
   cf-socket.h        \
   cfilters.h         \
   conncache.h        \
