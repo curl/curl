@@ -73,14 +73,6 @@
 #define SCH_DEV(x) do { } while(0)
 #endif
 
-#ifdef HAS_CLIENT_CERT_PATH
-#ifdef UNICODE
-#define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_W
-#else
-#define CURL_CERT_STORE_PROV_SYSTEM CERT_STORE_PROV_SYSTEM_A
-#endif
-#endif
-
 /* Offered by mingw-w64 v8+. MS SDK 7.0A+. */
 #ifndef SP_PROT_TLS1_0_CLIENT
 #define SP_PROT_TLS1_0_CLIENT           SP_PROT_TLS1_CLIENT
@@ -692,7 +684,13 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
     else {
       cert_store =
-        CertOpenStore(CURL_CERT_STORE_PROV_SYSTEM, 0,
+        CertOpenStore(
+#ifdef UNICODE
+                      CERT_STORE_PROV_SYSTEM_W,
+#else
+                      CERT_STORE_PROV_SYSTEM_A,
+#endif
+                      0,
                       (HCRYPTPROV)NULL,
                       CERT_STORE_OPEN_EXISTING_FLAG | cert_store_name,
                       cert_store_path);
