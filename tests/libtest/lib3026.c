@@ -26,12 +26,8 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-static DWORD WINAPI t3026_run_thread(LPVOID ptr)
-#else
 #include <process.h>
-static unsigned int WINAPI t3026_run_thread(void *ptr)
-#endif
+static CURL_THREAD_RETURN_T WINAPI t3026_run_thread(void *ptr)
 {
   CURLcode *result = ptr;
 
