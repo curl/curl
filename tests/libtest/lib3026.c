@@ -40,11 +40,6 @@ static CURL_THREAD_RETURN_T __stdcall t3026_run_thread(void *ptr)
 
 static CURLcode test_lib3026(const char *URL)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  typedef HANDLE curl_win_thread_handle_t;
-#else
-  typedef uintptr_t curl_win_thread_handle_t;
-#endif
   CURLcode results[NUM_THREADS];
   curl_win_thread_handle_t thread_handles[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;

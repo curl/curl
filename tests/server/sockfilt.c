@@ -557,7 +557,6 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
 
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
-  typedef uintptr_t curl_win_thread_handle_t;
   struct select_ws_wait_data *data;
   curl_win_thread_handle_t thread;
 
