@@ -88,13 +88,18 @@ int main(int argc, char **argv)
 
     /* only allow HTTP, TFTP and SFTP */
     curl_easy_setopt(curl, CURLOPT_PROTOCOLS,
-                     (long)CURLPROTO_HTTP | CURLPROTO_TFTP | CURLPROTO_SFTP);
+                     CURLPROTO_HTTP | CURLPROTO_TFTP | CURLPROTO_SFTP);
 
     /* Perform the request */
     curl_easy_perform(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLPROTO_*** macros became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # DEPRECATED
 
