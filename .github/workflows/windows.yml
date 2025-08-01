@@ -484,7 +484,7 @@ jobs:
         env:
           MATRIX_URL: '${{ matrix.url }}'
         run: |
-          cd /d
+          cd /c
           mkdir my-cache
           cd my-cache
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
@@ -508,7 +508,7 @@ jobs:
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/c/my-cache/${MATRIX_DIR}/bin:$PATH"
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
@@ -538,7 +538,7 @@ jobs:
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/c/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld
 
       - name: 'curl version'
@@ -552,7 +552,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/c/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
       - name: 'install test prereqs'
@@ -568,7 +568,7 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/c/my-cache/${MATRIX_DIR}/bin:$PATH"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
@@ -581,7 +581,7 @@ jobs:
         if: ${{ !contains(matrix.name, '!examples') }}
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/c/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target curl-examples
 
   linux-cross-mingw-w64:
@@ -882,6 +882,7 @@ jobs:
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
           else  # OpenSSH-Windows
+            cd /c
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
             unzip bin.zip
