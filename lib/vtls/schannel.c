@@ -1098,6 +1098,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->recv_sspi_close_notify = FALSE;
   backend->recv_connection_closed = FALSE;
   backend->recv_renegotiating = FALSE;
+  backend->renegotiate_state.started = FALSE;
   backend->encdata_is_incomplete = FALSE;
 
   /* continue to second handshake step */
@@ -1661,6 +1662,63 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+/* This function renegotiates the connection due to a server request received
+   by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
+   incomplete. In that case, we remain in the renegotiation (connecting) stage
+   and future calls to schannel_recv and schannel_send must call this function
+   first to complete the renegotiation. */
+static CURLcode
+schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  CURLcode result;
+  bool done;
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
+  struct schannel_renegotiate_state *rs = &backend->renegotiate_state;
+
+  if(!backend->recv_renegotiating) {
+    failf(data, "schannel: unexpected call to schannel_recv_renegotiate");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(!rs->started) { /* new renegotiation */
+    infof(data, "schannel: renegotiating SSL/TLS connection");
+    DEBUGASSERT(connssl->state == ssl_connection_complete);
+    DEBUGASSERT(connssl->connecting_state == ssl_connect_done);
+    connssl->state = ssl_connection_negotiating;
+    connssl->connecting_state = ssl_connect_2;
+    memset(rs, 0, sizeof(*rs));
+    rs->io_need = CURL_SSL_IO_NEED_SEND;
+    rs->started = TRUE;
+  }
+
+  /* the current io_need state may have been overwritten since the last time
+     this function was called. restore the io_need state needed to continue the
+     renegotiation. */
+
+  connssl->io_need = rs->io_need;
+
+  result = schannel_connect(cf, data, &done);
+
+  rs->io_need = connssl->io_need;
+
+  if(result == CURLE_AGAIN || (!result && !done))
+    return CURLE_AGAIN;
+
+  rs->started = FALSE;
+  backend->recv_renegotiating = FALSE;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+
+  if(result) {
+    infof(data, "schannel: renegotiation failed");
+    return result;
+  }
+
+  infof(data, "schannel: SSL/TLS connection renegotiated");
+  return CURLE_OK;
+}
+
 static CURLcode
 schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
               const void *buf, size_t len, size_t *pnwritten)
@@ -1677,6 +1735,12 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
   *pnwritten = 0;
+
+  if(backend->recv_renegotiating) {
+    result = schannel_recv_renegotiate(cf, data);
+    if(result)
+      return result;
+  }
 
   /* check if the maximum stream sizes were queried */
   if(backend->stream_sizes.cbMaximumMessage == 0) {
@@ -1809,7 +1873,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *connssl = cf->ctx;
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
-  bool done = FALSE;
   SecBuffer inbuf[4];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
@@ -1822,6 +1885,12 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
   *pnread = 0;
+
+  if(backend->recv_renegotiating) {
+    result = schannel_recv_renegotiate(cf, data);
+    if(result)
+      return result;
+  }
 
   /****************************************************************************
    * Do not return or set backend->recv_unrecoverable_err unless in the
@@ -2015,21 +2084,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           goto cleanup;
         }
 
-        /* begin renegotiation */
-        infof(data, "schannel: renegotiating SSL/TLS connection");
-        connssl->state = ssl_connection_negotiating;
-        connssl->connecting_state = ssl_connect_2;
-        connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = TRUE;
-        result = schannel_connect(cf, data, &done);
-        backend->recv_renegotiating = FALSE;
-        if(result) {
-          infof(data, "schannel: renegotiation failed");
+        result = schannel_recv_renegotiate(cf, data);
+        if(result)
           goto cleanup;
-        }
+
         /* now retry receiving data */
         sspi_status = SEC_E_OK;
-        infof(data, "schannel: SSL/TLS connection renegotiated");
         continue;
       }
       /* check if the server closed the connection */
