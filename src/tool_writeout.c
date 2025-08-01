@@ -571,11 +571,9 @@ static const char *outtime(const char *ptr, /* %time{ ... */
       const char *timestr = getenv("CURL_TIME");
       if(timestr) {
         curl_off_t val;
-        unsigned int usecs;
         curlx_str_number(&timestr, &val, TIME_T_MAX);
         cnow.tv_sec = (time_t)val;
-        usecs = (unsigned int)(val % 1000000);
-        cnow.tv_usec = usecs;
+        cnow.tv_usec = (unsigned int)(val % 1000000);
       }
     }
 #endif
