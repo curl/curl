@@ -46,11 +46,13 @@ jobs:
     timeout-minutes: 15
     defaults:
       run:
-        shell: D:\cygwin\bin\bash.exe '{0}'
+        shell: R:\cygwin\bin\bash.exe '{0}'
     env:
       MAKEFLAGS: -j 5
       SHELLOPTS: 'igncr'
       MATRIX_BUILD: '${{ matrix.build }}'
+      BLD: '/cygdrive/r/bld'
+      RAMDISK_SIZE: '1280M'
     strategy:
       matrix:
         include:
@@ -58,11 +60,44 @@ jobs:
           - { build: 'cmake'    , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
+      - name: 'cache imdisk'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-imdisk
+        with:
+          path: ~/imdisk
+          key: ${{ runner.os }}-imdisk
+
+      - name: 'setup RAM disk'
+        shell: sh
+        env:
+          CACHE_HIT: '${{ steps.cache-imdisk.outputs.cache-hit }}'
+        run: &ram-disk-install |
+          if [ "${CACHE_HIT}" != 'true' ]; then
+            cd ~
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+              --location 'https://static.ltr-data.se/files/imdiskinst.exe' --output pack.bin
+            [ 'cdcd8e76e6e631b66318b743fd3a5ee2c270c1509fdb5679f2b78c6332859a02' = "$(openssl dgst -sha256 pack.bin | grep -a -i -o -E '[0-9a-f]{64}$')" ] || false
+            7z x -y -oimdisk pack.bin >/dev/null
+            rm -f pack.bin
+          fi
+          cd ~/imdisk
+          # https://github.com/LTRData/ImDisk/wiki/ARM64-setup
+          [[ "$(uname -s)" = *'ARM64'* ]] && arch='ARM64' || arch='amd64'
+          cp awealloc/"${arch}"/awealloc.sys sys/"${arch}"/imdisk.sys                     "$(cygpath "${SYSTEMROOT}")"/System32/drivers
+          cp cpl/"${arch}"/imdisk.cpl cli/"${arch}"/imdisk.exe svc/"${arch}"/imdsksvc.exe "$(cygpath "${SYSTEMROOT}")"/System32
+          sc create imdisk   type= kernel error= ignore start= auto binPath= system32\\drivers\\imdisk.sys
+          sc create awealloc type= kernel error= ignore start= auto binPath= system32\\drivers\\awealloc.sys
+          sc create imdsksvc type= own    error= ignore start= auto binPath= imdsksvc.exe
+          sc start imdisk
+          sc start awealloc
+          sc start imdsksvc
+          /c/Windows/System32/imdisk.exe -a -s "${RAMDISK_SIZE:-2048M}" -m "${RAMDISK_DRIVE:-R:}" -p '/FS:NTFS /Q /Y'
+
       - uses: cygwin/cygwin-install-action@f2009323764960f80959895c7bc3bb30210afe4d # v6
         with:
           platform: ${{ matrix.platform }}
           site: https://mirrors.kernel.org/sourceware/cygwin/
-          work-vol: 'D:'
+          work-vol: 'R:'
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
@@ -92,14 +127,16 @@ jobs:
           MATRIX_CONFIG: '${{ matrix.config }}'
         run: |
           PATH=/usr/bin
+          cd .. && cp -r curl /cygdrive/r && cd /cygdrive/r/curl
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
+            cmake -B "${BLD}" -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            basedir="$PWD"
+            mkdir "${BLD}" && cd "${BLD}" && "${basedir}"/configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
@@ -110,23 +147,23 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           PATH=/usr/bin
-          cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+          cat "${BLD}"/config.log "${BLD}"/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
           PATH=/usr/bin
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+          echo '::group::raw'; cat "${BLD}"/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' "${BLD}"/lib/curl_config.h | sort || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose
-            cmake --install bld --verbose
+            cmake --build "${BLD}" --verbose
+            cmake --install "${BLD}" --verbose
           else
-            make -C bld V=1 install
+            make -C "${BLD}" V=1 install
           fi
 
       - name: 'curl -V'
@@ -135,9 +172,9 @@ jobs:
           PATH=/usr/bin
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            PATH="$PWD/bld/lib:$PATH"
+            PATH="$(realpath "${BLD}")/lib:$PATH"
           fi
-          bld/src/curl.exe --disable --version
+          "${BLD}"/src/curl.exe --disable --version
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
@@ -145,9 +182,9 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target testdeps
+            cmake --build "${BLD}" --verbose --target testdeps
           else
-            make -C bld V=1 -C tests
+            make -C "${BLD}" V=1 -C tests
           fi
 
       - name: 'run tests'
@@ -162,10 +199,10 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --verbose --target test-ci
+            PATH="$(realpath "${BLD}")/lib:$PATH"
+            cmake --build "${BLD}" --verbose --target test-ci
           else
-            make -C bld V=1 test-ci
+            make -C "${BLD}" V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -174,13 +211,13 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
+            cmake --build "${BLD}" --verbose --target curl-examples-build
           else
-            make -C bld V=1 examples
+            make -C "${BLD}" V=1 examples
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: du -sh . /cygdrive/r/cygwin /cygdrive/r/cygwin-packages; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB "${BLD}"
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -192,8 +229,11 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_BUILD: '${{ matrix.build }}'
+      MATRIX_IMAGE: '${{ matrix.image }}'
       MATRIX_SYS: '${{ matrix.sys }}'
       MATRIX_TEST: '${{ matrix.test }}'
+      BLD: '/r/bld'
+      RAMDISK_SIZE: '512M'
     strategy:
       matrix:
         include:
@@ -219,6 +259,19 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
+      - name: 'cache imdisk'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-imdisk
+        with:
+          path: ~/imdisk
+          key: ${{ runner.os }}-imdisk
+
+      - name: 'setup RAM disk'
+        shell: sh
+        env:
+          CACHE_HIT: '${{ steps.cache-imdisk.outputs.cache-hit }}'
+        run: *ram-disk-install
+
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ matrix.sys == 'msys' }}
         with:
@@ -266,6 +319,7 @@ jobs:
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
+          cd .. && cp -r curl /r && cd /r/curl
           if [ "${MATRIX_TEST}" = 'uwp' ]; then
             CPPFLAGS='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
             if [[ "${MATRIX_ENV}" != 'clang'* ]]; then
@@ -286,7 +340,7 @@ jobs:
               [ "${MATRIX_TEST}" = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-              cmake -B "bld${_chkprefill}" -G Ninja ${options} \
+              cmake -B "${BLD}${_chkprefill}" -G Ninja ${options} \
                 -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
                 -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
@@ -294,13 +348,14 @@ jobs:
                 -DCURL_WERROR=ON \
                 ${MATRIX_CONFIG}
             done
-            if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
-              echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+            if [ -d "${BLD}_chkprefill" ] && ! diff -u "${BLD}"/lib/curl_config.h "${BLD}_chkprefill"/lib/curl_config.h; then
+              echo '::group::reference configure log'; cat "${BLD}_chkprefill"/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
               false
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            basedir="$PWD"
+            mkdir "${BLD}" && cd "${BLD}" && "${basedir}"/configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
               --disable-dependency-tracking --enable-option-checking=fatal \
@@ -309,37 +364,37 @@ jobs:
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+        run: cat "${BLD}"/config.log "${BLD}"/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-          cat bld/cmake_install.cmake || true
+          echo '::group::raw'; cat "${BLD}"/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' "${BLD}"/lib/curl_config.h | sort || true
+          cat "${BLD}"/cmake_install.cmake || true
 
       - name: 'build'
         timeout-minutes: 10
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose
-            cmake --install bld --verbose
+            cmake --build "${BLD}" --verbose
+            cmake --install "${BLD}" --verbose
           else
-            make -C bld V=1 install
+            make -C "${BLD}" V=1 install
           fi
 
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            PATH="$PWD/bld/lib:$PATH"
+            PATH="$(realpath "${BLD}")/lib:$PATH"
           else
-            PATH="$PWD/bld/lib/.libs:$PATH"
+            PATH="$(realpath "${BLD}")/lib/.libs:$PATH"
             # avoid libtool's curl.exe wrapper for shared builds
-            mv bld/src/.libs/curl.exe bld/src/curl.exe || true
+            mv "${BLD}"/src/.libs/curl.exe "${BLD}"/src/curl.exe || true
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
-            bld/src/curl.exe --disable --version
+            "${BLD}"/src/curl.exe --disable --version
           fi
 
       - name: 'build tests'
@@ -347,16 +402,16 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target testdeps
+            cmake --build "${BLD}" --verbose --target testdeps
           else
-            make -C bld V=1 -C tests
+            make -C "${BLD}" V=1 -C tests
           fi
           if [ "${MATRIX_BUILD}" != 'cmake' ]; then
             # avoid libtool's .exe wrappers for shared builds
-            mv bld/tests/libtest/.libs/*.exe bld/tests/libtest || true
-            mv bld/tests/server/.libs/*.exe bld/tests/server || true
-            mv bld/tests/tunit/.libs/*.exe bld/tests/tunit || true
-            mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
+            mv "${BLD}"/tests/libtest/.libs/*.exe "${BLD}"/tests/libtest || true
+            mv "${BLD}"/tests/server/.libs/*.exe "${BLD}"/tests/server || true
+            mv "${BLD}"/tests/tunit/.libs/*.exe "${BLD}"/tests/tunit || true
+            mv "${BLD}"/tests/unit/.libs/*.exe "${BLD}"/tests/unit || true
           fi
 
       - name: 'install test prereqs'
@@ -385,11 +440,11 @@ jobs:
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            PATH="$PWD/bld/lib:$PATH"
-            cmake --build bld --verbose --target test-ci
+            PATH="$(realpath "${BLD}")/lib:$PATH"
+            cmake --build "${BLD}" --verbose --target test-ci
           else
-            PATH="$PWD/bld/lib/.libs:$PATH"
-            make -C bld V=1 test-ci
+            PATH="$(realpath "${BLD}")/lib/.libs:$PATH"
+            make -C "${BLD}" V=1 test-ci
           fi
 
       - name: 'build examples'
@@ -397,13 +452,13 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
+            cmake --build "${BLD}" --verbose --target curl-examples-build
           else
-            make -C bld V=1 examples
+            make -C "${BLD}" V=1 examples
           fi
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB "${BLD}"
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
@@ -415,6 +470,8 @@ jobs:
     env:
       MAKEFLAGS: -j 5
       MATRIX_DIR: '${{ matrix.dir }}'
+      BLD: '/r/bld'
+      RAMDISK_SIZE: '1536M'
     strategy:
       matrix:
         include:
@@ -475,6 +532,19 @@ jobs:
             chkprefill: ''  # Set it once to silence actionlint
       fail-fast: false
     steps:
+      - name: 'cache imdisk'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-imdisk
+        with:
+          path: ~/imdisk
+          key: ${{ runner.os }}-imdisk
+
+      - name: 'setup RAM disk'
+        shell: sh
+        env:
+          CACHE_HIT: '${{ steps.cache-imdisk.outputs.cache-hit }}'
+        run: *ram-disk-install
+
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: ${{ matrix.sys }}
@@ -490,7 +560,7 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-compiler
         with:
-          path: D:\my-cache
+          path: R:\my-cache
           key: ${{ runner.os }}-mingw-w64-${{ matrix.ver }}-${{ matrix.env }}
 
       - name: 'install compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
@@ -499,7 +569,7 @@ jobs:
         env:
           MATRIX_URL: '${{ matrix.url }}'
         run: |
-          cd /d
+          cd /r
           mkdir my-cache
           cd my-cache
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 240 --retry 3 --retry-connrefused \
@@ -521,12 +591,13 @@ jobs:
           MATRIX_TYPE: '${{ matrix.type }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/r/my-cache/${MATRIX_DIR}/bin:$PATH"
+          cd .. && cp -r curl /r && cd /r/curl
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
-            cmake -B "bld${_chkprefill}" -G Ninja ${options} \
+            cmake -B "${BLD}${_chkprefill}" -G Ninja ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
@@ -534,39 +605,39 @@ jobs:
               -DUSE_LIBIDN2=OFF \
               ${MATRIX_CONFIG}
           done
-          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
-            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+          if [ -d "${BLD}_chkprefill" ] && ! diff -u "${BLD}"/lib/curl_config.h "${BLD}_chkprefill"/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat "${BLD}_chkprefill"/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
             false
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+        run: cat "${BLD}"/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+          echo '::group::raw'; cat "${BLD}"/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' "${BLD}"/lib/curl_config.h | sort || true
 
       - name: 'build'
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          cmake --build bld
+          PATH="/r/my-cache/${MATRIX_DIR}/bin:$PATH"
+          cmake --build "${BLD}"
 
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
-          PATH="$PWD/bld/lib:$PATH"
-          bld/src/curl.exe --disable --version
+          PATH="$(realpath "${BLD}")/lib:$PATH"
+          "${BLD}"/src/curl.exe --disable --version
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          cmake --build bld --target testdeps
+          PATH="/r/my-cache/${MATRIX_DIR}/bin:$PATH"
+          cmake --build "${BLD}" --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -581,24 +652,24 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
+          PATH="/r/my-cache/${MATRIX_DIR}/bin:$PATH"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --target test-ci
+          PATH="$(realpath "${BLD}")/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build "${BLD}" --target test-ci
 
       - name: 'build examples'
         if: ${{ !contains(matrix.name, '!examples') }}
         timeout-minutes: 5
         run: |
-          PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          cmake --build bld --target curl-examples-build
+          PATH="/r/my-cache/${MATRIX_DIR}/bin:$PATH"
+          cmake --build "${BLD}" --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB "${BLD}"
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
@@ -714,6 +785,8 @@ jobs:
       MATRIX_OPENSSH: '${{ matrix.openssh }}'
       MATRIX_PLAT: '${{ matrix.plat }}'
       MATRIX_TYPE: '${{ matrix.type }}'
+      BLD: '/r/bld'
+      RAMDISK_SIZE: '1024M'
       OPENSSH_WINDOWS_VERSION: 'v9.8.1.0p1-Preview'
       VCPKG_DISABLE_METRICS: '1'
     strategy:
@@ -799,6 +872,19 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install-msys2 }}
 
+      - name: 'cache imdisk'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-imdisk
+        with:
+          path: ~/imdisk
+          key: ${{ runner.os }}-imdisk
+
+      - name: 'setup RAM disk'
+        shell: sh
+        env:
+          CACHE_HIT: '${{ steps.cache-imdisk.outputs.cache-hit }}'
+        run: *ram-disk-install
+
       - name: 'vcpkg versions'
         if: ${{ matrix.install-vcpkg  }}
         timeout-minutes: 1
@@ -823,6 +909,7 @@ jobs:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
           [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
+          cd .. && cp -r curl /r && cd /r/curl
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
             cflags=''
@@ -883,7 +970,7 @@ jobs:
               options+=" -DVCPKG_TARGET_TRIPLET=${MATRIX_ARCH}-${MATRIX_PLAT}"
               options+=" -DCMAKE_C_COMPILER_TARGET=${MATRIX_ARCH}-${MATRIX_PLAT}"
             fi
-            cmake -B "bld${_chkprefill}" ${options} \
+            cmake -B "${BLD}${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_RC_FLAGS="${rcflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
@@ -895,37 +982,37 @@ jobs:
               -DBUILD_SHARED_LIBS=OFF \
               ${MATRIX_CONFIG}
           done
-          if [ -d bld_chkprefill ] && ! diff -u bld/lib/curl_config.h bld_chkprefill/lib/curl_config.h; then
-            echo '::group::reference configure log'; cat bld_chkprefill/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
+          if [ -d "${BLD}_chkprefill" ] && ! diff -u "${BLD}"/lib/curl_config.h "${BLD}_chkprefill"/lib/curl_config.h; then
+            echo '::group::reference configure log'; cat "${BLD}_chkprefill"/CMakeFiles/CMake*.yaml 2>/dev/null || true; echo '::endgroup::'
             false
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+        run: cat "${BLD}"/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+          echo '::group::raw'; cat "${BLD}"/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' "${BLD}"/lib/curl_config.h | sort || true
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
+        run: cmake --build "${BLD}" --config "${MATRIX_TYPE}" --parallel 5
 
       - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;
+          /usr/bin/find "${BLD}" \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
-            PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
-            "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
+            PATH="$(realpath "${BLD}")/lib/${MATRIX_TYPE}:$PATH"
+            "${BLD}/src/${MATRIX_TYPE}/curl.exe" --disable --version
           fi
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
+        run: cmake --build "${BLD}" --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -940,7 +1027,7 @@ jobs:
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
           else  # OpenSSH-Windows
-            cd /c  # no D: drive on windows-11-arm runners
+            cd /c
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
             unzip bin.zip
@@ -973,13 +1060,13 @@ jobs:
             fi
             PATH="/c/OpenSSH-Win64:$PATH"
           fi
-          PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config "${MATRIX_TYPE}" --target test-ci
+          PATH="$(realpath "${BLD}")/lib/${MATRIX_TYPE}:$PATH:/c/Program Files (x86)/stunnel/bin"
+          cmake --build "${BLD}" --config "${MATRIX_TYPE}" --target test-ci
 
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
+        run: cmake --build "${BLD}" --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
+        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB "${BLD}"
