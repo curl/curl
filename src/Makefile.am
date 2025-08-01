@@ -166,7 +166,8 @@ $(HUGE): $(ASCIIPAGE) $(MKHELP)
 endif
 else # PERL
 $(HUGE):
-	(if test ! -f "$(srcdir)/$(HUGE)"; then                    \
+	$(HUGECMD)(                                                \
+	if test ! -f "$(srcdir)/$(HUGE)"; then                     \
 	  echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE); \
 	  echo '#include "tool_hugehelp.h"' >> $(HUGE);            \
 	  echo 'void hugehelp(void) {}' >> $(HUGE);                \
