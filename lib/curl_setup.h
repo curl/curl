@@ -640,6 +640,12 @@
 #endif
 #endif
 
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#define CURL_THREAD_RETURN_T DWORD
+#else
+#define CURL_THREAD_RETURN_T unsigned int
+#endif
+
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
