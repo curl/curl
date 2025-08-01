@@ -642,8 +642,10 @@
 
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
 #define CURL_THREAD_RETURN_T DWORD
+typedef HANDLE curl_win_thread_handle_t;
 #else
 #define CURL_THREAD_RETURN_T unsigned int
+typedef uintptr_t curl_win_thread_handle_t;
 #endif
 
 /*

@@ -133,11 +133,6 @@ int Curl_thread_cancel(curl_thread_t *hnd)
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  typedef HANDLE curl_win_thread_handle_t;
-#else
-  typedef uintptr_t curl_win_thread_handle_t;
-#endif
   curl_thread_t t;
   curl_win_thread_handle_t thread_handle;
 #if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)

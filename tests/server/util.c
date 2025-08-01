@@ -624,7 +624,6 @@ void install_signal_handlers(bool keep_sigalrm)
 
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   {
-    typedef uintptr_t curl_win_thread_handle_t;
     curl_win_thread_handle_t thread;
     thread = _beginthreadex(NULL, 0, &main_window_loop,
                             (void *)GetModuleHandle(NULL), 0, &thread_main_id);
