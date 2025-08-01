@@ -532,4 +532,4 @@ from UTC). As time is always UTC, this outputs `+0000`.
 
 ## `%Z`
 
-The timezone name, meaning `UTC`.
+The timezone name. For some reason `GMT`.

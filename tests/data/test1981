@@ -38,10 +38,10 @@ http
 Debug
 </features>
 <setenv>
-CURL_TIME=1754037100
+CURL_TIME=1754037103
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out='Time: %time{%d/%b/%Y %H:%M:%S.%f %z}\n' -s -o %LOGDIR/dump
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out='Time: %time{%d/%b/%Y %H:%M:%S.%f %z %Z}\n' -s -o %LOGDIR/dump
 </command>
 </client>
 
@@ -56,7 +56,7 @@ Accept: */*
 
 </protocol>
 <stdout mode="text">
-Time: 01/Aug/2025 08:31:40.037100 +0000
+Time: 01/Aug/2025 08:31:43.037103 +0000 GMT
 </stdout>
 </verify>
 </testcase>

@@ -584,13 +584,18 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     curlx_dyn_init(&format, 1024);
 
     /* insert sub-seconds for %f */
+    /* insert +0000 for %z because it is otherwise not portable */
     for(i = 0; !result && i < vlen; i++) {
-      if((i < vlen - 1) && ptr[i] == '%' && ptr[i + 1] == 'f') {
-        result = curlx_dyn_addf(&format, "%06u", usecs);
+      if((i < vlen - 1) && ptr[i] == '%' &&
+         ((ptr[i + 1] == 'f') || (ptr[i + 1] == 'z'))) {
+        if(ptr[i + 1] == 'f')
+          result = curlx_dyn_addf(&format, "%06u", usecs);
+        else
+          result = curlx_dyn_addn(&format, "+0000", 5);
         i++;
-        continue;
       }
-      result = curlx_dyn_addn(&format, &ptr[i], 1);
+      else
+        result = curlx_dyn_addn(&format, &ptr[i], 1);
     }
     if(!result) {
       /* !checksrc! disable BANNEDFUNC 1 */
