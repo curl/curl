@@ -64,7 +64,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "data=true");
 
     /* example.com is redirected, so we tell libcurl to send POST on 301,
-       302 and 303 HTTP response codes. */
+       302 and 303 HTTP response codes */
     curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
 
     curl_easy_perform(curl);
