@@ -132,14 +132,16 @@ HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
 
-curl_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_MANUAL
+curl_CPPFLAGS = $(AM_CPPFLAGS)
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
+curl_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
 
+if PERL
 if HAVE_LIBZ
 # This generates the tool_hugehelp.c file in both uncompressed and
 # compressed formats.
@@ -161,6 +163,20 @@ $(HUGE): $(ASCIIPAGE) $(MKHELP)
 	echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE);   \
 	echo '#include "tool_setup.h"' >> $(HUGE);                 \
 	$(PERL) $(MKHELP) < $(ASCIIPAGE) >> $(HUGE) )
+endif
+else # PERL
+$(HUGE):
+	(if [ -f "$(srcdir)/tool_hugehelp.c" ]; then \
+	  cp -p "$(srcdir)/tool_hugehelp.c" .; \
+	else \
+	  echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE); \
+	  echo '#include "tool_hugehelp.h"' >> $(HUGE);            \
+	  echo 'void hugehelp(void) {}' >> $(HUGE);                \
+	  echo 'void showhelp(const char *trigger, const char *arg, const char *endarg)' >> $(HUGE); \
+	  echo '{' >> $(HUGE);                                     \
+	  echo '  (void)trigger; (void)arg; (void)endarg;' >> $(HUGE); \
+	  echo '}' >> $(HUGE); \
+	fi)
 endif
 
 else # USE_MANUAL
