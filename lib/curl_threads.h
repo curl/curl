@@ -51,12 +51,6 @@
 #  define CURL_STDCALL
 #endif
 
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-#define CURL_THREAD_RETURN_T DWORD
-#else
-#define CURL_THREAD_RETURN_T unsigned int
-#endif
-
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
