@@ -409,7 +409,9 @@ sub render {
             if($tablemode) {
                 # end of table
                 push @desc, ".RE\n.IP\n" if($manpage);
+                push @desc, "\n" if(!$manpage);
                 $tablemode = 0;
+                $level = 0;
             }
             $header = 1;
             next;
