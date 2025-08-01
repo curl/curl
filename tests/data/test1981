@@ -56,7 +56,7 @@ Accept: */*
 
 </protocol>
 <stdout mode="text">
-Time: 01/Aug/2025 08:31:43.037103 +0000 GMT
+Time: 01/Aug/2025 08:31:43.037103 +0000 UTC
 </stdout>
 </verify>
 </testcase>
