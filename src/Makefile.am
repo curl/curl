@@ -175,7 +175,7 @@ $(HUGE):
 	  echo 'void showhelp(const char *trigger, const char *arg, const char *endarg)' >> $(HUGE); \
 	  echo '{' >> $(HUGE);                                     \
 	  echo '  (void)trigger; (void)arg; (void)endarg;' >> $(HUGE); \
-	  echo '}' >> $(HUGE); \
+	  echo '}' >> $(HUGE);                                     \
 	fi)
 endif
 
