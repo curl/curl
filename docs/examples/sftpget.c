@@ -86,7 +86,7 @@ int main(void)
     /* We activate ssh agent. For this to work you need
        to have ssh-agent running (type set | grep SSH_AGENT to check) or
        pageant on Windows (there is an icon in systray if so) */
-    curl_easy_setopt(curl, CURLOPT_SSH_AUTH_TYPES, (long)CURLSSH_AUTH_AGENT);
+    curl_easy_setopt(curl, CURLOPT_SSH_AUTH_TYPES, CURLSSH_AUTH_AGENT);
 #endif
 
     /* Switch on full protocol/debug output */

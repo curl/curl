@@ -846,19 +846,19 @@ typedef enum {
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
 #define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
 
-#define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
-#define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */
-#define CURLSSH_AUTH_PUBLICKEY (1<<0) /* public/private key files */
-#define CURLSSH_AUTH_PASSWORD  (1<<1) /* password */
-#define CURLSSH_AUTH_HOST      (1<<2) /* host key files */
-#define CURLSSH_AUTH_KEYBOARD  (1<<3) /* keyboard interactive */
-#define CURLSSH_AUTH_AGENT     (1<<4) /* agent (ssh-agent, pageant...) */
-#define CURLSSH_AUTH_GSSAPI    (1<<5) /* gssapi (kerberos, ...) */
+#define CURLSSH_AUTH_ANY       ~0L     /* all types supported by the server */
+#define CURLSSH_AUTH_NONE      0L      /* none allowed, silly but complete */
+#define CURLSSH_AUTH_PUBLICKEY (1L<<0) /* public/private key files */
+#define CURLSSH_AUTH_PASSWORD  (1L<<1) /* password */
+#define CURLSSH_AUTH_HOST      (1L<<2) /* host key files */
+#define CURLSSH_AUTH_KEYBOARD  (1L<<3) /* keyboard interactive */
+#define CURLSSH_AUTH_AGENT     (1L<<4) /* agent (ssh-agent, pageant...) */
+#define CURLSSH_AUTH_GSSAPI    (1L<<5) /* gssapi (kerberos, ...) */
 #define CURLSSH_AUTH_DEFAULT CURLSSH_AUTH_ANY
 
-#define CURLGSSAPI_DELEGATION_NONE        0      /* no delegation (default) */
-#define CURLGSSAPI_DELEGATION_POLICY_FLAG (1<<0) /* if permitted by policy */
-#define CURLGSSAPI_DELEGATION_FLAG        (1<<1) /* delegate always */
+#define CURLGSSAPI_DELEGATION_NONE        0L      /* no delegation (default) */
+#define CURLGSSAPI_DELEGATION_POLICY_FLAG (1L<<0) /* if permitted by policy */
+#define CURLGSSAPI_DELEGATION_FLAG        (1L<<1) /* delegate always */
 
 #define CURL_ERROR_SIZE 256
 
@@ -2430,7 +2430,7 @@ typedef struct curl_mime      curl_mime;      /* Mime context. */
 typedef struct curl_mimepart  curl_mimepart;  /* Mime part context. */
 
 /* CURLMIMEOPT_ defines are for the CURLOPT_MIME_OPTIONS option. */
-#define CURLMIMEOPT_FORMESCAPE  (1<<0) /* Use backslash-escaping for forms. */
+#define CURLMIMEOPT_FORMESCAPE  (1L<<0) /* Use backslash-escaping for forms. */
 
 /*
  * NAME curl_mime_init()
