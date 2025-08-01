@@ -166,7 +166,7 @@ $(HUGE): $(ASCIIPAGE) $(MKHELP)
 endif
 else # PERL
 $(HUGE):
-	(if [ -f "$(srcdir)/tool_hugehelp.c" ]; then \
+	(if test -f "$(srcdir)/tool_hugehelp.c"; then \
 	  cp -p "$(srcdir)/tool_hugehelp.c" .; \
 	else \
 	  echo '/* !checksrc! disable COPYRIGHT all */' > $(HUGE); \
