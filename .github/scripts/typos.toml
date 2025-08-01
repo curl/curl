@@ -25,5 +25,4 @@ extend-exclude = [
   "docs/THANKS",
   "packages/*",
   "scripts/wcurl",
-  "winbuild/*",
 ]
