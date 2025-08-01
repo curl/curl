@@ -84,7 +84,7 @@ int main(void)
 This option was known as CURLOPT_FTP_SSL up to 7.16.4. Supported by LDAP since
 7.81.0. Fully supported by the OpenLDAP backend only.
 
-CURLUSESSL_\* enums became `long` types in 8.13.0, prior to this version
+`CURLUSESSL_*` enums became `long` types in 8.13.0, prior to this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 # %AVAILABILITY%

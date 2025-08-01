@@ -77,7 +77,7 @@ int main(void)
 
 # HISTORY
 
-CURL_IPRESOLVE_\* macros became `long` types in 8.15.0, before this version
+`CURL_IPRESOLVE_*` macros became `long` types in 8.15.0, before this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 # %AVAILABILITY%
