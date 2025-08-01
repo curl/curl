@@ -68,6 +68,8 @@ struct ossl_ctx {
   X509*    server_cert;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
+  /* blocked writes need to retry with same length, remember it */
+  int      blocked_ssl_write_len;
 #ifndef HAVE_KEYLOG_CALLBACK
   /* Set to true once a valid keylog entry has been created to avoid dupes.
      This is a bool and not a bitfield because it is passed by address. */

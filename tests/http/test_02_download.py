@@ -754,7 +754,7 @@ class TestDownload:
 
     # download with looong urls
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024])
+    @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024, 80*1024, 96*1024])
     def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
@@ -784,6 +784,11 @@ class TestDownload:
                 # h2 is unable to send such large headers (frame limits)
                 r.check_exit_code(55)
             elif proto == 'h3':
-                r.check_exit_code(0)
-                # nghttpx reports 431 Request Header Field too Large
-                r.check_response(http_status=431)
+                if url_junk <= 64*1024:
+                    r.check_exit_code(0)
+                    # nghttpx reports 431 Request Header Field too Large
+                    r.check_response(http_status=431)
+                else:
+                    # nghttpx destroys the connection with internal error
+                    # ERR_QPACK_HEADER_TOO_LARGE
+                    r.check_exit_code(56)
