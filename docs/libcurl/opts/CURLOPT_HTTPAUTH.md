@@ -137,7 +137,7 @@ int main(void)
     CURLcode ret;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* allow whatever auth the server speaks */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
     curl_easy_setopt(curl, CURLOPT_USERPWD, "james:bond");
     ret = curl_easy_perform(curl);
   }
@@ -151,6 +151,9 @@ CURLAUTH_DIGEST_IE was added in 7.19.3
 CURLAUTH_ONLY was added in 7.21.3
 
 CURLAUTH_NTLM_WB was added in 7.22.0
+
+**CURLAUTH_*** macros became `long` types in 7.26.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 CURLAUTH_BEARER was added in 7.61.0
 

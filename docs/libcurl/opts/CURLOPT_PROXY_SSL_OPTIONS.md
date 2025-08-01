@@ -109,13 +109,18 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
     /* weaken TLS only for use with silly proxies */
-    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS, (long)
+    curl_easy_setopt(curl, CURLOPT_PROXY_SSL_OPTIONS,
                      CURLSSLOPT_ALLOW_BEAST | CURLSSLOPT_NO_REVOKE);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLSSLOPT_*** macros became `long` types in 8.15.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

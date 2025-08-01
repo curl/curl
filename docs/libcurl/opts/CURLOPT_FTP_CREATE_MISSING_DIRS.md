@@ -67,7 +67,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://example.com/non-existing/new.txt");
     curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                     (long)CURLFTP_CREATE_DIR_RETRY);
+                     CURLFTP_CREATE_DIR_RETRY);
 
     res = curl_easy_perform(curl);
 
@@ -75,6 +75,11 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLFTP_CREATE_*** enums became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

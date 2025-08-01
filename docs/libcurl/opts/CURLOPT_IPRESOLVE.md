@@ -66,7 +66,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
 
     /* of all addresses example.com resolves to, only IPv6 ones are used */
-    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, (long)CURL_IPRESOLVE_V6);
+    curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
 
     res = curl_easy_perform(curl);
 
@@ -74,6 +74,11 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+**CURL_IPRESOLVE_*** macros became `long` types in 8.15.0, before this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

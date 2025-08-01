@@ -65,7 +65,7 @@ int main(void)
 
     /* example.com is redirected, so we tell libcurl to send POST on 301,
        302 and 303 HTTP response codes */
-    curl_easy_setopt(curl, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_ALL);
+    curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
 
     curl_easy_perform(curl);
   }
@@ -76,6 +76,9 @@ int main(void)
 
 This option was known as CURLOPT_POST301 up to 7.19.0 as it only supported the
 301 then. CURL_REDIR_POST_303 was added in 7.26.0.
+
+**CURL_REDIR_*** macros became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

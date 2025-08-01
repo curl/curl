@@ -127,7 +127,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* ask libcurl to use TLS version 1.0 or later */
-    curl_easy_setopt(curl, CURLOPT_SSLVERSION, (long)CURL_SSLVERSION_TLSv1);
+    curl_easy_setopt(curl, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
 
     /* Perform the request */
     curl_easy_perform(curl);
@@ -149,6 +149,9 @@ supported with wolfSSL and the other macros did not set a minimum, but
 restricted the TLS version to only the specified one.
 
 Rustls support added in 8.10.0.
+
+**CURL_SSLVERSION_*** macros became `long` types in 8.16.0, prior to this
+version a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 
