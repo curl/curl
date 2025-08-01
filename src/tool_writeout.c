@@ -572,7 +572,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
       if(timestr) {
         curl_off_t val;
         curlx_str_number(&timestr, &val, TIME_T_MAX);
-#ifdef SIZEOF_TIME_T < 5
+#if SIZEOF_TIME_T < 5
         cnow.tv_sec = (time_t)(val & 0xffffffff);
 #else
         cnow.tv_sec = (time_t)val;
