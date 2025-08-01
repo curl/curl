@@ -62,7 +62,7 @@ int main(void)
 
 # HISTORY
 
-`CURLAUTH_*` macros became `long` types in 7.26.0, prior to this version
+**CURLAUTH_*** macros became `long` types in 7.26.0, prior to this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 # %AVAILABILITY%
