@@ -35,7 +35,7 @@
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
 #elif defined(USE_THREADS_WIN32)
-#  define CURL_STDCALL           __stdcall
+#  define CURL_STDCALL           CURL_WIN_THREADFUNC
 #  define curl_mutex_t           CRITICAL_SECTION
 #  define curl_thread_t          HANDLE
 #  define curl_thread_t_null     (HANDLE)0

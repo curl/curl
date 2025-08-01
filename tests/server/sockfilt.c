@@ -413,7 +413,8 @@ struct select_ws_wait_data {
   HANDLE abort;  /* internal event to abort waiting threads */
 };
 #include <process.h>
-static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
+static
+unsigned int CURL_WIN_THREADFUNC select_ws_wait_thread(void *lpParameter)
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
