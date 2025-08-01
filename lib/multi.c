@@ -2649,6 +2649,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 statemachine_end:
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {
+        bool conn_existed = FALSE;
         /*
          * If an error was returned, and we are not in completed state now,
          * then we go to completed and consider this transfer aborted.
@@ -2661,6 +2662,7 @@ statemachine_end:
         process_pending_handles(multi); /* connection */
 
         if(data->conn) {
+          conn_existed = TRUE;
           if(stream_error) {
             /* Do not attempt to send data over a connection that timed out */
             bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
@@ -2672,11 +2674,6 @@ statemachine_end:
             Curl_detach_connection(data);
             Curl_conn_terminate(data, conn, dead_connection);
           }
-        }
-        else if(data->mstate == MSTATE_CONNECT) {
-          /* Curl_connect() failed */
-          multi_posttransfer(data);
-          Curl_pgrsUpdate_nometer(data);
         }
           /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
@@ -2694,15 +2691,20 @@ statemachine_end:
         stream_error = FALSE;
         multistate(data, MSTATE_CONNECT);
         result = CURLE_OK;
-        rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
     else
 #endif
     {
-        multistate(data, MSTATE_COMPLETED);
-        rc = CURLM_CALL_MULTI_PERFORM;
+      if(!conn_existed && data->mstate == MSTATE_CONNECT) {
+        /* Curl_connect() failed */
+        multi_posttransfer(data);
+        Curl_pgrsUpdate_nometer(data);
+      }
+      multistate(data, MSTATE_COMPLETED);
     }
+      rc = CURLM_CALL_MULTI_PERFORM;
+
       }
       /* if there is still a connection to use, call the progress function */
       else if(data->conn && Curl_pgrsUpdate(data)) {
