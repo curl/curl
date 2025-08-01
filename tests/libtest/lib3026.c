@@ -27,7 +27,7 @@
 
 #ifdef _WIN32
 #include <process.h>
-static CURL_THREAD_RETURN_T WINAPI t3026_run_thread(void *ptr)
+static CURL_THREAD_RETURN_T __stdcall t3026_run_thread(void *ptr)
 {
   CURLcode *result = ptr;
 
