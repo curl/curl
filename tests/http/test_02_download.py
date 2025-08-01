@@ -758,6 +758,8 @@ class TestDownload:
     def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            pytest.skip("quiche fails from 16k onwards")
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?'
         url += 'x'*(url_junk)  # url is now longer than 'url_len'
