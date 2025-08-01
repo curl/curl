@@ -123,6 +123,11 @@ struct schannel_ssl_backend_data {
      more bytes into encdata then set this back to false. */
   unsigned long req_flags, ret_flags;
   CURLcode recv_unrecoverable_err; /* schannel_recv had an unrecoverable err */
+  struct schannel_renegotiate_state {
+    bool started;
+    struct curltime start_time;
+    int io_need;
+  } renegotiate_state;
   BIT(recv_sspi_close_notify); /* true if connection closed by close_notify */
   BIT(recv_connection_closed); /* true if connection closed, regardless how */
   BIT(recv_renegotiating);     /* true if recv is doing renegotiation */
