@@ -152,7 +152,7 @@ CURLAUTH_ONLY was added in 7.21.3
 
 CURLAUTH_NTLM_WB was added in 7.22.0
 
-`CURLAUTH_...` macros became `long` types in 7.26.0, prior to this version
+`CURLAUTH_*` macros became `long` types in 7.26.0, prior to this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 CURLAUTH_BEARER was added in 7.61.0

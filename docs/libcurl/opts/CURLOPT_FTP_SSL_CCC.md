@@ -72,7 +72,7 @@ int main(void)
 
 # HISTORY
 
-`CURLFTPSSL_...` enums became `long` types in 8.16.0, prior to this version
+`CURLFTPSSL_*` enums became `long` types in 8.16.0, prior to this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 # %AVAILABILITY%

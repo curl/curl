@@ -70,7 +70,7 @@ int main(void)
 
 # HISTORY
 
-`CURLFTPAUTH_...` enums became `long` types in 8.16.0, prior to this version
+`CURLFTPAUTH_*` enums became `long` types in 8.16.0, prior to this version
 a `long` cast is necessary when passing to curl_easy_setopt(3).
 
 # %AVAILABILITY%
