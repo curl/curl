@@ -488,7 +488,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 /* Window message queue loop for hidden main window, details see above.
  */
 #include <process.h>
-static CURL_THREAD_RETURN_T WINAPI main_window_loop(void *lpParameter)
+static
+CURL_THREAD_RETURN_T CURL_WIN_THREADFUNC main_window_loop(void *lpParameter)
 {
   WNDCLASS wc;
   BOOL ret;
