@@ -60,7 +60,6 @@ Failed connection problems that trigger this fallback:
 2. non-responsive servers
 3. connection issues
 
-
 ## CURLALTSVC_READONLYFILE
 
 Do not write the alt-svc cache back to the file specified with
