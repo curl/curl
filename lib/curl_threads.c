@@ -135,11 +135,7 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 {
   curl_thread_t t;
   curl_win_thread_handle_t thread_handle;
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
-#else
-  thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
-#endif
+  thread_handle = CURL_WIN_BEGINTHREAD(NULL, 0, func, arg, 0, NULL);
   t = (curl_thread_t)thread_handle;
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef UNDER_CE

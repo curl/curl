@@ -568,7 +568,8 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
     data->abort = abort;
 
     /* launch waiting thread */
-    thread = _beginthreadex(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
+    thread = CURL_WIN_BEGINTHREAD(NULL, 0, &select_ws_wait_thread, data, 0,
+                                  NULL);
 
     /* free data if thread failed to launch */
     if(!thread) {

@@ -58,11 +58,7 @@ static CURLcode test_lib3026(const char *URL)
   for(i = 0; i < tid_count; i++) {
     curl_win_thread_handle_t th;
     results[i] = CURL_LAST; /* initialize with invalid value */
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-    th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
-#else
-    th = _beginthreadex(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
-#endif
+    th = CURL_WIN_BEGINTHREAD(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
     if(!th) {
       curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
                     __FILE__, __LINE__, GetLastError());
