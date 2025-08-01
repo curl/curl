@@ -70,11 +70,11 @@ struct curl_trc_featt;
  * platforms that have a >= 64-bit type and then we use such a type for the
  * protocol fields in the protocol handler.
  */
-#define CURLPROTO_WS     (1<<30)
+#define CURLPROTO_WS     (1L<<30)
 #define CURLPROTO_WSS    ((curl_prot_t)1<<31)
 #else
-#define CURLPROTO_WS 0
-#define CURLPROTO_WSS 0
+#define CURLPROTO_WS     0L
+#define CURLPROTO_WSS    0L
 #endif
 
 /* the default protocols accepting a redirect to */
