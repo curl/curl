@@ -509,7 +509,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       (HWND)NULL, (HMENU)NULL,
-                                      wc.hInstance, (LPVOID)NULL);
+                                      wc.hInstance, NULL);
   if(!hidden_main_window) {
     win32_perror("CreateWindowEx failed");
     return (DWORD)-1;
