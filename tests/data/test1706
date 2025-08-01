@@ -224,23 +224,24 @@ DESCRIPTION
 
 		Permit  only   this  protocol   (ignoring  the   list   already
 		permitted), though subject to later modification by  subsequent
-		entries in  the  comma  separated list.  For  example:  --proto
-		-ftps uses the default protocols, but disables ftps
+		entries in the comma separated list.
 
-		--proto -all,https,+http only enables http and https
+	    For  example:  --proto  -ftps  uses  the  default  protocols,   but
+	    disables ftps
 
-		--proto =http,https also only enables http and https
+	    --proto -all,https,+http only enables http and https
 
-		Unknown and disabled protocols  produce a warning. This  allows
-		scripts to safely  rely on  being able  to disable  potentially
-		dangerous protocols,  without  relying upon  support  for  that
-		protocol being built into curl to avoid an error.
+	    --proto =http,https also only enables http and https
 
-		This option  can be  used  multiple times,  in which  case  the
-		effect is  the same  as concatenating  the protocols  into  one
-		instance of the option.
+	    Unknown and  disabled  protocols  produce a  warning.  This  allows
+	    scripts to  safely  rely  on  being  able  to  disable  potentially
+	    dangerous  protocols,  without  relying   upon  support  for   that
+	    protocol being built into curl to avoid an error.
 
-	    If --proto is provided several times, the last set value is used.
+	    This option can be  used multiple times,  in which case the  effect
+	    is the same  as concatenating  the protocols into  one instance  of
+	    the option.  If --proto  is provided  several times,  the last  set
+	    value is used.
 
 	    Example:
 	     curl --proto =http,https,sftp https://example.com
