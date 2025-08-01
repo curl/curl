@@ -54,10 +54,10 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
-#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+#include "altsvc.h" /* seems this is needed in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
