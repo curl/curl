@@ -5316,6 +5316,17 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
   memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
+  if(octx->blocked_ssl_write_len && (octx->blocked_ssl_write_len != memlen)) {
+    /* The previous SSL_write() call was blocked, using that length.
+     * We need to use that again or OpenSSL will freak out. A shorter
+     * length should not happen and is a bug in libcurl. */
+    if(octx->blocked_ssl_write_len > memlen) {
+      DEBUGASSERT(0);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    memlen = octx->blocked_ssl_write_len;
+  }
+  octx->blocked_ssl_write_len = 0;
   nwritten = SSL_write(octx->ssl, mem, memlen);
 
   if(nwritten > 0)
@@ -5326,16 +5337,19 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
     switch(err) {
     case SSL_ERROR_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      octx->blocked_ssl_write_len = memlen;
       result = CURLE_AGAIN;
       goto out;
     case SSL_ERROR_WANT_WRITE:
       result = CURLE_AGAIN;
+      octx->blocked_ssl_write_len = memlen;
       goto out;
     case SSL_ERROR_SYSCALL:
     {
       int sockerr = SOCKERRNO;
 
       if(octx->io_result == CURLE_AGAIN) {
+        octx->blocked_ssl_write_len = memlen;
         result = CURLE_AGAIN;
         goto out;
       }
