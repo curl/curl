@@ -133,7 +133,7 @@ int main(void)
 # HISTORY
 
 **CURLSSLOPT_*** macros became `long` types in 8.15.0, prior to this version
-a `long` cast is necessary when passing to curl_easy_setopt(3).
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

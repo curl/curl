@@ -78,7 +78,7 @@ This option was known as CURLOPT_POST301 up to 7.19.0 as it only supported the
 301 then. CURL_REDIR_POST_303 was added in 7.26.0.
 
 **CURL_REDIR_*** macros became `long` types in 8.16.0, prior to this version
-a `long` cast is necessary when passing to curl_easy_setopt(3).
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 
