@@ -751,3 +751,37 @@ class TestDownload:
              '-P', f'{pause_offset}', '-V', proto, url
         ])
         r.check_exit_code(0)
+
+    # download with looong urls
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024])
+    def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?'
+        url += 'x'*(url_junk)  # url is now longer than 'url_len'
+        r = curl.http_download(urls=[url], alpn_proto=proto)
+        if url_junk <= 1024:
+            r.check_exit_code(0)
+            r.check_response(http_status=200)
+        elif url_junk <= 16*1024:
+            r.check_exit_code(0)
+            # server replies with 414, Request URL too long
+            r.check_response(http_status=414)
+        elif url_junk <= 32*1024:
+            r.check_exit_code(0)
+            # server replies with 414, Request URL too long
+            r.check_response(http_status=414)
+        else:
+            # with urls larger than 64k, behaviour differs
+            if proto == 'http/1.1':
+                r.check_exit_code(0)
+                r.check_response(http_status=414)
+            elif proto == 'h2':
+                # h2 is unable to send such large headers (frame limits)
+                r.check_exit_code(55)
+            elif proto == 'h3':
+                r.check_exit_code(0)
+                # nghttpx reports 431 Request Header Field too Large
+                r.check_response(http_status=431)
