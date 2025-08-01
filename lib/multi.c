@@ -2647,35 +2647,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
 statemachine_end:
-    /* maybe retry if altsvc is breaking */
-#ifndef CURL_DISABLE_ALTSVC
-    if(result &&
-       data->asi && data->asi->used && !data->asi->errored) {
-      data->asi->errored = is_altsvc_error(result);
-
-      if(data->asi->errored &&
-         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
-        data->mstate <= MSTATE_PROTOCONNECTING &&
-        data->mstate >= MSTATE_CONNECT) {
-        infof(data, "Alt-Svc connection failed(%d). "
-                    "Retrying with original target", result);
-
-        if(data->conn && stream_error) {
-          bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
-          struct connectdata *conn = data->conn;
-
-          Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, dead_connection);
-        }
-
-        stream_error = FALSE;
-        multistate(data, MSTATE_CONNECT);
-        result = CURLE_OK;
-        rc = CURLM_CALL_MULTI_PERFORM;
-      }
-    }
-#endif
-
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {
         /*
@@ -2707,9 +2678,31 @@ statemachine_end:
           multi_posttransfer(data);
           Curl_pgrsUpdate_nometer(data);
         }
+          /* maybe retry if altsvc is breaking */
+#ifndef CURL_DISABLE_ALTSVC
+    if(data->asi && data->asi->used && !data->asi->errored) {
+      data->asi->errored = is_altsvc_error(result);
 
+      if(data->asi->errored &&
+         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+        data->mstate <= MSTATE_PROTOCONNECTING &&
+        data->mstate >= MSTATE_CONNECT) {
+
+        infof(data, "Alt-Svc connection failed(%d). "
+                    "Retrying with original target", result);
+
+        stream_error = FALSE;
+        multistate(data, MSTATE_CONNECT);
+        result = CURLE_OK;
+        rc = CURLM_CALL_MULTI_PERFORM;
+      }
+    }
+    else
+#endif
+    {
         multistate(data, MSTATE_COMPLETED);
         rc = CURLM_CALL_MULTI_PERFORM;
+    }
       }
       /* if there is still a connection to use, call the progress function */
       else if(data->conn && Curl_pgrsUpdate(data)) {
