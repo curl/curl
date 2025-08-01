@@ -280,8 +280,7 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
-AC_PATH_PROG(PERL, perl,,
-  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
+AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
 AC_SUBST(PERL)
 AM_CONDITIONAL(PERL, test -n "$PERL")
 
