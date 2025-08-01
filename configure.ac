@@ -663,7 +663,10 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
   esac ],
     AC_MSG_RESULT([no])
 )
-
+if test -z "$PERL" -a "$want_unity" = 'yes'; then
+  AC_MSG_WARN([perl was not found. Will not enable unity.])
+  want_unity='no'
+fi
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
 
 dnl ************************************************************
@@ -3901,6 +3904,10 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
 esac
+if test -z "$PERL" -a x"$ZSH_FUNCTIONS_DIR" != x; then
+  AC_MSG_WARN([perl was not found. Will not install zsh completions.])
+  ZSH_FUNCTIONS_DIR=''
+fi
 AM_CONDITIONAL(USE_ZSH_COMPLETION, test x"$ZSH_FUNCTIONS_DIR" != x)
 
 dnl **********************************************************************
@@ -3932,6 +3939,10 @@ case "$OPT_FISH_FPATH" in
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
 esac
+if test -z "$PERL" -a x"$FISH_FUNCTIONS_DIR" != x; then
+  AC_MSG_WARN([perl was not found. Will not install fish completions.])
+  FISH_FUNCTIONS_DIR=''
+fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
 dnl Now check for the very most basic headers. Then we can use these
