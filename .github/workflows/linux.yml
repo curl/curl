@@ -108,7 +108,7 @@ jobs:
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls'
             install_packages: libnghttp2-dev
@@ -572,7 +572,7 @@ jobs:
           else
             mkdir bld && cd bld && \
             ${MATRIX_CONFIGURE_PREFIX} \
-            ../configure --enable-unity --enable-warnings --enable-werror \
+            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
           fi
@@ -614,9 +614,13 @@ jobs:
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: bld/src/curl -V
 
-      - name: 'cmake install'
-        if: ${{ matrix.build.generate }}
-        run: cmake --install bld --strip
+      - name: 'curl install'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --install bld --strip
+          else
+            make -C bld V=1 install
+          fi
 
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}
