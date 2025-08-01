@@ -228,7 +228,7 @@ static CURLcode test_lib2700(const char *URL)
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
-  if(testnum == 2708)
+  if(testnum != 2708)
     easy_setopt(curl, CURLOPT_WS_OPTIONS, (long)CURLWS_NOAUTOPONG);
 
   res = curl_easy_perform(curl);
