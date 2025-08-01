@@ -113,7 +113,7 @@ jobs:
           make test-ci
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l | grep -q -v '^ *0$'
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
           popd
           scripts/checksrc-all.pl
 
@@ -138,7 +138,7 @@ jobs:
           make
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l | grep -q -v '^ *0$'
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
           popd
 
   verify-in-tree-autotools:
@@ -160,7 +160,7 @@ jobs:
           make
           make install
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l | grep -q -v '^ *0$'
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   verify-out-of-tree-cmake:
     name: 'CM out-of-tree !perl'
@@ -182,7 +182,7 @@ jobs:
           cmake --install build
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l | grep -q -v '^ *0$'
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   verify-in-tree-cmake:
     name: 'CM in-tree !perl'
@@ -204,7 +204,7 @@ jobs:
           cmake --install .
           export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
           curl-install/bin/curl --disable --version
-          curl-install/bin/curl --manual | wc -l | grep -q -v '^ *0$'
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   missing-files:
     name: 'missing files'
