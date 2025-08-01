@@ -24,7 +24,6 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 <setenv>
 CURL_WS_FORCE_ZERO_MASK=1
-LIB2700_AUTO_PONG=1
 </setenv>
 </client>
 
