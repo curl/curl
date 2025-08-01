@@ -54,11 +54,12 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
+#include "altsvc.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-#include "altsvc.h"
 
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
