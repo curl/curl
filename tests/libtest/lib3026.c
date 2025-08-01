@@ -26,12 +26,7 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-static DWORD WINAPI t3026_run_thread(LPVOID ptr)
-#else
-#include <process.h>
-static unsigned int WINAPI t3026_run_thread(void *ptr)
-#endif
+static DWORD WINAPI t3026_run_thread(void *ptr)
 {
   CURLcode *result = ptr;
 
@@ -44,13 +39,8 @@ static unsigned int WINAPI t3026_run_thread(void *ptr)
 
 static CURLcode test_lib3026(const char *URL)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  typedef HANDLE curl_win_thread_handle_t;
-#else
-  typedef uintptr_t curl_win_thread_handle_t;
-#endif
   CURLcode results[NUM_THREADS];
-  curl_win_thread_handle_t thread_handles[NUM_THREADS];
+  HANDLE thread_handles[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
@@ -65,13 +55,9 @@ static CURLcode test_lib3026(const char *URL)
   }
 
   for(i = 0; i < tid_count; i++) {
-    curl_win_thread_handle_t th;
+    HANDLE th;
     results[i] = CURL_LAST; /* initialize with invalid value */
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
     th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
-#else
-    th = _beginthreadex(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
-#endif
     if(!th) {
       curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
                     __FILE__, __LINE__, GetLastError());
@@ -84,8 +70,8 @@ static CURLcode test_lib3026(const char *URL)
 
 cleanup:
   for(i = 0; i < tid_count; i++) {
-    WaitForSingleObject((HANDLE)thread_handles[i], INFINITE);
-    CloseHandle((HANDLE)thread_handles[i]);
+    WaitForSingleObject(thread_handles[i], INFINITE);
+    CloseHandle(thread_handles[i]);
     if(results[i] != CURLE_OK) {
       curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
                     "with code %d (%s)\n", __FILE__, __LINE__,

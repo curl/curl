@@ -412,8 +412,7 @@ struct select_ws_wait_data {
   HANDLE signal; /* internal event to signal handle trigger */
   HANDLE abort;  /* internal event to abort waiting threads */
 };
-#include <process.h>
-static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
+static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
@@ -557,25 +556,25 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
 
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
-  typedef uintptr_t curl_win_thread_handle_t;
   struct select_ws_wait_data *data;
-  curl_win_thread_handle_t thread;
 
   /* allocate internal waiting data structure */
   data = malloc(sizeof(struct select_ws_wait_data));
   if(data) {
+    HANDLE thread;
+
     data->handle = handle;
     data->signal = signal;
     data->abort = abort;
 
     /* launch waiting thread */
-    thread = _beginthreadex(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
+    thread = CreateThread(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
 
     /* free data if thread failed to launch */
     if(!thread) {
       free(data);
     }
-    return (HANDLE)thread;
+    return thread;
   }
   return NULL;
 }
