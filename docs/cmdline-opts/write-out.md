@@ -528,7 +528,7 @@ The year as a decimal number including the century.
 ## `%z`
 
 The `+hhmm` or `-hhmm` numeric timezone (that is, the hour and minute offset
-from UTC). Since ths time is UTC, this always shows `+0000`.
+from UTC). As time is always UTC, this outputs `+0000`.
 
 ## `%Z`
 
