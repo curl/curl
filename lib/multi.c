@@ -54,10 +54,10 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
+#include "altsvc.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
-#include "altsvc.h" /* seems this is needed in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -2429,10 +2429,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       FALLTHROUGH();
 
     case MSTATE_CONNECT:
-
-#ifndef CURL_DISABLE_ALTSVC
-do_connect:
-#endif
       rc = state_connect(multi, data, nowp, &result);
       break;
 
@@ -2661,34 +2657,6 @@ do_connect:
     }
 
 statemachine_end:
-    /* maybe retry if altsvc is breaking */
-#ifndef CURL_DISABLE_ALTSVC
-    if(result &&
-       data->asi && data->asi->used && !data->asi->errored) {
-      data->asi->errored = is_altsvc_error(result);
-
-      if(data->asi->errored &&
-         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
-        data->mstate <= MSTATE_PROTOCONNECTING &&
-        data->mstate >= MSTATE_CONNECT) {
-        infof(data, "Alt-Svc connection failed(%d). "
-                    "Retrying with original target", result);
-
-        if(data->conn && stream_error) {
-          bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
-          struct connectdata *conn = data->conn;
-
-          Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, dead_connection);
-        }
-
-        stream_error = FALSE;
-        multistate(data, MSTATE_CONNECT);
-        goto do_connect;
-      }
-    }
-#endif
-
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {
         /*
@@ -2702,6 +2670,38 @@ statemachine_end:
         /* Check if we can move pending requests to send pipe */
         process_pending_handles(multi); /* connection */
 
+          /* maybe retry if altsvc is breaking */
+#ifndef CURL_DISABLE_ALTSVC
+    if(data->asi && data->asi->used && !data->asi->errored) {
+      data->asi->errored = is_altsvc_error(result);
+
+      if(data->asi->errored &&
+         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+        data->mstate <= MSTATE_PROTOCONNECTING &&
+        data->mstate >= MSTATE_CONNECT) {
+
+        infof(data, "Alt-Svc connection failed(%d). "
+                    "Retrying with original target", result);
+        if(data->conn) {
+           /* Do not attempt to send data over a connection that timed out */
+            bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
+            struct connectdata *conn = data->conn;
+
+            /* This is where we make sure that the conn pointer is reset.
+               We do not have to do this in every case block above where a
+               failure is detected */
+            Curl_detach_connection(data);
+            Curl_conn_terminate(data, conn, dead_connection);
+        }
+
+        stream_error = FALSE;
+        multistate(data, MSTATE_CONNECT);
+        result = CURLE_OK;
+        rc = CURLM_CALL_MULTI_PERFORM;
+        continue;
+      }
+    }
+#endif
         if(data->conn) {
           if(stream_error) {
             /* Do not attempt to send data over a connection that timed out */
