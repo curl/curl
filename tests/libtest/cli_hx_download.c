@@ -145,7 +145,7 @@ static int my_progress_d_cb(void *userdata,
     t->checked_ssl = TRUE;
     res = curl_easy_getinfo(t->easy, CURLINFO_TLS_SSL_PTR, &tls);
     if(res) {
-      curl_mfprintf(stderr, "[t-%d] info CURLINFO_TLS_SSL_PTR failed: %d\n",
+      curl_mfprintf(stderr, "[t-%zd] info CURLINFO_TLS_SSL_PTR failed: %d\n",
                     t->idx, res);
       assert(0);
     }
@@ -156,7 +156,7 @@ static int my_progress_d_cb(void *userdata,
         const char *version = SSL_get_version((SSL*)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
-        curl_mfprintf(stderr, "[t-%d] info OpenSSL using %s\n",
+        curl_mfprintf(stderr, "[t-%zd] info OpenSSL using %s\n",
                       t->idx, version);
         break;
       }
@@ -166,7 +166,7 @@ static int my_progress_d_cb(void *userdata,
         const char *version = wolfSSL_get_version((WOLFSSL*)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
-        curl_mfprintf(stderr, "[t-%d] info wolfSSL using %s\n",
+        curl_mfprintf(stderr, "[t-%zd] info wolfSSL using %s\n",
                       t->idx, version);
         break;
       }
@@ -175,7 +175,7 @@ static int my_progress_d_cb(void *userdata,
       case CURLSSLBACKEND_GNUTLS: {
         int v = gnutls_protocol_get_version((gnutls_session_t)tls->internals);
         assert(v);
-        curl_mfprintf(stderr, "[t-%d] info GnuTLS using %s\n",
+        curl_mfprintf(stderr, "[t-%zd] info GnuTLS using %s\n",
                       t->idx, gnutls_protocol_get_name(v));
         break;
       }
@@ -186,7 +186,7 @@ static int my_progress_d_cb(void *userdata,
           (mbedtls_ssl_context*)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
-        curl_mfprintf(stderr, "[t-%d] info mbedTLS using %s\n",
+        curl_mfprintf(stderr, "[t-%zd] info mbedTLS using %s\n",
                       t->idx, version);
         break;
       }
@@ -196,13 +196,13 @@ static int my_progress_d_cb(void *userdata,
         int v = rustls_connection_get_protocol_version(
           (struct rustls_connection*)tls->internals);
         assert(v);
-        curl_mfprintf(stderr, "[t-%d] info rustls TLS version 0x%x\n",
+        curl_mfprintf(stderr, "[t-%zd] info rustls TLS version 0x%x\n",
                       t->idx, v);
         break;
       }
 #endif
       default:
-        curl_mfprintf(stderr, "[t-%d] info SSL_PTR backend=%d, ptr=%p\n",
+        curl_mfprintf(stderr, "[t-%zd] info SSL_PTR backend=%d, ptr=%p\n",
                       t->idx, tls->backend, (void *)tls->internals);
         break;
       }
