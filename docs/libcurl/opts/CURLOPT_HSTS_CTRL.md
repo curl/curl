@@ -23,8 +23,8 @@ CURLOPT_HSTS_CTRL - control HSTS behavior
 ~~~c
 #include <curl/curl.h>
 
-#define CURLHSTS_ENABLE       (long)(1<<0)
-#define CURLHSTS_READONLYFILE (long)(1<<1)
+#define CURLHSTS_ENABLE       (1L<<0)
+#define CURLHSTS_READONLYFILE (1L<<1)
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HSTS_CTRL, long bitmask);
 ~~~
