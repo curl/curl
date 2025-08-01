@@ -555,7 +555,8 @@ static const char *outtime(const char *ptr, /* %time{ ... */
 #else
     struct curltime cnow;
 #endif
-    time_t now;
+    time_t secs;
+    unsigned int usecs;
     size_t i;
     size_t vlen;
     CURLcode result = CURLE_OK;
@@ -566,30 +567,26 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     cnow.tv_sec = time(NULL);
     cnow.tv_usec = 0;
 #endif
+    secs = cnow.tv_sec;
+    usecs = (unsigned int)cnow.tv_usec;
 #ifdef DEBUGBUILD
     {
       const char *timestr = getenv("CURL_TIME");
       if(timestr) {
         curl_off_t val;
         curlx_str_number(&timestr, &val, TIME_T_MAX);
-#if SIZEOF_TIME_T < 5
-        cnow.tv_sec = (time_t)(val & 0xffffffff);
-#else
-        cnow.tv_sec = (time_t)val;
-#endif
-        cnow.tv_usec = (unsigned int)(val % 1000000);
+        secs = (time_t)val;
+        usecs = (unsigned int)(val % 1000000);
       }
     }
 #endif
-    now = cnow.tv_sec;
     vlen = end - ptr;
     curlx_dyn_init(&format, 1024);
 
     /* insert sub-seconds for %f */
     for(i = 0; !result && i < vlen; i++) {
       if((i < vlen - 1) && ptr[i] == '%' && ptr[i + 1] == 'f') {
-        result = curlx_dyn_addf(&format, "%06u",
-                                (unsigned int)cnow.tv_usec);
+        result = curlx_dyn_addf(&format, "%06u", usecs);
         i++;
         continue;
       }
@@ -597,7 +594,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     }
     if(!result) {
       /* !checksrc! disable BANNEDFUNC 1 */
-      utc = gmtime(&now);
+      utc = gmtime(&secs);
       strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc);
       fputs(output, stream);
       curlx_dyn_free(&format);
