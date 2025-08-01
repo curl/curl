@@ -57,6 +57,7 @@
 #include "../curlx/version_win32.h"
 #include "../rand.h"
 #include "../curlx/strparse.h"
+#include "../progress.h"
 
 /* The last #include file should be: */
 #include "../curl_memory.h"
@@ -65,12 +66,15 @@
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
  * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
  * messages are extra verbose and intended for curl developers debugging
- * Schannel recv decryption.
+ * Schannel recv decryption and renegotiation.
  */
 #ifdef CURL_SCHANNEL_DEV_DEBUG
 #define SCH_DEV(x) x
+#define SCH_DEV_SHOWBOOL(x) \
+  infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
 #else
 #define SCH_DEV(x) do { } while(0)
+#define SCH_DEV_SHOWBOOL(x) do { } while(0)
 #endif
 
 /* Offered by mingw-w64 v8+. MS SDK 7.0A+. */
@@ -1099,6 +1103,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->recv_sspi_close_notify = FALSE;
   backend->recv_connection_closed = FALSE;
   backend->recv_renegotiating = FALSE;
+  backend->renegotiate_state.started = FALSE;
   backend->encdata_is_incomplete = FALSE;
 
   /* continue to second handshake step */
@@ -1680,6 +1685,205 @@ static CURLcode schannel_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+enum schannel_renegotiate_caller_t {
+  SCH_RENEG_CALLER_IS_RECV,
+  SCH_RENEG_CALLER_IS_SEND
+};
+
+/* This function renegotiates the connection due to a server request received
+   by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
+   incomplete. In that case, we remain in the renegotiation (connecting) stage
+   and future calls to schannel_recv and schannel_send must call this function
+   first to complete the renegotiation. */
+static CURLcode
+schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
+                          enum schannel_renegotiate_caller_t caller)
+{
+  CURLcode result;
+  curl_socket_t sockfd;
+  const timediff_t max_renegotiate_ms = 5 * 60 * 1000; /* 5 minutes */
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct schannel_ssl_backend_data *backend =
+    (struct schannel_ssl_backend_data *)connssl->backend;
+  struct schannel_renegotiate_state *rs = &backend->renegotiate_state;
+
+  if(!backend || !backend->recv_renegotiating) {
+    failf(data, "schannel: unexpected call to schannel_recv_renegotiate");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(caller == SCH_RENEG_CALLER_IS_RECV)
+    SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_recv"));
+  else if(caller == SCH_RENEG_CALLER_IS_SEND)
+    SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
+  else {
+    failf(data, "schannel: unknown caller for schannel_recv_renegotiate");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  sockfd = Curl_conn_cf_get_socket(cf, data);
+
+  if(sockfd == CURL_SOCKET_BAD) {
+    failf(data, "schannel: renegotiation missing socket");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(!rs->started) { /* new renegotiation */
+    infof(data, "schannel: renegotiating SSL/TLS connection");
+    DEBUGASSERT(connssl->state == ssl_connection_complete);
+    DEBUGASSERT(connssl->connecting_state == ssl_connect_done);
+    connssl->state = ssl_connection_negotiating;
+    connssl->connecting_state = ssl_connect_2;
+    memset(rs, 0, sizeof(*rs));
+    rs->io_need = CURL_SSL_IO_NEED_SEND;
+    rs->start_time = curlx_now();
+    rs->started = TRUE;
+  }
+
+  for(;;) {
+    bool block_read, block_write, blocking, done;
+    curl_socket_t readfd, writefd;
+    timediff_t elapsed;
+
+    elapsed = curlx_timediff(curlx_now(), rs->start_time);
+    if(elapsed >= max_renegotiate_ms) {
+      failf(data, "schannel: renegotiation timeout");
+      result = CURLE_SSL_CONNECT_ERROR;
+      break;
+    }
+
+    /* the current io_need state may have been overwritten since the last time
+       this function was called. restore the io_need state needed to continue
+       the renegotiation. */
+
+    connssl->io_need = rs->io_need;
+
+    result = schannel_connect(cf, data, &done);
+
+    rs->io_need = connssl->io_need;
+
+    if(!result && !done)
+      result = CURLE_AGAIN;
+
+    if(result != CURLE_AGAIN)
+      break;
+
+    readfd = (rs->io_need & CURL_SSL_IO_NEED_RECV) ? sockfd : CURL_SOCKET_BAD;
+    writefd = (rs->io_need & CURL_SSL_IO_NEED_SEND) ? sockfd : CURL_SOCKET_BAD;
+
+    if(readfd == CURL_SOCKET_BAD && writefd == CURL_SOCKET_BAD)
+      continue;
+
+    /* connect should not have requested io read and write together */
+    DEBUGASSERT(readfd == CURL_SOCKET_BAD || writefd == CURL_SOCKET_BAD);
+
+    /* This function is partially blocking to avoid a stoppage that would
+     * occur if the user is waiting on the socket only in one direction.
+     *
+     * For example, if the user has called recv then they may not be waiting
+     * for a writeable socket and vice versa, so we block to avoid that.
+     *
+     * In practice a wait is unlikely to occur. For caller recv if handshake
+     * data needs to be sent then we block for a writeable socket that should
+     * be writeable immediately except for OS resource constraints. For caller
+     * send if handshake data needs to be received then we block for a readable
+     * socket, which could take some time, but it's more likely the user has
+     * called recv since they had called it prior (only recv can start
+     * renegotiation and probably the user is going to call it again to get
+     * more of their data before calling send).
+     */
+
+    block_read = (caller == SCH_RENEG_CALLER_IS_SEND) ? TRUE : FALSE;
+    block_write = (caller == SCH_RENEG_CALLER_IS_RECV) ? TRUE : FALSE;
+
+    blocking = (block_read && (readfd != CURL_SOCKET_BAD)) ||
+               (block_write && (writefd != CURL_SOCKET_BAD));
+
+    SCH_DEV_SHOWBOOL(block_read);
+    SCH_DEV_SHOWBOOL(block_write);
+    SCH_DEV_SHOWBOOL(blocking);
+
+    for(;;) {
+      int what;
+      timediff_t timeout, remaining;
+
+      if(Curl_pgrsUpdate(data)) {
+        result = CURLE_ABORTED_BY_CALLBACK;
+        break;
+      }
+
+      elapsed = curlx_timediff(curlx_now(), rs->start_time);
+      if(elapsed >= max_renegotiate_ms) {
+        failf(data, "schannel: renegotiation timeout");
+        result = CURLE_SSL_CONNECT_ERROR;
+        break;
+      }
+      remaining = max_renegotiate_ms - elapsed;
+
+      if(blocking) {
+        timeout = Curl_timeleft(data, NULL, FALSE);
+
+        if(timeout < 0) {
+          result = CURLE_OPERATION_TIMEDOUT;
+          break;
+        }
+
+        /* the blocking is in intervals so that the progress function can be
+           called every second */
+        if(!timeout || timeout > 1000)
+          timeout = 1000;
+
+        if(timeout > remaining)
+          timeout = remaining;
+      }
+      else
+        timeout = 0;
+
+      SCH_DEV(infof(data, "schannel: renegotiation wait until socket is"
+                    "%s%s for up to %" FMT_TIMEDIFF_T " ms",
+                    ((readfd != CURL_SOCKET_BAD) ? " readable" : ""),
+                    ((writefd != CURL_SOCKET_BAD) ? " writeable" : ""),
+                    timeout));
+
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout);
+
+      if(what > 0 && (what & (CURL_CSELECT_IN | CURL_CSELECT_OUT))) {
+        SCH_DEV(infof(data, "schannel: renegotiation socket %s%s",
+                      ((what & CURL_CSELECT_IN) ? "CURL_CSELECT_IN " : ""),
+                      ((what & CURL_CSELECT_OUT) ? "CURL_CSELECT_OUT " : "")));
+        result = CURLE_AGAIN;
+        break;
+      }
+      else if(!what) {
+        SCH_DEV(infof(data, "schannel: renegotiation socket timeout"));
+        if(blocking)
+          continue;
+        else
+          return CURLE_AGAIN;
+      }
+
+      failf(data, "schannel: socket error during renegotiation");
+      result = CURLE_SSL_CONNECT_ERROR;
+      break;
+    }
+    if(result != CURLE_AGAIN)
+      break;
+  }
+
+  DEBUGASSERT(result != CURLE_AGAIN);
+
+  rs->started = FALSE;
+  backend->recv_renegotiating = FALSE;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
+
+  if(result)
+    failf(data, "schannel: renegotiation failed");
+  else
+    infof(data, "schannel: SSL/TLS connection renegotiated");
+
+  return result;
+}
+
 static CURLcode
 schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
               const void *buf, size_t len, size_t *pnwritten)
@@ -1696,6 +1900,12 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
   *pnwritten = 0;
+
+  if(backend->recv_renegotiating) {
+    result = schannel_recv_renegotiate(cf, data, SCH_RENEG_CALLER_IS_SEND);
+    if(result)
+      return result;
+  }
 
   /* check if the maximum stream sizes were queried */
   if(backend->stream_sizes.cbMaximumMessage == 0) {
@@ -1828,7 +2038,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct ssl_connect_data *connssl = cf->ctx;
   unsigned char *reallocated_buffer;
   size_t reallocated_length;
-  bool done = FALSE;
   SecBuffer inbuf[4];
   SecBufferDesc inbuf_desc;
   SECURITY_STATUS sspi_status = SEC_E_OK;
@@ -1841,6 +2050,12 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   DEBUGASSERT(backend);
   *pnread = 0;
+
+  if(backend->recv_renegotiating) {
+    result = schannel_recv_renegotiate(cf, data, SCH_RENEG_CALLER_IS_RECV);
+    if(result)
+      return result;
+  }
 
   /****************************************************************************
    * Do not return or set backend->recv_unrecoverable_err unless in the
@@ -2034,21 +2249,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           goto cleanup;
         }
 
-        /* begin renegotiation */
-        infof(data, "schannel: renegotiating SSL/TLS connection");
-        connssl->state = ssl_connection_negotiating;
-        connssl->connecting_state = ssl_connect_2;
-        connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = TRUE;
-        result = schannel_connect(cf, data, &done);
-        backend->recv_renegotiating = FALSE;
-        if(result) {
-          infof(data, "schannel: renegotiation failed");
+        result = schannel_recv_renegotiate(cf, data, SCH_RENEG_CALLER_IS_RECV);
+        if(result)
           goto cleanup;
-        }
+
         /* now retry receiving data */
         sspi_status = SEC_E_OK;
-        infof(data, "schannel: SSL/TLS connection renegotiated");
         continue;
       }
       /* check if the server closed the connection */
