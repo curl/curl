@@ -75,20 +75,14 @@ static CURLcode test_unit2604(const char *arg)
 #pragma GCC diagnostic pop
 #endif
 
+  char *cp0 = malloc(too_long + 1);
+  fail_unless(cp0, "could not alloc too long value");
+  memset(cp0, 'a', too_long);
+
   for(i = 0; list[i].home; i++) {
     char *path;
-    char *cp0 = NULL;
-    const char *cp;
-    CURLcode result;
-    if(i == 0) {
-      cp0 = malloc(too_long + 1);
-      fail_unless(cp0, "could not alloc too long value");
-      memset(cp0, 'a', too_long);
-      cp = cp0;
-    }
-    else
-      cp = list[i].cp;
-    result = Curl_get_pathname(&cp, &path, list[i].home);
+    const char *cp = i == 0 ? cp0 : list[i].cp;
+    CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
     printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
            list[i].cp, list[i].home, list[i].result);
     if(result != list[i].result) {
@@ -108,9 +102,9 @@ static CURLcode test_unit2604(const char *arg)
       }
       curl_free(path);
     }
-    if(i == 0)
-      free(cp0);
   }
+
+  free(cp0);
 
 #endif
 
