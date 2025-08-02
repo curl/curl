@@ -108,7 +108,7 @@ jobs:
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls'
             install_packages: libnghttp2-dev

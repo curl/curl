@@ -238,7 +238,7 @@ jobs:
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares
+            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
