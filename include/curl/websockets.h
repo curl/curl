@@ -72,6 +72,19 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   curl_off_t fragsize,
                                   unsigned int flags);
 
+/*
+ * NAME curl_ws_start_frame()
+ *
+ * DESCRIPTION
+ *
+ * Buffers a websocket frame header with the given flags and length.
+ * Errors when a previous frame is not complete, e.g. not all its
+ * payload has been added.
+ */
+CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
+                                         unsigned int flags,
+                                         curl_off_t frame_len);
+
 /* bits for the CURLOPT_WS_OPTIONS bitmask: */
 #define CURLWS_RAW_MODE   (1L<<0)
 #define CURLWS_NOAUTOPONG (1L<<1)

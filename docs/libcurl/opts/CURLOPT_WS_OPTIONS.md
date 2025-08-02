@@ -39,6 +39,7 @@ Available bits in the bitmask
 ## CURLWS_RAW_MODE (1)
 
 Deliver "raw" WebSocket traffic to the CURLOPT_WRITEFUNCTION(3)
+callback. Read "raw" WebSocket traffic from the CURLOPT_READFUNCTION(3)
 callback.
 
 In raw mode, libcurl does not handle pings or any other frame for the
