@@ -98,7 +98,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3L : 0L);
   test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME) ?
-                                   "3-1000000": (char *) NULL);
+                                   "3-1000000": (char *)NULL);
   test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1L : 0L);
   hasbody = 0;
   res = curl_easy_perform(curl);
