@@ -337,7 +337,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     t530_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      ssize_t usTimeout = t530_getMicroSecondTimeout(&timeout);
+      int usTimeout = curlx_sztosi(t530_getMicroSecondTimeout(&timeout));
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
