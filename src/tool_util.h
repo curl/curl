@@ -34,7 +34,7 @@ struct timeval tvrealnow(void);
 int struplocompare(const char *p1, const char *p2);
 int struplocompare4sort(const void *p1, const void *p2);
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 FILE *tool_execpath(const char *filename, char **pathp);
 #endif
 

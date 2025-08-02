@@ -75,7 +75,7 @@
 #endif
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW32CE__) && \
+#if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
 #error "Building curl requires mingw-w64 3.0 or later"
 #endif
@@ -120,14 +120,6 @@
 #      define CURL_WINDOWS_UWP
 #    endif
 #  endif
-#endif
-
-/* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
-   C99 (-std=gnu99) mode */
-#if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
-  (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
-  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
-#define CURL_NO_FMT_CHECKS
 #endif
 
 /* Compatibility */
@@ -492,23 +484,19 @@
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
-#    ifndef UNDER_CE
-#      undef  lseek
-#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)             _fstat(fdes, stp)
-#      define struct_stat                  struct _stat
-#    endif
+#    undef  lseek
+#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes, stp)             _fstat(fdes, stp)
+#    define struct_stat                  struct _stat
 #    define LSEEK_ERROR                  (long)-1
 #  endif
-#  ifndef UNDER_CE
-     int curlx_win32_stat(const char *path, struct_stat *buffer);
-     int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#    define stat(fname, stp)           curlx_win32_stat(fname, stp)
-#    define open                       curlx_win32_open
-#    define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
-#    define fopen(fname, mode)         CURL_FOPEN(fname, mode)
-#  endif
+   int curlx_win32_stat(const char *path, struct_stat *buffer);
+   int curlx_win32_open(const char *filename, int oflag, ...);
+   FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#  define stat(fname, stp)           curlx_win32_stat(fname, stp)
+#  define open                       curlx_win32_open
+#  define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
+#  define fopen(fname, mode)         CURL_FOPEN(fname, mode)
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
@@ -828,27 +816,6 @@
 #include "curl_setup_once.h"
 #endif
 
-#ifdef UNDER_CE
-#define getenv curl_getenv  /* Windows CE does not support getenv() */
-#define raise(s) ((void)(s))
-/* Terrible workarounds to make Windows CE compile */
-#define errno 0
-#define CURL_SETERRNO(x) ((void)(x))
-#define EINTR  4
-#define EAGAIN 11
-#define ENOMEM 12
-#define EACCES 13
-#define EEXIST 17
-#define EISDIR 21
-#define EINVAL 22
-#define ENOSPC 28
-#define strerror(x) "?"
-#undef STDIN_FILENO
-#define STDIN_FILENO 0
-#else
-#define CURL_SETERRNO(x) (errno = (x))
-#endif
-
 /*
  * Definition of our NOP statement Object-like macro
  */
@@ -937,7 +904,7 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  if defined(_WIN32) && !defined(UNDER_CE)
+#  ifdef _WIN32
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
 #  elif defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
