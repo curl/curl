@@ -214,10 +214,12 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
                                struct connectdata *conn, bool dead_connection);
 static CURLcode ftp_do_more(struct Curl_easy *data, int *completed);
 static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
-static int ftp_getsock(struct Curl_easy *data, struct connectdata *conn,
-                       curl_socket_t *socks);
-static int ftp_domore_getsock(struct Curl_easy *data,
-                              struct connectdata *conn, curl_socket_t *socks);
+static unsigned int ftp_getsock(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *socks);
+static unsigned int ftp_domore_getsock(struct Curl_easy *data,
+                                       struct connectdata *conn,
+                                       curl_socket_t *socks);
 static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done);
 static CURLcode ftp_setup_connection(struct Curl_easy *data,
@@ -781,17 +783,18 @@ static CURLcode ftp_state_pwd(struct Curl_easy *data,
 }
 
 /* For the FTP "protocol connect" and "doing" phases only */
-static int ftp_getsock(struct Curl_easy *data,
-                       struct connectdata *conn,
-                       curl_socket_t *socks)
+static unsigned int ftp_getsock(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *socks)
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
   return ftpc ? Curl_pp_getsock(data, &ftpc->pp, socks) : GETSOCK_BLANK;
 }
 
 /* For the FTP "DO_MORE" phase only */
-static int ftp_domore_getsock(struct Curl_easy *data,
-                              struct connectdata *conn, curl_socket_t *socks)
+static unsigned int ftp_domore_getsock(struct Curl_easy *data,
+                                       struct connectdata *conn,
+                                       curl_socket_t *socks)
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
   (void)data;

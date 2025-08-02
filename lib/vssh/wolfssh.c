@@ -66,9 +66,9 @@ static CURLcode wsftp_doing(struct Curl_easy *data,
 static CURLcode wsftp_disconnect(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  bool dead);
-static int wssh_getsock(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        curl_socket_t *sock);
+static unsigned int wssh_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *sock);
 static CURLcode wssh_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
 static void wssh_sshc_cleanup(struct ssh_conn *sshc);
@@ -1185,9 +1185,9 @@ static CURLcode wsftp_disconnect(struct Curl_easy *data,
   return result;
 }
 
-static int wssh_getsock(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        curl_socket_t *sock)
+static unsigned int wssh_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
   int dir = conn->waitfor;

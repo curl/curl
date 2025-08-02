@@ -157,8 +157,9 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done);
 static CURLcode smtp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
-static int smtp_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
+static unsigned int smtp_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *socks);
 static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -1413,8 +1414,9 @@ static CURLcode smtp_block_statemach(struct Curl_easy *data,
 }
 
 /* For the SMTP "protocol connect" and "doing" phases only */
-static int smtp_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks)
+static unsigned int smtp_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *socks)
 {
   struct smtp_conn *smtpc = Curl_conn_meta_get(conn, CURL_META_SMTP_CONN);
   return smtpc ?

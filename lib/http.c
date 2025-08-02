@@ -1524,9 +1524,9 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-int Curl_http_getsock_do(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks)
+unsigned int Curl_http_getsock_do(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  curl_socket_t *socks)
 {
   /* write mode */
   (void)conn;
