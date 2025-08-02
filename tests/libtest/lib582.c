@@ -44,7 +44,7 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "Remove socket fd %d\n", (int)fd);
+    curl_mfprintf(stderr, "Remove socket fd %" FMT_SOCKET_T "\n", fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -66,7 +66,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int)fd, what);
+  curl_mfprintf(stderr, "Add socket fd %" FMT_SOCKET_T " for %s\n", fd, what);
   t582_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
