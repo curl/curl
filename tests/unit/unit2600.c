@@ -375,7 +375,6 @@ static CURLcode test_unit2600(const char *arg)
     { 4, TURL, "test.com:123:::1,::2", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250,  250,    0,  2,      400,  TC_TMOT,  R_FAIL, NULL },
     /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT   */
-
     { 5, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
       CNCT_TMOT, 150, 250, 250,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
     /* mixed ip4+6, v6 always first, v4 kicks in on HE, fails after ~350ms */
@@ -390,6 +389,10 @@ static CURLcode test_unit2600(const char *arg)
       CNCT_TMOT, 150, 500, 500,     0,  1,      400,  TC_TMOT,  R_FAIL, NULL },
     /* mixed ip4+6, but only use v6, check it uses full connect timeout,
        although another address of the 'wrong' family is available */
+    { 9, TURL, "test.com:123:::1,192.0.2.1,::2,::3", CURL_IPRESOLVE_WHATEVER,
+      CNCT_TMOT, 50,  400,  400,    1,  3,      550,  TC_TMOT,  R_FAIL, NULL },
+    /* 1 v4, 3 v6, fails after (3*HE)+400ms, ~550ms, COULDNT_CONNECT */
+
 #endif
   };
 
