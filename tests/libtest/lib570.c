@@ -63,7 +63,7 @@ static CURLcode test_lib570(const char *URL)
   stream_uri = NULL;
 
   res = curl_easy_perform(curl);
-  if(res != (int)CURLE_RTSP_CSEQ_ERROR) {
+  if(res != CURLE_RTSP_CSEQ_ERROR) {
     curl_mfprintf(stderr, "Failed to detect CSeq mismatch");
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
