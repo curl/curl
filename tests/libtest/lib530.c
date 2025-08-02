@@ -75,7 +75,8 @@ static void t530_removeFd(struct t530_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "%s remove socket fd %d\n", t530_tag(), (int)fd);
+    curl_mfprintf(stderr, "%s remove socket fd %" FMT_SOCKET_T "\n",
+                  t530_tag(), fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -98,8 +99,8 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "%s add socket fd %d for %s\n",
-                t530_tag(), (int)fd, what);
+  curl_mfprintf(stderr, "%s add socket fd %" FMT_SOCKET_T " for %s\n",
+                t530_tag(), fd, what);
   t530_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
