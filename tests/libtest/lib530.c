@@ -215,7 +215,7 @@ static int t530_checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int t530_getMicroSecondTimeout(struct curltime *timeout)
+static ssize_t t530_getMicroSecondTimeout(struct curltime *timeout)
 {
   struct curltime now;
   ssize_t result;
@@ -225,7 +225,7 @@ static int t530_getMicroSecondTimeout(struct curltime *timeout)
   if(result < 0)
     result = 0;
 
-  return curlx_sztosi(result);
+  return result;
 }
 
 /**
@@ -337,7 +337,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     t530_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = t530_getMicroSecondTimeout(&timeout);
+      ssize_t usTimeout = t530_getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
