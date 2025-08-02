@@ -233,6 +233,7 @@ void tool_help(const char *category)
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
       "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help cheat-sheet\" to output a helpful cheat sheet"
 #endif
       ;
     puts("Usage: curl [options...] <url>");

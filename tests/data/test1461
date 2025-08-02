@@ -55,6 +55,7 @@ output, pop3, post, proxy, scp, sftp, smtp, ssh, telnet, tftp, timeout, tls,
 upload, verbose.
 Use "--help all" to list all options
 Use "--help [option]" to view documentation for a given option
+Use "--help cheat-sheet" to output a helpful cheat sheet
 </stdout>
 </verify>
 </testcase>

@@ -1,0 +1,34 @@
+<testcase>
+<info>
+<keywords>
+curl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+<server>
+none
+</server>
+
+<name>
+Verify curl -h cheat-sheet
+</name>
+
+<command>
+-h cheat-sheet
+</command>
+</client>
+
+#
+# Verify no error
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>
