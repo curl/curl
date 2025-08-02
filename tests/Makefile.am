@@ -138,7 +138,7 @@ endif
 perlcheck:
 	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
 
-build-certs:
+build-certs: perlcheck
 	(cd certs && $(MAKE))
 
 test: perlcheck all
