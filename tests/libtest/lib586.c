@@ -62,7 +62,7 @@ static void t586_test_lock(CURL *handle, curl_lock_data data,
       what = "ssl_session";
       break;
     default:
-      curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "lock: no such data: %d\n", data);
       return;
   }
   curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
@@ -89,7 +89,7 @@ static void t586_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
       what = "ssl_session";
       break;
     default:
-      curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
       return;
   }
   curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);

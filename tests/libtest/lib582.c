@@ -44,7 +44,7 @@ static void t582_removeFd(struct t582_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "Remove socket fd %d\n", (int)fd);
+    curl_mfprintf(stderr, "Remove socket fd %" FMT_SOCKET_T "\n", fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -66,7 +66,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "Add socket fd %d for %s\n", (int)fd, what);
+  curl_mfprintf(stderr, "Add socket fd %" FMT_SOCKET_T " for %s\n", fd, what);
   t582_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
@@ -161,7 +161,7 @@ static int t582_checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int t582_getMicroSecondTimeout(struct curltime *timeout)
+static ssize_t t582_getMicroSecondTimeout(struct curltime *timeout)
 {
   struct curltime now;
   ssize_t result;
@@ -171,7 +171,7 @@ static int t582_getMicroSecondTimeout(struct curltime *timeout)
   if(result < 0)
     result = 0;
 
-  return curlx_sztosi(result);
+  return result;
 }
 
 /**
@@ -317,7 +317,7 @@ static CURLcode test_lib582(const char *URL)
     t582_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = t582_getMicroSecondTimeout(&timeout);
+      int usTimeout = curlx_sztosi(t582_getMicroSecondTimeout(&timeout));
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }

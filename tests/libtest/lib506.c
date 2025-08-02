@@ -66,7 +66,7 @@ static void t506_test_lock(CURL *handle, curl_lock_data data,
       locknum = 2;
       break;
     default:
-      curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "lock: no such data: %d\n", data);
       return;
   }
 
@@ -102,7 +102,7 @@ static void t506_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
       locknum = 2;
       break;
     default:
-      curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
       return;
   }
 

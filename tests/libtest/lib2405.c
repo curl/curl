@@ -340,8 +340,7 @@ static CURLcode empty_multi_test(void)
   /* calling curl_multi_waitfds() on multi handle with added easy handle. */
   easy_init(easy);
 
-  if(set_easy((char *)CURL_UNCONST("http://example.com"), easy,
-              TEST_USE_HTTP1) != CURLE_OK)
+  if(set_easy("http://example.com", easy, TEST_USE_HTTP1) != CURLE_OK)
     goto test_cleanup;
 
   multi_add_handle(multi, easy);

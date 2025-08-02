@@ -98,12 +98,12 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3L : 0L);
   test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME) ?
-                                   "3-1000000": (char *) NULL);
+                                   "3-1000000": (char *)NULL);
   test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1L : 0L);
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    curl_mprintf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
+    curl_mprintf("%zu: bad error code (%d): resume=%s, fail=%s, http416=%s, "
                  "content-range=%s, expected=%d\n", num, res,
                  (p->flags & F_RESUME) ? "yes": "no",
                  (p->flags & F_FAIL) ? "yes": "no",
