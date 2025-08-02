@@ -397,8 +397,9 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   return result;
 }
 
-int Curl_pp_getsock(struct Curl_easy *data,
-                    struct pingpong *pp, curl_socket_t *socks)
+unsigned int Curl_pp_getsock(struct Curl_easy *data,
+                             struct pingpong *pp,
+                             curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   socks[0] = conn->sock[FIRSTSOCKET];

@@ -277,7 +277,7 @@ static void async_ares_cleanup(struct Curl_easy *data)
  * (using curl_multi_fdset()) wants to get our fd_set setup.
  */
 
-int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
+unsigned int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
   DEBUGASSERT(ares->channel);

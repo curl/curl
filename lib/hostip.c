@@ -1523,8 +1523,8 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 }
 #endif
 
-int Curl_resolv_getsock(struct Curl_easy *data,
-                        curl_socket_t *socks)
+unsigned int Curl_resolv_getsock(struct Curl_easy *data,
+                                 curl_socket_t *socks)
 {
 #ifdef CURLRES_ASYNCH
 #ifndef CURL_DISABLE_DOH

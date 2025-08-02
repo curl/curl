@@ -157,8 +157,9 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done);
 static CURLcode imap_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done);
-static int imap_getsock(struct Curl_easy *data, struct connectdata *conn,
-                        curl_socket_t *socks);
+static unsigned int imap_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *socks);
 static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -1560,9 +1561,9 @@ static CURLcode imap_block_statemach(struct Curl_easy *data,
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */
-static int imap_getsock(struct Curl_easy *data,
-                        struct connectdata *conn,
-                        curl_socket_t *socks)
+static unsigned int imap_getsock(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *socks)
 {
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   return imapc ?

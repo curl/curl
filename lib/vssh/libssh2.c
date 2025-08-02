@@ -99,8 +99,9 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode sftp_perform(struct Curl_easy *data, bool *connected,
                              bool *dophase_done);
-static int ssh_getsock(struct Curl_easy *data, struct connectdata *conn,
-                       curl_socket_t *sock);
+static unsigned int ssh_getsock(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *sock);
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn);
 static void ssh_attach(struct Curl_easy *data, struct connectdata *conn);
@@ -3087,9 +3088,9 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
 
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static int ssh_getsock(struct Curl_easy *data,
-                       struct connectdata *conn,
-                       curl_socket_t *sock)
+static unsigned int ssh_getsock(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
   (void)data;
