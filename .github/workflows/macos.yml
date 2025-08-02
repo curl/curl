@@ -457,7 +457,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --install bld --strip
           else
-            make install
+            make -C bld V=1 install
           fi
 
       - name: 'build tests'
