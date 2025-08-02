@@ -67,9 +67,9 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
     else if(sock != ntlm_sockets[idx]) {
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
-      curl_mfprintf(stderr, "Handle %d started on socket %" FMT_SOCKET_T
+      curl_mfprintf(stderr, "Handle %zd started on socket %" FMT_SOCKET_T
                     " and moved to %" FMT_SOCKET_T "\n",
-                    curlx_sztosi(idx), ntlm_sockets[idx], sock);
+                    idx, ntlm_sockets[idx], sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
