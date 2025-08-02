@@ -2425,7 +2425,7 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
-    elsif($ARGV[0] eq "--buildinfo") {
+    elsif($ARGV[0] eq "--ci") {
         $buildinfo=1;
     }
     elsif($ARGV[0] =~ /^-j(.*)/) {
@@ -2481,8 +2481,8 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
-  --buildinfo  show the content of buildinfo.txt
   -c path  use this curl executable
+  --ci     show extra info useful in for CI runs (e.g. buildinfo.txt dump)
   -d       display server debug info
   -e, --test-event  event-based execution
   --test-duphandle  duplicate handles before use

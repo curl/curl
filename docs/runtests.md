@@ -96,14 +96,14 @@ Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
 
 Display test results in automake style output (`PASS/FAIL: [number] [name]`).
 
-## `--buildinfo`
-
-Show the content of `buildinfo.txt`.
-
 ## `-c \<curl\>`
 
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
+
+## `--ci`
+
+show extra information useful in for CI runs (e.g. buildinfo.txt dump.)
 
 ## `-d`
 
