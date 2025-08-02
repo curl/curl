@@ -117,7 +117,7 @@ else
 TEST_COMMON += !documentation
 endif
 
-TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
+TEST = srcdir=$(srcdir) @PERL@ $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
 TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
@@ -136,9 +136,9 @@ endif
 
 # make sure that PERL is pointing to an executable
 perlcheck:
-	@if ! test -x "$(PERL)"; then echo "No perl!"; exit 2; fi
+	@if ! test -x "@PERL@"; then echo "No perl!"; exit 2; fi
 
-build-certs:
+build-certs: perlcheck
 	(cd certs && $(MAKE))
 
 # alias for 'test' to match CMake, where 'test' is a reserved target

@@ -38,7 +38,7 @@ all-am: test-ca.cacert
 # Generate all certs in a single shot, but declare just a single target file
 # to support GNU Make <4.3 without the "grouped explicit targets" feature.
 test-ca.cacert: $(CERTCONFIG_CA) $(CERTCONFIGS) genserv.pl
-	$(PERL) $(srcdir)/genserv.pl test $(CERTCONFIGS)
+	@PERL@ $(srcdir)/genserv.pl test $(CERTCONFIGS)
 
 clean-local:
 	rm -f $(GENERATEDCERTS) \
