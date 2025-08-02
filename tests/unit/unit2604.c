@@ -77,7 +77,7 @@ static CURLcode test_unit2604(const char *arg)
 
   for(i = 0; list[i].home; i++) {
     char *path;
-    char *cp0;
+    char *cp0 = NULL;
     const char *cp;
     CURLcode result;
     if(i == 0) {
