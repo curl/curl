@@ -103,7 +103,7 @@ curl executable in the build tree.
 
 ## `--ci`
 
-show extra information useful in for CI runs (e.g. buildinfo.txt dump.)
+Show extra information useful in for CI runs.
 
 ## `-d`
 
