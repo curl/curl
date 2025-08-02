@@ -317,7 +317,7 @@ static CURLcode test_lib582(const char *URL)
     t582_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      ssize_t usTimeout = t582_getMicroSecondTimeout(&timeout);
+      int usTimeout = curlx_sztosi(t582_getMicroSecondTimeout(&timeout));
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
