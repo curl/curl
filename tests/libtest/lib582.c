@@ -161,7 +161,7 @@ static int t582_checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int t582_getMicroSecondTimeout(struct curltime *timeout)
+static ssize_t t582_getMicroSecondTimeout(struct curltime *timeout)
 {
   struct curltime now;
   ssize_t result;
@@ -171,7 +171,7 @@ static int t582_getMicroSecondTimeout(struct curltime *timeout)
   if(result < 0)
     result = 0;
 
-  return curlx_sztosi(result);
+  return result;
 }
 
 /**
@@ -317,7 +317,7 @@ static CURLcode test_lib582(const char *URL)
     t582_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = t582_getMicroSecondTimeout(&timeout);
+      ssize_t usTimeout = t582_getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
