@@ -892,11 +892,15 @@ sub checksystemfeatures {
         $feature{"TrackMemory"} = 0;
     }
 
-    logmsg sprintf("* Env: %s%s%s%s", $valgrind?"Valgrind ":"",
-                   $run_duphandle?"test-duphandle ":"",
-                   $run_event_based?"event-based ":"",
-                   $nghttpx_h3);
-    logmsg sprintf("%s\n", $libtool?"Libtool ":"");
+    my $env = sprintf("%s%s%s%s%s",
+                      $valgrind?"Valgrind ":"",
+                      $run_duphandle?"test-duphandle ":"",
+                      $run_event_based?"event-based ":"",
+                      $nghttpx_h3,
+                      $libtool?"Libtool ":"");
+    if($env) {
+        logmsg "* Env: $env\n";
+    }
     logmsg "* Seed: $randseed\n";
 }
 
