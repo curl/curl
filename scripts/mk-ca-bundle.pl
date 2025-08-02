@@ -36,7 +36,7 @@ use Encode;
 use Getopt::Std;
 use MIME::Base64;
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 use vars qw($opt_b $opt_d $opt_f $opt_h $opt_i $opt_k $opt_l $opt_m $opt_n $opt_p $opt_q $opt_s $opt_t $opt_u $opt_v $opt_w);
 use List::Util;
 use Text::Wrap;

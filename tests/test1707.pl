@@ -28,7 +28,7 @@
 #
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $curl = shift @ARGV;
 my $opt = shift @ARGV;

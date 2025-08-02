@@ -40,7 +40,7 @@ Unfortunately it seems some perls like msysgit cannot handle a global input-only
 =cut
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my %optshort;
 my %optlong;

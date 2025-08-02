@@ -24,7 +24,7 @@
 ###########################################################################
 
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 my $c = 0;
 if(@ARGV && $ARGV[0] eq "-c") {

@@ -23,7 +23,7 @@
 #
 ###########################################################################
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 # Determine if the given curl executable supports the 'openssl' SSL engine
 if($#ARGV != 0) {

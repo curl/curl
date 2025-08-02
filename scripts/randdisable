@@ -21,7 +21,7 @@
 # - do a checkout in a ram-based filesystem
 #
 use strict;
-use warnings;
+use warnings 'FATAL' => 'all';
 
 use List::Util qw/shuffle/;
 
