@@ -872,11 +872,13 @@ sub checksystemfeatures {
            "* Features: $feat\n",
            "* Disabled: $dis\n",
            "* Host: $hostname\n",
-           "* System: $hosttype\n",
-           "* OS: $hostos\n",
-           "* Perl: $^V ($^X)\n",
-           "* diff: $havediff\n",
-           "* Args: $args\n");
+           "* System: $hosttype\n");
+    if($ci) {
+        logmsg("* OS: $hostos\n",
+               "* Perl: $^V ($^X)\n",
+               "* diff: $havediff\n");
+    }
+    logmsg("* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -890,11 +892,15 @@ sub checksystemfeatures {
         $feature{"TrackMemory"} = 0;
     }
 
-    logmsg sprintf("* Env: %s%s%s%s", $valgrind?"Valgrind ":"",
-                   $run_duphandle?"test-duphandle ":"",
-                   $run_event_based?"event-based ":"",
-                   $nghttpx_h3);
-    logmsg sprintf("%s\n", $libtool?"Libtool ":"");
+    my $env = sprintf("%s%s%s%s%s",
+                      $valgrind?"Valgrind ":"",
+                      $run_duphandle?"test-duphandle ":"",
+                      $run_event_based?"event-based ":"",
+                      $nghttpx_h3,
+                      $libtool?"Libtool ":"");
+    if($env) {
+        logmsg "* Env: $env\n";
+    }
     logmsg "* Seed: $randseed\n";
 }
 
@@ -2423,6 +2429,9 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
+    elsif($ARGV[0] eq "--ci") {
+        $ci=1;
+    }
     elsif($ARGV[0] =~ /^-j(.*)/) {
         # parallel jobs
         $jobs=1;
@@ -2477,6 +2486,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
   -c path  use this curl executable
+  --ci     show extra info useful in for CI runs (e.g. buildinfo.txt dump)
   -d       display server debug info
   -e, --test-event  event-based execution
   --test-duphandle  duplicate handles before use
@@ -2664,7 +2674,7 @@ if(!$listonly) {
 #######################################################################
 # Output information about the curl build
 #
-if(!$listonly) {
+if(!$listonly && $ci) {
     if(open(my $fd, "<", "../buildinfo.txt")) {
         while(my $line = <$fd>) {
             chomp $line;
