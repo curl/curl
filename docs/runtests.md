@@ -101,6 +101,10 @@ Display test results in automake style output (`PASS/FAIL: [number] [name]`).
 Provide a path to a custom curl binary to run the tests with. Default is the
 curl executable in the build tree.
 
+## `--ci`
+
+Show extra information useful in for CI runs.
+
 ## `-d`
 
 Enable protocol debug: have the servers display protocol output. If used in
