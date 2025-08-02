@@ -49,7 +49,7 @@ static CURLcode test_unit2604(const char *arg)
 /* 540 a's */
 #define SA540 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60
   int i;
-  size_t too_long = 90720;
+  const size_t too_long = 90720;
   struct set list[] = {
     { "-too-long-", "", "", "", CURLE_TOO_LARGE},
     { SA540 " c", SA540, "c", "/", CURLE_OK},
