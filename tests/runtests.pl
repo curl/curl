@@ -872,11 +872,13 @@ sub checksystemfeatures {
            "* Features: $feat\n",
            "* Disabled: $dis\n",
            "* Host: $hostname\n",
-           "* System: $hosttype\n",
-           "* OS: $hostos\n",
-           "* Perl: $^V ($^X)\n",
-           "* diff: $havediff\n",
-           "* Args: $args\n");
+           "* System: $hosttype\n");
+    if($buildinfo) {
+        logmsg("* OS: $hostos\n",
+               "* Perl: $^V ($^X)\n",
+               "* diff: $havediff\n");
+    }
+    logmsg("* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
