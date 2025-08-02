@@ -730,6 +730,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       if(!client_certs[0]) {
         /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
         CertCloseStore(cert_store, 0);
+        failf(data, "schannel: client cert not found in cert store");
         return CURLE_SSL_CERTPROBLEM;
       }
     }
