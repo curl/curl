@@ -2423,6 +2423,9 @@ while(@ARGV) {
         # lists the test case names only
         $listonly=1;
     }
+    elsif($ARGV[0] eq "--buildinfo") {
+        $buildinfo=1;
+    }
     elsif($ARGV[0] =~ /^-j(.*)/) {
         # parallel jobs
         $jobs=1;
@@ -2476,6 +2479,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
+  --buildinfo  show the content of buildinfo.txt
   -c path  use this curl executable
   -d       display server debug info
   -e, --test-event  event-based execution
@@ -2664,7 +2668,7 @@ if(!$listonly) {
 #######################################################################
 # Output information about the curl build
 #
-if(!$listonly) {
+if(!$listonly && $buildinfo) {
     if(open(my $fd, "<", "../buildinfo.txt")) {
         while(my $line = <$fd>) {
             chomp $line;
