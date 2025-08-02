@@ -873,7 +873,7 @@ sub checksystemfeatures {
            "* Disabled: $dis\n",
            "* Host: $hostname\n",
            "* System: $hosttype\n");
-    if($buildinfo) {
+    if($ci) {
         logmsg("* OS: $hostos\n",
                "* Perl: $^V ($^X)\n",
                "* diff: $havediff\n");
@@ -2426,7 +2426,7 @@ while(@ARGV) {
         $listonly=1;
     }
     elsif($ARGV[0] eq "--ci") {
-        $buildinfo=1;
+        $ci=1;
     }
     elsif($ARGV[0] =~ /^-j(.*)/) {
         # parallel jobs
@@ -2670,7 +2670,7 @@ if(!$listonly) {
 #######################################################################
 # Output information about the curl build
 #
-if(!$listonly && $buildinfo) {
+if(!$listonly && $ci) {
     if(open(my $fd, "<", "../buildinfo.txt")) {
         while(my $line = <$fd>) {
             chomp $line;
