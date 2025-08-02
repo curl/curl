@@ -250,8 +250,8 @@ static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
-                         const char *info)
+static CURLMcode socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
+                               const char *info)
 {
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
@@ -259,17 +259,18 @@ static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
     curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
                   t530_tag(), info, result, curl_multi_strerror(result));
   }
-  return (int)result;
+  return result;
 }
 
 /**
  * Invoke curl when a file descriptor is set.
  */
-static int t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
-                           fd_set *fdset, int evBitmask, const char *name)
+static CURLMcode t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
+                                 fd_set *fdset, int evBitmask,
+                                 const char *name)
 {
   int i;
-  int result = 0;
+  CURLMcode result = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
       result = socket_action(curl, sockets->sockets[i], evBitmask, name);
