@@ -141,6 +141,9 @@ perlcheck:
 build-certs:
 	(cd certs && $(MAKE))
 
+# alias for 'test' to match CMake, where 'test' is a reserved target
+tests: test
+
 test: perlcheck all
 	$(TEST) $(TFLAGS)
 
