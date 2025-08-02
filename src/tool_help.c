@@ -248,6 +248,8 @@ void tool_help(const char *category)
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
+  else if(curl_strequal(category, "cheat-sheet"))
+    tool_cheat_sheet();
   else if(category[0] == '-') {
 #ifdef USE_MANUAL
     /* command line option help */
@@ -404,4 +406,77 @@ void tool_list_engines(void)
   /* Cleanup the list of engines */
   curl_slist_free_all(engines);
   curl_easy_cleanup(curl);
+}
+
+/* Functions for outputting cheat-sheet argument.
+   Cheat sheet data structure organized by heading and option. */
+static const struct cheat_table {
+  const char *head;
+  const char *opt;
+} cheat_items[] = {
+  {"Verbose", "-v, --trace-ascii file"},
+  {"Hide progress", "-s"},
+  {"Extra info", "-w format"},
+  {"Write output", "-O, -o file"},
+  {"Timeout", "-m secs"},
+  {"Post", "-d string, -d @file"},
+  {"Multipart", "-F name=value, -F name=@file"},
+  {"Put", "-T file"},
+  {"Head", "-I"},
+  {"Custom", "-X METHOD"},
+  {"Basic auth", "-u user:password"},
+  {"Read cookies", "-b <file>"},
+  {"Write cookies", "-c <file>"},
+  {"Send cookies", "-b \"c=1; d=2\""},
+  {"User-agent", "-A string"},
+  {"Use proxy", "-x host:port"},
+  {"Headers add/remove", "-H \"name: value\", -H name:"},
+  {"Follow redirs", "-L"},
+  {"Gzip", "--compressed"},
+  {"Insecure", "-k"},
+  {NULL, NULL}
+};
+
+/* Support to print number of columns per screen width. */
+static void print_cheatsheet(size_t i, size_t col_num)
+{
+  /* Use consistent width for each column. */
+  size_t c;
+
+  for(c = 0; c < col_num; c++) {
+    /* The headings. */
+    if(cheat_items[c + i].head)
+      printf("%-30s ", cheat_items[c + i].head);
+    else {
+      col_num = c; /* Redefine for uneven rows. */
+      break;
+    }
+  }
+  puts("");
+  for(c = 0; c < col_num; c++)
+    printf("------------------------------ "); /* The separators. */
+  puts("");
+
+  /* The options. */
+  for(c = 0; c < col_num; c++)
+    printf("%-30s ", cheat_items[c + i].opt);
+  puts("\n");
+}
+
+/* Output cheat-sheet. */
+void tool_cheat_sheet(void)
+{
+  size_t cols = get_terminal_columns();
+  size_t i, j;
+
+  /* Set j based on col width, setting once, not in a loop. */
+  j = cols/31;
+  if(j > 8)
+    j = 8;
+  else if(j == 0)
+    j = 1;
+
+  /* Loop through cheat sheet sections. */
+  for(i = 0; i < CURL_ARRAYSIZE(cheat_items); i += j)
+    print_cheatsheet(i, j);
 }
