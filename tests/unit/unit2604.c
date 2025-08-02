@@ -76,7 +76,7 @@ static CURLcode test_unit2604(const char *arg)
 #endif
 
   char *cp0 = malloc(too_long + 1);
-  fail_unless(cp0, "could not alloc too long value");
+  abort_unless(cp0, "could not alloc too long value");
   memset(cp0, 'a', too_long);
 
   for(i = 0; list[i].home; i++) {
