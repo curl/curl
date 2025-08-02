@@ -75,7 +75,7 @@ static CURLcode test_unit2604(const char *arg)
 #pragma GCC diagnostic pop
 #endif
 
-  char *cp0 = malloc(too_long + 1);
+  char *cp0 = calloc(1, too_long + 1);
   abort_unless(cp0, "could not alloc too long value");
   memset(cp0, 'a', too_long);
 
