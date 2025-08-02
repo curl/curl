@@ -28,7 +28,7 @@
 size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream);
 size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
 
-static unsigned long realHeaderSize = 0;
+static size_t realHeaderSize = 0;
 
 static CURLcode test_lib1509(const char *URL)
 {
@@ -70,7 +70,7 @@ static CURLcode test_lib1509(const char *URL)
   }
 
   curl_mprintf("header length is ........: %ld\n", headerSize);
-  curl_mprintf("header length should be..: %lu\n", realHeaderSize);
+  curl_mprintf("header length should be..: %zu\n", realHeaderSize);
 
 test_cleanup:
 
@@ -91,7 +91,7 @@ size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
   (void)ptr;
   (void)stream;
 
-  realHeaderSize += curlx_uztoul(size * nmemb);
+  realHeaderSize += size * nmemb;
 
   return nmemb * size;
 }

@@ -178,13 +178,13 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
   if(result) {
-    curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %zd\n",
+    curl_mfprintf(stderr, "ws: curl_ws_recv returned %u, received %zu\n",
                   result, rlen);
     return result;
   }
 
   if(!(meta->flags & CURLWS_PONG)) {
-    curl_mfprintf(stderr, "recv_pong: wrong frame, got %zd bytes rflags %x\n",
+    curl_mfprintf(stderr, "recv_pong: wrong frame, got %zu bytes rflags %x\n",
                   rlen, meta->flags);
     return CURLE_RECV_ERROR;
   }

@@ -48,10 +48,10 @@ static size_t t552_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  int amount = curlx_uztosi(size * nmemb);
-  curl_mprintf("%.*s", amount, (char *)ptr);
+  size_t amount = size * nmemb;
+  curl_mprintf("%.*s", (int)amount, ptr);
   (void)stream;
-  return size * nmemb;
+  return amount;
 }
 
 static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)

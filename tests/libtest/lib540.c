@@ -159,7 +159,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
       if(msg->msg == CURLMSG_DONE) {
         size_t i;
         CURL *e = msg->easy_handle;
-        curl_mfprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
+        curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
                       curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);

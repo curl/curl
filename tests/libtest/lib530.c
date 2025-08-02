@@ -75,7 +75,8 @@ static void t530_removeFd(struct t530_Sockets *sockets, curl_socket_t fd,
   int i;
 
   if(mention)
-    curl_mfprintf(stderr, "%s remove socket fd %d\n", t530_tag(), (int)fd);
+    curl_mfprintf(stderr, "%s remove socket fd %" FMT_SOCKET_T "\n",
+                  t530_tag(), fd);
 
   for(i = 0; i < sockets->count; ++i) {
     if(sockets->sockets[i] == fd) {
@@ -98,8 +99,8 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
    * To ensure we only have each file descriptor once, we remove it then add
    * it again.
    */
-  curl_mfprintf(stderr, "%s add socket fd %d for %s\n",
-                t530_tag(), (int)fd, what);
+  curl_mfprintf(stderr, "%s add socket fd %" FMT_SOCKET_T " for %s\n",
+                t530_tag(), fd, what);
   t530_removeFd(sockets, fd, 0);
   /*
    * Allocate array storage when required.
@@ -214,7 +215,7 @@ static int t530_checkForCompletion(CURLM *curl, int *success)
   return result;
 }
 
-static int t530_getMicroSecondTimeout(struct curltime *timeout)
+static ssize_t t530_getMicroSecondTimeout(struct curltime *timeout)
 {
   struct curltime now;
   ssize_t result;
@@ -224,7 +225,7 @@ static int t530_getMicroSecondTimeout(struct curltime *timeout)
   if(result < 0)
     result = 0;
 
-  return curlx_sztosi(result);
+  return result;
 }
 
 /**
@@ -249,8 +250,8 @@ static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
-                         const char *info)
+static CURLMcode socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
+                               const char *info)
 {
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
@@ -258,17 +259,18 @@ static int socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
     curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
                   t530_tag(), info, result, curl_multi_strerror(result));
   }
-  return (int)result;
+  return result;
 }
 
 /**
  * Invoke curl when a file descriptor is set.
  */
-static int t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
-                           fd_set *fdset, int evBitmask, const char *name)
+static CURLMcode t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
+                                 fd_set *fdset, int evBitmask,
+                                 const char *name)
 {
   int i;
-  int result = 0;
+  CURLMcode result = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
       result = socket_action(curl, sockets->sockets[i], evBitmask, name);
@@ -335,7 +337,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     t530_updateFdSet(&sockets.write, &writeSet, &maxFd);
 
     if(timeout.tv_sec != (time_t)-1) {
-      int usTimeout = t530_getMicroSecondTimeout(&timeout);
+      int usTimeout = curlx_sztosi(t530_getMicroSecondTimeout(&timeout));
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
     }
