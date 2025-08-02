@@ -101,6 +101,7 @@ DPAGES = \
   fail-with-body.md \
   fail.md \
   false-start.md \
+  follow.md \
   form-escape.md \
   form-string.md \
   form.md \

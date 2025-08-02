@@ -224,6 +224,7 @@ struct OperationConfig {
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
   unsigned long timecond;
+  long followlocation;      /* follow http redirects mode */
   HttpReq httpreq;
   long proxyver;             /* set to CURLPROXY_HTTP* define */
   long ftp_ssl_ccc_mode;
@@ -264,7 +265,6 @@ struct OperationConfig {
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
   BIT(dirlistonly);         /* only get the FTP dir list */
-  BIT(followlocation);      /* follow http redirects */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */

@@ -200,6 +200,7 @@
 --range (-r)                         4.0
 --rate                               7.84.0
 --raw                                7.16.2
+--follow                             8.16.0
 --referer (-e)                       4.0
 --remote-header-name (-J)            7.20.0
 --remote-name (-O)                   4.0

@@ -9,6 +9,7 @@ Added: 7.10.4
 Multi: boolean
 See-also:
   - user
+  - follow
 Example:
   - --location-trusted -u user:password $URL
   - --location-trusted -H "Cookie: session=abc" $URL
