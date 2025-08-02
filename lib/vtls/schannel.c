@@ -1184,8 +1184,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(doread) {
       /* read encrypted handshake data from socket */
       result = Curl_conn_cf_recv(cf->next, data,
-                                 (char *) (backend->encdata_buffer +
-                                           backend->encdata_offset),
+                                 (char *)(backend->encdata_buffer +
+                                          backend->encdata_offset),
                                  backend->encdata_length -
                                  backend->encdata_offset,
                                  &nread);
@@ -1715,7 +1715,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* calculate the complete message length and allocate a buffer for it */
   data_len = backend->stream_sizes.cbHeader + len +
     backend->stream_sizes.cbTrailer;
-  ptr = (unsigned char *) malloc(data_len);
+  ptr = (unsigned char *)malloc(data_len);
   if(!ptr) {
     return CURLE_OUT_OF_MEMORY;
   }
@@ -1736,7 +1736,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
   sspi_status = Curl_pSecFn->EncryptMessage(&backend->ctxt->ctxt_handle, 0,
-                                         &outbuf_desc, 0);
+                                            &outbuf_desc, 0);
 
   /* check if the message was encrypted */
   if(sspi_status == SEC_E_OK) {
