@@ -115,8 +115,9 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
 CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
-int Curl_http_getsock_do(struct Curl_easy *data, struct connectdata *conn,
-                         curl_socket_t *socks);
+unsigned int Curl_http_getsock_do(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  curl_socket_t *socks);
 CURLcode Curl_http_write_resp(struct Curl_easy *data,
                               const char *buf, size_t blen,
                               bool is_eos);

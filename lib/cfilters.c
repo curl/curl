@@ -1175,10 +1175,10 @@ void Curl_pollset_set(struct Curl_easy *data,
 }
 
 static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
-                   int bitmap, curl_socket_t *socks)
+                   unsigned int bitmap, curl_socket_t *socks)
 {
   if(bitmap) {
-    int i;
+    unsigned int i;
     for(i = 0; i < MAX_SOCKSPEREASYHANDLE; ++i) {
       if(!(bitmap & GETSOCK_MASK_RW(i)) || !VALID_SOCK((socks[i]))) {
         break;
@@ -1198,13 +1198,13 @@ static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
 
 void Curl_pollset_add_socks(struct Curl_easy *data,
                             struct easy_pollset *ps,
-                            int (*get_socks_cb)(struct Curl_easy *data,
-                                                curl_socket_t *socks))
+                            unsigned int (*socks_cb)(struct Curl_easy *data,
+                                                     curl_socket_t *socks))
 {
   curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
-  int bitmap;
+  unsigned int bitmap;
 
-  bitmap = get_socks_cb(data, socks);
+  bitmap = socks_cb(data, socks);
   ps_add(data, ps, bitmap, socks);
 }
 

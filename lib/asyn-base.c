@@ -78,14 +78,15 @@
  * Returns: sockets-in-use-bitmap
  */
 
-int Curl_ares_getsock(struct Curl_easy *data,
-                      ares_channel channel,
-                      curl_socket_t *socks)
+unsigned int Curl_ares_getsock(struct Curl_easy *data,
+                               ares_channel channel,
+                               curl_socket_t *socks)
 {
   struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
   struct timeval timebuf;
-  int max = ares_getsock(channel,
-                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
+  unsigned int max = ares_getsock(channel,
+                                  (ares_socket_t *)socks,
+                                  MAX_SOCKSPEREASYHANDLE);
   struct timeval *timeout = ares_timeout(channel, &maxtime, &timebuf);
   timediff_t milli = curlx_tvtoms(timeout);
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);

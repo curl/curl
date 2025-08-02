@@ -907,7 +907,8 @@ void Curl_attach_connection(struct Curl_easy *data,
     conn->handler->attach(data, conn);
 }
 
-static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
+static unsigned int connecting_getsock(struct Curl_easy *data,
+                                       curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd;
@@ -923,7 +924,8 @@ static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-static int protocol_getsock(struct Curl_easy *data, curl_socket_t *socks)
+static unsigned int protocol_getsock(struct Curl_easy *data,
+                                     curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   curl_socket_t sockfd;
@@ -941,7 +943,8 @@ static int protocol_getsock(struct Curl_easy *data, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-static int domore_getsock(struct Curl_easy *data, curl_socket_t *socks)
+static unsigned int domore_getsock(struct Curl_easy *data,
+                                   curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   if(!conn)
@@ -956,7 +959,8 @@ static int domore_getsock(struct Curl_easy *data, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-static int doing_getsock(struct Curl_easy *data, curl_socket_t *socks)
+static unsigned int doing_getsock(struct Curl_easy *data,
+                                  curl_socket_t *socks)
 {
   struct connectdata *conn = data->conn;
   if(!conn)
@@ -971,7 +975,8 @@ static int doing_getsock(struct Curl_easy *data, curl_socket_t *socks)
   return GETSOCK_BLANK;
 }
 
-static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
+static unsigned int perform_getsock(struct Curl_easy *data,
+                                    curl_socket_t *sock)
 {
   struct connectdata *conn = data->conn;
   if(!conn)

@@ -629,10 +629,10 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   }
 }
 
-int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
+unsigned int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
-  int ret_val = 0;
+  unsigned int ret_val = 0;
 #if !defined(CURL_DISABLE_SOCKETPAIR) || defined(USE_HTTPSRR_ARES)
   int socketi = 0;
 #else

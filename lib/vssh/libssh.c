@@ -125,8 +125,9 @@ CURLcode sftp_perform(struct Curl_easy *data,
                       bool *connected,
                       bool *dophase_done);
 
-static int myssh_getsock(struct Curl_easy *data,
-                         struct connectdata *conn, curl_socket_t *sock);
+static unsigned int myssh_getsock(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  curl_socket_t *sock);
 static void myssh_block2waitfor(struct connectdata *conn,
                                 struct ssh_conn *sshc,
                                 bool block);
@@ -2390,9 +2391,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static int myssh_getsock(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *sock)
+static unsigned int myssh_getsock(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  curl_socket_t *sock)
 {
   int bitmap = GETSOCK_BLANK;
   (void)data;

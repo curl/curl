@@ -83,8 +83,9 @@ struct RTSP {
 static CURLcode rtsp_do(struct Curl_easy *data, bool *done);
 static CURLcode rtsp_done(struct Curl_easy *data, CURLcode, bool premature);
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done);
-static int rtsp_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn, curl_socket_t *socks);
+static unsigned int rtsp_getsock_do(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    curl_socket_t *socks);
 
 /*
  * Parse and write out an RTSP response.
@@ -110,8 +111,9 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
-                           curl_socket_t *socks)
+static unsigned int rtsp_getsock_do(struct Curl_easy *data,
+                                    struct connectdata *conn,
+                                    curl_socket_t *socks)
 {
   /* write mode */
   (void)data;

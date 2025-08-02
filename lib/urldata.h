@@ -471,6 +471,25 @@ struct hostname {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
+/* we support N sockets per easy handle. Set the corresponding bit to what
+   action we should wait for */
+#define MAX_SOCKSPEREASYHANDLE 16
+
+/* the write bits start at bit 16 for the *getsock() bitmap */
+#define GETSOCK_WRITEBITSTART 16
+
+#define GETSOCK_BLANK 0U /* no bits set */
+
+/* set the bit for the given sock number to make the bitmap for writable */
+#define GETSOCK_WRITESOCK(x) (1U << (GETSOCK_WRITEBITSTART + (x)))
+
+/* set the bit for the given sock number to make the bitmap for readable */
+#define GETSOCK_READSOCK(x) (1U << (x))
+
+/* mask for checking if read and/or write is set for index x */
+#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
+
+
 /* Polling requested by an easy handle.
  * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
  */
@@ -516,24 +535,28 @@ struct Curl_handler {
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  int (*proto_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  unsigned int (*proto_getsock)(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *socks);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  int (*doing_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  unsigned int (*doing_getsock)(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
      then return a proper fd set */
-  int (*domore_getsock)(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
+  unsigned int (*domore_getsock)(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 curl_socket_t *socks);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
-  int (*perform_getsock)(struct Curl_easy *data,
-                         struct connectdata *conn, curl_socket_t *socks);
+  unsigned int (*perform_getsock)(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  curl_socket_t *socks);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection. If the handler
