@@ -103,7 +103,7 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    curl_mprintf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
+    curl_mprintf("%zu: bad error code (%d): resume=%s, fail=%s, http416=%s, "
                  "content-range=%s, expected=%d\n", num, res,
                  (p->flags & F_RESUME) ? "yes": "no",
                  (p->flags & F_FAIL) ? "yes": "no",
