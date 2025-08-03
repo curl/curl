@@ -1674,6 +1674,29 @@ sub singletest_check {
         }
     }
 
+    my @dnsd = getpart("verify", "dns");
+    if(@dnsd) {
+        # we're supposed to verify a dynamically generated file!
+        my %hash = getpartattr("verify", "dns");
+        my $hostname=$hash{'host'};
+
+        # Verify the sent DNS requests
+        my @out = loadarray("$logdir/dnsd.input");
+        my @sverify = sort @dnsd;
+        my @sout = sort @out;
+
+        if($hostname) {
+            # when a hostname is set, we filter out requests to just this
+            # pattern
+            @sout = grep {/$hostname/} @sout;
+        }
+
+        $res = compare($runnerid, $testnum, $testname, "DNS", \@sout, \@sverify);
+        if($res) {
+            return -1;
+        }
+    }
+
     # accept multiple comma-separated error codes
     my @splerr = split(/ *, */, $errorcode);
     my $errok;

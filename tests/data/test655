@@ -36,7 +36,7 @@ lib%TESTNUMBER
 resolver start callback
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://failthis/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

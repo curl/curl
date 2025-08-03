@@ -367,6 +367,14 @@ static CURLcode async_rr_start(struct Curl_easy *data)
     thrdd->rr.channel = NULL;
     return CURLE_FAILED_INIT;
   }
+#ifdef CURLDEBUG
+  if(getenv("CURL_DNS_SERVER")) {
+    const char *servers = getenv("CURL_DNS_SERVER");
+    status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
+    if(status)
+      return CURLE_FAILED_INIT;
+  }
+#endif
 
   memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
   thrdd->rr.hinfo.port = -1;
@@ -374,6 +382,7 @@ static CURLcode async_rr_start(struct Curl_easy *data)
                     data->conn->host.name, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     async_thrdd_rr_done, data, NULL);
+  CURL_TRC_DNS(data, "Issued HTTPS-RR request for %s", data->conn->host.name);
   return CURLE_OK;
 }
 #endif
