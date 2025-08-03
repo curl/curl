@@ -45,14 +45,14 @@ struct category_descriptors {
 void tool_common_table(unsigned int category_flag)
 {
   size_t cols = get_terminal_columns();
-  size_t i, j, count = 0;
-  
+  size_t i, c, j, found, opt_idx, current, count = 0;
+
   /* First count how many options we have in this category */
   for(i = 0; helptext[i].opt; ++i) {
     if(helptext[i].categories & category_flag)
       count++;
   }
-  
+
   if(count == 0) {
     printf("No options found for this category.\n");
     return;
@@ -66,19 +66,19 @@ void tool_common_table(unsigned int category_flag)
     j = 1;
 
   /* Print options in table format */
-  size_t current = 0;
+  current = 0;
   for(i = 0; helptext[i].opt; ++i) {
     if(!(helptext[i].categories & category_flag))
       continue;
-      
+
     if(current % j == 0) {
       /* Start new row - print headers */
       if(current > 0)
         puts("\n");
-      size_t c;
+
       for(c = 0; c < j && (current + c) < count; c++) {
-        /* Find the c-th option from current position */
-        size_t opt_idx = 0, found = 0;
+        /* Find the common option from current position. */
+        opt_idx = 0, found = 0;
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
@@ -90,16 +90,16 @@ void tool_common_table(unsigned int category_flag)
         }
       }
       puts("");
-      
+
       /* Print separators */
       for(c = 0; c < j && (current + c) < count; c++)
         printf("------------------------------------------- ");
       puts("");
-      
+
       /* Print descriptions */
       for(c = 0; c < j && (current + c) < count; c++) {
-        /* Find the c-th option from current position */
-        size_t opt_idx = 0, found = 0;
+        /* Find the common description from current position */
+        opt_idx = 0, found = 0;
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
@@ -189,14 +189,14 @@ static void print_category(unsigned int category, unsigned int cols)
 static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
-  
+
   /* Qualifier: show common options as table. */
   if(curl_strequal(category, "table")) {
     printf("Common Use:\n");
     tool_common_table(CURLHELP_COMMON);
     return 0;
   }
-  
+
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
