@@ -6,7 +6,7 @@ Long: user-agent
 Arg: <name>
 Help: Send User-Agent <name> to server
 Protocols: HTTP
-Category: important http
+Category: important http common
 Added: 4.5.1
 Multi: single
 See-also:

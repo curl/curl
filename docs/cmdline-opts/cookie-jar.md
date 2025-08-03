@@ -6,7 +6,7 @@ Long: cookie-jar
 Arg: <filename>
 Protocols: HTTP
 Help: Save cookies to <filename> after operation
-Category: http
+Category: http common
 Added: 7.9
 Multi: single
 See-also:

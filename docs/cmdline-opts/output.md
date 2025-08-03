@@ -5,7 +5,7 @@ Long: output
 Arg: <file>
 Short: o
 Help: Write to file instead of stdout
-Category: important output
+Category: important output common
 Added: 4.0
 Multi: per-URL
 See-also:
