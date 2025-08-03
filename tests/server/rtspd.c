@@ -1224,7 +1224,7 @@ static int test_rtspd(int argc, char *argv[])
 
     logmsg("====> Client connect");
 
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && !defined(__EMSCRIPTEN__)
     /*
      * Disable the Nagle algorithm to make it easier to send out a large
      * response in many small segments to torture the clients more.
