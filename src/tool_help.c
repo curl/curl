@@ -78,7 +78,7 @@ void tool_common_table(unsigned int category_flag)
 
       for(c = 0; c < j && (current + c) < count; c++) {
         /* Find the common option from current position. */
-        opt_idx = 0, found = 0;
+        opt_idx, found = 0;
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
@@ -99,7 +99,7 @@ void tool_common_table(unsigned int category_flag)
       /* Print descriptions */
       for(c = 0; c < j && (current + c) < count; c++) {
         /* Find the common description from current position */
-        opt_idx = 0, found = 0;
+        opt_idx, found = 0;
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
