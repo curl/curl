@@ -31,6 +31,7 @@ curl invalid category --help
 Unknown category provided, here is a list of all categories:
 
  auth        Authentication methods
+ common      Common options
  connection  Manage connections
  curl        The command line tool itself
  deprecated  Legacy
