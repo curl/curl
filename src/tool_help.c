@@ -41,6 +41,81 @@ struct category_descriptors {
   unsigned int category;
 };
 
+/* Output table from common. */
+void tool_common_table(unsigned int category_flag)
+{
+  size_t cols = get_terminal_columns();
+  size_t i, j, count = 0;
+  
+  /* First count how many options we have in this category */
+  for(i = 0; helptext[i].opt; ++i) {
+    if(helptext[i].categories & category_flag)
+      count++;
+  }
+  
+  if(count == 0) {
+    printf("No options found for this category.\n");
+    return;
+  }
+
+  /* Set j based on col width, setting once, not in a loop. */
+  j = cols/45;
+  if(j > 8)
+    j = 8;
+  else if(j == 0)
+    j = 1;
+
+  /* Print options in table format */
+  size_t current = 0;
+  for(i = 0; helptext[i].opt; ++i) {
+    if(!(helptext[i].categories & category_flag))
+      continue;
+      
+    if(current % j == 0) {
+      /* Start new row - print headers */
+      if(current > 0)
+        puts("\n");
+      size_t c;
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Find the c-th option from current position */
+        size_t opt_idx = 0, found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
+          if(helptext[opt_idx].categories & category_flag) {
+            if(found == current + c) {
+              printf("%-44s ", helptext[opt_idx].opt);
+              break;
+            }
+            found++;
+          }
+        }
+      }
+      puts("");
+      
+      /* Print separators */
+      for(c = 0; c < j && (current + c) < count; c++)
+        printf("------------------------------------------- ");
+      puts("");
+      
+      /* Print descriptions */
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Find the c-th option from current position */
+        size_t opt_idx = 0, found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
+          if(helptext[opt_idx].categories & category_flag) {
+            if(found == current + c) {
+              printf("%-44s ", helptext[opt_idx].desc);
+              break;
+            }
+            found++;
+          }
+        }
+      }
+    }
+    current++;
+  }
+  puts("");
+}
+
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
   {"auth", "Authentication methods", CURLHELP_AUTH},
@@ -63,6 +138,7 @@ static const struct category_descriptors categories[] = {
   {"sftp", "SFTP protocol", CURLHELP_SFTP},
   {"smtp", "SMTP protocol", CURLHELP_SMTP},
   {"ssh", "SSH protocol", CURLHELP_SSH},
+  {"table", "Table of common options", 0},
   {"telnet", "TELNET protocol", CURLHELP_TELNET},
   {"tftp", "TFTP protocol", CURLHELP_TFTP},
   {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
@@ -113,6 +189,14 @@ static void print_category(unsigned int category, unsigned int cols)
 static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
+  
+  /* Qualifier: show common options as table. */
+  if(curl_strequal(category, "table")) {
+    printf("Common Use:\n");
+    tool_common_table(CURLHELP_COMMON);
+    return 0;
+  }
+  
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
