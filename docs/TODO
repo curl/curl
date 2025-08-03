@@ -23,6 +23,7 @@
  1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.6 thread-safe sharing
+ 1.7 disable TCP_NODELAY at build time
  1.8 CURLOPT_RESOLVE for any port number
  1.9 Cache negative name resolves
  1.10 auto-detect proxy
@@ -254,6 +255,15 @@
  several of the sharing options are documented as not safe and supported to
  share between multiple concurrent threads. Fixing this would enable more
  users to share data in more powerful ways.
+
+1.7 Disable TCP_NODELAY at build time
+
+ "We are running libcurl in WebAssembly which does not have TCP_NODELAY." If
+ TCP_NODELAY exists at build-time but (always) fails at runtime, every request
+ that sets this by default will output "Could not set TCP_NODELAY: Protocol
+ not available". Consider ways to improve this.
+
+ See https://github.com/curl/curl/issues/17974
 
 1.8 CURLOPT_RESOLVE for any port number
 
