@@ -94,6 +94,10 @@ struct Curl_tree *Curl_splay(struct curltime i,
   return t;
 }
 
+static const struct curltime SPLAY_SUBNODE = {
+  ~0, -1
+};
+
 /* Insert key i into the tree t. Return a pointer to the resulting tree or
  * NULL if something went wrong.
  *
@@ -103,10 +107,6 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
                                    struct Curl_tree *t,
                                    struct Curl_tree *node)
 {
-  static const struct curltime KEY_NOTUSED = {
-    ~0, -1
-  }; /* will *NEVER* appear */
-
   DEBUGASSERT(node);
 
   if(t) {
@@ -117,8 +117,7 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
          doubly-linked circular list of nodes. We add the new 'node' struct to
          the end of this list. */
 
-      node->key = KEY_NOTUSED; /* we set the key in the sub node to NOTUSED
-                                  to quickly identify this node as a subnode */
+      node->key = SPLAY_SUBNODE; /* identify this node as a subnode */
       node->samen = t;
       node->samep = t->samep;
       t->samep->samen = node;
@@ -214,9 +213,6 @@ int Curl_splayremove(struct Curl_tree *t,
                      struct Curl_tree *removenode,
                      struct Curl_tree **newroot)
 {
-  static const struct curltime KEY_NOTUSED = {
-    ~0, -1
-  }; /* will *NEVER* appear */
   struct Curl_tree *x;
 
   if(!t)
@@ -224,11 +220,11 @@ int Curl_splayremove(struct Curl_tree *t,
 
   DEBUGASSERT(removenode);
 
-  if(compare(KEY_NOTUSED, removenode->key) == 0) {
-    /* Key set to NOTUSED means it is a subnode within a 'same' linked list
-       and thus we can unlink it easily. */
+  if(compare(SPLAY_SUBNODE, removenode->key) == 0) {
+    /* It is a subnode within a 'same' linked list and thus we can unlink it
+       easily. */
     if(removenode->samen == removenode)
-      /* A non-subnode should never be set to KEY_NOTUSED */
+      /* A non-subnode should never be set to SPLAY_SUBNODE */
       return 3;
 
     removenode->samep->samen = removenode->samen;
@@ -249,8 +245,9 @@ int Curl_splayremove(struct Curl_tree *t,
      is not actually in the tree.
 
      We cannot just compare the keys here as a double remove in quick
-     succession of a node with key != KEY_NOTUSED && same != NULL
+     succession of a node with key != SPLAY_SUBNODE && same != NULL
      could return the same key but a different node. */
+  DEBUGASSERT(t == removenode);
   if(t != removenode)
     return 2;
 
