@@ -260,8 +260,8 @@
 
  "We are running libcurl in WebAssembly which does not have TCP_NODELAY." If
  TCP_NODELAY exists at build-time but (always) fails at runtime, every request
- that sets this by default will output "Could not set TCP_NODELAY: Protocol
- not available". Consider ways to improve this.
+ that sets this by default outputs "Could not set TCP_NODELAY: Protocol not
+ available". Consider ways to improve this.
 
  See https://github.com/curl/curl/issues/17974
 
