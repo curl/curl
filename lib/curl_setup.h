@@ -385,7 +385,7 @@
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
-#define USE_RESOLVE_ON_IPS 1
+#  define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
      defined(USE_IPV6)
 #    define CURL_MACOS_CALL_COPYPROXIES 1
