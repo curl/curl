@@ -44,6 +44,7 @@ struct category_descriptors {
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
   {"auth", "Authentication methods", CURLHELP_AUTH},
+  {"common", "Common options", CURLHELP_COMMON},
   {"connection", "Manage connections", CURLHELP_CONNECTION},
   {"curl", "The command line tool itself", CURLHELP_CURL},
   {"deprecated", "Legacy", CURLHELP_DEPRECATED},
