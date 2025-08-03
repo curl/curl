@@ -221,8 +221,8 @@ int Curl_splayremove(struct Curl_tree *t,
   DEBUGASSERT(removenode);
 
   if(compare(SPLAY_SUBNODE, removenode->key) == 0) {
-    /* Key set to NOTUSED means it is a subnode within a 'same' linked list
-       and thus we can unlink it easily. */
+    /* It is a subnode within a 'same' linked list and thus we can unlink it
+       easily. */
     if(removenode->samen == removenode)
       /* A non-subnode should never be set to SPLAY_SUBNODE */
       return 3;
