@@ -50,6 +50,7 @@ Unknown category provided, here is a list of all categories:
  sftp        SFTP protocol
  smtp        SMTP protocol
  ssh         SSH protocol
+ table       Table of common options
  telnet      TELNET protocol
  tftp        TFTP protocol
  timeout     Timeouts and delays
