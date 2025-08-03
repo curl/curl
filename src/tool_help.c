@@ -53,11 +53,6 @@ void tool_common_table(unsigned int category_flag)
       count++;
   }
 
-  if(count == 0) {
-    printf("No options found for this category.\n");
-    return;
-  }
-
   /* Set j based on col width, setting once, not in a loop. */
   j = cols/45;
   if(j > 8)
@@ -82,7 +77,11 @@ void tool_common_table(unsigned int category_flag)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
-              printf("%-44s ", helptext[opt_idx].opt);
+              /* Check if long option. */
+              if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
+                printf("%-44s", helptext[opt_idx].opt + 4);
+              else
+                printf("%-44s", helptext[opt_idx].opt);
               break;
             }
             found++;
@@ -103,7 +102,7 @@ void tool_common_table(unsigned int category_flag)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
-              printf("%-44s ", helptext[opt_idx].desc);
+              printf("%-44s", helptext[opt_idx].desc);
               break;
             }
             found++;
