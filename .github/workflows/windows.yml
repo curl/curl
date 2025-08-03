@@ -183,7 +183,7 @@ jobs:
           fi
 
       - name: 'diskspace used'
-        run: du -sh .
+        run: du -sh -t 250KB * bld
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -410,7 +410,7 @@ jobs:
           fi
 
       - name: 'diskspace used'
-        run: du -sh .
+        run: du -sh -t 250KB * bld
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
@@ -592,7 +592,7 @@ jobs:
           cmake --build bld --target curl-examples
 
       - name: 'diskspace used'
-        run: du -sh .
+        run: du -sh -t 250KB * bld
 
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
@@ -694,7 +694,7 @@ jobs:
           fi
 
       - name: 'diskspace used'
-        run: du -sh .
+        run: du -sh -t 250KB * bld
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
@@ -939,4 +939,4 @@ jobs:
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples
 
       - name: 'diskspace used'
-        run: du -sh .
+        run: du -sh -t 250KB * bld
