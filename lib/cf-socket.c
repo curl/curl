@@ -109,7 +109,7 @@ static void set_ipv6_v6only(curl_socket_t sockfd, int on)
 
 static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 {
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
   char buffer[STRERROR_LEN];

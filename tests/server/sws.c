@@ -158,7 +158,7 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
 
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
 /* returns true if the current socket is an IP one */
 static bool socket_domain_is_ip(void)
 {
@@ -1239,7 +1239,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     return CURL_SOCKET_BAD;
   }
 
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   if(socket_domain_is_ip()) {
     /* Disable the Nagle algorithm */
     curl_socklen_t flag = 1;
@@ -1545,7 +1545,7 @@ static void http_connect(curl_socket_t *infdp,
           }
           memset(req2, 0, sizeof(*req2));
           logmsg("====> Client connect DATA");
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
           if(socket_domain_is_ip()) {
             /* Disable the Nagle algorithm */
             curl_socklen_t flag = 1;
@@ -1871,7 +1871,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
   all_sockets[num_sockets] = msgsock;
   num_sockets += 1;
 
-#ifdef TCP_NODELAY
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   if(socket_domain_is_ip()) {
     /*
      * Disable the Nagle algorithm to make it easier to send out a large

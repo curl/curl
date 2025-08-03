@@ -1125,6 +1125,11 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define USE_HTTP3
 #endif
 
+/* WebAssembly builds have TCP_NODELAY, but runtime support is missing. */
+#ifndef __EMSCRIPTEN__
+#define CURL_TCP_NODELAY_SUPPORTED
+#endif
+
 /* Certain Windows implementations are not aligned with what curl expects,
    so always use the local one on this platform. E.g. the mingw-w64
    implementation can return wrong results for non-ASCII inputs. */
