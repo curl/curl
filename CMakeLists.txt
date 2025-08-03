@@ -355,7 +355,7 @@ if(WIN32)
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
+if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")) OR
    VCPKG_TOOLCHAIN OR
    (MINGW AND NOT CMAKE_CROSSCOMPILING))
   set(_curl_use_pkgconfig_default ON)
@@ -653,7 +653,7 @@ if(ENABLE_IPV6)
       set(ENABLE_IPV6 OFF CACHE BOOL "Enable IPv6 support" FORCE)  # Force the feature off as we use this name as guard macro
     endif()
 
-    if(APPLE AND NOT ENABLE_ARES)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT ENABLE_ARES)
       set(_use_core_foundation_and_core_services ON)
 
       find_library(SYSTEMCONFIGURATION_FRAMEWORK NAMES "SystemConfiguration")
