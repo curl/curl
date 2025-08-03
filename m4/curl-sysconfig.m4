@@ -32,7 +32,7 @@ AC_MSG_CHECKING([whether to link macOS CoreFoundation, CoreServices, and SystemC
       #if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
         return 0;
       #else
-      #error Not macOS
+        #error Not macOS
       #endif
     ]])
   ],[
