@@ -1536,7 +1536,7 @@ CURLcode Curl_resolv_getsock(struct Curl_easy *data,
   return Curl_async_getsock(data, ps);
 #else
   (void)data;
-  (void)socks;
+  (void)ps;
   return CURLE_OK;
 #endif
 }
