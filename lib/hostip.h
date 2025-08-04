@@ -67,7 +67,7 @@ struct Curl_dns_entry {
   struct Curl_https_rrinfo *hinfo;
 #endif
   /* timestamp == 0 -- permanent CURLOPT_RESOLVE entry (does not time out) */
-  time_t timestamp;
+  struct curltime timestamp;
   /* reference counter, entry is freed on reaching 0 */
   size_t refcount;
   /* hostname port number that resolved to addr. */

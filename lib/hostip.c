@@ -180,9 +180,9 @@ create_dnscache_id(const char *name,
 }
 
 struct dnscache_prune_data {
-  time_t now;
-  time_t oldest; /* oldest time in cache not pruned. */
-  int max_age_sec;
+  struct curltime now;
+  timediff_t oldest_ms; /* oldest time in cache not pruned. */
+  timediff_t max_age_ms;
 };
 
 /*
@@ -199,36 +199,36 @@ dnscache_entry_is_stale(void *datap, void *hc)
     (struct dnscache_prune_data *) datap;
   struct Curl_dns_entry *dns = (struct Curl_dns_entry *) hc;
 
-  if(dns->timestamp) {
-    /* age in seconds */
-    time_t age = prune->now - dns->timestamp;
-    if(age >= (time_t)prune->max_age_sec)
+  if(dns->timestamp.tv_sec || dns->timestamp.tv_usec) {
+    /* get age in milliseconds */
+    timediff_t age = curlx_timediff(prune->now, dns->timestamp);
+    if(age >= prune->max_age_ms)
       return TRUE;
-    if(age > prune->oldest)
-      prune->oldest = age;
+    if(age > prune->oldest_ms)
+      prune->oldest_ms = age;
   }
   return FALSE;
 }
 
 /*
  * Prune the DNS cache. This assumes that a lock has already been taken.
- * Returns the 'age' of the oldest still kept entry.
+ * Returns the 'age' of the oldest still kept entry - in milliseconds.
  */
-static time_t
-dnscache_prune(struct Curl_hash *hostcache, int cache_timeout,
-               time_t now)
+static timediff_t
+dnscache_prune(struct Curl_hash *hostcache, int cache_timeout_ms,
+               struct curltime now)
 {
   struct dnscache_prune_data user;
 
-  user.max_age_sec = cache_timeout;
+  user.max_age_ms = cache_timeout_ms;
   user.now = now;
-  user.oldest = 0;
+  user.oldest_ms = 0;
 
   Curl_hash_clean_with_criterium(hostcache,
                                  (void *) &user,
                                  dnscache_entry_is_stale);
 
-  return user.oldest;
+  return user.oldest_ms;
 }
 
 static struct Curl_dnscache *dnscache_get(struct Curl_easy *data)
@@ -261,31 +261,35 @@ static void dnscache_unlock(struct Curl_easy *data,
 void Curl_dnscache_prune(struct Curl_easy *data)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  time_t now;
+  struct curltime now;
   /* the timeout may be set -1 (forever) */
-  int timeout = data->set.dns_cache_timeout;
+  int timeout_ms = data->set.dns_cache_timeout_ms;
 
-  if(!dnscache)
+  if(!dnscache || (timeout_ms == -1))
     /* NULL hostcache means we cannot do it */
     return;
 
   dnscache_lock(data, dnscache);
 
-  now = time(NULL);
+  now = curlx_now();
 
   do {
     /* Remove outdated and unused entries from the hostcache */
-    time_t oldest = dnscache_prune(&dnscache->entries, timeout, now);
+    timediff_t oldest_ms = dnscache_prune(&dnscache->entries, timeout_ms, now);
 
-    if(oldest < INT_MAX)
-      timeout = (int)oldest; /* we know it fits */
+    if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE) {
+      if(oldest_ms < INT_MAX)
+        /* prune the ones over half this age */
+        timeout_ms = (int)oldest_ms / 2;
+      else
+        timeout_ms = INT_MAX/2;
+    }
     else
-      timeout = INT_MAX - 1;
+      break;
 
-    /* if the cache size is still too big, use the oldest age as new
-       prune limit */
-  } while(timeout &&
-          (Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE));
+    /* if the cache size is still too big, use the oldest age as new prune
+       limit */
+  } while(timeout_ms);
 
   dnscache_unlock(data, dnscache);
 }
@@ -337,13 +341,13 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     dns = Curl_hash_pick(&dnscache->entries, entry_id, entry_len + 1);
   }
 
-  if(dns && (data->set.dns_cache_timeout != -1)) {
+  if(dns && (data->set.dns_cache_timeout_ms != -1)) {
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
-    user.now = time(NULL);
-    user.max_age_sec = data->set.dns_cache_timeout;
-    user.oldest = 0;
+    user.now = curlx_now();
+    user.max_age_ms = data->set.dns_cache_timeout_ms;
+    user.oldest_ms = 0;
 
     if(dnscache_entry_is_stale(&user, dns)) {
       infof(data, "Hostname in DNS cache was stale, zapped");
@@ -530,12 +534,12 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
 
   dns->refcount = 1; /* the cache has the first reference */
   dns->addr = addr; /* this is the address(es) */
-  if(permanent)
-    dns->timestamp = 0; /* an entry that never goes stale */
+  if(permanent) {
+    dns->timestamp.tv_sec = 0; /* an entry that never goes stale */
+    dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
+  }
   else {
-    dns->timestamp = time(NULL);
-    if(dns->timestamp == 0)
-      dns->timestamp = 1;
+    dns->timestamp = curlx_now();
   }
   dns->hostport = port;
   if(hostlen)
