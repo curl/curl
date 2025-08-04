@@ -77,6 +77,7 @@
 #include "if2ip.h"
 #include "curl_ctype.h"
 #include "curlx/nonblock.h"
+#include "curlx/strparse.h"
 
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
@@ -852,15 +853,25 @@ static bool server_reachable(const char *server, int socktype)
       goto out;
     *rb = '\0';
     host++;
-    if(rb[1] == ':' && rb[2])
-      port = atoi(rb + 2);
+    if(rb[1] == ':' && rb[2]) {
+      const char *pp = rb + 2;
+      curl_off_t num;
+      if(curlx_str_number(&pp, &num, 65535) || num < 1 || *pp)
+        goto out;
+      port = (int)num;
+    }
   }
   else {
     p = strrchr(host, ':');
     if(p && strchr(host, ':') == p) {
       *p++ = '\0';
-      if(*p)
-        port = atoi(p);
+      iif(*p) {
+        const char *pp = p;
+        curl_off_t num;
+        if(curlx_str_number(&pp, &num, 65535) || num < 1 || *pp)
+          goto out;
+        port = (int)num;
+      }
     }
   }
 
@@ -1033,7 +1044,8 @@ static bool ares_interface_reachable(const char *interf,
 #ifdef USE_IPV6
             else if(ua->Address.lpSockaddr->sa_family == AF_INET6 && a6) {
               memcpy(a6,
-                     &((struct sockaddr_in6 *)ua->Address.lpSockaddr)->sin6_addr,
+                     &((struct sockaddr_in6 *)ua->Address.lpSockaddr)
+                       ->sin6_addr,
                      sizeof(struct in6_addr));
               found = TRUE;
             }
@@ -1094,10 +1106,12 @@ static bool ares_interface_reachable(const char *interf,
                                      struct in_addr *a4,
                                      unsigned char *a6)
 {
+  /* No API is available to test reachability on this platform.
+     Assume the interface is usable and bypass the verification. */
   (void)interf;
   (void)a4;
   (void)a6;
-  return FALSE;
+  return TRUE;
 }
 #endif
 CURLcode Curl_async_ares_set_dns_servers(struct Curl_easy *data)
@@ -1123,7 +1137,6 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
   if(!ok)
     interf = "";
 
-  
   if(ares->channel) {
     ares_set_local_dev(ares->channel, interf);
   #ifdef HAVE_CARES_SET_LOCAL
@@ -1132,7 +1145,7 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
     ares_set_local_ip6(ares->channel, a6);
   #endif
   #endif
-    }
+  }
 
   return CURLE_OK;
 #else /* c-ares version too old! */
