@@ -217,7 +217,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   int ver_max = MBEDTLS_SSL_MINOR_VERSION_3; /* TLS 1.2 */
 #else
   /* mbedTLS 3.2.0 (2022) introduced new methods for setting TLS version */
-  mbedtls_ssl_protocol_version ver_min = 
+  mbedtls_ssl_protocol_version ver_min =
 #if defined(MBEDTLS_SSL_PROTO_TLS1_2)
       MBEDTLS_SSL_VERSION_TLS1_2
 #else
@@ -549,7 +549,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ca_info_blob && verifypeer)
   {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using 
+    /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
     if(strcmp(ssl_cert_type, "DER") == 0
@@ -650,7 +650,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(ssl_cert_blob) {
 #ifdef MBEDTLS_PEM_PARSE_C
-    /* if DER or a null-terminated PEM just process using 
+    /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
     if(strcmp(ssl_cert_type, "DER") == 0
