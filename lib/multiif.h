@@ -53,20 +53,6 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
                                      size_t dnssize,
                                      size_t sesssize);
 
-/* the write bits start at bit 16 for the *getsock() bitmap */
-#define GETSOCK_WRITEBITSTART 16
-
-#define GETSOCK_BLANK 0 /* no bits set */
-
-/* set the bit for the given sock number to make the bitmap for writable */
-#define GETSOCK_WRITESOCK(x) (1 << (GETSOCK_WRITEBITSTART + (x)))
-
-/* set the bit for the given sock number to make the bitmap for readable */
-#define GETSOCK_READSOCK(x) (1 << (x))
-
-/* mask for checking if read and/or write is set for index x */
-#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
-
 /**
  * Let the multi handle know that the socket is about to be closed.
  * The multi will then remove anything it knows about the socket, so
@@ -86,9 +72,9 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 /* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
-void Curl_multi_getsock(struct Curl_easy *data,
-                        struct easy_pollset *ps,
-                        const char *caller);
+CURLMcode Curl_multi_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps,
+                             const char *caller);
 
 /**
  * Borrow the transfer buffer from the multi, suitable

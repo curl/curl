@@ -35,6 +35,7 @@
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"
+#include "select.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
@@ -426,22 +427,24 @@ static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+static CURLcode cf_hc_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   if(!cf->connected) {
     struct cf_hc_ctx *ctx = cf->ctx;
     size_t i;
 
-    for(i = 0; i < ctx->baller_count; i++) {
+    for(i = 0; (i < ctx->baller_count) && !result; i++) {
       struct cf_hc_baller *b = &ctx->ballers[i];
       if(!cf_hc_baller_is_active(b))
         continue;
-      Curl_conn_cf_adjust_pollset(b->cf, data, ps);
+      result = Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
   }
+  return result;
 }
 
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,

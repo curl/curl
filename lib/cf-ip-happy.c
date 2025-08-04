@@ -60,6 +60,7 @@
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
+#include "select.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 /* The last 3 #include files should be in this order */
@@ -533,16 +534,18 @@ static CURLcode cf_ip_ballers_shutdown(struct cf_ip_ballers *bs,
   return CURLE_OK;
 }
 
-static void cf_ip_ballers_pollset(struct cf_ip_ballers *bs,
-                                  struct Curl_easy *data,
-                                  struct easy_pollset *ps)
+static CURLcode cf_ip_ballers_pollset(struct cf_ip_ballers *bs,
+                                      struct Curl_easy *data,
+                                      struct easy_pollset *ps)
 {
   struct cf_ip_attempt *a;
-  for(a = bs->running; a; a = a->next) {
+  CURLcode result = CURLE_OK;
+  for(a = bs->running; a && !result; a = a->next) {
     if(a->result)
       continue;
-    Curl_conn_cf_adjust_pollset(a->cf, data, ps);
+    result = Curl_conn_cf_adjust_pollset(a->cf, data, ps);
   }
+  return result;
 }
 
 static bool cf_ip_ballers_pending(struct cf_ip_ballers *bs,
@@ -713,16 +716,18 @@ static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       struct easy_pollset *ps)
+static CURLcode cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct easy_pollset *ps)
 {
   struct cf_ip_happy_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(!cf->connected) {
-    cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+    result = cf_ip_ballers_pollset(&ctx->ballers, data, ps);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
   }
+  return result;
 }
 
 static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,

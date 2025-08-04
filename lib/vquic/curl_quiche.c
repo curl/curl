@@ -1142,15 +1142,16 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
     ctx->qconn, (curl_uint64_t)stream->id, 1) > 0);
 }
 
-static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+static CURLcode cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->qconn)
-    return;
+    return CURLE_OK;
 
   Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
   if(want_recv || want_send) {
@@ -1165,8 +1166,9 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
 
-    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
   }
+  return result;
 }
 
 /*

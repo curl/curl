@@ -1552,10 +1552,10 @@ const struct Curl_handler Curl_handler_ws = {
   Curl_http_connect,                    /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* proto_pollset */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -1579,10 +1579,10 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http_connect,                    /* connect_it */
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_getsock */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  NULL,                                 /* proto_pollset */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */

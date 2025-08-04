@@ -1161,11 +1161,12 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   return result;
 }
 
-static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    struct easy_pollset *ps)
+static CURLcode socks_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(!cf->connected && sx) {
     /* If we are not connected, the filter below is and has nothing
@@ -1177,13 +1178,14 @@ static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
     case CONNECT_AUTH_READ:
     case CONNECT_REQ_READ:
     case CONNECT_REQ_READ_MORE:
-      Curl_pollset_set_in_only(data, ps, sock);
+      result = Curl_pollset_set_in_only(data, ps, sock);
       break;
     default:
-      Curl_pollset_set_out_only(data, ps, sock);
+      result = Curl_pollset_set_out_only(data, ps, sock);
       break;
     }
   }
+  return result;
 }
 
 static void socks_proxy_cf_close(struct Curl_cfilter *cf,

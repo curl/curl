@@ -682,11 +682,12 @@ out:
   return result;
 }
 
-static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       struct easy_pollset *ps)
+static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
@@ -698,13 +699,14 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
          response headers or if we are still sending the request, wait
          for write. */
       if(tunnel_want_send(ts))
-        Curl_pollset_set_out_only(data, ps, sock);
+        result = Curl_pollset_set_out_only(data, ps, sock);
       else
-        Curl_pollset_set_in_only(data, ps, sock);
+        result = Curl_pollset_set_in_only(data, ps, sock);
     }
     else
-      Curl_pollset_set_out_only(data, ps, sock);
+      result = Curl_pollset_set_out_only(data, ps, sock);
   }
+  return result;
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,

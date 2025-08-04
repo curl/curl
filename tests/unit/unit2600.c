@@ -105,8 +105,10 @@ struct test_result {
 
 static const struct test_case *current_tc;
 static struct test_result *current_tr;
+static int test_idx;
 
 struct cf_test_ctx {
+  int idx;
   int ai_family;
   int transport;
   char id[16];
@@ -151,13 +153,13 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct easy_pollset *ps)
+static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
+  struct cf_test_ctx *ctx = cf->ctx;
   /* just for testing, give one socket with events back */
-  (void)cf;
-  Curl_pollset_set(data, ps, 1, TRUE, TRUE);
+  return Curl_pollset_set(data, ps, ctx->idx, TRUE, TRUE);
 }
 
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,
@@ -196,6 +198,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  ctx->idx = test_idx++;
   ctx->ai_family = ai->ai_family;
   ctx->transport = transport;
   ctx->started = curlx_now();

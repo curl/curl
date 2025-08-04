@@ -317,7 +317,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   DEBUGASSERT(prev_ps);
 
   /* Handle changes to sockets the transfer is interested in. */
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     unsigned char last_action;
     bool first_time = FALSE; /* data/conn appears first time on socket */
 
@@ -362,7 +362,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
                  entry->conn ? 1 : 0);
     }
     else {
-      for(j = 0; j < prev_ps->num; j++) {
+      for(j = 0; j < prev_ps->n; j++) {
         if(s == prev_ps->sockets[j]) {
           last_action = prev_ps->actions[j];
           break;
@@ -377,11 +377,11 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   }
 
   /* Handle changes to sockets the transfer is NO LONGER interested in. */
-  for(i = 0; i < prev_ps->num; i++) {
+  for(i = 0; i < prev_ps->n; i++) {
     bool stillused = FALSE;
 
     s = prev_ps->sockets[i];
-    for(j = 0; j < ps->num; j++) {
+    for(j = 0; j < ps->n; j++) {
       if(s == ps->sockets[j]) {
         /* socket is still supervised */
         stillused = TRUE;
@@ -437,15 +437,19 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   } /* for loop over num */
 
   /* Remember for next time */
-  memcpy(prev_ps, ps, sizeof(*prev_ps));
+  Curl_pollset_move(prev_ps, ps);
   return CURLM_OK;
 }
 
 static void mev_pollset_dtor(void *key, size_t klen, void *entry)
 {
+  struct easy_pollset *ps = entry;
   (void)key;
   (void)klen;
-  free(entry);
+  if(ps) {
+    Curl_pollset_cleanup(ps);
+    free(ps);
+  }
 }
 
 static struct easy_pollset*
@@ -453,7 +457,7 @@ mev_add_new_conn_pollset(struct connectdata *conn)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
   if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
@@ -466,7 +470,7 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
   if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
@@ -486,42 +490,47 @@ mev_get_last_pollset(struct Curl_easy *data,
   return NULL;
 }
 
-static void mev_init_cur_pollset(struct easy_pollset *ps,
-                                 struct Curl_easy *data,
-                                 struct connectdata *conn)
-{
-  memset(ps, 0, sizeof(*ps));
-  if(conn)
-    Curl_conn_adjust_pollset(data, conn, ps);
-  else if(data)
-    Curl_multi_getsock(data, ps, "ev assess");
-}
-
 static CURLMcode mev_assess(struct Curl_multi *multi,
                             struct Curl_easy *data,
                             struct connectdata *conn)
 {
-  if(multi && multi->socket_cb) {
-    struct easy_pollset ps, *last_ps;
+  struct easy_pollset ps, *last_ps;
+  CURLMcode res = CURLM_OK;
 
-    mev_init_cur_pollset(&ps, data, conn);
-    last_ps = mev_get_last_pollset(data, conn);
+  if(!multi || !multi->socket_cb)
+    return CURLM_OK;
 
-    if(!last_ps && ps.num) {
-      if(conn)
-        last_ps = mev_add_new_conn_pollset(conn);
-      else
-        last_ps = mev_add_new_xfer_pollset(data);
-      if(!last_ps)
-        return CURLM_OUT_OF_MEMORY;
+  Curl_pollset_init(&ps);
+  if(conn) {
+    CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
+    if(r) {
+      res = (r == CURLE_OUT_OF_MEMORY) ?
+            CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
+      goto out;
     }
-
-    if(last_ps)
-      return mev_pollset_diff(multi, data, conn, &ps, last_ps);
-    else
-      DEBUGASSERT(!ps.num);
   }
-  return CURLM_OK;
+  else if(data)
+    Curl_multi_pollset(data, &ps, "ev assess");
+  last_ps = mev_get_last_pollset(data, conn);
+
+  if(!last_ps && ps.n) {
+    if(conn)
+      last_ps = mev_add_new_conn_pollset(conn);
+    else
+      last_ps = mev_add_new_xfer_pollset(data);
+    if(!last_ps) {
+      res = CURLM_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
+  if(last_ps)
+    res = mev_pollset_diff(multi, data, conn, &ps, last_ps);
+  else
+    DEBUGASSERT(!ps.n);
+out:
+  Curl_pollset_cleanup(&ps);
+  return res;
 }
 
 CURLMcode Curl_multi_ev_assess_xfer(struct Curl_multi *multi,

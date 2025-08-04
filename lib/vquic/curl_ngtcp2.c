@@ -898,15 +898,16 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->qconn)
-    return;
+    return CURLE_OK;
 
   Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
   if(!want_send && !Curl_bufq_is_empty(&ctx->q.sendbuf))
@@ -926,9 +927,10 @@ static void cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
 
-    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  return result;
 }
 
 static int cb_h3_stream_close(nghttp3_conn *conn, int64_t sid,
