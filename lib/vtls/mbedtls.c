@@ -101,7 +101,7 @@ struct mbed_ssl_backend_data {
  */
 struct rng_context_t {
   mbedtls_entropy_context entropy;
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   mbedtls_ctr_drbg_context drbg;
 #elif defined(MBEDTLS_HMAC_DRBG_C)
   mbedtls_hmac_drbg_context drbg;
@@ -210,7 +210,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   /* TLS 1.0 and TLS 1.1 were dropped with mbedTLS 3.0.0 (2021). So, since
    * then, and before the introduction of TLS 1.3 in 3.6.0 (2024), this
    * function basically always sets TLS 1.2 as min/max, unless given
-   * unsupported option values, of if TLS 1.2 support is not compiled. */
+   * unsupported option values, or if TLS 1.2 support is not compiled. */
 
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
   int ver_min = MBEDTLS_SSL_MINOR_VERSION_3; /* TLS 1.2 */
@@ -295,8 +295,6 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-
-#ifndef CURL_DISABLE_CIPHER_SELECT
 /* TLS_ECJPAKE_WITH_AES_128_CCM_8 (0xC0FF) is marked experimental
    in mbedTLS. The number is not reserved by IANA nor is the
    cipher suite present in other SSL implementations. Provide
@@ -437,9 +435,7 @@ add_ciphers:
   mbedtls_ssl_conf_ciphersuites(&backend->config, backend->ciphersuites);
   return CURLE_OK;
 }
-#endif
 
-#ifndef CURL_DISABLE_CERTINFO
 static void
 mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 {
@@ -502,7 +498,7 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
     *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
 
   if(*flags) {
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
+#ifndef MBEDTLS_X509_REMOVE_INFO
     char buf[128];
     mbedtls_x509_crt_verify_info(buf, sizeof(buf), "", *flags);
     failf(data, "mbedTLS: %s", buf);
@@ -513,7 +509,6 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
 
   return 0;
 }
-#endif
 
 static CURLcode
 mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -811,10 +806,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Always let mbedTLS verify certificates, if verifypeer or verifyhost are
    * disabled we clear the corresponding error flags in the verify callback
    * function. That is also where we log verification errors. */
-
-#ifndef CURL_DISABLE_CERTINFO
   mbedtls_ssl_conf_verify(&backend->config, mbed_verify_cb, cf);
-#endif
   mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
 
   mbedtls_ssl_init(&backend->ssl);
@@ -844,13 +836,11 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                       mbedtls_bio_cf_read,
                       NULL /*  rev_timeout() */);
 
-
    /* Allow the user to select TLS 1.2/1.3 ciphersuites.
      If the user doesn't supply ciphersuites, the default
      secure ciphersuites are used (thus no need to call
      mbedtls_ssl_conf_ciphersuites() ).
   */
-#ifndef CURL_DISABLE_CIPHER_SELECT
 #ifndef HAS_TLS13_SUPPORT
   if(conn_config->cipher_list) {
     CURLcode result = mbed_set_selected_ciphers(data, backend,
@@ -867,11 +857,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return result;
     }
   }
-  else {
-    mbedtls_ssl_conf_ciphersuites(&backend->config,
-                                  mbedtls_ssl_list_ciphersuites());
-  }
-#endif
 
 #ifdef MBEDTLS_SSL_RENEGOTIATION
   mbedtls_ssl_conf_renegotiation(&backend->config,
@@ -1014,8 +999,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 
-#if (MBEDTLS_VERSION_NUMBER >= 0x03020000) && \
-   !defined(CURL_DISABLE_VERBOSE_STRINGS) && !defined(CURL_DISABLE_CIPHER_SELECT)
+#if (MBEDTLS_VERSION_NUMBER >= 0x03020000) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   {
     char cipher_str[64];
     uint16_t cipher_id;
@@ -1398,7 +1382,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
   int ret = -1;
   char errorbuf[128];
 
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   ret = mbedtls_ctr_drbg_random(&rng.drbg, entropy, length);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
   ret = mbedtls_hmac_drbg_random(&rng.drbg, entropy, length);
@@ -1487,7 +1471,7 @@ static int mbedtls_init(void)
 
 
   /* initialize the RNG context & entropy */
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   mbedtls_ctr_drbg_init(&rng.drbg);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
   mbedtls_hmac_drbg_init(&rng.drbg);
@@ -1497,13 +1481,12 @@ static int mbedtls_init(void)
 
   mbedtls_entropy_init(&rng.entropy);
 
-
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   int ret = mbedtls_ctr_drbg_seed(&rng.drbg,
       mbedtls_entropy_func, &rng.entropy,
       NULL, 0);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
-#if defined(MBEDTLS_SHA256_C)
+#ifdef MBEDTLS_SHA256_C
   const mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
 #elif defined(MBEDTLS_SHA512_C)
   const mbedtls_md_type_t md_type = MBEDTLS_MD_SHA512;
@@ -1514,9 +1497,9 @@ static int mbedtls_init(void)
       mbedtls_md_info_from_type(md_type),
       mbedtls_entropy_func, &rng.entropy,
       NULL, 0);
-#else /* !defined(MBEDTLS_CTR_DRBG_C) && !defined(MBEDTLS_HMAC_DRBG_C) */
+#else /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 #error "No DRBG available"
-#endif /* !defined(MBEDTLS_CTR_DRBG_C) && !defined(MBEDTLS_HMAC_DRBG_C) */
+#endif /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 
   if(ret != 0) {
     //TODO: write an error without a `data` param
@@ -1532,17 +1515,16 @@ static int mbedtls_init(void)
      Only use this if you have ample supply of good entropy.*/
   mbedtls_ctr_drbg_set_prediction_resistance(&rng.drbg,
                                              MBEDTLS_CTR_DRBG_PR_ON);
-
   return 1;
 }
 
 static void mbedtls_cleanup(void)
 {
-#if (defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3))
+#if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
   mbedtls_psa_crypto_free();
 #endif
 
-#if defined(MBEDTLS_CTR_DRBG_C)
+#ifdef MBEDTLS_CTR_DRBG_C
   mbedtls_ctr_drbg_free(&rng.drbg);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
   mbedtls_hmac_drbg_free(&rng.drbg);
@@ -1592,18 +1574,16 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
 
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
-#ifndef CURL_DISABLE_CERTINFO
   SSLSUPP_CERTINFO |
-#endif
 #ifdef MBEDTLS_PK_WRITE_C
   SSLSUPP_PINNEDPUBKEY |
 #endif
   SSLSUPP_SSL_CTX |
-#if defined(HAS_TLS13_SUPPORT) && !defined(CURL_DISABLE_CIPHER_SELECT)
+#ifdef HAS_TLS13_SUPPORT
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY
-#if defined(MBEDTLS_SSL_PROTO_TLS1_2) && !defined(CURL_DISABLE_CIPHER_SELECT)
+#ifdef MBEDTLS_SSL_PROTO_TLS1_2
   | SSLSUPP_CIPHER_LIST
 #endif
   ,

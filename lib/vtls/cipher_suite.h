@@ -26,8 +26,7 @@
 
 #include "../curl_setup.h"
 
-#if !defined(CURL_DISABLE_CERTINFO) && \
-     (defined(USE_MBEDTLS) || defined(USE_RUSTLS))
+#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include <stdint.h>
 
 /* Lookup IANA id for cipher suite string, returns 0 if not recognized */
