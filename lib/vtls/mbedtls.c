@@ -527,7 +527,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
 #ifdef MBEDTLS_PEM_PARSE_C
-  const char* const ssl_cert_type = ssl_config->cert_type;
+  const char * const ssl_cert_type = ssl_config->cert_type;
 #endif
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
   const char *hostname = connssl->peer.hostname;
@@ -546,14 +546,13 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
 
-  if(ca_info_blob && verifypeer)
-  {
+  if(ca_info_blob && verifypeer) {
 #ifdef MBEDTLS_PEM_PARSE_C
     /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
     if(strcmp(ssl_cert_type, "DER") == 0
-       || ((char*)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0'
+       || ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0'
       )
     {
       ret = mbedtls_x509_crt_parse(&backend->cacert,
@@ -654,9 +653,8 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     * mbedtls_x509_crt_parse().
     * */
     if(strcmp(ssl_cert_type, "DER") == 0
-       || ((char*)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0'
-      )
-    {
+       || ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0'
+      ) {
       ret = mbedtls_x509_crt_parse(&backend->clicert,
                                    ssl_cert_blob->data,
                                    ssl_cert_blob->len);
@@ -999,7 +997,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 
-#if (MBEDTLS_VERSION_NUMBER >= 0x03020000) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if (MBEDTLS_VERSION_NUMBER >= 0x03020000) && \
+     !defined(CURL_DISABLE_VERBOSE_STRINGS)
   {
     char cipher_str[64];
     uint16_t cipher_id;
@@ -1467,7 +1466,7 @@ static int mbedtls_init(void)
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
   psa_status_t status = psa_crypto_init();
-  if (status != PSA_SUCCESS)
+  if(status != PSA_SUCCESS)
     return 0;
 #endif  /* MBEDTLS_USE_PSA_CRYPTO || MBEDTLS_SSL_PROTO_TLS1_3 */
 
@@ -1500,8 +1499,8 @@ static int mbedtls_init(void)
 #error "No DRBG available"
 #endif /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 
-  if(ret != 0) {
-    /* FIXME: write an error without a `data` param
+  if(ret) {
+    /* write an error without a `data` param
     failf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
                   (unsigned int)-ret);
     */
