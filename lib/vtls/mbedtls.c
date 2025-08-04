@@ -111,7 +111,7 @@ struct rng_context_t {
 };
 
 static struct rng_context_t rng;
-static BOOL initialized_tls_lib = FALSE;
+static bool initialized_tls_lib = FALSE;
 
 #ifndef MBEDTLS_ERROR_C
 #define mbedtls_strerror(a,b,c) b[0] = 0
