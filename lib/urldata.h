@@ -1388,9 +1388,6 @@ struct UserDefined {
                            is to be reused */
   timediff_t conn_max_age_ms; /* max time since creation to allow a
                             connection that is to be reused */
-#ifndef CURL_DISABLE_TFTP
-  long tftp_blksize;    /* in bytes, 0 means use default */
-#endif
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
@@ -1485,7 +1482,6 @@ struct UserDefined {
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
 
-  long expect_100_timeout; /* in milliseconds */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   struct Curl_data_priority priority;
 #endif
@@ -1505,12 +1501,16 @@ struct UserDefined {
 #ifdef USE_ECH
   int tls_ech;      /* TLS ECH configuration  */
 #endif
+  unsigned short expect_100_timeout; /* in milliseconds */
   unsigned short use_port; /* which port to use (when not using default) */
 #ifndef CURL_DISABLE_BINDLOCAL
   unsigned short localport; /* local port number to bind to */
   unsigned short localportrange; /* number of additional port numbers to test
                                     in case the 'localport' one cannot be
                                     bind()ed */
+#endif
+#ifndef CURL_DISABLE_TFTP
+  unsigned short tftp_blksize;    /* in bytes, 0 means use default */
 #endif
 #ifndef CURL_DISABLE_NETRC
   unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
