@@ -865,7 +865,7 @@ static bool server_reachable(const char *server, int socktype)
     p = strrchr(host, ':');
     if(p && strchr(host, ':') == p) {
       *p++ = '\0';
-      iif(*p) {
+      if(*p) {
         const char *pp = p;
         curl_off_t num;
         if(curlx_str_number(&pp, &num, 65535) || num < 1 || *pp)
@@ -955,30 +955,30 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
 
     if(servers) {
       char *list = strdup(servers);
-      if(list) {
-        char *ptr = list;
-        bool any = FALSE;
+      if(!list)
+        return CURLE_OUT_OF_MEMORY;
+      char *ptr = list;
+      bool any = FALSE;
 
-        while(ptr) {
-          char *comma = strchr(ptr, ',');
-          if(comma)
-            *comma = '\0';
-          if(server_reachable(ptr, socktype)) {
-            any = TRUE;
-            break;
-          }
-          if(!comma)
-            break;
-          ptr = comma + 1;
+      while(ptr) {
+        char *comma = strchr(ptr, ',');
+        if(comma)
+          *comma = '\0';
+        if(server_reachable(ptr, socktype)) {
+          any = TRUE;
+          break;
         }
-        free(list);
-        if(!any) {
-          DEBUGF(infof(data,
-                       "all DNS servers unreachable, falling back to "
-                       "system resolver"));
-          Curl_async_destroy(data);
-          return CURLE_OK;
-        }
+        if(!comma)
+          break;
+        ptr = comma + 1;
+      }
+      free(list);
+      if(!any) {
+        DEBUGF(infof(data,
+                     "all DNS servers unreachable, falling back to "
+                     "system resolver"));
+        Curl_async_destroy(data);
+        return CURLE_OK;
       }
     }
 #ifdef HAVE_CARES_PORTS_CSV
@@ -1178,7 +1178,6 @@ CURLcode Curl_async_ares_set_dns_local_ip4(struct Curl_easy *data)
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)local_ip4;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
