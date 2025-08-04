@@ -919,7 +919,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       arg = 512;
     else if(arg > TFTP_BLKSIZE_MAX)
       arg = TFTP_BLKSIZE_MAX;
-    s->tftp_blksize = arg;
+    s->tftp_blksize = (unsigned short)arg;
     break;
 #endif
 #ifndef CURL_DISABLE_NETRC
@@ -1027,7 +1027,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->expect_100_timeout = arg;
+    if(arg > 0xffff)
+      arg = 0xffff;
+    s->expect_100_timeout = (unsigned short)arg;
     break;
 
 #endif /* ! CURL_DISABLE_HTTP */
