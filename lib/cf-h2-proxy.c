@@ -41,6 +41,7 @@
 #include "http_proxy.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "select.h"
 #include "cf-h2-proxy.h"
 
 /* The last 3 #include files should be in this order */

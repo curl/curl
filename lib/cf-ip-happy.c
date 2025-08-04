@@ -60,6 +60,7 @@
 #include "curl_trc.h"
 #include "multiif.h"
 #include "progress.h"
+#include "select.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
 /* The last 3 #include files should be in this order */

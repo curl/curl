@@ -35,6 +35,7 @@
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"
+#include "select.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */

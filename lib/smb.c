@@ -36,6 +36,7 @@
 #include "connect.h"
 #include "progress.h"
 #include "transfer.h"
+#include "select.h"
 #include "vtls/vtls.h"
 #include "curl_ntlm_core.h"
 #include "escape.h"

@@ -32,6 +32,7 @@
 #include "cf-haproxy.h"
 #include "curl_trc.h"
 #include "multiif.h"
+#include "select.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
