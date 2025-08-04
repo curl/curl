@@ -642,7 +642,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       size_t scidlen,
                       int *qlogfdp)
 {
-  const char *qlog_dir = getenv("QLOGDIR");
+  char *qlog_dir = curl_getenv("QLOGDIR");
   *qlogfdp = -1;
   if(qlog_dir) {
     struct dynbuf fname;
@@ -667,6 +667,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
         *qlogfdp = qlogfd;
     }
     curlx_dyn_free(&fname);
+    free(qlog_dir);
     if(result)
       return result;
   }
