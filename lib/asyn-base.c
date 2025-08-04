@@ -85,7 +85,7 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
 {
   struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
   struct timeval timebuf;
-  curl_socket_t sockets[5];
+  curl_socket_t sockets[16];  /* ARES documented limit */
   unsigned int bitmap, i;
   struct timeval *timeout;
   timediff_t milli;
