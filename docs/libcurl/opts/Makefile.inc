@@ -101,6 +101,11 @@ man_MANS =                                      \
   CURLINFO_TOTAL_TIME_T.3                       \
   CURLINFO_USED_PROXY.3                         \
   CURLINFO_XFER_ID.3                            \
+  CURLMINFO_XFERS_ADDED.3                       \
+  CURLMINFO_XFERS_CURRENT.3                     \
+  CURLMINFO_XFERS_DONE.3                        \
+  CURLMINFO_XFERS_PENDING.3                     \
+  CURLMINFO_XFERS_RUNNING.3                     \
   CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE.3          \
   CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE.3        \
   CURLMOPT_MAX_CONCURRENT_STREAMS.3             \
