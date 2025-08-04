@@ -388,7 +388,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ftp_filemethod = FTPFILE_MULTICWD;
   set->ftp_skip_ip = TRUE;    /* skip PASV IP by default */
 #endif
-  set->dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
+  set->dns_cache_timeout_ms = 60000; /* Timeout every 60 seconds by default */
 
   /* Timeout every 24 hours by default */
   set->general_ssl.ca_cache_timeout = 24 * 60 * 60;

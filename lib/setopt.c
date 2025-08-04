@@ -868,10 +868,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_DNS_CACHE_TIMEOUT:
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
-      arg = INT_MAX;
+    else if(arg > INT_MAX/1000)
+      arg = INT_MAX/1000;
 
-    s->dns_cache_timeout = (int)arg;
+    if(arg > 0)
+      arg *= 1000;
+    s->dns_cache_timeout_ms = (int)arg;
     break;
   case CURLOPT_CA_CACHE_TIMEOUT:
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {

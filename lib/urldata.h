@@ -1431,7 +1431,7 @@ struct UserDefined {
   unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
-  int dns_cache_timeout; /* DNS cache timeout (seconds) */
+  int dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   unsigned int buffer_size;      /* size of receive buffer to use */
   unsigned int upload_buffer_size; /* size of upload buffer to use,
                                       keep it >= CURL_MAX_WRITE_SIZE */
