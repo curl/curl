@@ -111,41 +111,31 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
 #endif
 
 
-/* we support N sockets per easy handle. Set the corresponding bit to what
-   action we should wait for */
-#define MAX_SOCKSPEREASYHANDLE 16
-
-/* the write bits start at bit 16 for the *getsock() bitmap */
-#define GETSOCK_WRITEBITSTART 16
-
-#define GETSOCK_BLANK 0U /* no bits set */
-
-/* set the bit for the given sock number to make the bitmap for writable */
-#define GETSOCK_WRITESOCK(x) (1U << (GETSOCK_WRITEBITSTART + (x)))
-
-/* set the bit for the given sock number to make the bitmap for readable */
-#define GETSOCK_READSOCK(x) (1U << (x))
-
-/* mask for checking if read and/or write is set for index x */
-#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
-
-
-/* Polling requested by an easy handle.
- * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
+/* Keep the sockets to poll for an easy handle.
+ * `actions` are bitmaps of CURL_POLL_IN and CURL_POLL_OUT.
+ * Starts with small capacity, grows on demand.
  */
-#ifdef DEBUGBUILD
-#define CURL_EASY_POLLSET_MAGIC  0x7a657370
-#endif
+#define EZ_POLLSET_DEF_COUNT    2
 
 struct easy_pollset {
-  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  curl_socket_t *sockets;
+  unsigned char *actions;
   unsigned int n;
   unsigned int count;
 #ifdef DEBUGBUILD
   int init;
 #endif
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
+  curl_socket_t def_sockets[EZ_POLLSET_DEF_COUNT];
+  unsigned char def_actions[EZ_POLLSET_DEF_COUNT];
 };
+
+#ifdef DEBUGBUILD
+#define CURL_EASY_POLLSET_MAGIC  0x7a657370
+#endif
+
+
+/* allocate and initialise */
+struct easy_pollset *Curl_pollset_create(void);
 
 /* Initialize before first use */
 void Curl_pollset_init(struct easy_pollset *ps);
@@ -153,6 +143,9 @@ void Curl_pollset_init(struct easy_pollset *ps);
 void Curl_pollset_cleanup(struct easy_pollset *ps);
 /* Reset to an empty pollset */
 void Curl_pollset_reset(struct easy_pollset *ps);
+/* Move pollset from to pollset to, replacing all in to,
+ * leaving from empty. */
+void Curl_pollset_move(struct easy_pollset *to, struct easy_pollset *from);
 
 /* Change the poll flags (CURL_POLL_IN/CURL_POLL_OUT) to the poll set for
  * socket `sock`. If the socket is not already part of the poll set, it

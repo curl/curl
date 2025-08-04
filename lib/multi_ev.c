@@ -437,7 +437,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   } /* for loop over num */
 
   /* Remember for next time */
-  memcpy(prev_ps, ps, sizeof(*prev_ps));
+  Curl_pollset_move(prev_ps, ps);
   return CURLM_OK;
 }
 
@@ -446,8 +446,10 @@ static void mev_pollset_dtor(void *key, size_t klen, void *entry)
   struct easy_pollset *ps = entry;
   (void)key;
   (void)klen;
-  Curl_pollset_cleanup(ps);
-  free(ps);
+  if(ps) {
+    Curl_pollset_cleanup(ps);
+    free(ps);
+  }
 }
 
 static struct easy_pollset*
@@ -455,10 +457,9 @@ mev_add_new_conn_pollset(struct connectdata *conn)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
-  Curl_pollset_init(ps);
   if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
   return ps;
@@ -469,10 +470,9 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
-  Curl_pollset_init(ps);
   if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
     return NULL;
   return ps;

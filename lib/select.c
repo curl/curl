@@ -509,17 +509,60 @@ void Curl_pollset_reset(struct easy_pollset *ps)
 
 void Curl_pollset_init(struct easy_pollset *ps)
 {
-  memset(ps, 0, sizeof(*ps));
 #ifdef DEBUGBUILD
   ps->init = CURL_EASY_POLLSET_MAGIC;
 #endif
-  ps->count = MAX_SOCKSPEREASYHANDLE;
+  ps->sockets = ps->def_sockets;
+  ps->actions = ps->def_actions;
+  ps->count = CURL_ARRAYSIZE(ps->def_sockets);
+  ps->n = 0;
   Curl_pollset_reset(ps);
+}
+
+struct easy_pollset *Curl_pollset_create(void)
+{
+  struct easy_pollset *ps = calloc(1, sizeof(*ps));
+  if(ps)
+    Curl_pollset_init(ps);
+  return ps;
 }
 
 void Curl_pollset_cleanup(struct easy_pollset *ps)
 {
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
+  if(ps->sockets != ps->def_sockets) {
+    free(ps->sockets);
+    ps->sockets = ps->def_sockets;
+  }
+  if(ps->actions != ps->def_actions) {
+    free(ps->actions);
+    ps->actions = ps->def_actions;
+  }
+  ps->count = CURL_ARRAYSIZE(ps->def_sockets);
   Curl_pollset_reset(ps);
+}
+
+void Curl_pollset_move(struct easy_pollset *to, struct easy_pollset *from)
+{
+  Curl_pollset_cleanup(to); /* deallocate anything in to */
+  if(from->sockets != from->def_sockets) {
+    DEBUGASSERT(from->actions != from->def_actions);
+    to->sockets = from->sockets;
+    to->actions = from->actions;
+    to->count = from->count;
+    to->n = from->n;
+    Curl_pollset_init(from);
+  }
+  else {
+    DEBUGASSERT(to->sockets == to->def_sockets);
+    DEBUGASSERT(to->actions == to->def_actions);
+    memcpy(to->sockets, from->sockets, to->count * sizeof(to->sockets[0]));
+    memcpy(to->actions, from->actions, to->count * sizeof(to->actions[0]));
+    to->n = from->n;
+    Curl_pollset_init(from);
+  }
 }
 
 /**
@@ -562,14 +605,33 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
   }
   /* not present */
   if(add_flags) {
-    /* Having more SOCKETS per easy handle than what is defined
-     * is a programming error. This indicates that we need
-     * to raise this limit, making easy_pollset larger.
-     * Since we use this in tight loops, we do not want to make
-     * the pollset dynamic unnecessarily.
-     * The current maximum in practise is HTTP/3 eyeballing where
-     * we have up to 4 sockets involved in connection setup.
-     */
+    if(i >= ps->count) { /* need to grow */
+      unsigned int new_count = CURLMAX(ps->count * 2, 8);
+      curl_socket_t *nsockets;
+      unsigned char *nactions;
+
+      CURL_TRC_M(data, "growing pollset capacity from %u to %u",
+                 ps->count, new_count);
+      if(new_count <= ps->count)
+        return CURLE_OUT_OF_MEMORY;
+      nsockets = calloc(new_count, sizeof(nsockets[0]));
+      if(!nsockets)
+        return CURLE_OUT_OF_MEMORY;
+      nactions = calloc(new_count, sizeof(nactions[0]));
+      if(!nactions) {
+        free(nsockets);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      memcpy(nsockets, ps->sockets, ps->count * sizeof(ps->sockets[0]));
+      memcpy(nactions, ps->actions, ps->count * sizeof(ps->actions[0]));
+      if(ps->sockets != ps->def_sockets)
+        free(ps->sockets);
+      ps->sockets = nsockets;
+      if(ps->actions != ps->def_actions)
+        free(ps->actions);
+      ps->actions = nactions;
+      ps->count = new_count;
+    }
     DEBUGASSERT(i < ps->count);
     if(i < ps->count) {
       ps->sockets[i] = sock;
