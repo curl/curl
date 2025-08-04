@@ -260,8 +260,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   return n;
 }
 
-static CURLcode pre_transfer(struct GlobalConfig *global,
-                             struct per_transfer *per)
+static CURLcode pre_transfer(struct per_transfer *per)
 {
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
@@ -269,7 +268,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
 #ifdef CURL_DISABLE_LIBCURL_OPTION
   (void)global; /* otherwise used in the my_setopt macros */
 #else
-  struct OperationConfig *config = global->current;
+  struct OperationConfig *config = per->config;
 #endif
 
   if(per->uploadfile && !stdin_upload(per->uploadfile)) {
@@ -1446,7 +1445,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     }
     per->added = TRUE;
 
-    result = pre_transfer(global, per);
+    result = pre_transfer(per);
     if(result)
       return result;
 
@@ -1500,7 +1499,6 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
 }
 
 struct parastate {
-  struct GlobalConfig *global;
   CURLM *multi;
   CURLSH *share;
   CURLMcode mcode;
@@ -1759,13 +1757,13 @@ static CURLcode parallel_event(struct parastate *s)
 
 #endif
 
-static CURLcode check_finished(struct parastate *s)
+static CURLcode check_finished(struct GlobalConfig *global,
+                               struct parastate *s)
 {
   CURLcode result = CURLE_OK;
   int rc;
   CURLMsg *msg;
   bool checkmore = FALSE;
-  struct GlobalConfig *global = s->global;
   progress_meter(global, s->multi, &s->start, FALSE);
   do {
     msg = curl_multi_info_read(s->multi, &rc);
@@ -1844,7 +1842,6 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   s->wrapitup = FALSE;
   s->wrapitup_processed = FALSE;
   s->tick = time(NULL);
-  s->global = global;
   s->multi = curl_multi_init();
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
@@ -1888,7 +1885,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
       if(!s->mcode)
-        result = check_finished(s);
+        result = check_finished(global, s);
     }
 
     (void)progress_meter(global, s->multi, &s->start, TRUE);
@@ -1931,7 +1928,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
 
     start = curlx_now();
     if(!per->skip) {
-      result = pre_transfer(global, per);
+      result = pre_transfer(per);
       if(result)
         break;
 
