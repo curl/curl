@@ -1501,9 +1501,10 @@ static int mbedtls_init(void)
 #endif /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 
   if(ret != 0) {
-    //TODO: write an error without a `data` param
-    //failf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
-    //              (unsigned int)-ret);
+    /* TODO: write an error without a `data` param
+    failf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
+                  (unsigned int)-ret);
+    */
     return 0;
   }
 
