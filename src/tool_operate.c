@@ -260,16 +260,13 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   return n;
 }
 
-static CURLcode pre_transfer(struct GlobalConfig *global,
-                             struct per_transfer *per)
+static CURLcode pre_transfer(struct per_transfer *per)
 {
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
-#ifdef CURL_DISABLE_LIBCURL_OPTION
-  (void)global; /* otherwise used in the my_setopt macros */
-#else
-  struct OperationConfig *config = global->current;
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+  struct OperationConfig *config = per->config;
 #endif
 
   if(per->uploadfile && !stdin_upload(per->uploadfile)) {
@@ -1446,7 +1443,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     }
     per->added = TRUE;
 
-    result = pre_transfer(global, per);
+    result = pre_transfer(per);
     if(result)
       return result;
 
@@ -1931,7 +1928,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
 
     start = curlx_now();
     if(!per->skip) {
-      result = pre_transfer(global, per);
+      result = pre_transfer(per);
       if(result)
         break;
 
