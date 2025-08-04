@@ -111,6 +111,7 @@ struct rng_context_t {
 };
 
 static struct rng_context_t rng;
+static BOOL initialized_tls_lib = FALSE;
 
 #ifndef MBEDTLS_ERROR_C
 #define mbedtls_strerror(a,b,c) b[0] = 0
@@ -1372,34 +1373,6 @@ static size_t mbedtls_version(char *buffer, size_t size)
 #endif
 }
 
-/* 'data' might be NULL */
-static CURLcode mbedtls_random(struct Curl_easy *data,
-                               unsigned char *entropy, size_t length)
-{
-#ifdef MBEDTLS_CTR_DRBG_C
-  int ret = -1;
-  char errorbuf[128];
-
-#ifdef MBEDTLS_CTR_DRBG_C
-  ret = mbedtls_ctr_drbg_random(&rng.drbg, entropy, length);
-#elif defined(MBEDTLS_HMAC_DRBG_C)
-  ret = mbedtls_hmac_drbg_random(&rng.drbg, entropy, length);
-#else
-#error "No DRBG available"
-#endif
-
-  if(ret) {
-    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
-          -ret, errorbuf);
-  }
-
-  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#else
-  return CURLE_NOT_BUILT_IN;
-#endif
-}
-
 static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 bool *done)
@@ -1463,6 +1436,11 @@ static int mbedtls_init(void)
 {
   int ret = 0;
 
+  /* workaround random() being called before the TLS lib is initialized */
+  if(initialized_tls_lib == TRUE) {
+    return 1;
+  }
+
 #if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
   psa_status_t status = psa_crypto_init();
   if(status != PSA_SUCCESS)
@@ -1499,10 +1477,8 @@ static int mbedtls_init(void)
 #endif /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 
   if(ret) {
-    /* write an error without a `data` param
-    failf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
+    failf(NULL, " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
                   (unsigned int)-ret);
-    */
     return 0;
   }
 
@@ -1513,7 +1489,47 @@ static int mbedtls_init(void)
      Only use this if you have ample supply of good entropy.*/
   mbedtls_ctr_drbg_set_prediction_resistance(&rng.drbg,
                                              MBEDTLS_CTR_DRBG_PR_ON);
+
+  initialized_tls_lib = TRUE;
   return 1;
+}
+
+/* 'data' might be NULL */
+static CURLcode mbedtls_random(struct Curl_easy *data,
+                               unsigned char *entropy, size_t length)
+{
+  /* workaround random() being called before the TLS lib is initialized */
+  if(initialized_tls_lib == FALSE) {
+    if (mbedtls_init())
+      initialized_tls_lib = TRUE;
+    else {
+      failf(data, "failed to initialize the mbedTLS library.");
+      return CURLE_FAILED_INIT;
+    }
+  }
+
+#ifdef MBEDTLS_CTR_DRBG_C
+  int ret = -1;
+  char errorbuf[128];
+
+#ifdef MBEDTLS_CTR_DRBG_C
+  ret = mbedtls_ctr_drbg_random(&rng.drbg, entropy, length);
+#elif defined(MBEDTLS_HMAC_DRBG_C)
+  ret = mbedtls_hmac_drbg_random(&rng.drbg, entropy, length);
+#else
+#error "No DRBG available"
+#endif
+
+  if(ret) {
+    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
+    failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
+          -ret, errorbuf);
+  }
+
+  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
+#else
+  return CURLE_NOT_BUILT_IN;
+#endif
 }
 
 static void mbedtls_cleanup(void)
@@ -1531,6 +1547,7 @@ static void mbedtls_cleanup(void)
 #endif
 
   mbedtls_entropy_free(&rng.entropy);
+  initialized_tls_lib = FALSE;
 }
 
 static bool mbedtls_data_pending(struct Curl_cfilter *cf,
