@@ -631,40 +631,6 @@ int Curl_pollset_poll(struct Curl_easy *data,
   return result;
 }
 
-static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
-                   unsigned int bitmap, curl_socket_t *socks)
-{
-  if(bitmap) {
-    unsigned int i;
-    for(i = 0; i < MAX_SOCKSPEREASYHANDLE; ++i) {
-      if(!(bitmap & GETSOCK_MASK_RW(i)) || !VALID_SOCK((socks[i]))) {
-        break;
-      }
-      if(bitmap & GETSOCK_READSOCK(i)) {
-        if(bitmap & GETSOCK_WRITESOCK(i))
-          Curl_pollset_add_inout(data, ps, socks[i]);
-        else
-          /* is READ, since we checked MASK_RW above */
-          Curl_pollset_add_in(data, ps, socks[i]);
-      }
-      else
-        Curl_pollset_add_out(data, ps, socks[i]);
-    }
-  }
-}
-
-void Curl_pollset_add_socks(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            unsigned int (*socks_cb)(struct Curl_easy *data,
-                                                     curl_socket_t *socks))
-{
-  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
-  unsigned int bitmap;
-
-  bitmap = socks_cb(data, socks);
-  ps_add(data, ps, bitmap, socks);
-}
-
 void Curl_pollset_check(struct Curl_easy *data,
                         struct easy_pollset *ps, curl_socket_t sock,
                         bool *pwant_read, bool *pwant_write)

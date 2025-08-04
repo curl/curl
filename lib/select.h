@@ -186,11 +186,6 @@ int Curl_pollset_poll(struct Curl_easy *data,
                       struct easy_pollset *ps,
                       timediff_t timeout_ms);
 
-void Curl_pollset_add_socks(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            unsigned int (*socks_cb)(struct Curl_easy *data,
-                                                     curl_socket_t *socks));
-
 /**
  * Check if the pollset, as is, wants to read and/or write regarding
  * the given socket.
