@@ -273,15 +273,15 @@ static void async_ares_cleanup(struct Curl_easy *data)
 }
 
 /*
- * Curl_async_getsock() is called when someone from the outside world
+ * Curl_async_pollset() is called when someone from the outside world
  * (using curl_multi_fdset()) wants to get our fd_set setup.
  */
 
-CURLcode Curl_async_getsock(struct Curl_easy *data, struct easy_pollset *ps)
+CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
   DEBUGASSERT(ares->channel);
-  return Curl_ares_getsock(data, ares->channel, ps);
+  return Curl_ares_pollset(data, ares->channel, ps);
 }
 
 /*

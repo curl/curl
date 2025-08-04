@@ -1523,7 +1523,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 }
 #endif
 
-CURLcode Curl_resolv_getsock(struct Curl_easy *data,
+CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)
 {
 #ifdef CURLRES_ASYNCH
@@ -1533,7 +1533,7 @@ CURLcode Curl_resolv_getsock(struct Curl_easy *data,
        sockets */
     return CURLE_OK;
 #endif
-  return Curl_async_getsock(data, ps);
+  return Curl_async_pollset(data, ps);
 #else
   (void)data;
   (void)ps;

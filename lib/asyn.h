@@ -71,15 +71,15 @@ void Curl_async_global_cleanup(void);
  */
 CURLcode Curl_async_get_impl(struct Curl_easy *easy, void **impl);
 
-/* Curl_async_getsock()
+/* Curl_async_pollset()
  *
- * This function is called from the Curl_multi_getsock() function.  'sock' is a
+ * This function is called from the Curl_multi_pollset() function.  'sock' is a
  * pointer to an array to hold the file descriptors, with 'numsock' being the
  * size of that array (in number of entries). This function is supposed to
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-CURLcode Curl_async_getsock(struct Curl_easy *data, struct easy_pollset *ps);
+CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps);
 
 /*
  * Curl_async_is_resolved()
@@ -128,7 +128,7 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 /* common functions for c-ares and threaded resolver with HTTPSRR */
 #include <ares.h>
 
-CURLcode Curl_ares_getsock(struct Curl_easy *data,
+CURLcode Curl_ares_pollset(struct Curl_easy *data,
                            ares_channel channel,
                            struct easy_pollset *ps);
 

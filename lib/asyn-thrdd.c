@@ -630,14 +630,14 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   }
 }
 
-CURLcode Curl_async_getsock(struct Curl_easy *data, struct easy_pollset *ps)
+CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   CURLcode result = CURLE_OK;
 
 #ifdef USE_HTTPSRR_ARES
   if(thrdd->rr.channel) {
-    result = Curl_ares_getsock(data, thrdd->rr.channel, ps);
+    result = Curl_ares_pollset(data, thrdd->rr.channel, ps);
     if(result)
       return result;
   }

@@ -125,9 +125,6 @@ CURLcode sftp_perform(struct Curl_easy *data,
                       bool *connected,
                       bool *dophase_done);
 
-static unsigned int myssh_getsock(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  curl_socket_t *sock);
 static CURLcode myssh_pollset(struct Curl_easy *data,
                               struct easy_pollset *ps);
 static void myssh_block2waitfor(struct connectdata *conn,
@@ -152,9 +149,9 @@ const struct Curl_handler Curl_handler_scp = {
   myssh_multi_statemach,        /* connecting */
   scp_doing,                    /* doing */
   myssh_pollset,                /* proto_pollset */
-  myssh_getsock,                /* doing_getsock */
-  ZERO_NULL,                    /* domore_getsock */
-  myssh_getsock,                /* perform_getsock */
+  myssh_pollset,                /* doing_pollset */
+  ZERO_NULL,                    /* domore_pollset */
+  myssh_pollset,                /* perform_pollset */
   scp_disconnect,               /* disconnect */
   ZERO_NULL,                    /* write_resp */
   ZERO_NULL,                    /* write_resp_hd */
@@ -181,9 +178,9 @@ const struct Curl_handler Curl_handler_sftp = {
   myssh_multi_statemach,                /* connecting */
   sftp_doing,                           /* doing */
   myssh_pollset,                        /* proto_pollset */
-  myssh_getsock,                        /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  myssh_getsock,                        /* perform_getsock */
+  myssh_pollset,                        /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  myssh_pollset,                        /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -2393,27 +2390,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static unsigned int myssh_getsock(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  curl_socket_t *sock)
-{
-  int bitmap = GETSOCK_BLANK;
-  (void)data;
-  sock[0] = conn->sock[FIRSTSOCKET];
-
-  if(conn->waitfor & KEEP_RECV)
-    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-
-  if(conn->waitfor & KEEP_SEND)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
-
-  if(!conn->waitfor)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
-
-  DEBUGF(infof(data, "ssh_getsock -> %x", bitmap));
-  return bitmap;
-}
-
 static CURLcode myssh_pollset(struct Curl_easy *data,
                               struct easy_pollset *ps)
 {
@@ -2455,7 +2431,7 @@ static CURLcode myssh_multi_statemach(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  bool block;    /* we store the status and use that to provide a ssh_getsock()
+  bool block;    /* we store the status and use that to provide a ssh_pollset()
                     implementation */
   CURLcode result;
 

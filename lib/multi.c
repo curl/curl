@@ -936,76 +936,61 @@ static CURLcode mstate_protocol_pollset(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static unsigned int domore_getsock(struct Curl_easy *data,
-                                   curl_socket_t *socks)
+static CURLcode mstate_do_pollset(struct Curl_easy *data,
+                                  struct easy_pollset *ps)
 {
   struct connectdata *conn = data->conn;
-  if(!conn)
-    return GETSOCK_BLANK;
-  if(conn->handler->domore_getsock)
-    return conn->handler->domore_getsock(data, conn, socks);
-  else if(conn->sockfd != CURL_SOCKET_BAD) {
-    /* Default is that we want to send something to the server */
-    socks[0] = conn->sockfd;
-    return GETSOCK_WRITESOCK(0);
+  if(data->conn) {
+    if(data->conn->handler->doing_pollset)
+      return data->conn->handler->doing_pollset(data, ps);
+    else if(conn->sockfd != CURL_SOCKET_BAD) {
+      /* Default is that we want to send something to the server */
+      return Curl_pollset_add_out(data, ps, conn->sockfd);
+    }
   }
-  return GETSOCK_BLANK;
+  return CURLE_OK;
 }
 
-static unsigned int doing_getsock(struct Curl_easy *data,
-                                  curl_socket_t *socks)
+static CURLcode mstate_domore_pollset(struct Curl_easy *data,
+                                      struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  if(!conn)
-    return GETSOCK_BLANK;
-  if(conn->handler->doing_getsock)
-    return conn->handler->doing_getsock(data, conn, socks);
-  else if(conn->sockfd != CURL_SOCKET_BAD) {
-    /* Default is that we want to send something to the server */
-    socks[0] = conn->sockfd;
-    return GETSOCK_WRITESOCK(0);
+  if(data->conn) {
+    if(data->conn->handler->domore_pollset)
+      return data->conn->handler->domore_pollset(data, ps);
+    else if(data->conn->sockfd != CURL_SOCKET_BAD) {
+      /* Default is that we want to send something to the server */
+      return Curl_pollset_add_out(data, ps, data->conn->sockfd);
+    }
   }
-  return GETSOCK_BLANK;
+  return CURLE_OK;
 }
 
-static unsigned int perform_getsock(struct Curl_easy *data,
-                                    curl_socket_t *sock)
+static CURLcode mstate_perform_pollset(struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  if(!conn)
-    return GETSOCK_BLANK;
-  else if(conn->handler->perform_getsock)
-    return conn->handler->perform_getsock(data, conn, sock);
+  if(!data->conn)
+    return CURLE_OK;
+  else if(data->conn->handler->perform_pollset)
+    return data->conn->handler->perform_pollset(data, ps);
   else {
     /* Default is to obey the data->req.keepon flags for send/recv */
-    int bitmap = GETSOCK_BLANK;
-    unsigned sockindex = 0;
+    CURLcode result = CURLE_OK;
     if(CURL_WANT_RECV(data)) {
-      DEBUGASSERT(conn->sockfd != CURL_SOCKET_BAD);
-      bitmap |= GETSOCK_READSOCK(sockindex);
-      sock[sockindex] = conn->sockfd;
+      DEBUGASSERT(data->conn->sockfd != CURL_SOCKET_BAD);
+      result = Curl_pollset_add_in(data, ps, data->conn->sockfd);
     }
 
-    if(Curl_req_want_send(data)) {
-      if((conn->sockfd != conn->writesockfd) ||
-         bitmap == GETSOCK_BLANK) {
-        /* only if they are not the same socket and we have a readable
-           one, we increase index */
-        if(bitmap != GETSOCK_BLANK)
-          sockindex++; /* increase index if we need two entries */
-
-        DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
-        sock[sockindex] = conn->writesockfd;
-      }
-      bitmap |= GETSOCK_WRITESOCK(sockindex);
+    if(!result && Curl_req_want_send(data)) {
+      DEBUGASSERT(data->conn->writesockfd != CURL_SOCKET_BAD);
+      result = Curl_pollset_add_out(data, ps, data->conn->writesockfd);
     }
-    return bitmap;
+    return result;
   }
 }
 
 /* Initializes `poll_set` with the current socket poll actions needed
  * for transfer `data`. */
-CURLMcode Curl_multi_getsock(struct Curl_easy *data,
+CURLMcode Curl_multi_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps,
                              const char *caller)
 {
@@ -1015,7 +1000,7 @@ CURLMcode Curl_multi_getsock(struct Curl_easy *data,
 
   /* If the transfer has no connection, this is fine. Happens when
      called via curl_multi_remove_handle() => Curl_multi_ev_assess() =>
-     Curl_multi_getsock(). */
+     Curl_multi_pollset(). */
   Curl_pollset_reset(ps);
   if(!data->conn)
     return CURLM_OK;
@@ -1030,7 +1015,7 @@ CURLMcode Curl_multi_getsock(struct Curl_easy *data,
     break;
 
   case MSTATE_RESOLVING:
-    result = Curl_resolv_getsock(data, ps);
+    result = Curl_resolv_pollset(data, ps);
     /* connection filters are not involved in this phase. It's ok if we get no
      * sockets to wait for. Resolving can wake up from other sources. */
     expect_sockets = FALSE;
@@ -1052,19 +1037,22 @@ CURLMcode Curl_multi_getsock(struct Curl_easy *data,
 
   case MSTATE_DO:
   case MSTATE_DOING:
-    Curl_pollset_add_socks(data, ps, doing_getsock);
-    Curl_conn_adjust_pollset(data, data->conn, ps);
+    result = mstate_do_pollset(data, ps);
+    if(!result)
+      Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DOING_MORE:
-    Curl_pollset_add_socks(data, ps, domore_getsock);
-    Curl_conn_adjust_pollset(data, data->conn, ps);
+    result = mstate_domore_pollset(data, ps);
+    if(!result)
+      Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DID: /* same as PERFORMING in regard to polling */
   case MSTATE_PERFORMING:
-    Curl_pollset_add_socks(data, ps, perform_getsock);
-    Curl_conn_adjust_pollset(data, data->conn, ps);
+    result = mstate_perform_pollset(data, ps);
+    if(!result)
+      Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_RATELIMITING:
@@ -1089,8 +1077,10 @@ CURLMcode Curl_multi_getsock(struct Curl_easy *data,
   if(result) {
     if(result == CURLE_OUT_OF_MEMORY)
       mresult = CURLM_OUT_OF_MEMORY;
-    else
+    else {
+      failf(data, "error determining pollset: %d", result);
       mresult = CURLM_INTERNAL_ERROR;
+    }
     goto out;
   }
 
@@ -1182,7 +1172,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
         continue;
       }
 
-      Curl_multi_getsock(data, &ps, "curl_multi_fdset");
+      Curl_multi_pollset(data, &ps, "curl_multi_fdset");
       for(i = 0; i < ps.n; i++) {
         if(!FDSET_SOCK(ps.sockets[i]))
           /* pretend it does not exist */
@@ -1245,7 +1235,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
         Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
-      Curl_multi_getsock(data, &ps, "curl_multi_waitfds");
+      Curl_multi_pollset(data, &ps, "curl_multi_waitfds");
       need += Curl_waitfds_add_ps(&cwfds, &ps);
     }
     while(Curl_uint_bset_next(&multi->process, mid, &mid));
@@ -1331,7 +1321,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
-      Curl_multi_getsock(data, &ps, "multi_wait");
+      Curl_multi_pollset(data, &ps, "multi_wait");
       if(Curl_pollfds_add_ps(&cpfds, &ps)) {
         result = CURLM_OUT_OF_MEMORY;
         goto out;

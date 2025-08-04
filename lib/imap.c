@@ -157,9 +157,6 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done);
 static CURLcode imap_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done);
-static unsigned int imap_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *socks);
 static CURLcode imap_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done);
@@ -200,9 +197,9 @@ const struct Curl_handler Curl_handler_imap = {
   imap_multi_statemach,             /* connecting */
   imap_doing,                       /* doing */
   imap_pollset,                     /* proto_pollset */
-  imap_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  imap_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -231,9 +228,9 @@ const struct Curl_handler Curl_handler_imaps = {
   imap_multi_statemach,             /* connecting */
   imap_doing,                       /* doing */
   imap_pollset,                     /* proto_pollset */
-  imap_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  imap_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -1563,15 +1560,6 @@ static CURLcode imap_block_statemach(struct Curl_easy *data,
 }
 
 /* For the IMAP "protocol connect" and "doing" phases only */
-static unsigned int imap_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *socks)
-{
-  struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
-  return imapc ?
-         Curl_pp_getsock(data, &imapc->pp, socks) : GETSOCK_BLANK;
-}
-
 static CURLcode imap_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)
 {

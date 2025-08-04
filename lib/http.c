@@ -138,9 +138,9 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -168,9 +168,9 @@ const struct Curl_handler Curl_handler_https = {
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_pollset */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -1524,14 +1524,12 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-unsigned int Curl_http_getsock_do(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  curl_socket_t *socks)
+CURLcode Curl_http_do_pollset(struct Curl_easy *data,
+                              struct easy_pollset *ps)
 {
   /* write mode */
-  (void)conn;
-  socks[0] = Curl_conn_get_socket(data, FIRSTSOCKET);
-  return GETSOCK_WRITESOCK(0);
+  curl_socket_t sock = Curl_conn_get_socket(data, FIRSTSOCKET);
+  return Curl_pollset_add_out(data, ps, sock);
 }
 
 /*

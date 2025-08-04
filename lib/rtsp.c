@@ -83,9 +83,8 @@ struct RTSP {
 static CURLcode rtsp_do(struct Curl_easy *data, bool *done);
 static CURLcode rtsp_done(struct Curl_easy *data, CURLcode, bool premature);
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done);
-static unsigned int rtsp_getsock_do(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    curl_socket_t *socks);
+static CURLcode rtsp_do_pollset(struct Curl_easy *data,
+                                struct easy_pollset *ps);
 
 /*
  * Parse and write out an RTSP response.
@@ -111,14 +110,11 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static unsigned int rtsp_getsock_do(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    curl_socket_t *socks)
+static CURLcode rtsp_do_pollset(struct Curl_easy *data,
+                                struct easy_pollset *ps)
 {
   /* write mode */
-  (void)data;
-  socks[0] = conn->sock[FIRSTSOCKET];
-  return GETSOCK_WRITESOCK(0);
+  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 static
@@ -140,9 +136,9 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
-  rtsp_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  rtsp_do_pollset,                      /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */

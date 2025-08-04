@@ -153,9 +153,6 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done);
 static CURLcode pop3_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done);
-static unsigned int pop3_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *socks);
 static CURLcode pop3_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done);
@@ -190,9 +187,9 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_multi_statemach,             /* connecting */
   pop3_doing,                       /* doing */
   pop3_pollset,                     /* proto_pollset */
-  pop3_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  pop3_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   pop3_disconnect,                  /* disconnect */
   pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -221,9 +218,9 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_multi_statemach,             /* connecting */
   pop3_doing,                       /* doing */
   pop3_pollset,                     /* proto_pollset */
-  pop3_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  pop3_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   pop3_disconnect,                  /* disconnect */
   pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -1272,16 +1269,6 @@ static CURLcode pop3_block_statemach(struct Curl_easy *data,
 }
 
 /* For the POP3 "protocol connect" and "doing" phases only */
-static unsigned int pop3_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *socks)
-{
-  struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
-  if(pop3c)
-    return Curl_pp_getsock(data, &pop3c->pp, socks);
-  return GETSOCK_BLANK;
-}
-
 static CURLcode pop3_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps)
 {

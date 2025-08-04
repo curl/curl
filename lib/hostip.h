@@ -200,7 +200,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 #else
 #define Curl_resolv_check(x,y) CURLE_NOT_BUILT_IN
 #endif
-CURLcode Curl_resolv_getsock(struct Curl_easy *data,
+CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 
 CURLcode Curl_resolver_error(struct Curl_easy *data);

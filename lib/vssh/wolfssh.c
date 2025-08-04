@@ -66,9 +66,6 @@ static CURLcode wsftp_doing(struct Curl_easy *data,
 static CURLcode wsftp_disconnect(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  bool dead);
-static unsigned int wssh_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *sock);
 static CURLcode wssh_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 static CURLcode wssh_setup_connection(struct Curl_easy *data,
@@ -90,9 +87,9 @@ const struct Curl_handler Curl_handler_scp = {
   wssh_multi_statemach,                 /* connecting */
   wscp_doing,                           /* doing */
   wssh_pollset,                         /* proto_pollset */
-  wssh_getsock,                         /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  wssh_getsock,                         /* perform_getsock */
+  wssh_pollset,                         /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  wssh_pollset,                         /* perform_pollset */
   wscp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -121,9 +118,9 @@ const struct Curl_handler Curl_handler_sftp = {
   wssh_multi_statemach,                 /* connecting */
   wsftp_doing,                          /* doing */
   wssh_pollset,                         /* proto_pollset */
-  wssh_getsock,                         /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  wssh_getsock,                         /* perform_getsock */
+  wssh_pollset,                         /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  wssh_pollset,                         /* perform_pollset */
   wsftp_disconnect,                     /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -934,7 +931,7 @@ static CURLcode wssh_multi_statemach(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   CURLcode result = CURLE_OK;
-  bool block; /* we store the status and use that to provide a ssh_getsock()
+  bool block; /* we store the status and use that to provide a ssh_pollset()
                  implementation */
   if(!sshc)
     return CURLE_FAILED_INIT;
@@ -1185,23 +1182,6 @@ static CURLcode wsftp_disconnect(struct Curl_easy *data,
     wssh_sshc_cleanup(sshc);
   DEBUGF(infof(data, "SSH DISCONNECT is done"));
   return result;
-}
-
-static unsigned int wssh_getsock(struct Curl_easy *data,
-                                 struct connectdata *conn,
-                                 curl_socket_t *sock)
-{
-  int bitmap = GETSOCK_BLANK;
-  int dir = conn->waitfor;
-  (void)data;
-  sock[0] = conn->sock[FIRSTSOCKET];
-
-  if(dir == KEEP_RECV)
-    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-  else if(dir == KEEP_SEND)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
-
-  return bitmap;
 }
 
 static CURLcode wssh_pollset(struct Curl_easy *data,

@@ -70,7 +70,7 @@
 #endif
 
 /*
- * Curl_ares_getsock() is called when the outside world (using
+ * Curl_ares_pollset() is called when the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we are talking with
  * ares. The caller must make sure that this function is only called when we
  * have a working ares channel.
@@ -79,7 +79,7 @@
  */
 
 
-CURLcode Curl_ares_getsock(struct Curl_easy *data,
+CURLcode Curl_ares_pollset(struct Curl_easy *data,
                            ares_channel channel,
                            struct easy_pollset *ps)
 {

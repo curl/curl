@@ -71,9 +71,9 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -97,9 +97,9 @@ const struct Curl_handler Curl_handler_gophers = {
   gopher_connecting,                    /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
