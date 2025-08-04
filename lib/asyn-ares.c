@@ -42,6 +42,18 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
+#endif
+#ifdef HAVE_IPHLPAPI_H
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 5)
+#include <wincrypt.h>
+#endif
+#include <iphlpapi.h>
+#endif
 #ifdef __VMS
 #include <in.h>
 #include <inet.h>
@@ -62,6 +74,7 @@
 #include "curlx/timediff.h"
 #include "httpsrr.h"
 #include "strdup.h"
+#include "if2ip.h"
 
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
@@ -866,6 +879,108 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
   return result;
 }
 
+/* Find addresses for an interface and verify that it is usable.
+   Returns true when the interface is up and has at least one address. */
+#if defined(HAVE_IPHLPAPI_H)
+static bool ares_interface_reachable(const char *interf,
+                                     struct in_addr *a4,
+                                     unsigned char *a6)
+{
+  IP_ADAPTER_ADDRESSES *addrs = NULL, *cur;
+  ULONG size = 0;
+  bool found = FALSE;
+
+  if(GetAdaptersAddresses(AF_UNSPEC,
+                          GAA_FLAG_SKIP_ANYCAST |
+                          GAA_FLAG_SKIP_MULTICAST |
+                          GAA_FLAG_SKIP_DNS_SERVER,
+                          NULL, addrs, &size) == ERROR_BUFFER_OVERFLOW) {
+    addrs = malloc(size);
+    if(addrs &&
+       GetAdaptersAddresses(AF_UNSPEC,
+                            GAA_FLAG_SKIP_ANYCAST |
+                            GAA_FLAG_SKIP_MULTICAST |
+                            GAA_FLAG_SKIP_DNS_SERVER,
+                            NULL, addrs, &size) == NO_ERROR) {
+      for(cur = addrs; cur; cur = cur->Next) {
+        if(curl_strequal(cur->AdapterName, interf) &&
+           cur->OperStatus == IfOperStatusUp) {
+          PIP_ADAPTER_UNICAST_ADDRESS ua;
+          for(ua = cur->FirstUnicastAddress; ua; ua = ua->Next) {
+            if(ua->Address.lpSockaddr->sa_family == AF_INET && a4) {
+              *a4 = ((struct sockaddr_in *)ua->Address.lpSockaddr)->sin_addr;
+              found = TRUE;
+            }
+#ifdef USE_IPV6
+            else if(ua->Address.lpSockaddr->sa_family == AF_INET6 && a6) {
+              memcpy(a6,
+                     &((struct sockaddr_in6 *)ua->Address.lpSockaddr)->sin6_addr,
+                     sizeof(struct in6_addr));
+              found = TRUE;
+            }
+#endif
+          }
+          break;
+        }
+      }
+    }
+    free(addrs);
+  }
+
+  (void)a6; /* silence compiler when !USE_IPV6 */
+  return found;
+}
+#elif defined(HAVE_IFADDRS_H) && defined(HAVE_NET_IF_H)
+static bool ares_interface_reachable(const char *interf,
+                                     struct in_addr *a4,
+                                     unsigned char *a6)
+{
+  struct ifaddrs *ifa, *ifas;
+  bool up = FALSE;
+  bool found = FALSE;
+
+  if(getifaddrs(&ifas))
+    return FALSE;
+
+  for(ifa = ifas; ifa; ifa = ifa->ifa_next) {
+    if(ifa->ifa_name && curl_strequal(ifa->ifa_name, interf)) {
+      if((ifa->ifa_flags & IFF_UP) && !(ifa->ifa_flags & IFF_LOOPBACK))
+        up = TRUE;
+      break;
+    }
+  }
+
+  if(up) {
+    char ipbuf[64];
+    if(a4 && Curl_if2ip(AF_INET, 0, 0, interf, ipbuf, sizeof(ipbuf))
+         == IF2IP_FOUND) {
+      if(curlx_inet_pton(AF_INET, ipbuf, a4) == 1)
+        found = TRUE;
+    }
+#ifdef USE_IPV6
+    if(a6 && Curl_if2ip(AF_INET6, 0, 0, interf, ipbuf, sizeof(ipbuf))
+         == IF2IP_FOUND) {
+      if(curlx_inet_pton(AF_INET6, ipbuf, a6) == 1)
+        found = TRUE;
+    }
+#endif
+  }
+
+  freeifaddrs(ifas);
+  (void)a6; /* silence compiler when !USE_IPV6 */
+  return found;
+}
+#else
+static bool ares_interface_reachable(const char *interf,
+                                     struct in_addr *a4,
+                                     unsigned char *a6)
+{
+  (void)interf;
+  (void)a4;
+  (void)a6;
+  return FALSE;
+}
+#endif
 CURLcode Curl_async_ares_set_dns_servers(struct Curl_easy *data)
 {
   return async_ares_set_dns_servers(data, TRUE);
@@ -876,18 +991,33 @@ CURLcode Curl_async_ares_set_dns_interface(struct Curl_easy *data)
 #ifdef HAVE_CARES_LOCAL_DEV
   struct async_ares_ctx *ares = &data->state.async.ares;
   const char *interf = data->set.str[STRING_DNS_INTERFACE];
+  struct in_addr a4;
+  unsigned char a6[16];
+  bool ok = FALSE;
 
-  if(!interf)
+  a4.s_addr = 0;
+  memset(a6, 0, sizeof(a6));
+
+  if(interf && *interf)
+    ok = ares_interface_reachable(interf, &a4, a6);
+
+  if(!ok)
     interf = "";
 
-  /* if channel is not there, this is just a parameter check */
-  if(ares->channel)
+  
+  if(ares->channel) {
     ares_set_local_dev(ares->channel, interf);
+  #ifdef HAVE_CARES_SET_LOCAL
+    ares_set_local_ip4(ares->channel, ntohl(a4.s_addr));
+  #ifdef USE_IPV6
+    ares_set_local_ip6(ares->channel, a6);
+  #endif
+  #endif
+    }
 
   return CURLE_OK;
 #else /* c-ares version too old! */
   (void)data;
-  (void)interf;
   return CURLE_NOT_BUILT_IN;
 #endif
 }
