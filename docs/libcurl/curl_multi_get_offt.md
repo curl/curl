@@ -37,38 +37,23 @@ The following information can be extracted:
 
 ## CURLMINFO_XFERS_CURRENT
 
-The number of easy handles currently added to the multi. This does not
-count handles removed. It does count internal handles that get
-added for tasks (like resolving via DoH, for example).
-
-For the total number of easy handles ever added to the multi, see
-*CURLMINFO_XFERS_ADDED*.
+See CURLMINFO_XFERS_CURRENT(3).
 
 ## CURLMINFO_XFERS_RUNNING
 
-The number of easy handles currently running, e.g. where the transfer
-has started but not finished yet.
+See CURLMINFO_XFERS_RUNNING(3).
 
 ## CURLMINFO_XFERS_PENDING
 
-The number of current easy handles waiting to start. An added transfer
-might become pending for various reasons: a connection limit forces it
-to wait, resolving DNS is not finished or it is not clear if an existing,
-matching connection may allow multiplexing (HTTP/2 or HTTP/3).
+See CURLMINFO_XFERS_PENDING(3).
 
 ## CURLMINFO_XFERS_DONE
 
-The number of easy handles currently finished, but not yet processed
-via curl_multi_info_read(3).
+See CURLMINFO_XFERS_DONE(3).
 
 ## CURLMINFO_XFERS_ADDED
 
-The cumulative number of all easy handles added to the multi, ever.
-This includes internal handles added for tasks (like resolving
-via DoH, for example).
-
-For the current number of easy handles managed by the multi, use
-*CURLMINFO_XFERS_CURRENT*.
+See CURLMINFO_XFERS_ADDED(3).
 
 # %PROTOCOLS%
 
