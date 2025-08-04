@@ -551,7 +551,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
-    if(strcmp(ssl_cert_type, "DER") == 0
+    if((ssl_cert_type && strcmp(ssl_cert_type, "DER") == 0)
        || ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0'
       ) {
       ret = mbedtls_x509_crt_parse(&backend->cacert,
@@ -651,7 +651,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
-    if(strcmp(ssl_cert_type, "DER") == 0
+    if((ssl_cert_type && strcmp(ssl_cert_type, "DER") == 0)
        || ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0'
       ) {
       ret = mbedtls_x509_crt_parse(&backend->clicert,
