@@ -75,6 +75,8 @@
 #include "httpsrr.h"
 #include "strdup.h"
 #include "if2ip.h"
+#include "curl_ctype.h"
+#include "curlx/nonblock.h"
 
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
@@ -823,6 +825,83 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
   return NULL; /* no struct yet */
 }
 
+static bool server_reachable(const char *server, int socktype)
+{
+  char *dup, *host, *p, *end;
+  int port = 53;
+  struct sockaddr_storage ss;
+  socklen_t sslen;
+  curl_socket_t sockfd = CURL_SOCKET_BAD;
+  bool ok = FALSE;
+
+  dup = strdup(server);
+  if(!dup)
+    return FALSE;
+
+  host = dup;
+  while(ISSPACE(*host))
+    host++;
+  end = host + strlen(host);
+  while(end > host && ISSPACE(end[-1]))
+    end--;
+  *end = '\0';
+
+  if(*host == '[') {
+    char *rb = strchr(host, ']');
+    if(!rb)
+      goto out;
+    *rb = '\0';
+    host++;
+    if(rb[1] == ':' && rb[2])
+      port = atoi(rb + 2);
+  }
+  else {
+    p = strrchr(host, ':');
+    if(p && strchr(host, ':') == p) {
+      *p++ = '\0';
+      if(*p)
+        port = atoi(p);
+    }
+  }
+
+  memset(&ss, 0, sizeof(ss));
+  if(curlx_inet_pton(AF_INET, host,
+                     &((struct sockaddr_in *)&ss)->sin_addr) == 1) {
+    struct sockaddr_in *sa4 = (struct sockaddr_in *)&ss;
+    sa4->sin_family = AF_INET;
+    sa4->sin_port = htons(port);
+    sslen = sizeof(*sa4);
+  }
+  else if(curlx_inet_pton(AF_INET6, host,
+                          &((struct sockaddr_in6 *)&ss)->sin6_addr) == 1) {
+    struct sockaddr_in6 *sa6 = (struct sockaddr_in6 *)&ss;
+    sa6->sin6_family = AF_INET6;
+    sa6->sin6_port = htons(port);
+    sslen = sizeof(*sa6);
+  }
+  else
+    goto out;
+
+  sockfd = socket(ss.ss_family, socktype, 0);
+  if(sockfd == CURL_SOCKET_BAD)
+    goto out;
+
+  curlx_nonblock(sockfd, TRUE);
+  if(connect(sockfd, (struct sockaddr *)&ss, sslen) == 0)
+    ok = TRUE;
+  else {
+    int err = SOCKERRNO;
+    if(err != ENETUNREACH && err != EHOSTUNREACH)
+      ok = TRUE;
+  }
+
+  sclose(sockfd);
+
+out:
+  free(dup);
+  return ok;
+}
+
 /* Set what DNS server are is to use. This is called in 2 situations:
  * 1. when the application does 'CURLOPT_DNS_SERVERS' and passing NULL
  *    means any previous set value should be unset. Which means
@@ -849,14 +928,54 @@ static CURLcode async_ares_set_dns_servers(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-#ifdef HAVE_CARES_SERVERS_CSV
+
   /* if channel is not there, this is just a parameter check */
-  if(ares->channel)
+  #ifdef HAVE_CARES_SERVERS_CSV
+  if(ares->channel) {
+    int socktype = SOCK_DGRAM;
+    struct ares_options aopts;
+    int optmask = 0;
+
+    if(ares_save_options(ares->channel, &aopts, &optmask) == ARES_SUCCESS) {
+      if((optmask & ARES_OPT_FLAGS) && (aopts.flags & ARES_FLAG_USEVC))
+        socktype = SOCK_STREAM;
+      ares_destroy_options(&aopts);
+    }
+
+    if(servers) {
+      char *list = strdup(servers);
+      if(list) {
+        char *ptr = list;
+        bool any = FALSE;
+
+        while(ptr) {
+          char *comma = strchr(ptr, ',');
+          if(comma)
+            *comma = '\0';
+          if(server_reachable(ptr, socktype)) {
+            any = TRUE;
+            break;
+          }
+          if(!comma)
+            break;
+          ptr = comma + 1;
+        }
+        free(list);
+        if(!any) {
+          DEBUGF(infof(data,
+                       "all DNS servers unreachable, falling back to "
+                       "system resolver"));
+          Curl_async_destroy(data);
+          return CURLE_OK;
+        }
+      }
+    }
 #ifdef HAVE_CARES_PORTS_CSV
     ares_result = ares_set_servers_ports_csv(ares->channel, servers);
 #else
     ares_result = ares_set_servers_csv(ares->channel, servers);
 #endif
+  }
   switch(ares_result) {
   case ARES_SUCCESS:
     result = CURLE_OK;
