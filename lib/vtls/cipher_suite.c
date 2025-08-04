@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
-#if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+#if !defined(CURL_DISABLE_CERTINFO) && \
+     (defined(USE_MBEDTLS) || defined(USE_RUSTLS))
 #include "cipher_suite.h"
 #include "../curl_printf.h"
 #include <string.h>
