@@ -334,7 +334,7 @@ ParameterError secs2ms(long *valp, const char *str)
       return PARAM_NUMBER_TOO_LARGE;
     /* how many milliseconds are in fracs ? */
     len = (str - s);
-    while((len > sizeof(CURL_ARRAYSIZE(digs)) || (fracs > LONG_MAX/100))) {
+    while((len > CURL_ARRAYSIZE(digs) || (fracs > LONG_MAX/100))) {
       fracs /= 10;
       len--;
     }
