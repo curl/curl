@@ -1435,6 +1435,7 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
 static int mbedtls_init(void)
 {
   int ret = 0;
+  psa_status_t status;
 
   /* workaround random() being called before the TLS lib is initialized */
   if(initialized_tls_lib == TRUE) {
@@ -1442,7 +1443,7 @@ static int mbedtls_init(void)
   }
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
-  psa_status_t status = psa_crypto_init();
+  status = psa_crypto_init();
   if(status != PSA_SUCCESS)
     return 0;
 #endif  /* MBEDTLS_USE_PSA_CRYPTO || MBEDTLS_SSL_PROTO_TLS1_3 */
@@ -1498,6 +1499,8 @@ static int mbedtls_init(void)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
+  int ret = -1;
+
   /* workaround random() being called before the TLS lib is initialized */
   if(initialized_tls_lib == FALSE) {
     if(mbedtls_init())
@@ -1507,9 +1510,6 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
       return CURLE_FAILED_INIT;
     }
   }
-
-#ifdef MBEDTLS_CTR_DRBG_C
-  int ret = -1;
 
 #ifdef MBEDTLS_CTR_DRBG_C
   ret = mbedtls_ctr_drbg_random(&rng.drbg, entropy, length);
@@ -1527,9 +1527,6 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
   }
 
   return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#else
-  return CURLE_NOT_BUILT_IN;
-#endif
 }
 
 static void mbedtls_cleanup(void)
