@@ -1025,34 +1025,34 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
   case MSTATE_TUNNELING:
     result = mstate_connecting_pollset(data, ps);
     if(!result)
-      Curl_conn_adjust_pollset(data, data->conn, ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_PROTOCONNECT:
   case MSTATE_PROTOCONNECTING:
     result = mstate_protocol_pollset(data, ps);
     if(!result)
-      Curl_conn_adjust_pollset(data, data->conn, ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DO:
   case MSTATE_DOING:
     result = mstate_do_pollset(data, ps);
     if(!result)
-      Curl_conn_adjust_pollset(data, data->conn, ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DOING_MORE:
     result = mstate_domore_pollset(data, ps);
     if(!result)
-      Curl_conn_adjust_pollset(data, data->conn, ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DID: /* same as PERFORMING in regard to polling */
   case MSTATE_PERFORMING:
     result = mstate_perform_pollset(data, ps);
     if(!result)
-      Curl_conn_adjust_pollset(data, data->conn, ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_RATELIMITING:

@@ -501,8 +501,14 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
     return CURLM_OK;
 
   Curl_pollset_init(&ps);
-  if(conn)
-    Curl_conn_adjust_pollset(data, conn, &ps);
+  if(conn) {
+    CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
+    if(r) {
+      res = (r == CURLE_OUT_OF_MEMORY) ?
+            CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
+      goto out;
+    }
+  }
   else if(data)
     Curl_multi_pollset(data, &ps, "ev assess");
   last_ps = mev_get_last_pollset(data, conn);

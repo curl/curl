@@ -493,10 +493,15 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
         e = Curl_node_next(e)) {
       unsigned int i;
       struct connectdata *conn = Curl_node_elem(e);
+      CURLcode result;
+
       Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
-      Curl_conn_adjust_pollset(data, conn, &ps);
+      result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
+
+      if(result)
+        continue;
 
       for(i = 0; i < ps.n; i++) {
 #ifdef __DJGPP__
@@ -530,6 +535,7 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
     struct Curl_llist_node *e;
     struct easy_pollset ps;
     struct connectdata *conn;
+    CURLcode result;
 
     Curl_pollset_init(&ps);
     for(e = Curl_llist_head(&cshutdn->list); e;
@@ -537,10 +543,11 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
-      Curl_conn_adjust_pollset(data, conn, &ps);
+      result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
-      need += Curl_waitfds_add_ps(cwfds, &ps);
+      if(!result)
+        need += Curl_waitfds_add_ps(cwfds, &ps);
     }
     Curl_pollset_cleanup(&ps);
   }
@@ -564,10 +571,11 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
-      Curl_conn_adjust_pollset(data, conn, &ps);
+      result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
-      result = Curl_pollfds_add_ps(cpfds, &ps);
+      if(!result)
+        result = Curl_pollfds_add_ps(cpfds, &ps);
       if(result) {
         Curl_pollset_cleanup(&ps);
         Curl_pollfds_cleanup(cpfds);

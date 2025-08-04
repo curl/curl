@@ -151,13 +151,13 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void cf_test_adjust_pollset(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct easy_pollset *ps)
+static CURLcode cf_test_adjust_pollset(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
   /* just for testing, give one socket with events back */
   (void)cf;
-  Curl_pollset_set(data, ps, 1, TRUE, TRUE);
+  return Curl_pollset_set(data, ps, 1, TRUE, TRUE);
 }
 
 static CURLcode cf_test_create(struct Curl_cfilter **pcf,

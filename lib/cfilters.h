@@ -80,7 +80,7 @@ struct easy_pollset;
  * @param data   the easy handle the pollset is about
  * @param ps     the pollset (inout) for the easy handle
  */
-typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
+typedef CURLcode Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          struct easy_pollset *ps);
 
@@ -244,7 +244,7 @@ void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
 
 /* Default implementations for the type functions, implementing pass-through
  * the filter chain. */
-void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
+CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct easy_pollset *ps);
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -477,16 +477,16 @@ void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
 /**
  * Adjust the pollset for the filter chain starting at `cf`.
  */
-void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps);
+CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps);
 
 /**
  * Adjust pollset from filters installed at transfer's connection.
  */
-void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              struct easy_pollset *ps);
+CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct easy_pollset *ps);
 
 /**
  * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.

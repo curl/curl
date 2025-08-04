@@ -67,14 +67,15 @@ CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
 static void conn_report_connect_stats(struct Curl_easy *data,
                                       struct connectdata *conn);
 
-void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                struct easy_pollset *ps)
+CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   /* NOP */
   (void)cf;
   (void)data;
   (void)ps;
+  return CURLE_OK;
 }
 
 bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -540,7 +541,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
         Curl_pollset_set_out_only(data, &ps, sockfd);
-      Curl_conn_adjust_pollset(data, data->conn, &ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, &ps);
+      if(result)
+        goto out;
       result = Curl_pollfds_add_ps(&cpfds, &ps);
       if(result)
         goto out;
@@ -712,10 +715,11 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
   return Curl_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
 }
 
-void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   /* Get the lowest not-connected filter, if there are any */
   while(cf && !cf->connected && cf->next && !cf->next->connected)
     cf = cf->next;
@@ -724,23 +728,26 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
     cf = cf->next;
   /* From there on, give all filters a chance to adjust the pollset.
    * Lower filters are called later, so they may override */
-  while(cf) {
-    cf->cft->adjust_pollset(cf, data, ps);
+  while(cf && !result) {
+    result = cf->cft->adjust_pollset(cf, data, ps);
     cf = cf->next;
   }
+  return result;
 }
 
-void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              struct easy_pollset *ps)
+CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   int i;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
-  for(i = 0; i < 2; ++i) {
-    Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
+  for(i = 0; (i < 2) && !result; ++i) {
+    result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
+  return result;
 }
 
 int Curl_conn_cf_poll(struct Curl_cfilter *cf,
@@ -755,8 +762,9 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
   DEBUGASSERT(data->conn);
   Curl_pollset_init(&ps);
 
-  Curl_conn_cf_adjust_pollset(cf, data, &ps);
-  result = Curl_pollset_poll(data, &ps, timeout_ms);
+  result = Curl_conn_cf_adjust_pollset(cf, data, &ps);
+  if(!result)
+    result = Curl_pollset_poll(data, &ps, timeout_ms);
   Curl_pollset_cleanup(&ps);
   return result;
 }
