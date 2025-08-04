@@ -436,8 +436,6 @@ void tool_table(unsigned int category_flag)
 {
   size_t cols = get_terminal_columns();
   size_t i, c, j, found, opt_idx, current, count = 0;
-  char cell_width[] = "%-44s";
-  char cell_space[] = " %-44s";
 
   /* First count how many options we have in this category */
   for(i = 0; helptext[i].opt; ++i) {
@@ -471,9 +469,9 @@ void tool_table(unsigned int category_flag)
             if(found == current + c) {
               /* Check if long option. */
               if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
-                printf(cell_width, helptext[opt_idx].opt + 4);
+                printf("%-44s", helptext[opt_idx].opt + 4);
               else
-                printf(cell_width, helptext[opt_idx].opt);
+                printf("%-44s", helptext[opt_idx].opt);
               break;
             }
             found++;
@@ -495,10 +493,10 @@ void tool_table(unsigned int category_flag)
           if(helptext[opt_idx].categories & category_flag) {
             if(found == current + c) {
               /* Extra space */
-              if (strlen(helptext[opt_idx].desc) > 44)
-                printf(cell_space, helptext[opt_idx].desc);
+              if(strlen(helptext[opt_idx].desc) > 44)
+                printf(" %-44s", helptext[opt_idx].desc);
               else
-                printf(cell_width, helptext[opt_idx].desc);
+                printf("%-44s", helptext[opt_idx].desc);
               break;
             }
             found++;
