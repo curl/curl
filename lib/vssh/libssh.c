@@ -128,6 +128,8 @@ CURLcode sftp_perform(struct Curl_easy *data,
 static unsigned int myssh_getsock(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   curl_socket_t *sock);
+static CURLcode myssh_pollset(struct Curl_easy *data,
+                              struct easy_pollset *ps);
 static void myssh_block2waitfor(struct connectdata *conn,
                                 struct ssh_conn *sshc,
                                 bool block);
@@ -149,7 +151,7 @@ const struct Curl_handler Curl_handler_scp = {
   myssh_connect,                /* connect_it */
   myssh_multi_statemach,        /* connecting */
   scp_doing,                    /* doing */
-  myssh_getsock,                /* proto_getsock */
+  myssh_pollset,                /* proto_pollset */
   myssh_getsock,                /* doing_getsock */
   ZERO_NULL,                    /* domore_getsock */
   myssh_getsock,                /* perform_getsock */
@@ -178,7 +180,7 @@ const struct Curl_handler Curl_handler_sftp = {
   myssh_connect,                        /* connect_it */
   myssh_multi_statemach,                /* connecting */
   sftp_doing,                           /* doing */
-  myssh_getsock,                        /* proto_getsock */
+  myssh_pollset,                        /* proto_pollset */
   myssh_getsock,                        /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   myssh_getsock,                        /* perform_getsock */
@@ -2410,6 +2412,21 @@ static unsigned int myssh_getsock(struct Curl_easy *data,
 
   DEBUGF(infof(data, "ssh_getsock -> %x", bitmap));
   return bitmap;
+}
+
+static CURLcode myssh_pollset(struct Curl_easy *data,
+                              struct easy_pollset *ps)
+{
+  int flags = 0;
+  if(data->conn->waitfor & KEEP_RECV)
+    flags |= CURL_POLL_IN;
+  if(data->conn->waitfor & KEEP_SEND)
+    flags |= CURL_POLL_OUT;
+  if(!data->conn->waitfor)
+    flags |= CURL_POLL_OUT;
+  return flags ?
+    Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET], flags, 0) :
+    CURLE_OK;
 }
 
 static void myssh_block2waitfor(struct connectdata *conn,

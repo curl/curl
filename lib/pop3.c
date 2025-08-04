@@ -156,6 +156,8 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done);
 static unsigned int pop3_getsock(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  curl_socket_t *socks);
+static CURLcode pop3_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode pop3_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode pop3_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -187,7 +189,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_connect,                     /* connect_it */
   pop3_multi_statemach,             /* connecting */
   pop3_doing,                       /* doing */
-  pop3_getsock,                     /* proto_getsock */
+  pop3_pollset,                     /* proto_pollset */
   pop3_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -218,7 +220,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_connect,                     /* connect_it */
   pop3_multi_statemach,             /* connecting */
   pop3_doing,                       /* doing */
-  pop3_getsock,                     /* proto_getsock */
+  pop3_pollset,                     /* proto_pollset */
   pop3_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -1278,6 +1280,14 @@ static unsigned int pop3_getsock(struct Curl_easy *data,
   if(pop3c)
     return Curl_pp_getsock(data, &pop3c->pp, socks);
   return GETSOCK_BLANK;
+}
+
+static CURLcode pop3_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
+{
+  struct pop3_conn *pop3c =
+    Curl_conn_meta_get(data->conn, CURL_META_POP3_CONN);
+  return pop3c ? Curl_pp_pollset(data, &pop3c->pp, ps) : CURLE_OK;
 }
 
 /***********************************************************************

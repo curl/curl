@@ -69,6 +69,8 @@ static CURLcode wsftp_disconnect(struct Curl_easy *data,
 static unsigned int wssh_getsock(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  curl_socket_t *sock);
+static CURLcode wssh_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode wssh_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
 static void wssh_sshc_cleanup(struct ssh_conn *sshc);
@@ -87,7 +89,7 @@ const struct Curl_handler Curl_handler_scp = {
   wssh_connect,                         /* connect_it */
   wssh_multi_statemach,                 /* connecting */
   wscp_doing,                           /* doing */
-  wssh_getsock,                         /* proto_getsock */
+  wssh_pollset,                         /* proto_pollset */
   wssh_getsock,                         /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   wssh_getsock,                         /* perform_getsock */
@@ -118,7 +120,7 @@ const struct Curl_handler Curl_handler_sftp = {
   wssh_connect,                         /* connect_it */
   wssh_multi_statemach,                 /* connecting */
   wsftp_doing,                          /* doing */
-  wssh_getsock,                         /* proto_getsock */
+  wssh_pollset,                         /* proto_pollset */
   wssh_getsock,                         /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   wssh_getsock,                         /* perform_getsock */
@@ -1200,6 +1202,19 @@ static unsigned int wssh_getsock(struct Curl_easy *data,
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
   return bitmap;
+}
+
+static CURLcode wssh_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
+{
+  int flags = 0;
+  if(data->conn->waitfor & KEEP_RECV)
+    flags |= CURL_POLL_IN;
+  if(data->conn->waitfor & KEEP_SEND)
+    flags |= CURL_POLL_OUT;
+  return flags ?
+    Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET], flags, 0) :
+    CURLE_OK;
 }
 
 void Curl_ssh_version(char *buffer, size_t buflen)

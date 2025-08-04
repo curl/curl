@@ -907,40 +907,33 @@ void Curl_attach_connection(struct Curl_easy *data,
     conn->handler->attach(data, conn);
 }
 
-static unsigned int connecting_getsock(struct Curl_easy *data,
-                                       curl_socket_t *socks)
+static CURLcode mstate_connecting_pollset(struct Curl_easy *data,
+                                          struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  curl_socket_t sockfd;
-
-  if(!conn)
-    return GETSOCK_BLANK;
-  sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
-  if(sockfd != CURL_SOCKET_BAD) {
-    /* Default is to wait to something from the server */
-    socks[0] = sockfd;
-    return GETSOCK_READSOCK(0);
+  if(data->conn) {
+    curl_socket_t sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+    if(sockfd != CURL_SOCKET_BAD) {
+      /* Default is to wait to something from the server */
+      return Curl_pollset_change(data, ps, sockfd, CURL_POLL_IN, 0);
+    }
   }
-  return GETSOCK_BLANK;
+  return CURLE_OK;
 }
 
-static unsigned int protocol_getsock(struct Curl_easy *data,
-                                     curl_socket_t *socks)
+static CURLcode mstate_protocol_pollset(struct Curl_easy *data,
+                                        struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  curl_socket_t sockfd;
-
-  if(!conn)
-    return GETSOCK_BLANK;
-  if(conn->handler->proto_getsock)
-    return conn->handler->proto_getsock(data, conn, socks);
-  sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
-  if(sockfd != CURL_SOCKET_BAD) {
-    /* Default is to wait to something from the server */
-    socks[0] = sockfd;
-    return GETSOCK_READSOCK(0);
+  if(data->conn) {
+    curl_socket_t sockfd;
+    if(data->conn->handler->proto_pollset)
+      return data->conn->handler->proto_pollset(data, ps);
+    sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+    if(sockfd != CURL_SOCKET_BAD) {
+      /* Default is to wait to something from the server */
+      return Curl_pollset_change(data, ps, sockfd, CURL_POLL_IN, 0);
+    }
   }
-  return GETSOCK_BLANK;
+  return CURLE_OK;
 }
 
 static unsigned int domore_getsock(struct Curl_easy *data,
@@ -1045,14 +1038,16 @@ CURLMcode Curl_multi_getsock(struct Curl_easy *data,
 
   case MSTATE_CONNECTING:
   case MSTATE_TUNNELING:
-    Curl_pollset_add_socks(data, ps, connecting_getsock);
-    Curl_conn_adjust_pollset(data, data->conn, ps);
+    result = mstate_connecting_pollset(data, ps);
+    if(!result)
+      Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_PROTOCONNECT:
   case MSTATE_PROTOCONNECTING:
-    Curl_pollset_add_socks(data, ps, protocol_getsock);
-    Curl_conn_adjust_pollset(data, data->conn, ps);
+    result = mstate_protocol_pollset(data, ps);
+    if(!result)
+      Curl_conn_adjust_pollset(data, data->conn, ps);
     break;
 
   case MSTATE_DO:

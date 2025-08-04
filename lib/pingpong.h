@@ -150,6 +150,9 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp);
 unsigned int Curl_pp_getsock(struct Curl_easy *data,
                              struct pingpong *pp,
                              curl_socket_t *socks);
+CURLcode Curl_pp_pollset(struct Curl_easy *data,
+                         struct pingpong *pp,
+                         struct easy_pollset *ps);
 
 
 /***********************************************************************

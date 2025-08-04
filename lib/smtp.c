@@ -160,6 +160,8 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
 static unsigned int smtp_getsock(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  curl_socket_t *socks);
+static CURLcode smtp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -193,7 +195,7 @@ const struct Curl_handler Curl_handler_smtp = {
   smtp_connect,                     /* connect_it */
   smtp_multi_statemach,             /* connecting */
   smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
+  smtp_pollset,                     /* proto_pollset */
   smtp_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -224,7 +226,7 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_connect,                     /* connect_it */
   smtp_multi_statemach,             /* connecting */
   smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
+  smtp_pollset,                     /* proto_pollset */
   smtp_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -1421,6 +1423,14 @@ static unsigned int smtp_getsock(struct Curl_easy *data,
   struct smtp_conn *smtpc = Curl_conn_meta_get(conn, CURL_META_SMTP_CONN);
   return smtpc ?
          Curl_pp_getsock(data, &smtpc->pp, socks) : GETSOCK_BLANK;
+}
+
+static CURLcode smtp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
+{
+  struct smtp_conn *smtpc =
+    Curl_conn_meta_get(data->conn, CURL_META_SMTP_CONN);
+  return smtpc ? Curl_pp_pollset(data, &smtpc->pp, ps) : CURLE_OK;
 }
 
 /***********************************************************************

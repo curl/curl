@@ -126,7 +126,7 @@ const struct Curl_handler Curl_handler_mqtt = {
   ZERO_NULL,                          /* connect_it */
   ZERO_NULL,                          /* connecting */
   mqtt_doing,                         /* doing */
-  ZERO_NULL,                          /* proto_getsock */
+  ZERO_NULL,                          /* proto_pollset */
   mqtt_getsock,                       /* doing_getsock */
   ZERO_NULL,                          /* domore_getsock */
   ZERO_NULL,                          /* perform_getsock */

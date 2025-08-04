@@ -413,6 +413,15 @@ unsigned int Curl_pp_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(0);
 }
 
+CURLcode Curl_pp_pollset(struct Curl_easy *data,
+                         struct pingpong *pp,
+                         struct easy_pollset *ps)
+{
+  int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
+  return Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET],
+                             flags, 0);
+}
+
 bool Curl_pp_needs_flush(struct Curl_easy *data,
                          struct pingpong *pp)
 {

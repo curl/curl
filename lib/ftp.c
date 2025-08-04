@@ -217,6 +217,8 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
 static unsigned int ftp_getsock(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 curl_socket_t *socks);
+static CURLcode ftp_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 static unsigned int ftp_domore_getsock(struct Curl_easy *data,
                                        struct connectdata *conn,
                                        curl_socket_t *socks);
@@ -259,7 +261,7 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
-  ftp_getsock,                     /* proto_getsock */
+  ftp_pollset,                     /* proto_pollset */
   ftp_getsock,                     /* doing_getsock */
   ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
@@ -292,7 +294,7 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
-  ftp_getsock,                     /* proto_getsock */
+  ftp_pollset,                     /* proto_pollset */
   ftp_getsock,                     /* doing_getsock */
   ftp_domore_getsock,              /* domore_getsock */
   ZERO_NULL,                       /* perform_getsock */
@@ -789,6 +791,13 @@ static unsigned int ftp_getsock(struct Curl_easy *data,
 {
   struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
   return ftpc ? Curl_pp_getsock(data, &ftpc->pp, socks) : GETSOCK_BLANK;
+}
+
+static CURLcode ftp_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps)
+{
+  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
+  return ftpc ? Curl_pp_pollset(data, &ftpc->pp, ps) : CURLE_OK;
 }
 
 /* For the FTP "DO_MORE" phase only */

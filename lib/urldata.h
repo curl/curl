@@ -507,9 +507,8 @@ struct Curl_handler {
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  unsigned int (*proto_getsock)(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                curl_socket_t *socks);
+  CURLcode (*proto_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */

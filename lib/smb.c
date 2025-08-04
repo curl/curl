@@ -302,6 +302,8 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done);
 static unsigned int smb_getsock(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 curl_socket_t *socks);
+static CURLcode smb_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 static CURLcode smb_parse_url_path(struct Curl_easy *data,
                                    struct smb_conn *smbc,
                                    struct smb_request *req);
@@ -318,7 +320,7 @@ const struct Curl_handler Curl_handler_smb = {
   smb_connect,                          /* connect_it */
   smb_connection_state,                 /* connecting */
   smb_request_state,                    /* doing */
-  smb_getsock,                          /* proto_getsock */
+  smb_pollset,                          /* proto_pollset */
   smb_getsock,                          /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
@@ -347,7 +349,7 @@ const struct Curl_handler Curl_handler_smbs = {
   smb_connect,                          /* connect_it */
   smb_connection_state,                 /* connecting */
   smb_request_state,                    /* doing */
-  smb_getsock,                          /* proto_getsock */
+  smb_pollset,                          /* proto_pollset */
   smb_getsock,                          /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
@@ -1213,6 +1215,12 @@ static unsigned int smb_getsock(struct Curl_easy *data,
   (void)data;
   socks[0] = conn->sock[FIRSTSOCKET];
   return GETSOCK_READSOCK(0) | GETSOCK_WRITESOCK(0);
+}
+
+static CURLcode smb_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps)
+{
+  return Curl_pollset_add_inout(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 static CURLcode smb_do(struct Curl_easy *data, bool *done)

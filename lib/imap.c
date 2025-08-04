@@ -160,6 +160,8 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done);
 static unsigned int imap_getsock(struct Curl_easy *data,
                                  struct connectdata *conn,
                                  curl_socket_t *socks);
+static CURLcode imap_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode imap_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode imap_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -197,7 +199,7 @@ const struct Curl_handler Curl_handler_imap = {
   imap_connect,                     /* connect_it */
   imap_multi_statemach,             /* connecting */
   imap_doing,                       /* doing */
-  imap_getsock,                     /* proto_getsock */
+  imap_pollset,                     /* proto_pollset */
   imap_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -228,7 +230,7 @@ const struct Curl_handler Curl_handler_imaps = {
   imap_connect,                     /* connect_it */
   imap_multi_statemach,             /* connecting */
   imap_doing,                       /* doing */
-  imap_getsock,                     /* proto_getsock */
+  imap_pollset,                     /* proto_pollset */
   imap_getsock,                     /* doing_getsock */
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
@@ -1568,6 +1570,14 @@ static unsigned int imap_getsock(struct Curl_easy *data,
   struct imap_conn *imapc = Curl_conn_meta_get(conn, CURL_META_IMAP_CONN);
   return imapc ?
          Curl_pp_getsock(data, &imapc->pp, socks) : GETSOCK_BLANK;
+}
+
+static CURLcode imap_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
+{
+  struct imap_conn *imapc =
+    Curl_conn_meta_get(data->conn, CURL_META_IMAP_CONN);
+  return imapc ? Curl_pp_pollset(data, &imapc->pp, ps) : CURLE_OK;
 }
 
 /***********************************************************************
