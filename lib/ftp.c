@@ -214,10 +214,10 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
                                struct connectdata *conn, bool dead_connection);
 static CURLcode ftp_do_more(struct Curl_easy *data, int *completed);
 static CURLcode ftp_multi_statemach(struct Curl_easy *data, bool *done);
-static int ftp_getsock(struct Curl_easy *data, struct connectdata *conn,
-                       curl_socket_t *socks);
-static int ftp_domore_getsock(struct Curl_easy *data,
-                              struct connectdata *conn, curl_socket_t *socks);
+static CURLcode ftp_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps);
+static CURLcode ftp_domore_pollset(struct Curl_easy *data,
+                                   struct easy_pollset *ps);
 static CURLcode ftp_doing(struct Curl_easy *data,
                           bool *dophase_done);
 static CURLcode ftp_setup_connection(struct Curl_easy *data,
@@ -257,10 +257,10 @@ const struct Curl_handler Curl_handler_ftp = {
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
-  ftp_getsock,                     /* proto_getsock */
-  ftp_getsock,                     /* doing_getsock */
-  ftp_domore_getsock,              /* domore_getsock */
-  ZERO_NULL,                       /* perform_getsock */
+  ftp_pollset,                     /* proto_pollset */
+  ftp_pollset,                     /* doing_pollset */
+  ftp_domore_pollset,              /* domore_pollset */
+  ZERO_NULL,                       /* perform_pollset */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* write_resp_hd */
@@ -290,10 +290,10 @@ const struct Curl_handler Curl_handler_ftps = {
   ftp_connect,                     /* connect_it */
   ftp_multi_statemach,             /* connecting */
   ftp_doing,                       /* doing */
-  ftp_getsock,                     /* proto_getsock */
-  ftp_getsock,                     /* doing_getsock */
-  ftp_domore_getsock,              /* domore_getsock */
-  ZERO_NULL,                       /* perform_getsock */
+  ftp_pollset,                     /* proto_pollset */
+  ftp_pollset,                     /* doing_pollset */
+  ftp_domore_pollset,              /* domore_pollset */
+  ZERO_NULL,                       /* perform_pollset */
   ftp_disconnect,                  /* disconnect */
   ZERO_NULL,                       /* write_resp */
   ZERO_NULL,                       /* write_resp_hd */
@@ -781,42 +781,39 @@ static CURLcode ftp_state_pwd(struct Curl_easy *data,
 }
 
 /* For the FTP "protocol connect" and "doing" phases only */
-static int ftp_getsock(struct Curl_easy *data,
-                       struct connectdata *conn,
-                       curl_socket_t *socks)
+static CURLcode ftp_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps)
 {
-  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-  return ftpc ? Curl_pp_getsock(data, &ftpc->pp, socks) : GETSOCK_BLANK;
+  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
+  return ftpc ? Curl_pp_pollset(data, &ftpc->pp, ps) : CURLE_OK;
 }
 
 /* For the FTP "DO_MORE" phase only */
-static int ftp_domore_getsock(struct Curl_easy *data,
-                              struct connectdata *conn, curl_socket_t *socks)
+static CURLcode ftp_domore_pollset(struct Curl_easy *data,
+                                   struct easy_pollset *ps)
 {
-  struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
-  (void)data;
+  struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
 
   if(!ftpc)
-    return GETSOCK_BLANK;
+    return CURLE_OK;
 
   /* When in DO_MORE state, we could be either waiting for us to connect to a
    * remote site, or we could wait for that site to connect to us. Or just
    * handle ordinary commands.
    */
-  CURL_TRC_FTP(data, "[%s] ftp_domore_getsock()", FTP_CSTATE(ftpc));
+  CURL_TRC_FTP(data, "[%s] ftp_domore_pollset()", FTP_CSTATE(ftpc));
 
   if(FTP_STOP == ftpc->state) {
     /* if stopped and still in this state, then we are also waiting for a
        connect on the secondary connection */
-    DEBUGASSERT(conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD ||
-               (conn->cfilter[SECONDARYSOCKET] &&
-                !Curl_conn_is_connected(conn, SECONDARYSOCKET)));
-    socks[0] = conn->sock[FIRSTSOCKET];
+    DEBUGASSERT(data->conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD ||
+               (data->conn->cfilter[SECONDARYSOCKET] &&
+                !Curl_conn_is_connected(data->conn, SECONDARYSOCKET)));
     /* An unconnected SECONDARY will add its socket by itself
      * via its adjust_pollset() */
-    return GETSOCK_READSOCK(0);
+    return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
   }
-  return Curl_pp_getsock(data, &ftpc->pp, socks);
+  return Curl_pp_pollset(data, &ftpc->pp, ps);
 }
 
 /* This is called after the FTP_QUOTE state is passed.

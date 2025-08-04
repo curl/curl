@@ -2465,17 +2465,18 @@ out:
   return result;
 }
 
-static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+static CURLcode cf_h2_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   curl_socket_t sock;
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->h2)
-    return;
+    return CURLE_OK;
 
   sock = Curl_conn_cf_get_socket(cf, data);
   Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
@@ -2493,7 +2494,7 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
                 (!c_exhaust && nghttp2_session_want_write(ctx->h2)) ||
                 !Curl_bufq_is_empty(&ctx->outbufq);
 
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
   else if(ctx->sent_goaway && !cf->shutdown) {
@@ -2502,9 +2503,10 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
     want_send = nghttp2_session_want_write(ctx->h2) ||
                 !Curl_bufq_is_empty(&ctx->outbufq);
     want_recv = nghttp2_session_want_read(ctx->h2);
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  return result;
 }
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,

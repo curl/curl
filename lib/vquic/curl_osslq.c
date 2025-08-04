@@ -2266,11 +2266,12 @@ out:
   return alive;
 }
 
-static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    struct easy_pollset *ps)
+static CURLcode cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        struct easy_pollset *ps)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->tls.ossl.ssl) {
     /* NOP */
@@ -2278,9 +2279,9 @@ static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
   else if(!cf->connected) {
     /* during handshake, transfer has not started yet. we always
      * add our socket for polling if SSL wants to send/recv */
-    Curl_pollset_set(data, ps, ctx->q.sockfd,
-                     SSL_net_read_desired(ctx->tls.ossl.ssl),
-                     SSL_net_write_desired(ctx->tls.ossl.ssl));
+    result = Curl_pollset_set(data, ps, ctx->q.sockfd,
+                              SSL_net_read_desired(ctx->tls.ossl.ssl),
+                              SSL_net_write_desired(ctx->tls.ossl.ssl));
   }
   else {
     /* once connected, we only modify the socket if it is present.
@@ -2288,15 +2289,16 @@ static void cf_osslq_adjust_pollset(struct Curl_cfilter *cf,
     bool want_recv, want_send;
     Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
     if(want_recv || want_send) {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
-                       SSL_net_read_desired(ctx->tls.ossl.ssl),
-                       SSL_net_write_desired(ctx->tls.ossl.ssl));
+      result = Curl_pollset_set(data, ps, ctx->q.sockfd,
+                                SSL_net_read_desired(ctx->tls.ossl.ssl),
+                                SSL_net_write_desired(ctx->tls.ossl.ssl));
     }
     else if(ctx->need_recv || ctx->need_send) {
-      Curl_pollset_set(data, ps, ctx->q.sockfd,
-                       ctx->need_recv, ctx->need_send);
+      result = Curl_pollset_set(data, ps, ctx->q.sockfd,
+                                ctx->need_recv, ctx->need_send);
     }
   }
+  return result;
 }
 
 static CURLcode cf_osslq_query(struct Curl_cfilter *cf,

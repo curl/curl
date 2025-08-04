@@ -63,6 +63,7 @@
 #include "url.h"
 #include "multiif.h"
 #include "curl_threads.h"
+#include "select.h"
 #include "strdup.h"
 
 #ifdef USE_ARES
@@ -629,33 +630,25 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   }
 }
 
-int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
+CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
-  int ret_val = 0;
-#if !defined(CURL_DISABLE_SOCKETPAIR) || defined(USE_HTTPSRR_ARES)
-  int socketi = 0;
-#else
-  (void)socks;
-#endif
+  CURLcode result = CURLE_OK;
 
 #ifdef USE_HTTPSRR_ARES
   if(thrdd->rr.channel) {
-    ret_val = Curl_ares_getsock(data, thrdd->rr.channel, socks);
-    for(socketi = 0; socketi < (MAX_SOCKSPEREASYHANDLE - 1); socketi++)
-      if(!ARES_GETSOCK_READABLE(ret_val, socketi) &&
-         !ARES_GETSOCK_WRITABLE(ret_val, socketi))
-        break;
+    result = Curl_ares_pollset(data, thrdd->rr.channel, ps);
+    if(result)
+      return result;
   }
 #endif
   if(!thrdd->addr)
-    return ret_val;
+    return result;
 
 #ifndef CURL_DISABLE_SOCKETPAIR
   if(thrdd->addr) {
     /* return read fd to client for polling the DNS resolution status */
-    socks[socketi] = thrdd->addr->sock_pair[0];
-    ret_val |= GETSOCK_READSOCK(socketi);
+    result = Curl_pollset_add_in(data, ps, thrdd->addr->sock_pair[0]);
   }
   else
 #endif
@@ -673,7 +666,7 @@ int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *socks)
     Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
   }
 
-  return ret_val;
+  return result;
 }
 
 #ifndef HAVE_GETADDRINFO

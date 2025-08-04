@@ -67,14 +67,15 @@ CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
 static void conn_report_connect_stats(struct Curl_easy *data,
                                       struct connectdata *conn);
 
-void Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                struct easy_pollset *ps)
+CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   /* NOP */
   (void)cf;
   (void)data;
   (void)ps;
+  return CURLE_OK;
 }
 
 bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -469,6 +470,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 {
 #define CF_CONN_NUM_POLLS_ON_STACK 5
   struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
+  struct easy_pollset ps;
   struct curl_pollfds cpfds;
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
@@ -486,6 +488,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(*done)
     return CURLE_OK;
 
+  Curl_pollset_init(&ps);
   Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
   while(!*done) {
     if(Curl_conn_needs_flush(data, sockindex)) {
@@ -523,7 +526,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       /* check allowed time left */
       const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-      struct easy_pollset ps;
       int rc;
 
       if(timeout_ms < 0) {
@@ -534,12 +536,14 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       }
 
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
+      Curl_pollset_reset(&ps);
       Curl_pollfds_reset(&cpfds);
-      memset(&ps, 0, sizeof(ps));
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
         Curl_pollset_set_out_only(data, &ps, sockfd);
-      Curl_conn_adjust_pollset(data, data->conn, &ps);
+      result = Curl_conn_adjust_pollset(data, data->conn, &ps);
+      if(result)
+        goto out;
       result = Curl_pollfds_add_ps(&cpfds, &ps);
       if(result)
         goto out;
@@ -557,6 +561,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   }
 
 out:
+  Curl_pollset_cleanup(&ps);
   Curl_pollfds_cleanup(&cpfds);
   return result;
 }
@@ -710,10 +715,11 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
   return Curl_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
 }
 
-void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   /* Get the lowest not-connected filter, if there are any */
   while(cf && !cf->connected && cf->next && !cf->next->connected)
     cf = cf->next;
@@ -722,23 +728,26 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
     cf = cf->next;
   /* From there on, give all filters a chance to adjust the pollset.
    * Lower filters are called later, so they may override */
-  while(cf) {
-    cf->cft->adjust_pollset(cf, data, ps);
+  while(cf && !result) {
+    result = cf->cft->adjust_pollset(cf, data, ps);
     cf = cf->next;
   }
+  return result;
 }
 
-void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              struct easy_pollset *ps)
+CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   int i;
 
   DEBUGASSERT(data);
   DEBUGASSERT(conn);
-  for(i = 0; i < 2; ++i) {
-    Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
+  for(i = 0; (i < 2) && !result; ++i) {
+    result = Curl_conn_cf_adjust_pollset(conn->cfilter[i], data, ps);
   }
+  return result;
 }
 
 int Curl_conn_cf_poll(struct Curl_cfilter *cf,
@@ -746,35 +755,18 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
                       timediff_t timeout_ms)
 {
   struct easy_pollset ps;
-  struct pollfd pfds[MAX_SOCKSPEREASYHANDLE];
-  unsigned int i, npfds = 0;
+  int result;
 
   DEBUGASSERT(cf);
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  memset(&ps, 0, sizeof(ps));
-  memset(pfds, 0, sizeof(pfds));
+  Curl_pollset_init(&ps);
 
-  Curl_conn_cf_adjust_pollset(cf, data, &ps);
-  DEBUGASSERT(ps.num <= MAX_SOCKSPEREASYHANDLE);
-  for(i = 0; i < ps.num; ++i) {
-    short events = 0;
-    if(ps.actions[i] & CURL_POLL_IN) {
-      events |= POLLIN;
-    }
-    if(ps.actions[i] & CURL_POLL_OUT) {
-      events |= POLLOUT;
-    }
-    if(events) {
-      pfds[npfds].fd = ps.sockets[i];
-      pfds[npfds].events = events;
-      ++npfds;
-    }
-  }
-
-  if(!npfds)
-    DEBUGF(infof(data, "no sockets to poll!"));
-  return Curl_poll(pfds, npfds, timeout_ms);
+  result = Curl_conn_cf_adjust_pollset(cf, data, &ps);
+  if(!result)
+    result = Curl_pollset_poll(data, &ps, timeout_ms);
+  Curl_pollset_cleanup(&ps);
+  return result;
 }
 
 void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
@@ -1098,143 +1090,4 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                                        pnwritten);
   *pnwritten = 0;
   return CURLE_FAILED_INIT;
-}
-
-void Curl_pollset_reset(struct Curl_easy *data,
-                        struct easy_pollset *ps)
-{
-  size_t i;
-  (void)data;
-  memset(ps, 0, sizeof(*ps));
-  for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++)
-    ps->sockets[i] = CURL_SOCKET_BAD;
-}
-
-/**
- *
- */
-void Curl_pollset_change(struct Curl_easy *data,
-                         struct easy_pollset *ps, curl_socket_t sock,
-                         int add_flags, int remove_flags)
-{
-  unsigned int i;
-
-  (void)data;
-  DEBUGASSERT(VALID_SOCK(sock));
-  if(!VALID_SOCK(sock))
-    return;
-
-  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
-  for(i = 0; i < ps->num; ++i) {
-    if(ps->sockets[i] == sock) {
-      ps->actions[i] &= (unsigned char)(~remove_flags);
-      ps->actions[i] |= (unsigned char)add_flags;
-      /* all gone? remove socket */
-      if(!ps->actions[i]) {
-        if((i + 1) < ps->num) {
-          memmove(&ps->sockets[i], &ps->sockets[i + 1],
-                  (ps->num - (i + 1)) * sizeof(ps->sockets[0]));
-          memmove(&ps->actions[i], &ps->actions[i + 1],
-                  (ps->num - (i + 1)) * sizeof(ps->actions[0]));
-        }
-        --ps->num;
-      }
-      return;
-    }
-  }
-  /* not present */
-  if(add_flags) {
-    /* Having more SOCKETS per easy handle than what is defined
-     * is a programming error. This indicates that we need
-     * to raise this limit, making easy_pollset larger.
-     * Since we use this in tight loops, we do not want to make
-     * the pollset dynamic unnecessarily.
-     * The current maximum in practise is HTTP/3 eyeballing where
-     * we have up to 4 sockets involved in connection setup.
-     */
-    DEBUGASSERT(i < MAX_SOCKSPEREASYHANDLE);
-    if(i < MAX_SOCKSPEREASYHANDLE) {
-      ps->sockets[i] = sock;
-      ps->actions[i] = (unsigned char)add_flags;
-      ps->num = i + 1;
-    }
-  }
-}
-
-void Curl_pollset_set(struct Curl_easy *data,
-                      struct easy_pollset *ps, curl_socket_t sock,
-                      bool do_in, bool do_out)
-{
-  Curl_pollset_change(data, ps, sock,
-                      (do_in ? CURL_POLL_IN : 0)|
-                      (do_out ? CURL_POLL_OUT : 0),
-                      (!do_in ? CURL_POLL_IN : 0)|
-                      (!do_out ? CURL_POLL_OUT : 0));
-}
-
-static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
-                   int bitmap, curl_socket_t *socks)
-{
-  if(bitmap) {
-    int i;
-    for(i = 0; i < MAX_SOCKSPEREASYHANDLE; ++i) {
-      if(!(bitmap & GETSOCK_MASK_RW(i)) || !VALID_SOCK((socks[i]))) {
-        break;
-      }
-      if(bitmap & GETSOCK_READSOCK(i)) {
-        if(bitmap & GETSOCK_WRITESOCK(i))
-          Curl_pollset_add_inout(data, ps, socks[i]);
-        else
-          /* is READ, since we checked MASK_RW above */
-          Curl_pollset_add_in(data, ps, socks[i]);
-      }
-      else
-        Curl_pollset_add_out(data, ps, socks[i]);
-    }
-  }
-}
-
-void Curl_pollset_add_socks(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            int (*get_socks_cb)(struct Curl_easy *data,
-                                                curl_socket_t *socks))
-{
-  curl_socket_t socks[MAX_SOCKSPEREASYHANDLE];
-  int bitmap;
-
-  bitmap = get_socks_cb(data, socks);
-  ps_add(data, ps, bitmap, socks);
-}
-
-void Curl_pollset_check(struct Curl_easy *data,
-                        struct easy_pollset *ps, curl_socket_t sock,
-                        bool *pwant_read, bool *pwant_write)
-{
-  unsigned int i;
-
-  (void)data;
-  DEBUGASSERT(VALID_SOCK(sock));
-  for(i = 0; i < ps->num; ++i) {
-    if(ps->sockets[i] == sock) {
-      *pwant_read = !!(ps->actions[i] & CURL_POLL_IN);
-      *pwant_write = !!(ps->actions[i] & CURL_POLL_OUT);
-      return;
-    }
-  }
-  *pwant_read = *pwant_write = FALSE;
-}
-
-bool Curl_pollset_want_read(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            curl_socket_t sock)
-{
-  unsigned int i;
-  (void)data;
-  for(i = 0; i < ps->num; ++i) {
-    if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
-      return TRUE;
-  }
-  return FALSE;
 }

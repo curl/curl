@@ -80,7 +80,7 @@ struct easy_pollset;
  * @param data   the easy handle the pollset is about
  * @param ps     the pollset (inout) for the easy handle
  */
-typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
+typedef CURLcode Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          struct easy_pollset *ps);
 
@@ -244,7 +244,7 @@ void Curl_cf_def_destroy_this(struct Curl_cfilter *cf,
 
 /* Default implementations for the type functions, implementing pass-through
  * the filter chain. */
-void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
+CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct easy_pollset *ps);
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
@@ -477,16 +477,16 @@ void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex);
 /**
  * Adjust the pollset for the filter chain starting at `cf`.
  */
-void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps);
+CURLcode Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps);
 
 /**
  * Adjust pollset from filters installed at transfer's connection.
  */
-void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                              struct connectdata *conn,
-                              struct easy_pollset *ps);
+CURLcode Curl_conn_adjust_pollset(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  struct easy_pollset *ps);
 
 /**
  * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.
@@ -631,56 +631,6 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
-
-void Curl_pollset_reset(struct Curl_easy *data,
-                        struct easy_pollset *ps);
-
-/* Change the poll flags (CURL_POLL_IN/CURL_POLL_OUT) to the poll set for
- * socket `sock`. If the socket is not already part of the poll set, it
- * will be added.
- * If the socket is present and all poll flags are cleared, it will be removed.
- */
-void Curl_pollset_change(struct Curl_easy *data,
-                         struct easy_pollset *ps, curl_socket_t sock,
-                         int add_flags, int remove_flags);
-
-void Curl_pollset_set(struct Curl_easy *data,
-                      struct easy_pollset *ps, curl_socket_t sock,
-                      bool do_in, bool do_out);
-
-#define Curl_pollset_add_in(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
-#define Curl_pollset_add_out(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
-#define Curl_pollset_add_inout(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_IN|CURL_POLL_OUT, 0)
-#define Curl_pollset_set_in_only(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_IN, CURL_POLL_OUT)
-#define Curl_pollset_set_out_only(data, ps, sock) \
-          Curl_pollset_change((data), (ps), (sock), \
-                               CURL_POLL_OUT, CURL_POLL_IN)
-
-void Curl_pollset_add_socks(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            int (*get_socks_cb)(struct Curl_easy *data,
-                                                curl_socket_t *socks));
-
-/**
- * Check if the pollset, as is, wants to read and/or write regarding
- * the given socket.
- */
-void Curl_pollset_check(struct Curl_easy *data,
-                        struct easy_pollset *ps, curl_socket_t sock,
-                        bool *pwant_read, bool *pwant_write);
-
-/**
- * Return TRUE if the pollset contains socket with CURL_POLL_IN.
- */
-bool Curl_pollset_want_read(struct Curl_easy *data,
-                            struct easy_pollset *ps,
-                            curl_socket_t sock);
 
 /**
  * Types and macros used to keep the current easy handle in filter calls,

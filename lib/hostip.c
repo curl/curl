@@ -1527,21 +1527,21 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 }
 #endif
 
-int Curl_resolv_getsock(struct Curl_easy *data,
-                        curl_socket_t *socks)
+CURLcode Curl_resolv_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
 {
 #ifdef CURLRES_ASYNCH
 #ifndef CURL_DISABLE_DOH
   if(data->conn->bits.doh)
     /* nothing to wait for during DoH resolve, those handles have their own
        sockets */
-    return GETSOCK_BLANK;
+    return CURLE_OK;
 #endif
-  return Curl_async_getsock(data, socks);
+  return Curl_async_pollset(data, ps);
 #else
   (void)data;
-  (void)socks;
-  return GETSOCK_BLANK;
+  (void)ps;
+  return CURLE_OK;
 #endif
 }
 

@@ -471,15 +471,6 @@ struct hostname {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
-/* Polling requested by an easy handle.
- * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
- */
-struct easy_pollset {
-  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  unsigned int num;
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
-};
-
 /*
  * Specific protocol handler.
  */
@@ -516,24 +507,24 @@ struct Curl_handler {
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  int (*proto_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*proto_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  int (*doing_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*doing_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
      then return a proper fd set */
-  int (*domore_getsock)(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*domore_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
-  int (*perform_getsock)(struct Curl_easy *data,
-                         struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*perform_pollset)(struct Curl_easy *data,
+                              struct easy_pollset *ps);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection. If the handler
