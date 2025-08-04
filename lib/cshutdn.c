@@ -486,18 +486,19 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
 {
   if(Curl_llist_head(&cshutdn->list)) {
     struct Curl_llist_node *e;
+    struct easy_pollset ps;
 
+    Curl_pollset_init(&ps);
     for(e = Curl_llist_head(&cshutdn->list); e;
         e = Curl_node_next(e)) {
-      struct easy_pollset ps;
       unsigned int i;
       struct connectdata *conn = Curl_node_elem(e);
-      memset(&ps, 0, sizeof(ps));
+      Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
       Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
-      for(i = 0; i < ps.num; i++) {
+      for(i = 0; i < ps.n; i++) {
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
@@ -514,6 +515,7 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
           *maxfd = (int)ps.sockets[i];
       }
     }
+    Curl_pollset_cleanup(&ps);
   }
 }
 
@@ -529,16 +531,18 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
     struct easy_pollset ps;
     struct connectdata *conn;
 
+    Curl_pollset_init(&ps);
     for(e = Curl_llist_head(&cshutdn->list); e;
         e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
-      memset(&ps, 0, sizeof(ps));
+      Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
       Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
       need += Curl_waitfds_add_ps(cwfds, &ps);
     }
+    Curl_pollset_cleanup(&ps);
   }
   return need;
 }
@@ -554,20 +558,23 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
     struct easy_pollset ps;
     struct connectdata *conn;
 
+    Curl_pollset_init(&ps);
     for(e = Curl_llist_head(&cshutdn->list); e;
         e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
-      memset(&ps, 0, sizeof(ps));
+      Curl_pollset_reset(&ps);
       Curl_attach_connection(data, conn);
       Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
       result = Curl_pollfds_add_ps(cpfds, &ps);
       if(result) {
+        Curl_pollset_cleanup(&ps);
         Curl_pollfds_cleanup(cpfds);
         goto out;
       }
     }
+    Curl_pollset_cleanup(&ps);
   }
 out:
   return result;

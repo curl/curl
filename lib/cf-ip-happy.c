@@ -722,7 +722,7 @@ static void cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->n);
   }
 }
 

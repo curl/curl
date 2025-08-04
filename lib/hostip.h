@@ -53,6 +53,7 @@ struct addrinfo;
 struct hostent;
 struct Curl_easy;
 struct connectdata;
+struct easy_pollset;
 
 enum alpnid {
   ALPN_none = 0,
@@ -199,8 +200,8 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 #else
 #define Curl_resolv_check(x,y) CURLE_NOT_BUILT_IN
 #endif
-unsigned int Curl_resolv_getsock(struct Curl_easy *data,
-                                 curl_socket_t *socks);
+CURLcode Curl_resolv_getsock(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 
 CURLcode Curl_resolver_error(struct Curl_easy *data);
 

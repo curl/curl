@@ -41,6 +41,7 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
+#include "curl_trc.h"
 #include "curlx/timediff.h"
 #include "curlx/wait.h"
 #include "curlx/warnless.h"
@@ -423,7 +424,7 @@ CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
 
   DEBUGASSERT(cpfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     short events = 0;
     if(ps->actions[i] & CURL_POLL_IN)
       events |= POLLIN;
@@ -481,7 +482,7 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
 
   DEBUGASSERT(cwfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     short events = 0;
     if(ps->actions[i] & CURL_POLL_IN)
       events |= CURL_WAIT_POLLIN;
@@ -493,48 +494,70 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
   return need;
 }
 
-void Curl_pollset_reset(struct Curl_easy *data,
-                        struct easy_pollset *ps)
+void Curl_pollset_reset(struct easy_pollset *ps)
 {
-  size_t i;
-  (void)data;
-  memset(ps, 0, sizeof(*ps));
-  for(i = 0; i < MAX_SOCKSPEREASYHANDLE; i++)
+  unsigned int i;
+  ps->n = 0;
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
+  DEBUGASSERT(ps->count);
+  for(i = 0; i < ps->count; i++)
     ps->sockets[i] = CURL_SOCKET_BAD;
+  memset(ps->actions, 0, ps->count * sizeof(ps->actions[0]));
+}
+
+void Curl_pollset_init(struct easy_pollset *ps)
+{
+  memset(ps, 0, sizeof(*ps));
+#ifdef DEBUGBUILD
+  ps->init = CURL_EASY_POLLSET_MAGIC;
+#endif
+  ps->count = MAX_SOCKSPEREASYHANDLE;
+  Curl_pollset_reset(ps);
+}
+
+void Curl_pollset_cleanup(struct easy_pollset *ps)
+{
+  Curl_pollset_reset(ps);
 }
 
 /**
  *
  */
-void Curl_pollset_change(struct Curl_easy *data,
-                         struct easy_pollset *ps, curl_socket_t sock,
-                         int add_flags, int remove_flags)
+CURLcode Curl_pollset_change(struct Curl_easy *data,
+                             struct easy_pollset *ps, curl_socket_t sock,
+                             int add_flags, int remove_flags)
 {
   unsigned int i;
+
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
 
   (void)data;
   DEBUGASSERT(VALID_SOCK(sock));
   if(!VALID_SOCK(sock))
-    return;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
   DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
   DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
-  for(i = 0; i < ps->num; ++i) {
+  for(i = 0; i < ps->n; ++i) {
     if(ps->sockets[i] == sock) {
       ps->actions[i] &= (unsigned char)(~remove_flags);
       ps->actions[i] |= (unsigned char)add_flags;
       /* all gone? remove socket */
       if(!ps->actions[i]) {
-        if((i + 1) < ps->num) {
+        if((i + 1) < ps->n) {
           memmove(&ps->sockets[i], &ps->sockets[i + 1],
-                  (ps->num - (i + 1)) * sizeof(ps->sockets[0]));
+                  (ps->n - (i + 1)) * sizeof(ps->sockets[0]));
           memmove(&ps->actions[i], &ps->actions[i + 1],
-                  (ps->num - (i + 1)) * sizeof(ps->actions[0]));
+                  (ps->n - (i + 1)) * sizeof(ps->actions[0]));
         }
-        --ps->num;
+        --ps->n;
       }
-      return;
+      return CURLE_OK;
     }
   }
   /* not present */
@@ -547,24 +570,65 @@ void Curl_pollset_change(struct Curl_easy *data,
      * The current maximum in practise is HTTP/3 eyeballing where
      * we have up to 4 sockets involved in connection setup.
      */
-    DEBUGASSERT(i < MAX_SOCKSPEREASYHANDLE);
-    if(i < MAX_SOCKSPEREASYHANDLE) {
+    DEBUGASSERT(i < ps->count);
+    if(i < ps->count) {
       ps->sockets[i] = sock;
       ps->actions[i] = (unsigned char)add_flags;
-      ps->num = i + 1;
+      ps->n = i + 1;
     }
   }
+  return CURLE_OK;
 }
 
-void Curl_pollset_set(struct Curl_easy *data,
-                      struct easy_pollset *ps, curl_socket_t sock,
-                      bool do_in, bool do_out)
+CURLcode Curl_pollset_set(struct Curl_easy *data,
+                          struct easy_pollset *ps, curl_socket_t sock,
+                          bool do_in, bool do_out)
 {
-  Curl_pollset_change(data, ps, sock,
-                      (do_in ? CURL_POLL_IN : 0)|
-                      (do_out ? CURL_POLL_OUT : 0),
-                      (!do_in ? CURL_POLL_IN : 0)|
-                      (!do_out ? CURL_POLL_OUT : 0));
+  return Curl_pollset_change(data, ps, sock,
+                             (do_in ? CURL_POLL_IN : 0)|
+                             (do_out ? CURL_POLL_OUT : 0),
+                             (!do_in ? CURL_POLL_IN : 0)|
+                             (!do_out ? CURL_POLL_OUT : 0));
+}
+
+int Curl_pollset_poll(struct Curl_easy *data,
+                      struct easy_pollset *ps,
+                      timediff_t timeout_ms)
+{
+  struct pollfd *pfds;
+  unsigned int i, npfds;
+  int result;
+
+  (void)data;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+
+  if(!ps->n)
+    return curlx_wait_ms(timeout_ms);
+
+  pfds = calloc(ps->n, sizeof(*pfds));
+  if(!pfds)
+    return -1;
+
+  npfds = 0;
+  for(i = 0; i < ps->n; ++i) {
+    short events = 0;
+    if(ps->actions[i] & CURL_POLL_IN) {
+      events |= POLLIN;
+    }
+    if(ps->actions[i] & CURL_POLL_OUT) {
+      events |= POLLOUT;
+    }
+    if(events) {
+      pfds[npfds].fd = ps->sockets[i];
+      pfds[npfds].events = events;
+      ++npfds;
+    }
+  }
+
+  result = Curl_poll(pfds, npfds, timeout_ms);
+  free(pfds);
+  return result;
 }
 
 static void ps_add(struct Curl_easy *data, struct easy_pollset *ps,
@@ -609,7 +673,7 @@ void Curl_pollset_check(struct Curl_easy *data,
 
   (void)data;
   DEBUGASSERT(VALID_SOCK(sock));
-  for(i = 0; i < ps->num; ++i) {
+  for(i = 0; i < ps->n; ++i) {
     if(ps->sockets[i] == sock) {
       *pwant_read = !!(ps->actions[i] & CURL_POLL_IN);
       *pwant_write = !!(ps->actions[i] & CURL_POLL_OUT);
@@ -625,7 +689,7 @@ bool Curl_pollset_want_read(struct Curl_easy *data,
 {
   unsigned int i;
   (void)data;
-  for(i = 0; i < ps->num; ++i) {
+  for(i = 0; i < ps->n; ++i) {
     if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
       return TRUE;
   }

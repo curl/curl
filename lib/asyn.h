@@ -37,6 +37,7 @@ struct Curl_dns_entry;
 struct addrinfo;
 struct hostent;
 struct connectdata;
+struct easy_pollset;
 
 #if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
 #error cannot have both CURLRES_ARES and CURLRES_THREADED defined
@@ -78,7 +79,7 @@ CURLcode Curl_async_get_impl(struct Curl_easy *easy, void **impl);
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-unsigned int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *sock);
+CURLcode Curl_async_getsock(struct Curl_easy *data, struct easy_pollset *ps);
 
 /*
  * Curl_async_is_resolved()
@@ -127,9 +128,10 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 /* common functions for c-ares and threaded resolver with HTTPSRR */
 #include <ares.h>
 
-unsigned int Curl_ares_getsock(struct Curl_easy *data,
-                               ares_channel channel,
-                               curl_socket_t *socks);
+CURLcode Curl_ares_getsock(struct Curl_easy *data,
+                           ares_channel channel,
+                           struct easy_pollset *ps);
+
 int Curl_ares_perform(ares_channel channel,
                       timediff_t timeout_ms);
 #endif

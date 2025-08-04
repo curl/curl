@@ -72,9 +72,9 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 /* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
-void Curl_multi_getsock(struct Curl_easy *data,
-                        struct easy_pollset *ps,
-                        const char *caller);
+CURLMcode Curl_multi_getsock(struct Curl_easy *data,
+                             struct easy_pollset *ps,
+                             const char *caller);
 
 /**
  * Borrow the transfer buffer from the multi, suitable

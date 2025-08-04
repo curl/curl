@@ -469,6 +469,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 {
 #define CF_CONN_NUM_POLLS_ON_STACK 5
   struct pollfd a_few_on_stack[CF_CONN_NUM_POLLS_ON_STACK];
+  struct easy_pollset ps;
   struct curl_pollfds cpfds;
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
@@ -486,6 +487,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   if(*done)
     return CURLE_OK;
 
+  Curl_pollset_init(&ps);
   Curl_pollfds_init(&cpfds, a_few_on_stack, CF_CONN_NUM_POLLS_ON_STACK);
   while(!*done) {
     if(Curl_conn_needs_flush(data, sockindex)) {
@@ -523,7 +525,6 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       /* check allowed time left */
       const timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-      struct easy_pollset ps;
       int rc;
 
       if(timeout_ms < 0) {
@@ -534,8 +535,8 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       }
 
       CURL_TRC_CF(data, cf, "Curl_conn_connect(block=1), do poll");
+      Curl_pollset_reset(&ps);
       Curl_pollfds_reset(&cpfds);
-      memset(&ps, 0, sizeof(ps));
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
         Curl_pollset_set_out_only(data, &ps, sockfd);
@@ -557,6 +558,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
   }
 
 out:
+  Curl_pollset_cleanup(&ps);
   Curl_pollfds_cleanup(&cpfds);
   return result;
 }
@@ -746,35 +748,17 @@ int Curl_conn_cf_poll(struct Curl_cfilter *cf,
                       timediff_t timeout_ms)
 {
   struct easy_pollset ps;
-  struct pollfd pfds[MAX_SOCKSPEREASYHANDLE];
-  unsigned int i, npfds = 0;
+  int result;
 
   DEBUGASSERT(cf);
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
-  memset(&ps, 0, sizeof(ps));
-  memset(pfds, 0, sizeof(pfds));
+  Curl_pollset_init(&ps);
 
   Curl_conn_cf_adjust_pollset(cf, data, &ps);
-  DEBUGASSERT(ps.num <= MAX_SOCKSPEREASYHANDLE);
-  for(i = 0; i < ps.num; ++i) {
-    short events = 0;
-    if(ps.actions[i] & CURL_POLL_IN) {
-      events |= POLLIN;
-    }
-    if(ps.actions[i] & CURL_POLL_OUT) {
-      events |= POLLOUT;
-    }
-    if(events) {
-      pfds[npfds].fd = ps.sockets[i];
-      pfds[npfds].events = events;
-      ++npfds;
-    }
-  }
-
-  if(!npfds)
-    DEBUGF(infof(data, "no sockets to poll!"));
-  return Curl_poll(pfds, npfds, timeout_ms);
+  result = Curl_pollset_poll(data, &ps, timeout_ms);
+  Curl_pollset_cleanup(&ps);
+  return result;
 }
 
 void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,

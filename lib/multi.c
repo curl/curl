@@ -1012,18 +1012,20 @@ static unsigned int perform_getsock(struct Curl_easy *data,
 
 /* Initializes `poll_set` with the current socket poll actions needed
  * for transfer `data`. */
-void Curl_multi_getsock(struct Curl_easy *data,
-                        struct easy_pollset *ps,
-                        const char *caller)
+CURLMcode Curl_multi_getsock(struct Curl_easy *data,
+                             struct easy_pollset *ps,
+                             const char *caller)
 {
+  CURLMcode mresult = CURLM_OK;
+  CURLcode result = CURLE_OK;
   bool expect_sockets = TRUE;
 
   /* If the transfer has no connection, this is fine. Happens when
      called via curl_multi_remove_handle() => Curl_multi_ev_assess() =>
      Curl_multi_getsock(). */
-  Curl_pollset_reset(data, ps);
+  Curl_pollset_reset(ps);
   if(!data->conn)
-    return;
+    return CURLM_OK;
 
   switch(data->mstate) {
   case MSTATE_INIT:
@@ -1035,7 +1037,7 @@ void Curl_multi_getsock(struct Curl_easy *data,
     break;
 
   case MSTATE_RESOLVING:
-    Curl_pollset_add_socks(data, ps, Curl_resolv_getsock);
+    result = Curl_resolv_getsock(data, ps);
     /* connection filters are not involved in this phase. It's ok if we get no
      * sockets to wait for. Resolving can wake up from other sources. */
     expect_sockets = FALSE;
@@ -1089,6 +1091,13 @@ void Curl_multi_getsock(struct Curl_easy *data,
     break;
   }
 
+  if(result) {
+    if(result == CURLE_OUT_OF_MEMORY)
+      mresult = CURLM_OUT_OF_MEMORY;
+    else
+      mresult = CURLM_INTERNAL_ERROR;
+    goto out;
+  }
 
   /* Unblocked and waiting to receive with buffered input.
    * Make transfer run again at next opportunity. */
@@ -1102,7 +1111,7 @@ void Curl_multi_getsock(struct Curl_easy *data,
     Curl_multi_mark_dirty(data);
   }
 
-  switch(ps->num) {
+  switch(ps->n) {
     case 0:
       CURL_TRC_M(data, "%s pollset[], timeouts=%zu, paused %d/%d (r/w)",
                  caller, Curl_llist_count(&data->state.timeoutlist),
@@ -1129,10 +1138,10 @@ void Curl_multi_getsock(struct Curl_easy *data,
       break;
     default:
       CURL_TRC_M(data, "%s pollset[fds=%u], timeouts=%zu",
-                 caller, ps->num, Curl_llist_count(&data->state.timeoutlist));
+                 caller, ps->n, Curl_llist_count(&data->state.timeoutlist));
       break;
   }
-  if(expect_sockets && !ps->num && data->multi &&
+  if(expect_sockets && !ps->n && data->multi &&
      !Curl_uint_bset_contains(&data->multi->dirty, data->mid) &&
      !Curl_llist_count(&data->state.timeoutlist) &&
      !Curl_cwriter_is_paused(data) && !Curl_creader_is_paused(data) &&
@@ -1145,6 +1154,8 @@ void Curl_multi_getsock(struct Curl_easy *data,
     infof(data, "WARNING: no socket in pollset or timer, transfer may stall!");
     DEBUGASSERT(0);
   }
+out:
+  return mresult;
 }
 
 CURLMcode curl_multi_fdset(CURLM *m,
@@ -1156,6 +1167,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
      and then we must make sure that is done. */
   int this_max_fd = -1;
   struct Curl_multi *multi = m;
+  struct easy_pollset ps;
   unsigned int i, mid;
   (void)exc_fd_set; /* not used */
 
@@ -1165,10 +1177,10 @@ CURLMcode curl_multi_fdset(CURLM *m,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
+  Curl_pollset_init(&ps);
   if(Curl_uint_bset_first(&multi->process, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-      struct easy_pollset ps;
 
       if(!data) {
         DEBUGASSERT(0);
@@ -1176,7 +1188,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
       }
 
       Curl_multi_getsock(data, &ps, "curl_multi_fdset");
-      for(i = 0; i < ps.num; i++) {
+      for(i = 0; i < ps.n; i++) {
         if(!FDSET_SOCK(ps.sockets[i]))
           /* pretend it does not exist */
           continue;
@@ -1202,6 +1214,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
                       read_fd_set, write_fd_set, &this_max_fd);
 
   *max_fd = this_max_fd;
+  Curl_pollset_cleanup(&ps);
 
   return CURLM_OK;
 }
@@ -1214,6 +1227,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   struct Curl_waitfds cwfds;
   CURLMcode result = CURLM_OK;
   struct Curl_multi *multi = m;
+  struct easy_pollset ps;
   unsigned int need = 0, mid;
 
   if(!ufds && (size || !fd_count))
@@ -1225,11 +1239,11 @@ CURLMcode curl_multi_waitfds(CURLM *m,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
+  Curl_pollset_init(&ps);
   Curl_waitfds_init(&cwfds, ufds, size);
   if(Curl_uint_bset_first(&multi->process, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-      struct easy_pollset ps;
       if(!data) {
         DEBUGASSERT(0);
         Curl_uint_bset_remove(&multi->process, mid);
@@ -1250,6 +1264,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
 
   if(fd_count)
     *fd_count = need;
+  Curl_pollset_cleanup(&ps);
   return result;
 }
 
@@ -1283,6 +1298,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct curltime expire_time;
   long timeout_internal;
   int retcode = 0;
+  struct easy_pollset ps;
   struct pollfd a_few_on_stack[NUM_POLLS_ON_STACK];
   struct curl_pollfds cpfds;
   unsigned int curl_nfds = 0; /* how many pfds are for curl transfers */
@@ -1307,12 +1323,12 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   if(timeout_ms < 0)
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
+  Curl_pollset_init(&ps);
   Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
 
   /* Add the curl handles to our pollfds first */
   if(Curl_uint_bset_first(&multi->process, &mid)) {
     do {
-      struct easy_pollset ps;
       data = Curl_multi_get_easy(multi, mid);
       if(!data) {
         DEBUGASSERT(0);
@@ -1519,6 +1535,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   }
 
 out:
+  Curl_pollset_cleanup(&ps);
   Curl_pollfds_cleanup(&cpfds);
   return result;
 }
