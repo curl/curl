@@ -182,7 +182,7 @@ jobs:
             make -C bld V=1 examples
           fi
 
-      - name: 'diskspace used'
+      - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB bld
 
   msys2:  # both msys and mingw-w64
@@ -409,7 +409,7 @@ jobs:
             make -C bld V=1 examples
           fi
 
-      - name: 'diskspace used'
+      - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB bld
 
   mingw-w64-standalone-downloads:
@@ -591,7 +591,7 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target curl-examples
 
-      - name: 'diskspace used'
+      - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB bld
 
   linux-cross-mingw-w64:
@@ -693,7 +693,7 @@ jobs:
             make -C bld examples
           fi
 
-      - name: 'diskspace used'
+      - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB bld
 
   msvc:
@@ -938,5 +938,5 @@ jobs:
         if: ${{ contains(matrix.name, '+examples') }}
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples
 
-      - name: 'diskspace used'
+      - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB bld
