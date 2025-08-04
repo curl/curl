@@ -41,80 +41,6 @@ struct category_descriptors {
   unsigned int category;
 };
 
-/* Output table from common. */
-void tool_common_table(unsigned int category_flag)
-{
-  size_t cols = get_terminal_columns();
-  size_t i, c, j, found, opt_idx, current, count = 0;
-
-  /* First count how many options we have in this category */
-  for(i = 0; helptext[i].opt; ++i) {
-    if(helptext[i].categories & category_flag)
-      count++;
-  }
-
-  /* Set j based on col width, setting once, not in a loop. */
-  j = cols/45;
-  if(j > 8)
-    j = 8;
-  else if(j == 0)
-    j = 1;
-
-  /* Print options in table format */
-  current = 0;
-  for(i = 0; helptext[i].opt; ++i) {
-    if(!(helptext[i].categories & category_flag))
-      continue;
-
-    if(current % j == 0) {
-      /* Start new row - print headers */
-      if(current > 0)
-        puts("\n");
-
-      for(c = 0; c < j && (current + c) < count; c++) {
-        /* Find the common option from current position. */
-        found = 0;
-        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
-          if(helptext[opt_idx].categories & category_flag) {
-            if(found == current + c) {
-              /* Check if long option. */
-              if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
-                printf("%-44s", helptext[opt_idx].opt + 4);
-              else
-                printf("%-44s", helptext[opt_idx].opt);
-              break;
-            }
-            found++;
-          }
-        }
-      }
-      puts("");
-
-      /* Print separators */
-      for(c = 0; c < j && (current + c) < count; c++)
-        printf("------------------------------------------- ");
-      puts("");
-
-      /* Print descriptions */
-      for(c = 0; c < j && (current + c) < count; c++) {
-        /* Find the common description from current position */
-        found = 0;
-        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
-          if(helptext[opt_idx].categories & category_flag) {
-            if(found == current + c) {
-              printf("%-44s", helptext[opt_idx].desc);
-              break;
-            }
-            found++;
-          }
-        }
-      }
-    }
-    current++;
-  }
-  puts("");
-}
-
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
   {"auth", "Authentication methods", CURLHELP_AUTH},
@@ -137,7 +63,7 @@ static const struct category_descriptors categories[] = {
   {"sftp", "SFTP protocol", CURLHELP_SFTP},
   {"smtp", "SMTP protocol", CURLHELP_SMTP},
   {"ssh", "SSH protocol", CURLHELP_SSH},
-  {"table", "Table of common options", 0},
+  {"table", "Table format category (use table:<category>)", 0},
   {"telnet", "TELNET protocol", CURLHELP_TELNET},
   {"tftp", "TFTP protocol", CURLHELP_TFTP},
   {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
@@ -189,11 +115,26 @@ static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
 
-  /* Qualifier: show common options as table. */
-  if(curl_strequal(category, "table")) {
-    printf("Common Use:\n");
-    tool_common_table(CURLHELP_COMMON);
-    return 0;
+  /* Handle table:category syntax */
+  if(!strncmp(category, "table", 5)) {
+    const char *table_category = category + 5;
+
+    /* Default to common. */
+    if(!*table_category) {
+      printf("Common Use:\n");
+      tool_table(CURLHELP_COMMON);
+      return 0;
+    }
+
+    /* Find category. */
+    for(i = 0; i < CURL_ARRAYSIZE(categories); ++i) {
+      if(curl_strequal(categories[i].opt, table_category + 1)) {
+        printf("%s Table:\n", categories[i].desc);
+        tool_table(categories[i].category);
+        return 0;
+      }
+    }
+    return 1;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
@@ -492,4 +433,84 @@ void tool_list_engines(void)
   /* Cleanup the list of engines */
   curl_slist_free_all(engines);
   curl_easy_cleanup(curl);
+}
+
+/* Output table from common. */
+void tool_table(unsigned int category_flag)
+{
+  size_t cols = get_terminal_columns();
+  size_t i, c, j, found, opt_idx, current, count = 0;
+  char cell_width[] = "%-44s";
+  char cell_space[] = " %-44s";
+
+  /* First count how many options we have in this category */
+  for(i = 0; helptext[i].opt; ++i) {
+    if(helptext[i].categories & category_flag)
+      count++;
+  }
+
+  /* Set j based on col width, setting once, not in a loop. */
+  j = cols/45;
+  if(j > 8)
+    j = 8;
+  else if(j == 0)
+    j = 1;
+
+  /* Print options in table format */
+  current = 0;
+  for(i = 0; helptext[i].opt; ++i) {
+    if(!(helptext[i].categories & category_flag))
+      continue;
+
+    if(current % j == 0) {
+      /* Start new row - print headers */
+      if(current > 0)
+        puts("\n");
+
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Find the common option from current position. */
+        found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
+          if(helptext[opt_idx].categories & category_flag) {
+            if(found == current + c) {
+              /* Check if long option. */
+              if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
+                printf(cell_width, helptext[opt_idx].opt + 4);
+              else
+                printf(cell_width, helptext[opt_idx].opt);
+              break;
+            }
+            found++;
+          }
+        }
+      }
+      puts("");
+
+      /* Print separators */
+      for(c = 0; c < j && (current + c) < count; c++)
+        printf("------------------------------------------- ");
+      puts("");
+
+      /* Print descriptions */
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Find the common description from current position */
+        found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx) {
+          if(helptext[opt_idx].categories & category_flag) {
+            if(found == current + c) {
+              /* Extra space */
+              if (strlen(helptext[opt_idx].desc) > 44)
+                printf(cell_space, helptext[opt_idx].desc);
+              else
+                printf(cell_width, helptext[opt_idx].desc);
+              break;
+            }
+            found++;
+          }
+        }
+      }
+    }
+    current++;
+  }
+  puts("");
 }
