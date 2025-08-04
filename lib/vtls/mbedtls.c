@@ -1463,6 +1463,8 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
+  int ret = 0;
+
 #if defined(MBEDTLS_USE_PSA_CRYPTO) || defined(MBEDTLS_SSL_PROTO_TLS1_3)
   psa_status_t status = psa_crypto_init();
   if (status != PSA_SUCCESS)
@@ -1482,9 +1484,8 @@ static int mbedtls_init(void)
   mbedtls_entropy_init(&rng.entropy);
 
 #ifdef MBEDTLS_CTR_DRBG_C
-  int ret = mbedtls_ctr_drbg_seed(&rng.drbg,
-      mbedtls_entropy_func, &rng.entropy,
-      NULL, 0);
+  ret = mbedtls_ctr_drbg_seed(&rng.drbg, mbedtls_entropy_func, &rng.entropy,
+                              NULL, 0);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
 #ifdef MBEDTLS_SHA256_C
   const mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
@@ -1493,10 +1494,8 @@ static int mbedtls_init(void)
 #else
 #error "No message digest available for HMAC_DRBG"
 #endif
-  int ret = mbedtls_hmac_drbg_seed(&rng.drbg,
-      mbedtls_md_info_from_type(md_type),
-      mbedtls_entropy_func, &rng.entropy,
-      NULL, 0);
+  ret = mbedtls_hmac_drbg_seed(&rng.drbg, mbedtls_md_info_from_type(md_type),
+                               mbedtls_entropy_func, &rng.entropy, NULL, 0);
 #else /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
 #error "No DRBG available"
 #endif /* !MBEDTLS_CTR_DRBG_C && !MBEDTLS_HMAC_DRBG_C */
