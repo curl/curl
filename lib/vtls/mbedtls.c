@@ -1500,7 +1500,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 {
   /* workaround random() being called before the TLS lib is initialized */
   if(initialized_tls_lib == FALSE) {
-    if (mbedtls_init())
+    if(mbedtls_init())
       initialized_tls_lib = TRUE;
     else {
       failf(data, "failed to initialize the mbedTLS library.");
@@ -1510,7 +1510,6 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 
 #ifdef MBEDTLS_CTR_DRBG_C
   int ret = -1;
-  char errorbuf[128];
 
 #ifdef MBEDTLS_CTR_DRBG_C
   ret = mbedtls_ctr_drbg_random(&rng.drbg, entropy, length);
@@ -1521,6 +1520,7 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
 #endif
 
   if(ret) {
+    char errorbuf[128];
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
           -ret, errorbuf);
