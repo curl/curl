@@ -1686,6 +1686,98 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
   return result;
 }
 
+#ifndef CURL_DISABLE_COOKIES
+static CURLcode cookielist(struct Curl_easy *data,
+                           const char *ptr)
+{
+  if(!ptr)
+    return CURLE_OK;
+
+  if(curl_strequal(ptr, "ALL")) {
+    /* clear all cookies */
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    Curl_cookie_clearall(data->cookies);
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+  }
+  else if(curl_strequal(ptr, "SESS")) {
+    /* clear session cookies */
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    Curl_cookie_clearsess(data->cookies);
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+  }
+  else if(curl_strequal(ptr, "FLUSH")) {
+    /* flush cookies to file, takes care of the locking */
+    Curl_flush_cookies(data, FALSE);
+  }
+  else if(curl_strequal(ptr, "RELOAD")) {
+    /* reload cookies from file */
+    Curl_cookie_loadfiles(data);
+  }
+  else {
+    if(!data->cookies) {
+      /* if cookie engine was not running, activate it */
+      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      if(!data->cookies)
+        return CURLE_OUT_OF_MEMORY;
+    }
+
+    /* general protection against mistakes and abuse */
+    if(strlen(ptr) > CURL_MAX_INPUT_LENGTH)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+    if(checkprefix("Set-Cookie:", ptr))
+      /* HTTP Header format line */
+      Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
+                      NULL, TRUE);
+    else
+      /* Netscape format line */
+      Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
+                      NULL, TRUE);
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+  }
+  return CURLE_OK;
+}
+
+static CURLcode cookiefile(struct Curl_easy *data,
+                           const char *ptr)
+{
+  /*
+   * Set cookie file to read and parse. Can be used multiple times.
+   */
+  if(ptr) {
+    struct curl_slist *cl;
+    /* general protection against mistakes and abuse */
+    if(strlen(ptr) > CURL_MAX_INPUT_LENGTH)
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    /* append the cookie filename to the list of filenames, and deal with
+       them later */
+    cl = curl_slist_append(data->state.cookielist, ptr);
+    if(!cl) {
+      curl_slist_free_all(data->state.cookielist);
+      data->state.cookielist = NULL;
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->state.cookielist = cl; /* store the list for later use */
+  }
+  else {
+    /* clear the list of cookie files */
+    curl_slist_free_all(data->state.cookielist);
+    data->state.cookielist = NULL;
+
+    if(!data->share || !data->share->cookies) {
+      /* throw away all existing cookies if this is not a shared cookie
+         container */
+      Curl_cookie_clearall(data->cookies);
+      Curl_cookie_cleanup(data->cookies);
+    }
+    /* disable the cookie engine */
+    data->cookies = NULL;
+  }
+  return CURLE_OK;
+}
+#endif
+
 static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
                             char *ptr)
 {
@@ -1846,39 +1938,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(&s->str[STRING_COOKIE], ptr);
 
   case CURLOPT_COOKIEFILE:
-    /*
-     * Set cookie file to read and parse. Can be used multiple times.
-     */
-    if(ptr) {
-      struct curl_slist *cl;
-      /* general protection against mistakes and abuse */
-      if(strlen(ptr) > CURL_MAX_INPUT_LENGTH)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      /* append the cookie filename to the list of filenames, and deal with
-         them later */
-      cl = curl_slist_append(data->state.cookielist, ptr);
-      if(!cl) {
-        curl_slist_free_all(data->state.cookielist);
-        data->state.cookielist = NULL;
-        return CURLE_OUT_OF_MEMORY;
-      }
-      data->state.cookielist = cl; /* store the list for later use */
-    }
-    else {
-      /* clear the list of cookie files */
-      curl_slist_free_all(data->state.cookielist);
-      data->state.cookielist = NULL;
-
-      if(!data->share || !data->share->cookies) {
-        /* throw away all existing cookies if this is not a shared cookie
-           container */
-        Curl_cookie_clearall(data->cookies);
-        Curl_cookie_cleanup(data->cookies);
-      }
-      /* disable the cookie engine */
-      data->cookies = NULL;
-    }
-    break;
+    return cookiefile(data, ptr);
 
   case CURLOPT_COOKIEJAR:
     /*
@@ -1899,54 +1959,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_COOKIELIST:
-    if(!ptr)
-      break;
-
-    if(curl_strequal(ptr, "ALL")) {
-      /* clear all cookies */
-      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      Curl_cookie_clearall(data->cookies);
-      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-    }
-    else if(curl_strequal(ptr, "SESS")) {
-      /* clear session cookies */
-      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      Curl_cookie_clearsess(data->cookies);
-      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-    }
-    else if(curl_strequal(ptr, "FLUSH")) {
-      /* flush cookies to file, takes care of the locking */
-      Curl_flush_cookies(data, FALSE);
-    }
-    else if(curl_strequal(ptr, "RELOAD")) {
-      /* reload cookies from file */
-      Curl_cookie_loadfiles(data);
-      break;
-    }
-    else {
-      if(!data->cookies) {
-        /* if cookie engine was not running, activate it */
-        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
-        if(!data->cookies)
-          return CURLE_OUT_OF_MEMORY;
-      }
-
-      /* general protection against mistakes and abuse */
-      if(strlen(ptr) > CURL_MAX_INPUT_LENGTH)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-
-      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      if(checkprefix("Set-Cookie:", ptr))
-        /* HTTP Header format line */
-        Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
-                        NULL, TRUE);
-      else
-        /* Netscape format line */
-        Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
-                        NULL, TRUE);
-      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-    }
-    break;
+    return cookielist(data, ptr);
 #endif /* !CURL_DISABLE_COOKIES */
 
 #endif /* ! CURL_DISABLE_HTTP */
