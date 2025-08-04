@@ -321,7 +321,7 @@ ParameterError secs2ms(long *valp, const char *str)
 {
   curl_off_t secs;
   long ms = 0;
-  const unsigned int digs[] = { 1, 10, 100, 1000, 10000, 1000000,
+  const unsigned int digs[] = { 1, 10, 100, 1000, 10000, 100000,
     1000000, 10000000, 100000000 };
   if(!str ||
      curlx_str_number(&str, &secs, LONG_MAX/1000 - 1))
@@ -334,7 +334,7 @@ ParameterError secs2ms(long *valp, const char *str)
       return PARAM_NUMBER_TOO_LARGE;
     /* how many milliseconds are in fracs ? */
     len = (str - s);
-    while((len > sizeof(CURL_ARRAYSIZE(digs)) || (fracs > LONG_MAX/100))) {
+    while((len > CURL_ARRAYSIZE(digs) || (fracs > LONG_MAX/100))) {
       fracs /= 10;
       len--;
     }
