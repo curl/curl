@@ -853,8 +853,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   return CURLE_OK;
 }
 
-static CURLcode value_range(long *value, long below_error,
-                            long min, curl_off_t max)
+static CURLcode value_range(long *value, long below_error, long min, long max)
 {
   if(*value < below_error)
     return CURLE_BAD_FUNCTION_ARGUMENT;
