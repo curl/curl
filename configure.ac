@@ -5331,7 +5331,7 @@ if test "$CURL_DISABLE_HTTP" != "1"; then
 fi
 if test "$CURL_DISABLE_FTP" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTP"
-  if test "x$SSL_ENABLED" = "x1"; then
+  if test "$SSL_ENABLED" = "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS FTPS"
   fi
 fi
