@@ -203,7 +203,7 @@ if test "$OPT_OPENSSL" != no; then
     ])
   ])
 
-  if test X"$HAVECRYPTO" = X"yes"; then
+  if test "$HAVECRYPTO" = "yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
@@ -234,17 +234,17 @@ if test "$OPT_OPENSSL" != no; then
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
     fi
 
-    if test X"$OPENSSL_ENABLED" != X"1"; then
+    if test "$OPENSSL_ENABLED" != "1"; then
       LIBS="$CLEANLIBS"
     fi
 
-    if test X"$OPT_OPENSSL" != Xoff &&
+    if test "$OPT_OPENSSL" != off &&
        test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
   fi
 
-  if test X"$OPENSSL_ENABLED" = X"1"; then
+  if test "$OPENSSL_ENABLED" = "1"; then
     dnl These can only exist if OpenSSL exists
 
     AC_MSG_CHECKING([for BoringSSL])
@@ -381,11 +381,11 @@ fi
 dnl ---
 dnl Whether the OpenSSL configuration will be loaded automatically
 dnl ---
-if test X"$OPENSSL_ENABLED" = X"1"; then
+if test "$OPENSSL_ENABLED" = "1"; then
   AC_ARG_ENABLE(openssl-auto-load-config,
 AS_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of OpenSSL configuration])
 AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading of OpenSSL configuration]),
-  [ if test X"$enableval" = X"no"; then
+  [ if test "$enableval" = "no"; then
       AC_MSG_NOTICE([automatic loading of OpenSSL configuration disabled])
       AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
     fi
