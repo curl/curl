@@ -286,11 +286,11 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;
 
-    if(hdrcbdata->global->isatty &&
+    if(hdrcbdata->config->global->isatty &&
 #ifdef _WIN32
        tool_term_has_bold &&
 #endif
-       hdrcbdata->global->styled_output)
+       hdrcbdata->config->global->styled_output)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;

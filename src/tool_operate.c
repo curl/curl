@@ -1353,7 +1353,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
       hdrcbdata->outs = outs;
       hdrcbdata->heads = heads;
       hdrcbdata->etag_save = etag_save;
-      hdrcbdata->global = global;
       hdrcbdata->config = config;
 
       result = config2setopts(config, per, curl, share);
