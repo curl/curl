@@ -123,10 +123,10 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       fi
 
       if test $_libcurl_wanted -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
-        if test x"$LIBCURL_CPPFLAGS" = "x"; then
+        if test "$LIBCURL_CPPFLAGS" = ""; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
-        if test x"$LIBCURL" = "x"; then
+        if test "$LIBCURL" = ""; then
           LIBCURL=`$_libcurl_config --libs`
 
           # This is so silly, but Apple actually has a bug in their
