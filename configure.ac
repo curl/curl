@@ -1814,7 +1814,7 @@ AC_MSG_CHECKING([if GSS-API support is requested])
 if test "$want_gss" = yes; then
   AC_MSG_RESULT(yes)
 
-  if test $GSSAPI_ROOT != "/usr"; then
+  if test "$GSSAPI_ROOT" != "/usr"; then
     CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
   else
     CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
@@ -1900,7 +1900,7 @@ if test "$want_gss" = yes; then
     if test "$curl_cv_apple" = 'yes'; then
       LIBS="-lgssapi_krb5 -lresolv $LIBS"
     else
-      if test $GSSAPI_ROOT != "/usr"; then
+      if test "$GSSAPI_ROOT" != "/usr"; then
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
       else
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
@@ -3893,7 +3893,7 @@ case "$OPT_LIBUV" in
 esac
 
 if test "$want_libuv" != no; then
-  if test $want_debug != yes; then
+  if test "$want_debug" != yes; then
     AC_MSG_ERROR([Using libuv without debug support enabled is useless])
   fi
 
