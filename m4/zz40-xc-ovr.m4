@@ -393,7 +393,7 @@ done
 IFS=$xc_tst_prev_IFS
 xc_tst_dirs_sem=`expr "$xc_tst_dirs_sem" : '.*'`
 
-if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
+if test "$xc_tst_dirs_sem" -eq "$xc_tst_dirs_col"; then
   # When both counting methods give the same result we do not want to
   # chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
@@ -404,7 +404,7 @@ if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   fi
 else
   # Separator with the greater directory count is the auto-detected one.
-  if test $xc_tst_dirs_sem -gt $xc_tst_dirs_col; then
+  if test "$xc_tst_dirs_sem" -gt "$xc_tst_dirs_col"; then
     xc_tst_auto_separator=';'
   else
     xc_tst_auto_separator=':'
@@ -412,7 +412,7 @@ else
   if test -z "$PATH_SEPARATOR"; then
     # Simply use the auto-detected one when not already set.
     PATH_SEPARATOR=$xc_tst_auto_separator
-  elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
+  elif test "$PATH_SEPARATOR" != "$xc_tst_auto_separator"; then
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
   fi
 fi
@@ -656,7 +656,7 @@ if test -z "$PATH_SEPARATOR"; then
 fi
 AC_MSG_CHECKING([for path separator])
 AC_MSG_RESULT([$PATH_SEPARATOR])
-if test "x$PATH_SEPARATOR" != "x$xc_PATH_SEPARATOR"; then
+if test "$PATH_SEPARATOR" != "$xc_PATH_SEPARATOR"; then
   AC_MSG_CHECKING([for initial path separator])
   AC_MSG_RESULT([$xc_PATH_SEPARATOR])
   AC_MSG_ERROR([path separator mismatch (internal or config.site problem)])

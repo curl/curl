@@ -190,7 +190,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       curl_cv_native_windows="no"
     ])
   ])
-  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$curl_cv_native_windows" = xyes)
+  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "$curl_cv_native_windows" = "yes")
 ])
 
 
@@ -910,7 +910,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         curl_func_clock_gettime="yes"
         ;;
       *)
-        if test "x$dontwant_rt" = "xyes" ; then
+        if test "$dontwant_rt" = "yes"; then
           AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
           curl_func_clock_gettime="no"
         else
@@ -926,7 +926,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     esac
     #
     dnl only do runtime verification when not cross-compiling
-    if test "x$cross_compiling" != "xyes" &&
+    if test "$cross_compiling" != "yes" &&
       test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       CURL_RUN_IFELSE([
@@ -1082,7 +1082,7 @@ dnl macro. It must also run AFTER all lib-checking macros are complete.
 AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
 
   dnl this test is of course not sensible if we are cross-compiling!
-  if test "x$cross_compiling" != xyes; then
+  if test "$cross_compiling" != "yes"; then
 
     dnl just run a program to verify that the libs checked for previous to this
     dnl point also is available runtime!
@@ -1125,7 +1125,7 @@ AS_HELP_STRING([--with-ca-bundle=FILE],
 AS_HELP_STRING([--without-ca-bundle], [Do not use a default CA bundle]),
   [
     want_ca="$withval"
-    if test "x$want_ca" = "xyes"; then
+    if test "$want_ca" = "yes"; then
       AC_MSG_ERROR([--with-ca-bundle=FILE requires a path to the CA bundle])
     fi
   ],
@@ -1139,7 +1139,7 @@ GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   [
     want_capath="$withval"
-    if test "x$want_capath" = "xyes"; then
+    if test "$want_capath" = "yes"; then
       AC_MSG_ERROR([--with-ca-path=DIRECTORY requires a path to the CA path directory])
     fi
   ],
@@ -1149,22 +1149,22 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   capath_warning="   (warning: certs not found)"
   check_capath=""
 
-  if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+  if test "$APPLE_SECTRUST_ENABLED" = "1"; then
     ca_native="Apple SecTrust"
   else
     ca_native="no"
   fi
 
-  if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
-          "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
+  if test "$want_ca" != "no" && test "$want_ca" != "unset" &&
+     test "$want_capath" != "no" && test "$want_capath" != "unset"; then
     dnl both given
     ca="$want_ca"
     capath="$want_capath"
-  elif test "x$want_ca" != "xno" -a "x$want_ca" != "xunset"; then
+  elif test "$want_ca" != "no" && test "$want_ca" != "unset"; then
     dnl --with-ca-bundle given
     ca="$want_ca"
     capath="no"
-  elif test "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
+  elif test "$want_capath" != "no" && test "$want_capath" != "unset"; then
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
@@ -1177,15 +1177,15 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     dnl Both auto-detections can be skipped by --without-ca-*
     ca="no"
     capath="no"
-    if test "x$cross_compiling" != "xyes" -a \
-            "x$curl_cv_native_windows" != "xyes"; then
+    if test "$cross_compiling" != "yes" &&
+       test "$curl_cv_native_windows" != "yes"; then
       dnl NOT cross-compiling and...
       dnl neither of the --with-ca-* options are provided
-      if test "x$want_ca" = "xunset"; then
+      if test "$want_ca" = "unset"; then
         dnl the path we previously would have installed the curl CA bundle
         dnl to, and thus we now check for an already existing cert in that
         dnl place in case we find no other
-        if test "x$prefix" != xNONE; then
+        if test "$prefix" != "NONE"; then
           cac="${prefix}/share/curl/curl-ca-bundle.crt"
         else
           cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
@@ -1204,7 +1204,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
         done
       fi
       AC_MSG_NOTICE([want $want_capath ca $ca])
-      if test "x$want_capath" = "xunset"; then
+      if test "$want_capath" = "unset"; then
         check_capath="/etc/ssl/certs"
       fi
     else
@@ -1213,18 +1213,18 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     fi
   fi
 
-  if test "x$ca" = "xno" || test -f "$ca"; then
+  if test "$ca" = "no" || test -f "$ca"; then
     ca_warning=""
   fi
 
-  if test "x$capath" != "xno"; then
+  if test "$capath" != "no"; then
     check_capath="$capath"
   fi
 
-  if test ! -z "$check_capath"; then
+  if test -n "$check_capath"; then
     for a in "$check_capath"; do
       if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-        if test "x$capath" = "xno"; then
+        if test "$capath" = "no"; then
           capath="$a"
         fi
         capath_warning=""
@@ -1233,22 +1233,22 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     done
   fi
 
-  if test "x$capath" = "xno"; then
+  if test "$capath" = "no"; then
     capath_warning=""
   fi
 
-  if test "x$ca" != "xno"; then
+  if test "$ca" != "no"; then
     CURL_CA_BUNDLE="$ca"
     AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
   fi
-  if test "x$capath" != "xno"; then
+  if test "$capath" != "no"; then
     CURL_CA_PATH="\"$capath\""
     AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
     AC_MSG_RESULT([$capath (capath)])
   fi
-  if test "x$ca" = "xno" && test "x$capath" = "xno"; then
+  if test "$ca" = "no" && test "$capath" = "no"; then
     AC_MSG_RESULT([no])
   fi
 
@@ -1257,14 +1257,14 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
 AS_HELP_STRING([--with-ca-fallback], [Use OpenSSL's built-in CA store])
 AS_HELP_STRING([--without-ca-fallback], [Do not use OpenSSL's built-in CA store]),
   [
-    if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
+    if test "$with_ca_fallback" != "yes" && test "$with_ca_fallback" != "no"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
     fi
   ],
   [ with_ca_fallback="no"])
   AC_MSG_RESULT([$with_ca_fallback])
-  if test "x$with_ca_fallback" = "xyes"; then
-    if test "x$OPENSSL_ENABLED" != "x1"; then
+  if test "$with_ca_fallback" = "yes"; then
+    if test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL])
     fi
     AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use OpenSSL's built-in CA store])
@@ -1286,14 +1286,14 @@ AS_HELP_STRING([--with-ca-embed=FILE],
 AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
-    if test "x$want_ca_embed" = "xyes"; then
+    if test "$want_ca_embed" = "yes"; then
       AC_MSG_ERROR([--with-ca-embed=FILE requires a path to the CA bundle])
     fi
   ],
   [ want_ca_embed="unset" ])
 
   CURL_CA_EMBED=''
-  if test "x$want_ca_embed" != "xno" -a "x$want_ca_embed" != "xunset" -a -f "$want_ca_embed"; then
+  if test "$want_ca_embed" != "no" && test "$want_ca_embed" != "unset" && test -f "$want_ca_embed"; then
     if test -n "$PERL"; then
       CURL_CA_EMBED="$want_ca_embed"
       AC_SUBST(CURL_CA_EMBED)
@@ -1315,7 +1315,7 @@ AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports Win32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
+  if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         #undef inline
@@ -1382,7 +1382,7 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
       [$PATH:/usr/bin:/usr/local/bin])
   fi
 
-  if test "x$PKGCONFIG" != "xno"; then
+  if test "$PKGCONFIG" != "no"; then
     AC_MSG_CHECKING([for $1 options with pkg-config])
     dnl ask pkg-config about $1
     itexists=`CURL_EXPORT_PCDIR([$2]) dnl
@@ -1423,7 +1423,7 @@ dnl Save build info for test runner to pick up and log
 
 AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   curl_pflags=""
-  if test "$curl_cv_apple" = 'yes'; then
+  if test "$curl_cv_apple" = "yes"; then
     curl_pflags="${curl_pflags} APPLE"
   fi
   case $host in
@@ -1443,20 +1443,20 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
       fi
       ;;
   esac
-  if test "$curl_cv_native_windows" = 'yes'; then
+  if test "$curl_cv_native_windows" = "yes"; then
     curl_pflags="${curl_pflags} WIN32"
   fi
-  if test "$curl_cv_winuwp" = 'yes'; then
+  if test "$curl_cv_winuwp" = "yes"; then
     curl_pflags="${curl_pflags} UWP"
   fi
-  if test "$curl_cv_cygwin" = 'yes'; then
+  if test "$curl_cv_cygwin" = "yes"; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
   case $host_os in
     msdos*) curl_pflags="${curl_pflags} DOS";;
     amiga*) curl_pflags="${curl_pflags} AMIGA";;
   esac
-  if test "x$compiler_id" = 'xGNU_C'; then
+  if test "$compiler_id" = "GNU_C"; then
     curl_pflags="${curl_pflags} GCC"
   fi
   if test "$compiler_id" = "APPLECLANG"; then
@@ -1467,7 +1467,7 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   case $host_os in
     mingw*) curl_pflags="${curl_pflags} MINGW";;
   esac
-  if test "x$cross_compiling" = 'xyes'; then
+  if test "$cross_compiling" = "yes"; then
     curl_pflags="${curl_pflags} CROSS"
   fi
   squeeze curl_pflags
@@ -1509,7 +1509,7 @@ TEST EINVAL TEST
   AC_MSG_RESULT([$cpp])
 
   dnl we need cpp -P so check if it works then
-  if test "x$cpp" = "xyes"; then
+  if test "$cpp" = "yes"; then
     AC_MSG_CHECKING([if cpp -P works])
     OLDCPPFLAGS=$CPPFLAGS
     CPPFLAGS="$CPPFLAGS -P"
@@ -1519,7 +1519,7 @@ TEST EINVAL TEST
     ], [cpp_p=yes], [cpp_p=no])
     AC_MSG_RESULT([$cpp_p])
 
-    if test "x$cpp_p" = "xno"; then
+    if test "$cpp_p" = "no"; then
       AC_MSG_WARN([failed to figure out cpp -P alternative])
       # without -P
       CPPPFLAG=""
