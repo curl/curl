@@ -185,7 +185,6 @@ my %opts = (
     '--wdebug' => 6,
     );
 
-
 #########################################################################
 # parse the curl code that parses the command line arguments!
 open($r, "<", "$root/src/tool_getparam.c") ||
@@ -256,7 +255,6 @@ while(<$r>) {
     }
 }
 close($r);
-
 
 #########################################################################
 # parse the curl code that outputs the curl -h list

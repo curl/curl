@@ -64,7 +64,6 @@ use testutil qw(
     );
 use getpart;
 
-
 #######################################################################
 # logmsg is our general message logging subroutine.
 # This function is currently required to be here by servers.pm
@@ -105,7 +104,6 @@ sub parseprotocols {
     push @protocols, 'none';
 }
 
-
 #######################################################################
 # Initialize @protocols from the curl binary under test
 #
@@ -116,7 +114,6 @@ sub init_protocols {
         }
     }
 }
-
 
 #######################################################################
 # Initialize the test harness to run tests

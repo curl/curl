@@ -468,7 +468,6 @@ sub killallsockfilters {
     }
 }
 
-
 sub set_advisor_read_lock {
     my ($filename) = @_;
 
@@ -479,7 +478,6 @@ sub set_advisor_read_lock {
     printf "Error creating lock file $filename error: $!\n";
 }
 
-
 sub clear_advisor_read_lock {
     my ($filename) = @_;
 
@@ -487,6 +485,5 @@ sub clear_advisor_read_lock {
         unlink($filename);
     }
 }
-
 
 1;

@@ -140,7 +140,6 @@ scan_cmake_config_h();
 scan_sources();
 scan_docs();
 
-
 my $error = 0;
 # Check the configure symbols for use in code
 for my $s (sort keys %disable) {

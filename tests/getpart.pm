@@ -252,7 +252,6 @@ sub loadtest {
     return 0;
 }
 
-
 # Return entire document as list of lines
 sub fulltest {
     return @xml;
@@ -323,7 +322,6 @@ sub savetest {
 # Strip off all lines that match the specified pattern and return
 # the new array.
 #
-
 sub striparray {
     my ($pattern, $arrayref) = @_;
 
@@ -422,6 +420,5 @@ sub loadarray {
     }
     return @array;
 }
-
 
 1;

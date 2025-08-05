@@ -55,7 +55,6 @@ static CURLcode test_lib651(const char *URL)
   if(formrc)
     curl_mprintf("curl_formadd(1) = %d\n", formrc);
 
-
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");

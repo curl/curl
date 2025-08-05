@@ -85,7 +85,6 @@ use pathhelp qw(
 use Cwd qw(getcwd);
 use File::Spec;
 
-
 #######################################################################
 # global configuration variables
 #

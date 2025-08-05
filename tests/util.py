@@ -29,9 +29,7 @@ import re
 
 log = logging.getLogger(__name__)
 
-
 REPLY_DATA = re.compile("<reply>[ \t\n\r]*<data[^<]*>(.*?)</data>", re.MULTILINE | re.DOTALL)
-
 
 class ClosingFileHandler(logging.StreamHandler):
     def __init__(self, filename):
@@ -81,7 +79,6 @@ class TestData(object):
 
         # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()
-
 
 if __name__ == '__main__':
     td = TestData("./data")

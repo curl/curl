@@ -220,6 +220,7 @@ sub logmsg_bufferfortest {
         $singletest_bufferedrunner = $runnerid;
     }
 }
+
 #######################################################################
 # Store a log message in a buffer for this test
 # The messages can then be displayed all at once at the end of the test
@@ -325,7 +326,6 @@ if($ENV{"NGHTTPX"}) {
     chomp $nghttpx_h3;
 }
 
-
 #######################################################################
 # Get the list of tests that the tests/data/Makefile.am knows about!
 #
@@ -343,7 +343,6 @@ sub get_disttests {
     }
     close($dh);
 }
-
 
 #######################################################################
 # Remove all files in the specified directory
@@ -380,7 +379,6 @@ sub cleardir {
     closedir $dh;
     return $done;
 }
-
 
 #######################################################################
 # Given two array references, this function will store them in two temporary
@@ -423,7 +421,6 @@ sub showdiff {
 
     return @out;
 }
-
 
 #######################################################################
 # compare test results with the expected output, we might filter off
@@ -951,7 +948,6 @@ sub timestampskippedevents {
     }
 }
 
-
 # Setup CI Test Run
 sub citest_starttestrun {
     if(azure_check_environment()) {
@@ -960,7 +956,6 @@ sub citest_starttestrun {
     }
     # Appveyor does not require anything here
 }
-
 
 # Register the test case with the CI runner
 sub citest_starttest {
@@ -978,7 +973,6 @@ sub citest_starttest {
         appveyor_create_test_result($ACURL, $testnum, $testname);
     }
 }
-
 
 # Submit the test case result with the CI runner
 sub citest_finishtest {
@@ -1000,7 +994,6 @@ sub citest_finishtestrun {
     }
     # Appveyor does not require anything here
 }
-
 
 # add one set of test timings from the runner to global set
 sub updatetesttimings {
@@ -1026,7 +1019,6 @@ sub updatetesttimings {
     }
 }
 
-
 #######################################################################
 # Return the log directory for the given test runner
 sub getrunnernumlogdir {
@@ -1049,7 +1041,6 @@ sub getrunnerlogdir {
     }
     die "Internal error: runner ID $runnerid not found";
 }
-
 
 #######################################################################
 # Verify that this test case should be run
@@ -1194,7 +1185,6 @@ sub singletest_shouldrun {
 
     return ($why, $errorreturncode);
 }
-
 
 #######################################################################
 # Print the test name and count tests
@@ -1903,7 +1893,6 @@ sub singletest_check {
     return 0;
 }
 
-
 #######################################################################
 # Report a successful test
 sub singletest_success {
@@ -2104,7 +2093,6 @@ sub singletest {
             logmsg singletest_dumplogs();
             return ($cmdres, 0);
         }
-
 
         #######################################################################
         # Report a successful test
@@ -2763,7 +2751,6 @@ if(!$listonly) {
 #######################################################################
 # Fetch all disabled tests, if there are any
 #
-
 sub disabledtests {
     my ($file) = @_;
     my @input;
@@ -3255,7 +3242,7 @@ if(%skipped && !$short) {
         my $r = $_;
         my $skip_count = $skipped{$r};
         my $log_line = sprintf("TESTINFO: \"%s\" %d time%s (", $r, $skip_count,
-                           ($skip_count == 1) ? "" : "s");
+                               ($skip_count == 1) ? "" : "s");
 
         # now gather all test case numbers that had this reason for being
         # skipped

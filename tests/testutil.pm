@@ -64,7 +64,6 @@ use globalconfig qw(
 my $logfunc;      # optional reference to function for logging
 my @logmessages;  # array holding logged messages
 
-
 #######################################################################
 # Log an informational message
 # If a log callback function was set in setlogfunc, it is called. If not,
@@ -97,7 +96,6 @@ sub clearlogs {
     undef @logmessages;
     return $loglines;
 }
-
 
 #######################################################################
 
