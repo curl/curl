@@ -720,7 +720,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data,
       Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
-      conn->sockfd = conn->writesockfd;
+      data->conn->recv_idx = FIRSTSOCKET;
 
       if(result) {
         wssh_state(data, sshc, SSH_SFTP_CLOSE);
@@ -819,7 +819,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data,
       Curl_xfer_setup1(data, CURL_XFER_RECV, data->req.size, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
-      conn->writesockfd = conn->sockfd;
+      conn->send_idx = 0;
 
       if(result) {
         /* this should never occur; the close state should be entered

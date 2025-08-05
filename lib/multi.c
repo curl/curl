@@ -940,13 +940,13 @@ static CURLcode mstate_protocol_pollset(struct Curl_easy *data,
 static CURLcode mstate_do_pollset(struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
   if(data->conn) {
     if(data->conn->handler->doing_pollset)
       return data->conn->handler->doing_pollset(data, ps);
-    else if(conn->sockfd != CURL_SOCKET_BAD) {
+    else if(CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
       /* Default is that we want to send something to the server */
-      return Curl_pollset_add_out(data, ps, conn->sockfd);
+      return Curl_pollset_add_out(
+        data, ps, data->conn->sock[data->conn->send_idx]);
     }
   }
   return CURLE_OK;
@@ -958,9 +958,10 @@ static CURLcode mstate_domore_pollset(struct Curl_easy *data,
   if(data->conn) {
     if(data->conn->handler->domore_pollset)
       return data->conn->handler->domore_pollset(data, ps);
-    else if(data->conn->sockfd != CURL_SOCKET_BAD) {
+    else if(CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
       /* Default is that we want to send something to the server */
-      return Curl_pollset_add_out(data, ps, data->conn->sockfd);
+      return Curl_pollset_add_out(
+        data, ps, data->conn->sock[data->conn->send_idx]);
     }
   }
   return CURLE_OK;
@@ -976,14 +977,15 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   else {
     /* Default is to obey the data->req.keepon flags for send/recv */
     CURLcode result = CURLE_OK;
-    if(CURL_WANT_RECV(data)) {
-      DEBUGASSERT(data->conn->sockfd != CURL_SOCKET_BAD);
-      result = Curl_pollset_add_in(data, ps, data->conn->sockfd);
+    if(CURL_WANT_RECV(data) && CONN_SOCK_IDX_VALID(data->conn->recv_idx)) {
+      result = Curl_pollset_add_in(
+        data, ps, data->conn->sock[data->conn->recv_idx]);
     }
 
-    if(!result && Curl_req_want_send(data)) {
-      DEBUGASSERT(data->conn->writesockfd != CURL_SOCKET_BAD);
-      result = Curl_pollset_add_out(data, ps, data->conn->writesockfd);
+    if(!result && Curl_req_want_send(data) &&
+       CONN_SOCK_IDX_VALID(data->conn->send_idx)) {
+      result = Curl_pollset_add_out(
+        data, ps, data->conn->sock[data->conn->send_idx]);
     }
     return result;
   }
@@ -2555,8 +2557,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       /* Only perform the transfer if there is a good socket to work with.
          Having both BAD is a signal to skip immediately to DONE */
-      if((data->conn->sockfd != CURL_SOCKET_BAD) ||
-         (data->conn->writesockfd != CURL_SOCKET_BAD))
+      if(CONN_SOCK_IDX_VALID(data->conn->recv_idx) ||
+         CONN_SOCK_IDX_VALID(data->conn->send_idx))
         multistate(data, MSTATE_PERFORMING);
       else {
 #ifndef CURL_DISABLE_FTP

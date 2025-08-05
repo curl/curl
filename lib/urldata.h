@@ -672,11 +672,18 @@ struct connectdata {
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection poolas idle */
-  curl_socket_t sock[2]; /* two sockets, the second is used for the data
-                            transfer when doing FTP */
+
+  /* A connection can have one or two sockets and connection filters.
+   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
+  curl_socket_t sock[2];
+  struct Curl_cfilter *cfilter[2]; /* connection filters */
   Curl_recv *recv[2];
   Curl_send *send[2];
-  struct Curl_cfilter *cfilter[2]; /* connection filters */
+  int recv_idx;  /* on which socket index to receive, default 0 */
+  int send_idx;  /* on which socket index to send, default 0 */
+
+#define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
+
   struct {
     struct curltime start[2]; /* when filter shutdown started */
     timediff_t timeout_ms; /* 0 means no timeout */
@@ -697,10 +704,6 @@ struct connectdata {
   struct curltime keepalive;
 
   /**** curl_get() phase fields */
-
-  curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
-  curl_socket_t writesockfd; /* socket to write to, it may be the same we read
-                                from. CURL_SOCKET_BAD disables */
 
 #ifdef HAVE_GSSAPI
   BIT(sec_complete); /* if Kerberos is enabled for this connection */

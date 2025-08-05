@@ -1397,8 +1397,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
-  conn->sockfd = CURL_SOCKET_BAD;
-  conn->writesockfd = CURL_SOCKET_BAD;
+  conn->recv_idx = 0; /* default for receiving transfer data */
+  conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
   conn->remote_port = -1; /* unknown at this point */
 
