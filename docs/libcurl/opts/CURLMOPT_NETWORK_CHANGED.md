@@ -42,13 +42,13 @@ to clear the caches.
 The call affects only the connection and DNS cache of the multi handle
 itself and not the ones owned by SHARE handles.
 
-## CURLM_NWCOPT_CLEAR_CONNS
+## CURLMNWC_CLEAR_CONNS
 
 No longer reuse any existing connection in the multi handle's
 connection cache. This closes all connections that are not in use.
 Ongoing transfers continue on the connections they operate on.
 
-## CURLM_NWCOPT_CLEAR_DNS
+## CURLMNWC_CLEAR_DNS
 
 Clear the multi handle's DNS cache.
 
@@ -66,7 +66,7 @@ int main(void)
   CURLM *m = curl_multi_init();
   /* do transfers on the multi handle */
   /* do not reuse existing connections */
-  curl_multi_setopt(m, CURLMOPT_NETWORK_CHANGED, CURLM_NWCOPT_CLEAR_CONNS);
+  curl_multi_setopt(m, CURLMOPT_NETWORK_CHANGED, CURLMNWC_CLEAR_CONNS);
 }
 ~~~
 

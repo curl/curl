@@ -403,15 +403,15 @@ typedef enum {
 
 /* Definition of bits for the CURLMOPT_NETWORK_CHANGED argument: */
 
-/* - CURLM_NWCOPT_CLEAR_CONNS tells libcurl to prevent further reuse
-     of existing connections. Connections that are idle will be closed.
-     Ongoing transfers will continue with the connection they have. */
-#define CURLM_NWCOPT_CLEAR_CONNS (1L<<0)
+/* - CURLMNWC_CLEAR_CONNS tells libcurl to prevent further reuse of existing
+   connections. Connections that are idle will be closed. Ongoing transfers
+   will continue with the connection they have. */
+#define CURLMNWC_CLEAR_CONNS (1L<<0)
 
-/* - CURLM_NWCOPT_CLEAR_DNS tells libcurl to prevent further reuse
-     of existing connections. Connections that are idle will be closed.
-     Ongoing transfers will continue with the connection they have. */
-#define CURLM_NWCOPT_CLEAR_DNS (1L<<0)
+/* - CURLMNWC_CLEAR_DNS tells libcurl to prevent further reuse of existing
+   connections. Connections that are idle will be closed. Ongoing transfers
+   will continue with the connection they have. */
+#define CURLMNWC_CLEAR_DNS (1L<<0)
 
 /*
  * Name:    curl_multi_setopt()
