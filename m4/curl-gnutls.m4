@@ -27,10 +27,10 @@ dnl check for GnuTLS
 dnl ----------------------------------------------------
 
 AC_DEFUN([CURL_WITH_GNUTLS], [
-if test "x$OPT_GNUTLS" != xno; then
+if test "$OPT_GNUTLS" != no; then
   ssl_msg=
 
-  if test X"$OPT_GNUTLS" != Xno; then
+  if test "$OPT_GNUTLS" != no; then
 
     addld=""
     addlib=""
@@ -38,7 +38,7 @@ if test "x$OPT_GNUTLS" != xno; then
     version=""
     addcflags=""
 
-    if test "x$OPT_GNUTLS" = "xyes"; then
+    if test "$OPT_GNUTLS" = "yes"; then
       dnl this is with no particular path given
       CURL_CHECK_PKGCONFIG(gnutls)
 
@@ -113,7 +113,7 @@ if test "x$OPT_GNUTLS" != xno; then
           CPPFLAGS="$CLEANCPPFLAGS"
         ])
 
-      if test "x$USE_GNUTLS" = "xyes"; then
+      if test "$USE_GNUTLS" = "yes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
         check_for_ca_bundle=1
         if test -n "$gtlslib"; then
@@ -121,7 +121,7 @@ if test "x$OPT_GNUTLS" != xno; then
           dnl linker doesn't search through, we need to add it to
           dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
-          if test "x$cross_compiling" != "xyes"; then
+          if test "$cross_compiling" != "yes"; then
             CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$gtlslib"
             export CURL_LIBRARY_PATH
             AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])

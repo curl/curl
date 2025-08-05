@@ -59,8 +59,8 @@ case "x$enable_static" in @%:@ (
     xc_lt_want_enable_static='no'
     ;;
 esac
-if test "x$xc_lt_want_enable_shared" = 'xno' &&
-  test "x$xc_lt_want_enable_static" = 'xno'; then
+if test "$xc_lt_want_enable_shared" = 'no' &&
+  test "$xc_lt_want_enable_static" = 'no'; then
   AC_MSG_ERROR([can not disable shared and static libraries simultaneously])
 fi
 
@@ -71,8 +71,8 @@ fi
 # must be used in order to build a proper static library.
 #
 
-if test "x$xc_lt_want_enable_shared" = 'xyes' &&
-  test "x$xc_lt_want_enable_static" = 'xyes'; then
+if test "$xc_lt_want_enable_shared" = 'yes' &&
+  test "$xc_lt_want_enable_static" = 'yes'; then
   case $host_os in @%:@ (
     cegcc* | os2* | aix*)
       xc_lt_want_enable_static='no'
@@ -229,7 +229,7 @@ m4_define([_XC_CHECK_LT_SHLIB_USE_VERSION_INFO],
 
 AC_MSG_CHECKING([whether to build shared libraries with -version-info])
 xc_lt_shlib_use_version_info='yes'
-if test "x$version_type" = 'xnone'; then
+if test "$version_type" = 'none'; then
   xc_lt_shlib_use_version_info='no'
 fi
 case $host_os in @%:@ (
@@ -259,7 +259,7 @@ m4_define([_XC_CHECK_LT_SHLIB_USE_NO_UNDEFINED],
 
 AC_MSG_CHECKING([whether to build shared libraries with -no-undefined])
 xc_lt_shlib_use_no_undefined='no'
-if test "x$allow_undefined" = 'xno'; then
+if test "$allow_undefined" = 'no'; then
   xc_lt_shlib_use_no_undefined='yes'
 elif test "x$allow_undefined_flag" = 'xunsupported'; then
   xc_lt_shlib_use_no_undefined='yes'
@@ -293,7 +293,7 @@ AC_MSG_CHECKING([whether to build shared libraries with -mimpure-text])
 xc_lt_shlib_use_mimpure_text='no'
 case $host_os in @%:@ (
   solaris2*)
-    if test "x$GCC" = 'xyes'; then
+    if test "$GCC" = 'yes'; then
       xc_lt_shlib_use_mimpure_text='yes'
     fi
     ;;

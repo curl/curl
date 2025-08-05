@@ -27,7 +27,7 @@ dnl check for mbedTLS
 dnl ----------------------------------------------------
 AC_DEFUN([CURL_WITH_MBEDTLS], [
 
-if test "x$OPT_MBEDTLS" != xno; then
+if test "$OPT_MBEDTLS" != no; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
   _ldflagspc=$LDFLAGSPC
@@ -58,7 +58,7 @@ if test "x$OPT_MBEDTLS" != xno; then
     addcflags=""
     mbedtlslib=""
 
-    if test "x$USE_MBEDTLS" != "xyes"; then
+    if test "$USE_MBEDTLS" != "yes"; then
       dnl add the path and test again
       addld=-L$OPT_MBEDTLS/lib$libsuff
       addcflags=-I$OPT_MBEDTLS/include
@@ -85,7 +85,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         ], -lmbedx509 -lmbedcrypto)
     fi
 
-    if test "x$USE_MBEDTLS" = "xyes"; then
+    if test "$USE_MBEDTLS" = "yes"; then
       AC_MSG_NOTICE([detected mbedTLS])
       check_for_ca_bundle=1
 
@@ -96,7 +96,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         dnl linker doesn't search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
+        if test "$cross_compiling" != "yes"; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$mbedtlslib"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])

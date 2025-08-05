@@ -392,15 +392,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "$curl_cv_func_fcntl_o_nonblock" = "yes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctl_fionbio" = "yes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_fionbio" = "yes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_camel_fionbio" = "yes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "$curl_cv_func_setsockopt_so_nonblock" = "yes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])
@@ -433,7 +433,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
+  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test $doing_symbol_hiding = yes)
   AC_SUBST(CFLAG_CURL_SYMBOL_HIDING)
 ])
 

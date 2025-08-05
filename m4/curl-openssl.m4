@@ -30,7 +30,7 @@ dnl Check for OpenSSL libraries and headers
 dnl **********************************************************************
 
 AC_DEFUN([CURL_WITH_OPENSSL], [
-if test "x$OPT_OPENSSL" != xno; then
+if test "$OPT_OPENSSL" != no; then
   ssl_msg=
 
   dnl backup the pre-ssl variables
@@ -334,7 +334,7 @@ if test "x$OPT_OPENSSL" != xno; then
       dnl when the ssl shared libs were found in a path that the run-time
       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
-      if test "x$cross_compiling" != "xyes"; then
+      if test "$cross_compiling" != "yes"; then
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
         export CURL_LIBRARY_PATH
         AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])

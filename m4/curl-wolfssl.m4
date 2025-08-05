@@ -36,7 +36,7 @@ case "$OPT_WOLFSSL" in
     ;;
 esac
 
-if test "x$OPT_WOLFSSL" != xno; then
+if test "$OPT_WOLFSSL" != no; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
   _ldflagspc=$LDFLAGSPC
@@ -82,7 +82,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       addlib="$addlib -lm"
     fi
 
-    if test "x$USE_WOLFSSL" != "xyes"; then
+    if test "$USE_WOLFSSL" != "yes"; then
 
       LDFLAGS="$LDFLAGS $addld"
       LDFLAGSPC="$LDFLAGSPC $addld"
@@ -126,7 +126,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       LIBS="$my_ac_save_LIBS"
     fi
 
-    if test "x$USE_WOLFSSL" = "xyes"; then
+    if test "$USE_WOLFSSL" = "yes"; then
       AC_MSG_NOTICE([detected wolfSSL])
       check_for_ca_bundle=1
 
@@ -150,12 +150,12 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
-      if test "x$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'xyes'; then
+      if test "$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'yes'; then
         HAVE_WOLFSSL_DES_ECB_ENCRYPT=1
       fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
-      if test "x$ac_cv_func_wolfSSL_BIO_new" = 'xyes'; then
+      if test "$ac_cv_func_wolfSSL_BIO_new" = 'yes'; then
         HAVE_WOLFSSL_BIO_NEW=1
       fi
 
@@ -164,7 +164,7 @@ if test "x$OPT_WOLFSSL" != xno; then
         dnl linker doesn't search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
+        if test "$cross_compiling" != "yes"; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$wolfssllibpath"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $wolfssllibpath to CURL_LIBRARY_PATH])
