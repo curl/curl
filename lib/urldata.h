@@ -1348,8 +1348,6 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
-  long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
-                        for infinity */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -1412,6 +1410,8 @@ struct UserDefined {
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
+  short maxredirs;    /* maximum no. of http(s) redirects to follow,
+                         set to -1 for infinity */
   unsigned short proxyport; /* If non-zero, use this port number by
                                default. If the proxy string features a
                                ":[port]" that one will override this. */
@@ -1419,7 +1419,7 @@ struct UserDefined {
   unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
-  int dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
+  timediff_t dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   unsigned int buffer_size;      /* size of receive buffer to use */
   unsigned int upload_buffer_size; /* size of upload buffer to use,
                                       keep it >= CURL_MAX_WRITE_SIZE */

@@ -60,7 +60,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
   if(secs < 0)
@@ -854,6 +853,18 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   return CURLE_OK;
 }
 
+static CURLcode value_range(long *value, long below_error,
+                            long min, curl_off_t max)
+{
+  if(*value < below_error)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  else if(*value < min)
+    *value = min;
+  else if(*value > max)
+    *value = max;
+  return CURLE_OK;
+}
+
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
@@ -866,21 +877,13 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX/1000)
-      arg = INT_MAX/1000;
+    return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
 
-    if(arg > 0)
-      arg *= 1000;
-    s->dns_cache_timeout_ms = (int)arg;
-    break;
   case CURLOPT_CA_CACHE_TIMEOUT:
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
-      if(arg < -1)
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      else if(arg > INT_MAX)
-        arg = INT_MAX;
+      result = value_range(&arg, -1, -1, INT_MAX);
+      if(result)
+        return result;
 
       s->general_ssl.ca_cache_timeout = (int)arg;
     }
@@ -888,64 +891,38 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       return CURLE_NOT_BUILT_IN;
     break;
   case CURLOPT_MAXCONNECTS:
-    /*
-     * Set the absolute number of maximum simultaneous alive connection that
-     * libcurl is allowed to have.
-     */
-    if(uarg > UINT_MAX)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->maxconnects = (unsigned int)uarg;
+    result = value_range(&arg, 1, 1, UINT_MAX);
+    if(result)
+      return result;
+    s->maxconnects = (unsigned int)arg;
     break;
   case CURLOPT_SERVER_RESPONSE_TIMEOUT:
-    /*
-     * Option that specifies how quickly a server response must be obtained
-     * before it is considered failure. For pingpong protocols.
-     */
     return setopt_set_timeout_sec(&s->server_response_timeout, arg);
 
   case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
-    /*
-     * Option that specifies how quickly a server response must be obtained
-     * before it is considered failure. For pingpong protocols.
-     */
     return setopt_set_timeout_ms(&s->server_response_timeout, arg);
 
 #ifndef CURL_DISABLE_TFTP
   case CURLOPT_TFTP_BLKSIZE:
-    /*
-     * TFTP option that specifies the block size to use for data transmission.
-     */
-    if(arg < TFTP_BLKSIZE_MIN)
-      arg = 512;
-    else if(arg > TFTP_BLKSIZE_MAX)
-      arg = TFTP_BLKSIZE_MAX;
+    result = value_range(&arg, 0, TFTP_BLKSIZE_MIN, TFTP_BLKSIZE_MAX);
+    if(result)
+      return result;
     s->tftp_blksize = (unsigned short)arg;
     break;
 #endif
 #ifndef CURL_DISABLE_NETRC
   case CURLOPT_NETRC:
-    /*
-     * Parse the $HOME/.netrc file
-     */
     if((arg < CURL_NETRC_IGNORED) || (arg >= CURL_NETRC_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->use_netrc = (unsigned char)arg;
     break;
 #endif
   case CURLOPT_TIMECONDITION:
-    /*
-     * Set HTTP time condition. This must be one of the defines in the
-     * curl/curl.h header file.
-     */
     if((arg < CURL_TIMECOND_NONE) || (arg >= CURL_TIMECOND_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->timecondition = (unsigned char)arg;
     break;
   case CURLOPT_TIMEVALUE:
-    /*
-     * This is the value to compare with the remote document with the
-     * method set with CURLOPT_TIMECONDITION
-     */
     s->timevalue = (time_t)arg;
     break;
   case CURLOPT_SSLVERSION:
@@ -955,10 +932,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     return Curl_setopt_SSLVERSION(data, option, arg);
 
   case CURLOPT_POSTFIELDSIZE:
-    /*
-     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
-     * figure it out. Enables binary posts.
-     */
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -973,34 +946,19 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_FOLLOWLOCATION:
-    /*
-     * Follow Location: header hints on an HTTP-server.
-     */
     if(uarg > 3)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->http_follow_mode = (unsigned char)uarg;
     break;
 
   case CURLOPT_MAXREDIRS:
-    /*
-     * The maximum amount of hops you allow curl to follow Location:
-     * headers. This should mostly be used to detect never-ending loops.
-     */
-    if(arg < -1)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->maxredirs = arg;
+    result = value_range(&arg, -1, 0, 0x7fff);
+    if(result)
+      return result;
+    s->maxredirs = (short)arg;
     break;
 
   case CURLOPT_POSTREDIR:
-    /*
-     * Set the behavior of POST when redirecting
-     * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
-     * CURL_REDIR_POST_301 - POST is kept as POST after 301
-     * CURL_REDIR_POST_302 - POST is kept as POST after 302
-     * CURL_REDIR_POST_303 - POST is kept as POST after 303
-     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
-     * other - POST is kept as POST after 301 and 302
-     */
     if(arg < CURL_REDIR_GET_ALL)
       /* no return error on too high numbers since the bitmask could be
          extended in a future */
@@ -1009,9 +967,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_HEADEROPT:
-    /*
-     * Set header option.
-     */
     s->sep_headers = !!(arg & CURLHEADER_SEPARATE);
     break;
   case CURLOPT_HTTPAUTH:
@@ -1021,14 +976,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     return setopt_HTTP_VERSION(data, arg);
 
   case CURLOPT_EXPECT_100_TIMEOUT_MS:
-    /*
-     * Time to wait for a response to an HTTP request containing an
-     * Expect: 100-continue header before sending the data anyway.
-     */
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    if(arg > 0xffff)
-      arg = 0xffff;
+    result = value_range(&arg, 0, 0, 0xffff);
+    if(result)
+      return result;
     s->expect_100_timeout = (unsigned short)arg;
     break;
 
@@ -1041,9 +991,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYPORT:
-    /*
-     * Explicitly set HTTP proxy port number.
-     */
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->proxyport = (unsigned short)arg;
@@ -1053,9 +1000,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     return httpauth(data, TRUE, uarg);
 
   case CURLOPT_PROXYTYPE:
-    /*
-     * Set proxy type.
-     */
     if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->proxytype = (unsigned char)arg;
@@ -1070,9 +1014,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifndef CURL_DISABLE_FTP
   case CURLOPT_FTP_FILEMETHOD:
-    /*
-     * How do access files over FTP.
-     */
     if((arg < CURLFTPMETHOD_DEFAULT) || (arg >= CURLFTPMETHOD_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->ftp_filemethod = (unsigned char)arg;
@@ -1084,89 +1025,53 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_FTPSSLAUTH:
-    /*
-     * Set a specific auth for FTP-SSL transfers.
-     */
     if((arg < CURLFTPAUTH_DEFAULT) || (arg >= CURLFTPAUTH_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->ftpsslauth = (unsigned char)arg;
     break;
   case CURLOPT_ACCEPTTIMEOUT_MS:
-    /*
-     * The maximum time for curl to wait for FTP server connect
-     */
     return setopt_set_timeout_ms(&s->accepttimeout, arg);
 #endif /* ! CURL_DISABLE_FTP */
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
-    /*
-     * An FTP/SFTP option that modifies an upload to create missing
-     * directories on the server.
-     */
-    /* reserve other values for future use */
     if((arg < CURLFTP_CREATE_DIR_NONE) || (arg > CURLFTP_CREATE_DIR_RETRY))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->ftp_create_missing_dirs = (unsigned char)arg;
     break;
 #endif /* ! CURL_DISABLE_FTP || USE_SSH */
   case CURLOPT_INFILESIZE:
-    /*
-     * If known, this should inform curl about the file size of the
-     * to-be-uploaded file.
-     */
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->filesize = arg;
     break;
   case CURLOPT_LOW_SPEED_LIMIT:
-    /*
-     * The low speed limit that if transfers are below this for
-     * CURLOPT_LOW_SPEED_TIME, the transfer is aborted.
-     */
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->low_speed_limit = arg;
     break;
   case CURLOPT_LOW_SPEED_TIME:
-    /*
-     * The low speed time that if transfers are below the set
-     * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
-     */
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->low_speed_time = arg;
     break;
   case CURLOPT_PORT:
-    /*
-     * The port number to use when getting the URL. 0 disables it.
-     */
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->use_port = (unsigned short)arg;
     break;
   case CURLOPT_TIMEOUT:
-    /*
-     * The maximum time you allow curl to use for a single transfer
-     * operation.
-     */
     return setopt_set_timeout_sec(&s->timeout, arg);
 
   case CURLOPT_TIMEOUT_MS:
     return setopt_set_timeout_ms(&s->timeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT:
-    /*
-     * The maximum time you allow curl to use to connect.
-     */
     return setopt_set_timeout_sec(&s->connecttimeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT_MS:
     return setopt_set_timeout_ms(&s->connecttimeout, arg);
 
   case CURLOPT_RESUME_FROM:
-    /*
-     * Resume transfer at the given file position
-     */
     if(arg < -1)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->set_resume_from = arg;
@@ -1174,17 +1079,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifndef CURL_DISABLE_BINDLOCAL
   case CURLOPT_LOCALPORT:
-    /*
-     * Set what local port to bind the socket to when performing an operation.
-     */
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->localport = curlx_sltous(arg);
     break;
   case CURLOPT_LOCALPORTRANGE:
-    /*
-     * Set number of local ports to try, starting with CURLOPT_LOCALPORT.
-     */
     if((arg < 0) || (arg > 65535))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->localportrange = curlx_sltous(arg);
@@ -1193,51 +1092,28 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifdef HAVE_GSSAPI
   case CURLOPT_GSSAPI_DELEGATION:
-    /*
-     * GSS-API credential delegation bitmask
-     */
     s->gssapi_delegation = (unsigned char)uarg&
       (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
     break;
 #endif
 
   case CURLOPT_SSL_FALSESTART:
-    /*
-     * No TLS backends support false start anymore.
-     */
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_BUFFERSIZE:
-    /*
-     * The application kindly asks for a differently sized receive buffer.
-     * If it seems reasonable, we will use it.
-     */
-    if(arg > READBUFFER_MAX)
-      arg = READBUFFER_MAX;
-    else if(arg < 1)
-      arg = READBUFFER_SIZE;
-    else if(arg < READBUFFER_MIN)
-      arg = READBUFFER_MIN;
-
+    result = value_range(&arg, 0, READBUFFER_MIN, READBUFFER_MAX);
+    if(result)
+      return result;
     s->buffer_size = (unsigned int)arg;
     break;
 
   case CURLOPT_UPLOAD_BUFFERSIZE:
-    /*
-     * The application kindly asks for a differently sized upload buffer.
-     * Cap it to sensible.
-     */
-    if(arg > UPLOADBUFFER_MAX)
-      arg = UPLOADBUFFER_MAX;
-    else if(arg < UPLOADBUFFER_MIN)
-      arg = UPLOADBUFFER_MIN;
-
+    result = value_range(&arg, 0, UPLOADBUFFER_MIN, UPLOADBUFFER_MAX);
+    if(result)
+      return result;
     s->upload_buffer_size = (unsigned int)arg;
     break;
 
   case CURLOPT_MAXFILESIZE:
-    /*
-     * Set the maximum size of a file to download.
-     */
     if(arg < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_filesize = arg;
@@ -1245,9 +1121,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifdef USE_SSL
   case CURLOPT_USE_SSL:
-    /*
-     * Make transfers attempt to use SSL/TLS.
-     */
     if((arg < CURLUSESSL_NONE) || (arg >= CURLUSESSL_LAST))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->use_ssl = (unsigned char)arg;
@@ -1270,12 +1143,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_CONNECT_ONLY:
-    /*
-     * No data transfer.
-     * (1) - only do connection
-     * (2) - do first get request but get no content
-     */
-    if(arg > 2)
+    if(arg < 0 || arg > 2)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->connect_only = !!arg;
     s->connect_only_ws = (arg == 2);
@@ -1283,7 +1151,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 
 #ifdef USE_SSH
-    /* we only include SSH options if explicitly built to support SSH */
   case CURLOPT_SSH_AUTH_TYPES:
     s->ssh_auth_types = (int)arg;
     break;
@@ -1291,9 +1158,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_NEW_FILE_PERMS:
-    /*
-     * Uses these permissions instead of 0644
-     */
     if((arg < 0) || (arg > 0777))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->new_file_perms = (unsigned int)arg;
@@ -1301,9 +1165,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif
 #ifdef USE_SSH
   case CURLOPT_NEW_DIRECTORY_PERMS:
-    /*
-     * Uses these permissions instead of 0755
-     */
     if((arg < 0) || (arg > 0777))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->new_directory_perms = (unsigned int)arg;
@@ -1311,11 +1172,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif
 #ifdef USE_IPV6
   case CURLOPT_ADDRESS_SCOPE:
-    /*
-     * Use this scope id when using IPv6
-     * We always get longs when passed plain numericals so we should check
-     * that the value fits into an unsigned 32-bit integer.
-     */
 #if SIZEOF_LONG > 4
     if(uarg > UINT_MAX)
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1324,17 +1180,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 #endif
   case CURLOPT_PROTOCOLS:
-    /* set the bitmask for the protocols that are allowed to be used for the
-       transfer, which thus helps the app which takes URLs from users or other
-       external inputs and want to restrict what protocol(s) to deal with.
-       Defaults to CURLPROTO_ALL. */
     s->allowed_protocols = (curl_prot_t)arg;
     break;
 
   case CURLOPT_REDIR_PROTOCOLS:
-    /* set the bitmask for the protocols that libcurl is allowed to follow to,
-       as a subset of the CURLOPT_PROTOCOLS ones. That means the protocol
-       needs to be set in both bitmasks to be allowed to get redirected to. */
     s->redir_protocols = (curl_prot_t)arg;
     break;
 
@@ -1342,40 +1191,31 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_RTSP_REQUEST:
     return setopt_RTSP_REQUEST(data, arg);
   case CURLOPT_RTSP_CLIENT_CSEQ:
-    /*
-     * Set the CSEQ number to issue for the next RTSP request. Useful if the
-     * application is resuming a previously broken connection. The CSEQ
-     * will increment from this new number henceforth.
-     */
     data->state.rtsp_next_client_CSeq = arg;
     break;
 
   case CURLOPT_RTSP_SERVER_CSEQ:
-    /* Same as the above, but for server-initiated requests */
     data->state.rtsp_next_server_CSeq = arg;
     break;
 
 #endif /* ! CURL_DISABLE_RTSP */
 
   case CURLOPT_TCP_KEEPIDLE:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
-      arg = INT_MAX;
+    result = value_range(&arg, 0, 0, INT_MAX);
+    if(result)
+      return result;
     s->tcp_keepidle = (int)arg;
     break;
   case CURLOPT_TCP_KEEPINTVL:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
-      arg = INT_MAX;
+    result = value_range(&arg, 0, 0, INT_MAX);
+    if(result)
+      return result;
     s->tcp_keepintvl = (int)arg;
     break;
   case CURLOPT_TCP_KEEPCNT:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    else if(arg > INT_MAX)
-      arg = INT_MAX;
+    result = value_range(&arg, 0, 0, INT_MAX);
+    if(result)
+      return result;
     s->tcp_keepcnt = (int)arg;
     break;
   case CURLOPT_SSL_ENABLE_NPN:
@@ -1438,16 +1278,12 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /* deprecated */
     break;
   case CURLOPT_SSLENGINE_DEFAULT:
-    /*
-     * flag to set engine as default.
-     */
     Curl_safefree(s->str[STRING_SSL_ENGINE]);
     return Curl_ssl_set_engine_default(data);
   case CURLOPT_UPLOAD_FLAGS:
     s->upload_flags = (unsigned char)arg;
     break;
   default:
-    /* unknown option */
     return CURLE_UNKNOWN_OPTION;
   }
   return CURLE_OK;
