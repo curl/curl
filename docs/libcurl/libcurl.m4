@@ -122,7 +122,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           ])
       fi
 
-      if test $_libcurl_wanted -eq 0 || test x$libcurl_cv_lib_version_ok = xyes; then
+      if test $_libcurl_wanted -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
         if test x"$LIBCURL_CPPFLAGS" = "x"; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
@@ -217,13 +217,13 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           eval AS_TR_SH(libcurl_feature_$_libcurl_feature)=yes
         done
 
-        if test "x$_libcurl_protocols" = "x"; then
+        if test "$_libcurl_protocols" = ""; then
 
           # We do not have --protocols, so just assume that all
           # protocols are available
           _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP"
 
-          if test x$libcurl_feature_SSL = xyes; then
+          if test "$libcurl_feature_SSL" = yes; then
             _libcurl_protocols="$_libcurl_protocols HTTPS"
 
             # FTPS was not standards-compliant until version
@@ -261,7 +261,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     unset _libcurl_ldflags
   fi
 
-  if test x$_libcurl_with = xno || test x$libcurl_cv_lib_curl_usable != xyes; then
+  if test "$_libcurl_with" = no || test "$libcurl_cv_lib_curl_usable" != yes; then
     # This is the IF-NO path
     ifelse([$4],,:,[$4])
   else
