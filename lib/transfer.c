@@ -162,38 +162,23 @@ bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc)
 
 static CURLcode xfer_recv_shutdown(struct Curl_easy *data, bool *done)
 {
-  int sockindex;
-
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  if(data->conn->sockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
-  sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
-  return Curl_conn_shutdown(data, sockindex, done);
+  return Curl_conn_shutdown(data, data->conn->recv_idx, done);
 }
 
 static bool xfer_recv_shutdown_started(struct Curl_easy *data)
 {
-  int sockindex;
-
   if(!data || !data->conn)
     return FALSE;
-  if(data->conn->sockfd == CURL_SOCKET_BAD)
-    return FALSE;
-  sockindex = (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]);
-  return Curl_shutdown_started(data, sockindex);
+  return Curl_shutdown_started(data, data->conn->recv_idx);
 }
 
 CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
 {
-  int sockindex;
-
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  if(data->conn->writesockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
-  sockindex = (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]);
-  return Curl_conn_shutdown(data, sockindex, done);
+  return Curl_conn_shutdown(data, data->conn->send_idx, done);
 }
 
 /**
@@ -759,19 +744,15 @@ static void xfer_setup(
 
   if(Curl_conn_is_multiplex(conn, FIRSTSOCKET) || want_send) {
     /* when multiplexing, the read/write sockets need to be the same! */
-    conn->sockfd = sockindex == -1 ?
-      ((writesockindex == -1 ? CURL_SOCKET_BAD : conn->sock[writesockindex])) :
-      conn->sock[sockindex];
-    conn->writesockfd = conn->sockfd;
     if(want_send)
       /* special and HTTP-specific */
       writesockindex = FIRSTSOCKET;
+    conn->recv_idx = sockindex;
+    conn->send_idx = writesockindex;
   }
   else {
-    conn->sockfd = sockindex == -1 ?
-      CURL_SOCKET_BAD : conn->sock[sockindex];
-    conn->writesockfd = writesockindex == -1 ?
-      CURL_SOCKET_BAD : conn->sock[writesockindex];
+    conn->recv_idx = sockindex;
+    conn->send_idx = writesockindex;
   }
 
   k->getheader = getheader;
@@ -798,6 +779,8 @@ static void xfer_setup(
       k->keepon |= KEEP_SEND;
   } /* if(k->getheader || !data->req.no_body) */
 
+  CURL_TRC_M(data, "transfer setup: recv_idx=%d, send_idx=%d",
+             conn->recv_idx, conn->send_idx);
 }
 
 void Curl_xfer_setup_nop(struct Curl_easy *data)
@@ -886,18 +869,12 @@ CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature)
 
 bool Curl_xfer_needs_flush(struct Curl_easy *data)
 {
-  int sockindex;
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
-               (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  return Curl_conn_needs_flush(data, sockindex);
+  return Curl_conn_needs_flush(data, data->conn->send_idx);
 }
 
 CURLcode Curl_xfer_flush(struct Curl_easy *data)
 {
-  int sockindex;
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
-               (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  return Curl_conn_flush(data, sockindex);
+  return Curl_conn_flush(data, data->conn->send_idx);
 }
 
 CURLcode Curl_xfer_send(struct Curl_easy *data,
@@ -905,14 +882,12 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
                         size_t *pnwritten)
 {
   CURLcode result;
-  int sockindex;
 
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
 
-  sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
-               (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
-  result = Curl_conn_send(data, sockindex, buf, blen, eos, pnwritten);
+  result = Curl_conn_send(data, data->conn->send_idx,
+                          buf, blen, eos, pnwritten);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     *pnwritten = 0;
@@ -929,17 +904,13 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         char *buf, size_t blen,
                         size_t *pnrcvd)
 {
-  int sockindex;
-
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   DEBUGASSERT(data->set.buffer_size > 0);
 
-  sockindex = ((data->conn->sockfd != CURL_SOCKET_BAD) &&
-               (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]));
   if((size_t)data->set.buffer_size < blen)
     blen = (size_t)data->set.buffer_size;
-  return Curl_conn_recv(data, sockindex, buf, blen, pnrcvd);
+  return Curl_conn_recv(data, data->conn->recv_idx, buf, blen, pnrcvd);
 }
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data)
