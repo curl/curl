@@ -102,7 +102,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       AC_PATH_PROG([_libcurl_config],[curl-config],[],[$PATH])
     fi
 
-    if test x$_libcurl_config != "x"; then
+    if test "$_libcurl_config" != ""; then
       AC_CACHE_CHECK([for the version of libcurl],
         [libcurl_cv_lib_curl_version],
         [libcurl_cv_lib_curl_version=`$_libcurl_config --version | $AWK '{print $[]2}'`])
