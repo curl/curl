@@ -1323,7 +1323,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     data->info.wouldredirect = follow_url;
 
     if(reachedmax) {
-      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
+      failf(data, "Maximum (%d) redirects followed", data->set.maxredirs);
       return CURLE_TOO_MANY_REDIRECTS;
     }
     return CURLE_OK;

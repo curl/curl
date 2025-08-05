@@ -217,7 +217,7 @@ dnscache_entry_is_stale(void *datap, void *hc)
  * Returns the 'age' of the oldest still kept entry - in milliseconds.
  */
 static timediff_t
-dnscache_prune(struct Curl_hash *hostcache, int cache_timeout_ms,
+dnscache_prune(struct Curl_hash *hostcache, timediff_t cache_timeout_ms,
                struct curltime now)
 {
   struct dnscache_prune_data user;
@@ -265,7 +265,7 @@ void Curl_dnscache_prune(struct Curl_easy *data)
   struct Curl_dnscache *dnscache = dnscache_get(data);
   struct curltime now;
   /* the timeout may be set -1 (forever) */
-  int timeout_ms = data->set.dns_cache_timeout_ms;
+  timediff_t timeout_ms = data->set.dns_cache_timeout_ms;
 
   if(!dnscache || (timeout_ms == -1))
     /* NULL hostcache means we cannot do it */

@@ -1348,8 +1348,6 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
-  long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
-                        for infinity */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -1419,7 +1417,7 @@ struct UserDefined {
   unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
-  int dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
+  timediff_t dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   unsigned int buffer_size;      /* size of receive buffer to use */
   unsigned int upload_buffer_size; /* size of upload buffer to use,
                                       keep it >= CURL_MAX_WRITE_SIZE */
@@ -1501,6 +1499,8 @@ struct UserDefined {
 #ifdef USE_ECH
   int tls_ech;      /* TLS ECH configuration  */
 #endif
+  short maxredirs;    /* maximum no. of http(s) redirects to follow,
+                         set to -1 for infinity */
   unsigned short expect_100_timeout; /* in milliseconds */
   unsigned short use_port; /* which port to use (when not using default) */
 #ifndef CURL_DISABLE_BINDLOCAL
