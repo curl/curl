@@ -1339,7 +1339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
     CURL_RUN_IFELSE([
@@ -1415,7 +1415,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
-    if test "$curl_cv_apple" = 'yes'; then
+    if test "$curl_cv_apple" = "yes"; then
       dnl Darwin 6.0 and macOS 10.2.X and newer
       tst_tsafe_getaddrinfo="yes"
     fi
@@ -2027,7 +2027,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
     CURL_RUN_IFELSE([
@@ -2148,7 +2148,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
     CURL_RUN_IFELSE([
@@ -2268,7 +2268,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
     CURL_RUN_IFELSE([
@@ -2429,7 +2429,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
     CURL_RUN_IFELSE([
@@ -4016,7 +4016,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4079,7 +4079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4259,7 +4259,7 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  if test "$curl_cv_apple" = 'yes'; then
+  if test "$curl_cv_apple" = "yes"; then
     AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
   else
     oldcc=$CC
@@ -4291,7 +4291,7 @@ AC_DEFUN([CURL_COVERAGE],[
     coverage="$enableval")
 
   dnl if not gcc or clang switch off again
-  AS_IF([test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" -a "$compiler_id" != "APPLECLANG"], coverage="no" )
+  AS_IF([test "$compiler_id" != "GNU_C" && test "$compiler_id" != "CLANG" && test "$compiler_id" != "APPLECLANG"], coverage="no" )
   AC_MSG_RESULT($coverage)
 
   if test "x$coverage" = "xyes"; then
@@ -4390,11 +4390,11 @@ AC_DEFUN([CURL_SIZEOF], [
       r=0
     ])
     dnl get out of the loop once matched
-    if test $r -gt 0; then
+    if test "$r" -gt 0; then
       break;
     fi
   done
-  if test $r -eq 0; then
+  if test "$r" -eq 0; then
     AC_MSG_ERROR([Failed to find size of $1])
   fi
   AC_MSG_RESULT($r)

@@ -25,7 +25,7 @@
 AC_DEFUN([CURL_WITH_AMISSL], [
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL v5)])
 if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
-  if test "x$OPT_AMISSL" != xno; then
+  if test "x$OPT_AMISSL" != "xno"; then
     ssl_msg=
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -43,7 +43,7 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="AmiSSL"
-      test amissl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      test "amissl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       AMISSL_ENABLED=1
       OPENSSL_ENABLED=1
       # Use AmiSSL's built-in ca bundle
