@@ -31,22 +31,12 @@
 #include "tool_parsecfg.h"
 #include "tool_paramhlp.h"
 #include "tool_writeout_json.h"
+#include "tool_strdup.h"
 #include "var.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_EXPAND_CONTENT 10000000
 #define MAX_VAR_LEN 128 /* max length of a name */
-
-static char *Memdup(const char *data, size_t len)
-{
-  char *p = malloc(len + 1);
-  if(!p)
-    return NULL;
-  if(len)
-    memcpy(p, data, len);
-  p[len] = 0;
-  return p;
-}
 
 /* free everything */
 void varcleanup(struct GlobalConfig *global)
@@ -208,7 +198,7 @@ static ParameterError varfunc(struct GlobalConfig *global,
       free(c);
 
     clen = curlx_dyn_len(out);
-    c = Memdup(curlx_dyn_ptr(out), clen);
+    c = memdup0(curlx_dyn_ptr(out), clen);
     if(!c) {
       err = PARAM_NO_MEM;
       break;
@@ -379,7 +369,7 @@ static ParameterError addvariable(struct GlobalConfig *global,
   if(p) {
     memcpy(p->name, name, nlen);
 
-    p->content = contalloc ? content : Memdup(content, clen);
+    p->content = contalloc ? content : memdup0(content, clen);
     if(p->content) {
       p->clen = clen;
 

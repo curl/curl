@@ -27,6 +27,7 @@
 #include "tool_doswin.h"
 #include "tool_urlglob.h"
 #include "tool_vms.h"
+#include "tool_strdup.h"
 #include "memdebug.h" /* keep this as LAST include */
 
 #define GLOBERROR(string, column, code) \
@@ -45,12 +46,9 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   if(!pat->content.Set.elements)
     return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
 
-  pat->content.Set.elements[0] = malloc(len + 1);
+  pat->content.Set.elements[0] = memdup0(fixed, len);
   if(!pat->content.Set.elements[0])
     return GLOBERROR("out of memory", 0, CURLE_OUT_OF_MEMORY);
-
-  memcpy(pat->content.Set.elements[0], fixed, len);
-  pat->content.Set.elements[0][len] = 0;
 
   return CURLE_OK;
 }
