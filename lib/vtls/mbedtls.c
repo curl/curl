@@ -152,7 +152,7 @@ static void mbed_debug(void *context, int level, const char *f_name,
       return;
 
   /* discount any trailing newline */
-  if(line[len - 1] == '\n'){
+  if(line[len - 1] == '\n') {
     len--;
 
     if(len == 0)
