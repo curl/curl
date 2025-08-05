@@ -1197,9 +1197,9 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     int event, int arg1, void *arg2)
+static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int event, int arg1, void *arg2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1238,6 +1238,10 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_CTRL_CONN_INFO_UPDATE:
+    if(!cf->sockindex && cf->connected)
+      cf->conn->httpversion_seen = 30;
+    break;
   default:
     break;
   }
@@ -1621,7 +1625,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_data_pending,
   cf_quiche_send,
   cf_quiche_recv,
-  cf_quiche_data_event,
+  cf_quiche_cntrl,
   cf_quiche_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_quiche_query,

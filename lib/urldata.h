@@ -768,7 +768,7 @@ struct connectdata {
    and happy eyeballing. Use `Curl_conn_get_transport() for actual value
    once the connection is set up. */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
-  /* HTTP version last responded with by the server.
+  /* HTTP version last responded with by the server or negotiated via ALPN.
    * 0 at start, then one of 09, 10, 11, etc. */
   unsigned char httpversion_seen;
   unsigned char connect_only;

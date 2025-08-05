@@ -1605,6 +1605,30 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
     CURLE_UNKNOWN_OPTION;
 }
 
+static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+
+  (void)arg1;
+  (void)arg2;
+  (void)data;
+  switch(event) {
+  case CF_CTRL_CONN_INFO_UPDATE:
+    if(connssl->negotiated.alpn && !cf->sockindex) {
+      if(!strcmp("http/1.1", connssl->negotiated.alpn))
+        cf->conn->httpversion_seen = 11;
+      else if(!strcmp("h2", connssl->negotiated.alpn))
+        cf->conn->httpversion_seen = 20;
+      else if(!strcmp("h3", connssl->negotiated.alpn))
+        cf->conn->httpversion_seen = 30;
+    }
+    break;
+  }
+  return CURLE_OK;
+}
+
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
@@ -1628,7 +1652,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  Curl_cf_def_cntrl,
+  ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
