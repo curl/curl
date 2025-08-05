@@ -243,9 +243,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
     free(wc_buf);
   }
 
-  rc = bytes;
-
-  *retp = rc;
+  *retp = bytes;
   return 0;
 }
 #endif
@@ -341,7 +339,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
-    int retval = win_console(fhnd, outs, buffer, bytes, &rc);
+    size_t retval = win_console(fhnd, outs, buffer, bytes, &rc);
     if(retval)
       return retval;
   }
