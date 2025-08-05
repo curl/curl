@@ -141,13 +141,10 @@ static void mbed_debug(void *context, int level, const char *f_name,
                        int line_nb, const char *line)
 {
   struct Curl_easy *data = (struct Curl_easy *)context;
+  size_t len = line ? strlen(line) : 0;
   (void)level;
   (void)line_nb;
   (void)f_name;
-  size_t len = 0;
-
-  if(line)
-    len = strlen(line);
 
   /* bail out on nowhere to write data
   or if data is empty */
