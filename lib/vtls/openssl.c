@@ -1856,8 +1856,10 @@ static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   if(bio_out) {
+    unsigned long flags = (XN_FLAG_SEP_SPLUS_SPC | XN_FLAG_ONELINE & \
+                           ~ASN1_STRFLGS_ESC_MSB & ~XN_FLAG_SPC_EQ);
     curlx_dyn_reset(d);
-    rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_SPLUS_SPC);
+    rc = X509_NAME_print_ex(bio_out, a, 0, flags);
     if(rc != -1) {
       BIO_get_mem_ptr(bio_out, &biomem);
       result = curlx_dyn_addn(d, biomem->data, biomem->length);
