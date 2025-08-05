@@ -129,7 +129,7 @@ static int get_category_content(const char *category, unsigned int cols)
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       if(table_flag == 1) {
-        printf("%s: %s table:\n", categories[i].opt, categories[i].desc);
+        printf("%s: %s table\n", categories[i].opt, categories[i].desc);
         tool_table(categories[i].category, cols);
       } else {
         printf("%s: %s\n", categories[i].opt, categories[i].desc);

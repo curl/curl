@@ -23,7 +23,7 @@ none
 curl table:category --help
 </name>
 <command>
---help tAbLe:FiLe
+--help tAbLe:telNet
 </command>
 </client>
 
@@ -34,22 +34,10 @@ curl table:category --help
 0
 </errorcode>
 <stdout mode="text">
-file: FILE protocol table:
---create-file-mode <mode>
+telnet: TELNET protocol table
+-t, --telnet-option <opt=val>
 -------------------------------------------
-File mode for created files
-
--I, --head
--------------------------------------------
-Show document info only
-
--l, --list-only
--------------------------------------------
-List only mode
-
--r, --range <range>
--------------------------------------------
-Retrieve only the bytes within RANGE
+Set telnet option
 </stdout>
 </verify>
 </testcase>
