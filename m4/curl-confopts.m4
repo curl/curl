@@ -433,7 +433,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test $doing_symbol_hiding = yes)
+  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test "$doing_symbol_hiding" = yes)
   AC_SUBST(CFLAG_CURL_SYMBOL_HIDING)
 ])
 
