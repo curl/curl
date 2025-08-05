@@ -163,9 +163,9 @@ function cli_test()
   IFS=" " read -r -a echparms <<< "${@:4}"
 
   TMPF=$(mktemp)
-  cmd="timeout $tout $CURL ${CURL_PARAMS[*]} ${echparms[*]} $turl >$TMPF 2>&1"
+  cmd="timeout $tout $CURL ${CURL_PARAMS[*]} ${echparms[*]} $turl > $TMPF 2>&1"
   echo "cli_test: $cmd " >> "$logfile"
-  timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" "${echparms[@]}" "$turl" >"$TMPF" 2>&1
+  timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" "${echparms[@]}" "$turl" > "$TMPF" 2>&1
   eres=$?
   if [[ "$eres" == "124" ]]; then
     allgood="no"
