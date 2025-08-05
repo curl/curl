@@ -4042,7 +4042,7 @@ AC_CHECK_TYPE(long long,
   longlong="yes"
 )
 
-if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
+if test "$ac_cv_sizeof_curl_off_t" -lt 8; then
   AC_MSG_ERROR([64 bit curl_off_t is required])
 fi
 
@@ -5020,7 +5020,7 @@ if test "$CURL_DISABLE_HTTP" != "1"; then
       CURL_DISABLE_WEBSOCKETS=1
       ;;
     *)
-      if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+      if test "$ac_cv_sizeof_curl_off_t" -gt 4; then
         AC_MSG_RESULT(yes)
       else
         dnl WebSockets requires >32 bit curl_off_t
@@ -5269,8 +5269,8 @@ if test "$SSLS_EXPORT_ENABLED" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSLS-EXPORT"
 fi
 
-if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
-  if test ${ac_cv_sizeof_off_t} -gt 4 -o \
+if test "$ac_cv_sizeof_curl_off_t" -gt 4; then
+  if test "$ac_cv_sizeof_off_t" -gt 4 -o \
      "$curl_win32_file_api" = "win32_large_files"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES Largefile"
   fi
