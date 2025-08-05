@@ -42,3 +42,14 @@ char *strdup(const char *str)
   return newstr;
 }
 #endif
+
+char *memdup0(const char *data, size_t len)
+{
+  char *p = malloc(len + 1);
+  if(!p)
+    return NULL;
+  if(len)
+    memcpy(p, data, len);
+  p[len] = 0;
+  return p;
+}
