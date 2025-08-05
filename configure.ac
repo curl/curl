@@ -1809,7 +1809,7 @@ AC_MSG_CHECKING([if GSS-API support is requested])
 if test "$want_gss" = yes; then
   AC_MSG_RESULT(yes)
 
-  if test $GSSAPI_ROOT != "/usr"; then
+  if test "$GSSAPI_ROOT" != "/usr"; then
     CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
   else
     CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
@@ -1902,7 +1902,7 @@ if test "$want_gss" = yes; then
     if test "$curl_cv_apple" = 'yes'; then
       LIBS="-lgssapi_krb5 -lresolv $LIBS"
     else
-      if test $GSSAPI_ROOT != "/usr"; then
+      if test "$GSSAPI_ROOT" != "/usr"; then
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
       else
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
@@ -2210,7 +2210,7 @@ AC_ARG_WITH(libgsasl,
   [disable libgsasl support for SCRAM]),
   with_libgsasl=$withval,
   with_libgsasl=yes)
-if test $with_libgsasl != "no"; then
+if test "$with_libgsasl" != "no"; then
   AC_SEARCH_LIBS(gsasl_init, gsasl,
     [curl_gsasl_msg="enabled";
       AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
@@ -3818,7 +3818,7 @@ case "$OPT_LIBUV" in
 esac
 
 if test "$want_libuv" != no; then
-  if test $want_debug != yes; then
+  if test "$want_debug" != yes; then
     AC_MSG_ERROR([Using libuv without debug support enabled is useless])
   fi
 
