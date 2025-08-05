@@ -66,8 +66,8 @@ struct GlobalConfig;
 
 struct State {
   struct getout *urlnode;
-  struct URLGlob *inglob;
-  struct URLGlob *urls;
+  struct URLGlob inglob;
+  struct URLGlob urlglob;
   char *outfiles;
   char *httpgetfields;
   char *uploadfile;
