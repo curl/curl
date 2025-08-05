@@ -43,7 +43,7 @@ env:
 jobs:
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 15
     defaults:
       run:
@@ -414,7 +414,7 @@ jobs:
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
-    runs-on: windows-2022
+    runs-on: windows-2025
     timeout-minutes: 15
     defaults:
       run:
