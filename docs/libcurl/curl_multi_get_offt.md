@@ -28,8 +28,8 @@ CURLMcode curl_multi_get_offt(CURLM *multi_handle,
 
 # DESCRIPTION
 
-Get the *info* kept in the *multi* handle for `CURLMI_OFFT_*`.
-If the *info* is not applicable, this function returns CURLM_UNKNOWN_OPTION.
+Get the *info* kept in the *multi* handle. If the *info* is not applicable,
+this function returns CURLM_UNKNOWN_OPTION.
 
 # OPTIONS
 
