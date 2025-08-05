@@ -801,9 +801,14 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
 {
   struct Curl_cfilter *cf, *cf_proxy = NULL;
 
-  DEBUGASSERT(data->conn);
-  cf = (data->conn && CONN_SOCK_IDX_VALID(sockindex)) ?
-       data->conn->cfilter[sockindex] : NULL;
+  if(!data->conn) {
+    DEBUGASSERT(0);
+    *phost = "";
+    *pport = -1;
+    return;
+  }
+
+  cf = CONN_SOCK_IDX_VALID(sockindex) ? data->conn->cfilter[sockindex] : NULL;
   /* Find the "lowest" tunneling proxy filter that has not connected yet. */
   while(cf && !cf->connected) {
     if((cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY)) ==
