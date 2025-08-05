@@ -149,7 +149,7 @@ static void mbed_debug(void *context, int level, const char *f_name,
   /* bail out on nowhere to write data
   or if data is empty */
   if(!data || len == 0 || line[0] == 0)
-      return;
+    return;
 
   /* discount any trailing newline */
   if(line[len - 1] == '\n') {
