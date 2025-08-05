@@ -231,6 +231,7 @@ CURLcode curlx_dyn_addf(struct dynbuf *s, const char *fmt, ...)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
+  DEBUGASSERT(strcmp(fmt, "%s")); /* use curlx_dyn_add instead */
   va_start(ap, fmt);
   result = curlx_dyn_vaddf(s, fmt, ap);
   va_end(ap);
