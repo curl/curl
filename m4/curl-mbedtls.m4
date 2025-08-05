@@ -33,7 +33,7 @@ if test "$OPT_MBEDTLS" != no; then
   _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
-  if test X"$OPT_MBEDTLS" != Xno; then
+  if test "$OPT_MBEDTLS" != no; then
 
     if test "$OPT_MBEDTLS" = "yes"; then
       OPT_MBEDTLS=""
