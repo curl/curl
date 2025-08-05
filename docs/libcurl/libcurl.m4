@@ -153,7 +153,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       unset _libcurl_wanted
     fi
 
-    if test $_libcurl_try_link = yes; then
+    if test "$_libcurl_try_link" = yes; then
 
       # we did not find curl-config, so let's see if the user-supplied
       # link line (or failing that, "-lcurl") is enough.
@@ -187,7 +187,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         unset _libcurl_save_libs
         ])
 
-      if test $libcurl_cv_lib_curl_usable = yes; then
+      if test "$libcurl_cv_lib_curl_usable" = yes; then
 
         # Does curl_free() exist in this version of libcurl?
         # If not, fake it with free()
