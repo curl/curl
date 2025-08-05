@@ -131,7 +131,8 @@ static int get_category_content(const char *category, unsigned int cols)
       if(table_flag == 1) {
         printf("%s: %s table\n", categories[i].opt, categories[i].desc);
         tool_table(categories[i].category, cols);
-      } else {
+      }
+      else {
         printf("%s: %s\n", categories[i].opt, categories[i].desc);
         print_category(categories[i].category, cols);
       }
