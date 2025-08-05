@@ -393,7 +393,7 @@ done
 IFS=$xc_tst_prev_IFS
 xc_tst_dirs_sem=`expr "$xc_tst_dirs_sem" : '.*'`
 
-if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
+if test "$xc_tst_dirs_sem" -eq "$xc_tst_dirs_col"; then
   # When both counting methods give the same result we do not want to
   # chose one over the other, and consider auto-detection not possible.
   if test -z "$PATH_SEPARATOR"; then
@@ -404,7 +404,7 @@ if test $xc_tst_dirs_sem -eq $xc_tst_dirs_col; then
   fi
 else
   # Separator with the greater directory count is the auto-detected one.
-  if test $xc_tst_dirs_sem -gt $xc_tst_dirs_col; then
+  if test "$xc_tst_dirs_sem" -gt "$xc_tst_dirs_col"; then
     xc_tst_auto_separator=';'
   else
     xc_tst_auto_separator=':'
