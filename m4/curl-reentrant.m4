@@ -407,8 +407,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   fi
   #
   AC_MSG_CHECKING([if _REENTRANT is onwards defined])
-  if test "$tmp_reentrant_initially_defined" = "yes" ||
-    test "$tmp_need_reentrant" = "yes"; then
+  if test "$tmp_reentrant_initially_defined" = "yes" -o "$tmp_need_reentrant" = "yes"; then
     CURL_CONFIGURE_FROM_NOW_ON_WITH_REENTRANT
     AC_MSG_RESULT([yes])
   else
@@ -462,8 +461,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   fi
   #
   AC_MSG_CHECKING([if _THREAD_SAFE is onwards defined])
-  if test "$tmp_thread_safe_initially_defined" = "yes" ||
-    test "$tmp_need_thread_safe" = "yes"; then
+  if test "$tmp_thread_safe_initially_defined" = "yes" -o "$tmp_need_thread_safe" = "yes"; then
     CURL_CONFIGURE_FROM_NOW_ON_WITH_THREAD_SAFE
     AC_MSG_RESULT([yes])
   else

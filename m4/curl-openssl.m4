@@ -238,8 +238,7 @@ if test "$OPT_OPENSSL" != no; then
       LIBS="$CLEANLIBS"
     fi
 
-    if test "$OPT_OPENSSL" != off &&
-       test "$OPENSSL_ENABLED" != "1"; then
+    if test "$OPT_OPENSSL" != off -a "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
   fi
@@ -347,8 +346,7 @@ if test "$OPT_OPENSSL" != no; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-if test "$OPT_OPENSSL" != no &&
-   test "$OPENSSL_ENABLED" != "1"; then
+if test "$OPT_OPENSSL" != no -a "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])

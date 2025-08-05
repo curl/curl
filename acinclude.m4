@@ -58,7 +58,7 @@ AC_DEFUN([CURL_CHECK_DEF], [
       "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
       "$SED" 's/.*CURL_DEF_TOKEN[[ ]][[ ]]*//' 2>/dev/null | \
       "$SED" 's/[["]][[ ]]*[["]]//g' 2>/dev/null`
-    if test -z "$tmp_exp" || test "$tmp_exp" = "$1"; then
+    if test -z "$tmp_exp" -o "$tmp_exp" = "$1"; then
       tmp_exp=""
     fi
   ])
@@ -926,8 +926,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     esac
     #
     dnl only do runtime verification when not cross-compiling
-    if test "$cross_compiling" != "yes" &&
-      test "$curl_func_clock_gettime" = "yes"; then
+    if test "$cross_compiling" != "yes" -a "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       CURL_RUN_IFELSE([
         AC_LANG_PROGRAM([[
@@ -1203,7 +1202,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     fi
   fi
 
-  if test "$ca" = "no" || test -f "$ca"; then
+  if test "$ca" = "no" -o -f "$ca"; then
     ca_warning=""
   fi
 
@@ -1238,7 +1237,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
     AC_MSG_RESULT([$capath (capath)])
   fi
-  if test "$ca" = "no" && test "$capath" = "no"; then
+  if test "$ca" = "no" -a "$capath" = "no"; then
     AC_MSG_RESULT([no])
   fi
 

@@ -122,7 +122,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           ])
       fi
 
-      if test "$_libcurl_wanted" -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
+      if test "$_libcurl_wanted" -eq 0 -o "$libcurl_cv_lib_version_ok" = yes; then
         if test "$LIBCURL_CPPFLAGS" = ""; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
@@ -261,7 +261,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     unset _libcurl_ldflags
   fi
 
-  if test "$_libcurl_with" = no || test "$libcurl_cv_lib_curl_usable" != yes; then
+  if test "$_libcurl_with" = no -o "$libcurl_cv_lib_curl_usable" != yes; then
     # This is the IF-NO path
     ifelse([$4],,:,[$4])
   else

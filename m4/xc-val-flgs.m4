@@ -207,10 +207,10 @@ AC_DEFUN([XC_CHECK_USER_FLAGS], [
   _XC_CHECK_VAR_LDFLAGS
   _XC_CHECK_VAR_CPPFLAGS
   _XC_CHECK_VAR_CFLAGS
-  if test "$xc_bad_var_libs" = yes ||
-     test "$xc_bad_var_cflags" = yes ||
-     test "$xc_bad_var_ldflags" = yes ||
-     test "$xc_bad_var_cppflags" = yes; then
+  if test "$xc_bad_var_libs" = yes \
+       -o "$xc_bad_var_cflags" = yes \
+       -o "$xc_bad_var_ldflags" = yes \
+       -o "$xc_bad_var_cppflags" = yes; then
     AC_MSG_ERROR([Can not continue. Fix errors mentioned immediately above this line.])
   fi
 ])
@@ -235,10 +235,10 @@ AC_DEFUN([XC_CHECK_BUILD_FLAGS], [
   _XC_CHECK_VAR_LDFLAGS
   _XC_CHECK_VAR_CPPFLAGS
   _XC_CHECK_VAR_CFLAGS
-  if test "$xc_bad_var_libs" = yes ||
-     test "$xc_bad_var_cflags" = yes ||
-     test "$xc_bad_var_ldflags" = yes ||
-     test "$xc_bad_var_cppflags" = yes; then
+  if test "$xc_bad_var_libs" = yes \
+       -o "$xc_bad_var_cflags" = yes \
+       -o "$xc_bad_var_ldflags" = yes \
+       -o "$xc_bad_var_cppflags" = yes; then
     AC_MSG_WARN([Continuing even with errors mentioned immediately above this line.])
   fi
 ])

@@ -72,7 +72,7 @@ if test -z "$SED"; then
   dnl allow it to be overridden
   AC_PATH_PROG([SED], [sed], [not_found],
     [$PATH:/usr/bin:/usr/local/bin])
-  if test -z "$SED" || test "$SED" = "not_found"; then
+  if test -z "$SED" -o "$SED" = "not_found"; then
     AC_MSG_ERROR([sed not found in PATH. Cannot continue without sed.])
   fi
 fi
@@ -84,7 +84,7 @@ if test -z "$GREP"; then
   dnl allow it to be overridden
   AC_PATH_PROG([GREP], [grep], [not_found],
     [$PATH:/usr/bin:/usr/local/bin])
-  if test -z "$GREP" || test "$GREP" = "not_found"; then
+  if test -z "$GREP" -o "$GREP" = "not_found"; then
     AC_MSG_ERROR([grep not found in PATH. Cannot continue without grep.])
   fi
 fi
@@ -104,7 +104,7 @@ if test -z "$EGREP"; then
       [$PATH:/usr/bin:/usr/local/bin])
   fi
 fi
-if test -z "$EGREP" || test "$EGREP" = "not_found"; then
+if test -z "$EGREP" -o "$EGREP" = "not_found"; then
   AC_MSG_ERROR([grep -E is not working and egrep is not found in PATH. Cannot continue.])
 fi
 AC_SUBST([EGREP])
@@ -115,7 +115,7 @@ if test -z "$AR"; then
   dnl allow it to be overridden
   AC_PATH_TOOL([AR], [ar], [not_found],
     [$PATH:/usr/bin:/usr/local/bin])
-  if test -z "$AR" || test "$AR" = "not_found"; then
+  if test -z "$AR" -o "$AR" = "not_found"; then
     AC_MSG_ERROR([ar not found in PATH. Cannot continue without ar.])
   fi
 fi
@@ -578,8 +578,7 @@ supports_unittests=yes
 # cross-compilation of unit tests static library/programs fails when
 # libcurl shared library is built. This might be due to a libtool or
 # automake issue. In this case we disable unit tests.
-if test "$cross_compiling" != "no" &&
-   test "$enable_shared" != "no"; then
+if test "$cross_compiling" != "no" -a "$enable_shared" != "no"; then
   supports_unittests=no
 fi
 
@@ -635,8 +634,7 @@ case $host_os in
   cygwin*|msys*) curl_cv_cygwin='yes';;
 esac
 
-AM_CONDITIONAL([HAVE_WINDRES],
-  [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
+AM_CONDITIONAL([HAVE_WINDRES], [test "$curl_cv_native_windows" = "yes" -a -n "${RC}"])
 
 if test "$curl_cv_native_windows" = "yes"; then
   AM_COND_IF([HAVE_WINDRES],,
@@ -1421,20 +1419,20 @@ else
       LDFLAGS=$clean_LDFLAGS]
     )
 
-  if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"; then
+  if test "$HAVE_LIBZ" = "1" -a "$HAVE_ZLIB_H" != "1"; then
     AC_MSG_WARN([configure found only the libz lib, not the header file!])
     HAVE_LIBZ=""
     CPPFLAGS=$clean_CPPFLAGS
     LDFLAGS=$clean_LDFLAGS
     LIBS=$clean_LIBS
     ZLIB_LIBS=""
-  elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"; then
+  elif test "$HAVE_LIBZ" != "1" -a "$HAVE_ZLIB_H" = "1"; then
     AC_MSG_WARN([configure found only the libz header file, not the lib!])
     CPPFLAGS=$clean_CPPFLAGS
     LDFLAGS=$clean_LDFLAGS
     LIBS=$clean_LIBS
     ZLIB_LIBS=""
-  elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"; then
+  elif test "$HAVE_LIBZ" = "1" -a "$HAVE_ZLIB_H" = "1"; then
     dnl both header and lib were found!
     AC_SUBST(HAVE_LIBZ)
     AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
@@ -1524,8 +1522,7 @@ if test "$OPT_BROTLI" != no; then
     AC_DEFINE(HAVE_BROTLI, 1, [if BROTLI is in use])
   )
 
-  if test "$OPT_BROTLI" != off &&
-     test "$HAVE_BROTLI" != "1"; then
+  if test "$OPT_BROTLI" != off -a "$HAVE_BROTLI" != "1"; then
     AC_MSG_ERROR([BROTLI libs and/or directories were not found where specified!])
   fi
 
@@ -1613,8 +1610,7 @@ if test "$OPT_ZSTD" != no; then
     AC_DEFINE(HAVE_ZSTD, 1, [if libzstd is in use])
   )
 
-  if test "$OPT_ZSTD" != off &&
-     test "$HAVE_ZSTD" != "1"; then
+  if test "$OPT_ZSTD" != off -a "$HAVE_ZSTD" != "1"; then
     AC_MSG_ERROR([libzstd was not found where specified!])
   fi
 
@@ -2302,8 +2298,7 @@ if test "$OPT_LIBSSH2" != no; then
     USE_LIBSSH2=1
   )
 
-  if test "$OPT_LIBSSH2" != off &&
-     test "$USE_LIBSSH2" != "1"; then
+  if test "$OPT_LIBSSH2" != off -a "$USE_LIBSSH2" != "1"; then
     AC_MSG_ERROR([libssh2 libs and/or directories were not found where specified!])
   fi
 
@@ -2378,8 +2373,7 @@ elif test "$OPT_LIBSSH" != no; then
     USE_LIBSSH=1
   )
 
-  if test "$OPT_LIBSSH" != off &&
-     test "$USE_LIBSSH" != "1"; then
+  if test "$OPT_LIBSSH" != off -a test "$USE_LIBSSH" != "1"; then
     AC_MSG_ERROR([libssh libs and/or directories were not found where specified!])
   fi
 
@@ -2485,7 +2479,7 @@ case "$OPT_LDAP" in
     ;;
 esac
 
-if test "$CURL_DISABLE_LDAP" != 1 && test "$want_ldap" != "no"; then
+if test "$CURL_DISABLE_LDAP" != 1 -a "$want_ldap" != "no"; then
 
   CURL_CHECK_HEADER_LBER
   CURL_CHECK_HEADER_LDAP
@@ -2689,8 +2683,7 @@ if test "$OPT_LIBRTMP" != no; then
       LIBS=$CLEANLIBS
   )
 
-  if test "$OPT_LIBRTMP" != off &&
-     test "$USE_LIBRTMP" != "1"; then
+  if test "$OPT_LIBRTMP" != off -a "$USE_LIBRTMP" != "1"; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi
 fi
@@ -4258,14 +4251,14 @@ if test "$ipv6" = yes -a "$curl_cv_apple" = 'yes'; then
 fi
 
 dnl Windows threaded resolver check
-if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
+if test "$want_threaded_resolver" = "yes" -a "$curl_cv_native_windows" = "yes"; then
   USE_THREADS_WIN32=1
   AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
   curl_res_msg="Win32 threaded"
 fi
 
 dnl detect pthreads
-if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; then
+if test "$want_threaded_resolver" = "yes" -a "$USE_THREADS_WIN32" != "1"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
@@ -4558,7 +4551,7 @@ AS_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
     want_tls_srp=yes
 )
 
-if test "$want_tls_srp" = "yes" && ( test "$HAVE_GNUTLS_SRP" = "1" || test "$HAVE_OPENSSL_SRP" = "1"); then
+if test "$want_tls_srp" = "yes" && test "$HAVE_GNUTLS_SRP" = "1" -o "$HAVE_OPENSSL_SRP" = "1"; then
   AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
   USE_TLS_SRP=1
   curl_tls_srp_msg="enabled"
@@ -5344,8 +5337,8 @@ fi
 if test "$CURL_DISABLE_LDAP" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
   if test "$CURL_DISABLE_LDAPS" != "1"; then
-    if (test "$USE_OPENLDAP" = "1" && test "$SSL_ENABLED" = "1") ||
-      (test "$USE_OPENLDAP" != "1" && test "$HAVE_LDAP_SSL" = "1"); then
+    if test "$USE_OPENLDAP" = "1" -a "$SSL_ENABLED" = "1" ||
+      test "$USE_OPENLDAP" != "1" -a "$HAVE_LDAP_SSL" = "1"; then
       SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
     fi
   fi
@@ -5444,8 +5437,7 @@ XC_CHECK_BUILD_FLAGS
 SSL_BACKENDS=${ssl_backends}
 AC_SUBST(SSL_BACKENDS)
 
-if test "$want_curldebug_assumed" = "yes" &&
-  test "$want_curldebug" = "yes" && test "$USE_ARES" = "1"; then
+if test "$want_curldebug_assumed" = "yes" -a "$want_curldebug" = "yes" -a "$USE_ARES" = "1"; then
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
