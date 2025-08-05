@@ -117,7 +117,7 @@ esac
 # be overridden using 'configure --disable-shared --without-pic'.
 #
 
-if test "x$xc_lt_want_with_pic" = 'xdefault'; then
+if test "$xc_lt_want_with_pic" = 'default'; then
   case $host_cpu in @%:@ (
     x86_64 | amd64 | ia64)
       case $host_os in @%:@ (
@@ -261,7 +261,7 @@ AC_MSG_CHECKING([whether to build shared libraries with -no-undefined])
 xc_lt_shlib_use_no_undefined='no'
 if test "$allow_undefined" = 'no'; then
   xc_lt_shlib_use_no_undefined='yes'
-elif test "x$allow_undefined_flag" = 'xunsupported'; then
+elif test "$allow_undefined_flag" = 'unsupported'; then
   xc_lt_shlib_use_no_undefined='yes'
 fi
 case $host_os in @%:@ (
