@@ -68,35 +68,24 @@ bool tool_create_output_file(struct OutStruct *outs,
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
-      size_t len = strlen(fname);
-      size_t newlen = len + 13; /* nul + 1-11 digits + dot */
-      char *newname;
-      /* Guard against wraparound in new filename */
-      if(newlen < len) {
-        errorf(global, "overflow in filename generation");
-        return FALSE;
-      }
-      newname = malloc(newlen);
-      if(!newname) {
-        errorf(global, "out of memory");
-        return FALSE;
-      }
-      memcpy(newname, fname, len);
-      newname[len] = '.';
+      struct dynbuf fbuffer;
+      curlx_dyn_init(&fbuffer, 1025);
       /* !checksrc! disable ERRNOVAR 1 */
       while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
             next_num < 100 /* and we have not reached the retry limit */ ) {
-        msnprintf(newname + len + 1, 12, "%d", next_num);
+        curlx_dyn_reset(&fbuffer);
+        if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
+          return FALSE;
         next_num++;
         do {
-          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
-                             OPENMODE);
+          fd = open(curlx_dyn_ptr(&fbuffer),
+                    O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
-      outs->filename = newname; /* remember the new one */
+      outs->filename = curlx_dyn_ptr(&fbuffer); /* remember the new one */
       outs->alloc_filename = TRUE;
     }
     /* An else statement to not overwrite existing files and not retry with
