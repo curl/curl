@@ -27,7 +27,7 @@ dnl ----------------------------------------------------
 dnl check for Rustls
 dnl ----------------------------------------------------
 
-if test "x$OPT_RUSTLS" != xno; then
+if test "$OPT_RUSTLS" != no; then
   ssl_msg=
 
   dnl backup the pre-ssl variables
@@ -152,7 +152,7 @@ if test "x$OPT_RUSTLS" != xno; then
   LDFLAGS="$CLEANLDFLAGS $SSL_LDFLAGS"
   LDFLAGSPC="$CLEANLDFLAGSPC $SSL_LDFLAGS"
 
-  if test "x$USE_RUSTLS" = "xyes"; then
+  if test "$USE_RUSTLS" = "yes"; then
     AC_MSG_NOTICE([detected Rustls])
     check_for_ca_bundle=1
 
@@ -161,7 +161,7 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH so that further configure tests do not
       dnl fail due to this
-      if test "x$cross_compiling" != "xyes"; then
+      if test "$cross_compiling" != "yes"; then
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_RUSTLS"
         export CURL_LIBRARY_PATH
         AC_MSG_NOTICE([Added $LIB_RUSTLS to CURL_LIBRARY_PATH])
