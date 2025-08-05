@@ -603,7 +603,7 @@ case $host_os in
     ;;
 esac
 
-AM_CONDITIONAL(BUILD_UNITTESTS, test $supports_unittests = yes)
+AM_CONDITIONAL(BUILD_UNITTESTS, test "$supports_unittests" = yes)
 
 # In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
 # jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
