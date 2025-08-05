@@ -116,14 +116,14 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.x or newer
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
-#          - name: 'mbedtls-pkg MultiSSL'
-#            install_packages: libnghttp2-dev libmbedtls-dev
-#            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
+          #- name: 'mbedtls-pkg MultiSSL'
+          #   install_packages: libnghttp2-dev libmbedtls-dev
+          #   generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
 
-#          - name: 'mbedtls-pkg !pc'
-#            install_packages: libnghttp2-dev libmbedtls-dev
-#            install_steps: skipall
-#            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
+          #- name: 'mbedtls-pkg !pc'
+          #  install_packages: libnghttp2-dev libmbedtls-dev
+          #  install_steps: skipall
+          #  generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'awslc'
             install_packages: zlib1g-dev
@@ -415,9 +415,8 @@ jobs:
           path: ~/mbedtls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
-      # TODO: re-add cache check: && steps.cache-mbedtls.outputs.cache-hit != 'true'
       - name: 'build mbedtls'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
