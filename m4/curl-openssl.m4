@@ -347,7 +347,7 @@ if test "$OPT_OPENSSL" != no; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-if test X"$OPT_OPENSSL" != Xno &&
+if test "$OPT_OPENSSL" != no &&
    test "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])

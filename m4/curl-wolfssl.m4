@@ -43,7 +43,7 @@ if test "$OPT_WOLFSSL" != no; then
 
   ssl_msg=
 
-  if test X"$OPT_WOLFSSL" != Xno; then
+  if test "$OPT_WOLFSSL" != no; then
 
     if test "$OPT_WOLFSSL" = "yes"; then
       OPT_WOLFSSL=""
