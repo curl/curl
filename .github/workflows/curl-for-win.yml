@@ -74,7 +74,7 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   linux-musl-llvm:
-    name: 'Linux llvm MUSL (amd64, RISC-V)'
+    name: 'Linux llvm MUSL (amd64, riscv64)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
