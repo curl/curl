@@ -4384,11 +4384,11 @@ AC_DEFUN([CURL_SIZEOF], [
       r=0
     ])
     dnl get out of the loop once matched
-    if test $r -gt 0; then
+    if test "$r" -gt 0; then
       break;
     fi
   done
-  if test $r -eq 0; then
+  if test "$r" -eq 0; then
     AC_MSG_ERROR([Failed to find size of $1])
   fi
   AC_MSG_RESULT($r)
