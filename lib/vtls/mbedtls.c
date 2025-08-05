@@ -71,6 +71,12 @@
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
+/* Error-out on old mbedTLS versions immediately */
+#if MBEDTLS_VERSION_NUMBER < 0x03060000
+ /* https://github.com/Mbed-TLS/mbedtls/releases */
+#error "mbedTLS 3.6.x is the oldest supported version of mbedTLS"
+#endif
+
 /* ALPN for http2 */
 #if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
 #  define HAS_ALPN_MBEDTLS
@@ -138,14 +144,22 @@ static void mbed_debug(void *context, int level, const char *f_name,
   (void)level;
   (void)line_nb;
   (void)f_name;
+  size_t len = line ? strlen(line) : 0;
 
-  if(data) {
-    size_t len = strlen(line);
-    if(len && (line[len - 1] == '\n'))
-      /* discount any trailing newline */
-      len--;
-    infof(data, "%.*s", (int)len, line);
+  /* bail out on nowhere to write data
+  or if data is empty */
+  if(!data || len == 0 || line[0] == 0)
+      return;
+
+  /* discount any trailing newline */
+  if(line[len - 1] == '\n'){
+    len--;
+
+    if(len == 0)
+      return;
   }
+
+  infof(data, "%.*s", (int)len, line);
 }
 #endif
 
