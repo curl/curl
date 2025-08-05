@@ -93,7 +93,7 @@ AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
     *)
       dnl --enable-ares option used
       want_ares="yes"
-      if test -n "$enableval" && test "$enableval" != "yes"; then
+      if test -n "$enableval" -a "$enableval" != "yes"; then
         want_ares_path="$enableval"
       fi
       ;;
@@ -423,8 +423,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   AC_MSG_CHECKING([whether hiding of library internal symbols will actually happen])
   CFLAG_CURL_SYMBOL_HIDING=""
   doing_symbol_hiding="no"
-  if test "$want_symbol_hiding" = "yes" &&
-    test "$supports_symbol_hiding" = "yes"; then
+  if test "$want_symbol_hiding" = "yes" -a "$supports_symbol_hiding" = "yes"; then
     doing_symbol_hiding="yes"
     CFLAG_CURL_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
     AC_DEFINE_UNQUOTED(CURL_EXTERN_SYMBOL, $symbol_hiding_EXTERN,

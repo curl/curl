@@ -532,10 +532,10 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
   fi
   #
   AC_MSG_CHECKING([if alarm might be used])
-  if test "$tst_links_alarm" = "yes" &&
-     test "$tst_proto_alarm" = "yes" &&
-     test "$tst_compi_alarm" = "yes" &&
-     test "$tst_allow_alarm" = "yes"; then
+  if test "$tst_links_alarm" = "yes" \
+       -a "$tst_proto_alarm" = "yes" \
+       -a "$tst_compi_alarm" = "yes" \
+       -a "$tst_allow_alarm" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_ALARM, 1,
       [Define to 1 if you have the alarm function.])
@@ -623,10 +623,10 @@ AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
   fi
   #
   AC_MSG_CHECKING([if basename might be used])
-  if test "$tst_links_basename" = "yes" &&
-     test "$tst_proto_basename" = "yes" &&
-     test "$tst_compi_basename" = "yes" &&
-     test "$tst_allow_basename" = "yes"; then
+  if test "$tst_links_basename" = "yes" \
+       -a "$tst_proto_basename" = "yes" \
+       -a "$tst_compi_basename" = "yes" \
+       -a "$tst_allow_basename" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_BASENAME, 1,
       [Define to 1 if you have the basename function.])
@@ -713,10 +713,10 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   fi
   #
   AC_MSG_CHECKING([if closesocket might be used])
-  if test "$tst_links_closesocket" = "yes" &&
-     test "$tst_proto_closesocket" = "yes" &&
-     test "$tst_compi_closesocket" = "yes" &&
-     test "$tst_allow_closesocket" = "yes"; then
+  if test "$tst_links_closesocket" = "yes" \
+       -a "$tst_proto_closesocket" = "yes" \
+       -a "$tst_compi_closesocket" = "yes" \
+       -a "$tst_allow_closesocket" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET, 1,
       [Define to 1 if you have the closesocket function.])
@@ -792,9 +792,9 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   fi
   #
   AC_MSG_CHECKING([if CloseSocket might be used])
-  if test "$tst_links_closesocket_camel" = "yes" &&
-     test "$tst_compi_closesocket_camel" = "yes" &&
-     test "$tst_allow_closesocket_camel" = "yes"; then
+  if test "$tst_links_closesocket_camel" = "yes" \
+       -a "$tst_compi_closesocket_camel" = "yes" \
+       -a "$tst_allow_closesocket_camel" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_CLOSESOCKET_CAMEL, 1,
       [Define to 1 if you have the CloseSocket camel case function.])
@@ -875,10 +875,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
   fi
   #
   AC_MSG_CHECKING([if fcntl might be used])
-  if test "$tst_links_fcntl" = "yes" &&
-     test "$tst_proto_fcntl" = "yes" &&
-     test "$tst_compi_fcntl" = "yes" &&
-     test "$tst_allow_fcntl" = "yes"; then
+  if test "$tst_links_fcntl" = "yes" \
+       -a "$tst_proto_fcntl" = "yes" \
+       -a "$tst_compi_fcntl" = "yes" \
+       -a "$tst_allow_fcntl" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL, 1,
       [Define to 1 if you have the fcntl function.])
@@ -941,8 +941,8 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
   fi
   #
   AC_MSG_CHECKING([if fcntl O_NONBLOCK might be used])
-  if test "$tst_compi_fcntl_o_nonblock" = "yes" &&
-     test "$tst_allow_fcntl_o_nonblock" = "yes"; then
+  if test "$tst_compi_fcntl_o_nonblock" = "yes" \
+       -a "$tst_allow_fcntl_o_nonblock" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FCNTL_O_NONBLOCK, 1,
       [Define to 1 if you have a working fcntl O_NONBLOCK function.])
@@ -1035,10 +1035,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   fi
   #
   AC_MSG_CHECKING([if freeaddrinfo might be used])
-  if test "$tst_links_freeaddrinfo" = "yes" &&
-     test "$tst_proto_freeaddrinfo" = "yes" &&
-     test "$tst_compi_freeaddrinfo" = "yes" &&
-     test "$tst_allow_freeaddrinfo" = "yes"; then
+  if test "$tst_links_freeaddrinfo" = "yes" \
+       -a "$tst_proto_freeaddrinfo" = "yes" \
+       -a "$tst_compi_freeaddrinfo" = "yes" \
+       -a "$tst_allow_freeaddrinfo" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FREEADDRINFO, 1,
       [Define to 1 if you have the freeaddrinfo function.])
@@ -1148,10 +1148,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
   fi
   #
   AC_MSG_CHECKING([if fsetxattr might be used])
-  if test "$tst_links_fsetxattr" = "yes" &&
-     test "$tst_proto_fsetxattr" = "yes" &&
-     test "$tst_compi_fsetxattr" = "yes" &&
-     test "$tst_allow_fsetxattr" = "yes"; then
+  if test "$tst_links_fsetxattr" = "yes" \
+       -a "$tst_proto_fsetxattr" = "yes" \
+       -a "$tst_compi_fsetxattr" = "yes" \
+       -a "$tst_allow_fsetxattr" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FSETXATTR, 1,
       [Define to 1 if you have the fsetxattr function.])
@@ -1242,10 +1242,10 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
   fi
   #
   AC_MSG_CHECKING([if ftruncate might be used])
-  if test "$tst_links_ftruncate" = "yes" &&
-     test "$tst_proto_ftruncate" = "yes" &&
-     test "$tst_compi_ftruncate" = "yes" &&
-     test "$tst_allow_ftruncate" = "yes"; then
+  if test "$tst_links_ftruncate" = "yes" \
+       -a "$tst_proto_ftruncate" = "yes" \
+       -a "$tst_compi_ftruncate" = "yes" \
+       -a "$tst_allow_ftruncate" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_FTRUNCATE, 1,
       [Define to 1 if you have the ftruncate function.])
@@ -1339,8 +1339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_getaddrinfo" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -1386,8 +1385,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     ])
   fi
   #
-  if test "$tst_compi_getaddrinfo" = "yes" &&
-    test "$tst_works_getaddrinfo" != "no"; then
+  if test "$tst_compi_getaddrinfo" = "yes" -a "$tst_works_getaddrinfo" != "no"; then
     AC_MSG_CHECKING([if getaddrinfo usage allowed])
     if test "$curl_disallow_getaddrinfo" != "yes"; then
       AC_MSG_RESULT([yes])
@@ -1399,10 +1397,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   AC_MSG_CHECKING([if getaddrinfo might be used])
-  if test "$tst_proto_getaddrinfo" = "yes" &&
-     test "$tst_compi_getaddrinfo" = "yes" &&
-     test "$tst_allow_getaddrinfo" = "yes" &&
-     test "$tst_works_getaddrinfo" != "no"; then
+  if test "$tst_proto_getaddrinfo" = "yes" \
+       -a "$tst_compi_getaddrinfo" = "yes" \
+       -a "$tst_allow_getaddrinfo" = "yes" \
+       -a "$tst_works_getaddrinfo" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO, 1,
       [Define to 1 if you have a working getaddrinfo function.])
@@ -1469,8 +1467,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
-    if test "$tst_tsafe_getaddrinfo" = "unknown" &&
-       test "$curl_cv_native_windows" = "yes"; then
+    if test "$tst_tsafe_getaddrinfo" = "unknown" \
+         -a "$curl_cv_native_windows" = "yes"; then
       tst_tsafe_getaddrinfo="yes"
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
@@ -1607,10 +1605,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
   fi
   #
   AC_MSG_CHECKING([if gethostbyname_r might be used])
-  if test "$tst_links_gethostbyname_r" = "yes" &&
-     test "$tst_proto_gethostbyname_r" = "yes" &&
-     test "$tst_compi_gethostbyname_r" = "yes" &&
-     test "$tst_allow_gethostbyname_r" = "yes"; then
+  if test "$tst_links_gethostbyname_r" = "yes" \
+       -a "$tst_proto_gethostbyname_r" = "yes" \
+       -a "$tst_compi_gethostbyname_r" = "yes" \
+       -a "$tst_allow_gethostbyname_r" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETHOSTBYNAME_R, 1,
       [Define to 1 if you have the gethostbyname_r function.])
@@ -1755,10 +1753,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   fi
   #
   AC_MSG_CHECKING([if gethostname might be used])
-  if test "$tst_links_gethostname" = "yes" &&
-     test "$tst_proto_gethostname" = "yes" &&
-     test "$tst_compi_gethostname" = "yes" &&
-     test "$tst_allow_gethostname" = "yes"; then
+  if test "$tst_links_gethostname" = "yes" \
+       -a "$tst_proto_gethostname" = "yes" \
+       -a "$tst_compi_gethostname" = "yes" \
+       -a "$tst_allow_gethostname" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETHOSTNAME, 1,
       [Define to 1 if you have the gethostname function.])
@@ -1853,10 +1851,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   fi
   #
   AC_MSG_CHECKING([if getpeername might be used])
-  if test "$tst_links_getpeername" = "yes" &&
-     test "$tst_proto_getpeername" = "yes" &&
-     test "$tst_compi_getpeername" = "yes" &&
-     test "$tst_allow_getpeername" = "yes"; then
+  if test "$tst_links_getpeername" = "yes" \
+       -a "$tst_proto_getpeername" = "yes" \
+       -a "$tst_compi_getpeername" = "yes" \
+       -a "$tst_allow_getpeername" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETPEERNAME, 1,
       [Define to 1 if you have the getpeername function.])
@@ -1951,10 +1949,10 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   fi
   #
   AC_MSG_CHECKING([if getsockname might be used])
-  if test "$tst_links_getsockname" = "yes" &&
-     test "$tst_proto_getsockname" = "yes" &&
-     test "$tst_compi_getsockname" = "yes" &&
-     test "$tst_allow_getsockname" = "yes"; then
+  if test "$tst_links_getsockname" = "yes" \
+       -a "$tst_proto_getsockname" = "yes" \
+       -a "$tst_compi_getsockname" = "yes" \
+       -a "$tst_allow_getsockname" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETSOCKNAME, 1,
       [Define to 1 if you have the getsockname function.])
@@ -2027,8 +2025,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_getifaddrs" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2055,8 +2052,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
     ])
   fi
   #
-  if test "$tst_compi_getifaddrs" = "yes" &&
-    test "$tst_works_getifaddrs" != "no"; then
+  if test "$tst_compi_getifaddrs" = "yes" -a "$tst_works_getifaddrs" != "no"; then
     AC_MSG_CHECKING([if getifaddrs usage allowed])
     if test "$curl_disallow_getifaddrs" != "yes"; then
       AC_MSG_RESULT([yes])
@@ -2068,11 +2064,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
   #
   AC_MSG_CHECKING([if getifaddrs might be used])
-  if test "$tst_links_getifaddrs" = "yes" &&
-     test "$tst_proto_getifaddrs" = "yes" &&
-     test "$tst_compi_getifaddrs" = "yes" &&
-     test "$tst_allow_getifaddrs" = "yes" &&
-     test "$tst_works_getifaddrs" != "no"; then
+  if test "$tst_links_getifaddrs" = "yes" \
+       -a "$tst_proto_getifaddrs" = "yes" \
+       -a "$tst_compi_getifaddrs" = "yes" \
+       -a "$tst_allow_getifaddrs" = "yes" \
+       -a "$tst_works_getifaddrs" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GETIFADDRS, 1,
       [Define to 1 if you have a working getifaddrs function.])
@@ -2148,8 +2144,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_gmtime_r" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2175,8 +2170,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
     ])
   fi
   #
-  if test "$tst_compi_gmtime_r" = "yes" &&
-    test "$tst_works_gmtime_r" != "no"; then
+  if test "$tst_compi_gmtime_r" = "yes" -a "$tst_works_gmtime_r" != "no"; then
     AC_MSG_CHECKING([if gmtime_r usage allowed])
     if test "$curl_disallow_gmtime_r" != "yes"; then
       AC_MSG_RESULT([yes])
@@ -2188,11 +2182,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
   #
   AC_MSG_CHECKING([if gmtime_r might be used])
-  if test "$tst_links_gmtime_r" = "yes" &&
-     test "$tst_proto_gmtime_r" = "yes" &&
-     test "$tst_compi_gmtime_r" = "yes" &&
-     test "$tst_allow_gmtime_r" = "yes" &&
-     test "$tst_works_gmtime_r" != "no"; then
+  if test "$tst_links_gmtime_r" = "yes" \
+       -a "$tst_proto_gmtime_r" = "yes" \
+       -a "$tst_compi_gmtime_r" = "yes" \
+       -a "$tst_allow_gmtime_r" = "yes" \
+       -a "$tst_works_gmtime_r" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_GMTIME_R, 1,
       [Define to 1 if you have a working gmtime_r function.])
@@ -2268,8 +2262,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_inet_ntop" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2336,8 +2329,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
     ])
   fi
   #
-  if test "$tst_compi_inet_ntop" = "yes" &&
-    test "$tst_works_inet_ntop" != "no"; then
+  if test "$tst_compi_inet_ntop" = "yes" -a "$tst_works_inet_ntop" != "no"; then
     AC_MSG_CHECKING([if inet_ntop usage allowed])
     if test "$curl_disallow_inet_ntop" != "yes"; then
       AC_MSG_RESULT([yes])
@@ -2349,11 +2341,11 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
   #
   AC_MSG_CHECKING([if inet_ntop might be used])
-  if test "$tst_links_inet_ntop" = "yes" &&
-     test "$tst_proto_inet_ntop" = "yes" &&
-     test "$tst_compi_inet_ntop" = "yes" &&
-     test "$tst_allow_inet_ntop" = "yes" &&
-     test "$tst_works_inet_ntop" != "no"; then
+  if test "$tst_links_inet_ntop" = "yes" \
+       -a "$tst_proto_inet_ntop" = "yes" \
+       -a "$tst_compi_inet_ntop" = "yes" \
+       -a "$tst_allow_inet_ntop" = "yes" \
+       -a "$tst_works_inet_ntop" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_NTOP, 1,
       [Define to 1 if you have an IPv6 capable working inet_ntop function.])
@@ -2429,8 +2421,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_compi_inet_pton" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2490,8 +2481,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
     ])
   fi
   #
-  if test "$tst_compi_inet_pton" = "yes" &&
-    test "$tst_works_inet_pton" != "no"; then
+  if test "$tst_compi_inet_pton" = "yes" -a "$tst_works_inet_pton" != "no"; then
     AC_MSG_CHECKING([if inet_pton usage allowed])
     if test "$curl_disallow_inet_pton" != "yes"; then
       AC_MSG_RESULT([yes])
@@ -2503,11 +2493,11 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
   #
   AC_MSG_CHECKING([if inet_pton might be used])
-  if test "$tst_links_inet_pton" = "yes" &&
-     test "$tst_proto_inet_pton" = "yes" &&
-     test "$tst_compi_inet_pton" = "yes" &&
-     test "$tst_allow_inet_pton" = "yes" &&
-     test "$tst_works_inet_pton" != "no"; then
+  if test "$tst_links_inet_pton" = "yes" \
+       -a "$tst_proto_inet_pton" = "yes" \
+       -a "$tst_compi_inet_pton" = "yes" \
+       -a "$tst_allow_inet_pton" = "yes" \
+       -a "$tst_works_inet_pton" != "no"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_INET_PTON, 1,
       [Define to 1 if you have an IPv6 capable working inet_pton function.])
@@ -2589,10 +2579,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
   fi
   #
   AC_MSG_CHECKING([if ioctl might be used])
-  if test "$tst_links_ioctl" = "yes" &&
-     test "$tst_proto_ioctl" = "yes" &&
-     test "$tst_compi_ioctl" = "yes" &&
-     test "$tst_allow_ioctl" = "yes"; then
+  if test "$tst_links_ioctl" = "yes" \
+       -a "$tst_proto_ioctl" = "yes" \
+       -a "$tst_compi_ioctl" = "yes" \
+       -a "$tst_allow_ioctl" = "yes"; then
     AC_MSG_RESULT([yes])
     curl_cv_func_ioctl="yes"
     CURL_CHECK_FUNC_IOCTL_FIONBIO
@@ -2647,8 +2637,8 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
   fi
   #
   AC_MSG_CHECKING([if ioctl FIONBIO might be used])
-  if test "$tst_compi_ioctl_fionbio" = "yes" &&
-     test "$tst_allow_ioctl_fionbio" = "yes"; then
+  if test "$tst_compi_ioctl_fionbio" = "yes" \
+       -a "$tst_allow_ioctl_fionbio" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_FIONBIO, 1,
       [Define to 1 if you have a working ioctl FIONBIO function.])
@@ -2704,8 +2694,8 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
   fi
   #
   AC_MSG_CHECKING([if ioctl SIOCGIFADDR might be used])
-  if test "$tst_compi_ioctl_siocgifaddr" = "yes" &&
-     test "$tst_allow_ioctl_siocgifaddr" = "yes"; then
+  if test "$tst_compi_ioctl_siocgifaddr" = "yes" \
+       -a "$tst_allow_ioctl_siocgifaddr" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTL_SIOCGIFADDR, 1,
       [Define to 1 if you have a working ioctl SIOCGIFADDR function.])
@@ -2792,10 +2782,10 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   fi
   #
   AC_MSG_CHECKING([if ioctlsocket might be used])
-  if test "$tst_links_ioctlsocket" = "yes" &&
-     test "$tst_proto_ioctlsocket" = "yes" &&
-     test "$tst_compi_ioctlsocket" = "yes" &&
-     test "$tst_allow_ioctlsocket" = "yes"; then
+  if test "$tst_links_ioctlsocket" = "yes" \
+       -a "$tst_proto_ioctlsocket" = "yes" \
+       -a "$tst_compi_ioctlsocket" = "yes" \
+       -a "$tst_allow_ioctlsocket" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET, 1,
       [Define to 1 if you have the ioctlsocket function.])
@@ -2851,8 +2841,8 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
   fi
   #
   AC_MSG_CHECKING([if ioctlsocket FIONBIO might be used])
-  if test "$tst_compi_ioctlsocket_fionbio" = "yes" &&
-     test "$tst_allow_ioctlsocket_fionbio" = "yes"; then
+  if test "$tst_compi_ioctlsocket_fionbio" = "yes" \
+       -a "$tst_allow_ioctlsocket_fionbio" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_FIONBIO, 1,
       [Define to 1 if you have a working ioctlsocket FIONBIO function.])
@@ -2925,9 +2915,9 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   fi
   #
   AC_MSG_CHECKING([if IoctlSocket might be used])
-  if test "$tst_links_ioctlsocket_camel" = "yes" &&
-     test "$tst_compi_ioctlsocket_camel" = "yes" &&
-     test "$tst_allow_ioctlsocket_camel" = "yes"; then
+  if test "$tst_links_ioctlsocket_camel" = "yes" \
+       -a "$tst_compi_ioctlsocket_camel" = "yes" \
+       -a "$tst_allow_ioctlsocket_camel" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL, 1,
       [Define to 1 if you have the IoctlSocket camel case function.])
@@ -2983,8 +2973,8 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
   fi
   #
   AC_MSG_CHECKING([if IoctlSocket FIONBIO might be used])
-  if test "$tst_compi_ioctlsocket_camel_fionbio" = "yes" &&
-     test "$tst_allow_ioctlsocket_camel_fionbio" = "yes"; then
+  if test "$tst_compi_ioctlsocket_camel_fionbio" = "yes" \
+       -a "$tst_allow_ioctlsocket_camel_fionbio" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1,
       [Define to 1 if you have a working IoctlSocket camel case FIONBIO function.])
@@ -3055,8 +3045,8 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
     ])
   fi
   #
-  if test "$tst_proto_memrchr" = "yes" ||
-     test "$tst_macro_memrchr" = "yes"; then
+  if test "$tst_proto_memrchr" = "yes" \
+       -o "$tst_macro_memrchr" = "yes"; then
     AC_MSG_CHECKING([if memrchr is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -3086,10 +3076,8 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
   fi
   #
   AC_MSG_CHECKING([if memrchr might be used])
-  if (test "$tst_proto_memrchr" = "yes" ||
-      test "$tst_macro_memrchr" = "yes") &&
-     test "$tst_compi_memrchr" = "yes" &&
-     test "$tst_allow_memrchr" = "yes"; then
+  if test "$tst_proto_memrchr" = "yes" -o "$tst_macro_memrchr" = "yes" &&
+     test "$tst_compi_memrchr" = "yes" -a "$tst_allow_memrchr" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_MEMRCHR, 1,
       [Define to 1 if you have the memrchr function or macro.])
@@ -3171,10 +3159,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
   fi
   #
   AC_MSG_CHECKING([if sigaction might be used])
-  if test "$tst_links_sigaction" = "yes" &&
-     test "$tst_proto_sigaction" = "yes" &&
-     test "$tst_compi_sigaction" = "yes" &&
-     test "$tst_allow_sigaction" = "yes"; then
+  if test "$tst_links_sigaction" = "yes" \
+       -a "$tst_proto_sigaction" = "yes" \
+       -a "$tst_compi_sigaction" = "yes" \
+       -a "$tst_allow_sigaction" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGACTION, 1,
       [Define to 1 if you have the sigaction function.])
@@ -3256,10 +3244,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
   fi
   #
   AC_MSG_CHECKING([if siginterrupt might be used])
-  if test "$tst_links_siginterrupt" = "yes" &&
-     test "$tst_proto_siginterrupt" = "yes" &&
-     test "$tst_compi_siginterrupt" = "yes" &&
-     test "$tst_allow_siginterrupt" = "yes"; then
+  if test "$tst_links_siginterrupt" = "yes" \
+       -a "$tst_proto_siginterrupt" = "yes" \
+       -a "$tst_compi_siginterrupt" = "yes" \
+       -a "$tst_allow_siginterrupt" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGINTERRUPT, 1,
       [Define to 1 if you have the siginterrupt function.])
@@ -3341,10 +3329,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
   fi
   #
   AC_MSG_CHECKING([if signal might be used])
-  if test "$tst_links_signal" = "yes" &&
-     test "$tst_proto_signal" = "yes" &&
-     test "$tst_compi_signal" = "yes" &&
-     test "$tst_allow_signal" = "yes"; then
+  if test "$tst_links_signal" = "yes" \
+       -a "$tst_proto_signal" = "yes" \
+       -a "$tst_compi_signal" = "yes" \
+       -a "$tst_allow_signal" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGNAL, 1,
       [Define to 1 if you have the signal function.])
@@ -3416,8 +3404,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
     ])
   fi
   #
-  if test "$tst_proto_sigsetjmp" = "yes" ||
-     test "$tst_macro_sigsetjmp" = "yes"; then
+  if test "$tst_proto_sigsetjmp" = "yes" \
+       -o "$tst_macro_sigsetjmp" = "yes"; then
     AC_MSG_CHECKING([if sigsetjmp is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -3448,10 +3436,8 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
   fi
   #
   AC_MSG_CHECKING([if sigsetjmp might be used])
-  if (test "$tst_proto_sigsetjmp" = "yes" ||
-      test "$tst_macro_sigsetjmp" = "yes") &&
-     test "$tst_compi_sigsetjmp" = "yes" &&
-     test "$tst_allow_sigsetjmp" = "yes"; then
+  if test "$tst_proto_sigsetjmp" = "yes" -o "$tst_macro_sigsetjmp" = "yes" &&
+     test "$tst_compi_sigsetjmp" = "yes" -a "$tst_allow_sigsetjmp" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SIGSETJMP, 1,
       [Define to 1 if you have the sigsetjmp function or macro.])
@@ -3545,10 +3531,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   fi
   #
   AC_MSG_CHECKING([if socket might be used])
-  if test "$tst_links_socket" = "yes" &&
-     test "$tst_proto_socket" = "yes" &&
-     test "$tst_compi_socket" = "yes" &&
-     test "$tst_allow_socket" = "yes"; then
+  if test "$tst_links_socket" = "yes" \
+       -a "$tst_proto_socket" = "yes" \
+       -a "$tst_compi_socket" = "yes" \
+       -a "$tst_allow_socket" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SOCKET, 1,
       [Define to 1 if you have the socket function.])
@@ -3631,10 +3617,10 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
   fi
   #
   AC_MSG_CHECKING([if socketpair might be used])
-  if test "$tst_links_socketpair" = "yes" &&
-     test "$tst_proto_socketpair" = "yes" &&
-     test "$tst_compi_socketpair" = "yes" &&
-     test "$tst_allow_socketpair" = "yes"; then
+  if test "$tst_links_socketpair" = "yes" \
+       -a "$tst_proto_socketpair" = "yes" \
+       -a "$tst_compi_socketpair" = "yes" \
+       -a "$tst_allow_socketpair" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_SOCKETPAIR, 1,
       [Define to 1 if you have the socketpair function.])
@@ -3716,10 +3702,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
   fi
   #
   AC_MSG_CHECKING([if strcasecmp might be used])
-  if test "$tst_links_strcasecmp" = "yes" &&
-     test "$tst_proto_strcasecmp" = "yes" &&
-     test "$tst_compi_strcasecmp" = "yes" &&
-     test "$tst_allow_strcasecmp" = "yes"; then
+  if test "$tst_links_strcasecmp" = "yes" \
+       -a "$tst_proto_strcasecmp" = "yes" \
+       -a "$tst_compi_strcasecmp" = "yes" \
+       -a "$tst_allow_strcasecmp" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRCASECMP, 1,
       [Define to 1 if you have the strcasecmp function.])
@@ -3800,10 +3786,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
   fi
   #
   AC_MSG_CHECKING([if strcmpi might be used])
-  if test "$tst_links_strcmpi" = "yes" &&
-     test "$tst_proto_strcmpi" = "yes" &&
-     test "$tst_compi_strcmpi" = "yes" &&
-     test "$tst_allow_strcmpi" = "yes"; then
+  if test "$tst_links_strcmpi" = "yes" \
+       -a "$tst_proto_strcmpi" = "yes" \
+       -a "$tst_compi_strcmpi" = "yes" \
+       -a "$tst_allow_strcmpi" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRCMPI, 1,
       [Define to 1 if you have the strcmpi function.])
@@ -3886,10 +3872,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
   fi
   #
   AC_MSG_CHECKING([if strdup might be used])
-  if test "$tst_links_strdup" = "yes" &&
-     test "$tst_proto_strdup" = "yes" &&
-     test "$tst_compi_strdup" = "yes" &&
-     test "$tst_allow_strdup" = "yes"; then
+  if test "$tst_links_strdup" = "yes" \
+       -a "$tst_proto_strdup" = "yes" \
+       -a "$tst_compi_strdup" = "yes" \
+       -a "$tst_allow_strdup" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRDUP, 1,
       [Define to 1 if you have the strdup function.])
@@ -4016,8 +4002,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_glibc_strerror_r" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4045,8 +4030,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     ])
   fi
   #
-  if test "$tst_compi_strerror_r" = "yes" &&
-    test "$tst_works_glibc_strerror_r" != "yes"; then
+  if test "$tst_compi_strerror_r" = "yes" -a "$tst_works_glibc_strerror_r" != "yes"; then
     AC_MSG_CHECKING([if strerror_r is POSIX like])
     tst_posix_strerror_r_type_arg3="unknown"
     for arg3 in 'size_t' 'int' 'unsigned int'; do
@@ -4079,8 +4063,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" &&
-    test "$tst_posix_strerror_r" = "yes"; then
+  if test "$cross_compiling" != "yes" -a "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -4114,14 +4097,14 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   if test "$tst_works_posix_strerror_r" = "yes"; then
     tst_glibc_strerror_r="no"
   fi
-  if test "$tst_glibc_strerror_r" = "yes" &&
-    test "$tst_works_glibc_strerror_r" != "no" &&
-    test "$tst_posix_strerror_r" != "yes"; then
+  if test "$tst_glibc_strerror_r" = "yes" \
+       -a "$tst_works_glibc_strerror_r" != "no" \
+       -a "$tst_posix_strerror_r" != "yes"; then
     tst_allow_strerror_r="check"
   fi
-  if test "$tst_posix_strerror_r" = "yes" &&
-    test "$tst_works_posix_strerror_r" != "no" &&
-    test "$tst_glibc_strerror_r" != "yes"; then
+  if test "$tst_posix_strerror_r" = "yes" \
+       -a "$tst_works_posix_strerror_r" != "no" \
+       -a "$tst_glibc_strerror_r" != "yes"; then
     tst_allow_strerror_r="check"
   fi
   if test "$tst_allow_strerror_r" = "check"; then
@@ -4136,10 +4119,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   AC_MSG_CHECKING([if strerror_r might be used])
-  if test "$tst_links_strerror_r" = "yes" &&
-     test "$tst_proto_strerror_r" = "yes" &&
-     test "$tst_compi_strerror_r" = "yes" &&
-     test "$tst_allow_strerror_r" = "yes"; then
+  if test "$tst_links_strerror_r" = "yes" \
+       -a "$tst_proto_strerror_r" = "yes" \
+       -a "$tst_compi_strerror_r" = "yes" \
+       -a "$tst_allow_strerror_r" = "yes"; then
     AC_MSG_RESULT([yes])
     if test "$tst_glibc_strerror_r" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_STRERROR_R, 1,
@@ -4159,8 +4142,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
     curl_cv_func_strerror_r="no"
   fi
   #
-  if test "$tst_compi_strerror_r" = "yes" &&
-     test "$tst_allow_strerror_r" = "unknown"; then
+  if test "$tst_compi_strerror_r" = "yes" \
+       -a "$tst_allow_strerror_r" = "unknown"; then
     AC_MSG_WARN([cannot determine strerror_r() style: edit lib/curl_config.h manually.])
   fi
   #
@@ -4237,10 +4220,10 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   fi
   #
   AC_MSG_CHECKING([if stricmp might be used])
-  if test "$tst_links_stricmp" = "yes" &&
-     test "$tst_proto_stricmp" = "yes" &&
-     test "$tst_compi_stricmp" = "yes" &&
-     test "$tst_allow_stricmp" = "yes"; then
+  if test "$tst_links_stricmp" = "yes" \
+       -a "$tst_proto_stricmp" = "yes" \
+       -a "$tst_compi_stricmp" = "yes" \
+       -a "$tst_allow_stricmp" = "yes"; then
     AC_MSG_RESULT([yes])
     AC_DEFINE_UNQUOTED(HAVE_STRICMP, 1,
       [Define to 1 if you have the stricmp function.])

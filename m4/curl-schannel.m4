@@ -26,8 +26,7 @@ AC_DEFUN([CURL_WITH_SCHANNEL], [
 AC_MSG_CHECKING([whether to enable Windows native SSL/TLS])
 if test "$OPT_SCHANNEL" != no; then
   ssl_msg=
-  if test "$OPT_SCHANNEL" != "no" &&
-     test "$curl_cv_native_windows" = "yes"; then
+  if test "$OPT_SCHANNEL" != "no" -a "$curl_cv_native_windows" = "yes"; then
     if test "$curl_cv_winuwp" = 'yes'; then
       AC_MSG_ERROR([UWP does not support Schannel.])
     fi

@@ -59,8 +59,8 @@ case "x$enable_static" in @%:@ (
     xc_lt_want_enable_static='no'
     ;;
 esac
-if test "$xc_lt_want_enable_shared" = 'no' &&
-  test "$xc_lt_want_enable_static" = 'no'; then
+if test "$xc_lt_want_enable_shared" = 'no' \
+     -a "$xc_lt_want_enable_static" = 'no'; then
   AC_MSG_ERROR([can not disable shared and static libraries simultaneously])
 fi
 
@@ -71,8 +71,8 @@ fi
 # must be used in order to build a proper static library.
 #
 
-if test "$xc_lt_want_enable_shared" = 'yes' &&
-  test "$xc_lt_want_enable_static" = 'yes'; then
+if test "$xc_lt_want_enable_shared" = 'yes' \
+     -a "$xc_lt_want_enable_static" = 'yes'; then
   case $host_os in @%:@ (
     cegcc* | os2* | aix*)
       xc_lt_want_enable_static='no'
@@ -367,8 +367,8 @@ m4_define([_XC_CHECK_LT_BUILD_SINGLE_VERSION],
 #
 
 AC_MSG_CHECKING([whether to build shared libraries only])
-if test "$xc_lt_build_shared" = 'yes' &&
-  test "$xc_lt_build_static" = 'no'; then
+if test "$xc_lt_build_shared" = 'yes' \
+     -a "$xc_lt_build_static" = 'no'; then
   xc_lt_build_shared_only='yes'
 else
   xc_lt_build_shared_only='no'
@@ -380,8 +380,8 @@ AC_MSG_RESULT([$xc_lt_build_shared_only])
 #
 
 AC_MSG_CHECKING([whether to build static libraries only])
-if test "$xc_lt_build_static" = 'yes' &&
-  test "$xc_lt_build_shared" = 'no'; then
+if test "$xc_lt_build_static" = 'yes' \
+     -a "$xc_lt_build_shared" = 'no'; then
   xc_lt_build_static_only='yes'
 else
   xc_lt_build_static_only='no'

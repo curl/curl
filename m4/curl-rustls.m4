@@ -185,8 +185,7 @@ if test "$OPT_RUSTLS" != no; then
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 
-  if test "$OPT_RUSTLS" != no &&
-    test "$RUSTLS_ENABLED" != "1"; then
+  if test "$OPT_RUSTLS" != no -a "$RUSTLS_ENABLED" != "1"; then
     AC_MSG_NOTICE([OPT_RUSTLS: $OPT_RUSTLS])
     AC_MSG_NOTICE([RUSTLS_ENABLED: $RUSTLS_ENABLED])
     AC_MSG_ERROR([--with-rustls was given but Rustls could not be detected])
