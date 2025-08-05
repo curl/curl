@@ -3244,13 +3244,13 @@ CURLMcode curl_multi_setopt(CURLM *m,
     }
     break;
   case CURLMOPT_NETWORK_CHANGED: {
-      long val = va_arg(param, long);
-      if(val & CURLM_NWCOPT_CLEAR_DNS) {
-        Curl_dnscache_clear(multi->admin);
-      }
-      if(val & CURLM_NWCOPT_CLEAR_CONNS) {
-        Curl_cpool_nw_changed(multi->admin);
-      }
+    long val = va_arg(param, long);
+    if(val & CURLMNWC_CLEAR_DNS) {
+      Curl_dnscache_clear(multi->admin);
+    }
+    if(val & CURLMNWC_CLEAR_CONNS) {
+      Curl_cpool_nw_changed(multi->admin);
+    }
     break;
   }
   default:
