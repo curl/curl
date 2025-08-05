@@ -2704,8 +2704,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       if(result)
         goto fail;
       info_version = "HTTP/2";
-      /* There is no ALPN here, but the connection is now definitely h2 */
-      conn->httpversion_seen = 20;
     }
     else
       info_version = "HTTP/1.x";
