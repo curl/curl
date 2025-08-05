@@ -2168,9 +2168,9 @@ static bool cf_osslq_data_pending(struct Curl_cfilter *cf,
   return stream && !Curl_bufq_is_empty(&stream->recvbuf);
 }
 
-static CURLcode cf_osslq_data_event(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    int event, int arg1, void *arg2)
+static CURLcode cf_osslq_cntrl(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               int event, int arg1, void *arg2)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -2206,6 +2206,10 @@ static CURLcode cf_osslq_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_CTRL_CONN_INFO_UPDATE:
+    if(!cf->sockindex && cf->connected)
+      cf->conn->httpversion_seen = 30;
+    break;
   default:
     break;
   }
@@ -2384,7 +2388,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_osslq_data_pending,
   cf_osslq_send,
   cf_osslq_recv,
-  cf_osslq_data_event,
+  cf_osslq_cntrl,
   cf_osslq_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_osslq_query,
