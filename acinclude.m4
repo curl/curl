@@ -190,7 +190,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       curl_cv_native_windows="no"
     ])
   ])
-  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "x$curl_cv_native_windows" = xyes)
+  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "$curl_cv_native_windows" = yes)
 ])
 
 
@@ -910,7 +910,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         curl_func_clock_gettime="yes"
         ;;
       *)
-        if test "x$dontwant_rt" = "xyes" ; then
+        if test "$dontwant_rt" = "yes" ; then
           AC_MSG_WARN([needs -lrt but asked not to use it, HAVE_CLOCK_GETTIME_MONOTONIC will not be defined])
           curl_func_clock_gettime="no"
         else
@@ -926,7 +926,7 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
     esac
     #
     dnl only do runtime verification when not cross-compiling
-    if test "x$cross_compiling" != "xyes" &&
+    if test "$cross_compiling" != "yes" &&
       test "$curl_func_clock_gettime" = "yes"; then
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       CURL_RUN_IFELSE([
