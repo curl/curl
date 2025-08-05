@@ -110,11 +110,11 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       _libcurl_version=`echo $libcurl_cv_lib_curl_version | $_libcurl_version_parse`
       _libcurl_wanted=`echo ifelse([$2],,[0],[$2]) | $_libcurl_version_parse`
 
-      if test $_libcurl_wanted -gt 0; then
+      if test "$_libcurl_wanted" -gt 0; then
         AC_CACHE_CHECK([for libcurl >= version $2],
           [libcurl_cv_lib_version_ok],
           [
-          if test $_libcurl_version -ge $_libcurl_wanted; then
+          if test "$_libcurl_version" -ge "$_libcurl_wanted"; then
             libcurl_cv_lib_version_ok=yes
           else
             libcurl_cv_lib_version_ok=no
@@ -122,7 +122,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           ])
       fi
 
-      if test $_libcurl_wanted -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
+      if test "$_libcurl_wanted" -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
         if test "$LIBCURL_CPPFLAGS" = ""; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
@@ -143,7 +143,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         _libcurl_features=`$_libcurl_config --feature`
 
         # Is it modern enough to have --protocols? (7.12.4)
-        if test $_libcurl_version -ge 461828; then
+        if test "$_libcurl_version" -ge 461828; then
           _libcurl_protocols=`$_libcurl_config --protocols`
         fi
       else
@@ -228,14 +228,14 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
 
             # FTPS was not standards-compliant until version
             # 7.11.0 (0x070b00 == 461568)
-            if test $_libcurl_version -ge 461568; then
+            if test "$_libcurl_version" -ge 461568; then
               _libcurl_protocols="$_libcurl_protocols FTPS"
             fi
           fi
 
           # RTSP, IMAP, POP3 and SMTP were added in
           # 7.20.0 (0x071400 == 463872)
-          if test $_libcurl_version -ge 463872; then
+          if test "$_libcurl_version" -ge 463872; then
             _libcurl_protocols="$_libcurl_protocols RTSP IMAP POP3 SMTP"
           fi
         fi
