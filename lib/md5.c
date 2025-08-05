@@ -36,11 +36,6 @@
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
-
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
-#endif
 #endif /* USE_MBEDTLS */
 
 #ifdef USE_OPENSSL
@@ -161,36 +156,19 @@ typedef mbedtls_md5_context my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
-  if(mbedtls_md5_starts(ctx))
-    return CURLE_OUT_OF_MEMORY;
-#elif defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  if(mbedtls_md5_starts_ret(ctx))
-    return CURLE_OUT_OF_MEMORY;
-#else
-  (void)mbedtls_md5_starts(ctx);
-#endif
-  return CURLE_OK;
+  return mbedtls_md5_starts(ctx) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
 static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_update(ctx, data, length);
-#else
-  (void)mbedtls_md5_update_ret(ctx, data, length);
-#endif
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_md5_finish(ctx, digest);
-#else
-  (void)mbedtls_md5_finish_ret(ctx, digest);
-#endif
 }
 
 #elif defined(AN_APPLE_OS)
