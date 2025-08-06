@@ -1756,13 +1756,13 @@ static CURLcode parallel_event(struct parastate *s)
 
 #endif
 
-static CURLcode check_finished(struct GlobalConfig *global,
-                               struct parastate *s)
+static CURLcode check_finished(struct parastate *s)
 {
   CURLcode result = CURLE_OK;
   int rc;
   CURLMsg *msg;
   bool checkmore = FALSE;
+  struct GlobalConfig *global = s->global;
   progress_meter(global, s->multi, &s->start, FALSE);
   do {
     msg = curl_multi_info_read(s->multi, &rc);
@@ -1885,7 +1885,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
       if(!s->mcode)
-        result = check_finished(global, s);
+        result = check_finished(s);
     }
 
     (void)progress_meter(global, s->multi, &s->start, TRUE);
