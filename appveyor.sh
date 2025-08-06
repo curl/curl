@@ -163,7 +163,7 @@ fi
 
 if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
+  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
 # disk space used
