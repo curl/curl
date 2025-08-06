@@ -41,7 +41,7 @@ runresults() {
   set -x
 }
 
-if [ "${mode}" = 'ExternalProject' ]; then
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
   src="${PWD}/source.tar.gz"
   sha="$(openssl dgst -sha256 "${src}" | grep -a -i -o -E '[0-9a-f]{64}$')"
