@@ -81,7 +81,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   set(_curl_libcurl_static_lib "${_curl_install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
   string(REPLACE " " ";" CURL_TEST_OPTS "${CURL_TEST_OPTS}")
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-    set(_download_extract_timestamp "DOWNLOAD_EXTRACT_TIMESTAMP ON")
+    set(_download_extract_timestamp "DOWNLOAD_EXTRACT_TIMESTAMP" "ON")
   endif()
   ExternalProject_Add(curl-external
     URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
