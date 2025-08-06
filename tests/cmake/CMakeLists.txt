@@ -80,8 +80,12 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
   set(_curl_libcurl_static_lib "${_curl_install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
   string(REPLACE " " ";" CURL_TEST_OPTS "${CURL_TEST_OPTS}")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+    set(_download_extract_timestamp "DOWNLOAD_EXTRACT_TIMESTAMP ON")
+  endif()
   ExternalProject_Add(curl-external
     URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
+    ${_download_extract_timestamp}
     PREFIX "${CMAKE_BINARY_DIR}/curl-external"
     CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCURL_USE_PKGCONFIG=OFF
       -DCURL_ENABLE_SSL=OFF -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBSSH2=OFF -DUSE_NGHTTP2=OFF
