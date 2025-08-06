@@ -72,7 +72,7 @@ void Curl_xfer_setup_send(struct Curl_easy *data,
                           int sockindex);
 
 /* The transfer receives data on the given socket index, the
- * amount to recieve (or -1 if unknown) and if headers are expected */
+ * amount to receive (or -1 if unknown) and if headers are expected */
 void Curl_xfer_setup_recv(struct Curl_easy *data,
                           int sockindex,
                           curl_off_t recv_size,
