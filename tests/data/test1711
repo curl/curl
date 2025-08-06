@@ -23,7 +23,7 @@ none
 curl table:category --help
 </name>
 <command>
---help tAbLe:FiLe
+--help tAbLe:CoMmOn
 </command>
 </client>
 
@@ -34,22 +34,90 @@ curl table:category --help
 0
 </errorcode>
 <stdout mode="text">
-file: FILE protocol table
---create-file-mode <mode>                   
+common: Common options table
+--compressed                                
 ------------------------------------------- 
-File mode for created files                 
+Request compressed response                 
+
+-b, --cookie <data|filename>                
+------------------------------------------- 
+Send cookies from string/load from file     
+
+-c, --cookie-jar <filename>                 
+------------------------------------------- 
+Save cookies to <filename> after operation  
+
+-d, --data <data>                           
+------------------------------------------- 
+HTTP POST data                              
+
+-F, --form <name=content>                   
+------------------------------------------- 
+Specify multipart MIME data                 
 
 -I, --head                                  
 ------------------------------------------- 
 Show document info only                     
 
--l, --list-only                             
+-H, --header <header/@file>                 
 ------------------------------------------- 
-List only mode                              
+Pass custom header(s) to server             
 
--r, --range <range>                         
+-k, --insecure                              
 ------------------------------------------- 
-Retrieve only the bytes within RANGE        
+Allow insecure server connections           
+
+-L, --location                              
+------------------------------------------- 
+Follow redirects                            
+
+-m, --max-time <seconds>                    
+------------------------------------------- 
+Maximum time allowed for transfer           
+
+-o, --output <file>                         
+------------------------------------------- 
+Write to file instead of stdout             
+
+-x, --proxy <[protocol://]host[:port]>      
+------------------------------------------- 
+Use this proxy                              
+
+-O, --remote-name                           
+------------------------------------------- 
+Write output to file named as remote file   
+
+-X, --request <method>                      
+------------------------------------------- 
+Specify request method to use               
+
+-s, --silent                                
+------------------------------------------- 
+Silent mode                                 
+
+--trace-ascii <file>                        
+------------------------------------------- 
+Like --trace, but without hex output        
+
+-T, --upload-file <file>                    
+------------------------------------------- 
+Transfer local FILE to destination          
+
+-u, --user <user:password>                  
+------------------------------------------- 
+Server user and password                    
+
+-A, --user-agent <name>                     
+------------------------------------------- 
+Send User-Agent <name> to server            
+
+-v, --verbose                               
+------------------------------------------- 
+Make the operation more talkative           
+
+-w, --write-out <format>                    
+------------------------------------------- 
+Output FORMAT after completion              
 </stdout>
 </verify>
 </testcase>
