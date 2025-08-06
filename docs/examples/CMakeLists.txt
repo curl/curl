@@ -28,8 +28,9 @@ add_custom_target(curl-examples)
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+set(_all_plus_one "")
 set(_all "all")
-foreach(_target IN LISTS check_PROGRAMS _all)
+foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
   set(_target_name "curl-example-${_target}")
   if(_target STREQUAL "all")
     if(CMAKE_VERSION VERSION_LESS 3.12)
@@ -37,9 +38,11 @@ foreach(_target IN LISTS check_PROGRAMS _all)
     endif()
     set(_example_c "${check_PROGRAMS}")
     list(TRANSFORM _example_c APPEND ".c")
-    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_example_c})
+    add_library(${_target_name} STATIC EXCLUDE_FROM_ALL ${_example_c})
+    add_custom_target(curl-examples-build)  # Special target to compile all tests quickly and build a single test to probe linkage
+    add_dependencies(curl-examples-build ${_target_name} ${_all_plus_one})  # Include a full built of a single test
   else()
-    set(_onetest ${_target_name})  # ends with a single, existing test for curl-examples-build target
+    set(_all_plus_one ${_target_name})  # Save the last test for the curl-examples-build target
     add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c")
     add_dependencies(curl-examples ${_target_name})
   endif()
@@ -48,9 +51,3 @@ foreach(_target IN LISTS check_PROGRAMS _all)
     "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>" "$<$<BOOL:${MSVC}>:_CRT_SECURE_NO_DEPRECATE>")
   set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" PROJECT_LABEL "Example ${_target}" UNITY_BUILD OFF)
 endforeach()
-
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-  # Special target to compile all tests quickly and build a single test to probe linkage
-  add_custom_target(curl-examples-build)
-  add_dependencies(curl-examples-build curl-example-all "${_onetest}")
-endif()
