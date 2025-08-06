@@ -1257,7 +1257,7 @@ static CURLcode smtp_state_data_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
 
     /* End of DO phase */
     smtp_state(data, smtpc, SMTP_STOP);

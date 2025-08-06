@@ -296,10 +296,10 @@ static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
 
   if(data->state.upload) {
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
-    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
   }
   else
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, FALSE);
   *done = TRUE;
   return CURLE_OK;
 }

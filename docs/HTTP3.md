@@ -93,8 +93,9 @@ Build curl:
 
 ## Build with quictls
 
-OpenSSL does not offer the required APIs for building a QUIC client. You need
-to use a TLS library that has such APIs and that works with *ngtcp2*.
+OpenSSL versions before v3.5.0 did not offer the required APIs for building a
+QUIC client. You then need to use another TLS library that has such APIs and
+that works with *ngtcp2*.
 
 Build quictls (any `+quic` tagged version works):
 

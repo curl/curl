@@ -546,12 +546,14 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
 
     /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
-    Curl_xfer_setup2(data, CURL_XFER_SEND, -1, TRUE, TRUE);
+    Curl_xfer_setup_send(data, SECONDARYSOCKET);
+    Curl_xfer_set_shutdown(data, TRUE, TRUE);
   }
   else {
     /* FTP download, shutdown, do not ignore errors */
-    Curl_xfer_setup2(data, CURL_XFER_RECV,
-                     ftpc->retr_size_saved, TRUE, FALSE);
+    Curl_xfer_setup_recv(data, SECONDARYSOCKET,
+                         ftpc->retr_size_saved, FALSE);
+    Curl_xfer_set_shutdown(data, TRUE, FALSE);
   }
 
   ftpc->pp.pending_resp = TRUE; /* expect server response */
