@@ -36,9 +36,9 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
     if(CMAKE_VERSION VERSION_LESS 3.12)
       continue()
     endif()
-    set(_example_c "${check_PROGRAMS}")
-    list(TRANSFORM _example_c APPEND ".c")
-    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_example_c})
+    set(_examples_c "${check_PROGRAMS}")
+    list(TRANSFORM _examples_c APPEND ".c")
+    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_examples_c})
     add_custom_target(curl-examples-build)  # Special target to compile all tests quickly and build a single test to probe linkage
     add_dependencies(curl-examples-build ${_target_name} ${_all_plus_one})  # Include a full build of a single test
   else()
