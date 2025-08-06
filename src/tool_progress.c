@@ -148,8 +148,7 @@ static struct speedcount speedstore[SPEEDCNT];
   |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
 */
-bool progress_meter(struct GlobalConfig *global,
-                    CURLM *multi,
+bool progress_meter(CURLM *multi,
                     struct curltime *start,
                     bool final)
 {

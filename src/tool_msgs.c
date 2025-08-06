@@ -34,13 +34,11 @@
 #define NOTE_PREFIX "Note: "
 #define ERROR_PREFIX "curl: "
 
-static void voutf(struct GlobalConfig *global,
-                  const char *prefix,
+static void voutf(const char *prefix,
                   const char *fmt,
-                  va_list ap) CURL_PRINTF(3, 0);
+                  va_list ap) CURL_PRINTF(2, 0);
 
-static void voutf(struct GlobalConfig *global,
-                  const char *prefix,
+static void voutf(const char *prefix,
                   const char *fmt,
                   va_list ap)
 {
@@ -90,12 +88,12 @@ static void voutf(struct GlobalConfig *global,
  * Emit 'note' formatted message on configured 'errors' stream, if verbose was
  * selected.
  */
-void notef(struct GlobalConfig *global, const char *fmt, ...)
+void notef(const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
   if(global->tracetype)
-    voutf(global, NOTE_PREFIX, fmt, ap);
+    voutf(NOTE_PREFIX, fmt, ap);
   va_end(ap);
 }
 
@@ -103,11 +101,11 @@ void notef(struct GlobalConfig *global, const char *fmt, ...)
  * Emit warning formatted message on configured 'errors' stream unless
  * mute (--silent) was selected.
  */
-void warnf(struct GlobalConfig *global, const char *fmt, ...)
+void warnf(const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
-  voutf(global, WARN_PREFIX, fmt, ap);
+  voutf(WARN_PREFIX, fmt, ap);
   va_end(ap);
 }
 
@@ -137,12 +135,12 @@ void helpf(FILE *errors, const char *fmt, ...)
  * Emit error message on error stream if not muted. When errors are not tied
  * to command line arguments, use helpf() for such errors.
  */
-void errorf(struct GlobalConfig *global, const char *fmt, ...)
+void errorf(const char *fmt, ...)
 {
   if(!global->silent || global->showerror) {
     va_list ap;
     va_start(ap, fmt);
-    voutf(global, ERROR_PREFIX, fmt, ap);
+    voutf(ERROR_PREFIX, fmt, ap);
     va_end(ap);
   }
 }

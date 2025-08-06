@@ -41,7 +41,7 @@ static const char *unslashquote(const char *line, char *param);
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename, struct GlobalConfig *global)
+int parseconfig(const char *filename)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
@@ -156,9 +156,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           case '#': /* comment */
             break;
           default:
-            warnf(config->global, "%s:%d: warning: '%s' uses unquoted "
+            warnf("%s:%d: warning: '%s' uses unquoted "
                   "whitespace", filename, lineno, option);
-            warnf(config->global, "This may cause side-effects. "
+            warnf("This may cause side-effects. "
                   "Consider using double quotes?");
           }
         }
@@ -181,7 +181,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(res == PARAM_NEXT_OPERATION) {
         if(config->url_list && config->url_list->url) {
           /* Allocate the next config */
-          config->next = config_alloc(global);
+          config->next = config_alloc();
           if(config->next) {
             /* Update the last operation pointer */
             global->last = config->next;
@@ -206,7 +206,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
           const char *reason = param2text(res);
-          errorf(config->global, "%s:%d: '%s' %s",
+          errorf("%s:%d: '%s' %s",
                  filename, lineno, option, reason);
           rc = (int)res;
         }

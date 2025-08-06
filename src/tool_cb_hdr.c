@@ -99,7 +99,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 #ifdef DEBUGBUILD
   if(size * nmemb > (size_t)CURL_MAX_HTTP_HEADER) {
-    warnf(per->config->global, "Header data exceeds write limit");
+    warnf("Header data exceeds write limit");
     return CURL_WRITEFUNC_ERROR;
   }
 #endif
@@ -120,8 +120,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       return rc;
     /* flush the stream to send off what we got earlier */
     if(fflush(heads->stream)) {
-      errorf(per->config->global, "Failed writing headers to %s",
-             per->config->headerfile);
+      errorf("Failed writing headers to %s", per->config->headerfile);
       return CURL_WRITEFUNC_ERROR;
     }
   }
@@ -286,11 +285,11 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     if(!outs->stream && !tool_create_output_file(outs, per->config))
       return CURL_WRITEFUNC_ERROR;
 
-    if(hdrcbdata->config->global->isatty &&
+    if(global->isatty &&
 #ifdef _WIN32
        tool_term_has_bold &&
 #endif
-       hdrcbdata->config->global->styled_output)
+       global->styled_output)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;

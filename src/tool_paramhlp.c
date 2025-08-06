@@ -405,8 +405,7 @@ static void protoset_clear(const char **protoset, const char *proto)
 
 #define MAX_PROTOSTRING (64*11) /* Enough room for 64 10-chars proto names. */
 
-ParameterError proto2num(struct OperationConfig *config,
-                         const char * const *val, char **ostr, const char *str)
+ParameterError proto2num(const char * const *val, char **ostr, const char *str)
 {
   const char **protoset;
   struct dynbuf obuf;
@@ -497,7 +496,7 @@ ParameterError proto2num(struct OperationConfig *config,
            if no protocols are allowed */
         if(action == set)
           protoset[0] = NULL;
-        warnf(config->global, "unrecognized protocol '%s'", buffer);
+        warnf("unrecognized protocol '%s'", buffer);
       }
     }
     if(next)
@@ -620,7 +619,7 @@ ParameterError add2list(struct curl_slist **list, const char *ptr)
   return PARAM_OK;
 }
 
-long ftpfilemethod(struct OperationConfig *config, const char *str)
+long ftpfilemethod(const char *str)
 {
   if(curl_strequal("singlecwd", str))
     return CURLFTPMETHOD_SINGLECWD;
@@ -629,26 +628,24 @@ long ftpfilemethod(struct OperationConfig *config, const char *str)
   if(curl_strequal("multicwd", str))
     return CURLFTPMETHOD_MULTICWD;
 
-  warnf(config->global, "unrecognized ftp file method '%s', using default",
-        str);
+  warnf("unrecognized ftp file method '%s', using default", str);
 
   return CURLFTPMETHOD_MULTICWD;
 }
 
-long ftpcccmethod(struct OperationConfig *config, const char *str)
+long ftpcccmethod(const char *str)
 {
   if(curl_strequal("passive", str))
     return CURLFTPSSL_CCC_PASSIVE;
   if(curl_strequal("active", str))
     return CURLFTPSSL_CCC_ACTIVE;
 
-  warnf(config->global, "unrecognized ftp CCC method '%s', using default",
-        str);
+  warnf("unrecognized ftp CCC method '%s', using default", str);
 
   return CURLFTPSSL_CCC_PASSIVE;
 }
 
-long delegation(struct OperationConfig *config, const char *str)
+long delegation(const char *str)
 {
   if(curl_strequal("none", str))
     return CURLGSSAPI_DELEGATION_NONE;
@@ -657,8 +654,7 @@ long delegation(struct OperationConfig *config, const char *str)
   if(curl_strequal("always", str))
     return CURLGSSAPI_DELEGATION_FLAG;
 
-  warnf(config->global, "unrecognized delegation method '%s', using none",
-        str);
+  warnf("unrecognized delegation method '%s', using none", str);
 
   return CURLGSSAPI_DELEGATION_NONE;
 }
@@ -722,7 +718,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   if(!result && !config->useragent) {
     config->useragent = my_useragent();
     if(!config->useragent) {
-      errorf(config->global, "out of memory");
+      errorf("out of memory");
       result = CURLE_OUT_OF_MEMORY;
     }
   }

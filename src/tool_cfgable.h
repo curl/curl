@@ -62,7 +62,7 @@
 #define tool_safefree(ptr)                      \
   do { free((ptr)); (ptr) = NULL;} while(0)
 
-struct GlobalConfig;
+extern struct GlobalConfig *global;
 
 struct State {
   struct getout *urlnode;
@@ -188,7 +188,6 @@ struct OperationConfig {
   char *ech;                      /* Config set by --ech keywords */
   char *ech_config;               /* Config set by "--ech esl:" option */
   char *ech_public;               /* Config set by "--ech pn:" option */
-  struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
   curl_off_t condtime;
@@ -377,7 +376,9 @@ struct GlobalConfig {
   BIT(isatty);                    /* Updated internally if output is a tty */
 };
 
-struct OperationConfig *config_alloc(struct GlobalConfig *global);
+struct OperationConfig *config_alloc(void);
 void config_free(struct OperationConfig *config);
+CURLcode globalconf_init(void);
+void globalconf_free(void);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */

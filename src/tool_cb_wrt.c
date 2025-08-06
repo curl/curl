@@ -45,12 +45,10 @@
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
-  struct GlobalConfig *global;
   FILE *file = NULL;
   const char *fname = outs->filename;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
-  global = config->global;
   DEBUGASSERT(fname && *fname);
 
   if(config->file_clobber_mode == CLOBBER_ALWAYS ||
@@ -101,8 +99,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   }
 
   if(!file) {
-    warnf(global, "Failed to open the file %s: %s", fname,
-          strerror(errno));
+    warnf("Failed to open the file %s: %s", fname, strerror(errno));
     return FALSE;
   }
   outs->s_isreg = TRUE;
@@ -248,7 +245,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
-  bool is_tty = config->global->isatty;
+  bool is_tty = global->isatty;
 #if defined(_WIN32) && !defined(UNDER_CE)
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
@@ -268,13 +265,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
-      warnf(config->global, "Header data size exceeds write limit");
+      warnf("Header data size exceeds write limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
   else {
     if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
-      warnf(config->global, "Data size exceeds write limit");
+      warnf("Data size exceeds write limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
@@ -303,7 +300,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
         check_fails = TRUE;
     }
     if(check_fails) {
-      warnf(config->global, "Invalid output struct data for write callback");
+      warnf("Invalid output struct data for write callback");
       return CURL_WRITEFUNC_ERROR;
     }
   }
@@ -315,7 +312,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
     if(memchr(buffer, 0, bytes)) {
-      warnf(config->global, "Binary output can mess up your terminal. "
+      warnf("Binary output can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
             "anyway, or consider \"--output <FILE>\" to save to a file.");
       config->synthetic_error = TRUE;
