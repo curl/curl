@@ -1,18 +1,19 @@
 curl and libcurl 8.15.1
 
  Public curl releases:         270
- Command line options:         271
+ Command line options:         272
  curl_easy_setopt() options:   308
- Public functions in libcurl:  96
- Contributors:                 3478
+ Public functions in libcurl:  97
+ Contributors:                 3483
 
 This release includes the following changes:
 
  o build: bump minimum required mingw-w64 to v3.0 (from v1.0) [33]
  o curl: add --follow [129]
- o curl: add --parallel-max-host to limit concurrent connections per host [81]
  o curl: add --out-null [101]
+ o curl: add --parallel-max-host to limit concurrent connections per host [81]
  o curl: make --retry-delay and --retry-max-time accept decimal seconds [112]
+ o hostip: cache negative name resolves [175]
  o ip happy eyeballing: keep attempts running [80]
  o multi: add curl_multi_get_offt [56]
  o multi: add CURLMOPT_NETWORK_CHANGED to signal network changed [84]
@@ -27,8 +28,10 @@ This release includes the following bugfixes:
 
  o _PROTOCOLS.md: mention file:// is only for absolute paths [102]
  o alpn: query filter [104]
+ o BINDINGS.md: add LibQurl [156]
  o bufq: add integer overflow checks before chunk allocations [108]
  o build: allow libtests/clients to use libcurl dependencies directly [87]
+ o build: disable `TCP_NODELAY` for emscripten [176]
  o build: enable _GNU_SOURCE on GNU/Hurd [27]
  o build: extend GNU C guards to clang where applicable, fix fallouts [61]
  o build: fix build errors/warnings in rare configurations [7]
@@ -105,11 +108,13 @@ This release includes the following bugfixes:
  o multi event: remove only announced [25]
  o multi: don't insert a node into the splay tree twice [68]
  o multi: fix assert in multi_getsock() [53]
+ o multi: fix bad splay management [133]
  o multi: process pending, one by one [90]
  o multi: replace remaining EXPIRE_RUN_NOW [67]
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o openssl: check SSL_write() length on retries [152]
+ o openssl: output unescaped utf8 x509 issuer/subject DNs [169]
  o openssl: some small cleanups [42]
  o openssl: split cert_stuff into smaller sub functions [72]
  o parallel-max: bump the max value to 65535 [86]
@@ -136,6 +141,7 @@ This release includes the following bugfixes:
  o test1560: skip some URLs if UTF-8 is not supported [34]
  o test1: raise alloc limits [11]
  o test428: re-enable for Windows [5]
+ o tests/ech_tests.sh: indent, if/for style, inline ifs [131]
  o tests: constify command-line arguments [82]
  o tests: drop unused `CURL_FORCEHOST` envs [36]
  o tests: fix perl warnings in http2-server, http3-server [119]
@@ -149,11 +155,16 @@ This release includes the following bugfixes:
  o tidy-up: prefer `ifdef`/`ifndef` for single checks [64]
  o tls: CURLINFO_TLS_SSL_PTR testing [79]
  o tool_operate: avoid superfluous strdup'ing output [1]
+ o tool_operate: use the correct config pointer [115]
  o tool_paramhlp: fix secs2ms() [116]
+ o tool_urlglob: polish, cleanups, improvements [141]
  o unit-tests: build the unitprotos.h from here [73]
  o unit2604: avoid `UNCONST()` [135]
  o urlapi: allow more path characters "raw" when asked to URL encode [146]
+ o urldata: reduce two long struct fields to unsigned short [174]
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
+ o vquic: use curl_getenv [168]
+ o vtls: set seen http version on successful ALPN [160]
  o windows: assume `ADDRESS_FAMILY`, drop feature checks [88]
  o windows: document toolchain support for `CERT_NAME_SEARCH_ALL_NAMES_FLAG`
  o windows: document toolchain support for some macros (cont.) [111]
@@ -164,6 +175,7 @@ This release includes the following bugfixes:
  o windows: fix `if_nametoindex()` detection with autotools, improve with cmake [24]
  o windows: include `wincrypt.h` before `iphlpapi.h` for mingw-w64 <6 [50]
  o windows: target version macro tidy-ups [3]
+ o wolfssl: rename ML-KEM hybrids to match IETF draft [173]
  o ws: avoid NULL pointer deref in curl_ws_recv [91]
 
 This release includes the following known bugs:
@@ -185,16 +197,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi,
+  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
   Berthin Torres Callañaupa, Caolán McNamara, Cole Leavitt, d1r3ct0r,
   Dan Fandrich, Daniel Böhmer, Daniel Stenberg, David Zhuang, Dominik Tomecki,
-  Eshan Kelkar, Harry Sintonen, Jeroen Ooms, Kai Pastor, lf- on github,
-  LoRd_MuldeR, nevakrien on github, Paul Gilmartin, Petar Popovic,
-  Philippe Antoine, Pino Toscano, Qriist on github, Ray Satiro, renovate[bot],
-  rm-rmonaghan on github, Schrijvers Luc, Sergio Durigan Junior,
-  Stefan Eissing, Tal Regev, Todd Gamblin, Viktor Szakats, Waldemar Kornewald,
-  yaoy6 on github, ウさん
-  (37 contributors)
+  Eshan Kelkar, Harry Sintonen, IoannisGS on github, Jeroen Ooms, Kai Pastor,
+  kkmuffme on github, letshack9707 on hackerone, lf- on github, LoRd_MuldeR,
+  nevakrien on github, Paul Gilmartin, Petar Popovic, Philippe Antoine,
+  Pino Toscano, Qriist, Qriist on github, Ray Satiro, renovate[bot],
+  rm-rmonaghan on github, Roberto Hidalgo, Schrijvers Luc,
+  Sergio Durigan Junior, Stefan Eissing, Tal Regev, Todd Gamblin,
+  Viktor Szakats, Waldemar Kornewald, yaoy6 on github, ウさん
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -312,6 +325,7 @@ References to bug reports and discussions on issues:
  [112] = https://curl.se/bug/?i=18109
  [113] = https://curl.se/bug/?i=18085
  [114] = https://curl.se/bug/?i=18108
+ [115] = https://curl.se/bug/?i=18200
  [116] = https://curl.se/bug/?i=18167
  [117] = https://curl.se/bug/?i=18096
  [118] = https://curl.se/bug/?i=18092
@@ -327,13 +341,16 @@ References to bug reports and discussions on issues:
  [128] = https://curl.se/bug/?i=18165
  [129] = https://curl.se/bug/?i=16543
  [130] = https://curl.se/bug/?i=18162
+ [131] = https://curl.se/bug/?i=18187
  [132] = https://curl.se/bug/?i=18160
+ [133] = https://curl.se/bug/?i=18201
  [134] = https://curl.se/bug/?i=18147
  [135] = https://curl.se/bug/?i=18143
  [136] = https://curl.se/bug/?i=18142
  [137] = https://curl.se/bug/?i=18141
  [138] = https://curl.se/bug/?i=18158
  [139] = https://curl.se/bug/?i=18149
+ [141] = https://curl.se/bug/?i=18198
  [142] = https://curl.se/bug/?i=18145
  [143] = https://curl.se/bug/?i=18130
  [144] = https://curl.se/bug/?i=18118
@@ -345,3 +362,11 @@ References to bug reports and discussions on issues:
  [150] = https://curl.se/bug/?i=18137
  [151] = https://curl.se/bug/?i=18138
  [152] = https://curl.se/bug/?i=18121
+ [156] = https://curl.se/bug/?i=18195
+ [160] = https://curl.se/bug/?i=18177
+ [168] = https://curl.se/bug/?i=18170
+ [169] = https://curl.se/bug/?i=18171
+ [173] = https://curl.se/bug/?i=18123
+ [174] = https://curl.se/bug/?i=18173
+ [175] = https://curl.se/bug/?i=18157
+ [176] = https://curl.se/bug/?i=17974
