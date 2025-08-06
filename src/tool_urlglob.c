@@ -596,7 +596,7 @@ CURLcode glob_match_url(char **output, const char *filename,
   curlx_dyn_init(&dyn, MAX_OUTPUT_GLOB_LENGTH);
 
   while(*filename) {
-    CURLcode result;
+    CURLcode result = CURLE_OK;
     if(*filename == '#' && ISDIGIT(filename[1])) {
       const char *ptr = filename;
       curl_off_t num;
