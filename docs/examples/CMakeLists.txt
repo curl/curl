@@ -49,6 +49,8 @@ foreach(_target IN LISTS check_PROGRAMS _all)
   set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" PROJECT_LABEL "Example ${_target}" UNITY_BUILD OFF)
 endforeach()
 
-# Special target to compile all tests quickly and build a single test to probe linkage
-add_custom_target(curl-examples-build)
-add_dependencies(curl-examples-build curl-example-all "${_onetest}")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
+  # Special target to compile all tests quickly and build a single test to probe linkage
+  add_custom_target(curl-examples-build)
+  add_dependencies(curl-examples-build curl-example-all "${_onetest}")
+endif()
