@@ -87,8 +87,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     }
     if(result < 0) {
       int error = errno;
-      warnf(config->global,
-            "Setting type of service to %d failed with errno %d: %s;\n",
+      warnf("Setting type of service to %d failed with errno %d: %s\n",
             tos, error, strerror(error));
     }
   }
@@ -99,7 +98,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
       (void *)&priority, sizeof(priority)) != 0) {
       int error = errno;
-      warnf(config->global, "VLAN priority %d failed with errno %d: %s;\n",
+      warnf("VLAN priority %d failed with errno %d: %s\n",
             priority, error, strerror(error));
     }
   }
@@ -173,7 +172,6 @@ static CURLcode url_proto_and_rewrite(char **url,
 
 static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
   CURLcode result;
 
   /* SSH and SSL private key uses same command-line option */
@@ -213,11 +211,11 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       global->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf(global, "Couldn't find a known_hosts file");
+      errorf("Couldn't find a known_hosts file");
       return CURLE_FAILED_INIT;
     }
     else
-      warnf(global, "Couldn't find a known_hosts file");
+      warnf("Couldn't find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
@@ -279,7 +277,6 @@ static long tlsversion(unsigned char mintls,
 /* only called if libcurl supports TLS */
 static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
   CURLcode result = CURLE_OK;
 
   if(config->cacert)
@@ -301,7 +298,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     if((result == CURLE_NOT_BUILT_IN) ||
        (result == CURLE_UNKNOWN_OPTION)) {
       if(config->proxy_capath) {
-        warnf(global, "ignoring %s, not supported by libcurl with %s",
+        warnf("ignoring %s, not supported by libcurl with %s",
               config->proxy_capath ? "--proxy-capath" : "--capath",
               ssl_backend());
       }
@@ -316,9 +313,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
-    notef(config->global,
-          "Using embedded CA bundle (%zu bytes)",
-          blob.len);
+    notef("Using embedded CA bundle (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
       warnf(global, "ignoring %s, not supported by libcurl with %s",
@@ -330,9 +325,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
-    notef(config->global,
-          "Using embedded CA bundle, for proxies (%zu bytes)",
-          blob.len);
+    notef("Using embedded CA bundle, for proxies (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
       warnf(global, "ignoring %s, not supported by libcurl with %s",
@@ -352,14 +345,14 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     result = my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY,
                            config->pinnedpubkey);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--pinnedpubkey", ssl_backend());
   }
   if(config->proxy_pinnedpubkey) {
     result = my_setopt_str(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
                            config->proxy_pinnedpubkey);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-pinnedpubkey", ssl_backend());
   }
 
@@ -441,28 +434,28 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     result = my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST,
                            config->cipher_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--ciphers", ssl_backend());
   }
   if(config->proxy_cipher_list) {
     result = my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
                            config->proxy_cipher_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-ciphers", ssl_backend());
   }
   if(config->cipher13_list) {
     result = my_setopt_str(curl, CURLOPT_TLS13_CIPHERS,
                            config->cipher13_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--tls13-ciphers", ssl_backend());
   }
   if(config->proxy_cipher13_list) {
     result = my_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
                            config->proxy_cipher13_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-tls13-ciphers", ssl_backend());
   }
 
@@ -581,8 +574,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
         result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
       if(result) {
-        warnf(config->global,
-              "skipped provided cookie, the cookie header "
+        warnf("skipped provided cookie, the cookie header "
               "would go over %u bytes", MAX_COOKIE_LINE);
         return result;
       }
@@ -675,7 +667,7 @@ static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 
 static void gen_trace_setopts(struct OperationConfig *config, CURL *curl)
 {
-  if(config->global->tracetype != TRACE_NONE) {
+  if(global->tracetype != TRACE_NONE) {
     my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(curl, CURLOPT_DEBUGDATA, config);
     my_setopt_long(curl, CURLOPT_VERBOSE, 1L);
@@ -686,8 +678,6 @@ static void gen_cb_setopts(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
-  (void)config;
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
   my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);
@@ -729,7 +719,7 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
     CURLcode result = my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
 
     if(result) {
-      errorf(config->global, "proxy support is disabled in this libcurl");
+      errorf("proxy support is disabled in this libcurl");
       config->synthetic_error = TRUE;
       return CURLE_NOT_BUILT_IN;
     }
@@ -806,7 +796,6 @@ CURLcode config2setopts(struct OperationConfig *config,
                         CURL *curl,
                         CURLSH *share)
 {
-  struct GlobalConfig *global = config->global;
   const char *use_proto;
   CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
@@ -887,7 +876,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   switch(config->httpreq) {
   case TOOL_HTTPREQ_SIMPLEPOST:
     if(config->resume_from) {
-      errorf(global, "cannot mix --continue-at with --data");
+      errorf("cannot mix --continue-at with --data");
       result = CURLE_FAILED_INIT;
     }
     else {
@@ -902,7 +891,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     curl_mime_free(config->mimepost);
     config->mimepost = NULL;
     if(config->resume_from) {
-      errorf(global, "cannot mix --continue-at with --form");
+      errorf("cannot mix --continue-at with --form");
       result = CURLE_FAILED_INIT;
     }
     else {
@@ -985,7 +974,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
   my_setopt_offt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
   my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
-  customrequest_helper(config, config->httpreq, config->customrequest);
+  customrequest_helper(config->httpreq, config->customrequest);
   my_setopt(curl, CURLOPT_STDERR, tool_stderr);
   my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
   my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);

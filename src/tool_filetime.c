@@ -32,8 +32,7 @@
 #endif
 
 /* Returns 0 on success, non-zero on file problems */
-int getfiletime(const char *filename, struct GlobalConfig *global,
-                curl_off_t *stamp)
+int getfiletime(const char *filename, curl_off_t *stamp)
 {
   int rc = 1;
 
@@ -81,14 +80,13 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
     rc = 0;
   }
   else
-    warnf(global, "Failed to get filetime: %s", strerror(errno));
+    warnf("Failed to get filetime: %s", strerror(errno));
 #endif
   return rc;
 }
 
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(_WIN32)
-void setfiletime(curl_off_t filetime, const char *filename,
-                 struct GlobalConfig *global)
+void setfiletime(curl_off_t filetime, const char *filename)
 {
   if(filetime >= 0) {
 /* Windows utime() may attempt to adjust the Unix GMT file time by a daylight
@@ -136,7 +134,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
     times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
     times[0].tv_usec = times[1].tv_usec = 0;
     if(utimes(filename, times)) {
-      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on '%s': %s", filetime, filename, strerror(errno));
     }
 

@@ -36,7 +36,7 @@ void tool_init_stderr(void)
   tool_stderr = stderr;
 }
 
-void tool_set_stderr_file(struct GlobalConfig *global, const char *filename)
+void tool_set_stderr_file(const char *filename)
 {
   FILE *fp;
 
@@ -52,7 +52,7 @@ void tool_set_stderr_file(struct GlobalConfig *global, const char *filename)
      subsequent freopen will fail. */
   fp = fopen(filename, FOPEN_WRITETEXT);
   if(!fp) {
-    warnf(global, "Warning: Failed to open %s", filename);
+    warnf("Warning: Failed to open %s", filename);
     return;
   }
   fclose(fp);

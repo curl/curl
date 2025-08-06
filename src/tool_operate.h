@@ -79,7 +79,7 @@ struct per_transfer {
   BIT(skip);  /* considered already done */
 };
 
-CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[]);
+CURLcode operate(int argc, argv_item_t argv[]);
 void single_transfer_cleanup(struct OperationConfig *config);
 
 extern struct per_transfer *transfers; /* first node */

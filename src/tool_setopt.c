@@ -231,8 +231,7 @@ static char *c_escape(const char *str, curl_off_t len)
 }
 
 /* setopt wrapper for enum types */
-CURLcode tool_setopt_enum(CURL *curl, struct OperationConfig *config,
-                          const char *name, CURLoption tag,
+CURLcode tool_setopt_enum(CURL *curl, const char *name, CURLoption tag,
                           const struct NameValue *nvlist, long lval)
 {
   CURLcode ret = CURLE_OK;
@@ -242,7 +241,7 @@ CURLcode tool_setopt_enum(CURL *curl, struct OperationConfig *config,
   if(!lval)
     skip = TRUE;
 
-  if(config->global->libcurl && !skip && !ret) {
+  if(global->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
     const struct NameValue *nv = NULL;
     for(nv = nvlist; nv->name; nv++) {
@@ -264,14 +263,13 @@ CURLcode tool_setopt_enum(CURL *curl, struct OperationConfig *config,
 
 #ifdef DEBUGBUILD
   if(ret)
-    warnf(config->global, "option %s returned error (%d)", name, (int)ret);
+    warnf("option %s returned error (%d)", name, (int)ret);
 #endif
   return ret;
 }
 
 /* setopt wrapper for CURLOPT_SSLVERSION */
-CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
-                                const char *name, CURLoption tag,
+CURLcode tool_setopt_SSLVERSION(CURL *curl, const char *name, CURLoption tag,
                                 long lval)
 {
   CURLcode ret = CURLE_OK;
@@ -281,7 +279,7 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
   if(!lval)
     skip = TRUE;
 
-  if(config->global->libcurl && !skip && !ret) {
+  if(global->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
     const struct NameValue *nv = NULL;
     const struct NameValue *nv2 = NULL;
@@ -316,14 +314,13 @@ CURLcode tool_setopt_SSLVERSION(CURL *curl, struct OperationConfig *config,
 
 #ifdef DEBUGBUILD
   if(ret)
-    warnf(config->global, "option %s returned error (%d)", name, (int)ret);
+    warnf("option %s returned error (%d)", name, (int)ret);
 #endif
   return ret;
 }
 
 /* setopt wrapper for bitmasks */
-CURLcode tool_setopt_bitmask(CURL *curl, struct OperationConfig *config,
-                             const char *name, CURLoption tag,
+CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
                              const struct NameValueUnsigned *nvlist,
                              long lval)
 {
@@ -332,7 +329,7 @@ CURLcode tool_setopt_bitmask(CURL *curl, struct OperationConfig *config,
   if(!lval)
     skip = TRUE;
 
-  if(config->global->libcurl && !skip && !ret) {
+  if(global->libcurl && !skip && !ret) {
     /* we only use this for real if --libcurl was used */
     char preamble[80];
     unsigned long rest = (unsigned long)lval;
@@ -558,7 +555,7 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
   CURLcode ret = curl_easy_setopt(curl, tag, mimepost);
   int mimeno = 0;
 
-  if(!ret && config->global->libcurl) {
+  if(!ret && global->libcurl) {
     ret = libcurl_generate_mime(curl, config, config->mimeroot, &mimeno);
 
     if(!ret)
@@ -570,15 +567,14 @@ CURLcode tool_setopt_mimepost(CURL *curl, struct OperationConfig *config,
 }
 
 /* setopt wrapper for curl_slist options */
-CURLcode tool_setopt_slist(CURL *curl, struct OperationConfig *config,
-                           const char *name, CURLoption tag,
+CURLcode tool_setopt_slist(CURL *curl, const char *name, CURLoption tag,
                            struct curl_slist *list)
 {
   CURLcode ret = CURLE_OK;
 
   ret = curl_easy_setopt(curl, tag, list);
 
-  if(config->global->libcurl && list && !ret) {
+  if(global->libcurl && list && !ret) {
     int i;
 
     ret = libcurl_generate_slist(list, &i);
@@ -591,8 +587,7 @@ CURLcode tool_setopt_slist(CURL *curl, struct OperationConfig *config,
 }
 
 /* options that set long */
-CURLcode tool_setopt_long(CURL *curl, struct OperationConfig *config,
-                          const char *name, CURLoption tag,
+CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
                           long lval)
 {
   long defval = 0L;
@@ -608,7 +603,7 @@ CURLcode tool_setopt_long(CURL *curl, struct OperationConfig *config,
   }
 
   ret = curl_easy_setopt(curl, tag, lval);
-  if((lval != defval) && config->global->libcurl && !ret) {
+  if((lval != defval) && global->libcurl && !ret) {
     /* we only use this for real if --libcurl was used */
     ret = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, %ldL);",
                        name, lval);
@@ -617,15 +612,14 @@ CURLcode tool_setopt_long(CURL *curl, struct OperationConfig *config,
 }
 
 /* options that set curl_off_t */
-CURLcode tool_setopt_offt(CURL *curl, struct OperationConfig *config,
-                          const char *name, CURLoption tag,
+CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
                           curl_off_t lval)
 {
   CURLcode ret = CURLE_OK;
   DEBUGASSERT((tag >= CURLOPTTYPE_OFF_T) && (tag < CURLOPTTYPE_BLOB));
 
   ret = curl_easy_setopt(curl, tag, lval);
-  if(config->global->libcurl && !ret && lval) {
+  if(global->libcurl && !ret && lval) {
     /* we only use this for real if --libcurl was used */
     ret = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, (curl_off_t)%"
           CURL_FORMAT_CURL_OFF_T ");", name, lval);
@@ -635,8 +629,9 @@ CURLcode tool_setopt_offt(CURL *curl, struct OperationConfig *config,
 }
 
 /* setopt wrapper for setting object and function pointer options */
-CURLcode tool_setopt(CURL *curl, bool str, struct OperationConfig *config,
-                     const char *name, CURLoption tag, ...)
+CURLcode tool_setopt(CURL *curl, struct OperationConfig *config,
+                     bool str, const char *name, CURLoption tag,
+                     ...)
 {
   va_list arg;
   CURLcode ret = CURLE_OK;
@@ -657,7 +652,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct OperationConfig *config,
 
   va_end(arg);
 
-  if(config->global->libcurl && pval && !ret) {
+  if(global->libcurl && pval && !ret) {
     /* we only use this if --libcurl was used */
 
     if(!str) {

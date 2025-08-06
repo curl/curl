@@ -29,14 +29,16 @@
 #include "tool_main.h"
 #include "memdebug.h" /* keep this as LAST include */
 
-struct OperationConfig *config_alloc(struct GlobalConfig *global)
+struct GlobalConfig globalconf;
+struct GlobalConfig *global;
+
+struct OperationConfig *config_alloc(void)
 {
   struct OperationConfig *config =
     calloc(1, sizeof(struct OperationConfig));
   if(!config)
     return NULL;
 
-  config->global = global;
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;

@@ -45,24 +45,15 @@ ParameterError str2unum(long *val, const char *str);
 ParameterError oct2nummax(long *val, const char *str, long max);
 ParameterError str2unummax(long *val, const char *str, long max);
 ParameterError secs2ms(long *val, const char *str);
-
-ParameterError proto2num(struct OperationConfig *config,
-                         const char * const *val, char **obuf,
+ParameterError proto2num(const char * const *val, char **obuf,
                          const char *str);
-
 ParameterError check_protocol(const char *str);
-
 ParameterError str2offset(curl_off_t *val, const char *str);
-
 CURLcode get_args(struct OperationConfig *config, const size_t i);
-
 ParameterError add2list(struct curl_slist **list, const char *ptr);
-
-long ftpfilemethod(struct OperationConfig *config, const char *str);
-
-long ftpcccmethod(struct OperationConfig *config, const char *str);
-
-long delegation(struct OperationConfig *config, const char *str);
+long ftpfilemethod(const char *str);
+long ftpcccmethod(const char *str);
+long delegation(const char *str);
 
 ParameterError str2tls_max(unsigned char *val, const char *str);
 

@@ -173,8 +173,7 @@ fail:
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
  */
-CURLcode get_url_file_name(struct GlobalConfig *global,
-                           char **filename, const char *url)
+CURLcode get_url_file_name(char **filename, const char *url)
 {
   CURLU *uh = curl_url();
   char *path = NULL;
@@ -212,7 +211,7 @@ CURLcode get_url_file_name(struct GlobalConfig *global,
       else {
         /* no slash => empty string, use default */
         *filename = strdup("curl_response");
-        warnf(global, "No remote file name, uses \"%s\"", *filename);
+        warnf("No remote file name, uses \"%s\"", *filename);
       }
 
       curl_free(path);
