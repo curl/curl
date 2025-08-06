@@ -177,7 +177,7 @@ jobs:
         run: |
           PATH=/usr/bin
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples
+            cmake --build bld --verbose --target curl-examples-build
           else
             make -C bld V=1 examples
           fi
@@ -404,7 +404,7 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples
+            cmake --build bld --verbose --target curl-examples-build
           else
             make -C bld V=1 examples
           fi
@@ -589,7 +589,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
-          cmake --build bld --target curl-examples
+          cmake --build bld --target curl-examples-build
 
       - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
@@ -687,7 +687,7 @@ jobs:
         if: ${{ matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for clang-tidy
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --target curl-examples-build
           else
             make -C bld examples
           fi
@@ -935,7 +935,7 @@ jobs:
       - name: 'build examples'
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
 
       - name: 'disk space used'
         run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
