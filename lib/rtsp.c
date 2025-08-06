@@ -370,7 +370,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, TRUE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, TRUE);
     goto out;
   }
 
@@ -636,7 +636,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1, TRUE);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, httpversion);

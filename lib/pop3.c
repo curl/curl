@@ -1116,7 +1116,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 
   if(pop3->transfer == PPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, FALSE);
 
     if(pp->overflow) {
       /* The recv buffer contains data that is actually body content so send

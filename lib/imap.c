@@ -1347,7 +1347,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
-      Curl_xfer_setup1(data, CURL_XFER_RECV, size, FALSE);
+      Curl_xfer_setup_recv(data, FIRSTSOCKET, size, FALSE);
     }
   }
   else {
@@ -1398,7 +1398,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
-    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
 
     /* End of DO phase */
     imap_state(data, imapc, IMAP_STOP);
