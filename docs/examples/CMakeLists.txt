@@ -38,7 +38,7 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
     endif()
     set(_example_c "${check_PROGRAMS}")
     list(TRANSFORM _example_c APPEND ".c")
-    add_library(${_target_name} STATIC EXCLUDE_FROM_ALL ${_example_c})
+    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_example_c})
     add_custom_target(curl-examples-build)  # Special target to compile all tests quickly and build a single test to probe linkage
     add_dependencies(curl-examples-build ${_target_name} ${_all_plus_one})  # Include a full build of a single test
   else()
