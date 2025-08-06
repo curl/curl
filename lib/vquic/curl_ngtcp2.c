@@ -1208,12 +1208,13 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
   }
 
   nghttp3_settings_default(&ctx->h3settings);
+  nghttp3_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
+                     Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
 
   rc = nghttp3_conn_client_new(&ctx->h3conn,
                                &ngh3_callbacks,
                                &ctx->h3settings,
-                               nghttp3_mem_default(),
-                               cf);
+                               &mem, cf);
   if(rc) {
     failf(data, "error creating nghttp3 connection instance");
     return CURLE_OUT_OF_MEMORY;
@@ -2466,12 +2467,14 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&ctx->connected_path.remote,
                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
+  ngtcp2_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
+                    Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
 
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
                               NGTCP2_PROTO_VER_V1, &ng_callbacks,
                               &ctx->settings, &ctx->transport_params,
-                              NULL, cf);
+                              &mem, cf);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 

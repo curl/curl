@@ -723,6 +723,34 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
+
+void *Curl_ngtcp2_malloc(size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_cmalloc(size);
+}
+
+void Curl_ngtcp2_free(void *ptr, void *user_data)
+{
+  (void)user_data;
+  Curl_cfree(ptr);
+}
+
+void *Curl_ngtcp2_calloc(size_t nmemb, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_ccalloc(nmemb, size);
+}
+
+void *Curl_ngtcp2_realloc(void *ptr, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_crealloc(ptr, size);
+}
+
+#endif /* USE_NGTCP2 || USE_NGHTTP3 */
+
 #else /* CURL_DISABLE_HTTP || !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
