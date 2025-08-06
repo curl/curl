@@ -1499,6 +1499,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
 }
 
 struct parastate {
+  struct GlobalConfig *global;
   CURLM *multi;
   CURLSH *share;
   CURLMcode mcode;
@@ -1842,6 +1843,7 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
   s->wrapitup = FALSE;
   s->wrapitup_processed = FALSE;
   s->tick = time(NULL);
+  s->global = global;
   s->multi = curl_multi_init();
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
