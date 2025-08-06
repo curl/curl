@@ -199,7 +199,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples --verbose
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples-build --verbose
           else
             make -C bld examples V=1
           fi
@@ -520,7 +520,7 @@ jobs:
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples
+            cmake --build bld --verbose --target curl-examples-build
           else
             make -C bld examples V=1
           fi

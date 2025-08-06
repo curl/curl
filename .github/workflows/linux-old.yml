@@ -123,6 +123,9 @@ jobs:
       - name: 'cmake run tests'
         run: make -C bld-cares test-ci
 
+      - name: 'cmake build examples'
+        run: make -C bld-cares curl-examples-build
+
       - name: 'autoreconf'
         run: autoreconf -if
 

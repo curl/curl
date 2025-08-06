@@ -698,7 +698,7 @@ jobs:
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples
+            ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples-build
           else
             ${MATRIX_MAKE_PREFIX} make -C bld V=1 examples
           fi

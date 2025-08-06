@@ -83,7 +83,7 @@ jobs:
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --target curl-examples
+            time cmake --build bld --target curl-examples-build
             echo '::endgroup::'
 
   openbsd:
@@ -128,7 +128,7 @@ jobs:
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --target curl-examples
+            time cmake --build bld --target curl-examples-build
             echo '::endgroup::'
 
   freebsd:
@@ -232,7 +232,7 @@ jobs:
             if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
               echo '::group::build examples'
               if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-                time cmake --build bld --target curl-examples
+                time cmake --build bld --target curl-examples-build
               else
                 time make -C bld examples
               fi
@@ -361,7 +361,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --target curl-examples-build
           else
             make -C bld examples
           fi
@@ -473,7 +473,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --target curl-examples-build
           else
             make -C bld examples
           fi
