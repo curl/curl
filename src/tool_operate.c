@@ -265,9 +265,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
   curl_off_t uploadfilesize = -1;
   struct_stat fileinfo;
   CURLcode result = CURLE_OK;
-#ifdef CURL_DISABLE_LIBCURL_OPTION
-  (void)global; /* otherwise used in the my_setopt macros */
-#else
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   struct OperationConfig *config = per->config;
 #endif
 
