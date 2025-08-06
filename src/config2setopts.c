@@ -576,7 +576,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
     curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
     for(cl = config->cookies; cl; cl = cl->next) {
       if(cl == config->cookies)
-        result = curlx_dyn_addf(&cookies, "%s", cl->data);
+        result = curlx_dyn_add(&cookies, cl->data);
       else
         result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
