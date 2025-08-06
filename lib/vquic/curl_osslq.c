@@ -1099,12 +1099,12 @@ static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
                                      void *user_data)
 {
   struct cf_osslq_h3conn *h3 = &ctx->h3;
+  nghttp3_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
+                     Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
   CURLcode result;
   int rc;
 
   nghttp3_settings_default(&h3->settings);
-  nghttp3_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
-                     Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
   rc = nghttp3_conn_client_new(&h3->conn,
                                &ngh3_callbacks,
                                &h3->settings,

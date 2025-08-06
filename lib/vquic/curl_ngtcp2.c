@@ -1199,6 +1199,8 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  nghttp3_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
+                     Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
   int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
   int rc;
 
@@ -1208,8 +1210,6 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
   }
 
   nghttp3_settings_default(&ctx->h3settings);
-  nghttp3_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
-                     Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
 
   rc = nghttp3_conn_client_new(&ctx->h3conn,
                                &ngh3_callbacks,
@@ -2425,6 +2425,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                  struct pkt_io_ctx *pktx)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  ngtcp2_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
+                    Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
   int rc;
   int rv;
   CURLcode result;
@@ -2467,8 +2469,6 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&ctx->connected_path.remote,
                    &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
-  ngtcp2_mem mem = {NULL, Curl_ngtcp2_malloc, Curl_ngtcp2_free,
-                    Curl_ngtcp2_calloc, Curl_ngtcp2_realloc};
 
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,
