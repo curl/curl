@@ -223,6 +223,7 @@ int Curl_splayremove(struct Curl_tree *t,
   if(compare(SPLAY_SUBNODE, removenode->key) == 0) {
     /* It is a subnode within a 'same' linked list and thus we can unlink it
        easily. */
+    DEBUGASSERT(removenode->samen != removenode);
     if(removenode->samen == removenode)
       /* A non-subnode should never be set to SPLAY_SUBNODE */
       return 3;
