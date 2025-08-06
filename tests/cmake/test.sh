@@ -48,7 +48,7 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} $*" \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} -DCMAKE_UNITY_BUILD=ON $*" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     "${cmake_consumer}" --build "${bldc}" --verbose
