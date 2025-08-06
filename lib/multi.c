@@ -2793,16 +2793,15 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
     if(t) {
       /* the removed may have another timeout in queue */
       struct Curl_easy *data = Curl_splayget(t);
+      (void)add_next_timeout(now, multi, data);
       if(data->mstate == MSTATE_PENDING) {
         bool stream_unused;
         CURLcode result_unused;
         if(multi_handle_timeout(data, &now, &stream_unused, &result_unused)) {
           infof(data, "PENDING handle timeout");
           move_pending_to_connect(multi, data);
-          continue;
         }
       }
-      (void)add_next_timeout(now, multi, Curl_splayget(t));
     }
   } while(t);
 
