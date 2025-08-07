@@ -116,12 +116,12 @@ static int get_category_content(const char *category, unsigned int cols)
   unsigned int i;
 
   /* Checking for table. */
-  size_t table_flag = 0;
+  bool table_flag = FALSE;
 
   /* Check and handle table:<category> syntax. */
   if(curl_strnequal(category, "table", 5)) {
     const char *table_category = category + 5;
-    table_flag = 1; /* Use tool_table(). */
+    table_flag = TRUE; /* Use tool_table(). */
 
     /* Default to common. */
     if(!*table_category)
@@ -431,15 +431,23 @@ void tool_list_engines(void)
 /* Output table from category. */
 void tool_table(unsigned int category, unsigned int cols)
 {
-  size_t i, c, j, found, opt_idx, current, count = 0;
+  size_t i, c, j, found, opt_idx, current, max_len, lng_spc, count = 0;
 
   /* Count options in category. */
-  for(i = 0; helptext[i].opt; ++i)
-    if(helptext[i].categories & category)
+  for(i = 0; helptext[i].opt; ++i) {
+    if(helptext[i].categories & category) {
+      /* use length of longest description to set col width. */
+      if(count == 0)
+        max_len = strlen(helptext[i].desc);
+      else
+        if(max_len < strlen(helptext[i].desc))
+          max_len = strlen(helptext[i].desc);
       count++;
+    }
+  }
 
-  /* Set j based on col width. */
-  j = cols/45;
+  /* Set j based on longest description length. */
+  j = cols/max_len;
   if(j > 8)
     j = 8;
   else if(j == 0)
@@ -463,11 +471,13 @@ void tool_table(unsigned int category, unsigned int cols)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
+              lng_spc = 0;
               /* Check if long option. */
               if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
-                printf("%-44s", helptext[opt_idx].opt + 4);
-              else
-                printf("%-44s", helptext[opt_idx].opt);
+                lng_spc = 4;
+              /* Output option. */
+              printf("%-*s ", (int)(max_len),
+                     helptext[opt_idx].opt + lng_spc);
               break;
             }
             found++;
@@ -476,8 +486,11 @@ void tool_table(unsigned int category, unsigned int cols)
       puts("");
 
       /* Print separator. */
-      for(c = 0; c < j && (current + c) < count; c++)
-        printf("------------------------------------------- ");
+      for(c = 0; c < j && (current + c) < count; c++) {
+        for(opt_idx = 0; opt_idx < max_len; opt_idx++)
+          putchar('-');
+        putchar(' ');
+      }
       puts("");
 
       /* Description row. */
@@ -487,11 +500,8 @@ void tool_table(unsigned int category, unsigned int cols)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
-              /* Extra space for longer descriptions. */
-              if(strlen(helptext[opt_idx].desc) > 44)
-                printf("%-44s %s", helptext[opt_idx].desc, " ");
-              else
-                printf("%-44s", helptext[opt_idx].desc);
+              /* Output decription. */
+              printf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
               break;
             }
             found++;
