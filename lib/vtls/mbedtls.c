@@ -805,7 +805,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
    * - 3 Informational
    * - 4 Verbose
    */
-  mbedtls_debug_set_threshold(4);
+  mbedtls_debug_set_threshold(1);
 #endif
 
 
