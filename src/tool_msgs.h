@@ -30,8 +30,8 @@ void warnf(const char *fmt, ...)
   CURL_PRINTF(1, 2);
 void notef(const char *fmt, ...)
   CURL_PRINTF(1, 2);
-void helpf(FILE *errors, const char *fmt, ...)
-  CURL_PRINTF(2, 3);
+void helpf(const char *fmt, ...)
+  CURL_PRINTF(1, 2);
 void errorf(const char *fmt, ...)
   CURL_PRINTF(1, 2);
 

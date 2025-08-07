@@ -302,7 +302,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
-      helpf(tool_stderr, "cannot open '%s'", per->uploadfile);
+      helpf("cannot open '%s'", per->uploadfile);
       if(per->infd != -1) {
         close(per->infd);
         per->infd = STDIN_FILENO;
@@ -2082,7 +2082,7 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
-    helpf(tool_stderr, "(%d) no URL specified", CURLE_FAILED_INIT);
+    helpf("(%d) no URL specified", CURLE_FAILED_INIT);
     return CURLE_FAILED_INIT;
   }
 
@@ -2205,7 +2205,7 @@ CURLcode operate(int argc, argv_item_t argv[])
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {
-      helpf(tool_stderr, NULL);
+      helpf(NULL);
       result = CURLE_FAILED_INIT;
     }
   }
