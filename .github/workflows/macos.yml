@@ -111,7 +111,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
