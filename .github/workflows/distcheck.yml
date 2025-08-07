@@ -317,7 +317,6 @@ jobs:
           export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
             export CFLAGS='-arch arm64'
-            export TEST_CMAKE_FLAGS='-DCURL_USE_LIBPSL=OFF'  # auto-detection does not work with old-cmake
           fi
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             export TEST_CMAKE_GENERATOR='MSYS Makefiles'
