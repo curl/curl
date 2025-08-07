@@ -78,7 +78,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   include(ExternalProject)
   set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
-  set(_curl_libcurl_static_lib "${_curl_install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(_curl_static_lib "${_curl_install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
   string(REPLACE " " ";" CURL_TEST_OPTS "${CURL_TEST_OPTS}")
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
     set(_download_extract_timestamp "DOWNLOAD_EXTRACT_TIMESTAMP" "ON")
@@ -91,16 +91,16 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
       -DCURL_ENABLE_SSL=OFF -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBSSH2=OFF -DUSE_NGHTTP2=OFF
       -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DUSE_LIBIDN2=OFF -DENABLE_IPV6=OFF
       ${CURL_TEST_OPTS}
-    BUILD_BYPRODUCTS "${_curl_libcurl_static_lib}")
+    BUILD_BYPRODUCTS "${_curl_static_lib}")
 
   add_executable(test-consumer-static-fetch "test.c")
   add_dependencies(test-consumer-static-fetch curl-external)
   if(WIN32)
     target_compile_definitions(test-consumer-static-fetch PRIVATE "CURL_STATICLIB")
-    list(APPEND _curl_libcurl_static_lib "ws2_32" "bcrypt")
+    list(APPEND _curl_static_lib "ws2_32" "bcrypt")
   endif()
   target_include_directories(test-consumer-static-fetch PRIVATE "${_curl_install_dir}/include")
-  target_link_libraries(test-consumer-static-fetch PRIVATE "${_curl_libcurl_static_lib}")
+  target_link_libraries(test-consumer-static-fetch PRIVATE "${_curl_static_lib}")
 endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
