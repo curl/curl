@@ -316,7 +316,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     notef("Using embedded CA bundle (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
@@ -328,7 +328,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     notef("Using embedded CA bundle, for proxies (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
@@ -1069,13 +1069,11 @@ CURLcode config2setopts(struct OperationConfig *config,
     my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
 #else
     if(config->ip_tos > 0) {
-      errorf(config->global,
-             "Type of service is not supported in this build.");
+      errorf("Type of service is not supported in this build.");
       result = CURLE_NOT_BUILT_IN;
     }
     if(config->vlan_priority > 0) {
-      errorf(config->global,
-             "VLAN priority is not supported in this build.");
+      errorf("VLAN priority is not supported in this build.");
       result = CURLE_NOT_BUILT_IN;
     }
 #endif
