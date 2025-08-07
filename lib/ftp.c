@@ -551,8 +551,7 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
   }
   else {
     /* FTP download, shutdown, do not ignore errors */
-    Curl_xfer_setup_recv(data, SECONDARYSOCKET,
-                         ftpc->retr_size_saved, FALSE);
+    Curl_xfer_setup_recv(data, SECONDARYSOCKET, ftpc->retr_size_saved);
     Curl_xfer_set_shutdown(data, TRUE, FALSE);
   }
 

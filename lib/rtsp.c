@@ -100,6 +100,10 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
                                     bool is_eos);
+static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
+                                       const char *buf,
+                                       size_t blen,
+                                       bool is_eos);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -141,7 +145,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
+  rtsp_rtp_write_resp_hd,               /* write_resp_hd */
   rtsp_conncheck,                       /* connection_check */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
@@ -370,7 +374,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, TRUE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
     goto out;
   }
 
@@ -636,7 +640,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1, TRUE);
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, httpversion);
@@ -933,6 +937,14 @@ out:
     data->req.download_done = TRUE;
   }
   return result;
+}
+
+static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
+                                       const char *buf,
+                                       size_t blen,
+                                       bool is_eos)
+{
+  return rtsp_rtp_write_resp(data, buf, blen, is_eos);
 }
 
 static

@@ -240,7 +240,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   return CURLE_OK;
 }
 #endif /* CURL_DISABLE_GOPHER */

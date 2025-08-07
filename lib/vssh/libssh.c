@@ -1423,7 +1423,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
     myssh_to(data, sshc, SSH_STOP);
     return rc;
   }
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
   data->conn->send_idx = 0;
@@ -2279,7 +2279,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
         /* download data */
         bytecount = ssh_scp_request_get_size(sshc->scp_session);
         data->req.maxdownload = (curl_off_t) bytecount;
-        Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount, FALSE);
+        Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
         /* not set by Curl_xfer_setup to preserve keepon bits */
         conn->send_idx = 0;

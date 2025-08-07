@@ -72,11 +72,10 @@ void Curl_xfer_setup_send(struct Curl_easy *data,
                           int sockindex);
 
 /* The transfer receives data on the given socket index, the
- * amount to receive (or -1 if unknown) and if headers are expected */
+ * amount to receive (or -1 if unknown). */
 void Curl_xfer_setup_recv(struct Curl_easy *data,
                           int sockindex,
-                          curl_off_t recv_size,
-                          bool getheader);
+                          curl_off_t recv_size);
 
 /* *After* Curl_xfer_setup_xxx(), tell the transfer to shutdown the
  * connection at the end. Let the transfer either fail or ignore any
@@ -87,13 +86,11 @@ void Curl_xfer_set_shutdown(struct Curl_easy *data,
 
 /**
  * The transfer will use socket 1 to send/recv. `recv_size` is
- * the amount to receive or -1 if unknown. `getheader` indicates
- * response header processing is expected.
+ * the amount to receive or -1 if unknown.
  */
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
                               int sockindex,
-                              curl_off_t recv_size,
-                              bool getheader);
+                              curl_off_t recv_size);
 
 /**
  * Multi has set transfer to DONE. Last chance to trigger

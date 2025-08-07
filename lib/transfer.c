@@ -721,8 +721,7 @@ static void xfer_setup(
   struct Curl_easy *data,   /* transfer */
   int send_idx,             /* sockindex to send on or -1 */
   int recv_idx,             /* sockindex to receive on or -1 */
-  curl_off_t recv_size,     /* how much to receive, -1 if unknown */
-  bool getheader            /* TRUE if header parsing is wanted */
+  curl_off_t recv_size      /* how much to receive, -1 if unknown */
   )
 {
   struct SingleRequest *k = &data->req;
@@ -738,10 +737,10 @@ static void xfer_setup(
   conn->send_idx = send_idx;
   conn->recv_idx = recv_idx;
 
-  k->getheader = getheader;
   /* without receiving, there should be not recv_size */
   DEBUGASSERT((conn->recv_idx >= 0) || (recv_size == -1));
   k->size = recv_size;
+  k->header = !!conn->handler->write_resp_hd;
   /* by default, we do not shutdown at the end of the transfer */
   k->shutdown = FALSE;
   k->shutdown_err_ignore = FALSE;
@@ -749,14 +748,11 @@ static void xfer_setup(
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may
      be called after that */
-  if(!k->getheader) {
-    k->header = FALSE;
-    if(recv_size > 0)
-      Curl_pgrsSetDownloadSize(data, recv_size);
-  }
+  if(!k->header && (recv_size > 0))
+    Curl_pgrsSetDownloadSize(data, recv_size);
 
   /* we want header and/or body, if neither then do not do this! */
-  if(k->getheader || !data->req.no_body) {
+  if(conn->handler->write_resp_hd || !data->req.no_body) {
 
     if(conn->recv_idx != -1)
       k->keepon |= KEEP_RECV;
@@ -771,29 +767,27 @@ static void xfer_setup(
 
 void Curl_xfer_setup_nop(struct Curl_easy *data)
 {
-  xfer_setup(data, -1, -1, -1, FALSE);
+  xfer_setup(data, -1, -1, -1);
 }
 
 void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
                               int sockindex,
-                              curl_off_t recv_size,
-                              bool getheader)
+                              curl_off_t recv_size)
 {
-  xfer_setup(data, sockindex, sockindex, recv_size, getheader);
+  xfer_setup(data, sockindex, sockindex, recv_size);
 }
 
 void Curl_xfer_setup_send(struct Curl_easy *data,
                           int sockindex)
 {
-  xfer_setup(data, sockindex, -1, -1, FALSE);
+  xfer_setup(data, sockindex, -1, -1);
 }
 
 void Curl_xfer_setup_recv(struct Curl_easy *data,
                           int sockindex,
-                          curl_off_t recv_size,
-                          bool getheader)
+                          curl_off_t recv_size)
 {
-  xfer_setup(data, -1, sockindex, recv_size, getheader);
+  xfer_setup(data, -1, sockindex, recv_size);
 }
 
 void Curl_xfer_set_shutdown(struct Curl_easy *data,
