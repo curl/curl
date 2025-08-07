@@ -603,8 +603,8 @@ static const char *outtime(const char *ptr, /* %time{ ... */
     if(!result) {
       /* !checksrc! disable BANNEDFUNC 1 */
       utc = gmtime(&secs);
-      strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc);
-      fputs(output, stream);
+      if(strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc))
+        fputs(output, stream);
       curlx_dyn_free(&format);
     }
     ptr = end + 1;
