@@ -449,11 +449,12 @@ void tool_table(unsigned int category, unsigned int cols)
       else
         /* Set max_len by longest description or option. */
         if(max_len < strlen(helptext[i].desc) ||
-           max_len < strlen(helptext[i].opt))
+           max_len < strlen(helptext[i].opt)) {
           if(strlen(helptext[i].opt) < strlen(helptext[i].desc))
             max_len = strlen(helptext[i].desc);
           else
             max_len = strlen(helptext[i].opt);
+        }
       count++;
     }
   }
