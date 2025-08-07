@@ -299,7 +299,7 @@ static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
     Curl_xfer_setup_send(data, FIRSTSOCKET);
   }
   else
-    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1, FALSE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   *done = TRUE;
   return CURLE_OK;
 }

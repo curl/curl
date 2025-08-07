@@ -816,7 +816,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data,
         wssh_state(data, sshc, SSH_STOP);
         break;
       }
-      Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size, FALSE);
+      Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
       conn->send_idx = 0;

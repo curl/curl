@@ -1540,7 +1540,7 @@ sftp_download_stat(struct Curl_easy *data,
     myssh_state(data, sshc, SSH_STOP);
     return CURLE_OK;
   }
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
   data->conn->send_idx = 0;
@@ -2460,7 +2460,7 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
   /* download data */
   bytecount = (curl_off_t)sb.st_size;
   data->req.maxdownload = (curl_off_t)sb.st_size;
-  Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
   data->conn->send_idx = 0;

@@ -2415,7 +2415,7 @@ static CURLcode http_req_complete(struct Curl_easy *data,
 out:
   if(!result) {
     /* setup variables for the upcoming transfer */
-    Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1, TRUE);
+    Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
   }
   return result;
 }

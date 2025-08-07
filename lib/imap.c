@@ -1347,7 +1347,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
     else {
       /* IMAP download */
       data->req.maxdownload = size;
-      Curl_xfer_setup_recv(data, FIRSTSOCKET, size, FALSE);
+      Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
     }
   }
   else {
