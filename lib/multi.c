@@ -912,7 +912,7 @@ static CURLcode mstate_connecting_pollset(struct Curl_easy *data,
                                           struct easy_pollset *ps)
 {
   if(data->conn) {
-    curl_socket_t sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+    curl_socket_t sockfd = Curl_conn_get_first_socket(data);
     if(sockfd != CURL_SOCKET_BAD) {
       /* Default is to wait to something from the server */
       return Curl_pollset_change(data, ps, sockfd, CURL_POLL_IN, 0);
@@ -928,7 +928,7 @@ static CURLcode mstate_protocol_pollset(struct Curl_easy *data,
     curl_socket_t sockfd;
     if(data->conn->handler->proto_pollset)
       return data->conn->handler->proto_pollset(data, ps);
-    sockfd = Curl_conn_get_socket(data, FIRSTSOCKET);
+    sockfd = data->conn->sock[FIRSTSOCKET];
     if(sockfd != CURL_SOCKET_BAD) {
       /* Default is to wait to something from the server */
       return Curl_pollset_change(data, ps, sockfd, CURL_POLL_IN, 0);

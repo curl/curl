@@ -910,18 +910,19 @@ CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
   return result;
 }
 
-curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
+curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
 
-  cf = (data->conn && CONN_SOCK_IDX_VALID(sockindex)) ?
-       data->conn->cfilter[sockindex] : NULL;
+  if(!data->conn)
+    return CURL_SOCKET_BAD;
+
+  cf = data->conn->cfilter[FIRSTSOCKET];
   /* if the top filter has not connected, ask it (and its sub-filters)
-   * for the socket. Otherwise conn->sock[sockindex] should have it.
-   */
+   * for the socket. Otherwise conn->sock[sockindex] should have it. */
   if(cf && !cf->connected)
     return Curl_conn_cf_get_socket(cf, data);
-  return data->conn ? data->conn->sock[sockindex] : CURL_SOCKET_BAD;
+  return data->conn->sock[FIRSTSOCKET];
 }
 
 const struct Curl_sockaddr_ex *

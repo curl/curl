@@ -1528,8 +1528,7 @@ CURLcode Curl_http_do_pollset(struct Curl_easy *data,
                               struct easy_pollset *ps)
 {
   /* write mode */
-  curl_socket_t sock = Curl_conn_get_socket(data, FIRSTSOCKET);
-  return Curl_pollset_add_out(data, ps, sock);
+  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 /*
