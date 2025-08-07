@@ -302,7 +302,6 @@ jobs:
           persist-credentials: false
 
       - name: 'via ExternalProject'
-        if: ${{ !contains(matrix.image, 'linux') }}
         run: ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
       - name: 'via FetchContent'
         run: ./tests/cmake/test.sh FetchContent ${TESTOPTS} -DCURL_USE_OPENSSL=ON
@@ -312,7 +311,6 @@ jobs:
         run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
 
       - name: 'via ExternalProject (old cmake)'
-        if: ${{ contains(matrix.image, 'linux') }}
         run: |
           export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
           if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
