@@ -3066,9 +3066,9 @@ ParameterError parse_args(int argc, argv_item_t argv[])
     const char *reason = param2text(result);
 
     if(orig_opt && strcmp(":", orig_opt))
-      helpf(tool_stderr, "option %s: %s", orig_opt, reason);
+      helpf("option %s: %s", orig_opt, reason);
     else
-      helpf(tool_stderr, "%s", reason);
+      helpf("%s", reason);
   }
 
   unicodefree(orig_opt);
