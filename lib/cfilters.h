@@ -460,10 +460,11 @@ bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex);
 CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex);
 
 /**
- * Return the socket used on data's connection for the index.
+ * Return the socket used on data's connection for FIRSTSOCKET,
+ * querying filters if the whole chain has not connected yet.
  * Returns CURL_SOCKET_BAD if not available.
  */
-curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex);
+curl_socket_t Curl_conn_get_first_socket(struct Curl_easy *data);
 
 /* Return a pointer to the connected socket address or NULL. */
 const struct Curl_sockaddr_ex *
