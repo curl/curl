@@ -431,22 +431,27 @@ void tool_list_engines(void)
 /* Output table from category. */
 void tool_table(unsigned int category, unsigned int cols)
 {
-  size_t i, c, j, found, opt_idx, current, max_len, lng_spc, count = 0;
+  size_t i, c, j, found, opt_idx, current, lng_spc, max_len, count = 0;
 
   /* Count options in category. */
   for(i = 0; helptext[i].opt; ++i) {
     if(helptext[i].categories & category) {
-      /* use length of longest description to set col width. */
+      /* use length of longest description or option to set col width. */
       if(count == 0)
-        max_len = strlen(helptext[i].desc);
+        if(strlen(helptext[i].desc) > strlen(helptext[i].opt))
+          max_len = strlen(helptext[i].desc);
+        else
+          max_len = strlen(helptext[i].opt);
       else
         if(max_len < strlen(helptext[i].desc))
           max_len = strlen(helptext[i].desc);
+        else if(max_len < strlen(helptext[i].opt))
+          max_len = strlen(helptext[i].opt);
       count++;
     }
   }
 
-  /* Set j based on longest description length. */
+  /* Set j based on longest description or option length. */
   j = cols/max_len;
   if(j > 8)
     j = 8;
