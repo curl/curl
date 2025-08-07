@@ -436,6 +436,9 @@ void tool_table(unsigned int category, unsigned int cols)
 
   /* Count options in category. */
   for(i = 0; helptext[i].opt; ++i) {
+    if(!(helptext[i].categories & category))
+      continue;
+
     if(helptext[i].categories & category) {
       /* use length of longest description or option to set col width. */
       if(count == 0)
@@ -509,7 +512,7 @@ void tool_table(unsigned int category, unsigned int cols)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
-              /* Output decription. */
+              /* Output description. */
               printf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
               break;
             }
