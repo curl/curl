@@ -356,8 +356,13 @@ performed using the same connection cache.
 
 TIME OUTPUT FORMAT
 
-When showing time with `%time{}`, the following output qualifiers are
-available:
+To show time with `%time{}` the characters within `{}` creates a special
+format string that may contain special character sequences called conversion
+specifications. Each conversion specification starts with `%` and is followed
+by a character that instructs curl to output a particular time detail. All
+other characters used are displayed as-is and-
+
+The following conversion specification are available:
 
 ## `%a`
 
@@ -378,7 +383,7 @@ The full month name according to the current locale.
 ## `%c`
 
 The preferred date and time representation for the current locale. (In the
-POSIX locale this is equivalent to %a %b %e %H:%M:%S %Y.)
+POSIX locale this is equivalent to `%a %b %e %H:%M:%S %Y`.)
 
 ## `%C`
 
@@ -390,12 +395,12 @@ The day of the month as a decimal number (range 01 to 31).
 
 ## `%D`
 
-Equivalent to %m/%d/%y. In international contexts, this format is ambiguous
+Equivalent to `%m/%d/%y`. In international contexts, this format is ambiguous
 and should be avoided.)
 
 ## `%e`
 
-Like %d, the day of the month as a decimal number, but a leading zero is
+Like `%d`, the day of the month as a decimal number, but a leading zero is
 replaced by a space.
 
 ## `%f`
@@ -405,14 +410,14 @@ code and not a standard one.)
 
 ## `%F`
 
-Equivalent to %Y-%m-%d (the ISO 8601 date format).
+Equivalent to `%Y-%m-%d` (the ISO 8601 date format).
 
 ## `%G`
 
 The ISO 8601 week-based year with century as a decimal number. The 4-digit
-year corresponding to the ISO week number (see %V). This has the same format
-and value as %Y, except that if the ISO week number belongs to the previous or
-next year, that year is used instead.
+year corresponding to the ISO week number (see `%V`). This has the same format
+and value as `%Y`, except that if the ISO week number belongs to the previous
+or next year, that year is used instead.
 
 ## `%g`
 
@@ -459,7 +464,7 @@ strings for the current locale. Noon is treated as "PM" and midnight as "AM".
 
 ## `%P`
 
-Like %p but in lowercase: "am" or "pm" or a corresponding string for the
+Like `%p` but in lowercase: "am" or "pm" or a corresponding string for the
 current locale.
 
 ## `%r`
@@ -468,8 +473,8 @@ The time in am or pm notation.
 
 ## `%R`
 
-The time in 24-hour notation (%H:%M). For a version including the seconds, see
-`%T` below.
+The time in 24-hour notation (`%H:%M`). For a version including the seconds,
+see `%T` below.
 
 ## `%s`
 
@@ -478,11 +483,11 @@ The number of seconds since the Epoch, 1970-01-01 00:00:00 +0000 (UTC).
 ## `%S`
 
 The second as a decimal number (range 00 to 60). (The range is up to 60 to
-allow for occasional leap seconds.)
+allow for occasional leap seconds.) See `%f` for microseconds.
 
 ## `%T`
 
-The time in 24-hour notation (%H:%M:%S).
+The time in 24-hour notation (`%H:%M:%S`).
 
 ## `%u`
 
@@ -533,3 +538,7 @@ from UTC). As time is always UTC, this outputs `+0000`.
 ## `%Z`
 
 The timezone name. For some reason `GMT`.
+
+## `%%`
+
+A literal `%` character.
