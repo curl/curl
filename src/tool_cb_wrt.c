@@ -109,7 +109,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   return TRUE;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
                           char *buffer, size_t bytes,
                           size_t *retp)
