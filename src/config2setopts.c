@@ -678,6 +678,8 @@ static void gen_cb_setopts(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURL *curl)
 {
+  (void)config; /* when --libcurl is disabled */
+
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
   my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);
