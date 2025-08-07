@@ -431,7 +431,8 @@ void tool_list_engines(void)
 /* Output table from category. */
 void tool_table(unsigned int category, unsigned int cols)
 {
-  size_t i, c, j, found, opt_idx, current, lng_spc, max_len, count = 0;
+  size_t i, c, j, found, opt_idx, current, lng_spc, count = 0;
+  size_t max_len = 0;
 
   /* Count options in category. */
   for(i = 0; helptext[i].opt; ++i) {
@@ -444,10 +445,12 @@ void tool_table(unsigned int category, unsigned int cols)
           max_len = strlen(helptext[i].opt);
       else
         /* Set max_len by longest description or option. */
-        if(max_len < strlen(helptext[i].desc))
-          max_len = strlen(helptext[i].desc);
-        if(max_len < strlen(helptext[i].opt))
-          max_len = strlen(helptext[i].opt);
+        if(max_len < strlen(helptext[i].desc) ||
+           max_len < strlen(helptext[i].opt))
+          if(strlen(helptext[i].opt) < strlen(helptext[i].desc))
+            max_len = strlen(helptext[i].desc);
+          else
+            max_len = strlen(helptext[i].opt);
       count++;
     }
   }
