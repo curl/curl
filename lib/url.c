@@ -3514,6 +3514,10 @@ static CURLcode create_conn(struct Curl_easy *data,
    *************************************************************/
   if((conn->given->flags&PROTOPT_SSL) && conn->bits.httpproxy)
     conn->bits.tunnel_proxy = TRUE;
+
+  /* Carry over the no-retry-on-reuse into connection bits. */
+  conn->bits.retry_on_reuse = !data->set.retry_on_reuse_forbid;
+
 #endif
 
   /*************************************************************

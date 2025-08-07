@@ -379,6 +379,8 @@ struct ConnectBits {
   /* always modify bits.close with the connclose() and connkeep() macros! */
   BIT(close); /* if set, we close the connection after this request */
   BIT(reuse); /* if set, this is a reused connection */
+  BIT(retry_on_reuse); /* if set, a reused connection after connection reset
+                          is allowed to retry the request */
   BIT(altused); /* this is an alt-svc "redirect" */
   BIT(conn_to_host); /* if set, this connection has a "connect to host"
                         that overrides the host in the URL */
@@ -1605,6 +1607,7 @@ struct UserDefined {
 #endif
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
   BIT(reuse_fresh);    /* do not reuse an existing connection  */
+  BIT(retry_on_reuse_forbid);   /* do not retry under connection reset */
   BIT(no_signal);      /* do not use any signal/alarm handler */
   BIT(tcp_nodelay);    /* whether to enable TCP_NODELAY or not */
   BIT(ignorecl);       /* ignore content length */

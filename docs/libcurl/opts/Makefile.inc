@@ -185,6 +185,7 @@ man_MANS =                                      \
   CURLOPT_FNMATCH_DATA.3                        \
   CURLOPT_FNMATCH_FUNCTION.3                    \
   CURLOPT_FOLLOWLOCATION.3                      \
+  CURLOPT_FORBID_RETRY_ON_REUSE.3               \
   CURLOPT_FORBID_REUSE.3                        \
   CURLOPT_FRESH_CONNECT.3                       \
   CURLOPT_FTP_ACCOUNT.3                         \

@@ -332,6 +332,12 @@ Callback for wildcard matching. See CURLOPT_FNMATCH_FUNCTION(3)
 
 Follow HTTP redirects. See CURLOPT_FOLLOWLOCATION(3)
 
+## CURLOPT_FORBID_RETRY_ON_REUSE
+
+Prevent curl from transparently retry a transfer on a new connection when a
+previously reused connection was reset or otherwise no longer unavailable.
+See CURLOPT_FORBID_RETRY_ON_REUSE(3)
+
 ## CURLOPT_FORBID_REUSE
 
 Prevent subsequent connections from reusing this. See CURLOPT_FORBID_REUSE(3)

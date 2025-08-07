@@ -452,6 +452,13 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
      */
     s->reuse_forbid = enabled;
     break;
+  case CURLOPT_FORBID_RETRY_ON_REUSE:
+    /**
+     * No retry under any circumstances even when a reset happens on a reused
+     * connection.
+     */
+    s->retry_on_reuse_forbid = enabled;
+    break;
   case CURLOPT_FRESH_CONNECT:
     /*
      * This transfer shall not use a previously cached connection but
