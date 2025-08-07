@@ -68,17 +68,15 @@ struct State {
   struct getout *urlnode;
   struct URLGlob inglob;
   struct URLGlob urlglob;
-  char *outfiles;
   char *httpgetfields;
   char *uploadfile;
-  curl_off_t infilenum; /* number of files to upload */
-  curl_off_t up;        /* upload file counter within a single upload glob */
+  curl_off_t upnum;     /* number of files to upload */
+  curl_off_t upidx;     /* index for upload glob */
   curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
-  curl_off_t li;        /* index for globbed URLs */
+  curl_off_t urlidx;    /* index for globbed URLs */
 };
 
 struct OperationConfig {
-  struct State state;             /* for create_transfer() */
   struct dynbuf postdata;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
@@ -342,6 +340,7 @@ struct OperationConfig {
 };
 
 struct GlobalConfig {
+  struct State state;             /* for create_transfer() */
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
   char *libcurl;                  /* Output libcurl code to this filename */
