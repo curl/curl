@@ -378,5 +378,7 @@ struct GlobalConfig {
 
 struct OperationConfig *config_alloc(void);
 void config_free(struct OperationConfig *config);
+CURLcode globalconf_init(void);
+void globalconf_free(void);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */
