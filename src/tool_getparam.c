@@ -2354,8 +2354,7 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     break;
   case C_LIBCURL: /* --libcurl */
 #ifdef CURL_DISABLE_LIBCURL_OPTION
-    warnf(global,
-          "--libcurl option was disabled at build-time");
+    warnf("--libcurl option was disabled at build-time");
     err = PARAM_OPTION_UNKNOWN;
 #else
     err = getstr(&global->libcurl, nextarg, DENY_BLANK);

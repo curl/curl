@@ -1387,10 +1387,8 @@ static long all_added; /* number of easy handles currently added */
  * to add even after this call returns. sets 'addedp' to TRUE if one or more
  * transfers were added.
  */
-static CURLcode add_parallel_transfers(CURLM *multi,
-                                       CURLSH *share,
-                                       bool *morep,
-                                       bool *addedp)
+static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
+                                       bool *morep, bool *addedp)
 {
   struct per_transfer *per;
   CURLcode result = CURLE_OK;
@@ -1524,8 +1522,7 @@ static void check_multi_info(struct datauv *uv)
     uv->s->result = result;
 
   if(uv->s->more_transfers) {
-    result = add_parallel_transfers(uv->s->global, uv->s->multi,
-                                    uv->s->share,
+    result = add_parallel_transfers(uv->s->multi, uv->s->share,
                                     &uv->s->more_transfers,
                                     &uv->s->added_transfers);
     if(result && !uv->s->result)
@@ -1674,7 +1671,7 @@ static CURLcode parallel_event(struct parastate *s)
   curl_multi_setopt(s->multi, CURLMOPT_TIMERFUNCTION, cb_timeout);
   curl_multi_setopt(s->multi, CURLMOPT_TIMERDATA, &uv);
   curl_multi_setopt(s->multi, CURLMOPT_MAX_HOST_CONNECTIONS,
-                    s->global->parallel_host);
+                    global->parallel_host);
 
   /* kickstart the thing */
   curl_multi_socket_action(s->multi, CURL_SOCKET_TIMEOUT, 0,
@@ -1708,8 +1705,8 @@ static CURLcode parallel_event(struct parastate *s)
     }
 
     if(s->more_transfers) {
-      result = add_parallel_transfers(s->global, s->multi, s->share,
-                                      &s->more_transfers, &s->added_transfers);
+      result = add_parallel_transfers(s->multi, s->share, &s->more_transfers,
+                                      &s->added_transfers);
       if(result && !s->result)
         s->result = result;
     }
