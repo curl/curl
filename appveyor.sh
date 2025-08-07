@@ -161,8 +161,7 @@ fi
 
 # build examples
 
-if [ "${EXAMPLES}" = 'ON' ] && \
-   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples-build
 fi
 
