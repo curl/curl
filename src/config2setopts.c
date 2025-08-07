@@ -87,7 +87,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     }
     if(result < 0) {
       int error = errno;
-      warnf("Setting type of service to %d failed with errno %d: %s\n",
+      warnf("Setting type of service to %d failed with errno %d: %s",
             tos, error, strerror(error));
     }
   }
@@ -96,9 +96,9 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   if(config->vlan_priority > 0) {
     int priority = (int)config->vlan_priority;
     if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
-      (void *)&priority, sizeof(priority)) != 0) {
+                  (void *)&priority, sizeof(priority)) != 0) {
       int error = errno;
-      warnf("VLAN priority %d failed with errno %d: %s\n",
+      warnf("VLAN priority %d failed with errno %d: %s",
             priority, error, strerror(error));
     }
   }

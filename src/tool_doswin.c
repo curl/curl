@@ -768,14 +768,14 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
                            &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
-    errorf("accept error: %08lx\n", GetLastError());
+    errorf("accept error: %08lx", GetLastError());
     goto ThreadCleanup;
   }
 
   closesocket(tdata->socket_l); /* sclose here fails test 1498 */
   tdata->socket_l = CURL_SOCKET_BAD;
   if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
-    errorf("shutdown error: %08lx\n", GetLastError());
+    errorf("shutdown error: %08lx", GetLastError());
     goto ThreadCleanup;
   }
   for(;;) {
@@ -862,7 +862,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     result = listen(tdata->socket_l, 1);
     if(result == SOCKET_ERROR) {
-      errorf("listen error: %08lx\n", GetLastError());
+      errorf("listen error: %08lx", GetLastError());
       break;
     }
 
