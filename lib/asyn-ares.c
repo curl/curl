@@ -237,26 +237,6 @@ CURLcode Curl_async_get_impl(struct Curl_easy *data, void **impl)
   return result;
 }
 
-static void async_ares_cleanup(struct Curl_easy *data);
-
-void Curl_async_ares_shutdown(struct Curl_easy *data)
-{
-  struct async_ares_ctx *ares = &data->state.async.ares;
-  if(ares->channel)
-    ares_cancel(ares->channel);
-  async_ares_cleanup(data);
-}
-
-void Curl_async_ares_destroy(struct Curl_easy *data)
-{
-  struct async_ares_ctx *ares = &data->state.async.ares;
-  Curl_async_ares_shutdown(data);
-  if(ares->channel) {
-    ares_destroy(ares->channel);
-    ares->channel = NULL;
-  }
-}
-
 /*
  * async_ares_cleanup() cleans up async resolver data.
  */
@@ -270,6 +250,26 @@ static void async_ares_cleanup(struct Curl_easy *data)
 #ifdef USE_HTTPSRR
   Curl_httpsrr_cleanup(&ares->hinfo);
 #endif
+}
+
+void Curl_async_ares_shutdown(struct Curl_easy *data)
+{
+  /* c-ares has a method to "cancel" operations on a channel, but
+   * as reported in #18216, this does not totally reset the channel
+   * and ares may get stuck.
+   * We need to destroy the channel and on demand create a new
+   * one to avoid that. */
+  Curl_async_ares_destroy(data);
+}
+
+void Curl_async_ares_destroy(struct Curl_easy *data)
+{
+  struct async_ares_ctx *ares = &data->state.async.ares;
+  if(ares->channel) {
+    ares_destroy(ares->channel);
+    ares->channel = NULL;
+  }
+  async_ares_cleanup(data);
 }
 
 /*
