@@ -75,7 +75,6 @@ build:
               packages/**,\
               plan9/**,\
               projects/**,\
-              winbuild/**,\
               lib/libcurl.def,\
               tests/cmake/**\
               }"
@@ -520,6 +519,5 @@ Windows:
               m4/curl-schannel.m4,\
               projects/**,\
               src/tool_doswin.c,\
-              winbuild/**,\
               lib/libcurl.def\
               }"
