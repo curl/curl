@@ -52,9 +52,9 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
       # warning LNK4221: This object file does not define any previously undefined public symbols,
       #                  so it will not be used by any link operation that consumes this library
       if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-        target_link_options(curl-examples-build PRIVATE "-ignore:4006" "-ignore:4221")
+        set_target_properties(curl-examples-build PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006" "-ignore:4221")
       else()
-        target_link_libraries(curl-examples-build PRIVATE "-ignore:4006" "-ignore:4221")
+        set_target_properties(curl-examples-build PROPERTIES STATIC_LIBRARY_FLAGS "-ignore:4006" "-ignore:4221")
       endif()
     endif()
   else()
