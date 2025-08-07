@@ -581,7 +581,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 #ifdef __VMS
   if(is_vms_shell()) {
     /* VMS DCL shell behavior */
-    if(global.silent && !global.showerror)
+    if(global->silent && !global->showerror)
       vms_show = VMSSTS_HIDE;
   }
   else
@@ -1062,7 +1062,7 @@ static void check_stdin_upload(struct OperationConfig *config,
     /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
-    curl_socket_t f = win32_stdin_read_thread(global);
+    curl_socket_t f = win32_stdin_read_thread();
 
     if(f == CURL_SOCKET_BAD)
       warnf("win32_stdin_read_thread returned INVALID_SOCKET "

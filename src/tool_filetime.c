@@ -55,21 +55,21 @@ int getfiletime(const char *filename, curl_off_t *stamp)
         | ((curl_off_t)ft.dwHighDateTime) << 32;
 
       if(converted < 116444736000000000)
-        warnf(global, "Failed to get filetime: underflow");
+        warnf("Failed to get filetime: underflow");
       else {
         *stamp = (converted - 116444736000000000) / 10000000;
         rc = 0;
       }
     }
     else {
-      warnf(global, "Failed to get filetime: "
+      warnf("Failed to get filetime: "
             "GetFileTime failed: GetLastError %u",
             (unsigned int)GetLastError());
     }
     CloseHandle(hfile);
   }
   else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
-    warnf(global, "Failed to get filetime: "
+    warnf("Failed to get filetime: "
           "CreateFile failed: GetLastError %u",
           (unsigned int)GetLastError());
   }
@@ -99,7 +99,7 @@ void setfiletime(curl_off_t filetime, const char *filename)
     /* 910670515199 is the maximum Unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */
     if(filetime > 910670515199) {
-      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on outfile: overflow", filetime);
       curlx_unicodefree(tchar_filename);
       return;
@@ -117,14 +117,14 @@ void setfiletime(curl_off_t filetime, const char *filename)
       ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
       ft.dwHighDateTime = (DWORD)(converted >> 32);
       if(!SetFileTime(hfile, NULL, &ft, &ft)) {
-        warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+        warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
               " on outfile: SetFileTime failed: GetLastError %u",
               filetime, (unsigned int)GetLastError());
       }
       CloseHandle(hfile);
     }
     else {
-      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on outfile: CreateFile failed: GetLastError %u",
             filetime, (unsigned int)GetLastError());
     }
@@ -143,7 +143,7 @@ void setfiletime(curl_off_t filetime, const char *filename)
     times.actime = (time_t)filetime;
     times.modtime = (time_t)filetime;
     if(utime(filename, &times)) {
-      warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on '%s': %s", filetime, filename, strerror(errno));
     }
 #endif
