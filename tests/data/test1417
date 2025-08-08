@@ -14,7 +14,7 @@ HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Trailer: chunky-trailer
-Connection: mooo
+Connection: close
 
 40
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -32,7 +32,7 @@ HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Trailer: chunky-trailer
-Connection: mooo
+Connection: close
 
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
 chunky-trailer: header data
@@ -68,7 +68,7 @@ HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Trailer: chunky-trailer
-Connection: mooo
+Connection: close
 
 chunky-trailer: header data
 </file>
