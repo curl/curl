@@ -165,3 +165,9 @@ if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
+
+# disk space used
+
+if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 50KB _bld
+fi
