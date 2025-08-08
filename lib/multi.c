@@ -2329,24 +2329,6 @@ static CURLMcode state_connect(struct Curl_multi *multi,
   return rc;
 }
 
-#ifndef CURL_DISABLE_ALTSVC
-static bool is_altsvc_error(CURLcode rc)
-{
-  switch(rc) {
-  case CURLE_COULDNT_RESOLVE_PROXY:
-  case CURLE_COULDNT_RESOLVE_HOST:
-  case CURLE_COULDNT_CONNECT:
-  case CURLE_GOT_NOTHING:
-  case CURLE_SEND_ERROR:
-  case CURLE_RECV_ERROR:
-    return true;
-
-  default:
-    return false;
-  }
-}
-#endif
-
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct curltime *nowp,
                                  struct Curl_easy *data)
@@ -2677,32 +2659,30 @@ statemachine_end:
 
           /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(data->asi && data->asi->used && !data->asi->errored) {
-      data->asi->errored = is_altsvc_error(result);
+    if(data->asi && data->asi->used &&
+      Curl_is_altsvc_error(result) &&
+      !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+      data->mstate <= MSTATE_PROTOCONNECTING &&
+      data->mstate >= MSTATE_CONNECT) {
 
-      if(data->asi->errored &&
-         !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
-        data->mstate <= MSTATE_PROTOCONNECTING &&
-        data->mstate >= MSTATE_CONNECT) {
+      infof(data, "Alt-Svc connection failed(%d). "
+                  "Retrying with another target", result);
+      if(data->conn) {
+        struct connectdata *conn = data->conn;
 
-        infof(data, "Alt-Svc connection failed(%d). "
-                    "Retrying with original target", result);
-        if(data->conn) {
-          struct connectdata *conn = data->conn;
-
-          /* This is where we make sure that the conn pointer is reset.
-             We do not have to do this in every case block above where a
-             failure is detected */
-          Curl_detach_connection(data);
-          Curl_conn_terminate(data, conn, FALSE);
-        }
-
-        stream_error = FALSE;
-        multistate(data, MSTATE_CONNECT);
-        result = CURLE_OK;
-        rc = CURLM_CALL_MULTI_PERFORM;
-        continue;
+        /* This is where we make sure that the conn pointer is reset.
+           We do not have to do this in every case block above where a
+           failure is detected */
+        Curl_detach_connection(data);
+        Curl_conn_terminate(data, conn, FALSE);
       }
+
+      data->asi->used = FALSE;
+      stream_error = FALSE;
+      multistate(data, MSTATE_CONNECT);
+      result = CURLE_OK;
+      rc = CURLM_CALL_MULTI_PERFORM;
+      continue;
     }
 #endif
         if(data->conn) {
