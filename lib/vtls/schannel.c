@@ -1716,7 +1716,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
   for(;;) {
     bool block_read, block_write, blocking, done;
     curl_socket_t sockfd, readfd, writefd;
-    timediff_t elapsed, remaining;
+    timediff_t elapsed;
 
     elapsed = curlx_timediff(curlx_now(), rs->start_time);
     if(elapsed >= max_renegotiate_ms) {
@@ -1724,7 +1724,6 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_SSL_CONNECT_ERROR;
       break;
     }
-    remaining = max_renegotiate_ms - elapsed;
 
     /* the current io_need state may have been overwritten since the last time
        this function was called. restore the io_need state needed to continue
@@ -1784,7 +1783,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     for(;;) {
       int what;
-      timediff_t timeout;
+      timediff_t timeout, remaining;
 
       if(Curl_pgrsUpdate(data)) {
         result = CURLE_ABORTED_BY_CALLBACK;
