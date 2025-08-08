@@ -28,7 +28,7 @@ add_custom_target(curl-examples)
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set(_all_plus_one "")
+set(_all_canary "")
 set(_all "all")
 foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
   set(_target_name "curl-example-${_target}")
@@ -56,9 +56,9 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
       add_library(${_target_name} STATIC EXCLUDE_FROM_ALL ${_examples_c})
     endif()
     add_custom_target(curl-examples-build)  # Special target to compile all tests quickly and build a single test to probe linkage
-    add_dependencies(curl-examples-build ${_target_name} ${_all_plus_one})  # Include a full build of a single test
+    add_dependencies(curl-examples-build ${_target_name} ${_all_canary})  # Include a full build of a single test
   else()
-    set(_all_plus_one ${_target_name})  # Save the last test for the curl-examples-build target
+    set(_all_canary ${_target_name})  # Save the last test for the curl-examples-build target
     add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c")
     add_dependencies(curl-examples ${_target_name})
   endif()
