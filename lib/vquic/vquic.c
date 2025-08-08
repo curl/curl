@@ -749,6 +749,28 @@ void *Curl_ngtcp2_realloc(void *ptr, size_t size, void *user_data)
   return Curl_crealloc(ptr, size);
 }
 
+#ifdef USE_NGTCP2
+static ngtcp2_mem curl_ngtcp2_mem_ = {
+  NULL,
+  Curl_ngtcp2_malloc,
+  Curl_ngtcp2_free,
+  Curl_ngtcp2_calloc,
+  Curl_ngtcp2_realloc
+};
+void *Curl_ngtcp2_mem(void) { return (void *)&curl_ngtcp2_mem_; }
+#endif
+
+#ifdef USE_NGHTTP3
+static nghttp3_mem curl_nghttp3_mem_ = {
+  NULL,
+  Curl_ngtcp2_malloc,
+  Curl_ngtcp2_free,
+  Curl_ngtcp2_calloc,
+  Curl_ngtcp2_realloc
+};
+void *Curl_nghttp3_mem(void) { return (void *)&curl_nghttp3_mem_; }
+#endif
+
 #endif /* USE_NGTCP2 || USE_NGHTTP3 */
 
 #else /* CURL_DISABLE_HTTP || !USE_HTTP3 */

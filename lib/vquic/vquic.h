@@ -56,6 +56,13 @@ void Curl_ngtcp2_free(void *ptr, void *user_data);
 void *Curl_ngtcp2_calloc(size_t nmemb, size_t size, void *user_data);
 void *Curl_ngtcp2_realloc(void *ptr, size_t size, void *user_data);
 
+#ifdef USE_NGTCP2
+void *Curl_ngtcp2_mem(void);
+#endif
+#ifdef USE_NGHTTP3
+void *Curl_nghttp3_mem(void);
+#endif
+
 #endif /* USE_NGTCP2 || USE_NGHTTP3 */
 
 #else
