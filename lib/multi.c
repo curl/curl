@@ -2329,7 +2329,6 @@ static CURLMcode state_connect(struct Curl_multi *multi,
 static bool is_altsvc_error(CURLcode rc)
 {
   switch(rc) {
-  case CURLE_URL_MALFORMAT:
   case CURLE_COULDNT_RESOLVE_PROXY:
   case CURLE_COULDNT_RESOLVE_HOST:
   case CURLE_COULDNT_CONNECT:
@@ -2683,15 +2682,13 @@ statemachine_end:
         infof(data, "Alt-Svc connection failed(%d). "
                     "Retrying with original target", result);
         if(data->conn) {
-           /* Do not attempt to send data over a connection that timed out */
-            bool dead_connection = result == CURLE_OPERATION_TIMEDOUT;
-            struct connectdata *conn = data->conn;
+          struct connectdata *conn = data->conn;
 
-            /* This is where we make sure that the conn pointer is reset.
-               We do not have to do this in every case block above where a
-               failure is detected */
-            Curl_detach_connection(data);
-            Curl_conn_terminate(data, conn, dead_connection);
+          /* This is where we make sure that the conn pointer is reset.
+             We do not have to do this in every case block above where a
+             failure is detected */
+          Curl_detach_connection(data);
+          Curl_conn_terminate(data, conn, FALSE);
         }
 
         stream_error = FALSE;

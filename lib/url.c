@@ -3857,11 +3857,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
   struct connectdata *conn;
   bool reused = FALSE;
 
-#ifndef CURL_DISABLE_ALTSVC
-  if(data->asi)
-    data->asi->used = FALSE;
-#endif
-
   *asyncp = FALSE; /* assume synchronous resolves by default */
   *protocol_done = FALSE;
 
