@@ -2946,7 +2946,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   DEBUGASSERT(cf->cft == &Curl_cft_nghttp2);
   ctx = cf->ctx;
 
-  data->req.httpversion_sent = 20; /* It's an h2 request now */
+  data->req.httpversion_sent = 20; /* it is an h2 request now */
   data->req.header = TRUE; /* we expect the real response to come in h2 */
   data->req.headerline = 0; /* restart the header line counter */
 
