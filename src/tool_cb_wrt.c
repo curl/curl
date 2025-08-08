@@ -115,8 +115,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
                           char *buffer, size_t bytes,
                           size_t *retp)
 {
-  wchar_t *wc_buf;
-  DWORD wc_len, chars_written;
+  DWORD chars_written;
   unsigned char *rbuf = (unsigned char *)buffer;
   DWORD rlen = (DWORD)bytes;
 
@@ -206,27 +205,30 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 
   if(rlen) {
     /* calculate buffer size for wide characters */
-    wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
-                                        NULL, 0);
-    if(!wc_len)
+    DWORD len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf,
+                                           (int)rlen, NULL, 0);
+    if(!len)
       return CURL_WRITEFUNC_ERROR;
 
-    wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
-    if(!wc_buf)
-      return CURL_WRITEFUNC_ERROR;
-
-    wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
-                                        wc_buf, (int)wc_len);
-    if(!wc_len) {
-      free(wc_buf);
-      return CURL_WRITEFUNC_ERROR;
+    /* grow the buffer if needed */
+    if(len > global->term.len) {
+      wchar_t *buf = (wchar_t *) realloc(global->term.buf,
+                                         len * sizeof(wchar_t));
+      if(!buf)
+        return CURL_WRITEFUNC_ERROR;
+      global->term.len = len;
+      global->term.buf = buf;
     }
 
-    if(!WriteConsoleW((HANDLE) fhnd, wc_buf, wc_len, &chars_written, NULL)) {
-      free(wc_buf);
+    len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
+                                     global->term.buf,
+                                     (int)len);
+    if(!len)
       return CURL_WRITEFUNC_ERROR;
-    }
-    free(wc_buf);
+
+    if(!WriteConsoleW((HANDLE) fhnd, global->term.buf,
+                      len, &chars_written, NULL))
+      return CURL_WRITEFUNC_ERROR;
   }
 
   *retp = bytes;
