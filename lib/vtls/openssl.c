@@ -3327,8 +3327,10 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
         continue;
 
       x509 = d2i_X509(NULL, &encoded_cert, (long)pContext->cbCertEncoded);
-      if(!x509)
+      if(!x509) {
+        ERR_clear_error();
         continue;
+      }
 
       /* Try to import the certificate. This may fail for legitimate
          reasons such as duplicate certificate, which is allowed by MS but
