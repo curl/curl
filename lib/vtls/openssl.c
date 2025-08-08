@@ -3327,10 +3327,8 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
         continue;
 
       x509 = d2i_X509(NULL, &encoded_cert, (long)pContext->cbCertEncoded);
-      if(!x509) {
-        ERR_clear_error();
+      if(!x509)
         continue;
-      }
 
       /* Try to import the certificate. This may fail for legitimate
          reasons such as duplicate certificate, which is allowed by MS but
@@ -4536,9 +4534,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   DEBUGASSERT(octx);
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
-  ERR_clear_error();
-
-  err = SSL_connect(octx->ssl);
 
   if(!octx->x509_store_setup) {
     /* After having send off the ClientHello, we prepare the x509
@@ -4548,6 +4543,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       return result;
     octx->x509_store_setup = TRUE;
   }
+
+  ERR_clear_error();
+
+  err = SSL_connect(octx->ssl);
 
 #ifndef HAVE_KEYLOG_CALLBACK
   /* If key logging is enabled, wait for the handshake to complete and then
