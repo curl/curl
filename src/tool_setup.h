@@ -93,15 +93,6 @@ extern FILE *tool_stderr;
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
 
-#ifdef UNDER_CE
-#  undef isatty
-#  define isatty(fd) 0  /* fd is void*, expects int */
-#  undef _get_osfhandle
-#  define _get_osfhandle(fd) (fd)
-#  undef _getch
-#  define _getch() 0
-#endif
-
 #ifndef HAVE_FTRUNCATE
 
 int tool_ftruncate64(int fd, curl_off_t where);

@@ -105,28 +105,20 @@ int Curl_thread_join(curl_thread_t *hnd)
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
   typedef HANDLE curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
 #endif
   curl_thread_t t;
   curl_win_thread_handle_t thread_handle;
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
   thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
   thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
 #endif
   t = (curl_thread_t)thread_handle;
   if((t == 0) || (t == LongToHandle(-1L))) {
-#ifdef UNDER_CE
-    DWORD gle = GetLastError();
-    /* !checksrc! disable ERRNOVAR 1 */
-    int err = (gle == ERROR_ACCESS_DENIED ||
-               gle == ERROR_NOT_ENOUGH_MEMORY) ?
-               EACCES : EINVAL;
-    CURL_SETERRNO(err);
-#endif
     return curl_thread_t_null;
   }
   return t;
