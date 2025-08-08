@@ -45,7 +45,7 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
         if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
           set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
         else()
-          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_FLAGS "-ignore:4006;-ignore:4221")
+          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_FLAGS "-ignore:4006 -ignore:4221")
         endif()
       endif()
     else()
