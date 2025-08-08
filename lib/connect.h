@@ -123,6 +123,9 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct Curl_dns_entry *dns,
                          int ssl_mode);
 
+/* Set conn to en-/disable multiplexing. */
+void Curl_conn_set_multiplex(struct connectdata *conn, bool multiplex);
+
 extern struct Curl_cftype Curl_cft_setup;
 
 #endif /* HEADER_CURL_CONNECT_H */
