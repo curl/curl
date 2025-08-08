@@ -170,5 +170,5 @@ fi
 
 du -sh .; echo; du -sh -t 250KB ./*
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  echo; du -h -t 50KB _bld
+  echo; du -h -t 250KB _bld
 fi
