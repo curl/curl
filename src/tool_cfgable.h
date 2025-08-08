@@ -339,6 +339,13 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
+#if defined(_WIN32) && !defined(UNDER_CE)
+struct termout {
+  wchar_t *buf;
+  DWORD len;
+};
+#endif
+
 struct GlobalConfig {
   struct State state;             /* for create_transfer() */
   char *trace_dump;               /* file to dump the network trace to */
@@ -351,6 +358,9 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
+#if defined(_WIN32) && !defined(UNDER_CE)
+  struct termout term;
+#endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
