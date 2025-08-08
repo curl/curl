@@ -850,13 +850,19 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
 static void
 ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 {
-  const SSL_SESSION *session = SSL_get_session(ssl);
+  const SSL_SESSION *session;
   unsigned char client_random[SSL3_RANDOM_SIZE];
   unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
   int master_key_length = 0;
 
-  if(!session || *keylog_done)
+  ERR_set_mark();
+
+  session = SSL_get_session(ssl);
+
+  if(!session || *keylog_done) {
+    ERR_pop_to_mark();
     return;
+  }
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* ssl->s3 is not checked in OpenSSL 1.1.0-pre6, but let's assume that
@@ -871,6 +877,8 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
     memcpy(client_random, ssl->s3->client_random, SSL3_RANDOM_SIZE);
   }
 #endif
+
+  ERR_pop_to_mark();
 
   /* The handshake has not progressed sufficiently yet, or this is a TLS 1.3
    * session (when curl was built with older OpenSSL headers and running with
@@ -3327,10 +3335,8 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
         continue;
 
       x509 = d2i_X509(NULL, &encoded_cert, (long)pContext->cbCertEncoded);
-      if(!x509) {
-        ERR_clear_error();
+      if(!x509)
         continue;
-      }
 
       /* Try to import the certificate. This may fail for legitimate
          reasons such as duplicate certificate, which is allowed by MS but
@@ -3661,6 +3667,8 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
+  ERR_set_mark();
+
   cached_store = ossl_get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(ssl_ctx, cached_store);
@@ -3674,6 +3682,8 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     }
   }
 
+  ERR_pop_to_mark();
+
   return result;
 }
 #else /* HAVE_SSL_X509_STORE_SHARE */
@@ -3681,9 +3691,17 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx)
 {
-  X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
+  CURLcode result;
+  X509_STORE *store;
 
-  return ossl_populate_x509_store(cf, data, store);
+  ERR_set_mark();
+
+  store = SSL_CTX_get_cert_store(ssl_ctx);
+  result = ossl_populate_x509_store(cf, data, store);
+
+  ERR_pop_to_mark();
+
+  return result;
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 
