@@ -2622,7 +2622,7 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
       info_version = "HTTP/2";
       /* There is no ALPN here, but the connection is now definitely h2 */
       conn->httpversion_seen = 20;
-      Curl_conn_set_multiplex(conn, TRUE);
+      Curl_conn_set_multiplex(conn);
     }
     else
       info_version = "HTTP/1.x";

@@ -1236,7 +1236,7 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_CONN_INFO_UPDATE:
     if(!cf->sockindex && cf->connected) {
       cf->conn->httpversion_seen = 30;
-      Curl_conn_set_multiplex(cf->conn, TRUE);
+      Curl_conn_set_multiplex(cf->conn);
     }
     break;
   default:
