@@ -2289,7 +2289,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
 
   *announced_exp100 = FALSE;
   /* Avoid Expect: 100-continue if Upgrade: is used */
-  if(data->req.upgr101 != UPGR101_INIT)
+  if(data->req.upgr101 != UPGR101_NONE)
     return CURLE_OK;
 
   /* For really small puts we do not use Expect: headers at all, and for
@@ -3571,10 +3571,6 @@ static CURLcode http_statusline(struct Curl_easy *data,
     infof(data, "HTTP 1.0, assume close after body");
     connclose(conn, "HTTP/1.0 close after body");
   }
-  else if(k->httpversion == 20 ||
-          (k->upgr101 == UPGR101_H2 && k->httpcode == 101)) {
-    DEBUGF(infof(data, "HTTP/2 found, allow multiplexing"));
-  }
 
   k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
   switch(k->httpcode) {
@@ -3717,6 +3713,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
+  bool conn_changed = FALSE;
 
   (void)buf; /* not used without HTTP2 enabled */
   *pconsumed = 0;
@@ -3757,47 +3754,54 @@ static CURLcode http_on_response(struct Curl_easy *data,
        */
       http_exp100_got100(data);
       break;
-    case 101:
-      /* Switching Protocols only allowed from HTTP/1.1 */
+    case 101: {
+      int upgr101_requested = k->upgr101;
+
       if(k->httpversion_sent != 11) {
         /* invalid for other HTTP versions */
-        failf(data, "unexpected 101 response code");
+        failf(data, "server sent 101 response while not talking HTTP/1.1");
         result = CURLE_WEIRD_SERVER_REPLY;
         goto out;
       }
-      if(k->upgr101 == UPGR101_H2) {
-        /* Switching to HTTP/2, where we will get more responses */
+
+      /* Whatever the success, upgrade was selected. */
+      k->upgr101 = UPGR101_RECEIVED;
+      data->conn->bits.upgrade_in_progress = FALSE;
+      conn_changed = TRUE;
+
+      /* To be fully conform, we would check the "Upgrade:" response header
+       * to mention the protocol we requested. */
+      switch(upgr101_requested) {
+      case UPGR101_H2:
+        /* Switch to HTTP/2, where we will get more responses.
+         * blen bytes in bug are already h2 protocol bytes */
         infof(data, "Received 101, Switching to HTTP/2");
-        k->upgr101 = UPGR101_RECEIVED;
-        data->conn->bits.asks_multiplex = FALSE;
-        /* We expect more response from HTTP/2 later */
-        k->header = TRUE;
-        k->headerline = 0; /* restart the header line counter */
-        k->httpversion_sent = 20; /* It's an HTTP/2 request now */
-        /* Any remaining `buf` bytes are already HTTP/2 and passed to
-         * be processed. */
         result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
         if(result)
           goto out;
         *pconsumed += blen;
-      }
+        break;
 #ifndef CURL_DISABLE_WEBSOCKETS
-      else if(k->upgr101 == UPGR101_WS) {
-        /* verify the response. Any passed `buf` bytes are already in
-         * WebSockets format and taken in by the protocol handler. */
+      case UPGR101_WS:
+        /* Switch to WebSocket, where we now stream ws frames.
+         * blen bytes in bug are already ws protocol bytes */
+        infof(data, "Received 101, Switching to WebSocket");
         result = Curl_ws_accept(data, buf, blen);
         if(result)
           goto out;
         *pconsumed += blen; /* ws accept handled the data */
-      }
+        break;
 #endif
-      else {
+      default:
         /* We silently accept this as the final response. What are we
          * switching to if we did not ask for an Upgrade? Maybe the
          * application provided an `Upgrade: xxx` header? */
         k->header = FALSE;
+        break;
       }
+      /* processed 101 */
       break;
+    }
     default:
       /* The server may send us other 1xx responses, like informative
        * 103. This have no influence on request processing and we expect
@@ -3809,12 +3813,10 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   /* k->httpcode >= 200, final response */
   k->header = FALSE;
-
-  if(k->upgr101 == UPGR101_H2) {
-    /* A requested upgrade was denied, poke the multi handle to possibly
-       allow a pending pipewait to continue */
-    data->conn->bits.asks_multiplex = FALSE;
-    Curl_multi_connchanged(data->multi);
+  if(data->conn->bits.upgrade_in_progress) {
+    /* Asked for protocol upgrade, but it was not selected by the server */
+    data->conn->bits.upgrade_in_progress = FALSE;
+    conn_changed = TRUE;
   }
 
   if((k->size == -1) && !k->chunk && !conn->bits.close &&
@@ -3863,9 +3865,9 @@ static CURLcode http_on_response(struct Curl_easy *data,
 #endif
 
 #ifndef CURL_DISABLE_WEBSOCKETS
-  /* All >=200 HTTP status codes are errors when wanting WebSockets */
+  /* All >=200 HTTP status codes are errors when wanting WebSocket */
   if(data->req.upgr101 == UPGR101_WS) {
-    failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
+    failf(data, "Refused WebSocket upgrade: %d", k->httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;
     goto out;
   }
@@ -3984,6 +3986,10 @@ out:
     /* if not written yet, write it now */
     result = Curl_1st_err(
       result, http_write_header(data, last_hd, last_hd_len));
+  }
+  if(conn_changed) {
+    /* poke the multi handle to allow any pending pipewait to retry now */
+    Curl_multi_connchanged(data->multi);
   }
   return result;
 }

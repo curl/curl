@@ -1829,7 +1829,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   free(base64);
 
   k->upgr101 = UPGR101_H2;
-  data->conn->bits.asks_multiplex = TRUE;
+  data->conn->bits.upgrade_in_progress = TRUE;
 
   return result;
 }
@@ -2696,6 +2696,12 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_DONE:
     http2_data_done(cf, data);
     break;
+  case CF_CTRL_CONN_INFO_UPDATE:
+    if(!cf->sockindex && cf->connected) {
+      cf->conn->httpversion_seen = 20;
+      Curl_conn_set_multiplex(cf->conn, TRUE);
+    }
+    break;
   default:
     break;
   }
@@ -2895,9 +2901,6 @@ CURLcode Curl_http2_switch(struct Curl_easy *data)
     return result;
   CURL_TRC_CF(data, cf, "switching connection to HTTP/2");
 
-  data->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  Curl_multi_connchanged(data->multi);
-
   if(cf->next) {
     bool done;
     return Curl_conn_cf_connect(cf, data, &done);
@@ -2917,8 +2920,6 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
     return result;
 
   cf_h2 = cf->next;
-  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  Curl_multi_connchanged(data->multi);
 
   if(cf_h2->next) {
     bool done;
@@ -2936,7 +2937,6 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   CURLcode result;
 
   DEBUGASSERT(Curl_conn_http_version(data, conn) <  20);
-  DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
   if(result)
@@ -2945,6 +2945,10 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
 
   DEBUGASSERT(cf->cft == &Curl_cft_nghttp2);
   ctx = cf->ctx;
+
+  data->req.httpversion_sent = 20; /* It's an h2 request now */
+  data->req.header = TRUE; /* we expect the real response to come in h2 */
+  data->req.headerline = 0; /* restart the header line counter */
 
   if(nread > 0) {
     /* Remaining data from the protocol switch reply is already using
@@ -2968,14 +2972,13 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
           " after upgrade: len=%zu", nread);
   }
 
-  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  Curl_multi_connchanged(data->multi);
-
   if(cf->next) {
     bool done;
-    return Curl_conn_cf_connect(cf, data, &done);
+    result = Curl_conn_cf_connect(cf, data, &done);
+    if(!result)
+      cf->cft->cntrl(cf, data, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
   }
-  return CURLE_OK;
+  return result;
 }
 
 /* Only call this function for a transfer that already got an HTTP/2

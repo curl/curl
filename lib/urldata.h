@@ -389,7 +389,7 @@ struct ConnectBits {
 #endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
-  BIT(asks_multiplex); /* connection asks for multiplexing, but is not yet */
+  BIT(upgrade_in_progress); /* protocol upgrade is in progress */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */

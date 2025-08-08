@@ -621,3 +621,13 @@ out:
     Curl_resolv_unlink(data, &data->state.dns[sockindex]);
   return result;
 }
+
+void Curl_conn_set_multiplex(struct connectdata *conn, bool multiplex)
+{
+  if(conn->bits.multiplex != multiplex) {
+    conn->bits.multiplex = multiplex;
+    if(conn->attached_multi) {
+      Curl_multi_connchanged(conn->attached_multi);
+    }
+  }
+}

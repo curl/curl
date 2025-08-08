@@ -907,8 +907,8 @@ static bool url_match_fully_connected(struct connectdata *conn,
                                       struct url_conn_match *m)
 {
   if(!Curl_conn_is_connected(conn, FIRSTSOCKET) ||
-     conn->bits.asks_multiplex) {
-    /* Not yet connected, or not yet decided if it multiplexes. The later
+     conn->bits.upgrade_in_progress) {
+    /* Not yet connected, or a protocol upgrade is in progress. The later
      * happens for HTTP/2 Upgrade: requests that need a response. */
     if(m->may_multiplex) {
       m->seen_pending_conn = TRUE;
@@ -1268,6 +1268,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_connect_config(conn, m))
     return FALSE;
 
+  /* match for destination and protocol? */
   if(!url_match_destination(conn, m))
     return FALSE;
 
