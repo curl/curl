@@ -42,6 +42,7 @@ struct altsvc {
   struct Curl_llist_node node;
   unsigned int prio;
   BIT(persist);
+  BIT(used);
 };
 
 struct altsvcinfo {
@@ -49,7 +50,6 @@ struct altsvcinfo {
   struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
 
-  BIT(errored);
   BIT(used);
 };
 
@@ -69,6 +69,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         int srcport,
                         struct altsvc **dstentry,
                         const int versions); /* CURLALTSVC_H* bits */
+bool Curl_is_altsvc_error(CURLcode rc);
+
 #else
 /* disabled */
 #define Curl_altsvc_save(a,b,c)
