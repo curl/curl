@@ -1136,15 +1136,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
     if(state->upidx >= state->upnum) {
-      /* Free this URL node data without destroying the node itself nor
-         modifying next pointer. */
-      u->outset = u->urlset = u->useremote =
-        u->uploadset = u->noupload = u->noglob = FALSE;
-      glob_cleanup(&state->urlglob);
       state->urlnum = 0;
-
       tool_safefree(state->uploadfile);
-      /* Free list of globbed upload files */
       glob_cleanup(&state->inglob);
       state->upidx = 0;
       state->urlnode = u->next; /* next node */
