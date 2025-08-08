@@ -582,7 +582,7 @@ static void update_meta(struct websocket *ws,
   ws->recvframe.bytesleft = bytesleft;
 }
 
-/* WebSockets decoding client writer */
+/* WebSocket decoding client writer */
 struct ws_cw_ctx {
   struct Curl_cwriter super;
   struct bufq buf;
@@ -1268,6 +1268,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   }
   data->state.http_hd_upgrade = TRUE;
   k->upgr101 = UPGR101_WS;
+  data->conn->bits.upgrade_in_progress = TRUE;
   return result;
 }
 
@@ -1358,6 +1359,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   if(result)
     goto out;
   ws_dec_writer = NULL; /* owned by transfer now */
+
+  k->header = FALSE; /* we will not get more response headers */
 
   if(data->set.connect_only) {
     size_t nwritten;
@@ -1806,7 +1809,7 @@ out:
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  /* WebSockets is 1.1 only (for now) */
+  /* WebSocket is 1.1 only (for now) */
   data->state.http_neg.accept_09 = FALSE;
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;

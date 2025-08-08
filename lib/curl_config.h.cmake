@@ -148,7 +148,7 @@
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
-/* disabled WebSockets */
+/* disabled WebSocket */
 #cmakedefine CURL_DISABLE_WEBSOCKETS 1
 
 /* disables use of socketpair for curl_multi_poll */
