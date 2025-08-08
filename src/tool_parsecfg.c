@@ -44,6 +44,8 @@
  */
 static int unslashquote(const char *line, struct dynbuf *param)
 {
+  curlx_dyn_reset(param);
+
   while(*line && (*line != '\"')) {
     if(*line == '\\') {
       char out;
@@ -244,7 +246,6 @@ int parseconfig(const char *filename)
           rc = (int)res;
         }
       }
-      curlx_dyn_reset(&pbuf);
     }
     curlx_dyn_free(&buf);
     curlx_dyn_free(&pbuf);
