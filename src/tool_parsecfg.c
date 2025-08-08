@@ -65,6 +65,9 @@ static int unslashquote(const char *line, struct dynbuf *param)
       case 'v':
         out = '\v';
         break;
+      case '\"':
+        out = '\"';
+        break;
       }
       if(curlx_dyn_addn(param, &out, 1))
         return 1;
