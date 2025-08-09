@@ -875,6 +875,8 @@ sub checksystemfeatures {
            "* System: $hosttype\n");
     if($ci) {
         logmsg("* OS: $hostos\n",
+               "* MSYS: $ENV{'MSYS'}\n",
+               "* CYGWIN: $ENV{'CYGWIN'}\n",
                "* Perl: $^V ($^X)\n",
                "* diff: $havediff\n");
     }
