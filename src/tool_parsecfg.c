@@ -214,15 +214,18 @@ int parseconfig(const char *filename)
           char *tparam = strdup(param + 1);
           if(!tparam) {
             rc = 1; /* out of memory */
+            free(tparam);
             break;
           }
           curlx_dyn_reset(&pbuf);
           if(curlx_dyn_add(&pbuf, home)) {
             rc = 1; /* out of memory */
+            free(tparam);
             break;
           }
           if(curlx_dyn_add(&pbuf, tparam)) {
             rc = 1; /* out of memory */
+            free(tparam);
             break;
           }
           free(tparam);
