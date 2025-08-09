@@ -211,7 +211,7 @@ int parseconfig(const char *filename)
       if(param && param[0] == '~') {
 #ifdef _WIN32
         const char *home = curl_getenv("UserProfile");
-#elif
+#else
         const char *home = curl_getenv("HOME");
 #endif
         if(home) {
