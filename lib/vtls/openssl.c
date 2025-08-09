@@ -850,13 +850,19 @@ static void ossl_keylog_callback(const SSL *ssl, const char *line)
 static void
 ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
 {
-  const SSL_SESSION *session = SSL_get_session(ssl);
+  const SSL_SESSION *session;
   unsigned char client_random[SSL3_RANDOM_SIZE];
   unsigned char master_key[SSL_MAX_MASTER_KEY_LENGTH];
   int master_key_length = 0;
 
-  if(!session || *keylog_done)
+  ERR_set_mark();
+
+  session = SSL_get_session(ssl);
+
+  if(!session || *keylog_done) {
+    ERR_pop_to_mark();
     return;
+  }
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* ssl->s3 is not checked in OpenSSL 1.1.0-pre6, but let's assume that
@@ -871,6 +877,8 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
     memcpy(client_random, ssl->s3->client_random, SSL3_RANDOM_SIZE);
   }
 #endif
+
+  ERR_pop_to_mark();
 
   /* The handshake has not progressed sufficiently yet, or this is a TLS 1.3
    * session (when curl was built with older OpenSSL headers and running with
@@ -3659,6 +3667,8 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
+  ERR_set_mark();
+
   cached_store = ossl_get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(ssl_ctx, cached_store);
@@ -3671,6 +3681,8 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
       ossl_set_cached_x509_store(cf, data, store);
     }
   }
+
+  ERR_pop_to_mark();
 
   return result;
 }
@@ -4539,12 +4551,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   err = SSL_connect(octx->ssl);
 
   if(!octx->x509_store_setup) {
-    CURLcode result;
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
-    ERR_set_mark();
-    result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
-    ERR_pop_to_mark();
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
     if(result)
       return result;
     octx->x509_store_setup = TRUE;
@@ -4554,11 +4563,8 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   /* If key logging is enabled, wait for the handshake to complete and then
    * proceed with logging secrets (for TLS 1.2 or older).
    */
-  if(Curl_tls_keylog_enabled() && !octx->keylog_done) {
-    ERR_set_mark();
+  if(Curl_tls_keylog_enabled() && !octx->keylog_done)
     ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);
-    ERR_pop_to_mark();
-  }
 #endif
 
   /* 1  is fine
