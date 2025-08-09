@@ -109,6 +109,7 @@ target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
+set_target_properties(curlinfo PROPERTIES UNITY_BUILD OFF)
 
 # special libcurltool library just for unittests
 add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES} ${_curlx_cfiles_lib} ${_curlx_hfiles_lib})
