@@ -30,6 +30,7 @@ http
 </server>
 <setenv>
 CURL_HOME=%PWD/%LOGDIR
+USERPROFILE
 XDG_CONFIG_HOME
 </setenv>
 <name>
