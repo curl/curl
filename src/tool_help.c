@@ -433,6 +433,7 @@ void tool_table(unsigned int category, unsigned int cols)
 {
   size_t i, c, j, found, opt_idx, current, lng_spc, count = 0;
   size_t max_len = 0;
+  const char *e_sp;
 
   /* Count options in category. */
   for(i = 0; helptext[i].opt; ++i) {
@@ -450,7 +451,7 @@ void tool_table(unsigned int category, unsigned int cols)
         /* Set max_len by longest description or option. */
         if(max_len < strlen(helptext[i].desc) ||
            max_len < strlen(helptext[i].opt)) {
-          if(strlen(helptext[i].opt) < strlen(helptext[i].desc))
+          if(strlen(helptext[i].desc) > strlen(helptext[i].opt))
             max_len = strlen(helptext[i].desc);
           else
             max_len = strlen(helptext[i].opt);
@@ -484,11 +485,12 @@ void tool_table(unsigned int category, unsigned int cols)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
-              lng_spc = 0;
-              /* Check if long option. */
-              if(strncmp(helptext[opt_idx].opt, "    ", 4) == 0)
-                lng_spc = 4;
-              /* Output option. */
+             /* Equate option space to left align. */
+              e_sp = helptext[opt_idx].opt +
+                strspn(helptext[opt_idx].opt, " ");
+              lng_spc = (strncmp(e_sp, "--", 2) == 0) ?
+                (int)(e_sp - helptext[opt_idx].opt) : 0;
+              /* Output, left aligning option name. */
               printf("%-*s ", (int)(max_len),
                      helptext[opt_idx].opt + lng_spc);
               break;
