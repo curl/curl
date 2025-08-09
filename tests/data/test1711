@@ -1,0 +1,123 @@
+<testcase>
+<info>
+<keywords>
+--help
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+<server>
+none
+</server>
+<name>
+curl table:category --help
+</name>
+<command>
+--help tAbLe:CoMmOn
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+common: Common options table
+--compressed                               
+------------------------------------------ 
+Request compressed response                
+
+-b, --cookie <data|filename>               
+------------------------------------------ 
+Send cookies from string/load from file    
+
+-c, --cookie-jar <filename>                
+------------------------------------------ 
+Save cookies to <filename> after operation 
+
+-d, --data <data>                          
+------------------------------------------ 
+HTTP POST data                             
+
+-F, --form <name=content>                  
+------------------------------------------ 
+Specify multipart MIME data                
+
+-I, --head                                 
+------------------------------------------ 
+Show document info only                    
+
+-H, --header <header/@file>                
+------------------------------------------ 
+Pass custom header(s) to server            
+
+-k, --insecure                             
+------------------------------------------ 
+Allow insecure server connections          
+
+-L, --location                             
+------------------------------------------ 
+Follow redirects                           
+
+-m, --max-time <seconds>                   
+------------------------------------------ 
+Maximum time allowed for transfer          
+
+-o, --output <file>                        
+------------------------------------------ 
+Write to file instead of stdout            
+
+-x, --proxy <[protocol://]host[:port]>     
+------------------------------------------ 
+Use this proxy                             
+
+-O, --remote-name                          
+------------------------------------------ 
+Write output to file named as remote file  
+
+-X, --request <method>                     
+------------------------------------------ 
+Specify request method to use              
+
+-s, --silent                               
+------------------------------------------ 
+Silent mode                                
+
+--trace-ascii <file>                       
+------------------------------------------ 
+Like --trace, but without hex output       
+
+-T, --upload-file <file>                   
+------------------------------------------ 
+Transfer local FILE to destination         
+
+-u, --user <user:password>                 
+------------------------------------------ 
+Server user and password                   
+
+-A, --user-agent <name>                    
+------------------------------------------ 
+Send User-Agent <name> to server           
+
+-v, --verbose                              
+------------------------------------------ 
+Make the operation more talkative          
+
+-w, --write-out <format>                   
+------------------------------------------ 
+Output FORMAT after completion             
+</stdout>
+</verify>
+</testcase>
