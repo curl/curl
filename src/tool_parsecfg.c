@@ -209,7 +209,11 @@ int parseconfig(const char *filename)
 
       /* expand tilde-characters to the users home directory */
       if(param && param[0] == '~') {
+#ifdef _WIN32
+        const char *home = curl_getenv("UserProfile");
+#elif
         const char *home = curl_getenv("HOME");
+#endif
         if(home) {
           char *tparam = strdup(param + 1);
           if(!tparam) {
