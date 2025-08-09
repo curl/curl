@@ -234,7 +234,6 @@ int parseconfig(const char *filename)
       }
 
       res = getparameter(option, param, &usedarg, config);
-
       config = global->last;
 
       if(!res && param && *param && !usedarg)
