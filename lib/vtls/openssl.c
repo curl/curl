@@ -4535,6 +4535,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
+  ERR_clear_error();
+
+  err = SSL_connect(octx->ssl);
+
   if(!octx->x509_store_setup) {
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
@@ -4543,10 +4547,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       return result;
     octx->x509_store_setup = TRUE;
   }
-
-  ERR_clear_error();
-
-  err = SSL_connect(octx->ssl);
 
 #ifndef HAVE_KEYLOG_CALLBACK
   /* If key logging is enabled, wait for the handshake to complete and then
