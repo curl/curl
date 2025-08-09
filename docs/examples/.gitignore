@@ -19,6 +19,7 @@ ephiperfifo
 evhiperfifo
 externalsocket
 fileupload
+ftp-delete
 ftp-wildcard
 ftpget
 ftpgetinfo
@@ -129,4 +130,5 @@ urlapi
 usercertinmem
 websocket
 websocket-cb
+websocket-updown
 xmlstream

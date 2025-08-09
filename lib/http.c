@@ -1822,7 +1822,9 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
 {
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
-  if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
+  if(conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+    httpreq = HTTPREQ_GET;
+  else if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->state.upload)
     httpreq = HTTPREQ_PUT;
 
@@ -3771,9 +3773,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
         if(result)
           goto out;
         *pconsumed += blen; /* ws accept handled the data */
-        k->header = FALSE; /* we will not get more responses */
-        if(data->set.connect_only)
-          k->keepon &= ~KEEP_RECV; /* read no more content */
       }
 #endif
       else {
