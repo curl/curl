@@ -39,6 +39,8 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CYGWIN: 'proc_retry:0'
+  MSYS: 'proc_retry:0'
 
 jobs:
   cygwin:
