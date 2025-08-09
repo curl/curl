@@ -4534,15 +4534,17 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   DEBUGASSERT(octx);
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
-
   ERR_clear_error();
 
   err = SSL_connect(octx->ssl);
 
   if(!octx->x509_store_setup) {
+    CURLcode result;
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
+    ERR_set_mark();
+    result = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
+    ERR_pop_to_mark();
     if(result)
       return result;
     octx->x509_store_setup = TRUE;
@@ -4552,8 +4554,11 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
   /* If key logging is enabled, wait for the handshake to complete and then
    * proceed with logging secrets (for TLS 1.2 or older).
    */
-  if(Curl_tls_keylog_enabled() && !octx->keylog_done)
+  if(Curl_tls_keylog_enabled() && !octx->keylog_done) {
+    ERR_set_mark();
     ossl_log_tls12_secret(octx->ssl, &octx->keylog_done);
+    ERR_pop_to_mark();
+  }
 #endif
 
   /* 1  is fine
