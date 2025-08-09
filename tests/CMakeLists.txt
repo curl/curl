@@ -61,6 +61,10 @@ function(curl_add_runtests _targetname _test_flags)
     endif()
     list(APPEND _depends "testdeps")
   endif()
+  unset(_setenv)
+  if(CMAKE_CONFIGURATION_TYPES)
+    set(_setenv "${CMAKE_COMMAND}" -E env "CURL_DIRSUFFIX=$<CONFIG>")
+  endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
@@ -68,6 +72,7 @@ function(curl_add_runtests _targetname _test_flags)
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}
     COMMAND
+      ${_setenv}
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${_test_flags_list}
       "\$TFLAGS"
