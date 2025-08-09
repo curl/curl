@@ -912,7 +912,6 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          export CURL_DIRSUFFIX="${MATRIX_TYPE}"
           TFLAGS="-j8 ${TFLAGS}"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \

@@ -141,7 +141,6 @@ fi
 
 if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${TFLAGS}" != 'skiprun' ]; then
-  export CURL_DIRSUFFIX="${PRJ_CFG}"
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
