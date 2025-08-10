@@ -111,7 +111,6 @@
  13.2 TLS channel binding
  13.3 Defeat TLS fingerprinting
  13.4 Consider OCSP stapling by default
- 13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 Less memory massaging with Schannel
  13.8 Support DANE
@@ -805,14 +804,6 @@
  drops the OCSP support, the benefit of this might however be limited.
 
  https://github.com/curl/curl/issues/15483
-
-13.5 Export session ids
-
- Add an interface to libcurl that enables "session IDs" to get
- exported/imported. Cris Bailiff said: "OpenSSL has functions which can
- serialise the current SSL state to a buffer of your choice, and recover/reset
- the state from such a buffer at a later date - this is used by mod_ssl for
- apache to implement and SSL session ID cache".
 
 13.6 Provide callback for cert verification
 
