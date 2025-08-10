@@ -451,10 +451,8 @@ void tool_table(unsigned int category, unsigned int cols)
         /* Set max_len by longest description or option. */
         if(max_len < strlen(helptext[i].desc) ||
            max_len < strlen(helptext[i].opt)) {
-          if(strlen(helptext[i].desc) > strlen(helptext[i].opt))
-            max_len = strlen(helptext[i].desc);
-          else
-            max_len = strlen(helptext[i].opt);
+          max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
+            strlen(helptext[i].desc) : strlen(helptext[i].opt);
         }
       count++;
     }
@@ -485,11 +483,11 @@ void tool_table(unsigned int category, unsigned int cols)
         for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
-             /* Equate option space to left align. */
+              /* Equate option space to left align. */
               e_sp = helptext[opt_idx].opt +
                 strspn(helptext[opt_idx].opt, " ");
-              lng_spc = (strncmp(e_sp, "--", 2) == 0) ?
-                (int)(e_sp - helptext[opt_idx].opt) : 0;
+              /* Where to start output of option, removing space for long. */
+              lng_spc = (int)(e_sp - helptext[opt_idx].opt);
               /* Output, left aligning option name. */
               printf("%-*s ", (int)(max_len),
                      helptext[opt_idx].opt + lng_spc);
