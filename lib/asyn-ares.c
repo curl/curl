@@ -359,32 +359,10 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     /* if we have not found anything, report the proper
      * CURLE_COULDNT_RESOLVE_* code */
     if(!result && !data->state.async.dns) {
-      result = Curl_resolver_error(data);
-      if(ares->ares_status != ARES_SUCCESS) {
-        const char *msg;
-        switch(ares->ares_status) {
-        case ARES_ECONNREFUSED:
-          msg = "connection to DNS server refused";
-          break;
-        case ARES_ETIMEOUT:
-          msg = "query to DNS server timed out";
-          break;
-        case ARES_ENOTFOUND:
-          msg = "DNS server did not find the address";
-          break;
-        case ARES_EREFUSED:
-          msg = "DNS server refused query";
-          break;
-        default:
-          msg = "resolve failed";
-          break;
-        }
-        CURL_TRC_DNS(data, "asyn-ares: %s (error %d)", msg, ares->ares_status);
-#if ARES_VERSION >= 0x011800  /* >= v1.24.0 */
-        CURL_TRC_DNS(data, "asyn-ares config: %s",
-                     ares_get_servers_csv(ares->channel));
-#endif
-      }
+      const char *msg = NULL;
+      if(ares->ares_status != ARES_SUCCESS)
+        msg = ares_strerror(ares->ares_status);
+      result = Curl_resolver_error(data, msg);
     }
 
     if(result)
@@ -767,6 +745,11 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
   /* initial status - failed */
   ares->ares_status = ARES_ENOTFOUND;
   ares->result = CURLE_OK;
+
+#if ARES_VERSION >= 0x011800  /* >= v1.24.0 */
+  CURL_TRC_DNS(data, "asyn-ares: servers=%s",
+               ares_get_servers_csv(ares->channel));
+#endif
 
 #ifdef HAVE_CARES_GETADDRINFO
   {

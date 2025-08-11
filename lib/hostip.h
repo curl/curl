@@ -201,7 +201,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 
-CURLcode Curl_resolver_error(struct Curl_easy *data);
+CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail);
 
 #ifdef CURLRES_SYNCH
 /*

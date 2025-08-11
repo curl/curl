@@ -683,7 +683,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     }
 
     if(!result && !data->state.async.dns)
-      result = Curl_resolver_error(data);
+      result = Curl_resolver_error(data, NULL);
     if(result)
       Curl_resolv_unlink(data, &data->state.async.dns);
     *dns = data->state.async.dns;

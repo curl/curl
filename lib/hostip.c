@@ -1552,7 +1552,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
   if(data->conn->bits.doh) {
     result = Curl_doh_is_resolved(data, dns);
     if(result)
-      Curl_resolver_error(data);
+      Curl_resolver_error(data, NULL);
   }
   else
 #endif
@@ -1618,7 +1618,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data,
  */
 
 #ifdef USE_CURL_ASYNC
-CURLcode Curl_resolver_error(struct Curl_easy *data)
+CURLcode Curl_resolver_error(struct Curl_easy *data, const char *detail)
 {
   struct connectdata *conn = data->conn;
   const char *host_or_proxy = "host";
@@ -1634,7 +1634,8 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   }
 #endif
 
-  failf(data, "Could not resolve %s: %s", host_or_proxy, name);
+  failf(data, "Could not resolve %s: %s%s%s%s", host_or_proxy, name,
+        detail ? " (" : "", detail ? detail : "", detail ? ")" : "");
   return result;
 }
 #endif /* USE_CURL_ASYNC */
