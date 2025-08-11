@@ -3691,9 +3691,17 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    SSL_CTX *ssl_ctx)
 {
-  X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
+  CURLcode result;
+  X509_STORE *store;
 
-  return ossl_populate_x509_store(cf, data, store);
+  ERR_set_mark();
+
+  store = SSL_CTX_get_cert_store(ssl_ctx);
+  result = ossl_populate_x509_store(cf, data, store);
+
+  ERR_pop_to_mark();
+
+  return result;
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 
