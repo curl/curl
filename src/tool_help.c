@@ -123,11 +123,8 @@ static int get_category_content(const char *category, unsigned int cols)
     const char *table_category = category + 5;
     table_flag = TRUE; /* Use tool_table(). */
 
-    /* Default to common. */
-    if(!*table_category)
-      category = "common";
-    else
-      category = table_category + 1;
+    /* Set category, defaulting to common. */
+    category = (!*table_category) ? "common" : table_category + 1;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
@@ -441,14 +438,11 @@ void tool_table(unsigned int category, unsigned int cols)
       continue;
 
     if(helptext[i].categories & category) {
-      /* use length of longest description or option to set col width. */
+      /* Use length of longest description or option to set col width. */
       if(count == 0)
-        if(strlen(helptext[i].desc) > strlen(helptext[i].opt))
-          max_len = strlen(helptext[i].desc);
-        else
-          max_len = strlen(helptext[i].opt);
+        max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
+          strlen(helptext[i].desc) : strlen(helptext[i].opt);
       else
-        /* Set max_len by longest description or option. */
         if(max_len < strlen(helptext[i].desc) ||
            max_len < strlen(helptext[i].opt)) {
           max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
@@ -459,7 +453,7 @@ void tool_table(unsigned int category, unsigned int cols)
   }
 
   /* Set j based on longest description or option length. */
-  j = cols/(max_len + 1); /* Prevents extra new line for some categories. */
+  j = cols/(max_len + 1);
   if(j > 8)
     j = 8;
   else if(j == 0)
@@ -486,7 +480,7 @@ void tool_table(unsigned int category, unsigned int cols)
               /* Equate option space to left align. */
               e_sp = helptext[opt_idx].opt +
                 strspn(helptext[opt_idx].opt, " ");
-              /* Where to start output of option, removing space for long. */
+              /* Use space before long or short option to align. */
               lng_spc = (int)(e_sp - helptext[opt_idx].opt);
               /* Output, left aligning option name. */
               printf("%-*s ", (int)(max_len),
