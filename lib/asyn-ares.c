@@ -379,8 +379,10 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
           break;
         }
         CURL_TRC_DNS(data, "asyn-ares: %s (error %d)", msg, ares->ares_status);
+#if ARES_VERSION >= 0x011800  /* >= v1.24.0 */
         CURL_TRC_DNS(data, "asyn-ares config: %s",
                      ares_get_servers_csv(ares->channel));
+#endif
       }
     }
 
