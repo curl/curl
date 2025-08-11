@@ -1249,8 +1249,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                  p->dnstype, &de);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
-        infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
-              doh_type2name(p->dnstype), dohp->host);
+        CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
+                     doh_type2name(p->dnstype), dohp->host);
       }
 #endif
     } /* next slot */
