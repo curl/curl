@@ -27,6 +27,7 @@ versions of libs and build tools.
  - OpenSSL      1.0.2a
  - LibreSSL     2.9.1
  - GnuTLS       3.1.10
+ - mbedTLS      3.2.0
  - zlib         1.2.5.2
  - libssh2      1.2.8
  - c-ares       1.6.0

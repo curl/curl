@@ -113,17 +113,21 @@ jobs:
           - name: 'mbedtls'
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
-          - name: 'mbedtls-pkg MultiSSL'
+          - name: 'mbedtls-pkg MultiSSL !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
-
-          - name: 'mbedtls-pkg !pc'
-            install_packages: libnghttp2-dev libmbedtls-dev
-            install_steps: skipall
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
+            install_steps: mbedtls skipall
+            generate: >-
+              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls
+              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
+              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
+              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
+              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
+              -DCURL_USE_PKGCONFIG=OFF -DCURL_USE_OPENSSL=ON
+              -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
+              -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'awslc'
             install_packages: zlib1g-dev

@@ -38,9 +38,8 @@
 #include <nettle/sha.h>
 #elif defined(USE_MBEDTLS)
 #include <mbedtls/version.h>
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
 #endif
 #include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
@@ -134,11 +133,7 @@ typedef mbedtls_sha256_context my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_starts(ctx, 0);
-#else
-  (void)mbedtls_sha256_starts_ret(ctx, 0);
-#endif
   return CURLE_OK;
 }
 
@@ -146,20 +141,12 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_update(ctx, data, length);
-#else
-  (void)mbedtls_sha256_update_ret(ctx, data, length);
-#endif
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
   (void)mbedtls_sha256_finish(ctx, digest);
-#else
-  (void)mbedtls_sha256_finish_ret(ctx, digest);
-#endif
 }
 
 #elif defined(AN_APPLE_OS)

@@ -53,15 +53,10 @@
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
 #include <mbedtls/mbedtls_config.h>
-#else
-#include <mbedtls/config.h>
-#endif
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
-#endif
 #endif /* USE_MBEDTLS */
 
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
@@ -220,12 +215,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data) {
-#ifndef HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
     mbedtls_md4(ctx->data, ctx->size, result);
-#else
-    (void)mbedtls_md4_ret(ctx->data, ctx->size, result);
-#endif
-
     Curl_safefree(ctx->data);
     ctx->size = 0;
   }
