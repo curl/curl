@@ -143,7 +143,7 @@ struct async_ares_ctx {
   int num_pending; /* number of outstanding c-ares requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
-  int last_status;
+  int ares_status; /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result; /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */

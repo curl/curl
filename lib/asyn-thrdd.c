@@ -173,7 +173,7 @@ addr_ctx_create(const char *hostname, int port,
     goto err_exit;
   }
 #endif
-  addr_ctx->sock_error = CURL_ASYNC_SUCCESS;
+  addr_ctx->sock_error = 0;
 
   /* Copying hostname string because original can be destroyed by parent
    * thread during gethostbyname execution.

@@ -1547,6 +1547,8 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
 #ifndef CURL_DISABLE_DOH
   if(data->conn->bits.doh) {
     result = Curl_doh_is_resolved(data, dns);
+    if(result)
+      Curl_resolver_error(data);
   }
   else
 #endif

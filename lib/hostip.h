@@ -47,8 +47,6 @@
 #define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
                                     many seconds for a name resolve */
 
-#define CURL_ASYNC_SUCCESS CURLE_OK
-
 struct addrinfo;
 struct hostent;
 struct Curl_easy;
