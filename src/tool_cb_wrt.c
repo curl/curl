@@ -227,7 +227,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
       return CURL_WRITEFUNC_ERROR;
 
     if(!WriteConsoleW((HANDLE) fhnd, global->term.buf,
-                      global->term.len, &chars_written, NULL))
+                      len, &chars_written, NULL))
       return CURL_WRITEFUNC_ERROR;
   }
 
