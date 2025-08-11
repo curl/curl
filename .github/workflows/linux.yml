@@ -113,7 +113,7 @@ jobs:
           - name: 'mbedtls'
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0 or v2.28.8
+            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL'
