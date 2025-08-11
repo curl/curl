@@ -1194,21 +1194,28 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                  backend->encdata_offset,
                                  &nread);
       if(result == CURLE_AGAIN) {
-        connssl->io_need = CURL_SSL_IO_NEED_RECV;
-        DEBUGF(infof(data, "schannel: failed to receive handshake, "
-                     "need more data"));
-        return CURLE_OK;
+        if(!backend->encdata_offset || backend->encdata_is_incomplete) {
+          connssl->io_need = CURL_SSL_IO_NEED_RECV;
+          DEBUGF(infof(data, "schannel: failed to receive handshake, "
+                       "need more data"));
+          return CURLE_OK;
+        }
+        else {
+          DEBUGF(infof(data, "schannel: no new handshake data received, "
+                       "continuing to process existing handshake data"));
+        }
       }
       else if(result || (nread == 0)) {
         failf(data, "schannel: failed to receive handshake, "
               "SSL/TLS connection failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
-
-      /* increase encrypted data buffer offset */
-      backend->encdata_offset += nread;
-      backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
+      else {
+        /* increase encrypted data buffer offset */
+        backend->encdata_offset += nread;
+        backend->encdata_is_incomplete = FALSE;
+        SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
+      }
     }
 
     SCH_DEV(infof(data,
