@@ -4,7 +4,7 @@ curl and libcurl 8.15.1
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  97
- Contributors:                 3483
+ Contributors:                 3486
 
 This release includes the following changes:
 
@@ -28,6 +28,7 @@ This release includes the following bugfixes:
 
  o _PROTOCOLS.md: mention file:// is only for absolute paths [102]
  o alpn: query filter [104]
+ o ares: destroy channel on shutdown [178]
  o BINDINGS.md: add LibQurl [156]
  o bufq: add integer overflow checks before chunk allocations [108]
  o build: allow libtests/clients to use libcurl dependencies directly [87]
@@ -43,14 +44,18 @@ This release includes the following bugfixes:
  o cf-https-connect: delete unused declaration [15]
  o cmake: capitalize 'Rustls' in the config summary
  o cmake: defer building `unitprotos.h` till a test target needs it [75]
+ o cmake: define `WIN32_LEAN_AND_MEAN` for examples [159]
+ o cmake: drop redundant unity mode for `curlinfo` [155]
  o cmake: enable `-Wall` for MSVC 1944 [128]
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: fix to restrict `SystemConfiguration` to macOS [139]
  o cmake: keep websockets disabled if HTTP is disabled
  o cmake: make `runtests` targets build the curl tool [32]
+ o cmake: make the ExternalProject test work [183]
  o cmake: omit linking duplicate/unnecessary libs to tests & examples [45]
  o cmake: re-add simple test target, and name it `tests` [142]
+ o cmake: set `CURL_DIRSUFFIX` automatically in multi-config builds [154]
  o CODE_STYLE: sync with recent `checksrc.pl` updates [49]
  o config-win32.h: do not use winsock2 `inet_ntop()`/`inet_pton()` [58]
  o configure: if no perl, disable unity and shell completion, related tidy ups [137]
@@ -99,6 +104,7 @@ This release includes the following bugfixes:
  o lib1560: replace an `int` with `bool` [97]
  o lib2700: use `testnum` [151]
  o lib517: use `LL` 64-bit literals & re-enable a test case (`time_t`) [100]
+ o libcurl: reset rewind flag in curl_easy_reset() [184]
  o libssh: Use sftp_aio instead of sftp_async for sftp_recv [92]
  o libtests: update format strings to avoid casts, drop some macros [109]
  o libtests: use `FMT_SOCKET_T`, drop more casts [136]
@@ -114,6 +120,7 @@ This release includes the following bugfixes:
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o openssl: check SSL_write() length on retries [152]
+ o openssl: clear errors after a failed `d2i_X509()` [161]
  o openssl: output unescaped utf8 x509 issuer/subject DNs [169]
  o openssl: some small cleanups [42]
  o openssl: split cert_stuff into smaller sub functions [72]
@@ -122,6 +129,7 @@ This release includes the following bugfixes:
  o pytest: increase server KeepAliveTimeout [26]
  o pytest: relax error check on test_07_22 [16]
  o runtests: add `--ci` option, show `Env:` only when non-empty [134]
+ o schannel: add an error message for client cert not found [165]
  o schannel: assume `CERT_CHAIN_REVOCATION_CHECK_CHAIN` [114]
  o schannel: drop fallbacks for 4 macros [121]
  o schannel: drop fallbacks for unused `BCRYPT_*` macros [122]
@@ -141,6 +149,7 @@ This release includes the following bugfixes:
  o test1560: skip some URLs if UTF-8 is not supported [34]
  o test1: raise alloc limits [11]
  o test428: re-enable for Windows [5]
+ o test436: fix running on Windows with `_curlrc` present [153]
  o tests/ech_tests.sh: indent, if/for style, inline ifs [131]
  o tests: constify command-line arguments [82]
  o tests: drop unused `CURL_FORCEHOST` envs [36]
@@ -154,9 +163,11 @@ This release includes the following bugfixes:
  o tidy-up: move literal to the right side of comparisons [65]
  o tidy-up: prefer `ifdef`/`ifndef` for single checks [64]
  o tls: CURLINFO_TLS_SSL_PTR testing [79]
+ o tool_cb_wrt: stop alloc/free for every chunk windows console output [140]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o tool_operate: use the correct config pointer [115]
  o tool_paramhlp: fix secs2ms() [116]
+ o tool_parsecfg: use dynbuf for quoted arguments [162]
  o tool_urlglob: polish, cleanups, improvements [141]
  o unit-tests: build the unitprotos.h from here [73]
  o unit2604: avoid `UNCONST()` [135]
@@ -199,15 +210,16 @@ advice from friends like these:
 
   adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
   Berthin Torres Callañaupa, Caolán McNamara, Cole Leavitt, d1r3ct0r,
-  Dan Fandrich, Daniel Böhmer, Daniel Stenberg, David Zhuang, Dominik Tomecki,
-  Eshan Kelkar, Harry Sintonen, IoannisGS on github, Jeroen Ooms, Kai Pastor,
-  kkmuffme on github, letshack9707 on hackerone, lf- on github, LoRd_MuldeR,
-  nevakrien on github, Paul Gilmartin, Petar Popovic, Philippe Antoine,
-  Pino Toscano, Qriist, Qriist on github, Ray Satiro, renovate[bot],
-  rm-rmonaghan on github, Roberto Hidalgo, Schrijvers Luc,
+  Dan Fandrich, Daniel Böhmer, Daniel Stenberg, David Zhuang, devgs on github,
+  Dominik Tomecki, Eshan Kelkar, Harry Sintonen, IoannisGS on github,
+  Jeroen Ooms, Kai Pastor, Karthik Das, kkmuffme on github,
+  letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Michał Petryka,
+  nevakrien on github, Oxan van Leeuwen, Paul Gilmartin, Petar Popovic,
+  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
+  renovate[bot], rm-rmonaghan on github, Roberto Hidalgo, Schrijvers Luc,
   Sergio Durigan Junior, Stefan Eissing, Tal Regev, Todd Gamblin,
   Viktor Szakats, Waldemar Kornewald, yaoy6 on github, ウさん
-  (43 contributors)
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -350,6 +362,7 @@ References to bug reports and discussions on issues:
  [137] = https://curl.se/bug/?i=18141
  [138] = https://curl.se/bug/?i=18158
  [139] = https://curl.se/bug/?i=18149
+ [140] = https://curl.se/bug/?i=18233
  [141] = https://curl.se/bug/?i=18198
  [142] = https://curl.se/bug/?i=18145
  [143] = https://curl.se/bug/?i=18130
@@ -362,11 +375,21 @@ References to bug reports and discussions on issues:
  [150] = https://curl.se/bug/?i=18137
  [151] = https://curl.se/bug/?i=18138
  [152] = https://curl.se/bug/?i=18121
+ [153] = https://curl.se/bug/?i=18242
+ [154] = https://curl.se/bug/?i=18241
+ [155] = https://curl.se/bug/?i=18238
  [156] = https://curl.se/bug/?i=18195
+ [159] = https://curl.se/bug/?i=18232
  [160] = https://curl.se/bug/?i=18177
+ [161] = https://curl.se/bug/?i=18190
+ [162] = https://curl.se/bug/?i=18230
+ [165] = https://curl.se/bug/?i=18124
  [168] = https://curl.se/bug/?i=18170
  [169] = https://curl.se/bug/?i=18171
  [173] = https://curl.se/bug/?i=18123
  [174] = https://curl.se/bug/?i=18173
  [175] = https://curl.se/bug/?i=18157
  [176] = https://curl.se/bug/?i=17974
+ [178] = https://curl.se/bug/?i=18216
+ [183] = https://curl.se/bug/?i=18208
+ [184] = https://curl.se/bug/?i=18206
