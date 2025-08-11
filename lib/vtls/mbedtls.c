@@ -37,8 +37,8 @@
 /* #define MBEDTLS_DEBUG */
 
 #include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03000000
-  #error "mbedTLS 3.0.0 or later required"
+#if MBEDTLS_VERSION_NUMBER < 0x03010000
+  #error "mbedTLS 3.1.0 or later required"
 #endif
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
@@ -1017,12 +1017,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     unsigned char *pubkey = NULL;
 
     peercert = mbedtls_ssl_get_peer_cert(&backend->ssl);
-#if MBEDTLS_VERSION_NUMBER == 0x03000000
-    if(!peercert || !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p) ||
-       !peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len)) {
-#else
     if(!peercert || !peercert->raw.p || !peercert->raw.len) {
-#endif
       failf(data, "Failed due to missing peer certificate");
       return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
     }
@@ -1044,24 +1039,13 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
        needs a non-const key, for now.
        https://github.com/Mbed-TLS/mbedtls/issues/396 */
-#if MBEDTLS_VERSION_NUMBER == 0x03000000
-    if(mbedtls_x509_crt_parse_der(p,
-                        peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p),
-                        peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(len))) {
-#else
     if(mbedtls_x509_crt_parse_der(p, peercert->raw.p, peercert->raw.len)) {
-#endif
       failf(data, "Failed copying peer certificate");
       result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
       goto pinnedpubkey_error;
     }
 
-#if MBEDTLS_VERSION_NUMBER == 0x03000000
-    size = mbedtls_pk_write_pubkey_der(&p->MBEDTLS_PRIVATE(pk), pubkey,
-                                       PUB_DER_MAX_BYTES);
-#else
     size = mbedtls_pk_write_pubkey_der(&p->pk, pubkey, PUB_DER_MAX_BYTES);
-#endif
 
     if(size <= 0) {
       failf(data, "Failed copying public key from peer certificate");
