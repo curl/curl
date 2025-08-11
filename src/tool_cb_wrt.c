@@ -222,7 +222,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 
     len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
                                      global->term.buf,
-                                     (int)global->term.len);
+                                     (int)len);
     if(!len)
       return CURL_WRITEFUNC_ERROR;
 
