@@ -1062,6 +1062,16 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
 
   *entry = NULL;
 
+#ifdef USE_ALARM_TIMEOUT
+  CURL_TRC_DNS(data, "starting resolve of %s:%d, timeout of %"
+               FMT_TIMEDIFF_T "ms",
+               hostname, port, timeoutms);
+#else
+  CURL_TRC_DNS(data, "starting resolve of %s:%d, no ALARM available,
+               "timeout of %" FMT_TIMEDIFF_T "ms will not apply",
+               hostname, port, timeoutms);
+#endif
+
   if(timeoutms < 0)
     /* got an already expired timeout */
     return CURLE_OPERATION_TIMEDOUT;
