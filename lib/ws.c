@@ -569,7 +569,7 @@ static void update_meta(struct websocket *ws,
   ws->frame.bytesleft = bytesleft;
 }
 
-/* WebSockets decoding client writer */
+/* WebSocket decoding client writer */
 struct ws_cw_ctx {
   struct Curl_cwriter super;
   struct bufq buf;
@@ -946,6 +946,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     }
   }
   k->upgr101 = UPGR101_WS;
+  data->conn->bits.upgrade_in_progress = TRUE;
   return result;
 }
 
@@ -1037,7 +1038,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     memset(ws->enc.mask, 0, sizeof(ws->enc.mask));
 #endif
 
-  infof(data, "[WS] Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
+  infof(data, "[WS] using mask %02x%02x%02x%02x",
         ws->enc.mask[0], ws->enc.mask[1], ws->enc.mask[2], ws->enc.mask[3]);
 
   /* Install our client writer that decodes WS frames payload */
@@ -1052,6 +1053,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     return result;
   }
 
+  k->header = FALSE; /* we will not get more response headers */
+
   if(data->set.connect_only) {
     size_t nwritten;
     /* In CONNECT_ONLY setup, the payloads from `mem` need to be received
@@ -1063,6 +1066,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       return result;
     DEBUGASSERT(nread == nwritten);
     infof(data, "%zu bytes websocket payload", nread);
+    k->keepon &= ~KEEP_RECV; /* read no more content */
   }
   else { /* !connect_only */
     /* And pass any additional data to the writers */
@@ -1070,7 +1074,6 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       result = Curl_client_write(data, CLIENTWRITE_BODY, mem, nread);
     }
   }
-  k->upgr101 = UPGR101_RECEIVED;
 
   return result;
 }
@@ -1518,7 +1521,7 @@ out:
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  /* WebSockets is 1.1 only (for now) */
+  /* WebSocket is 1.1 only (for now) */
   data->state.http_neg.accept_09 = FALSE;
   data->state.http_neg.only_10 = FALSE;
   data->state.http_neg.wanted = CURL_HTTP_V1x;
