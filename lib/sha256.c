@@ -38,8 +38,8 @@
 #include <nettle/sha.h>
 #elif defined(USE_MBEDTLS)
 #include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03010000
-  #error "mbedTLS 3.1.0 or later required"
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
 #endif
 #include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
