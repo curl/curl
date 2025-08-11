@@ -693,28 +693,22 @@ async_ares_node2addr(struct ares_addrinfo_node *node)
 }
 
 static void async_ares_addrinfo_cb(void *user_data, int status, int timeouts,
-                                   struct ares_addrinfo *result)
+                                   struct ares_addrinfo *ares_ai)
 {
   struct Curl_easy *data = (struct Curl_easy *)user_data;
   struct async_ares_ctx *ares = &data->state.async.ares;
   (void)timeouts;
-  CURL_TRC_DNS(data, "asyn-ares: addrinfo callback, status=%d", status);
-  switch(status) {
-  case ARES_SUCCESS:
-    ares->ares_status = status; /* one success overrides any error */
-    ares->temp_ai = async_ares_node2addr(result->nodes);
-    ares_freeaddrinfo(result);
-    break;
-  default:
-    if(ares->ares_status != ARES_SUCCESS) {
-      ares->ares_status = status;
-    }
-    break;
+  if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
+    ares->ares_status = status;
+  if(status == ARES_SUCCESS) {
+    ares->temp_ai = async_ares_node2addr(ares_ai->nodes);
+    ares_freeaddrinfo(ares_ai);
   }
   ares->num_pending--;
-  CURL_TRC_DNS(data, "ares: addrinfo done, status=%d, pending=%d, "
-               "addr=%sfound",
-               status, ares->num_pending, ares->temp_ai ? "" : "not ");
+  CURL_TRC_DNS(data, "ares: addrinfo done, query status=%d, "
+               "overall status=%d, pending=%d, addr=%sfound",
+               status, ares->ares_status, ares->num_pending,
+               ares->temp_ai ? "" : "not ");
 }
 
 #endif
