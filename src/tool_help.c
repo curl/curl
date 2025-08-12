@@ -439,15 +439,11 @@ void tool_table(unsigned int category, unsigned int cols)
 
     if(helptext[i].categories & category) {
       /* Use length of longest description or option to set col width. */
-      if(count == 0)
+      if(max_len < strlen(helptext[i].desc) ||
+         max_len < strlen(helptext[i].opt)) {
         max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
           strlen(helptext[i].desc) : strlen(helptext[i].opt);
-      else
-        if(max_len < strlen(helptext[i].desc) ||
-           max_len < strlen(helptext[i].opt)) {
-          max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
-            strlen(helptext[i].desc) : strlen(helptext[i].opt);
-        }
+      }
       count++;
     }
   }
