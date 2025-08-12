@@ -50,7 +50,7 @@ env:
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 3.6.4
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.56.0
+  AWSLC_VERSION: 1.58.0
   # handled in renovate.json
   OPENSSL_VERSION: 3.5.2
   # handled in renovate.json
