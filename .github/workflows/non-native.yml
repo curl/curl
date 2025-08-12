@@ -69,6 +69,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug \
+              -DENABLE_THREADED_RESOLVER=OFF \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
