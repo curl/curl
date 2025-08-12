@@ -78,6 +78,26 @@
 #define USE_ALARM_TIMEOUT
 #endif
 
+#ifndef USE_ALARM_TIMEOUT
+#ifndef CURLRES_SYNCH
+/* disabling USE_ALARM_TIMEOUT because we are not using
+   the SYNCH resolver is fine */
+#endif
+#ifndef HAVE_ALARM
+#error "USE_ALARM_TIMEOUT disabled, HAVE_ALARM not defined"
+#endif
+#ifndef SIGALRM
+#error "USE_ALARM_TIMEOUT disabled, SIGALRM not defined"
+#endif
+#ifndef HAVE_SIGSETJMP
+#error "USE_ALARM_TIMEOUT disabled, HAVE_SIGSETJMP not defined"
+#endif
+#ifndef GLOBAL_INIT_IS_THREADSAFE
+#error "USE_ALARM_TIMEOUT disabled, GLOBAL_INIT_IS_THREADSAFE not defined"
+#endif
+#endif /* !USE_ALARM_TIMEOUT */
+
+
 #define MAX_HOSTCACHE_LEN (255 + 7) /* max FQDN + colon + port number + zero */
 
 #define MAX_DNS_CACHE_SIZE 29999

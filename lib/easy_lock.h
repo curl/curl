@@ -37,6 +37,7 @@
 #define curl_simple_lock_unlock(m) ReleaseSRWLockExclusive(m)
 
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
+
 #include <stdatomic.h>
 #ifdef HAVE_SCHED_YIELD
 #include <sched.h>
@@ -61,7 +62,7 @@
 #define HAVE_BUILTIN_IA32_PAUSE
 #endif
 
-#endif
+#endif /* !__INTEL_COMPILER */
 
 static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
 {
