@@ -750,7 +750,7 @@ static void *Curl_ngtcp2_realloc(void *ptr, size_t size, void *user_data)
 }
 
 #ifdef USE_NGTCP2
-static struct ngtcp2_mem curl_ngtcp2_mem_ = {
+static struct ngtcp2_mem curl_ngtcp2_mem = {
   NULL,
   Curl_ngtcp2_malloc,
   Curl_ngtcp2_free,
@@ -759,12 +759,12 @@ static struct ngtcp2_mem curl_ngtcp2_mem_ = {
 };
 struct ngtcp2_mem *Curl_ngtcp2_mem(void)
 {
-  return &curl_ngtcp2_mem_;
+  return &curl_ngtcp2_mem;
 }
 #endif
 
 #ifdef USE_NGHTTP3
-static struct nghttp3_mem curl_nghttp3_mem_ = {
+static struct nghttp3_mem curl_nghttp3_mem = {
   NULL,
   Curl_ngtcp2_malloc,
   Curl_ngtcp2_free,
@@ -773,7 +773,7 @@ static struct nghttp3_mem curl_nghttp3_mem_ = {
 };
 struct nghttp3_mem *Curl_nghttp3_mem(void)
 {
-  return &curl_nghttp3_mem_;
+  return &curl_nghttp3_mem;
 }
 #endif
 
