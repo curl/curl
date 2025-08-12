@@ -148,7 +148,6 @@ COMPLICATED_EXAMPLES = \
   evhiperfifo.c \
   ghiper.c \
   hiperfifo.c \
-  href_extractor.c \
   htmltidy.c \
   htmltitle.cpp \
   multi-event.c \
