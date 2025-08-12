@@ -1106,7 +1106,7 @@ static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
   rc = nghttp3_conn_client_new(&h3->conn,
                                &ngh3_callbacks,
                                &h3->settings,
-                               (nghttp3_mem *)Curl_nghttp3_mem(),
+                               Curl_nghttp3_mem(),
                                user_data);
   if(rc) {
     result = CURLE_OUT_OF_MEMORY;

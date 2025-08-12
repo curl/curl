@@ -91,4 +91,13 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
 
 #endif /* !USE_HTTP3 */
 
+#ifdef USE_NGTCP2
+struct ngtcp2_mem;
+struct ngtcp2_mem *Curl_ngtcp2_mem(void);
+#endif
+#ifdef USE_NGHTTP3
+struct nghttp3_mem;
+struct nghttp3_mem *Curl_nghttp3_mem(void);
+#endif
+
 #endif /* HEADER_CURL_VQUIC_QUIC_INT_H */

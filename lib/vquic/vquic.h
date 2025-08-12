@@ -49,22 +49,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 
 extern struct Curl_cftype Curl_cft_http3;
 
-#if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
-
-void *Curl_ngtcp2_malloc(size_t size, void *user_data);
-void Curl_ngtcp2_free(void *ptr, void *user_data);
-void *Curl_ngtcp2_calloc(size_t nmemb, size_t size, void *user_data);
-void *Curl_ngtcp2_realloc(void *ptr, size_t size, void *user_data);
-
-#ifdef USE_NGTCP2
-void *Curl_ngtcp2_mem(void);
-#endif
-#ifdef USE_NGHTTP3
-void *Curl_nghttp3_mem(void);
-#endif
-
-#endif /* USE_NGTCP2 || USE_NGHTTP3 */
-
 #else
 #define Curl_vquic_init() 1
 #endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
