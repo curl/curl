@@ -513,9 +513,13 @@ static const struct feat features_table[] = {
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
 #endif
+#ifdef USE_SSL
 #ifdef USE_APPLE_SECTRUST
   FEATURE("AppleSecTrust", NULL,              0),
+#elif defined(CURL_CA_NATIVE)
+  FEATURE("NativeCA",    NULL,              0),
 #endif
+#endif /* USE_SSL */
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),
 #endif

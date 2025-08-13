@@ -2093,6 +2093,28 @@ elif test "$VALID_DEFAULT_SSL_BACKEND" = "yes"; then
   AC_DEFINE_UNQUOTED([CURL_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
 fi
 
+dnl ---------------------
+dnl check native CA store
+dnl ---------------------
+
+ca_native_opt=0
+AC_MSG_CHECKING([whether to use native CA store])
+AC_ARG_ENABLE(ca-native,
+AS_HELP_STRING([--enable-ca-native],[Enable native CA store])
+AS_HELP_STRING([--disable-ca-native],[Disable native CA store (default)]),
+[ case "$enableval" in
+  yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(CURL_CA_NATIVE, 1, [If native CA store is enabled])
+    ca_native_opt=1
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
 dnl **********************************************************************
 dnl Check for the CA bundle
 dnl **********************************************************************
@@ -2109,21 +2131,38 @@ dnl check unsafe CA search
 dnl ----------------------
 
 if test "$curl_cv_native_windows" = "yes"; then
+  ca_search=1
   AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
   AC_ARG_ENABLE(ca-search,
-AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows (default)])
+AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows])
 AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on Windows]),
   [ case "$enableval" in
     no)
       AC_MSG_RESULT([no])
-      AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+      ca_search=0
+      ;;
+    yes)
+      AC_MSG_RESULT([yes])
       ;;
     *)
-      AC_MSG_RESULT([yes])
+      if test "$ca_native_opt" = "1"; then
+        AC_MSG_RESULT([no])
+        ca_search=0
+      else
+        AC_MSG_RESULT([yes])
+      fi
       ;;
     esac ],
-      AC_MSG_RESULT([yes])
+      if test "$ca_native_opt" = "1"; then
+        AC_MSG_RESULT([no])
+        ca_search=0
+      else
+        AC_MSG_RESULT([yes])
+      fi
   )
+  if test "$ca_search" = "0"; then
+    AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+  fi
 fi
 
 dnl --------------------
@@ -5286,8 +5325,12 @@ if test "$OPENSSL_ENABLED" = "1" || test -n "$SSL_ENABLED"; then
   fi
 fi
 
-if test "$APPLE_SECTRUST_ENABLED" = "1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
+if test -n "$SSL_ENABLED"; then
+  if test "$APPLE_SECTRUST_ENABLED" = "1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
+  elif test "$ca_native_opt" = "1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES NativeCA"
+  fi
 fi
 
 if test "$want_httpsrr" != "no"; then

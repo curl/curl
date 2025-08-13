@@ -200,7 +200,7 @@ jobs:
           - { build: 'autotools', sys: 'msys'      , env: 'x86_64'       , tflags: ''          , config: '--with-openssl', install: 'openssl-devel libssh2-devel', name: 'default R' }
           # MinGW
           - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'   , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static --without-zlib', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default' }
-          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''          , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-static --disable-shared', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
+          - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''          , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-static --disable-shared --enable-ca-native', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '--min=1650', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U' }
           # MinGW torture
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=13 --min=700 1 to 950'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel U torture 1' }
@@ -764,6 +764,7 @@ jobs:
               -DNGTCP2_INCLUDE_DIR=/ucrt64/include
               -DNGTCP2_LIBRARY=/ucrt64/lib/libngtcp2.dll.a
               -DNGTCP2_CRYPTO_OSSL_LIBRARY=/ucrt64/lib/libngtcp2_crypto_ossl.dll.a
+              -DCURL_CA_NATIVE=ON
 
           - name: 'schannel U'
             install-vcpkg: 'zlib libssh2[core,zlib]'

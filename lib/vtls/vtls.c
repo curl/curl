@@ -295,7 +295,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
 
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
@@ -341,7 +341,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_APPLE_SECTRUST) || defined(CURL_CA_NATIVE)
     if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
       sslc->native_ca_store = TRUE;
 #endif
