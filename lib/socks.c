@@ -529,6 +529,110 @@ CONNECT_REQ_INIT:
   return CURLPX_OK; /* Proxy was successful! */
 }
 
+static CURLproxycode socks5_init(struct Curl_cfilter *cf,
+                                 struct socks_state *sx,
+                                 struct Curl_easy *data,
+                                 const bool socks5_resolve_local,
+                                 const size_t hostname_len)
+{
+  struct connectdata *conn = cf->conn;
+  const unsigned char auth = data->set.socks5auth;
+  unsigned char *socksreq = sx->buffer;
+
+  if(conn->bits.httpproxy)
+    CURL_TRC_CF(data, cf, "SOCKS5: connecting to HTTP proxy %s port %d",
+                sx->hostname, sx->remote_port);
+
+  /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
+  if(!socks5_resolve_local && hostname_len > 255) {
+    failf(data, "SOCKS5: the destination hostname is too long to be "
+          "resolved remotely by the proxy.");
+    return CURLPX_LONG_HOSTNAME;
+  }
+
+  if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
+    infof(data, "warning: unsupported value passed to "
+          "CURLOPT_SOCKS5_AUTH: %u", auth);
+  if(!(auth & CURLAUTH_BASIC))
+    /* disable username/password auth */
+    sx->proxy_user = NULL;
+
+  if(!sx->outstanding) {
+    size_t idx = 0;
+    socksreq[idx++] = 5;   /* version */
+    idx++;                 /* number of authentication methods */
+    socksreq[idx++] = 0;   /* no authentication */
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+    if(auth & CURLAUTH_GSSAPI)
+      socksreq[idx++] = 1; /* GSS-API */
+#endif
+    if(sx->proxy_user)
+      socksreq[idx++] = 2; /* username/password */
+    /* write the number of authentication methods */
+    socksreq[1] = (unsigned char) (idx - 2);
+
+    sx->outp = socksreq;
+    DEBUGASSERT(idx <= sizeof(sx->buffer));
+    sx->outstanding = idx;
+  }
+
+  return socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
+                          "initial SOCKS5 request");
+}
+
+static CURLproxycode socks5_auth_init(struct Curl_cfilter *cf,
+                                      struct socks_state *sx,
+                                      struct Curl_easy *data)
+{
+  /* Needs username and password */
+  size_t proxy_user_len, proxy_password_len;
+  size_t len = 0;
+  unsigned char *socksreq = sx->buffer;
+
+  if(sx->proxy_user && sx->proxy_password) {
+    proxy_user_len = strlen(sx->proxy_user);
+    proxy_password_len = strlen(sx->proxy_password);
+  }
+  else {
+    proxy_user_len = 0;
+    proxy_password_len = 0;
+  }
+
+  /*   username/password request looks like
+   * +----+------+----------+------+----------+
+   * |VER | ULEN |  UNAME   | PLEN |  PASSWD  |
+   * +----+------+----------+------+----------+
+   * | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
+   * +----+------+----------+------+----------+
+   */
+  socksreq[len++] = 1;    /* username/pw subnegotiation version */
+  socksreq[len++] = (unsigned char) proxy_user_len;
+  if(sx->proxy_user && proxy_user_len) {
+    /* the length must fit in a single byte */
+    if(proxy_user_len > 255) {
+      failf(data, "Excessive username length for proxy auth");
+      return CURLPX_LONG_USER;
+    }
+    memcpy(socksreq + len, sx->proxy_user, proxy_user_len);
+  }
+  len += proxy_user_len;
+  socksreq[len++] = (unsigned char) proxy_password_len;
+  if(sx->proxy_password && proxy_password_len) {
+    /* the length must fit in a single byte */
+    if(proxy_password_len > 255) {
+      failf(data, "Excessive password length for proxy auth");
+      return CURLPX_LONG_PASSWD;
+    }
+    memcpy(socksreq + len, sx->proxy_password, proxy_password_len);
+  }
+  len += proxy_password_len;
+  sxstate(sx, cf, data, CONNECT_AUTH_SEND);
+  DEBUGASSERT(len <= sizeof(sx->buffer));
+  sx->outstanding = len;
+  sx->outp = socksreq;
+  return CURLPX_OK;
+}
+
 /*
  * This function logs in to a SOCKS5 proxy and sends the specifics to the final
  * destination server.
@@ -555,66 +659,20 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   */
   struct connectdata *conn = cf->conn;
   unsigned char *socksreq = sx->buffer;
-  size_t idx;
   CURLcode result;
   CURLproxycode presult;
   bool socks5_resolve_local =
     (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5);
   const size_t hostname_len = strlen(sx->hostname);
   size_t len = 0;
-  const unsigned char auth = data->set.socks5auth;
   bool allow_gssapi = FALSE;
   struct Curl_dns_entry *dns = NULL;
 
   switch(sx->state) {
   case CONNECT_SOCKS_INIT:
-    if(conn->bits.httpproxy)
-      CURL_TRC_CF(data, cf, "SOCKS5: connecting to HTTP proxy %s port %d",
-                  sx->hostname, sx->remote_port);
-
-    /* RFC1928 chapter 5 specifies max 255 chars for domain name in packet */
-    if(!socks5_resolve_local && hostname_len > 255) {
-      failf(data, "SOCKS5: the destination hostname is too long to be "
-            "resolved remotely by the proxy.");
-      return CURLPX_LONG_HOSTNAME;
-    }
-
-    if(auth & ~(CURLAUTH_BASIC | CURLAUTH_GSSAPI))
-      infof(data, "warning: unsupported value passed to "
-            "CURLOPT_SOCKS5_AUTH: %u", auth);
-    if(!(auth & CURLAUTH_BASIC))
-      /* disable username/password auth */
-      sx->proxy_user = NULL;
-#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
-    if(auth & CURLAUTH_GSSAPI)
-      allow_gssapi = TRUE;
-#endif
-
-    if(!sx->outstanding) {
-      idx = 0;
-      socksreq[idx++] = 5;   /* version */
-      idx++;                 /* number of authentication methods */
-      socksreq[idx++] = 0;   /* no authentication */
-      if(allow_gssapi)
-        socksreq[idx++] = 1; /* GSS-API */
-      if(sx->proxy_user)
-        socksreq[idx++] = 2; /* username/password */
-      /* write the number of authentication methods */
-      socksreq[1] = (unsigned char) (idx - 2);
-
-      sx->outp = socksreq;
-      DEBUGASSERT(idx <= sizeof(sx->buffer));
-      sx->outstanding = idx;
-    }
-
-    presult = socks_state_send(cf, sx, data, CURLPX_SEND_CONNECT,
-                               "initial SOCKS5 request");
-    if(CURLPX_OK != presult)
+    presult = socks5_init(cf, sx, data, socks5_resolve_local, hostname_len);
+    if(presult || sx->outstanding)
       return presult;
-    else if(sx->outstanding) {
-      /* remain in sending state */
-      return CURLPX_OK;
-    }
     sxstate(sx, cf, data, CONNECT_SOCKS_READ);
     goto CONNECT_SOCKS_READ_INIT;
   case CONNECT_SOCKS_SEND:
@@ -635,6 +693,10 @@ CONNECT_SOCKS_READ_INIT:
   case CONNECT_SOCKS_READ:
     presult = socks_state_recv(cf, sx, data, CURLPX_RECV_CONNECT,
                                "initial SOCKS5 response");
+#if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
+    if(data->set.socks5auth & CURLAUTH_GSSAPI)
+      allow_gssapi = TRUE;
+#endif
     if(CURLPX_OK != presult)
       return presult;
     else if(sx->outstanding) {
@@ -690,52 +752,10 @@ CONNECT_SOCKS_READ_INIT:
     break;
 
 CONNECT_AUTH_INIT:
-  case CONNECT_AUTH_INIT: {
-    /* Needs username and password */
-    size_t proxy_user_len, proxy_password_len;
-    if(sx->proxy_user && sx->proxy_password) {
-      proxy_user_len = strlen(sx->proxy_user);
-      proxy_password_len = strlen(sx->proxy_password);
-    }
-    else {
-      proxy_user_len = 0;
-      proxy_password_len = 0;
-    }
-
-    /*   username/password request looks like
-     * +----+------+----------+------+----------+
-     * |VER | ULEN |  UNAME   | PLEN |  PASSWD  |
-     * +----+------+----------+------+----------+
-     * | 1  |  1   | 1 to 255 |  1   | 1 to 255 |
-     * +----+------+----------+------+----------+
-     */
-    len = 0;
-    socksreq[len++] = 1;    /* username/pw subnegotiation version */
-    socksreq[len++] = (unsigned char) proxy_user_len;
-    if(sx->proxy_user && proxy_user_len) {
-      /* the length must fit in a single byte */
-      if(proxy_user_len > 255) {
-        failf(data, "Excessive username length for proxy auth");
-        return CURLPX_LONG_USER;
-      }
-      memcpy(socksreq + len, sx->proxy_user, proxy_user_len);
-    }
-    len += proxy_user_len;
-    socksreq[len++] = (unsigned char) proxy_password_len;
-    if(sx->proxy_password && proxy_password_len) {
-      /* the length must fit in a single byte */
-      if(proxy_password_len > 255) {
-        failf(data, "Excessive password length for proxy auth");
-        return CURLPX_LONG_PASSWD;
-      }
-      memcpy(socksreq + len, sx->proxy_password, proxy_password_len);
-    }
-    len += proxy_password_len;
-    sxstate(sx, cf, data, CONNECT_AUTH_SEND);
-    DEBUGASSERT(len <= sizeof(sx->buffer));
-    sx->outstanding = len;
-    sx->outp = socksreq;
-  }
+  case CONNECT_AUTH_INIT:
+    presult = socks5_auth_init(cf, sx, data);
+    if(presult)
+      return presult;
     FALLTHROUGH();
   case CONNECT_AUTH_SEND:
     presult = socks_state_send(cf, sx, data, CURLPX_SEND_AUTH,
