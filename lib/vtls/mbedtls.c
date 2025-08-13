@@ -107,16 +107,8 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
-/* PSA can be used independently of TLS 1.3 */
-#if defined(MBEDTLS_USE_PSA_CRYPTO) && MBEDTLS_VERSION_NUMBER >= 0x03060000
-#define HAS_PSA_SUPPORT
-#endif
-
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3) && MBEDTLS_VERSION_NUMBER >= 0x03060000
-#define HAS_TLS13_SUPPORT
-#endif
-
-#if defined(HAS_TLS13_SUPPORT) && defined(MBEDTLS_SSL_SESSION_TICKETS)
+/* TLSv1.3 support requires mbedTLS 3.6.0+ */
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3) && defined(MBEDTLS_SSL_SESSION_TICKETS)
 #define HAS_SESSION_TICKETS
 #endif
 
@@ -260,7 +252,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
 
   mbedtls_ssl_protocol_version ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
   mbedtls_ssl_protocol_version ver_max =
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     MBEDTLS_SSL_VERSION_TLS1_3
 #else
     MBEDTLS_SSL_VERSION_TLS1_2
@@ -276,7 +268,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
     ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
     break;
   case CURL_SSLVERSION_TLSv1_3:
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     ver_min = MBEDTLS_SSL_VERSION_TLS1_3;
     break;
 #endif
@@ -290,7 +282,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   case CURL_SSLVERSION_MAX_DEFAULT:
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_TLSv1_3:
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
     break;
 #endif
@@ -363,7 +355,7 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
   if(!selected)
     return CURLE_OUT_OF_MEMORY;
 
-#ifndef HAS_TLS13_SUPPORT
+#ifndef MBEDTLS_SSL_PROTO_TLS1_3
   (void)ciphers13, (void)j;
 #else
   if(!ciphers13) {
@@ -411,7 +403,7 @@ add_ciphers:
     selected[count++] = id;
   }
 
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
   if(ciphers == ciphers13 && ciphers12) {
     ciphers = ciphers12;
     goto add_ciphers;
@@ -799,7 +791,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                       mbedtls_bio_cf_read,
                       NULL /*  rev_timeout() */);
 
-#ifndef HAS_TLS13_SUPPORT
+#ifndef MBEDTLS_SSL_PROTO_TLS1_3
   if(conn_config->cipher_list) {
     CURLcode result = mbed_set_selected_ciphers(data, backend,
                                                 conn_config->cipher_list,
@@ -1149,7 +1141,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
                 len, -nwritten);
     result = ((nwritten == MBEDTLS_ERR_SSL_WANT_WRITE)
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
       || (nwritten == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
 #endif
       ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
@@ -1219,7 +1211,7 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
      * WANT_READ, but has not encountered an EAGAIN. */
     if(ret == MBEDTLS_ERR_SSL_WANT_READ)
       ret = mbedtls_ssl_read(&backend->ssl, buf, sizeof(buf));
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
     if(ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
       continue;
 #endif
@@ -1431,7 +1423,7 @@ static int mbedtls_init(void)
 #ifdef HAS_THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef HAS_PSA_SUPPORT
+#ifdef MBEDTLS_USE_PSA_CRYPTO  /* requires mbedTLS 3.6.0+ */
   {
     int ret;
 #ifdef HAS_THREADING_SUPPORT
@@ -1444,7 +1436,7 @@ static int mbedtls_init(void)
     if(ret != PSA_SUCCESS)
       return 0;
   }
-#endif /* HAS_PSA_SUPPORT */
+#endif /* MBEDTLS_USE_PSA_CRYPTO */
   return 1;
 }
 
@@ -1498,7 +1490,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
-#ifdef HAS_TLS13_SUPPORT
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY |
