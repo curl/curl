@@ -100,6 +100,17 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
+int Curl_thread_cancel(curl_thread_t *hnd)
+{
+  (void)hnd;
+#ifdef PTHREAD_CANCEL_ENABLE
+  if(*hnd != curl_thread_t_null) {
+    return pthread_cancel(**hnd);
+  }
+#endif
+  return 0;
+}
+
 #elif defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
@@ -150,7 +161,16 @@ int Curl_thread_join(curl_thread_t *hnd)
 
   Curl_thread_destroy(hnd);
 
+
   return ret;
+}
+
+int Curl_thread_cancel(curl_thread_t *hnd)
+{
+  if(*hnd != curl_thread_t_null) {
+    return 1; /* not supported */
+  }
+  return 0;
 }
 
 #endif /* USE_THREADS_* */
