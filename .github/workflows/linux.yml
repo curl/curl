@@ -234,7 +234,7 @@ jobs:
           - name: 'thread-sanitizer'
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssl-tsan
-            CPPFLAGS: -fsanitize=thread -g
+            CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread -Wl,-rpath,/home/runner/openssl/lib
             CC: clang
             generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl -DENABLE_DEBUG=ON
