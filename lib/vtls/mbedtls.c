@@ -107,11 +107,6 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
-/* TLSv1.3 support requires mbedTLS 3.6.0+ */
-#if defined(MBEDTLS_SSL_PROTO_TLS1_3) && defined(MBEDTLS_SSL_SESSION_TICKETS)
-#define HAS_SESSION_TICKETS
-#endif
-
 #ifdef HAS_THREADING_SUPPORT
 static mbedtls_entropy_context ts_entropy;
 
@@ -752,7 +747,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_SESSION_TICKETS
+#ifdef MBEDTLS_SSL_SESSION_TICKETS
   /* New in mbedTLS 3.6.1, need to enable, default is now disabled */
   mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets(&backend->config,
     MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED);
@@ -1293,7 +1288,7 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
                 buffersize, -nread);
     switch(nread) {
-#ifdef HAS_SESSION_TICKETS
+#ifdef MBEDTLS_SSL_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
       mbed_new_session(cf, data);
       FALLTHROUGH();
@@ -1490,7 +1485,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
-#ifdef MBEDTLS_SSL_PROTO_TLS1_3
+#ifdef MBEDTLS_SSL_PROTO_TLS1_3  /* TLSv1.3 support requires mbedTLS 3.6.0+ */
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY |
