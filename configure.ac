@@ -2104,6 +2104,26 @@ fi
 
 AM_CONDITIONAL(CURL_CA_EMBED_SET, test -n "$CURL_CA_EMBED")
 
+dnl --------------------------------
+dnl check native CA store by default
+dnl --------------------------------
+
+AC_MSG_CHECKING([whether to use native CA store by default in the curl tool])
+AC_ARG_ENABLE(ca-native,
+AS_HELP_STRING([--enable-ca-native-by-default],[Enable native CA store by default in the curl tool])
+AS_HELP_STRING([--disable-ca-native-by-default],[Disable native CA store by default in the curl tool (default)]),
+[ case "$enableval" in
+  yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(CURL_CA_NATIVE_BY_DEFAULT, 1, [If native CA store by default in the curl tool is enabled])
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
 dnl ----------------------
 dnl check unsafe CA search
 dnl ----------------------
