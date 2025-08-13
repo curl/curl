@@ -1132,10 +1132,6 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
     prev_alarm = alarm(curlx_sltoui(timeout/1000L));
   }
 
-#ifdef DEBUGBUILD
-  Curl_resolve_test_delay();
-#endif
-
 #else /* USE_ALARM_TIMEOUT */
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
@@ -1638,18 +1634,3 @@ CURLcode Curl_resolver_error(struct Curl_easy *data)
   return result;
 }
 #endif /* USE_CURL_ASYNC */
-
-#ifdef DEBUGBUILD
-#include "curlx/wait.h"
-
-void Curl_resolve_test_delay(void)
-{
-  const char *p = getenv("CURL_DNS_DELAY_MS");
-  if(p) {
-    curl_off_t l;
-    if(!curlx_str_number(&p, &l, TIME_T_MAX) && l) {
-      curlx_wait_ms((timediff_t)l);
-    }
-  }
-}
-#endif

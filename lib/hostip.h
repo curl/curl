@@ -216,8 +216,4 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 
 #endif
 
-#ifdef DEBUGBUILD
-void Curl_resolve_test_delay(void);
-#endif
-
 #endif /* HEADER_CURL_HOSTIP_H */
