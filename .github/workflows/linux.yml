@@ -103,7 +103,12 @@ jobs:
           - name: 'mbedtls valgrind'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev valgrind
             install_steps: mbedtls
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            generate: >-
+              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
+              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
+              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
+              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
 
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
