@@ -39,6 +39,7 @@ use warnings;
 use 5.006;
 
 use File::Basename;
+use Time::HiRes;
 
 BEGIN {
     use base qw(Exporter);
@@ -83,9 +84,6 @@ use Storable qw(
 
 use pathhelp qw(
     exe_ext
-    );
-use processhelp qw(
-    portable_sleep
     );
 use servers qw(
     checkcmd
@@ -419,7 +417,7 @@ sub waitlockunlock {
         my $lockretry = $serverlogslocktimeout * 20;
         my @locks;
         while((@locks = logslocked()) && $lockretry--) {
-            portable_sleep(0.05);
+            Time::HiRes::sleep(0.05);
         }
         if(($lockretry < 0) &&
            ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
@@ -1092,7 +1090,7 @@ sub singletest_clean {
         }
     }
 
-    portable_sleep($postcommanddelay) if($postcommanddelay);
+    Time::HiRes::sleep($postcommanddelay) if($postcommanddelay);
 
     my @killtestservers = getpart("client", "killserver");
     if(@killtestservers) {

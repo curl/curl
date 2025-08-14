@@ -27,11 +27,12 @@ package processhelp;
 use strict;
 use warnings;
 
+use Time::HiRes;
+
 BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        portable_sleep
         pidfromfile
         pidexists
         pidwait
@@ -42,17 +43,6 @@ BEGIN {
         set_advisor_read_lock
         clear_advisor_read_lock
     );
-
-    # portable sleeping needs Time::HiRes
-    eval {
-        no warnings "all";
-        require Time::HiRes;
-    };
-    # portable sleeping falls back to native Sleep on Windows
-    eval {
-        no warnings "all";
-        require Win32;
-    }
 }
 
 use serverhelp qw(
@@ -68,27 +58,6 @@ use pathhelp qw(
 use globalconfig qw(
     $dev_null
     );
-
-#######################################################################
-# portable_sleep uses Time::HiRes::sleep if available and falls back
-# to the classic approach of using select(undef, undef, undef, ...).
-# even though that one is not portable due to being implemented using
-# select on Windows: https://perldoc.perl.org/perlport.html#select
-# Therefore it uses Win32::Sleep on Windows systems instead.
-#
-sub portable_sleep {
-    my ($seconds) = @_;
-
-    if($Time::HiRes::VERSION) {
-        Time::HiRes::sleep($seconds);
-    }
-    elsif(os_is_win()) {
-        Win32::Sleep($seconds*1000);
-    }
-    else {
-        select(undef, undef, undef, $seconds);
-    }
-}
 
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
@@ -238,7 +207,7 @@ sub pidwait {
                     last;
                 }
             }
-            portable_sleep(0.2);
+            Time::HiRes::sleep(0.2);
         }
         return $pid;
     }
@@ -346,7 +315,7 @@ sub killpid {
             last if(not scalar(@signalled));
             # give any zombies of us a chance to move on to the afterlife
             pidwait(0, &WNOHANG);
-            portable_sleep(0.05);
+            Time::HiRes::sleep(0.05);
         }
     }
 
