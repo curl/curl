@@ -60,7 +60,9 @@ callbacks to add additional validation code for certificates, and even to
 change the actual URI of an HTTPS request.
 
 For OpenSSL, asynchronous certificate verification via *SSL_set_retry_verify*
-is supported. (Added in 8.3.0)
+is supported. When *SSL_set_retry_verify* is set, the transfer is paused.
+When verification should continue, call curl_easy_pause(3) to unpause
+the transfer. (Added in 8.3.0, Pausing added in 8.16.0)
 
 The CURLOPT_SSL_CTX_FUNCTION(3) callback allows the application to reach in
 and modify SSL details in the connection without libcurl itself knowing
