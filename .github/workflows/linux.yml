@@ -160,7 +160,8 @@ jobs:
 
           - name: 'openssl -O3 libssh valgrind'
             install_packages: zlib1g-dev libssh-dev valgrind
-            configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
+            CFLAGS: -O3
+            generate: --with-openssl -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
