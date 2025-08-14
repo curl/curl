@@ -103,7 +103,12 @@ jobs:
           - name: 'mbedtls valgrind'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev valgrind
             install_steps: mbedtls
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug
+            generate: >-
+              -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+              -DMBEDTLS_INCLUDE_DIR=/home/runner/mbedtls/include
+              -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
+              -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
+              -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
 
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
@@ -145,7 +150,7 @@ jobs:
 
           - name: 'openssl libssh2 sync-resolver valgrind'
             install_packages: zlib1g-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
-            configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_USE_LIBSSH2=ON
 
           - name: 'openssl'
             install_packages: zlib1g-dev
@@ -160,7 +165,8 @@ jobs:
 
           - name: 'openssl -O3 libssh valgrind'
             install_packages: zlib1g-dev libssh-dev valgrind
-            configure: CFLAGS=-O3 --with-openssl --enable-debug --with-libssh
+            CFLAGS: -O3
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
@@ -260,12 +266,12 @@ jobs:
           - name: 'rustls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            configure: --with-rustls --enable-ech --enable-debug
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls skiprun pytest
-            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
+            configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'IntelC openssl'
             install_packages: zlib1g-dev libssl-dev
