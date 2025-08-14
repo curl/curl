@@ -65,6 +65,10 @@ use pathhelp qw(
     os_is_win
     );
 
+use globalconfig qw(
+    $dev_null
+    );
+
 #######################################################################
 # portable_sleep uses Time::HiRes::sleep if available and falls back
 # to the classic approach of using select(undef, undef, undef, ...).
@@ -143,7 +147,7 @@ sub pidexists {
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
-                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                my $result = `tasklist -fi \"$filter\" 2>$dev_null`;
                 if(index($result, "$pid") != -1) {
                     return -$pid;
                 }
@@ -173,7 +177,7 @@ sub pidterm {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
-                my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
+                my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
                 print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
@@ -198,7 +202,7 @@ sub pidkill {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
-                my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
+                my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
                 print "Executing: '$cmd'\n";
                 system($cmd);
                 return;
