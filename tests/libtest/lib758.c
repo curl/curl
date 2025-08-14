@@ -441,7 +441,6 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
       tv.tv_usec = 100000;
     }
 
-    assert(maxFd);
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
