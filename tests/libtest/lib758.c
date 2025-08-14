@@ -61,9 +61,9 @@ static struct t758_ctx {
 static const char *t758_tag(void)
 {
   curl_msnprintf(t758_ctx.buf, sizeof(t758_ctx.buf),
-                "[T758-%d-%d] [%d/%d]",
-                t758_ctx.max_socket_calls, t758_ctx.max_timer_calls,
-                t758_ctx.socket_calls, t758_ctx.timer_calls);
+                 "[T758-%d-%d] [%d/%d]",
+                 t758_ctx.max_socket_calls, t758_ctx.max_timer_calls,
+                 t758_ctx.socket_calls, t758_ctx.timer_calls);
   return t758_ctx.buf;
 }
 
@@ -71,7 +71,6 @@ static void t758_msg(const char *msg)
 {
   curl_mfprintf(stderr, "%s %s\n", t758_tag(), msg);
 }
-
 
 
 struct t758_Sockets {
@@ -154,8 +153,8 @@ static int t758_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
 {
   struct t758_ReadWriteSockets *sockets = userp;
 
-  (void)easy; /* unused */
-  (void)socketp; /* unused */
+  (void)easy;
+  (void)socketp;
 
   t758_ctx.socket_calls++;
   t758_msg("-> CURLMOPT_SOCKETFUNCTION");
