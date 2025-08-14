@@ -32,8 +32,20 @@
 
 #include "testtrace.h"
 #include "memdebug.h"
+
+#ifdef USE_OPENSSL
+
 #include <openssl/x509.h>
 #include <openssl/ssl.h>
+
+#if ((OPENSSL_VERSION_NUMBER >= 0x30000000L) && \
+     !defined(LIBRESSL_VERSION_NUMBER) && \
+     !defined(OPENSSL_IS_BORINGSSL))
+#define T578_ENABLED
+#endif
+#endif
+
+#ifdef T578_ENABLED
 
 static struct t758_ctx {
   int socket_calls;
@@ -488,3 +500,11 @@ static CURLcode test_lib758(const char *URL)
 
   return rc;
 }
+
+#else /* T578_ENABLED */
+static CURLcode test_lib758(const char *URL)
+{
+  (void)URL;
+  return CURLE_OK;
+}
+#endif
