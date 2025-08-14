@@ -74,7 +74,7 @@ use globalconfig qw(
 # to the classic approach of using select(undef, undef, undef, ...).
 # even though that one is not portable due to being implemented using
 # select on Windows: https://perldoc.perl.org/perlport.html#select
-# Therefore it uses Win32::Sleep on Windows systems instead.
+# Therefore it uses sleep() on Windows systems instead.
 #
 sub portable_sleep {
     my ($seconds) = @_;
@@ -83,7 +83,7 @@ sub portable_sleep {
         Time::HiRes::sleep($seconds);
     }
     elsif(os_is_win()) {
-        Win32::Sleep($seconds*1000);
+        sleep($seconds);
     }
     else {
         select(undef, undef, undef, $seconds);
