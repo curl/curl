@@ -76,7 +76,7 @@ our $logfile;  # server log file name, for logmsg
 # logmsg is general message logging subroutine for our test servers.
 #
 sub logmsg {
-    my ($seconds, $usec) = gettimeofday();
+    my ($seconds, $usec) = Time::HiRes::gettimeofday();
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
         localtime($seconds);
     my $now = sprintf("%02d:%02d:%02d.%06d ", $hour, $min, $sec, $usec);
