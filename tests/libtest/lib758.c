@@ -348,17 +348,18 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
   t758_msg("start");
   start_test_timing();
 
-  curl_global_trace("all");
-
-  res_global_init(CURL_GLOBAL_ALL);
-  if(res != CURLE_OK)
-    return res;
-
   if(curl_global_sslset(CURLSSLBACKEND_OPENSSL, NULL, NULL) != CURLSSLSET_OK) {
     t758_msg("could not set OpenSSL as backend");
     res = CURLE_FAILED_INIT;
     return res;
   }
+
+  res_global_init(CURL_GLOBAL_ALL);
+  if(res != CURLE_OK)
+    return res;
+
+  curl_global_trace("all");
+
 
   easy_init(curl);
   debug_config.nohex = TRUE;
