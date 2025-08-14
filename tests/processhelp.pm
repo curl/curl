@@ -27,6 +27,8 @@ package processhelp;
 use strict;
 use warnings;
 
+use Time::HiRes;
+
 BEGIN {
     use base qw(Exporter);
 
@@ -42,12 +44,6 @@ BEGIN {
         set_advisor_read_lock
         clear_advisor_read_lock
     );
-
-    # portable sleeping needs Time::HiRes
-    eval {
-        no warnings "all";
-        require Time::HiRes;
-    };
 }
 
 use serverhelp qw(
@@ -65,24 +61,10 @@ use globalconfig qw(
     );
 
 #######################################################################
-# portable_sleep uses Time::HiRes::sleep if available and falls back
-# to the classic approach of using select(undef, undef, undef, ...).
-# even though that one is not portable due to being implemented using
-# select on Windows: https://perldoc.perl.org/perlport.html#select
-# Therefore it uses sleep() on Windows systems instead.
-#
+# portable_sleep uses Time::HiRes::sleep()
 sub portable_sleep {
     my ($seconds) = @_;
-
-    if($Time::HiRes::VERSION) {
-        Time::HiRes::sleep($seconds);
-    }
-    elsif(os_is_win()) {
-        sleep($seconds);
-    }
-    else {
-        select(undef, undef, undef, $seconds);
-    }
+    Time::HiRes::sleep($seconds);
 }
 
 #######################################################################
