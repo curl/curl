@@ -2438,22 +2438,24 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
       DEBUGASSERT(data->conn);
-      result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
-      if(connected && !result) {
-        if(!data->conn->bits.reuse &&
-           Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
-          /* new connection, can multiplex, wake pending handles */
-          process_pending_handles(data->multi);
+      if(!Curl_xfer_recv_is_paused(data)) {
+        result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
+        if(connected && !result) {
+          if(!data->conn->bits.reuse &&
+             Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+            /* new connection, can multiplex, wake pending handles */
+            process_pending_handles(data->multi);
+          }
+          rc = CURLM_CALL_MULTI_PERFORM;
+          multistate(data, MSTATE_PROTOCONNECT);
         }
-        rc = CURLM_CALL_MULTI_PERFORM;
-        multistate(data, MSTATE_PROTOCONNECT);
-      }
-      else if(result) {
-        /* failure detected */
-        multi_posttransfer(data);
-        multi_done(data, result, TRUE);
-        stream_error = TRUE;
-        break;
+        else if(result) {
+          /* failure detected */
+          multi_posttransfer(data);
+          multi_done(data, result, TRUE);
+          stream_error = TRUE;
+          break;
+        }
       }
       break;
 
