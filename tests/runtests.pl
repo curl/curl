@@ -92,9 +92,6 @@ use pathhelp qw(
     exe_ext
     sys_native_current_path
     );
-use processhelp qw(
-    portable_sleep
-    );
 
 use appveyor;
 use azure;

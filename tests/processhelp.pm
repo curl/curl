@@ -33,7 +33,6 @@ BEGIN {
     use base qw(Exporter);
 
     our @EXPORT = qw(
-        portable_sleep
         pidfromfile
         pidexists
         pidwait
@@ -59,13 +58,6 @@ use pathhelp qw(
 use globalconfig qw(
     $dev_null
     );
-
-#######################################################################
-# portable_sleep uses Time::HiRes::sleep()
-sub portable_sleep {
-    my ($seconds) = @_;
-    Time::HiRes::sleep($seconds);
-}
 
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
@@ -215,7 +207,7 @@ sub pidwait {
                     last;
                 }
             }
-            portable_sleep(0.2);
+            Time::HiRes::sleep(0.2);
         }
         return $pid;
     }
@@ -323,7 +315,7 @@ sub killpid {
             last if(not scalar(@signalled));
             # give any zombies of us a chance to move on to the afterlife
             pidwait(0, &WNOHANG);
-            portable_sleep(0.05);
+            Time::HiRes::sleep(0.05);
         }
     }
 
