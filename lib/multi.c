@@ -3098,7 +3098,23 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     goto out;
   }
 
-  if(s != CURL_SOCKET_TIMEOUT) {
+  if(s == CURL_SOCKET_RETRY_CERT) {
+    unsigned int mid;
+    if(Curl_uint_bset_first(&multi->process, &mid)) {
+      do {
+        struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
+        if(data && data->conn->bits.cert_verification_pending &&
+           data->conn->bits.cert_verification_finished) {
+          Curl_multi_mark_dirty(data);
+          data->conn->bits.cert_verification_pending = FALSE;
+          data->conn->bits.cert_verification_finished = FALSE;
+          mrc.run_cpool = TRUE; /* should we? */
+        }
+      } while(Curl_uint_bset_next(&multi->process, mid, &mid));
+    }
+    s = CURL_SOCKET_BAD;
+  }
+  else if(s != CURL_SOCKET_TIMEOUT) {
     /* Mark all transfers of that socket as dirty */
     Curl_multi_ev_dirty_xfers(multi, s, &mrc.run_cpool);
   }

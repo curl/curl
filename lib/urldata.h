@@ -426,6 +426,8 @@ struct ConnectBits {
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
+  BIT(cert_verification_pending);
+  BIT(cert_verification_finished);
 };
 
 struct hostname {

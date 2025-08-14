@@ -31,13 +31,17 @@
 #include "first.h"
 
 #include "memdebug.h"
-
+#include <openssl/x509.h>
+#include <openssl/ssl.h>
 
 static struct t530_ctx {
   int socket_calls;
   int max_socket_calls;
   int timer_calls;
   int max_timer_calls;
+  int fake_async_cert_verification_pending;
+  int fake_async_cert_verification_finished;
+  int number_of_cert_verify_callbacks;
   char buf[1024];
 } t530_ctx;
 
@@ -55,6 +59,47 @@ static void t530_msg(const char *msg)
   curl_mfprintf(stderr, "%s %s\n", t530_tag(), msg);
 }
 
+
+
+static const char *curl_infotype_to_string(curl_infotype type)
+{
+  switch(type) {
+    case CURLINFO_TEXT:
+      return "text";
+    case CURLINFO_HEADER_IN:
+      return "header_in";
+    case CURLINFO_HEADER_OUT:
+      return "header_out";
+    case CURLINFO_DATA_IN:
+      return "data_in";
+    case CURLINFO_DATA_OUT:
+      return "data_out";
+    case CURLINFO_SSL_DATA_IN:
+      return "ssl_data_in";
+    case CURLINFO_SSL_DATA_OUT:
+      return "ssl_data_out";
+    default:
+      return "unknown";
+  }
+}
+
+static int debug_cb(CURL *handle,
+                    curl_infotype type,
+                    char *data,
+                    size_t size,
+                    void *userdata)
+{
+  char buf[65536];
+  (void)handle; /* unused */
+  (void)userdata; /* unused */
+  if(size >= sizeof(buf))
+    size = sizeof(buf) - 1; /* leave room for NUL */
+  memcpy(buf, data, size);
+  buf[size] = '\0'; /* ensure NUL termination */
+  curl_mfprintf(stderr, "%s %s %s\n", t530_tag(),
+                curl_infotype_to_string(type), buf);
+  return 0;
+}
 
 struct t530_Sockets {
   curl_socket_t *sockets;
@@ -185,6 +230,37 @@ static int t530_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
   return 0;
 }
 
+static int t530_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
+{
+  SSL * ssl;
+  (void)arg; /* unused */
+  ssl = (SSL *)X509_STORE_CTX_get_ex_data(ctx,
+        SSL_get_ex_data_X509_STORE_CTX_idx());
+  t530_ctx.number_of_cert_verify_callbacks++;
+  if(!t530_ctx.fake_async_cert_verification_pending) {
+    t530_ctx.fake_async_cert_verification_pending = 1;
+    t530_msg("   initial t530_cert_verify_callback");
+    return SSL_set_retry_verify(ssl);
+  }
+  else if(t530_ctx.fake_async_cert_verification_finished) {
+    t530_msg("   final t530_cert_verify_callback");
+    return 1; /* success */
+  }
+  else {
+    t530_msg("   pending t530_cert_verify_callback");
+    return SSL_set_retry_verify(ssl);
+  }
+}
+
+static CURLcode
+t530_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp)
+{
+  SSL_CTX *ctx = (SSL_CTX *) ssl_ctx;
+  (void)curl; /* unused */
+  SSL_CTX_set_cert_verify_callback(ctx, t530_cert_verify_callback, clientp);
+  return CURLE_OK;
+}
+
 /**
  * Check for curl completion.
  */
@@ -296,17 +372,22 @@ static CURLcode testone(char *URL, int timer_fail_at, int socket_fail_at)
   t530_msg("start");
   start_test_timing();
 
+  curl_global_trace("all");
+
   res_global_init(CURL_GLOBAL_ALL);
   if(res != CURLE_OK)
     return res;
 
   easy_init(curl);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_cb);
 
   /* specify target */
   easy_setopt(curl, CURLOPT_URL, URL);
 
   /* go verbose */
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, t530_set_ssl_ctx_callback);
 
   multi_init(m);
 
@@ -322,13 +403,43 @@ static CURLcode testone(char *URL, int timer_fail_at, int socket_fail_at)
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-
   while(!t530_checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
     tv.tv_sec = 10;
 
+    if(t530_ctx.fake_async_cert_verification_pending &&
+        !t530_ctx.fake_async_cert_verification_finished) {
+      if(sockets.read.count || sockets.write.count) {
+        t530_msg("during verification there should be no sockets scheduled");
+        res = TEST_ERR_MAJOR_BAD;
+        goto test_cleanup;
+      }
+      if(t530_ctx.number_of_cert_verify_callbacks != 1) {
+        t530_msg("expecting exactly one cert verify callback here");
+        res = TEST_ERR_MAJOR_BAD;
+        goto test_cleanup;
+      }
+      t530_ctx.fake_async_cert_verification_finished = 1;
+      if(socket_action(m, CURL_SOCKET_RETRY_CERT, 0, "timeout")) {
+        t530_msg("spurious retry cert action");
+        res = TEST_ERR_MAJOR_BAD;
+        goto test_cleanup;
+      }
+      easy_setopt(curl, CURLOPT_ASYNC_CERT_VERIFY_FINISHED, 1L);
+      if(socket_action(m, CURL_SOCKET_RETRY_CERT, 0, "timeout")) {
+        t530_msg("unblocking transfer after cert verification finished");
+        res = TEST_ERR_MAJOR_BAD;
+        goto test_cleanup;
+      }
+      if(t530_ctx.number_of_cert_verify_callbacks != 2) {
+        t530_msg("this should have triggered the callback again, right?");
+        res = TEST_ERR_MAJOR_BAD;
+        goto test_cleanup;
+      }
+      t530_msg("TEST: all fine?");
+    }
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
     t530_updateFdSet(&sockets.read, &readSet, &maxFd);
@@ -370,6 +481,11 @@ static CURLcode testone(char *URL, int timer_fail_at, int socket_fail_at)
 
     abort_on_test_timeout();
   }
+  if(success && t530_ctx.number_of_cert_verify_callbacks != 2) {
+    t530_msg("unexpected invocations of cert verify callback");
+    res = TEST_ERR_MAJOR_BAD;
+    goto test_cleanup;
+  }
 
   if(!success) {
     t530_msg("Error getting file.");
@@ -400,22 +516,6 @@ static CURLcode test_lib530(char *URL)
      callback calls */
   rc = testone(URL, 0, 0); /* no callback fails */
   if(rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
-
-  rc = testone(URL, 1, 0); /* fail 1st call to timer callback */
-  if(!rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
-
-  rc = testone(URL, 2, 0); /* fail 2nd call to timer callback */
-  if(!rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
-
-  rc = testone(URL, 0, 1); /* fail 1st call to socket callback */
-  if(!rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
-
-  rc = testone(URL, 0, 2); /* fail 2nd call to socket callback */
-  if(!rc)
     curl_mfprintf(stderr, "%s FAILED: %d\n", t530_tag(), rc);
 
   return CURLE_OK;

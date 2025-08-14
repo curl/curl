@@ -2,7 +2,7 @@
 <info>
 <keywords>
 multi
-HTTP
+HTTPS
 </keywords>
 </info>
 
@@ -28,7 +28,7 @@ Funny-head: yesyes
 # Client-side
 <client>
 <server>
-http
+https
 </server>
 <tool>
 lib%TESTNUMBER
@@ -37,7 +37,7 @@ lib%TESTNUMBER
 multi_socket interface transfer with callbacks returning error
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/file%TESTNUMBER
+https://localhost:%HTTPSPORT/file%TESTNUMBER
 </command>
 </client>
 

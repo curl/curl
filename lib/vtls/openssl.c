@@ -4538,7 +4538,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #ifdef SSL_ERROR_WANT_RETRY_VERIFY
     if(SSL_ERROR_WANT_RETRY_VERIFY == detail) {
       CURL_TRC_CF(data, cf, "SSL_connect() -> want retry_verify");
-      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      data->conn->bits.cert_verification_pending = TRUE;
       return CURLE_AGAIN;
     }
 #endif

@@ -1421,6 +1421,17 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_UPLOAD_FLAGS:
     data->set.upload_flags = (unsigned char)arg;
     break;
+  case CURLOPT_ASYNC_CERT_VERIFY_FINISHED:
+    if(!arg) {
+      DEBUGF(infof(data, "bad CURLOPT_ASYNC_CERT_VERIFY_FINISHED input"));
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if(!data->conn->bits.cert_verification_pending) {
+      DEBUGF(infof(data, "cert verification not pending"));
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    data->conn->bits.cert_verification_finished = TRUE;
+    break;
   default:
     /* unknown option */
     return CURLE_UNKNOWN_OPTION;

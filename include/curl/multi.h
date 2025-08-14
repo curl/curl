@@ -287,6 +287,7 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 #define CURL_POLL_REMOVE 4
 
 #define CURL_SOCKET_TIMEOUT CURL_SOCKET_BAD
+#define CURL_SOCKET_RETRY_CERT -2
 
 #define CURL_CSELECT_IN   0x01
 #define CURL_CSELECT_OUT  0x02
