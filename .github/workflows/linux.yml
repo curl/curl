@@ -161,7 +161,7 @@ jobs:
           - name: 'openssl -O3 libssh valgrind'
             install_packages: zlib1g-dev libssh-dev valgrind
             CFLAGS: -O3
-            generate: --with-openssl -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
@@ -261,12 +261,12 @@ jobs:
           - name: 'rustls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
             install_steps: rust rustls
-            configure: --with-rustls --enable-ech --enable-debug
+            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
 
           - name: 'rustls'
             install_packages: libnghttp2-dev libldap-dev
             install_steps: rust rustls skiprun pytest
-            generate: -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DENABLE_DEBUG=ON
+            configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'IntelC openssl'
             install_packages: zlib1g-dev libssl-dev
