@@ -48,11 +48,6 @@ BEGIN {
         no warnings "all";
         require Time::HiRes;
     };
-    # portable sleeping falls back to native Sleep on Windows
-    eval {
-        no warnings "all";
-        require Win32;
-    }
 }
 
 use serverhelp qw(
