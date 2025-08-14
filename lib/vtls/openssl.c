@@ -61,7 +61,7 @@
 #include "../vauth/vauth.h"
 #include "keylog.h"
 #include "hostcheck.h"
-#include "transfer.h"
+#include "../transfer.h"
 #include "../multiif.h"
 #include "../curlx/strparse.h"
 #include "../strdup.h"
