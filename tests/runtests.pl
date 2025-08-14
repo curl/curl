@@ -87,11 +87,11 @@ use POSIX qw(setlocale LC_ALL);
 
 use serverhelp qw(
     server_exe
-    );
+);
 use pathhelp qw(
     exe_ext
     sys_native_current_path
-    );
+);
 
 use appveyor;
 use azure;

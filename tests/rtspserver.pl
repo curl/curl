@@ -35,7 +35,7 @@ use serverhelp qw(
     server_pidfilename
     server_logfilename
     server_exe
-    );
+);
 
 my $verbose = 0;     # set to 1 for debugging
 my $port = 8990;     # just a default

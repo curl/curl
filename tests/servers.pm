@@ -78,7 +78,7 @@ use serverhelp qw(
     server_portfilename
     server_logfilename
     server_exe
-    );
+);
 
 use sshhelp qw(
     $hstpubmd5f
@@ -98,14 +98,14 @@ use sshhelp qw(
     find_sftp
     find_httptlssrv
     sshversioninfo
-    );
+);
 
 use pathhelp qw(
     exe_ext
     os_is_win
     build_sys_abs_path
     sys_native_abs_path
-    );
+);
 
 use processhelp;
 use globalconfig;
@@ -115,8 +115,7 @@ use testutil qw(
     runclientoutput
     exerunner
     shell_quote
-    );
-
+);
 
 my %serverpidfile; # all server pid file names, identified by server id
 my %serverportfile;# all server port file names, identified by server id

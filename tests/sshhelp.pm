@@ -72,7 +72,7 @@ use File::Spec;
 
 use pathhelp qw(
     exe_ext
-    );
+);
 
 #***************************************************************************
 # Global variables initialization

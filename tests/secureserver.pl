@@ -42,7 +42,7 @@ use File::Basename;
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    );
+);
 
 use pathhelp;
 

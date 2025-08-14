@@ -59,7 +59,7 @@ use getpart qw(
     getpartattr
     getpart
     loadtest
-    );
+);
 
 use processhelp;
 
@@ -74,12 +74,12 @@ use serverhelp qw(
     mainsockf_logfilename
     datasockf_pidfilename
     datasockf_logfilename
-    );
+);
 
 use globalconfig qw(
     $SERVERCMD
     $LOCKDIR
-    );
+);
 
 #**********************************************************************
 # global vars...

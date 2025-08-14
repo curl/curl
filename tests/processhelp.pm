@@ -31,7 +31,7 @@ use Time::HiRes;
 
 use pathhelp qw(
     os_is_win
-    );
+);
 
 my $has_win32_process;
 
@@ -67,11 +67,11 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
-    );
+);
 
 use globalconfig qw(
     $dev_null
-    );
+);
 
 #######################################################################
 # pidfromfile returns the pid stored in the given pidfile.  The value
