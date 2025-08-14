@@ -1026,9 +1026,13 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
 
   case MSTATE_CONNECTING:
   case MSTATE_TUNNELING:
-    result = mstate_connecting_pollset(data, ps);
-    if(!result)
-      result = Curl_conn_adjust_pollset(data, data->conn, ps);
+    if(!Curl_xfer_recv_is_paused(data)) {
+      result = mstate_connecting_pollset(data, ps);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, data->conn, ps);
+    }
+    else
+      expect_sockets = FALSE;
     break;
 
   case MSTATE_PROTOCONNECT:
