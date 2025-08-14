@@ -706,7 +706,7 @@ jobs:
           ../.github/scripts/randcurl.pl 60 ../bld/src/curl
 
       - name: 'build examples'
-        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        if: ${{ !contains(matrix.build.install_packages, 'valgrind') && matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             ${MATRIX_MAKE_PREFIX} cmake --build bld --verbose --target curl-examples-build
