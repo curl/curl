@@ -72,7 +72,7 @@ jobs:
         run: |
           cd /d
           mkdir perl-win32-pkgs
-          cd perl-win32-pkgs
+          pushd perl-win32-pkgs
           sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
 
           # https://metacpan.org/pod/Win32::Process
@@ -81,27 +81,17 @@ jobs:
           cd Win32-Process-0.17
           perl Makefile.PL
           sed -i.bak 's/-lcrypt//g' Makefile
-          make install
-          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
-          # Installing /usr/lib/perl5/site_perl/Win32/Process.pm
-          # Installing /usr/share/man/man3/Win32.Process.3pm
-          # Appending installation info to /usr/lib/perl5/core_perl/perllocal.pod
-          cd ..
+          make
+          popd
 
           # https://metacpan.org/pod/Win32::Process::List
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://cpan.metacpan.org/authors/id/R/RP/RPAGITSCH/Win32-Process-List-0.09.tar.gz" | tar -xz
-          cd Win32-Process-List-0.09
+          pushd Win32-Process-List-0.09
           perl Makefile.PL
           sed -i.bak 's/-lcrypt//g' Makefile
-          make install
-          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
-          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
-          # Installing /usr/lib/perl5/site_perl/Win32/Process/List.pm
-          # Installing /usr/lib/perl5/site_perl/Win32/Process/processes.pl
-          # Installing /usr/share/man/man3/Win32.Process.List.3pm
-          # Appending installation info to /usr/lib/perl5/core_perl/perllocal.pod
-          cd ..
+          make
+          popd
 
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
@@ -1004,12 +994,17 @@ jobs:
         run: |
           pushd /d/perl-win32-pkgs
           pushd Win32-Process-0.17
-          make install
+          install -d blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
+          install -d blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
           popd
           pushd Win32-Process-List-0.09
-          make install
+          install -d blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
+          install -d blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
+          install -d blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
+          install -d blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
           popd
           popd
+
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
