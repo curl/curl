@@ -23,7 +23,7 @@ name: 'Old Linux'
     branches:
       - master
       - '*/ci'
-    paths-ignore:
+    paths-ignore: &shared_paths
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
@@ -35,15 +35,7 @@ name: 'Old Linux'
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '**/*.md'
-      - '.circleci/**'
-      - 'appveyor.*'
-      - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
-      - 'projects/**'
-      - 'winbuild/**'
+    paths-ignore: *shared_paths
 
 permissions: {}
 
