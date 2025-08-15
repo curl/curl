@@ -206,6 +206,39 @@ int parseconfig(const char *filename)
 #ifdef DEBUG_CONFIG
       fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
+
+      /* expand tilde-characters to the users home directory */
+      if(param && param[0] == '~') {
+        char *home = curl_getenv("HOME");
+        if(!home)
+          home = curl_getenv("USERPROFILE");
+        if(!home) {
+          rc = 1; /* cannot find home */
+          break;
+        }
+        if(home) {
+          char *tparam = strdup(param + 1);
+          if(!tparam) {
+            rc = 1; /* out of memory */
+            free(tparam);
+            break;
+          }
+          curlx_dyn_reset(&pbuf);
+          if(curlx_dyn_add(&pbuf, home)) {
+            rc = 1; /* out of memory */
+            free(tparam);
+            break;
+          }
+          if(curlx_dyn_add(&pbuf, tparam)) {
+            rc = 1; /* out of memory */
+            free(tparam);
+            break;
+          }
+          free(tparam);
+          param = curlx_dyn_ptr(&pbuf);
+        }
+      }
+
       res = getparameter(option, param, &usedarg, config);
       config = global->last;
 
