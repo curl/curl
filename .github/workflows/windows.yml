@@ -41,6 +41,68 @@ env:
   CURL_CI: github
 
 jobs:
+  build-cache:
+    name: 'Build caches'
+    runs-on: windows-2022
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      MAKEFLAGS: -j 5
+    steps:
+      - name: 'cache Perl Win32::Process'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: ~/perl-win32-pkgs
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+      - name: 'install build prereqs'
+        if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
+        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
+        with:
+          msystem: msys
+          install: gcc make
+
+      - name: 'build Perl Win32::Process'
+        if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
+        run: |
+          cd ~
+          mkdir perl-win32-pkgs
+          cd perl-win32-pkgs
+          sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
+
+          # https://metacpan.org/pod/Win32::Process
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://cpan.metacpan.org/authors/id/J/JD/JDB/Win32-Process-0.17.tar.gz" | tar -xz
+          cd Win32-Process-0.17
+          perl Makefile.PL
+          sed -i.bak 's/-lcrypt//g' Makefile
+          make install
+          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
+          # Installing /usr/lib/perl5/site_perl/Win32/Process.pm
+          # Installing /usr/share/man/man3/Win32.Process.3pm
+          # Appending installation info to /usr/lib/perl5/core_perl/perllocal.pod
+          cd ..
+
+          # https://metacpan.org/pod/Win32::Process::List
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://cpan.metacpan.org/authors/id/R/RP/RPAGITSCH/Win32-Process-List-0.09.tar.gz" | tar -xz
+          cd Win32-Process-List-0.09
+          perl Makefile.PL
+          sed -i.bak 's/-lcrypt//g' Makefile
+          make install
+          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
+          # Installing /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
+          # Installing /usr/lib/perl5/site_perl/Win32/Process/List.pm
+          # Installing /usr/lib/perl5/site_perl/Win32/Process/processes.pl
+          # Installing /usr/share/man/man3/Win32.Process.List.3pm
+          # Appending installation info to /usr/lib/perl5/core_perl/perllocal.pod
+          cd ..
+
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-2022
@@ -697,6 +759,8 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
+    needs:
+      - build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: 15
     defaults:
@@ -928,6 +992,13 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          cd perl-win32-pkgs
+          cd Win32-Process-0.17
+          make install
+          cd ..
+          cd Win32-Process-List-0.09
+          make install
+          cd ..
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
