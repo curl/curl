@@ -43,6 +43,15 @@ BEGIN {
         set_advisor_read_lock
         clear_advisor_read_lock
     );
+
+    # portable sleeping falls back to native Sleep on Windows
+    eval {
+        no warnings "all";
+        # https://metacpan.org/pod/Win32::Process
+        require Win32::Process;
+        # https://metacpan.org/pod/Win32::Process::List
+        require Win32::Process::List;
+    }
 }
 
 use serverhelp qw(
