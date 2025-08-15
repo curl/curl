@@ -61,7 +61,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install build prereqs'
-        if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
         uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         with:
           msystem: msys
