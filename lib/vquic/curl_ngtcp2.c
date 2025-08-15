@@ -1212,7 +1212,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
   rc = nghttp3_conn_client_new(&ctx->h3conn,
                                &ngh3_callbacks,
                                &ctx->h3settings,
-                               nghttp3_mem_default(),
+                               Curl_nghttp3_mem(),
                                cf);
   if(rc) {
     failf(data, "error creating nghttp3 connection instance");
@@ -2475,7 +2475,7 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
                               &ctx->connected_path,
                               NGTCP2_PROTO_VER_V1, &ng_callbacks,
                               &ctx->settings, &ctx->transport_params,
-                              NULL, cf);
+                              Curl_ngtcp2_mem(), cf);
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
