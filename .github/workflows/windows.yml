@@ -57,7 +57,7 @@ jobs:
         env:
           cache-name: cache-perl-win32-pkgs
         with:
-          path: D:\perl-win32-pkgs
+          path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install build prereqs'
@@ -70,7 +70,7 @@ jobs:
       - name: 'build perl packages'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
         run: |
-          cd /d
+          cd /c
           mkdir perl-win32-pkgs
           pushd perl-win32-pkgs
           sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
@@ -985,14 +985,14 @@ jobs:
         env:
           cache-name: cache-perl-win32-pkgs
         with:
-          path: D:\perl-win32-pkgs
+          path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          pushd /d/perl-win32-pkgs
+          pushd /c/perl-win32-pkgs
           pushd Win32-Process-0.17
           install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
           install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
