@@ -51,7 +51,7 @@ jobs:
     env:
       MAKEFLAGS: -j 5
     steps:
-      - name: 'cache Perl Win32::Process'
+      - name: 'cache perl packages'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-perl-win32-pkgs
         env:
@@ -67,7 +67,7 @@ jobs:
           msystem: msys
           install: gcc make
 
-      - name: 'build Perl Win32::Process'
+      - name: 'build perl packages'
         if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
         run: |
           cd ~
@@ -987,6 +987,16 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
+
+      - name: 'cache perl packages'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: ~/perl-win32-pkgs
+          key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
