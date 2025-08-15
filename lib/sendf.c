@@ -291,13 +291,6 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     if(nwrite == wmax) {
       data->req.download_done = TRUE;
     }
-
-    if((type & CLIENTWRITE_EOS) && !data->req.no_body &&
-       (data->req.maxdownload > data->req.bytecount)) {
-      failf(data, "end of response with %" FMT_OFF_T " bytes missing",
-            data->req.maxdownload - data->req.bytecount);
-      return CURLE_PARTIAL_FILE;
-    }
   }
 
   /* Error on too large filesize is handled below, after writing
