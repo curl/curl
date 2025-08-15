@@ -3,8 +3,8 @@ curl and libcurl 8.15.1
  Public curl releases:         270
  Command line options:         272
  curl_easy_setopt() options:   308
- Public functions in libcurl:  97
- Contributors:                 3486
+ Public functions in libcurl:  98
+ Contributors:                 3488
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following changes:
  o curl: make --retry-delay and --retry-max-time accept decimal seconds [112]
  o hostip: cache negative name resolves [175]
  o ip happy eyeballing: keep attempts running [80]
+ o mbedtls: bump minimum version required to 3.2.0 [180]
  o multi: add curl_multi_get_offt [56]
  o multi: add CURLMOPT_NETWORK_CHANGED to signal network changed [84]
  o netrc: use the NETRC environment variable (first) if set [70]
@@ -22,6 +23,7 @@ This release includes the following changes:
  o tls: make default TLS version be minimum 1.2 [71]
  o tool_getparam: add support for `--longopt=value` [69]
  o vquic: drop msh3 [8]
+ o websocket: support CURLOPT_READFUNCTION [193]
  o writeout: add %time{} [74]
 
 This release includes the following bugfixes:
@@ -50,6 +52,7 @@ This release includes the following bugfixes:
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: fix to restrict `SystemConfiguration` to macOS [139]
+ o cmake: improve error message for invalid HTTP/3 MultiSSL configs [187]
  o cmake: keep websockets disabled if HTTP is disabled
  o cmake: make `runtests` targets build the curl tool [32]
  o cmake: make the ExternalProject test work [183]
@@ -62,6 +65,7 @@ This release includes the following bugfixes:
  o connectdata: remove primary+secondary ip_quadruple [126]
  o connection: terminate after goaway [62]
  o contrithanks: fix for BSD `sed` tool [98]
+ o cookie: don't treat the leading slash as trailing [185]
  o curl-config: remove X prefix use [138]
  o curl/system.h: fix for GCC 3.3.x and older [38]
  o curl: make the URL indexes 64 bit [117]
@@ -84,6 +88,7 @@ This release includes the following bugfixes:
  o CURLOPT: bump remaining macros to `long` [147]
  o CURLOPT: drop redundant `long` casts [55]
  o CURLOPT: replace `(long)` cast with `L` suffix for `CURLHSTS_*` macros
+ o CURLOPT_HTTP_VERSION: mention new default value [179]
  o delta: fix warnings, fix for non-GNU `date` tool [99]
  o DEPRECATE.md: drop support for Windows XP/2003 [31]
  o DEPRECATE.md: remove leftover "nothing" [57]
@@ -94,6 +99,8 @@ This release includes the following bugfixes:
  o doh: rename symbols to avoid collision with mingw-w64 headers [66]
  o easy handle: check validity on external calls [28]
  o examples: drop long cast for `CURLALTSVC_*`
+ o examples: remove base64 encoded chunks from examples [189]
+ o examples: remove href_extractor.c [186]
  o gnutls: some small cleanups [41]
  o hmac: return error if init fails [2]
  o hostip: do DNS cache pruning in milliseconds [132]
@@ -109,6 +116,7 @@ This release includes the following bugfixes:
  o libtests: update format strings to avoid casts, drop some macros [109]
  o libtests: use `FMT_SOCKET_T`, drop more casts [136]
  o managen: reset text mode at end of table marker [145]
+ o mbedtls: check for feature macros instead of version [166]
  o memanalyze: fix warnings [22]
  o memory: make function overrides work reliably in unity builds [93]
  o multi event: remove only announced [25]
@@ -122,13 +130,17 @@ This release includes the following bugfixes:
  o openssl: check SSL_write() length on retries [152]
  o openssl: clear errors after a failed `d2i_X509()` [161]
  o openssl: output unescaped utf8 x509 issuer/subject DNs [169]
+ o openssl: save and restore OpenSSL error queue in two functions [172]
  o openssl: some small cleanups [42]
  o openssl: split cert_stuff into smaller sub functions [72]
  o parallel-max: bump the max value to 65535 [86]
+ o processhelp.pm: fix to use the correct null device on Windows [164]
  o pytest: add SOCKS tests and scoring [9]
  o pytest: increase server KeepAliveTimeout [26]
  o pytest: relax error check on test_07_22 [16]
+ o resolving: dns error tracing [196]
  o runtests: add `--ci` option, show `Env:` only when non-empty [134]
+ o runtests: assume `Time::HiRes`, drop Perl Win32 dependency [163]
  o schannel: add an error message for client cert not found [165]
  o schannel: assume `CERT_CHAIN_REVOCATION_CHECK_CHAIN` [114]
  o schannel: drop fallbacks for 4 macros [121]
@@ -163,6 +175,7 @@ This release includes the following bugfixes:
  o tidy-up: move literal to the right side of comparisons [65]
  o tidy-up: prefer `ifdef`/`ifndef` for single checks [64]
  o tls: CURLINFO_TLS_SSL_PTR testing [79]
+ o TODO: remove session export item [194]
  o tool_cb_wrt: stop alloc/free for every chunk windows console output [140]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o tool_operate: use the correct config pointer [115]
@@ -171,6 +184,7 @@ This release includes the following bugfixes:
  o tool_urlglob: polish, cleanups, improvements [141]
  o unit-tests: build the unitprotos.h from here [73]
  o unit2604: avoid `UNCONST()` [135]
+ o URL-SYNTAX.md: drop link to codepoints.net to pass linkcheck [190]
  o urlapi: allow more path characters "raw" when asked to URL encode [146]
  o urldata: reduce two long struct fields to unsigned short [174]
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
@@ -210,16 +224,17 @@ advice from friends like these:
 
   adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
   Berthin Torres Callañaupa, Caolán McNamara, Cole Leavitt, d1r3ct0r,
-  Dan Fandrich, Daniel Böhmer, Daniel Stenberg, David Zhuang, devgs on github,
-  Dominik Tomecki, Eshan Kelkar, Harry Sintonen, IoannisGS on github,
-  Jeroen Ooms, Kai Pastor, Karthik Das, kkmuffme on github,
-  letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Michał Petryka,
-  nevakrien on github, Oxan van Leeuwen, Paul Gilmartin, Petar Popovic,
-  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
-  renovate[bot], rm-rmonaghan on github, Roberto Hidalgo, Schrijvers Luc,
+  Dan Fandrich, Daniel Böhmer, Daniel Engberg, Daniel Stenberg, David Zhuang,
+  devgs on github, Dominik Tomecki, Eshan Kelkar, Google Big Sleep,
+  Harry Sintonen, IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms,
+  Kai Pastor, Karthik Das, kkmuffme on github, letshack9707 on hackerone,
+  lf- on github, LoRd_MuldeR, Michał Petryka, nevakrien on github,
+  Oxan van Leeuwen, Paul Gilmartin, Petar Popovic, Philippe Antoine,
+  Pino Toscano, Qriist, Qriist on github, Ray Satiro, renovate[bot],
+  rm-rmonaghan on github, Roberto Hidalgo, Samuel Henrique, Schrijvers Luc,
   Sergio Durigan Junior, Stefan Eissing, Tal Regev, Todd Gamblin,
   Viktor Szakats, Waldemar Kornewald, yaoy6 on github, ウさん
-  (47 contributors)
+  (51 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -383,13 +398,27 @@ References to bug reports and discussions on issues:
  [160] = https://curl.se/bug/?i=18177
  [161] = https://curl.se/bug/?i=18190
  [162] = https://curl.se/bug/?i=18230
+ [163] = https://curl.se/bug/?i=18287
+ [164] = https://curl.se/bug/?i=18282
  [165] = https://curl.se/bug/?i=18124
+ [166] = https://curl.se/bug/?i=18271
  [168] = https://curl.se/bug/?i=18170
  [169] = https://curl.se/bug/?i=18171
+ [172] = https://curl.se/bug/?i=18190
  [173] = https://curl.se/bug/?i=18123
  [174] = https://curl.se/bug/?i=18173
  [175] = https://curl.se/bug/?i=18157
  [176] = https://curl.se/bug/?i=17974
  [178] = https://curl.se/bug/?i=18216
+ [179] = https://curl.se/bug/?i=18272
+ [180] = https://curl.se/bug/?i=18254
  [183] = https://curl.se/bug/?i=18208
  [184] = https://curl.se/bug/?i=18206
+ [185] = https://curl.se/bug/?i=18266
+ [186] = https://curl.se/bug/?i=18264
+ [187] = https://curl.se/bug/?i=18246
+ [189] = https://curl.se/bug/?i=18260
+ [190] = https://curl.se/bug/?i=18259
+ [193] = https://curl.se/bug/?i=17683
+ [194] = https://curl.se/bug/?i=18243
+ [196] = https://curl.se/bug/?i=18247
