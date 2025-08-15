@@ -68,7 +68,7 @@ jobs:
           install: gcc make
 
       - name: 'build perl packages'
-        if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
         run: |
           cd /d
           mkdir perl-win32-pkgs
