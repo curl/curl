@@ -994,14 +994,14 @@ jobs:
         run: |
           pushd /d/perl-win32-pkgs
           pushd Win32-Process-0.17
-          install -d blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
-          install -d blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
+          install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process
+          install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32
           popd
           pushd Win32-Process-List-0.09
-          install -d blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
-          install -d blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
-          install -d blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
-          install -d blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
+          install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List
+          install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List
+          install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process
+          install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process
           popd
           popd
 
