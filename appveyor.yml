@@ -147,57 +147,6 @@ environment:
       PRJ_CFG: Debug
       HTTP_ONLY: 'ON'
 
-    # winbuild-based builds
-
-    - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: winbuild_vs2015
-      DEBUG: 'yes'
-      PATHPART: debug
-      ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: winbuild_vs2015
-      DEBUG: 'no'
-      PATHPART: release
-      ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: winbuild_vs2017
-      DEBUG: 'yes'
-      PATHPART: debug
-      ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: winbuild_vs2017
-      DEBUG: 'no'
-      PATHPART: release
-      ENABLE_UNICODE: 'no'
-    - job_name: 'winbuild, VS2015, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: winbuild_vs2015
-      DEBUG: 'yes'
-      PATHPART: debug
-      ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2015, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: winbuild_vs2015
-      DEBUG: 'no'
-      PATHPART: release
-      ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Debug, x64, OpenSSL 1.1.1, Unicode, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: winbuild_vs2017
-      DEBUG: 'yes'
-      PATHPART: debug
-      ENABLE_UNICODE: 'yes'
-    - job_name: 'winbuild, VS2017, Release, x64, OpenSSL 1.1.1, Unicode, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
-      BUILD_SYSTEM: winbuild_vs2017
-      DEBUG: 'no'
-      PATHPART: release
-      ENABLE_UNICODE: 'yes'
-
     # generated VisualStudioSolution-based builds
 
     - job_name: 'VisualStudioSolution, VS2013, Debug, x86, Schannel, Build-only'
