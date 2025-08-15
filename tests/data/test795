@@ -1,0 +1,39 @@
+<testcase>
+<info>
+<keywords>
+DNS
+</keywords>
+</info>
+
+# Client-side
+<client>
+<features>
+http
+Debug
+!c-ares
+!win32
+</features>
+<name>
+Delayed resolve --connect-timeout check
+</name>
+<server>
+none
+</server>
+<setenv>
+CURL_DNS_DELAY_MS=5000
+</setenv>
+<command>
+http://test.invalid -v --no-progress-meter --trace-config dns --connect-timeout 1 -w \%{time_total}
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+28
+</errorcode>
+<postcheck>
+%SRCDIR/libtest/test795.pl %LOGDIR/stdout%TESTNUMBER 2 >> %LOGDIR/stderr%TESTNUMBER
+</postcheck>
+</verify>
+</testcase>

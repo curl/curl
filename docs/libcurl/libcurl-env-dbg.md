@@ -83,6 +83,11 @@ When built with c-ares for name resolving, setting this environment variable
 to `[IP:port]` makes libcurl use that DNS server instead of the system
 default. This is used by the curl test suite.
 
+## `CURL_DNS_DELAY_MS`
+
+Delay the DNS resolve by this many milliseconds. This is used in the test
+suite to check proper handling of CURLOPT_CONNECTTIMEOUT(3).
+
 ## `CURL_FTP_PWD_STOP`
 
 When set, the first transfer - when using ftp: - returns before sending

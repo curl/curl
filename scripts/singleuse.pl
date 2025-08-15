@@ -51,6 +51,7 @@ my %wl = (
     'Curl_creader_def_read' => 'internal api',
     'Curl_creader_def_total_length' => 'internal api',
     'Curl_meta_reset' => 'internal api',
+    'Curl_thread_destroy' => 'internal api',
     'Curl_trc_dns' => 'internal api',
     'curlx_base64_decode' => 'internal api',
     'curlx_base64_encode' => 'internal api',
