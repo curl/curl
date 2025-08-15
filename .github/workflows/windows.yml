@@ -57,7 +57,7 @@ jobs:
         env:
           cache-name: cache-perl-win32-pkgs
         with:
-          path: ~/perl-win32-pkgs
+          path: D:\perl-win32-pkgs
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install build prereqs'
@@ -70,7 +70,7 @@ jobs:
       - name: 'build perl packages'
         if: ${{ steps.cache-perl-win32-process.outputs.cache-hit != 'true' }}
         run: |
-          cd ~
+          cd /d
           mkdir perl-win32-pkgs
           cd perl-win32-pkgs
           sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
@@ -995,20 +995,21 @@ jobs:
         env:
           cache-name: cache-perl-win32-pkgs
         with:
-          path: ~/perl-win32-pkgs
+          path: D:\perl-win32-pkgs
           key: ${{ runner.os }}-build-${{ env.cache-name }}
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          cd perl-win32-pkgs
-          cd Win32-Process-0.17
+          pushd /d/perl-win32-pkgs
+          pushd Win32-Process-0.17
           make install
-          cd ..
-          cd Win32-Process-List-0.09
+          popd
+          pushd Win32-Process-List-0.09
           make install
-          cd ..
+          popd
+          popd
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
