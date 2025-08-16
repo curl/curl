@@ -128,11 +128,15 @@ sub pidexists {
         if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
+print "\n>>>pidexists|$has_win32_process|\n";
                 if($has_win32_process) {
+print ">>>pidexists Win32\n";
                     my %processes = Win32::Process::List->new()->GetProcesses();
                     if(exists $processes{$pid}) {
+print ">>>pidexists Win32 -> YES\n";
                         return -$pid;
                     }
+print ">>>pidexists Win32 -> NO\n";
                 } else {
                     my $filter = "PID eq $pid";
                     # https://ss64.com/nt/tasklist.html
@@ -166,7 +170,9 @@ sub pidterm {
         if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
+print "\n>>>pidterm|$has_win32_process|\n";
                 if($has_win32_process) {
+print "\n>>>pidterm Win32\n";
                     Win32::Process::KillProcess($pid, 0);
                 } else {
                     # https://ss64.com/nt/taskkill.html
@@ -195,7 +201,9 @@ sub pidkill {
         if($pid > 4194304 && os_is_win()) {
             $pid -= 4194304;
             if($^O ne 'MSWin32') {
+print "\n>>>pidkill|$has_win32_process|\n";
                 if($has_win32_process) {
+print "\n>>>pidkill Win32\n";
                     Win32::Process::KillProcess($pid, 0);
                 } else {
                     # https://ss64.com/nt/taskkill.html
