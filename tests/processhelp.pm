@@ -29,6 +29,10 @@ use warnings;
 
 use Time::HiRes;
 
+use pathhelp qw(
+    os_is_win
+    );
+
 my $has_win32_process = 0;
 
 BEGIN {
@@ -61,10 +65,6 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
-    );
-
-use pathhelp qw(
-    os_is_win
     );
 
 use globalconfig qw(
