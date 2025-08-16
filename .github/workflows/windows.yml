@@ -53,6 +53,9 @@ jobs:
       matrix:
         image: [windows-2022, windows-11-arm]
     steps:
+      - name: 'info'
+        run: echo '${{ runner.name }}|${{ runner.os }}|${{ runner.arch }}|'
+
       - name: 'cache perl packages'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-perl-win32-pkgs
