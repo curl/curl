@@ -37,6 +37,9 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
       set(_examples_c "${check_PROGRAMS}")
       list(TRANSFORM _examples_c APPEND ".c")
       add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_examples_c})
+      if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+        set_target_properties(${_target_name} PROPERTIES COMPILE_OPTIONS "-O0")
+      endif()
       if(MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
         # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
         # warning LNK4006: main already defined in ....obj; second definition ignored
