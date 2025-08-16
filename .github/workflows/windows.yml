@@ -753,7 +753,7 @@ jobs:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     needs:
       - build-cache
-    runs-on: ${{ matrix.image || 'windows-2022' }}
+    runs-on: ${{ matrix.image }}
     timeout-minutes: 15
     defaults:
       run:
@@ -799,6 +799,7 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
+            image: 'windows-2022'
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
