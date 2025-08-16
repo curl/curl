@@ -1615,6 +1615,9 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
   if(!data->cookies || (data->cookies->numcookies == 0))
     return NULL;
 
+  /* at first, remove expired cookies */
+  remove_expired(data->cookies);
+
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     for(n = Curl_llist_head(&data->cookies->cookielist[i]); n;
         n = Curl_node_next(n)) {
