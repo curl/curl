@@ -53,9 +53,6 @@ jobs:
       matrix:
         image: [windows-2022, windows-11-arm]
     steps:
-      - name: 'info'
-        run: echo '${{ runner.name }}|${{ runner.os }}|${{ runner.arch }}|'
-
       - name: 'cache perl packages'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-perl-win32-pkgs
@@ -63,7 +60,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ matrix.image }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
       - name: 'install build prereqs'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
@@ -423,10 +420,33 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
+      - name: 'cache perl packages'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: C:\perl-win32-pkgs
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          pushd /c/perl-win32-pkgs
+          pushd Win32-Process-0.17
+          install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
+          install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
+          popd
+          pushd Win32-Process-List-0.09
+          install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
+          install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
+          install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
+          install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
+          popd
+          popd
+
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
@@ -619,10 +639,33 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
+      - name: 'cache perl packages'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: C:\perl-win32-pkgs
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          pushd /c/perl-win32-pkgs
+          pushd Win32-Process-0.17
+          install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
+          install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
+          popd
+          pushd Win32-Process-List-0.09
+          install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
+          install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
+          install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
+          install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
+          popd
+          popd
+
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
@@ -756,7 +799,7 @@ jobs:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     needs:
       - build-cache
-    runs-on: ${{ matrix.image }}
+    runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: 15
     defaults:
       run:
@@ -802,7 +845,6 @@ jobs:
             env: 'ucrt-x86_64'
             plat: 'windows'
             type: 'Debug'
-            image: 'windows-2022'
             chkprefill: '_chkprefill'
             config: >-
               -DENABLE_DEBUG=ON
@@ -992,7 +1034,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ matrix.image }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
