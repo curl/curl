@@ -830,7 +830,7 @@ jobs:
             if [ "${TFLAGS}" = 'skiprun' ]; then
               options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             fi
-            if [ "${TFLAGS}" = 'skiprun' ] && [ "${MATRIX_ARCH}" != 'x64' ]; then
+            if [ "${TFLAGS}" = 'skiprun' ] || [ "${MATRIX_ARCH}" != 'x64' ]; then
               [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
               [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
               [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
