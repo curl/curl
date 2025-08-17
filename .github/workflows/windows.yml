@@ -844,18 +844,22 @@ jobs:
               # and makes it problematic to use from this script.
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               echo '-----------------------------------------'
-              /usr/bin/find '/c/Program Files/Microsoft Visual Studio' -type d
+              /usr/bin/find '/c/Program Files/Microsoft Visual Studio/2022/Enterprise/vc/tools/msvc' \( -name '*.exe' -o -name '*.h' -o -name '*.lib' \)
               echo '-----------------------------------------'
-              /usr/bin/find '/c/Program Files (x86)/Windows Kits' -type d
+              /usr/bin/find '/c/Program Files (x86)/Windows Kits/10' \( -name '*.exe' -o -name '*.h' -o -name '*.lib' \)
               echo '-----------------------------------------'
               MSVC_ROOTD="$(cygpath --dos "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces
               MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/2022/Enterprise/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)"
               MSVC_ROOTW="$(cygpath --windows "$MSVC_ROOTU")"
               MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
+              echo "MSVC_ROOTW:|$MSVC_ROOTW|"
+              echo "MSVC_ROOTU:|$MSVC_ROOTU|"
               MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
+              echo "MSVC_BINU:|$MSVC_BINU|"
               MSDK_ROOTW="$(cygpath --dos "$(printenv 'ProgramFiles(x86)')/Windows Kits")/10"
               MSDK_ROOTU="$(cygpath --unix "$MSDK_ROOTW")"
               MSDK_VER="$(basename "$(/usr/bin/find "$MSDK_ROOTU/lib" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)")"
+              echo "MSDK_VER:|$MSDK_VER|"
               MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
               MSDK_INCU="$MSDK_ROOTU/include/$MSDK_VER"
               MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
