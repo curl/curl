@@ -828,13 +828,11 @@ jobs:
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
             if [ "${TFLAGS}" = 'skiprun' ]; then
-              options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
-            fi
-            if [ "${TFLAGS}" = 'skiprun' ]; then
               [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
               [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
               [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
               options+=" -DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}"
+              options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             else
               # Use Ninja when running tests to avoid MSBuild heuristics picking
               # up "error messages" in the test log output and making the job fail.
@@ -867,13 +865,13 @@ jobs:
               inc+=" -external:I$MSDK_INCU/winrt"
               inc+=" -external:I$MSDK_INCU/km"
               options+=' -G Ninja'
-              options+=' -DCMAKE_RC_COMPILER="$MSDK_BINU/rc.exe"
-              options+=' -DCMAKE_MT="$MSDK_BINU/mt.exe"
-              options+=' -DCMAKE_RC_FLAGS="$inc"
-              options+=' -DCMAKE_C_FLAGS="$inc"
-              options+=' -DCMAKE_EXE_LINKER_FLAGS="$lib"
-              options+=' -DCMAKE_SHARED_LINKER_FLAGS="$lib"
-              options+=' -DCMAKE_C_COMPILER="$MSVC_BINU/cl.exe"
+              options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
+              options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
+              options+=" -DCMAKE_RC_FLAGS=$inc"
+              options+=" -DCMAKE_C_FLAGS=$inc"
+              options+=" -DCMAKE_EXE_LINKER_FLAGS=$lib"
+              options+=" -DCMAKE_SHARED_LINKER_FLAGS=$lib"
+              options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
