@@ -837,6 +837,7 @@ jobs:
               # Use Ninja when running tests to avoid MSBuild heuristics picking up
               # "error messages" in the test log output and making the job fail.
               options+=' -G Ninja'
+              options+=' -DCMAKE_C_COMPILER=cl.exe'
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
