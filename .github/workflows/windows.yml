@@ -827,15 +827,20 @@ jobs:
               ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
-            [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
-            [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
             if [ "${TFLAGS}" = 'skiprun' ]; then
               options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
+            fi
+            if [ "${TFLAGS}" = 'skiprun' ] && [ "${MATRIX_ARCH}" != 'x64' ]; then
+              [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
+              [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
+              [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
               options+=" -DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}"
             else
-              # Use Ninja when running tests to avoid MSBuild heuristics picking up
-              # "error messages" in the test log output and making the job fail.
+              # Use Ninja when running tests to avoid MSBuild heuristics picking
+              # up "error messages" in the test log output and making the job fail.
+              # Unfortunately switching CPU target requires vcvarsall.bat, which
+              # has no stable disk location, its an MS-DOS batch file setting env,
+              # and makes it problematic to use from this script.
               options+=' -G Ninja'
               options+=' -DCMAKE_C_COMPILER=cl.exe'
             fi
