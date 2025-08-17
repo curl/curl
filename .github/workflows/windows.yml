@@ -840,7 +840,8 @@ jobs:
               # has no stable disk location, its an MS-DOS batch file setting env,
               # and makes it problematic to use from this script.
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
-              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$PROGRAMFILES/Microsoft Visual Studio/2022/Community/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+              MSVC_ROOTD="$(cygpath --dos "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces
+              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/2022/Community/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
               MSVC_ROOTW="$(cygpath --windows "$MSVC_ROOTU")"
               MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
               MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
