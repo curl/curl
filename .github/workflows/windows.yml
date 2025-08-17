@@ -830,7 +830,14 @@ jobs:
             [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
             [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
             [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
-            [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
+            if [ "${TFLAGS}" = 'skiprun' ]; then
+              options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
+              options+=" -DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}"
+            else
+              # Use Ninja when running tests to avoid MSBuild heuristics picking up
+              # "error messages" in the test log output and making the job fail.
+              options+=' -G Ninja'
+            fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
               options+=" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
@@ -842,7 +849,6 @@ jobs:
               -DCMAKE_C_FLAGS="${cflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
