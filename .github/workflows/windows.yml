@@ -821,6 +821,9 @@ jobs:
           [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
+            cflags=''
+            rcflags=''
+            ldflags=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
               cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
@@ -851,23 +854,17 @@ jobs:
               MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
               MSDK_INCU="$MSDK_ROOTU/include/$MSDK_VER"
               MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
-              lib=''
-              lib+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
-              lib+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
-              lib+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
-              inc=''
-              inc+=" -external:W0"
-              inc+=" -external:I$MSVC_ROOTU/include"
-              inc+=" -external:I$MSDK_INCU/shared"
-              inc+=" -external:I$MSDK_INCU/ucrt"
-              inc+=" -external:I$MSDK_INCU/um"
+              cflags+=" -external:W0"
+              cflags+=" -external:I$MSVC_ROOTU/include"
+              cflags+=" -external:I$MSDK_INCU/shared"
+              cflags+=" -external:I$MSDK_INCU/ucrt"
+              cflags+=" -external:I$MSDK_INCU/um"
+              ldflags+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
+              ldflags+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
+              ldflags+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
               options+=' -G Ninja'
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
-              options+=" -DCMAKE_RC_FLAGS=$inc"
-              options+=" -DCMAKE_C_FLAGS=$inc"
-              options+=" -DCMAKE_EXE_LINKER_FLAGS=$lib"
-              options+=" -DCMAKE_SHARED_LINKER_FLAGS=$lib"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
@@ -879,6 +876,7 @@ jobs:
             fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
+              -DCMAKE_RC_FLAGS="${rcflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_UNITY_BUILD=ON \
