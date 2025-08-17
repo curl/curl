@@ -830,7 +830,7 @@ jobs:
             if [ "${TFLAGS}" = 'skiprun' ]; then
               options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
             fi
-            if [ "${TFLAGS}" = 'skiprun' ] || [ "${MATRIX_ARCH}" != 'x64' ]; then
+            if [ "${TFLAGS}" = 'skiprun' ]; then
               [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
               [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
               [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
@@ -841,8 +841,39 @@ jobs:
               # Unfortunately switching CPU target requires vcvarsall.bat, which
               # has no stable disk location, its an MS-DOS batch file setting env,
               # and makes it problematic to use from this script.
+              [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
+              MSVC_ROOTW="$(cygpath --dos "$(/usr/bin/find "$PROGRAMFILES/Microsoft Visual Studio/2022/Community/vc/tools/msvc" -mindepth 1 -maxdepth 1 -type d | head -n 1)")"
+              MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
+              MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
+              MSDK_ROOTW="$(cygpath --dos "$(printenv 'ProgramFiles(x86)')/Windows Kits/10")"
+              MSDK_ROOTU="$(cygpath --unix "$MSDK_ROOTW")"
+              MSDK_VER="$(basename "$(/usr/bin/find "$MSDK_ROOTU/lib" -mindepth 1 -maxdepth 1 -type d | head -n 1)")"
+              MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
+              MSDK_INCU="$MSDK_ROOTU/include/$MSDK_VER"
+              MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
+              lib=''
+              lib+=" -libpath:$MSVC_ROOTW/atlmfc/lib/$MATRIX_ARCH"
+              lib+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
+              lib+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
+              lib+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
+              lib+=" -libpath:$MSDK_LIBW/km/$MATRIX_ARCH"
+              inc=''
+              inc+=" -external:W0"
+              inc+=" -external:I$MSVC_ROOTU/atlmfc/include"
+              inc+=" -external:I$MSVC_ROOTU/include"
+              inc+=" -external:I$MSDK_INCU/shared"
+              inc+=" -external:I$MSDK_INCU/ucrt"
+              inc+=" -external:I$MSDK_INCU/um"
+              inc+=" -external:I$MSDK_INCU/winrt"
+              inc+=" -external:I$MSDK_INCU/km"
               options+=' -G Ninja'
-              options+=' -DCMAKE_C_COMPILER=cl.exe'
+              options+=' -DCMAKE_RC_COMPILER="$MSDK_BINU/rc.exe"
+              options+=' -DCMAKE_MT="$MSDK_BINU/mt.exe"
+              options+=' -DCMAKE_RC_FLAGS="$inc"
+              options+=' -DCMAKE_C_FLAGS="$inc"
+              options+=' -DCMAKE_EXE_LINKER_FLAGS="$lib"
+              options+=' -DCMAKE_SHARED_LINKER_FLAGS="$lib"
+              options+=' -DCMAKE_C_COMPILER="$MSVC_BINU/cl.exe"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
