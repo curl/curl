@@ -875,6 +875,7 @@ jobs:
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
+              rcflags+=" -I$MSDK_INCW/shared"
               rcflags+=" -I$MSDK_INCW/um"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
