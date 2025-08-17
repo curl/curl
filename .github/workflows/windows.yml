@@ -858,7 +858,6 @@ jobs:
               MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
               MSDK_INCW="$MSDK_ROOTW/include/$MSDK_VER"
               MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
-              cflags+=" -external:W0"
               cflags+=" -external:I$MSVC_ROOTW/atlmfc/include"
               cflags+=" -external:I$MSVC_ROOTW/include"
               cflags+=" -external:I$MSDK_INCW/shared"
@@ -876,6 +875,7 @@ jobs:
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
               rcflags="${cflags}"
+              cflags+=" -external:W0"
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
