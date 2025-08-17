@@ -913,7 +913,7 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 5
-        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --verbose
+        run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
