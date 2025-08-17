@@ -852,20 +852,15 @@ jobs:
               MSDK_INCU="$MSDK_ROOTU/include/$MSDK_VER"
               MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
               lib=''
-              lib+=" -libpath:$MSVC_ROOTW/atlmfc/lib/$MATRIX_ARCH"
               lib+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
               lib+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
               lib+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
-              lib+=" -libpath:$MSDK_LIBW/km/$MATRIX_ARCH"
               inc=''
               inc+=" -external:W0"
-              inc+=" -external:I$MSVC_ROOTU/atlmfc/include"
               inc+=" -external:I$MSVC_ROOTU/include"
               inc+=" -external:I$MSDK_INCU/shared"
               inc+=" -external:I$MSDK_INCU/ucrt"
               inc+=" -external:I$MSDK_INCU/um"
-              inc+=" -external:I$MSDK_INCU/winrt"
-              inc+=" -external:I$MSDK_INCU/km"
               options+=' -G Ninja'
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
