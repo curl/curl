@@ -644,6 +644,10 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   CURLcode result = CURLE_OK;
 
+#if !defined(USE_HTTPSRR_ARES) && defined(CURL_DISABLE_SOCKETPAIR)
+  (void)ps;
+#endif
+
 #ifdef USE_HTTPSRR_ARES
   if(thrdd->rr.channel) {
     result = Curl_ares_pollset(data, thrdd->rr.channel, ps);
