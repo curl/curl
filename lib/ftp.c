@@ -331,15 +331,10 @@ static void close_secondarysocket(struct Curl_easy *data,
 
 static void freedirs(struct ftp_conn *ftpc)
 {
-  if(ftpc->dirs) {
-    int i;
-    for(i = 0; i < ftpc->dirdepth; i++)
-      free(ftpc->dirs[i]);
-    Curl_safefree(ftpc->dirs);
-    ftpc->dirdepth = 0;
-  }
+  Curl_safefree(ftpc->dirs);
+  ftpc->dirdepth = 0;
   Curl_safefree(ftpc->rawpath);
-  Curl_safefree(ftpc->file);
+  ftpc->file = NULL;
   Curl_safefree(ftpc->newhost);
 }
 
@@ -813,6 +808,20 @@ static CURLcode ftp_domore_pollset(struct Curl_easy *data,
   return Curl_pp_pollset(data, &ftpc->pp, ps);
 }
 
+static int pathlen(struct ftp_conn *ftpc, int num)
+{
+  DEBUGASSERT(ftpc->dirs);
+  DEBUGASSERT(ftpc->dirdepth > num);
+  return ftpc->dirs[num].len;
+}
+
+static const char *pathpiece(struct ftp_conn *ftpc, int num)
+{
+  DEBUGASSERT(ftpc->dirs);
+  DEBUGASSERT(ftpc->dirdepth > num);
+  return &ftpc->rawpath[ ftpc->dirs[num].start ];
+}
+
 /* This is called after the FTP_QUOTE state is passed.
 
    ftp_state_cwd() sends the range of CWD commands to the server to change to
@@ -831,13 +840,13 @@ static CURLcode ftp_state_cwd(struct Curl_easy *data,
   else {
     /* FTPFILE_NOCWD with full path: expect ftpc->cwddone! */
     DEBUGASSERT((data->set.ftp_filemethod != FTPFILE_NOCWD) ||
-                !(ftpc->dirdepth && ftpc->dirs[0][0] == '/'));
+                !(ftpc->dirdepth && ftpc->rawpath[0] == '/'));
 
     ftpc->count2 = 0; /* count2 counts failed CWDs */
 
     if(data->conn->bits.reuse && ftpc->entrypath &&
        /* no need to go to entrypath when we have an absolute path */
-       !(ftpc->dirdepth && ftpc->dirs[0][0] == '/')) {
+       !(ftpc->dirdepth && ftpc->rawpath[0] == '/')) {
       /* This is a reused connection. Since we change directory to where the
          transfer is taking place, we must first get back to the original dir
          where we ended up after login: */
@@ -852,8 +861,8 @@ static CURLcode ftp_state_cwd(struct Curl_easy *data,
         ftpc->cwdcount = 1;
         /* issue the first CWD, the rest is sent when the CWD responses are
            received... */
-        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %s",
-                               ftpc->dirs[ftpc->cwdcount -1]);
+        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
+                               pathlen(ftpc, 0), pathpiece(ftpc, 0));
         if(!result)
           ftp_state(data, ftpc, FTP_CWD);
       }
@@ -3055,8 +3064,9 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           create the dir) this then allows for a second try to CWD to it. */
           ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
 
-          result = Curl_pp_sendf(data, &ftpc->pp, "MKD %s",
-                                 ftpc->dirs[ftpc->cwdcount - 1]);
+          result = Curl_pp_sendf(data, &ftpc->pp, "MKD %.*s",
+                                 pathlen(ftpc, ftpc->cwdcount - 1),
+                                 pathpiece(ftpc, ftpc->cwdcount - 1));
           if(!result)
             ftp_state(data, ftpc, FTP_MKD);
         }
@@ -3073,8 +3083,9 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
         ftpc->count2 = 0;
         if(++ftpc->cwdcount <= ftpc->dirdepth)
           /* send next CWD */
-          result = Curl_pp_sendf(data, &ftpc->pp, "CWD %s",
-                                 ftpc->dirs[ftpc->cwdcount - 1]);
+          result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
+                                 pathlen(ftpc, ftpc->cwdcount - 1),
+                                 pathpiece(ftpc, ftpc->cwdcount - 1));
         else
           result = ftp_state_mdtm(data, ftpc, ftp);
       }
@@ -3089,8 +3100,9 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       else {
         ftp_state(data, ftpc, FTP_CWD);
         /* send CWD */
-        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %s",
-                               ftpc->dirs[ftpc->cwdcount - 1]);
+        result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
+                               pathlen(ftpc, ftpc->cwdcount - 1),
+                               pathpiece(ftpc, ftpc->cwdcount - 1));
       }
       break;
 
@@ -3258,7 +3270,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   ssize_t nread;
   int ftpcode;
   CURLcode result = CURLE_OK;
-  const char *rawPath = NULL;
 
   if(!ftp || !ftpc)
     return CURLE_OK;
@@ -3301,6 +3312,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       Curl_set_in_callback(data, TRUE);
       data->set.chunk_end(data->set.wildcardptr);
       Curl_set_in_callback(data, FALSE);
+      freedirs(ftpc);
     }
     ftpc->known_filesize = -1;
   }
@@ -3314,32 +3326,30 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     ftpc->prevpath = NULL; /* no path remembering */
   }
   else { /* remember working directory for connection reuse */
-    rawPath = ftpc->rawpath;
-    if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (rawPath[0] == '/'))
-      ; /* full path => no CWDs happened => keep ftpc->prevpath */
-    else {
-      size_t pathLen = strlen(ftpc->rawpath);
+    const char *rawPath = ftpc->rawpath;
+    if(rawPath) {
+      if((data->set.ftp_filemethod == FTPFILE_NOCWD) && (rawPath[0] == '/'))
+        ; /* full path => no CWDs happened => keep ftpc->prevpath */
+      else {
+        size_t pathLen = strlen(ftpc->rawpath);
 
-      free(ftpc->prevpath);
+        free(ftpc->prevpath);
 
-      if(!ftpc->cwdfail) {
-        if(data->set.ftp_filemethod == FTPFILE_NOCWD)
-          pathLen = 0; /* relative path => working directory is FTP home */
+        if(!ftpc->cwdfail) {
+          if(data->set.ftp_filemethod == FTPFILE_NOCWD)
+            pathLen = 0; /* relative path => working directory is FTP home */
+          else
+            /* file is url-decoded */
+            pathLen -= ftpc->file ? strlen(ftpc->file) : 0;
+          ftpc->prevpath = Curl_memdup0(rawPath, pathLen);
+        }
         else
-          /* file is url-decoded */
-          pathLen -= ftpc->file ? strlen(ftpc->file) : 0;
-        ftpc->prevpath = Curl_memdup0(rawPath, pathLen);
+          ftpc->prevpath = NULL; /* no path */
       }
-      else
-        ftpc->prevpath = NULL; /* no path */
     }
-
     if(ftpc->prevpath)
       infof(data, "Remembering we are in dir \"%s\"", ftpc->prevpath);
   }
-
-  /* free the dir tree and file parts */
-  freedirs(ftpc);
 
   /* shut down the socket to inform the server we are done */
 
@@ -4179,6 +4189,8 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
   ftpc->ctl_valid = FALSE;
   ftpc->cwdfail = FALSE;
 
+  if(ftpc->rawpath)
+    freedirs(ftpc);
   /* url-decode ftp path before further evaluation */
   result = Curl_urldecode(ftp->path, 0, &ftpc->rawpath, &pathLen, REJECT_CTRL);
   if(result) {
@@ -4209,15 +4221,11 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
           dirlen = 1;
 
         ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
-        if(!ftpc->dirs) {
+        if(!ftpc->dirs)
           return CURLE_OUT_OF_MEMORY;
-        }
 
-        ftpc->dirs[0] = Curl_memdup0(rawPath, dirlen);
-        if(!ftpc->dirs[0]) {
-          return CURLE_OUT_OF_MEMORY;
-        }
-
+        ftpc->dirs[0].start = 0;
+        ftpc->dirs[0].len = (int)dirlen;
         ftpc->dirdepth = 1; /* we consider it to be a single dir */
         fileName = slashPos + 1; /* rest is filename */
       }
@@ -4237,11 +4245,14 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
         if(*str == '/')
           ++dirAlloc;
 
+      if(dirAlloc >= 1000)
+        /* suspiciously deep dir hierarchy */
+        return CURLE_URL_MALFORMAT;
+
       if(dirAlloc) {
         ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
-        if(!ftpc->dirs) {
+        if(!ftpc->dirs)
           return CURLE_OUT_OF_MEMORY;
-        }
 
         /* parse the URL path into separate path components */
         /* !checksrc! disable EQUALSNULL 1 */
@@ -4255,12 +4266,10 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
           /* we skip empty path components, like "x//y" since the FTP command
              CWD requires a parameter and a non-existent parameter a) does not
              work on many servers and b) has no effect on the others. */
-          if(compLen > 0) {
-            char *comp = Curl_memdup0(curPos, compLen);
-            if(!comp) {
-              return CURLE_OUT_OF_MEMORY;
-            }
-            ftpc->dirs[ftpc->dirdepth++] = comp;
+          if(compLen) {
+            ftpc->dirs[ftpc->dirdepth].start = (int)(curPos - rawPath);
+            ftpc->dirs[ftpc->dirdepth].len = (int)compLen;
+            ftpc->dirdepth++;
           }
           curPos = slashPos + 1;
         }
@@ -4272,7 +4281,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
   } /* switch */
 
   if(fileName && *fileName)
-    ftpc->file = strdup(fileName);
+    ftpc->file = fileName;
   else
     ftpc->file = NULL; /* instead of point to a zero byte,
                             we make it a NULL pointer */
