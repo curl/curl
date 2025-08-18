@@ -239,42 +239,6 @@ jobs:
               echo '::endgroup::'
             fi
 
-  omnios:
-    name: 'OmniOS, AM gcc openssl amd64'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          persist-credentials: false
-      - name: 'autotools'
-        uses: vmactions/omnios-vm@c31844c7abe722cd7c97df82cab1f1fab1e5339f # v1
-        with:
-          usesh: true
-          # https://pkg.omnios.org/r151052/core/en/index.shtml
-          prepare: pkg install build-essential libtool nghttp2
-          run: |
-            set -e
-            ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
-            export MAKEFLAGS=-j3
-            export CURL_CI=github
-            time autoreconf -fi
-            mkdir bld && cd bld
-            time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
-              --prefix="$HOME"/curl-install \
-              --with-openssl \
-              --disable-dependency-tracking \
-              || { tail -n 1000 config.log; false; }
-            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time gmake install
-            src/curl --disable --version
-            time gmake -C tests
-            time gmake test-ci V=1
-            echo '::group::build examples'
-            time gmake examples
-            echo '::endgroup::'
-
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: 'ubuntu-latest'
