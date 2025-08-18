@@ -4168,6 +4168,20 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static size_t numof_slashes(const char *str)
+{
+  const char *slashPos;
+  size_t num = 0;
+  do {
+    slashPos = strchr(str, '/');
+    if(slashPos) {
+      ++num;
+      str = slashPos + 1;
+    }
+  } while(slashPos);
+  return num;
+}
+
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4238,12 +4252,8 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
       /* current position: begin of next path component */
       const char *curPos = rawPath;
 
-      /* number of entries allocated for the 'dirs' array */
-      size_t dirAlloc = 0;
-      const char *str = rawPath;
-      for(; *str != 0; ++str)
-        if(*str == '/')
-          ++dirAlloc;
+      /* number of entries to allocate for the 'dirs' array */
+      size_t dirAlloc = numof_slashes(rawPath);
 
       if(dirAlloc >= 1000)
         /* suspiciously deep dir hierarchy */
@@ -4255,26 +4265,25 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
 
         /* parse the URL path into separate path components */
-        /* !checksrc! disable EQUALSNULL 1 */
-        while((slashPos = strchr(curPos, '/')) != NULL) {
-          size_t compLen = slashPos - curPos;
+        while(dirAlloc--) {
+          const char *spos = strchr(curPos, '/');
+          size_t clen = spos - curPos;
 
           /* path starts with a slash: add that as a directory */
-          if((compLen == 0) && (ftpc->dirdepth == 0))
-            ++compLen;
+          if(!clen && (ftpc->dirdepth == 0))
+            ++clen;
 
           /* we skip empty path components, like "x//y" since the FTP command
              CWD requires a parameter and a non-existent parameter a) does not
              work on many servers and b) has no effect on the others. */
-          if(compLen) {
+          if(clen) {
             ftpc->dirs[ftpc->dirdepth].start = (int)(curPos - rawPath);
-            ftpc->dirs[ftpc->dirdepth].len = (int)compLen;
+            ftpc->dirs[ftpc->dirdepth].len = (int)clen;
             ftpc->dirdepth++;
           }
-          curPos = slashPos + 1;
+          curPos = spos + 1;
         }
       }
-      DEBUGASSERT((size_t)ftpc->dirdepth <= dirAlloc);
       fileName = curPos; /* the rest is the filename (or empty) */
     }
     break;
