@@ -104,6 +104,7 @@ if(MSVC OR CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Cl
   if(APPLE AND CMAKE_OSX_SYSROOT)
     string(APPEND CURL_CPP " -isysroot ${CMAKE_OSX_SYSROOT}")
   endif()
+  string(APPEND CURL_CPP " ${CMAKE_C_FLAGS}")
   # Add header directories, like autotools builds do.
   get_property(_include_dirs TARGET ${LIB_SELECTED} PROPERTY INCLUDE_DIRECTORIES)
   foreach(_include_dir IN LISTS _include_dirs)
