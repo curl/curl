@@ -551,7 +551,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -821,16 +821,58 @@ jobs:
           [ -f "${MINGW_PREFIX}/include/zconf.h" ] && sed -i -E 's|(# +define +Z_HAVE_UNISTD_H)|/*\1*/|g' "${MINGW_PREFIX}/include/zconf.h"  # Patch MSYS2 zconf.h for MSVC
           for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
             options=''
+            cflags=''
+            rcflags=''
+            ldflags=''
             if [ "${MATRIX_PLAT}" = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-              cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-              ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
+              cflags+=' -DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+              ldflags+=' -OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
               vsglobals=';AppxPackage=false;WindowsAppContainer=false'
             fi
-            [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
-            [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
-            [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
-            [ "${TFLAGS}" = 'skiprun' ] && options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
+            if [ "${TFLAGS}" = 'skiprun' ]; then
+              [ "${MATRIX_ARCH}" = 'arm64' ] && options+=' -A ARM64'
+              [ "${MATRIX_ARCH}" = 'x64' ] && options+=' -A x64'
+              [ "${MATRIX_ARCH}" = 'x86' ] && options+=' -A Win32'
+              options+=" -DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}"
+              options+=' -D_CURL_SKIP_BUILD_CERTS=ON'
+              unset CMAKE_GENERATOR
+            else
+              # Use Ninja when running tests to avoid MSBuild heuristics picking
+              # up "error messages" in the test log output and making the job fail.
+              # Officially this requires the vcvarsall.bat MS-DOS batch file (as of
+              # VS2022). Since it integrates badly with CI steps and shell scripts
+              # scripts, reproduce the necessary build configuration manually, and
+              # without envs.
+              [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
+              MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
+              MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/2022/Enterprise/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
+              MSVC_ROOTW="$(cygpath --mixed "$MSVC_ROOTU")"
+              MSVC_ROOTU="$(cygpath --unix "$MSVC_ROOTW")"
+              MSVC_BINU="$MSVC_ROOTU/bin/Host$MSVC_HOST/$MATRIX_ARCH"
+              MSDK_ROOTW="$(cygpath --mixed --short-name "$(printenv 'ProgramFiles(x86)')/Windows Kits")/10"
+              MSDK_ROOTU="$(cygpath --unix "$MSDK_ROOTW")"
+              MSDK_VER="$(basename "$(/usr/bin/find "$MSDK_ROOTU/lib" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)")"
+              MSDK_LIBW="$MSDK_ROOTW/lib/$MSDK_VER"
+              MSDK_INCW="$MSDK_ROOTW/include/$MSDK_VER"
+              MSDK_BINU="$MSDK_ROOTU/bin/$MSDK_VER/$MSVC_HOST"
+              cflags+=" -external:W0"
+              cflags+=" -external:I$MSVC_ROOTW/include"
+              cflags+=" -external:I$MSDK_INCW/shared"
+              cflags+=" -external:I$MSDK_INCW/ucrt"
+              cflags+=" -external:I$MSDK_INCW/um"
+              cflags+=" -external:I$MSDK_INCW/km"
+              rcflags+=" -I$MSDK_INCW/shared"
+              rcflags+=" -I$MSDK_INCW/um"
+              ldflags+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
+              ldflags+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
+              ldflags+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
+              ldflags+=" -libpath:$MSDK_LIBW/km/$MATRIX_ARCH"
+              options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
+              options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
+              options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
+              export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
+            fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
             if [ -n "${MATRIX_INSTALL_VCPKG}" ]; then
               options+=" -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
@@ -840,9 +882,9 @@ jobs:
             fi
             cmake -B "bld${_chkprefill}" ${options} \
               -DCMAKE_C_FLAGS="${cflags}" \
+              -DCMAKE_RC_FLAGS="${rcflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
@@ -871,7 +913,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version

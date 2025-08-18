@@ -1256,7 +1256,7 @@ out:
        !Curl_conn_is_ssl(conn, SECONDARYSOCKET)) {
       result = Curl_ssl_cfilter_add(data, conn, SECONDARYSOCKET);
     }
-    data->conn->bits.do_more = FALSE;
+    conn->bits.do_more = FALSE;
     Curl_pgrsTime(data, TIMER_STARTACCEPT);
     Curl_expire(data, (data->set.accepttimeout > 0) ?
                 data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT,

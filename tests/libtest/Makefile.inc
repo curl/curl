@@ -71,7 +71,7 @@ TESTS_C = \
   lib661.c                                     lib666.c lib667.c lib668.c \
   lib670.c                            lib674.c lib676.c lib677.c lib678.c \
   lib694.c lib695.c \
-  lib751.c          lib753.c \
+  lib751.c          lib753.c                                     lib758.c \
   lib757.c \
   lib1156.c \
   lib1301.c                                                   lib1308.c \
@@ -82,7 +82,7 @@ TESTS_C = \
   lib1522.c lib1523.c           lib1525.c lib1526.c lib1527.c lib1528.c \
   lib1529.c lib1530.c lib1531.c lib1532.c lib1533.c lib1534.c lib1535.c \
   lib1536.c lib1537.c lib1538.c           lib1540.c lib1541.c lib1542.c \
-  lib1545.c                                         lib1550.c lib1551.c \
+  lib1545.c                               lib1549.c lib1550.c lib1551.c \
   lib1552.c lib1553.c lib1554.c lib1555.c lib1556.c lib1557.c lib1558.c \
   lib1559.c lib1560.c                               lib1564.c lib1565.c \
   lib1567.c lib1568.c lib1569.c           lib1571.c \
