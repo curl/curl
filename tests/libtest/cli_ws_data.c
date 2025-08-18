@@ -195,6 +195,8 @@ struct test_ws_m1_ctx {
   char *recv_buf;
   size_t send_len, nsent;
   size_t recv_len, nrcvd;
+  int read_calls;
+  int write_calls;
 };
 
 static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
@@ -204,14 +206,21 @@ static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
   size_t len = nitems * buflen;
   size_t left = ctx->send_len - ctx->nsent;
 
-  curl_mfprintf(stderr, "m1_read(len=%zu, left=%zu)\n", len, left);
-  if(left) {
+  ctx->read_calls++;
+  curl_mfprintf(stderr, "m1_read(len=%zu, left=%zu, call #%d)\n",
+                len, left, ctx->read_calls);
+  if(ctx->read_calls == 1)
+    curl_ws_start_frame(ctx->easy, CURLWS_BINARY, ctx->send_len);
+
+  if(left || (ctx->read_calls == 1)) {
     if(left > len)
       left = len;
     memcpy(buf, ctx->send_buf + ctx->nsent, left);
     ctx->nsent += left;
     return left;
   }
+  curl_mfprintf(stderr, "m1_read, pausing, call #%d\n",
+                ctx->read_calls);
   return CURL_READFUNC_PAUSE;
 }
 
@@ -221,7 +230,9 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
   struct test_ws_m1_ctx *ctx = userdata;
   size_t len = nitems * buflen;
 
-  curl_mfprintf(stderr, "m1_write(len=%zu)\n", len);
+  ctx->write_calls++;
+  curl_mfprintf(stderr, "m1_write(len=%zu, call +%d)\n",
+                len, ctx->write_calls);
   if(len > (ctx->recv_len - ctx->nrcvd))
     return CURL_WRITEFUNC_ERROR;
   memcpy(ctx->recv_buf + ctx->nrcvd, buf, len);
@@ -240,6 +251,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
   struct test_ws_m1_ctx m1_ctx;
   size_t i, len;
 
+  curl_mfprintf(stderr, "test_ws_data_m1_echo(min=%zu, max=%zu)\n",
+                plen_min, plen_max);
   memset(&m1_ctx, 0, sizeof(m1_ctx));
   m1_ctx.send_buf = calloc(1, plen_max + 1);
   m1_ctx.recv_buf = calloc(1, plen_max + 1);
@@ -278,19 +291,25 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
   for(len = plen_min; len <= plen_max; ++len) {
     /* init what we want to send and expect to receive */
+    curl_mfprintf(stderr, "m1_echo, iter len=%zu\n", len);
     m1_ctx.send_len = len;
     m1_ctx.nsent = 0;
     m1_ctx.recv_len = len;
     m1_ctx.nrcvd = 0;
+    m1_ctx.read_calls = 0;
+    m1_ctx.write_calls = 0;
     memset(m1_ctx.recv_buf, 0, plen_max);
     curl_easy_pause(m1_ctx.easy, CURLPAUSE_CONT);
 
     for(i = 0; i < count; ++i) {
+      curl_mfprintf(stderr, "m1_echo, iter len=%zu, count=%zu\n", len, i);
       while(1) {
         int still_running; /* keep number of running handles */
         CURLMcode mc = curl_multi_perform(multi, &still_running);
 
-        if(!still_running || (m1_ctx.nrcvd == m1_ctx.recv_len)) {
+        if(!still_running ||
+           (m1_ctx.read_calls && m1_ctx.write_calls &&
+            m1_ctx.nrcvd == m1_ctx.recv_len)) {
           /* got the full echo back or failed */
           break;
         }

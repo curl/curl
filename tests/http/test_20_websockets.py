@@ -135,7 +135,7 @@ class TestWebsockets:
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
-        r = client.run(args=[f'-{model}', '-m', str(0), '-M', str(10), url])
+        r = client.run(args=[f'-{model}', '-m', str(1), '-M', str(10), url])
         r.check_exit_code(0)
 
     @pytest.mark.parametrize("model", [
@@ -191,5 +191,19 @@ class TestWebsockets:
         url = f'ws://localhost:{env.ws_port}/'
         count = 10
         large = 20000
+        r = client.run(args=[f'-{model}', '-c', str(count), '-m', str(large), url])
+        r.check_exit_code(0)
+
+    @pytest.mark.parametrize("model", [
+        pytest.param(1, id='multi_perform'),
+        pytest.param(2, id='curl_ws_send+recv'),
+    ])
+    def test_20_09_data_empty(self, env: Env, ws_echo, model):
+        client = LocalClient(env=env, name='cli_ws_data')
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{env.ws_port}/'
+        count = 10
+        large = 0
         r = client.run(args=[f'-{model}', '-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)
