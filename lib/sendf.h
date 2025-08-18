@@ -50,6 +50,7 @@
 #define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
 #define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
 #define CLIENTWRITE_EOS     (1<<7) /* End Of transfer download Stream */
+#define CLIENTWRITE_0LEN    (1<<8) /* write even 0-length buffers */
 
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what
@@ -202,6 +203,11 @@ void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
 
 
+typedef enum {
+  CURL_CRCNTRL_REWIND,
+  CURL_CRCNTRL_UNPAUSE,
+  CURL_CRCNTRL_CLEAR_EOS
+} Curl_creader_cntrl;
 
 /* Client Reader Type, provides the implementation */
 struct Curl_crtype {
@@ -215,8 +221,8 @@ struct Curl_crtype {
                              struct Curl_creader *reader);
   CURLcode (*resume_from)(struct Curl_easy *data,
                           struct Curl_creader *reader, curl_off_t offset);
-  CURLcode (*rewind)(struct Curl_easy *data, struct Curl_creader *reader);
-  CURLcode (*unpause)(struct Curl_easy *data, struct Curl_creader *reader);
+  CURLcode (*cntrl)(struct Curl_easy *data, struct Curl_creader *reader,
+                    Curl_creader_cntrl opcode);
   bool (*is_paused)(struct Curl_easy *data, struct Curl_creader *reader);
   void (*done)(struct Curl_easy *data,
                struct Curl_creader *reader, int premature);
@@ -264,10 +270,9 @@ curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
 CURLcode Curl_creader_def_resume_from(struct Curl_easy *data,
                                       struct Curl_creader *reader,
                                       curl_off_t offset);
-CURLcode Curl_creader_def_rewind(struct Curl_easy *data,
-                                 struct Curl_creader *reader);
-CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
-                                  struct Curl_creader *reader);
+CURLcode Curl_creader_def_cntrl(struct Curl_easy *data,
+                                struct Curl_creader *reader,
+                                Curl_creader_cntrl opcode);
 bool Curl_creader_def_is_paused(struct Curl_easy *data,
                                 struct Curl_creader *reader);
 void Curl_creader_def_done(struct Curl_easy *data,
@@ -280,6 +285,10 @@ void Curl_creader_def_done(struct Curl_easy *data,
 CURLcode Curl_creader_read(struct Curl_easy *data,
                            struct Curl_creader *reader,
                            char *buf, size_t blen, size_t *nread, bool *eos);
+
+/* Tell the reader and all below that any EOS state is to be cleared */
+void Curl_creader_clear_eos(struct Curl_easy *data,
+                            struct Curl_creader *reader);
 
 /**
  * Create a new creader instance with given type and phase. Is not

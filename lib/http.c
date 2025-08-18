@@ -4836,8 +4836,7 @@ static const struct Curl_crtype cr_exp100 = {
   Curl_creader_def_needs_rewind,
   Curl_creader_def_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
+  Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
   cr_exp100_done,
   sizeof(struct cr_exp100_ctx)
