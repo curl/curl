@@ -113,6 +113,7 @@ if(MSVC OR CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Cl
 else()
   set(CURL_CPP "cpp")
 endif()
+message(STATUS "CURL_CPP|${CURL_CPP}|")
 # Generate version script for the linker, for versioned symbols.
 # Consumed variable:
 #   CURL_CPP
