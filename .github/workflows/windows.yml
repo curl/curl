@@ -862,6 +862,8 @@ jobs:
               cflags+=" -external:I$MSDK_INCW/ucrt"
               cflags+=" -external:I$MSDK_INCW/um"
               cflags+=" -external:I$MSDK_INCW/km"
+              rcflags+=" -I$MSDK_INCW/shared"
+              rcflags+=" -I$MSDK_INCW/um"
               ldflags+=" -libpath:$MSVC_ROOTW/lib/$MATRIX_ARCH"
               ldflags+=" -libpath:$MSDK_LIBW/ucrt/$MATRIX_ARCH"
               ldflags+=" -libpath:$MSDK_LIBW/um/$MATRIX_ARCH"
@@ -869,8 +871,6 @@ jobs:
               options+=" -DCMAKE_RC_COMPILER=$MSDK_BINU/rc.exe"
               options+=" -DCMAKE_MT=$MSDK_BINU/mt.exe"
               options+=" -DCMAKE_C_COMPILER=$MSVC_BINU/cl.exe"
-              rcflags+=" -I$MSDK_INCW/shared"
-              rcflags+=" -I$MSDK_INCW/um"
               export CMAKE_GENERATOR='Ninja Multi-Config'  # pass it via env to avoid space issues
             fi
             [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
