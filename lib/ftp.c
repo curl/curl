@@ -3081,13 +3081,15 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
       else {
         /* success */
         ftpc->count2 = 0;
-        if(++ftpc->cwdcount <= ftpc->dirdepth)
+        if(ftpc->cwdcount >= ftpc->dirdepth)
+          result = ftp_state_mdtm(data, ftpc, ftp);
+        else {
+          ftpc->cwdcount++;
           /* send next CWD */
           result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
                                  pathlen(ftpc, ftpc->cwdcount - 1),
                                  pathpiece(ftpc, ftpc->cwdcount - 1));
-        else
-          result = ftp_state_mdtm(data, ftpc, ftp);
+        }
       }
       break;
 
