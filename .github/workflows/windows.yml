@@ -432,10 +432,10 @@ jobs:
           path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
-      - name: 'install test prereqs'
+      - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
-        run: |
+        run: &perl-win32-pkgs-install |
           if [ -d /c/perl-win32-pkgs ]; then
             cd /c/perl-win32-pkgs
             cd Win32-Process-0.17
@@ -451,6 +451,10 @@ jobs:
             cd ..
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
@@ -655,23 +659,15 @@ jobs:
           path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
+      - name: 'install test prereqs perl'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: *perl-win32-pkgs-install
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          cd /c/perl-win32-pkgs
-          cd Win32-Process-0.17
-          install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
-          install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
-          cd ..
-          cd Win32-Process-List-0.09
-          install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
-          install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
-          install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
-          install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
-          cd ..
-          cd ..
-
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
@@ -1042,23 +1038,15 @@ jobs:
           path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
+      - name: 'install test prereqs perl'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: *perl-win32-pkgs-install
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          cd /c/perl-win32-pkgs
-          cd Win32-Process-0.17
-          install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
-          install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
-          cd ..
-          cd Win32-Process-List-0.09
-          install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
-          install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
-          install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
-          install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
-          cd ..
-          cd ..
-
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
             /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
