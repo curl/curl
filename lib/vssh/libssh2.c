@@ -3073,7 +3073,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
     }
 
-  } while(!result && (sshc->state != SSH_STOP));
+  } while(!result && (sshc->state != SSH_STOP) && !*block);
 
   if(result == CURLE_AGAIN) {
     /* we would block, we need to wait for the socket to be ready (in the
