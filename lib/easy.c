@@ -573,7 +573,8 @@ static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
  */
 static int poll_fds(struct events *ev,
                     struct pollfd *fds,
-                    const unsigned int numfds)
+                    const unsigned int numfds,
+                    CURLcode *result)
 {
   int pollrc;
 
@@ -588,7 +589,7 @@ static int poll_fds(struct events *ev,
             numfds, ev->ms, pollrc);
 #endif
     if(pollrc < 0)
-      return CURLE_UNRECOVERABLE_POLL;
+      *result = CURLE_UNRECOVERABLE_POLL;
   }
   else {
 #if DEBUG_EV_POLL
@@ -621,7 +622,9 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     /* get the time stamp to use to figure out how long poll takes */
     before = curlx_now();
 
-    pollrc = poll_fds(ev, fds, numfds);
+    pollrc = poll_fds(ev, fds, numfds, &result);
+    if(result == CURLE_UNRECOVERABLE_POLL)
+      return result;
 
     ev->msbump = FALSE; /* reset here */
 
