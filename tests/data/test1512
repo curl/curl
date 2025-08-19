@@ -54,7 +54,7 @@ lib%TESTNUMBER
 GLOBAL CACHE test over two easy performs
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
+- %HOSTIP %HTTPPORT
 </command>
 </client>
 

@@ -55,7 +55,7 @@ lib%TESTNUMBER
 HTTP GET connection cache limit (CURLOPT_MAXCONNECTS)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
+- %HOSTIP %HTTPPORT
 </command>
 </client>
 
