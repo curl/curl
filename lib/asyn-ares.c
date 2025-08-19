@@ -280,8 +280,9 @@ void Curl_async_ares_destroy(struct Curl_easy *data)
 CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
-  DEBUGASSERT(ares->channel);
-  return Curl_ares_pollset(data, ares->channel, ps);
+  if(ares->channel)
+    return Curl_ares_pollset(data, ares->channel, ps);
+  return CURLE_OK;
 }
 
 /*
