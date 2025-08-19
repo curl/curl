@@ -18,9 +18,6 @@ lib%TESTNUMBER
 <name>
 Test all curl_easy_setopt and curl_easy_getinfo options
 </name>
-<command>
-unused
-</command>
 </client>
 
 #

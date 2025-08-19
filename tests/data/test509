@@ -25,9 +25,6 @@ lib%TESTNUMBER
 <name>
 initialization with memory callbacks and actual usage
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #
