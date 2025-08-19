@@ -571,35 +571,35 @@ static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
  *
  * poll the fds[] array
  */
-static int poll_fds(struct events *ev,
-                    struct pollfd *fds,
-                    const unsigned int numfds,
-                    CURLcode *result)
+static CURLcode poll_fds(struct events *ev,
+                         struct pollfd *fds,
+                         const unsigned int numfds,
+                         int *pollrc)
 {
-  int pollrc;
+  CURLcode result = CURLE_OK;
 
   if(numfds) {
     /* wait for activity or timeout */
 #if DEBUG_EV_POLL
     fprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
 #endif
-    pollrc = Curl_poll(fds, numfds, ev->ms);
+    *pollrc = Curl_poll(fds, numfds, ev->ms);
 #if DEBUG_EV_POLL
     fprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
-            numfds, ev->ms, pollrc);
+            numfds, ev->ms, *pollrc);
 #endif
-    if(pollrc < 0)
-      *result = CURLE_UNRECOVERABLE_POLL;
+    if(*pollrc < 0)
+      return CURLE_UNRECOVERABLE_POLL;
   }
   else {
 #if DEBUG_EV_POLL
     fprintf(stderr, "poll, but no fds, wait timeout=%ldms\n", ev->ms);
 #endif
-    pollrc = 0;
+    *pollrc = 0;
     if(ev->ms > 0)
       curlx_wait_ms(ev->ms);
   }
-  return pollrc;
+  return result;
 }
 
 /* wait_or_timeout()
@@ -622,8 +622,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     /* get the time stamp to use to figure out how long poll takes */
     before = curlx_now();
 
-    pollrc = poll_fds(ev, fds, numfds, &result);
-    if(result == CURLE_UNRECOVERABLE_POLL)
+    result = poll_fds(ev, fds, numfds, &pollrc);
+    if(result)
       return result;
 
     ev->msbump = FALSE; /* reset here */
