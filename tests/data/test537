@@ -46,6 +46,9 @@ lib%TESTNUMBER
 <name>
 HTTP GET with a HUGE number of file descriptors open
 </name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
 </client>
 
 #
