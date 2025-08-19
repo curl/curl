@@ -91,6 +91,10 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
   timediff_t milli;
   CURLcode result = CURLE_OK;
 
+  DEBUGASSERT(channel);
+  if(!channel)
+    return CURLE_FAILED_INIT;
+
   bitmap = ares_getsock(channel, (ares_socket_t *)sockets,
                         CURL_ARRAYSIZE(sockets));
   for(i = 0; i < CURL_ARRAYSIZE(sockets); ++i) {
@@ -107,6 +111,8 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
   }
 
   timeout = ares_timeout(channel, &maxtime, &timebuf);
+  if(!timeout)
+    timeout = &maxtime;
   milli = curlx_tvtoms(timeout);
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
   return result;
