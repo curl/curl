@@ -58,9 +58,6 @@ lib%TESTNUMBER
 <name>
 HTTP GET multiple over HTTP/3
 </name>
-<command>
-https://%HOSTIP:%HTTP3PORT/path/%TESTNUMBER %HOSTIP %HTTP3PORT %CERTDIR/certs/test-ca.cacert
-</command>
 </client>
 
 # Verify data after the test has been "shot"

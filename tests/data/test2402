@@ -59,9 +59,6 @@ lib%TESTNUMBER
 <name>
 HTTP GET multiple files over HTTP/2 using HTTPS
 </name>
-<command>
-https://%HOSTIP:%HTTP2TLSPORT/path/%TESTNUMBER %HOSTIP %HTTP2TLSPORT
-</command>
 </client>
 
 # Verify data after the test has been "shot"

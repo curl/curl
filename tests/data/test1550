@@ -22,8 +22,5 @@ lib%TESTNUMBER
 <name>
 verify setting pipelining blocklisting options
 </name>
-<command>
-http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
-</command>
 </client>
 </testcase>

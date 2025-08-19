@@ -19,9 +19,6 @@ CURLOPT_PROTOCOLS_STR
 <tool>
 lib%TESTNUMBER
 </tool>
-<command>
--
-</command>
 </client>
 
 <verify>
