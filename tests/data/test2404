@@ -60,7 +60,7 @@ lib%TESTNUMBER
 HTTP/2 using STREAM_WEIGHTs
 </name>
 <command>
-https://%HOSTIP:%HTTP2TLSPORT/path/%TESTNUMBER %HOSTIP %HTTP2TLSPORT
+- %HOSTIP %HTTP2TLSPORT
 </command>
 </client>
 

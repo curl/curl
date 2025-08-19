@@ -59,7 +59,7 @@ lib%TESTNUMBER
 HTTP GET multiple over HTTP/3
 </name>
 <command>
-https://%HOSTIP:%HTTP3PORT/path/%TESTNUMBER %HOSTIP %HTTP3PORT %CERTDIR/certs/test-ca.cacert
+- %HOSTIP %HTTP3PORT %CERTDIR/certs/test-ca.cacert
 </command>
 </client>
 

@@ -23,9 +23,6 @@ TrackMemory
 <name>
 unit tests memory tracking operational
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

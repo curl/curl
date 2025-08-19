@@ -17,9 +17,6 @@ lib%TESTNUMBER
 <name>
 Close a multi handle without using it
 </name>
-<command>
-http://%HOSTIP:%NOLISTENPORT/path/%TESTNUMBER
-</command>
 </client>
 
 # Verify data after the test has been "shot"

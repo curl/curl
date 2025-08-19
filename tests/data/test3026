@@ -30,9 +30,6 @@ curl_global_init thread-safety
 <tool>
 lib%TESTNUMBER
 </tool>
-<command>
-none
-</command>
 </client>
 
 #
