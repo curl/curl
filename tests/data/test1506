@@ -54,6 +54,9 @@ lib%TESTNUMBER
 <name>
 HTTP GET connection cache limit (CURLMOPT_MAXCONNECTS)
 </name>
+<command>
+http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
+</command>
 </client>
 
 # Verify data after the test has been "shot"

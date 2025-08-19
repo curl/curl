@@ -46,6 +46,9 @@ lib%TESTNUMBER
 <name>
 HTTP GET with more than FD_SETSIZE descriptors open
 </name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
 </client>
 
 #
