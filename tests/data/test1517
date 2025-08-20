@@ -36,8 +36,8 @@ This is a virtual description of server virtual error.
 
 # Client-side
 <client>
-<features>
 # Windows TCP does not deliver response data but reports CONNABORTED
+<features>
 !cygwin
 !win32
 </features>
