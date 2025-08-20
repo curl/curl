@@ -34,7 +34,6 @@ http
 <setenv>
 FUNVALUE=contents%TESTNUMBER
 VALUE2=curl
-BLANK=
 </setenv>
 <name>
 variable expand the file name with --expand-output
