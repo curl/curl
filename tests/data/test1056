@@ -49,6 +49,8 @@ body
 # to skip those.
 <features>
 IPv6
+# Test is not supported on the Windows kernel
+!cygwin
 !win32
 </features>
 <server>
@@ -61,9 +63,6 @@ HTTP follow redirect from IPv4 to IPv6 with scope
 <command>
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
-<precheck>
-%PERL -e "print 'Test is not supported on the Windows kernel' if($^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin');"
-</precheck>
 </client>
 
 #
