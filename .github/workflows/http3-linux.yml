@@ -264,6 +264,13 @@ jobs:
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
 
+          - name: 'openssl'
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build
+              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_USE_LIBUV=ON
+
           - name: 'quictls'
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
@@ -272,6 +279,13 @@ jobs:
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
 
+          - name: 'quictls'
+            PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DOPENSSL_ROOT_DIR=/home/runner/quictls/build
+              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_USE_LIBUV=ON
+
           - name: 'gnutls'
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
@@ -279,6 +293,13 @@ jobs:
               --with-ngtcp2 --enable-debug
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
+
+          - name: 'gnutls'
+            PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DCURL_USE_GNUTLS=ON
+              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_USE_LIBUV=ON
 
           - name: 'wolfssl'
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -303,6 +324,13 @@ jobs:
               --enable-debug --disable-ntlm
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
               --with-libuv
+
+          - name: 'openssl-quic'
+            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
+              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_USE_LIBUV=ON
 
           - name: 'quiche'
             configure: >-
