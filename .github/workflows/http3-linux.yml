@@ -562,11 +562,3 @@ jobs:
           else
             make -C bld V=1 pytest-ci
           fi
-
-      - name: 'build examples'
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples-build
-          else
-            make -C bld V=1 examples
-          fi
