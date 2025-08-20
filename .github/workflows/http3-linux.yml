@@ -460,23 +460,36 @@ jobs:
         if: ${{ matrix.build.configure }}
         run: autoreconf -fi
 
-      - name: 'configure'
+      - name: 'configure (+ non-unity build)'
         env:
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
-          [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake -B bld -G Ninja \
-              -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
-              ${MATRIX_GENERATE}
-          else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
-              ${MATRIX_CONFIGURE}
-          fi
+          for unity in 0 1; do
+            rm -rf bld
+            options=''
+            [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
+            if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+              [ "${unity}" = 1 ] && options+=' -DCMAKE_UNITY_BUILD=ON'
+              cmake -B bld -G Ninja \
+                -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
+                 -DCURL_WERROR=ON \
+                ${MATRIX_GENERATE} ${options}
+              if [ "${unity}" = 0 ]; then
+                cmake --build bld --verbose
+              fi
+            else
+              [ "${unity}" = 1 ] && options+=' --enable-unity'
+              mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+                --disable-dependency-tracking \
+                ${MATRIX_CONFIGURE} ${options}
+              cd ..
+              if [ "${unity}" = 0 ]; then
+                make -C bld V=1
+              fi
+            fi
+          done
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
