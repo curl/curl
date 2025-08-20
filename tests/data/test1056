@@ -45,8 +45,7 @@ body
 # This test relies on the IPv6 scope field being ignored when connecting to
 # ipv6-localhost (i.e. [::1%259999] is treated as [::1]). Maybe this is a bit
 # dodgy, but it happens on all our test platforms but Windows so skip this
-# test there. This feature doesn't work on msys or Cygwin, so use a precheck
-# to skip those. Not supported on the Windows kernel.
+# test there. Not supported on the Windows kernel, this includes MSYS2/Cygwin.
 <features>
 IPv6
 !cygwin
