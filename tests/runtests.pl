@@ -568,6 +568,9 @@ sub checksystemfeatures {
                 $pwd = sys_native_current_path();
                 $feature{"win32"} = 1;
             }
+            if($curl =~ /cygwin|msys/i) {
+                $feature{"cygwin"} = 1;
+            }
             if($libcurl =~ /\sschannel\b/i) {
                 $feature{"Schannel"} = 1;
                 $feature{"SSLpinning"} = 1;
