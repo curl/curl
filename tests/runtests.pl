@@ -888,7 +888,7 @@ sub checksystemfeatures {
     }
     logmsg "* Seed: $randseed\n";
     if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") != 0) {
-        logmsg "* diff: missing\n");
+        logmsg "* diff: missing\n";
     }
 }
 
