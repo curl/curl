@@ -602,8 +602,7 @@ static CURLcode bufq_slurpn(struct bufq *q, size_t max_len,
       break;
     }
     else if(n == 0) {
-      /* eof */
-      result = CURLE_OK;
+      /* eof, result remains CURLE_OK */
       break;
     }
     *pnread += n;
