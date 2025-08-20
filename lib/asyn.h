@@ -180,6 +180,9 @@ struct async_thrdd_addr_ctx {
   char *hostname;        /* hostname to resolve, Curl_async.hostname
                             duplicate */
   curl_mutex_t mutx;
+#ifdef USE_CURL_COND_T
+  curl_cond_t  cond;
+#endif
 #ifndef CURL_DISABLE_SOCKETPAIR
   curl_socket_t sock_pair[2]; /* eventfd/pipes/socket pair */
 #endif

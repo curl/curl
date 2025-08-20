@@ -100,6 +100,34 @@ int Curl_thread_join(curl_thread_t *hnd)
   return ret;
 }
 
+/* do not use pthread_cancel if:
+ * - pthread_cancel seems to be absent
+ * - on FreeBSD, as we see hangers in CI testing
+ * - this is a -fsanitize=thread build
+ *   (clang sanitizer reports false positive when functions to not return)
+ */
+#if defined(PTHREAD_CANCEL_ENABLE) && !defined(__FreeBSD__)
+#if defined(__has_feature)
+#  if !__has_feature(thread_sanitizer)
+#define USE_PTHREAD_CANCEL
+#  endif
+#else /* __has_feature */
+#define USE_PTHREAD_CANCEL
+#endif /* !__has_feature */
+#endif /* PTHREAD_CANCEL_ENABLE && !__FreeBSD__ */
+
+int Curl_thread_cancel(curl_thread_t *hnd)
+{
+  (void)hnd;
+  if(*hnd != curl_thread_t_null)
+#ifdef USE_PTHREAD_CANCEL
+    return pthread_cancel(**hnd);
+#else
+    return 1; /* not supported */
+#endif
+  return 0;
+}
+
 #elif defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
@@ -150,7 +178,16 @@ int Curl_thread_join(curl_thread_t *hnd)
 
   Curl_thread_destroy(hnd);
 
+
   return ret;
+}
+
+int Curl_thread_cancel(curl_thread_t *hnd)
+{
+  if(*hnd != curl_thread_t_null) {
+    return 1; /* not supported */
+  }
+  return 0;
 }
 
 #endif /* USE_THREADS_* */
