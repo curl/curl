@@ -261,7 +261,6 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
 
@@ -270,7 +269,6 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
               --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
 
@@ -279,7 +277,6 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
               --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
 
@@ -288,7 +285,6 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
               --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
               --with-libuv
@@ -305,7 +301,6 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --enable-warnings --enable-werror --enable-debug --disable-ntlm
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
               --with-libuv
 
@@ -315,7 +310,6 @@ jobs:
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
               --enable-warnings --enable-werror --enable-debug
               --with-quiche=/home/runner/quiche/target/release
-              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx
               --with-ca-fallback
               --with-libuv
 
@@ -472,6 +466,7 @@ jobs:
               ${MATRIX_GENERATE}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+              --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
           fi
