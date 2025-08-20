@@ -853,14 +853,6 @@ sub checksystemfeatures {
     chomp $hosttype;
     my $hostos=$^O;
 
-    my $havediff;
-    if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") == 0) {
-      $havediff = 'available';
-    }
-    else {
-      $havediff = 'missing';
-    }
-
     # display summary information about curl and the test host
     logmsg("********* System characteristics ******** \n",
            "* $curl\n",
@@ -869,14 +861,10 @@ sub checksystemfeatures {
            "* Features: $feat\n",
            "* Disabled: $dis\n",
            "* Host: $hostname\n",
-           "* System: $hosttype\n");
-    if($ci) {
-        logmsg("* OS: $hostos\n",
-               "* Perl: $^V ($^X)\n",
-               "* diff: $havediff\n");
-    }
-    logmsg("* Args: $args\n");
-
+           "* System: $hosttype\n",
+           "* OS: $hostos\n",
+           "* Perl: $^V ($^X)\n"
+           "* Args: $args\n");
     if($jobs) {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
@@ -899,6 +887,9 @@ sub checksystemfeatures {
         logmsg "* Env: $env\n";
     }
     logmsg "* Seed: $randseed\n";
+    if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") != 0) {
+        logmsg "* diff: missing\n");
+    }
 }
 
 #######################################################################
