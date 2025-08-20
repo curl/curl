@@ -1190,21 +1190,28 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                                  backend->encdata_offset,
                                  &nread);
       if(result == CURLE_AGAIN) {
-        connssl->io_need = CURL_SSL_IO_NEED_RECV;
-        DEBUGF(infof(data, "schannel: failed to receive handshake, "
-                     "need more data"));
-        return CURLE_OK;
+        if(!backend->encdata_offset || backend->encdata_is_incomplete) {
+          connssl->io_need = CURL_SSL_IO_NEED_RECV;
+          DEBUGF(infof(data, "schannel: failed to receive handshake, "
+                       "need more data"));
+          return CURLE_OK;
+        }
+        else {
+          DEBUGF(infof(data, "schannel: no new handshake data received, "
+                       "continuing to process existing handshake data"));
+        }
       }
       else if(result || (nread == 0)) {
         failf(data, "schannel: failed to receive handshake, "
               "SSL/TLS connection failed");
         return CURLE_SSL_CONNECT_ERROR;
       }
-
-      /* increase encrypted data buffer offset */
-      backend->encdata_offset += nread;
-      backend->encdata_is_incomplete = FALSE;
-      SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
+      else {
+        /* increase encrypted data buffer offset */
+        backend->encdata_offset += nread;
+        backend->encdata_is_incomplete = FALSE;
+        SCH_DEV(infof(data, "schannel: encrypted data got %zu", nread));
+      }
     }
 
     SCH_DEV(infof(data,
@@ -1231,6 +1238,16 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* copy received handshake data into input buffer */
     memcpy(inbuf[0].pvBuffer, backend->encdata_buffer,
            backend->encdata_offset);
+
+    /* The socket must be writeable (or a poll error occurred) before we call
+       InitializeSecurityContext to continue processing the received TLS
+       records. This is because that function is not idempotent and we don't
+       support partial save/resume sending replies of handshake tokens. */
+    if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
+      SCH_DEV(infof(data, "schannel: handshake waiting for writeable socket"));
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      return CURLE_OK;
+    }
 
     sspi_status = Curl_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
