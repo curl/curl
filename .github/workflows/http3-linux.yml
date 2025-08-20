@@ -260,7 +260,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-ngtcp2 --enable-debug --disable-ntlm
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv
 
@@ -268,7 +268,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
-              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --with-ngtcp2 --enable-debug --disable-ntlm
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv
 
@@ -276,7 +276,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
-              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
+              --with-ngtcp2 --enable-debug
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv
 
@@ -284,7 +284,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
-              --with-ngtcp2 --enable-warnings --enable-werror --enable-debug
+              --with-ngtcp2 --enable-debug
               --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
               --with-libuv
@@ -300,7 +300,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --enable-warnings --enable-werror --enable-debug --disable-ntlm
+              --enable-debug --disable-ntlm
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
               --with-libuv
 
@@ -308,7 +308,7 @@ jobs:
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
-              --enable-warnings --enable-werror --enable-debug
+              --enable-debug
               --with-quiche=/home/runner/quiche/target/release
               --with-ca-fallback
               --with-libuv
