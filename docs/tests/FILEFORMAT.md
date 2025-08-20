@@ -455,6 +455,7 @@ Features testable here are:
 - `codeset-utf8`. If the running codeset is UTF-8 capable.
 - `cookies`
 - `crypto`
+- `cygwin`
 - `Debug`
 - `digest`
 - `DoH`

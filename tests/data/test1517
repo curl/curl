@@ -36,6 +36,11 @@ This is a virtual description of server virtual error.
 
 # Client-side
 <client>
+# Windows TCP does not deliver response data but reports CONNABORTED
+<features>
+!cygwin
+!win32
+</features>
 <server>
 http
 </server>
@@ -43,12 +48,6 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
-# precheck is a command line to run before the test, to see if we can execute
-# the test or not
-<precheck>
-%LIBTESTS lib%TESTNUMBER check
-</precheck>
-
 <name>
 HTTP POST, server responds before completed send
 </name>
