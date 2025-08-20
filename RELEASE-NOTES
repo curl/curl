@@ -150,7 +150,6 @@ This release includes the following bugfixes:
  o pytest: increase server KeepAliveTimeout [26]
  o pytest: relax error check on test_07_22 [16]
  o resolving: dns error tracing [196]
- o runtests: add `--ci` option, show `Env:` only when non-empty [134]
  o runtests: assume `Time::HiRes`, drop Perl Win32 dependency [163]
  o schannel: add an error message for client cert not found [165]
  o schannel: assume `CERT_CHAIN_REVOCATION_CHECK_CHAIN` [114]
@@ -386,7 +385,6 @@ References to bug reports and discussions on issues:
  [131] = https://curl.se/bug/?i=18187
  [132] = https://curl.se/bug/?i=18160
  [133] = https://curl.se/bug/?i=18201
- [134] = https://curl.se/bug/?i=18147
  [135] = https://curl.se/bug/?i=18143
  [136] = https://curl.se/bug/?i=18142
  [137] = https://curl.se/bug/?i=18141
