@@ -264,6 +264,7 @@ jobs:
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
 
           - name: 'openssl'
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build
@@ -271,6 +272,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quictls'
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
@@ -285,6 +287,7 @@ jobs:
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
 
           - name: 'gnutls'
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
@@ -308,12 +311,14 @@ jobs:
               --enable-unity
 
           - name: 'wolfssl'
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
 
           - name: 'openssl-quic'
+            install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
@@ -328,6 +333,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quiche'
+            install_steps: skipall
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
