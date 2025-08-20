@@ -260,7 +260,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-ngtcp2 --enable-debug --disable-ntlm
+              --with-ngtcp2 --disable-ntlm
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
               --with-libuv --enable-unity
 
@@ -268,14 +268,14 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build
-              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quictls'
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
-              --with-ngtcp2 --enable-debug --disable-ntlm
+              --with-ngtcp2 --disable-ntlm
               --with-openssl=/home/runner/quictls/build --enable-ssls-export
               --with-libuv --enable-unity
 
@@ -283,14 +283,14 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quictls/build
-              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
-              --with-ngtcp2 --enable-debug
+              --with-ngtcp2
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
               --with-libuv --enable-unity
 
@@ -298,14 +298,14 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_GNUTLS=ON
-              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
           - name: 'wolfssl'
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
-              --with-ngtcp2 --enable-debug
+              --with-ngtcp2
               --with-wolfssl=/home/runner/wolfssl/build
               --enable-ech --enable-ssls-export
               --with-libuv --enable-unity
@@ -313,7 +313,7 @@ jobs:
           - name: 'wolfssl'
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
+              -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
@@ -321,7 +321,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --enable-debug --disable-ntlm
+              --disable-ntlm
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
               --with-libuv --enable-unity
 
@@ -329,14 +329,13 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
-              -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON -DCURL_DISABLE_NTLM=ON
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quiche'
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
-              --enable-debug
               --with-quiche=/home/runner/quiche/target/release
               --with-ca-fallback
               --with-libuv --enable-unity
@@ -344,7 +343,7 @@ jobs:
           - name: 'quiche'
             PKG_CONFIG_PATH: /home/runner/quiche/target/release
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
               -DUSE_QUICHE=ON
               -DCURL_CA_FALLBACK=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
@@ -488,12 +487,12 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
-              -DCURL_WERROR=ON \
+              -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE}
           else
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror --enable-debug \
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               --disable-dependency-tracking \
               ${MATRIX_CONFIGURE}
