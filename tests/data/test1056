@@ -46,10 +46,9 @@ body
 # ipv6-localhost (i.e. [::1%259999] is treated as [::1]). Maybe this is a bit
 # dodgy, but it happens on all our test platforms but Windows so skip this
 # test there. This feature doesn't work on msys or Cygwin, so use a precheck
-# to skip those.
+# to skip those. Not supported on the Windows kernel.
 <features>
 IPv6
-# Test is not supported on the Windows kernel
 !cygwin
 !win32
 </features>
