@@ -36,6 +36,7 @@ http
 FUNVALUE=contents
 VALUE2=curl
 BLANK=
+CURL_NOT_SET
 </setenv>
 <name>
 Environment variables in config file w/o [expand]
