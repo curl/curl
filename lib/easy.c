@@ -576,8 +576,6 @@ static CURLcode poll_fds(struct events *ev,
                          const unsigned int numfds,
                          int *pollrc)
 {
-  CURLcode result = CURLE_OK;
-
   if(numfds) {
     /* wait for activity or timeout */
 #if DEBUG_EV_POLL
@@ -599,7 +597,7 @@ static CURLcode poll_fds(struct events *ev,
     if(ev->ms > 0)
       curlx_wait_ms(ev->ms);
   }
-  return result;
+  return CURLE_OK;
 }
 
 /* wait_or_timeout()
