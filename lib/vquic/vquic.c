@@ -30,9 +30,6 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef USE_NGHTTP3
-#include <nghttp3/nghttp3.h>
-#endif
 #include "../urldata.h"
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
