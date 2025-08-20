@@ -43,18 +43,17 @@ http
 <tool>
 lib%TESTNUMBER
 </tool>
-# precheck is a command line to run before the test, to see if we can execute
-# the test or not
-<precheck>
-%LIBTESTS lib%TESTNUMBER check
-</precheck>
-
 <name>
 HTTP POST, server responds before completed send
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
+<features>
+# Windows TCP does not deliver response data but reports CONNABORTED
+!cygwin
+!win32
+</features>
 </client>
 
 #
