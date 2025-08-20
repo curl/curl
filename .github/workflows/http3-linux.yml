@@ -329,7 +329,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_DISABLE_NTLM=ON
               -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quiche'
