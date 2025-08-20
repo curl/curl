@@ -262,7 +262,7 @@ jobs:
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --with-ngtcp2 --disable-ntlm
               --with-openssl=/home/runner/openssl/build --enable-ssls-export
-              --with-libuv --enable-unity
+              --with-libuv
 
           - name: 'openssl'
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -284,7 +284,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quictls/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
-              -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
+              -DCURL_USE_LIBUV=ON
 
           - name: 'gnutls'
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -292,7 +292,7 @@ jobs:
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
               --with-ngtcp2
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
-              --with-libuv --enable-unity
+              --with-libuv
 
           - name: 'gnutls'
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -315,7 +315,7 @@ jobs:
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
-              -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
+              -DCURL_USE_LIBUV=ON
 
           - name: 'openssl-quic'
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -323,7 +323,7 @@ jobs:
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
               --disable-ntlm
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
-              --with-libuv --enable-unity
+              --with-libuv
 
           - name: 'openssl-quic'
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
@@ -346,7 +346,7 @@ jobs:
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
               -DUSE_QUICHE=ON
               -DCURL_CA_FALLBACK=ON
-              -DCURL_USE_LIBUV=ON -DCMAKE_UNITY_BUILD=ON
+              -DCURL_USE_LIBUV=ON
 
     steps:
       - name: 'install prereqs'
