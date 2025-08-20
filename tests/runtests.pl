@@ -863,7 +863,7 @@ sub checksystemfeatures {
            "* Host: $hostname\n",
            "* System: $hosttype\n",
            "* OS: $hostos\n",
-           "* Perl: $^V ($^X)\n"
+           "* Perl: $^V ($^X)\n",
            "* Args: $args\n");
     if($jobs) {
         # Only show if not the default for now
