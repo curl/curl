@@ -80,7 +80,7 @@ int main(void)
     }
     else {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "curl told us %u\n", res);
     }
 
     /* always cleanup */
