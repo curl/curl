@@ -195,8 +195,12 @@ struct test_ws_m1_ctx {
   char *recv_buf;
   size_t send_len, nsent;
   size_t recv_len, nrcvd;
+  int nframes;
   int read_calls;
   int write_calls;
+  int frames_read;
+  int frames_written;
+  BIT(frame_reading);
 };
 
 static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
@@ -207,21 +211,36 @@ static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
   size_t left = ctx->send_len - ctx->nsent;
 
   ctx->read_calls++;
-  curl_mfprintf(stderr, "m1_read(len=%zu, left=%zu, call #%d)\n",
-                len, left, ctx->read_calls);
-  if(ctx->read_calls == 1)
-    curl_ws_start_frame(ctx->easy, CURLWS_BINARY, ctx->send_len);
 
-  if(left || (ctx->read_calls == 1)) {
+  if(ctx->frames_read >= ctx->nframes)
+    goto out;
+
+  if(!ctx->frame_reading) {
+    curl_ws_start_frame(ctx->easy, CURLWS_BINARY, ctx->send_len);
+    ctx->frame_reading = TRUE;
+  }
+
+  if(ctx->frame_reading) {
+    bool complete;
     if(left > len)
       left = len;
     memcpy(buf, ctx->send_buf + ctx->nsent, left);
     ctx->nsent += left;
+    complete = (ctx->send_len == ctx->nsent);
+    curl_mfprintf(stderr, "m1_read(len=%zu, call #%d, frame #%d%s) -> %zu\n",
+                  len, ctx->read_calls, ctx->frames_read,
+                  complete ? " complete" : "", left);
+    if(complete) {
+      ++ctx->frames_read;
+      ctx->frame_reading = FALSE;
+      ctx->nsent = 0;
+    }
     return left;
   }
-  curl_mfprintf(stderr, "m1_read, pausing, call #%d\n",
-                ctx->read_calls);
-  return CURL_READFUNC_PAUSE;
+out:
+  curl_mfprintf(stderr, "m1_read(len=%zu, call #%d) -> EOS\n",
+                len, ctx->read_calls);
+  return 0;
 }
 
 static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
@@ -229,20 +248,41 @@ static size_t test_ws_data_m1_write(char *buf, size_t nitems, size_t buflen,
 {
   struct test_ws_m1_ctx *ctx = userdata;
   size_t len = nitems * buflen;
+  bool complete;
 
   ctx->write_calls++;
-  curl_mfprintf(stderr, "m1_write(len=%zu, call +%d)\n",
-                len, ctx->write_calls);
-  if(len > (ctx->recv_len - ctx->nrcvd))
+  if(len > (ctx->recv_len - ctx->nrcvd)) {
+    curl_mfprintf(stderr, "m1_write(len=%zu, call #%d) -> ERROR\n",
+                  len, ctx->write_calls);
     return CURL_WRITEFUNC_ERROR;
+  }
   memcpy(ctx->recv_buf + ctx->nrcvd, buf, len);
   ctx->nrcvd += len;
+  complete = (ctx->recv_len == ctx->nrcvd);
+
+  if(memcmp(ctx->send_buf, ctx->recv_buf, ctx->nrcvd)) {
+    curl_mfprintf(stderr, "m1_write(len=%zu, call #%d, frame #%d) -> "
+                  "data differs\n",
+                  len, ctx->write_calls, ctx->frames_written);
+    debug_dump("", "expected:", stderr,
+               (unsigned char *)ctx->send_buf, ctx->nrcvd, 0);
+    debug_dump("", "received:", stderr,
+               (unsigned char *)ctx->recv_buf, ctx->nrcvd, 0);
+    return CURL_WRITEFUNC_ERROR;
+  }
+
+  curl_mfprintf(stderr, "m1_write(len=%zu, call #%d, frame #%d%s) -> %zu\n",
+                len, ctx->write_calls, ctx->frames_written,
+                complete ? " complete" : "", len);
+  if(complete) {
+    ++ctx->frames_written;
+    ctx->nrcvd = 0;
+  }
   return len;
 }
 
 /* WebSocket Mode 1: multi handle, READ/WRITEFUNCTION use */
 static CURLcode test_ws_data_m1_echo(const char *url,
-                                     size_t count,
                                      size_t plen_min,
                                      size_t plen_max)
 {
@@ -276,64 +316,70 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     goto out;
   }
 
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_URL, url);
-  /* use the callback style */
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_USERAGENT, "ws-data");
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_VERBOSE, 1L);
-  /* we want to send */
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_UPLOAD, 1L);
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_READFUNCTION, test_ws_data_m1_read);
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_READDATA, &m1_ctx);
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEFUNCTION, test_ws_data_m1_write);
-  curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEDATA, &m1_ctx);
-
-  curl_multi_add_handle(multi, m1_ctx.easy);
-
   for(len = plen_min; len <= plen_max; ++len) {
     /* init what we want to send and expect to receive */
     curl_mfprintf(stderr, "m1_echo, iter len=%zu\n", len);
+
     m1_ctx.send_len = len;
     m1_ctx.nsent = 0;
     m1_ctx.recv_len = len;
     m1_ctx.nrcvd = 0;
+    m1_ctx.nframes = 2;
     m1_ctx.read_calls = 0;
     m1_ctx.write_calls = 0;
+    m1_ctx.frames_read = 0;
+    m1_ctx.frames_written = 0;
     memset(m1_ctx.recv_buf, 0, plen_max);
     curl_easy_pause(m1_ctx.easy, CURLPAUSE_CONT);
 
-    for(i = 0; i < count; ++i) {
-      curl_mfprintf(stderr, "m1_echo, iter len=%zu, count=%zu\n", len, i);
-      while(1) {
-        int still_running; /* keep number of running handles */
-        CURLMcode mc = curl_multi_perform(multi, &still_running);
+    curl_easy_reset(m1_ctx.easy);
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_URL, url);
+    /* use the callback style */
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_USERAGENT, "ws-data");
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_VERBOSE, 1L);
+    /* we want to send */
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_READFUNCTION, test_ws_data_m1_read);
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_READDATA, &m1_ctx);
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEFUNCTION,
+                     test_ws_data_m1_write);
+    curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEDATA, &m1_ctx);
 
-        if(!still_running ||
-           (m1_ctx.read_calls && m1_ctx.write_calls &&
-            m1_ctx.nrcvd == m1_ctx.recv_len)) {
-          /* got the full echo back or failed */
-          break;
-        }
+    curl_multi_add_handle(multi, m1_ctx.easy);
 
-        if(!mc && still_running) {
-          mc = curl_multi_poll(multi, NULL, 0, 1, NULL);
-        }
-        if(mc) {
-          r = CURLE_RECV_ERROR;
-          goto out;
-        }
+    while(1) {
+      int still_running; /* keep number of running handles */
+      CURLMcode mc = curl_multi_perform(multi, &still_running);
 
+      if(!still_running || (m1_ctx.frames_written >= m1_ctx.nframes)) {
+        /* got the full echo back or failed */
+        break;
       }
 
-      if(memcmp(m1_ctx.send_buf, m1_ctx.recv_buf, m1_ctx.send_len)) {
-        curl_mfprintf(stderr, "recv_data: data differs\n");
-        debug_dump("", "expected:", stderr,
-                   (unsigned char *)m1_ctx.send_buf, m1_ctx.send_len, 0);
-        debug_dump("", "received:", stderr,
-                   (unsigned char *)m1_ctx.recv_buf, m1_ctx.nrcvd, 0);
+      if(!mc && still_running) {
+        mc = curl_multi_poll(multi, NULL, 0, 1, NULL);
+      }
+      if(mc) {
         r = CURLE_RECV_ERROR;
         goto out;
       }
 
+    }
+
+    curl_multi_remove_handle(multi, m1_ctx.easy);
+
+    /* check results */
+    if(m1_ctx.frames_read < m1_ctx.nframes) {
+      curl_mfprintf(stderr, "m1_echo, sent only %d/%d frames\n",
+                    m1_ctx.frames_read, m1_ctx.nframes);
+      r = CURLE_SEND_ERROR;
+      goto out;
+    }
+    if(m1_ctx.frames_written < m1_ctx.frames_read) {
+      curl_mfprintf(stderr, "m1_echo, received only %d/%d frames\n",
+                    m1_ctx.frames_written, m1_ctx.frames_read);
+      r = CURLE_RECV_ERROR;
+      goto out;
     }
   }
 
@@ -422,7 +468,7 @@ static CURLcode test_cli_ws_data(const char *URL)
   curl_global_init(CURL_GLOBAL_ALL);
 
   if(model == 1)
-    res = test_ws_data_m1_echo(url, count, plen_min, plen_max);
+    res = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
     res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 

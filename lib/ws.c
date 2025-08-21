@@ -947,6 +947,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
     if(!Curl_bufq_is_empty(&ws->sendbuf)) {
       /* client_read started a new frame, we disregard any eos reported */
       ctx->read_eos = FALSE;
+      Curl_creader_clear_eos(data, reader->next);
     }
     else if(!nread) {
       /* nothing to convert, return this right away */
@@ -995,8 +996,7 @@ static const struct Curl_crtype ws_cr_encode = {
   Curl_creader_def_needs_rewind,
   Curl_creader_def_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
+  Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_ws_ctx)
