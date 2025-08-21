@@ -471,7 +471,8 @@ static CURLcode mqtt_verify_connack(struct Curl_easy *data)
 
   if(ptr[0] != 0x00 || ptr[1] != 0x00) {
     failf(data, "Expected %02x%02x but got %02x%02x",
-          (unsigned int)0x00, (unsigned int)0x00, ptr[0], ptr[1]);
+          (unsigned int)0x00, (unsigned int)0x00,
+          (unsigned int)ptr[0], (unsigned int)ptr[1]);
     curlx_dyn_reset(&mq->recvbuf);
     result = CURLE_WEIRD_SERVER_REPLY;
     goto fail;
