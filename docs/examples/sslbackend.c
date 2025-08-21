@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     assert(result == CURLSSLSET_UNKNOWN_BACKEND);
 
     for(i = 0; list[i]; i++)
-      printf("SSL backend #%d: '%s' (ID: %d)\n",
+      printf("SSL backend #%d: '%s' (ID: %u)\n",
              i, list[i]->name, list[i]->id);
 
     return 0;
