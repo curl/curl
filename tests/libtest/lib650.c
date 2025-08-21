@@ -82,7 +82,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
   if(formrc) {
-    curl_mprintf("curl_formadd(1) = %d\n", formrc);
+    curl_mprintf("curl_formadd(1) = %u\n", formrc);
     goto test_cleanup;
   }
 
@@ -104,7 +104,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(2) = %d\n", formrc);
+    curl_mprintf("curl_formadd(2) = %u\n", formrc);
     goto test_cleanup;
   }
 
@@ -124,7 +124,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(3) = %d\n", formrc);
+    curl_mprintf("curl_formadd(3) = %u\n", formrc);
     goto test_cleanup;
   }
 
@@ -135,7 +135,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_FILECONTENT, libtest_arg2,
                         CURLFORM_END);
   if(formrc) {
-    curl_mprintf("curl_formadd(4) = %d\n", formrc);
+    curl_mprintf("curl_formadd(4) = %u\n", formrc);
     goto test_cleanup;
   }
 
@@ -155,7 +155,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(5) = %d\n", formrc);
+    curl_mprintf("curl_formadd(5) = %u\n", formrc);
     goto test_cleanup;
   }
 
@@ -167,7 +167,7 @@ static CURLcode test_lib650(const char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(6) = %d\n", formrc);
+    curl_mprintf("curl_formadd(6) = %u\n", formrc);
     goto test_cleanup;
   }
 
