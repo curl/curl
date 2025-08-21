@@ -475,7 +475,7 @@ CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
         t = glob->error;
 
       /* send error description to the error-stream */
-      curl_mfprintf(error, "curl: (%d) %s\n", res, t);
+      curl_mfprintf(error, "curl: (%u) %s\n", res, t);
     }
     /* it failed, we cleanup */
     glob_cleanup(glob);
