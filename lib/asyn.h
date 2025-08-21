@@ -196,6 +196,7 @@ struct async_thrdd_addr_ctx {
   int port;
   int sock_error;
   int ref_count;
+  BIT(thrd_done);
 };
 
 /* Context for threaded resolver */
