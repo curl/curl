@@ -362,7 +362,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 out:
   Curl_multi_xfer_buf_release(data, xfer_buf);
   if(result)
-    DEBUGF(infof(data, "sendrecv_dl() -> %d", result));
+    DEBUGF(infof(data, "sendrecv_dl() -> %u", result));
   return result;
 }
 
@@ -471,7 +471,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
 
 out:
   if(result)
-    DEBUGF(infof(data, "Curl_sendrecv() -> %d", result));
+    DEBUGF(infof(data, "Curl_sendrecv() -> %u", result));
   return result;
 }
 
@@ -884,7 +884,7 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   else if(!result && *pnwritten)
     data->info.request_size += *pnwritten;
 
-  DEBUGF(infof(data, "Curl_xfer_send(len=%zu, eos=%d) -> %d, %zu",
+  DEBUGF(infof(data, "Curl_xfer_send(len=%zu, eos=%d) -> %u, %zu",
                blen, eos, result, *pnwritten));
   return result;
 }
