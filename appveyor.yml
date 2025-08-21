@@ -61,13 +61,12 @@ environment:
       SCHANNEL: 'ON'
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
-    - job_name: 'CMake, VS2010, Debug, x64, OpenSSL 1.0.2 + Schannel, Shared, Build-tests & examples, XP'
+    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Shared, Build-tests & examples, XP'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
       WINTARGET: 0x0501  # Windows XP
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
       SCHANNEL: 'ON'
       SHARED: 'ON'
       EXAMPLES: 'ON'
