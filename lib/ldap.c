@@ -430,7 +430,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
     server = ldap_init(host, ipquad.remote_port);
     if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
+      failf(data, "LDAP local: Cannot connect to %s:%d",
             conn->host.dispname, ipquad.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
@@ -473,7 +473,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   else {
     server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
     if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
+      failf(data, "LDAP local: Cannot connect to %s:%d",
             conn->host.dispname, ipquad.remote_port);
       result = CURLE_COULDNT_CONNECT;
       goto quit;
