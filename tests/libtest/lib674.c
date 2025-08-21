@@ -63,7 +63,7 @@ static CURLcode test_lib674(const char *URL)
 
   if(res) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
-                  "with code %d (%s)\n",
+                  "with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }
