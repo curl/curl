@@ -733,7 +733,7 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
     return CURL_IETF_PROTO_TLS1_1;
   case GNUTLS_TLS1_2:
     return CURL_IETF_PROTO_TLS1_2;
-#ifdef GNUTLS_TLS1_3
+#if GNUTLS_VERSION_NUMBER >= 0x030603
   case GNUTLS_TLS1_3:
     return CURL_IETF_PROTO_TLS1_3;
 #endif
