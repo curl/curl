@@ -264,7 +264,7 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   DEBUGASSERT(entry->writers + entry->readers);
 
   CURL_TRC_M(data, "ev update fd=%" FMT_SOCKET_T ", action '%s%s' -> '%s%s'"
-             " (%d/%d r/w)", s,
+             " (%u/%u r/w)", s,
              (last_action & CURL_POLL_IN) ? "IN" : "",
              (last_action & CURL_POLL_OUT) ? "OUT" : "",
              (cur_action & CURL_POLL_IN) ? "IN" : "",

@@ -1090,7 +1090,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     break;
 
   default:
-    failf(data, "multi_getsock: unexpected multi state %d", data->mstate);
+    failf(data, "multi_getsock: unexpected multi state %u", data->mstate);
     DEBUGASSERT(0);
     expect_sockets = FALSE;
     break;
@@ -1100,7 +1100,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     if(result == CURLE_OUT_OF_MEMORY)
       mresult = CURLM_OUT_OF_MEMORY;
     else {
-      failf(data, "error determining pollset: %d", result);
+      failf(data, "error determining pollset: %u", result);
       mresult = CURLM_INTERNAL_ERROR;
     }
     goto out;
@@ -1421,7 +1421,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     timeout_ms = (int)timeout_internal;
 
   if(data)
-    CURL_TRC_M(data, "multi_wait(fds=%d, timeout=%d) tinternal=%ld",
+    CURL_TRC_M(data, "multi_wait(fds=%u, timeout=%d) tinternal=%ld",
                cpfds.n, timeout_ms, timeout_internal);
 #if defined(ENABLE_WAKEUP) && defined(USE_WINSOCK)
   if(cpfds.n || use_wakeup) {
@@ -2250,7 +2250,7 @@ static CURLMcode state_resolving(struct Curl_multi *multi,
   CURLMcode rc = CURLM_OK;
 
   result = Curl_resolv_check(data, &dns);
-  CURL_TRC_DNS(data, "Curl_resolv_check() -> %d, %s",
+  CURL_TRC_DNS(data, "Curl_resolv_check() -> %u, %s",
                result, dns ? "found" : "missing");
   /* Update sockets here, because the socket(s) may have been closed and the
      application thus needs to be told, even if it is likely that the same
