@@ -33,7 +33,8 @@
 enum Curl_proxy_use {
   HEADER_SERVER,  /* direct to server */
   HEADER_PROXY,   /* regular request to proxy */
-  HEADER_CONNECT  /* sending CONNECT to a proxy */
+  HEADER_CONNECT, /* sending CONNECT to a proxy */
+  HEADER_CONNECT_UDP /* sending CONNECT-UDP to a proxy */
 };
 
 CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
@@ -44,6 +45,10 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         int http_version_major);
+CURLcode Curl_http_proxy_create_CONNECTUDP(struct httpreq **preq,
+                                           struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           int http_version_major);
 
 /* Default proxy timeout in milliseconds */
 #define PROXY_TIMEOUT (3600*1000)
@@ -60,6 +65,10 @@ extern struct Curl_cftype Curl_cft_http_proxy;
 #endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP */
 
 #define IS_HTTPS_PROXY(t) (((t) == CURLPROXY_HTTPS) ||  \
-                           ((t) == CURLPROXY_HTTPS2))
+                           ((t) == CURLPROXY_HTTPS2) || \
+                           ((t) == CURLPROXY_HTTPS3))
+
+#define IS_QUIC_PROXY(t) ((t) == CURLPROXY_HTTPS3)
 
 #endif /* HEADER_CURL_HTTP_PROXY_H */
+

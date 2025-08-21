@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_VQUIC_CURL_OSSLQ_H
-#define HEADER_CURL_VQUIC_CURL_OSSLQ_H
+#ifndef HEADER_CURL_H3_PROXY_H
+#define HEADER_CURL_H3_PROXY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,32 +24,15 @@
  *
  ***************************************************************************/
 
-#include "../curl_setup.h"
+#include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_OPENSSL_QUIC) && \
-  defined(USE_NGHTTP3)
+#if defined(USE_NGHTTP3) && !defined(CURL_DISABLE_PROXY)
 
-#ifdef HAVE_NETINET_UDP_H
-#include <netinet/udp.h>
-#endif
+CURLcode Curl_cf_h3_proxy_insert_after(struct Curl_cfilter **pcf,
+                                       struct Curl_easy *data);
 
-struct Curl_cfilter;
+extern struct Curl_cftype Curl_cft_h3_proxy;
 
-#include "../urldata.h"
+#endif /* USE_NGHTTP3 && !CURL_DISABLE_PROXY */
 
-void Curl_osslq_ver(char *p, size_t len);
-
-CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
-                              struct Curl_easy *data,
-                              struct connectdata *conn,
-                              const struct Curl_addrinfo *ai);
-
-CURLcode Curl_cf_osslq_insert_after(struct Curl_cfilter *cf_at,
-                              struct Curl_easy *data,
-                              struct Curl_dns_entry *remotehost);
-bool Curl_conn_is_osslq(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex);
-#endif
-
-#endif /* HEADER_CURL_VQUIC_CURL_OSSLQ_H */
+#endif /* HEADER_CURL_H3_PROXY_H */
