@@ -51,7 +51,7 @@
 
 /* Check for OpenSSL 1.1.1 which has early data support. */
 #undef HAVE_OPENSSL_EARLYDATA
-#if OPENSSL_VERSION_NUMBER >= 0x10100010L && defined(TLS1_3_VERSION) && \
+#if defined(TLS1_3_VERSION) && \
     !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
 #define HAVE_OPENSSL_EARLYDATA
 #endif
