@@ -36,7 +36,7 @@
 
 #include "curl_threads.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
+/* The last #include FILE should be: */
 #include "memdebug.h"
 
 #ifdef USE_THREADS_POSIX
