@@ -103,7 +103,7 @@ static CURLcode test_unit1652(const char *arg)
   fail_unless(verify(output, input) == 0, "Simple string test");
 
   /* Injecting a few different variables with a format */
-  Curl_infof(easy, "%s %u testing %lu", input, 42, 43L);
+  Curl_infof(easy, "%s %d testing %ld", input, 42, 43L);
   fail_unless(verify(output, "Simple Test 42 testing 43\n") == 0,
               "Format string");
 
