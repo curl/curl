@@ -128,7 +128,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     if(vlen != 2)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     hi->port = (unsigned short)((val[0] << 8) | val[1]);
-    CURL_TRC_DNS(data, "HTTPS RR port %u", hi->port);
+    CURL_TRC_DNS(data, "HTTPS RR port %d", hi->port);
     break;
   default:
     CURL_TRC_DNS(data, "HTTPS RR unknown code");

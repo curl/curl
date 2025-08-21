@@ -390,7 +390,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    BIO_printf(mem, "%lx", X509_get_version(x));
+    BIO_printf(mem, "%lx", (unsigned long)X509_get_version(x));
     result = push_certinfo(data, mem, "Version", i);
     if(result)
       break;
@@ -499,9 +499,9 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #else
           RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+          BIO_printf(mem, "%d", (int)(n ? BN_num_bits(n) : 0));
 #else
-          BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
+          BIO_printf(mem, "%d", (int)(rsa->n ? BN_num_bits(rsa->n) : 0));
 #endif /* HAVE_OPAQUE_RSA_DSA_DH */
           result = push_certinfo(data, mem, "RSA Public Key", i);
           if(result)
