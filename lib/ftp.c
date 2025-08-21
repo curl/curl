@@ -714,7 +714,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
-  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zd, ftpcode=%d",
+  CURL_TRC_FTP(data, "getftpresponse -> result=%u, nread=%zd, ftpcode=%d",
                result, *nreadp, *ftpcodep);
 
   return result;
@@ -3445,7 +3445,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   /* Send any post-transfer QUOTE strings? */
   if(!status && !result && !premature && data->set.postquote)
     result = ftp_sendquote(data, ftpc, data->set.postquote);
-  CURL_TRC_FTP(data, "[%s] done, result=%d", FTP_CSTATE(ftpc), result);
+  CURL_TRC_FTP(data, "[%s] done, result=%u", FTP_CSTATE(ftpc), result);
   return result;
 }
 
@@ -4500,7 +4500,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   ftpc->use_ssl = data->set.use_ssl;
   ftpc->ccc = data->set.ftp_ccc;
 
-  CURL_TRC_FTP(data, "[%s] setup connection -> %d", FTP_CSTATE(ftpc), result);
+  CURL_TRC_FTP(data, "[%s] setup connection -> %u", FTP_CSTATE(ftpc), result);
   return result;
 }
 
