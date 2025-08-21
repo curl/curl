@@ -1217,7 +1217,7 @@ out:
     ctx->connected_at = curlx_now();
     cf->connected = TRUE;
   }
-  CURL_TRC_CF(data, cf, "cf_socket_open() -> %d, fd=%" FMT_SOCKET_T,
+  CURL_TRC_CF(data, cf, "cf_socket_open() -> %u, fd=%" FMT_SOCKET_T,
               result, ctx->sock);
   return result;
 }
@@ -1356,7 +1356,7 @@ out:
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       {
         char buffer[STRERROR_LEN];
-        infof(data, "connect to %s port %u from %s port %d failed: %s",
+        infof(data, "connect to %s port %d from %s port %d failed: %s",
               ctx->ip.remote_ip, ctx->ip.remote_port,
               ctx->ip.local_ip, ctx->ip.local_port,
               curlx_strerror(ctx->error, buffer, sizeof(buffer)));
@@ -1510,7 +1510,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     win_update_sndbuf_size(ctx);
 #endif
 
-  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "send(len=%zu) -> %u, %zu",
               orig_len, result, *pnwritten);
   cf->conn->sock[cf->sockindex] = fdsave;
   return result;
@@ -1573,7 +1573,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   else
     *pnread = (size_t)nread;
 
-  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
+  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %u, %zu", len, result, *pnread);
   if(!result && !ctx->got_first_byte) {
     ctx->first_byte_at = curlx_now();
     ctx->got_first_byte = TRUE;
@@ -1866,7 +1866,7 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
   if(ctx->sock == CURL_SOCKET_BAD) {
     result = cf_socket_open(cf, data);
     if(result) {
-      CURL_TRC_CF(data, cf, "cf_udp_connect(), open failed -> %d", result);
+      CURL_TRC_CF(data, cf, "cf_udp_connect(), open failed -> %u", result);
       goto out;
     }
 
@@ -2090,7 +2090,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
               " ip=%s:%d", ctx->sock, ctx->ip.local_ip, ctx->ip.local_port);
   socketstate = Curl_socket_check(ctx->sock, CURL_SOCKET_BAD,
                                   CURL_SOCKET_BAD, 0);
-  CURL_TRC_CF(data, cf, "socket_check -> %x", socketstate);
+  CURL_TRC_CF(data, cf, "socket_check -> %x", (unsigned int)socketstate);
   switch(socketstate) {
   case -1: /* error */
     /* let's die here */

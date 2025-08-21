@@ -1292,7 +1292,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         free(portnum);
       }
       if(port != data->info.conn_remote_port) {
-        infof(data, "Clear auth, redirects to port from %u to %u",
+        infof(data, "Clear auth, redirects to port from %d to %d",
               data->info.conn_remote_port, port);
         clear = TRUE;
       }
@@ -3573,13 +3573,13 @@ static CURLcode http_statusline(struct Curl_easy *data,
     /* no major version switch mid-connection */
     if(k->httpversion_sent &&
        (k->httpversion/10 != k->httpversion_sent/10)) {
-      failf(data, "Version mismatch (from HTTP/%u to HTTP/%u)",
+      failf(data, "Version mismatch (from HTTP/%d to HTTP/%d)",
             k->httpversion_sent/10, k->httpversion/10);
       return CURLE_WEIRD_SERVER_REPLY;
     }
     break;
   default:
-    failf(data, "Unsupported HTTP version (%u.%d) in response",
+    failf(data, "Unsupported HTTP version (%d.%d) in response",
           k->httpversion/10, k->httpversion%10);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }

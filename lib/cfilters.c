@@ -211,7 +211,7 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
       bool cfdone = FALSE;
       result = cf->cft->do_shutdown(cf, data, &cfdone);
       if(result) {
-        CURL_TRC_CF(data, cf, "shut down failed with %d", result);
+        CURL_TRC_CF(data, cf, "shut down failed with %u", result);
         return result;
       }
       else if(!cfdone) {
@@ -453,7 +453,7 @@ static CURLcode cf_verboseconnect(struct Curl_easy *data,
     if(result)
       return result;
 
-    infof(data, "Established %sconnection to %s (%s port %u) from %s port %u ",
+    infof(data, "Established %sconnection to %s (%s port %d) from %s port %d ",
           (cf->sockindex == SECONDARYSOCKET) ? "2nd " : "",
           CURL_CONN_HOST_DISPNAME(data->conn),
           ipquad.remote_ip, ipquad.remote_port,
@@ -501,7 +501,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     }
 
     result = cf->cft->do_connect(cf, data, done);
-    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %d, done=%d",
+    CURL_TRC_CF(data, cf, "Curl_conn_connect(block=%d) -> %u, done=%d",
                 blocking, result, *done);
     if(!result && *done) {
       /* Now that the complete filter chain is connected, let all filters
@@ -516,7 +516,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %u",
                   result);
       conn_report_connect_stats(data, data->conn);
       goto out;

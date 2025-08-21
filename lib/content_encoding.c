@@ -783,7 +783,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       }
 
       if(Curl_cwriter_count(data, phase) + 1 >= MAX_ENCODE_STACK) {
-        failf(data, "Reject response due to more than %u content encodings",
+        failf(data, "Reject response due to more than %d content encodings",
               MAX_ENCODE_STACK);
         return CURLE_BAD_CONTENT_ENCODING;
       }
@@ -819,7 +819,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
         cwt = &error_writer;  /* Defer error at use. */
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
-      CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
+      CURL_TRC_WRITE(data, "added %s decoder %s -> %u",
                      is_transfer ? "transfer" : "content", cwt->name, result);
       if(result)
         return result;
