@@ -81,7 +81,7 @@ static bool gtls_inited = FALSE;
 #define HAVE_GNUTLS_EARLY_DATA
 #endif
 
-# include <gnutls/ocsp.h>
+#include <gnutls/ocsp.h>
 
 struct gtls_ssl_backend_data {
   struct gtls_ctx gtls;
@@ -909,7 +909,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
 #endif
 
 #ifdef GNUTLS_NO_TICKETS_TLS12
-    init_flags |= GNUTLS_NO_TICKETS_TLS12;
+  init_flags |= GNUTLS_NO_TICKETS_TLS12;
 #endif
 
 #ifdef GNUTLS_NO_STATUS_REQUEST
