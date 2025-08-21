@@ -42,7 +42,7 @@ static CURLcode test_lib2308(const char *URL)
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_curl);
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   res = curl_easy_perform(curl);
-  curl_mprintf("Returned %d, should be %d.\n", res, CURLE_WRITE_ERROR);
+  curl_mprintf("Returned %u, should be %d.\n", res, CURLE_WRITE_ERROR);
   fflush(stdout);
   curl_easy_cleanup(curl);
   curl_global_cleanup();

@@ -368,7 +368,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
       curl_mfprintf(stderr, "[t-%zu] STARTING\n", t->idx);
       rc = curl_easy_perform(easy);
-      curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, rc);
+      curl_mfprintf(stderr, "[t-%zu] DONE -> %u\n", t->idx, rc);
       t->easy = NULL;
       curl_easy_reset(easy);
     }
@@ -419,7 +419,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
             curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &res_status);
             t->done = 1;
             curl_mfprintf(stderr, "[t-%zu] FINISHED, "
-                          "result=%d, response=%ld\n",
+                          "result=%u, response=%ld\n",
                           t->idx, m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;

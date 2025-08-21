@@ -37,19 +37,19 @@ static CURLcode test_lib1558(const char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   res = curl_easy_perform(curl);
   if(res) {
-    curl_mfprintf(stderr, "curl_easy_perform() returned %d (%s)\n",
+    curl_mfprintf(stderr, "curl_easy_perform() returned %u (%s)\n",
                   res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
   if(res) {
-    curl_mfprintf(stderr, "curl_easy_getinfo() returned %d (%s)\n",
+    curl_mfprintf(stderr, "curl_easy_getinfo() returned %u (%s)\n",
                   res, curl_easy_strerror(res));
     goto test_cleanup;
   }
 
-  curl_mprintf("Protocol: %lx\n", protocol);
+  curl_mprintf("Protocol: %lx\n", (unsigned long)protocol);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

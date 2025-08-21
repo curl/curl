@@ -252,7 +252,7 @@ static int t758_checkForCompletion(CURLM *curl, int *success)
         *success = 0;
     }
     else {
-      curl_mfprintf(stderr, "%s got an unexpected message from curl: %i\n",
+      curl_mfprintf(stderr, "%s got an unexpected message from curl: %u\n",
                     t758_tag(), message->msg);
       result = 1;
       *success = 0;
@@ -302,7 +302,7 @@ static CURLMcode t758_saction(CURLM *curl, curl_socket_t s,
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
   if(result != CURLM_OK) {
-    curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
+    curl_mfprintf(stderr, "%s Curl error on %s (%d) %s\n",
                   t758_tag(), info, result, curl_multi_strerror(result));
   }
   return result;
@@ -499,7 +499,7 @@ static CURLcode test_lib758(const char *URL)
      callback calls */
   rc = t758_one(URL, 0, 0); /* no callback fails */
   if(rc)
-    curl_mfprintf(stderr, "%s FAILED: %d\n", t758_tag(), rc);
+    curl_mfprintf(stderr, "%s FAILED: %u\n", t758_tag(), rc);
 
   return rc;
 }

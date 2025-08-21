@@ -133,7 +133,7 @@ cleanup:
     pthread_join(tids[i], NULL);
     if(results[i] != CURLE_OK) {
       curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
-                    "with code %d (%s)\n", __FILE__, __LINE__,
+                    "with code %u (%s)\n", __FILE__, __LINE__,
                     i, results[i], curl_easy_strerror(results[i]));
       test_failure = TEST_ERR_MAJOR_BAD;
     }

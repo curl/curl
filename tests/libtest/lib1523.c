@@ -68,11 +68,11 @@ static CURLcode test_lib1523(const char *URL)
 
   ret = run(hnd, 1, 2);
   if(ret)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+    curl_mfprintf(stderr, "error (%u) %s\n", ret, buffer);
 
   ret = run(hnd, 12000, 1);
   if(ret != CURLE_OPERATION_TIMEDOUT)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+    curl_mfprintf(stderr, "error (%u) %s\n", ret, buffer);
   else
     ret = CURLE_OK;
 

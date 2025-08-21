@@ -88,7 +88,7 @@ static CURLcode test_lib1522(const char *URL)
     }
   }
   else {
-    curl_mprintf("curl_easy_perform() failed. e = %d\n", code);
+    curl_mprintf("curl_easy_perform() failed. e = %u\n", code);
   }
 test_cleanup:
   curl_slist_free_all(pHeaderList);

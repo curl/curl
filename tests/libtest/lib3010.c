@@ -40,7 +40,7 @@ static CURLcode test_lib3010(const char *URL)
     ret = curl_easy_perform(curl);
     if(ret) {
       curl_mfprintf(stderr,
-                    "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                    "%s:%d curl_easy_perform() failed with code %u (%s)\n",
                     __FILE__, __LINE__, ret, curl_easy_strerror(ret));
       goto test_cleanup;
     }
@@ -51,7 +51,7 @@ static CURLcode test_lib3010(const char *URL)
     ret = curl_easy_perform(curl);
     if(ret) {
       curl_mfprintf(stderr,
-                    "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                    "%s:%d curl_easy_perform() failed with code %u (%s)\n",
                     __FILE__, __LINE__, ret, curl_easy_strerror(ret));
       goto test_cleanup;
     }

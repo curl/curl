@@ -86,7 +86,7 @@ static CURLcode test_lib677(const char *URL)
           continue;
         }
         else if(ec) {
-          curl_mfprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
+          curl_mfprintf(stderr, "curl_easy_send() failed, with code %u (%s)\n",
                         ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
@@ -107,7 +107,7 @@ static CURLcode test_lib677(const char *URL)
           continue;
         }
         else if(ec) {
-          curl_mfprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
+          curl_mfprintf(stderr, "curl_easy_recv() failed, with code %u (%s)\n",
                         ec, curl_easy_strerror(ec));
           res = ec;
           goto test_cleanup;

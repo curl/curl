@@ -57,7 +57,7 @@ retry:
     goto retry;
   }
   if(res) {
-    curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
+    curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     assert(nsent == 0);
     return res;
@@ -86,7 +86,7 @@ retry:
     goto retry;
   }
   if(res) {
-    curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
+    curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     assert(nread == 0);
     return res;
@@ -128,7 +128,7 @@ retry:
     goto retry;
   }
   if(res) {
-    curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %d (%s)\n",
+    curl_mfprintf(stderr, "%s:%d curl_ws_send() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     assert(nsent == 0);
     return res;
@@ -157,7 +157,7 @@ retry:
     goto retry;
   }
   if(res) {
-    curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %d (%s)\n",
+    curl_mfprintf(stderr, "%s:%d curl_ws_recv() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     assert(nread == 0);
     return res;
@@ -234,7 +234,7 @@ static CURLcode test_lib2700(const char *URL)
   res = curl_easy_perform(curl);
   if(res) {
     curl_mfprintf(stderr,
-                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  "%s:%d curl_easy_perform() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }

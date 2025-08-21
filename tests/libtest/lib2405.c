@@ -45,12 +45,12 @@
 
 #define test_check(expected_fds) \
   if(res != CURLE_OK) { \
-    curl_mfprintf(stderr, "test failed with code: %d\n", res); \
+    curl_mfprintf(stderr, "test failed with code: %u\n", res); \
     goto test_cleanup; \
   } \
   else if(fd_count != expected_fds) { \
-    curl_mfprintf(stderr, "Max number of waitfds: %d not as expected: %d\n", \
-      fd_count, expected_fds); \
+    curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
+      fd_count, (unsigned int)expected_fds); \
     res = TEST_ERR_FAILURE; \
     goto test_cleanup; \
   }
@@ -332,7 +332,7 @@ static CURLcode empty_multi_test(void)
   }
   else if(fd_count > 0) {
     curl_mfprintf(stderr, "curl_multi_waitfds() returned non-zero count of "
-                  "waitfds: %d.\n", fd_count);
+                  "waitfds: %u.\n", fd_count);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
@@ -354,7 +354,7 @@ static CURLcode empty_multi_test(void)
   }
   else if(fd_count > 0) {
     curl_mfprintf(stderr, "curl_multi_waitfds() returned non-zero count of "
-                  "waitfds: %d.\n", fd_count);
+                  "waitfds: %u.\n", fd_count);
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }

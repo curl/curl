@@ -48,10 +48,10 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
     long httpcode = 0;
     /* end of a response */
     result = curl_easy_getinfo(st->easy, CURLINFO_RESPONSE_CODE, &httpcode);
-    curl_mfprintf(stderr, "header_callback, get status: %ld, %d\n",
+    curl_mfprintf(stderr, "header_callback, get status: %ld, %u\n",
                   httpcode, result);
     if(httpcode < 100 || httpcode >= 1000) {
-      curl_mfprintf(stderr, "header_callback, invalid status: %ld, %d\n",
+      curl_mfprintf(stderr, "header_callback, invalid status: %ld, %u\n",
                     httpcode, result);
       return CURLE_WRITE_ERROR;
     }
@@ -60,7 +60,7 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
       result = curl_easy_getinfo(st->easy, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                                  &clen);
       curl_mfprintf(stderr, "header_callback, info Content-Length: "
-                    "%" CURL_FORMAT_CURL_OFF_T ", %d\n", clen, result);
+                    "%" CURL_FORMAT_CURL_OFF_T ", %u\n", clen, result);
       if(result) {
         st->result = result;
         return CURLE_WRITE_ERROR;

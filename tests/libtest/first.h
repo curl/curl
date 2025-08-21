@@ -377,7 +377,7 @@ void ws_close(CURL *curl);
   CURLMcode ec;                                                     \
   if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_poll() failed, "        \
-                  "with code %u (%s)\n",                            \
+                  "with code %d (%s)\n",                            \
                   (Y), (Z), ec, curl_multi_strerror(ec));           \
     res = TEST_ERR_MULTI;                                           \
   }                                                                 \
@@ -407,7 +407,7 @@ void ws_close(CURL *curl);
   CURLMcode ec;                                                \
   if((ec = curl_multi_wakeup((A))) != CURLM_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_multi_wakeup() failed, " \
-                  "with code %u (%s)\n",                       \
+                  "with code %d (%s)\n",                       \
                   (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \

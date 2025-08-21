@@ -98,11 +98,11 @@ static CURLcode test_lib1597(const char *URL)
   for(i = 0; prots[i].in; i++) {
     res = curl_easy_setopt(curl, CURLOPT_PROTOCOLS_STR, prots[i].in);
     if(res != *prots[i].exp) {
-      curl_mprintf("unexpectedly '%s' returned %d\n", prots[i].in, res);
+      curl_mprintf("unexpectedly '%s' returned %u\n", prots[i].in, res);
       break;
     }
   }
-  curl_mprintf("Tested %u strings\n", i);
+  curl_mprintf("Tested %d strings\n", i);
 
 test_cleanup:
   curl_easy_cleanup(curl);

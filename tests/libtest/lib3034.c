@@ -56,7 +56,7 @@ static CURLcode test_lib3034(const char *URL)
   res = curl_easy_perform(curl);
   if(res != CURLE_SEND_FAIL_REWIND) {
     curl_mfprintf(stderr,
-                  "%s:%d curl_easy_perform() failed with code %d (%s)\n",
+                  "%s:%d curl_easy_perform() failed with code %u (%s)\n",
                   __FILE__, __LINE__, res, curl_easy_strerror(res));
     goto test_cleanup;
   }

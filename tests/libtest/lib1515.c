@@ -128,7 +128,7 @@ static CURLcode test_lib1515(const char *URL)
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
     if(res != CURLE_OK) {
-      curl_mfprintf(stderr, "request %s failed with %d\n", target_url, res);
+      curl_mfprintf(stderr, "request %s failed with %u\n", target_url, res);
       goto test_cleanup;
     }
 

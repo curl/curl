@@ -65,7 +65,7 @@ static CURLcode test_lib1947(const char *URL)
     if(h)
       count++;
   } while(h);
-  curl_mprintf("count = %u\n", count);
+  curl_mprintf("count = %d\n", count);
 
   /* perform another request - without redirect */
   easy_setopt(curl, CURLOPT_URL, libtest_arg2);
@@ -83,7 +83,7 @@ static CURLcode test_lib1947(const char *URL)
     if(h)
       count++;
   } while(h);
-  curl_mprintf("count = %u\n", count);
+  curl_mprintf("count = %d\n", count);
 
 test_cleanup:
   curl_easy_cleanup(curl);

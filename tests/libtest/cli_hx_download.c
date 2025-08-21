@@ -145,7 +145,7 @@ static int my_progress_d_cb(void *userdata,
     t->checked_ssl = TRUE;
     res = curl_easy_getinfo(t->easy, CURLINFO_TLS_SSL_PTR, &tls);
     if(res) {
-      curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %d\n",
+      curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %u\n",
                     t->idx, res);
       assert(0);
     }
@@ -202,7 +202,7 @@ static int my_progress_d_cb(void *userdata,
       }
 #endif
       default:
-        curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%d, ptr=%p\n",
+        curl_mfprintf(stderr, "[t-%zu] info SSL_PTR backend=%u, ptr=%p\n",
                       t->idx, tls->backend, (void *)tls->internals);
         break;
       }
@@ -456,7 +456,7 @@ static CURLcode test_cli_hx_download(const char *URL)
         if(t) {
           t->done = 1;
           t->result = m->data.result;
-          curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
+          curl_mfprintf(stderr, "[t-%zu] FINISHED with result %u\n",
                         t->idx, t->result);
           if(use_earlydata) {
             curl_off_t sent;

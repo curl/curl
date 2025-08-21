@@ -47,7 +47,7 @@ static CURLcode test_lib1916(const char *URL)
     }
     res = curl_easy_perform(curl);
     if(res) {
-      curl_mprintf("res: %d\n", res);
+      curl_mprintf("res: %u\n", res);
     }
     curl_easy_cleanup(curl);
   }

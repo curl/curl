@@ -48,7 +48,7 @@ static void flush_data(struct ws_data *wd)
 
   curl_mprintf("\n");
   if(wd->has_meta)
-    curl_mprintf("RECFLAGS: %x\n", wd->meta_flags);
+    curl_mprintf("RECFLAGS: %x\n", (unsigned int)wd->meta_flags);
   else
     curl_mfprintf(stderr, "RECFLAGS: NULL\n");
   wd->blen = 0;
@@ -115,7 +115,7 @@ static CURLcode test_lib2302(const char *URL)
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t2302_write_cb);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
       res = curl_easy_perform(curl);
-      curl_mfprintf(stderr, "curl_easy_perform() returned %d\n", res);
+      curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", res);
       /* always cleanup */
       curl_easy_cleanup(curl);
       flush_data(&ws_data);

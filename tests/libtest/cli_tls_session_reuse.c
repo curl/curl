@@ -206,7 +206,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
         }
         else if(msg->data.result) {
           curl_mfprintf(stderr, "transfer #%" CURL_FORMAT_CURL_OFF_T
-                        ": failed with %d\n", xfer_id, msg->data.result);
+                        ": failed with %u\n", xfer_id, msg->data.result);
           goto cleanup;
         }
         else if(status != 200) {
