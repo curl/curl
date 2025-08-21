@@ -77,6 +77,10 @@ static bool gtls_inited = FALSE;
 #error "too old GnuTLS version"
 #endif
 
+#if GNUTLS_VERSION_NUMBER >= 0x03060d
+#define HAVE_GNUTLS_EARLY_DATA
+#endif
+
 # include <gnutls/ocsp.h>
 
 struct gtls_ssl_backend_data {
@@ -655,7 +659,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#if GNUTLS_VERSION_NUMBER >= 0x030605
+#ifdef HAVE_GNUTLS_EARLY_DATA
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -738,7 +742,7 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
   }
 }
 
-#if GNUTLS_VERSION_NUMBER >= 0x030605
+#ifdef HAVE_GNUTLS_EARLY_DATA
 static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           gnutls_session_t session)
@@ -1055,6 +1059,7 @@ static int keylog_callback(gnutls_session_t session, const char *label,
   return 0;
 }
 
+#ifdef HAVE_GNUTLS_EARLY_DATA
 static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct alpn_spec *alpns,
@@ -1088,6 +1093,7 @@ static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
   }
   return result;
 }
+#endif
 
 CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
@@ -1166,11 +1172,13 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       goto out;
   }
 
+#ifdef HAVE_GNUTLS_EARLY_DATA
   /* Open the file if a TLS or QUIC backend has not done this before. */
   Curl_tls_keylog_open();
   if(Curl_tls_keylog_enabled()) {
     gnutls_session_set_keylog_function(gctx->session, keylog_callback);
   }
+#endif
 
   /* convert the ALPN string from our arguments to a list of strings that
    * gnutls wants and will convert internally back to this string for sending
@@ -1215,7 +1223,13 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
                               connssl->alpn, NULL, NULL, cf,
-                              gtls_on_session_reuse);
+#ifdef HAVE_GNUTLS_EARLY_DATA
+                              gtls_on_session_reuse
+#else
+                              NULL
+#endif
+                              );
+
   if(result)
     return result;
 
@@ -1226,7 +1240,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
-#if GNUTLS_VERSION_NUMBER >= 0x030605
+#ifdef HAVE_GNUTLS_EARLY_DATA
   gnutls_handshake_set_hook_function(backend->gtls.session,
                                      GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
                                      gtls_handshake_cb);
@@ -1803,17 +1817,18 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-#ifdef GNUTLS_TLS1_3
+#ifdef HAVE_GNUTLS_EARLY_DATA
   /* Only on TLSv1.2 or lower do we have the session id now. For
    * TLSv1.3 we get it via a SESSION_TICKET message that arrives later. */
   if(gnutls_protocol_get_version(session) < GNUTLS_TLS1_3)
-#endif
     result = cf_gtls_update_session_id(cf, data, session);
+#endif
 
 out:
   return result;
 }
 
+#ifdef HAVE_GNUTLS_EARLY_DATA
 static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
                                     struct Curl_easy *data)
 {
@@ -1852,6 +1867,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
 out:
   return result;
 }
+#endif
 
 /*
  * This function is called after the TCP connect has completed. Setup the TLS
@@ -1888,6 +1904,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
   }
 
   if(connssl->connecting_state == ssl_connect_2) {
+#ifdef HAVE_GNUTLS_EARLY_DATA
     if(connssl->earlydata_state == ssl_earlydata_await) {
       goto out;
     }
@@ -1899,7 +1916,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
     }
     DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
                 (connssl->earlydata_state == ssl_earlydata_sent));
-
+#endif
     result = handshake(cf, data);
     if(result)
       goto out;
@@ -1930,6 +1947,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
     if(result)
       goto out;
 
+#ifdef HAVE_GNUTLS_EARLY_DATA
     if(connssl->earlydata_state > ssl_earlydata_none) {
       /* We should be in this state by now */
       DEBUGASSERT(connssl->earlydata_state == ssl_earlydata_sent);
@@ -1938,6 +1956,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
          GNUTLS_SFLAGS_EARLY_DATA) ?
         ssl_earlydata_accepted : ssl_earlydata_rejected;
     }
+#endif
     connssl->connecting_state = ssl_connect_done;
   }
 
@@ -1960,12 +1979,14 @@ static CURLcode gtls_connect(struct Curl_cfilter *cf,
                              bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
+#ifdef HAVE_GNUTLS_EARLY_DATA
   if((connssl->state == ssl_connection_deferred) &&
      (connssl->earlydata_state == ssl_earlydata_await)) {
     /* We refuse to be pushed, we are waiting for someone to send/recv. */
     *done = TRUE;
     return CURLE_OK;
   }
+#endif
   return gtls_connect_common(cf, data, done);
 }
 
