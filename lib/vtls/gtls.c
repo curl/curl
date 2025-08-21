@@ -655,6 +655,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#if GNUTLS_VERSION_NUMBER >= 0x030605
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -715,6 +716,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   }
   return result;
 }
+#endif
 
 int Curl_glts_get_ietf_proto(gnutls_session_t session)
 {
@@ -727,13 +729,16 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
     return CURL_IETF_PROTO_TLS1_1;
   case GNUTLS_TLS1_2:
     return CURL_IETF_PROTO_TLS1_2;
+#ifdef GNUTLS_TLS1_3
   case GNUTLS_TLS1_3:
     return CURL_IETF_PROTO_TLS1_3;
+#endif
   default:
     return CURL_IETF_PROTO_UNKNOWN;
   }
 }
 
+#if GNUTLS_VERSION_NUMBER >= 0x030605
 static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           gnutls_session_t session)
@@ -769,6 +774,7 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
   }
   return 0;
 }
+#endif
 
 static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
@@ -883,6 +889,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
 
   /* Initialize TLS session as a client */
   init_flags = GNUTLS_CLIENT;
+#ifdef GNUTLS_ENABLE_EARLY_DATA
   if(peer->transport == TRNSPRT_QUIC && earlydata_max > 0)
     init_flags |= GNUTLS_ENABLE_EARLY_DATA | GNUTLS_NO_END_OF_EARLY_DATA;
   else if(earlydata_max > 0 && earlydata_max != 0xFFFFFFFFUL)
@@ -891,6 +898,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
      * and one announcing 0xFFFFFFFFUL. On TCP+TLS, this is unlikely, but
      * on QUIC this is common. */
     init_flags |= GNUTLS_ENABLE_EARLY_DATA;
+#endif
 
 #ifdef GNUTLS_FORCE_CLIENT_CERT
   init_flags |= GNUTLS_FORCE_CLIENT_CERT;
@@ -1218,9 +1226,11 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
+#if GNUTLS_VERSION_NUMBER >= 0x030605
   gnutls_handshake_set_hook_function(backend->gtls.session,
                                      GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
                                      gtls_handshake_cb);
+#endif
 
   /* register callback functions and handle to send and receive data. */
   gnutls_transport_set_ptr(backend->gtls.session, cf);
@@ -1793,9 +1803,11 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
+#ifdef GNUTLS_TLS1_3
   /* Only on TLSv1.2 or lower do we have the session id now. For
    * TLSv1.3 we get it via a SESSION_TICKET message that arrives later. */
   if(gnutls_protocol_get_version(session) < GNUTLS_TLS1_3)
+#endif
     result = cf_gtls_update_session_id(cf, data, session);
 
 out:
