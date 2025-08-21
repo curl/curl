@@ -70,7 +70,7 @@ jobs:
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
-          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev librtmp-dev stunnel4 groff
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libgnutls28-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev librtmp-dev stunnel4 groff
           # GitHub's actions/checkout needs newer glibc and libstdc++. The latter also depends on
           # gcc-8-base, but it doesn't actually seem used in our situation and isn't available in
           # the main repo, so force the install.
@@ -87,7 +87,7 @@ jobs:
           mkdir bld-1
           cd bld-1
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
+            -DCURL_USE_GNUTLS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
           make install
           src/curl --disable --version
 
@@ -103,7 +103,7 @@ jobs:
           mkdir bld-cares
           cd bld-cares
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
+            -DCURL_USE_GNUTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
       - name: 'cmake curl_config.h'
@@ -136,7 +136,7 @@ jobs:
           mkdir bld-am
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
-            --with-openssl --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
+            --with-gnutls --enable-ares --with-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
       - name: 'autotools curl_config.h'

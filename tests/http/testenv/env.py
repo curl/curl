@@ -464,7 +464,9 @@ class Env:
 
     @staticmethod
     def curl_can_early_data() -> bool:
-        return Env.curl_uses_any_libs(['gnutls', 'wolfssl', 'quictls', 'openssl'])
+        if Env.curl_uses_lib('gnutls'):
+            return Env.curl_lib_version_at_least('gnutls', '3.6.13')
+        return Env.curl_uses_any_libs(['wolfssl', 'quictls', 'openssl'])
 
     @staticmethod
     def curl_can_h3_early_data() -> bool:
