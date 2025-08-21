@@ -1114,7 +1114,7 @@ static bool juggle(curl_socket_t *sockfdp,
       snprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
                ipv_inuse, server_port);
       buffer_len = (ssize_t)strlen((char *)buffer);
-      snprintf(data, sizeof(data), "PORT\n%04x\n", (int)buffer_len);
+      snprintf(data, sizeof(data), "PORT\n%04x\n", (unsigned int)buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, buffer_len))
