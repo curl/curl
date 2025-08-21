@@ -135,13 +135,13 @@ static CURLcode test_unit1660(const char *arg)
       result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 
       if(result != headers[i].result) {
-        curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
+        curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %u\n",
                       headers[i].hdr, result);
         unitfail++;
         continue;
       }
       else if(result) {
-        curl_mprintf("Input %u: error %d\n", i, (int) result);
+        curl_mprintf("Input %d: error %u\n", i, (int) result);
         continue;
       }
     }

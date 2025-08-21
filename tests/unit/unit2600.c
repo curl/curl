@@ -252,7 +252,7 @@ static void check_result(const struct test_case *tc,
     && CURLE_OPERATION_TIMEDOUT != tr->result) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
-    curl_msprintf(msg, "%d: expected result %d but got %d",
+    curl_msprintf(msg, "%d: expected result %u but got %u",
                   tc->id, tc->exp_result, tr->result);
     fail(msg);
   }

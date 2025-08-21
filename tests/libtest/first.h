@@ -190,7 +190,7 @@ void ws_close(CURL *curl);
   CURLcode ec;                                                \
   if((ec = curl_easy_setopt((A), (B), (C))) != CURLE_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_easy_setopt() failed, " \
-                  "with code %d (%s)\n",                      \
+                  "with code %u (%s)\n",                      \
                   (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
@@ -377,7 +377,7 @@ void ws_close(CURL *curl);
   CURLMcode ec;                                                     \
   if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_poll() failed, "        \
-                  "with code %d (%s)\n",                            \
+                  "with code %u (%s)\n",                            \
                   (Y), (Z), ec, curl_multi_strerror(ec));           \
     res = TEST_ERR_MULTI;                                           \
   }                                                                 \
@@ -407,7 +407,7 @@ void ws_close(CURL *curl);
   CURLMcode ec;                                                \
   if((ec = curl_multi_wakeup((A))) != CURLM_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_multi_wakeup() failed, " \
-                  "with code %d (%s)\n",                       \
+                  "with code %u (%s)\n",                       \
                   (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \
@@ -494,7 +494,7 @@ void ws_close(CURL *curl);
   CURLcode ec;                                                \
   if((ec = curl_global_init((A))) != CURLE_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_global_init() failed, " \
-                  "with code %d (%s)\n",                      \
+                  "with code %u (%s)\n",                      \
                   (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
