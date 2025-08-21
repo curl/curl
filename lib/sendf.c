@@ -90,8 +90,8 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   }
 
   result = Curl_cwriter_write(data, data->req.writer_stack, type, buf, blen);
-  CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %d",
-                 type, blen, result);
+  CURL_TRC_WRITE(data, "client_write(type=%x, len=%zu) -> %u",
+                 (unsigned int)type, blen, result);
   return result;
 }
 
@@ -152,7 +152,7 @@ CURLcode Curl_client_start(struct Curl_easy *data)
     while(r) {
       result = r->crt->cntrl(data, r, CURL_CRCNTRL_REWIND);
       if(result) {
-        failf(data, "rewind of client reader '%s' failed: %d",
+        failf(data, "rewind of client reader '%s' failed: %u",
               r->crt->name, result);
         return result;
       }
@@ -252,8 +252,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     if(is_connect && data->set.suppress_connect_headers)
       return CURLE_OK;
     result = Curl_cwriter_write(data, writer->next, type, buf, nbytes);
-    CURL_TRC_WRITE(data, "download_write header(type=%x, blen=%zu) -> %d",
-                   type, nbytes, result);
+    CURL_TRC_WRITE(data, "download_write header(type=%x, blen=%zu) -> %u",
+                   (unsigned int)type, nbytes, result);
     return result;
   }
 
@@ -267,7 +267,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     /* BODY arrives although we want none, bail out */
     streamclose(data->conn, "ignoring body");
     CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu), "
-                   "did not want a BODY", type, nbytes);
+                   "did not want a BODY", (unsigned int)type, nbytes);
     data->req.download_done = TRUE;
     if(data->info.header_size)
       /* if headers have been received, this is fine */
@@ -310,8 +310,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   if(!data->req.ignorebody && (nwrite || (type & CLIENTWRITE_EOS))) {
     result = Curl_cwriter_write(data, writer->next, type, buf, nwrite);
-    CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu) -> %d",
-                   type, nbytes, result);
+    CURL_TRC_WRITE(data, "download_write body(type=%x, blen=%zu) -> %u",
+                   (unsigned int)type, nbytes, result);
     if(result)
       return result;
   }
@@ -754,7 +754,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     break;
   }
   CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"FMT_OFF_T
-                ", read=%"FMT_OFF_T") -> %d, nread=%zu, eos=%d",
+                ", read=%"FMT_OFF_T") -> %u, nread=%zu, eos=%d",
                 blen, ctx->total_len, ctx->read_len, result,
                 *pnread, *peos);
   return result;
@@ -887,7 +887,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
 #endif
       int err = fseek(data->state.in, 0, SEEK_SET);
       CURL_TRC_READ(data, "cr_in, rewind via fseek -> %d(%d)",
-                    (int)err, (int)errno);
+                    err, (int)errno);
       if(err != -1)
         /* successful rewind */
         return CURLE_OK;
@@ -1075,7 +1075,7 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_READ(data, "cr_lc_read(len=%zu) -> %d, nread=%zu, eos=%d",
+  CURL_TRC_READ(data, "cr_lc_read(len=%zu) -> %u, nread=%zu, eos=%d",
                 blen, result, *pnread, *peos);
   return result;
 }
@@ -1161,7 +1161,7 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
 out:
-  CURL_TRC_READ(data, "add fread reader, len=%"FMT_OFF_T " -> %d",
+  CURL_TRC_READ(data, "add fread reader, len=%"FMT_OFF_T " -> %u",
                 len, result);
   return result;
 }
@@ -1221,7 +1221,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
 
   result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
-  CURL_TRC_READ(data, "client_read(len=%zu) -> %d, nread=%zu, eos=%d",
+  CURL_TRC_READ(data, "client_read(len=%zu) -> %u, nread=%zu, eos=%d",
                 blen, result, *nread, *eos);
   return result;
 }
@@ -1409,7 +1409,7 @@ CURLcode Curl_creader_set_buf(struct Curl_easy *data,
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
 out:
-  CURL_TRC_READ(data, "add buf reader, len=%zu -> %d", blen, result);
+  CURL_TRC_READ(data, "add buf reader, len=%zu -> %u", blen, result);
   return result;
 }
 
@@ -1479,5 +1479,4 @@ struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
       return r;
   }
   return NULL;
-
 }

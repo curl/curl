@@ -321,7 +321,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       bool done;
       result = Curl_xfer_send_shutdown(data, &done);
       if(result && data->req.shutdown_err_ignore) {
-        infof(data, "Shutdown send direction error: %d. Broken server? "
+        infof(data, "Shutdown send direction error: %u. Broken server? "
               "Proceeding as if everything is ok.", result);
         result = CURLE_OK;
         done = TRUE;

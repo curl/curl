@@ -849,7 +849,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   }
   if((arg > ok) || (arg < 0))
     /* reserve other values for future use */
-    infof(data, "boolean setopt(%d) got unsupported argument %ld,"
+    infof(data, "boolean setopt(%u) got unsupported argument %ld,"
           " treated as %d", option, arg, enabled);
 
   *set = TRUE;

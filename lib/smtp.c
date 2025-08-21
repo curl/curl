@@ -1512,7 +1512,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
 
   /* Clear the transfer mode for the next request */
   smtp->transfer = PPTRANSFER_BODY;
-  CURL_TRC_SMTP(data, "smtp_done(status=%d, premature=%d) -> %d",
+  CURL_TRC_SMTP(data, "smtp_done(status=%u, premature=%d) -> %u",
                 status, premature, result);
   return result;
 }
@@ -1573,7 +1573,7 @@ static CURLcode smtp_perform(struct Curl_easy *data,
   *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
 out:
-  CURL_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",
+  CURL_TRC_SMTP(data, "smtp_perform() -> %u, connected=%d, done=%d",
                 result, *connected, *dophase_done);
   return result;
 }
@@ -1606,7 +1606,7 @@ static CURLcode smtp_do(struct Curl_easy *data, bool *done)
     return result;
 
   result = smtp_regular_transfer(data, smtpc, smtp, done);
-  CURL_TRC_SMTP(data, "smtp_do() -> %d, done=%d", result, *done);
+  CURL_TRC_SMTP(data, "smtp_do() -> %u, done=%d", result, *done);
   return result;
 }
 
@@ -1672,7 +1672,7 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
   }
 
-  CURL_TRC_SMTP(data, "smtp_doing() -> %d, done=%d", result, *dophase_done);
+  CURL_TRC_SMTP(data, "smtp_doing() -> %u, done=%d", result, *dophase_done);
   return result;
 }
 
@@ -1709,7 +1709,7 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
   if(!result && *dophase_done)
     result = smtp_dophase_done(data, smtp, connected);
 
-  CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
+  CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %u, done=%d",
                 result, *dophase_done);
   return result;
 }
@@ -1753,7 +1753,7 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
     result = CURLE_OUT_OF_MEMORY;
 
 out:
-  CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", result);
+  CURL_TRC_SMTP(data, "smtp_setup_connection() -> %u", result);
   return result;
 }
 
@@ -2046,7 +2046,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;
-  DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
+  DEBUGF(infof(data, "cr_eob_read(%zu) -> %u, %zd, %d",
          blen, result, *pnread, *peos));
   return result;
 }

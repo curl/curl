@@ -798,7 +798,8 @@ static CURLcode auth_create_digest_http_message(
 
   if(digest->qop) {
     hashthis = curl_maprintf("%s:%s:%08x:%s:%s:%s", ha1, digest->nonce,
-                             digest->nc, digest->cnonce, digest->qop, ha2);
+                             (unsigned int)digest->nc,
+                             digest->cnonce, digest->qop, ha2);
   }
   else {
     hashthis = curl_maprintf("%s:%s:%s", ha1, digest->nonce, ha2);
@@ -861,7 +862,7 @@ static CURLcode auth_create_digest_http_message(
                              nonce_quoted,
                              uripath,
                              digest->cnonce,
-                             digest->nc,
+                             (unsigned int)digest->nc,
                              digest->qop,
                              request_digest);
 
