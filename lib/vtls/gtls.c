@@ -893,7 +893,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
 
   /* Initialize TLS session as a client */
   init_flags = GNUTLS_CLIENT;
-#ifdef GNUTLS_ENABLE_EARLY_DATA
+#ifdef HAVE_GNUTLS_EARLY_DATA
   if(peer->transport == TRNSPRT_QUIC && earlydata_max > 0)
     init_flags |= GNUTLS_ENABLE_EARLY_DATA | GNUTLS_NO_END_OF_EARLY_DATA;
   else if(earlydata_max > 0 && earlydata_max != 0xFFFFFFFFUL)
