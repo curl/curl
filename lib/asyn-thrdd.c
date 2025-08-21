@@ -643,7 +643,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     if(result)
       Curl_resolv_unlink(data, &data->state.async.dns);
     *dns = data->state.async.dns;
-    CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
+    CURL_TRC_DNS(data, "is_resolved() result=%u, dns=%sfound",
                  result, *dns ? "" : "not ");
     async_thrdd_shutdown(data);
     return result;
