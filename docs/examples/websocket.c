@@ -89,13 +89,12 @@ retry:
               buffer);
     }
     else if(meta->flags & CURLWS_BINARY) {
-      fprintf(stderr, "ws: received BINARY frame of %u bytes\n",
-              (unsigned int)rlen);
+      fprintf(stderr, "ws: received BINARY frame of %u bytes\n", (int)rlen);
     }
     else {
       /* some other frame arrived. */
-      fprintf(stderr, "ws: received frame of %u bytes rflags %x\n",
-              (unsigned int)rlen, meta->flags);
+      fprintf(stderr, "ws: received frame of %u bytes rflags %x\n", (int)rlen,
+              meta->flags);
       goto retry;
     }
   }
