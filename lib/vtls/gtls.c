@@ -1044,6 +1044,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#ifdef HAVE_GNUTLS_EARLY_DATA
 static int keylog_callback(gnutls_session_t session, const char *label,
                            const gnutls_datum_t *secret)
 {
@@ -1059,7 +1060,6 @@ static int keylog_callback(gnutls_session_t session, const char *label,
   return 0;
 }
 
-#ifdef HAVE_GNUTLS_EARLY_DATA
 static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct alpn_spec *alpns,
@@ -1978,8 +1978,8 @@ static CURLcode gtls_connect(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              bool *done)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
 #ifdef HAVE_GNUTLS_EARLY_DATA
+  struct ssl_connect_data *connssl = cf->ctx;
   if((connssl->state == ssl_connection_deferred) &&
      (connssl->earlydata_state == ssl_earlydata_await)) {
     /* We refuse to be pushed, we are waiting for someone to send/recv. */
