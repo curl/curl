@@ -81,7 +81,7 @@ static CURLcode test_lib1518(const char *URL)
   curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
   test_setopt(curl, CURLOPT_WRITEFUNCTION, t1518_write_cb);
 
-  curl_mprintf("res %d\n"
+  curl_mprintf("res %u\n"
                "status %ld\n"
                "redirects %ld\n"
                "effectiveurl %s\n"
