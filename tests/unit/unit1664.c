@@ -362,7 +362,7 @@ static CURLcode test_unit1664(const char *arg)
       const char *orgline = line;
       int rc = curlx_str_newline(&line);
       curl_mprintf("%d: (%%%02x) %d, line %d\n",
-                   i, *orgline, rc, (int)(line - orgline));
+                   i, (unsigned int)*orgline, rc, (int)(line - orgline));
     }
   }
 
