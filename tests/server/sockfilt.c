@@ -1192,7 +1192,7 @@ static bool juggle(curl_socket_t *sockfdp,
     nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
     if(nread_socket > 0) {
-      snprintf(data, sizeof(data), "DATA\n%04x\n", (int)nread_socket);
+      snprintf(data, sizeof(data), "DATA\n%04x\n", (unsigned int)nread_socket);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, nread_socket))
