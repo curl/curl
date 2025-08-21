@@ -237,6 +237,7 @@ err_exit:
 static void async_thrd_cleanup(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
+  Curl_thread_disable_cancel();
   addr_ctx_unlink(&addr_ctx, NULL);
 }
 
@@ -380,14 +381,15 @@ static void async_thrdd_destroy(struct Curl_easy *data)
     Curl_mutex_acquire(&addr->mutx);
     done = (addr->ref_count <= 1);
     Curl_mutex_release(&addr->mutx);
-    CURL_TRC_DNS(data, "resolve, destroy async data, shared ref=%d",
-                 addr->ref_count);
-    if(done)
+    if(done) {
       Curl_thread_join(&addr->thread_hnd);
+      CURL_TRC_DNS(data, "async_thrdd_destroy, thread joined");
+    }
     else {
       /* thread is still running. Detach the thread while mutexed, it will
        * trigger the cleanup when it releases its reference. */
       Curl_thread_destroy(&addr->thread_hnd);
+      CURL_TRC_DNS(data, "async_thrdd_destroy, thread detached");
     }
   }
   addr_ctx_unlink(&thrdd->addr, data);
@@ -536,7 +538,14 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   done = (addr_ctx->ref_count <= 1);
+  /* We are no longer interested in wakeups */
+  if(addr_ctx->sock_pair[1] != CURL_SOCKET_BAD) {
+    wakeup_close(addr_ctx->sock_pair[1]);
+    addr_ctx->sock_pair[1] = CURL_SOCKET_BAD;
+  }
   Curl_mutex_release(&addr_ctx->mutx);
+
+  DEBUGASSERT(addr_ctx->thread_hnd != curl_thread_t_null);
   if(!done) {
     CURL_TRC_DNS(data, "attempt to cancel resolve thread");
     (void)Curl_thread_cancel(&addr_ctx->thread_hnd);
