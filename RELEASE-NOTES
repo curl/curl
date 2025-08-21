@@ -4,7 +4,7 @@ curl and libcurl 8.15.1
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3490
+ Contributors:                 3492
 
 This release includes the following changes:
 
@@ -31,8 +31,11 @@ This release includes the following bugfixes:
  o _PROTOCOLS.md: mention file:// is only for absolute paths [102]
  o alpn: query filter [104]
  o ares: destroy channel on shutdown [178]
+ o asyn-thrdd: fix Curl_async_pollset without socketpair [205]
  o BINDINGS.md: add LibQurl [156]
  o bufq: add integer overflow checks before chunk allocations [108]
+ o bufq: removed "Useless Assignment" [188]
+ o bufq: simplify condition [207]
  o build: allow libtests/clients to use libcurl dependencies directly [87]
  o build: disable `TCP_NODELAY` for emscripten [176]
  o build: enable _GNU_SOURCE on GNU/Hurd [27]
@@ -52,6 +55,7 @@ This release includes the following bugfixes:
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: fix to restrict `SystemConfiguration` to macOS [139]
+ o cmake: honor `CMAKE_C_FLAGS` in test 1119 and 1167 [206]
  o cmake: improve error message for invalid HTTP/3 MultiSSL configs [187]
  o cmake: keep websockets disabled if HTTP is disabled
  o cmake: make `runtests` targets build the curl tool [32]
@@ -103,6 +107,8 @@ This release includes the following bugfixes:
  o examples: drop long cast for `CURLALTSVC_*`
  o examples: remove base64 encoded chunks from examples [189]
  o examples: remove href_extractor.c [186]
+ o ftp: store dir components as start+len instead of memdup'ing [198]
+ o ftp: use 'conn' instead of 'data->conn' [208]
  o gnutls: some small cleanups [41]
  o hmac: return error if init fails [2]
  o hostip: do DNS cache pruning in milliseconds [132]
@@ -129,6 +135,7 @@ This release includes the following bugfixes:
  o multi: replace remaining EXPIRE_RUN_NOW [67]
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
+ o ngtcp2: use custom mem funcs [204]
  o openssl: auto-pause on verify callback retry [167]
  o openssl: check SSL_write() length on retries [152]
  o openssl: clear errors after a failed `d2i_X509()` [161]
@@ -138,6 +145,7 @@ This release includes the following bugfixes:
  o openssl: split cert_stuff into smaller sub functions [72]
  o parallel-max: bump the max value to 65535 [86]
  o processhelp.pm: fix to use the correct null device on Windows [164]
+ o processhelp.pm: use `Win32::Process*` perl modules if available [200]
  o pytest: add SOCKS tests and scoring [9]
  o pytest: increase server KeepAliveTimeout [26]
  o pytest: relax error check on test_07_22 [16]
@@ -168,6 +176,7 @@ This release includes the following bugfixes:
  o test436: fix running on Windows with `_curlrc` present [153]
  o tests/ech_tests.sh: indent, if/for style, inline ifs [131]
  o tests: constify command-line arguments [82]
+ o tests: delete unused commands [177]
  o tests: drop unused `CURL_FORCEHOST` envs [36]
  o tests: fix perl warnings in http2-server, http3-server [119]
  o tests: fix prechecks to call the bundle libtest tool [120]
@@ -229,17 +238,18 @@ advice from friends like these:
   adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
   Berthin Torres Callañaupa, Caolán McNamara, Cole Leavitt, d1r3ct0r,
   Dan Fandrich, Daniel Böhmer, Daniel Engberg, Daniel Stenberg, David Zhuang,
-  devgs on github, Dominik Tomecki, Eshan Kelkar, Google Big Sleep,
-  Harry Sintonen, IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms,
-  Kai Pastor, Karthik Das, kkmuffme on github, kupavcevdenis on github,
-  letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Michał Petryka,
+  devgs on github, Dominik Tomecki, Eshan Kelkar, Gabriel Marin,
+  Google Big Sleep, Harry Sintonen, IoannisGS on github, Jelle Raaijmakers,
+  Jeroen Ooms, Kai Pastor, Karthik Das, kkmuffme on github,
+  kupavcevdenis on github, letshack9707 on hackerone, lf- on github,
+  LoRd_MuldeR, Marcel Raad, Michał Petryka, Natris on github,
   nevakrien on github, Oxan van Leeuwen, Paul Gilmartin, Petar Popovic,
   Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
   renovate[bot], rm-rmonaghan on github, Roberto Hidalgo, Samuel Henrique,
-  Schrijvers Luc, Sergio Durigan Junior, Stefan Eissing, Tal Regev,
+  Schrijvers Luc, Sergio Durigan Junior, Stefan Eissing, sunriseL, Tal Regev,
   Todd Gamblin, Viktor Szakats, Waldemar Kornewald, xfangfang, yaoy6 on github,
   ウさん
-  (53 contributors)
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -418,6 +428,7 @@ References to bug reports and discussions on issues:
  [174] = https://curl.se/bug/?i=18173
  [175] = https://curl.se/bug/?i=18157
  [176] = https://curl.se/bug/?i=17974
+ [177] = https://curl.se/bug/?i=18319
  [178] = https://curl.se/bug/?i=18216
  [179] = https://curl.se/bug/?i=18272
  [180] = https://curl.se/bug/?i=18254
@@ -426,8 +437,16 @@ References to bug reports and discussions on issues:
  [185] = https://curl.se/bug/?i=18266
  [186] = https://curl.se/bug/?i=18264
  [187] = https://curl.se/bug/?i=18246
+ [188] = https://curl.se/bug/?i=18322
  [189] = https://curl.se/bug/?i=18260
  [190] = https://curl.se/bug/?i=18259
  [193] = https://curl.se/bug/?i=17683
  [194] = https://curl.se/bug/?i=18243
  [196] = https://curl.se/bug/?i=18247
+ [198] = https://curl.se/bug/?i=18312
+ [200] = https://curl.se/bug/?i=18308
+ [204] = https://curl.se/bug/?i=18196
+ [205] = https://curl.se/bug/?i=18306
+ [206] = https://curl.se/bug/?i=18307
+ [207] = https://curl.se/bug/?i=18305
+ [208] = https://curl.se/bug/?i=18304
