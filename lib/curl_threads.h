@@ -34,12 +34,6 @@
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
-#  define USE_CURL_COND_T
-#  define curl_cond_t            pthread_cond_t
-#  define Curl_cond_init(c)      pthread_cond_init(c, NULL)
-#  define Curl_cond_destroy(c)   pthread_cond_destroy(c)
-#  define Curl_cond_wait(c, m)   pthread_cond_wait(c, m)
-#  define Curl_cond_signal(c)    pthread_cond_signal(c)
 #elif defined(USE_THREADS_WIN32)
 #  define CURL_STDCALL           __stdcall
 #  define curl_mutex_t           CRITICAL_SECTION
@@ -53,14 +47,6 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
-#  if defined(_WIN32_WINNT) && (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-#  define USE_CURL_COND_T
-#  define curl_cond_t            CONDITION_VARIABLE
-#  define Curl_cond_init(c)      InitializeConditionVariable(c)
-#  define Curl_cond_destroy(c)   (void)(c)
-#  define Curl_cond_wait(c, m)   SleepConditionVariableCS(c, m, INFINITE)
-#  define Curl_cond_signal(c)    WakeConditionVariable(c)
-#  endif
 #else
 #  define CURL_STDCALL
 #endif
