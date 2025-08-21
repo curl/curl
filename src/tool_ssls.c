@@ -108,7 +108,7 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
 
     r = curl_easy_ssls_import(easy, NULL, shmac, shmac_len, sdata, sdata_len);
     if(r) {
-      warnf("import of session from line %d rejected(%d)", i, r);
+      warnf("import of session from line %d rejected(%u)", i, r);
       continue;
     }
     ++imported;
@@ -177,7 +177,7 @@ static CURLcode tool_ssls_exp(CURL *easy, void *userptr,
   ctx->exported++;
 out:
   if(r)
-    warnf("Warning: error saving SSL session for '%s': %d", session_key, r);
+    warnf("Warning: error saving SSL session for '%s': %u", session_key, r);
   curl_free(enc);
   return r;
 }
