@@ -1220,7 +1220,8 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
    */
   peer->transport = transport;
 #ifndef CURL_DISABLE_PROXY
-  if(Curl_ssl_cf_is_proxy(cf)) {
+  if(Curl_ssl_cf_is_proxy(cf) ||
+      (cf->conn->http_proxy.proxytype == CURLPROXY_HTTPS3)) {
     ehostname = cf->conn->http_proxy.host.name;
     edispname = cf->conn->http_proxy.host.dispname;
     peer->port = cf->conn->http_proxy.port;
@@ -1756,6 +1757,12 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
     allowed = (CURL_HTTP_V1x|CURL_HTTP_V2x);
+  }
+#endif
+#ifdef USE_HTTP3
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3) {
+    use_alpn = TRUE;
+    allowed = CURL_HTTP_V3x;
   }
 #endif
 

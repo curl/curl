@@ -1621,8 +1621,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   if(is_connect)
     proxy = HEADER_CONNECT;
   else
-    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy ?
-      HEADER_PROXY : HEADER_SERVER;
+    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy &&
+        !data->conn->bits.udp_tunnel_proxy ? HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
   case HEADER_SERVER:
@@ -1636,6 +1636,12 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
     }
     break;
   case HEADER_CONNECT:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
+case HEADER_CONNECT_UDP:
     if(data->set.sep_headers)
       h[0] = data->set.proxyheaders;
     else
@@ -1970,7 +1976,8 @@ static CURLcode http_target(struct Curl_easy *data,
   }
 
 #ifndef CURL_DISABLE_PROXY
-  if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
+  if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy &&
+        !data->conn->bits.udp_tunnel_proxy) {
     /* Using a proxy but does not tunnel through it */
 
     /* The path sent to the proxy is in fact the entire URL. But if the remote
@@ -2596,13 +2603,20 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
 
   alpn = Curl_conn_get_alpn_negotiated(data, conn);
   if(alpn && !strcmp("h3", alpn)) {
+#ifndef CURL_DISABLE_PROXY
+    if((Curl_conn_http_version(data, conn) != 30) && conn->bits.proxy &&
+        !conn->bits.tunnel_proxy && !conn->bits.udp_tunnel_proxy) {
+      result = CURLE_OK;
+    }
+    else
+#endif
     DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
     info_version = "HTTP/3";
   }
   else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
-    if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.proxy && !conn->bits.tunnel_proxy) {
+    if((Curl_conn_http_version(data, conn) != 20) && conn->bits.proxy &&
+        !conn->bits.tunnel_proxy && !conn->bits.udp_tunnel_proxy) {
       result = Curl_http2_switch(data);
       if(result)
         return result;
@@ -4602,8 +4616,10 @@ struct name_const {
 static const struct name_const H2_NON_FIELD[] = {
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
+  { STRCONST("Protocol") },
   { STRCONST("Connection") },
   { STRCONST("Keep-Alive") },
+  { STRCONST(":Capsule-protocol") },
   { STRCONST("Proxy-Connection") },
   { STRCONST("Transfer-Encoding") },
 };

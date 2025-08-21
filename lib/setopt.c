@@ -600,6 +600,12 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
      */
     s->tunnel_thru_httpproxy = enabled;
     break;
+  case CURLOPT_HTTPPROXYUDPTUNNEL:
+    /*
+     * Tunnel operations through the UDP proxy instead of normal proxy use
+     */
+    s->tunnel_thru_httpproxy_udp = enabled;
+    break;
   case CURLOPT_HAPROXYPROTOCOL:
     /*
      * Set to send the HAProxy Proxy Protocol header

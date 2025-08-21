@@ -257,6 +257,7 @@ static const struct LongShort aliases[]= {
   {"proxy-digest",               ARG_BOOL, ' ', C_PROXY_DIGEST},
   {"proxy-header",               ARG_STRG, ' ', C_PROXY_HEADER},
   {"proxy-http2",                ARG_BOOL, ' ', C_PROXY_HTTP2},
+  {"proxy-http3",                ARG_BOOL, ' ', C_PROXY_HTTP3},
   {"proxy-insecure",             ARG_BOOL, ' ', C_PROXY_INSECURE},
   {"proxy-key",                  ARG_FILE|ARG_TLS, ' ', C_PROXY_KEY},
   {"proxy-key-type",             ARG_STRG|ARG_TLS, ' ', C_PROXY_KEY_TYPE},
@@ -277,6 +278,7 @@ static const struct LongShort aliases[]= {
   {"proxy-user",                 ARG_STRG|ARG_CLEAR, 'U', C_PROXY_USER},
   {"proxy1.0",                   ARG_STRG, ' ', C_PROXY1_0},
   {"proxytunnel",                ARG_BOOL, 'p', C_PROXYTUNNEL},
+  {"proxyudptunnel",             ARG_BOOL, ' ', C_PROXYUDPTUNNEL},
   {"pubkey",                     ARG_STRG, ' ', C_PUBKEY},
   {"quote",                      ARG_STRG, 'Q', C_QUOTE},
   {"random-file",                ARG_FILE|ARG_DEPR, ' ', C_RANDOM_FILE},
@@ -1968,6 +1970,12 @@ static ParameterError opt_bool(struct OperationConfig *config,
 
     config->proxyver = toggle ? CURLPROXY_HTTPS2 : CURLPROXY_HTTPS;
     break;
+  case C_PROXY_HTTP3: /* --proxy-http3 */
+    if(!feature_httpsproxy || !feature_http3)
+      return PARAM_LIBCURL_DOESNT_SUPPORT;
+
+    config->proxyver = toggle ? CURLPROXY_HTTPS3 : CURLPROXY_HTTPS;
+    break;
   case C_APPEND: /* --append */
     config->ftp_append = toggle;
     break;
@@ -2111,6 +2119,10 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_PROXYTUNNEL: /* --proxytunnel */
     config->proxytunnel = toggle;
+    break;
+  case C_PROXYUDPTUNNEL: /* --proxyudptunnel */
+    /* UDP proxy tunnel for non-http protocols */
+    config->proxyudptunnel = toggle;
     break;
   case C_DISABLE: /* --disable */
     /* if used first, already taken care of, we do it like this so we do not
@@ -2770,8 +2782,13 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_PROXY: /* --proxy */
     /* --proxy */
     err = getstr(&config->proxy, nextarg, ALLOW_BLANK);
-    if(config->proxyver != CURLPROXY_HTTPS2)
+    if(config->proxyver != CURLPROXY_HTTPS2 &&
+                config->proxyver != CURLPROXY_HTTPS3)
       config->proxyver = CURLPROXY_HTTP;
+    else if(config->proxyver != CURLPROXY_HTTPS3)
+      config->proxyver = CURLPROXY_HTTPS2;
+    else
+      config->proxyver = CURLPROXY_HTTPS3;
     break;
   case C_REQUEST: /* --request */
     /* set custom request */

@@ -157,9 +157,9 @@ The currently existing filter types (curl 8.5.0) are:
   `accept()`ed in a `listen()`
 * `SSL`: filter that applies TLS en-/decryption and handshake. Manages the
   underlying TLS backend implementation.
-* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`: the first manages the connection to an
-  HTTP proxy server and uses the other depending on which ALPN protocol has
-  been negotiated.
+* `HTTP-PROXY`, `H1-PROXY`, `H2-PROXY`, `H3-PROXY`: the first manages the
+   connection to an HTTP proxy server and uses the other depending on which
+   ALPN protocol has been negotiated.
 * `SOCKS-PROXY`: filter for the various SOCKS proxy protocol variations
 * `HAPROXY`: filter for the protocol of the same name, providing client IP
   information to a server.
@@ -220,6 +220,26 @@ as an `SSL` flagged filter is seen first. `conn3` is also encrypted as the
 `SSL` flag is checked before the presence of `IP_CONNECT`.
 
 Similar checks can determine if a connection is multiplexed or not.
+
+## Adding CONNECT-UDP support
+HTTP/3 on top of HTTP/1.1:
+conn --> HTTP/3 --> HTTP-PROXY --> H1-PROXY --> SSL --> HAPY-EYEBALLS --> TCP
+
+HTTP/3 on top of HTTP/2:
+conn --> HTTP/3 --> HTTP-PROXY --> H2-PROXY --> SSL --> HAPY-EYEBALLS --> TCP
+
+## Adding H3-PROXY support
+HTTP/1.1 on top of HTTP/3:
+conn --> HTTP/1.1 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
+
+HTTP/2 on top of HTTP/3:
+conn --> HTTP/2 --> SSL --> HTTP-PROXY --> H3-PROXY --> UDP
+
+HTTP/3 on top of HTTP/3:
+conn --> HTTP/3 --> HTTP-PROXY --> H3-PROXY --> UDP
+
+NOTE:
+This (H3-PROXY) does not have HAPY-EYEBALLS support
 
 ## Filter Tracing
 

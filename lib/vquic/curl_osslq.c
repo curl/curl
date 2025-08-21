@@ -292,6 +292,7 @@ struct cf_osslq_ctx {
   SSL_POLL_ITEM *poll_items;         /* Array for polling on writable state */
   struct Curl_easy **curl_items;     /* Array of easy objs */
   size_t items_max;                  /* max elements in poll/curl_items */
+  struct Curl_addrinfo *addr;        /* remote addr */
   BIT(initialized);
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
@@ -301,6 +302,148 @@ struct cf_osslq_ctx {
 };
 
 static void h3_stream_hash_free(unsigned int id, void *stream);
+
+static int
+ossl_bio_masque_create(BIO *bio)
+{
+  BIO_set_shutdown(bio, 1);
+  BIO_set_init(bio, 1);
+  BIO_set_data(bio, NULL);
+  return 1;
+}
+
+static int
+ossl_bio_masque_destroy(BIO *bio)
+{
+  if(!bio)
+    return 0;
+  return 1;
+}
+
+static long
+ossl_bio_masque_ctrl(BIO *bio, int cmd, long num, void *ptr)
+{
+  struct Curl_cfilter *cf = BIO_get_data(bio);
+  long ret = 1;
+
+  (void)cf;
+  (void)ptr;
+  switch(cmd) {
+  case BIO_CTRL_GET_CLOSE:
+    ret = (long)BIO_get_shutdown(bio);
+    break;
+  case BIO_CTRL_SET_CLOSE:
+    BIO_set_shutdown(bio, (int)num);
+    break;
+  case BIO_CTRL_FLUSH:
+    /* we do no delayed writes, but if we ever would, this
+     * needs to trigger it. */
+    ret = 1;
+    break;
+  case BIO_CTRL_DUP:
+    ret = 1;
+    break;
+#ifdef BIO_CTRL_EOF
+  case BIO_CTRL_EOF:
+    /* EOF has been reached on input? */
+    return !cf->next || !cf->next->connected;
+#endif
+  default:
+    ret = 0;
+    break;
+  }
+  return ret;
+}
+
+# define BIO_MSG_N(array, stride, n) \
+  (*(BIO_MSG *)((char *)(array) + (n)*(stride)))
+
+static int
+ossl_bio_masque_write(BIO *bio, BIO_MSG *msg, size_t stride,
+                      size_t num_msg, uint64_t flags,
+                      size_t *num_processed)
+{
+  struct Curl_cfilter *cf = BIO_get_data(bio);
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  size_t nwritten;
+  CURLcode result = CURLE_SEND_ERROR;
+  BIO_MSG *bm;
+
+  (void)flags;
+
+  DEBUGASSERT(data);
+
+  for(size_t i = 0; i < num_msg; ++i) {
+    bm = &BIO_MSG_N(msg, stride, i);
+
+    result = Curl_conn_cf_send(cf->next, data, bm->data, bm->data_len, FALSE,
+                                 &nwritten);
+    CURL_TRC_CF(data, cf, "ossl_bio_masque_write(len=%lu) -> %d, err=%d",
+        bm->data_len, (int)nwritten, result);
+  }
+  *num_processed = (size_t)num_msg;
+  return 1;
+}
+
+static int
+ossl_bio_masque_read(BIO *b, BIO_MSG *msg, size_t stride,
+                     size_t num_msg, uint64_t flags,
+                     size_t *num_processed)
+{
+  struct Curl_cfilter *cf = BIO_get_data(b);
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
+  size_t nread;
+  CURLcode result = CURLE_RECV_ERROR;
+
+  (void)flags;
+  DEBUGASSERT(data);
+
+  if(num_msg == 0) {
+    *num_processed = 0;
+    return 1;
+  }
+
+  result = Curl_conn_cf_recv(cf->next, data,
+                            (char *)msg, stride, &nread);
+  CURL_TRC_CF(data, cf, "ossl_bio_masque_read(dgrams read=%zu) err=%d",
+              nread, result);
+
+  BIO_clear_retry_flags(b);
+
+  if(nread <= 0) {
+    if(CURLE_AGAIN == result) {
+      BIO_set_retry_read(b);
+      *num_processed = 1;
+      return 1;
+    }
+    *num_processed = 0;
+    return 0;
+  }
+
+  *num_processed = nread;
+   return 1;
+}
+
+static BIO_METHOD
+*ossl_bio_quic_cf_method_create(void)
+{
+  BIO_METHOD *m = BIO_meth_new(BIO_TYPE_DGRAM, "OpenSSL MASQUE BIO");
+  if(m) {
+    BIO_meth_set_sendmmsg(m, &ossl_bio_masque_write);
+    BIO_meth_set_recvmmsg(m, &ossl_bio_masque_read);
+    BIO_meth_set_ctrl(m, &ossl_bio_masque_ctrl);
+    BIO_meth_set_create(m, &ossl_bio_masque_create);
+    BIO_meth_set_destroy(m, &ossl_bio_masque_destroy);
+  }
+  return m;
+}
+
+static void
+ossl_bio_masque_method_free(BIO_METHOD *m)
+{
+  if(m)
+    BIO_meth_free(m);
+}
 
 static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
 {
@@ -331,6 +474,10 @@ static void cf_osslq_ctx_close(struct cf_osslq_ctx *ctx)
   struct cf_call_data save = ctx->call_data;
 
   cf_osslq_h3conn_cleanup(&ctx->h3);
+  if(ctx->tls.ossl.bio_method) {
+    ossl_bio_masque_method_free(ctx->tls.ossl.bio_method);
+    ctx->tls.ossl.bio_method = NULL;
+  }
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
   ctx->call_data = save;
@@ -1161,9 +1308,8 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *peer_addr = NULL;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
-static const struct alpn_spec ALPN_SPEC_H3 = {
-  { "h3" }, 1
-};
+  struct Curl_sockaddr_ex addr_ex;
+  static const struct alpn_spec ALPN_SPEC_H3 = { { "h3" }, 1 };
 
   DEBUGASSERT(ctx->initialized);
 
@@ -1177,51 +1323,83 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
   if(result)
     goto out;
 
-  result = CURLE_QUIC_CONNECT_ERROR;
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
-  if(!peer_addr)
-    goto out;
-
-  ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
-  rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
-                   &ctx->q.local_addrlen);
-  if(rv == -1)
-    goto out;
-
-  result = make_bio_addr(&baddr, peer_addr);
-  if(result) {
-    failf(data, "error creating BIO_ADDR from sockaddr");
-    goto out;
-  }
-
-  /* Type conversions, see #12861: OpenSSL wants an `int`, but on 64-bit
-   * Win32 systems, Microsoft defines SOCKET as `unsigned long long`.
-   */
-#if defined(_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
-  if(ctx->q.sockfd > INT_MAX) {
-    failf(data, "Windows socket identifier larger than MAX_INT, "
-          "unable to set in OpenSSL dgram API.");
+  if(cf->next->cft == &Curl_cft_udp) {
     result = CURLE_QUIC_CONNECT_ERROR;
-    goto out;
-  }
-  bio = BIO_new_dgram((int)ctx->q.sockfd, BIO_NOCLOSE);
-#else
-  bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
-#endif
-  if(!bio) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
+    Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
+    if(!peer_addr)
+      goto out;
 
-  if(!SSL_set1_initial_peer_addr(ctx->tls.ossl.ssl, baddr)) {
-    failf(data, "failed to set the initial peer address");
-    result = CURLE_FAILED_INIT;
-    goto out;
+    ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
+    rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
+                    &ctx->q.local_addrlen);
+    if(rv == -1)
+      goto out;
+
+    result = make_bio_addr(&baddr, peer_addr);
+    if(result) {
+      failf(data, "error creating BIO_ADDR from sockaddr");
+      goto out;
+    }
+  /* Type conversions, see #12861: OpenSSL wants an `int`, but on 64-bit
+    * Win32 systems, Microsoft defines SOCKET as `unsigned long long`.
+  */
+#if defined(_WIN32) && !defined(__LWIP_OPT_H__) && !defined(LWIP_HDR_OPT_H)
+    if(ctx->q.sockfd > INT_MAX) {
+      failf(data, "Windows socket identifier larger than MAX_INT, "
+            "unable to set in OpenSSL dgram API.");
+      result = CURLE_QUIC_CONNECT_ERROR;
+      goto out;
+    }
+    bio = BIO_new_dgram((int)ctx->q.sockfd, BIO_NOCLOSE);
+#else
+    bio = BIO_new_dgram(ctx->q.sockfd, BIO_NOCLOSE);
+#endif
+    if(!bio) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    if(!SSL_set1_initial_peer_addr(ctx->tls.ossl.ssl, baddr)) {
+      failf(data, "failed to set the initial peer address");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    if(!SSL_set_blocking_mode(ctx->tls.ossl.ssl, 0)) {
+      failf(data, "failed to turn off blocking mode");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
   }
-  if(!SSL_set_blocking_mode(ctx->tls.ossl.ssl, 0)) {
-    failf(data, "failed to turn off blocking mode");
-    result = CURLE_FAILED_INIT;
-    goto out;
+  else {
+    ctx->tls.ossl.bio_method = ossl_bio_quic_cf_method_create();
+    if(!ctx->tls.ossl.bio_method)
+      return CURLE_OUT_OF_MEMORY;
+    bio = BIO_new(ctx->tls.ossl.bio_method);
+    if(!bio)
+      return CURLE_OUT_OF_MEMORY;
+
+    addr_ex.family = AF_INET;
+    addr_ex.protocol = IPPROTO_UDP;
+    addr_ex.addrlen = ctx->addr->ai_addrlen;
+    addr_ex._sa_ex_u.addr = *ctx->addr->ai_addr;
+
+    result = make_bio_addr(&baddr, &addr_ex);
+    if(result) {
+      failf(data, "error creating BIO_ADDR from proxy sockaddr");
+      goto out;
+    }
+
+    if(!SSL_set1_initial_peer_addr(ctx->tls.ossl.ssl, baddr)) {
+      failf(data, "failed to set the initial peer address");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    if(!SSL_set_blocking_mode(ctx->tls.ossl.ssl, 0)) {
+      failf(data, "failed to turn off blocking mode");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
+    BIO_set_data(bio, cf);
   }
 
   SSL_set_bio(ctx->tls.ossl.ssl, bio, bio);
@@ -1755,11 +1933,13 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  /* Connect the UDP filter first */
-  if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, done);
-    if(result || !*done)
-      return result;
+  if(cf->next->cft == &Curl_cft_udp) {
+    /* Connect the UDP filter first */
+    if(!cf->next->connected) {
+      result = Curl_conn_cf_connect(cf->next, data, done);
+      if(result || !*done)
+        return result;
+    }
   }
 
   *done = FALSE;
@@ -1848,11 +2028,16 @@ out:
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(result) {
-    struct ip_quadruple ip;
+    if(cf->next->cft == &Curl_cft_udp) {
+      struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-    infof(data, "QUIC connect to %s port %u failed: %s",
-          ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
+      Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+      infof(data, "QUIC connect to %s port %u failed: %s",
+            ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
+      }
+      else {
+        infof(data, "QUIC connect failed");
+      }
   }
 #endif
   if(!result)
@@ -2429,6 +2614,49 @@ out:
   if(result) {
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
+    Curl_safefree(cf);
+    cf_osslq_ctx_free(ctx);
+  }
+  return result;
+}
+
+
+static struct Curl_addrinfo *
+addr_first_match(struct Curl_addrinfo *addr, int family)
+{
+  while(addr) {
+    if(addr->ai_family == family)
+      return addr;
+    addr = addr->ai_next;
+  }
+  return NULL;
+}
+
+CURLcode Curl_cf_osslq_insert_after(struct Curl_cfilter *cf_at,
+  struct Curl_easy *data, struct Curl_dns_entry *remotehost)
+{
+  struct cf_osslq_ctx *ctx = NULL;
+  struct Curl_cfilter *cf = NULL;
+  struct Curl_addrinfo *addr;
+  CURLcode result;
+
+  (void)data;
+  ctx = calloc(1, sizeof(*ctx));
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  cf_osslq_ctx_init(ctx);
+  addr = addr_first_match(remotehost->addr, AF_INET);
+  ctx->addr = addr;
+
+  result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
+  if(result)
+    goto out;
+  Curl_conn_cf_insert_after(cf_at, cf);
+  cf->conn = cf_at->conn;
+out:
+  if(result) {
     Curl_safefree(cf);
     cf_osslq_ctx_free(ctx);
   }

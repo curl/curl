@@ -1435,6 +1435,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   conn->bits.proxy_user_passwd = !!data->state.aptr.proxyuser;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
+  conn->bits.udp_tunnel_proxy = data->set.tunnel_thru_httpproxy_udp;
 #endif /* CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_FTP
@@ -1443,7 +1444,10 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #endif
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
-  conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
+  if(conn->http_proxy.proxytype == CURLPROXY_HTTPS3)
+    conn->transport_wanted = TRNSPRT_QUIC;
+  else
+    conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Initialize the attached xfers bitset */
   Curl_uint_spbset_init(&conn->xfers_attached);
@@ -2245,10 +2249,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     }
 
     if(curl_strequal("https", scheme)) {
-      if(proxytype != CURLPROXY_HTTPS2)
+      if(proxytype != CURLPROXY_HTTPS2 && proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS;
-      else
+      else if(proxytype != CURLPROXY_HTTPS3)
         proxytype = CURLPROXY_HTTPS2;
+      else
+        proxytype = CURLPROXY_HTTPS3;
     }
     else if(curl_strequal("socks5h", scheme))
       proxytype = CURLPROXY_SOCKS5_HOSTNAME;
