@@ -69,7 +69,7 @@ int main(void)
       do {
         h = curl_easy_nextheader(curl, CURLH_HEADER, -1, prev);
         if(h)
-          printf(" %s: %s (%u)\n", h->name, h->value, (int)h->amount);
+          printf(" %s: %s (%u)\n", h->name, h->value, (unsigned int)h->amount);
         prev = h;
       } while(h);
 
