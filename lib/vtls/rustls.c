@@ -1212,13 +1212,14 @@ cr_connect(struct Curl_cfilter *cf,
       }
       if(data->set.ssl.certinfo) {
         size_t num_certs = 0;
+        size_t i;
         while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
           num_certs++;
         }
         result = Curl_ssl_init_certinfo(data, (int)num_certs);
         if(result)
           return result;
-        for(size_t i = 0; i < num_certs; i++) {
+        for(i = 0; i < num_certs; i++) {
           const rustls_certificate *cert;
           const unsigned char *der_data;
           size_t der_len;
