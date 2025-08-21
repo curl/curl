@@ -691,7 +691,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   result = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
                              &nwritten);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %u, %zu",
               blen, result, nwritten);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
@@ -720,7 +720,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   result = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &nread);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %u, %zu",
               blen, result, nread);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
@@ -2342,7 +2342,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %d", peer->type);
+    failf(data, "unexpected ssl peer type: %u", peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2795,7 +2795,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   case 0:
     break;
   default:
-    msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    msnprintf(unknown, sizeof(unknown), "(%x)", (unsigned int)ssl_ver);
     verstr = unknown;
     break;
   }
@@ -5444,7 +5444,7 @@ out:
      *   until more data arrives */
     connssl->input_pending = FALSE;
   }
-  CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %d, %zu (in_pending=%d)",
+  CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %u, %zu (in_pending=%d)",
               buffersize, result, *pnread, connssl->input_pending);
   return result;
 }
