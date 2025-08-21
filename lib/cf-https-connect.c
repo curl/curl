@@ -383,7 +383,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "connect -> %u, done=%d", result, *done);
   return result;
 }
 
@@ -423,7 +423,7 @@ static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
         result = ctx->ballers[i].result;
     }
   }
-  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "shutdown -> %u, done=%d", result, *done);
   return result;
 }
 
@@ -442,7 +442,7 @@ static CURLcode cf_hc_adjust_pollset(struct Curl_cfilter *cf,
         continue;
       result = Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %u, %u socks", result, ps->n);
   }
   return result;
 }
