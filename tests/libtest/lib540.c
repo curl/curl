@@ -159,7 +159,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
       if(msg->msg == CURLMSG_DONE) {
         size_t i;
         CURL *e = msg->easy_handle;
-        curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
+        curl_mfprintf(stderr, "R: %u - %s\n", msg->data.result,
                       curl_easy_strerror(msg->data.result));
         curl_multi_remove_handle(cm, e);
         curl_easy_cleanup(e);
@@ -171,7 +171,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
         }
       }
       else
-        curl_mfprintf(stderr, "E: CURLMsg (%d)\n", msg->msg);
+        curl_mfprintf(stderr, "E: CURLMsg (%u)\n", msg->msg);
     }
 
     res_test_timedout();
