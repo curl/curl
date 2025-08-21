@@ -238,9 +238,6 @@ static void async_thrd_cleanup(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
   Curl_thread_disable_cancel();
-#ifdef DEBUGBUILD
-    Curl_resolve_test_delay();
-#endif
   addr_ctx_unlink(&addr_ctx, NULL);
 }
 
