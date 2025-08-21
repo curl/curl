@@ -184,7 +184,7 @@ CURLcode ws_recv_pong(CURL *curl, const char *expected_payload)
 
   if(!(meta->flags & CURLWS_PONG)) {
     curl_mfprintf(stderr, "recv_pong: wrong frame, got %zu bytes rflags %x\n",
-                  rlen, meta->flags);
+                  rlen, (unsigned int)meta->flags);
     return CURLE_RECV_ERROR;
   }
 
@@ -278,7 +278,7 @@ int main(int argc, const char **argv)
     testnum = 0;
 
   result = entry_func(URL);
-  curl_mfprintf(stderr, "Test ended with result %d\n", result);
+  curl_mfprintf(stderr, "Test ended with result %u\n", result);
 
 #ifdef _WIN32
   /* flush buffers of all streams regardless of mode */
