@@ -74,7 +74,7 @@ use sshhelp qw(
     find_sftp
     find_sshkeygen
     sshversioninfo
-);
+    );
 
 #***************************************************************************
 # Subs imported from serverhelp module
@@ -83,7 +83,7 @@ use serverhelp qw(
     $logfile
     server_pidfilename
     server_logfilename
-);
+    );
 
 use pathhelp;
 

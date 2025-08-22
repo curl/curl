@@ -59,10 +59,10 @@ BEGIN {
 use globalconfig;
 use pathhelp qw(
     exe_ext
-);
+    );
 use testutil qw(
     exerunner
-);
+    );
 
 our $logfile;  # server log file name, for logmsg
 

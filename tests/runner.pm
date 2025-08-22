@@ -76,15 +76,15 @@ BEGIN {
 
 use B qw(
     svref_2object
-);
+    );
 use Storable qw(
     freeze
     thaw
-);
+    );
 
 use pathhelp qw(
     exe_ext
-);
+    );
 use servers qw(
     checkcmd
     initserverconfig
@@ -92,7 +92,7 @@ use servers qw(
     stopserver
     stopservers
     subvariables
-);
+    );
 use getpart;
 use globalconfig;
 use testutil qw(
@@ -105,7 +105,7 @@ use testutil qw(
     subsha256base64file
     substrippemfile
     subnewlines
-);
+    );
 use valgrind;
 
 
