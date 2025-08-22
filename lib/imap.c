@@ -1324,7 +1324,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
       if(result)
         return result;
 
-      infof(data, "Written %zu bytes, %" FMT_OFF_TU
+      infof(data, "Written %zu bytes, %" FMT_OFF_T
             " bytes are left for transfer", chunk, size - chunk);
 
       /* Have we used the entire overflow or just part of it?*/
