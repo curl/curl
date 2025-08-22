@@ -659,14 +659,16 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
                    "SEC_E_ILLEGAL_MESSAGE (0x%08lx) - This error usually "
                    "occurs when a fatal SSL/TLS alert is received (e.g. "
                    "handshake failed). More detail may be available in "
-                   "the Windows System event log.", err);
+                   "the Windows System event log.", (unsigned long)err);
   }
   else {
     char msgbuf[256];
     if(curlx_get_winapi_error((DWORD)err, msgbuf, sizeof(msgbuf)))
-      curl_msnprintf(buf, buflen, "%s (0x%08lx) - %s", txt, err, msgbuf);
+      curl_msnprintf(buf, buflen, "%s (0x%08lx) - %s",
+                     txt, (unsigned long)err, msgbuf);
     else
-      curl_msnprintf(buf, buflen, "%s (0x%08lx)", txt, err);
+      curl_msnprintf(buf, buflen, "%s (0x%08lx)",
+                     txt, (unsigned long)err);
   }
 
 #else
