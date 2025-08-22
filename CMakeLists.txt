@@ -1501,11 +1501,15 @@ if(_curl_ca_bundle_supported)
   set(CURL_CA_BUNDLE "auto" CACHE
     STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_FALLBACK OFF CACHE
-    BOOL "Use built-in CA store of TLS backend. Defaults to OFF")
+    BOOL "Use OpenSSL's built-in CA store. Defaults to OFF")
   set(CURL_CA_PATH "auto" CACHE
     STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_EMBED "" CACHE
     STRING "Path to the CA bundle to embed in the curl tool.")
+
+  if(CURL_CA_FALLBACK AND NOT CURL_USE_OPENSSL)
+    message(FATAL_ERROR "CURL_CA_FALLBACK only works with OpenSSL")
+  endif()
 
   if(CURL_CA_BUNDLE STREQUAL "")
     message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
