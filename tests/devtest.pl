@@ -54,14 +54,14 @@ use servers qw(
     protoport
     serverfortest
     stopservers
-);
+    );
 use runner qw(
     readtestkeywords
     singletest_preprocess
-);
+    );
 use testutil qw(
     setlogfunc
-);
+    );
 use getpart;
 
 

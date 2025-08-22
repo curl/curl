@@ -58,7 +58,7 @@ use globalconfig qw(
     $torture
     $verbose
     $dev_null
-);
+    );
 
 my $logfunc;      # optional reference to function for logging
 my @logmessages;  # array holding logged messages
