@@ -135,10 +135,6 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
-#ifndef OPENSSL_VERSION_NUMBER
-#error "OPENSSL_VERSION_NUMBER not defined"
-#endif
-
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
 #endif
