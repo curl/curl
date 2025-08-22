@@ -14,7 +14,7 @@ Join the community
 
  2. Subscribe to the suitable [mailing lists](https://curl.se/mail/)
 
-Read [CONTRIBUTE](../docs/CONTRIBUTE.md)
+Read [CONTRIBUTE](/docs/CONTRIBUTE.md)
 ---------------------------------------
 
 Send your suggestions using one of these methods:
