@@ -158,7 +158,6 @@
  18.15 --retry should resume
  18.17 consider filename from the redirected URL with -O ?
  18.18 retry on network is unreachable
- 18.19 expand ~/ in config files
  18.20 hostname sections in config files
  18.21 retry on the redirected-to URL
  18.23 Set the modification date on an uploaded file
@@ -1133,12 +1132,6 @@
  want to retry for?
 
  https://github.com/curl/curl/issues/1603
-
-18.19 expand ~/ in config files
-
- For example .curlrc could benefit from being able to do this.
-
- See https://github.com/curl/curl/issues/2317
 
 18.20 hostname sections in config files
 
