@@ -2476,7 +2476,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
                        const void *buf, size_t len, SSL *ssl,
                        void *userp)
 {
-  const char *verstr = "???";
+  const char *verstr;
   struct Curl_cfilter *cf = userp;
   struct Curl_easy *data = NULL;
   char unknown[32];
@@ -2511,12 +2511,8 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.2";
     break;
 #endif
-#ifdef TLS1_3_VERSION  /* OpenSSL 1.1.1+, all forks */
   case TLS1_3_VERSION:
     verstr = "TLSv1.3";
-    break;
-#endif
-  case 0:
     break;
   default:
     msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
@@ -2611,12 +2607,8 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
     ossl_ssl_version_min = TLS1_2_VERSION;
     break;
   case CURL_SSLVERSION_TLSv1_3:
-#ifdef TLS1_3_VERSION
     ossl_ssl_version_min = TLS1_3_VERSION;
     break;
-#else
-    return CURLE_NOT_BUILT_IN;
-#endif
   }
 
   /* CURL_SSLVERSION_DEFAULT means that no option was selected.
@@ -2645,11 +2637,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
   case CURL_SSLVERSION_MAX_TLSv1_2:
     ossl_ssl_version_max = TLS1_2_VERSION;
     break;
-#ifdef TLS1_3_VERSION
   case CURL_SSLVERSION_MAX_TLSv1_3:
     ossl_ssl_version_max = TLS1_3_VERSION;
     break;
-#endif
   case CURL_SSLVERSION_MAX_NONE:  /* none selected */
   case CURL_SSLVERSION_MAX_DEFAULT:  /* max selected */
   default:
