@@ -3493,7 +3493,6 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        rt.openssl.org/Ticket/Display.html?id=3621
     */
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-#ifdef X509_V_FLAG_PARTIAL_CHAIN
     if(!ssl_config->no_partialchain && !ssl_crlfile) {
       /* Have intermediate certificates in the trust store be treated as
          trust-anchors, in the same way as self-signed root CA certificates
@@ -3505,7 +3504,6 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
       */
       X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
     }
-#endif
   }
 
   return result;
