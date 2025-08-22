@@ -4196,10 +4196,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_default_read_buffer_len(octx->ssl_ctx, 0x401e * 4);
 #endif
 
-#ifdef SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-#endif
 
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
