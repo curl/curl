@@ -3492,9 +3492,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        https://web.archive.org/web/20190422050538/
        rt.openssl.org/Ticket/Display.html?id=3621
     */
-#ifdef X509_V_FLAG_TRUSTED_FIRST
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-#endif
 #ifdef X509_V_FLAG_PARTIAL_CHAIN
     if(!ssl_config->no_partialchain && !ssl_crlfile) {
       /* Have intermediate certificates in the trust store be treated as
