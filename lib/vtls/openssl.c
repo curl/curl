@@ -244,10 +244,6 @@ typedef int numcert_t;
 #define HAVE_RANDOM_INIT_BY_DEFAULT 1
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && !defined(HAVE_BORINGSSL_LIKE)
-#define HAVE_OPENSSL_VERSION
-#endif
-
 #ifdef HAVE_BORINGSSL_LIKE
 typedef uint32_t sslerr_t;
 #else
@@ -5576,7 +5572,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE,
                    AWSLC_VERSION_NUMBER_STRING);
-#elif defined(HAVE_OPENSSL_VERSION) && defined(OPENSSL_VERSION_STRING)
+#elif defined(OPENSSL_VERSION_STRING)  /* OpenSSL 3+ */
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #else
