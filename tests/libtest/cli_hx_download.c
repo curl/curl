@@ -197,7 +197,7 @@ static int my_progress_d_cb(void *userdata,
           (struct rustls_connection*)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
-                      t->idx, v);
+                      t->idx, (unsigned int)v);
         break;
       }
 #endif
