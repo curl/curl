@@ -135,7 +135,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   }
 
   result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %u, %zd",
+  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %u, %zu",
               blen, result, nread);
   backend->gtls.io_result = result;
   if(result) {
