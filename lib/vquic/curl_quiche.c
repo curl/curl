@@ -1036,7 +1036,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      CURL_TRC_CF(data, cf, "send_request(%s) -> %" FMT_PRIu64,
+      CURL_TRC_CF(data, cf, "send_request(%s) -> %" FMT_PRId64,
                   data->state.url, stream3_id);
     }
     result = CURLE_SEND_ERROR;
@@ -1441,7 +1441,7 @@ out:
     struct ip_quadruple ip;
 
     if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
-      infof(data, "connect to %s port %u failed: %s",
+      infof(data, "connect to %s port %d failed: %s",
             ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
     else
       infof(data, "connect failed: %s", curl_easy_strerror(result));
