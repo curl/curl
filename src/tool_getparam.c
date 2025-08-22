@@ -1477,7 +1477,7 @@ static ParameterError parse_verbose(bool toggle)
   else if(!verbose_nopts) {
     /* fist `-v` in an argument resets to base verbosity */
     global->verbosity = 0;
-    if(set_trace_config("-all"))
+    if(!global->trace_set && set_trace_config("-all"))
       return PARAM_NO_MEM;
   }
   /* the '%' thing here will cause the trace get sent to stderr */
@@ -2443,6 +2443,7 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     /* 0 is a valid value for this timeout */
     break;
   case C_TRACE_CONFIG: /* --trace-config */
+    global->trace_set = TRUE;
     if(set_trace_config(nextarg))
       err = PARAM_NO_MEM;
     break;
