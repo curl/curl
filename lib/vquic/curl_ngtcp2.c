@@ -1488,7 +1488,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read req body -> "
-              "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%d vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->id, (int)nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
