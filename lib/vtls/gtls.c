@@ -101,7 +101,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
 
   DEBUGASSERT(data);
   result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
-  CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %u, %zu",
               blen, result, nwritten);
   backend->gtls.io_result = result;
   if(result) {
@@ -135,7 +135,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   }
 
   result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zd",
+  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %u, %zd",
               blen, result, nread);
   backend->gtls.io_result = result;
   if(result) {
@@ -2041,7 +2041,7 @@ out:
   }
   *done = ((connssl->state == ssl_connection_complete) ||
            (connssl->state == ssl_connection_deferred));
-  CURL_TRC_CF(data, cf, "gtls_connect_common() -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "gtls_connect_common() -> %u, done=%d", result, *done);
   return result;
 }
 
@@ -2116,7 +2116,7 @@ static CURLcode gtls_send(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "gtls_send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "gtls_send(len=%zu) -> %u, %zu",
               blen, result, *pnwritten);
   return result;
 }
