@@ -119,15 +119,15 @@ static const char *osslq_SSL_ERROR_to_str(int err)
     return "SSL_ERROR_WANT_CONNECT";
   case SSL_ERROR_WANT_ACCEPT:
     return "SSL_ERROR_WANT_ACCEPT";
-#ifdef SSL_ERROR_WANT_ASYNC  /* OpenSSL 1.1.0+, LibreSSL 4.0.0+ */
+#ifdef SSL_ERROR_WANT_ASYNC  /* OpenSSL 1.1.0+, LibreSSL 4+ */
   case SSL_ERROR_WANT_ASYNC:
     return "SSL_ERROR_WANT_ASYNC";
 #endif
-#ifdef SSL_ERROR_WANT_ASYNC_JOB  /* OpenSSL 1.1.0+, LibreSSL 4.0.0+ */
+#ifdef SSL_ERROR_WANT_ASYNC_JOB  /* OpenSSL 1.1.0+, LibreSSL 4+ */
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
-#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB  /* OpenSSL 1.1.1, LibreSSL 4.0.0 */
+#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB  /* OpenSSL 1.1.1, LibreSSL 4+ */
   case SSL_ERROR_WANT_CLIENT_HELLO_CB:
     return "SSL_ERROR_WANT_CLIENT_HELLO_CB";
 #endif
