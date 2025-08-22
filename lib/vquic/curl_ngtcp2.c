@@ -2134,7 +2134,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       NULL, /* pkt_info */
       (uint8_t *)buffer, sizeof(buffer),
       &ctx->last_error, pktx.ts);
-    CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
+    CURL_TRC_CF(data, cf, "start shutdown(err_type=%u, err_code=%"
                 FMT_PRIu64 ") -> %d", ctx->last_error.type,
                 (curl_uint64_t)ctx->last_error.error_code, (int)nwritten);
     /* there are cases listed in ngtcp2 documentation where this call
@@ -2663,7 +2663,7 @@ out:
     struct ip_quadruple ip;
 
     if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
-      infof(data, "QUIC connect to %s port %u failed: %s",
+      infof(data, "QUIC connect to %s port %d failed: %s",
             ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
