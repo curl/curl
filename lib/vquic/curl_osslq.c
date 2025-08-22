@@ -1031,7 +1031,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read req body -> "
-              "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%d vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->s.id, (int)nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
@@ -1860,7 +1860,7 @@ out:
     struct ip_quadruple ip;
 
     if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
-      infof(data, "QUIC connect to %s port %u failed: %s",
+      infof(data, "QUIC connect to %s port %d failed: %s",
             ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
