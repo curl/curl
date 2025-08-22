@@ -799,7 +799,8 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
       !get_winsock_error(err, buf, buflen) &&
 #endif
       !curlx_get_winapi_error(err, buf, buflen))
-      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
+      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)",
+                     err, (unsigned int)err);
   }
 #else /* not Windows coming up */
 
