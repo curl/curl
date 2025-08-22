@@ -75,11 +75,14 @@ int Curl_thread_cancel(curl_thread_t *hnd);
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL)
 #define Curl_thread_disable_cancel()     \
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL)
+#define Curl_thread_cancel_deferred()     \
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL)
 #else
 #define Curl_thread_push_cleanup(a,b)   ((void)a,(void)b)
 #define Curl_thread_pop_cleanup()       Curl_nop_stmt
 #define Curl_thread_enable_cancel()     Curl_nop_stmt
 #define Curl_thread_disable_cancel()    Curl_nop_stmt
+#define Curl_thread_cancel_deferred()   Curl_nop_stmt
 #endif
 
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
