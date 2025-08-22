@@ -533,7 +533,7 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     break;
 
   default:
-    CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] recv, unhandled event %d",
+    CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] recv, unhandled event %u",
                 stream->id, quiche_h3_event_type(ev));
     break;
   }
@@ -1025,7 +1025,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                       stream->send_closed);
-  CURL_TRC_CF(data, cf, "quiche_send_request() -> %" FMT_PRIu64, stream3_id);
+  CURL_TRC_CF(data, cf, "quiche_send_request() -> %" FMT_PRId64, stream3_id);
   if(stream3_id < 0) {
     if(QUICHE_H3_ERR_STREAM_BLOCKED == stream3_id) {
       /* quiche seems to report this error if the connection window is
