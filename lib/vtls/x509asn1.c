@@ -620,8 +620,8 @@ static CURLcode UTime2str(struct dynbuf *store,
 
   tzl = end - tzp;
   return curlx_dyn_addf(store, "%u%.2s-%.2s-%.2s %.2s:%.2s:%.2s %.*s",
-                        20 - (*beg >= '5'), beg, beg + 2, beg + 4,
-                        beg + 6, beg + 8, sec,
+                        (unsigned int)(20 - (*beg >= '5')),
+                        beg, beg + 2, beg + 4, beg + 6, beg + 8, sec,
                         (int)tzl, tzp);
 }
 
