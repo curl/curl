@@ -2677,10 +2677,6 @@ end:
 
 #endif /* USE_OPENSSL */
 
-/* The SSL_CTRL_SET_MSG_CALLBACK does not exist in ancient OpenSSL versions
-   and thus this cannot be done there. */
-#ifdef SSL_CTRL_SET_MSG_CALLBACK
-
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
 #ifdef SSL2_VERSION_MAJOR
@@ -2895,7 +2891,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
              CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void)ssl;
 }
-#endif
 
 #ifdef USE_OPENSSL
 /* ====================================================== */
