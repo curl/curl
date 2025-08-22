@@ -33,7 +33,7 @@ imap
 --libcurl for IMAP FETCH message
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --libcurl %LOGDIR/test%TESTNUMBER.c
@@ -111,6 +111,7 @@ $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 </stripfile>
 </verify>
 </testcase>

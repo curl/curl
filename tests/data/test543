@@ -17,10 +17,6 @@ lib%TESTNUMBER
 <name>
 curl_easy_escape
 </name>
-<command>
--
-</command>
-
 </client>
 
 # Verify data after the test has been "shot"

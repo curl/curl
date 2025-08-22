@@ -39,7 +39,7 @@ static int t1553_xferinfo(void *p,
   return 1; /* fail as fast as we can */
 }
 
-static CURLcode test_lib1553(char *URL)
+static CURLcode test_lib1553(const char *URL)
 {
   CURL *curls = NULL;
   CURLM *multi = NULL;
@@ -71,9 +71,9 @@ static CURLcode test_lib1553(char *URL)
   easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, t1553_xferinfo);
   easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+  test_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curls, CURLOPT_VERBOSE, 1L);
 

@@ -54,11 +54,22 @@ sub getsrcvars {
     close($f);
 }
 
+my %special = (
+    'header{name}' => 1,
+    'output{filename}' => 1,
+    'time{format}' => 1,
+    );
+
 sub getdocsvars {
     open(my $f, "<", "$root/../docs/cmdline-opts/write-out.md");
     while(<$f>) {
-        if($_ =~ /^\#\# \`([^\`]*)\`/) {
-            if($1 ne "header{name}" && $1 ne "output{filename}") {
+        chomp;
+        $_ =~ s/[\r\n]//g;
+        if($_ =~ /^\#\# *\z/) {
+            last;
+        }
+        elsif($_ =~ /^\#\# \`([^\`]*)\`/) {
+            if(!$special{$1}) {
                 $indocs{$1} = 1;
             }
         }

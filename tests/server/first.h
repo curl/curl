@@ -23,6 +23,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
+/* Test servers simply are standalone programs that do not use libcurl
+ * library.  For convenience and to ease portability of these servers,
+ * some source code files from the libcurl subdirectory are also used
+ * to build the servers.  In order to achieve proper linkage of these
+ * files on Windows targets it is necessary to build the test servers
+ * with CURL_STATICLIB defined, independently of how libcurl is built.
+ * For other platforms, this macro is a no-op and safe to set.
+ */
+#define CURL_STATICLIB
+
+#define WITHOUT_LIBCURL
+#define CURL_NO_OLDIES
+
 #include "curl_setup.h"
 
 typedef int (*entry_func_t)(int, char **);

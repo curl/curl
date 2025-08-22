@@ -130,7 +130,7 @@ void *create_thread(void *progress_bar)
                                NULL, /* default attributes please */
                                pull_one_url,
                                NULL);
-    if(0 != error)
+    if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);

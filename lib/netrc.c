@@ -390,53 +390,57 @@ const char *Curl_netrc_strerror(NETRCcode ret)
  */
 NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
                           char **loginp, char **passwordp,
-                          char *netrcfile)
+                          const char *netrcfile)
 {
   NETRCcode retcode = NETRC_OK;
   char *filealloc = NULL;
 
   if(!netrcfile) {
+    char *home = NULL;
+    char *homea = NULL;
 #if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
     char pwbuf[1024];
 #endif
-    char *home = NULL;
-    char *homea = curl_getenv("HOME"); /* portable environment reader */
-    if(homea) {
-      home = homea;
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
-    }
-    else {
-      struct passwd pw, *pw_res;
-      if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
-         && pw_res) {
-        home = pw.pw_dir;
-      }
-#elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
-    }
-    else {
-      struct passwd *pw;
-      pw = getpwuid(geteuid());
-      if(pw) {
-        home = pw->pw_dir;
-      }
-#elif defined(_WIN32)
-    }
-    else {
-      homea = curl_getenv("USERPROFILE");
+    filealloc = curl_getenv("NETRC");
+    if(!filealloc) {
+      homea = curl_getenv("HOME"); /* portable environment reader */
       if(homea) {
         home = homea;
+#if defined(HAVE_GETPWUID_R) && defined(HAVE_GETEUID)
       }
+      else {
+        struct passwd pw, *pw_res;
+        if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
+           && pw_res) {
+          home = pw.pw_dir;
+        }
+#elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
+      }
+      else {
+        struct passwd *pw;
+        pw = getpwuid(geteuid());
+        if(pw) {
+          home = pw->pw_dir;
+        }
+#elif defined(_WIN32)
+      }
+      else {
+        homea = curl_getenv("USERPROFILE");
+        if(homea) {
+          home = homea;
+        }
 #endif
-    }
+      }
 
-    if(!home)
-      return NETRC_FILE_MISSING; /* no home directory found (or possibly out
-                                    of memory) */
+      if(!home)
+        return NETRC_FILE_MISSING; /* no home directory found (or possibly out
+                                      of memory) */
 
-    filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
-    if(!filealloc) {
-      free(homea);
-      return NETRC_OUT_OF_MEMORY;
+      filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
+      if(!filealloc) {
+        free(homea);
+        return NETRC_OUT_OF_MEMORY;
+      }
     }
     retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
     free(filealloc);

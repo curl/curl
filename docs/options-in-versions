@@ -145,11 +145,13 @@
 --ntlm                               7.10.6
 --ntlm-wb                            7.22.0
 --oauth2-bearer                      7.33.0
+--out-null                           8.16.0
 --output (-o)                        4.0
 --output-dir                         7.73.0
 --parallel (-Z)                      7.66.0
 --parallel-immediate                 7.68.0
 --parallel-max                       7.66.0
+--parallel-max-host                  8.16.0
 --pass                               7.9.3
 --path-as-is                         7.42.0
 --pinnedpubkey                       7.39.0
@@ -198,6 +200,7 @@
 --range (-r)                         4.0
 --rate                               7.84.0
 --raw                                7.16.2
+--follow                             8.16.0
 --referer (-e)                       4.0
 --remote-header-name (-J)            7.20.0
 --remote-name (-O)                   4.0

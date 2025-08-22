@@ -16,7 +16,7 @@ RFC7628
 <reply>
 <servercmd>
 AUTH OAUTHBEARER
-REPLY AUTH 334 eyJzdGF0dXMiOiJpbnZhbGlkX3Rva2VuIiwic2NvcGUiOiJleGFtcGxlX3Njb3BlIiwib3BlbmlkLWNvbmZpZ3VyYXRpb24iOiJodHRwczovL2V4YW1wbGUuY29tLy53ZWxsLWtub3duL29wZW5pZC1jb25maWd1cmF0aW9uIn0
+REPLY AUTH 334 %b64[{"status":"invalid_token","scope":"example_scope","openid-configuration":"https://example.com/.well-known/openid-configuration"}]b64%
 REPLY AQ== 535 Username and Password not accepted. Learn more at\r\n535 http://support.example.com/mail/oauth
 </servercmd>
 </reply>

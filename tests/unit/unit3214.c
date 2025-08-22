@@ -56,7 +56,7 @@ static void checksize(const char *name, size_t size, size_t allowed)
 #define MAX_CURLMSG             24
 #define MAX_CURL_HEADER         48
 
-static CURLcode test_unit3214(char *arg)
+static CURLcode test_unit3214(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

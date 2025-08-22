@@ -25,14 +25,6 @@
 
 #include "memdebug.h"
 
-/*
- * This is the list of basic details you need to tweak to get things right.
- */
-#define USERNAME "user@example.com"
-#define PASSWORD "123qwerty"
-#define RECIPIENT "<1507-recipient@example.com>"
-#define MAILFROM "<1507-realuser@example.com>"
-
 static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   (void)ptr;
@@ -42,41 +34,41 @@ static size_t t1507_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode test_lib1507(char *URL)
+static CURLcode test_lib1507(const char *URL)
 {
-   static const int MULTI_PERFORM_HANG_TIMEOUT = 60 * 1000;
+  static const int MULTI_PERFORM_HANG_TIMEOUT = 60 * 1000;
 
-   CURLcode res = CURLE_OK;
-   CURL *curl = NULL;
-   CURLM *mcurl = NULL;
-   int still_running = 1;
-   struct curltime mp_start;
-   struct curl_slist *rcpt_list = NULL;
+  CURLcode res = CURLE_OK;
+  CURL *curl = NULL;
+  CURLM *mcurl = NULL;
+  int still_running = 1;
+  struct curltime mp_start;
+  struct curl_slist *rcpt_list = NULL;
 
-   curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
-   easy_init(curl);
+  easy_init(curl);
 
-   multi_init(mcurl);
+  multi_init(mcurl);
 
-   rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
-   /* more addresses can be added here
-      rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
-   */
-
-   curl_easy_setopt(curl, CURLOPT_URL, URL);
+  rcpt_list = curl_slist_append(rcpt_list, "<1507-recipient@example.com>");
 #if 0
-   curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
-   curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
+  /* more addresses can be added here */
+  rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
 #endif
-   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-   curl_easy_setopt(curl, CURLOPT_READFUNCTION, t1507_read_cb);
-   curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
-   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
-   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   multi_add_handle(mcurl, curl);
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+#if 0
+  curl_easy_setopt(curl, CURLOPT_USERNAME, "user@example.com");
+  curl_easy_setopt(curl, CURLOPT_PASSWORD, "123qwerty");
+#endif
+  curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(curl, CURLOPT_READFUNCTION, t1507_read_cb);
+  curl_easy_setopt(curl, CURLOPT_MAIL_FROM, "<1507-realuser@example.com>");
+  curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  multi_add_handle(mcurl, curl);
 
-   mp_start = curlx_now();
+  mp_start = curlx_now();
 
   /* we start some action by calling perform right away */
   curl_multi_perform(mcurl, &still_running);

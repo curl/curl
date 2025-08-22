@@ -30,7 +30,8 @@
 
 #include "memdebug.h"
 
-#define UPLOADTHIS "this is the blurb we want to upload\n"
+static const char t547_uploadthis[] = "this is the blurb we want to upload\n";
+#define T547_DATALEN (sizeof(t547_uploadthis)-1)
 
 static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
@@ -43,10 +44,10 @@ static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
   }
   (*counter)++; /* bump */
 
-  if(size * nmemb >= strlen(UPLOADTHIS)) {
+  if(size * nmemb >= T547_DATALEN) {
     curl_mfprintf(stderr, "READ!\n");
-    strcpy(ptr, UPLOADTHIS);
-    return strlen(UPLOADTHIS);
+    strcpy(ptr, t547_uploadthis);
+    return T547_DATALEN;
   }
   curl_mfprintf(stderr, "READ NOT FINE!\n");
   return 0;
@@ -63,7 +64,7 @@ static curlioerr t547_ioctl_callback(CURL *handle, int cmd, void *clientp)
   return CURLIOE_OK;
 }
 
-static CURLcode test_lib547(char *URL)
+static CURLcode test_lib547(const char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -86,7 +87,7 @@ static CURLcode test_lib547(char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   if(testnum == 548) {
     /* set the data to POST with a mere pointer to a null-terminated string */
-    test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
+    test_setopt(curl, CURLOPT_POSTFIELDS, t547_uploadthis);
   }
   else {
     /* 547 style, which means reading the POST data from a callback */
@@ -97,13 +98,13 @@ static CURLcode test_lib547(char *URL)
     test_setopt(curl, CURLOPT_READDATA, &counter);
     /* We CANNOT do the POST fine without setting the size (or choose
        chunked)! */
-    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(UPLOADTHIS));
+    test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)T547_DATALEN);
   }
   test_setopt(curl, CURLOPT_POST, 1L);
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   test_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
   test_setopt(curl, CURLOPT_PROXYAUTH,
-                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
+              CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
 
   res = curl_easy_perform(curl);
 

@@ -53,7 +53,7 @@ static CURLcode run(CURL *hnd, long limit, long time)
   return curl_easy_perform(hnd);
 }
 
-static CURLcode test_lib1523(char *URL)
+static CURLcode test_lib1523(const char *URL)
 {
   CURLcode ret;
   CURL *hnd;

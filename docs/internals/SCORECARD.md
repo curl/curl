@@ -52,6 +52,13 @@ curl> python3 tests/http/scorecard.py -d --download-sizes=1mb --download-count=1
 
 Similar options are available for uploads and requests scenarios.
 
+## sockd
+
+If you have configured curl with `--with-test-danted=<danted-path>` for a
+`dante-server` installed on your system, you can provide the scorecard
+with arguments `--socks4` or `--socks5` to test performance with a SOCKS proxy
+involved. (Note: this does not work for HTTP/3)
+
 ## dtrace
 
 With the `--dtrace` option, scorecard produces a dtrace sample of the user stacks in `tests/http/gen/curl/curl.user_stacks`. On many platforms, `dtrace` requires **special permissions**. It is therefore invoked via `sudo` and you should make sure that sudo works for the run without prompting for a password.

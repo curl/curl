@@ -41,6 +41,7 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
+#include "curl_trc.h"
 #include "curlx/timediff.h"
 #include "curlx/wait.h"
 #include "curlx/warnless.h"
@@ -423,7 +424,7 @@ CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
 
   DEBUGASSERT(cpfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     short events = 0;
     if(ps->actions[i] & CURL_POLL_IN)
       events |= POLLIN;
@@ -481,7 +482,7 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
 
   DEBUGASSERT(cwfds);
   DEBUGASSERT(ps);
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     short events = 0;
     if(ps->actions[i] & CURL_POLL_IN)
       events |= CURL_WAIT_POLLIN;
@@ -491,4 +492,234 @@ unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
       need += cwfds_add_sock(cwfds, ps->sockets[i], events);
   }
   return need;
+}
+
+void Curl_pollset_reset(struct easy_pollset *ps)
+{
+  unsigned int i;
+  ps->n = 0;
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
+  DEBUGASSERT(ps->count);
+  for(i = 0; i < ps->count; i++)
+    ps->sockets[i] = CURL_SOCKET_BAD;
+  memset(ps->actions, 0, ps->count * sizeof(ps->actions[0]));
+}
+
+void Curl_pollset_init(struct easy_pollset *ps)
+{
+#ifdef DEBUGBUILD
+  ps->init = CURL_EASY_POLLSET_MAGIC;
+#endif
+  ps->sockets = ps->def_sockets;
+  ps->actions = ps->def_actions;
+  ps->count = CURL_ARRAYSIZE(ps->def_sockets);
+  ps->n = 0;
+  Curl_pollset_reset(ps);
+}
+
+struct easy_pollset *Curl_pollset_create(void)
+{
+  struct easy_pollset *ps = calloc(1, sizeof(*ps));
+  if(ps)
+    Curl_pollset_init(ps);
+  return ps;
+}
+
+void Curl_pollset_cleanup(struct easy_pollset *ps)
+{
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
+  if(ps->sockets != ps->def_sockets) {
+    free(ps->sockets);
+    ps->sockets = ps->def_sockets;
+  }
+  if(ps->actions != ps->def_actions) {
+    free(ps->actions);
+    ps->actions = ps->def_actions;
+  }
+  ps->count = CURL_ARRAYSIZE(ps->def_sockets);
+  Curl_pollset_reset(ps);
+}
+
+void Curl_pollset_move(struct easy_pollset *to, struct easy_pollset *from)
+{
+  Curl_pollset_cleanup(to); /* deallocate anything in to */
+  if(from->sockets != from->def_sockets) {
+    DEBUGASSERT(from->actions != from->def_actions);
+    to->sockets = from->sockets;
+    to->actions = from->actions;
+    to->count = from->count;
+    to->n = from->n;
+    Curl_pollset_init(from);
+  }
+  else {
+    DEBUGASSERT(to->sockets == to->def_sockets);
+    DEBUGASSERT(to->actions == to->def_actions);
+    memcpy(to->sockets, from->sockets, to->count * sizeof(to->sockets[0]));
+    memcpy(to->actions, from->actions, to->count * sizeof(to->actions[0]));
+    to->n = from->n;
+    Curl_pollset_init(from);
+  }
+}
+
+/**
+ *
+ */
+CURLcode Curl_pollset_change(struct Curl_easy *data,
+                             struct easy_pollset *ps, curl_socket_t sock,
+                             int add_flags, int remove_flags)
+{
+  unsigned int i;
+
+#ifdef DEBUGBUILD
+  DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
+#endif
+
+  (void)data;
+  DEBUGASSERT(VALID_SOCK(sock));
+  if(!VALID_SOCK(sock))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
+  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
+  DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
+  for(i = 0; i < ps->n; ++i) {
+    if(ps->sockets[i] == sock) {
+      ps->actions[i] &= (unsigned char)(~remove_flags);
+      ps->actions[i] |= (unsigned char)add_flags;
+      /* all gone? remove socket */
+      if(!ps->actions[i]) {
+        if((i + 1) < ps->n) {
+          memmove(&ps->sockets[i], &ps->sockets[i + 1],
+                  (ps->n - (i + 1)) * sizeof(ps->sockets[0]));
+          memmove(&ps->actions[i], &ps->actions[i + 1],
+                  (ps->n - (i + 1)) * sizeof(ps->actions[0]));
+        }
+        --ps->n;
+      }
+      return CURLE_OK;
+    }
+  }
+  /* not present */
+  if(add_flags) {
+    if(i >= ps->count) { /* need to grow */
+      unsigned int new_count = CURLMAX(ps->count * 2, 8);
+      curl_socket_t *nsockets;
+      unsigned char *nactions;
+
+      CURL_TRC_M(data, "growing pollset capacity from %u to %u",
+                 ps->count, new_count);
+      if(new_count <= ps->count)
+        return CURLE_OUT_OF_MEMORY;
+      nsockets = calloc(new_count, sizeof(nsockets[0]));
+      if(!nsockets)
+        return CURLE_OUT_OF_MEMORY;
+      nactions = calloc(new_count, sizeof(nactions[0]));
+      if(!nactions) {
+        free(nsockets);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      memcpy(nsockets, ps->sockets, ps->count * sizeof(ps->sockets[0]));
+      memcpy(nactions, ps->actions, ps->count * sizeof(ps->actions[0]));
+      if(ps->sockets != ps->def_sockets)
+        free(ps->sockets);
+      ps->sockets = nsockets;
+      if(ps->actions != ps->def_actions)
+        free(ps->actions);
+      ps->actions = nactions;
+      ps->count = new_count;
+    }
+    DEBUGASSERT(i < ps->count);
+    if(i < ps->count) {
+      ps->sockets[i] = sock;
+      ps->actions[i] = (unsigned char)add_flags;
+      ps->n = i + 1;
+    }
+  }
+  return CURLE_OK;
+}
+
+CURLcode Curl_pollset_set(struct Curl_easy *data,
+                          struct easy_pollset *ps, curl_socket_t sock,
+                          bool do_in, bool do_out)
+{
+  return Curl_pollset_change(data, ps, sock,
+                             (do_in ? CURL_POLL_IN : 0)|
+                             (do_out ? CURL_POLL_OUT : 0),
+                             (!do_in ? CURL_POLL_IN : 0)|
+                             (!do_out ? CURL_POLL_OUT : 0));
+}
+
+int Curl_pollset_poll(struct Curl_easy *data,
+                      struct easy_pollset *ps,
+                      timediff_t timeout_ms)
+{
+  struct pollfd *pfds;
+  unsigned int i, npfds;
+  int result;
+
+  (void)data;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+
+  if(!ps->n)
+    return curlx_wait_ms(timeout_ms);
+
+  pfds = calloc(ps->n, sizeof(*pfds));
+  if(!pfds)
+    return -1;
+
+  npfds = 0;
+  for(i = 0; i < ps->n; ++i) {
+    short events = 0;
+    if(ps->actions[i] & CURL_POLL_IN) {
+      events |= POLLIN;
+    }
+    if(ps->actions[i] & CURL_POLL_OUT) {
+      events |= POLLOUT;
+    }
+    if(events) {
+      pfds[npfds].fd = ps->sockets[i];
+      pfds[npfds].events = events;
+      ++npfds;
+    }
+  }
+
+  result = Curl_poll(pfds, npfds, timeout_ms);
+  free(pfds);
+  return result;
+}
+
+void Curl_pollset_check(struct Curl_easy *data,
+                        struct easy_pollset *ps, curl_socket_t sock,
+                        bool *pwant_read, bool *pwant_write)
+{
+  unsigned int i;
+
+  (void)data;
+  DEBUGASSERT(VALID_SOCK(sock));
+  for(i = 0; i < ps->n; ++i) {
+    if(ps->sockets[i] == sock) {
+      *pwant_read = !!(ps->actions[i] & CURL_POLL_IN);
+      *pwant_write = !!(ps->actions[i] & CURL_POLL_OUT);
+      return;
+    }
+  }
+  *pwant_read = *pwant_write = FALSE;
+}
+
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock)
+{
+  unsigned int i;
+  (void)data;
+  for(i = 0; i < ps->n; ++i) {
+    if((ps->sockets[i] == sock) && (ps->actions[i] & CURL_POLL_IN))
+      return TRUE;
+  }
+  return FALSE;
 }

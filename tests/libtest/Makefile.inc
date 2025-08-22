@@ -44,6 +44,16 @@ CURLX_C = \
 
 # All libtest programs
 TESTS_C = \
+  cli_h2_pausing.c \
+  cli_h2_serverpush.c \
+  cli_h2_upgrade_extreme.c \
+  cli_hx_download.c \
+  cli_hx_upload.c \
+  cli_tls_session_reuse.c \
+  cli_upload_pausing.c \
+  cli_ws_data.c \
+  cli_ws_pingpong.c \
+  \
   lib500.c lib501.c lib502.c lib503.c lib504.c lib505.c lib506.c lib507.c \
   lib508.c lib509.c lib510.c lib511.c lib512.c lib513.c lib514.c lib515.c \
   lib516.c lib517.c lib518.c lib519.c lib520.c lib521.c lib523.c lib524.c \
@@ -61,7 +71,8 @@ TESTS_C = \
   lib661.c                                     lib666.c lib667.c lib668.c \
   lib670.c                            lib674.c lib676.c lib677.c lib678.c \
   lib694.c lib695.c \
-  lib751.c          lib753.c \
+  lib751.c          lib753.c                                     lib758.c \
+  lib757.c \
   lib1156.c \
   lib1301.c                                                   lib1308.c \
   lib1485.c \
@@ -71,7 +82,7 @@ TESTS_C = \
   lib1522.c lib1523.c           lib1525.c lib1526.c lib1527.c lib1528.c \
   lib1529.c lib1530.c lib1531.c lib1532.c lib1533.c lib1534.c lib1535.c \
   lib1536.c lib1537.c lib1538.c           lib1540.c lib1541.c lib1542.c \
-  lib1545.c                                         lib1550.c lib1551.c \
+  lib1545.c                               lib1549.c lib1550.c lib1551.c \
   lib1552.c lib1553.c lib1554.c lib1555.c lib1556.c lib1557.c lib1558.c \
   lib1559.c lib1560.c                               lib1564.c lib1565.c \
   lib1567.c lib1568.c lib1569.c           lib1571.c \
@@ -93,6 +104,6 @@ TESTS_C = \
   lib2402.c           lib2404.c lib2405.c \
   lib2502.c \
   lib2700.c \
-  lib3010.c lib3025.c lib3026.c lib3027.c \
+  lib3010.c lib3025.c lib3026.c lib3027.c lib3033.c lib3034.c \
   lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \
   lib3207.c lib3208.c

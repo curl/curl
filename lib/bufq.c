@@ -174,6 +174,12 @@ static CURLcode bufcp_take(struct bufc_pool *pool,
     return CURLE_OK;
   }
 
+  /* Check for integer overflow before allocation */
+  if(pool->chunk_size > SIZE_MAX - sizeof(*chunk)) {
+    *pchunk = NULL;
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   chunk = calloc(1, sizeof(*chunk) + pool->chunk_size);
   if(!chunk) {
     *pchunk = NULL;
@@ -302,6 +308,11 @@ static struct buf_chunk *get_spare(struct bufq *q)
     return chunk;
   }
   else {
+    /* Check for integer overflow before allocation */
+    if(q->chunk_size > SIZE_MAX - sizeof(*chunk)) {
+      return NULL;
+    }
+
     chunk = calloc(1, sizeof(*chunk) + q->chunk_size);
     if(!chunk)
       return NULL;
@@ -526,7 +537,8 @@ CURLcode Curl_bufq_write_pass(struct bufq *q,
       if(result != CURLE_AGAIN)
         /* real error, fail */
         return result;
-      if((result == CURLE_AGAIN) && *pwritten)
+      /* result == CURLE_AGAIN */
+      if(*pwritten)
         /* we did write successfully before */
         result = CURLE_OK;
       return result;
@@ -590,8 +602,7 @@ static CURLcode bufq_slurpn(struct bufq *q, size_t max_len,
       break;
     }
     else if(n == 0) {
-      /* eof */
-      result = CURLE_OK;
+      /* eof, result remains CURLE_OK */
       break;
     }
     *pnread += n;

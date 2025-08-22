@@ -64,7 +64,7 @@ static int sockopt_cb(void *clientp,
   return CURL_SOCKOPT_ALREADY_CONNECTED;
 }
 
-#if defined(__AMIGA__)
+#ifdef __AMIGA__
 #define my_inet_pton(x,y,z) inet_pton(x,(unsigned char *)y,z)
 #else
 #define my_inet_pton(x,y,z) inet_pton(x,y,z)
@@ -72,7 +72,7 @@ static int sockopt_cb(void *clientp,
 
 
 /* Expected args: URL IP PORT */
-static CURLcode test_lib1960(char *URL)
+static CURLcode test_lib1960(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = TEST_ERR_MAJOR_BAD;
@@ -144,7 +144,7 @@ test_cleanup:
   return res;
 }
 #else
-static CURLcode test_lib1960(char *URL)
+static CURLcode test_lib1960(const char *URL)
 {
   (void)URL;
   curl_mprintf("lacks inet_pton\n");

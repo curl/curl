@@ -21,11 +21,9 @@ CURLOPT_FTP_CREATE_MISSING_DIRS - create missing directories for FTP and SFTP
 ~~~c
 #include <curl/curl.h>
 
-typedef enum {
-  CURLFTP_CREATE_DIR_NONE,
-  CURLFTP_CREATE_DIR,
-  CURLFTP_CREATE_DIR_RETRY
-} curl_ftpcreatedir;
+#define CURLFTP_CREATE_DIR_NONE  0L
+#define CURLFTP_CREATE_DIR       1L
+#define CURLFTP_CREATE_DIR_RETRY 2L
 
 CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTP_CREATE_MISSING_DIRS,
                           long create);
@@ -69,7 +67,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://example.com/non-existing/new.txt");
     curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                     (long)CURLFTP_CREATE_DIR_RETRY);
+                     CURLFTP_CREATE_DIR_RETRY);
 
     res = curl_easy_perform(curl);
 
@@ -77,6 +75,11 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLFTP_CREATE_*** enums became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

@@ -35,7 +35,6 @@ http
 <setenv>
 FUNVALUE=contents
 VALUE2=curl
-BLANK=
 </setenv>
 <name>
 Environment variables within config file, unbalanced braces

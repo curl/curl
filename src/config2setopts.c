@@ -87,8 +87,7 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     }
     if(result < 0) {
       int error = errno;
-      warnf(config->global,
-            "Setting type of service to %d failed with errno %d: %s;\n",
+      warnf("Setting type of service to %d failed with errno %d: %s",
             tos, error, strerror(error));
     }
   }
@@ -97,9 +96,9 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
   if(config->vlan_priority > 0) {
     int priority = (int)config->vlan_priority;
     if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
-      (void *)&priority, sizeof(priority)) != 0) {
+                  (void *)&priority, sizeof(priority)) != 0) {
       int error = errno;
-      warnf(config->global, "VLAN priority %d failed with errno %d: %s;\n",
+      warnf("VLAN priority %d failed with errno %d: %s",
             priority, error, strerror(error));
     }
   }
@@ -173,7 +172,6 @@ static CURLcode url_proto_and_rewrite(char **url,
 
 static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
   CURLcode result;
 
   /* SSH and SSL private key uses same command-line option */
@@ -213,11 +211,11 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       global->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf(global, "Couldn't find a known_hosts file");
+      errorf("Couldn't find a known_hosts file");
       return CURLE_FAILED_INIT;
     }
     else
-      warnf(global, "Couldn't find a known_hosts file");
+      warnf("Couldn't find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }
@@ -229,10 +227,56 @@ extern const unsigned char curl_ca_embed[];
 #endif
 #endif
 
+static long tlsversion(unsigned char mintls,
+                       unsigned char maxtls)
+{
+  long tlsver = 0;
+  if(!mintls) { /* minimum is at default */
+    /* minimum is set to default, which we want to be 1.2 */
+    if(maxtls && (maxtls < 3))
+      /* max is set lower than 1.2 and minimum is default, change minimum to
+         the same as max */
+      mintls = maxtls;
+  }
+  switch(mintls) {
+  case 1:
+    tlsver = CURL_SSLVERSION_TLSv1_0;
+    break;
+  case 2:
+    tlsver = CURL_SSLVERSION_TLSv1_1;
+    break;
+  case 0: /* let default minimum be 1.2 */
+  case 3:
+    tlsver = CURL_SSLVERSION_TLSv1_2;
+    break;
+  case 4:
+  default: /* just in case */
+    tlsver = CURL_SSLVERSION_TLSv1_3;
+    break;
+  }
+  switch(maxtls) {
+  case 0: /* not set, leave it */
+    break;
+  case 1:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_0;
+    break;
+  case 2:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_1;
+    break;
+  case 3:
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_2;
+    break;
+  case 4:
+  default: /* just in case */
+    tlsver |= CURL_SSLVERSION_MAX_TLSv1_3;
+    break;
+  }
+  return tlsver;
+}
+
 /* only called if libcurl supports TLS */
 static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
   CURLcode result = CURLE_OK;
 
   if(config->cacert)
@@ -254,7 +298,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     if((result == CURLE_NOT_BUILT_IN) ||
        (result == CURLE_UNKNOWN_OPTION)) {
       if(config->proxy_capath) {
-        warnf(global, "ignoring %s, not supported by libcurl with %s",
+        warnf("ignoring %s, not supported by libcurl with %s",
               config->proxy_capath ? "--proxy-capath" : "--capath",
               ssl_backend());
       }
@@ -269,12 +313,10 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
-    notef(config->global,
-          "Using embedded CA bundle (%zu bytes)",
-          blob.len);
+    notef("Using embedded CA bundle (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
@@ -283,12 +325,10 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     blob.data = CURL_UNCONST(curl_ca_embed);
     blob.len = strlen((const char *)curl_ca_embed);
     blob.flags = CURL_BLOB_NOCOPY;
-    notef(config->global,
-          "Using embedded CA bundle, for proxies (%zu bytes)",
-          blob.len);
+    notef("Using embedded CA bundle, for proxies (%zu bytes)", blob.len);
     result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
     if(result == CURLE_NOT_BUILT_IN) {
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "embedded CA bundle", ssl_backend());
     }
   }
@@ -305,14 +345,14 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     result = my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY,
                            config->pinnedpubkey);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--pinnedpubkey", ssl_backend());
   }
   if(config->proxy_pinnedpubkey) {
     result = my_setopt_str(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
                            config->proxy_pinnedpubkey);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-pinnedpubkey", ssl_backend());
   }
 
@@ -364,7 +404,8 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_DOH_SSL_VERIFYSTATUS, 1);
 
   my_setopt_SSLVERSION(curl, CURLOPT_SSLVERSION,
-                       config->ssl_version | config->ssl_version_max);
+                       tlsversion(config->ssl_version,
+                                  config->ssl_version_max));
   if(config->proxy)
     my_setopt_SSLVERSION(curl, CURLOPT_PROXY_SSLVERSION,
                          config->proxy_ssl_version);
@@ -397,28 +438,28 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     result = my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST,
                            config->cipher_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--ciphers", ssl_backend());
   }
   if(config->proxy_cipher_list) {
     result = my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
                            config->proxy_cipher_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-ciphers", ssl_backend());
   }
   if(config->cipher13_list) {
     result = my_setopt_str(curl, CURLOPT_TLS13_CIPHERS,
                            config->cipher13_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--tls13-ciphers", ssl_backend());
   }
   if(config->proxy_cipher13_list) {
     result = my_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
                            config->proxy_cipher13_list);
     if(result == CURLE_NOT_BUILT_IN)
-      warnf(global, "ignoring %s, not supported by libcurl with %s",
+      warnf("ignoring %s, not supported by libcurl with %s",
             "--proxy-tls13-ciphers", ssl_backend());
   }
 
@@ -468,8 +509,7 @@ static CURLcode http_setopts(struct OperationConfig *config,
 {
   long postRedir = 0;
 
-  my_setopt_long(curl, CURLOPT_FOLLOWLOCATION,
-                 config->followlocation);
+  my_setopt_long(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
   my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH,
                  config->unrestricted_auth);
   my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
@@ -533,13 +573,12 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
     curlx_dyn_init(&cookies, MAX_COOKIE_LINE);
     for(cl = config->cookies; cl; cl = cl->next) {
       if(cl == config->cookies)
-        result = curlx_dyn_addf(&cookies, "%s", cl->data);
+        result = curlx_dyn_add(&cookies, cl->data);
       else
         result = curlx_dyn_addf(&cookies, ";%s", cl->data);
 
       if(result) {
-        warnf(config->global,
-              "skipped provided cookie, the cookie header "
+        warnf("skipped provided cookie, the cookie header "
               "would go over %u bytes", MAX_COOKIE_LINE);
         return result;
       }
@@ -609,7 +648,7 @@ static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 
   /* new in curl 7.16.1 */
   if(config->ftp_ssl_ccc)
-    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, (long)config->ftp_ssl_ccc_mode);
+    my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
   my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
@@ -632,7 +671,7 @@ static CURLcode ftp_setopts(struct OperationConfig *config, CURL *curl)
 
 static void gen_trace_setopts(struct OperationConfig *config, CURL *curl)
 {
-  if(config->global->tracetype != TRACE_NONE) {
+  if(global->tracetype != TRACE_NONE) {
     my_setopt(curl, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(curl, CURLOPT_DEBUGDATA, config);
     my_setopt_long(curl, CURLOPT_VERBOSE, 1L);
@@ -643,8 +682,8 @@ static void gen_cb_setopts(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURL *curl)
 {
-  struct GlobalConfig *global = config->global;
-  (void) config;
+  (void)config; /* when --libcurl is disabled */
+
   /* where to store */
   my_setopt(curl, CURLOPT_WRITEDATA, per);
   my_setopt(curl, CURLOPT_INTERLEAVEDATA, per);
@@ -686,7 +725,7 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
     CURLcode result = my_setopt_str(curl, CURLOPT_PROXY, config->proxy);
 
     if(result) {
-      errorf(config->global, "proxy support is disabled in this libcurl");
+      errorf("proxy support is disabled in this libcurl");
       config->synthetic_error = TRUE;
       return CURLE_NOT_BUILT_IN;
     }
@@ -707,7 +746,7 @@ static CURLcode proxy_setopts(struct OperationConfig *config, CURL *curl)
 
   /* new in libcurl 7.10.6 */
   if(config->proxyanyauth)
-    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+    my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
   else if(config->proxynegotiate)
     my_setopt_bitmask(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
   else if(config->proxyntlm)
@@ -763,7 +802,6 @@ CURLcode config2setopts(struct OperationConfig *config,
                         CURL *curl,
                         CURLSH *share)
 {
-  struct GlobalConfig *global = config->global;
   const char *use_proto;
   CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
@@ -810,11 +848,8 @@ CURLcode config2setopts(struct OperationConfig *config,
   /* call after the line above. It may override CURLOPT_NOPROGRESS */
   gen_cb_setopts(config, per, curl);
 
-  if(config->no_body)
-    my_setopt_long(curl, CURLOPT_NOBODY, 1);
-
-  if(config->oauth_bearer)
-    my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
+  my_setopt_long(curl, CURLOPT_NOBODY, config->no_body);
+  my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
   result = proxy_setopts(config, curl);
   if(result)
@@ -833,12 +868,9 @@ CURLcode config2setopts(struct OperationConfig *config,
   else
     my_setopt_enum(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
 
-  if(config->netrc_file)
-    my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
-
+  my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
   my_setopt_long(curl, CURLOPT_TRANSFERTEXT, config->use_ascii);
-  if(config->login_options)
-    my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
+  my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
   my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
   my_setopt_str(curl, CURLOPT_RANGE, config->range);
   if(!global->parallel) {
@@ -850,7 +882,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   switch(config->httpreq) {
   case TOOL_HTTPREQ_SIMPLEPOST:
     if(config->resume_from) {
-      errorf(global, "cannot mix --continue-at with --data");
+      errorf("cannot mix --continue-at with --data");
       result = CURLE_FAILED_INIT;
     }
     else {
@@ -865,7 +897,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     curl_mime_free(config->mimepost);
     config->mimepost = NULL;
     if(config->resume_from) {
-      errorf(global, "cannot mix --continue-at with --form");
+      errorf("cannot mix --continue-at with --form");
       result = CURLE_FAILED_INIT;
     }
     else {
@@ -880,11 +912,9 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  /* new in libcurl 7.81.0 */
   if(config->mime_options)
     my_setopt_long(curl, CURLOPT_MIME_OPTIONS, config->mime_options);
 
-  /* new in libcurl 7.10.6 (default is Basic) */
   if(config->authtype)
     my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, config->authtype);
 
@@ -951,70 +981,36 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
   my_setopt_offt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
   my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
-  customrequest_helper(config, config->httpreq, config->customrequest);
+  customrequest_helper(config->httpreq, config->customrequest);
   my_setopt(curl, CURLOPT_STDERR, tool_stderr);
-
-  /* three new ones in libcurl 7.3: */
   my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
   my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
   progressbarinit(&per->progressbar, config);
-
-  /* new in libcurl 7.24.0: */
-  if(config->dns_servers)
-    my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
-
-  /* new in libcurl 7.33.0: */
-  if(config->dns_interface)
-    my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
-  if(config->dns_ipv4_addr)
-    my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
-  if(config->dns_ipv6_addr)
-    my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
-
-  /* new in libcurl 7.6.2: */
+  my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
+  my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
+  my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
+  my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
   my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
-
-  /* new in libcurl 7.7: */
   my_setopt_long(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connecttimeout_ms);
-
-  if(config->doh_url)
-    my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
-
-  /* new in curl 7.10.7, extended in 7.19.4. Modified to use
-     CREATE_DIR_RETRY in 7.49.0 */
+  my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
   my_setopt_long(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                  (config->ftp_create_dirs ?
                   CURLFTP_CREATE_DIR_RETRY : CURLFTP_CREATE_DIR_NONE));
-
-  /* new in curl 7.10.8 */
-  if(config->max_filesize)
-    my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE,
-                   config->max_filesize);
-
+  my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE,
+                 config->max_filesize);
   my_setopt_long(curl, CURLOPT_IPRESOLVE, config->ip_version);
-
-  /* new in curl 7.19.4 */
   if(config->socks5_gssapi_nec)
     my_setopt_long(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1);
-
-  /* new in curl 7.55.0 */
   if(config->socks5_auth)
     my_setopt_bitmask(curl, CURLOPT_SOCKS5_AUTH, config->socks5_auth);
-
-  /* new in curl 7.43.0 */
-  if(config->service_name)
-    my_setopt_str(curl, CURLOPT_SERVICE_NAME, config->service_name);
-
-  /* curl 7.13.0 */
+  my_setopt_str(curl, CURLOPT_SERVICE_NAME, config->service_name);
   my_setopt_long(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl);
 
-  /* curl 7.15.2 */
   if(config->localport) {
     my_setopt_long(curl, CURLOPT_LOCALPORT, config->localport);
     my_setopt_long(curl, CURLOPT_LOCALPORTRANGE, config->localportrange);
   }
 
-  /* curl 7.16.2 */
   if(config->raw) {
     my_setopt_long(curl, CURLOPT_HTTP_CONTENT_DECODING, 0);
     my_setopt_long(curl, CURLOPT_HTTP_TRANSFER_DECODING, 0);
@@ -1024,20 +1020,13 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  /* curl 7.20.0 */
   if(config->tftp_blksize && proto_tftp)
     my_setopt_long(curl, CURLOPT_TFTP_BLKSIZE, config->tftp_blksize);
 
-  if(config->mail_from)
-    my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
-
-  if(config->mail_rcpt)
-    my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
-
-  /* curl 7.69.x */
+  my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
+  my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
   my_setopt_long(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS,
                  config->mail_rcpt_allowfails);
-
   if(config->create_file_mode)
     my_setopt_long(curl, CURLOPT_NEW_FILE_PERMS, config->create_file_mode);
 
@@ -1046,34 +1035,19 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(config->proto_redir_present)
     my_setopt_str(curl, CURLOPT_REDIR_PROTOCOLS_STR, config->proto_redir_str);
 
-  if(config->resolve)
-    /* new in 7.21.3 */
-    my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+  my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
-  if(config->connect_to)
-    /* new in 7.49.0 */
-    my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
-
-  /* new in 7.21.4 */
   if(feature_tls_srp)
     tls_srp_setopts(config, curl);
 
-  /* new in 7.22.0 */
   if(config->gssapi_delegation)
     my_setopt_long(curl, CURLOPT_GSSAPI_DELEGATION, config->gssapi_delegation);
 
-  if(config->mail_auth)
-    my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+  my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+  my_setopt_str(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
+  my_setopt_long(curl, CURLOPT_SASL_IR, config->sasl_ir);
 
-  /* new in 7.66.0 */
-  if(config->sasl_authzid)
-    my_setopt_str(curl, CURLOPT_SASL_AUTHZID, config->sasl_authzid);
-
-  /* new in 7.31.0 */
-  if(config->sasl_ir)
-    my_setopt_long(curl, CURLOPT_SASL_IR, 1);
-
-  /* new in 7.40.0, abstract support added in 7.53.0 */
   if(config->unix_socket_path) {
     if(config->abstract_unix_socket) {
       my_setopt_str(curl, CURLOPT_ABSTRACT_UNIX_SOCKET,
@@ -1085,42 +1059,32 @@ CURLcode config2setopts(struct OperationConfig *config,
     }
   }
 
-  /* new in 7.45.0 */
-  if(config->proto_default)
-    my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
+  my_setopt_str(curl, CURLOPT_DEFAULT_PROTOCOL, config->proto_default);
+  my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS,
+                 config->tftp_no_options && proto_tftp);
 
-  /* new in 7.48.0 */
-  if(config->tftp_no_options && proto_tftp)
-    my_setopt_long(curl, CURLOPT_TFTP_NO_OPTIONS, 1);
-
-  /* new in 7.59.0 */
   if(config->happy_eyeballs_timeout_ms != CURL_HET_DEFAULT)
     my_setopt_long(curl, CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS,
                    config->happy_eyeballs_timeout_ms);
 
-  if(config->disallow_username_in_url)
-    my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL, 1);
+  my_setopt_long(curl, CURLOPT_DISALLOW_USERNAME_IN_URL,
+                 config->disallow_username_in_url);
 
-  /* new in 8.9.0 */
   if(config->ip_tos > 0 || config->vlan_priority > 0) {
 #if defined(IP_TOS) || defined(IPV6_TCLASS) || defined(SO_PRIORITY)
     my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback);
     my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
 #else
     if(config->ip_tos > 0) {
-      errorf(config->global,
-             "Type of service is not supported in this build.");
+      errorf("Type of service is not supported in this build.");
       result = CURLE_NOT_BUILT_IN;
     }
     if(config->vlan_priority > 0) {
-      errorf(config->global,
-             "VLAN priority is not supported in this build.");
+      errorf("VLAN priority is not supported in this build.");
       result = CURLE_NOT_BUILT_IN;
     }
 #endif
   }
-  /* new in 8.13.0 */
-  if(config->upload_flags)
-    my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
+  my_setopt_long(curl, CURLOPT_UPLOAD_FLAGS, config->upload_flags);
   return result;
 }

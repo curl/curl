@@ -26,13 +26,13 @@
 #include "tool_setup.h"
 #include "tool_cfgable.h"
 
-void warnf(struct GlobalConfig *global, const char *fmt, ...)
-  CURL_PRINTF(2, 3);
-void notef(struct GlobalConfig *global, const char *fmt, ...)
-  CURL_PRINTF(2, 3);
-void helpf(FILE *errors, const char *fmt, ...)
-  CURL_PRINTF(2, 3);
-void errorf(struct GlobalConfig *global, const char *fmt, ...)
-  CURL_PRINTF(2, 3);
+void warnf(const char *fmt, ...)
+  CURL_PRINTF(1, 2);
+void notef(const char *fmt, ...)
+  CURL_PRINTF(1, 2);
+void helpf(const char *fmt, ...)
+  CURL_PRINTF(1, 2);
+void errorf(const char *fmt, ...)
+  CURL_PRINTF(1, 2);
 
 #endif /* HEADER_CURL_TOOL_MSGS_H */

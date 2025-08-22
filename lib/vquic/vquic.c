@@ -30,12 +30,14 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef USE_NGHTTP3
+#include <nghttp3/nghttp3.h>
+#endif
 #include "../urldata.h"
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
-#include "curl_msh3.h"
 #include "curl_ngtcp2.h"
 #include "curl_osslq.h"
 #include "curl_quiche.h"
@@ -52,7 +54,7 @@
 #include "../memdebug.h"
 
 
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    2
@@ -76,8 +78,6 @@ void Curl_quic_ver(char *p, size_t len)
   Curl_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
-#elif defined(USE_MSH3)
-  Curl_msh3_ver(p, len);
 #endif
 }
 
@@ -615,7 +615,7 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             vquic_recv_pkt_cb *recv_cb, void *userp)
 {
   CURLcode result;
-#if defined(HAVE_SENDMMSG)
+#ifdef HAVE_SENDMMSG
   result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #elif defined(HAVE_SENDMSG)
   result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
@@ -645,7 +645,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
                       size_t scidlen,
                       int *qlogfdp)
 {
-  const char *qlog_dir = getenv("QLOGDIR");
+  char *qlog_dir = curl_getenv("QLOGDIR");
   *qlogfdp = -1;
   if(qlog_dir) {
     struct dynbuf fname;
@@ -670,6 +670,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
         *qlogfdp = qlogfd;
     }
     curlx_dyn_free(&fname);
+    free(qlog_dir);
     if(result)
       return result;
   }
@@ -691,8 +692,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   return Curl_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
-#elif defined(USE_MSH3)
-  return Curl_cf_msh3_create(pcf, data, conn, ai);
 #else
   *pcf = NULL;
   (void)data;
@@ -728,7 +727,63 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#else /* USE_HTTP3 */
+#if defined(USE_NGTCP2) || defined(USE_NGHTTP3)
+
+static void *vquic_ngtcp2_malloc(size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_cmalloc(size);
+}
+
+static void vquic_ngtcp2_free(void *ptr, void *user_data)
+{
+  (void)user_data;
+  Curl_cfree(ptr);
+}
+
+static void *vquic_ngtcp2_calloc(size_t nmemb, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_ccalloc(nmemb, size);
+}
+
+static void *vquic_ngtcp2_realloc(void *ptr, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_crealloc(ptr, size);
+}
+
+#ifdef USE_NGTCP2
+static struct ngtcp2_mem vquic_ngtcp2_mem = {
+  NULL,
+  vquic_ngtcp2_malloc,
+  vquic_ngtcp2_free,
+  vquic_ngtcp2_calloc,
+  vquic_ngtcp2_realloc
+};
+struct ngtcp2_mem *Curl_ngtcp2_mem(void)
+{
+  return &vquic_ngtcp2_mem;
+}
+#endif
+
+#ifdef USE_NGHTTP3
+static struct nghttp3_mem vquic_nghttp3_mem = {
+  NULL,
+  vquic_ngtcp2_malloc,
+  vquic_ngtcp2_free,
+  vquic_ngtcp2_calloc,
+  vquic_ngtcp2_realloc
+};
+struct nghttp3_mem *Curl_nghttp3_mem(void)
+{
+  return &vquic_nghttp3_mem;
+}
+#endif
+
+#endif /* USE_NGTCP2 || USE_NGHTTP3 */
+
+#else /* CURL_DISABLE_HTTP || !USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn,
@@ -741,4 +796,4 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !USE_HTTP3 */
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */

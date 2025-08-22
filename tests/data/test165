@@ -33,8 +33,7 @@ proxy
 codeset-utf8
 </features>
 <setenv>
-LC_ALL=en_US.UTF-8
-LC_CTYPE=en_US.UTF-8
+LC_ALL=C.UTF-8
 </setenv>
 <name>
 HTTP over proxy with IDN host name

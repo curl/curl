@@ -35,7 +35,7 @@
 
 #define DNS_TIMEOUT 1L
 
-static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
+static CURLcode do_one_request(CURLM *m, const char *URL, const char *resolve)
 {
   CURL *curls;
   struct curl_slist *resolve_list = NULL;
@@ -52,9 +52,9 @@ static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
   easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
   easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
-  easy_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+  easy_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curls, CURLOPT_VERBOSE, 1L);
 
@@ -100,13 +100,13 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib1515(char *URL)
+static CURLcode test_lib1515(const char *URL)
 {
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
-  char *address = libtest_arg2;
-  char *port = libtest_arg3;
-  char *path = URL;
+  const char *path = URL;
+  const char *address = libtest_arg2;
+  const char *port = libtest_arg3;
   char dns_entry[256];
   int i;
   int count = 2;

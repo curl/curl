@@ -24,8 +24,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_OPENSSL)                        \
-  || defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H

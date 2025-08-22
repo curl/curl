@@ -37,6 +37,7 @@ struct Curl_dns_entry;
 struct addrinfo;
 struct hostent;
 struct connectdata;
+struct easy_pollset;
 
 #if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
 #error cannot have both CURLRES_ARES and CURLRES_THREADED defined
@@ -70,15 +71,15 @@ void Curl_async_global_cleanup(void);
  */
 CURLcode Curl_async_get_impl(struct Curl_easy *easy, void **impl);
 
-/* Curl_async_getsock()
+/* Curl_async_pollset()
  *
- * This function is called from the Curl_multi_getsock() function.  'sock' is a
+ * This function is called from the Curl_multi_pollset() function.  'sock' is a
  * pointer to an array to hold the file descriptors, with 'numsock' being the
  * size of that array (in number of entries). This function is supposed to
  * return bitmask indicating what file descriptors (referring to array indexes
  * in the 'sock' array) to wait for, read/write.
  */
-int Curl_async_getsock(struct Curl_easy *data, curl_socket_t *sock);
+CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps);
 
 /*
  * Curl_async_is_resolved()
@@ -127,9 +128,10 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 /* common functions for c-ares and threaded resolver with HTTPSRR */
 #include <ares.h>
 
-int Curl_ares_getsock(struct Curl_easy *data,
-                      ares_channel channel,
-                      curl_socket_t *socks);
+CURLcode Curl_ares_pollset(struct Curl_easy *data,
+                           ares_channel channel,
+                           struct easy_pollset *ps);
+
 int Curl_ares_perform(ares_channel channel,
                       timediff_t timeout_ms);
 #endif
@@ -141,7 +143,7 @@ struct async_ares_ctx {
   int num_pending; /* number of outstanding c-ares requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
-  int last_status;
+  int ares_status; /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
   CURLcode result; /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
@@ -191,6 +193,8 @@ struct async_thrdd_addr_ctx {
   int port;
   int sock_error;
   int ref_count;
+  BIT(thrd_done);
+  BIT(do_abort);
 };
 
 /* Context for threaded resolver */
@@ -236,7 +240,7 @@ struct doh_probes;
 
 #ifdef USE_CURL_ASYNC
 struct Curl_async {
-#ifdef CURLRES_ARES /*  */
+#ifdef CURLRES_ARES
   struct async_ares_ctx ares;
 #elif defined(CURLRES_THREADED)
   struct async_thrdd_ctx thrdd;

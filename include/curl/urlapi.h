@@ -26,7 +26,7 @@
 
 #include "curl.h"
 
-#ifdef  __cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 

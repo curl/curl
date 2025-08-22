@@ -25,9 +25,6 @@ lib%TESTNUMBER
 <name>
 simple libcurl attempt operation without URL set
 </name>
-<command>
-http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER
-</command>
 </client>
 
 #

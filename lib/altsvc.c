@@ -260,11 +260,11 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 #ifdef USE_IPV6
   else {
     char ipv6_unused[16];
-    if(1 == curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused)) {
+    if(curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused) == 1) {
       dst6_pre = "[";
       dst6_post = "]";
     }
-    if(1 == curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused)) {
+    if(curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused) == 1) {
       src6_pre = "[";
       src6_post = "]";
     }

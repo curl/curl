@@ -59,8 +59,8 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
         size_t index = 0;
         size_t amount = header->amount;
         do {
-          curl_mprintf("- %s == %s (%u/%u)\n", header->name, header->value,
-                       (int)index, (int)amount);
+          curl_mprintf("- %s == %s (%zu/%zu)\n", header->name, header->value,
+                       index, amount);
 
           if(++index == amount)
             break;
@@ -77,7 +77,7 @@ static void t1940_showem(CURL *easy, int header_request, unsigned int type)
   }
 }
 
-static CURLcode test_lib1940(char *URL)
+static CURLcode test_lib1940(const char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;

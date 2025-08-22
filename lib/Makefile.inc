@@ -110,7 +110,6 @@ LIB_VTLS_HFILES =           \
   vtls/x509asn1.h
 
 LIB_VQUIC_CFILES = \
-  vquic/curl_msh3.c   \
   vquic/curl_ngtcp2.c   \
   vquic/curl_osslq.c   \
   vquic/curl_quiche.c   \
@@ -118,7 +117,6 @@ LIB_VQUIC_CFILES = \
   vquic/vquic-tls.c
 
 LIB_VQUIC_HFILES = \
-  vquic/curl_msh3.h   \
   vquic/curl_ngtcp2.h   \
   vquic/curl_osslq.h   \
   vquic/curl_quiche.h   \
@@ -148,6 +146,7 @@ LIB_CFILES =         \
   cf-h2-proxy.c      \
   cf-haproxy.c       \
   cf-https-connect.c \
+  cf-ip-happy.c      \
   cf-socket.c        \
   cfilters.c         \
   conncache.c        \
@@ -276,6 +275,7 @@ LIB_HFILES =         \
   cf-h2-proxy.h      \
   cf-haproxy.h       \
   cf-https-connect.h \
+  cf-ip-happy.h      \
   cf-socket.h        \
   cfilters.h         \
   conncache.h        \
@@ -296,6 +296,7 @@ LIB_HFILES =         \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \
+  curl_mem_undef.h   \
   curl_memory.h      \
   curl_memrchr.h     \
   curl_ntlm_core.h   \

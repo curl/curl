@@ -40,6 +40,9 @@ pair of angled brackets (\<\>), however, should you not use an angled bracket
 as the first character libcurl assumes you provided a single email address and
 encloses that address within brackets for you.
 
+In order to specify DSN parameters (as per RFC 3461), the address has to be
+written in angled brackets, followed by the parameters.
+
 When performing an address verification (**VRFY** command), each recipient
 should be specified as the username or username plus domain (as per Section
 3.5 of RFC 5321).
@@ -68,6 +71,7 @@ int main(void)
     struct curl_slist *list;
     list = curl_slist_append(NULL, "root@localhost");
     list = curl_slist_append(list, "person@example.com");
+    list = curl_slist_append(list, "<other@example.com> NOTIFY=SUCCESS");
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, list);
     res = curl_easy_perform(curl);

@@ -26,7 +26,7 @@ smtp
 --libcurl for SMTP
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <file name="%LOGDIR/test%TESTNUMBER.eml">
 From: different
@@ -129,6 +129,7 @@ $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 </stripfile>
 </verify>
 </testcase>

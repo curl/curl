@@ -203,8 +203,8 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer)
 {
-  (void) data;
-  (void) writer;
+  (void)data;
+  (void)writer;
 }
 
 static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
@@ -281,7 +281,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
    * This gives deterministic BODY writes on varying buffer receive
    * lengths. */
   nwrite = nbytes;
-  if(-1 != data->req.maxdownload) {
+  if(data->req.maxdownload != -1) {
     size_t wmax = get_max_body_write_len(data, data->req.maxdownload);
     if(nwrite > wmax) {
       excess_len = nbytes - wmax;
@@ -293,9 +293,9 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     }
 
     if((type & CLIENTWRITE_EOS) && !data->req.no_body &&
-       (data->req.maxdownload > data->req.bytecount)) {
+       (data->req.size > data->req.bytecount)) {
       failf(data, "end of response with %" FMT_OFF_T " bytes missing",
-            data->req.maxdownload - data->req.bytecount);
+            data->req.size - data->req.bytecount);
       return CURLE_PARTIAL_FILE;
     }
   }
@@ -879,7 +879,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
       int err = fseek(data->state.in, 0, SEEK_SET);
       CURL_TRC_READ(data, "cr_in, rewind via fseek -> %d(%d)",
                     (int)err, (int)errno);
-      if(-1 != err)
+      if(err != -1)
         /* successful rewind */
         return CURLE_OK;
     }

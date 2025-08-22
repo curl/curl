@@ -22,9 +22,6 @@ lib%TESTNUMBER
 <name>
 libcurl URL escape/unescape tests
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

@@ -95,7 +95,7 @@ static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
  * Read/write HSTS cache entries via callback.
  */
 
-static CURLcode test_lib1915(char *URL)
+static CURLcode test_lib1915(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd;
@@ -103,8 +103,8 @@ static CURLcode test_lib1915(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
 
   easy_init(hnd);
   easy_setopt(hnd, CURLOPT_URL, URL);
@@ -114,7 +114,7 @@ static CURLcode test_lib1915(char *URL)
   easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
   easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
   easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-  easy_setopt(hnd, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(hnd, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   res = curl_easy_perform(hnd);
@@ -133,7 +133,7 @@ static CURLcode test_lib1915(char *URL)
   easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
   easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
   easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-  easy_setopt(hnd, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(hnd, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   res = curl_easy_perform(hnd);

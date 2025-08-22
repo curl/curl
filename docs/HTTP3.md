@@ -23,13 +23,10 @@ QUIC libraries we are using:
 
 [OpenSSL 3.2+ QUIC](https://github.com/openssl/openssl) - **EXPERIMENTAL**
 
-[msh3](https://github.com/nibanks/msh3) (with [msquic](https://github.com/microsoft/msquic)) - **EXPERIMENTAL**
-
 ## Experimental
 
 HTTP/3 support in curl is considered **EXPERIMENTAL** until further notice
-when built to use *quiche* or *msh3*. Only the *ngtcp2* backend is not
-experimental.
+when built to use *quiche*. Only the *ngtcp2* backend is not experimental.
 
 Further development and tweaking of the HTTP/3 support in curl happens in the
 master branch using pull-requests, just like ordinary changes.
@@ -299,63 +296,6 @@ You can build curl with cmake:
 
  If `make install` results in `Permission denied` error, you need to prepend
  it with `sudo`.
-
-# msh3 (msquic) version
-
-**Note**: The msquic HTTP/3 backend is immature and is not properly functional
-one as of September 2023. Feel free to help us test it and improve it, but
-there is no point in filing bugs about it just yet.
-
-msh3 support is **EXPERIMENTAL**
-
-## Build Linux (with quictls fork of OpenSSL)
-
-Build msh3:
-
-     % git clone -b v0.6.0 --depth 1 --recursive https://github.com/nibanks/msh3
-     % cd msh3 && mkdir build && cd build
-     % cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build .
-     % cmake --install .
-
-Build curl:
-
-     % git clone https://github.com/curl/curl
-     % cd curl
-     % autoreconf -fi
-     % ./configure LDFLAGS="-Wl,-rpath,/usr/local/lib" --with-msh3=/usr/local --with-openssl
-     % make
-     % make install
-
-Run from `/usr/local/bin/curl`.
-
-## Build Windows
-
-Build msh3:
-
-     % git clone -b v0.6.0 --depth 1 --recursive https://github.com/nibanks/msh3
-     % cd msh3 && mkdir build && cd build
-     % cmake -G 'Visual Studio 17 2022' -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-     % cmake --build . --config Release
-     % cmake --install . --config Release
-
-**Note** - On Windows, Schannel is used for TLS support by default. If you
-with to use (the quictls fork of) OpenSSL, specify the `-DQUIC_TLS=openssl`
-option to the generate command above. Also note that OpenSSL brings with it an
-additional set of build dependencies not specified here.
-
-Build curl (in [Visual Studio Command
-prompt](../winbuild/README.md#open-a-command-prompt)):
-
-     % git clone https://github.com/curl/curl
-     % cd curl/winbuild
-     % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
-
-Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
-directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
-`curl.exe` directory. For example:
-
-     % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se/
 
 # `--http3`
 

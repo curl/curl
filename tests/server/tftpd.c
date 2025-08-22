@@ -481,7 +481,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     }
     /* formerly
        putc(c, file); */
-    if(1 != write(test->ofile, &c, 1))
+    if(write(test->ofile, &c, 1) != 1)
       break;
 skipit:
     prevchar = c;
@@ -508,15 +508,15 @@ static int synchnet(curl_socket_t f /* socket to flush */)
   curl_socklen_t fromaddrlen;
 
   for(;;) {
-#if defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
+#ifdef HAVE_IOCTLSOCKET_CAMEL_FIONBIO
     long i;
-    (void) IoctlSocket(f, FIONBIO, &i);
+    (void)IoctlSocket(f, FIONBIO, &i);
 #elif defined(HAVE_IOCTLSOCKET)
     unsigned long i;
-    (void) ioctlsocket(f, FIONREAD, &i);
+    (void)ioctlsocket(f, FIONREAD, &i);
 #else
     int i;
-    (void) ioctl(f, FIONREAD, &i);
+    (void)ioctl(f, FIONREAD, &i);
 #endif
     if(i) {
       j++;
@@ -528,8 +528,8 @@ static int synchnet(curl_socket_t f /* socket to flush */)
       else
         fromaddrlen = sizeof(fromaddr.sa6);
 #endif
-      (void) recvfrom(f, rbuf, sizeof(rbuf), 0,
-                      &fromaddr.sa, &fromaddrlen);
+      (void)recvfrom(f, rbuf, sizeof(rbuf), 0,
+                     &fromaddr.sa, &fromaddrlen);
     }
     else
       break;
@@ -662,8 +662,8 @@ static int test_tftpd(int argc, char **argv)
   }
 
   flag = 1;
-  if(0 != setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-            (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, sstrerror(error));
@@ -1029,7 +1029,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
     cmd = orgcmd;
     while(cmd && cmdsize) {
       char *check;
-      if(1 == sscanf(cmd, "writedelay: %d", &num)) {
+      if(sscanf(cmd, "writedelay: %d", &num) == 1) {
         logmsg("instructed to delay %d secs between packets", num);
         req->writedelay = num;
       }
@@ -1118,7 +1118,7 @@ static int validate_access(struct testcase *test,
 
     stream = test2fopen(testno, logdir);
 
-    if(0 != partno)
+    if(partno)
       snprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
     if(!stream) {
@@ -1179,7 +1179,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
     sdp->th_block = htons(sendblock);
     timeout = 0;
 #ifdef HAVE_SIGSETJMP
-    (void) sigsetjmp(timeoutbuf, 1);
+    (void)sigsetjmp(timeoutbuf, 1);
 #endif
     if(test->writedelay) {
       logmsg("Pausing %d seconds before %d bytes", test->writedelay,
@@ -1223,7 +1223,7 @@ send_data:
           break;
         }
         /* Re-synchronize with the other side */
-        (void) synchnet(peer);
+        (void)synchnet(peer);
         if(sap->th_block == (sendblock-1)) {
           goto send_data;
         }
@@ -1257,7 +1257,7 @@ static void recvtftp(struct testcase *test, const struct formats *pf)
     rap->th_block = htons(recvblock);
     recvblock++;
 #ifdef HAVE_SIGSETJMP
-    (void) sigsetjmp(timeoutbuf, 1);
+    (void)sigsetjmp(timeoutbuf, 1);
 #endif
 send_ack:
     logmsg("write");
@@ -1291,7 +1291,7 @@ send_ack:
           break;                         /* normal */
         }
         /* Re-synchronize with the other side */
-        (void) synchnet(peer);
+        (void)synchnet(peer);
         if(rdp->th_block == (recvblock-1))
           goto send_ack;                 /* rexmit */
       }
@@ -1315,7 +1315,7 @@ send_ack:
 
   rap->th_opcode = htons(opcode_ACK);  /* send the "final" ack */
   rap->th_block = htons(recvblock);
-  (void) swrite(peer, &ackbuf.storage[0], 4);
+  (void)swrite(peer, &ackbuf.storage[0], 4);
 #if defined(HAVE_ALARM) && defined(SIGALRM)
   mysignal(SIGALRM, justtimeout);        /* just abort read on timeout */
   alarm(rexmtval);
@@ -1330,7 +1330,7 @@ send_ack:
   if(n >= 4 &&                               /* if read some data */
      rdp->th_opcode == opcode_DATA &&        /* and got a data block */
      recvblock == rdp->th_block) {           /* then my last ack was lost */
-    (void) swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
+    (void)swrite(peer, &ackbuf.storage[0], 4);  /* resend final ack */
   }
 abort:
   /* make sure the output file is closed in case of abort */

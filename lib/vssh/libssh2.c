@@ -99,8 +99,8 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode sftp_perform(struct Curl_easy *data, bool *connected,
                              bool *dophase_done);
-static int ssh_getsock(struct Curl_easy *data, struct connectdata *conn,
-                       curl_socket_t *sock);
+static CURLcode ssh_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 static CURLcode ssh_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn);
 static void ssh_attach(struct Curl_easy *data, struct connectdata *conn);
@@ -119,10 +119,10 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   scp_doing,                            /* doing */
-  ssh_getsock,                          /* proto_getsock */
-  ssh_getsock,                          /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ssh_getsock,                          /* perform_getsock */
+  ssh_pollset,                          /* proto_pollset */
+  ssh_pollset,                          /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ssh_pollset,                          /* perform_pollset */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -150,10 +150,10 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_connect,                          /* connect_it */
   ssh_multi_statemach,                  /* connecting */
   sftp_doing,                           /* doing */
-  ssh_getsock,                          /* proto_getsock */
-  ssh_getsock,                          /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ssh_getsock,                          /* perform_getsock */
+  ssh_pollset,                          /* proto_pollset */
+  ssh_pollset,                          /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ssh_pollset,                          /* perform_pollset */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -1199,10 +1199,10 @@ sftp_upload_init(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
   }
   /* upload data */
-  Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+  Curl_xfer_setup_send(data, FIRSTSOCKET);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
-  data->conn->sockfd = data->conn->writesockfd;
+  data->conn->recv_idx = FIRSTSOCKET;
 
   /* store this original bitmask setup to use later on if we cannot
      figure out a "real" bitmask */
@@ -1540,10 +1540,10 @@ sftp_download_stat(struct Curl_easy *data,
     myssh_state(data, sshc, SSH_STOP);
     return CURLE_OK;
   }
-  Curl_xfer_setup1(data, CURL_XFER_RECV, data->req.size, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, data->req.size);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
-  data->conn->writesockfd = data->conn->sockfd;
+  data->conn->send_idx = 0;
 
   myssh_state(data, sshc, SSH_STOP);
 
@@ -1945,8 +1945,8 @@ static CURLcode ssh_state_auth_done(struct Curl_easy *data,
 
   Curl_pgrsTime(data, TIMER_APPCONNECT); /* SSH is connected */
 
-  conn->sockfd = conn->sock[FIRSTSOCKET];
-  conn->writesockfd = CURL_SOCKET_BAD;
+  data->conn->recv_idx = FIRSTSOCKET;
+  conn->send_idx = -1;
 
   if(conn->handler->protocol == CURLPROTO_SFTP) {
     myssh_state(data, sshc, SSH_SFTP_INIT);
@@ -2460,10 +2460,10 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
   /* download data */
   bytecount = (curl_off_t)sb.st_size;
   data->req.maxdownload = (curl_off_t)sb.st_size;
-  Curl_xfer_setup1(data, CURL_XFER_RECV, bytecount, FALSE);
+  Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
-  data->conn->writesockfd = data->conn->sockfd;
+  data->conn->send_idx = 0;
 
   myssh_state(data, sshc, SSH_STOP);
   return CURLE_OK;
@@ -2609,10 +2609,10 @@ static CURLcode ssh_state_scp_upload_init(struct Curl_easy *data,
   /* upload data */
   data->req.size = data->state.infilesize;
   Curl_pgrsSetUploadSize(data, data->state.infilesize);
-  Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+  Curl_xfer_setup_send(data, FIRSTSOCKET);
 
   /* not set by Curl_xfer_setup to preserve keepon bits */
-  data->conn->sockfd = data->conn->writesockfd;
+  data->conn->recv_idx = FIRSTSOCKET;
 
   /* store this original bitmask setup to use later on if we cannot
      figure out a "real" bitmask */
@@ -3073,7 +3073,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
       break;
     }
 
-  } while(!result && (sshc->state != SSH_STOP));
+  } while(!result && (sshc->state != SSH_STOP) && !*block);
 
   if(result == CURLE_AGAIN) {
     /* we would block, we need to wait for the socket to be ready (in the
@@ -3087,22 +3087,17 @@ static CURLcode ssh_statemachine(struct Curl_easy *data,
 
 /* called by the multi interface to figure out what socket(s) to wait for and
    for what actions in the DO_DONE, PERFORM and WAITPERFORM states */
-static int ssh_getsock(struct Curl_easy *data,
-                       struct connectdata *conn,
-                       curl_socket_t *sock)
+static CURLcode ssh_pollset(struct Curl_easy *data,
+                            struct easy_pollset *ps)
 {
-  int bitmap = GETSOCK_BLANK;
-  (void)data;
-
-  sock[0] = conn->sock[FIRSTSOCKET];
-
-  if(conn->waitfor & KEEP_RECV)
-    bitmap |= GETSOCK_READSOCK(FIRSTSOCKET);
-
-  if(conn->waitfor & KEEP_SEND)
-    bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
-
-  return bitmap;
+  int flags = 0;
+  if(data->conn->waitfor & KEEP_RECV)
+    flags |= CURL_POLL_IN;
+  if(data->conn->waitfor & KEEP_SEND)
+    flags |= CURL_POLL_OUT;
+  return flags ?
+    Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET], flags, 0) :
+    CURLE_OK;
 }
 
 /*
@@ -3139,7 +3134,7 @@ static CURLcode ssh_multi_statemach(struct Curl_easy *data, bool *done)
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
   CURLcode result = CURLE_OK;
-  bool block; /* we store the status and use that to provide a ssh_getsock()
+  bool block; /* we store the status and use that to provide a ssh_pollset()
                  implementation */
   if(!sshc || !sshp)
     return CURLE_FAILED_INIT;
@@ -3695,7 +3690,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  (void) dead_connection;
+  (void)dead_connection;
 
   if(sshc && sshc->ssh_session && sshp) {
     /* only if there is a session still around to use! */
@@ -3867,7 +3862,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
-  (void) dead_connection;
+  (void)dead_connection;
 
   DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 

@@ -71,7 +71,7 @@ proxy
 digest
 </features>
 <name>
-HTTP proxy auth Digest multi API re-using connection
+HTTP proxy auth Digest multi API reusing connection
 </name>
 <command>
 http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:person custom.set.host.name

@@ -94,7 +94,7 @@ unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 
 #if !defined(CURL_DISABLE_BINDLOCAL) || !defined(CURL_DISABLE_FTP)
 
-#if defined(HAVE_GETIFADDRS)
+#ifdef HAVE_GETIFADDRS
 
 if2ip_result_t Curl_if2ip(int af,
 #ifdef USE_IPV6
@@ -109,7 +109,7 @@ if2ip_result_t Curl_if2ip(int af,
 
 #if defined(USE_IPV6) && \
     !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
-  (void) local_scope_id;
+  (void)local_scope_id;
 #endif
 
   if(getifaddrs(&head) >= 0) {
@@ -252,14 +252,14 @@ if2ip_result_t Curl_if2ip(int af,
                           const char *interf,
                           char *buf, size_t buf_size)
 {
-    (void) af;
+    (void)af;
 #ifdef USE_IPV6
-    (void) remote_scope;
-    (void) local_scope_id;
+    (void)remote_scope;
+    (void)local_scope_id;
 #endif
-    (void) interf;
-    (void) buf;
-    (void) buf_size;
+    (void)interf;
+    (void)buf;
+    (void)buf_size;
     return IF2IP_NOT_FOUND;
 }
 

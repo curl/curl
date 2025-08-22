@@ -205,8 +205,8 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
                                              const struct bufref *type2,
                                              struct ntlmdata *ntlm)
 {
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
 #endif
 
   /* Ensure we have a valid type-2 message */
@@ -257,11 +257,11 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned long attrs;
   TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) data;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)data;
 #endif
-  (void) passwdp;
-  (void) userp;
+  (void)passwdp;
+  (void)userp;
 
   /* Setup the type-2 "input" security buffer */
   type_2_desc.ulVersion     = SECBUFFER_VERSION;

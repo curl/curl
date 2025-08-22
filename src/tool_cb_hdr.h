@@ -41,7 +41,6 @@
  */
 
 struct HdrCbData {
-  struct GlobalConfig *global;
   struct OperationConfig *config;
   struct OutStruct *outs;
   struct OutStruct *heads;

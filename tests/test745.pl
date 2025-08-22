@@ -60,6 +60,18 @@ sub getinclude {
     $enum{"CURLOPT_CONV_FROM_UTF8_FUNCTION"}++;
     $enum{"CURLOPT_CONV_TO_NETWORK_FUNCTION"}++;
     close($f);
+
+    open(my $f, "<", "$root/include/curl/multi.h")
+        || die "no curl.h";
+    while(<$f>) {
+        if($_ =~ /\((CURLMOPT[^,]*), (CURLOPTTYPE_[^,]*)/) {
+            my ($opt, $type) = ($1, $2);
+            if($type !~ /LONG|OFF_T/) {
+                $enum{$opt}++;
+            }
+        }
+    }
+    close($f);
 }
 
 gettypecheck();

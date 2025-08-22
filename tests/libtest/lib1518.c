@@ -37,7 +37,7 @@ static size_t t1518_write_cb(char *buffer, size_t size, size_t nitems,
   return 0;
 }
 
-static CURLcode test_lib1518(char *URL)
+static CURLcode test_lib1518(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

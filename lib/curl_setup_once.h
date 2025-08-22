@@ -206,8 +206,6 @@ struct timeval {
 #  define CURL_SCLOSE(x)  close((x))
 #endif
 
-#define sclose(x)  CURL_SCLOSE(x)
-
 /*
  * Stack-independent version of fcntl() on sockets:
  */

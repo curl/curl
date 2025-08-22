@@ -60,9 +60,6 @@ EPSV
 RETR file.txt
 EPSV
 RETR someothertext.txt
-CWD /
-CWD fully_simulated
-CWD UNIX
 EPSV
 TYPE A
 LIST

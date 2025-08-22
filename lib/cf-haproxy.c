@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY)
+#ifndef CURL_DISABLE_PROXY
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -32,6 +32,7 @@
 #include "cf-haproxy.h"
 #include "curl_trc.h"
 #include "multiif.h"
+#include "select.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -72,7 +73,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   CURLcode result;
   const char *client_ip;
   struct ip_quadruple ipquad;
-  int is_ipv6;
+  bool is_ipv6;
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
@@ -178,15 +179,17 @@ static void cf_haproxy_close(struct Curl_cfilter *cf,
     cf->next->cft->do_close(cf->next, data);
 }
 
-static void cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      struct easy_pollset *ps)
+static CURLcode cf_haproxy_adjust_pollset(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          struct easy_pollset *ps)
 {
   if(cf->next->connected && !cf->connected) {
     /* If we are not connected, but the filter "below" is
      * and not waiting on something, we are sending. */
-    Curl_pollset_set_out_only(data, ps, Curl_conn_cf_get_socket(cf, data));
+    return Curl_pollset_set_out_only(
+      data, ps, Curl_conn_cf_get_socket(cf, data));
   }
+  return CURLE_OK;
 }
 
 struct Curl_cftype Curl_cft_haproxy = {

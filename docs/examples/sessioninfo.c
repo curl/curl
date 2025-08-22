@@ -102,7 +102,7 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
-    (void) curl_easy_perform(curl);
+    (void)curl_easy_perform(curl);
 
     curl_easy_cleanup(curl);
   }

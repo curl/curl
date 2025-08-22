@@ -34,7 +34,7 @@ static size_t t513_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode test_lib513(char *URL)
+static CURLcode test_lib513(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

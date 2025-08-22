@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_RTSP)
+#ifndef CURL_DISABLE_RTSP
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -83,8 +83,8 @@ struct RTSP {
 static CURLcode rtsp_do(struct Curl_easy *data, bool *done);
 static CURLcode rtsp_done(struct Curl_easy *data, CURLcode, bool premature);
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done);
-static int rtsp_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn, curl_socket_t *socks);
+static CURLcode rtsp_do_pollset(struct Curl_easy *data,
+                                struct easy_pollset *ps);
 
 /*
  * Parse and write out an RTSP response.
@@ -100,6 +100,10 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                                     const char *buf,
                                     size_t blen,
                                     bool is_eos);
+static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
+                                       const char *buf,
+                                       size_t blen,
+                                       bool is_eos);
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -110,13 +114,11 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
-                           curl_socket_t *socks)
+static CURLcode rtsp_do_pollset(struct Curl_easy *data,
+                                struct easy_pollset *ps)
 {
   /* write mode */
-  (void)data;
-  socks[0] = conn->sock[FIRSTSOCKET];
-  return GETSOCK_WRITESOCK(0);
+  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 static
@@ -137,13 +139,13 @@ const struct Curl_handler Curl_handler_rtsp = {
   rtsp_connect,                         /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  rtsp_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* proto_pollset */
+  rtsp_do_pollset,                      /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
-  ZERO_NULL,                            /* write_resp_hd */
+  rtsp_rtp_write_resp_hd,               /* write_resp_hd */
   rtsp_conncheck,                       /* connection_check */
   ZERO_NULL,                            /* attach connection */
   Curl_http_follow,                     /* follow */
@@ -372,7 +374,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, TRUE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
     goto out;
   }
 
@@ -638,7 +640,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer, httpversion);
@@ -935,6 +937,14 @@ out:
     data->req.download_done = TRUE;
   }
   return result;
+}
+
+static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
+                                       const char *buf,
+                                       size_t blen,
+                                       bool is_eos)
+{
+  return rtsp_rtp_write_resp(data, buf, blen, is_eos);
 }
 
 static

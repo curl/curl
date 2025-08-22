@@ -58,7 +58,7 @@ static int resolver_alloc_cb_pass(void *resolver_state, void *reserved,
   return 0;
 }
 
-static CURLcode test_lib655(char *URL)
+static CURLcode test_lib655(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -74,7 +74,7 @@ static CURLcode test_lib655(char *URL)
     goto test_cleanup;
   }
 
-  /* First set the URL that is about to receive our request. */
+  /* Set the URL that is about to receive our first request. */
   test_setopt(curl, CURLOPT_URL, URL);
 
   test_setopt(curl, CURLOPT_RESOLVER_START_DATA, TEST_DATA_STRING);
@@ -90,6 +90,9 @@ static CURLcode test_lib655(char *URL)
       res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
+
+  /* Set the URL that receives our second request. */
+  test_setopt(curl, CURLOPT_URL, libtest_arg2);
 
   test_setopt(curl, CURLOPT_RESOLVER_START_FUNCTION, resolver_alloc_cb_pass);
 

@@ -4,7 +4,6 @@ SPDX-License-Identifier: curl
 Long: digest
 Help: HTTP Digest Authentication
 Protocols: HTTP
-Mutexed: basic ntlm negotiate
 Category: proxy auth http
 Added: 7.10.6
 Multi: boolean

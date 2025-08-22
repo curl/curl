@@ -90,6 +90,8 @@ server does not support HTTP/3.
 
 # DEFAULT
 
+Since curl 8.13.0: CURL_HTTP_VERSION_NONE
+
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
 Before that: CURL_HTTP_VERSION_1_1
@@ -105,8 +107,7 @@ int main(void)
   if(curl) {
     CURLcode ret;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION,
-                     (long)CURL_HTTP_VERSION_2TLS);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
     ret = curl_easy_perform(curl);
     if(ret == CURLE_HTTP_RETURNED_ERROR) {
       /* an HTTP response error problem */
@@ -114,6 +115,11 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+**CURL_HTTP_VERSION_*** enums became `long` types in 8.13.0, prior to this
+version a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

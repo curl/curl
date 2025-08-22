@@ -28,6 +28,9 @@ if test "x$OPT_SCHANNEL" != xno; then
   ssl_msg=
   if test "x$OPT_SCHANNEL" != "xno" &&
      test "x$curl_cv_native_windows" = "xyes"; then
+    if test "$curl_cv_winuwp" = 'yes'; then
+      AC_MSG_ERROR([UWP does not support Schannel.])
+    fi
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     ssl_msg="Schannel"

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE)
+#ifdef USE_CURL_NTLM_CORE
 
 #include <string.h>
 
@@ -53,21 +53,14 @@
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
 #include <mbedtls/mbedtls_config.h>
-#else
-#include <mbedtls/config.h>
-#endif
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
-#endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_GNUTLS)
-#include <nettle/md4.h>
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
-#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 #include <wolfssl/openssl/md4.h>
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 #include <openssl/md4.h>
@@ -83,6 +76,8 @@
 #include <CommonCrypto/CommonDigest.h>
 #elif defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
+#elif defined(USE_GNUTLS)
+#include <nettle/md4.h>
 #elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
 #include <mbedtls/md4.h>
 #endif
@@ -93,27 +88,7 @@
 #include "memdebug.h"
 
 
-#if defined(USE_GNUTLS)
-
-typedef struct md4_ctx MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx)
-{
-  md4_init(ctx);
-  return 1;
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  md4_update(ctx, size, data);
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  md4_digest(ctx, MD4_DIGEST_SIZE, result);
-}
-
-#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
 #ifdef OPENSSL_COEXIST
   #define MD4_CTX WOLFSSL_MD4_CTX
@@ -193,6 +168,26 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
     CryptReleaseContext(ctx->hCryptProv, 0);
 }
 
+#elif defined(USE_GNUTLS)
+
+typedef struct md4_ctx MD4_CTX;
+
+static int MD4_Init(MD4_CTX *ctx)
+{
+  md4_init(ctx);
+  return 1;
+}
+
+static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
+{
+  md4_update(ctx, size, data);
+}
+
+static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
+{
+  md4_digest(ctx, MD4_DIGEST_SIZE, result);
+}
+
 #elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
 
 struct md4_ctx {
@@ -220,12 +215,7 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   if(ctx->data) {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
     mbedtls_md4(ctx->data, ctx->size, result);
-#else
-    (void) mbedtls_md4_ret(ctx->data, ctx->size, result);
-#endif
-
     Curl_safefree(ctx->data);
     ctx->size = 0;
   }

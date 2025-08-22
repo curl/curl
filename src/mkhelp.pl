@@ -23,10 +23,16 @@
 #
 ###########################################################################
 
-if($ARGV[0] eq "-c") {
-    $c=1;
+use strict;
+use warnings;
+
+my $c = 0;
+if(@ARGV && $ARGV[0] eq "-c") {
+    $c = 1;
     shift @ARGV;
 }
+
+my @out;
 
 push @out, "          _   _ ____  _\n";
 push @out, "      ___| | | |  _ \\| |\n";
@@ -67,8 +73,8 @@ if($c)
     my $gzippedContent;
     IO::Compress::Gzip::gzip(
         \$content, \$gzippedContent, Level => 9, TextFlag => 1, Time=>0) or die "gzip failed:";
-    $gzip = length($content);
-    $gzipped = length($gzippedContent);
+    my $gzip = length($content);
+    my $gzipped = length($gzippedContent);
 
     print <<HEAD
 #include <zlib.h>
@@ -98,13 +104,13 @@ HEAD
 #define BUF_SIZE 0x10000
 static voidpf zalloc_func(voidpf opaque, unsigned int items, unsigned int size)
 {
-  (void) opaque;
+  (void)opaque;
   /* not a typo, keep it calloc() */
   return (voidpf) calloc(items, size);
 }
 static void zfree_func(voidpf opaque, voidpf ptr)
 {
-  (void) opaque;
+  (void)opaque;
   free(ptr);
 }
 

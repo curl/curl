@@ -23,6 +23,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#define CURL_NO_OLDIES
+#define CURL_DISABLE_DEPRECATION
+
 /* Now include the curl_setup.h file from libcurl's private libdir (the source
    version, but that might include "curl_config.h" from the build dir so we
    need both of them in the include path), so that we get good in-depth
@@ -31,7 +34,7 @@
 
 #include <curl/curl.h>
 
-typedef CURLcode (*entry_func_t)(char *);
+typedef CURLcode (*entry_func_t)(const char *);
 
 struct entry_s {
   const char *name;
@@ -66,20 +69,31 @@ extern int unitfail; /* for unittests */
   if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK)      \
     goto test_cleanup
 
-extern char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
-extern char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
-extern char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
+extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
+extern const char *libtest_arg3; /* set by first.c to the argv[3] or NULL */
+extern const char *libtest_arg4; /* set by first.c to the argv[4] or NULL */
 
 /* argc and argv as passed in to the main() function */
 extern int test_argc;
-extern char **test_argv;
+extern const char **test_argv;
 extern int testnum;
 extern struct curltime tv_test_start; /* for test timing */
+
+extern int coptind;
+extern const char *coptarg;
+int cgetopt(int argc, const char * const argv[], const char *optstring);
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
+
+#ifndef CURL_DISABLE_WEBSOCKETS
+CURLcode ws_send_ping(CURL *curl, const char *send_payload);
+CURLcode ws_recv_pong(CURL *curl, const char *expected_payload);
+/* just close the connection */
+void ws_close(CURL *curl);
+#endif
 
 /*
 ** TEST_ERR_* values must within the CURLcode range to not cause compiler
@@ -179,7 +193,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_easy_setopt((A), (B), (C))) != CURLE_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_easy_setopt() failed, " \
                   "with code %d (%s)\n",                      \
-                  (Y), (Z), (int)ec, curl_easy_strerror(ec)); \
+                  (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
 } while(0)
@@ -203,7 +217,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_setopt((A), (B), (C))) != CURLM_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_multi_setopt() failed, " \
                   "with code %d (%s)\n",                       \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
+                  (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \
 } while(0)
@@ -227,7 +241,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_add_handle((A), (B))) != CURLM_OK) {         \
     curl_mfprintf(stderr, "%s:%d curl_multi_add_handle() failed, " \
                   "with code %d (%s)\n",                           \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
+                  (Y), (Z), ec, curl_multi_strerror(ec));          \
     res = TEST_ERR_MULTI;                                          \
   }                                                                \
 } while(0)
@@ -251,7 +265,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_remove_handle((A), (B))) != CURLM_OK) {         \
     curl_mfprintf(stderr, "%s:%d curl_multi_remove_handle() failed, " \
                   "with code %d (%s)\n",                              \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));        \
+                  (Y), (Z), ec, curl_multi_strerror(ec));             \
     res = TEST_ERR_MULTI;                                             \
   }                                                                   \
 } while(0)
@@ -276,7 +290,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_perform((A), (B))) != CURLM_OK) {                \
     curl_mfprintf(stderr, "%s:%d curl_multi_perform() failed, "        \
                   "with code %d (%s)\n",                               \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));         \
+                  (Y), (Z), ec, curl_multi_strerror(ec));              \
     res = TEST_ERR_MULTI;                                              \
   }                                                                    \
   else if(*((B)) < 0) {                                                \
@@ -306,7 +320,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_fdset((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_fdset() failed, "        \
                   "with code %d (%s)\n",                             \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));       \
+                  (Y), (Z), ec, curl_multi_strerror(ec));            \
     res = TEST_ERR_MULTI;                                            \
   }                                                                  \
   else if(*((E)) < -1) {                                             \
@@ -336,7 +350,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_timeout((A), (B))) != CURLM_OK) {            \
     curl_mfprintf(stderr, "%s:%d curl_multi_timeout() failed, "    \
                   "with code %d (%s)\n",                           \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));     \
+                  (Y), (Z), ec, curl_multi_strerror(ec));          \
     res = TEST_ERR_BAD_TIMEOUT;                                    \
   }                                                                \
   else if(*((B)) < -1L) {                                          \
@@ -366,7 +380,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
     curl_mfprintf(stderr, "%s:%d curl_multi_poll() failed, "        \
                   "with code %d (%s)\n",                            \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec));      \
+                  (Y), (Z), ec, curl_multi_strerror(ec));           \
     res = TEST_ERR_MULTI;                                           \
   }                                                                 \
   else if(*((E)) < 0) {                                             \
@@ -396,7 +410,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_multi_wakeup((A))) != CURLM_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_multi_wakeup() failed, " \
                   "with code %d (%s)\n",                       \
-                  (Y), (Z), (int)ec, curl_multi_strerror(ec)); \
+                  (Y), (Z), ec, curl_multi_strerror(ec));      \
     res = TEST_ERR_MULTI;                                      \
   }                                                            \
 } while(0)
@@ -481,7 +495,7 @@ extern char *hexdump(const unsigned char *buffer, size_t len);
   if((ec = curl_global_init((A))) != CURLE_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_global_init() failed, " \
                   "with code %d (%s)\n",                      \
-                  (Y), (Z), (int)ec, curl_easy_strerror(ec)); \
+                  (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
 } while(0)

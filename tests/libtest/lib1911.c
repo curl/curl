@@ -29,7 +29,7 @@
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
 
-static CURLcode test_lib1911(char *URL)
+static CURLcode test_lib1911(const char *URL)
 {
   static char testbuf[MAX_INPUT_LENGTH + 2];
 
@@ -49,7 +49,7 @@ static CURLcode test_lib1911(char *URL)
   memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
   testbuf[MAX_INPUT_LENGTH + 1] = 0;
 
-  curl_mprintf("string length: %d\n", (int)strlen(testbuf));
+  curl_mprintf("string length: %zu\n", strlen(testbuf));
 
   for(o = curl_easy_option_next(NULL);
       o;

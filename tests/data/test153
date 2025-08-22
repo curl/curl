@@ -116,7 +116,7 @@ Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/%TESTNUMBER0002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
+Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/%TESTNUMBER0002", cnonce="MTA4MzIr", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
 User-Agent: curl/%VERSION
 Accept: */*
 

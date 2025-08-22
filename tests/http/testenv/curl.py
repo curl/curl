@@ -500,7 +500,8 @@ class CurlClient:
                  run_env: Optional[Dict[str, str]] = None,
                  server_addr: Optional[str] = None,
                  with_dtrace: bool = False,
-                 with_flame: bool = False):
+                 with_flame: bool = False,
+                 socks_args: Optional[List[str]] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
@@ -513,6 +514,7 @@ class CurlClient:
         self._with_flame = with_flame
         if self._with_flame:
             self._with_dtrace = True
+        self._socks_args = socks_args
         self._silent = silent
         self._run_env = run_env
         self._server_addr = server_addr if server_addr else '127.0.0.1'
@@ -585,7 +587,7 @@ class CurlClient:
             extra_args = []
         if no_save:
             extra_args.extend([
-                '-o', '/dev/null',
+                '--out-null',
             ])
         else:
             extra_args.extend([
@@ -634,7 +636,7 @@ class CurlClient:
         if extra_args is None:
             extra_args = []
         extra_args.extend([
-            '-X', 'DELETE', '-o', '/dev/null',
+            '-X', 'DELETE', '--out-null',
         ])
         if with_stats:
             extra_args.extend([
@@ -700,7 +702,7 @@ class CurlClient:
             extra_args = []
         if no_save:
             extra_args.extend([
-                '-o', '/dev/null',
+                '--out-null',
             ])
         else:
             extra_args.extend([
@@ -897,6 +899,9 @@ class CurlClient:
         args = [self._curl, "-s", "--path-as-is"]
         if 'CURL_TEST_EVENT' in os.environ:
             args.append('--test-event')
+
+        if self._socks_args:
+            args.extend(self._socks_args)
 
         if with_headers:
             args.extend(["-D", self._headerfile])

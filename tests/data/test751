@@ -22,9 +22,6 @@ lib%TESTNUMBER
 <name>
 multi - add many easy handles
 </name>
-<command>
-</command>
-</file>
 </client>
 
 # 1000 easy handles needs memory

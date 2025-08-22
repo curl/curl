@@ -24,8 +24,7 @@
 
 set(LIBCURL_OUTPUT_NAME "${LIB_NAME}" CACHE STRING "Basename of the curl library")
 
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_LIBCURL")
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_DEBUG_MACROS} "BUILDING_LIBCURL")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
@@ -56,7 +55,7 @@ if(CURL_BUILD_TESTING)
       ${CSOURCES} > "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/extract-unit-protos" ${CSOURCES}
     VERBATIM)
-  add_custom_target(curlu-unitprotos ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h")
+  add_custom_target(curlu-unitprotos DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/unitprotos.h")
 endif()
 
 ## Library definition

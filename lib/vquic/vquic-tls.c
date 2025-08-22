@@ -167,7 +167,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 
 #ifdef USE_OPENSSL
   (void)conn_config;
-  result = Curl_oss_check_peer_cert(cf, data, &ctx->ossl, peer);
+  result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
   if(conn_config->verifyhost) {
     result = Curl_gtls_verifyserver(data, ctx->gtls.session,
@@ -208,7 +208,7 @@ bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
   return TRUE;
 #elif defined(USE_GNUTLS)
   (void)give_ssl_ctx; /* gnutls always returns its session */
-  info->backend = CURLSSLBACKEND_OPENSSL;
+  info->backend = CURLSSLBACKEND_GNUTLS;
   info->internals = ctx->gtls.session;
   return TRUE;
 #elif defined(USE_WOLFSSL)

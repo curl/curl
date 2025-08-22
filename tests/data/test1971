@@ -25,16 +25,13 @@ Content-Length: 0
 <server>
 http
 </server>
-# this relies on the debug feature which allows tests to set the time
+# this relies on the Debug feature which allows tests to set the time
 <features>
 SSL
 Debug
 crypto
 aws
 </features>
-<setenv>
-CURL_FORCEHOST=1
-</setenv>
 
 <name>
 HTTP AWS_SIGV4 for AWS S3: UPLOAD with unknown INFILESIZE

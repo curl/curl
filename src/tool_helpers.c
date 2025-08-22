@@ -75,7 +75,7 @@ const char *param2text(ParameterError error)
   }
 }
 
-int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
+int SetHTTPrequest(HttpReq req, HttpReq *store)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
   const char *reqname[]= {
@@ -92,15 +92,14 @@ int SetHTTPrequest(struct OperationConfig *config, HttpReq req, HttpReq *store)
     *store = req;
     return 0;
   }
-  warnf(config->global, "You can only select one HTTP request method! "
+  warnf("You can only select one HTTP request method! "
         "You asked for both %s and %s.",
         reqname[req], reqname[*store]);
 
   return 1;
 }
 
-void customrequest_helper(struct OperationConfig *config, HttpReq req,
-                          char *method)
+void customrequest_helper(HttpReq req, char *method)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
   const char *dflt[]= {
@@ -115,12 +114,11 @@ void customrequest_helper(struct OperationConfig *config, HttpReq req,
   if(!method)
     ;
   else if(curl_strequal(method, dflt[req])) {
-    notef(config->global, "Unnecessary use of -X or --request, %s is already "
+    notef("Unnecessary use of -X or --request, %s is already "
           "inferred.", dflt[req]);
   }
   else if(curl_strequal(method, "head")) {
-    warnf(config->global,
-          "Setting custom HTTP method to HEAD with -X/--request may not work "
+    warnf("Setting custom HTTP method to HEAD with -X/--request may not work "
           "the way you want. Consider using -I/--head instead.");
   }
 }

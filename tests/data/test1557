@@ -21,7 +21,7 @@ lib%TESTNUMBER
 Remove easy handle in pending connections doesn't leave dangling entry
 </name>
 <command>
-nothing
+hostname.invalid
 </command>
 </client>
 

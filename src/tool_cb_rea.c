@@ -71,12 +71,12 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       timeout.tv_usec = (int)((wait%1000)*1000);
 
       FD_ZERO(&bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(per->infd, &bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
@@ -90,7 +90,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    Make sure we are in non-blocking mode and infd is not regular stdin
    On Linux per->infd should be stdin (0) and the block below should not
    execute */
-  if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
+  if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
     rc = recv(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
@@ -103,7 +103,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       rc = 0;
     }
 #else
-    warnf(per->config->global, "per->infd != 0: FD == %d. This behavior"
+    warnf("per->infd != 0: FD == %d. This behavior"
           " is only supported on desktop Windows", per->infd);
 #endif
   }
@@ -123,7 +123,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
      (per->uploadedsofar + rc > per->uploadfilesize)) {
     /* do not allow uploading more than originally set out to do */
     curl_off_t delta = per->uploadedsofar + rc - per->uploadfilesize;
-    warnf(per->config->global, "File size larger in the end than when "
+    warnf("File size larger in the end than when "
           "started. Dropping at least %" CURL_FORMAT_CURL_OFF_T " bytes",
           delta);
     rc = (ssize_t)(per->uploadfilesize - per->uploadedsofar);
@@ -161,12 +161,12 @@ int tool_readbusy_cb(void *clientp,
       timeout.tv_usec = 1000;
 
       FD_ZERO(&bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
       FD_SET(per->infd, &bits);
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic pop
 #endif
       select(per->infd + 1, &bits, NULL, NULL, &timeout);

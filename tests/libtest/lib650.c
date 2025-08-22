@@ -34,12 +34,12 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
 {
   size_t *pcounter = (size_t *) userp;
 
-  (void) buf;
+  (void)buf;
   *pcounter += len;
   return len;
 }
 
-static CURLcode test_lib650(char *URL)
+static CURLcode test_lib650(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = TEST_ERR_MAJOR_BAD;
@@ -82,7 +82,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_CONTENTHEADER, headers,
                         CURLFORM_END);
   if(formrc) {
-    curl_mprintf("curl_formadd(1) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -104,7 +104,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(2) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(2) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -124,7 +124,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(3) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(3) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -135,7 +135,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_FILECONTENT, libtest_arg2,
                         CURLFORM_END);
   if(formrc) {
-    curl_mprintf("curl_formadd(4) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(4) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -146,7 +146,7 @@ static CURLcode test_lib650(char *URL)
   curl_formget(formpost, (void *) &formlength, count_chars);
 
   /* Include length in data for external check. */
-  curl_msnprintf(flbuf, sizeof(flbuf), "%lu", (unsigned long) formlength);
+  curl_msnprintf(flbuf, sizeof(flbuf), "%zu", formlength);
 
   formrc = curl_formadd(&formpost,
                         &lastptr,
@@ -155,7 +155,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(5) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(5) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -167,7 +167,7 @@ static CURLcode test_lib650(char *URL)
                         CURLFORM_END);
 
   if(formrc) {
-    curl_mprintf("curl_formadd(6) = %d\n", (int) formrc);
+    curl_mprintf("curl_formadd(6) = %d\n", formrc);
     goto test_cleanup;
   }
 
@@ -187,7 +187,7 @@ static CURLcode test_lib650(char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  test_setopt(curl, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_301);
+  test_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_301);
 
   /* include headers in the output */
   test_setopt(curl, CURLOPT_HEADER, 1L);

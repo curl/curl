@@ -13,7 +13,7 @@ urlapi
 none
 </server>
 <setenv>
-LANG=en_US.UTF-8
+LC_ALL=C.UTF-8
 </setenv>
 <features>
 file

@@ -27,7 +27,7 @@
 #include "hsts.h"
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
-static CURLcode test_unit1660(char *arg)
+static CURLcode test_unit1660(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   puts("nothing to do when HTTP or HSTS are disabled");
@@ -46,7 +46,7 @@ static void showsts(struct stsentry *e, const char *chost)
   }
 }
 
-static CURLcode test_unit1660(char *arg)
+static CURLcode test_unit1660(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

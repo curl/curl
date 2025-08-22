@@ -38,18 +38,18 @@ jobs:
     name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
       - name: 'check'
         run: scripts/checksrc-all.pl
 
-  codespell-cmakelint-pytype-ruff:
-    name: 'codespell, cmakelint, pytype, ruff'
+  spellcheck-cmakelint-pytype-ruff:
+    name: 'spellcheck, cmakelint, pytype, ruff'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -61,20 +61,23 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
-            codespell python3-pip python3-networkx python3-pydot python3-yaml \
+            python3-pip python3-networkx python3-pydot python3-yaml \
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
             python3-typing-extensions python3-libcst python3-impacket \
             python3-websockets python3-pytest python3-filelock python3-pytest-xdist
-          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9
+          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9 codespell==2.4.1
 
-      - name: 'spellcheck'
+      - name: 'codespell'
         run: |
-          codespell \
-            --skip scripts/mk-ca-bundle.pl \
-            --skip src/tool_hugehelp.c \
-            --skip scripts/wcurl \
-            -I .github/scripts/codespell-ignore.txt \
-            CMake include m4 scripts src lib
+          codespell --version
+          .github/scripts/codespell.sh
+
+      - name: 'typos'
+        run: |
+          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          typos --version
+          .github/scripts/typos.sh
 
       - name: 'cmakelint'
         run: scripts/cmakelint.sh
@@ -89,7 +92,7 @@ jobs:
     name: 'REUSE'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -101,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -124,7 +127,7 @@ jobs:
       - name: 'install prereqs'
         run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 

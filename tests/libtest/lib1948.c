@@ -25,7 +25,7 @@
 
 typedef struct
 {
-  char *buf;
+  const char *buf;
   size_t len;
 } put_buffer;
 
@@ -40,7 +40,7 @@ static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return tocopy;
 }
 
-static CURLcode test_lib1948(char *URL)
+static CURLcode test_lib1948(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -55,7 +55,7 @@ static CURLcode test_lib1948(char *URL)
   easy_setopt(curl, CURLOPT_UPLOAD, 1L);
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_READFUNCTION, put_callback);
-  pbuf.buf = (char *)CURL_UNCONST(testput);
+  pbuf.buf = testput;
   pbuf.len = strlen(testput);
   easy_setopt(curl, CURLOPT_READDATA, &pbuf);
   easy_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testput));

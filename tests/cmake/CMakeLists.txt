@@ -31,20 +31,7 @@ option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 
 message(STATUS "TEST_INTEGRATION_MODE: ${TEST_INTEGRATION_MODE}")
 
-if(TEST_INTEGRATION_MODE STREQUAL "FetchContent" AND CMAKE_VERSION VERSION_LESS 3.14)
-  message(FATAL_ERROR "This test requires CMake 3.14 or upper")
-endif()
-
-if(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")  # Broken
-  include(ExternalProject)
-  ExternalProject_Add(libssh2
-    URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
-    INSTALL_COMMAND ""
-    DOWNLOAD_EXTRACT_TIMESTAMP ON)
-endif()
-
-if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
-   TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
+if(TEST_INTEGRATION_MODE STREQUAL "find_package")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # Double-inclusion test
   foreach(_result_var IN ITEMS
@@ -75,6 +62,9 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
+  if(CMAKE_VERSION VERSION_LESS 3.14)
+    message(FATAL_ERROR "This test requires CMake 3.14 or upper")
+  endif()
   include(FetchContent)
   option(FROM_GIT_REPO "Git URL" "https://github.com/curl/curl.git")
   option(FROM_GIT_TAG "Git tag" "master")
@@ -85,17 +75,48 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
   set(BUILD_SHARED_LIBS ON CACHE BOOL "")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
+elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
+  include(ExternalProject)
+  set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
+  set(_curl_static_lib "${_curl_install_dir}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  string(REPLACE " " ";" CURL_TEST_OPTS "${CURL_TEST_OPTS}")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+    set(_download_extract_timestamp "DOWNLOAD_EXTRACT_TIMESTAMP" "ON")
+  endif()
+  ExternalProject_Add(curl-external
+    URL "${FROM_ARCHIVE}" URL_HASH "SHA256=${FROM_HASH}"
+    ${_download_extract_timestamp}
+    PREFIX "${CMAKE_BINARY_DIR}/curl-external"
+    CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${_curl_install_dir}" -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCURL_USE_PKGCONFIG=OFF
+      -DCURL_ENABLE_SSL=OFF -DCURL_ENABLE_SSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_USE_LIBSSH2=OFF -DUSE_NGHTTP2=OFF
+      -DCURL_BROTLI=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DUSE_LIBIDN2=OFF -DENABLE_IPV6=OFF
+      ${CURL_TEST_OPTS}
+    BUILD_BYPRODUCTS "${_curl_static_lib}")
+
+  add_executable(test-consumer-static-fetch "test.c")
+  add_dependencies(test-consumer-static-fetch curl-external)
+  if(WIN32)
+    target_compile_definitions(test-consumer-static-fetch PRIVATE "CURL_STATICLIB")
+    list(APPEND _curl_static_lib "ws2_32" "bcrypt")
+  endif()
+  target_include_directories(test-consumer-static-fetch PRIVATE "${_curl_install_dir}/include")
+  target_link_libraries(test-consumer-static-fetch PRIVATE "${_curl_static_lib}")
 endif()
 
-add_executable(test-consumer-static-ns "test.c")
-target_link_libraries(test-consumer-static-ns PRIVATE "CURL::libcurl_static")
+if(TEST_INTEGRATION_MODE STREQUAL "find_package" OR
+   TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
+   TEST_INTEGRATION_MODE STREQUAL "FetchContent")
 
-add_executable(test-consumer-shared-ns "test.c")
-target_link_libraries(test-consumer-shared-ns PRIVATE "CURL::libcurl_shared")
+  add_executable(test-consumer-static-ns "test.c")
+  target_link_libraries(test-consumer-static-ns PRIVATE "CURL::libcurl_static")
 
-# Alias for either shared or static library
-add_executable(test-consumer-selected-ns "test.c")
-target_link_libraries(test-consumer-selected-ns PRIVATE "CURL::libcurl")
+  add_executable(test-consumer-shared-ns "test.c")
+  target_link_libraries(test-consumer-shared-ns PRIVATE "CURL::libcurl_shared")
+
+  # Alias for either shared or static library
+  add_executable(test-consumer-selected-ns "test.c")
+  target_link_libraries(test-consumer-selected-ns PRIVATE "CURL::libcurl")
+endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory" OR
    TEST_INTEGRATION_MODE STREQUAL "FetchContent")

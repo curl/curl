@@ -69,7 +69,7 @@ int main(void)
 
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, (long)CURLMIMEOPT_FORMESCAPE);
+    curl_easy_setopt(curl, CURLOPT_MIME_OPTIONS, CURLMIMEOPT_FORMESCAPE);
 
     form = curl_mime_init(curl);
     if(form) {
@@ -90,6 +90,11 @@ int main(void)
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLMIMEOPT_FORMESCAPE** macro became `long` type in 8.16.0, prior to this
+version a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

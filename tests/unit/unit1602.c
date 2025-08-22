@@ -45,7 +45,7 @@ static void t1602_stop(struct Curl_hash *hash)
   Curl_hash_destroy(hash);
 }
 
-static CURLcode test_unit1602(char *arg)
+static CURLcode test_unit1602(const char *arg)
 {
   struct Curl_hash hash;
 

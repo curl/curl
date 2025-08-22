@@ -110,6 +110,90 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
   } while(0)
 #endif
 
+
+/* Keep the sockets to poll for an easy handle.
+ * `actions` are bitmaps of CURL_POLL_IN and CURL_POLL_OUT.
+ * Starts with small capacity, grows on demand.
+ */
+#define EZ_POLLSET_DEF_COUNT    2
+
+struct easy_pollset {
+  curl_socket_t *sockets;
+  unsigned char *actions;
+  unsigned int n;
+  unsigned int count;
+#ifdef DEBUGBUILD
+  int init;
+#endif
+  curl_socket_t def_sockets[EZ_POLLSET_DEF_COUNT];
+  unsigned char def_actions[EZ_POLLSET_DEF_COUNT];
+};
+
+#ifdef DEBUGBUILD
+#define CURL_EASY_POLLSET_MAGIC  0x7a657370
+#endif
+
+
+/* allocate and initialise */
+struct easy_pollset *Curl_pollset_create(void);
+
+/* Initialize before first use */
+void Curl_pollset_init(struct easy_pollset *ps);
+/* Free any allocated resources */
+void Curl_pollset_cleanup(struct easy_pollset *ps);
+/* Reset to an empty pollset */
+void Curl_pollset_reset(struct easy_pollset *ps);
+/* Move pollset from to pollset to, replacing all in to,
+ * leaving from empty. */
+void Curl_pollset_move(struct easy_pollset *to, struct easy_pollset *from);
+
+/* Change the poll flags (CURL_POLL_IN/CURL_POLL_OUT) to the poll set for
+ * socket `sock`. If the socket is not already part of the poll set, it
+ * will be added.
+ * If the socket is present and all poll flags are cleared, it will be removed.
+ */
+CURLcode Curl_pollset_change(struct Curl_easy *data,
+                             struct easy_pollset *ps, curl_socket_t sock,
+                             int add_flags, int remove_flags);
+
+CURLcode Curl_pollset_set(struct Curl_easy *data,
+                          struct easy_pollset *ps, curl_socket_t sock,
+                          bool do_in, bool do_out);
+
+#define Curl_pollset_add_in(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
+#define Curl_pollset_add_out(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
+#define Curl_pollset_add_inout(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_IN|CURL_POLL_OUT, 0)
+#define Curl_pollset_set_in_only(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_IN, CURL_POLL_OUT)
+#define Curl_pollset_set_out_only(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), \
+                               CURL_POLL_OUT, CURL_POLL_IN)
+
+/* return < = on error, 0 on timeout or how many sockets are ready */
+int Curl_pollset_poll(struct Curl_easy *data,
+                      struct easy_pollset *ps,
+                      timediff_t timeout_ms);
+
+/**
+ * Check if the pollset, as is, wants to read and/or write regarding
+ * the given socket.
+ */
+void Curl_pollset_check(struct Curl_easy *data,
+                        struct easy_pollset *ps, curl_socket_t sock,
+                        bool *pwant_read, bool *pwant_write);
+
+/**
+ * Return TRUE if the pollset contains socket with CURL_POLL_IN.
+ */
+bool Curl_pollset_want_read(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock);
+
 struct curl_pollfds {
   struct pollfd *pfds;
   unsigned int n;

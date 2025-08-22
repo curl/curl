@@ -63,7 +63,7 @@ static const char *ret2name(int i)
   /* not reached */
 }
 
-static CURLcode test_unit1307(char *arg)
+static CURLcode test_unit1307(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -146,8 +146,8 @@ static CURLcode test_unit1307(char *arg)
     { "[! ][ ]",                  "  ",                     NOMATCH },
     { "[! ][ ]",                  "a ",                     MATCH },
     { "*[^a].t?t",                "a.txt",                  NOMATCH },
-    { "*[^a].t?t",                "ba.txt",                 NOMATCH },
-    { "*[^a].t?t",                "ab.txt",                 MATCH },
+    { "*[^a].t?t",                "ca.txt",                 NOMATCH },
+    { "*[^a].t?t",                "ac.txt",                 MATCH },
     { "*[^a]",                    "",                       NOMATCH },
     { "[!\xFF]",                  "",             NOMATCH|LINUX_FAIL},
     { "[!\xFF]",                  "\xFF",  NOMATCH|LINUX_FAIL|MAC_FAIL},
@@ -311,7 +311,7 @@ static CURLcode test_unit1307(char *arg)
 
 #else
 
-static CURLcode test_unit1307(char *arg)
+static CURLcode test_unit1307(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

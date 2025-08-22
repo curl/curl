@@ -22,6 +22,8 @@
 # * SPDX-License-Identifier: curl
 # *
 # ***************************************************************************
+use strict;
+use warnings;
 
 use POSIX qw(strftime);
 my @ts;

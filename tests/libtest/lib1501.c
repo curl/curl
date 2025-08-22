@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1501(char *URL)
+static CURLcode test_lib1501(const char *URL)
 {
   static const long HANG_TIMEOUT = 30 * 1000;
   /* 500 milliseconds allowed. An extreme number but lets be really

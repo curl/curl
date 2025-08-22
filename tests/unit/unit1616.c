@@ -45,7 +45,7 @@ static void t1616_stop(struct uint_hash *hash)
   Curl_uint_hash_destroy(hash);
 }
 
-static CURLcode test_unit1616(char *arg)
+static CURLcode test_unit1616(const char *arg)
 {
   struct uint_hash hash;
 

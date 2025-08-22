@@ -50,7 +50,7 @@ static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
   return 0;
 }
 
-static CURLcode test_lib578(char *URL)
+static CURLcode test_lib578(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

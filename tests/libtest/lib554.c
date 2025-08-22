@@ -56,7 +56,7 @@ static size_t t587_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return CURL_READFUNC_ABORT;
 }
 
-static CURLcode t554_test_once(char *URL, bool oldstyle)
+static CURLcode t554_test_once(const char *URL, bool oldstyle)
 {
   static const char testdata[] =
     "this is what we post to the silly web server\n";
@@ -95,7 +95,7 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
   }
 
   if(formrc)
-    curl_mprintf("curl_formadd(1) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(1) = %d\n", formrc);
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
@@ -112,7 +112,7 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(2) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(2) = %d\n", formrc);
 
   /* Fill in the filename field */
   formrc = curl_formadd(&formpost,
@@ -121,7 +121,7 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
                         CURLFORM_COPYCONTENTS, "postit2.c",
                         CURLFORM_END);
   if(formrc)
-    curl_mprintf("curl_formadd(3) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(3) = %d\n", formrc);
 
   /* Fill in a submit field too */
   formrc = curl_formadd(&formpost,
@@ -132,17 +132,17 @@ static CURLcode t554_test_once(char *URL, bool oldstyle)
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(4) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(4) = %d\n", formrc);
 
   formrc = curl_formadd(&formpost, &lastptr,
                         CURLFORM_COPYNAME, "somename",
                         CURLFORM_BUFFER, "somefile.txt",
                         CURLFORM_BUFFERPTR, "blah blah",
-                        CURLFORM_BUFFERLENGTH, (long)9,
+                        CURLFORM_BUFFERLENGTH, 9L,
                         CURLFORM_END);
 
   if(formrc)
-    curl_mprintf("curl_formadd(5) = %d\n", (int)formrc);
+    curl_mprintf("curl_formadd(5) = %d\n", formrc);
 
   curl = curl_easy_init();
   if(!curl) {
@@ -192,7 +192,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib554(char *URL)
+static CURLcode test_lib554(const char *URL)
 {
   CURLcode res;
 

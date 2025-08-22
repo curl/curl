@@ -45,7 +45,7 @@ static size_t t1525_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return strlen(t1525_testdata);
 }
 
-static CURLcode test_lib1525(char *URL)
+static CURLcode test_lib1525(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_FAILED_INIT;
@@ -74,11 +74,11 @@ static CURLcode test_lib1525(char *URL)
   test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
   test_setopt(curl, CURLOPT_PROXYHEADER, hhl);
-  test_setopt(curl, CURLOPT_HEADEROPT, (long)CURLHEADER_UNIFIED);
+  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
   test_setopt(curl, CURLOPT_POST, 0L);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_PROXYTYPE, (long)CURLPROXY_HTTP);
+  test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, t1525_read_cb);

@@ -100,7 +100,7 @@ static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode test_lib579(char *URL)
+static CURLcode test_lib579(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -149,7 +149,7 @@ static CURLcode test_lib579(char *URL)
   /* enforce chunked transfer by setting the header */
   test_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
-  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+  test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
 
   /* we want to use our own progress function */

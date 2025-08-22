@@ -48,13 +48,14 @@
 
 #ifdef _WIN32
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \
   !defined(CURL_WINDOWS_UWP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
 #  endif
+   /* Offered by mingw-w64 v3+. MS SDK v7.0A+. */
 #  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
 #  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  endif
@@ -72,7 +73,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
-#if defined(HAVE_WIN_BCRYPTGENRANDOM)
+#ifdef HAVE_WIN_BCRYPTGENRANDOM
   if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
@@ -100,7 +101,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-#if !defined(USE_SSL)
+#ifndef USE_SSL
 /* ---- possibly non-cryptographic version following ---- */
 static CURLcode weak_random(struct Curl_easy *data,
                             unsigned char *entropy,
@@ -119,7 +120,7 @@ static CURLcode weak_random(struct Curl_easy *data,
   }
 #endif
 
-#if defined(HAVE_ARC4RANDOM)
+#ifdef HAVE_ARC4RANDOM
   (void)data;
   r = (unsigned int)arc4random();
   memcpy(entropy, &r, length);

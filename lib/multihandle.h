@@ -72,15 +72,9 @@ typedef enum {
   MSTATE_LAST          /* 18 - not a true state, never use this */
 } CURLMstate;
 
-/* we support N sockets per easy handle. Set the corresponding bit to what
-   action we should wait for */
-#define MAX_SOCKSPEREASYHANDLE 5
-#define GETSOCK_READABLE (0x00ff)
-#define GETSOCK_WRITABLE (0xff00)
-
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
 
-#if !defined(CURL_DISABLE_SOCKETPAIR)
+#ifndef CURL_DISABLE_SOCKETPAIR
 #define ENABLE_WAKEUP
 #endif
 
@@ -95,6 +89,7 @@ struct Curl_multi {
 
   unsigned int xfers_alive; /* amount of added transfers that have
                                not yet reached COMPLETE state */
+  curl_off_t xfers_total_ever; /* total of added transfers, ever. */
   struct uint_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */
   struct uint_bset process; /* transfer being processed */

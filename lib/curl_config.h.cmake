@@ -336,9 +336,6 @@
 /* Define to 1 if symbol `sa_family_t' exists */
 #cmakedefine HAVE_SA_FAMILY_T 1
 
-/* Define to 1 if symbol `ADDRESS_FAMILY' exists */
-#cmakedefine HAVE_ADDRESS_FAMILY 1
-
 /* Define to 1 if you have the ioctlsocket function. */
 #cmakedefine HAVE_IOCTLSOCKET 1
 
@@ -760,9 +757,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 if you have the quiche_conn_set_qlog_fd function. */
 #cmakedefine HAVE_QUICHE_CONN_SET_QLOG_FD 1
-
-/* to enable msh3 */
-#cmakedefine USE_MSH3 1
 
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS 1

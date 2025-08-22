@@ -27,7 +27,7 @@
 
 #define WAKEUP_NUM 10
 
-static CURLcode test_lib1564(char *URL)
+static CURLcode test_lib1564(const char *URL)
 {
   CURLM *multi = NULL;
   int numfds;

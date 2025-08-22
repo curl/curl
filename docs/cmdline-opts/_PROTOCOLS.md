@@ -8,7 +8,7 @@ Lets you lookup words using online dictionaries.
 ## FILE
 Read or write local files. curl does not support accessing file:// URL
 remotely, but when running on Microsoft Windows using the native UNC approach
-works.
+works. Only absolute paths.
 ## FTP(S)
 curl supports the File Transfer Protocol with a lot of tweaks and levers. With
 or without using TLS.

@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib3105(char *URL)
+static CURLcode test_lib3105(const char *URL)
 {
   CURL *curls = NULL;
   CURLM *multi = NULL;
@@ -47,7 +47,7 @@ static CURLcode test_lib3105(char *URL)
   mc += curl_multi_remove_handle(multi, curls);
 
   if(mc) {
-    curl_mfprintf(stderr, "%d was unexpected\n", (int)mc);
+    curl_mfprintf(stderr, "%d was unexpected\n", mc);
     i = CURLE_FAILED_INIT;
   }
 

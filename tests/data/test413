@@ -37,7 +37,7 @@ http
 alt-svc using host name with trailing dot on host from file
 </name>
 <setenv>
-# make debug-curl accept Alt-Svc over plain HTTP
+# make Debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
 <command>

@@ -45,12 +45,10 @@
 bool tool_create_output_file(struct OutStruct *outs,
                              struct OperationConfig *config)
 {
-  struct GlobalConfig *global;
   FILE *file = NULL;
   const char *fname = outs->filename;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
-  global = config->global;
   DEBUGASSERT(fname && *fname);
 
   if(config->file_clobber_mode == CLOBBER_ALWAYS ||
@@ -68,35 +66,24 @@ bool tool_create_output_file(struct OutStruct *outs,
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
-      size_t len = strlen(fname);
-      size_t newlen = len + 13; /* nul + 1-11 digits + dot */
-      char *newname;
-      /* Guard against wraparound in new filename */
-      if(newlen < len) {
-        errorf(global, "overflow in filename generation");
-        return FALSE;
-      }
-      newname = malloc(newlen);
-      if(!newname) {
-        errorf(global, "out of memory");
-        return FALSE;
-      }
-      memcpy(newname, fname, len);
-      newname[len] = '.';
+      struct dynbuf fbuffer;
+      curlx_dyn_init(&fbuffer, 1025);
       /* !checksrc! disable ERRNOVAR 1 */
       while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
             next_num < 100 /* and we have not reached the retry limit */ ) {
-        msnprintf(newname + len + 1, 12, "%d", next_num);
+        curlx_dyn_reset(&fbuffer);
+        if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
+          return FALSE;
         next_num++;
         do {
-          fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
-                             OPENMODE);
+          fd = open(curlx_dyn_ptr(&fbuffer),
+                    O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
-      outs->filename = newname; /* remember the new one */
+      outs->filename = curlx_dyn_ptr(&fbuffer); /* remember the new one */
       outs->alloc_filename = TRUE;
     }
     /* An else statement to not overwrite existing files and not retry with
@@ -112,8 +99,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   }
 
   if(!file) {
-    warnf(global, "Failed to open the file %s: %s", fname,
-          strerror(errno));
+    warnf("Failed to open the file %s: %s", fname, strerror(errno));
     return FALSE;
   }
   outs->s_isreg = TRUE;
@@ -123,6 +109,132 @@ bool tool_create_output_file(struct OutStruct *outs,
   outs->init = 0;
   return TRUE;
 }
+
+#if defined(_WIN32) && !defined(UNDER_CE)
+static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
+                          char *buffer, size_t bytes,
+                          size_t *retp)
+{
+  DWORD chars_written;
+  unsigned char *rbuf = (unsigned char *)buffer;
+  DWORD rlen = (DWORD)bytes;
+
+#define IS_TRAILING_BYTE(x) (0x80 <= (x) && (x) < 0xC0)
+
+  /* attempt to complete an incomplete UTF-8 sequence from previous call. the
+     sequence does not have to be well-formed. */
+  if(outs->utf8seq[0] && rlen) {
+    bool complete = false;
+    /* two byte sequence (lead byte 110yyyyy) */
+    if(0xC0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xE0) {
+      outs->utf8seq[1] = *rbuf++;
+      --rlen;
+      complete = true;
+    }
+    /* three byte sequence (lead byte 1110zzzz) */
+    else if(0xE0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF0) {
+      if(!outs->utf8seq[1]) {
+        outs->utf8seq[1] = *rbuf++;
+        --rlen;
+      }
+      if(rlen && !outs->utf8seq[2]) {
+        outs->utf8seq[2] = *rbuf++;
+        --rlen;
+        complete = true;
+      }
+    }
+    /* four byte sequence (lead byte 11110uuu) */
+    else if(0xF0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF8) {
+      if(!outs->utf8seq[1]) {
+        outs->utf8seq[1] = *rbuf++;
+        --rlen;
+      }
+      if(rlen && !outs->utf8seq[2]) {
+        outs->utf8seq[2] = *rbuf++;
+        --rlen;
+      }
+      if(rlen && !outs->utf8seq[3]) {
+        outs->utf8seq[3] = *rbuf++;
+        --rlen;
+        complete = true;
+      }
+    }
+
+    if(complete) {
+      WCHAR prefix[3] = {0};  /* UTF-16 (1-2 WCHARs) + NUL */
+
+      if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
+                             prefix, CURL_ARRAYSIZE(prefix))) {
+        DEBUGASSERT(prefix[2] == L'\0');
+        if(!WriteConsoleW((HANDLE) fhnd, prefix, prefix[1] ? 2 : 1,
+                          &chars_written, NULL)) {
+          return CURL_WRITEFUNC_ERROR;
+        }
+      }
+      /* else: UTF-8 input was not well formed and OS is pre-Vista which drops
+         invalid characters instead of writing U+FFFD to output. */
+      memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
+    }
+  }
+
+  /* suppress an incomplete utf-8 sequence at end of rbuf */
+  if(!outs->utf8seq[0] && rlen && (rbuf[rlen - 1] & 0x80)) {
+    /* check for lead byte from a two, three or four byte sequence */
+    if(0xC0 <= rbuf[rlen - 1] && rbuf[rlen - 1] < 0xF8) {
+      outs->utf8seq[0] = rbuf[rlen - 1];
+      rlen -= 1;
+    }
+    else if(rlen >= 2 && IS_TRAILING_BYTE(rbuf[rlen - 1])) {
+      /* check for lead byte from a three or four byte sequence */
+      if(0xE0 <= rbuf[rlen - 2] && rbuf[rlen - 2] < 0xF8) {
+        outs->utf8seq[0] = rbuf[rlen - 2];
+        outs->utf8seq[1] = rbuf[rlen - 1];
+        rlen -= 2;
+      }
+      else if(rlen >= 3 && IS_TRAILING_BYTE(rbuf[rlen - 2])) {
+        /* check for lead byte from a four byte sequence */
+        if(0xF0 <= rbuf[rlen - 3] && rbuf[rlen - 3] < 0xF8) {
+          outs->utf8seq[0] = rbuf[rlen - 3];
+          outs->utf8seq[1] = rbuf[rlen - 2];
+          outs->utf8seq[2] = rbuf[rlen - 1];
+          rlen -= 3;
+        }
+      }
+    }
+  }
+
+  if(rlen) {
+    /* calculate buffer size for wide characters */
+    DWORD len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf,
+                                           (int)rlen, NULL, 0);
+    if(!len)
+      return CURL_WRITEFUNC_ERROR;
+
+    /* grow the buffer if needed */
+    if(len > global->term.len) {
+      wchar_t *buf = (wchar_t *) realloc(global->term.buf,
+                                         len * sizeof(wchar_t));
+      if(!buf)
+        return CURL_WRITEFUNC_ERROR;
+      global->term.len = len;
+      global->term.buf = buf;
+    }
+
+    len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
+                                     global->term.buf,
+                                     (int)len);
+    if(!len)
+      return CURL_WRITEFUNC_ERROR;
+
+    if(!WriteConsoleW((HANDLE) fhnd, global->term.buf,
+                      len, &chars_written, NULL))
+      return CURL_WRITEFUNC_ERROR;
+  }
+
+  *retp = bytes;
+  return 0;
+}
+#endif
 
 /*
 ** callback for CURLOPT_WRITEFUNCTION
@@ -135,11 +247,14 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OutStruct *outs = &per->outs;
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
-  bool is_tty = config->global->isatty;
+  bool is_tty = global->isatty;
 #if defined(_WIN32) && !defined(UNDER_CE)
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
 #endif
+
+  if(outs->out_null)
+    return bytes;
 
 #ifdef DEBUGBUILD
   {
@@ -152,13 +267,13 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->show_headers) {
     if(bytes > (size_t)CURL_MAX_HTTP_HEADER) {
-      warnf(config->global, "Header data size exceeds write limit");
+      warnf("Header data size exceeds write limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
   else {
     if(bytes > (size_t)CURL_MAX_WRITE_SIZE) {
-      warnf(config->global, "Data size exceeds write limit");
+      warnf("Data size exceeds write limit");
       return CURL_WRITEFUNC_ERROR;
     }
   }
@@ -187,7 +302,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
         check_fails = TRUE;
     }
     if(check_fails) {
-      warnf(config->global, "Invalid output struct data for write callback");
+      warnf("Invalid output struct data for write callback");
       return CURL_WRITEFUNC_ERROR;
     }
   }
@@ -199,7 +314,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(is_tty && (outs->bytes < 2000) && !config->terminal_binary_ok) {
     /* binary output to terminal? */
     if(memchr(buffer, 0, bytes)) {
-      warnf(config->global, "Binary output can mess up your terminal. "
+      warnf("Binary output can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
             "anyway, or consider \"--output <FILE>\" to save to a file.");
       config->synthetic_error = TRUE;
@@ -212,131 +327,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
-    wchar_t *wc_buf;
-    DWORD wc_len, chars_written;
-    unsigned char *rbuf = (unsigned char *)buffer;
-    DWORD rlen = (DWORD)bytes;
-
-#define IS_TRAILING_BYTE(x) (0x80 <= (x) && (x) < 0xC0)
-
-    /* attempt to complete an incomplete UTF-8 sequence from previous call.
-       the sequence does not have to be well-formed. */
-    if(outs->utf8seq[0] && rlen) {
-      bool complete = false;
-      /* two byte sequence (lead byte 110yyyyy) */
-      if(0xC0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xE0) {
-        outs->utf8seq[1] = *rbuf++;
-        --rlen;
-        complete = true;
-      }
-      /* three byte sequence (lead byte 1110zzzz) */
-      else if(0xE0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF0) {
-        if(!outs->utf8seq[1]) {
-          outs->utf8seq[1] = *rbuf++;
-          --rlen;
-        }
-        if(rlen && !outs->utf8seq[2]) {
-          outs->utf8seq[2] = *rbuf++;
-          --rlen;
-          complete = true;
-        }
-      }
-      /* four byte sequence (lead byte 11110uuu) */
-      else if(0xF0 <= outs->utf8seq[0] && outs->utf8seq[0] < 0xF8) {
-        if(!outs->utf8seq[1]) {
-          outs->utf8seq[1] = *rbuf++;
-          --rlen;
-        }
-        if(rlen && !outs->utf8seq[2]) {
-          outs->utf8seq[2] = *rbuf++;
-          --rlen;
-        }
-        if(rlen && !outs->utf8seq[3]) {
-          outs->utf8seq[3] = *rbuf++;
-          --rlen;
-          complete = true;
-        }
-      }
-
-      if(complete) {
-        WCHAR prefix[3] = {0};  /* UTF-16 (1-2 WCHARs) + NUL */
-
-        if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
-                               prefix, CURL_ARRAYSIZE(prefix))) {
-          DEBUGASSERT(prefix[2] == L'\0');
-          if(!WriteConsoleW(
-              (HANDLE) fhnd,
-              prefix,
-              prefix[1] ? 2 : 1,
-              &chars_written,
-              NULL)) {
-            return CURL_WRITEFUNC_ERROR;
-          }
-        }
-        /* else: UTF-8 input was not well formed and OS is pre-Vista which
-           drops invalid characters instead of writing U+FFFD to output.  */
-
-        memset(outs->utf8seq, 0, sizeof(outs->utf8seq));
-      }
-    }
-
-    /* suppress an incomplete utf-8 sequence at end of rbuf */
-    if(!outs->utf8seq[0] && rlen && (rbuf[rlen - 1] & 0x80)) {
-      /* check for lead byte from a two, three or four byte sequence */
-      if(0xC0 <= rbuf[rlen - 1] && rbuf[rlen - 1] < 0xF8) {
-        outs->utf8seq[0] = rbuf[rlen - 1];
-        rlen -= 1;
-      }
-      else if(rlen >= 2 && IS_TRAILING_BYTE(rbuf[rlen - 1])) {
-        /* check for lead byte from a three or four byte sequence */
-        if(0xE0 <= rbuf[rlen - 2] && rbuf[rlen - 2] < 0xF8) {
-          outs->utf8seq[0] = rbuf[rlen - 2];
-          outs->utf8seq[1] = rbuf[rlen - 1];
-          rlen -= 2;
-        }
-        else if(rlen >= 3 && IS_TRAILING_BYTE(rbuf[rlen - 2])) {
-          /* check for lead byte from a four byte sequence */
-          if(0xF0 <= rbuf[rlen - 3] && rbuf[rlen - 3] < 0xF8) {
-            outs->utf8seq[0] = rbuf[rlen - 3];
-            outs->utf8seq[1] = rbuf[rlen - 2];
-            outs->utf8seq[2] = rbuf[rlen - 1];
-            rlen -= 3;
-          }
-        }
-      }
-    }
-
-    if(rlen) {
-      /* calculate buffer size for wide characters */
-      wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
-                                          NULL, 0);
-      if(!wc_len)
-        return CURL_WRITEFUNC_ERROR;
-
-      wc_buf = (wchar_t*) malloc(wc_len * sizeof(wchar_t));
-      if(!wc_buf)
-        return CURL_WRITEFUNC_ERROR;
-
-      wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
-                                          wc_buf, (int)wc_len);
-      if(!wc_len) {
-        free(wc_buf);
-        return CURL_WRITEFUNC_ERROR;
-      }
-
-      if(!WriteConsoleW(
-          (HANDLE) fhnd,
-          wc_buf,
-          wc_len,
-          &chars_written,
-          NULL)) {
-        free(wc_buf);
-        return CURL_WRITEFUNC_ERROR;
-      }
-      free(wc_buf);
-    }
-
-    rc = bytes;
+    size_t retval = win_console(fhnd, outs, buffer, bytes, &rc);
+    if(retval)
+      return retval;
   }
   else
 #endif

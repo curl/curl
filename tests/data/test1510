@@ -55,7 +55,7 @@ lib%TESTNUMBER
 HTTP GET connection cache limit (CURLOPT_MAXCONNECTS)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT
+- %HOSTIP %HTTPPORT
 </command>
 </client>
 
@@ -83,10 +83,10 @@ Accept: */*
 ^Host:.*
 </strip>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-* Connection #0 to host server1.example.com left intact
-* Connection #1 to host server2.example.com left intact
-* Connection #2 to host server3.example.com left intact
-* Connection #3 to host server4.example.com left intact
+* Connection #0 to host server1.example.com:%HTTPPORT left intact
+* Connection #1 to host server2.example.com:%HTTPPORT left intact
+* Connection #2 to host server3.example.com:%HTTPPORT left intact
+* Connection #3 to host server4.example.com:%HTTPPORT left intact
 </file>
 <stripfile>
 $_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))

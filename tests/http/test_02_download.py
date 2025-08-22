@@ -114,8 +114,6 @@ class TestDownload:
     def test_02_05_download_many_sequential(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 shaky here")
         if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
            sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('mbedtls 3.6.3 fails this test on macOS CI runners')
@@ -220,8 +218,6 @@ class TestDownload:
     def test_02_11_10MB_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
@@ -258,8 +254,6 @@ class TestDownload:
     def test_02_14_not_found(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)
@@ -274,8 +268,6 @@ class TestDownload:
     def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)
@@ -320,7 +312,7 @@ class TestDownload:
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -343,7 +335,7 @@ class TestDownload:
         run_env['CURL_DEBUG'] = 'multi,http/2'
         if swin_max > 0:
             run_env['CURL_H2_STREAM_WIN_MAX'] = f'{swin_max}'
-        client = LocalClient(name='hx_download', env=env, run_env=run_env)
+        client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -363,7 +355,7 @@ class TestDownload:
         max_parallel = 5
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -391,7 +383,7 @@ class TestDownload:
             pause_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -420,7 +412,7 @@ class TestDownload:
             abort_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -449,7 +441,7 @@ class TestDownload:
             fail_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -483,7 +475,7 @@ class TestDownload:
     # before protocol switch has happened
     def test_02_25_h2_upgrade_x(self, env: Env, httpd):
         url = f'http://localhost:{env.http_port}/data-100k'
-        client = LocalClient(name='h2_upgrade_extreme', env=env, timeout=15)
+        client = LocalClient(name='cli_h2_upgrade_extreme', env=env, timeout=15)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[url])
@@ -493,37 +485,45 @@ class TestDownload:
     # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
-        client = LocalClient(name='tls_session_reuse', env=env)
+        client = LocalClient(name='cli_tls_session_reuse', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
-        r = client.run(args=[proto, url])
+        r = client.run(args=[url, proto])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?&chunks=6&chunk_size=8000'
-        client = LocalClient(env=env, name='h2_pausing')
+        client = LocalClient(env=env, name='cli_h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?error=502'
-        client = LocalClient(env=env, name='h2_pausing')
+        client = LocalClient(env=env, name='cli_h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
             '/curltest/tweak/?status=200&chunks=1&chunk_size=100'
-        client = LocalClient(env=env, name='h2_pausing')
+        client = LocalClient(env=env, name='cli_h2_pausing')
         r = client.run(args=['-V', proto, url])
         r.check_exit_code(0)
 
@@ -557,10 +557,12 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_29_h2_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -597,6 +599,7 @@ class TestDownload:
 
     # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_32_earlydata(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_can_early_data():
@@ -614,7 +617,7 @@ class TestDownload:
         if proto != 'h3':
             port = env.nghttpx_https_port
         url = f'https://{env.domain1}:{port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -660,7 +663,7 @@ class TestDownload:
         url = f'https://{env.domain1}:{port}/{docname}'
         run_env = os.environ.copy()
         run_env['CURL_DEBUG'] = 'multi'
-        client = LocalClient(name='hx_download', env=env, run_env=run_env)
+        client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -698,7 +701,7 @@ class TestDownload:
         url = f'https://{env.domain1}:{port}/{docname}'
         run_env = os.environ.copy()
         run_env['CURL_DEBUG'] = 'multi'
-        client = LocalClient(name='hx_download', env=env, run_env=run_env)
+        client = LocalClient(name='cli_hx_download', env=env, run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -740,7 +743,7 @@ class TestDownload:
         pause_offset = 1024 * 1024
         docname = 'bomb-100m.txt.var'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -748,3 +751,44 @@ class TestDownload:
              '-P', f'{pause_offset}', '-V', proto, url
         ])
         r.check_exit_code(0)
+
+    # download with looong urls
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024, 80*1024, 96*1024])
+    def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('quiche'):
+            pytest.skip("quiche fails from 16k onwards")
+        curl = CurlClient(env=env)
+        # url is longer than 'url_len'
+        url = f'https://{env.authority_for(env.domain1, proto)}/data.json?{"x"*(url_junk)}'
+        r = curl.http_download(urls=[url], alpn_proto=proto)
+        if url_junk <= 1024:
+            r.check_exit_code(0)
+            r.check_response(http_status=200)
+        elif url_junk <= 16*1024:
+            r.check_exit_code(0)
+            # server replies with 414, Request URL too long
+            r.check_response(http_status=414)
+        elif url_junk <= 32*1024:
+            r.check_exit_code(0)
+            # server replies with 414, Request URL too long
+            r.check_response(http_status=414)
+        else:
+            # with urls larger than 64k, behaviour differs
+            if proto == 'http/1.1':
+                r.check_exit_code(0)
+                r.check_response(http_status=414)
+            elif proto == 'h2':
+                # h2 is unable to send such large headers (frame limits)
+                r.check_exit_code(55)
+            elif proto == 'h3':
+                if url_junk <= 64*1024:
+                    r.check_exit_code(0)
+                    # nghttpx reports 431 Request Header Field too Large
+                    r.check_response(http_status=431)
+                else:
+                    # nghttpx destroys the connection with internal error
+                    # ERR_QPACK_HEADER_TOO_LARGE
+                    r.check_exit_code(56)

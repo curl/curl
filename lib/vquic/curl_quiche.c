@@ -24,7 +24,7 @@
 
 #include "../curl_setup.h"
 
-#ifdef USE_QUICHE
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_QUICHE)
 #include <quiche.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
@@ -40,6 +40,7 @@
 #include "../connect.h"
 #include "../progress.h"
 #include "../strerror.h"
+#include "../select.h"
 #include "../http1.h"
 #include "vquic.h"
 #include "vquic_int.h"
@@ -1024,6 +1025,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   stream3_id = quiche_h3_send_request(ctx->h3c, ctx->qconn, nva, nheader,
                                       stream->send_closed);
+  CURL_TRC_CF(data, cf, "quiche_send_request() -> %" FMT_PRIu64, stream3_id);
   if(stream3_id < 0) {
     if(QUICHE_H3_ERR_STREAM_BLOCKED == stream3_id) {
       /* quiche seems to report this error if the connection window is
@@ -1141,15 +1143,16 @@ static bool stream_is_writeable(struct Curl_cfilter *cf,
     ctx->qconn, (curl_uint64_t)stream->id, 1) > 0);
 }
 
-static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+static CURLcode cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->qconn)
-    return;
+    return CURLE_OK;
 
   Curl_pollset_check(data, ps, ctx->q.sockfd, &want_recv, &want_send);
   if(want_recv || want_send) {
@@ -1164,8 +1167,9 @@ static void cf_quiche_adjust_pollset(struct Curl_cfilter *cf,
     want_send = (!s_exhaust && want_send) ||
                  !Curl_bufq_is_empty(&ctx->q.sendbuf);
 
-    Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, ctx->q.sockfd, want_recv, want_send);
   }
+  return result;
 }
 
 /*
@@ -1194,9 +1198,9 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     int event, int arg1, void *arg2)
+static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                int event, int arg1, void *arg2)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1235,6 +1239,10 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_CTRL_CONN_INFO_UPDATE:
+    if(!cf->sockindex && cf->connected)
+      cf->conn->httpversion_seen = 30;
+    break;
   default:
     break;
   }
@@ -1416,7 +1424,6 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
         goto out;
       }
       cf->connected = TRUE;
-      cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
       connkeep(cf->conn, "HTTP/3 default");
     }
@@ -1552,9 +1559,15 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   case CF_QUERY_SSL_CTX_INFO: {
     struct curl_tlssessioninfo *info = pres2;
     if(Curl_vquic_tls_get_ssl_info(&ctx->tls,
-                                   (query == CF_QUERY_SSL_INFO), info))
+                                   (query == CF_QUERY_SSL_CTX_INFO), info))
       return CURLE_OK;
     break;
+  }
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = cf->connected ? "h3" : NULL;
+    return CURLE_OK;
   }
   default:
     break;
@@ -1613,7 +1626,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_data_pending,
   cf_quiche_send,
   cf_quiche_recv,
-  cf_quiche_data_event,
+  cf_quiche_cntrl,
   cf_quiche_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_quiche_query,

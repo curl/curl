@@ -66,6 +66,11 @@ When the netrc feature is used (CURLOPT_NETRC(3)), this variable is
 checked as the secondary way to find the "current" home directory (on Windows
 only) in which the .netrc file is likely to exist.
 
+## `NETRC`
+
+The filename used as netrc file when CURLOPT_NETRC(3) is used without
+CURLOPT_NETRC_FILE(3). (Added in 8.16.0)
+
 ## `NO_PROXY`
 
 This has the same functionality as the CURLOPT_NOPROXY(3) option: it

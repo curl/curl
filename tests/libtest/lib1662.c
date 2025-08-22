@@ -46,7 +46,7 @@ static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode test_lib1662(char *URL)
+static CURLcode test_lib1662(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *hnd;
@@ -73,8 +73,7 @@ static CURLcode test_lib1662(char *URL)
       curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/2000");
       curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, 1L);
       curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-      curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION,
-                       (long)CURL_HTTP_VERSION_2TLS);
+      curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
       curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
       curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
       curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);

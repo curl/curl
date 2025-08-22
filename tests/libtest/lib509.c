@@ -67,7 +67,7 @@ static void custom_free(void *ptr)
 }
 
 
-static CURLcode test_lib509(char *URL)
+static CURLcode test_lib509(const char *URL)
 {
   static const unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                                     0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};

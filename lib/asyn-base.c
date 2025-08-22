@@ -70,7 +70,7 @@
 #endif
 
 /*
- * Curl_ares_getsock() is called when the outside world (using
+ * Curl_ares_pollset() is called when the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we are talking with
  * ares. The caller must make sure that this function is only called when we
  * have a working ares channel.
@@ -78,18 +78,44 @@
  * Returns: sockets-in-use-bitmap
  */
 
-int Curl_ares_getsock(struct Curl_easy *data,
-                      ares_channel channel,
-                      curl_socket_t *socks)
+
+CURLcode Curl_ares_pollset(struct Curl_easy *data,
+                           ares_channel channel,
+                           struct easy_pollset *ps)
 {
   struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
   struct timeval timebuf;
-  int max = ares_getsock(channel,
-                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
-  struct timeval *timeout = ares_timeout(channel, &maxtime, &timebuf);
-  timediff_t milli = curlx_tvtoms(timeout);
+  curl_socket_t sockets[16];  /* ARES documented limit */
+  unsigned int bitmap, i;
+  struct timeval *timeout;
+  timediff_t milli;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(channel);
+  if(!channel)
+    return CURLE_FAILED_INIT;
+
+  bitmap = ares_getsock(channel, (ares_socket_t *)sockets,
+                        CURL_ARRAYSIZE(sockets));
+  for(i = 0; i < CURL_ARRAYSIZE(sockets); ++i) {
+    int flags = 0;
+    if(ARES_GETSOCK_READABLE(bitmap, i))
+      flags |= CURL_POLL_IN;
+    if(ARES_GETSOCK_WRITABLE(bitmap, i))
+      flags |= CURL_POLL_OUT;
+    if(!flags)
+      break;
+    result = Curl_pollset_change(data, ps, sockets[i], flags, 0);
+    if(result)
+      return result;
+  }
+
+  timeout = ares_timeout(channel, &maxtime, &timebuf);
+  if(!timeout)
+    timeout = &maxtime;
+  milli = curlx_tvtoms(timeout);
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-  return max;
+  return result;
 }
 
 /*

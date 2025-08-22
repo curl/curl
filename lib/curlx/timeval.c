@@ -115,7 +115,7 @@ struct curltime curlx_now(void)
         (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
-    (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow))) {
+    (clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow) == 0)) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
@@ -127,7 +127,7 @@ struct curltime curlx_now(void)
         (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
-    (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
+    (clock_gettime(CLOCK_MONOTONIC, &tsnow) == 0)) {
     cnow.tv_sec = tsnow.tv_sec;
     cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
@@ -168,11 +168,11 @@ struct curltime curlx_now(void)
   struct curltime cnow;
   uint64_t usecs;
 
-  if(0 == timebase.denom)
-    (void) mach_timebase_info(&timebase);
+  if(timebase.denom == 0)
+    (void)mach_timebase_info(&timebase);
 
   usecs = mach_absolute_time();
-  usecs *= timebase.numer;
+  usecs *= timebase.numer; /* spellchecker:disable-line */
   usecs /= timebase.denom;
   usecs /= 1000;
 

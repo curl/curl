@@ -25,7 +25,7 @@
 
 #include "doh.h"
 
-static CURLcode test_unit1650(char *arg)
+static CURLcode test_unit1650(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -55,11 +55,11 @@ static CURLcode test_unit1650(char *arg)
   };
 
   static const struct dohrequest req[] = {
-    {"test.host.name", DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
-    {"test.host.name", DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, DOH_OK },
+    {"test.host.name", CURL_DNS_TYPE_A, DNS_Q1, sizeof(DNS_Q1)-1, DOH_OK },
+    {"test.host.name", CURL_DNS_TYPE_AAAA, DNS_Q2, sizeof(DNS_Q2)-1, DOH_OK },
     {"zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
      ".host.name",
-     DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }
+     CURL_DNS_TYPE_AAAA, NULL, 0, DOH_DNS_BAD_LABEL }
   };
 
   struct dohresp {
@@ -82,43 +82,43 @@ static CURLcode test_unit1650(char *arg)
   static const char full49[] = DNS_FOO_EXAMPLE_COM;
 
   static const struct dohresp resp[] = {
-  {"\x00\x00", 2, DNS_TYPE_A, DOH_TOO_SMALL_BUFFER, NULL },
+  {"\x00\x00", 2, CURL_DNS_TYPE_A, DOH_TOO_SMALL_BUFFER, NULL },
   {"\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01", 12,
-   DNS_TYPE_A, DOH_DNS_BAD_ID, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_BAD_ID, NULL },
   {"\x00\x00\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01", 12,
-   DNS_TYPE_A, DOH_DNS_BAD_RCODE, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_BAD_RCODE, NULL },
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x03\x66\x6f\x6f", 16,
-   DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x03\x66\x6f\x6f\x00", 17,
-   DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x03\x66\x6f\x6f\x00"
    "\x00\x01\x00\x01", 21,
-   DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x03\x66\x6f\x6f\x00"
    "\x00\x01\x00\x01"
    "\x04", 18,
-   DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
+   CURL_DNS_TYPE_A, DOH_DNS_OUT_OF_RANGE, NULL },
 
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x04\x63\x75\x72"
    "\x6c\x04\x63\x75\x72\x6c\x00\x00\x05\x00\x01\xc0\x0c\x00\x05\x00"
    "\x01\x00\x00\x00\x37\x00\x11\x08\x61\x6e\x79\x77\x68\x65\x72\x65"
    "\x06\x72\x65\x61\x6c\x6c\x79\x00", 56,
-   DNS_TYPE_A, DOH_OK, "anywhere.really "},
+   CURL_DNS_TYPE_A, DOH_OK, "anywhere.really "},
 
-  {DNS_FOO_EXAMPLE_COM, 49, DNS_TYPE_A, DOH_OK, "127.0.0.1 "},
+  {DNS_FOO_EXAMPLE_COM, 49, CURL_DNS_TYPE_A, DOH_OK, "127.0.0.1 "},
 
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x04\x61\x61\x61"
    "\x61\x07\x65\x78\x61\x6d\x70\x6c\x65\x03\x63\x6f\x6d\x00\x00\x1c"
    "\x00\x01\xc0\x0c\x00\x1c\x00\x01\x00\x00\x00\x37\x00\x10\x20\x20"
    "\x20\x20\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x20\x20", 62,
-   DNS_TYPE_AAAA, DOH_OK,
+   CURL_DNS_TYPE_AAAA, DOH_OK,
    "2020:2020:0000:0000:0000:0000:0000:2020 " },
 
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x00\x00\x00\x04\x63\x75\x72"
    "\x6c\x04\x63\x75\x72\x6c\x00\x00\x05\x00\x01\xc0\x0c\x00\x05\x00"
    "\x01\x00\x00\x00\x37\x00"
    "\x07\x03\x61\x6e\x79\xc0\x27\x00", 46,
-   DNS_TYPE_A, DOH_DNS_LABEL_LOOP, NULL},
+   CURL_DNS_TYPE_A, DOH_DNS_LABEL_LOOP, NULL},
 
   /* packet with NSCOUNT == 1 */
   {"\x00\x00\x01\x00\x00\x01\x00\x01\x00\x01\x00\x00\x04\x61\x61\x61"
@@ -129,7 +129,7 @@ static CURLcode test_unit1650(char *arg)
    "\00\x04\x01\x01\x01\x01", /* RDDATA */
 
    62 + 30,
-   DNS_TYPE_AAAA, DOH_OK,
+   CURL_DNS_TYPE_AAAA, DOH_OK,
    "2020:2020:0000:0000:0000:0000:0000:2020 " },
 
   /* packet with ARCOUNT == 1 */
@@ -141,7 +141,7 @@ static CURLcode test_unit1650(char *arg)
    "\00\x04\x01\x01\x01\x01", /* RDDATA */
 
    62 + 30,
-   DNS_TYPE_AAAA, DOH_OK,
+   CURL_DNS_TYPE_AAAA, DOH_OK,
    "2020:2020:0000:0000:0000:0000:0000:2020 " },
 
   };
@@ -194,7 +194,7 @@ static CURLcode test_unit1650(char *arg)
       size_t o;
       struct dohaddr *a;
       a = &d.addr[u];
-      if(resp[i].type == DNS_TYPE_A) {
+      if(resp[i].type == CURL_DNS_TYPE_A) {
         p = &a->ip.v4[0];
         curl_msnprintf(ptr, len, "%u.%u.%u.%u ", p[0], p[1], p[2], p[3]);
         o = strlen(ptr);
@@ -236,7 +236,8 @@ static CURLcode test_unit1650(char *arg)
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49, i, CURL_DNS_TYPE_A,
+                         &d);
     if(!rc) {
       /* none of them should work */
       curl_mfprintf(stderr, "%zu: %d\n", i, rc);
@@ -250,7 +251,7 @@ static CURLcode test_unit1650(char *arg)
     DOHcode rc;
     memset(&d, 0, sizeof(d));
     rc = doh_resp_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
-                         DNS_TYPE_A, &d);
+                         CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
       curl_mfprintf(stderr, "2 %zu: %d\n", i, rc);
@@ -264,7 +265,7 @@ static CURLcode test_unit1650(char *arg)
     struct dohaddr *a;
     memset(&d, 0, sizeof(d));
     rc = doh_resp_decode((const unsigned char *)full49, sizeof(full49)-1,
-                         DNS_TYPE_A, &d);
+                         CURL_DNS_TYPE_A, &d);
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];

@@ -160,8 +160,8 @@ static CURLcode tftp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
 static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done);
 static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done);
-static int tftp_getsock(struct Curl_easy *data, struct connectdata *conn,
-                        curl_socket_t *socks);
+static CURLcode tftp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode tftp_translate_code(tftp_error_t error);
 
 
@@ -178,10 +178,10 @@ const struct Curl_handler Curl_handler_tftp = {
   tftp_connect,                         /* connect_it */
   tftp_multi_statemach,                 /* connecting */
   tftp_doing,                           /* doing */
-  tftp_getsock,                         /* proto_getsock */
-  tftp_getsock,                         /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  tftp_pollset,                         /* proto_pollset */
+  tftp_pollset,                         /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -1074,19 +1074,10 @@ static CURLcode tftp_done(struct Curl_easy *data, CURLcode status,
   return result;
 }
 
-/**********************************************************
- *
- * tftp_getsock
- *
- * The getsock callback
- *
- **********************************************************/
-static int tftp_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks)
+static CURLcode tftp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
 {
-  (void)data;
-  socks[0] = conn->sock[FIRSTSOCKET];
-  return GETSOCK_READSOCK(0);
+  return Curl_pollset_add_in(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 /**********************************************************

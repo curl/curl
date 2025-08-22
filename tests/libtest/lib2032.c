@@ -49,7 +49,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   if(CURLE_OK != code) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
                   "with code %d (%s)\n",
-                  __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+                  __FILE__, __LINE__, code, curl_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
@@ -67,8 +67,9 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
     else if(sock != ntlm_sockets[idx]) {
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
-      curl_mfprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
-                    curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
+      curl_mfprintf(stderr, "Handle %zd started on socket %" FMT_SOCKET_T
+                    " and moved to %" FMT_SOCKET_T "\n",
+                    idx, ntlm_sockets[idx], sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
@@ -76,7 +77,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
+static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 {
   enum HandleState {
     ReadyForNewHandle,
@@ -142,7 +143,7 @@ static CURLcode test_lib2032(char *URL)  /* libntlmconnect */
                   "testuser:testpass");
       easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEFUNCTION, callback);
       easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEDATA,
-                  ntlm_easy + num_handles);
+                  (void *)(ntlm_easy + num_handles));
       easy_setopt(ntlm_easy[num_handles], CURLOPT_HEADER, 1L);
 
       multi_add_handle(multi, ntlm_easy[num_handles]);

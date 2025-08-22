@@ -109,7 +109,7 @@ static void set_ipv6_v6only(curl_socket_t sockfd, int on)
 
 static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
 {
-#if defined(TCP_NODELAY)
+#if defined(TCP_NODELAY) && defined(CURL_TCP_NODELAY_SUPPORTED)
   curl_socklen_t onoff = (curl_socklen_t) 1;
   int level = IPPROTO_TCP;
   char buffer[STRERROR_LEN];
@@ -136,7 +136,7 @@ static void nosigpipe(struct Curl_easy *data,
   (void)data;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
                 (void *)&onoff, sizeof(onoff)) < 0) {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
     char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s",
           Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -164,6 +164,7 @@ static void nosigpipe(struct Curl_easy *data,
 #define KEEPALIVE_FACTOR(x)
 #endif
 
+/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
 #if defined(USE_WINSOCK) && !defined(SIO_KEEPALIVE_VALS)
 #define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
 
@@ -188,9 +189,9 @@ tcpkeepalive(struct Curl_easy *data,
           sockfd, SOCKERRNO);
   }
   else {
-#if defined(SIO_KEEPALIVE_VALS) /* Windows */
+#ifdef SIO_KEEPALIVE_VALS /* Windows */
 /* Windows 10, version 1709 (10.0.16299) and later versions */
-#if defined(CURL_WINSOCK_KEEP_SSO)
+#ifdef CURL_WINSOCK_KEEP_SSO
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
@@ -307,9 +308,9 @@ tcpkeepalive(struct Curl_easy *data,
  * Assign the address `ai` to the Curl_sockaddr_ex `dest` and
  * set the transport used.
  */
-CURLcode Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
-                               const struct Curl_addrinfo *ai,
-                               int transport)
+static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
+                                 const struct Curl_addrinfo *ai,
+                                 int transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -406,7 +407,7 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
     /* if the caller does not want info back, use a local temp copy */
     addr = &dummy;
 
-  result = Curl_sock_assign_addr(addr, ai, transport);
+  result = sock_assign_addr(addr, ai, transport);
   if(result)
     return result;
 
@@ -844,7 +845,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
 #endif
 
-  if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
+  if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
 #ifdef UNDER_CE
   /* Old Windows CE versions do not support SO_ERROR */
@@ -860,7 +861,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
     err = 0;
   }
 #endif
-  if((0 == err) || (SOCKEISCONN == err))
+  if((err == 0) || (SOCKEISCONN == err))
     /* we are connected, awesome! */
     rc = TRUE;
   else
@@ -885,7 +886,7 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
   switch(error) {
   case SOCKEINPROGRESS:
   case SOCKEWOULDBLOCK:
-#if defined(EAGAIN)
+#ifdef EAGAIN
 #if (EAGAIN) != (SOCKEWOULDBLOCK)
     /* On some platforms EAGAIN and EWOULDBLOCK are the
      * same value, and on others they are different, hence
@@ -949,7 +950,7 @@ static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
   ctx->sock = CURL_SOCKET_BAD;
   ctx->transport = transport;
 
-  result = Curl_sock_assign_addr(&ctx->addr, ai, transport);
+  result = sock_assign_addr(&ctx->addr, ai, transport);
   if(result)
     return result;
 
@@ -1237,8 +1238,8 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)data;
   if(is_tcp_fastopen) {
-#if defined(CONNECT_DATA_IDEMPOTENT) /* Darwin */
-#  if defined(HAVE_BUILTIN_AVAILABLE)
+#ifdef CONNECT_DATA_IDEMPOTENT /* Darwin */
+#  ifdef HAVE_BUILTIN_AVAILABLE
     /* while connectx function is available since macOS 10.11 / iOS 9,
        it did not have the interface declared correctly until
        Xcode 9 / macOS SDK 10.13 */
@@ -1375,11 +1376,12 @@ out:
   return result;
 }
 
-static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+static CURLcode cf_socket_adjust_pollset(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(ctx->sock != CURL_SOCKET_BAD) {
     /* A listening socket filter needs to be connected before the accept
@@ -1387,25 +1389,27 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
      * FTP no longer does the socket checks and accept calls and delegates
      * all that to the filter. */
     if(ctx->listening) {
-      Curl_pollset_set_in_only(data, ps, ctx->sock);
+      result = Curl_pollset_set_in_only(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
     else if(!cf->connected) {
-      Curl_pollset_set_out_only(data, ps, ctx->sock);
+      result = Curl_pollset_set_out_only(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
     else if(!ctx->active) {
-      Curl_pollset_add_in(data, ps, ctx->sock);
+      result = Curl_pollset_add_in(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, !active, POLLIN fd=%"
                   FMT_SOCKET_T, ctx->sock);
     }
   }
+  return result;
 }
 
 #ifdef USE_WINSOCK
 
+/* Offered by mingw-w64 v13+. MS SDK 7.0A+. */
 #ifndef SIO_IDEAL_SEND_BACKLOG_QUERY
 #define SIO_IDEAL_SEND_BACKLOG_QUERY 0x4004747B
 #endif
@@ -1505,7 +1509,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else
     *pnwritten = (size_t)nwritten;
 
-#if defined(USE_WINSOCK)
+#ifdef USE_WINSOCK
   if(!result)
     win_update_sndbuf_size(ctx);
 #endif
@@ -1600,15 +1604,10 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* use this socket from now on */
   cf->conn->sock[cf->sockindex] = ctx->sock;
   set_local_ip(cf, data);
-  if(cf->sockindex == FIRSTSOCKET) {
-    cf->conn->primary = ctx->ip;
-  #ifdef USE_IPV6
+#ifdef USE_IPV6
+  if(cf->sockindex == FIRSTSOCKET)
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6);
-  #endif
-  }
-  else {
-    cf->conn->secondary = ctx->ip;
-  }
+#endif
   ctx->active = TRUE;
 }
 
@@ -2111,7 +2110,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(0 == getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
+  if(!getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
     size = sizeof(add);
 #ifdef HAVE_ACCEPT4
     s_accepted = accept4(ctx->sock, (struct sockaddr *) &add, &size,

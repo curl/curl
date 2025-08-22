@@ -42,7 +42,7 @@ static size_t header(char *ptr, size_t size, size_t nmemb, void *stream)
   return nmemb * size;
 }
 
-static CURLcode test_lib1556(char *URL)
+static CURLcode test_lib1556(const char *URL)
 {
   CURLcode code;
   CURL *curl = NULL;
@@ -67,7 +67,7 @@ static CURLcode test_lib1556(char *URL)
     goto test_cleanup;
   }
 
-  curl_mprintf("Max = %ld\n", (long)info.largest);
+  curl_mprintf("Max = %zu\n", info.largest);
 
 test_cleanup:
 

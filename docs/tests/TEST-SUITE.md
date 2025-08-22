@@ -53,7 +53,6 @@ SPDX-License-Identifier: curl
   - `openssl` (the command line tool, for generating test server certificates)
   - `openssh` or `SunSSH` (for SCP and SFTP tests)
   - `nghttpx` (for HTTP/2 and HTTP/3 tests)
-  - An available `en_US.UTF-8` locale
 
 ### Installation of impacket
 

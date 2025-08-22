@@ -27,16 +27,19 @@
 #include "tool_formparse.h"
 #include "tool_paramhlp.h"
 #include "tool_main.h"
+#include "tool_msgs.h"
 #include "memdebug.h" /* keep this as LAST include */
 
-struct OperationConfig *config_alloc(struct GlobalConfig *global)
+static struct GlobalConfig globalconf;
+struct GlobalConfig *global;
+
+struct OperationConfig *config_alloc(void)
 {
   struct OperationConfig *config =
     calloc(1, sizeof(struct OperationConfig));
   if(!config)
     return NULL;
 
-  config->global = global;
   config->use_httpget = FALSE;
   config->create_dirs = FALSE;
   config->maxredirs = DEFAULT_MAXREDIRS;
@@ -49,6 +52,7 @@ struct OperationConfig *config_alloc(struct GlobalConfig *global)
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
   config->upload_flags = CURLULFLAG_SEEN;
+  config->retry_delay_ms = RETRY_SLEEP_DEFAULT;
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
   return config;
 }
@@ -207,4 +211,82 @@ void config_free(struct OperationConfig *config)
 
     last = prev;
   }
+}
+
+/*
+ * This is the main global constructor for the app. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+CURLcode globalconf_init(void)
+{
+  CURLcode result = CURLE_OK;
+  global = &globalconf;
+
+#ifdef __DJGPP__
+  /* stop stat() wasting time */
+  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
+#endif
+
+  /* Initialise the global config */
+  global->showerror = FALSE;          /* show errors when silent */
+  global->styled_output = TRUE;       /* enable detection */
+  global->parallel_max = PARALLEL_DEFAULT;
+
+  /* Allocate the initial operate config */
+  global->first = global->last = config_alloc();
+  if(global->first) {
+    /* Perform the libcurl initialization */
+    result = curl_global_init(CURL_GLOBAL_DEFAULT);
+    if(!result) {
+      /* Get information about libcurl */
+      result = get_libcurl_info();
+
+      if(result) {
+        errorf("error retrieving curl library information");
+        free(global->first);
+      }
+    }
+    else {
+      errorf("error initializing curl library");
+      free(global->first);
+    }
+  }
+  else {
+    errorf("error initializing curl");
+    result = CURLE_FAILED_INIT;
+  }
+
+  return result;
+}
+
+static void free_globalconfig(void)
+{
+  tool_safefree(global->trace_dump);
+
+  if(global->trace_fopened && global->trace_stream)
+    fclose(global->trace_stream);
+  global->trace_stream = NULL;
+
+  tool_safefree(global->libcurl);
+#if defined(_WIN32) && !defined(UNDER_CE)
+  free(global->term.buf);
+#endif
+}
+
+/*
+ * This is the main global destructor for the app. Call this after _all_
+ * libcurl usage is done.
+ */
+void globalconf_free(void)
+{
+  /* Cleanup the easy handle */
+  /* Main cleanup */
+  curl_global_cleanup();
+  free_globalconfig();
+
+  /* Free the OperationConfig structures */
+  config_free(global->last);
+  global->first = NULL;
+  global->last = NULL;
 }

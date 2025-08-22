@@ -74,14 +74,13 @@ typedef enum {
 static int parsekeyword(const unsigned char **pattern, unsigned char *charset)
 {
   parsekey_state state = CURLFNM_PKW_INIT;
-#define KEYLEN 10
-  char keyword[KEYLEN] = { 0 };
-  int i;
+  char keyword[10] = { 0 };
+  size_t i;
   const unsigned char *p = *pattern;
   bool found = FALSE;
   for(i = 0; !found; i++) {
     char c = (char)*p++;
-    if(i >= KEYLEN)
+    if(i >= sizeof(keyword))
       return SETCHARSET_FAIL;
     switch(state) {
     case CURLFNM_PKW_INIT:

@@ -55,14 +55,18 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_TIMEVALUE, 1577833200L);
 
     /* If-Modified-Since the above time stamp */
-    curl_easy_setopt(curl, CURLOPT_TIMECONDITION,
-                     (long)CURL_TIMECOND_IFMODSINCE);
+    curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
 
     /* Perform the request */
     curl_easy_perform(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+**CURL_TIMECOND_*** enums became `long` types in 8.13.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

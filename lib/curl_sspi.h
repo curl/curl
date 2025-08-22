@@ -65,6 +65,7 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SP_NAME_NEGOTIATE           "Negotiate"
 #define SP_NAME_KERBEROS            "Kerberos"
 
+/* Offered by mingw-w64 v9+. MS SDK 7.0A+. */
 #ifndef ISC_REQ_USE_HTTP_STYLE
 #define ISC_REQ_USE_HTTP_STYLE                0x01000000
 #endif
@@ -288,14 +289,17 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_E_KDC_CERT_REVOKED                ((HRESULT)0x8009035BL)
 #endif
 #endif /* __MINGW32CE__ */
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_INVALID_PARAMETER
-# define SEC_E_INVALID_PARAMETER              ((HRESULT)0x8009035DL)
+#define SEC_E_INVALID_PARAMETER               ((HRESULT)0x8009035DL)
 #endif
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_DELEGATION_POLICY
-# define SEC_E_DELEGATION_POLICY              ((HRESULT)0x8009035EL)
+#define SEC_E_DELEGATION_POLICY               ((HRESULT)0x8009035EL)
 #endif
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_E_POLICY_NLTM_ONLY
-# define SEC_E_POLICY_NLTM_ONLY               ((HRESULT)0x8009035FL)
+#define SEC_E_POLICY_NLTM_ONLY                ((HRESULT)0x8009035FL)
 #endif
 
 #ifdef __MINGW32CE__
@@ -324,37 +328,17 @@ extern PSecurityFunctionTable Curl_pSecFn;
 #define SEC_I_NO_LSA_CONTEXT                  ((HRESULT)0x00090323L)
 #endif
 #endif /* __MINGW32CE__ */
+
+/* Offered by mingw-w64 v8+. MS SDK 6.0A+. */
 #ifndef SEC_I_SIGNATURE_NEEDED
 #define SEC_I_SIGNATURE_NEEDED                ((HRESULT)0x0009035CL)
 #endif
 
-#ifndef CRYPT_E_REVOKED
-#define CRYPT_E_REVOKED                       ((HRESULT)0x80092010L)
-#endif
-
-#ifndef CRYPT_E_NO_REVOCATION_DLL
-#define CRYPT_E_NO_REVOCATION_DLL             ((HRESULT)0x80092011L)
-#endif
-
-#ifndef CRYPT_E_NO_REVOCATION_CHECK
-#define CRYPT_E_NO_REVOCATION_CHECK           ((HRESULT)0x80092012L)
-#endif
-
-#ifndef CRYPT_E_REVOCATION_OFFLINE
-#define CRYPT_E_REVOCATION_OFFLINE            ((HRESULT)0x80092013L)
-#endif
-
+#ifdef __MINGW32CE__
 #ifndef CRYPT_E_NOT_IN_REVOCATION_DATABASE
 #define CRYPT_E_NOT_IN_REVOCATION_DATABASE    ((HRESULT)0x80092014L)
 #endif
-
-#ifdef UNICODE
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_UNICODE
-#else
-#  define SECFLAG_WINNT_AUTH_IDENTITY \
-     (unsigned long)SEC_WINNT_AUTH_IDENTITY_ANSI
-#endif
+#endif /* __MINGW32CE__ */
 
 /*
  * Definitions required from ntsecapi.h are directly provided below this point

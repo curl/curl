@@ -25,14 +25,22 @@
  ***************************************************************************/
 #include "first.h"
 
+void debug_dump(const char *timebuf, const char *text,
+                FILE *stream, const unsigned char *ptr,
+                size_t size, bool nohex);
+
 struct libtest_trace_cfg {
-  int tracetime;  /* 0 represents FALSE, anything else TRUE */
-  int nohex;      /* 0 represents FALSE, anything else TRUE */
+  bool tracetime;
+  bool nohex;
 };
 
-extern struct libtest_trace_cfg libtest_debug_config;
+extern struct libtest_trace_cfg debug_config;
 
 int libtest_debug_cb(CURL *handle, curl_infotype type,
                      char *data, size_t size, void *userp);
+
+/* callback for CURLOPT_DEBUGFUNCTION (client tests) */
+int cli_debug_cb(CURL *handle, curl_infotype type,
+                 char *data, size_t size, void *userp);
 
 #endif /* HEADER_LIBTEST_TESTTRACE_H */

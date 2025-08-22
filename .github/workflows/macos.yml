@@ -111,7 +111,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -137,7 +137,7 @@ jobs:
           cmake --build .
           cmake --install . --verbose
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -199,7 +199,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples --verbose
+            cmake --build bld ${MATRIX_OPTIONS} --parallel 4 --target curl-examples-build --verbose
           else
             make -C bld examples V=1
           fi
@@ -214,6 +214,7 @@ jobs:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_COMPILER: '${{ matrix.compiler }}'
       MATRIX_INSTALL: '${{ matrix.build.install }}'
+      MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
       MATRIX_MACOS_VERSION_MIN: '${{ matrix.build.macos-version-min }}'
     strategy:
       fail-fast: false
@@ -237,7 +238,7 @@ jobs:
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares
+            configure: --enable-debug --with-libssh --with-openssl=/opt/homebrew/opt/openssl --enable-ares --with-fish-functions-dir --with-zsh-functions-dir
           - name: 'OpenSSL libssh'
             compiler: llvm@18
             install: libssh libnghttp3
@@ -264,8 +265,9 @@ jobs:
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
           - name: 'OpenSSL'
             compiler: clang
+            install: libnghttp3 libngtcp2
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
@@ -277,43 +279,53 @@ jobs:
             macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN'
-            install: gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
+            install: libnghttp3 libngtcp2 gsasl rtmpdump
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
+            compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
+            install_steps: clang-tidy
             generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
-            clang-tidy: true
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
             install: quictls libssh
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/quictls -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-          - name: 'LibreSSL !ldap heimdal c-ares +examples'
-            install: libressl heimdal
-            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DCURL_DISABLE_LDAP=ON
+          - name: 'LibreSSL openldap heimdal c-ares +examples'
+            install: libressl heimdal openldap
+            generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             install_steps: pytest
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-          - name: 'mbedTLS openldap brotli zstd'
-            install: brotli mbedtls zstd openldap
-            generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
+          - name: 'mbedTLS !ldap brotli zstd MultiSSL AppleIDN'
+            compiler: llvm@18
+            install: brotli mbedtls zstd
+            install_steps: codeset-test
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls -DCURL_USE_OPENSSL=ON -DUSE_APPLE_IDN=ON
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'aws-lc'
+            compiler: gcc-12
+            install: aws-lc
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
+          - name: 'Rustls'
+            compiler: clang
+            install: rustls-ffi
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
           - name: 'OpenSSL torture !FTP'
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            compiler: clang
+            install: libnghttp3
+            install_steps: torture
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
             tflags: -t --shallow=25 !FTP
-            torture: true
           - name: 'OpenSSL torture FTP'
-            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl
+            compiler: clang
+            install: libnghttp3
+            install_steps: torture
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DUSE_OPENSSL_QUIC=ON
             tflags: -t --shallow=20 FTP
-            torture: true
         exclude:
-          - { compiler: llvm@18, build: { macos-version-min: '10.15' } }
-          - { compiler: llvm@18, build: { torture: true } }
-          - { compiler: gcc-12, build: { torture: true } }
-          - { compiler: llvm@18, build: { clang-tidy: true } }
-          - { compiler: gcc-12, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
           - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
@@ -330,7 +342,7 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
-            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'clang-tidy') && 'nghttp2 stunnel' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
 
         run: |
@@ -339,7 +351,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
         run: |
           if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
@@ -357,7 +369,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -370,7 +382,6 @@ jobs:
           MATRIX_CHKPREFILL: '${{ matrix.build.chkprefill }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
-          MATRIX_INSTALL_STEPS: '${{ matrix.build.install_steps }}'
         run: |
           if [[ "${MATRIX_COMPILER}" = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
@@ -412,7 +423,7 @@ jobs:
             fi
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=/opt/homebrew/opt/libpsl \
               ${MATRIX_CONFIGURE} ${options}
@@ -441,9 +452,13 @@ jobs:
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
-      - name: 'cmake install'
-        if: ${{ matrix.build.generate }}
-        run: cmake --install bld --strip
+      - name: 'curl install'
+        run: |
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --install bld --strip
+          else
+            make -C bld V=1 install
+          fi
 
       - name: 'build tests'
         run: |
@@ -454,21 +469,27 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !matrix.build.clang-tidy }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
         run: |
           python3 -m venv ~/venv
           source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ !matrix.build.clang-tidy }}
-        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
+        timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
         env:
-          TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+          TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
           source ~/venv/bin/activate
+          if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
+            locale || true
+            export LC_ALL=C
+            export LC_CTYPE=C
+            export LC_NUMERIC=fr_FR.UTF-8
+          fi
           rm -f ~/.curlrc
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target "${TEST_TARGET}"
@@ -477,13 +498,13 @@ jobs:
           fi
 
       - name: 'install pytest prereqs'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
         run: |
           source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
-        if: ${{ !matrix.build.clang-tidy && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
         env:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
@@ -499,7 +520,7 @@ jobs:
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-examples
+            cmake --build bld --verbose --target curl-examples-build
           else
             make -C bld examples V=1
           fi
@@ -583,7 +604,7 @@ jobs:
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 

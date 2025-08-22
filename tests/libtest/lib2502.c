@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-static CURLcode test_lib2502(char *URL)
+static CURLcode test_lib2502(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {0};
@@ -36,8 +36,8 @@ static CURLcode test_lib2502(char *URL)
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  char *port = libtest_arg3;
-  char *address = libtest_arg2;
+  const char *port = libtest_arg3;
+  const char *address = libtest_arg2;
 
   (void)URL;
 
@@ -64,20 +64,20 @@ static CURLcode test_lib2502(char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "https://localhost:%s/path/2502%04i",
-                   port, (int)i + 1);
+                   "https://localhost:%s/path/2502%04zu",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */
     easy_setopt(curl[i], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3ONLY);
-    easy_setopt(curl[i], CURLOPT_CONNECTTIMEOUT_MS, (long)5000);
+    easy_setopt(curl[i], CURLOPT_CONNECTTIMEOUT_MS, 5000L);
     easy_setopt(curl[i], CURLOPT_CAINFO, libtest_arg4);
     /* wait for first connection established to see if we can share it */
     easy_setopt(curl[i], CURLOPT_PIPEWAIT, 1L);
     /* go verbose */
-    libtest_debug_config.nohex = 1;
-    libtest_debug_config.tracetime = 0;
-    test_setopt(curl[i], CURLOPT_DEBUGDATA, &libtest_debug_config);
+    debug_config.nohex = TRUE;
+    debug_config.tracetime = FALSE;
+    test_setopt(curl[i], CURLOPT_DEBUGDATA, &debug_config);
     easy_setopt(curl[i], CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
     /* include headers */

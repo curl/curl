@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-static CURLcode test_lib1599(char *URL)
+static CURLcode test_lib1599(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -33,7 +33,7 @@ static CURLcode test_lib1599(char *URL)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_NETRC, (long)CURL_NETRC_REQUIRED);
+    curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
     curl_easy_setopt(curl, CURLOPT_NETRC_FILE, libtest_arg2);
 
     res = curl_easy_perform(curl);

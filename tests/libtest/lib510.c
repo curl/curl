@@ -60,7 +60,7 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode test_lib510(char *URL)
+static CURLcode test_lib510(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -110,7 +110,7 @@ static CURLcode test_lib510(char *URL)
   test_setopt(curl, CURLOPT_HTTPHEADER, slist);
 
   if(testnum == 565) {
-    test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+    test_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
     test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
   }
 

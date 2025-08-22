@@ -66,7 +66,7 @@ int main(void)
 #ifdef USE_ENGINE
   pKeyName  = "rsa_test";
   pKeyType  = "ENG";
-  pEngine   = "chil";            /* for nChiper HSM... */
+  pEngine   = "chil";            /* for nCipher HSM... */
 #else
   pKeyName  = "testkey.pem";
   pKeyType  = "PEM";

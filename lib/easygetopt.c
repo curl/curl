@@ -82,7 +82,7 @@ const struct curl_easyoption *curl_easy_option_by_name(const char *name)
   return NULL;
 }
 
-const struct curl_easyoption *curl_easy_option_by_id (CURLoption id)
+const struct curl_easyoption *curl_easy_option_by_id(CURLoption id)
 {
   (void)id;
   return NULL;

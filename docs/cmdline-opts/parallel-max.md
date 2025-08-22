@@ -10,6 +10,7 @@ Multi: single
 Scope: global
 See-also:
   - parallel
+  - parallel-max-host
 Example:
   - --parallel-max 100 -Z $URL ftp://example.com/
 ---
@@ -19,4 +20,4 @@ Example:
 When asked to do parallel transfers, using --parallel, this option controls
 the maximum amount of transfers to do simultaneously.
 
-The default is 50. 300 is the largest supported value.
+The default is 50. 65535 is the largest supported value.

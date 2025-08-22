@@ -41,7 +41,7 @@ static void t3212_stop(struct uint_tbl *tbl)
   Curl_uint_tbl_destroy(tbl);
 }
 
-static CURLcode test_unit3212(char *arg)
+static CURLcode test_unit3212(const char *arg)
 {
   struct uint_tbl tbl;
   int dummy;

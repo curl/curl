@@ -71,14 +71,14 @@ void curlx_dyn_free(struct dynbuf *s)
 static CURLcode dyn_nappend(struct dynbuf *s,
                             const unsigned char *mem, size_t len)
 {
-  size_t indx = s->leng;
+  size_t idx = s->leng;
   size_t a = s->allc;
-  size_t fit = len + indx + 1; /* new string + old string + zero byte */
+  size_t fit = len + idx + 1; /* new string + old string + zero byte */
 
   /* try to detect if there is rubbish in the struct */
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(s->toobig);
-  DEBUGASSERT(indx < s->toobig);
+  DEBUGASSERT(idx < s->toobig);
   DEBUGASSERT(!s->leng || s->bufr);
   DEBUGASSERT(a <= s->toobig);
   DEBUGASSERT(!len || mem);
@@ -88,7 +88,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
     return CURLE_TOO_LARGE;
   }
   else if(!a) {
-    DEBUGASSERT(!indx);
+    DEBUGASSERT(!idx);
     /* first invoke */
     if(MIN_FIRST_ALLOC > s->toobig)
       a = s->toobig;
@@ -118,8 +118,8 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   }
 
   if(len)
-    memcpy(&s->bufr[indx], mem, len);
-  s->leng = indx + len;
+    memcpy(&s->bufr[idx], mem, len);
+  s->leng = idx + len;
   s->bufr[s->leng] = 0;
   return CURLE_OK;
 }
@@ -231,6 +231,7 @@ CURLcode curlx_dyn_addf(struct dynbuf *s, const char *fmt, ...)
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
+  DEBUGASSERT(strcmp(fmt, "%s")); /* use curlx_dyn_add instead */
   va_start(ap, fmt);
   result = curlx_dyn_vaddf(s, fmt, ap);
   va_end(ap);

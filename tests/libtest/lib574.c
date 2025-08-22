@@ -34,7 +34,7 @@ static int new_fnmatch(void *ptr,
   return CURL_FNMATCHFUNC_MATCH;
 }
 
-static CURLcode test_lib574(char *URL)
+static CURLcode test_lib574(const char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -54,7 +54,7 @@ static CURLcode test_lib574(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
   test_setopt(curl, CURLOPT_FNMATCH_FUNCTION, new_fnmatch);
-  test_setopt(curl, CURLOPT_TIMEOUT_MS, (long) TEST_HANG_TIMEOUT);
+  test_setopt(curl, CURLOPT_TIMEOUT_MS, (long)TEST_HANG_TIMEOUT);
 
   res = curl_easy_perform(curl);
   if(res) {

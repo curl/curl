@@ -32,7 +32,7 @@
  * Example based on source code provided by Erick Nuwendam. Thanks!
  */
 
-static CURLcode test_lib505(char *URL)
+static CURLcode test_lib505(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;

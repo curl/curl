@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1568(char *URL)
+static CURLcode test_lib1568(const char *URL)
 {
   CURLcode ret;
   CURL *hnd;
@@ -37,7 +37,7 @@ static CURLcode test_lib1568(char *URL)
   curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "testuser:testpass");
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "lib1568");
-  curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
+  curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
 

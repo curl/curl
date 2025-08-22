@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1511(char *URL)
+static CURLcode test_lib1511(const char *URL)
 {
   long unmet;
   CURL *curl = NULL;
@@ -37,7 +37,7 @@ static CURLcode test_lib1511(char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_HEADER, 1L);
-  easy_setopt(curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
+  easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
 
   /* TIMEVALUE in the future */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);

@@ -79,13 +79,6 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #define CURL_DEFAULT_HTTPS_PROXY_PORT 443 /* default https proxy port unless
                                              specified */
 
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define Curl_verboseconnect(x,y,z)  Curl_nop_stmt
-#else
-void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
-                         int sockindex);
-#endif
-
 /**
  * Return TRUE iff the given connection is considered dead.
  * @param nowp      NULL or pointer to time being checked against.
@@ -118,7 +111,7 @@ CURLcode Curl_1st_fatal(CURLcode r1, CURLcode r2);
 void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else
 #define Curl_data_priority_clear_state(x)
-#endif /* !(defined(USE_HTTP2) || defined(USE_HTTP3)) */
+#endif /* USE_HTTP2 || USE_HTTP3 */
 
 #ifdef USE_NGHTTP2
 CURLcode Curl_data_priority_add_child(struct Curl_easy *parent,

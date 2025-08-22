@@ -33,7 +33,6 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
 
 extern struct Curl_cftype Curl_cft_h2_proxy;
 
-
-#endif /* defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY) */
+#endif /* USE_NGHTTP2 && !CURL_DISABLE_PROXY */
 
 #endif /* HEADER_CURL_H2_PROXY_H */

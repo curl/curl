@@ -52,13 +52,18 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "sftp://example.com/file");
-    curl_easy_setopt(curl, CURLOPT_SSH_AUTH_TYPES, (long)
+    curl_easy_setopt(curl, CURLOPT_SSH_AUTH_TYPES,
                      CURLSSH_AUTH_PUBLICKEY | CURLSSH_AUTH_KEYBOARD);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLSSH_AUTH_*** macros became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

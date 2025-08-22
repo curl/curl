@@ -45,7 +45,7 @@ class TestProxyAuth:
 
     def get_tunnel_proto_used(self, r: ExecResult):
         for line in r.trace_lines:
-            m = re.match(r'.* CONNECT tunnel: (\S+) negotiated$', line)
+            m = re.match(r'.* CONNECT: \'(\S+)\' negotiated$', line)
             if m:
                 return m.group(1)
         assert False, f'tunnel protocol not found in:\n{"".join(r.trace_lines)}'
@@ -119,6 +119,7 @@ class TestProxyAuth:
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
     def test_13_07_tunnels_no_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):
@@ -132,12 +133,12 @@ class TestProxyAuth:
                                extra_args=xargs)
         # expect "COULD_NOT_CONNECT"
         r.check_response(exitcode=56, http_status=None)
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
 
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx available")
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
     def test_13_08_tunnels_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):
@@ -152,8 +153,7 @@ class TestProxyAuth:
                                extra_args=xargs)
         r.check_response(count=1, http_status=200,
                          protocol='HTTP/2' if proto == 'h2' else 'HTTP/1.1')
-        assert self.get_tunnel_proto_used(r) == 'HTTP/2' \
-            if tunnel == 'h2' else 'HTTP/1.1'
+        assert self.get_tunnel_proto_used(r) == tunnel
 
     @pytest.mark.skipif(condition=not Env.curl_has_feature('SPNEGO'),
                         reason='curl lacks SPNEGO support')

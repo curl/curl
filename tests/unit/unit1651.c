@@ -25,7 +25,7 @@
 
 #include "vtls/x509asn1.h"
 
-static CURLcode test_unit1651(char *arg)
+static CURLcode test_unit1651(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -363,7 +363,7 @@ static CURLcode test_unit1651(char *arg)
       for(i = 0; i < 45; i++) {
         unsigned char backup = cert[i];
         cert[i] = (unsigned char) (byte & 0xff);
-        (void) Curl_extract_certinfo(data, 0, beg, end);
+        (void)Curl_extract_certinfo(data, 0, beg, end);
         cert[i] = backup;
       }
     }

@@ -26,7 +26,6 @@
 #include "testutil.h"
 #include "memdebug.h"
 
-#define JAR libtest_arg2
 #define THREADS 2
 
 /* struct containing data of a thread */
@@ -67,7 +66,7 @@ static void t506_test_lock(CURL *handle, curl_lock_data data,
       locknum = 2;
       break;
     default:
-      curl_mfprintf(stderr, "lock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "lock: no such data: %d\n", data);
       return;
   }
 
@@ -103,7 +102,7 @@ static void t506_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
       locknum = 2;
       break;
     default:
-      curl_mfprintf(stderr, "unlock: no such data: %d\n", (int)data);
+      curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
       return;
   }
 
@@ -152,7 +151,7 @@ static void *t506_test_fire(void *ptr)
   if(code) {
     int i = 0;
     curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
-                  tdata->url, i, (int)code);
+                  tdata->url, i, code);
   }
 
   curl_mprintf("CLEANUP\n");
@@ -163,7 +162,7 @@ static void *t506_test_fire(void *ptr)
 }
 
 /* test function */
-static CURLcode test_lib506(char *URL)
+static CURLcode test_lib506(const char *URL)
 {
   CURLcode res;
   CURLSHcode scode = CURLSHE_OK;
@@ -177,6 +176,8 @@ static CURLcode test_lib506(char *URL)
   struct curl_slist *next_cookie = NULL;
   int i;
   struct t506_userdata user;
+
+  const char *jar = libtest_arg2;
 
   user.text = "Pigs in space";
   user.counter = 0;
@@ -284,7 +285,7 @@ static CURLcode test_lib506(char *URL)
   curl_mprintf("CURLOPT_SHARE\n");
   test_setopt(curl, CURLOPT_SHARE,      share);
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEJAR,  JAR);
+  test_setopt(curl, CURLOPT_COOKIEJAR,  jar);
   curl_mprintf("CURLOPT_COOKIELIST FLUSH\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "FLUSH");
 
@@ -313,7 +314,7 @@ static CURLcode test_lib506(char *URL)
   curl_mprintf("CURLOPT_COOKIELIST ALL\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "ALL");
   curl_mprintf("CURLOPT_COOKIEJAR\n");
-  test_setopt(curl, CURLOPT_COOKIEFILE, JAR);
+  test_setopt(curl, CURLOPT_COOKIEFILE, jar);
   curl_mprintf("CURLOPT_COOKIELIST RELOAD\n");
   test_setopt(curl, CURLOPT_COOKIELIST, "RELOAD");
 
@@ -327,7 +328,7 @@ static CURLcode test_lib506(char *URL)
   }
   curl_mprintf("loaded cookies:\n");
   if(!cookies) {
-    curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", JAR);
+    curl_mfprintf(stderr, "  reloading cookies from '%s' failed\n", jar);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -363,8 +364,7 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
-                  (int)scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

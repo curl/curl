@@ -72,8 +72,6 @@ class TestCaddy:
     def test_08_01_download_1(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
@@ -84,8 +82,6 @@ class TestCaddy:
     def test_08_02_download_1mb_sequential(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         count = 50
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
@@ -97,8 +93,6 @@ class TestCaddy:
     def test_08_03_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
@@ -119,8 +113,6 @@ class TestCaddy:
     def test_08_04a_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         count = 40
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
@@ -134,8 +126,6 @@ class TestCaddy:
     def test_08_04b_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
@@ -149,8 +139,6 @@ class TestCaddy:
     def test_08_05_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
         if proto == 'h3' and not env.have_h3_curl():
             pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 itself crashes")
         if proto == 'http/1.1' and env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedtls 3.6.0 fails on 50 connections with: "
                         "ssl_handshake returned: (-0x7F00) SSL - Memory allocation failed")
@@ -172,8 +160,6 @@ class TestCaddy:
     def test_08_06_post_parallel(self, env: Env, httpd, caddy, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 20
         data = '0123456789'
@@ -191,8 +177,6 @@ class TestCaddy:
     def test_08_07_put_large(self, env: Env, httpd, caddy, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
-            pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1<
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-10m')
@@ -215,7 +199,7 @@ class TestCaddy:
         count = 2
         docname = 'data10k.data'
         url = f'https://{env.domain1}:{caddy.port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

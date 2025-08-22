@@ -178,7 +178,7 @@ wssl_tls13_secret_callback(SSL *ssl, int id, const unsigned char *secret,
   Curl_tls_keylog_write(label, client_random, secret, secretSz);
   return 0;
 }
-#endif /* defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13) */
+#endif /* HAVE_SECRET_CALLBACK && WOLFSSL_TLS13 */
 
 static void wssl_log_tls12_secret(WOLFSSL *ssl)
 {
@@ -243,12 +243,12 @@ static const struct group_name_map gnm[] = {
   { WOLFSSL_ML_KEM_512, "ML_KEM_512" },
   { WOLFSSL_ML_KEM_768, "ML_KEM_768" },
   { WOLFSSL_ML_KEM_1024, "ML_KEM_1024" },
-  { WOLFSSL_P256_ML_KEM_512, "P256_ML_KEM_512" },
-  { WOLFSSL_P384_ML_KEM_768, "P384_ML_KEM_768" },
-  { WOLFSSL_P521_ML_KEM_1024, "P521_ML_KEM_1024" },
-  { WOLFSSL_P256_ML_KEM_768, "P256_ML_KEM_768" },
-  { WOLFSSL_P384_ML_KEM_1024, "P384_ML_KEM_1024" },
-  { WOLFSSL_X25519_ML_KEM_768, "X25519_ML_KEM_768" },
+  { WOLFSSL_SECP256R1MLKEM512, "SecP256r1MLKEM512" },
+  { WOLFSSL_SECP384R1MLKEM768, "SecP384r1MLKEM768" },
+  { WOLFSSL_SECP521R1MLKEM1024, "SecP521r1MLKEM1024" },
+  { WOLFSSL_SECP256R1MLKEM768, "SecP256r1MLKEM768" },
+  { WOLFSSL_SECP384R1MLKEM1024, "SecP384r1MLKEM1024" },
+  { WOLFSSL_X25519MLKEM768, "X25519MLKEM768" },
   { 0, NULL }
 };
 #endif
@@ -931,7 +931,7 @@ wssl_legacy_CTX_set_min_proto_version(WOLFSSL_CTX* ctx, int version)
 static int
 wssl_legacy_CTX_set_max_proto_version(WOLFSSL_CTX* ctx, int version)
 {
-  (void) ctx, (void) version;
+  (void)ctx, (void)version;
   return WOLFSSL_NOT_IMPLEMENTED;
 }
 #define wolfSSL_CTX_set_min_proto_version wssl_legacy_CTX_set_min_proto_version
@@ -1275,7 +1275,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #ifdef NO_FILESYSTEM
   else if(conn_config->verifypeer) {
     failf(data, "SSL: Certificates cannot be loaded because wolfSSL was built"
-          " with \"no filesystem\". Either disable peer verification"
+          " with \"no file system\". Either disable peer verification"
           " (insecure) or if you are building an application with libcurl you"
           " can load certificates via CURLOPT_SSL_CTX_FUNCTION.");
     result = CURLE_SSL_CONNECT_ERROR;
@@ -1542,6 +1542,7 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  (void)cf;
 #endif
 
   if(pinnedpubkey) {
@@ -1758,7 +1759,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
       }
     }
 #ifdef USE_ECH_WOLFSSL
-    else if(-1 == detail) {
+    else if(detail == -1) {
       /* try access a retry_config ECHConfigList for tracing */
       byte echConfigs[1000];
       word32 echConfigsLen = 1000;
@@ -1966,7 +1967,7 @@ static void wssl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
 
-  (void) data;
+  (void)data;
 
   DEBUGASSERT(wssl);
 
@@ -2239,12 +2240,12 @@ static CURLcode wssl_sha256sum(const unsigned char *tmp, /* input */
 }
 
 static void *wssl_get_internals(struct ssl_connect_data *connssl,
-                                CURLINFO info UNUSED_PARAM)
+                                CURLINFO info)
 {
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
-  (void)info;
   DEBUGASSERT(wssl);
-  return wssl->ssl;
+  return info == CURLINFO_TLS_SESSION ?
+    (void *)wssl->ssl_ctx : (void *)wssl->ssl;
 }
 
 const struct Curl_ssl Curl_ssl_wolfssl = {

@@ -63,12 +63,17 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/file.txt");
     curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_CONTROL);
     /* go back to clear-text FTP after authenticating */
-    curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, (long)CURLFTPSSL_CCC_ACTIVE);
+    curl_easy_setopt(curl, CURLOPT_FTP_SSL_CCC, CURLFTPSSL_CCC_ACTIVE);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }
 ~~~
+
+# HISTORY
+
+**CURLFTPSSL_*** enums became `long` types in 8.16.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

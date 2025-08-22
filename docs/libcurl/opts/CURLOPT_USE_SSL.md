@@ -71,7 +71,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/dir/file.ext");
 
     /* require use of SSL for this, or fail */
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, (long)CURLUSESSL_ALL);
+    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_ALL);
 
     /* Perform the request */
     curl_easy_perform(curl);
@@ -83,6 +83,9 @@ int main(void)
 
 This option was known as CURLOPT_FTP_SSL up to 7.16.4. Supported by LDAP since
 7.81.0. Fully supported by the OpenLDAP backend only.
+
+**CURLUSESSL_*** enums became `long` types in 8.13.0, prior to this version
+a `long` cast was necessary when passed to curl_easy_setopt(3).
 
 # %AVAILABILITY%
 

@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib652(char *URL)
+static CURLcode test_lib652(const char *URL)
 {
   static char testbuf[17000]; /* more than 16K */
 

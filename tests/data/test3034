@@ -1,0 +1,40 @@
+<testcase>
+<info>
+<keywords>
+CURLOPT_READFUNCTION
+curl_easy_reset
+rewind
+</keywords>
+</info>
+
+# Server side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 307 Temporary Redirect OK swsclose
+Content-Length: 0
+Location: /%TESTNUMBER
+</data>
+</reply>
+
+# Client side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+Test reset resolves rewind failure
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

@@ -62,7 +62,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->shutdown = FALSE;
   req->bytecount = 0;
   req->writebytecount = 0;
-  req->header = TRUE; /* assume header */
+  req->header = FALSE;
   req->headerline = 0;
   req->headerbytecount = 0;
   req->allheadercount =  0;
@@ -153,6 +153,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->eos_written = FALSE;
   req->eos_read = FALSE;
   req->eos_sent = FALSE;
+  req->rewind_read = FALSE;
   req->upload_done = FALSE;
   req->upload_aborted = FALSE;
   req->ignorebody = FALSE;
@@ -160,7 +161,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->chunk = FALSE;
   req->ignore_cl = FALSE;
   req->upload_chunky = FALSE;
-  req->getheader = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
@@ -380,8 +380,14 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
   data->req.httpversion_sent = httpversion;
   buf = curlx_dyn_ptr(req);
   blen = curlx_dyn_len(req);
-  if(!Curl_creader_total_length(data)) {
-    /* Request without body. Try to send directly from the buf given. */
+  /* if the sendbuf is empty and the request without body and
+   * the length to send fits info a sendbuf chunk, we send it directly.
+   * If `blen` is larger then `chunk_size`, we can not. Because we
+   * might have to retry a blocked send later from sendbuf and that
+   * would result in retry sends with a shrunken length. That is trouble. */
+  if(Curl_bufq_is_empty(&data->req.sendbuf) &&
+     !Curl_creader_total_length(data) &&
+     (blen <= data->req.sendbuf.chunk_size)) {
     data->req.eos_read = TRUE;
     result = xfer_send(data, buf, blen, blen, &nwritten);
     if(result)

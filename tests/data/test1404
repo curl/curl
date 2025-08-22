@@ -34,7 +34,7 @@ http
 --libcurl plus -F with 3 files, one with explicit type & encoder
 </name>
 <setenv>
-SSL_CERT_FILE=
+SSL_CERT_FILE
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2' --libcurl %LOGDIR/test%TESTNUMBER.c
@@ -99,6 +99,7 @@ $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
+$_ = '' if /CURLOPT_SSLVERSION/
 # CURL_DOES_CONVERSION generates an extra comment.
 $_ = '' if /\/\* "value" \*\//
 </stripfile>

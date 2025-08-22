@@ -45,11 +45,11 @@ env:
 
 jobs:
   linux-glibc-gcc:
-    name: 'Linux gcc glibc'
+    name: 'Linux gcc glibc (amd64, arm64)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
           path: 'curl'
@@ -74,11 +74,11 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   linux-musl-llvm:
-    name: 'Linux llvm MUSL'
+    name: 'Linux llvm MUSL (amd64, riscv64)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
           path: 'curl'
@@ -101,13 +101,13 @@ jobs:
             sh -c ./_ci-linux-debian.sh
 
   mac-clang:
-    name: 'macOS clang'
+    name: 'macOS clang (x86_64)'
     runs-on: macos-latest
     timeout-minutes: 10
     env:
       CW_JOBS: '4'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
           path: 'curl'
@@ -121,11 +121,11 @@ jobs:
           sh -c ./_ci-mac-homebrew.sh
 
   win-llvm:
-    name: 'Windows llvm'
+    name: 'Windows llvm (x64)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
           path: 'curl'
@@ -147,12 +147,12 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-  win-gcc-libssh-zlibold-x86:
-    name: 'Windows gcc libssh zlib-classic x86'
+  win-gcc-zlibold-x86:
+    name: 'Windows gcc zlib-classic (x86)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
           path: 'curl'
@@ -161,7 +161,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-win-x86-gcc-libssh1-zlibng'
+          export CW_CONFIG='-main-werror-unitybatch-win-x86-gcc-zlibng'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default

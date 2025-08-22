@@ -24,8 +24,8 @@
 
 #include "curl_setup.h"
 
-#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) \
-    || !defined(CURL_DISABLE_DIGEST_AUTH)
+#if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH)
 
 #include <string.h>
 #include <curl/curl.h>
@@ -36,10 +36,8 @@
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
-
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
 #endif
 #endif /* USE_MBEDTLS */
 
@@ -57,7 +55,7 @@
   #endif
 #endif
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
@@ -84,7 +82,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(USE_GNUTLS)
+#ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
 
@@ -161,15 +159,8 @@ typedef mbedtls_md5_context my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
   if(mbedtls_md5_starts(ctx))
     return CURLE_OUT_OF_MEMORY;
-#elif defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  if(mbedtls_md5_starts_ret(ctx))
-    return CURLE_OUT_OF_MEMORY;
-#else
-  (void)mbedtls_md5_starts(ctx);
-#endif
   return CURLE_OK;
 }
 
@@ -177,20 +168,12 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_update(ctx, data, length);
-#else
-  (void) mbedtls_md5_update_ret(ctx, data, length);
-#endif
+  (void)mbedtls_md5_update(ctx, data, length);
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_md5_finish(ctx, digest);
-#else
-  (void) mbedtls_md5_finish_ret(ctx, digest);
-#endif
+  (void)mbedtls_md5_finish(ctx, digest);
 }
 
 #elif defined(AN_APPLE_OS)

@@ -511,7 +511,7 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
   {
     char dest[16]; /* fits a binary IPv6 address */
     hostname[hlen] = 0; /* end the address there */
-    if(1 != curlx_inet_pton(AF_INET6, hostname, dest))
+    if(curlx_inet_pton(AF_INET6, hostname, dest) != 1)
       return CURLUE_BAD_IPV6;
     if(curlx_inet_ntop(AF_INET6, dest, hostname, hlen)) {
       hlen = strlen(hostname); /* might be shorter now */
@@ -1757,13 +1757,26 @@ static CURLUcode urlset_clear(CURLU *u, CURLUPart what)
   return CURLUE_OK;
 }
 
+static bool allowed_in_path(unsigned char x)
+{
+  switch(x) {
+  case '!': case '$': case '&': case '\'':
+  case '(': case ')': case '{': case '}':
+  case '[': case ']': case '*': case '+':
+  case ',': case ';': case '=': case ':':
+  case '@': case '/':
+    return TRUE;
+  }
+  return FALSE;
+}
+
 CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                        const char *part, unsigned int flags)
 {
   char **storep = NULL;
   bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   bool plusencode = FALSE;
-  bool urlskipslash = FALSE;
+  bool pathmode = FALSE;
   bool leadingslash = FALSE;
   bool appendquery = FALSE;
   bool equalsencode = FALSE;
@@ -1808,7 +1821,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
   case CURLUPART_PORT:
     return set_url_port(u, part);
   case CURLUPART_PATH:
-    urlskipslash = TRUE;
+    pathmode = TRUE;
     leadingslash = TRUE; /* enforce */
     storep = &u->path;
     break;
@@ -1850,7 +1863,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
             return CURLUE_OUT_OF_MEMORY;
         }
         else if(ISUNRESERVED(*i) ||
-                ((*i == '/') && urlskipslash) ||
+                (pathmode && allowed_in_path(*i)) ||
                 ((*i == '=') && equalsencode)) {
           if((*i == '=') && equalsencode)
             /* only skip the first equals sign */

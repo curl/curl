@@ -62,23 +62,21 @@
 #define tool_safefree(ptr)                      \
   do { free((ptr)); (ptr) = NULL;} while(0)
 
-struct GlobalConfig;
+extern struct GlobalConfig *global;
 
 struct State {
   struct getout *urlnode;
-  struct URLGlob *inglob;
-  struct URLGlob *urls;
-  char *outfiles;
+  struct URLGlob inglob;
+  struct URLGlob urlglob;
   char *httpgetfields;
   char *uploadfile;
-  curl_off_t infilenum; /* number of files to upload */
-  curl_off_t up;        /* upload file counter within a single upload glob */
+  curl_off_t upnum;     /* number of files to upload */
+  curl_off_t upidx;     /* index for upload glob */
   curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
-  curl_off_t li;
+  curl_off_t urlidx;    /* index for globbed URLs */
 };
 
 struct OperationConfig {
-  struct State state;             /* for create_transfer() */
   struct dynbuf postdata;
   char *useragent;
   struct curl_slist *cookies;  /* cookies to serialize into a single line */
@@ -188,7 +186,6 @@ struct OperationConfig {
   char *ech;                      /* Config set by --ech keywords */
   char *ech_config;               /* Config set by "--ech esl:" option */
   char *ech_public;               /* Config set by "--ech pn:" option */
-  struct GlobalConfig *global;
   struct OperationConfig *prev;
   struct OperationConfig *next;   /* Always last in the struct */
   curl_off_t condtime;
@@ -196,8 +193,6 @@ struct OperationConfig {
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
 
-  long ssl_version;
-  long ssl_version_max;
   long proxy_ssl_version;
   long ip_version;
   long create_file_mode; /* CURLOPT_NEW_FILE_PERMS */
@@ -214,8 +209,8 @@ struct OperationConfig {
   long httpversion;
   unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   long req_retry;           /* number of retries */
-  long retry_delay;         /* delay between retries (in seconds) */
-  long retry_maxtime;       /* maximum time to keep retrying */
+  long retry_delay_ms;      /* delay between retries (in milliseconds) */
+  long retry_maxtime_ms;    /* maximum time to keep retrying */
 
   unsigned long mime_options; /* Mime option flags. */
   long tftp_blksize;        /* TFTP BLKSIZE option */
@@ -226,10 +221,11 @@ struct OperationConfig {
   long happy_eyeballs_timeout_ms; /* happy eyeballs timeout in milliseconds.
                                      0 is valid. default: CURL_HET_DEFAULT. */
   unsigned long timecond;
+  long followlocation;      /* follow http redirects mode */
   HttpReq httpreq;
   long proxyver;             /* set to CURLPROXY_HTTP* define */
-  int ftp_ssl_ccc_mode;
-  int ftp_filemethod;
+  long ftp_ssl_ccc_mode;
+  long ftp_filemethod;
   enum {
     CLOBBER_DEFAULT, /* Provides compatibility with previous versions of curl,
                         by using the default behavior for -o, -O, and -J.
@@ -246,6 +242,9 @@ struct OperationConfig {
   char* dkey;
   char* dkey_type;
   char* dkey_passwd;
+  unsigned char ssl_version;     /* 0 - 4, 0 being default */
+  unsigned char ssl_version_max; /* 0 - 4, 0 being default */
+
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -269,7 +268,6 @@ struct OperationConfig {
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
   BIT(dirlistonly);         /* only get the FTP dir list */
-  BIT(followlocation);      /* follow http redirects */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */
@@ -347,7 +345,15 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
+#if defined(_WIN32) && !defined(UNDER_CE)
+struct termout {
+  wchar_t *buf;
+  DWORD len;
+};
+#endif
+
 struct GlobalConfig {
+  struct State state;             /* for create_transfer() */
   char *trace_dump;               /* file to dump the network trace to */
   FILE *trace_stream;
   char *libcurl;                  /* Output libcurl code to this filename */
@@ -358,10 +364,14 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
+#if defined(_WIN32) && !defined(UNDER_CE)
+  struct termout term;
+#endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
+  unsigned short parallel_host; /* MAX_PARALLEL_HOST is the maximum */
   unsigned short parallel_max; /* MAX_PARALLEL is the maximum */
   unsigned char verbosity;        /* How verbose we should be */
 #ifdef DEBUGBUILD
@@ -381,7 +391,9 @@ struct GlobalConfig {
   BIT(isatty);                    /* Updated internally if output is a tty */
 };
 
-struct OperationConfig *config_alloc(struct GlobalConfig *global);
+struct OperationConfig *config_alloc(void);
 void config_free(struct OperationConfig *config);
+CURLcode globalconf_init(void);
+void globalconf_free(void);
 
 #endif /* HEADER_CURL_TOOL_CFGABLE_H */

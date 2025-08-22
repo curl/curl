@@ -120,7 +120,7 @@ static void check_set(const char *name, unsigned int capacity,
   Curl_uint_bset_destroy(&bset);
 }
 
-static CURLcode test_unit3211(char *arg)
+static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

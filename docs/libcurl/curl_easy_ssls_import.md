@@ -20,7 +20,7 @@ Added-in: 8.12.0
 
 # NAME
 
-curl_easy_ssls_export - export SSL sessions
+curl_easy_ssls_import - import SSL sessions
 
 # SYNOPSIS
 

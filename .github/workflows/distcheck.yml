@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -58,7 +58,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix="$HOME"/temp --without-ssl --without-libpsl
+          ./configure --prefix="$HOME"/temp --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           make install
@@ -73,7 +73,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: 'release-tgz'
 
@@ -84,7 +84,7 @@ jobs:
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
           mkdir build
           pushd build
-          ../curl-99.98.97/configure --without-ssl --without-libpsl
+          ../curl-99.98.97/configure --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           popd
@@ -97,7 +97,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: 'release-tgz'
 
@@ -108,20 +108,22 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --without-ssl --enable-debug --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --enable-debug --without-libpsl
           make
           make test-ci
           make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
           popd
           scripts/checksrc-all.pl
 
-  verify-out-of-tree-cmake:
-    name: 'CM out-of-tree'
+  verify-out-of-tree-autotools:
+    name: 'AM out-of-tree !perl'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: 'release-tgz'
 
@@ -130,9 +132,79 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+          mkdir build
+          pushd build
+          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+          popd
+
+  verify-in-tree-autotools:
+    name: 'AM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          make
+          make install
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+
+  verify-out-of-tree-cmake:
+    name: 'CM out-of-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake -B build -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
           cmake --build build
           cmake --install build
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
+
+  verify-in-tree-cmake:
+    name: 'CM in-tree !perl'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: 'release-tgz'
+
+      - name: 'build & install'
+        run: |
+          echo "::stop-commands::$(uuidgen)"
+          tar xvf curl-99.98.97.tar.gz
+          pushd curl-99.98.97
+          cmake . -G Ninja -DCMAKE_INSTALL_PREFIX="$PWD"/curl-install -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DPERL_EXECUTABLE=
+          cmake --build .
+          cmake --install .
+          export LD_LIBRARY_PATH="$PWD/curl-install/lib:$LD_LIBRARY_PATH"
+          curl-install/bin/curl --disable --version
+          curl-install/bin/curl --manual | wc -l | grep -v '^ *0$'
 
   missing-files:
     name: 'missing files'
@@ -140,11 +212,11 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
         with:
           name: 'release-tgz'
 
@@ -156,7 +228,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -188,7 +260,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [ubuntu-latest, macos-latest, windows-latest]
+        image: [ubuntu-latest, macos-latest, windows-2022]
     steps:
       - uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
         if: ${{ contains(matrix.image, 'windows') }}
@@ -225,16 +297,32 @@ jobs:
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
           fi
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
+      - name: 'via ExternalProject'
+        if: ${{ !contains(matrix.image, 'ubuntu') }}
+        run: ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
       - name: 'via FetchContent'
         run: ./tests/cmake/test.sh FetchContent ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via add_subdirectory'
         run: ./tests/cmake/test.sh add_subdirectory ${TESTOPTS} -DCURL_USE_OPENSSL=ON
       - name: 'via find_package'
         run: ./tests/cmake/test.sh find_package ${TESTOPTS} -DCURL_USE_OPENSSL=ON
+
+      - name: 'via ExternalProject (old cmake)'
+        if: ${{ contains(matrix.image, 'ubuntu') }}
+        run: |
+          export TEST_CMAKE_CONSUMER; TEST_CMAKE_CONSUMER="$(cat ~/old-cmake-path.txt)"
+          if [[ "${MATRIX_IMAGE}" = *'macos'* ]]; then
+            export CFLAGS='-arch arm64'
+          fi
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            export TEST_CMAKE_GENERATOR='MSYS Makefiles'
+            export TEST_CMAKE_FLAGS='-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc'
+          fi
+          ./tests/cmake/test.sh ExternalProject ${TESTOPTS}
 
       - name: 'via add_subdirectory OpenSSL (old cmake)'
         run: |

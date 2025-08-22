@@ -59,7 +59,7 @@ lib%TESTNUMBER
 HTTP GET multiple over HTTP/3
 </name>
 <command>
-https://%HOSTIP:%HTTP3PORT/path/%TESTNUMBER %HOSTIP %HTTP3PORT %CERTDIR/certs/test-ca.cacert
+- %HOSTIP %HTTP3PORT %CERTDIR/certs/test-ca.cacert
 </command>
 </client>
 
@@ -91,10 +91,10 @@ Via: 3 nghttpx
 ^Host:.*
 </strip>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-== Info: Connection #0 to host localhost left intact
-== Info: Connection #0 to host localhost left intact
-== Info: Connection #0 to host localhost left intact
-== Info: Connection #0 to host localhost left intact
+== Info: Connection #0 to host localhost:%HTTP3PORT left intact
+== Info: Connection #0 to host localhost:%HTTP3PORT left intact
+== Info: Connection #0 to host localhost:%HTTP3PORT left intact
+== Info: Connection #0 to host localhost:%HTTP3PORT left intact
 </file>
 <stripfile>
 $_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))

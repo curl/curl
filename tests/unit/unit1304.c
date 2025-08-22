@@ -33,7 +33,7 @@ static void t1304_stop(char **password, char **login)
   Curl_safefree(*login);
 }
 
-static CURLcode test_unit1304(char *arg)
+static CURLcode test_unit1304(const char *arg)
 {
   char *login = NULL;
   char *password = NULL;
@@ -80,7 +80,7 @@ static CURLcode test_unit1304(char *arg)
    * Test a non existent login (substring of an existing one) in our
    * netrc file.
    */
-  login = (char *)CURL_UNCONST("admi");
+  login = (char *)CURL_UNCONST("admi"); /* spellchecker:disable-line */
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
                            "example.com", &login, &password, arg);
@@ -178,7 +178,7 @@ static CURLcode test_unit1304(char *arg)
 
 #else
 
-static CURLcode test_unit1304(char *arg)
+static CURLcode test_unit1304(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   UNITTEST_END_SIMPLE

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP)
+#ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -35,6 +35,7 @@
 #include "multiif.h"
 #include "cf-https-connect.h"
 #include "http2.h"
+#include "select.h"
 #include "vquic/vquic.h"
 
 /* The last 3 #include files should be in this order */
@@ -226,24 +227,22 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   cf->next = winner->cf;
   winner->cf = NULL;
 
-  switch(cf->conn->alpn) {
-  case CURL_HTTP_VERSION_3:
-    break;
-  case CURL_HTTP_VERSION_2:
 #ifdef USE_NGHTTP2
+  {
     /* Using nghttp2, we add the filter "below" us, so when the conn
      * closes, we tear it down for a fresh reconnect */
-    result = Curl_http2_switch_at(cf, data);
-    if(result) {
-      ctx->state = CF_HC_FAILURE;
-      ctx->result = result;
-      return result;
+    const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
+    if(alpn && !strcmp("h2", alpn)) {
+      result = Curl_http2_switch_at(cf, data);
+      if(result) {
+        ctx->state = CF_HC_FAILURE;
+        ctx->result = result;
+        return result;
+      }
     }
-#endif
-    break;
-  default:
-    break;
   }
+#endif
+
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
   return result;
@@ -428,22 +427,24 @@ static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+static CURLcode cf_hc_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
+  CURLcode result = CURLE_OK;
   if(!cf->connected) {
     struct cf_hc_ctx *ctx = cf->ctx;
     size_t i;
 
-    for(i = 0; i < ctx->baller_count; i++) {
+    for(i = 0; (i < ctx->baller_count) && !result; i++) {
       struct cf_hc_baller *b = &ctx->ballers[i];
       if(!cf_hc_baller_is_active(b))
         continue;
-      Curl_conn_cf_adjust_pollset(b->cf, data, ps);
+      result = Curl_conn_cf_adjust_pollset(b->cf, data, ps);
     }
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
   }
+  return result;
 }
 
 static bool cf_hc_data_pending(struct Curl_cfilter *cf,
@@ -749,4 +750,4 @@ out:
   return result;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) */
+#endif /* !CURL_DISABLE_HTTP */

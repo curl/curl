@@ -40,7 +40,7 @@ http-ipv6
 HTTPS IPv4 GET translated by alt-svc to IPv6 address
 </name>
 <setenv>
-# make debug-curl accept Alt-Svc over plain HTTP
+# make Debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
 <command>

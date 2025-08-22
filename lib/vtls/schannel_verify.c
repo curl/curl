@@ -56,8 +56,6 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#ifdef HAS_MANUAL_VERIFY_API
-
 #ifdef __MINGW32CE__
 #define CERT_QUERY_OBJECT_BLOB 0x00000002
 #define CERT_QUERY_CONTENT_CERT 1
@@ -94,7 +92,7 @@ struct cert_chain_engine_config_win8 {
   DWORD dwExclusiveFlags;
 };
 
-/* Not defined before mingw-w64 4.0.0 */
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
 #define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
 #endif
@@ -370,11 +368,7 @@ cleanup:
 
   return result;
 }
-#endif
 
-#endif /* HAS_MANUAL_VERIFY_API */
-
-#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -390,18 +384,11 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   BOOL Win8_compat)
 {
   DWORD actual_length = 0;
-#if defined(CURL_WINDOWS_UWP)
-  (void)data;
-  (void)cert_context;
-  (void)host_names;
-  (void)length;
-  (void)alt_name_info;
-  (void)Win8_compat;
-#else
   BOOL compute_content = FALSE;
   LPTSTR current_pos = NULL;
   DWORD i;
 
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
   if(Win8_compat) {
@@ -471,7 +458,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
-#endif
   return actual_length;
 }
 
@@ -510,12 +496,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#if defined(CURL_WINDOWS_UWP)
-  (void)data;
-  (void)ctx;
-  (void)alt_name_info;
-  (void)alt_name_info_size;
-#else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
@@ -553,7 +533,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
     return result;
   }
   result = TRUE;
-#endif
   return result;
 }
 #endif /* !UNDER_CE */
@@ -767,7 +746,6 @@ cleanup:
   return result;
 }
 
-#ifdef HAS_MANUAL_VERIFY_API
 /* Verify the server's certificate and hostname */
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
@@ -801,8 +779,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
 #ifndef UNDER_CE
   if(result == CURLE_OK &&
-      (conn_config->CAfile || conn_config->ca_info_blob) &&
-      BACKEND->use_manual_cred_validation) {
+     (conn_config->CAfile || conn_config->ca_info_blob) &&
+     BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
      * trusted certificates. This is only supported on Windows 7+.
@@ -979,5 +957,4 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   return result;
 }
 
-#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

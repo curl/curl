@@ -62,7 +62,7 @@ http
 HTTP with auth in URL redirected to another host
 </name>
 <command>
--x %HOSTIP:%HTTPPORT http://alberto:einstein@somwhere.example/%TESTNUMBER --location-trusted
+-x %HOSTIP:%HTTPPORT http://alberto:einstein@somewhere.example/%TESTNUMBER --location-trusted
 </command>
 </client>
 
@@ -73,8 +73,8 @@ HTTP with auth in URL redirected to another host
 QUIT
 </strip>
 <protocol>
-GET http://somwhere.example/998 HTTP/1.1
-Host: somwhere.example
+GET http://somewhere.example/998 HTTP/1.1
+Host: somewhere.example
 Authorization: Basic %b64[alberto:einstein]b64%
 User-Agent: curl/%VERSION
 Accept: */*

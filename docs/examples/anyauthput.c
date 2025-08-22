@@ -61,7 +61,7 @@ static int my_seek(void *userp, curl_off_t offset, int origin)
 {
   FILE *fp = (FILE *) userp;
 
-  if(-1 == fseek(fp, (long) offset, origin))
+  if(fseek(fp, (long) offset, origin) == -1)
     /* could not seek */
     return CURL_SEEKFUNC_CANTSEEK;
 
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
        data twice!!! */
-    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
     /* set user name and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");

@@ -27,9 +27,6 @@ lib%TESTNUMBER
 <name>
 libtest memory tracking operational
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

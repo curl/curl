@@ -49,11 +49,11 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -83,7 +83,7 @@ jobs:
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --target curl-examples
+            time cmake --build bld --target curl-examples-build
             echo '::endgroup::'
 
   openbsd:
@@ -94,11 +94,11 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -128,7 +128,7 @@ jobs:
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
-            time cmake --build bld --target curl-examples
+            time cmake --build bld --target curl-examples-build
             echo '::endgroup::'
 
   freebsd:
@@ -144,11 +144,11 @@ jobs:
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
       - name: '${{ matrix.build }}'
-        uses: cross-platform-actions/action@97419d18f6470332677e345e9df97cdc71244ead # v0.28.0
+        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
         env:
           CC: '${{ matrix.compiler }}'
           MATRIX_ARCH: '${{ matrix.arch }}'
@@ -158,7 +158,7 @@ jobs:
         with:
           environment_variables: CC MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
-          version: '14.2'
+          version: '14.3'
           architecture: ${{ matrix.arch }}
           run: |
             export CURL_CI=github
@@ -232,48 +232,12 @@ jobs:
             if [ "${MATRIX_DESC#*!examples*}" = "${MATRIX_DESC}" ]; then
               echo '::group::build examples'
               if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-                time cmake --build bld --target curl-examples
+                time cmake --build bld --target curl-examples-build
               else
                 time make -C bld examples
               fi
               echo '::endgroup::'
             fi
-
-  omnios:
-    name: 'OmniOS, AM gcc openssl amd64'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-      - name: 'autotools'
-        uses: vmactions/omnios-vm@8eba2a9217262f275d4566751a92d6ef2f433d00 # v1
-        with:
-          usesh: true
-          # https://pkg.omnios.org/r151052/core/en/index.shtml
-          prepare: pkg install build-essential libtool nghttp2
-          run: |
-            set -e
-            ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
-            export MAKEFLAGS=-j3
-            export CURL_CI=github
-            time autoreconf -fi
-            mkdir bld && cd bld
-            time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
-              --prefix="$HOME"/curl-install \
-              --with-openssl \
-              --disable-dependency-tracking \
-              || { tail -n 1000 config.log; false; }
-            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
-            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
-            time gmake install
-            src/curl --disable --version
-            time gmake -C tests
-            time gmake test-ci V=1
-            echo '::group::build examples'
-            time gmake examples
-            echo '::endgroup::'
 
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
@@ -299,7 +263,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
 
@@ -361,119 +325,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
-          else
-            make -C bld examples
-          fi
-
-  msdos:
-    name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp openssl i586"
-    runs-on: 'ubuntu-latest'
-    timeout-minutes: 5
-    env:
-      MAKEFLAGS: -j 5
-      MATRIX_BUILD: '${{ matrix.build }}'
-      TOOLCHAIN_VERSION: '3.4'
-    strategy:
-      matrix:
-        build: [autotools, cmake]
-      fail-fast: false
-    steps:
-      - name: 'install packages'
-        run: |
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libfl2
-
-      - name: 'cache compiler (djgpp)'
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-compiler
-        with:
-          path: ~/djgpp
-          key: ${{ runner.os }}-djgpp-${{ env.TOOLCHAIN_VERSION }}-amd64
-
-      - name: 'install compiler (djgpp)'
-        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
-        run: |
-          cd ~
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused \
-            --location "https://github.com/andrewwutw/build-djgpp/releases/download/v${TOOLCHAIN_VERSION}/djgpp-linux64-gcc1220.tar.bz2" | tar -xj
-          cd djgpp
-          for f in wat3211b.zip zlb13b.zip ssl102ub.zip; do
-            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-              "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output bin.zip
-            unzip -q bin.zip
-            rm -f bin.zip
-          done
-
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-
-      - name: 'configure'
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake -B bld -G Ninja \
-              -DCMAKE_SYSTEM_NAME=DOS \
-              -DCMAKE_SYSTEM_PROCESSOR=x86 \
-              -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-              -DCMAKE_C_COMPILER="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
-              -DCMAKE_UNITY_BUILD=ON \
-              -DCURL_WERROR=ON \
-              -DCURL_USE_LIBPSL=OFF \
-              -DOPENSSL_INCLUDE_DIR="$HOME/djgpp/include" \
-              -DOPENSSL_SSL_LIBRARY="$HOME/djgpp/lib/libssl.a" \
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/djgpp/lib/libcrypto.a" \
-              -DZLIB_INCLUDE_DIR="$HOME/djgpp/include" \
-              -DZLIB_LIBRARY="$HOME/djgpp/lib/libz.a" \
-              -DWATT_ROOT="$HOME/djgpp/net/watt"
-          else
-            autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
-              CC="$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc" \
-              AR="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar" \
-              RANLIB="$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib" \
-              WATT_ROOT="$HOME/djgpp/net/watt" \
-              --host=i586-pc-msdosdjgpp \
-              --with-openssl="$HOME/djgpp" \
-              --with-zlib="$HOME/djgpp" \
-              --without-libpsl \
-              --disable-shared
-          fi
-
-      - name: 'configure log'
-        if: ${{ !cancelled() }}
-        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'build'
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
-          else
-            make -C bld
-          fi
-
-      - name: 'curl info'
-        run: find . \( -name '*.exe' -o -name '*.a' \) -exec file '{}' \;
-
-      - name: 'build tests'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target testdeps
-          else
-            make -C bld -C tests
-          fi
-
-      - name: 'build examples'
-        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
-        run: |
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --target curl-examples
+            cmake --build bld --target curl-examples-build
           else
             make -C bld examples
           fi

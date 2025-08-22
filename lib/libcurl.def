@@ -54,6 +54,7 @@ curl_multi_assign
 curl_multi_cleanup
 curl_multi_fdset
 curl_multi_get_handles
+curl_multi_get_offt
 curl_multi_info_read
 curl_multi_init
 curl_multi_perform
@@ -95,3 +96,4 @@ curl_version_info
 curl_ws_meta
 curl_ws_recv
 curl_ws_send
+curl_ws_start_frame

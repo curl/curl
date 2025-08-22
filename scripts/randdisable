@@ -18,9 +18,14 @@
 # Tips:
 #
 # - edit the @tls array to include all TLS backends you can build with
-# - do a checkout in a ram-based filesystem
+# - do a checkout in a ram-based file system
 #
+use strict;
+use warnings;
+
 use List::Util qw/shuffle/;
+
+my @disable;
 
 sub getoptions {
     my @all = `./configure --help`;

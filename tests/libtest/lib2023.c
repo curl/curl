@@ -83,7 +83,7 @@ static long parse_auth_name(const char *arg)
   return CURLAUTH_NONE;
 }
 
-static CURLcode test_lib2023(char *URL)  /* libauthretry */
+static CURLcode test_lib2023(const char *URL)  /* libauthretry */
 {
   CURLcode res;
   CURL *curl = NULL;

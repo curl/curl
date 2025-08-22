@@ -6,7 +6,7 @@ Help: Use HTTP Negotiate (SPNEGO) authentication
 Protocols: HTTP
 Category: auth http
 Added: 7.10.6
-Multi: mutex
+Multi: boolean
 See-also:
   - basic
   - ntlm

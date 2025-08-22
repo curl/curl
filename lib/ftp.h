@@ -120,6 +120,11 @@ struct FTP {
   curl_off_t downloadsize;
 };
 
+/* one struct entry for each path component (of 'rawpath') */
+struct pathcomp {
+  int start; /* start column */
+  int len;   /* length in bytes */
+};
 
 /* ftp_conn is used for struct connection-oriented data in the connectdata
    struct */
@@ -128,8 +133,9 @@ struct ftp_conn {
   char *account;
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
-  char *file;    /* url-decoded filename (or path) */
-  char **dirs;   /* realloc()ed array for path components */
+  const char *file; /* url-decoded filename (or path), points into rawpath */
+  char *rawpath; /* URL decoded, allocated, version of the path */
+  struct pathcomp *dirs; /* allocated array for path components */
   char *newhost; /* the (allocated) IP addr or hostname to connect the data
                     connection to */
   char *prevpath;   /* url-decoded conn->path from the previous transfer */

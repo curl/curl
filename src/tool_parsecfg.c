@@ -36,12 +36,52 @@
    specified with an initial dash! */
 #define ISSEP(x,dash) (!dash && (((x) == '=') || ((x) == ':')))
 
-static const char *unslashquote(const char *line, char *param);
+/*
+ * Copies the string from line to the param dynbuf, unquoting backslash-quoted
+ * characters and null-terminating the output string. Stops at the first
+ * non-backslash-quoted double quote character or the end of the input string.
+ * param must be at least as long as the input string. Returns 0 on success.
+ */
+static int unslashquote(const char *line, struct dynbuf *param)
+{
+  curlx_dyn_reset(param);
+
+  while(*line && (*line != '\"')) {
+    if(*line == '\\') {
+      char out;
+      line++;
+
+      /* default is to output the letter after the backslash */
+      switch(out = *line) {
+      case '\0':
+        continue; /* this'll break out of the loop */
+      case 't':
+        out = '\t';
+        break;
+      case 'n':
+        out = '\n';
+        break;
+      case 'r':
+        out = '\r';
+        break;
+      case 'v':
+        out = '\v';
+        break;
+      }
+      if(curlx_dyn_addn(param, &out, 1))
+        return 1;
+      line++;
+    }
+    else if(curlx_dyn_addn(param, line++, 1))
+      return 1;
+  }
+  return 0; /* ok */
+}
 
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename, struct GlobalConfig *global)
+int parseconfig(const char *filename)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
@@ -87,13 +127,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     int lineno = 0;
     bool dashed_option;
     struct dynbuf buf;
+    struct dynbuf pbuf;
     bool fileerror = FALSE;
     curlx_dyn_init(&buf, MAX_CONFIG_LINE_LENGTH);
+    curlx_dyn_init(&pbuf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
     while(!rc && my_get_line(file, &buf, &fileerror)) {
       ParameterError res;
-      bool alloced_param = FALSE;
       lineno++;
       line = curlx_dyn_ptr(&buf);
       if(!line) {
@@ -125,15 +166,10 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       /* the parameter starts here (unless quoted) */
       if(*line == '\"') {
         /* quoted parameter, do the quote dance */
-        line++;
-        param = malloc(strlen(line) + 1); /* parameter */
-        if(!param) {
-          /* out of memory */
-          rc = 1;
+        rc = unslashquote(++line, &pbuf);
+        if(rc)
           break;
-        }
-        alloced_param = TRUE;
-        (void)unslashquote(line, param);
+        param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
       }
       else {
         param = line; /* parameter starts here */
@@ -156,10 +192,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
           case '#': /* comment */
             break;
           default:
-            warnf(config->global, "%s:%d: warning: '%s' uses unquoted "
-                  "whitespace", filename, lineno, option);
-            warnf(config->global, "This may cause side-effects. "
-                  "Consider using double quotes?");
+            warnf("%s:%d: warning: '%s' uses unquoted whitespace. "
+                  "This may cause side-effects. Consider double quotes.",
+                  filename, lineno, option);
           }
         }
         if(!*param)
@@ -181,7 +216,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       if(res == PARAM_NEXT_OPERATION) {
         if(config->url_list && config->url_list->url) {
           /* Allocate the next config */
-          config->next = config_alloc(global);
+          config->next = config_alloc();
           if(config->next) {
             /* Update the last operation pointer */
             global->last = config->next;
@@ -206,16 +241,14 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
           const char *reason = param2text(res);
-          errorf(config->global, "%s:%d: '%s' %s",
+          errorf("%s:%d: '%s' %s",
                  filename, lineno, option, reason);
           rc = (int)res;
         }
       }
-
-      if(alloced_param)
-        tool_safefree(param);
     }
     curlx_dyn_free(&buf);
+    curlx_dyn_free(&pbuf);
     if(file != stdin)
       fclose(file);
     if(fileerror)
@@ -228,46 +261,6 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
   return rc;
 }
 
-/*
- * Copies the string from line to the buffer at param, unquoting
- * backslash-quoted characters and null-terminating the output string. Stops
- * at the first non-backslash-quoted double quote character or the end of the
- * input string. param must be at least as long as the input string. Returns
- * the pointer after the last handled input character.
- */
-static const char *unslashquote(const char *line, char *param)
-{
-  while(*line && (*line != '\"')) {
-    if(*line == '\\') {
-      char out;
-      line++;
-
-      /* default is to output the letter after the backslash */
-      switch(out = *line) {
-      case '\0':
-        continue; /* this'll break out of the loop */
-      case 't':
-        out = '\t';
-        break;
-      case 'n':
-        out = '\n';
-        break;
-      case 'r':
-        out = '\r';
-        break;
-      case 'v':
-        out = '\v';
-        break;
-      }
-      *param++ = out;
-      line++;
-    }
-    else
-      *param++ = *line++;
-  }
-  *param = '\0'; /* always null-terminate */
-  return line;
-}
 
 static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 {

@@ -18,6 +18,9 @@
 # directory where it runs.
 #
 
+use strict;
+use warnings;
+
 my $curl = "../src/curl";
 my $url = "localhost:7777"; # not listening to this
 
@@ -30,6 +33,14 @@ if(!$seconds) {
     $seconds = 10;
 }
 print "Run $curl for $seconds seconds\n";
+
+my @opt;
+my %arg;
+my %uniq;
+my %allrc;
+
+my $totalargs = 0;
+my $totalcmds = 0;
 
 my $counter = 0xabcdef + time();
 sub getnum {
@@ -81,7 +92,7 @@ sub randarg {
         "0123456789".
         ",-?#$%!@ ";
     my $len = getnum(20);
-    my $o;
+    my $o = '';
     for (1 .. $len) {
         $o .= substr($nice, getnum(length($nice)), 1);
     }
@@ -164,6 +175,7 @@ sub runconfig {
         my $o = getnum($nopts);
         my $option = $opt[$o];
         my $ar = "";
+        $uniq{$option} = 0 if(!exists $uniq{$option});
         $uniq{$option}++;
         if($arg{$option}) {
             $ar = " ".randarg();

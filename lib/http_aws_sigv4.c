@@ -1149,4 +1149,4 @@ static bool should_urlencode(struct Curl_str *service_name)
   return true;
 }
 
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_AWS) */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_AWS */

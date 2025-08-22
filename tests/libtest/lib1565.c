@@ -85,7 +85,7 @@ test_cleanup:
   return NULL;
 }
 
-static CURLcode test_lib1565(char *URL)
+static CURLcode test_lib1565(const char *URL)
 {
   int still_running;
   int num;
@@ -132,7 +132,7 @@ static CURLcode test_lib1565(char *URL)
       else {
         curl_mfprintf(stderr,
                       "%s:%d Got an unexpected message from curl: %i\n",
-                      __FILE__, __LINE__, (int)message->msg);
+                      __FILE__, __LINE__, message->msg);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -199,7 +199,7 @@ test_cleanup:
 }
 
 #else /* without pthread, this test doesn't work */
-static CURLcode test_lib1565(char *URL)
+static CURLcode test_lib1565(const char *URL)
 {
   (void)URL;
   return CURLE_OK;

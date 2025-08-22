@@ -136,7 +136,8 @@ check_PROGRAMS = \
   url2file \
   urlapi \
   websocket \
-  websocket-cb
+  websocket-cb \
+  websocket-updown
 
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so do not bother attempting to compile them here.
@@ -147,7 +148,6 @@ COMPLICATED_EXAMPLES = \
   evhiperfifo.c \
   ghiper.c \
   hiperfifo.c \
-  href_extractor.c \
   htmltidy.c \
   htmltitle.cpp \
   multi-event.c \

@@ -41,7 +41,7 @@ static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
   return ret;
 }
 
-static CURLcode test_unit1653(char *arg)
+static CURLcode test_unit1653(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 

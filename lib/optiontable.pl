@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
+
 print <<HEAD
 /***************************************************************************
  *                                  _   _ ____  _
@@ -37,31 +40,36 @@ HEAD
 
 my $lastnum=0;
 
+my %opt;
+my %type;
+my @names;
+my %alias;
+
 sub add {
-    my($opt, $type, $num)=@_;
+    my($optstr, $typestr, $num)=@_;
     my $name;
     # remove all spaces from the type
-    $type =~ s/ //g;
-    my $ext = $type;
+    $typestr =~ s/ //g;
+    my $ext = $typestr;
 
-    if($opt =~ /OBSOLETE/) {
+    if($optstr =~ /OBSOLETE/) {
         # skip obsolete options
         next;
     }
 
-    if($opt =~ /^CURLOPT_(.*)/) {
+    if($optstr =~ /^CURLOPT_(.*)/) {
         $name=$1;
     }
     $ext =~ s/CURLOPTTYPE_//;
     $ext =~ s/CBPOINT/CBPTR/;
     $ext =~ s/POINT\z//;
-    $type = "CURLOT_$ext";
+    $typestr = "CURLOT_$ext";
 
-    $opt{$name} = $opt;
-    $type{$name} = $type;
+    $opt{$name} = $optstr;
+    $type{$name} = $typestr;
     push @names, $name;
     if($num < $lastnum) {
-        print STDERR "ERROR: $opt has bad number: $num < $lastnum\n";
+        print STDERR "ERROR: $optstr has bad number: $num < $lastnum\n";
         exit 2;
     }
     else {
@@ -123,8 +131,8 @@ for my $name (sort @names) {
         $name = $alias{$name};
         $flag = "CURLOT_FLAG_ALIAS";
     }
-    $o = sprintf("  {\"%s\", %s, %s, %s},\n",
-                 $oname, $opt{$name}, $type{$name}, $flag);
+    my $o = sprintf("  {\"%s\", %s, %s, %s},\n",
+                    $oname, $opt{$name}, $type{$name}, $flag);
     if(length($o) < 80) {
         print $o;
     }

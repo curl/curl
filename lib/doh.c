@@ -348,10 +348,10 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 #endif
 #ifndef DEBUGBUILD
   /* enforce HTTPS if not debug */
-  ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, (long)CURLPROTO_HTTPS);
+  ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
 #else
   /* in debug mode, also allow http */
-  ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, (long)CURLPROTO_HTTP|CURLPROTO_HTTPS);
+  ERROR_CHECK_SETOPT(CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 #endif
   ERROR_CHECK_SETOPT(CURLOPT_TIMEOUT_MS, (long)timeout_ms);
   ERROR_CHECK_SETOPT(CURLOPT_SHARE, (CURLSH *)data->share);
@@ -484,7 +484,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   data->sub_xfer_done = doh_probe_done;
 
   /* create IPv4 DoH request */
-  result = doh_probe_run(data, DNS_TYPE_A,
+  result = doh_probe_run(data, CURL_DNS_TYPE_A,
                          hostname, data->set.str[STRING_DOH],
                          data->multi,
                          &dohp->probe_resp[DOH_SLOT_IPV4].probe_mid);
@@ -495,7 +495,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 #ifdef USE_IPV6
   if((ip_version != CURL_IPRESOLVE_V4) && Curl_ipv6works(data)) {
     /* create IPv6 DoH request */
-    result = doh_probe_run(data, DNS_TYPE_AAAA,
+    result = doh_probe_run(data, CURL_DNS_TYPE_AAAA,
                            hostname, data->set.str[STRING_DOH],
                            data->multi,
                            &dohp->probe_resp[DOH_SLOT_IPV6].probe_mid);
@@ -514,7 +514,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
       if(!qname)
         goto error;
     }
-    result = doh_probe_run(data, DNS_TYPE_HTTPS,
+    result = doh_probe_run(data, CURL_DNS_TYPE_HTTPS,
                            qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
@@ -581,7 +581,7 @@ static void doh_store_a(const unsigned char *doh, int index,
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
     struct dohaddr *a = &d->addr[d->numaddr];
-    a->type = DNS_TYPE_A;
+    a->type = CURL_DNS_TYPE_A;
     memcpy(&a->ip.v4, &doh[index], 4);
     d->numaddr++;
   }
@@ -593,7 +593,7 @@ static void doh_store_aaaa(const unsigned char *doh, int index,
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
     struct dohaddr *a = &d->addr[d->numaddr];
-    a->type = DNS_TYPE_AAAA;
+    a->type = CURL_DNS_TYPE_AAAA;
     memcpy(&a->ip.v6, &doh[index], 16);
     d->numaddr++;
   }
@@ -681,29 +681,29 @@ static DOHcode doh_rdata(const unsigned char *doh,
   DOHcode rc;
 
   switch(type) {
-  case DNS_TYPE_A:
+  case CURL_DNS_TYPE_A:
     if(rdlength != 4)
       return DOH_DNS_RDATA_LEN;
     doh_store_a(doh, index, d);
     break;
-  case DNS_TYPE_AAAA:
+  case CURL_DNS_TYPE_AAAA:
     if(rdlength != 16)
       return DOH_DNS_RDATA_LEN;
     doh_store_aaaa(doh, index, d);
     break;
 #ifdef USE_HTTPSRR
-  case DNS_TYPE_HTTPS:
+  case CURL_DNS_TYPE_HTTPS:
     rc = doh_store_https(doh, index, d, rdlength);
     if(rc)
       return rc;
     break;
 #endif
-  case DNS_TYPE_CNAME:
+  case CURL_DNS_TYPE_CNAME:
     rc = doh_store_cname(doh, dohlen, (unsigned int)index, d);
     if(rc)
       return rc;
     break;
-  case DNS_TYPE_DNAME:
+  case CURL_DNS_TYPE_DNAME:
     /* explicit for clarity; just skip; rely on synthesized CNAME  */
     break;
   default:
@@ -770,8 +770,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
       return DOH_DNS_OUT_OF_RANGE;
 
     type = doh_get16bit(doh, index);
-    if((type != DNS_TYPE_CNAME)    /* may be synthesized from DNAME */
-       && (type != DNS_TYPE_DNAME) /* if present, accept and ignore */
+    if((type != CURL_DNS_TYPE_CNAME)    /* may be synthesized from DNAME */
+       && (type != CURL_DNS_TYPE_DNAME) /* if present, accept and ignore */
        && (type != dnstype))
       /* Not the same type as was asked for nor CNAME nor DNAME */
       return DOH_DNS_UNEXPECTED_TYPE;
@@ -855,9 +855,10 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     return DOH_DNS_MALFORMAT; /* something is wrong */
 
 #ifdef USE_HTTTPS
-  if((type != DNS_TYPE_NS) && !d->numcname && !d->numaddr && !d->numhttps_rrs)
+  if((type != CURL_DNS_TYPE_NS) && !d->numcname && !d->numaddr &&
+      !d->numhttps_rrs)
 #else
-  if((type != DNS_TYPE_NS) && !d->numcname && !d->numaddr)
+  if((type != CURL_DNS_TYPE_NS) && !d->numcname && !d->numaddr)
 #endif
     /* nothing stored! */
     return DOH_NO_CONTENT;
@@ -873,12 +874,12 @@ static void doh_show(struct Curl_easy *data,
   infof(data, "[DoH] TTL: %u seconds", d->ttl);
   for(i = 0; i < d->numaddr; i++) {
     const struct dohaddr *a = &d->addr[i];
-    if(a->type == DNS_TYPE_A) {
+    if(a->type == CURL_DNS_TYPE_A) {
       infof(data, "[DoH] A: %u.%u.%u.%u",
             a->ip.v4[0], a->ip.v4[1],
             a->ip.v4[2], a->ip.v4[3]);
     }
-    else if(a->type == DNS_TYPE_AAAA) {
+    else if(a->type == CURL_DNS_TYPE_AAAA) {
       int j;
       char buffer[128] = "[DoH] AAAA: ";
       size_t len = strlen(buffer);
@@ -948,7 +949,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
   for(i = 0; i < de->numaddr; i++) {
     size_t ss_size;
     CURL_SA_FAMILY_T addrtype;
-    if(de->addr[i].type == DNS_TYPE_AAAA) {
+    if(de->addr[i].type == CURL_DNS_TYPE_AAAA) {
 #ifndef USE_IPV6
       /* we cannot handle IPv6 addresses */
       continue;
@@ -1025,12 +1026,12 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 static const char *doh_type2name(DNStype dnstype)
 {
   switch(dnstype) {
-    case DNS_TYPE_A:
+    case CURL_DNS_TYPE_A:
       return "A";
-    case DNS_TYPE_AAAA:
+    case CURL_DNS_TYPE_AAAA:
       return "AAAA";
 #ifdef USE_HTTPSRR
-    case DNS_TYPE_HTTPS:
+    case CURL_DNS_TYPE_HTTPS:
       return "HTTPS";
 #endif
     default:
@@ -1248,8 +1249,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                  p->dnstype, &de);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(rc[slot]) {
-        infof(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
-              doh_type2name(p->dnstype), dohp->host);
+        CURL_TRC_DNS(data, "DoH: %s type %s for %s", doh_strerror(rc[slot]),
+                     doh_type2name(p->dnstype), dohp->host);
       }
 #endif
     } /* next slot */

@@ -8,7 +8,7 @@ FTP
 # Server-side
 <reply>
 <servercmd>
-REPLY EPSV 229 Entering Passiv Mode (|||1000000|)
+REPLY EPSV 229 Entering Passive Mode (|||1000000|)
 </servercmd>
 </reply>
 

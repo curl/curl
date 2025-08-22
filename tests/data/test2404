@@ -60,7 +60,7 @@ lib%TESTNUMBER
 HTTP/2 using STREAM_WEIGHTs
 </name>
 <command>
-https://%HOSTIP:%HTTP2TLSPORT/path/%TESTNUMBER %HOSTIP %HTTP2TLSPORT
+- %HOSTIP %HTTP2TLSPORT
 </command>
 </client>
 
@@ -96,10 +96,10 @@ Via: 2 nghttpx
 ^Host:.*
 </strip>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
+* Connection #0 to host localhost:%HTTP2TLSPORT left intact
+* Connection #0 to host localhost:%HTTP2TLSPORT left intact
+* Connection #0 to host localhost:%HTTP2TLSPORT left intact
+* Connection #0 to host localhost:%HTTP2TLSPORT left intact
 </file>
 <stripfile>
 $_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))

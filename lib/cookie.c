@@ -167,13 +167,13 @@ static bool pathmatch(const char *cookie_path, const char *uri_path)
 
   /* cookie_path must not have last '/' separator. ex: /sample */
   cookie_path_len = strlen(cookie_path);
-  if(1 == cookie_path_len) {
+  if(cookie_path_len == 1) {
     /* cookie_path must be '/' */
     return TRUE;
   }
 
   /* #-fragments are already cut off! */
-  if(0 == strlen(uri_path) || uri_path[0] != '/')
+  if(strlen(uri_path) == 0 || uri_path[0] != '/')
     uri_path = "/";
 
   /*
@@ -296,9 +296,9 @@ static char *sanitize_cookie_path(const char *cookie_path)
     /* Let cookie-path be the default-path. */
     return strdup("/");
 
-  /* remove trailing slash */
+  /* remove trailing slash when path is non-empty */
   /* convert /hoge/ to /hoge */
-  if(len && cookie_path[len - 1] == '/')
+  if(len > 1 && cookie_path[len - 1] == '/')
     len--;
 
   return Curl_memdup0(cookie_path, len);
@@ -872,7 +872,7 @@ parse_netscape(struct Cookie *co,
       break;
     }
   }
-  if(6 == fields) {
+  if(fields == 6) {
     /* we got a cookie with blank contents, fix it */
     co->value = strdup("");
     if(!co->value)
@@ -881,7 +881,7 @@ parse_netscape(struct Cookie *co,
       fields++;
   }
 
-  if(7 != fields)
+  if(fields != 7)
     /* we did not find the sufficient number of fields */
     return CERR_FIELDS;
 
@@ -965,7 +965,7 @@ replace_existing(struct Curl_easy *data,
          clist->spath && co->spath && /* both have paths */
          clist->secure && !co->secure && !secure) {
         size_t cllen;
-        const char *sep;
+        const char *sep = NULL;
 
         /*
          * A non-secure cookie may not overlay an existing secure cookie.
@@ -974,8 +974,9 @@ replace_existing(struct Curl_easy *data,
          * "/loginhelper" is ok.
          */
 
-        sep = strchr(clist->spath + 1, '/');
-
+        DEBUGASSERT(clist->spath[0]);
+        if(clist->spath[0])
+          sep = strchr(clist->spath + 1, '/');
         if(sep)
           cllen = sep - clist->spath;
         else
@@ -1613,6 +1614,9 @@ static struct curl_slist *cookie_list(struct Curl_easy *data)
 
   if(!data->cookies || (data->cookies->numcookies == 0))
     return NULL;
+
+  /* at first, remove expired cookies */
+  remove_expired(data->cookies);
 
   for(i = 0; i < COOKIE_HASH_SIZE; i++) {
     for(n = Curl_llist_head(&data->cookies->cookielist[i]); n;

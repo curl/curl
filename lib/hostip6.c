@@ -57,7 +57,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(CURLRES_SYNCH)
+#ifdef CURLRES_SYNCH
 
 #ifdef DEBUG_ADDRINFO
 static void dump_addrinfo(const struct Curl_addrinfo *ai)
@@ -114,8 +114,8 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
    * The AI_NUMERICHOST must not be set to get synthesized IPv6 address from
    * an IPv4 address on iOS and macOS.
    */
-  if((1 == curlx_inet_pton(AF_INET, hostname, addrbuf)) ||
-     (1 == curlx_inet_pton(AF_INET6, hostname, addrbuf))) {
+  if((curlx_inet_pton(AF_INET, hostname, addrbuf) == 1) ||
+     (curlx_inet_pton(AF_INET6, hostname, addrbuf) == 1)) {
     /* the given address is numerical only, prevent a reverse lookup */
     hints.ai_flags = AI_NUMERICHOST;
   }

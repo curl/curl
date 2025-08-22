@@ -23,9 +23,6 @@ lib%TESTNUMBER
 <name>
 curl_mprintf() testing
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

@@ -137,10 +137,10 @@ const struct Curl_handler Curl_handler_http = {
   Curl_http_connect,                    /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* proto_pollset */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -167,10 +167,10 @@ const struct Curl_handler Curl_handler_https = {
   Curl_http_connect,                    /* connect_it */
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_getsock */
-  Curl_http_getsock_do,                 /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  NULL,                                 /* proto_pollset */
+  Curl_http_do_pollset,                 /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -474,7 +474,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(abort_upload) {
     /* We'd like to abort the upload - but should we? */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
       ongoing_auth = "NTLM";
@@ -486,7 +486,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
       }
     }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
     /* There is still data left to send */
     if((data->state.authproxy.picked == CURLAUTH_NEGOTIATE) ||
        (data->state.authhost.picked == CURLAUTH_NEGOTIATE)) {
@@ -1077,7 +1077,9 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   }
   return result;
 #else
-  (void) proxy;
+  (void)data;
+  (void)proxy;
+  (void)auth;
   /* nothing to do when disabled */
   return CURLE_OK;
 #endif
@@ -1321,7 +1323,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     data->info.wouldredirect = follow_url;
 
     if(reachedmax) {
-      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
+      failf(data, "Maximum (%d) redirects followed", data->set.maxredirs);
       return CURLE_TOO_MANY_REDIRECTS;
     }
     return CURLE_OK;
@@ -1522,14 +1524,11 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
-int Curl_http_getsock_do(struct Curl_easy *data,
-                         struct connectdata *conn,
-                         curl_socket_t *socks)
+CURLcode Curl_http_do_pollset(struct Curl_easy *data,
+                              struct easy_pollset *ps)
 {
   /* write mode */
-  (void)conn;
-  socks[0] = Curl_conn_get_socket(data, FIRSTSOCKET);
-  return GETSOCK_WRITESOCK(0);
+  return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
 /*
@@ -1823,7 +1822,9 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
 {
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
-  if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
+  if(conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+    httpreq = HTTPREQ_GET;
+  else if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->state.upload)
     httpreq = HTTPREQ_PUT;
 
@@ -1894,7 +1895,7 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
   ptr = Curl_checkheaders(data, STRCONST("Host"));
   if(ptr && (!data->state.this_is_a_follow ||
              curl_strequal(data->state.first_host, conn->host.name))) {
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
     /* If we have a given custom Host: header, we extract the hostname in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
@@ -2415,12 +2416,12 @@ static CURLcode http_req_complete(struct Curl_easy *data,
 out:
   if(!result) {
     /* setup variables for the upcoming transfer */
-    Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
+    Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
   }
   return result;
 }
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
 
 static CURLcode http_cookies(struct Curl_easy *data,
                              struct connectdata *conn,
@@ -2671,42 +2672,48 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   char *altused = NULL;
   const char *p_accept;      /* Accept: string */
   unsigned char httpversion;
+  const char *alpn;
+  const char *info_version = NULL;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that are not yet sent, since we can deal with
      the rest of the request in the PERFORM phase. */
   *done = TRUE;
-
-  switch(conn->alpn) {
-  case CURL_HTTP_VERSION_3:
+  alpn = Curl_conn_get_alpn_negotiated(data, conn);
+  if(alpn && !strcmp("h3", alpn)) {
     DEBUGASSERT(Curl_conn_http_version(data, conn) == 30);
-    break;
-  case CURL_HTTP_VERSION_2:
+    info_version = "HTTP/3";
+  }
+  else if(alpn && !strcmp("h2", alpn)) {
 #ifndef CURL_DISABLE_PROXY
     if((Curl_conn_http_version(data, conn) != 20) &&
-       conn->bits.proxy && !conn->bits.tunnel_proxy
-      ) {
+       conn->bits.proxy && !conn->bits.tunnel_proxy) {
       result = Curl_http2_switch(data);
       if(result)
         goto fail;
     }
     else
 #endif
-      DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
-    break;
-  case CURL_HTTP_VERSION_1_1:
-    /* continue with HTTP/1.x when explicitly requested */
-    break;
-  default:
+    DEBUGASSERT(Curl_conn_http_version(data, conn) == 20);
+    info_version = "HTTP/2";
+  }
+  else {
     /* Check if user wants to use HTTP/2 with clear TCP */
     if(Curl_http2_may_switch(data)) {
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
       result = Curl_http2_switch(data);
       if(result)
         goto fail;
+      info_version = "HTTP/2";
+      /* There is no ALPN here, but the connection is now definitely h2 */
+      conn->httpversion_seen = 20;
     }
-    break;
+    else
+      info_version = "HTTP/1.x";
   }
+
+  if(info_version && !data->conn->bits.reuse)
+    infof(data, "using %s", info_version);
 
   /* Add collecting of headers written to client. For a new connection,
    * we might have done that already, but reuse
@@ -3319,7 +3326,7 @@ static CURLcode http_header_s(struct Curl_easy *data,
   (void)hdlen;
 #endif
 
-#if !defined(CURL_DISABLE_COOKIES)
+#ifndef CURL_DISABLE_COOKIES
   v = (data->cookies && data->state.cookie_engine) ?
     HD_VAL(hd, hdlen, "Set-Cookie:") : NULL;
   if(v) {
@@ -3766,9 +3773,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
         if(result)
           goto out;
         *pconsumed += blen; /* ws accept handled the data */
-        k->header = FALSE; /* we will not get more responses */
-        if(data->set.connect_only)
-          k->keepon &= ~KEEP_RECV; /* read no more content */
       }
 #endif
       else {
@@ -3813,7 +3817,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   /* At this point we have some idea about the fate of the connection.
      If we are closing the connection it may result auth failure. */
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   if(conn->bits.close &&
      (((data->req.httpcode == 401) &&
        (conn->http_ntlm_state == NTLMSTATE_TYPE2)) ||
@@ -3823,7 +3827,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     data->state.authproblem = TRUE;
   }
 #endif
-#if defined(USE_SPNEGO)
+#ifdef USE_SPNEGO
   if(conn->bits.close &&
     (((data->req.httpcode == 401) &&
       (conn->http_negotiate_state == GSS_AUTHRECV)) ||
@@ -3947,7 +3951,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */
-  if((0 == k->maxdownload) && (k->httpversion_sent < 20))
+  if((k->maxdownload == 0) && (k->httpversion_sent < 20))
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */
@@ -4368,7 +4372,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
   req = calloc(1, sizeof(*req) + m_len);
   if(!req)
     goto out;
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic push
+/* error: 'memcpy' offset [137, 142] from the object at 'req' is out of
+   the bounds of referenced subobject 'method' with type 'char[1]' at
+   offset 136 */
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
   memcpy(req->method, method, m_len);
+#if defined(__GNUC__) && __GNUC__ >= 13
+#pragma GCC diagnostic pop
+#endif
   if(scheme) {
     req->scheme = Curl_memdup0(scheme, s_len);
     if(!req->scheme)
@@ -4569,7 +4583,7 @@ struct name_const {
 };
 
 /* keep them sorted by length! */
-static struct name_const H2_NON_FIELD[] = {
+static const struct name_const H2_NON_FIELD[] = {
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
   { STRCONST("Connection") },
@@ -4771,7 +4785,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     /* We are now waiting for a reply from the server or
      * a timeout on our side IFF the request has been fully sent. */
     DEBUGF(infof(data, "cr_exp100_read, start AWAITING_CONTINUE, "
-           "timeout %ldms", data->set.expect_100_timeout));
+           "timeout %dms", data->set.expect_100_timeout));
     ctx->state = EXP100_AWAITING_CONTINUE;
     ctx->start = curlx_now();
     Curl_expire(data, data->set.expect_100_timeout, EXPIRE_100_TIMEOUT);

@@ -76,6 +76,12 @@ if test "x$OPT_WOLFSSL" != xno; then
       fi
     fi
 
+    if test "$curl_cv_apple" = 'yes'; then
+      addlib="$addlib -framework Security -framework CoreFoundation"
+    else
+      addlib="$addlib -lm"
+    fi
+
     if test "x$USE_WOLFSSL" != "xyes"; then
 
       LDFLAGS="$LDFLAGS $addld"
@@ -127,7 +133,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       dnl wolfssl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
       CURL_SIZEOF(long long)
 
-      LIBS="$addlib -lm $LIBS"
+      LIBS="$addlib $LIBS"
 
       dnl is this wolfSSL providing the original QUIC API?
       AC_CHECK_FUNCS([wolfSSL_set_quic_use_legacy_codepoint], [QUIC_ENABLED=yes])

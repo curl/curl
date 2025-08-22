@@ -34,7 +34,7 @@ struct etest {
   size_t olen;
 };
 
-static CURLcode test_unit1302(char *arg)
+static CURLcode test_unit1302(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   CURLcode rc;
@@ -84,7 +84,7 @@ static CURLcode test_unit1302(char *arg)
     {"\x01", 1, "AQ", 2 },
     {"\x02", 1, "Ag", 2 },
     {"\x03", 1, "Aw", 2 },
-    {"\x04", 1, "BA", 2 },
+    {"\x04", 1, "BA", 2 }, /* spellchecker:disable-line */
     {"\x05", 1, "BQ", 2 },
     {"\x06", 1, "Bg", 2 },
     {"\x07", 1, "Bw", 2 },

@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#ifdef USE_NGHTTP2
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGHTTP2)
 #include <stdint.h>
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
@@ -488,7 +488,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *value, size_t valuelen,
                      uint8_t flags,
                      void *userp);
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int error_callback(nghttp2_session *session, const char *msg,
                           size_t len, void *userp);
 #endif
@@ -523,7 +523,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_begin_headers_callback(
     cbs, on_begin_headers);
   nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
 #endif
 
@@ -1779,7 +1779,7 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   return (nread == 0) ? NGHTTP2_ERR_DEFERRED : nread;
 }
 
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 static int error_callback(nghttp2_session *session,
                           const char *msg,
                           size_t len,
@@ -2220,7 +2220,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
   const void *body = NULL;
-  size_t nheader, bodylen, i;
+  size_t nheader, bodylen;
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
@@ -2282,9 +2282,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     goto out;
   }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #define MAX_ACC 60000  /* <64KB to account for some overhead */
   if(Curl_trc_is_verbose(data)) {
-    size_t acc = 0;
+    size_t acc = 0, i;
 
     infof(data, "[HTTP/2] [%d] OPENED stream for %s",
           stream_id, data->state.url);
@@ -2302,6 +2303,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
             "stream to be rejected.", MAX_ACC);
     }
   }
+#endif
 
   stream->id = stream_id;
 
@@ -2348,7 +2350,7 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     DEBUGASSERT(stream);
   }
   else if(stream->body_eos) {
-    /* We already wrote this, but CURLE_AGAINed the call due to not
+    /* We already wrote this, but CURLE_AGAIN-ed the call due to not
      * being able to flush stream->sendbuf. Make a 0-length write
      * to trigger flushing again.
      * If this works, we report to have written `len` bytes. */
@@ -2463,17 +2465,18 @@ out:
   return result;
 }
 
-static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data,
-                                 struct easy_pollset *ps)
+static CURLcode cf_h2_adjust_pollset(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     struct easy_pollset *ps)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   curl_socket_t sock;
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!ctx->h2)
-    return;
+    return CURLE_OK;
 
   sock = Curl_conn_cf_get_socket(cf, data);
   Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
@@ -2491,7 +2494,7 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
                 (!c_exhaust && nghttp2_session_want_write(ctx->h2)) ||
                 !Curl_bufq_is_empty(&ctx->outbufq);
 
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
   else if(ctx->sent_goaway && !cf->shutdown) {
@@ -2500,9 +2503,10 @@ static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
     want_send = nghttp2_session_want_write(ctx->h2) ||
                 !Curl_bufq_is_empty(&ctx->outbufq);
     want_recv = nghttp2_session_want_read(ctx->h2);
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
     CF_DATA_RESTORE(cf, save);
   }
+  return result;
 }
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
@@ -3008,23 +3012,23 @@ void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data)
   return Curl_crealloc(ptr, size);
 }
 
-#else /* !USE_NGHTTP2 */
+#else /* CURL_DISABLE_HTTP || !USE_NGHTTP2 */
 
 /* Satisfy external references even if http2 is not compiled in. */
 #include <curl/curl.h>
 
 char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num)
 {
-  (void) h;
-  (void) num;
+  (void)h;
+  (void)num;
   return NULL;
 }
 
 char *curl_pushheader_byname(struct curl_pushheaders *h, const char *header)
 {
-  (void) h;
-  (void) header;
+  (void)h;
+  (void)header;
   return NULL;
 }
 
-#endif /* USE_NGHTTP2 */
+#endif /* !CURL_DISABLE_HTTP && USE_NGHTTP2 */

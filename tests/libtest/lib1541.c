@@ -34,11 +34,10 @@ struct t1541_transfer_status {
 
 #define KN(a)   a, #a
 
-static int t1541_geterr(const char *name, CURLcode val, int lineno)
+static void t1541_geterr(const char *name, CURLcode val, int lineno)
 {
   curl_mprintf("CURLINFO_%s returned %d, \"%s\" on line %d\n",
                name, val, curl_easy_strerror(val), lineno);
-  return (int)val;
 }
 
 static void report_time(const char *key, const char *where, curl_off_t time,
@@ -108,7 +107,7 @@ static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return size * nmemb;
 }
 
-static CURLcode test_lib1541(char *URL)
+static CURLcode test_lib1541(const char *URL)
 {
   CURL *curls = NULL;
   CURLcode res = CURLE_OK;

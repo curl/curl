@@ -173,7 +173,7 @@ curl_headers_msg="enabled (--disable-headers-api)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2)"
-     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic, --with-msh3)"
+     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -280,6 +280,10 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
+AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
+AC_SUBST(PERL)
+AM_CONDITIONAL(PERL, test -n "$PERL")
+
 TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
@@ -371,6 +375,36 @@ if test x"$HTTPD_ENABLED" = "xno"; then
 fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
+
+dnl we'd like a dante as test socks server
+dnl
+DANTED_ENABLED="maybe"
+AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
+                         [where to find danted socks daemon for testing])],
+  [request_danted=$withval], [request_danted=check])
+if test x"$request_danted" = "xcheck" -o x"$request_danted" = "xyes"; then
+  if test -x "/usr/sbin/danted"; then
+    # common location on distros (debian/ubuntu)
+    DANTED="/usr/sbin/danted"
+  else
+    AC_PATH_PROG([DANTED], [danted])
+    if test "x$DANTED" = "x"; then
+      AC_PATH_PROG([DANTED], [danted])
+    fi
+  fi
+elif test x"$request_danted" != "xno"; then
+  DANTED="${request_danted}"
+  if test ! -x "${DANTED}"; then
+    AC_MSG_NOTICE([danted not found as ${DANTED}, danted tests disabled])
+    DANTED_ENABLED="no"
+  else
+    AC_MSG_NOTICE([using DANTED=$DANTED for tests])
+  fi
+fi
+if test x"$DANTED_ENABLED" = "xno"; then
+  DANTED=""
+fi
+AC_SUBST(DANTED)
 
 dnl the nghttpx we might use in httpd testing
 if test "x$TEST_NGHTTPX" != "x" -a "x$TEST_NGHTTPX" != "xnghttpx"; then
@@ -574,7 +608,7 @@ AM_CONDITIONAL(BUILD_UNITTESTS, test x$supports_unittests = xyes)
 # In order to detect support of sendmmsg() and accept4(), we need to escape the POSIX
 # jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
 case $host_os in
-  *linux*|cygwin*|msys*)
+  *linux*|cygwin*|msys*|gnu*)
     CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
     ;;
 esac
@@ -629,7 +663,10 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
   esac ],
     AC_MSG_RESULT([no])
 )
-
+if test -z "$PERL" -a "$want_unity" = 'yes'; then
+  AC_MSG_WARN([perl was not found. Will not enable unity.])
+  want_unity='no'
+fi
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
 
 dnl ************************************************************
@@ -1026,7 +1063,10 @@ AS_HELP_STRING([--disable-docs],[Disable documentation]),
     AC_MSG_RESULT(yes)
     BUILD_DOCS=1
 )
-
+if test -z "$PERL" -a "x$BUILD_DOCS" != "x0"; then
+  AC_MSG_WARN([perl was not found. Will not build documentation.])
+  BUILD_DOCS=0
+fi
 
 dnl ************************************************************
 dnl disable C code generation support
@@ -1241,13 +1281,13 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
   AC_MSG_CHECKING([for gethostbyname for AmigaOS bsdsocket.library])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-  #define __USE_INLINE__
-  #include <proto/bsdsocket.h>
-  #ifdef __amigaos4__
-  struct SocketIFace *ISocket = NULL;
-  #else
-  struct Library *SocketBase = NULL;
-  #endif
+      #define __USE_INLINE__
+      #include <proto/bsdsocket.h>
+      #ifdef __amigaos4__
+      struct SocketIFace *ISocket = NULL;
+      #else
+      struct Library *SocketBase = NULL;
+      #endif
     ]],[[
       unsigned char host[] = "localhost";
       gethostbyname(host);
@@ -2983,7 +3023,7 @@ if test "$want_idn" = "yes"; then
     tst_links_libidn="no"
   ])
   #
-  AC_CHECK_HEADERS( idn2.h )
+  AC_CHECK_HEADERS(idn2.h)
 
   if test "$tst_links_libidn" = "yes"; then
     AC_DEFINE(HAVE_LIBIDN2, 1, [Define to 1 if you have the `idn2' library (-lidn2).])
@@ -3752,97 +3792,6 @@ if test X"$want_quiche" != Xno; then
 fi
 
 dnl **********************************************************************
-dnl Check for msh3/msquic (QUIC)
-dnl **********************************************************************
-
-OPT_MSH3="no"
-
-if test "x$disable_http" = "xyes" -o "x$USE_NGTCP" = "x1"; then
-  # without HTTP or with ngtcp2, msh3 is no use
-  OPT_MSH3="no"
-fi
-
-AC_ARG_WITH(msh3,
-AS_HELP_STRING([--with-msh3=PATH],[Enable msh3 usage])
-AS_HELP_STRING([--without-msh3],[Disable msh3 usage]),
-  [OPT_MSH3=$withval])
-case "$OPT_MSH3" in
-  no)
-    dnl --without-msh3 option used
-    want_msh3="no"
-    ;;
-  yes)
-    dnl --with-msh3 option used without path
-    want_msh3="default"
-    want_msh3_path=""
-    ;;
-  *)
-    dnl --with-msh3 option used with path
-    want_msh3="yes"
-    want_msh3_path="$withval"
-    ;;
-esac
-
-if test X"$want_msh3" != Xno; then
-
-  dnl msh3 on non-Windows needs an OpenSSL with the QUIC API
-  if test "$curl_cv_native_windows" != "yes"; then
-    if test "$QUIC_ENABLED" != "yes"; then
-      AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-msh3 a no-no])
-    fi
-    if test "$OPENSSL_ENABLED" != "1"; then
-      AC_MSG_ERROR([msh3/msquic requires OpenSSL])
-    fi
-  fi
-
-  if test "$NGHTTP3_ENABLED" = 1; then
-    AC_MSG_ERROR([--with-msh3 and --with-ngtcp2 are mutually exclusive])
-  fi
-  if test "$USE_QUICHE" = 1; then
-    AC_MSG_ERROR([--with-msh3 and --with-quiche are mutually exclusive])
-  fi
-
-  dnl backup the pre-msh3 variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANLDFLAGSPC="$LDFLAGSPC"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  if test -n "$want_msh3_path"; then
-    LD_MSH3="-L$want_msh3_path/lib"
-    CPP_MSH3="-I$want_msh3_path/include"
-    DIR_MSH3="$want_msh3_path/lib"
-    LDFLAGS="$LDFLAGS $LD_MSH3"
-    LDFLAGSPC="$LDFLAGSPC $LD_MSH3"
-    CPPFLAGS="$CPPFLAGS $CPP_MSH3"
-  fi
-  LIBS="-lmsh3 $LIBS"
-
-  AC_CHECK_LIB(msh3, MsH3ApiOpen,
-    [
-      AC_CHECK_HEADERS(msh3.h,
-        curl_h3_msg="enabled (msh3)"
-        AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-        USE_MSH3=1
-        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
-        export CURL_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
-        dnl FIXME: Enable when msh3 was detected via pkg-config
-        if false; then
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
-        fi
-        experimental="$experimental HTTP3"
-      )
-    ],
-      dnl not found, revert back to clean variables
-      LDFLAGS=$CLEANLDFLAGS
-      LDFLAGSPC=$CLEANLDFLAGSPC
-      CPPFLAGS=$CLEANCPPFLAGS
-      LIBS=$CLEANLIBS
-  )
-fi
-
-dnl **********************************************************************
 dnl libuv is only ever used for debug purposes
 dnl **********************************************************************
 
@@ -3955,6 +3904,10 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
 esac
+if test -z "$PERL" -a x"$ZSH_FUNCTIONS_DIR" != x; then
+  AC_MSG_WARN([perl was not found. Will not install zsh completions.])
+  ZSH_FUNCTIONS_DIR=''
+fi
 AM_CONDITIONAL(USE_ZSH_COMPLETION, test x"$ZSH_FUNCTIONS_DIR" != x)
 
 dnl **********************************************************************
@@ -3986,6 +3939,10 @@ case "$OPT_FISH_FPATH" in
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
 esac
+if test -z "$PERL" -a x"$FISH_FUNCTIONS_DIR" != x; then
+  AC_MSG_WARN([perl was not found. Will not install fish completions.])
+  FISH_FUNCTIONS_DIR=''
+fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
 dnl Now check for the very most basic headers. Then we can use these
@@ -4106,30 +4063,14 @@ AC_CHECK_TYPE([bool],[
 #endif
 ])
 
-# check for sa_family_t
-AC_CHECK_TYPE(sa_family_t,
-  AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),
+if test "$curl_cv_native_windows" != 'yes'; then
+  # check for sa_family_t
+  AC_CHECK_TYPE(sa_family_t,
+    AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),,
   [
-  # The Windows name?
-  AC_CHECK_TYPE(ADDRESS_FAMILY,
-    AC_DEFINE(HAVE_ADDRESS_FAMILY, 1, [Define to 1 if symbol `ADDRESS_FAMILY' exists]),
-    [],
-    [
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-    ])
-  ],
-[
-#ifndef _WIN32
-#include <sys/socket.h>
-#endif
-])
+  #include <sys/socket.h>
+  ])
+fi
 
 # check for suseconds_t
 AC_CHECK_TYPE([suseconds_t],[
@@ -4224,7 +4165,6 @@ AC_CHECK_FUNCS([\
   getpwuid_r \
   getrlimit \
   gettimeofday \
-  if_nametoindex \
   mach_absolute_time \
   pipe \
   pipe2 \
@@ -4238,8 +4178,28 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-if test "$curl_cv_native_windows" != 'yes'; then
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_MSG_CHECKING([for if_nametoindex on Windows])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifndef WIN32_LEAN_AND_MEAN
+      #define WIN32_LEAN_AND_MEAN
+      #endif
+      #include <winsock2.h>
+      #include <wincrypt.h>  /* workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
+      #include <iphlpapi.h>
+    ]],[[
+      if_nametoindex("");
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_IF_NAMETOINDEX, 1, [if you have the 'if_nametoindex' function])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+else
   AC_CHECK_FUNCS([\
+    if_nametoindex \
     realpath \
     sched_yield \
   ])
@@ -4275,16 +4235,6 @@ if test "$curl_cv_native_windows" != 'yes'; then
 fi
 
 CURL_CHECK_NONBLOCKING_SOCKET
-
-AC_PATH_PROG(PERL, perl,,
-  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
-AC_SUBST(PERL)
-
-if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
-  if test -z "$PERL"; then
-    AC_MSG_ERROR([perl was not found, needed for docs, manual and CA embed])
-  fi
-fi
 
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(BUILD_DOCS, test x"$BUILD_DOCS" = x1)
@@ -4409,44 +4359,46 @@ AS_HELP_STRING([--disable-verbose],[Disable verbose strings]),
     AC_MSG_RESULT(yes)
 )
 
-dnl ************************************************************
-dnl enable SSPI support
-dnl
-AC_MSG_CHECKING([whether to enable SSPI support (Windows native builds only)])
-AC_ARG_ENABLE(sspi,
-AS_HELP_STRING([--enable-sspi],[Enable SSPI])
-AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
-[ case "$enableval" in
-  yes)
-    if test "$curl_cv_native_windows" = "yes"; then
-      AC_MSG_RESULT(yes)
-      AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
-      USE_WINDOWS_SSPI=1
-      curl_sspi_msg="enabled"
-    else
-      AC_MSG_RESULT(no)
-      AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
-    fi
-    ;;
-  *)
-    if test "x$SCHANNEL_ENABLED" = "x1"; then
-      # --with-schannel implies --enable-sspi
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-    fi
-    ;;
-  esac ],
-    if test "x$SCHANNEL_ENABLED" = "x1"; then
-      # --with-schannel implies --enable-sspi
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-    fi
-)
+if test "$curl_cv_winuwp" != 'yes'; then
+  dnl ************************************************************
+  dnl enable SSPI support
+  dnl
+  AC_MSG_CHECKING([whether to enable SSPI support (Windows native builds only)])
+  AC_ARG_ENABLE(sspi,
+  AS_HELP_STRING([--enable-sspi],[Enable SSPI])
+  AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
+  [ case "$enableval" in
+    yes)
+      if test "$curl_cv_native_windows" = "yes"; then
+        AC_MSG_RESULT(yes)
+        AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
+        USE_WINDOWS_SSPI=1
+        curl_sspi_msg="enabled"
+      else
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([--enable-sspi Ignored. Only supported on native Windows builds.])
+      fi
+      ;;
+    *)
+      if test "x$SCHANNEL_ENABLED" = "x1"; then
+        # --with-schannel implies --enable-sspi
+        AC_MSG_RESULT(yes)
+      else
+        AC_MSG_RESULT(no)
+      fi
+      ;;
+    esac ],
+      if test "x$SCHANNEL_ENABLED" = "x1"; then
+        # --with-schannel implies --enable-sspi
+        AC_MSG_RESULT(yes)
+      else
+        AC_MSG_RESULT(no)
+      fi
+  )
 
-if test "x$USE_WINDOWS_SSPI" = "x1"; then
-  LIBS="-lsecur32 $LIBS"
+  if test "x$USE_WINDOWS_SSPI" = "x1"; then
+    LIBS="-lsecur32 $LIBS"
+  fi
 fi
 
 dnl ************************************************************
@@ -5098,7 +5050,7 @@ if test "x$want_ssls_export" != "xno"; then
   SSLS_EXPORT_SUPPORT=''
 
   if test "x$SSL_ENABLED" != "x1"; then
-    AC_MSG_ERROR([--enable-ssls-export ignored: No SSL support])
+    AC_MSG_WARN([--enable-ssls-export ignored: No SSL support])
   else
     SSLS_EXPORT_ENABLED=1
     AC_DEFINE(USE_SSLS_EXPORT, 1, [if SSL session export support is available])
@@ -5267,7 +5219,7 @@ if test "x$USE_NGHTTP2" = "x1"; then
 fi
 
 if test "x$USE_NGTCP2_H3" = "x1" -o "x$USE_QUICHE" = "x1" \
-    -o "x$USE_OPENSSL_H3" = "x1" -o "x$USE_MSH3" = "x1"; then
+    -o "x$USE_OPENSSL_H3" = "x1"; then
   if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
     AC_MSG_ERROR([MultiSSL cannot be enabled with HTTP/3 and vice versa])
   fi
@@ -5334,7 +5286,7 @@ else
     AC_LANG_PROGRAM([[
       #include <windows.h>
     ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+      #if (_WIN32_WINNT < 0x600)
       #error
       #endif
     ]])
@@ -5521,7 +5473,6 @@ AC_CONFIG_FILES([\
   tests/libtest/Makefile \
   tests/unit/Makefile \
   tests/tunit/Makefile \
-  tests/client/Makefile \
   tests/http/config.ini \
   tests/http/Makefile \
   packages/Makefile \

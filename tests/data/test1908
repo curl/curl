@@ -34,7 +34,7 @@ alt-svc: h2="second.example:443"; ma=315360000;
 http
 </server>
 
-# require debug so that alt-svc can work over plain old HTTP
+# require Debug so that alt-svc can work over plain old HTTP
 <features>
 alt-svc
 Debug
@@ -43,7 +43,7 @@ Debug
 alt-svc cache save after resetting the handle
 </name>
 <setenv>
-# make debug-curl accept Alt-Svc over plain HTTP
+# make Debug-curl accept Alt-Svc over plain HTTP
 CURL_ALTSVC_HTTP="yeah"
 </setenv>
 <tool>

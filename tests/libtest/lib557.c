@@ -45,13 +45,6 @@
 #endif
 
 #define BUFSZ    256
-#define USHORT_TESTS_ARRSZ 1 + 100
-#define SSHORT_TESTS_ARRSZ 1 + 100
-#define UINT_TESTS_ARRSZ   1 + 100
-#define SINT_TESTS_ARRSZ   1 + 100
-#define ULONG_TESTS_ARRSZ  1 + 100
-#define SLONG_TESTS_ARRSZ  1 + 100
-#define COFFT_TESTS_ARRSZ  1 + 100
 
 
 struct unsshort_st {
@@ -103,13 +96,13 @@ struct curloff_st {
 };
 
 
-static struct unsshort_st us_test[USHORT_TESTS_ARRSZ];
-static struct sigshort_st ss_test[SSHORT_TESTS_ARRSZ];
-static struct unsint_st   ui_test[UINT_TESTS_ARRSZ];
-static struct sigint_st   si_test[SINT_TESTS_ARRSZ];
-static struct unslong_st  ul_test[ULONG_TESTS_ARRSZ];
-static struct siglong_st  sl_test[SLONG_TESTS_ARRSZ];
-static struct curloff_st  co_test[COFFT_TESTS_ARRSZ];
+static struct unsshort_st us_test[1 + 100];
+static struct sigshort_st ss_test[1 + 100];
+static struct unsint_st   ui_test[1 + 100];
+static struct sigint_st   si_test[1 + 100];
+static struct unslong_st  ul_test[1 + 100];
+static struct siglong_st  sl_test[1 + 100];
+static struct curloff_st  co_test[1 + 100];
 
 
 static int test_unsigned_short_formatting(void)
@@ -1146,7 +1139,7 @@ static int test_string_formatting(void)
   errors += string_check(buf, "09foo");
 
   curl_msnprintf(buf, sizeof(buf), "%*.*s", 5, 2, "foo");
-  errors += string_check(buf, "   fo");
+  errors += string_check(buf, "   fo"); /* spellchecker:disable-line */
 
   curl_msnprintf(buf, sizeof(buf), "%*.*s", 2, 5, "foo");
   errors += string_check(buf, "foo");
@@ -1539,7 +1532,7 @@ static int test_return_codes(void)
   return 0;
 }
 
-static CURLcode test_lib557(char *URL)
+static CURLcode test_lib557(const char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */

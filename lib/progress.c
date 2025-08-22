@@ -449,7 +449,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
 
       /* Figure out the exact time for the time span */
       span_ms = curlx_timediff(now, p->speeder_time[checkindex]);
-      if(0 == span_ms)
+      if(span_ms == 0)
         span_ms = 1; /* at least one millisecond MUST have passed */
 
       /* Calculate the average speed the last 'span_ms' milliseconds */

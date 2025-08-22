@@ -76,7 +76,7 @@ static int runawhile(struct Curl_easy *easy,
   return finaltime;
 }
 
-static CURLcode test_unit1606(char *arg)
+static CURLcode test_unit1606(const char *arg)
 {
   struct Curl_easy *easy;
 

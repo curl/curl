@@ -35,7 +35,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-static CURLcode test_lib1542(char *URL)
+static CURLcode test_lib1542(const char *URL)
 {
   CURL *easy = NULL;
   CURLcode res = CURLE_OK;
@@ -46,9 +46,9 @@ static CURLcode test_lib1542(char *URL)
 
   easy_setopt(easy, CURLOPT_URL, URL);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 0;
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = FALSE;
+  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
   easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
 

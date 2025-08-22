@@ -34,8 +34,6 @@ void Curl_init_CONNECT(struct Curl_easy *data);
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 
 CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
-int Curl_single_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 
@@ -66,38 +64,33 @@ bool Curl_xfer_write_is_paused(struct Curl_easy *data);
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos);
 
-#define CURL_XFER_NOP     (0)
-#define CURL_XFER_RECV    (1<<(0))
-#define CURL_XFER_SEND    (1<<(1))
-#define CURL_XFER_SENDRECV (CURL_XFER_RECV|CURL_XFER_SEND)
-
-/**
- * The transfer is neither receiving nor sending now.
- */
+/* The transfer is neither receiving nor sending. */
 void Curl_xfer_setup_nop(struct Curl_easy *data);
+
+/* The transfer sends data on the given socket index */
+void Curl_xfer_setup_send(struct Curl_easy *data,
+                          int sockindex);
+
+/* The transfer receives data on the given socket index, the
+ * amount to receive (or -1 if unknown). */
+void Curl_xfer_setup_recv(struct Curl_easy *data,
+                          int sockindex,
+                          curl_off_t recv_size);
+
+/* *After* Curl_xfer_setup_xxx(), tell the transfer to shutdown the
+ * connection at the end. Let the transfer either fail or ignore any
+ * errors during shutdown. */
+void Curl_xfer_set_shutdown(struct Curl_easy *data,
+                            bool shutdown,
+                            bool ignore_errors);
 
 /**
  * The transfer will use socket 1 to send/recv. `recv_size` is
- * the amount to receive or -1 if unknown. `getheader` indicates
- * response header processing is expected.
+ * the amount to receive or -1 if unknown.
  */
-void Curl_xfer_setup1(struct Curl_easy *data,
-                      int send_recv,
-                      curl_off_t recv_size,
-                      bool getheader);
-
-/**
- * The transfer will use socket 2 to send/recv. `recv_size` is
- * the amount to receive or -1 if unknown. With `shutdown` being
- * set, the transfer is only allowed to either send OR receive
- * and the socket 2 connection will be shutdown at the end of
- * the transfer. An unclean shutdown will fail the transfer
- * unless `shutdown_err_ignore` is TRUE.
- */
-void Curl_xfer_setup2(struct Curl_easy *data,
-                      int send_recv,
-                      curl_off_t recv_size,
-                      bool shutdown, bool shutdown_err_ignore);
+void Curl_xfer_setup_sendrecv(struct Curl_easy *data,
+                              int sockindex,
+                              curl_off_t recv_size);
 
 /**
  * Multi has set transfer to DONE. Last chance to trigger

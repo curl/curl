@@ -36,7 +36,7 @@ static CURLcode t1607_setup(void)
   return res;
 }
 
-static CURLcode test_unit1607(char *arg)
+static CURLcode test_unit1607(const char *arg)
 {
   /* In builds without IPv6 support CURLOPT_RESOLVE should skip over those
      addresses, so we have to do that as well. */
@@ -193,7 +193,7 @@ static CURLcode test_unit1607(char *arg)
         break;
       }
 
-      if(dns->timestamp && tests[i].permanent) {
+      if(dns->timestamp.tv_sec && tests[i].permanent) {
         curl_mfprintf(stderr,
                       "%s:%d tests[%d] failed. the timestamp is not zero "
                       "but tests[%d].permanent is TRUE\n",
@@ -202,7 +202,7 @@ static CURLcode test_unit1607(char *arg)
         break;
       }
 
-      if(dns->timestamp == 0 && !tests[i].permanent) {
+      if(dns->timestamp.tv_sec == 0 && !tests[i].permanent) {
         curl_mfprintf(stderr, "%s:%d tests[%d] failed. the timestamp is zero "
                       "but tests[%d].permanent is FALSE\n",
                       __FILE__, __LINE__, i, i);

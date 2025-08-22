@@ -167,7 +167,13 @@ while(my $filename = <$git_ls_files>) {
         for my $e (split(//, $non)) {
             $hex .= sprintf("%s%02x", $hex ? " ": "", ord($e));
         }
-        push @err, "content: has non-ASCII: '$non' ($hex)";
+        my $line;
+        for my $l (split(/\n/, $content)) {
+            $line++;
+            if($l =~ /([\x80-\xff]+)/) {
+                push @err, "line $line: has non-ASCII: '$non' ($hex)";
+            }
+        }
     }
 
     if(@err) {

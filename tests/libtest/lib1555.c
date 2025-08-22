@@ -53,7 +53,7 @@ static int progressCallback(void *arg,
   return 1;
 }
 
-static CURLcode test_lib1555(char *URL)
+static CURLcode test_lib1555(const char *URL)
 {
   CURLcode res = CURLE_OK;
 
@@ -62,11 +62,11 @@ static CURLcode test_lib1555(char *URL)
   easy_init(t1555_curl);
 
   easy_setopt(t1555_curl, CURLOPT_URL, URL);
-  easy_setopt(t1555_curl, CURLOPT_TIMEOUT, (long)7);
-  easy_setopt(t1555_curl, CURLOPT_NOSIGNAL, (long)1);
+  easy_setopt(t1555_curl, CURLOPT_TIMEOUT, 7L);
+  easy_setopt(t1555_curl, CURLOPT_NOSIGNAL, 1L);
   easy_setopt(t1555_curl, CURLOPT_PROGRESSFUNCTION, progressCallback);
   easy_setopt(t1555_curl, CURLOPT_PROGRESSDATA, NULL);
-  easy_setopt(t1555_curl, CURLOPT_NOPROGRESS, (long)0);
+  easy_setopt(t1555_curl, CURLOPT_NOPROGRESS, 0L);
 
   res = curl_easy_perform(t1555_curl);
 

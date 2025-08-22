@@ -41,8 +41,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_ALTSVC, "altsvc.txt");
 
     /* restrict which HTTP versions to use alternatives */
-    curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL, (long)
-                     CURLALTSVC_H1|CURLALTSVC_H2|CURLALTSVC_H3);
+    curl_easy_setopt(curl, CURLOPT_ALTSVC_CTRL,
+                     CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3);
 
     /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);

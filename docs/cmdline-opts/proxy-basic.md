@@ -5,7 +5,7 @@ Long: proxy-basic
 Help: Use Basic authentication on the proxy
 Category: proxy auth
 Added: 7.12.0
-Multi: mutex
+Multi: boolean
 See-also:
   - proxy
   - proxy-anyauth

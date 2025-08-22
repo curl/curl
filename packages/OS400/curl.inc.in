@@ -2216,7 +2216,7 @@
      d  CURLMOPT_MAX_CONCURRENT_STREAMS...
      d                 c                   10016
       *
-      * Bitmask bits for CURLMOPT_PIPELING.
+      * Bitmask bits for CURLMOPT_PIPELINING.
       *
      d CURLPIPE_NOTHING...
      d                 c                   x'00000000'

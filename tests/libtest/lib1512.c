@@ -32,12 +32,12 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1512(char *URL)
+static CURLcode test_lib1512(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[2] = {NULL, NULL};
-  char *port = libtest_arg3;
-  char *address = libtest_arg2;
+  const char *port = libtest_arg3;
+  const char *address = libtest_arg2;
   char dnsentry[256];
   struct curl_slist *slist = NULL;
   size_t i;
@@ -60,8 +60,8 @@ static CURLcode test_lib1512(char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "http://server.example.curl:%s/path/1512%04i",
-                   port, (int)i + 1);
+                   "http://server.example.curl:%s/path/1512%04zu",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go verbose */

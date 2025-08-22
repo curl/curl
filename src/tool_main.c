@@ -61,8 +61,8 @@
 int vms_show = 0;
 #endif
 
-#if defined(__AMIGA__)
-#if defined(__GNUC__)
+#ifdef __AMIGA__
+#ifdef __GNUC__
 #define CURL_USED __attribute__((used))
 #else
 #define CURL_USED
@@ -141,80 +141,6 @@ static void memory_tracking_init(void)
 #endif
 
 /*
- * This is the main global constructor for the app. Call this before
- * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
- * used, or havoc may be the result.
- */
-static CURLcode main_init(struct GlobalConfig *global)
-{
-  CURLcode result = CURLE_OK;
-
-#ifdef __DJGPP__
-  /* stop stat() wasting time */
-  _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
-#endif
-
-  /* Initialise the global config */
-  global->showerror = FALSE;          /* show errors when silent */
-  global->styled_output = TRUE;       /* enable detection */
-  global->parallel_max = PARALLEL_DEFAULT;
-
-  /* Allocate the initial operate config */
-  global->first = global->last = config_alloc(global);
-  if(global->first) {
-    /* Perform the libcurl initialization */
-    result = curl_global_init(CURL_GLOBAL_DEFAULT);
-    if(!result) {
-      /* Get information about libcurl */
-      result = get_libcurl_info();
-
-      if(result) {
-        errorf(global, "error retrieving curl library information");
-        free(global->first);
-      }
-    }
-    else {
-      errorf(global, "error initializing curl library");
-      free(global->first);
-    }
-  }
-  else {
-    errorf(global, "error initializing curl");
-    result = CURLE_FAILED_INIT;
-  }
-
-  return result;
-}
-
-static void free_globalconfig(struct GlobalConfig *global)
-{
-  tool_safefree(global->trace_dump);
-
-  if(global->trace_fopened && global->trace_stream)
-    fclose(global->trace_stream);
-  global->trace_stream = NULL;
-
-  tool_safefree(global->libcurl);
-}
-
-/*
- * This is the main global destructor for the app. Call this after _all_
- * libcurl usage is done.
- */
-static void main_free(struct GlobalConfig *global)
-{
-  /* Cleanup the easy handle */
-  /* Main cleanup */
-  curl_global_cleanup();
-  free_globalconfig(global);
-
-  /* Free the OperationConfig structures */
-  config_free(global->last);
-  global->first = NULL;
-  global->last = NULL;
-}
-
-/*
 ** curl tool main function.
 */
 #if defined(_UNICODE) && !defined(UNDER_CE)
@@ -230,8 +156,6 @@ int main(int argc, char *argv[])
 #endif
 {
   CURLcode result = CURLE_OK;
-  struct GlobalConfig global;
-  memset(&global, 0, sizeof(global));
 
   tool_init_stderr();
 
@@ -250,13 +174,13 @@ int main(int argc, char *argv[])
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
-    errorf(&global, "(%d) Windows-specific init failed", result);
+    errorf("(%d) Windows-specific init failed", result);
     return (int)result;
   }
 #endif
 
   if(main_checkfds()) {
-    errorf(&global, "out of file descriptors");
+    errorf("out of file descriptors");
     return CURLE_FAILED_INIT;
   }
 
@@ -269,13 +193,13 @@ int main(int argc, char *argv[])
 
   /* Initialize the curl library - do not call any libcurl functions before
      this point */
-  result = main_init(&global);
+  result = globalconf_init();
   if(!result) {
     /* Start our curl operation */
-    result = operate(&global, argc, argv);
+    result = operate(argc, argv);
 
     /* Perform the main cleanup */
-    main_free(&global);
+    globalconf_free();
   }
 
 #ifdef _WIN32

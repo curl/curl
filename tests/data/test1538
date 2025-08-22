@@ -23,9 +23,6 @@ lib%TESTNUMBER
 <name>
 libcurl strerror API call tests
 </name>
-<command>
-nothing
-</command>
 </client>
 
 #

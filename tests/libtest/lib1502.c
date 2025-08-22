@@ -33,7 +33,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib1502(char *URL)
+static CURLcode test_lib1502(const char *URL)
 {
   CURL *easy = NULL;
   CURL *dup;

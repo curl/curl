@@ -46,8 +46,8 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 #ifndef HAVE_GETHOSTNAME
 
   /* Allow compilation and return failure when unavailable */
-  (void) name;
-  (void) namelen;
+  (void)name;
+  (void)namelen;
   return -1;
 
 #else

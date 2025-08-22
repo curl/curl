@@ -166,8 +166,8 @@ struct Curl_ssl {
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */
-  void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          struct easy_pollset *ps);
+  CURLcode (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                             struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
@@ -190,8 +190,9 @@ struct Curl_ssl {
 
 extern const struct Curl_ssl *Curl_ssl;
 
-void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
-                             struct easy_pollset *ps);
+CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps);
 
 /**
  * Get the SSL filter below the given one or NULL if there is none.

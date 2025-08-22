@@ -36,8 +36,11 @@ was added in 7.48.0. The only reason you would use this option instead is if
 you could be using a version of libcurl earlier than 7.48.0.
 
 This option is exactly the same as CURLINFO_TLS_SSL_PTR(3) except in the
-case of OpenSSL. If the session *backend* is CURLSSLBACKEND_OPENSSL the
-session *internals* pointer varies depending on the option:
+case of OpenSSL and wolfSSL. If the session *backend* is
+CURLSSLBACKEND_OPENSSL the session *internals* pointer varies depending
+on the option:
+
+## OpenSSL:
 
 CURLINFO_TLS_SESSION(3) OpenSSL session *internals* is **SSL_CTX ***.
 
@@ -45,6 +48,17 @@ CURLINFO_TLS_SSL_PTR(3) OpenSSL session *internals* is **SSL ***.
 
 You can obtain an **SSL_CTX** pointer from an SSL pointer using OpenSSL
 function *SSL_get_SSL_CTX(3)*. Therefore unless you need compatibility
+with older versions of libcurl use CURLINFO_TLS_SSL_PTR(3). Refer to
+that document for more information.
+
+## wolfSSL
+
+CURLINFO_TLS_SESSION(3) wolfSSL session *internals* is **WOLFSSL_CTX ***.
+
+CURLINFO_TLS_SSL_PTR(3) wolfSSL session *internals* is **WOLFSSL ***.
+
+You can obtain an **WOLFSSL_CTX** pointer from an SSL pointer using wolfSSL
+function *wolfSSL_get_SSL_CTX(3)*. Therefore unless you need compatibility
 with older versions of libcurl use CURLINFO_TLS_SSL_PTR(3). Refer to
 that document for more information.
 

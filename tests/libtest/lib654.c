@@ -59,7 +59,7 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode test_lib654(char *URL)
+static CURLcode test_lib654(const char *URL)
 {
   static const char testdata[] = "dummy\n";
 

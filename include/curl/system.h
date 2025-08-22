@@ -66,7 +66,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__POCC__)
-#  if defined(_MSC_VER)
+#  ifdef _MSC_VER
 #    define CURL_TYPEOF_CURL_OFF_T     __int64
 #    define CURL_FORMAT_CURL_OFF_T     "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU    "I64u"
@@ -82,7 +82,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 #elif defined(__LCC__)
-#  if defined(__MCST__) /* MCST eLbrus Compiler Collection */
+#  ifdef __MCST__ /* MCST eLbrus Compiler Collection */
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -118,7 +118,7 @@
 #  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 
 #elif defined(__TANDEM)
-#  if !defined(__LP64)
+#  ifndef __LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -135,7 +135,7 @@
 #  endif
 
 #elif defined(UNDER_CE)
-#  if defined(__MINGW32CE__)
+#  ifdef __MINGW32CE__
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -162,7 +162,7 @@
 #  define CURL_PULL_SYS_TYPES_H      1
 
 #elif defined(__VMS)
-#  if defined(__VAX)
+#  ifdef __VAX
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -188,7 +188,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__MVS__)
-#  if defined(_LONG_LONG)
+#  ifdef _LONG_LONG
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -207,7 +207,7 @@
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
-#    if defined(_LONG_LONG)
+#    ifdef _LONG_LONG
 #      define CURL_TYPEOF_CURL_OFF_T     long long
 #      define CURL_FORMAT_CURL_OFF_T     "lld"
 #      define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -266,7 +266,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__xlc__) /* IBM xlc compiler */
-#  if !defined(_LP64)
+#  ifndef _LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -284,7 +284,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #elif defined(__hpux) /* HP aCC compiler */
-#  if !defined(_LP64)
+#  ifndef _LP64
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
@@ -336,8 +336,11 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    define CURL_POPCOUNT64(x)         __builtin_popcountll(x)
-#    define CURL_CTZ64(x)              __builtin_ctzll(x)
+#    if (__GNUC__ >= 4) || \
+       ((__GNUC__ == 3) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 4))
+#      define CURL_POPCOUNT64(x)       __builtin_popcountll(x)
+#      define CURL_CTZ64(x)            __builtin_ctzll(x)
+#    endif
 #  elif defined(__LP64__) || \
         defined(__x86_64__) || defined(__ppc64__) || defined(__sparc64__) || \
         defined(__e2k__) || \
@@ -348,8 +351,11 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
 #    define CURL_SUFFIX_CURL_OFF_T     L
 #    define CURL_SUFFIX_CURL_OFF_TU    UL
-#    define CURL_POPCOUNT64(x)         __builtin_popcountl(x)
-#    define CURL_CTZ64(x)              __builtin_ctzl(x)
+#    if (__GNUC__ >= 4) || \
+       ((__GNUC__ == 3) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 4))
+#      define CURL_POPCOUNT64(x)       __builtin_popcountl(x)
+#      define CURL_CTZ64(x)            __builtin_ctzl(x)
+#    endif
 #  endif
 #  define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
 #  define CURL_PULL_SYS_TYPES_H      1

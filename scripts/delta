@@ -30,7 +30,13 @@
 #
 # In the git clone root, invoke 'scripts/delta [release tag]'
 
-$start = $ARGV[0];
+use strict;
+use warnings;
+
+use POSIX;
+use Time::Piece;
+
+my $start = $ARGV[0] || '';
 
 if($start eq "-h") {
     print "Usage: summary [tag]\n";
@@ -41,22 +47,22 @@ elsif($start eq "") {
     chomp $start;
 }
 
-$commits = `git log --oneline $start.. | wc -l`;
-$committers = `git shortlog -s $start.. | wc -l`;
-$bcommitters = `git shortlog -s $start | wc -l`;
+my $commits = `git log --oneline $start.. | wc -l`;
+my $committers = `git shortlog -s $start.. | wc -l`;
+my $bcommitters = `git shortlog -s $start | wc -l`;
 
-$acommits = `git log --oneline | wc -l`;
-$acommitters = `git shortlog -s | wc -l`;
+my $acommits = `git log --oneline | wc -l`;
+my $acommitters = `git shortlog -s | wc -l`;
 
 # delta from now compared to before
-$ncommitters = $acommitters - $bcommitters;
+my $ncommitters = $acommitters - $bcommitters;
 
 # number of contributors right now
-$acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
+my $acontribs = `./scripts/contrithanks.sh stdout | wc -l`;
 # number when the tag was set
-$bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
+my $bcontribs = `git show $start:docs/THANKS | grep -c '^[^ ]'`;
 # delta
-$contribs = $acontribs - $bcontribs;
+my $contribs = $acontribs - $bcontribs;
 
 # number of setops:
 sub setopts {
@@ -71,45 +77,50 @@ sub setopts {
     close(H);
     return $opts;
 }
-$asetopts = setopts("<include/curl/curl.h");
-$bsetopts = setopts("git show $start:include/curl/curl.h|");
-$nsetopts = $asetopts - $bsetopts;
+my $asetopts = setopts("<include/curl/curl.h");
+my $bsetopts = setopts("git show $start:include/curl/curl.h|");
+my $nsetopts = $asetopts - $bsetopts;
 
 # Number of command line options:
-$aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
-$boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{"....--'`;
-$noptions=$aoptions - $boptions;
+my $aoptions=`grep -c '{"....--' src/tool_listhelp.c`;
+my $boptions=`git show $start:src/tool_listhelp.c 2>/dev/null | grep -c '{"....--'`;
+my $noptions=$aoptions - $boptions;
 
 # current local branch
-$branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
+my $branch=`git rev-parse --abbrev-ref HEAD 2>/dev/null`;
 chomp $branch;
 # Number of files in git
-$afiles=`git ls-files | wc -l`;
-$deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
-$creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null| wc -l`;
+my $afiles=`git ls-files | wc -l`;
+my $deletes=`git diff-tree --diff-filter=A -r --summary origin/$branch $start 2>/dev/null | wc -l`;
+my $creates=`git diff-tree --diff-filter=D -r --summary origin/$branch $start 2>/dev/null | wc -l`;
 
 # Time since that tag
-$tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
-$taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
+my $tagged=`git for-each-ref --format="%(refname:short) | %(taggerdate:unix)" refs/tags/* | grep ^$start | cut "-d|" -f2`; # Unix timestamp
+my $taggednice=`git for-each-ref --format="%(refname:short) | %(creatordate)" refs/tags/* | grep ^$start | cut '-d|' -f2`; # human readable time
 chomp $taggednice;
-$now=`date +%s`;
-$elapsed=$now - $tagged; # number of seconds since tag
-$total=$now - `date -d 19980320 +%s`;
-$totalhttpget=$now - `date -d 19961111 +%s`;
+my $now=POSIX::strftime("%s", localtime());
+my $elapsed=$now - $tagged; # number of seconds since tag
+my $total=$now - Time::Piece->strptime('19980320', '%Y%m%d')->epoch;
+my $totalhttpget=$now - Time::Piece->strptime('19961111', '%Y%m%d')->epoch;
 
 # Number of public functions in libcurl
-$apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
-$bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
-$public = $apublic - $bpublic;
+my $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
+my $bpublic=`git grep ^CURL_EXTERN $start -- include/curl | wc -l`;
+my $public = $apublic - $bpublic;
 
 # diffstat
-$diffstat=`git diff --stat $start.. | tail -1`;
+my ($fileschanged, $insertions, $deletions);
+my $diffstat=`git diff --stat $start.. | tail -1`;
 if($diffstat =~ /^ *(\d+) files changed, (\d+) insertions\(\+\), (\d+)/) {
     ($fileschanged, $insertions, $deletions)=($1, $2, $3);
 }
 
 # Changes/bug-fixes currently logged
+my $numchanges = 0;
+my $numbugfixes = 0;
+my $numcontributors = 0;
 open(F, "<RELEASE-NOTES");
+my $mode=0;
 while(<F>) {
     if($_ =~ /following changes:/) {
         $mode=1;

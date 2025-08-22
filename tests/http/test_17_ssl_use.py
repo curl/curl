@@ -36,6 +36,31 @@ from testenv import Env, CurlClient, LocalClient
 log = logging.getLogger(__name__)
 
 
+class TLSDefs:
+    TLS_VERSIONS = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+    TLS_VERSION_IDS = {
+        'TLSv1': 0x301,
+        'TLSv1.1': 0x302,
+        'TLSv1.2': 0x303,
+        'TLSv1.3': 0x304
+    }
+    CURL_ARG_MIN_VERSION_ID = {
+        'none': 0x0,
+        'tlsv1': 0x301,
+        'tlsv1.0': 0x301,
+        'tlsv1.1': 0x302,
+        'tlsv1.2': 0x303,
+        'tlsv1.3': 0x304,
+    }
+    CURL_ARG_MAX_VERSION_ID = {
+        'none': 0x0,
+        '1.0': 0x301,
+        '1.1': 0x302,
+        '1.2': 0x303,
+        '1.3': 0x304,
+    }
+
+
 class TestSSLUse:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -270,18 +295,54 @@ class TestSSLUse:
 
     @staticmethod
     def gen_test_17_09_list():
-        return [[tls_proto, max_ver, min_ver]
-                for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-                for max_ver in range(5)
-                for min_ver in range(-2, 4)]
+        return [
+            [server_tls, min_arg, max_arg]
+            for server_tls in TLSDefs.TLS_VERSIONS
+            for min_arg in TLSDefs.CURL_ARG_MIN_VERSION_ID
+            for max_arg in TLSDefs.CURL_ARG_MAX_VERSION_ID
+        ]
 
-    @pytest.mark.parametrize("tls_proto, max_ver, min_ver", gen_test_17_09_list())
-    def test_17_09_ssl_min_max(self, env: Env, httpd, configures_httpd, tls_proto, max_ver, min_ver):
+    @pytest.mark.parametrize("server_tls, min_arg, max_arg", gen_test_17_09_list())
+    def test_17_09_ssl_min_max(self, env: Env, httpd, configures_httpd, server_tls, min_arg, max_arg):
+        # We test if curl using min/max versions arguments (and defaults) can connect
+        # to a server using 'server_tls' version only
         httpd.set_extra_config('base', [
-            f'SSLProtocol {tls_proto}',
+            f'SSLProtocol {server_tls}',
             'SSLCipherSuite ALL:@SECLEVEL=0',
         ])
         httpd.reload_if_config_changed()
+        # curl's TLS backend supported version
+        if env.curl_uses_lib('gnutls') or \
+            env.curl_uses_lib('quiche') or \
+                env.curl_uses_lib('aws-lc'):
+            curl_supported = [0x301, 0x302, 0x303, 0x304]
+        elif env.curl_uses_lib('openssl') and \
+                env.curl_lib_version_before('openssl', '3.0.0'):
+            curl_supported = [0x301, 0x302, 0x303, 0x304]
+        else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
+            curl_supported = [0x303, 0x304]
+
+        extra_args = ['--trace-config', 'ssl']
+
+        # determine effective min/max version used by curl with these args
+        if max_arg != 'none':
+            extra_args.extend(['--tls-max', max_arg])
+            curl_max_ver = TLSDefs.CURL_ARG_MAX_VERSION_ID[max_arg]
+        else:
+            curl_max_ver = max(TLSDefs.TLS_VERSION_IDS.values())
+        if min_arg != 'none':
+            extra_args.append(f'--{min_arg}')
+            curl_min_ver = TLSDefs.CURL_ARG_MIN_VERSION_ID[min_arg]
+        else:
+            curl_min_ver = min(0x303, curl_max_ver)  # TLSv1.2 is the default now
+
+        # collect all versions that curl is allowed with this command lines and supports
+        curl_allowed = [tid for tid in sorted(TLSDefs.TLS_VERSION_IDS.values())
+                        if curl_min_ver <= tid <= curl_max_ver and
+                        tid in curl_supported]
+        # we expect a successful transfer, when the server TLS version is allowed
+        server_ver = TLSDefs.TLS_VERSION_IDS[server_tls]
+        # do the transfer
         proto = 'http/1.1'
         run_env = os.environ.copy()
         if env.curl_uses_lib('gnutls'):
@@ -295,30 +356,16 @@ class TestSSLUse:
             run_env['GNUTLS_SYSTEM_PRIORITY_FILE'] = our_config
         curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
-        # SSL backend specifics
-        if env.curl_uses_lib('gnutls'):
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-        elif env.curl_uses_lib('quiche'):
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-        elif env.curl_uses_lib('aws-lc'):
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-        elif env.curl_uses_lib('openssl') and \
-            env.curl_lib_version_before('openssl', '3.0.0'):
-            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
-        else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
-            supported = [None, None, 'TLSv1.2', 'TLSv1.3']
-        # test
-        extra_args = [[], ['--tlsv1'], ['--tlsv1.0'], ['--tlsv1.1'], ['--tlsv1.2'], ['--tlsv1.3']][min_ver+2] + \
-            [['--tls-max', '1.0'], ['--tls-max', '1.1'], ['--tls-max', '1.2'], ['--tls-max', '1.3'], []][max_ver]
-        extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
-        if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
-            assert r.exit_code == 0, f'extra_args={extra_args}\n{r.dump_logs()}'
-            assert r.json['HTTPS'] == 'on', r.dump_logs()
-            assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
-        else:
-            assert r.exit_code != 0, f'extra_args={extra_args}\n{r.dump_logs()}'
 
+        if server_ver in curl_allowed:
+            assert r.exit_code == 0, f'should succeed, server={server_ver:04x}, curl=[{curl_min_ver:04x}, {curl_max_ver:04x}], allowed={curl_allowed}\n{r.dump_logs()}'
+            assert r.json['HTTPS'] == 'on', r.dump_logs()
+            assert r.json['SSL_PROTOCOL'] == server_tls, r.dump_logs()
+        else:
+            assert r.exit_code != 0, f'should fail, server={server_ver:04x}, curl=[{curl_min_ver:04x}, {curl_max_ver:04x}]\n{r.dump_logs()}'
+
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     def test_17_10_h3_session_reuse(self, env: Env, httpd, nghttpx):
         if not env.have_h3():
             pytest.skip("h3 not supported")
@@ -330,7 +377,7 @@ class TestSSLUse:
         count = 2
         docname = 'data-10k'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='hx_download', env=env)
+        client = LocalClient(name='cli_hx_download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

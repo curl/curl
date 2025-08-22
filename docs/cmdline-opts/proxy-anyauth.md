@@ -5,7 +5,7 @@ Long: proxy-anyauth
 Help: Pick any proxy authentication method
 Added: 7.13.2
 Category: proxy auth
-Multi: mutex
+Multi: custom
 See-also:
   - proxy
   - proxy-basic

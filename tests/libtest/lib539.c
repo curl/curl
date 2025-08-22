@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib539(char *URL)
+static CURLcode test_lib539(const char *URL)
 {
   CURLcode res;
   CURL *curl;
@@ -49,7 +49,7 @@ static CURLcode test_lib539(char *URL)
    */
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_SINGLECWD);
+  test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
 
   res = curl_easy_perform(curl);
   if(res == CURLE_OK) {
@@ -70,7 +70,7 @@ static CURLcode test_lib539(char *URL)
     }
 
     test_setopt(curl, CURLOPT_URL, libtest_arg2);
-    test_setopt(curl, CURLOPT_FTP_FILEMETHOD, (long) CURLFTPMETHOD_NOCWD);
+    test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
     test_setopt(curl, CURLOPT_QUOTE, slist);
 
     res = curl_easy_perform(curl);

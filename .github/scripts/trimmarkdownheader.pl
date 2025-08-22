@@ -7,7 +7,10 @@
 # Outputs: the same file, minus the header
 #
 
-my $f = $ARGV[0];
+use strict;
+use warnings;
+
+my $f = $ARGV[0] || '';
 
 open(F, "<$f") or die;
 

@@ -25,14 +25,12 @@
 
 #include "memdebug.h"
 
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 #include <pthread.h>
 #endif
-#include "curl_threads.h"
-#endif
 
-#define CAINFO libtest_arg2
+#include "curl_threads.h"
+
 #define THREAD_SIZE 16
 #define PER_THREAD_SIZE 8
 
@@ -70,18 +68,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   return realsize;
 }
 
-static
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-DWORD
-#else
-unsigned int
-#endif
-CURL_STDCALL
-#else
-unsigned int
-#endif
-test_thread(void *ptr)
+static CURL_THREAD_RETURN_T CURL_STDCALL test_thread(void *ptr)
 {
   struct Ctx *ctx = (struct Ctx *)ptr;
   CURLcode res = CURLE_OK;
@@ -93,11 +80,11 @@ test_thread(void *ptr)
   for(i = 0; i < PER_THREAD_SIZE; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
-      curl_easy_setopt(curl, CURLOPT_URL, (char *)CURL_UNCONST(ctx->URL));
+      curl_easy_setopt(curl, CURLOPT_URL, ctx->URL);
 
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, ctx->share);
-      curl_easy_setopt(curl, CURLOPT_CAINFO, CAINFO);
+      curl_easy_setopt(curl, CURLOPT_CAINFO, libtest_arg2);
 
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_memory_callback);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, ptr);
@@ -174,7 +161,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 static void execute(CURLSH *share, struct Ctx *ctx)
 {
   size_t i;
-  (void) share;
+  (void)share;
   for(i = 0; i < THREAD_SIZE; i++) {
     test_thread((void *)&ctx[i]);
   }
@@ -182,7 +169,7 @@ static void execute(CURLSH *share, struct Ctx *ctx)
 
 #endif
 
-static CURLcode test_lib3207(char *URL)
+static CURLcode test_lib3207(const char *URL)
 {
   CURLcode res = CURLE_OK;
   size_t i;

@@ -65,10 +65,10 @@ static int t670_xferinfo(void *clientp,
 {
   struct t670_ReadThis *pooh = (struct t670_ReadThis *) clientp;
 
-  (void) dltotal;
-  (void) dlnow;
-  (void) ultotal;
-  (void) ulnow;
+  (void)dltotal;
+  (void)dlnow;
+  (void)ultotal;
+  (void)ulnow;
 
   if(pooh->origin) {
     time_t delta = time(NULL) - pooh->origin;
@@ -85,7 +85,7 @@ static int t670_xferinfo(void *clientp,
   return 0;
 }
 
-static CURLcode test_lib670(char *URL)
+static CURLcode test_lib670(const char *URL)
 {
   static const char testname[] = "field";
 
@@ -125,8 +125,8 @@ static CURLcode test_lib670(char *URL)
     res = curl_mime_name(part, testname);
     if(res != CURLE_OK) {
       curl_mfprintf(stderr,
-              "Something went wrong when building the mime structure: %d\n",
-              res);
+                 "Something went wrong when building the mime structure: %d\n",
+                 res);
       goto test_cleanup;
     }
 
@@ -147,7 +147,7 @@ static CURLcode test_lib670(char *URL)
                           CURLFORM_CONTENTLEN, (curl_off_t) 2,
                           CURLFORM_END);
     if(formrc) {
-      curl_mfprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
+      curl_mfprintf(stderr, "curl_formadd() = %d\n", formrc);
       goto test_cleanup;
     }
 

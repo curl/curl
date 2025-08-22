@@ -74,7 +74,7 @@ static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static CURLcode set_easy(char *URL, CURL *easy, long option)
+static CURLcode set_easy(const char *URL, CURL *easy, long option)
 {
   CURLcode res = CURLE_OK;
 
@@ -116,7 +116,8 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_run(char *URL, long option, unsigned int *max_fd_count)
+static CURLcode test_run(const char *URL, long option,
+                         unsigned int *max_fd_count)
 {
   CURLMcode mc = CURLM_OK;
   CURLM *multi = NULL;
@@ -339,8 +340,7 @@ static CURLcode empty_multi_test(void)
   /* calling curl_multi_waitfds() on multi handle with added easy handle. */
   easy_init(easy);
 
-  if(set_easy((char *)CURL_UNCONST("http://example.com"), easy,
-              TEST_USE_HTTP1) != CURLE_OK)
+  if(set_easy("http://example.com", easy, TEST_USE_HTTP1) != CURLE_OK)
     goto test_cleanup;
 
   multi_add_handle(multi, easy);
@@ -367,7 +367,7 @@ test_cleanup:
   return res;
 }
 
-static CURLcode test_lib2405(char *URL)
+static CURLcode test_lib2405(const char *URL)
 {
   CURLcode res = CURLE_OK;
   unsigned int fd_count = 0;

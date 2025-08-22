@@ -66,7 +66,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/include   \
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-AM_CPPFLAGS += -DBUILDING_LIBCURL
 AM_LDFLAGS =
 AM_CFLAGS =
 if DEBUGBUILD
@@ -75,6 +74,7 @@ endif
 if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
+AM_CPPFLAGS += -DBUILDING_LIBCURL
 
 if DOING_NATIVE_WINDOWS
 CSOURCES += dllmain.c
@@ -162,7 +162,7 @@ CHECKSOURCES = checksrc
 endif
 endif
 
-all-local: $(CHECKSOURCES) $(UNITPROTOS)
+all-local: $(CHECKSOURCES)
 
 UNIT_V = $(UNITV_$(V))
 UNITV_0 = @echo "  UNITPR  " $@;

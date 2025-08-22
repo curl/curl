@@ -41,20 +41,20 @@ runresults() {
   set -x
 }
 
-if [ "${mode}" = 'ExternalProject' ]; then  # Broken
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'ExternalProject' ]; then
   (cd "${src}"; git archive --format=tar HEAD) | gzip > source.tar.gz
   src="${PWD}/source.tar.gz"
   sha="$(openssl dgst -sha256 "${src}" | grep -a -i -o -E '[0-9a-f]{64}$')"
   bldc='bld-externalproject'
   rm -rf "${bldc}"
   if [ -n "${cmake_consumer_modern:-}" ]; then  # 3.15+
-    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${cmake_opts} -DCMAKE_UNITY_BUILD=ON ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_consumer}" -B "${bldc}" -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} -DCMAKE_UNITY_BUILD=ON $*" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     "${cmake_consumer}" --build "${bldc}" --verbose
   else
     mkdir "${bldc}"; cd "${bldc}"
-    "${cmake_consumer}" .. -G "${gen}" ${cmake_opts} ${TEST_CMAKE_FLAGS:-} "$@" \
+    "${cmake_consumer}" .. -G "${gen}" ${TEST_CMAKE_FLAGS:-} -DCURL_TEST_OPTS="${cmake_opts} $*" \
       -DTEST_INTEGRATION_MODE=ExternalProject \
       -DFROM_ARCHIVE="${src}" -DFROM_HASH="${sha}"
     VERBOSE=1 "${cmake_consumer}" --build .

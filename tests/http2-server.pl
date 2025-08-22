@@ -23,6 +23,9 @@
 #
 #***************************************************************************
 
+use strict;
+use warnings;
+
 # This script invokes nghttpx properly to have it serve HTTP/2 for us.
 # nghttpx runs as a proxy in front of our "actual" HTTP/1 server.
 use Cwd;
@@ -30,6 +33,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use File::Spec;
 
+my $verbose = 0;     # set to 1 for debugging
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
 my $logfile = "$logdir/http2.log";
@@ -103,8 +107,8 @@ while(@ARGV) {
     shift @ARGV;
 }
 
-$certfile = abs_path("certs/$cert.pem");
-$keyfile = abs_path("certs/$cert.key");
+my $certfile = abs_path("certs/$cert.pem");
+my $keyfile = abs_path("certs/$cert.key");
 
 my $cmdline="$nghttpx --backend=$connect ".
     "--backend-keep-alive-timeout=500ms ".

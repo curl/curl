@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib2402(char *URL)
+static CURLcode test_lib2402(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES] = {0};
@@ -35,8 +35,8 @@ static CURLcode test_lib2402(char *URL)
   char target_url[256];
   char dnsentry[256];
   struct curl_slist *slist = NULL;
-  char *port = libtest_arg3;
-  char *address = libtest_arg2;
+  const char *port = libtest_arg3;
+  const char *address = libtest_arg2;
 
   (void)URL;
 
@@ -63,8 +63,8 @@ static CURLcode test_lib2402(char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "https://localhost:%s/path/2402%04i",
-                   port, (int)i + 1);
+                   "https://localhost:%s/path/2402%04zu",
+                   port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */

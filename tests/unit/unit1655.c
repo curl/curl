@@ -25,7 +25,7 @@
 
 #include "doh.h" /* from the lib dir */
 
-static CURLcode test_unit1655(char *arg)
+static CURLcode test_unit1655(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
@@ -98,7 +98,7 @@ static CURLcode test_unit1655(char *arg)
       victim.canary1 = 87; /* magic numbers, arbitrarily picked */
       victim.canary2 = 35;
       victim.canary3 = 41;
-      d = doh_req_encode(name, DNS_TYPE_A, victim.dohbuffer,
+      d = doh_req_encode(name, CURL_DNS_TYPE_A, victim.dohbuffer,
                          sizeof(struct demo), /* allow room for overflow */
                          &olen);
 
@@ -130,7 +130,7 @@ static CURLcode test_unit1655(char *arg)
 
   /* run normal cases and try to trigger buffer length related errors */
   do {
-    DNStype dnstype = DNS_TYPE_A;
+    DNStype dnstype = CURL_DNS_TYPE_A;
     unsigned char buffer[128];
     const size_t buflen = sizeof(buffer);
     const size_t magic1 = 9765;

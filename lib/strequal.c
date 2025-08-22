@@ -59,7 +59,7 @@ static int ncasecompare(const char *first, const char *second, size_t max)
     first++;
     second++;
   }
-  if(0 == max)
+  if(max == 0)
     return 1; /* they are equal this far */
 
   return Curl_raw_toupper(*first) == Curl_raw_toupper(*second);

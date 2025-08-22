@@ -141,7 +141,7 @@ while test "$#" -gt 0; do
     ;;
 
   --cflags)
-    if test "X@includedir@" = 'X/usr/include'; then
+    if test "@includedir@" = '/usr/include'; then
       echo '@LIBCURL_PC_CFLAGS@'
     else
       echo "@LIBCURL_PC_CFLAGS@ -I@includedir@"
@@ -149,12 +149,12 @@ while test "$#" -gt 0; do
     ;;
 
   --libs)
-    if test "X@libdir@" != 'X/usr/lib' -a "X@libdir@" != 'X/usr/lib64'; then
+    if test "@libdir@" != '/usr/lib' -a "@libdir@" != '/usr/lib64'; then
       curllibdir="-L@libdir@ "
     else
       curllibdir=''
     fi
-    if test 'X@ENABLE_SHARED@' = 'Xno'; then
+    if test '@ENABLE_SHARED@' = 'no'; then
       echo "${curllibdir}-lcurl @LIBCURL_PC_LIBS_PRIVATE@"
     else
       echo "${curllibdir}-lcurl"
@@ -166,7 +166,7 @@ while test "$#" -gt 0; do
     ;;
 
   --static-libs)
-    if test 'X@ENABLE_STATIC@' != 'Xno'; then
+    if test '@ENABLE_STATIC@' != 'no'; then
       echo "@libdir@/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@"
     else
       echo 'curl was built with static libraries disabled' >&2

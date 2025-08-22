@@ -87,7 +87,7 @@ digest
 HTTP with proxy-requiring-NTLM to site-requiring-Digest
 </name>
 <command>
-http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --digest --user digest:alot
+http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-user testuser:testpass --proxy-ntlm --digest --user digest:a-lot
 </command>
 </client>
 
@@ -110,7 +110,7 @@ Proxy-Connection: Keep-Alive
 
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
-Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/%TESTNUMBER", response="95d48591985a03c4b49cb962aa7bd3e6"
+Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/%TESTNUMBER", response="89b737a4b6eefde285c093c92e9bd6ea"
 User-Agent: curl/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive

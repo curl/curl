@@ -135,7 +135,7 @@
               _curl_easy_setopt_err_error_buffer();                     \
           if((option) == CURLOPT_CURLU)                                 \
             if(!curlcheck_ptr((value), CURLU))                          \
-              _curl_easy_setopt_err_curlu();                    \
+              _curl_easy_setopt_err_curlu();                            \
           if((option) == CURLOPT_STDERR)                                \
             if(!curlcheck_FILE(value))                                  \
               _curl_easy_setopt_err_FILE();                             \
@@ -178,7 +178,7 @@
               _curl_easy_getinfo_err_curl_slist();                      \
           if(curlcheck_tlssessioninfo_info(info))                       \
             if(!curlcheck_arr((arg), struct curl_tlssessioninfo *))     \
-              _curl_easy_getinfo_err_curl_tlssessioninfo();            \
+              _curl_easy_getinfo_err_curl_tlssessioninfo();             \
           if(curlcheck_certinfo_info(info))                             \
             if(!curlcheck_arr((arg), struct curl_certinfo *))           \
               _curl_easy_getinfo_err_curl_certinfo();                   \
@@ -193,11 +193,68 @@
       curl_easy_getinfo(handle, info, arg);                             \
     })
 
+#define curl_multi_setopt(handle, option, value)                        \
+  __extension__({                                                       \
+      if(__builtin_constant_p(option)) {                                \
+        if(curlcheck_long_option(option))                               \
+          if(!curlcheck_long(value))                                    \
+            _curl_multi_setopt_err_long();                              \
+        if(curlcheck_off_t_option(option))                              \
+          if(!curlcheck_off_t(value))                                   \
+            _curl_multi_setopt_err_curl_off_t();                        \
+        if(curlcheck_multicb_data_option(option))                       \
+          if(!curlcheck_cb_data(value))                                 \
+            _curl_multi_setopt_err_cb_data();                           \
+        if(curlcheck_charpp_option(option))                             \
+          if(!curlcheck_ptrptr(value, char))                            \
+            _curl_multi_setopt_err_charpp();                            \
+        if((option) == CURLMOPT_PUSHFUNCTION)                           \
+          if(!curlcheck_multipush_cb(value))                            \
+            _curl_multi_setopt_err_pushcb();                            \
+        if((option) == CURLMOPT_SOCKETFUNCTION)                         \
+          if(!curlcheck_multisocket_cb(value))                          \
+            _curl_multi_setopt_err_socketcb();                          \
+        if((option) == CURLMOPT_TIMERFUNCTION)                          \
+          if(!curlcheck_multitimer_cb(value))                           \
+            _curl_multi_setopt_err_timercb();                           \
+      }                                                                 \
+      curl_multi_setopt(handle, option, value);                         \
+    })
+
+/* evaluates to true if the option takes a data argument to pass to a
+   callback */
+#define curlcheck_multicb_data_option(option)                           \
+  ((option) == CURLMOPT_PUSHDATA ||                                     \
+   (option) == CURLMOPT_SOCKETDATA ||                                   \
+   (option) == CURLMOPT_TIMERDATA ||                                    \
+   0)
+
+/* evaluates to true if the option takes a char ** argument */
+#define curlcheck_charpp_option(option)                                 \
+  ((option) == CURLMOPT_PIPELINING_SERVER_BL ||                         \
+   (option) == CURLMOPT_PIPELINING_SITE_BL ||                           \
+   0)
+
+/* evaluates to true if expr is of type curl_multi_timer_callback */
+#define curlcheck_multitimer_cb(expr)                                   \
+  (curlcheck_NULL(expr) ||                                              \
+   curlcheck_cb_compatible((expr), curl_multi_timer_callback))
+
+/* evaluates to true if expr is of type curl_socket_callback */
+#define curlcheck_multisocket_cb(expr)                                  \
+  (curlcheck_NULL(expr) ||                                              \
+   curlcheck_cb_compatible((expr), curl_socket_callback))
+
+/* evaluates to true if expr is of type curl_push_callback */
+#define curlcheck_multipush_cb(expr)                                  \
+  (curlcheck_NULL(expr) ||                                            \
+   curlcheck_cb_compatible((expr), curl_push_callback))
+
 /*
  * For now, just make sure that the functions are called with three arguments
  */
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
-#define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+
 
 /* the actual warnings, triggered by calling the _curl_easy_setopt_err*
  * functions */
@@ -207,6 +264,21 @@
   static void __attribute__((__warning__(message)))                     \
   __attribute__((__unused__)) __attribute__((__noinline__))             \
   id(void) { __asm__(""); }
+
+CURLWARNING(_curl_multi_setopt_err_long,
+            "curl_multi_setopt expects a long argument")
+CURLWARNING(_curl_multi_setopt_err_curl_off_t,
+            "curl_multi_setopt expects a curl_off_t argument")
+CURLWARNING(_curl_multi_setopt_err_cb_data,
+            "curl_multi_setopt expects a 'void *' argument")
+CURLWARNING(_curl_multi_setopt_err_charpp,
+            "curl_multi_setopt expects a 'char **' argument")
+CURLWARNING(_curl_multi_setopt_err_pushcb,
+            "curl_multi_setopt expects a curl_push_callback argument")
+CURLWARNING(_curl_multi_setopt_err_socketcb,
+            "curl_multi_setopt expects a curl_socket_callback argument")
+CURLWARNING(_curl_multi_setopt_err_timercb,
+            "curl_multi_setopt expects a curl_multi_timer_callback argument")
 
 CURLWARNING(_curl_easy_setopt_err_long,
             "curl_easy_setopt expects a long argument")
@@ -539,6 +611,14 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    __builtin_types_compatible_p(__typeof__(expr), type *) ||            \
    __builtin_types_compatible_p(__typeof__(expr), const type *))
 
+/* evaluates to true if expr is type**, const type** or NULL */
+#define curlcheck_ptrptr(expr, type)                                    \
+  (curlcheck_NULL(expr) ||                                              \
+   __builtin_types_compatible_p(__typeof__(expr), type **) ||           \
+   __builtin_types_compatible_p(__typeof__(expr), type *[]) ||          \
+   __builtin_types_compatible_p(__typeof__(expr), const type *[]) ||    \
+   __builtin_types_compatible_p(__typeof__(expr), const type **))
+
 /* evaluates to true if expr is one of type[], type*, NULL or const type* */
 #define curlcheck_arr(expr, type)                                       \
   (curlcheck_ptr((expr), type) ||                                       \
@@ -551,7 +631,7 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    curlcheck_arr((expr), unsigned char))
 
 /* evaluates to true if expr is a CURL * */
-#define curlcheck_curl(expr)                                          \
+#define curlcheck_curl(expr)                                            \
   (curlcheck_NULL(expr) ||                                              \
    __builtin_types_compatible_p(__typeof__(expr), CURL *))
 
@@ -845,8 +925,8 @@ typedef long (*_curl_chunk_bgn_callback2)(void *, void *, int);
    curlcheck_cb_compatible((expr), curl_sshhostkeycallback))
 
 /* evaluates to true if expr is of type curl_sshkeycallback */
-#define curlcheck_ssh_key_cb(expr)                                  \
-  (curlcheck_NULL(expr) ||                                          \
+#define curlcheck_ssh_key_cb(expr)                                      \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_sshkeycallback))
 
 /* evaluates to true if expr is of type curl_interleave_callback */
@@ -860,13 +940,13 @@ typedef size_t (*_curl_interleave_callback2)(char *p, size_t s,
                                              size_t n, void *u);
 
 /* evaluates to true if expr is of type curl_prereq_callback */
-#define curlcheck_prereq_cb(expr)                                    \
-  (curlcheck_NULL(expr) ||                                           \
+#define curlcheck_prereq_cb(expr)                                       \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_prereq_callback))
 
 /* evaluates to true if expr is of type curl_trailer_callback */
-#define curlcheck_trailer_cb(expr)                                    \
-  (curlcheck_NULL(expr) ||                                            \
+#define curlcheck_trailer_cb(expr)                                      \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_trailer_callback))
 
 #endif /* CURLINC_TYPECHECK_GCC_H */

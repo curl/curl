@@ -44,7 +44,7 @@
 
 #include "memdebug.h"
 
-static CURLcode test_lib526(char *URL)
+static CURLcode test_lib526(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES];
@@ -96,7 +96,7 @@ static CURLcode test_lib526(char *URL)
         curl[current] = NULL;
       }
       if(++current < CURL_ARRAYSIZE(curl)) {
-        curl_mfprintf(stderr, "Advancing to URL %d\n", (int)current);
+        curl_mfprintf(stderr, "Advancing to URL %zu\n", current);
         if(testnum == 532) {
           /* first remove the only handle we use */
           curl_multi_remove_handle(m, curl[0]);

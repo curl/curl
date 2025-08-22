@@ -70,11 +70,11 @@ struct curl_trc_featt;
  * platforms that have a >= 64-bit type and then we use such a type for the
  * protocol fields in the protocol handler.
  */
-#define CURLPROTO_WS     (1<<30)
+#define CURLPROTO_WS     (1L<<30)
 #define CURLPROTO_WSS    ((curl_prot_t)1<<31)
 #else
-#define CURLPROTO_WS 0
-#define CURLPROTO_WSS 0
+#define CURLPROTO_WS     0L
+#define CURLPROTO_WSS    0L
 #endif
 
 /* the default protocols accepting a redirect to */
@@ -324,7 +324,7 @@ struct ssl_general_config {
 #ifndef CURL_DISABLE_DIGEST_AUTH
 /* Struct used for Digest challenge-response authentication */
 struct digestdata {
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
   BYTE *input_token;
   size_t input_token_len;
   CtxtHandle *http_context;
@@ -430,6 +430,7 @@ struct ConnectBits {
   BIT(parallel_connect); /* set TRUE when a parallel connect attempt has
                             started (happy eyeballs) */
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
+  BIT(no_reuse); /* connection should not be reused */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
   BIT(in_cpool);     /* connection is kept in a connection pool */
@@ -477,15 +478,6 @@ struct hostname {
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
 
-/* Polling requested by an easy handle.
- * `action` is CURL_POLL_IN, CURL_POLL_OUT or CURL_POLL_INOUT.
- */
-struct easy_pollset {
-  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
-  unsigned int num;
-  unsigned char actions[MAX_SOCKSPEREASYHANDLE];
-};
-
 /*
  * Specific protocol handler.
  */
@@ -522,24 +514,24 @@ struct Curl_handler {
 
   /* Called from the multi interface during the PROTOCONNECT phase, and it
      should then return a proper fd set */
-  int (*proto_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*proto_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DOING phase, and it should
      then return a proper fd set */
-  int (*doing_getsock)(struct Curl_easy *data,
-                       struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*doing_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DO_MORE phase, and it should
      then return a proper fd set */
-  int (*domore_getsock)(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*domore_pollset)(struct Curl_easy *data,
+                            struct easy_pollset *ps);
 
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
-  int (*perform_getsock)(struct Curl_easy *data,
-                         struct connectdata *conn, curl_socket_t *socks);
+  CURLcode (*perform_pollset)(struct Curl_easy *data,
+                              struct easy_pollset *ps);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection. If the handler
@@ -632,8 +624,7 @@ struct ip_quadruple {
 struct proxy_info {
   struct hostname host;
   int port;
-  unsigned char proxytype; /* curl_proxytype: what kind of proxy that is in
-                              use */
+  unsigned char proxytype; /* what kind of proxy that is in use */
   char *user;    /* proxy username string, allocated */
   char *passwd;  /* proxy password string, allocated */
 };
@@ -681,14 +672,6 @@ struct connectdata {
   struct proxy_info socks_proxy;
   struct proxy_info http_proxy;
 #endif
-  /* 'primary' and 'secondary' get filled with IP quadruple
-     (local/remote numerical ip address and port) whenever a connect is
-     *attempted*.
-     When more than one address is tried for a connection these will hold data
-     for the last attempt. When the connection is actually established
-     these are updated with data which comes directly from the socket. */
-  struct ip_quadruple primary;
-  struct ip_quadruple secondary;
   char *user;    /* username string, allocated */
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
@@ -696,11 +679,18 @@ struct connectdata {
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime created; /* creation time */
   struct curltime lastused; /* when returned to the connection poolas idle */
-  curl_socket_t sock[2]; /* two sockets, the second is used for the data
-                            transfer when doing FTP */
+
+  /* A connection can have one or two sockets and connection filters.
+   * The protocol using the 2nd one is FTP for CONTROL+DATA sockets */
+  curl_socket_t sock[2];
+  struct Curl_cfilter *cfilter[2]; /* connection filters */
   Curl_recv *recv[2];
   Curl_send *send[2];
-  struct Curl_cfilter *cfilter[2]; /* connection filters */
+  int recv_idx;  /* on which socket index to receive, default 0 */
+  int send_idx;  /* on which socket index to send, default 0 */
+
+#define CONN_SOCK_IDX_VALID(i)    (((i) >= 0) && ((i) < 2))
+
   struct {
     struct curltime start[2]; /* when filter shutdown started */
     timediff_t timeout_ms; /* 0 means no timeout */
@@ -721,10 +711,6 @@ struct connectdata {
   struct curltime keepalive;
 
   /**** curl_get() phase fields */
-
-  curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
-  curl_socket_t writesockfd; /* socket to write to, it may be the same we read
-                                from. CURL_SOCKET_BAD disables */
 
 #ifdef HAVE_GSSAPI
   BIT(sec_complete); /* if Kerberos is enabled for this connection */
@@ -749,10 +735,10 @@ struct connectdata {
 
   /*************** Request - specific items ************/
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
-  CtxtHandle *sslContext;
+  CtxtHandle *sslContext;  /* mingw-w64 v9+. MS SDK 7.0A+. */
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
   curlntlm http_ntlm_state;
   curlntlm proxy_ntlm_state;
 #endif
@@ -787,17 +773,12 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
-                         value */
-#ifndef CURL_DISABLE_PROXY
-  unsigned char proxy_alpn; /* APLN of proxy tunnel, CURL_HTTP_VERSION* */
-#endif
   unsigned char transport_wanted; /* one of the TRNSPRT_* defines. Not
    necessarily the transport the connection ends using due to Alt-Svc
    and happy eyeballing. Use `Curl_conn_get_transport() for actual value
    once the connection is set up. */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
-  /* HTTP version last responded with by the server.
+  /* HTTP version last responded with by the server or negotiated via ALPN.
    * 0 at start, then one of 09, 10, 11, etc. */
   unsigned char httpversion_seen;
   unsigned char connect_only;
@@ -973,7 +954,6 @@ typedef enum {
   EXPIRE_HAPPY_EYEBALLS_DNS, /* See asyn-ares.c */
   EXPIRE_HAPPY_EYEBALLS,
   EXPIRE_MULTI_PENDING,
-  EXPIRE_RUN_NOW,
   EXPIRE_SPEEDCHECK,
   EXPIRE_TIMEOUT,
   EXPIRE_TOOFAST,
@@ -1060,7 +1040,7 @@ struct UrlState {
   struct Curl_async async;  /* asynchronous name resolver data */
 #endif
 
-#if defined(USE_OPENSSL)
+#ifdef USE_OPENSSL
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
   void *engine;
   /* void instead of OSSL_PROVIDER */
@@ -1262,7 +1242,7 @@ enum dupstring {
   STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
   STRING_FTPPORT,         /* port to send with the FTP PORT command */
 #endif
-#if defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   STRING_KRB_LEVEL,       /* krb security level */
 #endif
 #ifndef CURL_DISABLE_NETRC
@@ -1384,8 +1364,6 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
-  long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
-                        for infinity */
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
@@ -1424,9 +1402,6 @@ struct UserDefined {
                            is to be reused */
   timediff_t conn_max_age_ms; /* max time since creation to allow a
                             connection that is to be reused */
-#ifndef CURL_DISABLE_TFTP
-  long tftp_blksize;    /* in bytes, 0 means use default */
-#endif
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
@@ -1454,11 +1429,11 @@ struct UserDefined {
   unsigned short proxyport; /* If non-zero, use this port number by
                                default. If the proxy string features a
                                ":[port]" that one will override this. */
-  unsigned char proxytype; /* what kind of proxy: curl_proxytype */
+  unsigned char proxytype; /* what kind of proxy */
   unsigned char socks5auth;/* kind of SOCKS5 authentication to use (bitmask) */
 #endif
   struct ssl_general_config general_ssl; /* general user defined SSL stuff */
-  int dns_cache_timeout; /* DNS cache timeout (seconds) */
+  timediff_t dns_cache_timeout_ms; /* DNS cache timeout (milliseconds) */
   unsigned int buffer_size;      /* size of receive buffer to use */
   unsigned int upload_buffer_size; /* size of upload buffer to use,
                                       keep it >= CURL_MAX_WRITE_SIZE */
@@ -1521,7 +1496,6 @@ struct UserDefined {
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
 
-  long expect_100_timeout; /* in milliseconds */
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   struct Curl_data_priority priority;
 #endif
@@ -1541,12 +1515,18 @@ struct UserDefined {
 #ifdef USE_ECH
   int tls_ech;      /* TLS ECH configuration  */
 #endif
+  short maxredirs;    /* maximum no. of http(s) redirects to follow,
+                         set to -1 for infinity */
+  unsigned short expect_100_timeout; /* in milliseconds */
   unsigned short use_port; /* which port to use (when not using default) */
 #ifndef CURL_DISABLE_BINDLOCAL
   unsigned short localport; /* local port number to bind to */
   unsigned short localportrange; /* number of additional port numbers to test
                                     in case the 'localport' one cannot be
                                     bind()ed */
+#endif
+#ifndef CURL_DISABLE_TFTP
+  unsigned short tftp_blksize;    /* in bytes, 0 means use default */
 #endif
 #ifndef CURL_DISABLE_NETRC
   unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
@@ -1633,7 +1613,7 @@ struct UserDefined {
                              location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(verbose);        /* output verbosity */
-#if defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   BIT(krb);            /* Kerberos connection requested */
 #endif
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
