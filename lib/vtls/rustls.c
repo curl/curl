@@ -263,7 +263,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "rustls_recv(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "rustls_recv(len=%zu) -> %u, %zu",
               plainlen, result, *pnread);
   return result;
 }
@@ -385,7 +385,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     *pnwritten += (ssize_t)plainwritten;
 
 out:
-  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %u, %zd",
+  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %u, %zu",
               plainlen, result, *pnwritten);
   return result;
 }
@@ -1150,13 +1150,13 @@ cr_connect(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
+  CURL_TRC_CF(data, cf, "cr_connect, state=%u", connssl->state);
   *done = FALSE;
 
   if(!backend->conn) {
     result = cr_init_backend(cf, data,
                (struct rustls_ssl_backend_data *)connssl->backend);
-    CURL_TRC_CF(data, cf, "cr_connect, init backend -> %u", result);
+    CURL_TRC_CF(data, cf, "cr_connect, init backend -> %d", result);
     if(result != CURLE_OK) {
       return result;
     }
@@ -1229,7 +1229,7 @@ cr_connect(struct Curl_cfilter *cf,
             size_t errorlen;
             rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
             failf(data,
-              "Failed getting DER of server certificate #%ld: %.*s", i,
+              "Failed getting DER of server certificate #%zu: %.*s", i,
               (int)errorlen, errorbuf);
             return map_error(rresult);
           }
