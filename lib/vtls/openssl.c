@@ -216,8 +216,10 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 
 #ifdef HAVE_BORINGSSL_LIKE
 typedef size_t numcert_t;
+typedef uint32_t sslerr_t;
 #else
 typedef int numcert_t;
+typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
 
@@ -242,12 +244,6 @@ typedef int numcert_t;
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
 #define HAVE_RANDOM_INIT_BY_DEFAULT 1
-#endif
-
-#ifdef HAVE_BORINGSSL_LIKE
-typedef uint32_t sslerr_t;
-#else
-typedef unsigned long sslerr_t;
 #endif
 
 /*
