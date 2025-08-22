@@ -107,7 +107,7 @@ redirects for security reasons: only HTTP, HTTPS, FTP and FTPS are
 enabled by default. Applications may opt to restrict that set further.
 
 A redirect to a file: URL would cause the libcurl to read (or write) arbitrary
-files from the local filesystem. If the application returns the data back to
+files from the local file system. If the application returns the data back to
 the user (as would happen in some kinds of CGI scripts), an attacker could
 leverage this to read otherwise forbidden data (e.g.
 **file://localhost/etc/passwd**).

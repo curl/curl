@@ -64,8 +64,8 @@ leak the privacy of your communication. We recommend to *not* persist
 peer keys for this reason.
 
 **Caveat**: The key may contain filenames or paths. It does not reflect the
-*contents* in the filesystem. If you change `/etc/ssl/cert.pem` and reuse a
-previous ticket, curl might trust a server which no longer has a root
+*contents* in the file system. If you change `/etc/ssl/cert.pem` and reuse
+a previous ticket, curl might trust a server which no longer has a root
 certificate in the file.
 
 

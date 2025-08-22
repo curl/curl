@@ -55,7 +55,7 @@ if($ARGV[0] eq "prepare") {
     print FILE "Test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
-    # represented exactly on a FAT filesystem.
+    # represented exactly on a FAT file system.
     utime time, timegm(0,0,12,1,0,100), "plainfile.txt";
     chmod 0666, "plainfile.txt";
 
@@ -64,7 +64,7 @@ if($ARGV[0] eq "prepare") {
     print FILE "Read-only test file to support curl test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
-    # represented exactly on a FAT filesystem.
+    # represented exactly on a FAT file system.
     utime time, timegm(0,0,12,31,11,100), "rofile.txt";
     chmod 0444, "rofile.txt";
     if($^O eq 'cygwin') {
@@ -114,7 +114,7 @@ elsif($ARGV[0] eq "postprocess") {
                     next;
                 }
                 # Erase all directory metadata except for the name, as it is not
-                # consistent for across all test systems and filesystems
+                # consistent for across all test systems and file systems
                 push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
             } elsif($1 eq "-") {
                 # Ignore group and other permissions, because these may vary on

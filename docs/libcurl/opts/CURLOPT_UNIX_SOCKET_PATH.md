@@ -71,7 +71,7 @@ int main(void)
 ~~~
 
 If you are on Linux and somehow have a need for paths larger than 107 bytes,
-you can use the *proc* filesystem to bypass the limitation:
+you can use the *proc* file system to bypass the limitation:
 
 ~~~c
   int dirfd = open(long_directory_path_to_socket, O_DIRECTORY | O_RDONLY);
