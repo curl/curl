@@ -41,6 +41,10 @@
 #define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
 #endif
 
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+#define HAVE_BORINGSSL_LIKE
+#endif
+
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
@@ -55,8 +59,7 @@
 
 /* Check for OpenSSL 1.1.1 which has early data support. */
 #undef HAVE_OPENSSL_EARLYDATA
-#if defined(TLS1_3_VERSION) && \
-    !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+#if defined(TLS1_3_VERSION) && !defined(HAVE_BORINGSSL_LIKE)
 #define HAVE_OPENSSL_EARLYDATA
 #endif
 
