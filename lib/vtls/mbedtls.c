@@ -597,7 +597,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CACERT_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the filesystem not built in");
+    failf(data, "mbedtls: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -615,7 +615,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         return CURLE_SSL_CACERT_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the filesystem not built in");
+    failf(data, "mbedtls: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -635,7 +635,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CERTPROBLEM;
     }
 #else
-    failf(data, "mbedtls: functions that use the filesystem not built in");
+    failf(data, "mbedtls: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -681,7 +681,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         return CURLE_SSL_CERTPROBLEM;
       }
 #else
-      failf(data, "mbedtls: functions that use the filesystem not built in");
+      failf(data, "mbedtls: functions that use the file system not built in");
       return CURLE_NOT_BUILT_IN;
 #endif
     }
@@ -724,7 +724,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CRL_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the filesystem not built in");
+    failf(data, "mbedtls: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
