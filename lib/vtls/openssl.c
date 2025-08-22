@@ -5558,15 +5558,13 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
   return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE,
-                   CURL_BORINGSSL_VERSION);
+                   OSSL_PACKAGE, CURL_BORINGSSL_VERSION);
 #else
   return msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
 #elif defined(OPENSSL_IS_AWSLC)
   return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE,
-                   AWSLC_VERSION_NUMBER_STRING);
+                   OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
 #elif defined(OPENSSL_VERSION_STRING)  /* OpenSSL 3+ */
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
