@@ -135,17 +135,6 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
-/* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
-   renegotiations when built with BoringSSL. Renegotiating is non-compliant
-   with HTTP/2 and "an extremely dangerous protocol feature". Beware.
-
-#define ALLOW_RENEG 1
- */
-
-#ifndef OPENSSL_VERSION_NUMBER
-#error "OPENSSL_VERSION_NUMBER not defined"
-#endif
-
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
 #endif
@@ -3931,11 +3920,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(Curl_ssl_cf_get_primary_config(cf)->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
-#endif
-
-#if (defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)) && \
-    defined(ALLOW_RENEG)
-  SSL_set_renegotiate_mode(octx->ssl, ssl_renegotiate_freely);
 #endif
 
   SSL_set_connect_state(octx->ssl);
