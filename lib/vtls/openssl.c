@@ -105,11 +105,11 @@
 
 #ifdef LIBRESSL_VERSION_NUMBER
 /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
-# if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
-#  error "LibreSSL 2.9.1 or later required"
-# endif
+#  if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
+#    error "LibreSSL 2.9.1 or later required"
+#  endif
 #elif OPENSSL_VERSION_NUMBER < 0x1000201fL /* 2015-03-19 */
-# error "OpenSSL 1.0.2a or later required"
+#  error "OpenSSL 1.0.2a or later required"
 #endif
 
 #if defined(HAVE_OPENSSL3) && !defined(OPENSSL_NO_UI_CONSOLE)
@@ -123,7 +123,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
   !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL)
-  #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
+#define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
 #include "../curlx/warnless.h"
@@ -184,10 +184,10 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
      (defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER >= 0x3040100fL)) && \
     !defined(OPENSSL_IS_BORINGSSL)
-  #define HAVE_SSL_CTX_SET_CIPHERSUITES
-  #ifndef OPENSSL_IS_AWSLC
-    #define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
-  #endif
+#  define HAVE_SSL_CTX_SET_CIPHERSUITES
+#  ifndef OPENSSL_IS_AWSLC
+#    define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+#  endif
 #endif
 
 /* Whether SSL_CTX_set1_sigalgs_list is available
@@ -196,7 +196,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
  * LibreSSL: no
  */
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
-  #define HAVE_SSL_CTX_SET1_SIGALGS
+#define HAVE_SSL_CTX_SET1_SIGALGS
 #endif
 
 #ifdef LIBRESSL_VERSION_NUMBER
@@ -3916,7 +3916,7 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
     if(result)
       return result;
   }
-#endif  /* USE_ECH_OPENSSL */
+#endif /* USE_ECH_OPENSSL */
 
   return ossl_init_session_and_alpns(octx, cf, data, peer,
                                      alpns_requested, sess_reuse_cb);
