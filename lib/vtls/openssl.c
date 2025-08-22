@@ -104,7 +104,7 @@
 #endif
 
 #ifdef LIBRESSL_VERSION_NUMBER
-# /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
+/* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
 # if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
 #  error "LibreSSL 2.9.1 or later required"
 # endif
@@ -121,9 +121,8 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-     !defined(LIBRESSL_VERSION_NUMBER) && \
-     !defined(OPENSSL_IS_BORINGSSL))
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
+  !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL)
   #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
@@ -196,8 +195,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
  * BoringSSL: supported since 0.20240913.0 (commit 826ce15)
  * LibreSSL: no
  */
-#if (OPENSSL_VERSION_NUMBER >= 0x10002000L && \
-      !defined(LIBRESSL_VERSION_NUMBER))
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
   #define HAVE_SSL_CTX_SET1_SIGALGS
 #endif
 
@@ -207,8 +205,8 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
-#elif (defined(USE_NGTCP2) && defined(USE_NGHTTP3) &&   \
-       !defined(OPENSSL_QUIC_API2))
+#elif defined(USE_NGTCP2) && defined(USE_NGHTTP3) &&   \
+  !defined(OPENSSL_QUIC_API2)
 #define OSSL_PACKAGE "quictls"
 #else
 #define OSSL_PACKAGE "OpenSSL"
@@ -223,7 +221,7 @@ typedef unsigned long sslerr_t;
 #endif
 #define ossl_valsize_t numcert_t
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 /* up2date versions of OpenSSL maintain reasonably secure defaults without
  * breaking compatibility, so it is better not to override the defaults in curl
  */
@@ -242,7 +240,7 @@ typedef unsigned long sslerr_t;
 #endif
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define HAVE_RANDOM_INIT_BY_DEFAULT 1
 #endif
 
@@ -251,7 +249,7 @@ typedef unsigned long sslerr_t;
  * X509_STORE between connections. The API is:
  * * `X509_STORE_up_ref`       -- Introduced: OpenSSL 1.1.0.
  */
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* OpenSSL >= 1.1.0 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL >= 1.1.0 */
 #define HAVE_SSL_X509_STORE_SHARE
 #endif
 
@@ -322,8 +320,7 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 {
   int i;
   CURLcode result = CURLE_OK;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-  !defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
   const STACK_OF(X509_EXTENSION) *exts = extsarg;
 #else
   STACK_OF(X509_EXTENSION) *exts = CURL_UNCONST(extsarg);
@@ -1255,8 +1252,7 @@ static int enginecheck(struct Curl_easy *data,
     UI_METHOD *ui_method =
       UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
     if(!ui_method) {
-      failf(data, "unable do create " OSSL_PACKAGE
-            " user-interface method");
+      failf(data, "unable do create " OSSL_PACKAGE " user-interface method");
       return 0;
     }
     UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
@@ -1318,8 +1314,7 @@ static int providercheck(struct Curl_easy *data,
     UI_METHOD *ui_method =
       UI_create_method(OSSL_UI_METHOD_CAST("curl user interface"));
     if(!ui_method) {
-      failf(data, "unable do create " OSSL_PACKAGE
-            " user-interface method");
+      failf(data, "unable do create " OSSL_PACKAGE " user-interface method");
       return 0;
     }
     UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
@@ -1547,8 +1542,7 @@ static int pkcs12load(struct Curl_easy *data,
     cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
     if(!cert_bio) {
       failf(data,
-            "BIO_new_mem_buf NULL, " OSSL_PACKAGE
-            " error %s",
+            "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)) );
       return 0;
@@ -1558,8 +1552,7 @@ static int pkcs12load(struct Curl_easy *data,
     cert_bio = BIO_new(BIO_s_file());
     if(!cert_bio) {
       failf(data,
-            "BIO_new return NULL, " OSSL_PACKAGE
-            " error %s",
+            "BIO_new return NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)) );
       return 0;
@@ -2872,7 +2865,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #  define HAS_ALPN_OPENSSL
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
 static CURLcode
 ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 {
@@ -2970,7 +2963,7 @@ typedef unsigned long ctx_option_t;
 typedef long ctx_option_t;
 #endif
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) /* 1.1.0 */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L /* 1.1.0 */
 static CURLcode
 ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
                                     struct Curl_cfilter *cf,
@@ -3951,11 +3944,11 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
       /* it will be handled later with the context options */
-  #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
       *pmethod = TLS_client_method();
-  #else
+#else
       *pmethod = SSLv23_client_method();
-  #endif
+#endif
       break;
     case CURL_SSLVERSION_SSLv2:
       failf(data, "No SSLv2 support");
@@ -4118,7 +4111,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     ctx_options |= SSL_OP_NO_SSLv2;
     ctx_options |= SSL_OP_NO_SSLv3;
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* 1.1.0 */
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /* 1.1.0 */
     result = ossl_set_ssl_version_min_max(cf, octx->ssl_ctx);
 #else
     result = ossl_set_ssl_version_min_max_legacy(&ctx_options, cf, data);
@@ -4338,7 +4331,7 @@ void Curl_ossl_report_handshake(struct Curl_easy *data,
 
 #ifdef HAVE_OPENSSL3
     SSL_get_peer_signature_type_nid(octx->ssl, &psigtype_nid);
-#if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
+#if OPENSSL_VERSION_NUMBER >= 0x30200000L
     negotiated_group_name = SSL_get0_group_name(octx->ssl);
 #else
     negotiated_group_name =
@@ -4629,8 +4622,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
     Curl_ossl_report_handshake(data, octx);
 
-#ifdef USE_ECH_OPENSSL
-# ifndef HAVE_BORINGSSL_LIKE
+#if defined(USE_ECH_OPENSSL) && !defined(HAVE_BORINGSSL_LIKE)
     if(ECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
       const char *status = NULL;
@@ -4688,8 +4680,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     else {
       infof(data, "ECH: result: status is not attempted");
     }
-# endif /* !HAVE_BORINGSSL_LIKE */
-#endif /* USE_ECH_OPENSSL */
+#endif /* USE_ECH_OPENSSL && !HAVE_BORINGSSL_LIKE */
 
 #ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -4766,7 +4757,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
   return result;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L &&  \
   !(defined(LIBRESSL_VERSION_NUMBER) && \
     LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
   !defined(HAVE_BORINGSSL_LIKE) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -4859,8 +4850,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   if(!mem) {
     failf(data,
-          "BIO_new return NULL, " OSSL_PACKAGE
-          " error %s",
+          "BIO_new return NULL, " OSSL_PACKAGE " error %s",
           ossl_strerror(ERR_get_error(), error_buffer,
                         sizeof(error_buffer)) );
     return CURLE_OUT_OF_MEMORY;
@@ -4936,8 +4926,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                              (int)conn_config->issuercert_blob->len);
         if(!fp) {
           failf(data,
-                "BIO_new_mem_buf NULL, " OSSL_PACKAGE
-                " error %s",
+                "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)) );
           X509_free(octx->server_cert);
@@ -4949,8 +4938,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
         fp = BIO_new(BIO_s_file());
         if(!fp) {
           failf(data,
-                "BIO_new return NULL, " OSSL_PACKAGE
-                " error %s",
+                "BIO_new return NULL, " OSSL_PACKAGE " error %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)) );
           X509_free(octx->server_cert);
