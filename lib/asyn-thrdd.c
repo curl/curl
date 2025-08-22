@@ -346,7 +346,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #pragma clang diagnostic pop
 #endif
 
-  async_thrd_cleanup(addr_ctx, 0);
+  async_thrd_cleanup(addr_ctx);
   return 0;
 }
 
