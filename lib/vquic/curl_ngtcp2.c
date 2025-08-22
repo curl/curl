@@ -1023,7 +1023,7 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %d writing %zu "
+      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %u writing %zu "
                   "bytes of headers", stream->id, stream->xfer_result, blen);
   }
 }
@@ -1039,7 +1039,7 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
     /* If the transfer write is errored, we do not want any more data */
     if(stream->xfer_result) {
-      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %d writing %zu bytes "
+      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %u writing %zu bytes "
                   "of data", stream->id, stream->xfer_result, blen);
     }
   }
@@ -2292,7 +2292,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     DEBUGASSERT(data);
     if(!data)
       return 0;
-    CURL_TRC_CF(data, cf, "SSL message: %s %s [%d]",
+    CURL_TRC_CF(data, cf, "SSL message: %s %s [%u]",
                 incoming ? "<-" : "->", gtls_hs_msg_name(htype), htype);
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
