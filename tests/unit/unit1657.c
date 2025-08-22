@@ -72,13 +72,13 @@ static bool do_test1657(const struct test1657_spec *spec, size_t i,
   curlx_dyn_reset(buf);
   result = spec->setbuf(spec, buf);
   if(result) {
-    curl_mfprintf(stderr, "test %zu: error setting buf %d\n", i, result);
+    curl_mfprintf(stderr, "test %zu: error setting buf %u\n", i, result);
     return FALSE;
   }
   in = curlx_dyn_ptr(buf);
   result = Curl_x509_getASN1Element(&elem, in, in + curlx_dyn_len(buf));
   if(result != spec->exp_result) {
-    curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
+    curl_mfprintf(stderr, "test %zu: expect result %u, got %u\n",
                   i, spec->exp_result, result);
     return FALSE;
   }
