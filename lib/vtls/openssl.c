@@ -912,15 +912,15 @@ static const char *SSL_ERROR_to_str(int err)
     return "SSL_ERROR_WANT_CONNECT";
   case SSL_ERROR_WANT_ACCEPT:
     return "SSL_ERROR_WANT_ACCEPT";
-#ifdef SSL_ERROR_WANT_ASYNC  /* OpenSSL 1.1.0+, LibreSSL 4+ */
+#ifdef SSL_ERROR_WANT_ASYNC  /* OpenSSL 1.1.0+, LibreSSL 3.6.0+ */
   case SSL_ERROR_WANT_ASYNC:
     return "SSL_ERROR_WANT_ASYNC";
 #endif
-#ifdef SSL_ERROR_WANT_ASYNC_JOB  /* OpenSSL 1.1.0+, LibreSSL 4+ */
+#ifdef SSL_ERROR_WANT_ASYNC_JOB  /* OpenSSL 1.1.0+, LibreSSL 3.6.0+ */
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
-#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB  /* OpenSSL 1.1.1, LibreSSL 4+ */
+#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB  /* OpenSSL 1.1.1, LibreSSL 3.6.0+ */
   case SSL_ERROR_WANT_CLIENT_HELLO_CB:
     return "SSL_ERROR_WANT_CLIENT_HELLO_CB";
 #endif
@@ -1409,7 +1409,7 @@ static int providercheck(struct Curl_easy *data,
 static int engineload(struct Curl_easy *data,
                       SSL_CTX* ctx,
                       const char *cert_file)
-/* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <4 */
+/* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
 {
   char error_buffer[256];
@@ -2680,7 +2680,7 @@ end:
 
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
-#ifdef SSL2_VERSION_MAJOR  /* OpenSSL 1.0.2, LibreSSL <4 */
+#ifdef SSL2_VERSION_MAJOR  /* OpenSSL 1.0.2, LibreSSL <=3.9.2 */
   if(ssl_ver == SSL2_VERSION_MAJOR) {
     switch(msg) {
     case SSL2_MT_ERROR:
