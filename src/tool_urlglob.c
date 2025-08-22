@@ -142,7 +142,8 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
       if(!pat->c.set.elem)
         return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
 
-      pat->c.set.elem[pat->c.set.size] = strdup(curlx_dyn_ptr(&glob->buf));
+      pat->c.set.elem[pat->c.set.size] = strdup(curlx_dyn_ptr(&glob->buf) ?
+                                                curlx_dyn_ptr(&glob->buf): "");
       if(!pat->c.set.elem[pat->c.set.size])
         return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
       ++pat->c.set.size;
