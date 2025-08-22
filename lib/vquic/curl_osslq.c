@@ -807,7 +807,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 
   result = write_resp_raw(cf, data, buf, buflen, TRUE);
   if(result) {
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu, ERROR %d",
+    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu, ERROR %u",
                 stream->s.id, buflen, result);
     return NGHTTP3_ERR_CALLBACK_FAILURE;
   }
@@ -1238,7 +1238,7 @@ out:
     BIO_free(bio);
   if(baddr)
     BIO_ADDR_free(baddr);
-  CURL_TRC_CF(data, cf, "QUIC tls init -> %d", result);
+  CURL_TRC_CF(data, cf, "QUIC tls init -> %u", result);
   return result;
 }
 
@@ -1385,7 +1385,7 @@ static CURLcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
   }
 out:
   if(result)
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_osslq_stream_recv -> %d",
+    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_osslq_stream_recv -> %u",
                 s->id, result);
   return result;
 }
@@ -1464,7 +1464,7 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "progress_ingress -> %d", result);
+  CURL_TRC_CF(data, cf, "progress_ingress -> %u", result);
   return result;
 }
 
@@ -1685,7 +1685,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "h3_send_streams -> %d", result);
+  CURL_TRC_CF(data, cf, "h3_send_streams -> %u", result);
   return result;
 }
 
@@ -1711,7 +1711,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
   result = cf_osslq_check_and_unblock(cf, data);
 
 out:
-  CURL_TRC_CF(data, cf, "progress_egress -> %d", result);
+  CURL_TRC_CF(data, cf, "progress_egress -> %u", result);
   return result;
 }
 
@@ -1867,7 +1867,7 @@ out:
   if(!result)
     result = check_and_set_expiry(cf, data);
   if(result || *done)
-    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
+    CURL_TRC_CF(data, cf, "connect -> %u, done=%d", result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -2030,7 +2030,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!stream || stream->s.id < 0) {
     nwritten = h3_stream_open(cf, data, buf, len, &result);
     if(nwritten < 0) {
-      CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
+      CURL_TRC_CF(data, cf, "failed to open stream -> %u", result);
       goto out;
     }
     stream = H3_STREAM_CTX(ctx, data);
@@ -2057,7 +2057,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send, add to "
-                "sendbuf(len=%zu) -> %d, %zu",
+                "sendbuf(len=%zu) -> %u, %zu",
                 stream->s.id, len, result, *pnwritten);
     if(result)
       goto out;
@@ -2069,7 +2069,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   result = Curl_1st_err(result, check_and_set_expiry(cf, data));
 
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %u, %zu",
               stream ? stream->s.id : -1, len, result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -2124,7 +2124,7 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = Curl_bufq_cread(&stream->recvbuf, buf, len, pnread);
     if(result) {
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read recvbuf(len=%zu) "
-                  "-> %d, %zu", stream->s.id, len, result, *pnread);
+                  "-> %u, %zu", stream->s.id, len, result, *pnread);
       goto out;
     }
   }
@@ -2138,7 +2138,7 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = Curl_bufq_cread(&stream->recvbuf, buf, len, pnread);
     if(result) {
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read recvbuf(len=%zu) "
-                  "-> %d, %zu", stream->s.id, len, result, *pnread);
+                  "-> %u, %zu", stream->s.id, len, result, *pnread);
       goto out;
     }
   }
@@ -2158,7 +2158,7 @@ out:
   result = Curl_1st_err(result, cf_progress_egress(cf, data));
   result = Curl_1st_err(result, check_and_set_expiry(cf, data));
 
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(len=%zu) -> %u, %zu",
               stream ? stream->s.id : -1, len, result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -2273,7 +2273,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
        only "protocol frames" */
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %u", result);
     alive = result ? FALSE : TRUE;
   }
 
