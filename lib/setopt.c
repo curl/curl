@@ -2208,6 +2208,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_CERT], ptr);
 
+  case CURLOPT_SSLDCERT:
+    /*
+    * String that holds file name of the SM SSL encryption certificate to use
+    */
+    return Curl_setstropt(&data->set.str[STRING_DCERT], ptr);
+
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLCERT:
     /*
@@ -2221,6 +2227,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * String that holds file type of the SSL certificate to use
      */
     return Curl_setstropt(&data->set.str[STRING_CERT_TYPE], ptr);
+
+  case CURLOPT_SSLDCERTTYPE:
+    /*
+    * String that holds file type of the SM SSL encryption certificate to use
+    */
+    return Curl_setstropt(&data->set.str[STRING_DCERT_TYPE], ptr);
 
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLCERTTYPE:
@@ -2236,6 +2248,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_KEY], ptr);
 
+  case CURLOPT_SSLDKEY:
+    /*
+    * String that holds file name of the SSL SM encryption key to use
+    */
+    return Curl_setstropt(&data->set.str[STRING_DKEY], ptr);
+
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLKEY:
     /*
@@ -2250,6 +2268,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_KEY_TYPE], ptr);
 
+  case CURLOPT_SSLDKEYTYPE:
+    /*
+    * String that holds file type of the SM SSL encryption key to use
+    */
+    return Curl_setstropt(&data->set.str[STRING_DKEY_TYPE], ptr);
+
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLKEYTYPE:
     /*
@@ -2263,6 +2287,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * String that holds the SSL or SSH private key password.
      */
     return Curl_setstropt(&data->set.str[STRING_KEY_PASSWD], ptr);
+
+  case CURLOPT_DKEYPASSWD:
+    /*
+    * String that holds the SSL or SSH SM encryption private key password.
+    */
+    return Curl_setstropt(&data->set.str[STRING_DKEY_PASSWD], ptr);
 
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_KEYPASSWD:
@@ -2971,6 +3001,11 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      * Blob that holds file content of the SSL certificate to use
      */
     return Curl_setblobopt(&data->set.blobs[BLOB_CERT], blob);
+  case CURLOPT_SSLDCERT_BLOB:
+	/*
+	* Blob that holds file content of the SM SSL encryption certificate to use
+	*/
+	return Curl_setblobopt(&data->set.blobs[BLOB_DCERT], blob);
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_SSLCERT_BLOB:
     /*
@@ -3004,6 +3039,11 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      * Blob that holds file content of the SSL key to use
      */
     return Curl_setblobopt(&data->set.blobs[BLOB_KEY], blob);
+  case CURLOPT_SSLDKEY_BLOB:
+    /*
+    * Blob that holds file content of the SSL SM encrpytion key to use
+    */
+    return Curl_setblobopt(&data->set.blobs[BLOB_DKEY], blob);
   case CURLOPT_CAINFO_BLOB:
     /*
      * Blob that holds CA info for SSL connection.

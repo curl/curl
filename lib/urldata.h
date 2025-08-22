@@ -267,9 +267,11 @@ struct ssl_primary_config {
   char *signature_algorithms; /* list of signature algorithms to use */
   char *pinned_key;
   char *CRLfile;         /* CRL to check certificate revocation */
+  char* dclientcert;
   struct curl_blob *cert_blob;
   struct curl_blob *ca_info_blob;
   struct curl_blob *issuercert_blob;
+  struct curl_blob* dcert_blob;
 #ifdef USE_TLS_SRP
   char *username; /* TLS username (for, e.g., SRP) */
   char *password; /* TLS password (for, e.g., SRP) */
@@ -294,6 +296,11 @@ struct ssl_config_data {
   struct curl_blob *key_blob;
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
+  char* dcert_type; /* format for SM encryption certificate (default: PEM)*/
+  char* dkey; /* SM encryption private key file name */
+  struct curl_blob* dkey_blob;
+  char* dkey_type; /* format for SM encryption private key (default: PEM) */
+  char* dkey_passwd; /* plain text SM encryption private key password */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(earlydata);    /* use tls1.3 early data */
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
@@ -1335,14 +1342,18 @@ enum dupstring {
   STRING_ECH_CONFIG,            /* CURLOPT_ECH_CONFIG */
   STRING_ECH_PUBLIC,            /* CURLOPT_ECH_PUBLIC */
   STRING_SSL_SIGNATURE_ALGORITHMS, /* CURLOPT_SSL_SIGNATURE_ALGORITHMS */
+  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
+  STRING_DCERT,           /* SM client encrytion certificate file name */
+  STRING_DCERT_TYPE,      /* format for SM encryption certificate (default: PEM)*/
+  STRING_DKEY,            /* SM encrytion private key file name */
+  STRING_DKEY_PASSWD,     /* SM encrytion plain text private key password */
+  STRING_DKEY_TYPE,       /* SM format for encrytion private key (default: PEM) */
 
   /* -- end of null-terminated strings -- */
 
   STRING_LASTZEROTERMINATED,
 
   /* -- below this are pointers to binary data that cannot be strdup'ed. --- */
-
-  STRING_COPYPOSTFIELDS,  /* if POST, set the fields' values here */
 
   STRING_LAST /* not used, just an end-of-list marker */
 };
@@ -1358,6 +1369,8 @@ enum dupblob {
   BLOB_SSL_ISSUERCERT_PROXY,
   BLOB_CAINFO_PROXY,
 #endif
+  BLOB_DCERT,
+  BLOB_DKEY,
   BLOB_LAST
 };
 

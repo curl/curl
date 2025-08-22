@@ -327,13 +327,17 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_CERTINFO, 1);
 
   my_setopt_str(curl, CURLOPT_SSLCERT, config->cert);
+  my_setopt_str(curl, CURLOPT_SSLDCERT, config->dcert);
   my_setopt_str(curl, CURLOPT_PROXY_SSLCERT, config->proxy_cert);
   my_setopt_str(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
+  my_setopt_str(curl, CURLOPT_SSLDCERTTYPE, config->dcert_type);
   my_setopt_str(curl, CURLOPT_PROXY_SSLCERTTYPE,
                 config->proxy_cert_type);
   my_setopt_str(curl, CURLOPT_SSLKEY, config->key);
+  my_setopt_str(curl, CURLOPT_SSLDKEY, config->dkey);
   my_setopt_str(curl, CURLOPT_PROXY_SSLKEY, config->proxy_key);
   my_setopt_str(curl, CURLOPT_SSLKEYTYPE, config->key_type);
+  my_setopt_str(curl, CURLOPT_SSLDKEYTYPE, config->dkey_type);
   my_setopt_str(curl, CURLOPT_PROXY_SSLKEYTYPE,
                 config->proxy_key_type);
 
@@ -916,6 +920,7 @@ CURLcode config2setopts(struct OperationConfig *config,
     my_setopt_offt(curl, CURLOPT_RESUME_FROM_LARGE, 0);
 
   my_setopt_str(curl, CURLOPT_KEYPASSWD, config->key_passwd);
+  my_setopt_str(curl, CURLOPT_DKEYPASSWD, config->dkey_passwd);
   my_setopt_str(curl, CURLOPT_PROXY_KEYPASSWD, config->proxy_key_passwd);
 
   if(use_proto == proto_scp || use_proto == proto_sftp) {

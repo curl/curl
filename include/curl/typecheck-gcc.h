@@ -403,6 +403,11 @@ CURLWARNING(_curl_easy_getinfo_err_curl_off_t,
    (option) == CURLOPT_SSLKEYTYPE ||                                    \
    (option) == CURLOPT_SSL_CIPHER_LIST ||                               \
    (option) == CURLOPT_SSL_EC_CURVES ||                                 \
+   (option) == CURLOPT_DKEYPASSWD ||                                    \
+   (option) == CURLOPT_SSLDCERT ||                                      \
+   (option) == CURLOPT_SSLDCERTTYPE ||                                  \
+   (option) == CURLOPT_SSLDKEY ||                                       \
+   (option) == CURLOPT_SSLDKEYTYPE ||                                   \
    (option) == CURLOPT_SSL_SIGNATURE_ALGORITHMS ||                      \
    (option) == CURLOPT_TLS13_CIPHERS ||                                 \
    (option) == CURLOPT_TLSAUTH_PASSWORD ||                              \

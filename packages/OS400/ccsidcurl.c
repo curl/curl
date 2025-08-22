@@ -1175,6 +1175,11 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   case CURLOPT_USERNAME:
   case CURLOPT_USERPWD:
   case CURLOPT_XOAUTH2_BEARER:
+  case CURLOPT_DKEYPASSWD:
+  case CURLOPT_SSLDCERT:
+  case CURLOPT_SSLDCERTTYPE:
+  case CURLOPT_SSLDKEY:
+  case CURLOPT_SSLDKEYTYPE:
   /* END TRANSLATABLE STRING OPTIONS */
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);

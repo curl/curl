@@ -2661,7 +2661,7 @@ static const char *ssl_msg_type(int ssl_ver, int msg)
   }
   else
 #endif
-  if(ssl_ver == SSL3_VERSION_MAJOR) {
+  if(ssl_ver == SSL3_VERSION_MAJOR || ssl_ver == SM1_1_VERSION_MAJOR) {
     switch(msg) {
     case SSL3_MT_HELLO_REQUEST:
       return "Hello request";
@@ -2787,6 +2787,11 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.3";
     break;
 #endif
+#ifdef SM1_1_VERSION
+  case SM1_1_VERSION:
+    verstr = "TLCP";
+    break;
+#endif
   case 0:
     break;
   default:
@@ -2819,7 +2824,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
      * always pass-up content-type as 0. But the interesting message-type
      * is at 'buf[0]'.
      */
-    if(ssl_ver == SSL3_VERSION_MAJOR && content_type)
+    if((ssl_ver == SSL3_VERSION_MAJOR && content_type) || ssl_ver == SM1_1_VERSION_MAJOR)
       tls_rt_name = tls_rt_type(content_type);
     else
       tls_rt_name = "";
@@ -3945,6 +3950,9 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
       *pmethod = SSLv23_client_method();
   #endif
       break;
+    case CURL_SSLVERSION_TLCPv1_1:
+      *pmethod = CNTLS_client_method();
+      break;
     case CURL_SSLVERSION_SSLv2:
       failf(data, "No SSLv2 support");
       return CURLE_NOT_BUILT_IN;
@@ -4001,6 +4009,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
+  char* const ssl_dcert = ssl_config->primary.dclientcert;
+  const struct curl_blob* ssl_dcert_blob = ssl_config->primary.dcert_blob;
+  const char* const ssl_dcert_type = ssl_config->dcert_type;
   const bool verifypeer = conn_config->verifypeer;
   unsigned int ssl_version_min;
   char error_buffer[256];
@@ -4115,6 +4126,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   case CURL_SSLVERSION_TLSv1_1: /* TLS >= version 1.1 */
   case CURL_SSLVERSION_TLSv1_2: /* TLS >= version 1.2 */
   case CURL_SSLVERSION_TLSv1_3: /* TLS >= version 1.3 */
+  case CURL_SSLVERSION_TLCPv1_1: /* TLCP >= version 1.1 */
     /* asking for any TLS version as the minimum, means no SSL versions
        allowed */
     ctx_options |= SSL_OP_NO_SSLv2;
@@ -4190,6 +4202,19 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                    ssl_config->key_type, ssl_config->key_passwd))
       result = CURLE_SSL_CERTPROBLEM;
     if(result)
+      /* failf() is already done in cert_stuff() */
+      return result;
+  }
+
+  if (ssl_dcert || ssl_dcert_blob || ssl_dcert_type)
+  {
+    if (!result &&
+       !cert_stuff(data, octx->ssl_ctx,
+                   ssl_dcert, ssl_dcert_blob, ssl_dcert_type,
+                   ssl_config->dkey, ssl_config->dkey_blob,
+                   ssl_config->dkey_type, ssl_config->dkey_passwd))
+      result = CURLE_SSL_CERTPROBLEM;
+    if (result)
       /* failf() is already done in cert_stuff() */
       return result;
   }

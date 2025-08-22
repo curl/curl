@@ -314,6 +314,14 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD];
   data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
   data->set.ssl.key_blob = data->set.blobs[BLOB_KEY];
+  data->set.ssl.primary.dcert_blob = data->set.blobs[BLOB_DCERT];
+  data->set.ssl.dkey_blob = data->set.blobs[BLOB_DKEY];
+  data->set.ssl.primary.dcert_blob = data->set.blobs[BLOB_CERT];
+  data->set.ssl.dcert_type = data->set.str[STRING_DCERT_TYPE];
+  data->set.ssl.dkey = data->set.str[STRING_DKEY];
+  data->set.ssl.dkey_type = data->set.str[STRING_DKEY_TYPE];
+  data->set.ssl.dkey_passwd = data->set.str[STRING_DKEY_PASSWD];
+  data->set.ssl.primary.dclientcert = data->set.str[STRING_DCERT];
 
 #ifndef CURL_DISABLE_PROXY
   data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];

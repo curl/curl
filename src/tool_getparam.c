@@ -97,6 +97,8 @@ static const struct LongShort aliases[]= {
   {"cert",                       ARG_FILE|ARG_TLS|ARG_CLEAR, 'E', C_CERT},
   {"cert-status",                ARG_BOOL|ARG_TLS, ' ', C_CERT_STATUS},
   {"cert-type",                  ARG_STRG|ARG_TLS, ' ', C_CERT_TYPE},
+  {"cert2",                      ARG_FILE | ARG_TLS | ARG_CLEAR, ' ', C_CERT2},
+  {"cert2-type",                 ARG_STRG|ARG_TLS, ' ', C_CERT2_TYPE},
   {"ciphers",                    ARG_STRG|ARG_TLS, ' ', C_CIPHERS},
   {"clobber",                    ARG_BOOL|ARG_NO, ' ', C_CLOBBER},
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
@@ -195,6 +197,8 @@ static const struct LongShort aliases[]= {
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
+  { "key2",                       ARG_FILE, ' ', C_KEY2 },
+  {"key2-type",                  ARG_STRG|ARG_TLS, ' ', C_KEY2_TYPE},
   {"krb",                        ARG_STRG, ' ', C_KRB},
   {"krb4",                       ARG_STRG, ' ', C_KRB4},
   {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
@@ -230,6 +234,7 @@ static const struct LongShort aliases[]= {
   {"parallel-immediate",         ARG_BOOL, ' ', C_PARALLEL_IMMEDIATE},
   {"parallel-max",               ARG_STRG, ' ', C_PARALLEL_MAX},
   {"pass",                       ARG_STRG|ARG_CLEAR, ' ', C_PASS},
+  {"pass2",                      ARG_STRG|ARG_CLEAR, ' ', C_PASS2},
   {"path-as-is",                 ARG_BOOL, ' ', C_PATH_AS_IS},
   {"pinnedpubkey",               ARG_STRG|ARG_TLS, ' ', C_PINNEDPUBKEY},
   {"post301",                    ARG_BOOL, ' ', C_POST301},
@@ -338,6 +343,7 @@ static const struct LongShort aliases[]= {
   {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
+  {"tlcp",                       ARG_NONE|ARG_TLS, ' ', C_TLCP},
   {"tls-earlydata",              ARG_BOOL|ARG_TLS, ' ', C_TLS_EARLYDATA},
   {"tls-max",                    ARG_STRG|ARG_TLS, ' ', C_TLS_MAX},
   {"tls13-ciphers",              ARG_STRG|ARG_TLS, ' ', C_TLS13_CIPHERS},
@@ -1745,6 +1751,9 @@ static ParameterError opt_none(struct OperationConfig *config,
   case C_TLSV1_3: /* --tlsv1.3 */
     config->ssl_version = CURL_SSLVERSION_TLSv1_3;
     break;
+  case C_TLCP: /* --tlcp */
+    config->ssl_version = CURL_SSLVERSION_TLCPv1_1;
+    break;
   case C_IPV4: /* --ipv4 */
     config->ip_version = CURL_IPRESOLVE_V4;
     break;
@@ -2508,20 +2517,35 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_CERT: /* --cert */
     GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
     break;
+  case C_CERT2: /* --cert2 */
+    GetFileAndPassword(nextarg, &config->dcert, &config->dkey_passwd);
+    break;
   case C_CACERT: /* --cacert */
     err = getstr(&config->cacert, nextarg, DENY_BLANK);
     break;
   case C_CERT_TYPE: /* --cert-type */
     err = getstr(&config->cert_type, nextarg, DENY_BLANK);
     break;
+  case C_CERT2_TYPE: /* --cert2-type */
+    err = getstr(&config->dcert_type, nextarg, DENY_BLANK);
+    break;
   case C_KEY: /* --key */
     err = getstr(&config->key, nextarg, DENY_BLANK);
+    break;
+  case C_KEY2: /* --key2 */
+    err = getstr(&config->dkey, nextarg, DENY_BLANK);
     break;
   case C_KEY_TYPE: /* --key-type */
     err = getstr(&config->key_type, nextarg, DENY_BLANK);
     break;
+  case C_KEY2_TYPE: /* --key2-type */
+    err = getstr(&config->dkey_type, nextarg, DENY_BLANK);
+    break;
   case C_PASS: /* --pass */
     err = getstr(&config->key_passwd, nextarg, DENY_BLANK);
+    break;
+  case C_PASS2: /* --pass2 */
+    err = getstr(&config->dkey_passwd, nextarg, DENY_BLANK);
     break;
   case C_ENGINE: /* --engine */
     err = getstr(&config->engine, nextarg, DENY_BLANK);

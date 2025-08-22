@@ -241,6 +241,11 @@ struct OperationConfig {
   } file_clobber_mode;
   unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
+  char* dcert;
+  char* dcert_type;
+  char* dkey;
+  char* dkey_type;
+  char* dkey_passwd;
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */

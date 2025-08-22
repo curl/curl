@@ -2249,6 +2249,25 @@ typedef enum {
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
+  /* name of the file keeping your private SM encryption SSL-certificate */
+  CURLOPT(CURLOPT_SSLDCERT, CURLOPTTYPE_STRINGPOINT, 329),
+
+  /* password for the SSL or SSH SM encryption private key */
+  CURLOPT(CURLOPT_DKEYPASSWD, CURLOPTTYPE_STRINGPOINT, 330),
+
+  /* type of the file keeping your SM encryption SSL-certificate ("DER", "PEM", "ENG") */
+  CURLOPT(CURLOPT_SSLDCERTTYPE, CURLOPTTYPE_STRINGPOINT, 331),
+
+  /* name of the file keeping your SM encryption private SSL-key */
+  CURLOPT(CURLOPT_SSLDKEY, CURLOPTTYPE_STRINGPOINT, 332),
+
+  /* type of the file keeping your SM encryption private SSL-key ("DER", "PEM", "ENG") */
+  CURLOPT(CURLOPT_SSLDKEYTYPE, CURLOPTTYPE_STRINGPOINT, 333),
+
+  /* the SM encryption private SSL-certificate as a "blob" */
+  CURLOPT(CURLOPT_SSLDCERT_BLOB, CURLOPTTYPE_BLOB, 334),
+  CURLOPT(CURLOPT_SSLDKEY_BLOB, CURLOPTTYPE_BLOB, 335),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -2362,8 +2381,9 @@ enum CURL_NETRC_OPTION {
 #define CURL_SSLVERSION_TLSv1_1 5
 #define CURL_SSLVERSION_TLSv1_2 6
 #define CURL_SSLVERSION_TLSv1_3 7
+#define CURL_SSLVERSION_TLCPv1_1 8
 
-#define CURL_SSLVERSION_LAST 8 /* never use, keep last */
+#define CURL_SSLVERSION_LAST 9 /* never use, keep last */
 
 #define CURL_SSLVERSION_MAX_NONE 0
 #define CURL_SSLVERSION_MAX_DEFAULT (CURL_SSLVERSION_TLSv1   << 16)
@@ -2371,6 +2391,7 @@ enum CURL_NETRC_OPTION {
 #define CURL_SSLVERSION_MAX_TLSv1_1 (CURL_SSLVERSION_TLSv1_1 << 16)
 #define CURL_SSLVERSION_MAX_TLSv1_2 (CURL_SSLVERSION_TLSv1_2 << 16)
 #define CURL_SSLVERSION_MAX_TLSv1_3 (CURL_SSLVERSION_TLSv1_3 << 16)
+#define CURL_SSLVERSION_MAX_TLCPv1_1 = (CURL_SSLVERSION_TLCPv1_1 << 16)
 
   /* never use, keep last */
 #define CURL_SSLVERSION_MAX_LAST    (CURL_SSLVERSION_LAST    << 16)

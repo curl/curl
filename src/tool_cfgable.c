@@ -101,6 +101,12 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->proto_str);
   tool_safefree(config->proto_redir_str);
 
+  tool_safefree(config->dcert);
+  tool_safefree(config->dcert_type);
+  tool_safefree(config->dkey);
+  tool_safefree(config->dkey_type);
+  tool_safefree(config->dkey_passwd);
+
   urlnode = config->url_list;
   while(urlnode) {
     struct getout *next = urlnode->next;

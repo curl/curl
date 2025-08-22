@@ -744,11 +744,23 @@ static CURLcode set_cert_types(struct OperationConfig *config)
         return CURLE_OUT_OF_MEMORY;
     }
 
+    if (config->dcert && !config->dcert_type && is_pkcs11_uri(config->dcert)) {
+      config->dcert_type = strdup("ENG");
+      if (!config->dcert_type)
+        return CURLE_OUT_OF_MEMORY;
+    }
+
     /* Check if config->key is a PKCS#11 URI and set the config->key_type if
      * necessary */
     if(config->key && !config->key_type && is_pkcs11_uri(config->key)) {
       config->key_type = strdup("ENG");
       if(!config->key_type)
+        return CURLE_OUT_OF_MEMORY;
+    }
+
+    if (config->dkey && !config->dkey_type && is_pkcs11_uri(config->dkey)) {
+      config->dkey_type = strdup("ENG");
+      if (!config->dkey_type)
         return CURLE_OUT_OF_MEMORY;
     }
 
