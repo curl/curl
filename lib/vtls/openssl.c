@@ -2826,7 +2826,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.2";
     break;
 #endif
-#ifdef TLS1_3_VERSION
+#ifdef TLS1_3_VERSION  /* OpenSSL 1.1.1+, all forks */
   case TLS1_3_VERSION:
     verstr = "TLSv1.3";
     break;
