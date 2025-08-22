@@ -538,7 +538,11 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
+#ifdef _WIN32
+#  define FMT_SOCKET_T "u"
+#else
 #  define FMT_SOCKET_T "d"
+#endif
 #elif defined(_WIN32)
 #  define FMT_SOCKET_T "zu"
 #else
