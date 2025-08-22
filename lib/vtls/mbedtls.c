@@ -180,7 +180,7 @@ static int mbedtls_bio_cf_write(void *bio,
 
   result = Curl_conn_cf_send(cf->next, data, (const char *)buf, blen, FALSE,
                              &nwritten);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %u, %zu",
               blen, result, nwritten);
   if(CURLE_AGAIN == result)
     return MBEDTLS_ERR_SSL_WANT_WRITE;
@@ -202,7 +202,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
     return 0;
 
   result = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &nread);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %u, %zu",
               blen, result, nread);
   if(CURLE_AGAIN == result)
     return MBEDTLS_ERR_SSL_WANT_READ;
@@ -547,7 +547,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
-          -ret, errorbuf);
+          (unsigned int)-ret, errorbuf);
     return CURLE_FAILED_INIT;
   }
 #else
@@ -559,7 +559,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
-          -ret, errorbuf);
+          (unsigned int)-ret, errorbuf);
     return CURLE_FAILED_INIT;
   }
 #endif /* HAS_THREADING_SUPPORT */
@@ -581,7 +581,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
-            -ret, errorbuf);
+            (unsigned int)-ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -593,7 +593,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
-            ssl_cafile, -ret, errorbuf);
+            ssl_cafile, (unsigned int)-ret, errorbuf);
       return CURLE_SSL_CACERT_BADFILE;
     }
 #else
@@ -609,7 +609,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert path %s - mbedTLS: (-0x%04X) %s",
-            ssl_capath, -ret, errorbuf);
+            ssl_capath, (unsigned int)-ret, errorbuf);
 
       if(verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
@@ -630,7 +630,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading client cert file %s - mbedTLS: (-0x%04X) %s",
-            ssl_cert, -ret, errorbuf);
+            ssl_cert, (unsigned int)-ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -655,7 +655,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading client cert data %s - mbedTLS: (-0x%04X) %s",
-            ssl_config->key, -ret, errorbuf);
+            ssl_config->key, (unsigned int)-ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
   }
@@ -677,7 +677,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
         failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
-              ssl_config->key, -ret, errorbuf);
+              ssl_config->key, (unsigned int)-ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
 #else
@@ -702,7 +702,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
         failf(data, "Error parsing private key - mbedTLS: (-0x%04X) %s",
-              -ret, errorbuf);
+              (unsigned int)-ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
     }
@@ -719,7 +719,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading CRL file %s - mbedTLS: (-0x%04X) %s",
-            ssl_crlfile, -ret, errorbuf);
+            ssl_crlfile, (unsigned int)-ret, errorbuf);
 
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -777,7 +777,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "ssl_setup failed - mbedTLS: (-0x%04X) %s",
-          -ret, errorbuf);
+          (unsigned int)-ret, errorbuf);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -832,12 +832,12 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       ret = mbedtls_ssl_session_load(&session, sc_session->sdata,
                                      sc_session->sdata_len);
       if(ret) {
-        failf(data, "SSL session error loading: -0x%x", -ret);
+        failf(data, "SSL session error loading: -0x%x", (unsigned int)-ret);
       }
       else {
         ret = mbedtls_ssl_set_session(&backend->ssl, &session);
         if(ret)
-          failf(data, "SSL session error setting: -0x%x", -ret);
+          failf(data, "SSL session error setting: -0x%x", (unsigned int)-ret);
         else
           infof(data, "SSL reusing session ID");
       }
@@ -953,7 +953,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                 mbedtls_ssl_get_version_number(&backend->ssl));
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
     failf(data, "ssl_handshake returned: (-0x%04X) %s",
-          -ret, errorbuf);
+          (unsigned int)-ret, errorbuf);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -1064,7 +1064,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   ret = mbedtls_ssl_get_session(&backend->ssl, &session);
   msession_alloced = (ret != MBEDTLS_ERR_SSL_ALLOC_FAILED);
   if(ret) {
-    failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
+    failf(data, "mbedtls_ssl_get_session returned -0x%x", (unsigned int)-ret);
     result = CURLE_SSL_CONNECT_ERROR;
     goto out;
   }
@@ -1083,7 +1083,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   ret = mbedtls_ssl_session_save(&session, sdata, slen, &slen);
   if(ret) {
-    failf(data, "failed to serialize session: -0x%x", -ret);
+    failf(data, "failed to serialize session: -0x%x", (unsigned int)-ret);
     goto out;
   }
 
@@ -1137,7 +1137,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
-                len, -nwritten);
+                len, (size_t)-nwritten);
     switch(nwritten) {
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
@@ -1160,7 +1160,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %u, %zu",
               len, result, *pnwritten);
   return result;
 }
@@ -1205,7 +1205,8 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         goto out;
       default:
-        CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X", -ret);
+        CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
+                    (unsigned int)-ret);
         result = CURLE_RECV_ERROR;
         goto out;
       }
@@ -1246,7 +1247,8 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
     connssl->io_need = CURL_SSL_IO_NEED_SEND;
   }
   else {
-    CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X", -ret);
+    CURL_TRC_CF(data, cf, "mbedtls_shutdown error -0x%04X",
+                (unsigned int)-ret);
     result = CURLE_RECV_ERROR;
   }
 
@@ -1301,7 +1303,7 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     *pnread = (size_t)nread;
   else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
-                buffersize, -nread);
+                buffersize, (unsigned int)-nread);
     switch(nread) {
 #ifdef MBEDTLS_SSL_SESSION_TICKETS
     case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
@@ -1322,7 +1324,8 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     default: {
       char errorbuf[128];
       mbedtls_strerror(nread, errorbuf, sizeof(errorbuf));
-      failf(data, "ssl_read returned: (-0x%04X) %s", -nread, errorbuf);
+      failf(data, "ssl_read returned: (-0x%04X) %s",
+            (unsigned int)-nread, errorbuf);
       result = CURLE_RECV_ERROR;
       break;
     }
