@@ -701,7 +701,7 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
 
   (void)timeouts;
   --ares->num_pending;
-  CURL_TRC_DNS(data, "ares: httpsrr done, status=%d, pending=%d, "
+  CURL_TRC_DNS(data, "ares: httpsrr done, status=%u, pending=%d, "
                "dnsres=%sfound",
                status, ares->num_pending,
                (dnsrec &&
