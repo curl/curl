@@ -3051,6 +3051,7 @@ while() {
     my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : 1.0;
     my (@ridsready, $riderror) = runnerar_ready($runnerwait);
     if(@ridsready) {
+        $endwaitcnt = 0;
         for my $ridready (@ridsready) {
             if($ridready && ! defined $runnersrunning{$ridready}) {
                 # On Linux, a closed pipe still shows up as ready instead of error.
@@ -3145,7 +3146,7 @@ while() {
         delete $runnersrunning{$riderror} if(defined $runnersrunning{$riderror});
         $globalabort = 1;
     }
-    if(!scalar(@runtests) && ++$endwaitcnt == (240 + $jobs)) {
+    if(++$endwaitcnt == (240 + $jobs)) {
         # Once all tests have been scheduled on a runner at the end of a test
         # run, we just wait for their results to come in. If we're still
         # waiting after a couple of minutes ($endwaitcnt multiplied by
@@ -3154,6 +3155,7 @@ while() {
         # likely point to a single test that has hung.
         logmsg "Hmmm, the tests are taking a while to finish. Here is the status:\n";
         catch_usr1();
+        $endwaitcnt = 0;
     }
 }
 
