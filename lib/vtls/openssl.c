@@ -704,13 +704,11 @@ static long ossl_bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
   case BIO_CTRL_DUP:
     ret = 1;
     break;
-#ifdef BIO_CTRL_EOF
   case BIO_CTRL_EOF: {
     /* EOF has been reached on input? */
     struct ssl_connect_data *connssl = cf->ctx;
     return connssl->peer_closed;
   }
-#endif
   default:
     ret = 0;
     break;
@@ -914,17 +912,17 @@ static const char *SSL_ERROR_to_str(int err)
     return "SSL_ERROR_WANT_CONNECT";
   case SSL_ERROR_WANT_ACCEPT:
     return "SSL_ERROR_WANT_ACCEPT";
-#ifdef SSL_ERROR_WANT_ASYNC
+#ifdef SSL_ERROR_WANT_ASYNC  /* OpenSSL 1.1.0+, LibreSSL 3.6.0+ */
   case SSL_ERROR_WANT_ASYNC:
     return "SSL_ERROR_WANT_ASYNC";
 #endif
-#ifdef SSL_ERROR_WANT_ASYNC_JOB
+#ifdef SSL_ERROR_WANT_ASYNC_JOB  /* OpenSSL 1.1.0+, LibreSSL 3.6.0+ */
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
-#ifdef SSL_ERROR_WANT_EARLY
-  case SSL_ERROR_WANT_EARLY:
-    return "SSL_ERROR_WANT_EARLY";
+#ifdef SSL_ERROR_WANT_CLIENT_HELLO_CB  /* OpenSSL 1.1.1, LibreSSL 3.6.0+ */
+  case SSL_ERROR_WANT_CLIENT_HELLO_CB:
+    return "SSL_ERROR_WANT_CLIENT_HELLO_CB";
 #endif
   default:
     return "SSL_ERROR unknown";
@@ -1411,6 +1409,7 @@ static int providercheck(struct Curl_easy *data,
 static int engineload(struct Curl_easy *data,
                       SSL_CTX* ctx,
                       const char *cert_file)
+/* ENGINE_CTRL_GET_CMD_FROM_NAME supported by OpenSSL, LibreSSL <=3.8.3 */
 #if defined(USE_OPENSSL_ENGINE) && defined(ENGINE_CTRL_GET_CMD_FROM_NAME)
 {
   char error_buffer[256];
@@ -1904,12 +1903,6 @@ static int ossl_init(void)
 
 #ifdef USE_OPENSSL_ENGINE
   ENGINE_load_builtin_engines();
-#endif
-
-/* CONF_MFLAGS_DEFAULT_SECTION was introduced some time between 0.9.8b and
-   0.9.8e */
-#ifndef CONF_MFLAGS_DEFAULT_SECTION
-#define CONF_MFLAGS_DEFAULT_SECTION 0x0
 #endif
 
 #ifndef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
@@ -2683,15 +2676,9 @@ end:
 }
 #endif
 
-#endif /* USE_OPENSSL */
-
-/* The SSL_CTRL_SET_MSG_CALLBACK does not exist in ancient OpenSSL versions
-   and thus this cannot be done there. */
-#ifdef SSL_CTRL_SET_MSG_CALLBACK
-
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
-#ifdef SSL2_VERSION_MAJOR
+#ifdef SSL2_VERSION_MAJOR  /* OpenSSL 1.0.2, LibreSSL <=3.9.2 */
   if(ssl_ver == SSL2_VERSION_MAJOR) {
     switch(msg) {
     case SSL2_MT_ERROR:
@@ -2837,7 +2824,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
     verstr = "TLSv1.2";
     break;
 #endif
-#ifdef TLS1_3_VERSION
+#ifdef TLS1_3_VERSION  /* OpenSSL 1.1.1+, all forks */
   case TLS1_3_VERSION:
     verstr = "TLSv1.3";
     break;
@@ -2903,10 +2890,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
              CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void)ssl;
 }
-#endif
-
-#ifdef USE_OPENSSL
-/* ====================================================== */
 
 /* Check for ALPN support. */
 #ifndef OPENSSL_NO_TLSEXT
@@ -3505,10 +3488,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        https://web.archive.org/web/20190422050538/
        rt.openssl.org/Ticket/Display.html?id=3621
     */
-#ifdef X509_V_FLAG_TRUSTED_FIRST
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-#endif
-#ifdef X509_V_FLAG_PARTIAL_CHAIN
     if(!ssl_config->no_partialchain && !ssl_crlfile) {
       /* Have intermediate certificates in the trust store be treated as
          trust-anchors, in the same way as self-signed root CA certificates
@@ -3520,7 +3500,6 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
       */
       X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
     }
-#endif
   }
 
   return result;
@@ -3962,7 +3941,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   SSL_set_connect_state(octx->ssl);
 
   octx->server_cert = NULL;
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   if(peer->sni) {
     if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
       failf(data, "Failed set SNI");
@@ -3977,8 +3955,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
       return result;
   }
 #endif  /* USE_ECH_OPENSSL */
-
-#endif
 
   return ossl_init_session_and_alpns(octx, cf, data, peer,
                                      alpns_requested, sess_reuse_cb);
@@ -4104,13 +4080,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return result;
   }
 
-#ifdef SSL_CTRL_SET_MSG_CALLBACK
   if(data->set.fdebug && data->set.verbose) {
     /* the SSL trace callback is only used for verbose logging */
     SSL_CTX_set_msg_callback(octx->ssl_ctx, ossl_trace);
     SSL_CTX_set_msg_callback_arg(octx->ssl_ctx, cf);
   }
-#endif
 
   /* OpenSSL contains code to work around lots of bugs and flaws in various
      SSL-implementations. SSL_CTX_set_options() is used to enabled those
@@ -4148,27 +4122,15 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set.
   */
 
-  ctx_options = SSL_OP_ALL;
+  ctx_options = SSL_OP_ALL | SSL_OP_NO_TICKET | SSL_OP_NO_COMPRESSION;
 
-#ifdef SSL_OP_NO_TICKET
-  ctx_options |= SSL_OP_NO_TICKET;
-#endif
-
-#ifdef SSL_OP_NO_COMPRESSION
-  ctx_options |= SSL_OP_NO_COMPRESSION;
-#endif
-
-#ifdef SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
   /* mitigate CVE-2010-4180 */
   ctx_options &= ~(ctx_option_t)SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
-#endif
 
-#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
   /* unless the user explicitly asks to allow the protocol vulnerability we
      use the work-around */
   if(!ssl_config->enable_beast)
     ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
 
   switch(ssl_version_min) {
   case CURL_SSLVERSION_SSLv2:
@@ -4218,10 +4180,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_default_read_buffer_len(octx->ssl_ctx, 0x401e * 4);
 #endif
 
-#ifdef SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER
   /* We do retry writes sometimes from another buffer address */
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
-#endif
 
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
