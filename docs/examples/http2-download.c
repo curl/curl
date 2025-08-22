@@ -42,7 +42,7 @@
 /* This little trick makes sure that we do not enable pipelining for libcurls
    old enough to not have this symbol. It is _not_ defined to zero in a recent
    libcurl header. */
-#define CURLPIPE_MULTIPLEX 0
+#define CURLPIPE_MULTIPLEX 0L
 #endif
 
 struct transfer {
