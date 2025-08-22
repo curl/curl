@@ -244,7 +244,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Token format: creds:target:type:padding */
-    used = msnprintf(token, length, "%s:%.*s:%d:", creds,
+    used = msnprintf(token, length, "%s:%.*s:%u:", creds,
                      (int)target_desc.length, (const char *)target_desc.value,
                      ctx->sent);
 
