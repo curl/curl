@@ -2676,8 +2676,6 @@ end:
 }
 #endif
 
-#endif /* USE_OPENSSL */
-
 static const char *ssl_msg_type(int ssl_ver, int msg)
 {
 #ifdef SSL2_VERSION_MAJOR  /* OpenSSL 1.0.2, LibreSSL <=3.9.2 */
@@ -2892,9 +2890,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
              CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void)ssl;
 }
-
-#ifdef USE_OPENSSL
-/* ====================================================== */
 
 /* Check for ALPN support. */
 #ifndef OPENSSL_NO_TLSEXT
