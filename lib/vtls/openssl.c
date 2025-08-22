@@ -1798,8 +1798,7 @@ static CURLcode client_cert(struct Curl_easy *data,
       EVP_PKEY_free(pktmp);
     }
 
-#if !defined(OPENSSL_NO_RSA) && !defined(OPENSSL_IS_BORINGSSL) &&       \
-  !defined(OPENSSL_NO_DEPRECATED_3_0)
+#if !defined(OPENSSL_NO_RSA) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     {
       /* If RSA is used, do not check the private key if its flags indicate
        * it does not support it. */
