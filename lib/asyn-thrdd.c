@@ -524,11 +524,13 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   done = addr_ctx->thrd_done;
+#ifndef CURL_DISABLE_SOCKETPAIR
   /* We are no longer interested in wakeups */
   if(addr_ctx->sock_pair[1] != CURL_SOCKET_BAD) {
     wakeup_close(addr_ctx->sock_pair[1]);
     addr_ctx->sock_pair[1] = CURL_SOCKET_BAD;
   }
+#endif
   Curl_mutex_release(&addr_ctx->mutx);
 
   DEBUGASSERT(addr_ctx->thread_hnd != curl_thread_t_null);
