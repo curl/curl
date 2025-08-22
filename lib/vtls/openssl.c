@@ -3945,7 +3945,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   SSL_set_connect_state(octx->ssl);
 
   octx->server_cert = NULL;
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   if(peer->sni) {
     if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
       failf(data, "Failed set SNI");
@@ -3960,8 +3959,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
       return result;
   }
 #endif  /* USE_ECH_OPENSSL */
-
-#endif
 
   return ossl_init_session_and_alpns(octx, cf, data, peer,
                                      alpns_requested, sess_reuse_cb);
