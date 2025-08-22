@@ -508,7 +508,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
 
   DEBUGASSERT(!pop3c->ssldone);
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  DEBUGF(infof(data, "pop3_perform_upgrade_tls, connect -> %d, %d",
+  DEBUGF(infof(data, "pop3_perform_upgrade_tls, connect -> %u, %d",
          result, ssldone));
   if(!result && ssldone) {
     pop3c->ssldone = ssldone;
