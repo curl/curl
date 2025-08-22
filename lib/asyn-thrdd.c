@@ -135,13 +135,6 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 #ifndef CURL_DISABLE_SOCKETPAIR
   if(!destroy) {
     if(!data) { /* Called from thread, transfer still waiting on results. */
-      /* Mark thread as done and signal the condition again, in case the
-       * one waiting missed our fist signal at the start. */
-      addr_ctx->thrd_done = TRUE;
-#ifdef USE_CURL_COND_T
-      Curl_cond_signal(&addr_ctx->cond);
-#endif
-
       if(addr_ctx->sock_pair[1] != CURL_SOCKET_BAD) {
 #ifdef USE_EVENTFD
         const uint64_t buf[1] = { 1 };
@@ -386,7 +379,7 @@ static void async_thrdd_destroy(struct Curl_easy *data)
     bool done = TRUE;
 
     Curl_mutex_acquire(&addr->mutx);
-    done = addr->thrd_done;
+    done = (addr->ref_count <= 1);
     Curl_mutex_release(&addr->mutx);
     if(done) {
       Curl_thread_join(&addr->thread_hnd);
@@ -511,13 +504,9 @@ static bool async_thrdd_init(struct Curl_easy *data,
   }
   else {
 #ifdef USE_CURL_COND_T
-    /* need to handshake with thread for participation in ref counting.
-     * We wait to see the thread having incremented `ref_count`, so it
-     * started. However it may run to its end before we get the
-     * signal, in which case `ref_count` is 1 again, but then
-     * `thrd_done` is TRUE.*/
-    while((addr_ctx->ref_count <= 1) && !addr_ctx->thrd_done)
-      Curl_cond_wait(&addr_ctx->cond, &addr_ctx->mutx);
+    /* need to handshake with thread for participation in ref counting */
+    Curl_cond_wait(&addr_ctx->cond, &addr_ctx->mutx);
+    DEBUGASSERT(addr_ctx->ref_count >= 1);
 #endif
     Curl_mutex_release(&addr_ctx->mutx);
   }
@@ -548,7 +537,7 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
     return;
 
   Curl_mutex_acquire(&addr_ctx->mutx);
-  done = addr_ctx->thrd_done;
+  done = (addr_ctx->ref_count <= 1);
   /* We are no longer interested in wakeups */
   if(addr_ctx->sock_pair[1] != CURL_SOCKET_BAD) {
     wakeup_close(addr_ctx->sock_pair[1]);
@@ -671,7 +660,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   Curl_mutex_acquire(&thrdd->addr->mutx);
-  done = thrdd->addr->thrd_done;
+  done = (thrdd->addr->ref_count == 1);
   Curl_mutex_release(&thrdd->addr->mutx);
 
   if(done) {
