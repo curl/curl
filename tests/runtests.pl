@@ -3146,7 +3146,7 @@ while() {
         delete $runnersrunning{$riderror} if(defined $runnersrunning{$riderror});
         $globalabort = 1;
     }
-    if(++$endwaitcnt == (240 + $jobs)) {
+    if(++$endwaitcnt == 60) {
         # Once all tests have been scheduled on a runner at the end of a test
         # run, we just wait for their results to come in. If we're still
         # waiting after a couple of minutes ($endwaitcnt multiplied by
