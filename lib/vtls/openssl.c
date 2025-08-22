@@ -4132,12 +4132,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   /* mitigate CVE-2010-4180 */
   ctx_options &= ~(ctx_option_t)SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
 
-#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
   /* unless the user explicitly asks to allow the protocol vulnerability we
      use the work-around */
   if(!ssl_config->enable_beast)
     ctx_options &= ~(ctx_option_t)SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
-#endif
 
   switch(ssl_version_min) {
   case CURL_SSLVERSION_SSLv2:
