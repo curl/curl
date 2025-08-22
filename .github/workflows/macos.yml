@@ -229,6 +229,7 @@ jobs:
           - name: '!ssl !debug'
             compiler: gcc-12
             configure: --without-ssl
+            tflags: -j1 1557 --repeat=100
           - name: '!ssl'
             compiler: clang
             configure: --enable-debug --without-ssl

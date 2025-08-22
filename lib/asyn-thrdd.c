@@ -65,6 +65,7 @@
 #include "curl_threads.h"
 #include "select.h"
 #include "strdup.h"
+#include "curlx/wait.h"
 
 #ifdef USE_ARES
 #include <ares.h>
@@ -234,17 +235,9 @@ err_exit:
 static void async_thrd_cleanup(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
+
   Curl_thread_disable_cancel();
   addr_ctx_unlink(&addr_ctx, NULL);
-}
-
-static bool asyn_thrd_start(struct async_thrdd_addr_ctx *addr_ctx)
-{
-  Curl_thread_disable_cancel();
-  Curl_mutex_acquire(&addr_ctx->mutx);
-  ++addr_ctx->ref_count;
-  Curl_mutex_release(&addr_ctx->mutx);
-  return TRUE;
 }
 
 #ifdef HAVE_GETADDRINFO
@@ -258,10 +251,7 @@ static bool asyn_thrd_start(struct async_thrdd_addr_ctx *addr_ctx)
 static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
-  int rc;
-
-  if(!asyn_thrd_start(addr_ctx))
-    return 1;
+  bool do_abort;
 
 /* clang complains about empty statements and the pthread_cleanup* macros
  * are pretty ill defined. */
@@ -269,13 +259,20 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wextra-semi-stmt"
 #endif
-  Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
 
-  {
+  Curl_thread_cancel_deferred();
+  Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
+  Curl_thread_disable_cancel();
+
+  Curl_mutex_acquire(&addr_ctx->mutx);
+  do_abort = addr_ctx->do_abort;
+  Curl_mutex_release(&addr_ctx->mutx);
+
+  if(!do_abort) {
     char service[12];
+    int rc;
 
     Curl_thread_enable_cancel();
-
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
@@ -283,18 +280,18 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 
     rc = Curl_getaddrinfo_ex(addr_ctx->hostname, service,
                              &addr_ctx->hints, &addr_ctx->res);
-    Curl_thread_disable_cancel();
+
+    if(rc) {
+      addr_ctx->sock_error = SOCKERRNO ? SOCKERRNO : rc;
+      if(addr_ctx->sock_error == 0)
+        addr_ctx->sock_error = RESOLVER_ENOMEM;
+    }
+    else {
+      Curl_addrinfo_set_port(addr_ctx->res, addr_ctx->port);
+    }
   }
 
-  if(rc) {
-    addr_ctx->sock_error = SOCKERRNO ? SOCKERRNO : rc;
-    if(addr_ctx->sock_error == 0)
-      addr_ctx->sock_error = RESOLVER_ENOMEM;
-  }
-  else {
-    Curl_addrinfo_set_port(addr_ctx->res, addr_ctx->port);
-  }
-
+  Curl_thread_disable_cancel();
   Curl_thread_pop_cleanup();
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -312,10 +309,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 {
   struct async_thrdd_addr_ctx *addr_ctx = arg;
-  bool all_gone;
-
-  if(!asyn_thrd_start(addr_ctx))
-    return 1;
+  bool do_abort;
 
 /* clang complains about empty statements and the pthread_cleanup* macros
  * are pretty ill defined. */
@@ -323,23 +317,30 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wextra-semi-stmt"
 #endif
+
+  Curl_thread_cancel_deferred();
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
-  {
+  Curl_thread_disable_cancel();
+
+  Curl_mutex_acquire(&addr_ctx->mutx);
+  do_abort = addr_ctx->do_abort;
+  Curl_mutex_release(&addr_ctx->mutx);
+  if(!do_abort) {
+
     Curl_thread_enable_cancel();
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
 
     addr_ctx->res = Curl_ipv4_resolve_r(addr_ctx->hostname, addr_ctx->port);
-    Curl_thread_disable_cancel();
+    if(!addr_ctx->res) {
+      addr_ctx->sock_error = SOCKERRNO;
+      if(addr_ctx->sock_error == 0)
+        addr_ctx->sock_error = RESOLVER_ENOMEM;
+    }
   }
 
-  if(!addr_ctx->res) {
-    addr_ctx->sock_error = SOCKERRNO;
-    if(addr_ctx->sock_error == 0)
-      addr_ctx->sock_error = RESOLVER_ENOMEM;
-  }
-
+  Curl_thread_disable_cancel();
   Curl_thread_pop_cleanup();
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -478,8 +479,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
   thrdd->addr = addr_ctx;
 
   /* passing addr_ctx to the thread adds a reference */
-  Curl_mutex_acquire(&addr_ctx->mutx);
-  DEBUGASSERT(addr_ctx->ref_count == 1);
+  addr_ctx->ref_count = 2;
   addr_ctx->start = curlx_now();
 
 #ifdef HAVE_GETADDRINFO
@@ -490,12 +490,11 @@ static bool async_thrdd_init(struct Curl_easy *data,
 
   if(addr_ctx->thread_hnd == curl_thread_t_null) {
     /* The thread never started */
+    addr_ctx->ref_count = 1;
     addr_ctx->thrd_done = TRUE;
-    Curl_mutex_release(&addr_ctx->mutx);
     err = errno;
     goto err_exit;
   }
-  Curl_mutex_release(&addr_ctx->mutx);
 
 #ifdef USE_HTTPSRR_ARES
   if(async_rr_start(data))
@@ -523,6 +522,7 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
     return;
 
   Curl_mutex_acquire(&addr_ctx->mutx);
+  addr_ctx->do_abort = TRUE;
   done = addr_ctx->thrd_done;
 #ifndef CURL_DISABLE_SOCKETPAIR
   /* We are no longer interested in wakeups */
@@ -534,8 +534,13 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
   Curl_mutex_release(&addr_ctx->mutx);
 
   DEBUGASSERT(addr_ctx->thread_hnd != curl_thread_t_null);
-  if(!done) {
-    CURL_TRC_DNS(data, "attempt to cancel resolve thread");
+  if(!done && (addr_ctx->thread_hnd != curl_thread_t_null)) {
+    timediff_t alive_ms = curlx_timediff(curlx_now(), addr_ctx->start);
+    /* give thread a startup chance to get cancel mode, etc. set up
+     * before we cancel it. */
+    if(alive_ms < 5)
+      curlx_wait_ms(5 - alive_ms);
+    CURL_TRC_DNS(data, "cancelling resolve thread");
     (void)Curl_thread_cancel(&addr_ctx->thread_hnd);
   }
 }
@@ -555,18 +560,12 @@ static CURLcode asyn_thrdd_await(struct Curl_easy *data,
       async_thrdd_shutdown(data);
 
     CURL_TRC_DNS(data, "resolve, wait for thread to finish");
-    if(Curl_thread_join(&addr_ctx->thread_hnd)) {
-#ifdef DEBUGBUILD
-      Curl_mutex_acquire(&addr_ctx->mutx);
-      DEBUGASSERT(addr_ctx->ref_count == 1);
-      DEBUGASSERT(addr_ctx->thrd_done);
-      Curl_mutex_release(&addr_ctx->mutx);
-#endif
-      if(entry)
-        result = Curl_async_is_resolved(data, entry);
-    }
-    else
+    if(!Curl_thread_join(&addr_ctx->thread_hnd)) {
       DEBUGASSERT(0);
+    }
+
+    if(entry)
+      result = Curl_async_is_resolved(data, entry);
   }
 
   data->state.async.done = TRUE;
