@@ -37,6 +37,10 @@
 
 #include "../urldata.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#define HAVE_OPENSSL3  /* non-fork OpenSSL 3.x or later */
+#endif
+
 /*
  * Whether SSL_CTX_set_keylog_callback is available.
  * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
@@ -103,7 +107,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             void *ssl_user_data,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb);
 
-#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#ifndef HAVE_OPENSSL3
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 

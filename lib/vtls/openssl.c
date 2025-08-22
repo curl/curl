@@ -114,7 +114,7 @@
 # error "OpenSSL 1.0.2a or later required"
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x3000000fL && !defined(OPENSSL_NO_UI_CONSOLE)
+#if defined(HAVE_OPENSSL3) && !defined(OPENSSL_NO_UI_CONSOLE)
 #include <openssl/provider.h>
 #include <openssl/store.h>
 /* this is used in the following conditions to make them easier to read */
@@ -164,7 +164,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #define HAVE_SSL_COMP_FREE_COMPRESSION_METHODS 1
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+#ifdef HAVE_OPENSSL3
 #define HAVE_EVP_PKEY_GET_PARAMS 1
 #endif
 
@@ -2976,7 +2976,7 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx)
 
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef uint32_t ctx_option_t;
-#elif OPENSSL_VERSION_NUMBER >= 0x30000000L
+#elif defined(HAVE_OPENSSL3)
 typedef uint64_t ctx_option_t;
 #elif OPENSSL_VERSION_NUMBER >= 0x10100000L && \
   !defined(LIBRESSL_VERSION_NUMBER)
@@ -3400,7 +3400,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
     }
 
     if(ssl_cafile || ssl_capath) {
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+#ifdef HAVE_OPENSSL3
       /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
       if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
         if(!imported_native_ca && !imported_ca_info_blob) {
@@ -4351,7 +4351,7 @@ void Curl_ossl_report_handshake(struct Curl_easy *data,
     int psigtype_nid = NID_undef;
     const char *negotiated_group_name = NULL;
 
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+#ifdef HAVE_OPENSSL3
     SSL_get_peer_signature_type_nid(octx->ssl, &psigtype_nid);
 #if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
     negotiated_group_name = SSL_get0_group_name(octx->ssl);
@@ -4821,11 +4821,11 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 
     current_pkey = X509_get0_pubkey(current_cert);
     key_bits = EVP_PKEY_bits(current_pkey);
-#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#ifndef HAVE_OPENSSL3
 #define EVP_PKEY_get_security_bits EVP_PKEY_security_bits
 #endif
     key_sec_bits = EVP_PKEY_get_security_bits(current_pkey);
-#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+#ifdef HAVE_OPENSSL3
     {
       char group_name[80] = "";
       get_group_name = EVP_PKEY_get_group_name(current_pkey, group_name,
