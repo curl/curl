@@ -337,7 +337,7 @@ static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   }
   result = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &nwritten);
   wssl->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %u, %zu",
               blen, result, nwritten);
 #ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
@@ -375,7 +375,7 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
      * server response. This allows sending of ClientHello without delay. */
     result = Curl_wssl_setup_x509_store(cf, data, wssl);
     if(result) {
-      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %d", result);
+      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %u", result);
       wssl->io_result = result;
       return -1;
     }
@@ -383,7 +383,7 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 
   result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
   wssl->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %d, %zu", blen, result, nread);
+  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %u, %zu", blen, result, nread);
 #ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
 #endif
@@ -1689,7 +1689,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
      * store to verify the coming certificate from the server */
     result = Curl_wssl_setup_x509_store(cf, data, wssl);
     if(result) {
-      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %d", result);
+      CURL_TRC_CF(data, cf, "Curl_wssl_setup_x509_store() -> %u", result);
       return result;
     }
   }
@@ -1863,7 +1863,7 @@ static CURLcode wssl_send(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "wssl_send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "wssl_send(len=%zu) -> %u, %zu",
               blen, result, *pnwritten);
   return result;
 }
