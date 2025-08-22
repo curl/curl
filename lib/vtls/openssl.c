@@ -920,6 +920,10 @@ static const char *SSL_ERROR_to_str(int err)
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
+#ifdef SSL_ERROR_WANT_EARLY
+  case SSL_ERROR_WANT_EARLY:
+    return "SSL_ERROR_WANT_EARLY";
+#endif
   default:
     return "SSL_ERROR unknown";
   }
