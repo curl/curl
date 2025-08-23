@@ -65,7 +65,6 @@
 #include "curl_threads.h"
 #include "select.h"
 #include "strdup.h"
-#include "curlx/wait.h"
 
 #ifdef USE_ARES
 #include <ares.h>
@@ -229,7 +228,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
-  Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   do_abort = addr_ctx->do_abort;
@@ -239,7 +237,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
     char service[12];
     int rc;
 
-    Curl_thread_enable_cancel();
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
@@ -277,7 +274,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 
   }
 
-  Curl_thread_disable_cancel();
   Curl_thread_pop_cleanup();
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -305,15 +301,12 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
-  Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   do_abort = addr_ctx->do_abort;
   Curl_mutex_release(&addr_ctx->mutx);
 
   if(!do_abort) {
-
-    Curl_thread_enable_cancel();
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
@@ -344,7 +337,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #endif
   }
 
-  Curl_thread_disable_cancel();
   Curl_thread_pop_cleanup();
 #if defined(__clang__)
 #pragma clang diagnostic pop
