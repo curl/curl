@@ -99,8 +99,14 @@ sub storelink {
     my $dir = $f;
     $dir =~ s:([^/]*\z)::;
 
-    while($link =~ s:^\.\.\/::) {
-        $dir =~ s:([^/]*)\/\z::;
+    if($link =~ s/(^\/)//) {
+        # link starts with a slash, now removed
+        $dir = "";
+    }
+    else {
+        while($link =~ s:^\.\.\/::) {
+            $dir =~ s:([^/]*)\/\z::;
+        }
     }
 
     $flink{"./$dir$link"} .= "$f:$line ";
