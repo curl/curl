@@ -243,7 +243,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
           if(msg->easy_handle == handles[i].h) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
               curl_mfprintf(stderr, "ERROR: [%zu] done, paused=%d, "
-                            "resumed=%d, result %d - wtf?\n", i,
+                            "resumed=%d, result %u - wtf?\n", i,
                             handles[i].paused,
                             handles[i].resumed, msg->data.result);
               rc = (CURLcode)1;

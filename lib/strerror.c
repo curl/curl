@@ -799,7 +799,8 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
       !get_winsock_error(err, buf, buflen) &&
 #endif
       !curlx_get_winapi_error(err, buf, buflen))
-      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
+      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)",
+                     err, (unsigned int)err);
   }
 #else /* not Windows coming up */
 
@@ -977,14 +978,16 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
                    "SEC_E_ILLEGAL_MESSAGE (0x%08X) - This error usually "
                    "occurs when a fatal SSL/TLS alert is received (e.g. "
                    "handshake failed). More detail may be available in "
-                   "the Windows System event log.", err);
+                   "the Windows System event log.", (unsigned int)err);
   }
   else {
     char msgbuf[256];
     if(curlx_get_winapi_error(err, msgbuf, sizeof(msgbuf)))
-      curl_msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
+      curl_msnprintf(buf, buflen, "%s (0x%08X) - %s",
+                     txt, (unsigned int)err, msgbuf);
     else
-      curl_msnprintf(buf, buflen, "%s (0x%08X)", txt, err);
+      curl_msnprintf(buf, buflen, "%s (0x%08X)",
+                     txt, (unsigned int)err);
   }
 
 #else

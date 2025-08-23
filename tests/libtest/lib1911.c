@@ -81,7 +81,7 @@ static CURLcode test_lib1911(const char *URL)
         break;
       default:
         /* all other return codes are unexpected */
-        curl_mfprintf(stderr, "curl_easy_setopt(%s...) returned %d\n",
+        curl_mfprintf(stderr, "curl_easy_setopt(%s...) returned %u\n",
                       o->name, result);
         error++;
         break;

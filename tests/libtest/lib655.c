@@ -84,7 +84,7 @@ static CURLcode test_lib655(const char *URL)
   res = curl_easy_perform(curl);
   if(res != CURLE_COULDNT_RESOLVE_HOST) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
-                  "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n",
+                  "CURLE_COULDNT_RESOLVE_HOST but instead returned error %u\n",
                   res);
     if(res == CURLE_OK)
       res = TEST_ERR_FAILURE;

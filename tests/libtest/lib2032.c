@@ -48,7 +48,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 
   if(CURLE_OK != code) {
     curl_mfprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
-                  "with code %d (%s)\n",
+                  "with code %u (%s)\n",
                   __FILE__, __LINE__, code, curl_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
@@ -154,7 +154,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 
     multi_perform(multi, &running);
 
-    curl_mfprintf(stderr, "%s:%d running %d state %d\n",
+    curl_mfprintf(stderr, "%s:%d running %d state %u\n",
                   __FILE__, __LINE__, running, state);
 
     abort_on_test_timeout();
@@ -179,7 +179,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
       }
       state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
                                              : NoMoreHandles;
-      curl_mfprintf(stderr, "%s:%d new state %d\n",
+      curl_mfprintf(stderr, "%s:%d new state %u\n",
                     __FILE__, __LINE__, state);
     }
 
