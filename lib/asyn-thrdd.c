@@ -258,8 +258,11 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
       Curl_addrinfo_set_port(addr_ctx->res, addr_ctx->port);
     }
 
+    Curl_mutex_acquire(&addr_ctx->mutx);
+    do_abort = addr_ctx->do_abort;
+    Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
-    if(!addr_ctx->do_abort) {
+    if(!do_abort) {
 #ifdef USE_EVENTFD
       const uint64_t buf[1] = { 1 };
 #else
@@ -324,8 +327,11 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
         addr_ctx->sock_error = RESOLVER_ENOMEM;
     }
 
+    Curl_mutex_acquire(&addr_ctx->mutx);
+    do_abort = addr_ctx->do_abort;
+    Curl_mutex_release(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
-    if(!addr_ctx->do_abort) {
+    if(!do_abort) {
 #ifdef USE_EVENTFD
       const uint64_t buf[1] = { 1 };
 #else
