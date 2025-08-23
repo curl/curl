@@ -4231,7 +4231,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       }
     }
   }
-#endif
+#endif /* HAVE_OPENSSL_SRP && USE_TLS_SRP */
 
   /* OpenSSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
