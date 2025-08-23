@@ -292,6 +292,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="LibreSSL"
+      HAVE_LIBRESSL=1
     ],[
       AC_MSG_RESULT([no])
     ])
