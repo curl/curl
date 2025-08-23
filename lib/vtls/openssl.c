@@ -2504,7 +2504,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct ossl_ctx *octx)
 {
   int i, ocsp_status;
-#ifdef OPENSSL_IS_AWSLC
+#ifdef HAVE_BORINGSSL_LIKE
   const uint8_t *status;
 #else
   unsigned char *status;
@@ -5580,7 +5580,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
                    (ssleay_value >> 20) & 0xff,
                    (ssleay_value >> 12) & 0xff,
                    sub);
-#endif /* OPENSSL_IS_BORINGSSL */
+#endif
 }
 
 /* can be called with data == NULL */
