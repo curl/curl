@@ -1112,7 +1112,7 @@ if(USE_NGTCP2)
     elseif(HAVE_LIBRESSL)
       find_package(NGTCP2 COMPONENTS "LibreSSL")
       if(NOT NGTCP2_FOUND)
-        find_package(NGTCP2 REQUIRED COMPONENTS "quictls")  # for ngtcp2 1.14.0 or older
+        find_package(NGTCP2 REQUIRED COMPONENTS "quictls")  # for ngtcp2 <1.15.0
       endif()
     else()
       find_package(NGTCP2 REQUIRED COMPONENTS "quictls")
