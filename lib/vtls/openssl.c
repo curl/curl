@@ -232,14 +232,6 @@ typedef unsigned long sslerr_t;
   "ALL:!EXPORT:!EXPORT40:!EXPORT56:!aNULL:!LOW:!RC4:@STRENGTH"
 #endif
 
-#ifdef HAVE_OPENSSL_SRP
-/* the function exists */
-#ifdef USE_TLS_SRP
-/* the functionality is not disabled */
-#define USE_OPENSSL_SRP
-#endif
-#endif
-
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define HAVE_RANDOM_INIT_BY_DEFAULT 1
 #endif
@@ -4216,7 +4208,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   }
 #endif
 
-#ifdef USE_OPENSSL_SRP
+#if defined(HAVE_OPENSSL_SRP) && defined(USE_TLS_SRP)
   if(ssl_config->primary.username && Curl_auth_allowed_to_host(data)) {
     char * const ssl_username = ssl_config->primary.username;
     char * const ssl_password = ssl_config->primary.password;
@@ -4239,7 +4231,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       }
     }
   }
-#endif
+#endif /* HAVE_OPENSSL_SRP && USE_TLS_SRP */
 
   /* OpenSSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
