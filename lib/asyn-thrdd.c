@@ -229,7 +229,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
-  Curl_thread_cancel_deferred();
   Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
@@ -306,7 +305,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
-  Curl_thread_cancel_deferred();
   Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
