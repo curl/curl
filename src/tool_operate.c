@@ -1119,6 +1119,11 @@ static CURLcode single_transfer(struct OperationConfig *config,
     struct getout *u = state->urlnode;
     FILE *err = (!global->silent || global->showerror) ? tool_stderr : NULL;
 
+    if(!u->url) {
+      /* This node has no URL. End of the road. */
+      warnf("Got more output options than URLs");
+      break;
+    }
     if(u->infile) {
       if(!config->globoff && !glob_inuse(&state->inglob))
         result = glob_url(&state->inglob, u->infile, &state->upnum, err);
@@ -1141,11 +1146,6 @@ static CURLcode single_transfer(struct OperationConfig *config,
       glob_cleanup(&state->inglob);
       state->upidx = 0;
       state->urlnode = u->next; /* next node */
-      if(state->urlnode && !state->urlnode->url) {
-        /* This node has no URL. End of the road. */
-        warnf("Got more output options than URLs");
-        break;
-      }
       continue;
     }
 
