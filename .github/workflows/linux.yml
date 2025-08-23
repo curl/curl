@@ -51,6 +51,8 @@ env:
   MBEDTLS_VERSION: 3.6.4
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.58.0
+  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
+  BORINGSSL_VERSION: 0.20250818.0
   # handled in renovate.json
   OPENSSL_VERSION: 3.5.2
   # handled in renovate.json
@@ -143,6 +145,11 @@ jobs:
             install_packages: zlib1g-dev libidn2-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
+
+          - name: 'boringssl'
+            install_packages: zlib1g-dev
+            install_steps: boringssl pytest
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
           - name: 'openssl default'
             install_steps: pytest
@@ -515,6 +522,27 @@ jobs:
           mkdir "aws-lc-${AWSLC_VERSION}-build"
           cd "aws-lc-${AWSLC_VERSION}-build"
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc "../aws-lc-${AWSLC_VERSION}" -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+          cmake --build .
+          cmake --install .
+
+      - name: 'cache boringssl'
+        if: ${{ contains(matrix.build.install_steps, 'boringssl') }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-boringssl
+        env:
+          cache-name: cache-boringssl
+        with:
+          path: ~/boringssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+
+      - name: 'build boringssl'
+        if: ${{ contains(matrix.build.install_steps, 'boringssl') && steps.cache-boringssl.outputs.cache-hit != 'true' }}
+        run: |
+          mkdir boringssl-src
+          cd boringssl-src
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" | tar -xz
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON
           cmake --build .
           cmake --install .
 
