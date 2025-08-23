@@ -474,7 +474,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
 static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
                                     struct Curl_easy *data,
                                     struct bufq *inraw,
-                                    ws_write_payload *write_payload,
+                                    ws_write_payload *write_cb,
                                     void *write_ctx)
 {
   const unsigned char *inbuf;
@@ -487,9 +487,9 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if((curl_off_t)inlen > remain)
       inlen = (size_t)remain;
-    nwritten = write_payload(inbuf, inlen, dec->frame_age, dec->frame_flags,
-                             dec->payload_offset, dec->payload_len,
-                             write_ctx, &result);
+    nwritten = write_cb(inbuf, inlen, dec->frame_age, dec->frame_flags,
+                        dec->payload_offset, dec->payload_len,
+                        write_ctx, &result);
     if(nwritten < 0)
       return result;
     Curl_bufq_skip(inraw, (size_t)nwritten);
@@ -505,7 +505,7 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
 static CURLcode ws_dec_pass(struct ws_decoder *dec,
                             struct Curl_easy *data,
                             struct bufq *inraw,
-                            ws_write_payload *write_payload,
+                            ws_write_payload *write_cb,
                             void *write_ctx)
 {
   CURLcode result;
@@ -535,8 +535,8 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
       ssize_t nwritten;
       const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
-      nwritten = write_payload(&tmp, 0, dec->frame_age, dec->frame_flags,
-                               0, 0, write_ctx, &result);
+      nwritten = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
+                          0, 0, write_ctx, &result);
       if(nwritten < 0)
         return result;
       dec->state = WS_DEC_INIT;
@@ -544,7 +544,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     }
     FALLTHROUGH();
   case WS_DEC_PAYLOAD:
-    result = ws_dec_pass_payload(dec, data, inraw, write_payload, write_ctx);
+    result = ws_dec_pass_payload(dec, data, inraw, write_cb, write_ctx);
     ws_dec_info(dec, data, "passing");
     if(result)
       return result;
@@ -631,7 +631,8 @@ static ssize_t ws_cw_dec_next(const unsigned char *buf, size_t buflen,
     update_meta(ws, frame_age, frame_flags, payload_offset,
                 payload_len, buflen);
 
-    *err = Curl_cwriter_write(data, ctx->next_writer, ctx->cw_type,
+    *err = Curl_cwriter_write(data, ctx->next_writer,
+                              (ctx->cw_type | CLIENTWRITE_0LEN),
                               (const char *)buf, buflen);
     if(*err)
       return -1;
@@ -943,7 +944,12 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
       return result;
     ctx->read_eos = eos;
 
-    if(!nread) {
+    if(!Curl_bufq_is_empty(&ws->sendbuf)) {
+      /* client_read started a new frame, we disregard any eos reported */
+      ctx->read_eos = FALSE;
+      Curl_creader_clear_eos(data, reader->next);
+    }
+    else if(!nread) {
       /* nothing to convert, return this right away */
       if(ctx->read_eos)
         ctx->eos = TRUE;
@@ -952,7 +958,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
       goto out;
     }
 
-    if(!ws->enc.payload_remain) {
+    if(!ws->enc.payload_remain && Curl_bufq_is_empty(&ws->sendbuf)) {
       /* encode the data as a new BINARY frame */
       result = ws_enc_write_head(data, &ws->enc, CURLWS_BINARY, nread,
                                  &ws->sendbuf);
@@ -990,8 +996,7 @@ static const struct Curl_crtype ws_cr_encode = {
   Curl_creader_def_needs_rewind,
   Curl_creader_def_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
+  Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_ws_ctx)
@@ -1732,7 +1737,7 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *d,
     return CURLE_FAILED_INIT;
   }
 
-  CURL_TRC_WS(data, "curl_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
+  CURL_TRC_WS(data, "curl_ws_start_frame(flags=%x, frame_len=%" FMT_OFF_T,
               flags, frame_len);
 
   if(!data->conn) {

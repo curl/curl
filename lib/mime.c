@@ -2150,22 +2150,27 @@ static CURLcode cr_mime_resume_from(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode cr_mime_rewind(struct Curl_easy *data,
-                               struct Curl_creader *reader)
+static CURLcode cr_mime_cntrl(struct Curl_easy *data,
+                              struct Curl_creader *reader,
+                              Curl_creader_cntrl opcode)
 {
   struct cr_mime_ctx *ctx = reader->ctx;
-  CURLcode result = mime_rewind(ctx->part);
-  if(result)
-    failf(data, "Cannot rewind mime/post data");
-  return result;
-}
-
-static CURLcode cr_mime_unpause(struct Curl_easy *data,
-                                struct Curl_creader *reader)
-{
-  struct cr_mime_ctx *ctx = reader->ctx;
-  (void)data;
-  mime_unpause(ctx->part);
+  switch(opcode) {
+  case CURL_CRCNTRL_REWIND: {
+    CURLcode result = mime_rewind(ctx->part);
+    if(result)
+      failf(data, "Cannot rewind mime/post data");
+    return result;
+  }
+  case CURL_CRCNTRL_UNPAUSE:
+    mime_unpause(ctx->part);
+    break;
+  case CURL_CRCNTRL_CLEAR_EOS:
+    ctx->seen_eos = FALSE;
+    break;
+  default:
+    break;
+  }
   return CURLE_OK;
 }
 
@@ -2185,8 +2190,7 @@ static const struct Curl_crtype cr_mime = {
   cr_mime_needs_rewind,
   cr_mime_total_length,
   cr_mime_resume_from,
-  cr_mime_rewind,
-  cr_mime_unpause,
+  cr_mime_cntrl,
   cr_mime_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_mime_ctx)

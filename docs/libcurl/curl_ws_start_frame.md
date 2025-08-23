@@ -46,6 +46,14 @@ the data belonging to the frame.
 The function fails, if a previous frame has not been completely
 read yet. Also it fails in *CURLWS_RAW_MODE*.
 
+The read function in libcurl usually treats a return value of 0
+as the end of file indication and stops any further reads. This
+would prevent sending WebSocket frames of length 0.
+
+If the read function calls `curl_ws_start_frame()` however, a return
+value of 0 is *not* treated as an end of file and libcurl calls
+the read function again.
+
 # FLAGS
 
 Supports all flags documented in curl_ws_meta(3).
