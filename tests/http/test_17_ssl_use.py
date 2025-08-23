@@ -313,11 +313,12 @@ class TestSSLUse:
         httpd.reload_if_config_changed()
         # curl's TLS backend supported version
         if env.curl_uses_lib('gnutls') or \
-            env.curl_uses_lib('quiche') or \
-                env.curl_uses_lib('aws-lc'):
+           env.curl_uses_lib('quiche') or \
+           env.curl_uses_lib('aws-lc') or \
+           env.curl_uses_lib('boringssl'):
             curl_supported = [0x301, 0x302, 0x303, 0x304]
         elif env.curl_uses_lib('openssl') and \
-                env.curl_lib_version_before('openssl', '3.0.0'):
+             env.curl_lib_version_before('openssl', '3.0.0'):
             curl_supported = [0x301, 0x302, 0x303, 0x304]
         else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
             curl_supported = [0x303, 0x304]
