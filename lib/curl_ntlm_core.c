@@ -70,14 +70,10 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  ifdef OPENSSL_IS_AWSLC
+#  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
 #    define DES_set_key_unchecked (void)DES_set_key
-#    define DESKEYARG(x) *x
-#    define DESKEY(x) &x
-#  else
-#    define DESKEYARG(x) *x
-#    define DESKEY(x) &x
 #  endif
+#  define DESKEY(x) &x
 #else
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/openssl/md5.h>
@@ -91,12 +87,11 @@
 #    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
 #    define DES_ecb_encrypt wolfSSL_DES_ecb_encrypt
 #    define DESKEY(x) ((WOLFSSL_DES_key_schedule *)(x))
-#    define DESKEYARG(x) *x
 #  else
-#    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
 #  endif
 #endif
+#define DESKEYARG(x) *x
 
 #elif defined(USE_GNUTLS)
 

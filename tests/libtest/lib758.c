@@ -38,9 +38,7 @@
 #include <openssl/x509.h>
 #include <openssl/ssl.h>
 
-#if ((OPENSSL_VERSION_NUMBER >= 0x30000000L) && \
-     !defined(LIBRESSL_VERSION_NUMBER) && \
-     !defined(OPENSSL_IS_BORINGSSL))
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #define T578_ENABLED
 #endif
 #endif

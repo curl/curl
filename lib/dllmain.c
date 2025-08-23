@@ -37,10 +37,8 @@
 #if defined(_WIN32) && !defined(CURL_STATICLIB)
 
 #if defined(USE_OPENSSL) && \
-    !defined(OPENSSL_IS_AWSLC) && \
-    !defined(OPENSSL_IS_BORINGSSL) && \
-    !defined(LIBRESSL_VERSION_NUMBER) && \
-    (OPENSSL_VERSION_NUMBER >= 0x10100000L)
+  !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC) && \
+  !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define PREVENT_OPENSSL_MEMLEAK
 #endif
 
