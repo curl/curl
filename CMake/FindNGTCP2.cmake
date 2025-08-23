@@ -26,11 +26,11 @@
 # This module accepts optional COMPONENTS to control the crypto library (these are
 # mutually exclusive):
 #
-# - BoringSSL:  Use `libngtcp2_crypto_boringssl`. (choose this for AWS-LC)
+# - BoringSSL:  Use `libngtcp2_crypto_boringssl`. (also for AWS-LC)
 # - GnuTLS:     Use `libngtcp2_crypto_gnutls`.
 # - LibreSSL:   Use `libngtcp2_crypto_libressl`. (requires ngtcp2 1.15.0+)
 # - ossl:       Use `libngtcp2_crypto_ossl`.
-# - quictls:    Use `libngtcp2_crypto_quictls`.
+# - quictls:    Use `libngtcp2_crypto_quictls`. (also for LibreSSL with ngtcp2 <1.15.0)
 # - wolfSSL:    Use `libngtcp2_crypto_wolfssl`.
 #
 # Input variables:
