@@ -2504,7 +2504,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct ossl_ctx *octx)
 {
   int i, ocsp_status;
-#ifdef OPENSSL_IS_AWSLC
+#ifdef HAVE_BORINGSSL_LIKE
   const uint8_t *status;
 #else
   unsigned char *status;
