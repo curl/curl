@@ -538,13 +538,6 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 
   DEBUGASSERT(addr_ctx->thread_hnd != curl_thread_t_null);
   if(!done && (addr_ctx->thread_hnd != curl_thread_t_null)) {
-#if 0
-    timediff_t alive_ms = curlx_timediff(curlx_now(), addr_ctx->start);
-    /* give thread a startup chance to get cancel mode, etc. set up
-     * before we cancel it. */
-    if(alive_ms < 5)
-      curlx_wait_ms(5 - alive_ms);
-#endif
     CURL_TRC_DNS(data, "cancelling resolve thread");
     (void)Curl_thread_cancel(&addr_ctx->thread_hnd);
   }
