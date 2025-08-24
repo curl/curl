@@ -281,7 +281,7 @@ jobs:
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            --enable-lib-only --with-boringssl \
+            --enable-lib-only --with-boringssl --with-openssl=no \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX'
           make install
@@ -349,13 +349,14 @@ jobs:
               LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
               --with-ngtcp2 --disable-ntlm
               --with-openssl=/home/runner/awslc/build --enable-ssls-export
-              --enable-unity
+              --disable-unity
 
           - name: 'awslc'
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quictls'
             install_steps: skipall
