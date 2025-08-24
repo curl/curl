@@ -24,7 +24,7 @@ versions of libs and build tools.
 
  We aim to support these or later versions.
 
- - OpenSSL      3.0.0
+ - OpenSSL      1.1.1
  - LibreSSL     2.9.1
  - GnuTLS       3.1.10
  - mbedTLS      3.2.0

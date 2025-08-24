@@ -109,8 +109,8 @@
 #    error "LibreSSL 2.9.1 or later required"
 #  endif
 #elif !defined(HAVE_BORINGSSL_LIKE)
-#  ifndef HAVE_OPENSSL3 /* 2021-09-07 */
-#    error "OpenSSL 3.0.0 or later required"
+#  if OPENSSL_VERSION_NUMBER < 0x10101000L /* 2018-09-11 */
+#    error "OpenSSL 1.1.1 or later required"
 #  endif
 #endif
 
@@ -5155,9 +5155,41 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #elif defined(OPENSSL_IS_AWSLC)
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
-#else /* OpenSSL 3+ */
+#elif defined(OPENSSL_VERSION_STRING)  /* OpenSSL 3+ */
   return msnprintf(buffer, size, "%s/%s",
                    OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
+#else
+  /* not LibreSSL, BoringSSL and not using OpenSSL_version */
+
+  char sub[3];
+  unsigned long ssleay_value;
+  sub[2]='\0';
+  sub[1]='\0';
+  ssleay_value = OpenSSL_version_num();
+  if(ssleay_value&0xff0) {
+    int minor_ver = (ssleay_value >> 4) & 0xff;
+    if(minor_ver > 26) {
+      /* handle extended version introduced for 0.9.8za */
+      sub[1] = (char) ((minor_ver - 1) % 26 + 'a' + 1);
+      sub[0] = 'z';
+    }
+    else {
+      sub[0] = (char) (minor_ver + 'a' - 1);
+    }
+  }
+  else
+    sub[0]='\0';
+
+  return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
+#ifdef OPENSSL_FIPS
+                   "-fips"
+#endif
+                   ,
+                   OSSL_PACKAGE,
+                   (ssleay_value >> 28) & 0xf,
+                   (ssleay_value >> 20) & 0xff,
+                   (ssleay_value >> 12) & 0xff,
+                   sub);
 #endif
 }
 
