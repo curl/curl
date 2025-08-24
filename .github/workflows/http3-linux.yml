@@ -261,7 +261,7 @@ jobs:
 
       - name: 'build ngtcp2'
         if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
-        # building 4 times to get crypto libs for ossl, libressl, quictls and awslc installed
+        # building 3 times to get crypto libs for ossl, libressl, quictls and awslc installed
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
@@ -277,11 +277,7 @@ jobs:
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
-            --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
-          make install
-          make clean
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            --enable-lib-only --with-boringssl --with-openssl=no \
+            --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX'
           make install
