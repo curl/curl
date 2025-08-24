@@ -31,7 +31,7 @@
 
 static char *GetEnv(const char *variable)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE) || \
+#if defined(CURL_WINDOWS_UWP) || \
   defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
   (void)variable;
   return NULL;
