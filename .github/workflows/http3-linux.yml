@@ -276,7 +276,7 @@ jobs:
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            PKG_CONFIG_PATH=/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
+            PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
           make clean
