@@ -47,6 +47,8 @@ env:
   QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.1.0
+  # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
+  AWSLC_VERSION: 1.58.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   GNUTLS_VERSION: 3.8.10
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
@@ -83,6 +85,15 @@ jobs:
         with:
           path: ~/libressl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+
+      - name: 'cache awslc'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-awslc
+        env:
+          cache-name: cache-awslc
+        with:
+          path: ~/awslc/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'cache quictls'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -127,7 +138,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache nghttp2'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -142,6 +153,7 @@ jobs:
         if: >-
           ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
               steps.cache-libressl.outputs.cache-hit != 'true' ||
+              steps.cache-awslc.outputs.cache-hit != 'true' ||
               steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-gnutls.outputs.cache-hit != 'true' ||
               steps.cache-wolfssl.outputs.cache-hit != 'true' ||
@@ -184,7 +196,18 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
-          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl/build
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/libressl/build -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF
+          cmake --build .
+          cmake --install .
+
+      - name: 'build awslc'
+        if: ${{ steps.cache-awslc.outputs.cache-hit != 'true' }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
+          cd "aws-lc-${AWSLC_VERSION}"
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -238,7 +261,7 @@ jobs:
 
       - name: 'build ngtcp2'
         if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
-        # building 3 times to get crypto libs for ossl, libressl and quictls installed
+        # building 4 times to get crypto libs for ossl, libressl, quictls and awslc installed
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
@@ -250,6 +273,10 @@ jobs:
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=/home/runner/quictls/build/lib/pkgconfig --enable-lib-only --with-openssl
+          make install
+          make clean
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+            PKG_CONFIG_PATH=/home/runner/awslc/build/lib/pkgconfig --enable-lib-only --with-boringssl --without-openssl
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
@@ -311,6 +338,21 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/libressl/build
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+
+          - name: 'awslc'
+            install_steps: skipall
+            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            configure: >-
+              LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
+              --with-ngtcp2 --disable-ntlm
+              --with-openssl=/home/runner/awslc/build --enable-ssls-export
+              --enable-unity
+
+          - name: 'awslc'
+            PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
 
           - name: 'quictls'
@@ -428,6 +470,16 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
           fail-on-cache-miss: true
 
+      - name: 'cache awslc'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-awslc
+        env:
+          cache-name: cache-awslc
+        with:
+          path: ~/awslc/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
+          fail-on-cache-miss: true
+
       - name: 'cache quictls'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-quictls-no-deprecated
@@ -477,7 +529,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache nghttp2'
