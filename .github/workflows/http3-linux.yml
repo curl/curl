@@ -276,7 +276,7 @@ jobs:
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            PKG_CONFIG_PATH=/home/runner/awslc/build/lib/pkgconfig --enable-lib-only --with-boringssl --without-openssl
+            --enable-lib-only --with-boringssl=/home/runner/awslc/build --without-openssl
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
