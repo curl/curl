@@ -280,13 +280,11 @@ jobs:
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
           make clean
-          cmake -B . -G Ninja -DBUILD_TESTING=OFF -DENABLE_LIB_ONLY=ON -DENABLE_OPENSSL=OFF -DENABLE_BORINGSSL=ON \
-            -DBORINGSSL_INCLUDE_DIR=/home/runner/awslc/build/include \
-            -DBORINGSSL_LIBRARIES='/home/runner/awslc/build/lib/libcrypto.a;/home/runner/awslc/build/lib/libssl.a;-lpthread' \
-            -DCMAKE_CXX_FLAGS=-DBORINGSSL_NO_CXX \
-            -DCMAKE_INSTALL_PREFIX="$PWD"/build
-          cmake --build .
-          cmake --install .
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+            --enable-lib-only --with-boringssl \
+            BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
+            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX'
+          make install
 
       - name: 'build nghttp2'
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
