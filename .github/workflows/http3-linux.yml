@@ -279,7 +279,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
-            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX'
+            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX -fPIC'
           make install
 
       - name: 'build nghttp2'
