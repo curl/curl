@@ -118,7 +118,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     clangvlo=`echo $clangver | cut -d . -f2`
     compiler_ver="$clangver"
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
-    if test "$appleclang" = '1' -a "$oldapple" = '0'; then
+    if test "$appleclang" = '1' && test "$oldapple" = '0'; then
       dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
       if   test "$compiler_num" -ge '1300'; then compiler_num='1200'
       elif test "$compiler_num" -ge '1205'; then compiler_num='1101'
@@ -153,7 +153,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_DEC_C], [
   AC_MSG_CHECKING([if compiler is DEC/Compaq/HP C])
   CURL_CHECK_DEF([__DECC], [], [silent])
   CURL_CHECK_DEF([__DECC_VER], [], [silent])
-  if test "$curl_cv_have_def___DECC" = "yes" -a "$curl_cv_have_def___DECC_VER" = "yes"; then
+  if test "$curl_cv_have_def___DECC" = "yes" &&
+     test "$curl_cv_have_def___DECC_VER" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="DEC_C"
     flags_dbg_yes="-g2"
@@ -184,7 +185,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
   AC_REQUIRE([CURL_CHECK_COMPILER_CLANG])dnl
   AC_MSG_CHECKING([if compiler is GNU C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
-  if test "$curl_cv_have_def___GNUC__" = "yes" -a "$compiler_id" = "unknown"; then
+  if test "$curl_cv_have_def___GNUC__" = "yes" &&
+    test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="GNU_C"
     AC_MSG_CHECKING([compiler version])
@@ -300,7 +302,9 @@ AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPS_C], [
   AC_MSG_CHECKING([if compiler is SGI MIPS C])
   CURL_CHECK_DEF([__GNUC__], [], [silent])
   CURL_CHECK_DEF([__sgi], [], [silent])
-  if test "$curl_cv_have_def___GNUC__" = "no" -a "$curl_cv_have_def___sgi" = "yes" -a "$compiler_id" = "unknown"; then
+  if test "$curl_cv_have_def___GNUC__" = "no" &&
+    test "$curl_cv_have_def___sgi" = "yes" &&
+    test "$compiler_id" = "unknown"; then
     AC_MSG_RESULT([yes])
     compiler_id="SGI_MIPS_C"
     flags_dbg_yes="-g"
@@ -324,8 +328,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_SGI_MIPSPRO_C], [
   CURL_CHECK_DEF([_COMPILER_VERSION], [], [silent])
   CURL_CHECK_DEF([_SGI_COMPILER_VERSION], [], [silent])
   if test "$curl_cv_have_def___GNUC__" = "no" &&
-    (test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes" -o
-          "$curl_cv_have_def__COMPILER_VERSION" = "yes"); then
+    (test "$curl_cv_have_def__SGI_COMPILER_VERSION" = "yes" ||
+     test "$curl_cv_have_def__COMPILER_VERSION" = "yes"); then
     AC_MSG_RESULT([yes])
     compiler_id="SGI_MIPSPRO_C"
     flags_dbg_yes="-g"
@@ -389,9 +393,8 @@ AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
   AC_REQUIRE([CURL_CHECK_COMPILER])dnl
   AC_MSG_CHECKING([convert -I options to -isystem])
-  if test "$compiler_id" = "GNU_C" \
-       -o "$compiler_id" = "CLANG" \
-       -o "$compiler_id" = "APPLECLANG"; then
+  if test "$compiler_id" = "GNU_C" ||
+    test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
     AC_MSG_RESULT([yes])
     tmp_has_include="no"
     tmp_chg_FLAGS="$CFLAGS"
@@ -470,7 +473,8 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
     ])
   fi
   dnl only do runtime verification when not cross-compiling
-  if test "$cross_compiling" != "yes" -a "$tmp_compiler_works" = "yes"; then
+  if test "$cross_compiling" != "yes" &&
+    test "$tmp_compiler_works" = "yes"; then
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
         #ifdef __STDC__
@@ -626,7 +630,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" -o ! -z "$tmp_CPPFLAGS"; then
+    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts some basic options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
@@ -711,8 +715,8 @@ AC_DEFUN([CURL_SET_COMPILER_OPTIMIZE_OPTS], [
     dnl if CFLAGS or CPPFLAGS already hold optimizer flags. This implies
     dnl that an initially assumed optimizer setting might not be honored.
     #
-    if test "$want_optimize" = "assume_no" \
-         -o "$want_optimize" = "assume_yes"; then
+    if test "$want_optimize" = "assume_no" ||
+       test "$want_optimize" = "assume_yes"; then
       AC_MSG_CHECKING([if compiler optimizer assumed setting might be used])
       CURL_VAR_MATCH_IFELSE([tmp_CFLAGS],[$flags_opt_all],[
         honor_optimize_option="no"
@@ -920,7 +924,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
-          if test "$cross_compiling" != "yes" -o "$compiler_num" -ge "300"; then
+          if test "$cross_compiling" != "yes" ||
+            test "$compiler_num" -ge "300"; then
             tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           fi
           #
@@ -932,7 +937,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "104"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pointer-arith write-strings])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "$cross_compiling" != "yes" -o "$compiler_num" -ge "300"; then
+            if test "$cross_compiling" != "yes" ||
+              test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused shadow])
             fi
           fi
@@ -941,7 +947,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "207"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "$cross_compiling" != "yes" -o "$compiler_num" -ge "300"; then
+            if test "$cross_compiling" != "yes" ||
+              test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
             fi
@@ -1251,7 +1258,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" -o ! -z "$tmp_CPPFLAGS"; then
+    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts strict warning options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
@@ -1399,7 +1406,8 @@ AC_DEFUN([CURL_CHECK_COMPILER_STRUCT_MEMBER_SIZE], [
   ],[
     tst_compiler_check_two_works="yes"
   ])
-  if test "$tst_compiler_check_one_works" = "yes" -a "$tst_compiler_check_two_works" = "yes"; then
+  if test "$tst_compiler_check_one_works" = "yes" &&
+    test "$tst_compiler_check_two_works" = "yes"; then
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
