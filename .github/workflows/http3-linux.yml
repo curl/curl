@@ -207,7 +207,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
           cd "aws-lc-${AWSLC_VERSION}"
-          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
           cmake --build .
           cmake --install .
 
