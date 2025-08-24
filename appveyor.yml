@@ -46,6 +46,15 @@ environment:
 
     # generated CMake-based Visual Studio builds
 
+    - job_name: 'CMake, VS2008, Debug, x86, OpenSSL 1.0.2 + Schannel, Shared, Build-tests & examples'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      PRJ_GEN: 'Visual Studio 9 2008'
+      TARGET: '-A Win32'
+      PRJ_CFG: Debug
+      OPENSSL: 'ON'
+      SCHANNEL: 'ON'
+      SHARED: 'ON'
+      EXAMPLES: 'ON'
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.4, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -61,12 +70,13 @@ environment:
       SCHANNEL: 'ON'
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
-    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Shared, Build-tests & examples, XP'
+    - job_name: 'CMake, VS2010, Debug, x64, OpenSSL 1.0.2 + Schannel, Shared, Build-tests & examples, XP'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
       WINTARGET: 0x0501  # Windows XP
       PRJ_CFG: Debug
+      OPENSSL: 'ON'
       SCHANNEL: 'ON'
       SHARED: 'ON'
       EXAMPLES: 'ON'
@@ -101,7 +111,7 @@ environment:
       OPENSSL: 'ON'
       SHARED: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CMake, VS2019, Debug, x64, OpenSSL 1.1.1 + Schannel, Shared, Build-tests'
+    - job_name: 'CMake, VS2019, Debug, x64, OpenSSL 1.1.0 + Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       PRJ_GEN: 'Visual Studio 16 2019'
       TARGET: '-A x64'
