@@ -108,8 +108,10 @@
 #  if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
 #    error "LibreSSL 2.9.1 or later required"
 #  endif
-#elif OPENSSL_VERSION_NUMBER < 0x10100000L /* 2016-08-25 */
-#  error "OpenSSL 1.1.0 or later required"
+#elif !defined(HAVE_BORINGSSL_LIKE)
+#  if OPENSSL_VERSION_NUMBER < 0x10101000L /* 2018-09-11 */
+#    error "OpenSSL 1.1.1 or later required"
+#  endif
 #endif
 
 #if defined(HAVE_OPENSSL3) && !defined(OPENSSL_NO_UI_CONSOLE)
@@ -153,8 +155,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
  * BoringSSL: no
  * LibreSSL: supported since 3.4.1 (released 2021-10-14)
  */
-#if ((OPENSSL_VERSION_NUMBER >= 0x10101000L && \
-      !defined(LIBRESSL_VERSION_NUMBER)) || \
+#if (!defined(LIBRESSL_VERSION_NUMBER) || \
      (defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER >= 0x3040100fL)) && \
     !defined(OPENSSL_IS_BORINGSSL)
