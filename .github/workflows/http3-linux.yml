@@ -282,7 +282,7 @@ jobs:
           make clean
           cmake -B . -G Ninja -DBUILD_TESTING=OFF -DENABLE_LIB_ONLY=ON -DENABLE_OPENSSL=OFF -DENABLE_BORINGSSL=ON \
             -DBORINGSSL_INCLUDE_DIR=/home/runner/awslc/build/include \
-            -DBORINGSSL_LIBRARIES=/home/runner/awslc/build/lib/libcrypto.a;/home/runner/awslc/build/lib/libssl.a;-lpthread \
+            -DBORINGSSL_LIBRARIES='/home/runner/awslc/build/lib/libcrypto.a;/home/runner/awslc/build/lib/libssl.a;-lpthread' \
             -DCMAKE_CXX_FLAGS=-DBORINGSSL_NO_CXX \
             -DCMAKE_INSTALL_PREFIX="$PWD"/build
           cmake --build .
