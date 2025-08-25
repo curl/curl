@@ -215,28 +215,12 @@ rem
 
   call :extension %3 ext
 
-  if "%1" == "dsp" (
-    echo # Begin Source File>> %4
-    echo.>> %4
-    echo SOURCE=..\..\..\..\%2\%~3>> %4
-    echo # End Source File>> %4
-  ) else if "%1" == "vcproj1" (
-    echo %TABS%^<File>> %4
-    echo %TABS%	RelativePath="..\..\..\..\%2\%~3"^>>> %4
-    echo %TABS%^</File^>>> %4
-  ) else if "%1" == "vcproj2" (
-    echo %TABS%^<File>> %4
-    echo %TABS%	RelativePath="..\..\..\..\%2\%~3">> %4
-    echo %TABS%^>>> %4
-    echo %TABS%^</File^>>> %4
-  ) else if "%1" == "vcxproj" (
-    if "%ext%" == "c" (
-      echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
-    ) else if "%ext%" == "h" (
-      echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^" /^>>> %4
-    ) else if "%ext%" == "rc" (
-      echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
-    )
+  if "%ext%" == "c" (
+    echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+  ) else if "%ext%" == "h" (
+    echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+  ) else if "%ext%" == "rc" (
+    echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
   )
 
   exit /B
