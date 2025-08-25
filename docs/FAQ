@@ -1026,7 +1026,7 @@ FAQ
   timeout is set.
 
   See option TcpMaxConnectRetransmissions on this page:
-  https://support.microsoft.com/en-us/kb/175523/en-us
+  https://web.archive.org/web/20160819015101/support.microsoft.com/en-us/kb/175523
 
   Also, even on non-Windows systems there may run a firewall or anti-virus
   software or similar that accepts the connection but does not actually do
