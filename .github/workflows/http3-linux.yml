@@ -410,7 +410,7 @@ jobs:
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build
+              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBUILD_SHARED_LIBS=OFF
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCMAKE_UNITY_BUILD=ON
 
