@@ -4,7 +4,7 @@ curl and libcurl 8.15.1
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3492
+ Contributors:                 3495
 
 This release includes the following changes:
 
@@ -29,9 +29,14 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o _PROTOCOLS.md: mention file:// is only for absolute paths [102]
+ o acinclude: --with-ca-fallback only works with OpenSSL [217]
  o alpn: query filter [104]
  o ares: destroy channel on shutdown [178]
+ o ares: use `ares_strerror()` to retrieve error messages [236]
+ o asyn-thrdd: fix --disable-socketpair builds [235]
  o asyn-thrdd: fix Curl_async_pollset without socketpair [205]
+ o asyn-thrdd: fix no `HAVE_GETADDRINFO` builds [214]
+ o asyn-thrdd: manage DEFERRED and locks better [228]
  o BINDINGS.md: add LibQurl [156]
  o bufq: add integer overflow checks before chunk allocations [108]
  o bufq: removed "Useless Assignment" [188]
@@ -45,8 +50,10 @@ This release includes the following bugfixes:
  o build: fix mingw-w64 version guard for mingw32ce [124]
  o build: if no perl, fix to use the pre-built hugehelp, if present [144]
  o build: link to Apple frameworks required by static wolfSSL [40]
+ o build: support LibreSSL native crypto lib with ngtcp2 1.15.0+ [209]
  o build: tidy up compiler definition for tests [37]
  o cf-https-connect: delete unused declaration [15]
+ o cmake: `CURL_CA_FALLBACK` only works with OpenSSL [215]
  o cmake: capitalize 'Rustls' in the config summary
  o cmake: defer building `unitprotos.h` till a test target needs it [75]
  o cmake: define `WIN32_LEAN_AND_MEAN` for examples [159]
@@ -66,6 +73,7 @@ This release includes the following bugfixes:
  o CODE_STYLE: sync with recent `checksrc.pl` updates [49]
  o config-win32.h: do not use winsock2 `inet_ntop()`/`inet_pton()` [58]
  o configure: if no perl, disable unity and shell completion, related tidy ups [137]
+ o configure: tidy up internal names in ngtcp2 ossl detection logic [212]
  o connectdata: remove primary+secondary ip_quadruple [126]
  o connection: terminate after goaway [62]
  o contrithanks: fix for BSD `sed` tool [98]
@@ -101,14 +109,18 @@ This release includes the following bugfixes:
  o DISTROS.md: add Haiku [39]
  o docs/cmdline-opts: the auth types are not mutually exclusive [103]
  o docs: add CURLOPT type change history, drop casts where present [143]
+ o docs: fix link CONTRIBUTE.md link [192]
  o docs: fix name in curl_easy_ssls_export man page [12]
+ o docs: point two broken links to archive.org [134]
  o doh: rename symbols to avoid collision with mingw-w64 headers [66]
  o easy handle: check validity on external calls [28]
  o examples: drop long cast for `CURLALTSVC_*`
+ o examples: make `CURLPIPE_MULTIPLEX` fallback `long` [233]
  o examples: remove base64 encoded chunks from examples [189]
  o examples: remove href_extractor.c [186]
  o ftp: store dir components as start+len instead of memdup'ing [198]
  o ftp: use 'conn' instead of 'data->conn' [208]
+ o gnutls: fix building with older supported GnuTLS versions [241]
  o gnutls: some small cleanups [41]
  o hmac: return error if init fails [2]
  o hostip: do DNS cache pruning in milliseconds [132]
@@ -125,6 +137,7 @@ This release includes the following bugfixes:
  o libtests: use `FMT_SOCKET_T`, drop more casts [136]
  o managen: reset text mode at end of table marker [145]
  o mbedtls: check for feature macros instead of version [166]
+ o mdlinkcheck: handle links with a leading slash properly [195]
  o memanalyze: fix warnings [22]
  o memory: make function overrides work reliably in unity builds [93]
  o multi event: remove only announced [25]
@@ -136,27 +149,44 @@ This release includes the following bugfixes:
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o ngtcp2: use custom mem funcs [204]
+ o openssl: add and use `HAVE_BORINGSSL_LIKE` internal macro [222]
+ o openssl: add and use `HAVE_OPENSSL3` internal macro [223]
+ o openssl: assume `OPENSSL_VERSION_NUMBER` [181]
  o openssl: auto-pause on verify callback retry [167]
  o openssl: check SSL_write() length on retries [152]
  o openssl: clear errors after a failed `d2i_X509()` [161]
+ o openssl: drop more legacy cruft [224]
+ o openssl: drop redundant `HAVE_OPENSSL_VERSION` macro [221]
+ o openssl: drop redundant version check [246]
+ o openssl: drop single-use interim macro `USE_OPENSSL_SRP` [201]
+ o openssl: enable `HAVE_KEYLOG_CALLBACK` for AWS-LC [220]
+ o openssl: merge two `#if` blocks [218]
  o openssl: output unescaped utf8 x509 issuer/subject DNs [169]
+ o openssl: remove legacy cruft, document macro guards [231]
  o openssl: save and restore OpenSSL error queue in two functions [172]
  o openssl: some small cleanups [42]
  o openssl: split cert_stuff into smaller sub functions [72]
+ o openssl: sync an AWS-LC guard with BoringSSL [199]
+ o openssl: use `RSA_flags()` again with BoringSSL [219]
  o parallel-max: bump the max value to 65535 [86]
  o processhelp.pm: fix to use the correct null device on Windows [164]
  o processhelp.pm: use `Win32::Process*` perl modules if available [200]
+ o projects: drop unused logic from `generate.bat` [157]
  o pytest: add SOCKS tests and scoring [9]
+ o pytest: fix test_17_09_ssl_min_max for BoringSSL [197]
  o pytest: increase server KeepAliveTimeout [26]
  o pytest: relax error check on test_07_22 [16]
  o resolving: dns error tracing [196]
  o runtests: assume `Time::HiRes`, drop Perl Win32 dependency [163]
+ o runtests: replace `--ci` with `--buidinfo`, show OS/Perl version again [247]
+ o runtests: show still running tests when nothing has happened for a while [227]
  o schannel: add an error message for client cert not found [165]
  o schannel: assume `CERT_CHAIN_REVOCATION_CHECK_CHAIN` [114]
  o schannel: drop fallbacks for 4 macros [121]
  o schannel: drop fallbacks for unused `BCRYPT_*` macros [122]
  o schannel: drop old-mingw special case [77]
  o schannel: fix recent update for mingw32ce [123]
+ o schannel: improve handshake procedure [239]
  o schannel: not supported with UWP, drop redundant code [105]
  o schannel: use if(result) like the code style says [125]
  o scripts: enable strict warnings in Perl where missing, fix fallouts [63]
@@ -167,15 +197,19 @@ This release includes the following bugfixes:
  o setopt: split out cookielist() and cookiefile() [130]
  o socks: do_SOCKS5: Fix invalid buffer content on short send [43]
  o spacecheck.pl: when detecting unicode, mention line number [85]
+ o spelling: file system [232]
  o test1148: drop redundant `LC_NUMBER=` env setting [13]
+ o test1557: pass `long` type to `multi_setopt()` [234]
  o test1560: set locale/codeset with `LC_ALL` (was: `LANG`), test in CI [19]
  o test1560: skip some URLs if UTF-8 is not supported [34]
  o test1: raise alloc limits [11]
  o test428: re-enable for Windows [5]
  o test436: fix running on Windows with `_curlrc` present [153]
+ o test: add `cygwin` feature and use it (test 1056, 1517) [249]
  o tests/ech_tests.sh: indent, if/for style, inline ifs [131]
  o tests: constify command-line arguments [82]
  o tests: delete unused commands [177]
+ o tests: drop unused `BLANK` envs, unset `CURL_NOT_SET` [248]
  o tests: drop unused `CURL_FORCEHOST` envs [36]
  o tests: fix perl warnings in http2-server, http3-server [119]
  o tests: fix prechecks to call the bundle libtest tool [120]
@@ -183,17 +217,21 @@ This release includes the following bugfixes:
  o tests: merge clients into libtests, drop duplicate code [76]
  o tests: set `CURL_ENTROPY` per test, not globally [35]
  o tests: unset some envs instead of blanking them [4]
+ o threaded-resolver: fix shutdown [252]
  o tidy-up: `Curl_thread_create()` callback return type [20]
  o tidy-up: move literal to the right side of comparisons [65]
  o tidy-up: prefer `ifdef`/`ifndef` for single checks [64]
  o tls: CURLINFO_TLS_SSL_PTR testing [79]
  o TODO: remove session export item [194]
+ o TODO: remove the expand ~ idea [216]
  o tool_cb_wrt: stop alloc/free for every chunk windows console output [140]
  o tool_operate: avoid superfluous strdup'ing output [1]
+ o tool_operate: use stricter curl_multi_setopt() arguments [225]
  o tool_operate: use the correct config pointer [115]
  o tool_paramhlp: fix secs2ms() [116]
  o tool_parsecfg: use dynbuf for quoted arguments [162]
  o tool_urlglob: polish, cleanups, improvements [141]
+ o typecheck-gcc: add type checks for curl_multi_setopt() [226]
  o unit-tests: build the unitprotos.h from here [73]
  o unit2604: avoid `UNCONST()` [135]
  o URL-SYNTAX.md: drop link to codepoints.net to pass linkcheck [190]
@@ -202,6 +240,7 @@ This release includes the following bugfixes:
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
  o vquic: use curl_getenv [168]
  o vtls: set seen http version on successful ALPN [160]
+ o websocket example: cast print values to unsigned int [251]
  o windows: assume `ADDRESS_FAMILY`, drop feature checks [88]
  o windows: document toolchain support for `CERT_NAME_SEARCH_ALL_NAMES_FLAG`
  o windows: document toolchain support for some macros (cont.) [111]
@@ -235,20 +274,20 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
-  Berthin Torres Callañaupa, Caolán McNamara, Cole Leavitt, d1r3ct0r,
-  Dan Fandrich, Daniel Böhmer, Daniel Engberg, Daniel Stenberg, David Zhuang,
-  devgs on github, Dominik Tomecki, Eshan Kelkar, Gabriel Marin,
-  Google Big Sleep, Harry Sintonen, IoannisGS on github, Jelle Raaijmakers,
-  Jeroen Ooms, Kai Pastor, Karthik Das, kkmuffme on github,
-  kupavcevdenis on github, letshack9707 on hackerone, lf- on github,
-  LoRd_MuldeR, Marcel Raad, Michał Petryka, Natris on github,
-  nevakrien on github, Oxan van Leeuwen, Paul Gilmartin, Petar Popovic,
-  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
-  renovate[bot], rm-rmonaghan on github, Roberto Hidalgo, Samuel Henrique,
-  Schrijvers Luc, Sergio Durigan Junior, Stefan Eissing, sunriseL, Tal Regev,
-  Todd Gamblin, Viktor Szakats, Waldemar Kornewald, xfangfang, yaoy6 on github,
-  ウさん
-  (57 contributors)
+  Berthin Torres Callañaupa, BobodevMm on github, Caolán McNamara,
+  Cole Leavitt, d1r3ct0r, Dan Fandrich, Daniel Böhmer, Daniel Engberg,
+  Daniel Stenberg, David Zhuang, devgs on github, Dominik Tomecki,
+  Eshan Kelkar, Gabriel Marin, Gisle Vanem, Google Big Sleep, Harry Sintonen,
+  IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms, Kai Pastor, Karthik Das,
+  kkmuffme on github, kupavcevdenis on github, letshack9707 on hackerone,
+  lf- on github, LoRd_MuldeR, Marcel Raad, Michael Osipov, Michał Petryka,
+  Natris on github, nevakrien on github, Oxan van Leeuwen, Paul Gilmartin,
+  Petar Popovic, Philippe Antoine, Pino Toscano, Qriist, Qriist on github,
+  Ray Satiro, renovate[bot], rm-rmonaghan on github, Roberto Hidalgo,
+  Samuel Henrique, Schrijvers Luc, Sergio Durigan Junior, Simon Dalvai,
+  Stanislav Osipov, Stefan Eissing, sunriseL, Tal Regev, Todd Gamblin,
+  Viktor Szakats, Waldemar Kornewald, xfangfang, yaoy6 on github, ウさん
+  (62 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -385,6 +424,7 @@ References to bug reports and discussions on issues:
  [131] = https://curl.se/bug/?i=18187
  [132] = https://curl.se/bug/?i=18160
  [133] = https://curl.se/bug/?i=18201
+ [134] = https://curl.se/bug/?i=18393
  [135] = https://curl.se/bug/?i=18143
  [136] = https://curl.se/bug/?i=18142
  [137] = https://curl.se/bug/?i=18141
@@ -407,6 +447,7 @@ References to bug reports and discussions on issues:
  [154] = https://curl.se/bug/?i=18241
  [155] = https://curl.se/bug/?i=18238
  [156] = https://curl.se/bug/?i=18195
+ [157] = https://curl.se/bug/?i=18397
  [158] = https://curl.se/bug/?i=18299
  [159] = https://curl.se/bug/?i=18232
  [160] = https://curl.se/bug/?i=18177
@@ -430,6 +471,7 @@ References to bug reports and discussions on issues:
  [178] = https://curl.se/bug/?i=18216
  [179] = https://curl.se/bug/?i=18272
  [180] = https://curl.se/bug/?i=18254
+ [181] = https://curl.se/bug/?i=18388
  [183] = https://curl.se/bug/?i=18208
  [184] = https://curl.se/bug/?i=18206
  [185] = https://curl.se/bug/?i=18266
@@ -438,13 +480,49 @@ References to bug reports and discussions on issues:
  [188] = https://curl.se/bug/?i=18322
  [189] = https://curl.se/bug/?i=18260
  [190] = https://curl.se/bug/?i=18259
+ [192] = https://curl.se/bug/?i=18372
  [193] = https://curl.se/bug/?i=17683
  [194] = https://curl.se/bug/?i=18243
+ [195] = https://curl.se/bug/?i=18382
  [196] = https://curl.se/bug/?i=18247
+ [197] = https://curl.se/bug/?i=18385
  [198] = https://curl.se/bug/?i=18312
+ [199] = https://curl.se/bug/?i=18384
  [200] = https://curl.se/bug/?i=18308
+ [201] = https://curl.se/bug/?i=18383
  [204] = https://curl.se/bug/?i=18196
  [205] = https://curl.se/bug/?i=18306
  [206] = https://curl.se/bug/?i=18307
  [207] = https://curl.se/bug/?i=18305
  [208] = https://curl.se/bug/?i=18304
+ [209] = https://curl.se/bug/?i=18377
+ [212] = https://curl.se/bug/?i=18378
+ [214] = https://curl.se/bug/?i=18371
+ [215] = https://curl.se/bug/?i=18365
+ [216] = https://curl.se/bug/?i=18363
+ [217] = https://curl.se/bug/?i=18362
+ [218] = https://curl.se/bug/?i=18370
+ [219] = https://curl.se/bug/?i=18369
+ [220] = https://curl.se/bug/?i=18368
+ [221] = https://curl.se/bug/?i=18367
+ [222] = https://curl.se/bug/?i=18358
+ [223] = https://curl.se/bug/?i=18360
+ [224] = https://curl.se/bug/?i=18359
+ [225] = https://curl.se/bug/?i=18357
+ [226] = https://curl.se/bug/?i=18357
+ [227] = https://curl.se/bug/?i=18349
+ [228] = https://curl.se/bug/?i=18350
+ [231] = https://curl.se/bug/?i=18351
+ [232] = https://curl.se/bug/?i=18348
+ [233] = https://curl.se/bug/?i=18356
+ [234] = https://curl.se/bug/?i=18355
+ [235] = https://curl.se/bug/?i=18347
+ [236] = https://curl.se/bug/?i=18251
+ [239] = https://curl.se/bug/?i=18323
+ [241] = https://curl.se/bug/?i=18335
+ [246] = https://curl.se/bug/?i=18333
+ [247] = https://curl.se/bug/?i=18329
+ [248] = https://curl.se/bug/?i=18328
+ [249] = https://curl.se/bug/?i=18327
+ [251] = https://curl.se/bug/?i=18326
+ [252] = https://curl.se/bug/?i=18263
