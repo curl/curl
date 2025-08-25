@@ -44,9 +44,7 @@ rem ***************************************************************************
 :parseArgs
   if "%~1" == "" goto start
 
-  if /i "%~1" == "pre" (
-    set VERSION=PRE
-  ) else if /i "%~1" == "vc10" (
+  if /i "%~1" == "vc10" (
     set VERSION=VC10
   ) else if /i "%~1" == "vc11" (
     set VERSION=VC11
@@ -71,7 +69,6 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :start
-  if "%VERSION%" == "PRE" goto success
   if "%VERSION%" == "VC10" goto vc10
   if "%VERSION%" == "VC11" goto vc11
   if "%VERSION%" == "VC12" goto vc12
@@ -253,7 +250,6 @@ rem
   echo.
   echo What to generate:
   echo.
-  echo pre       - Prerequisites only
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
