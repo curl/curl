@@ -30,7 +30,7 @@ my @tabs = (
     "^m4/zz40-xc-ovr.m4",
     "Makefile\\.(am|example)\$",
     "/mkfile",
-    "\\.(bat|sln|vc)\$",
+    "\\.(sln|vc)\$",
     "^tests/data/test",
 );
 
