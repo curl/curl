@@ -280,7 +280,7 @@ jobs:
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX -fPIC'
-          make install
+          make install V=1
 
       - name: 'build nghttp2'
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
