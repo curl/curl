@@ -352,7 +352,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
-              -DCMAKE_UNITY_BUILD=ON
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 
           - name: 'quictls'
             install_steps: skipall
