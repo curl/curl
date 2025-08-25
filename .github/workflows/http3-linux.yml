@@ -345,7 +345,6 @@ jobs:
               LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
               --with-ngtcp2 --disable-ntlm
               --with-openssl=/home/runner/awslc/build --enable-ssls-export
-              --disable-unity
 
           - name: 'awslc'
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
