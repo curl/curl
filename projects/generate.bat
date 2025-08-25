@@ -146,42 +146,42 @@ rem
 
     if "!var!" == "CURL_SRC_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\src\*.c') do (
-        if /i "%%c" NEQ "curlinfo.c" call :element %1 src "%%c" %3
+        if /i "%%c" NEQ "curlinfo.c" call :element src "%%c" %3
       )
     ) else if "!var!" == "CURL_SRC_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element %1 src "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element src "%%h" %3
     ) else if "!var!" == "CURL_SRC_RC_FILES" (
-      for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element %1 src "%%r" %3
+      for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element src "%%r" %3
     ) else if "!var!" == "CURL_SRC_X_H_FILES" (
-      call :element %1 lib "config-win32.h" %3
-      call :element %1 lib "curl_setup.h" %3
+      call :element lib "config-win32.h" %3
+      call :element lib "curl_setup.h" %3
     ) else if "!var!" == "CURL_LIB_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element %1 lib "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element lib "%%c" %3
     ) else if "!var!" == "CURL_LIB_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element %1 include\curl "%%h" %3
-      for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element %1 lib "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element include\curl "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element lib "%%h" %3
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
-      for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element %1 lib "%%r" %3
+      for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element lib "%%r" %3
     ) else if "!var!" == "CURL_LIB_CURLX_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\curlx\*.c') do call :element %1 lib\curlx "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\curlx\*.c') do call :element lib\curlx "%%c" %3
     ) else if "!var!" == "CURL_LIB_CURLX_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\curlx\*.h') do call :element %1 lib\curlx "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\curlx\*.h') do call :element lib\curlx "%%h" %3
     ) else if "!var!" == "CURL_LIB_VAUTH_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element %1 lib\vauth "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element lib\vauth "%%c" %3
     ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element %1 lib\vauth "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element lib\vauth "%%h" %3
     ) else if "!var!" == "CURL_LIB_VQUIC_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element %1 lib\vquic "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element lib\vquic "%%c" %3
     ) else if "!var!" == "CURL_LIB_VQUIC_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element %1 lib\vquic "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element lib\vquic "%%h" %3
     ) else if "!var!" == "CURL_LIB_VSSH_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element %1 lib\vssh "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element lib\vssh "%%c" %3
     ) else if "!var!" == "CURL_LIB_VSSH_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element %1 lib\vssh "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element lib\vssh "%%h" %3
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element %1 lib\vtls "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element lib\vtls "%%c" %3
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element %1 lib\vtls "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element lib\vtls "%%h" %3
     ) else (
       echo.!var!>> %3
     )
@@ -192,22 +192,21 @@ rem
 
 rem Generates a single file xml element.
 rem
-rem %1 - Project Type (vcxproj for VC10, VC11, VC12, VC14, VC14.10, VC14.20 and VC14.30)
-rem %2 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
-rem %3 - Source filename
-rem %4 - Output project file
+rem %1 - Directory (src, lib, lib\vauth, lib\vquic, lib\vssh, lib\vtls)
+rem %2 - Source filename
+rem %3 - Output project file
 rem
 :element
   set "SPACES=    "
 
-  call :extension %3 ext
+  call :extension %2 ext
 
   if "%ext%" == "c" (
-    echo %SPACES%^<ClCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+    echo %SPACES%^<ClCompile Include=^"..\..\..\..\%1\%~2^" /^>>> %3
   ) else if "%ext%" == "h" (
-    echo %SPACES%^<ClInclude Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+    echo %SPACES%^<ClInclude Include=^"..\..\..\..\%1\%~2^" /^>>> %3
   ) else if "%ext%" == "rc" (
-    echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%2\%~3^" /^>>> %4
+    echo %SPACES%^<ResourceCompile Include=^"..\..\..\..\%1\%~2^" /^>>> %3
   )
 
   exit /B
