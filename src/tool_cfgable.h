@@ -383,6 +383,7 @@ struct GlobalConfig {
   BIT(silent);                    /* do not show messages, --silent given */
   BIT(noprogress);                /* do not show progress bar */
   BIT(isatty);                    /* Updated internally if output is a tty */
+  BIT(trace_set);                 /* --trace-config has been used */
 };
 
 struct OperationConfig *config_alloc(void);
