@@ -319,8 +319,8 @@ jobs:
         if: ${{ steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
-          cd ngtcp2
+          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
+          cd ngtcp2-boringssl
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             --enable-lib-only --with-openssl=no --with-boringssl \
