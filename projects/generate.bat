@@ -81,8 +81,8 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC10 project files
-    call :generate vcxproj Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
-    call :generate vcxproj Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
+    call :generate Windows\VC10\src\curl.tmpl Windows\VC10\src\curl.vcxproj
+    call :generate Windows\VC10\lib\libcurl.tmpl Windows\VC10\lib\libcurl.vcxproj
   ) else (
     echo Removing VC10 project files
     call :clean Windows\VC10\src\curl.vcxproj
@@ -96,8 +96,8 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC11 project files
-    call :generate vcxproj Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
-    call :generate vcxproj Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
+    call :generate Windows\VC11\src\curl.tmpl Windows\VC11\src\curl.vcxproj
+    call :generate Windows\VC11\lib\libcurl.tmpl Windows\VC11\lib\libcurl.vcxproj
   ) else (
     echo Removing VC11 project files
     call :clean Windows\VC11\src\curl.vcxproj
@@ -111,8 +111,8 @@ rem ***************************************************************************
 
   if "%MODE%" == "GENERATE" (
     echo Generating VC12 project files
-    call :generate vcxproj Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
-    call :generate vcxproj Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
+    call :generate Windows\VC12\src\curl.tmpl Windows\VC12\src\curl.vcxproj
+    call :generate Windows\VC12\lib\libcurl.tmpl Windows\VC12\lib\libcurl.vcxproj
   ) else (
     echo Removing VC12 project files
     call :clean Windows\VC12\src\curl.vcxproj
@@ -123,67 +123,66 @@ rem ***************************************************************************
 
 rem Main generate function.
 rem
-rem %1 - Project Type (vcxproj for VC10, VC11, VC12, VC14, VC14.10, VC14.20 and VC14.30)
-rem %2 - Input template file
-rem %3 - Output project file
+rem %1 - Input template file
+rem %2 - Output project file
 rem
 :generate
-  if not exist %2 (
+  if not exist %1 (
     echo.
-    echo Error: Cannot open %2
+    echo Error: Cannot open %1
     exit /B
   )
 
-  if exist %3 (
-    del %3
+  if exist %2 (
+    del %2
   )
 
-  echo * %CD%\%3
-  for /f "usebackq delims=" %%i in (`"findstr /n ^^ %2"`) do (
+  echo * %CD%\%2
+  for /f "usebackq delims=" %%i in (`"findstr /n ^^ %1"`) do (
     set "var=%%i"
     setlocal enabledelayedexpansion
     set "var=!var:*:=!"
 
     if "!var!" == "CURL_SRC_C_FILES" (
       for /f "delims=" %%c in ('dir /b ..\src\*.c') do (
-        if /i "%%c" NEQ "curlinfo.c" call :element src "%%c" %3
+        if /i "%%c" NEQ "curlinfo.c" call :element src "%%c" %2
       )
     ) else if "!var!" == "CURL_SRC_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element src "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\src\*.h') do call :element src "%%h" %2
     ) else if "!var!" == "CURL_SRC_RC_FILES" (
-      for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element src "%%r" %3
+      for /f "delims=" %%r in ('dir /b ..\src\*.rc') do call :element src "%%r" %2
     ) else if "!var!" == "CURL_SRC_X_H_FILES" (
-      call :element lib "config-win32.h" %3
-      call :element lib "curl_setup.h" %3
+      call :element lib "config-win32.h" %2
+      call :element lib "curl_setup.h" %2
     ) else if "!var!" == "CURL_LIB_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element lib "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\*.c') do call :element lib "%%c" %2
     ) else if "!var!" == "CURL_LIB_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element include\curl "%%h" %3
-      for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element lib "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\include\curl\*.h') do call :element include\curl "%%h" %2
+      for /f "delims=" %%h in ('dir /b ..\lib\*.h') do call :element lib "%%h" %2
     ) else if "!var!" == "CURL_LIB_RC_FILES" (
-      for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element lib "%%r" %3
+      for /f "delims=" %%r in ('dir /b ..\lib\*.rc') do call :element lib "%%r" %2
     ) else if "!var!" == "CURL_LIB_CURLX_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\curlx\*.c') do call :element lib\curlx "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\curlx\*.c') do call :element lib\curlx "%%c" %2
     ) else if "!var!" == "CURL_LIB_CURLX_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\curlx\*.h') do call :element lib\curlx "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\curlx\*.h') do call :element lib\curlx "%%h" %2
     ) else if "!var!" == "CURL_LIB_VAUTH_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element lib\vauth "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vauth\*.c') do call :element lib\vauth "%%c" %2
     ) else if "!var!" == "CURL_LIB_VAUTH_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element lib\vauth "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vauth\*.h') do call :element lib\vauth "%%h" %2
     ) else if "!var!" == "CURL_LIB_VQUIC_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element lib\vquic "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vquic\*.c') do call :element lib\vquic "%%c" %2
     ) else if "!var!" == "CURL_LIB_VQUIC_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element lib\vquic "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vquic\*.h') do call :element lib\vquic "%%h" %2
     ) else if "!var!" == "CURL_LIB_VSSH_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element lib\vssh "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vssh\*.c') do call :element lib\vssh "%%c" %2
     ) else if "!var!" == "CURL_LIB_VSSH_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element lib\vssh "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vssh\*.h') do call :element lib\vssh "%%h" %2
     ) else if "!var!" == "CURL_LIB_VTLS_C_FILES" (
-      for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element lib\vtls "%%c" %3
+      for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element lib\vtls "%%c" %2
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
-      for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element lib\vtls "%%h" %3
+      for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element lib\vtls "%%h" %2
     ) else (
-      echo.!var!>> %3
+      echo.!var!>> %2
     )
 
     endlocal
