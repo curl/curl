@@ -52,6 +52,8 @@ rem ***************************************************************************
     set VERSION=VC11
   ) else if /i "%~1" == "vc12" (
     set VERSION=VC12
+  ) else if /i "%~1" == "vc17" (
+    set VERSION=VC17
   ) else if /i "%~1" == "-clean" (
     set MODE=CLEAN
   ) else if /i "%~1" == "-?" (
@@ -75,6 +77,7 @@ rem ***************************************************************************
   if "%VERSION%" == "VC10" goto vc10
   if "%VERSION%" == "VC11" goto vc11
   if "%VERSION%" == "VC12" goto vc12
+  if "%VERSION%" == "VC17" goto vc17
 
 :vc10
   echo.
@@ -117,6 +120,20 @@ rem ***************************************************************************
     echo Removing VC12 project files
     call :clean Windows\VC12\src\curl.vcxproj
     call :clean Windows\VC12\lib\libcurl.vcxproj
+  )
+
+  if not "%VERSION%" == "ALL" goto success
+
+:vc17
+  echo.
+  if "%MODE%" == "GENERATE" (
+    echo Generating VC17 VS2022 project files
+    call :generate vcxproj Windows\VC17\src\curl.tmpl Windows\VC17\src\curl.vcxproj
+    call :generate vcxproj Windows\VC17\lib\libcurl.tmpl Windows\VC17\lib\libcurl.vcxproj
+  ) else (
+    echo Removing VC17 VS2022 project files
+    call :clean Windows\VC17\src\curl.vcxproj
+    call :clean Windows\VC17\lib\libcurl.vcxproj
   )
 
   goto success
@@ -288,6 +305,7 @@ rem
   echo vc10      - Use Visual Studio 2010
   echo vc11      - Use Visual Studio 2012
   echo vc12      - Use Visual Studio 2013
+  echo vc17      - Use Visual Studio 2022
   echo.
   echo Only legacy Visual Studio project files can be generated.
   echo.

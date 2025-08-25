@@ -8,7 +8,7 @@ Building via IDE Project Files
 ==============================
 
 This document describes how to compile, build and install curl and libcurl
-from sources using legacy versions of Visual Studio 2010 - 2013.
+from sources using legacy versions of Visual Studio 2010 - 2022.
 
 You need to generate the project files before using them. Please run "generate
 -help" for usage details.
@@ -32,7 +32,7 @@ The following directory structure is used for the legacy project files:
              |_src
 
 This structure allows for side-by-side compilation of curl on the same machine
-using different versions of a given compiler (for example VC10 and VC12) and
+using different versions of a given compiler (for example VC10 and VC17) and
 allows for your own application or product to be compiled against those
 variants of libcurl for example.
 
@@ -87,6 +87,7 @@ default version of Visual C++. We offer these versions:
  - VC10      (Visual Studio 2010 Version 10.0)
  - VC11      (Visual Studio 2012 Version 11.0)
  - VC12      (Visual Studio 2013 Version 12.0)
+ - VC17      (Visual Studio 2022 Version 17.0)
 
 Separate solutions are provided for both libcurl and the curl command line
 tool as well as a solution that includes both projects. libcurl.sln, curl.sln
