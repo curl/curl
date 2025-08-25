@@ -49,6 +49,8 @@ env:
   LIBRESSL_VERSION: 4.1.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.58.0
+  # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
+  BORINGSSL_VERSION: 0.20250818.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   GNUTLS_VERSION: 3.8.10
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
@@ -95,6 +97,15 @@ jobs:
           path: ~/awslc/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
+      - name: 'cache boringssl'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-boringssl
+        env:
+          cache-name: cache-boringssl
+        with:
+          path: ~/boringssl/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+
       - name: 'cache quictls'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-quictls-no-deprecated
@@ -140,6 +151,15 @@ jobs:
           path: ~/ngtcp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
+      - name: 'cache ngtcp2 boringssl'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-ngtcp2-boringssl
+        env:
+          cache-name: cache-ngtcp2-boringssl
+        with:
+          path: ~/ngtcp2-boringssl/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.BORINGSSL_VERSION }}
+
       - name: 'cache nghttp2'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-nghttp2
@@ -154,11 +174,13 @@ jobs:
           ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
               steps.cache-libressl.outputs.cache-hit != 'true' ||
               steps.cache-awslc.outputs.cache-hit != 'true' ||
+              steps.cache-boringssl.outputs.cache-hit != 'true' ||
               steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-gnutls.outputs.cache-hit != 'true' ||
               steps.cache-wolfssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
+              steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp2.outputs.cache-hit != 'true' }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
@@ -208,6 +230,17 @@ jobs:
             --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
           cd "aws-lc-${AWSLC_VERSION}"
           cmake -B . -G Ninja -DBUILD_SHARED_LIBS=ON -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build
+          cmake --build .
+          cmake --install .
+
+      - name: 'build boringssl'
+        if: ${{ steps.cache-boringssl.outputs.cache-hit != 'true' }}
+        run: |
+          mkdir boringssl-src
+          cd boringssl-src
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            "https://boringssl.googlesource.com/boringssl/+archive/${BORINGSSL_VERSION}.tar.gz" | tar -xz
+          cmake -B . -G Ninja -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/boringssl/build
           cmake --build .
           cmake --install .
 
@@ -282,6 +315,19 @@ jobs:
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
           make install
 
+      - name: 'build ngtcp2 boringssl'
+        if: ${{ steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' }}
+        run: |
+          cd ~
+          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
+          cd ngtcp2
+          autoreconf -fi
+          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+            --enable-lib-only --with-openssl=no --with-boringssl \
+            BORINGSSL_LIBS='-L/home/runner/boringssl/build/lib -lssl -lcrypto' \
+            BORINGSSL_CFLAGS='-I/home/runner/boringssl/build/include'
+          make install
+
       - name: 'build nghttp2'
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
         run: |
@@ -350,6 +396,21 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DBUILD_SHARED_LIBS=OFF
+              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DCMAKE_UNITY_BUILD=ON
+
+          - name: 'boringssl'
+            install_steps: skipall
+            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            configure: >-
+              LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
+              --with-ngtcp2 --disable-ntlm
+              --with-openssl=/home/runner/boringssl/build --enable-ssls-export
+
+          - name: 'boringssl'
+            PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            generate: >-
+              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCMAKE_UNITY_BUILD=ON
 
