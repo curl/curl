@@ -539,6 +539,16 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
           fail-on-cache-miss: true
 
+      - name: 'cache boringssl'
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-boringssl
+        env:
+          cache-name: cache-boringssl
+        with:
+          path: ~/boringssl/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
+          fail-on-cache-miss: true
+
       - name: 'cache quictls'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-quictls-no-deprecated
