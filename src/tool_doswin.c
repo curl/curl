@@ -472,7 +472,8 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
-     https://support.microsoft.com/en-us/kb/74496
+     https://web.archive.org/web/20160314141551/
+       support.microsoft.com/en-us/kb/74496
      https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
      */
   for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
