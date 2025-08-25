@@ -207,7 +207,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
           cd "aws-lc-${AWSLC_VERSION}"
-          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON
+          cmake -B . -G Ninja -DCMAKE_INSTALL_PREFIX=/home/runner/awslc/build -DBUILD_SHARED_LIBS=ON -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
@@ -279,7 +279,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
-            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX -fPIC'
+            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
           make install
 
       - name: 'build nghttp2'
@@ -350,9 +350,9 @@ jobs:
           - name: 'awslc'
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build
+              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DBUILD_SHARED_LIBS=OFF
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF
+              -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quictls'
             install_steps: skipall
