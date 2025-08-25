@@ -280,7 +280,7 @@ jobs:
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include -DBORINGSSL_NO_CXX -fPIC'
-          make install V=1
+          make install
 
       - name: 'build nghttp2'
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
@@ -352,7 +352,7 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
-              -DCMAKE_UNITY_BUILD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF
 
           - name: 'quictls'
             install_steps: skipall
