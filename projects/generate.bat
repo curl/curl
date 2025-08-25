@@ -199,19 +199,6 @@ rem %4 - Output project file
 rem
 :element
   set "SPACES=    "
-  if "%2" == "lib\vauth" (
-    set "TABS=				"
-  ) else if "%2" == "lib\vquic" (
-    set "TABS=				"
-  ) else if "%2" == "lib\vssh" (
-    set "TABS=				"
-  ) else if "%2" == "lib\vtls" (
-    set "TABS=				"
-  ) else if "%2" == "lib\curlx" (
-    set "TABS=				"
-  ) else (
-    set "TABS=			"
-  )
 
   call :extension %3 ext
 
