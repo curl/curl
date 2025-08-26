@@ -30,6 +30,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef SIZE_MAX
+#define SIZE_MAX        ((size_t) ~0)
+#endif
+
 static bool chunk_is_empty(const struct buf_chunk *chunk)
 {
   return chunk->r_offset >= chunk->w_offset;
