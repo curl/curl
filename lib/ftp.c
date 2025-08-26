@@ -2691,6 +2691,106 @@ static CURLcode ftp_state_acct_resp(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode ftp_pwd_resp(struct Curl_easy *data,
+                             struct ftp_conn *ftpc,
+                             int ftpcode)
+{
+  struct pingpong *pp = &ftpc->pp;
+  CURLcode result;
+
+  if(ftpcode == 257) {
+    char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                    letter */
+    bool entry_extracted = FALSE;
+    struct dynbuf out;
+    curlx_dyn_init(&out, 1000);
+
+    /* Reply format is like
+       257<space>[rubbish]"<directory-name>"<space><commentary> and the
+       RFC959 says
+
+       The directory name can contain any character; embedded
+       double-quotes should be escaped by double-quotes (the
+       "quote-doubling" convention).
+    */
+
+    /* scan for the first double-quote for non-standard responses */
+    while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
+      ptr++;
+
+    if('\"' == *ptr) {
+      /* it started good */
+      for(ptr++; *ptr; ptr++) {
+        if('\"' == *ptr) {
+          if('\"' == ptr[1]) {
+            /* "quote-doubling" */
+            result = curlx_dyn_addn(&out, &ptr[1], 1);
+            ptr++;
+          }
+          else {
+            /* end of path */
+            if(curlx_dyn_len(&out))
+              entry_extracted = TRUE;
+            break; /* get out of this loop */
+          }
+        }
+        else
+          result = curlx_dyn_addn(&out, ptr, 1);
+        if(result)
+          return result;
+      }
+    }
+    if(entry_extracted) {
+      /* If the path name does not look like an absolute path (i.e.: it
+         does not start with a '/'), we probably need some server-dependent
+         adjustments. For example, this is the case when connecting to
+         an OS400 FTP server: this server supports two name syntaxes,
+         the default one being incompatible with standard paths. In
+         addition, this server switches automatically to the regular path
+         syntax when one is encountered in a command: this results in
+         having an entrypath in the wrong syntax when later used in CWD.
+         The method used here is to check the server OS: we do it only
+         if the path name looks strange to minimize overhead on other
+         systems. */
+      char *dir = curlx_dyn_ptr(&out);
+
+      if(!ftpc->server_os && dir[0] != '/') {
+        result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
+        if(result) {
+          free(dir);
+          return result;
+        }
+        free(ftpc->entrypath);
+        ftpc->entrypath = dir; /* remember this */
+        infof(data, "Entry path is '%s'", ftpc->entrypath);
+        /* also save it where getinfo can access it: */
+        free(data->state.most_recent_ftp_entrypath);
+        data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+        if(!data->state.most_recent_ftp_entrypath)
+          return CURLE_OUT_OF_MEMORY;
+        ftp_state(data, ftpc, FTP_SYST);
+        return result;
+      }
+
+      free(ftpc->entrypath);
+      ftpc->entrypath = dir; /* remember this */
+      infof(data, "Entry path is '%s'", ftpc->entrypath);
+      /* also save it where getinfo can access it: */
+      free(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+      if(!data->state.most_recent_ftp_entrypath)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    else {
+      /* could not get the path */
+      curlx_dyn_free(&out);
+      infof(data, "Failed to figure out path");
+    }
+  }
+  ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
+  CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+  return CURLE_OK;
+}
 
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
@@ -2882,97 +2982,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     break;
 
   case FTP_PWD:
-    if(ftpcode == 257) {
-      char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                      letter */
-      bool entry_extracted = FALSE;
-      struct dynbuf out;
-      curlx_dyn_init(&out, 1000);
-
-      /* Reply format is like
-         257<space>[rubbish]"<directory-name>"<space><commentary> and the
-         RFC959 says
-
-         The directory name can contain any character; embedded
-         double-quotes should be escaped by double-quotes (the
-         "quote-doubling" convention).
-      */
-
-      /* scan for the first double-quote for non-standard responses */
-      while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
-        ptr++;
-
-      if('\"' == *ptr) {
-        /* it started good */
-        for(ptr++; *ptr; ptr++) {
-          if('\"' == *ptr) {
-            if('\"' == ptr[1]) {
-              /* "quote-doubling" */
-              result = curlx_dyn_addn(&out, &ptr[1], 1);
-              ptr++;
-            }
-            else {
-              /* end of path */
-              if(curlx_dyn_len(&out))
-                entry_extracted = TRUE;
-              break; /* get out of this loop */
-            }
-          }
-          else
-            result = curlx_dyn_addn(&out, ptr, 1);
-          if(result)
-            return result;
-        }
-      }
-      if(entry_extracted) {
-        /* If the path name does not look like an absolute path (i.e.: it
-           does not start with a '/'), we probably need some server-dependent
-           adjustments. For example, this is the case when connecting to
-           an OS400 FTP server: this server supports two name syntaxes,
-           the default one being incompatible with standard paths. In
-           addition, this server switches automatically to the regular path
-           syntax when one is encountered in a command: this results in
-           having an entrypath in the wrong syntax when later used in CWD.
-           The method used here is to check the server OS: we do it only
-           if the path name looks strange to minimize overhead on other
-           systems. */
-        char *dir = curlx_dyn_ptr(&out);
-
-        if(!ftpc->server_os && dir[0] != '/') {
-          result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
-          if(result) {
-            free(dir);
-            return result;
-          }
-          free(ftpc->entrypath);
-          ftpc->entrypath = dir; /* remember this */
-          infof(data, "Entry path is '%s'", ftpc->entrypath);
-          /* also save it where getinfo can access it: */
-          free(data->state.most_recent_ftp_entrypath);
-          data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
-          if(!data->state.most_recent_ftp_entrypath)
-            return CURLE_OUT_OF_MEMORY;
-          ftp_state(data, ftpc, FTP_SYST);
-          break;
-        }
-
-        free(ftpc->entrypath);
-        ftpc->entrypath = dir; /* remember this */
-        infof(data, "Entry path is '%s'", ftpc->entrypath);
-        /* also save it where getinfo can access it: */
-        free(data->state.most_recent_ftp_entrypath);
-        data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
-        if(!data->state.most_recent_ftp_entrypath)
-          return CURLE_OUT_OF_MEMORY;
-      }
-      else {
-        /* could not get the path */
-        curlx_dyn_free(&out);
-        infof(data, "Failed to figure out path");
-      }
-    }
-    ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
-    CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+    result = ftp_pwd_resp(data, ftpc, ftpcode);
     break;
 
   case FTP_SYST:
