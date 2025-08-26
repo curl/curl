@@ -103,8 +103,7 @@ static const char * const cf_socks_statename[] = {
 #endif
 
 #define SOCKS_CHUNK_SIZE    1024
-#define SOCKS_RECV_CHUNKS   1
-#define SOCKS_SEND_CHUNKS   1
+#define SOCKS_CHUNKS        1
 
 
 struct socks_state {
@@ -1048,9 +1047,9 @@ static CURLproxycode socks5_recv_resp1(struct socks_state *sx,
  * This function logs in to a SOCKS5 proxy and sends the specifics to the final
  * destination server.
  */
-static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
-                               struct socks_state *sx,
-                               struct Curl_easy *data)
+static CURLproxycode socks5_connect(struct Curl_cfilter *cf,
+                                    struct socks_state *sx,
+                                    struct Curl_easy *data)
 {
   CURLproxycode presult;
   bool done;
@@ -1081,7 +1080,7 @@ process_state:
       return CURLPX_OK;
     /* done sending! */
     sxstate(sx, cf, data, SOCKS5_ST_RESP0_RECV);
-    goto process_state;
+    FALLTHROUGH();
 
   case SOCKS5_ST_RESP0_RECV:
     presult = socks_recv(sx, cf, data, 2, &done);
@@ -1152,7 +1151,7 @@ process_state:
     }
     sx->start_resolving = TRUE;
     sxstate(sx, cf, data, SOCKS5_ST_RESOLVING);
-    goto process_state;
+    FALLTHROUGH();
 
   case SOCKS5_ST_RESOLVING:
     presult = socks5_resolving(sx, cf, data, &done);
@@ -1186,7 +1185,7 @@ process_state:
       return CURLPX_OK;
     CURL_TRC_CF(data, cf, "SOCKS5 request granted.");
     sxstate(sx, cf, data, SOCKS_ST_SUCCESS);
-    break;
+    FALLTHROUGH();
 
   case SOCKS_ST_SUCCESS:
     return CURLPX_OK;
@@ -1199,7 +1198,6 @@ process_state:
     DEBUGASSERT(0);
     return socks_failed(sx, cf, data, CURLPX_SEND_REQUEST);
   }
-  return CURLPX_OK; /* Proxy was successful! */
 }
 
 static void socks_proxy_cf_free(struct Curl_cfilter *cf)
@@ -1260,14 +1258,14 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
       conn->remote_port;
     sx->proxy_user = conn->socks_proxy.user;
     sx->proxy_password = conn->socks_proxy.passwd;
-    Curl_bufq_init2(&sx->iobuf, SOCKS_CHUNK_SIZE, SOCKS_SEND_CHUNKS,
+    Curl_bufq_init2(&sx->iobuf, SOCKS_CHUNK_SIZE, SOCKS_CHUNKS,
                     BUFQ_OPT_SOFT_LIMIT);
   }
 
   switch(conn->socks_proxy.proxytype) {
   case CURLPROXY_SOCKS5:
   case CURLPROXY_SOCKS5_HOSTNAME:
-    pxresult = do_SOCKS5(cf, sx, data);
+    pxresult = socks5_connect(cf, sx, data);
     break;
 
   case CURLPROXY_SOCKS4:
