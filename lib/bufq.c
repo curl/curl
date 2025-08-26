@@ -30,9 +30,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef SIZE_MAX
-#define SIZE_MAX        ((size_t) ~0)
-#endif
 
 static bool chunk_is_empty(const struct buf_chunk *chunk)
 {
@@ -179,7 +176,7 @@ static CURLcode bufcp_take(struct bufc_pool *pool,
   }
 
   /* Check for integer overflow before allocation */
-  if(pool->chunk_size > SIZE_MAX - sizeof(*chunk)) {
+  if(pool->chunk_size > SIZE_T_MAX - sizeof(*chunk)) {
     *pchunk = NULL;
     return CURLE_OUT_OF_MEMORY;
   }
