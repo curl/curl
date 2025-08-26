@@ -2792,6 +2792,75 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static const char * const ftpauth[] = { "SSL", "TLS" };
+
+static CURLcode ftp_wait_resp(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              struct ftp_conn *ftpc,
+                              int ftpcode)
+{
+  CURLcode result = CURLE_OK;
+  if(ftpcode == 230) {
+    /* 230 User logged in - already! Take as 220 if TLS required. */
+    if(data->set.use_ssl <= CURLUSESSL_TRY ||
+       conn->bits.ftp_use_control_ssl)
+      return ftp_state_user_resp(data, ftpc, ftpcode);
+  }
+  else if(ftpcode != 220) {
+    failf(data, "Got a %03d ftp-server response when 220 was expected",
+          ftpcode);
+    return CURLE_WEIRD_SERVER_REPLY;
+  }
+
+  /* We have received a 220 response fine, now we proceed. */
+#ifdef HAVE_GSSAPI
+  if(data->set.krb) {
+    /* If not anonymous login, try a secure login. Note that this
+       procedure is still BLOCKING. */
+
+    Curl_sec_request_prot(conn, "private");
+    /* We set private first as default, in case the line below fails to
+       set a valid level */
+    Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
+
+    if(Curl_sec_login(data, conn)) {
+      failf(data, "secure login failed");
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+    infof(data, "Authentication successful");
+  }
+#endif
+
+  if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
+    /* We do not have an SSL/TLS control connection yet, but FTPS is
+       requested. Try an FTPS connection now */
+
+    ftpc->count3 = 0;
+    switch((long)data->set.ftpsslauth) {
+    case CURLFTPAUTH_DEFAULT:
+    case CURLFTPAUTH_SSL:
+      ftpc->count2 = 1; /* add one to get next */
+      ftpc->count1 = 0;
+      break;
+    case CURLFTPAUTH_TLS:
+      ftpc->count2 = -1; /* subtract one to get next */
+      ftpc->count1 = 1;
+      break;
+    default:
+      failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
+            (int)data->set.ftpsslauth);
+      return CURLE_UNKNOWN_OPTION; /* we do not know what to do */
+    }
+    result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
+                           ftpauth[ftpc->count1]);
+    if(!result)
+      ftp_state(data, ftpc, FTP_AUTH);
+  }
+  else
+    result = ftp_state_user(data, ftpc, conn);
+  return result;
+}
+
 static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
                                     struct connectdata *conn)
 {
@@ -2800,7 +2869,6 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   struct ftp_conn *ftpc = Curl_conn_meta_get(conn, CURL_META_FTP_CONN);
   struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
   struct pingpong *pp;
-  static const char * const ftpauth[] = { "SSL", "TLS" };
   size_t nread = 0;
 
   if(!ftpc || !ftp)
@@ -2816,64 +2884,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
   /* we have now received a full FTP server response */
   switch(ftpc->state) {
   case FTP_WAIT220:
-    if(ftpcode == 230) {
-      /* 230 User logged in - already! Take as 220 if TLS required. */
-      if(data->set.use_ssl <= CURLUSESSL_TRY ||
-         conn->bits.ftp_use_control_ssl)
-        return ftp_state_user_resp(data, ftpc, ftpcode);
-    }
-    else if(ftpcode != 220) {
-      failf(data, "Got a %03d ftp-server response when 220 was expected",
-            ftpcode);
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
-
-    /* We have received a 220 response fine, now we proceed. */
-#ifdef HAVE_GSSAPI
-    if(data->set.krb) {
-      /* If not anonymous login, try a secure login. Note that this
-         procedure is still BLOCKING. */
-
-      Curl_sec_request_prot(conn, "private");
-      /* We set private first as default, in case the line below fails to
-         set a valid level */
-      Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
-
-      if(Curl_sec_login(data, conn)) {
-        failf(data, "secure login failed");
-        return CURLE_WEIRD_SERVER_REPLY;
-      }
-      infof(data, "Authentication successful");
-    }
-#endif
-
-    if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
-      /* We do not have an SSL/TLS control connection yet, but FTPS is
-         requested. Try an FTPS connection now */
-
-      ftpc->count3 = 0;
-      switch((long)data->set.ftpsslauth) {
-      case CURLFTPAUTH_DEFAULT:
-      case CURLFTPAUTH_SSL:
-        ftpc->count2 = 1; /* add one to get next */
-        ftpc->count1 = 0;
-        break;
-      case CURLFTPAUTH_TLS:
-        ftpc->count2 = -1; /* subtract one to get next */
-        ftpc->count1 = 1;
-        break;
-      default:
-        failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
-              (int)data->set.ftpsslauth);
-        return CURLE_UNKNOWN_OPTION; /* we do not know what to do */
-      }
-      result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
-                             ftpauth[ftpc->count1]);
-      if(!result)
-        ftp_state(data, ftpc, FTP_AUTH);
-    }
-    else
-      result = ftp_state_user(data, ftpc, conn);
+    result = ftp_wait_resp(data, conn, ftpc, ftpcode);
     break;
 
   case FTP_AUTH:
