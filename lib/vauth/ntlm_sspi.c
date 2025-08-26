@@ -317,7 +317,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                &attrs, &expiry);
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=%lx",
-          status);
+          (unsigned long)status);
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;

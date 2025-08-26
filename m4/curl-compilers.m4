@@ -907,6 +907,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [xor-used-as-pow])
           fi
+          dnl clang 19 or later
+          if test "$compiler_num" -ge "1900"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-signedness])
+          fi
         fi
         ;;
         #
@@ -1070,6 +1074,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 5 or later
           if test "$compiler_num" -ge "500"; then
             tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-signedness])
           fi
           #
           dnl Only gcc 6 or later

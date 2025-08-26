@@ -245,7 +245,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     }
     else if(nwritten != wlen) {
       failf(data, "Failure writing output to destination, "
-            "passed %zu returned %zd", wlen, nwritten);
+            "passed %zu returned %zu", wlen, nwritten);
       return CURLE_WRITE_ERROR;
     }
     *pconsumed += nwritten;
