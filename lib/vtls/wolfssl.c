@@ -938,9 +938,9 @@ wssl_legacy_CTX_set_max_proto_version(WOLFSSL_CTX* ctx, int version)
 #define wolfSSL_CTX_set_max_proto_version wssl_legacy_CTX_set_max_proto_version
 #endif
 
-static CURLcode client_certficate(struct Curl_easy *data,
-                                  struct ssl_config_data *ssl_config,
-                                  struct wssl_ctx *wctx)
+static CURLcode client_certificate(struct Curl_easy *data,
+                                   struct ssl_config_data *ssl_config,
+                                   struct wssl_ctx *wctx)
 {
   /* Load the client certificate, and private key */
 #ifndef NO_FILESYSTEM
@@ -1231,7 +1231,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     }
   }
 
-  result = client_certficate(data, ssl_config, wctx);
+  result = client_certificate(data, ssl_config, wctx);
   if(result)
     goto out;
 
