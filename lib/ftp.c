@@ -571,12 +571,12 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
                              struct ftp_conn *ftpc,
                              int sockindex,
                              struct pingpong *pp,
-                             int *ftpcode, /* return the ftp-code if done */
+                             int *ftpcodep, /* return the ftp-code if done */
                              size_t *size) /* size of the response */
 {
   int code;
   CURLcode result = Curl_pp_readresp(data, sockindex, pp, &code, size);
-
+  DEBUGASSERT(ftpcodep);
 #ifdef HAVE_GSSAPI
   {
     struct connectdata *conn = data->conn;
@@ -604,8 +604,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   if(!ftpc->shutdown)
     data->info.httpcode = code;
 
-  if(ftpcode)
-    *ftpcode = code;
+  *ftpcodep = code;
 
   if(code == 421) {
     /* 421 means "Service not available, closing control connection." and FTP
@@ -633,7 +632,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
 
 CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
                              ssize_t *nreadp, /* return number of bytes read */
-                             int *ftpcode) /* return the ftp-code */
+                             int *ftpcodep) /* return the ftp-code */
 {
   /*
    * We cannot read just one byte per read() and then go back to select() as
@@ -649,20 +648,16 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   struct pingpong *pp = &ftpc->pp;
   size_t nread;
   int cache_skip = 0;
-  int value_to_be_ignored = 0;
+  DEBUGASSERT(ftpcodep);
 
   CURL_TRC_FTP(data, "getFTPResponse start");
   *nreadp = 0;
-  if(ftpcode)
-    *ftpcode = 0; /* 0 for errors */
-  else
-    /* make the pointer point to something for the rest of this function */
-    ftpcode = &value_to_be_ignored;
+  *ftpcodep = 0; /* 0 for errors */
 
   if(!ftpc)
     return CURLE_FAILED_INIT;
 
-  while(!*ftpcode && !result) {
+  while(!*ftpcodep && !result) {
     /* check and reset timeout value every lap */
     timediff_t timeout = Curl_pp_state_timeout(data, pp, FALSE);
     timediff_t interval_ms;
@@ -720,7 +715,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
         break;
     }
 
-    result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, ftpcode, &nread);
+    result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, ftpcodep, &nread);
     if(result)
       break;
 
@@ -739,7 +734,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
 
   pp->pending_resp = FALSE;
   CURL_TRC_FTP(data, "getFTPResponse -> result=%d, nread=%zd, ftpcode=%d",
-               result, *nreadp, *ftpcode);
+               result, *nreadp, *ftpcodep);
 
   return result;
 }
@@ -2715,253 +2710,240 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     return Curl_pp_flushsend(data, pp);
 
   result = ftp_readresp(data, ftpc, FIRSTSOCKET, pp, &ftpcode, &nread);
-  if(result)
+  if(result || !ftpcode)
     return result;
 
-  if(ftpcode) {
-    /* we have now received a full FTP server response */
-    switch(ftpc->state) {
-    case FTP_WAIT220:
-      if(ftpcode == 230) {
-        /* 230 User logged in - already! Take as 220 if TLS required. */
-        if(data->set.use_ssl <= CURLUSESSL_TRY ||
-           conn->bits.ftp_use_control_ssl)
-          return ftp_state_user_resp(data, ftpc, ftpcode);
-      }
-      else if(ftpcode != 220) {
-        failf(data, "Got a %03d ftp-server response when 220 was expected",
-              ftpcode);
+  /* we have now received a full FTP server response */
+  switch(ftpc->state) {
+  case FTP_WAIT220:
+    if(ftpcode == 230) {
+      /* 230 User logged in - already! Take as 220 if TLS required. */
+      if(data->set.use_ssl <= CURLUSESSL_TRY ||
+         conn->bits.ftp_use_control_ssl)
+        return ftp_state_user_resp(data, ftpc, ftpcode);
+    }
+    else if(ftpcode != 220) {
+      failf(data, "Got a %03d ftp-server response when 220 was expected",
+            ftpcode);
+      return CURLE_WEIRD_SERVER_REPLY;
+    }
+
+    /* We have received a 220 response fine, now we proceed. */
+#ifdef HAVE_GSSAPI
+    if(data->set.krb) {
+      /* If not anonymous login, try a secure login. Note that this
+         procedure is still BLOCKING. */
+
+      Curl_sec_request_prot(conn, "private");
+      /* We set private first as default, in case the line below fails to
+         set a valid level */
+      Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
+
+      if(Curl_sec_login(data, conn)) {
+        failf(data, "secure login failed");
         return CURLE_WEIRD_SERVER_REPLY;
       }
-
-      /* We have received a 220 response fine, now we proceed. */
-#ifdef HAVE_GSSAPI
-      if(data->set.krb) {
-        /* If not anonymous login, try a secure login. Note that this
-           procedure is still BLOCKING. */
-
-        Curl_sec_request_prot(conn, "private");
-        /* We set private first as default, in case the line below fails to
-           set a valid level */
-        Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
-
-        if(Curl_sec_login(data, conn)) {
-          failf(data, "secure login failed");
-          return CURLE_WEIRD_SERVER_REPLY;
-        }
-        infof(data, "Authentication successful");
-      }
+      infof(data, "Authentication successful");
+    }
 #endif
 
-      if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
-        /* We do not have an SSL/TLS control connection yet, but FTPS is
-           requested. Try an FTPS connection now */
+    if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
+      /* We do not have an SSL/TLS control connection yet, but FTPS is
+         requested. Try an FTPS connection now */
 
-        ftpc->count3 = 0;
-        switch((long)data->set.ftpsslauth) {
-        case CURLFTPAUTH_DEFAULT:
-        case CURLFTPAUTH_SSL:
-          ftpc->count2 = 1; /* add one to get next */
-          ftpc->count1 = 0;
-          break;
-        case CURLFTPAUTH_TLS:
-          ftpc->count2 = -1; /* subtract one to get next */
-          ftpc->count1 = 1;
-          break;
-        default:
-          failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
-                (int)data->set.ftpsslauth);
-          return CURLE_UNKNOWN_OPTION; /* we do not know what to do */
-        }
-        result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
-                               ftpauth[ftpc->count1]);
-        if(!result)
-          ftp_state(data, ftpc, FTP_AUTH);
+      ftpc->count3 = 0;
+      switch((long)data->set.ftpsslauth) {
+      case CURLFTPAUTH_DEFAULT:
+      case CURLFTPAUTH_SSL:
+        ftpc->count2 = 1; /* add one to get next */
+        ftpc->count1 = 0;
+        break;
+      case CURLFTPAUTH_TLS:
+        ftpc->count2 = -1; /* subtract one to get next */
+        ftpc->count1 = 1;
+        break;
+      default:
+        failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d",
+              (int)data->set.ftpsslauth);
+        return CURLE_UNKNOWN_OPTION; /* we do not know what to do */
       }
-      else
+      result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
+                             ftpauth[ftpc->count1]);
+      if(!result)
+        ftp_state(data, ftpc, FTP_AUTH);
+    }
+    else
+      result = ftp_state_user(data, ftpc, conn);
+    break;
+
+  case FTP_AUTH:
+    /* we have gotten the response to a previous AUTH command */
+
+    if(pp->overflow)
+      return CURLE_WEIRD_SERVER_REPLY; /* Forbid pipelining in response. */
+
+    /* RFC2228 (page 5) says:
+     *
+     * If the server is willing to accept the named security mechanism,
+     * and does not require any security data, it must respond with
+     * reply code 234/334.
+     */
+
+    if((ftpcode == 234) || (ftpcode == 334)) {
+      /* this was BLOCKING, keep it so for now */
+      bool done;
+      if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
+        result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
+        if(result) {
+          /* we failed and bail out */
+          return CURLE_USE_SSL_FAILED;
+        }
+      }
+      result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
+      if(!result) {
+        conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
+        conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
         result = ftp_state_user(data, ftpc, conn);
-      break;
-
-    case FTP_AUTH:
-      /* we have gotten the response to a previous AUTH command */
-
-      if(pp->overflow)
-        return CURLE_WEIRD_SERVER_REPLY; /* Forbid pipelining in response. */
-
-      /* RFC2228 (page 5) says:
-       *
-       * If the server is willing to accept the named security mechanism,
-       * and does not require any security data, it must respond with
-       * reply code 234/334.
-       */
-
-      if((ftpcode == 234) || (ftpcode == 334)) {
-        /* this was BLOCKING, keep it so for now */
-        bool done;
-        if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-          result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
-          if(result) {
-            /* we failed and bail out */
-            return CURLE_USE_SSL_FAILED;
-          }
-        }
-        result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, &done);
-        if(!result) {
-          conn->bits.ftp_use_data_ssl = FALSE; /* clear-text data */
-          conn->bits.ftp_use_control_ssl = TRUE; /* SSL on control */
-          result = ftp_state_user(data, ftpc, conn);
-        }
       }
-      else if(ftpc->count3 < 1) {
-        ftpc->count3++;
-        ftpc->count1 += ftpc->count2; /* get next attempt */
-        result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
-                               ftpauth[ftpc->count1]);
-        /* remain in this same state */
-      }
-      else {
-        if(data->set.use_ssl > CURLUSESSL_TRY)
-          /* we failed and CURLUSESSL_CONTROL or CURLUSESSL_ALL is set */
-          result = CURLE_USE_SSL_FAILED;
-        else
-          /* ignore the failure and continue */
-          result = ftp_state_user(data, ftpc, conn);
-      }
-      break;
-
-    case FTP_USER:
-    case FTP_PASS:
-      result = ftp_state_user_resp(data, ftpc, ftpcode);
-      break;
-
-    case FTP_ACCT:
-      result = ftp_state_acct_resp(data, ftpc, ftpcode);
-      break;
-
-    case FTP_PBSZ:
-      result =
-        Curl_pp_sendf(data, &ftpc->pp, "PROT %c",
-                      data->set.use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
-      if(!result)
-        ftp_state(data, ftpc, FTP_PROT);
-      break;
-
-    case FTP_PROT:
-      if(ftpcode/100 == 2)
-        /* We have enabled SSL for the data connection! */
-        conn->bits.ftp_use_data_ssl =
-          (data->set.use_ssl != CURLUSESSL_CONTROL);
-      /* FTP servers typically responds with 500 if they decide to reject
-         our 'P' request */
-      else if(data->set.use_ssl > CURLUSESSL_CONTROL)
-        /* we failed and bails out */
-        return CURLE_USE_SSL_FAILED;
-
-      if(data->set.ftp_ccc) {
-        /* CCC - Clear Command Channel
-         */
-        result = Curl_pp_sendf(data, &ftpc->pp, "%s", "CCC");
-        if(!result)
-          ftp_state(data, ftpc, FTP_CCC);
-      }
+    }
+    else if(ftpc->count3 < 1) {
+      ftpc->count3++;
+      ftpc->count1 += ftpc->count2; /* get next attempt */
+      result = Curl_pp_sendf(data, &ftpc->pp, "AUTH %s",
+                             ftpauth[ftpc->count1]);
+      /* remain in this same state */
+    }
+    else {
+      if(data->set.use_ssl > CURLUSESSL_TRY)
+        /* we failed and CURLUSESSL_CONTROL or CURLUSESSL_ALL is set */
+        result = CURLE_USE_SSL_FAILED;
       else
-        result = ftp_state_pwd(data, ftpc);
-      break;
+        /* ignore the failure and continue */
+        result = ftp_state_user(data, ftpc, conn);
+    }
+    break;
 
-    case FTP_CCC:
-      if(ftpcode < 500) {
-        /* First shut down the SSL layer (note: this call will block) */
-        /* This has only been tested on the proftpd server, and the mod_tls
-         * code sends a close notify alert without waiting for a close notify
-         * alert in response. Thus we wait for a close notify alert from the
-         * server, but we do not send one. Let's hope other servers do
-         * the same... */
-        result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
-          (data->set.ftp_ccc == (unsigned char)CURLFTPSSL_CCC_ACTIVE));
+  case FTP_USER:
+  case FTP_PASS:
+    result = ftp_state_user_resp(data, ftpc, ftpcode);
+    break;
 
-        if(result)
-          failf(data, "Failed to clear the command channel (CCC)");
-      }
+  case FTP_ACCT:
+    result = ftp_state_acct_resp(data, ftpc, ftpcode);
+    break;
+
+  case FTP_PBSZ:
+    result =
+      Curl_pp_sendf(data, &ftpc->pp, "PROT %c",
+                    data->set.use_ssl == CURLUSESSL_CONTROL ? 'C' : 'P');
+    if(!result)
+      ftp_state(data, ftpc, FTP_PROT);
+    break;
+
+  case FTP_PROT:
+    if(ftpcode/100 == 2)
+      /* We have enabled SSL for the data connection! */
+      conn->bits.ftp_use_data_ssl =
+        (data->set.use_ssl != CURLUSESSL_CONTROL);
+    /* FTP servers typically responds with 500 if they decide to reject
+       our 'P' request */
+    else if(data->set.use_ssl > CURLUSESSL_CONTROL)
+      /* we failed and bails out */
+      return CURLE_USE_SSL_FAILED;
+
+    if(data->set.ftp_ccc) {
+      /* CCC - Clear Command Channel
+       */
+      result = Curl_pp_sendf(data, &ftpc->pp, "%s", "CCC");
       if(!result)
-        /* Then continue as normal */
-        result = ftp_state_pwd(data, ftpc);
-      break;
+        ftp_state(data, ftpc, FTP_CCC);
+    }
+    else
+      result = ftp_state_pwd(data, ftpc);
+    break;
 
-    case FTP_PWD:
-      if(ftpcode == 257) {
-        char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                        letter */
-        bool entry_extracted = FALSE;
-        struct dynbuf out;
-        curlx_dyn_init(&out, 1000);
+  case FTP_CCC:
+    if(ftpcode < 500) {
+      /* First shut down the SSL layer (note: this call will block) */
+      /* This has only been tested on the proftpd server, and the mod_tls
+       * code sends a close notify alert without waiting for a close notify
+       * alert in response. Thus we wait for a close notify alert from the
+       * server, but we do not send one. Let's hope other servers do
+       * the same... */
+      result = Curl_ssl_cfilter_remove(data, FIRSTSOCKET,
+                                       (data->set.ftp_ccc ==
+                                        (unsigned char)CURLFTPSSL_CCC_ACTIVE));
+      if(result)
+        failf(data, "Failed to clear the command channel (CCC)");
+    }
+    if(!result)
+      /* Then continue as normal */
+      result = ftp_state_pwd(data, ftpc);
+    break;
 
-        /* Reply format is like
-           257<space>[rubbish]"<directory-name>"<space><commentary> and the
-           RFC959 says
+  case FTP_PWD:
+    if(ftpcode == 257) {
+      char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                      letter */
+      bool entry_extracted = FALSE;
+      struct dynbuf out;
+      curlx_dyn_init(&out, 1000);
 
-           The directory name can contain any character; embedded
-           double-quotes should be escaped by double-quotes (the
-           "quote-doubling" convention).
-        */
+      /* Reply format is like
+         257<space>[rubbish]"<directory-name>"<space><commentary> and the
+         RFC959 says
 
-        /* scan for the first double-quote for non-standard responses */
-        while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
-          ptr++;
+         The directory name can contain any character; embedded
+         double-quotes should be escaped by double-quotes (the
+         "quote-doubling" convention).
+      */
 
-        if('\"' == *ptr) {
-          /* it started good */
-          for(ptr++; *ptr; ptr++) {
-            if('\"' == *ptr) {
-              if('\"' == ptr[1]) {
-                /* "quote-doubling" */
-                result = curlx_dyn_addn(&out, &ptr[1], 1);
-                ptr++;
-              }
-              else {
-                /* end of path */
-                if(curlx_dyn_len(&out))
-                  entry_extracted = TRUE;
-                break; /* get out of this loop */
-              }
+      /* scan for the first double-quote for non-standard responses */
+      while(*ptr != '\n' && *ptr != '\0' && *ptr != '"')
+        ptr++;
+
+      if('\"' == *ptr) {
+        /* it started good */
+        for(ptr++; *ptr; ptr++) {
+          if('\"' == *ptr) {
+            if('\"' == ptr[1]) {
+              /* "quote-doubling" */
+              result = curlx_dyn_addn(&out, &ptr[1], 1);
+              ptr++;
             }
-            else
-              result = curlx_dyn_addn(&out, ptr, 1);
-            if(result)
-              return result;
+            else {
+              /* end of path */
+              if(curlx_dyn_len(&out))
+                entry_extracted = TRUE;
+              break; /* get out of this loop */
+            }
           }
+          else
+            result = curlx_dyn_addn(&out, ptr, 1);
+          if(result)
+            return result;
         }
-        if(entry_extracted) {
-          /* If the path name does not look like an absolute path (i.e.: it
-             does not start with a '/'), we probably need some server-dependent
-             adjustments. For example, this is the case when connecting to
-             an OS400 FTP server: this server supports two name syntaxes,
-             the default one being incompatible with standard paths. In
-             addition, this server switches automatically to the regular path
-             syntax when one is encountered in a command: this results in
-             having an entrypath in the wrong syntax when later used in CWD.
-               The method used here is to check the server OS: we do it only
-             if the path name looks strange to minimize overhead on other
-             systems. */
-          char *dir = curlx_dyn_ptr(&out);
+      }
+      if(entry_extracted) {
+        /* If the path name does not look like an absolute path (i.e.: it
+           does not start with a '/'), we probably need some server-dependent
+           adjustments. For example, this is the case when connecting to
+           an OS400 FTP server: this server supports two name syntaxes,
+           the default one being incompatible with standard paths. In
+           addition, this server switches automatically to the regular path
+           syntax when one is encountered in a command: this results in
+           having an entrypath in the wrong syntax when later used in CWD.
+           The method used here is to check the server OS: we do it only
+           if the path name looks strange to minimize overhead on other
+           systems. */
+        char *dir = curlx_dyn_ptr(&out);
 
-          if(!ftpc->server_os && dir[0] != '/') {
-            result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
-            if(result) {
-              free(dir);
-              return result;
-            }
-            free(ftpc->entrypath);
-            ftpc->entrypath = dir; /* remember this */
-            infof(data, "Entry path is '%s'", ftpc->entrypath);
-            /* also save it where getinfo can access it: */
-            free(data->state.most_recent_ftp_entrypath);
-            data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
-            if(!data->state.most_recent_ftp_entrypath)
-              return CURLE_OUT_OF_MEMORY;
-            ftp_state(data, ftpc, FTP_SYST);
-            break;
+        if(!ftpc->server_os && dir[0] != '/') {
+          result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
+          if(result) {
+            free(dir);
+            return result;
           }
-
           free(ftpc->entrypath);
           ftpc->entrypath = dir; /* remember this */
           infof(data, "Entry path is '%s'", ftpc->entrypath);
@@ -2970,200 +2952,211 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
           if(!data->state.most_recent_ftp_entrypath)
             return CURLE_OUT_OF_MEMORY;
-        }
-        else {
-          /* could not get the path */
-          curlx_dyn_free(&out);
-          infof(data, "Failed to figure out path");
-        }
-      }
-      ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
-      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
-      break;
-
-    case FTP_SYST:
-      if(ftpcode == 215) {
-        char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
-                                                       letter */
-        char *os;
-        char *start;
-
-        /* Reply format is like
-           215<space><OS-name><space><commentary>
-        */
-        while(*ptr == ' ')
-          ptr++;
-        for(start = ptr; *ptr && *ptr != ' '; ptr++)
-          ;
-        os = Curl_memdup0(start, ptr - start);
-        if(!os)
-          return CURLE_OUT_OF_MEMORY;
-
-        /* Check for special servers here. */
-        if(curl_strequal(os, "OS/400")) {
-          /* Force OS400 name format 1. */
-          result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
-          if(result) {
-            free(os);
-            return result;
-          }
-          /* remember target server OS */
-          free(ftpc->server_os);
-          ftpc->server_os = os;
-          ftp_state(data, ftpc, FTP_NAMEFMT);
+          ftp_state(data, ftpc, FTP_SYST);
           break;
         }
-        /* Nothing special for the target server. */
+
+        free(ftpc->entrypath);
+        ftpc->entrypath = dir; /* remember this */
+        infof(data, "Entry path is '%s'", ftpc->entrypath);
+        /* also save it where getinfo can access it: */
+        free(data->state.most_recent_ftp_entrypath);
+        data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+        if(!data->state.most_recent_ftp_entrypath)
+          return CURLE_OUT_OF_MEMORY;
+      }
+      else {
+        /* could not get the path */
+        curlx_dyn_free(&out);
+        infof(data, "Failed to figure out path");
+      }
+    }
+    ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
+    CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+    break;
+
+  case FTP_SYST:
+    if(ftpcode == 215) {
+      char *ptr = curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first
+                                                      letter */
+      char *os;
+      char *start;
+
+      /* Reply format is like
+         215<space><OS-name><space><commentary>
+      */
+      while(*ptr == ' ')
+        ptr++;
+      for(start = ptr; *ptr && *ptr != ' '; ptr++)
+        ;
+      os = Curl_memdup0(start, ptr - start);
+      if(!os)
+        return CURLE_OUT_OF_MEMORY;
+
+      /* Check for special servers here. */
+      if(curl_strequal(os, "OS/400")) {
+        /* Force OS400 name format 1. */
+        result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
+        if(result) {
+          free(os);
+          return result;
+        }
         /* remember target server OS */
         free(ftpc->server_os);
         ftpc->server_os = os;
-      }
-      else {
-        /* Cannot identify server OS. Continue anyway and cross fingers. */
-      }
-
-      ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
-      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
-      break;
-
-    case FTP_NAMEFMT:
-      if(ftpcode == 250) {
-        /* Name format change successful: reload initial path. */
-        ftp_state_pwd(data, ftpc);
+        ftp_state(data, ftpc, FTP_NAMEFMT);
         break;
       }
+      /* Nothing special for the target server. */
+      /* remember target server OS */
+      free(ftpc->server_os);
+      ftpc->server_os = os;
+    }
+    else {
+      /* Cannot identify server OS. Continue anyway and cross fingers. */
+    }
 
-      ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
-      CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+    ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
+    CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+    break;
+
+  case FTP_NAMEFMT:
+    if(ftpcode == 250) {
+      /* Name format change successful: reload initial path. */
+      ftp_state_pwd(data, ftpc);
       break;
+    }
 
-    case FTP_QUOTE:
-    case FTP_POSTQUOTE:
-    case FTP_RETR_PREQUOTE:
-    case FTP_STOR_PREQUOTE:
-    case FTP_LIST_PREQUOTE:
-      if((ftpcode >= 400) && !ftpc->count2) {
-        /* failure response code, and not allowed to fail */
-        failf(data, "QUOT command failed with %03d", ftpcode);
-        result = CURLE_QUOTE_ERROR;
-      }
-      else
-        result = ftp_state_quote(data, ftpc, ftp, FALSE, ftpc->state);
-      break;
+    ftp_state(data, ftpc, FTP_STOP); /* we are done with CONNECT phase! */
+    CURL_TRC_FTP(data, "[%s] protocol connect phase DONE", FTP_CSTATE(ftpc));
+    break;
 
-    case FTP_CWD:
-      if(ftpcode/100 != 2) {
-        /* failure to CWD there */
-        if(data->set.ftp_create_missing_dirs &&
-           ftpc->cwdcount && !ftpc->count2) {
-          /* try making it */
-          ftpc->count2++; /* counter to prevent CWD-MKD loops */
+  case FTP_QUOTE:
+  case FTP_POSTQUOTE:
+  case FTP_RETR_PREQUOTE:
+  case FTP_STOR_PREQUOTE:
+  case FTP_LIST_PREQUOTE:
+    if((ftpcode >= 400) && !ftpc->count2) {
+      /* failure response code, and not allowed to fail */
+      failf(data, "QUOT command failed with %03d", ftpcode);
+      result = CURLE_QUOTE_ERROR;
+    }
+    else
+      result = ftp_state_quote(data, ftpc, ftp, FALSE, ftpc->state);
+    break;
 
-          /* count3 is set to allow MKD to fail once per dir. In the case when
-          CWD fails and then MKD fails (due to another session raced it to
-          create the dir) this then allows for a second try to CWD to it. */
-          ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
+  case FTP_CWD:
+    if(ftpcode/100 != 2) {
+      /* failure to CWD there */
+      if(data->set.ftp_create_missing_dirs &&
+         ftpc->cwdcount && !ftpc->count2) {
+        /* try making it */
+        ftpc->count2++; /* counter to prevent CWD-MKD loops */
 
-          result = Curl_pp_sendf(data, &ftpc->pp, "MKD %.*s",
-                                 pathlen(ftpc, ftpc->cwdcount - 1),
-                                 pathpiece(ftpc, ftpc->cwdcount - 1));
-          if(!result)
-            ftp_state(data, ftpc, FTP_MKD);
-        }
-        else {
-          /* return failure */
-          failf(data, "Server denied you to change to the given directory");
-          ftpc->cwdfail = TRUE; /* do not remember this path as we failed
-                                   to enter it */
-          result = CURLE_REMOTE_ACCESS_DENIED;
-        }
+        /* count3 is set to allow MKD to fail once per dir. In the case when
+           CWD fails and then MKD fails (due to another session raced it to
+           create the dir) this then allows for a second try to CWD to it. */
+        ftpc->count3 = (data->set.ftp_create_missing_dirs == 2) ? 1 : 0;
+
+        result = Curl_pp_sendf(data, &ftpc->pp, "MKD %.*s",
+                               pathlen(ftpc, ftpc->cwdcount - 1),
+                               pathpiece(ftpc, ftpc->cwdcount - 1));
+        if(!result)
+          ftp_state(data, ftpc, FTP_MKD);
       }
       else {
-        /* success */
-        ftpc->count2 = 0;
-        if(ftpc->cwdcount >= ftpc->dirdepth)
-          result = ftp_state_mdtm(data, ftpc, ftp);
-        else {
-          ftpc->cwdcount++;
-          /* send next CWD */
-          result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
-                                 pathlen(ftpc, ftpc->cwdcount - 1),
-                                 pathpiece(ftpc, ftpc->cwdcount - 1));
-        }
-      }
-      break;
-
-    case FTP_MKD:
-      if((ftpcode/100 != 2) && !ftpc->count3--) {
-        /* failure to MKD the dir */
-        failf(data, "Failed to MKD dir: %03d", ftpcode);
+        /* return failure */
+        failf(data, "Server denied you to change to the given directory");
+        ftpc->cwdfail = TRUE; /* do not remember this path as we failed
+                                 to enter it */
         result = CURLE_REMOTE_ACCESS_DENIED;
       }
+    }
+    else {
+      /* success */
+      ftpc->count2 = 0;
+      if(ftpc->cwdcount >= ftpc->dirdepth)
+        result = ftp_state_mdtm(data, ftpc, ftp);
       else {
-        ftp_state(data, ftpc, FTP_CWD);
-        /* send CWD */
+        ftpc->cwdcount++;
+        /* send next CWD */
         result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
                                pathlen(ftpc, ftpc->cwdcount - 1),
                                pathpiece(ftpc, ftpc->cwdcount - 1));
       }
-      break;
-
-    case FTP_MDTM:
-      result = ftp_state_mdtm_resp(data, ftpc, ftp, ftpcode);
-      break;
-
-    case FTP_TYPE:
-    case FTP_LIST_TYPE:
-    case FTP_RETR_TYPE:
-    case FTP_STOR_TYPE:
-    case FTP_RETR_LIST_TYPE:
-      result = ftp_state_type_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-      break;
-
-    case FTP_SIZE:
-    case FTP_RETR_SIZE:
-    case FTP_STOR_SIZE:
-      result = ftp_state_size_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-      break;
-
-    case FTP_REST:
-    case FTP_RETR_REST:
-      result = ftp_state_rest_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-      break;
-
-    case FTP_PRET:
-      if(ftpcode != 200) {
-        /* there only is this one standard OK return code. */
-        failf(data, "PRET command not accepted: %03d", ftpcode);
-        return CURLE_FTP_PRET_FAILED;
-      }
-      result = ftp_state_use_pasv(data, ftpc, conn);
-      break;
-
-    case FTP_PASV:
-      result = ftp_state_pasv_resp(data, ftpc, ftpcode);
-      break;
-
-    case FTP_PORT:
-      result = ftp_state_port_resp(data, ftpc, ftp, ftpcode);
-      break;
-
-    case FTP_LIST:
-    case FTP_RETR:
-      result = ftp_state_get_resp(data, ftpc, ftp, ftpcode, ftpc->state);
-      break;
-
-    case FTP_STOR:
-      result = ftp_state_stor_resp(data, ftpc, ftpcode, ftpc->state);
-      break;
-
-    case FTP_QUIT:
-    default:
-      /* internal error */
-      ftp_state(data, ftpc, FTP_STOP);
-      break;
     }
-  } /* if(ftpcode) */
+    break;
+
+  case FTP_MKD:
+    if((ftpcode/100 != 2) && !ftpc->count3--) {
+      /* failure to MKD the dir */
+      failf(data, "Failed to MKD dir: %03d", ftpcode);
+      result = CURLE_REMOTE_ACCESS_DENIED;
+    }
+    else {
+      ftp_state(data, ftpc, FTP_CWD);
+      /* send CWD */
+      result = Curl_pp_sendf(data, &ftpc->pp, "CWD %.*s",
+                             pathlen(ftpc, ftpc->cwdcount - 1),
+                             pathpiece(ftpc, ftpc->cwdcount - 1));
+    }
+    break;
+
+  case FTP_MDTM:
+    result = ftp_state_mdtm_resp(data, ftpc, ftp, ftpcode);
+    break;
+
+  case FTP_TYPE:
+  case FTP_LIST_TYPE:
+  case FTP_RETR_TYPE:
+  case FTP_STOR_TYPE:
+  case FTP_RETR_LIST_TYPE:
+    result = ftp_state_type_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_SIZE:
+  case FTP_RETR_SIZE:
+  case FTP_STOR_SIZE:
+    result = ftp_state_size_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_REST:
+  case FTP_RETR_REST:
+    result = ftp_state_rest_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_PRET:
+    if(ftpcode != 200) {
+      /* there only is this one standard OK return code. */
+      failf(data, "PRET command not accepted: %03d", ftpcode);
+      return CURLE_FTP_PRET_FAILED;
+    }
+    result = ftp_state_use_pasv(data, ftpc, conn);
+    break;
+
+  case FTP_PASV:
+    result = ftp_state_pasv_resp(data, ftpc, ftpcode);
+    break;
+
+  case FTP_PORT:
+    result = ftp_state_port_resp(data, ftpc, ftp, ftpcode);
+    break;
+
+  case FTP_LIST:
+  case FTP_RETR:
+    result = ftp_state_get_resp(data, ftpc, ftp, ftpcode, ftpc->state);
+    break;
+
+  case FTP_STOR:
+    result = ftp_state_stor_resp(data, ftpc, ftpcode, ftpc->state);
+    break;
+
+  case FTP_QUIT:
+  default:
+    /* internal error */
+    ftp_state(data, ftpc, FTP_STOP);
+    break;
+  }
 
   return result;
 }
