@@ -114,7 +114,7 @@ curl CONNECT request. (Added in 7.12.4)
 The http version that was effectively used. (Added in 7.50.0)
 
 ## `json`
-A JSON object with all available keys. (Added in 7.70.0)
+A JSON object with all available keys except `header_json`. (Added in 7.70.0)
 
 ## `local_ip`
 The IP address of the local end of the most recently done connection - can be
