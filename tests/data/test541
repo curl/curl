@@ -41,9 +41,6 @@ works?
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <upload>
 </upload>
 <protocol>

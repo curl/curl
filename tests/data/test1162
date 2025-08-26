@@ -37,9 +37,6 @@ MSYS2_ARG_CONV_EXCL=ftp://
 </setenv>
 </client>
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

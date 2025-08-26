@@ -41,9 +41,6 @@ ftp://%HOSTIP:%FTPPORT// --ftp-method singlecwd
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

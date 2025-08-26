@@ -69,9 +69,6 @@ HTTP with auth in URL redirected to another host
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 GET http://somewhere.example/998 HTTP/1.1
 Host: somewhere.example
