@@ -38,9 +38,6 @@ ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -J -D
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

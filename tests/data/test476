@@ -26,9 +26,6 @@ FTP PASV upload ASCII file already using CRLF
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 <upload crlf="yes" nonewline="yes">
 %repeat[1750 x a line of text used for verifying this !%0a]%
 </upload>

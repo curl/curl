@@ -37,9 +37,6 @@ ftp://%HOSTIP:%FTPPORT/520
 #
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-QUIT
-</strip>
 
 <protocol>
 USER anonymous
