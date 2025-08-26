@@ -310,7 +310,7 @@ static struct buf_chunk *get_spare(struct bufq *q)
   }
   else {
     /* Check for integer overflow before allocation */
-    if(q->chunk_size > SIZE_MAX - sizeof(*chunk)) {
+    if(q->chunk_size > SIZE_T_MAX - sizeof(*chunk)) {
       return NULL;
     }
 
