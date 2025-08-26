@@ -44,6 +44,10 @@ In January 2026, curl drops support for Windows XP and Server 2003. Their
 
 Making the new minimum target Windows version Vista / Server 2008.
 
+## c-ares 1.16.0
+
+In March 2026, we drop support for all c-ares versions before 1.16.0.
+
 ## Past removals
 
  - axTLS (removed in 7.63.0)
