@@ -147,8 +147,8 @@ jobs:
             "${DOCKER_IMAGE}" \
             sh -c ./_ci-linux-debian.sh
 
-  win-gcc-libssh-zlibold-x86:
-    name: 'Windows gcc libssh zlib-classic (x86)'
+  win-gcc-libssh-zlibold-x64:
+    name: 'Windows gcc libssh zlib-classic (x64)'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -161,7 +161,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-unitybatch-win-x86-gcc-libssh1-zlibold'
+          export CW_CONFIG='-main-werror-unitybatch-win-x64-gcc-libssh1-zlibold'
           export CW_REVISION="${GITHUB_SHA}"
           . ./_versions.sh
           sudo podman image trust set --type reject default
