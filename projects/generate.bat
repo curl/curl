@@ -156,29 +156,25 @@ rem
   )
 
   set "S01=$FORMATVER"
-  set "S02=$FORMATYEAR"
-  set "S03=$PLATFORMTOOLSET"
-  set "S04=$SUBDIR"
-  set "S05=$TOOLSVER"
+  set "S02=$PLATFORMTOOLSET"
+  set "S03=$SUBDIR"
+  set "S04=$TOOLSVER"
 
   if "%1" == "VC10" (
     set "R01=11.00"
-    set "R02=2010"
-    set "R03=v100"
-    set "R04=VC10"
-    set "R05=4.0"
+    set "R02=v100"
+    set "R03=VC10"
+    set "R04=4.0"
   ) else if "%1%" == "VC11" (
     set "R01=12.00"
-    set "R02=2012"
-    set "R03=v110"
-    set "R04=VC11"
-    set "R05=4.0"
+    set "R02=v110"
+    set "R03=VC11"
+    set "R04=4.0"
   ) else if "%1%" == "VC12" (
     set "R01=12.00"
-    set "R02=2013"
-    set "R03=v120"
-    set "R04=VC12"
-    set "R05=12.0"
+    set "R02=v120"
+    set "R03=VC12"
+    set "R04=12.0"
   )
 
   echo * %CD%\%3
@@ -189,7 +185,6 @@ rem
     set "var=!var:%S02%=%R02%!"
     set "var=!var:%S03%=%R03%!"
     set "var=!var:%S04%=%R04%!"
-    set "var=!var:%S05%=%R05%!"
 
     set "var=!var:*:=!"
 
