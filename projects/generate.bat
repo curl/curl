@@ -178,7 +178,7 @@ rem
     set "R02=2013"
     set "R03=v120"
     set "R04=VC12"
-    set "R05=4.0"
+    set "R05=12.0"
   )
 
   echo * %CD%\%3
