@@ -4,10 +4,15 @@
 
 root = true
 
-[*.{c,h}]
+[*]
 charset = utf-8
 insert_final_newline = true
 indent_style = space
+trim_trailing_whitespace = true
+
+[*.{c,h}]
 indent_size = 2
 max_line_length = 79
-trim_trailing_whitespace = true
+
+[*.{pl,pm}]
+indent_size = 4
