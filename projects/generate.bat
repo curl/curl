@@ -109,8 +109,8 @@ rem
 :generate_proj
   echo.
   echo Generating %1 project files
-  md Windows\%1\lib
-  md Windows\%1\src
+  if not exist Windows\%1\lib md Windows\%1\lib
+  if not exist Windows\%1\src md Windows\%1\src
   call :generate %1 Windows\tmpl\curl-all.sln            Windows\%1\curl-all.sln
   call :generate %1 Windows\tmpl\curl.sln                Windows\%1\src\curl.sln
   call :generate %1 Windows\tmpl\curl.vcxproj.tmpl       Windows\%1\src\curl.vcxproj
@@ -125,10 +125,16 @@ rem Main project clean function.
 rem
 rem %1 - version
 rem
-:generate_proj
+:clean_proj
   echo.
   echo Removing %1 project files
-  rd /Q /S Windows\%1
+  call :clean Windows\%1\curl-all.sln
+  call :clean Windows\%1\src\curl.sln
+  call :clean Windows\%1\src\curl.vcxproj
+  call :clean Windows\%1\src\curl.vcxproj.filters
+  call :clean Windows\%1\lib\libcurl.sln
+  call :clean Windows\%1\lib\libcurl.vcxproj
+  call :clean Windows\%1\lib\libcurl.vcxproj.filters
 
   exit /B
 
@@ -156,23 +162,23 @@ rem
   set "S05=$TOOLSVER"
 
   if "%1" == "VC10" (
-    set "R01=11.0"
+    set "R01=11.00"
     set "R02=2010"
     set "R03=v100"
     set "R04=VC10"
     set "R05=4.0"
   ) else if "%1%" == "VC11" (
-    set "R01=12.0"
+    set "R01=12.00"
     set "R02=2012"
     set "R03=v110"
     set "R04=VC11"
     set "R05=4.0"
   ) else if "%1%" == "VC12" (
-    set "R01=12.0"
+    set "R01=12.00"
     set "R02=2013"
     set "R03=v120"
     set "R04=VC12"
-    set "R05=12.0"
+    set "R05=4.0"
   )
 
   echo * %CD%\%3
