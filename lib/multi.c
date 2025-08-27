@@ -55,7 +55,6 @@
 #include "socks.h"
 #include "urlapi-int.h"
 #include "altsvc.h"
-
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -2644,6 +2643,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     }
 
 statemachine_end:
+
     if(data->mstate < MSTATE_COMPLETED) {
       if(result) {
         /*
@@ -2657,33 +2657,33 @@ statemachine_end:
         /* Check if we can move pending requests to send pipe */
         process_pending_handles(multi); /* connection */
 
-          /* maybe retry if altsvc is breaking */
+        /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
-    if(data->asi && data->asi->used &&
-      Curl_is_altsvc_error(result) &&
-      !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
-      data->mstate <= MSTATE_PROTOCONNECTING &&
-      data->mstate >= MSTATE_CONNECT) {
+        if(data->asi && data->asi->used &&
+          Curl_is_altsvc_error(result) &&
+          !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+          data->mstate <= MSTATE_PROTOCONNECTING &&
+          data->mstate >= MSTATE_CONNECT) {
 
-      infof(data, "Alt-Svc connection failed(%d). "
-                  "Retrying with another target", result);
-      if(data->conn) {
-        struct connectdata *conn = data->conn;
+          infof(data, "Alt-Svc connection failed(%u). "
+                      "Retrying with another target", result);
+          if(data->conn) {
+            struct connectdata *conn = data->conn;
 
-        /* This is where we make sure that the conn pointer is reset.
-           We do not have to do this in every case block above where a
-           failure is detected */
-        Curl_detach_connection(data);
-        Curl_conn_terminate(data, conn, FALSE);
-      }
+            /* This is where we make sure that the conn pointer is reset.
+               We do not have to do this in every case block above where a
+               failure is detected */
+            Curl_detach_connection(data);
+            Curl_conn_terminate(data, conn, FALSE);
+          }
 
-      data->asi->used = FALSE;
-      stream_error = FALSE;
-      multistate(data, MSTATE_CONNECT);
-      result = CURLE_OK;
-      rc = CURLM_CALL_MULTI_PERFORM;
-      continue;
-    }
+          data->asi->used = FALSE;
+          stream_error = FALSE;
+          multistate(data, MSTATE_CONNECT);
+          result = CURLE_OK;
+          rc = CURLM_CALL_MULTI_PERFORM;
+          continue;
+        }
 #endif
         if(data->conn) {
           if(stream_error) {
