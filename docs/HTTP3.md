@@ -87,7 +87,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
@@ -131,7 +131,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
@@ -173,7 +173,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
@@ -215,7 +215,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2=<somewhere3>
+     % ./configure PKG_CONFIG_PATH=<ngtcp2-root>/lib/pkgconfig --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-ngtcp2
      % make
      % make install
 
