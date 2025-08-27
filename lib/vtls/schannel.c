@@ -1246,6 +1246,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writeable socket"));
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      free(inbuf[0].pvBuffer);
       return CURLE_OK;
     }
 
