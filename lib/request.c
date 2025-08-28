@@ -308,7 +308,7 @@ static CURLcode req_flush(struct Curl_easy *data)
   }
 
   if(data->req.eos_read && !data->req.eos_sent) {
-    char tmp;
+    char tmp = 0;
     size_t nwritten;
     result = xfer_send(data, &tmp, 0, 0, &nwritten);
     if(result)
