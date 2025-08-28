@@ -75,7 +75,6 @@ static void cf_hc_baller_reset(struct cf_hc_baller *b,
 
 static bool cf_hc_baller_is_active(struct cf_hc_baller *b)
 {
-  /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
   return b->cf && !b->result;
 }
 

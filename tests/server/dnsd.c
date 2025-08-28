@@ -180,7 +180,6 @@ static void add_answer(unsigned char *bytes, size_t *w,
   size_t i = *w;
 
   /* add answer */
-  /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
   bytes[i++] = 0xc0;
   bytes[i++] = 0x0c; /* points to the query at this fixed packet index */
 

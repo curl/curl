@@ -560,7 +560,6 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   ssize_t nread;
   ssize_t nwrite;
   char buffer[512];
-  /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
   if(FD_ISSET(cp->clientfd, fds)) {
     /* read from client, send to remote */
     nread = recv(cp->clientfd, buffer, sizeof(buffer), 0);
@@ -574,7 +573,6 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     else
       return 1;
   }
-  /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
   if(FD_ISSET(cp->remotefd, fds)) {
     /* read from remote, send to client */
     nread = recv(cp->remotefd, buffer, sizeof(buffer), 0);
@@ -682,7 +680,6 @@ static bool socksd_incoming(curl_socket_t listenfd)
       return FALSE;
     }
 
-    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     if((clients < 2) && FD_ISSET(sockfd, &fds_read)) {
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {

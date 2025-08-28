@@ -1023,7 +1023,6 @@ static bool juggle(curl_socket_t *sockfdp,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-      /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
       FD_SET(sockfd, &fds_read);
 #ifdef __DJGPP__
 #pragma GCC diagnostic pop

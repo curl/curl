@@ -1753,7 +1753,6 @@ static bool content_type_match(const char *contenttype,
                                const char *target, size_t len)
 {
   if(contenttype && curl_strnequal(contenttype, target, len))
-    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     switch(contenttype[len]) {
     case '\0':
     case '\t':

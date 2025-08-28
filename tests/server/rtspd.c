@@ -655,7 +655,6 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     logmsg("Read %zd bytes", got);
 
     req->offset += (size_t)got;
-    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     reqbuf[req->offset] = '\0';
 
     done_processing = rtspd_ProcessRequest(req);

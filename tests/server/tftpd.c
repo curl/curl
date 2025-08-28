@@ -913,7 +913,6 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   filename = cp;
   do {
     bool endofit = true;
-    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     while(cp < &trsbuf.storage[size]) {
       if(*cp == '\0') {
         endofit = false;

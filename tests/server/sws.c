@@ -1311,7 +1311,6 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-      /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
       FD_SET(serverfd, &output);
 #ifdef __DJGPP__
 #pragma GCC diagnostic pop
@@ -1491,7 +1490,6 @@ static void http_connect(curl_socket_t *infdp,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-          /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
           FD_SET(serverfd[i], &input);
 #ifdef __DJGPP__
 #pragma GCC diagnostic pop
@@ -1609,7 +1607,6 @@ static void http_connect(curl_socket_t *infdp,
         size_t len;
         if(clientfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readclient[i]) - tos[i];
-          /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
           if(len && FD_ISSET(clientfd[i], &input)) {
             /* read from client */
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
@@ -1628,7 +1625,6 @@ static void http_connect(curl_socket_t *infdp,
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
           len = sizeof(readserver[i])-toc[i];
-          /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
           if(len && FD_ISSET(serverfd[i], &input)) {
             /* read from server */
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
@@ -1666,7 +1662,6 @@ static void http_connect(curl_socket_t *infdp,
           }
         }
         if(serverfd[i] != CURL_SOCKET_BAD) {
-          /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
           if(tos[i] && FD_ISSET(serverfd[i], &output)) {
             /* write to server */
             rc = swrite(serverfd[i], readclient[i], tos[i]);
