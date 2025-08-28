@@ -118,11 +118,8 @@ struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                bool noexpiry, const char *lineptr,
                                const char *domain, const char *path,
                                bool secure);
-
-int Curl_cookie_getlist(struct Curl_easy *data,
-                        struct CookieInfo *c, const char *host,
-                        const char *path, bool secure,
-                        struct Curl_llist *list);
+int Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
+                        const char *host, struct Curl_llist *list);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 

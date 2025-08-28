@@ -1314,15 +1314,17 @@ bool Curl_secure_context(struct connectdata *conn, const char *host)
  * Returns 0 when there is a list returned. Otherwise non-zero.
  */
 int Curl_cookie_getlist(struct Curl_easy *data,
-                        struct CookieInfo *ci,
-                        const char *host, const char *path,
-                        bool secure,
+                        struct connectdata *conn,
+                        const char *host,
                         struct Curl_llist *list)
 {
   size_t matches = 0;
   bool is_ip;
   const size_t myhash = cookiehash(host);
   struct Curl_llist_node *n;
+  const bool secure = Curl_secure_context(conn, host);
+  struct CookieInfo *ci = data->cookies;
+  const char *path = data->state.up.path;
 
   Curl_llist_init(list, NULL);
 

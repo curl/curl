@@ -2442,10 +2442,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
     if(data->cookies && data->state.cookie_engine) {
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : conn->host.name;
-      const bool secure_context = Curl_secure_context(conn, host);
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      rc = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
-                               secure_context, &list);
+      rc = Curl_cookie_getlist(data, conn, host, &list);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
     if(!rc) {
