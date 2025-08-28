@@ -53,6 +53,16 @@ jobs:
       matrix:
         image: [windows-2022, windows-11-arm]
     steps:
+      - name: 'install build prereqs'
+        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
+        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
+        with:
+          msystem: msys
+          install: gcc make
+
+      - name: 'perl version'
+        run: perl --version | tee "$GITHUB_WORKSPACE"/perlversion
+
       - name: 'cache perl packages'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-perl-win32-pkgs
@@ -60,14 +70,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
-
-      - name: 'install build prereqs'
-        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
-        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
-        with:
-          msystem: msys
-          install: gcc make
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'build perl packages'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
@@ -422,6 +425,14 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
+
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -430,33 +441,28 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: &perl-win32-pkgs-install |
+          perl --version
           if [ -d /c/perl-win32-pkgs ]; then
-            cd /c/perl-win32-pkgs
-            cd Win32-Process-0.17
+            pushd /c/perl-win32-pkgs
+            pushd Win32-Process-0.17
             install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
             install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
-            cd ..
-            cd Win32-Process-List-0.09
+            popd
+            pushd Win32-Process-List-0.09
             install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
             install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
             install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
             install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
-            cd ..
-            cd ..
+            popd
+            popd
           fi
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          perl -MWin32::Process -MWin32::Process::List -e 1 && echo '! Modules loading OK.' || echo '! Failed to load modules.'
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -649,6 +655,14 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
+
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -657,19 +671,12 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: *perl-win32-pkgs-install
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1028,21 +1035,6 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
-
-      - name: 'install test prereqs perl'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: *perl-win32-pkgs-install
-
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
@@ -1066,6 +1058,22 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           fi
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
+
+      - name: 'cache perl packages'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: C:\perl-win32-pkgs
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
+
+      - name: 'install test prereqs perl'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: *perl-win32-pkgs-install
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
