@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
+# test
+
 name: 'Windows'
 
 'on':
