@@ -113,10 +113,10 @@ rem
   if not exist Windows\%1\src md Windows\%1\src
   call :generate %1 Windows\tmpl\curl-all.sln            Windows\%1\curl-all.sln
   call :generate %1 Windows\tmpl\curl.sln                Windows\%1\src\curl.sln
-  call :generate %1 Windows\tmpl\curl.vcxproj.tmpl       Windows\%1\src\curl.vcxproj
+  call :generate %1 Windows\tmpl\curl.vcxproj            Windows\%1\src\curl.vcxproj
   call :generate %1 Windows\tmpl\curl.vcxproj.filters    Windows\%1\src\curl.vcxproj.filters
   call :generate %1 Windows\tmpl\libcurl.sln             Windows\%1\lib\libcurl.sln
-  call :generate %1 Windows\tmpl\libcurl.vcxproj.tmpl    Windows\%1\lib\libcurl.vcxproj
+  call :generate %1 Windows\tmpl\libcurl.vcxproj         Windows\%1\lib\libcurl.vcxproj
   call :generate %1 Windows\tmpl\libcurl.vcxproj.filters Windows\%1\lib\libcurl.vcxproj.filters
 
   exit /B
