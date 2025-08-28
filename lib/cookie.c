@@ -1319,7 +1319,7 @@ int Curl_cookie_getlist(struct Curl_easy *data,
                         struct Curl_llist *list)
 {
   size_t matches = 0;
-  bool is_ip;
+  const bool is_ip = Curl_host_is_ipnum(host);
   const size_t myhash = cookiehash(host);
   struct Curl_llist_node *n;
   const bool secure = Curl_secure_context(conn, host);
@@ -1333,9 +1333,6 @@ int Curl_cookie_getlist(struct Curl_easy *data,
 
   /* at first, remove expired cookies */
   remove_expired(ci);
-
-  /* check if host is an IP(v4|v6) address */
-  is_ip = Curl_host_is_ipnum(host);
 
   for(n = Curl_llist_head(&ci->cookielist[myhash]);
       n; n = Curl_node_next(n)) {
