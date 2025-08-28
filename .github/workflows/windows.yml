@@ -499,8 +499,6 @@ jobs:
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
-    needs:
-      - build-cache
     runs-on: windows-2022
     timeout-minutes: 15
     defaults:
@@ -648,16 +646,6 @@ jobs:
         run: |
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
-
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
