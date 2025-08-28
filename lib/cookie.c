@@ -1294,6 +1294,14 @@ static int cookie_sort_ct(const void *p1, const void *p2)
   return (c2->creationtime > c1->creationtime) ? 1 : -1;
 }
 
+bool Curl_secure_context(struct connectdata *conn, const char *host)
+{
+  return conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
+    curl_strequal("localhost", host) ||
+    !strcmp(host, "127.0.0.1") ||
+    !strcmp(host, "::1");
+}
+
 /*
  * Curl_cookie_getlist
  *
@@ -1306,15 +1314,17 @@ static int cookie_sort_ct(const void *p1, const void *p2)
  * Returns 0 when there is a list returned. Otherwise non-zero.
  */
 int Curl_cookie_getlist(struct Curl_easy *data,
-                        struct CookieInfo *ci,
-                        const char *host, const char *path,
-                        bool secure,
+                        struct connectdata *conn,
+                        const char *host,
                         struct Curl_llist *list)
 {
   size_t matches = 0;
-  bool is_ip;
+  const bool is_ip = Curl_host_is_ipnum(host);
   const size_t myhash = cookiehash(host);
   struct Curl_llist_node *n;
+  const bool secure = Curl_secure_context(conn, host);
+  struct CookieInfo *ci = data->cookies;
+  const char *path = data->state.up.path;
 
   Curl_llist_init(list, NULL);
 
@@ -1323,9 +1333,6 @@ int Curl_cookie_getlist(struct Curl_easy *data,
 
   /* at first, remove expired cookies */
   remove_expired(ci);
-
-  /* check if host is an IP(v4|v6) address */
-  is_ip = Curl_host_is_ipnum(host);
 
   for(n = Curl_llist_head(&ci->cookielist[myhash]);
       n; n = Curl_node_next(n)) {
