@@ -1048,6 +1048,7 @@ static size_t multissl_version(char *buffer, size_t size)
 
     backends[0] = '\0';
 
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     for(i = 0; available_backends[i]; ++i) {
       char vb[200];
       bool paren = (selected != available_backends[i]);
@@ -1088,6 +1089,7 @@ static int multissl_setup(const struct Curl_ssl *backend)
 
   env = curl_getenv("CURL_SSL_BACKEND");
   if(env) {
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     for(i = 0; available_backends[i]; i++) {
       if(curl_strequal(env, available_backends[i]->info.name)) {
         Curl_ssl = available_backends[i];
@@ -1134,6 +1136,7 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
            CURLSSLSET_UNKNOWN_BACKEND;
 #endif
 
+  /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
   for(i = 0; available_backends[i]; i++) {
     if(available_backends[i]->info.id == id ||
        (name && curl_strequal(available_backends[i]->info.name, name))) {

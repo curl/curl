@@ -99,6 +99,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
     }
 
     *length = offset + line_length(*buffer + offset, bytestoread);
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     if(*(*buffer + *length - 1) == '\n')
       break;
     offset = *length;

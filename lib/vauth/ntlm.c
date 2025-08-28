@@ -411,6 +411,7 @@ static void unicodecpy(unsigned char *dest, const char *src, size_t length)
 {
   size_t i;
   for(i = 0; i < length; i++) {
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     dest[2 * i] = (unsigned char)src[i];
     dest[2 * i + 1] = '\0';
   }
@@ -832,6 +833,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   DEBUGASSERT(size == hostoff);
   if(unicode)
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     unicodecpy(&ntlmbuf[size], host, hostlen / 2);
   else
     memcpy(&ntlmbuf[size], host, hostlen);

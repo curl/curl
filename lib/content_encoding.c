@@ -654,6 +654,7 @@ void Curl_all_content_encodings(char *buf, size_t blen)
         *p++ = ' ';
       }
     }
+    /* NOLINTNEXTLINE(clang-analyzer-security.ArrayBound) */
     p[-2] = '\0';
   }
 }
