@@ -105,11 +105,14 @@ struct CookieInfo {
 #define MAX_COOKIE_SEND_AMOUNT 150
 
 struct Curl_easy;
+struct connectdata;
+
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
  * are only used if the header boolean is TRUE.
  */
 
+bool Curl_secure_context(struct connectdata *conn, const char *host);
 struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                struct CookieInfo *c, bool header,
                                bool noexpiry, const char *lineptr,

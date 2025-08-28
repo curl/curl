@@ -2442,11 +2442,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
     if(data->cookies && data->state.cookie_engine) {
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : conn->host.name;
-      const bool secure_context =
-        conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
-        curl_strequal("localhost", host) ||
-        !strcmp(host, "127.0.0.1") ||
-        !strcmp(host, "::1");
+      const bool secure_context = Curl_secure_context(conn, host);
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       rc = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
                                secure_context, &list);
@@ -3334,14 +3330,8 @@ static CURLcode http_header_s(struct Curl_easy *data,
      * real peer hostname. */
     const char *host = data->state.aptr.cookiehost ?
       data->state.aptr.cookiehost : conn->host.name;
-    const bool secure_context =
-      conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
-      curl_strequal("localhost", host) ||
-      !strcmp(host, "127.0.0.1") ||
-      !strcmp(host, "::1");
-
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
-                    CURL_LOCK_ACCESS_SINGLE);
+    const bool secure_context = Curl_secure_context(conn, host);
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
                     data->state.up.path, secure_context);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
