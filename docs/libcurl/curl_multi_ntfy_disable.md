@@ -28,8 +28,8 @@ CURLMcode curl_multi_ntfy_disable(CURLM *multi_handle,
 # DESCRIPTION
 
 Disables collecting the given notification type in the multi handle. A
-callback function installed via CURLMOPT_NTFYFUNCTION(3) will no longer
-be called when this notification happens.
+callback function installed via CURLMOPT_NTFYFUNCTION(3) is no longer
+called when this notification happens.
 
 Only when a notification callback is installed *and* a notification
 is enabled are these collected and dispatched to the callback.
