@@ -424,6 +424,13 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -439,6 +446,7 @@ jobs:
         timeout-minutes: 5
         run: &perl-win32-pkgs-install |
           echo '-------------------'
+          perl --version
           if [ -d /c/perl-win32-pkgs ]; then
             echo "!!! perl-win32-pkgs directory detected"
             pushd /c/perl-win32-pkgs
@@ -459,20 +467,11 @@ jobs:
             popd
             popd
           else
-            echo "!!! perl-win32-pkgs directory NOT detected"
+            echo "perl-win32-pkgs directory not detected"
           fi
           echo '-------------------'
-          pwd
-          perl --version
           perl tests/wintest.pl
           echo '-------------------'
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -665,6 +664,13 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target testdeps
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
@@ -679,13 +685,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: *perl-win32-pkgs-install
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1044,21 +1043,6 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target testdeps
 
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
-
-      - name: 'install test prereqs perl'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: *perl-win32-pkgs-install
-
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
@@ -1082,6 +1066,21 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           fi
+
+      - name: 'cache perl packages'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-perl-win32-pkgs
+        env:
+          cache-name: cache-perl-win32-pkgs
+        with:
+          path: C:\perl-win32-pkgs
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+
+      - name: 'install test prereqs perl'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: *perl-win32-pkgs-install
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
