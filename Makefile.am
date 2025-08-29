@@ -79,7 +79,7 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile \
+EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig \
  $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST)
 
 DISTCLEANFILES = buildinfo.txt
