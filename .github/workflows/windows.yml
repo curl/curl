@@ -55,6 +55,9 @@ jobs:
       matrix:
         image: [windows-2022, windows-11-arm]
     steps:
+      - name: 'perl version'
+        run: perl --version | tee "$GITHUB_WORKSPACE"/perlversion
+
       - name: 'cache perl packages'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-perl-win32-pkgs
@@ -62,7 +65,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('C:/msys64/usr/lib/perl5/core_perl/CORE') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install build prereqs'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
@@ -430,6 +433,7 @@ jobs:
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh make
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
@@ -439,7 +443,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('C:/msys64/usr/lib/perl5/core_perl/CORE') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -666,6 +670,7 @@ jobs:
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed make
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -675,7 +680,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('C:/msys64/usr/lib/perl5/core_perl/CORE') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1064,6 +1069,7 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           fi
+          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1073,7 +1079,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('C:/msys64/usr/lib/perl5/core_perl/CORE') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
