@@ -3292,16 +3292,6 @@ CURLMcode curl_multi_setopt(CURLM *m,
   case CURLMOPT_NTFYDATA:
     multi->ntfy.ntfy_cb_data = va_arg(param, void *);
     break;
-  case CURLMOPT_NTFY_ENABLE:
-    uarg = va_arg(param, unsigned long);
-    if(uarg <= UINT_MAX)
-      Curl_mntfy_enable(multi, (unsigned int)uarg);
-    break;
-  case CURLMOPT_NTFY_DISABLE:
-    uarg = va_arg(param, unsigned long);
-    if(uarg <= UINT_MAX)
-      Curl_mntfy_disable(multi, (unsigned int)uarg);
-    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;
@@ -4020,6 +4010,24 @@ void Curl_multi_mark_dirty(struct Curl_easy *data)
 {
   if(data->multi && data->mid != UINT_MAX)
     Curl_uint_bset_add(&data->multi->dirty, data->mid);
+}
+
+CURLMcode curl_multi_ntfy_enable(CURLM *m, unsigned int notification)
+{
+  struct Curl_multi *multi = m;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+  return Curl_mntfy_enable(multi, notification);
+}
+
+CURLMcode curl_multi_ntfy_disable(CURLM *m, unsigned int notification)
+{
+  struct Curl_multi *multi = m;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+  return Curl_mntfy_disable(multi, notification);
 }
 
 #ifdef DEBUGBUILD
