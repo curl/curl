@@ -462,7 +462,7 @@ jobs:
             popd
             popd
           fi
-          perl tests/wintest.pl
+          perl -I tests -e 'use processhelp qw($has_win32_process); print "! Win32::Process* loaded: " . ($has_win32_process ? "YES" : "NO") . "\n";'
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
