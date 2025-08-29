@@ -426,7 +426,7 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
 CURLcode Curl_gtls_shared_creds_up_ref(struct gtls_shared_creds *creds)
 {
   DEBUGASSERT(creds);
-  if(creds->refcount < SIZE_T_MAX) {
+  if(creds->refcount < SIZE_MAX) {
     ++creds->refcount;
     return CURLE_OK;
   }

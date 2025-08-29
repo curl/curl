@@ -399,7 +399,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   size_t len = strlen(password);
   unsigned char *pw;
   CURLcode result;
-  if(len > SIZE_T_MAX/2) /* avoid integer overflow */
+  if(len > SIZE_MAX/2) /* avoid integer overflow */
     return CURLE_OUT_OF_MEMORY;
   pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
   if(!pw)

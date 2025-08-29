@@ -618,21 +618,21 @@
 #  endif
 #endif
 
-#ifndef SIZE_T_MAX
+#ifndef SIZE_MAX
 /* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
-#define SIZE_T_MAX 18446744073709551615U
+#define SIZE_MAX 18446744073709551615U
 #else
-#define SIZE_T_MAX 4294967295U
+#define SIZE_MAX 4294967295U
 #endif
 #endif
 
-#ifndef SSIZE_T_MAX
+#ifndef SSIZE_MAX
 /* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
-#define SSIZE_T_MAX 9223372036854775807
+#define SSIZE_MAX 9223372036854775807
 #else
-#define SSIZE_T_MAX 2147483647
+#define SSIZE_MAX 2147483647
 #endif
 #endif
 

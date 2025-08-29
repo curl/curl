@@ -218,15 +218,15 @@ static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
       return 0;
     }
 #if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
-    else if(remain_diff > SSIZE_T_MAX) {
-      return SIZE_T_MAX;
+    else if(remain_diff > SSIZE_MAX) {
+      return SIZE_MAX;
     }
 #endif
     else {
       return (size_t)remain_diff;
     }
   }
-  return SIZE_T_MAX;
+  return SIZE_MAX;
 }
 
 struct cw_download_ctx {

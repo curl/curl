@@ -130,7 +130,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
       if(pat->c.set.elem) {
         char **arr;
 
-        if(pat->c.set.size >= (curl_off_t)(SIZE_T_MAX/(sizeof(char *))))
+        if(pat->c.set.size >= (curl_off_t)(SIZE_MAX/(sizeof(char *))))
           return globerror(glob, "range overflow", 0, CURLE_URL_MALFORMAT);
 
         arr = realloc(pat->c.set.elem, (size_t)(pat->c.set.size + 1) *
