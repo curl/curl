@@ -450,8 +450,9 @@ jobs:
           if [ -d /c/perl-win32-pkgs ]; then
             echo "!!! perl-win32-pkgs directory detected"
             pushd /c/perl-win32-pkgs
-            sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
+            sed -i.bak 's/#define I_CRYPT//g'    /usr/lib/perl5/core_perl/CORE/config.h
             sed -i.bak 's/#define I_LANGINFO//g' /usr/lib/perl5/core_perl/CORE/config.h
+            sed -i.bak 's/#define I_SYS_WAIT//g' /usr/lib/perl5/core_perl/CORE/config.h
             pushd Win32-Process-0.17
             perl Makefile.PL
             make
