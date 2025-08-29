@@ -4128,9 +4128,13 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
      However using a large buffer (8 packets) actually decreases performance.
      4 packets is better.
-   */
 
-#ifdef HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN
+     AWS-LC seems to run into decryption failures with large buffers.
+     Sporadic failures in test_10_08 with h2 proxy uploads, increased
+     frequency with CURL_DBG_SOCK_RBLOCK=50.
+   */
+#if defined(HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN) && \
+    !defined(OPENSSL_IS_AWSLC)
   SSL_CTX_set_default_read_buffer_len(octx->ssl_ctx, 0x401e * 4);
 #endif
 
