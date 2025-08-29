@@ -48,7 +48,6 @@ BEGIN {
         killallsockfilters
         set_advisor_read_lock
         clear_advisor_read_lock
-        $has_win32_process
     );
 
     if(os_is_win() && $^O ne 'MSWin32') {
