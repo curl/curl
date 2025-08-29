@@ -151,6 +151,12 @@ CURLMcode Curl_mntfy_init(struct Curl_multi *multi)
 
 void Curl_mntfy_cleanup(struct Curl_multi *multi)
 {
+  while(multi->ntfy.head) {
+    struct mntfy_chunk *chunk = multi->ntfy.head;
+    multi->ntfy.head = chunk->next;
+    mnfty_chunk_destroy(chunk);
+  }
+  multi->ntfy.tail = NULL;
   Curl_uint_bset_destroy(&multi->ntfy.enabled);
 }
 
