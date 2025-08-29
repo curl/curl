@@ -140,10 +140,14 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
   mnfty_chunk_reset(chunk);
 }
 
-CURLMcode Curl_mntfy_init(struct Curl_multi *multi)
+void Curl_mntfy_init(struct Curl_multi *multi)
 {
   memset(&multi->ntfy, 0, sizeof(multi->ntfy));
   Curl_uint_bset_init(&multi->ntfy.enabled);
+}
+
+CURLMcode Curl_mntfy_resize(struct Curl_multi *multi)
+{
   if(Curl_uint_bset_resize(&multi->ntfy.enabled, CURLM_NTFY_EASY_DONE + 1))
     return CURLM_OUT_OF_MEMORY;
   return CURLM_OK;

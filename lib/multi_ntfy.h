@@ -38,7 +38,8 @@ struct curl_multi_ntfy {
   struct mntfy_chunk *tail;
 };
 
-CURLMcode Curl_mntfy_init(struct Curl_multi *multi);
+void Curl_mntfy_init(struct Curl_multi *multi);
+CURLMcode Curl_mntfy_resize(struct Curl_multi *multi);
 void Curl_mntfy_cleanup(struct Curl_multi *multi);
 
 CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type);

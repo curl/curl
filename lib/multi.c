@@ -244,6 +244,7 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->magic = CURL_MULTI_HANDLE;
 
   Curl_dnscache_init(&multi->dnscache, dnssize);
+  Curl_mntfy_init(multi);
   Curl_multi_ev_init(multi, ev_hashsize);
   Curl_uint_tbl_init(&multi->xfers, NULL);
   Curl_uint_bset_init(&multi->process);
@@ -258,7 +259,8 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->max_concurrent_streams = 100;
   multi->last_timeout_ms = -1;
 
-  if(Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
+  if(Curl_mntfy_resize(multi) ||
+     Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->dirty, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->msgsent, xfer_table_size) ||
@@ -277,9 +279,6 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
     multi->admin->set.verbose = TRUE;
 #endif
   Curl_uint_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
-
-  if(Curl_mntfy_init(multi))
-    goto error;
 
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
@@ -2901,7 +2900,6 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 
     multi->magic = 0; /* not good anymore */
 
-    Curl_mntfy_cleanup(multi);
     Curl_multi_ev_cleanup(multi);
     Curl_hash_destroy(&multi->proto_hash);
     Curl_dnscache_destroy(&multi->dnscache);
@@ -2922,6 +2920,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #endif
 
     multi_xfer_bufs_free(multi);
+    Curl_mntfy_cleanup(multi);
 #ifdef DEBUGBUILD
     if(Curl_uint_tbl_count(&multi->xfers)) {
       multi_xfer_tbl_dump(multi);
