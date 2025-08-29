@@ -56,8 +56,6 @@ my %wl = (
     'curlx_base64_decode' => 'internal api',
     'curlx_base64_encode' => 'internal api',
     'curlx_base64url_encode' => 'internal api',
-    'curl_multi_ntfy_disable' => 'internal api',
-    'curl_multi_ntfy_enable' => 'internal api',
 );
 
 my %api = (
@@ -117,6 +115,8 @@ my %api = (
     'curl_multi_get_offt' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
+    'curl_multi_ntfy_disable' => 'API',
+    'curl_multi_ntfy_enable' => 'API',
     'curl_multi_perform' => 'API',
     'curl_multi_remove_handle' => 'API',
     'curl_multi_setopt' => 'API',
