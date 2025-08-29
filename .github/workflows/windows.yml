@@ -428,7 +428,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh make
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
 
       - name: 'cache perl packages'
@@ -451,6 +451,7 @@ jobs:
             echo "!!! perl-win32-pkgs directory detected"
             pushd /c/perl-win32-pkgs
             sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
+            sed -i.bak 's/#define I_LANGINFO//g' /usr/lib/perl5/core_perl/CORE/config.h
             pushd Win32-Process-0.17
             perl Makefile.PL
             make
@@ -668,6 +669,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /usr/bin/pacman --noconfirm --noprogressbar --sync --needed make
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
@@ -1048,14 +1050,16 @@ jobs:
         timeout-minutes: 5
         run: |
           if [ -z "${MATRIX_OPENSSH}" ]; then  # MSYS2 openssh
-            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh make
           elif [ "${MATRIX_OPENSSH}" = 'OpenSSH-Windows-builtin' ]; then
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed make
             # https://learn.microsoft.com/windows-server/administration/openssh/openssh_install_firstuse
             if [ "${MATRIX_IMAGE}" != 'windows-2025' ]; then
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0'
               pwsh -Command 'Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0'
             fi
           else  # OpenSSH-Windows
+            /usr/bin/pacman --noconfirm --noprogressbar --sync --needed make
             cd /c  # no D: drive on windows-11-arm runners
             curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
               --location "https://github.com/PowerShell/Win32-OpenSSH/releases/download/${OPENSSH_WINDOWS_VERSION}/OpenSSH-Win64.zip" --output bin.zip
