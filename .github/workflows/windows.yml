@@ -462,7 +462,7 @@ jobs:
             popd
             popd
           fi
-          perl -MWin32::Process -MWin32::Process::List -e 1 || echo "! Modules could not be loaded."
+          perl -MWin32::Process -MWin32::Process::List -e 1 && echo '! Modules loading OK.' || echo '! Failed to load modules.'
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
