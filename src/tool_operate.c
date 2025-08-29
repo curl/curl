@@ -1398,6 +1398,8 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
 #ifdef DEBUGBUILD
     if(getenv("CURL_FORBID_REUSE"))
       (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
+    if(getenv("CURL_FORBID_RETRY_ON_REUSE"))
+      (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_RETRY_ON_REUSE, 1L);
 #endif
 
     mcode = curl_multi_add_handle(multi, per->curl);
@@ -1868,6 +1870,8 @@ static CURLcode serial_transfers(CURLSH *share)
 #ifdef DEBUGBUILD
       if(getenv("CURL_FORBID_REUSE"))
         (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
+      if(getenv("CURL_FORBID_RETRY_ON_REUSE"))
+        (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_RETRY_ON_REUSE, 1L);
 
       if(global->test_duphandle) {
         CURL *dup = curl_easy_duphandle(per->curl);
