@@ -431,9 +431,9 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->log_printf = NULL;
 #endif
 
-  (void)data;
   s->initial_ts = pktx->ts;
-  s->handshake_timeout = QUIC_HANDSHAKE_TIMEOUT;
+  s->handshake_timeout = (data->set.connecttimeout > 0) ?
+    data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * ctx->max_stream_window;
   s->max_stream_window = 10 * ctx->max_stream_window;
 
