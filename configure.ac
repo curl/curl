@@ -5536,9 +5536,9 @@ AC_CONFIG_FILES([\
   tests/http/Makefile \
   packages/Makefile \
   packages/vms/Makefile \
-  curl-config \
   libcurl.pc
 ])
+AC_CONFIG_FILES([curl-config], [chmod +x curl-config])
 AC_OUTPUT
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
