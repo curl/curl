@@ -457,6 +457,7 @@ jobs:
             echo "!!! perl-win32-pkgs directory NOT detected"
           fi
           echo '-------------------'
+          pwd
           perl --version
           perl tests/wintest.pl
           echo '-------------------'
