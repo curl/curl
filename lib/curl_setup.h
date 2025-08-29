@@ -475,6 +475,10 @@
 #include <curl/stdcheaders.h>
 #endif
 
+#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
+#include <stdint.h>
+#endif
+
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
