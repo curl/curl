@@ -442,11 +442,16 @@ jobs:
           if [ -d /c/perl-win32-pkgs ]; then
             echo "!!! perl-win32-pkgs directory detected"
             pushd /c/perl-win32-pkgs
+            sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
             pushd Win32-Process-0.17
+            perl Makefile.PL
+            make
             install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
             install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
             popd
             pushd Win32-Process-List-0.09
+            perl Makefile.PL
+            make
             install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
             install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
             install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
