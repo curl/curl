@@ -32,7 +32,7 @@ callback function installed via CURLMOPT_NTFYFUNCTION(3) will no longer
 be called when this notification happens.
 
 Only when a notification callback is installed *and* a notification
-is enabled will those be collected and dispatched to the callback.
+is enabled are these collected and dispatched to the callback.
 
 Several notification types can be enabled at the same time. Disabling
 an already disabled notification is not an error.

@@ -28,11 +28,11 @@ CURLMcode curl_multi_ntfy_enable(CURLM *multi_handle,
 # DESCRIPTION
 
 Enables collecting the given notification type in the multi handle. A
-callback function installed via CURLMOPT_NTFYFUNCTION(3) will be called
+callback function installed via CURLMOPT_NTFYFUNCTION(3) is called
 when this notification happens.
 
 Only when a notification callback is installed *and* a notification
-is enabled will those be collected and dispatched to the callback.
+is enabled are these collected and dispatched to the callback.
 
 Several notification types can be enabled at the same time. Enabling
 an already enabled notification is not an error.

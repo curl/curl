@@ -76,13 +76,13 @@ notification callback is then expected to read all available message,
 emptying the stack, so a subsequent addition triggers the notification
 again.
 
-The *easy* handle passed will be an internal handle.
+The *easy* handle passed is an internal handle.
 
 ## CURLM_NTFY_EASY_DONE
 
 When enabled via curl_multi_ntfy_enable(3), this notification is triggered
 when a an easy handle has finished. This happens both for
-successful and errored transfers.
+successful and failed transfers.
 
 The *easy* handle passed is the transfer that is done. This *may* be
 an internal handle when DoH or other features are used.
@@ -91,7 +91,7 @@ an internal handle when DoH or other features are used.
 *easy* identifies the transfer involved. This may be one of the
 application's own easy handle or an internal handle.
 
-**age_ms** is the time difference between the notification occuring
+**age_ms** is the time difference between when the notification occurred
 and the invocation of the callback, e.g. how much in the past it happened.
 
 **ntfyp** is set with CURLMOPT_NTFYDATA(3).
