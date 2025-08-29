@@ -55,6 +55,13 @@ jobs:
       matrix:
         image: [windows-2022, windows-11-arm]
     steps:
+      - name: 'install build prereqs'
+        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
+        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
+        with:
+          msystem: msys
+          install: gcc make
+
       - name: 'perl version'
         run: perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
@@ -66,13 +73,6 @@ jobs:
         with:
           path: C:\perl-win32-pkgs
           key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
-
-      - name: 'install build prereqs'
-        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
-        uses: msys2/setup-msys2@40677d36a502eb2cf0fb808cc9dec31bf6152638 # v2
-        with:
-          msystem: msys
-          install: gcc make
 
       - name: 'build perl packages'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
