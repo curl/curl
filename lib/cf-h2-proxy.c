@@ -474,7 +474,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
                 Curl_bufq_len(&ctx->inbufq), result, nread);
     if(result) {
       if(result != CURLE_AGAIN) {
-        failf(data, "Failed receiving HTTP2 data");
+        failf(data, "Failed receiving HTTP2 proxy data");
         return result;
       }
       break;
