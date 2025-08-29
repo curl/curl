@@ -62,7 +62,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('/usr/lib/perl5/core_perl/CORE') }}
 
       - name: 'install build prereqs'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
@@ -439,7 +439,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('/usr/lib/perl5/core_perl/CORE') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -675,7 +675,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('/usr/lib/perl5/core_perl/CORE') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -1073,7 +1073,7 @@ jobs:
           cache-name: cache-perl-win32-pkgs
         with:
           path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}
+          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('/usr/lib/perl5/core_perl/CORE') }}
 
       - name: 'install test prereqs perl'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
