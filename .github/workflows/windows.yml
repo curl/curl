@@ -439,6 +439,7 @@ jobs:
         timeout-minutes: 5
         run: &perl-win32-pkgs-install |
           echo '-------------------'
+          pushd
           if [ -d /c/perl-win32-pkgs ]; then
             echo "!!! perl-win32-pkgs directory detected"
             cd /c/perl-win32-pkgs
@@ -456,6 +457,7 @@ jobs:
           else
             echo "!!! perl-win32-pkgs directory NOT detected"
           fi
+          popd
           echo '-------------------'
           pwd
           perl --version
