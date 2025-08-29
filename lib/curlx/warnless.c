@@ -98,7 +98,7 @@ unsigned long curlx_uztoul(size_t uznum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-#if ULONG_MAX < SIZE_T_MAX
+#if ULONG_MAX < SIZE_MAX
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_ULONG);
 #endif
   return (unsigned long)(uznum & (size_t) CURL_MASK_ULONG);
@@ -119,7 +119,7 @@ unsigned int curlx_uztoui(size_t uznum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-#if UINT_MAX < SIZE_T_MAX
+#if UINT_MAX < SIZE_MAX
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_UINT);
 #endif
   return (unsigned int)(uznum & (size_t) CURL_MASK_UINT);
@@ -243,7 +243,7 @@ int curlx_sztosi(ssize_t sznum)
 #endif
 
   DEBUGASSERT(sznum >= 0);
-#if INT_MAX < SSIZE_T_MAX
+#if INT_MAX < SSIZE_MAX
   DEBUGASSERT((size_t) sznum <= (size_t) CURL_MASK_SINT);
 #endif
   return (int)(sznum & (ssize_t) CURL_MASK_SINT);

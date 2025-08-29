@@ -165,7 +165,7 @@ static int str_num_base(const char **linep, curl_off_t *nump, curl_off_t max,
     (base == 16) ? 'f' : '7';
   DEBUGASSERT(linep && *linep && nump);
   DEBUGASSERT((base == 8) || (base == 10) || (base == 16));
-  DEBUGASSERT(max >= 0); /* mostly to catch SIZE_T_MAX, which is too large */
+  DEBUGASSERT(max >= 0); /* mostly to catch SIZE_MAX, which is too large */
   *nump = 0;
   p = *linep;
   if(!valid_digit(*p, m))

@@ -62,7 +62,7 @@ int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 char *curlx_dyn_take(struct dynbuf *s, size_t *plen);
 
 /* Dynamic buffer max sizes */
-#define MAX_DYNBUF_SIZE (SIZE_T_MAX/2)
+#define MAX_DYNBUF_SIZE (SIZE_MAX/2)
 
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256

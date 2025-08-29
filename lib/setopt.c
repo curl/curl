@@ -1683,7 +1683,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       /*
        *  Check that requested length does not overflow the size_t type.
        */
-      else if(s->postfieldsize > SIZE_T_MAX)
+      else if(s->postfieldsize > SIZE_MAX)
         return CURLE_OUT_OF_MEMORY;
 #endif
       else {
