@@ -121,8 +121,14 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
+/*
+ * AWS-LC has `SSL_CTX_set_default_read_buffer_len()?` but runs into
+ * decryption failures with large buffers. Sporadic failures in
+ * test_10_08 with h2 proxy uploads, increased frequency
+ * with CURL_DBG_SOCK_RBLOCK=50. Looks like a bug on their part.
+ */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-  !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL)
+  !defined(LIBRESSL_VERSION_NUMBER) && !defined(HAVE_BORINGSSL_LIKE)
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
@@ -4129,7 +4135,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      However using a large buffer (8 packets) actually decreases performance.
      4 packets is better.
    */
-
 #ifdef HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN
   SSL_CTX_set_default_read_buffer_len(octx->ssl_ctx, 0x401e * 4);
 #endif
