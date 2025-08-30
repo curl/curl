@@ -473,7 +473,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
     ])
   fi
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tmp_compiler_works" = "yes"; then
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -924,7 +924,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
-          if test "x$cross_compiling" != "xyes" ||
+          if test "$cross_compiling" != "yes" ||
             test "$compiler_num" -ge "300"; then
             tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           fi
@@ -937,7 +937,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "104"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pointer-arith write-strings])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "x$cross_compiling" != "xyes" ||
+            if test "$cross_compiling" != "yes" ||
               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused shadow])
             fi
@@ -947,7 +947,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "207"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "x$cross_compiling" != "xyes" ||
+            if test "$cross_compiling" != "yes" ||
               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
@@ -1123,7 +1123,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         else
           dnl When cross-compiling with a gcc older than 3.0, disable
           dnl some warnings triggered on third party system headers.
-          if test "x$cross_compiling" = "xyes"; then
+          if test "$cross_compiling" = "yes"; then
             if test "$compiler_num" -ge "104"; then
               dnl gcc 1.4 or later
               tmp_CFLAGS="$tmp_CFLAGS -Wno-unused -Wno-shadow"
