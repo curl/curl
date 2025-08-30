@@ -339,7 +339,7 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 struct termout {
   wchar_t *buf;
   DWORD len;
@@ -358,7 +358,7 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   struct termout term;
 #endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this

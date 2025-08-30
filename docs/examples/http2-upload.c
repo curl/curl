@@ -30,11 +30,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
 /* somewhat Unix-specific */
 #ifndef _MSC_VER
