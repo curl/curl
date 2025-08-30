@@ -17,7 +17,6 @@ name: 'Linux HTTP/3'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -29,7 +28,6 @@ name: 'Linux HTTP/3'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
-      - 'winbuild/**'
 
 concurrency:
   # Hardcoded workflow filename as workflow name above is just Linux again
