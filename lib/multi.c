@@ -2851,6 +2851,8 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     unsigned int mid;
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
+    if(multi->in_ntfy_callback)
+      return CURLM_RECURSIVE_API_CALL;
 
     /* First remove all remaining easy handles,
      * close internal ones. admin handle is special */
