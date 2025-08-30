@@ -226,11 +226,11 @@ class TestProxy:
                              extra_args=xargs)
         assert self.get_tunnel_proto_used(r) == tunnel
         r.check_response(count=count, http_status=200)
+        assert r.total_connects == 1, r.dump_logs()
         indata = open(srcfile).readlines()
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == indata, f'response {i} differs'
-        assert r.total_connects == 1, r.dump_logs()
 
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
