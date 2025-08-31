@@ -88,7 +88,7 @@ int getfiletime(const char *filename, curl_off_t *stamp)
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(_WIN32)
 void setfiletime(curl_off_t filetime, const char *filename)
 {
-  if(filetime >= 0) {
+  if(filetime) {
 /* Windows utime() may attempt to adjust the Unix GMT file time by a daylight
    saving time offset and since it is GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
