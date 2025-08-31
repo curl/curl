@@ -66,8 +66,7 @@ struct per_transfer {
 
   /* NULL or malloced */
   char *uploadfile;
-  char *errorbuffer; /* allocated and assigned while this is used for a
-                        transfer */
+  char errorb[CURL_ERROR_SIZE];
   BIT(infdopen); /* TRUE if infd needs closing */
   BIT(noprogress);
   BIT(was_last_header_empty);
