@@ -866,7 +866,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
   my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
   my_setopt_str(curl, CURLOPT_RANGE, config->range);
-  my_setopt(curl, CURLOPT_ERRORBUFFER, per->errorb);
+  my_setopt(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
   my_setopt_long(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
   switch(config->httpreq) {
