@@ -2660,10 +2660,10 @@ statemachine_end:
         /* maybe retry if altsvc is breaking */
 #ifndef CURL_DISABLE_ALTSVC
         if(data->asi && data->asi->used &&
-          Curl_is_altsvc_error(result) &&
-          !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
-          data->mstate <= MSTATE_PROTOCONNECTING &&
-          data->mstate >= MSTATE_CONNECT) {
+           Curl_is_altsvc_error(result) &&
+           !(data->asi->flags & CURLALTSVC_NO_RETRY) &&
+           data->mstate <= MSTATE_PROTOCONNECTING &&
+           data->mstate >= MSTATE_CONNECT) {
 
           infof(data, "Alt-Svc connection failed(%u). "
                       "Retrying with another target", result);
