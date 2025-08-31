@@ -40,9 +40,6 @@
 
 #define BUFFER_SIZE 102400L
 
-/* When doing serial transfers, we use a single fixed error area */
-static char global_errorbuffer[CURL_ERROR_SIZE];
-
 #ifdef IP_TOS
 static int get_address_family(curl_socket_t sockfd)
 {
@@ -869,10 +866,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
   my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
   my_setopt_str(curl, CURLOPT_RANGE, config->range);
-  if(!global->parallel) {
-    per->errorbuffer = global_errorbuffer;
-    my_setopt(curl, CURLOPT_ERRORBUFFER, global_errorbuffer);
-  }
+  my_setopt(curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
   my_setopt_long(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
   switch(config->httpreq) {

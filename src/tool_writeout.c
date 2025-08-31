@@ -361,8 +361,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       break;
     case VAR_ERRORMSG:
       if(per_result) {
-        strinfo = (per->errorbuffer && per->errorbuffer[0]) ?
-          per->errorbuffer : curl_easy_strerror(per_result);
+        strinfo = (per->errorbuffer[0]) ? per->errorbuffer :
+          curl_easy_strerror(per_result);
         valid = true;
       }
       break;

@@ -582,7 +582,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
        (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
       fprintf(tool_stderr, "curl: (%d) %s\n", result,
-              (msg && msg[0]) ? msg : curl_easy_strerror(result));
+              msg[0] ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
     }
@@ -705,8 +705,6 @@ skip:
   free(per->url);
   free(per->outfile);
   free(per->uploadfile);
-  if(global->parallel)
-    free(per->errorbuffer);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
@@ -1346,7 +1344,6 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
   CURLcode result = CURLE_OK;
   CURLMcode mcode;
   bool sleeping = FALSE;
-  char *errorbuf;
   curl_off_t nxfers;
 
   *addedp = FALSE;
@@ -1381,10 +1378,6 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
     if(result)
       return result;
 
-    errorbuf = malloc(CURL_ERROR_SIZE);
-    if(!errorbuf)
-      return CURLE_OUT_OF_MEMORY;
-
     /* parallel connect means that we do not set PIPEWAIT since pipewait
        will make libcurl prefer multiplexing */
     (void)curl_easy_setopt(per->curl, CURLOPT_PIPEWAIT,
@@ -1395,6 +1388,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
     (void)curl_easy_setopt(per->curl, CURLOPT_XFERINFODATA, per);
     (void)curl_easy_setopt(per->curl, CURLOPT_NOPROGRESS, 0L);
+    (void)curl_easy_setopt(per->curl, CURLOPT_ERRORBUFFER, per->errorbuffer);
 #ifdef DEBUGBUILD
     if(getenv("CURL_FORBID_REUSE"))
       (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
@@ -1415,13 +1409,10 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
           break;
       } while(skipped);
     }
-    if(result) {
-      free(errorbuf);
+    if(result)
       return result;
-    }
-    errorbuf[0] = 0;
-    (void)curl_easy_setopt(per->curl, CURLOPT_ERRORBUFFER, errorbuf);
-    per->errorbuffer = errorbuf;
+
+    per->errorbuffer[0] = 0;
     per->added = TRUE;
     all_added++;
     *addedp = TRUE;
@@ -1706,8 +1697,7 @@ static CURLcode check_finished(struct parastate *s)
       curl_easy_getinfo(easy, CURLINFO_PRIVATE, (void *)&ended);
       curl_multi_remove_handle(s->multi, easy);
 
-      if(ended->abort && (tres == CURLE_ABORTED_BY_CALLBACK) &&
-         ended->errorbuffer) {
+      if(ended->abort && (tres == CURLE_ABORTED_BY_CALLBACK)) {
         msnprintf(ended->errorbuffer, CURL_ERROR_SIZE,
                   "Transfer aborted due to critical error "
                   "in another transfer");
