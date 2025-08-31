@@ -196,16 +196,17 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
 }
 
 static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
-                                 struct Curl_easy *data,
-                                 curl_write_callback wcb,
-                                 void *wcb_data,
-                                 cw_out_type otype,
-                                 const char *buf, size_t blen,
-                                 size_t *pnwritten)
+                                struct Curl_easy *data,
+                                curl_write_callback wcb,
+                                void *wcb_data,
+                                cw_out_type otype,
+                                const char *buf, size_t blen,
+                                size_t *pnwritten)
 {
   size_t nwritten;
   CURLcode result;
 
+  DEBUGASSERT(data->conn);
   *pnwritten = 0;
   Curl_set_in_callback(data, TRUE);
   nwritten = wcb((char *)CURL_UNCONST(buf), 1, blen, wcb_data);
@@ -214,7 +215,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
                  blen, (otype == CW_OUT_HDS) ? "header" : "body",
                  nwritten);
   if(CURL_WRITEFUNC_PAUSE == nwritten) {
-    if(data->conn && data->conn->handler->flags & PROTOPT_NONETWORK) {
+    if(data->conn->handler->flags & PROTOPT_NONETWORK) {
       /* Protocols that work without network cannot be paused. This is
          actually only FILE:// just now, and it cannot pause since the
          transfer is not done using the "normal" procedure. */
