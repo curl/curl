@@ -1024,11 +1024,6 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
       "Upgrade", "websocket"
     },
     {
-      /* The request MUST contain a |Connection| header field whose value
-         MUST include the "Upgrade" token. */
-      "Connection", "Upgrade",
-    },
-    {
       /* The request MUST include a header field with the name
          |Sec-WebSocket-Version|. The value of this header field MUST be
          13. */
@@ -1043,7 +1038,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
       "Sec-WebSocket-Key", NULL,
     }
   };
-  heads[3].val = &keyval[0];
+  heads[2].val = &keyval[0];
 
   /* 16 bytes random */
   result = Curl_rand(data, (unsigned char *)rand, sizeof(rand));
@@ -1065,6 +1060,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
                               heads[i].val);
     }
   }
+  data->state.http_hd_upgrade = TRUE;
   k->upgr101 = UPGR101_WS;
   return result;
 }

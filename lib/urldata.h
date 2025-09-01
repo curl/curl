@@ -1122,7 +1122,6 @@ struct UrlState {
 #ifndef CURL_DISABLE_RTSP
     char *rtsp_transport;
 #endif
-    char *te; /* TE: request header */
 
     /* transfer credentials */
     char *user;
@@ -1178,6 +1177,11 @@ struct UrlState {
                     internal use and the user does not have ownership of the
                     handle. */
   BIT(http_ignorecustom); /* ignore custom method from now */
+#ifndef CURL_DISABLE_HTTP
+  BIT(http_hd_te); /* Added HTTP header TE: */
+  BIT(http_hd_upgrade); /* Added HTTP header Upgrade: */
+  BIT(http_hd_h2_settings); /* Added HTTP header H2Settings: */
+#endif
 };
 
 /*
