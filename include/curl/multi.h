@@ -398,6 +398,12 @@ typedef enum {
   /* network has changed, adjust caches/connection reuse */
   CURLOPT(CURLMOPT_NETWORK_CHANGED, CURLOPTTYPE_LONG, 17),
 
+  /* This is the notify callback function pointer */
+  CURLOPT(CURLMOPT_NTFYFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 18),
+
+  /* This is the argument passed to the notify callback */
+  CURLOPT(CURLMOPT_NTFYDATA, CURLOPTTYPE_OBJECTPOINT, 19),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
@@ -519,6 +525,28 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
                                          struct curl_waitfd *ufds,
                                          unsigned int size,
                                          unsigned int *fd_count);
+
+/*
+ * Notifications dispatched by a multi handle, when enabled.
+ */
+#define CURLM_NTFY_INFO_READ    0
+#define CURLM_NTFY_EASY_DONE    1
+
+/*
+ * Callback to install via CURLMOPT_NTFYFUNCTION.
+ */
+typedef void (*curl_ntfy_callback)(CURLM *multi,
+                                   unsigned int notification,
+                                   CURL *easy,
+                                   long age_ms,
+                                   void *user_data);
+
+
+CURL_EXTERN CURLMcode curl_multi_ntfy_disable(CURLM *multi,
+                                              unsigned int notification);
+
+CURL_EXTERN CURLMcode curl_multi_ntfy_enable(CURLM *multi,
+                                             unsigned int notification);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

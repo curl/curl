@@ -220,6 +220,7 @@ LIB_CFILES =         \
   mqtt.c             \
   multi.c            \
   multi_ev.c         \
+  multi_ntfy.c       \
   netrc.c            \
   noproxy.c          \
   openldap.c         \
@@ -352,6 +353,7 @@ LIB_HFILES =         \
   mqtt.h             \
   multihandle.h      \
   multi_ev.h         \
+  multi_ntfy.h       \
   multiif.h          \
   netrc.h            \
   noproxy.h          \
