@@ -3165,7 +3165,8 @@ static CURLcode http_header_l(struct Curl_easy *data,
                    (data->set.timecondition || data->set.get_filetime)) ?
     HD_VAL(hd, hdlen, "Last-Modified:") : NULL;
   if(v) {
-    k->timeofdoc = Curl_getdate_capped(v);
+    if(Curl_getdate_capped(v, &k->timeofdoc))
+      k->timeofdoc = 0;
     if(data->set.get_filetime)
       data->info.filetime = k->timeofdoc;
     return CURLE_OK;
@@ -3280,14 +3281,12 @@ static CURLcode http_header_r(struct Curl_easy *data,
   if(v) {
     /* Retry-After = HTTP-date / delay-seconds */
     curl_off_t retry_after = 0; /* zero for unknown or "now" */
-    time_t date;
+    time_t date = 0;
     curlx_str_passblanks(&v);
 
     /* try it as a date first, because a date can otherwise start with and
        get treated as a number */
-    date = Curl_getdate_capped(v);
-
-    if((time_t)-1 != date) {
+    if(!Curl_getdate_capped(v, &date)) {
       time_t current = time(NULL);
       if(date >= current)
         /* convert date to number of seconds into the future */

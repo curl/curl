@@ -426,7 +426,7 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     bool subdomain = FALSE;
     struct stsentry *e;
     char dbuf[MAX_HSTS_DATELEN + 1];
-    time_t expires;
+    time_t expires = 0;
     const char *hp = curlx_str(&host);
 
     /* The date parser works on a null-terminated string. The maximum length
@@ -434,8 +434,10 @@ static CURLcode hsts_add(struct hsts *h, const char *line)
     memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
     dbuf[curlx_strlen(&date)] = 0;
 
-    expires = strcmp(dbuf, UNLIMITED) ? Curl_getdate_capped(dbuf) :
-      TIME_T_MAX;
+    if(!strcmp(dbuf, UNLIMITED))
+      expires = TIME_T_MAX;
+    else
+      Curl_getdate_capped(dbuf, &expires);
 
     if(hp[0] == '.') {
       curlx_str_nudge(&host, 1);
@@ -478,14 +480,14 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       e.name[0] = 0; /* just to make it clean */
       sc = data->set.hsts_read(data, &e, data->set.hsts_read_userp);
       if(sc == CURLSTS_OK) {
-        time_t expires;
+        time_t expires = 0;
         CURLcode result;
         DEBUGASSERT(e.name[0]);
         if(!e.name[0])
           /* bail out if no name was stored */
           return CURLE_BAD_FUNCTION_ARGUMENT;
         if(e.expire[0])
-          expires = Curl_getdate_capped(e.expire);
+          Curl_getdate_capped(e.expire, &expires);
         else
           expires = TIME_T_MAX; /* the end of time */
         result = hsts_create(h, e.name, strlen(e.name),

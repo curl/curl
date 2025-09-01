@@ -2102,6 +2102,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       int year, month, day, hour, minute, second;
       struct pingpong *pp = &ftpc->pp;
       char *resp = curlx_dyn_ptr(&pp->recvbuf) + 4;
+      bool showtime = FALSE;
       if(ftp_213_date(resp, &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
@@ -2109,7 +2110,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
                   "%04d%02d%02d %02d:%02d:%02d GMT",
                   year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
-        data->info.filetime = Curl_getdate_capped(timebuf);
+        if(!Curl_getdate_capped(timebuf, &data->info.filetime))
+          showtime = TRUE;
       }
 
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
@@ -2122,10 +2124,8 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
    warning: comparison of unsigned expression in '>= 0' is always true */
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
-      if(data->req.no_body &&
-         ftpc->file &&
-         data->set.get_filetime &&
-         (data->info.filetime >= 0) ) {
+      if(data->req.no_body && ftpc->file &&
+         data->set.get_filetime && showtime) {
 #if defined(__GNUC__) && (defined(__DJGPP__) || defined(__AMIGA__))
 #pragma GCC diagnostic pop
 #endif
