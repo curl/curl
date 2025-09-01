@@ -72,6 +72,14 @@ Max simultaneously open connections. See CURLMOPT_MAX_TOTAL_CONNECTIONS(3)
 
 Signal that the network has changed. See CURLMOPT_NETWORK_CHANGED(3)
 
+## CURLMOPT_NOTIFYDATA
+
+Custom pointer passed to the notify callback. See CURLMOPT_NOTIFYDATA(3)
+
+## CURLMOPT_NOTIFYFUNCTION
+
+Callback that receives notifications. See CURLMOPT_NOTIFYFUNCTION(3)
+
 ## CURLMOPT_PIPELINING
 
 Enable HTTP multiplexing. See CURLMOPT_PIPELINING(3)
