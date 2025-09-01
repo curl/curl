@@ -107,7 +107,7 @@ static void strstore(char **str, const char *newstr, size_t len);
 */
 static void cap_expires(time_t now, struct Cookie *co)
 {
-  if((TIME_T_MAX - COOKIES_MAXAGE - 30) > now) {
+  if(co->expires && (TIME_T_MAX - COOKIES_MAXAGE - 30) > now) {
     timediff_t cap = now + COOKIES_MAXAGE;
     if(co->expires > cap) {
       cap += 30;
@@ -388,17 +388,17 @@ static void remove_expired(struct CookieInfo *ci)
     for(n = Curl_llist_head(&ci->cookielist[i]); n; n = e) {
       co = Curl_node_elem(n);
       e = Curl_node_next(n);
-      if(co->expires && co->expires < now) {
-        Curl_node_remove(n);
-        freecookie(co);
-        ci->numcookies--;
-      }
-      else {
-        /*
-         * If this cookie has an expiration timestamp earlier than what we
-         * have seen so far then record it for the next round of expirations.
-         */
-        if(co->expires && co->expires < ci->next_expiration)
+      if(co->expires) {
+        if(co->expires < now) {
+          Curl_node_remove(n);
+          freecookie(co);
+          ci->numcookies--;
+        }
+        else if(co->expires < ci->next_expiration)
+          /*
+           * If this cookie has an expiration timestamp earlier than what we
+           * have seen so far then record it for the next round of expirations.
+           */
           ci->next_expiration = co->expires;
       }
     }
@@ -666,7 +666,6 @@ parse_cookie_header(struct Curl_easy *data,
         if(*maxage == '\"')
           maxage++;
         rc = curlx_str_number(&maxage, &co->expires, CURL_OFF_T_MAX);
-
         switch(rc) {
         case STRE_OVERFLOW:
           /* overflow, used max value */
@@ -678,8 +677,7 @@ parse_cookie_header(struct Curl_easy *data,
           break;
         case STRE_OK:
           if(!co->expires)
-            /* already expired */
-            co->expires = 1;
+            co->expires = 1; /* expire now */
           else if(CURL_OFF_T_MAX - now < co->expires)
             /* would overflow */
             co->expires = CURL_OFF_T_MAX;
@@ -698,18 +696,15 @@ parse_cookie_header(struct Curl_easy *data,
            * will be treated as a session cookie
            */
           char dbuf[MAX_DATE_LENGTH + 1];
+          time_t date = 0;
           memcpy(dbuf, curlx_str(&val), curlx_strlen(&val));
           dbuf[curlx_strlen(&val)] = 0;
-          co->expires = Curl_getdate_capped(dbuf);
-
-          /*
-           * Session cookies have expires set to 0 so if we get that back
-           * from the date parser let's add a second to make it a
-           * non-session cookie
-           */
-          if(co->expires == 0)
-            co->expires = 1;
-          else if(co->expires < 0)
+          if(!Curl_getdate_capped(dbuf, &date)) {
+            if(!date)
+              date++;
+            co->expires = (curl_off_t)date;
+          }
+          else
             co->expires = 0;
           cap_expires(now, co);
         }
@@ -1103,7 +1098,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
   if(!ci->running &&    /* read from a file */
      ci->newsession &&  /* clean session cookies */
-     !co->expires)      /* this is a session cookie since it does not expire */
+     !co->expires)      /* this is a session cookie */
     goto fail;
 
   co->livecookie = ci->running;

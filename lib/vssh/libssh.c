@@ -1855,9 +1855,9 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   }
   else if(!strncmp(cmd, "atime", 5) ||
           !strncmp(cmd, "mtime", 5)) {
-    time_t date = Curl_getdate_capped(sshc->quote_path1);
+    time_t date;
     bool fail = FALSE;
-    if(date == -1) {
+    if(Curl_getdate_capped(sshc->quote_path1, &date)) {
       failf(data, "incorrect date format for %.*s", 5, cmd);
       fail = TRUE;
     }
