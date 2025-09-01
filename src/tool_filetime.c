@@ -88,65 +88,63 @@ int getfiletime(const char *filename, curl_off_t *stamp)
 #if defined(HAVE_UTIME) || defined(HAVE_UTIMES) || defined(_WIN32)
 void setfiletime(curl_off_t filetime, const char *filename)
 {
-  if(filetime) {
 /* Windows utime() may attempt to adjust the Unix GMT file time by a daylight
    saving time offset and since it is GMT that is bad behavior. When we have
    access to a 64-bit type we can bypass utime and set the times directly. */
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-    HANDLE hfile;
-    TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
+  HANDLE hfile;
+  TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
 
-    /* 910670515199 is the maximum Unix filetime that can be used as a
-       Windows FILETIME without overflow: 30827-12-31T23:59:59. */
-    if(filetime > 910670515199) {
-      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: overflow", filetime);
-      curlx_unicodefree(tchar_filename);
-      return;
-    }
-
-    hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
-                       (FILE_SHARE_READ | FILE_SHARE_WRITE |
-                        FILE_SHARE_DELETE),
-                       NULL, OPEN_EXISTING, 0, NULL);
+  /* 910670515199 is the maximum Unix filetime that can be used as a
+     Windows FILETIME without overflow: 30827-12-31T23:59:59. */
+  if(filetime > 910670515199) {
+    warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+          " on outfile: overflow", filetime);
     curlx_unicodefree(tchar_filename);
-    if(hfile != INVALID_HANDLE_VALUE) {
-      curl_off_t converted = ((curl_off_t)filetime * 10000000) +
-        116444736000000000;
-      FILETIME ft;
-      ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
-      ft.dwHighDateTime = (DWORD)(converted >> 32);
-      if(!SetFileTime(hfile, NULL, &ft, &ft)) {
-        warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-              " on outfile: SetFileTime failed: GetLastError %u",
-              filetime, (unsigned int)GetLastError());
-      }
-      CloseHandle(hfile);
-    }
-    else {
+    return;
+  }
+
+  hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
+                     (FILE_SHARE_READ | FILE_SHARE_WRITE |
+                      FILE_SHARE_DELETE),
+                     NULL, OPEN_EXISTING, 0, NULL);
+  curlx_unicodefree(tchar_filename);
+  if(hfile != INVALID_HANDLE_VALUE) {
+    curl_off_t converted = ((curl_off_t)filetime * 10000000) +
+      116444736000000000;
+    FILETIME ft;
+    ft.dwLowDateTime = (DWORD)(converted & 0xFFFFFFFF);
+    ft.dwHighDateTime = (DWORD)(converted >> 32);
+    if(!SetFileTime(hfile, NULL, &ft, &ft)) {
       warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: CreateFile failed: GetLastError %u",
+            " on outfile: SetFileTime failed: GetLastError %u",
             filetime, (unsigned int)GetLastError());
     }
+    CloseHandle(hfile);
+  }
+  else {
+    warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+          " on outfile: CreateFile failed: GetLastError %u",
+          filetime, (unsigned int)GetLastError());
+  }
 
 #elif defined(HAVE_UTIMES)
-    struct timeval times[2];
-    times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
-    times[0].tv_usec = times[1].tv_usec = 0;
-    if(utimes(filename, times)) {
-      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on '%s': %s", filetime, filename, strerror(errno));
-    }
+  struct timeval times[2];
+  times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
+  times[0].tv_usec = times[1].tv_usec = 0;
+  if(utimes(filename, times)) {
+    warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+          " on '%s': %s", filetime, filename, strerror(errno));
+  }
 
 #elif defined(HAVE_UTIME)
-    struct utimbuf times;
-    times.actime = (time_t)filetime;
-    times.modtime = (time_t)filetime;
-    if(utime(filename, &times)) {
-      warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on '%s': %s", filetime, filename, strerror(errno));
-    }
-#endif
+  struct utimbuf times;
+  times.actime = (time_t)filetime;
+  times.modtime = (time_t)filetime;
+  if(utime(filename, &times)) {
+    warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
+          " on '%s': %s", filetime, filename, strerror(errno));
   }
+#endif
 }
 #endif /* HAVE_UTIME || HAVE_UTIMES || _WIN32 */

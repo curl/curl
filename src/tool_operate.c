@@ -679,7 +679,8 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     /* Ask libcurl if we got a remote file time */
     curl_off_t filetime = -1;
     curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-    setfiletime(filetime, outs->filename);
+    if(filetime != -1)
+      setfiletime(filetime, outs->filename);
   }
 skip:
   /* Write the --write-out data before cleanup but after result is final */
