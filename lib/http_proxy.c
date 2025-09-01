@@ -162,9 +162,8 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
                  we will force length zero then */
               hd_name_eq(name, namelen, STRCONST("Content-Length:")))
         ;
-      else if(data->state.aptr.te &&
-              /* when asking for Transfer-Encoding, do not pass on a custom
-                 Connection: */
+      else if(data->state.http_connection_hd_added &&
+              /* when Connection: header has already been added */
               hd_name_eq(name, namelen, STRCONST("Connection:")))
         ;
       else if((httpversion >= 20) &&

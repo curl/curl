@@ -775,7 +775,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     }
   }
 
-  Curl_http_method(data, conn, &method, &httpreq);
+  Curl_http_method(data, &method, &httpreq);
 
   payload_hash =
     parse_content_sha_hdr(data, curlx_str(&provider1),
