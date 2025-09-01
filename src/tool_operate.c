@@ -1464,26 +1464,8 @@ struct contextuv {
   struct datauv *uv;
 };
 
-static CURLcode check_finished(struct parastate *s);
-
-static void check_multi_info(struct datauv *uv)
-{
-  CURLcode result;
-
-  result = check_finished(uv->s);
-  if(result && !uv->s->result)
-    uv->s->result = result;
-
-  if(uv->s->more_transfers) {
-    result = add_parallel_transfers(uv->s->multi, uv->s->share,
-                                    &uv->s->more_transfers,
-                                    &uv->s->added_transfers);
-    if(result && !uv->s->result)
-      uv->s->result = result;
-    if(result)
-      uv_stop(uv->loop);
-  }
-}
+static void mnotify(CURLM *multi, unsigned int notification,
+                    CURL *easy, long age_ms, void *user_data);
 
 /* callback from libuv on socket activity */
 static void on_uv_socket(uv_poll_t *req, int status, int events)
@@ -1510,7 +1492,6 @@ static void on_uv_timeout(uv_timer_t *req)
   if(uv && uv->s) {
     curl_multi_socket_action(uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
                              &uv->s->still_running);
-    check_multi_info(uv);
   }
 }
 
@@ -1596,8 +1577,6 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
       uv_poll_stop(&c->poll_handle);
       destroy_context(c);
       curl_multi_assign(uv->s->multi, s, NULL);
-      /* check if we can do more now */
-      check_multi_info(uv);
     }
     break;
   default:
@@ -1641,10 +1620,6 @@ static CURLcode parallel_event(struct parastate *s)
     curl_mfprintf(tool_stderr, "parallel_event: uv_run() returned\n");
 #endif
 
-    result = check_finished(s);
-    if(result && !s->result)
-      s->result = result;
-
     /* early exit called */
     if(s->wrapitup) {
       if(s->still_running && !s->wrapitup_processed) {
@@ -1656,13 +1631,6 @@ static CURLcode parallel_event(struct parastate *s)
         s->wrapitup_processed = TRUE;
       }
       break;
-    }
-
-    if(s->more_transfers) {
-      result = add_parallel_transfers(s->multi, s->share, &s->more_transfers,
-                                      &s->added_transfers);
-      if(result && !s->result)
-        s->result = result;
     }
   }
 
@@ -1758,6 +1726,28 @@ static CURLcode check_finished(struct parastate *s)
   return result;
 }
 
+static void mnotify(CURLM *multi, unsigned int notification,
+                    CURL *easy, long age_ms, void *user_data)
+{
+  struct parastate *s = user_data;
+  CURLcode result;
+
+  (void)multi;
+  (void)easy;
+  (void)age_ms;
+
+  switch(notification) {
+  case CURLM_NTFY_INFO_READ:
+    result = check_finished(s);
+    /* remember first failure */
+    if(result && !s->result)
+      s->result = result;
+    break;
+  default:
+    break;
+  }
+}
+
 static CURLcode parallel_transfers(CURLSH *share)
 {
   CURLcode result;
@@ -1774,6 +1764,10 @@ static CURLcode parallel_transfers(CURLSH *share)
   s->multi = curl_multi_init();
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
+
+  (void)curl_multi_setopt(s->multi, CURLMOPT_NTFYFUNCTION, mnotify);
+  (void)curl_multi_setopt(s->multi, CURLMOPT_NTFYDATA, s);
+  (void)curl_multi_ntfy_enable(s->multi, CURLM_NTFY_INFO_READ);
 
   result = add_parallel_transfers(s->multi, s->share,
                                   &s->more_transfers, &s->added_transfers);
@@ -1813,12 +1807,13 @@ static CURLcode parallel_transfers(CURLSH *share)
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
-      if(!s->mcode)
-        result = check_finished(s);
     }
 
     (void)progress_meter(s->multi, &s->start, TRUE);
   }
+
+  /* Result is the first failed transfer - if there was one. */
+  result = s->result;
 
   /* Make sure to return some kind of error if there was a multi problem */
   if(s->mcode) {

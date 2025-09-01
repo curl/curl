@@ -1,0 +1,135 @@
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Title: CURLMOPT_NTFYFUNCTION
+Section: 3
+Source: libcurl
+See-also:
+  - CURLMOPT_NTFYDATA (3)
+  - curl_multi_socket_action (3)
+  - curl_multi_ntfy_disable (3)
+  - curl_multi_ntfy_enable (3)
+Protocol:
+  - All
+Added-in: 8.17.0
+---
+
+# NAME
+
+CURLMOPT_NTFYFUNCTION - callback receiving notifications
+
+# SYNOPSIS
+
+~~~c
+#include <curl/curl.h>
+
+void ntfy_callback(CURLM *multi,     /* multi handle */
+                   unsigned int notification, /* notification type */
+                   CURL *easy,       /* easy handle */
+                   long age_ms,      /* how long ago it happened */
+                   void *ntfyp);     /* private ntfy pointer */
+
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NTFYFUNCTION, ntfy_callback);
+~~~
+
+# DESCRIPTION
+
+Pass a pointer to your callback function, which should match the prototype
+shown above.
+
+When the multi handle processes transfers, changes can be observed
+by receiving notifications about them. This can eliminate the need to
+constantly interrogate the multi handle to observe such changes to
+act on them.
+
+Notifications are collected and dispatched to the application's callback
+function at an appropriate time. The **age_ms** argument tells the
+application how *long ago* the actual cause happened.
+
+The notify callback is different from other callbacks in that it
+can use more libcurl API functions. Apart from curl_multi_perform(3),
+curl_multi_socket(3), curl_multi_socket_action(3), curl_multi_socket_all(3)
+and curl_multi_cleanup(3) it may call all other methods on the
+multi and easy handles. This includes adding and removing easy
+handles to/from the multi handle.
+
+This callback may get invoked at any time when interacting with libcurl.
+This may even happen after all transfers are done and *may also*
+happen *during* a call to curl_multi_cleanup(3) when cached connections
+are shut down.
+
+# CALLBACK ARGUMENTS
+
+*multi* identifies the multi handle that triggered the notification.
+
+**notification** is the type of notification, e.g. what happened. The
+following types are available:
+
+## CURLM_NTFY_INFO_READ
+
+When enabled via curl_multi_ntfy_enable(3), this informs the application
+that there are new messages to be processed via curl_multi_info_read(3).
+
+This notification happens whenever a message is added to an empty
+message stack in the multi handle and not for subsequent additions. The
+notification callback is then expected to read all available message,
+emptying the stack, so a subsequent addition triggers the notification
+again.
+
+The *easy* handle passed is an internal handle.
+
+## CURLM_NTFY_EASY_DONE
+
+When enabled via curl_multi_ntfy_enable(3), this notification is triggered
+when a an easy handle has finished. This happens both for
+successful and failed transfers.
+
+The *easy* handle passed is the transfer that is done. This *may* be
+an internal handle when DoH or other features are used.
+
+
+*easy* identifies the transfer involved. This may be one of the
+application's own easy handle or an internal handle.
+
+**age_ms** is the time difference between when the notification occurred
+and the invocation of the callback, e.g. how much in the past it happened.
+
+**ntfyp** is set with CURLMOPT_NTFYDATA(3).
+
+# DEFAULT
+
+NULL (no callback)
+
+# %PROTOCOLS%
+
+# EXAMPLE
+
+~~~c
+struct priv {
+  void *ours;
+};
+
+static void ntfy_cb(CURLM *multi, unsigned int notification,
+                    CURL *easy, long age_ms, void *ntfyp)
+{
+  struct priv *p = ntfyp;
+  printf("my ptr: %p\n", p->ours);
+  /* ... */
+}
+
+int main(void)
+{
+  struct priv setup;
+  CURLM *multi = curl_multi_init();
+  /* ... use socket callback and custom pointer */
+  curl_multi_setopt(multi, CURLMOPT_NTFYFUNCTION, ntfy_cb);
+  curl_multi_setopt(multi, CURLMOPT_NTFYDATA, &setup);
+  curl_multi_ntfy_enable(multi, CURLM_NTFY_INFO_READ);
+}
+~~~
+
+# %AVAILABILITY%
+
+# RETURN VALUE
+
+Returns CURLM_OK.
