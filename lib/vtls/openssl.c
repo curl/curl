@@ -128,8 +128,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
  * with CURL_DBG_SOCK_RBLOCK=50. Looks like a bug on their part.
  */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-  !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL) && \
-  !defined(OPENSSL_IS_AWSLC)
+  !defined(LIBRESSL_VERSION_NUMBER) && !defined(HAVE_BORINGSSL_LIKE)
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
